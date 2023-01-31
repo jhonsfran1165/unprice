@@ -27,4 +27,20 @@ export const Icons = {
       ></path>
     </svg>
   ),
+  divider: (props: LucideProps) => (
+    <svg
+      fill="none"
+      shapeRendering="geometricPrecision"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1"
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      {...props}
+    >
+      <path d="M16.88 3.549L7.12 20.451" />
+    </svg>
+  ),
 }

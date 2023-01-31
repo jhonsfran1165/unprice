@@ -1,3 +1,4 @@
+import BackGround from "@/components/shared/background"
 import { SiteHeader } from "@/components/site-header"
 
 interface LayoutProps {
@@ -6,9 +7,17 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <>
-      <SiteHeader />
-      <main>{children}</main>
-    </>
+    <div className="flex min-h-screen flex-col justify-between">
+      {/* activate or deactivate the background */}
+      <div className={`${false ? "bg-gray-50" : ""} z-20`}>
+        <SiteHeader />
+
+        <div className="mx-auto max-w-screen-xl px-5 md:px-20">
+          <main>{children}</main>
+        </div>
+      </div>
+
+      <BackGround />
+    </div>
   )
 }
