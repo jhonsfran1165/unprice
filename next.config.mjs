@@ -5,6 +5,16 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
+  images: {
+    domains: [
+      "www.google.com",
+      "avatar.vercel.sh",
+      "faisalman.github.io",
+      "avatars.dicebear.com",
+      "res.cloudinary.com",
+      "pbs.twimg.com",
+    ],
+  },
 }
 
 export default nextConfig

@@ -1,16 +1,21 @@
 import Link from "next/link"
 
 import { siteConfig } from "@/config/site"
+import { fetchCategories } from "@/lib/getCategories"
 import { Icons } from "@/components/icons"
 import { MainNav } from "@/components/main-nav"
+import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
+import { TabGroup } from "@/components/shared/tab-group"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { buttonVariants } from "@/components/ui/button"
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const categories = await fetchCategories()
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-b-slate-200 bg-white dark:border-b-slate-700 dark:bg-slate-900">
-      <div className="mx-auto max-w-screen-xl px-5 md:px-20">
-        <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
+      <MaxWidthWrapper>
+        <div className="flex h-16 items-center space-x-2 sm:justify-between sm:space-x-0">
           <MainNav items={siteConfig.mainNav} />
           <div className="flex flex-1 items-center justify-end space-x-4">
             <nav className="flex items-center space-x-1">
@@ -50,7 +55,21 @@ export function SiteHeader() {
             </nav>
           </div>
         </div>
-      </div>
+        {/* tabs -> convert only that part to server components? */}
+        <div className="-mb-0.5 flex h-12 items-center justify-start space-x-2">
+          {categories && (
+            <TabGroup
+              path="/dashboard"
+              items={[
+                ...categories.map((x) => ({
+                  text: x.name,
+                  slug: x.slug,
+                })),
+              ]}
+            />
+          )}
+        </div>
+      </MaxWidthWrapper>
     </header>
   )
 }

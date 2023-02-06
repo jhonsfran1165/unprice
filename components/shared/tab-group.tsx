@@ -1,3 +1,7 @@
+"use client"
+
+import { useState } from "react"
+
 import { Tab } from "@/components/shared/tab"
 
 export type Item = {

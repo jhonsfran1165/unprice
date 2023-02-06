@@ -1,20 +1,21 @@
 import BackGround from "@/components/shared/background"
+import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 import { SiteHeader } from "@/components/site-header"
 
 interface LayoutProps {
   children: React.ReactNode
 }
 
-export function Layout({ children }: LayoutProps) {
+export async function Layout({ children }: LayoutProps) {
   return (
     <div className="flex min-h-screen flex-col justify-between">
       {/* activate or deactivate the background */}
       <div className={`${false ? "bg-gray-50" : ""} z-20`}>
+        {/* @ts-expect-error Server Component */}
         <SiteHeader />
-
-        <div className="mx-auto max-w-screen-xl px-5 md:px-20">
+        <MaxWidthWrapper>
           <main>{children}</main>
-        </div>
+        </MaxWidthWrapper>
       </div>
 
       <BackGround />
