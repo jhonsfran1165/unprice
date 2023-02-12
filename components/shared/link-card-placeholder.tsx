@@ -1,5 +1,3 @@
-"use client"
-
 export default function LinkCardPlaceholder() {
   return (
     <li className="flex items-center rounded-lg bg-white px-4 py-[1.15rem] shadow transition-all hover:shadow-md">

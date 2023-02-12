@@ -9,7 +9,7 @@ export default async function RootLayout({
   return (
     <div className="flex min-h-screen flex-col justify-between">
       {/* activate or deactivate the background */}
-      <div className={`${false ? "bg-gray-50" : ""} z-20`}>
+      <div className={`bg-primary z-20`}>
         {/* @ts-expect-error Server Component */}
         <SiteHeader />
         {children}

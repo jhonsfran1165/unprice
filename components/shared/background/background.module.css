@@ -3,6 +3,9 @@
   Paco & Rauno's amazing CMDK site (https://cmdk.paco.me) – all credits go to them! 
 */
 
+/*
+  Try to use this for dark mode https://github.com/pacocoursey/cmdk/blob/main/website/styles/index.module.scss
+*/
 .main {
   width: 100vw;
   min-height: 100vh;

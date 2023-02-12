@@ -8,7 +8,7 @@ import {
 } from "next/navigation"
 import useSWR from "swr"
 
-import { Database } from "@/lib/supabase/database.types"
+import { Database } from "@/types/database.types"
 import { fetcher } from "@/lib/utils"
 
 type Organization = Database["public"]["Tables"]["organization"]["Row"]

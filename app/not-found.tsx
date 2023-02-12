@@ -1,12 +1,31 @@
 import Link from "next/link"
 
+import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
+import { buttonVariants } from "@/components/ui/button"
+
 export default function NotFound() {
   return (
-    <Link
-      href="/dashboard"
-      className="relative inline-flex h-9 items-center rounded-md border border-slate-200 bg-white px-4 py-2  text-sm font-medium text-brand-900 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
-    >
-      Go to Dashboard
-    </Link>
+    <MaxWidthWrapper>
+      <section className="container grid items-center gap-6 pt-6 pb-8 md:py-10">
+        <div className="flex max-w-[980px] flex-col items-start gap-2">
+          <h1 className="mt-5 font-satoshi text-5xl font-extrabold leading-[1.15] text-black sm:text-6xl sm:leading-[1.15]">
+            404 Page not Found :(
+            <br />
+          </h1>
+          <p className="max-w-[700px] text-lg text-slate-700 dark:text-slate-400 sm:text-xl">
+            This page was not found.
+          </p>
+        </div>
+        <div className="flex gap-4">
+          <Link
+            href="/home"
+            rel="noreferrer"
+            className={buttonVariants({ size: "lg" })}
+          >
+            Home
+          </Link>
+        </div>
+      </section>
+    </MaxWidthWrapper>
   )
 }

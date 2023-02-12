@@ -6,10 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { SubmitHandler, useForm } from "react-hook-form"
 import * as z from "zod"
 
-import { Database } from "@/lib/supabase/database.types"
+import { User } from "@/types/supabase"
 import { userNameSchema } from "@/lib/validations/user"
 import { useSupabase } from "@/components/auth/supabase-provider"
-import Meta from "@/components/layout/meta"
 import Background from "@/components/shared/background"
 import BlurImage from "@/components/shared/blur-image"
 import LoadingDots from "@/components/shared/loading/loading-dots"
@@ -22,10 +21,8 @@ type Inputs = {
   password: string
 }
 
-type User = Database["public"]["Tables"]["profile"]["Row"]
-
 interface UserNameFormProps extends React.HTMLAttributes<HTMLFormElement> {
-  user: Pick<User, "id" | "full_name">
+  user: Pick<User, "id" | "email">
 }
 
 type FormData = z.infer<typeof userNameSchema>
@@ -62,6 +59,7 @@ export default function Login() {
       if (error) throw error
       alert("Check your email for the login link!")
     } catch (error) {
+      console.log(error)
       if (error instanceof Error) {
         setNoSuchAccount(true)
         setErrorMessage(error.message)
@@ -73,7 +71,6 @@ export default function Login() {
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
-      <Meta title="Sign in to Dub" />
       <Background />
       <div className="z-10 w-full max-w-md overflow-hidden rounded-2xl border border-gray-100 shadow-xl">
         <div className="flex flex-col items-center justify-center space-y-3 border-b border-gray-200 bg-white px-4 py-6 pt-8 text-center sm:px-16">

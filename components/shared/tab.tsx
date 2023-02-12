@@ -28,9 +28,8 @@ export const Tab = ({ path, item }: { path: string; item: Item }) => {
       key={href}
       href={href}
       className={cn("border-b-2 p-1", {
-        "border-black text-black dark:text-white dark:border-white": isActive,
-        "border-transparent text-gray-600 hover:text-black dark:hover:text-white":
-          !isActive,
+        "border-black dark:text-white dark:border-white": isActive,
+        "border-transparent text-gray-600 hover:text-black": !isActive,
       })}
     >
       <div className="rounded-md px-3 py-2 transition-all duration-75 hover:bg-gray-100 active:bg-gray-200">

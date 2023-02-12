@@ -11,7 +11,7 @@ export default function IndexPage() {
     <MaxWidthWrapper className="pb-10">
       <section className="container grid items-center gap-6 pt-6 pb-8 md:py-10">
         <div className="flex max-w-[980px] flex-col items-start gap-2">
-          <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.15] text-black sm:text-6xl sm:leading-[1.15]">
+          <h1 className="mt-5 font-satoshi text-5xl font-extrabold leading-[1.15] text-black sm:text-6xl sm:leading-[1.15]">
             Testing from Dashboard
           </h1>
         </div>

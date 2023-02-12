@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* define theme here */
+/* https://www.tints.dev/primary/000000 */
+@layer base {
+  :root {
+    --color-primary-hue: 112;
+    --color-base-hue: 243;
+    --color-secondary-hue: 360;
+
+    /* primary */
+    --primary: 230, 230, 230;
+    --secondary: 0, 0, 0;
+    --accent: 0, 0, 0;
+    --neutral: 0, 0, 0;
+    --base: 0, 0, 0;
+    --info: 0, 0, 0;
+    --success: 0, 0, 0;
+    --warning: 0, 0, 0;
+    --error: 0, 0, 0;
+  }
+
+  [data-theme="dark"] {
+    --primary: 0, 0, 0;
+    --secondary: 230, 230, 230;
+    --accent: 0, 0, 0;
+    --neutral: 0, 0, 0;
+    --base: 0, 0, 0;
+    --info: 0, 0, 0;
+    --success: 0, 0, 0;
+    --warning: 0, 0, 0;
+    --error: 0, 0, 0;
+  }
+}
+
+/* if you want to simplify this and read it from constants */
+/* https://github.com/shuding/nextra/pull/790/files */
