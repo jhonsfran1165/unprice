@@ -2,19 +2,20 @@ const colors = require("tailwindcss/colors")
 const { fontFamily } = require("tailwindcss/defaultTheme")
 
 // fix opacity support in tailwind for background and text
-// const makeVariantsColor = (v, l) => {
-//   return ({ opacityValue }) => {
-//     if (opacityValue === undefined) {
-//       return `hsl(var(${v})deg 100% ${l}%)`
-//     }
-//     return `hsl(var(${v})deg 100% ${l}% / ${opacityValue})`
-//   }
-// }
+/* https://github.com/adamwathan/tailwind-css-variable-text-opacity-demo */
+const makeVariantsColor = (v, l) => {
+  return ({ opacityValue }) => {
+    if (opacityValue === undefined) {
+      return `hsl(var(${v}) ${l}%)`
+    }
+    return `hsl(var(${v}) ${l}% / ${opacityValue})`
+  }
+}
 
 const withOpacity = (v) => {
   return ({ opacityValue }) => {
     if (opacityValue !== undefined) {
-      return `rgb(var(${v}), ${opacityValue})`
+      return `rgba(var(${v}), ${opacityValue})`
     }
     return `rgb(var(${v}))`
   }
@@ -24,51 +25,73 @@ const withOpacity = (v) => {
 module.exports = {
   // mode: "jit", // mode just in time
   darkMode: ["class", '[data-theme="dark"]'],
-  // darkMode: ["class", '[data-theme="dark"]'],
   // prefix: 'builderai-', // activate to use prefixes here
   content: [
     "app/**/*.{ts,tsx}",
     "pages/**/*.{ts,tsx}",
     "components/**/*.{ts,tsx}",
   ],
+  // disble hover on mobiles
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     screens: {
-      sm: "640px",
-      md: "768px",
-      lg: "1024px",
-      xl: "1280px",
-      "2xl": "1536px",
-      // tablet: "960px",
-      // desktop: "1024px",
+      sm: "640px", // mobile phones
+      md: "768px", // tablets
+      lg: "1024px", // desktops
+      xl: "1280px", // large screens
+      "2xl": "1536px", // extra large screens
     },
     colors: {
       transparent: "transparent",
       current: "currentColor",
       black: "#000",
       white: "#fff",
+      amber: colors.amber,
       gray: colors.gray,
+      red: colors.red,
+      // TODO: mapped stale color to match my theme
       slate: colors.slate,
-      neutral: colors.neutral,
-      "gray-1100": "rgb(10,10,11)",
-      "gray-1000": "rgb(17,17,19)",
+      orange: colors.orange,
+      blue: colors.blue,
+      yellow: colors.yellow,
+      success: withOpacity("--color-success"),
+      danger: withOpacity("--color-danger"),
+      warning: withOpacity("--color-warning"),
+      info: withOpacity("--color-info"),
+      error: withOpacity("--color-error"),
+      accent: withOpacity("--color-accent"),
+      muted: withOpacity("--color-muted"),
       primary: {
-        DEFAULT: withOpacity("--primary"),
-        // 50: withOpacity("--primary"),
-        // 100: makeVariantsColor("--color-primary-hue", 94),
-        // 200: makeVariantsColor("--color-primary-hue", 86),
-        // 300: makeVariantsColor("--color-primary-hue", 77),
-        // 400: makeVariantsColor("--color-primary-hue", 66),
-        // 500: makeVariantsColor("--color-primary-hue", 50),
-        // 600: makeVariantsColor("--color-primary-hue", 45),
-        // 700: makeVariantsColor("--color-primary-hue", 39),
-        // 750: makeVariantsColor("--color-primary-hue", 35),
-        // 800: makeVariantsColor("--color-primary-hue", 32),
-        // 900: makeVariantsColor("--color-primary-hue", 10),
+        DEFAULT: withOpacity("--color-primary-default"),
+        200: withOpacity("--color-primary-200"),
+        900: withOpacity("--color-primary-900"),
       },
       secondary: {
-        DEFAULT: withOpacity("--secondary"),
+        DEFAULT: withOpacity("--color-secondary-default"),
+        200: withOpacity("--color-secondary-200"),
+        900: withOpacity("--color-secondary-900"),
       },
-      base: withOpacity("--base"),
+      "base-skin": {
+        DEFAULT: withOpacity("--color-bg-default"),
+        200: withOpacity("--color-bg-200"),
+        900: withOpacity("--color-bg-900"),
+      },
+      "base-text": {
+        DEFAULT: withOpacity("--color-text-default"),
+        200: withOpacity("--color-text-200"),
+        900: withOpacity("--color-text-900"),
+        inverted: withOpacity("--color-text-inverted"),
+        muted: withOpacity("--color-text-muted"),
+        hover: withOpacity("--color-text-hover"),
+      },
+    },
+    // TODO: check if it is possible to configure variables here view config palette
+    configViewer: {
+      themeReplacements: {
+        "var(--color-primary-default)": "#d09c00",
+      },
     },
     fontSize: {
       xs: ".75rem",
@@ -93,6 +116,26 @@ module.exports = {
       },
     },
     extend: {
+      textColor: {
+        skin: {
+          base: withOpacity("--color-text-base"),
+          muted: withOpacity("--color-text-muted"),
+          inverted: withOpacity("--color-text-inverted"),
+        },
+      },
+      backgroundColor: {
+        skin: {
+          fill: withOpacity("--color-fill"),
+          "button-accent": withOpacity("--color-button-accent"),
+          "button-accent-hover": withOpacity("--color-button-accent-hover"),
+          "button-muted": withOpacity("--color-button-muted"),
+        },
+      },
+      gradientColorStops: {
+        skin: {
+          hue: withOpacity("--color-fill"),
+        },
+      },
       // Modify the default ring color so that it matches the brand color:
       // ringColor: {
       // 	DEFAULT: brandColor['500'],

@@ -6,8 +6,9 @@ export const parse = (req: NextRequest) => {
   let domain = req.headers.get("host")
   // if (HOME_HOSTNAMES.has(domain)) domain = "dub.sh";
   const path = req.nextUrl.pathname
+  const ip = req.ip ?? "127.0.0.1"
   const key = decodeURIComponent(path.split("/")[1]) // to handle foreign languages like Hebrew
-  return { domain, path, key }
+  return { domain, path, key, ip }
 }
 
 export const detectBot = (req: NextRequest) => {

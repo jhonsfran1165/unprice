@@ -3,8 +3,8 @@
 import { createContext, useContext, useState } from "react"
 import type { SupabaseClient } from "@supabase/auth-helpers-nextjs"
 
-import type { Database } from "@/types/database.types"
 import { createBrowserClient } from "@/lib/supabase/supabase-browser"
+import type { Database } from "@/lib/types/database.types"
 
 type SupabaseContext = {
   supabase: SupabaseClient<Database>

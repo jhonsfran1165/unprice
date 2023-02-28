@@ -1,4 +1,4 @@
-import { SubscriptionPlan } from "@/types"
+import { SubscriptionPlan } from "@/lib/types"
 
 export const freePlan: SubscriptionPlan = {
   name: "Free",

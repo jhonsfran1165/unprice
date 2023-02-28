@@ -36,3 +36,5 @@ report web vitals? https://github.com/SimeonGriggs/tints.dev/blob/main/app/repor
 
 Copy shandcnd with theme variables
 https://github.com/shadcn/ui/issues/52
+
+https://blog.logrocket.com/applying-dynamic-styles-tailwind-css/

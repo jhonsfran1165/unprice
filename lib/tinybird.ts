@@ -1,7 +1,8 @@
-import { NextRequest, userAgent } from "next/server";
-import { LOCALHOST_GEO_DATA } from "./constants";
-import { capitalize, getDomainWithoutWWW } from "./utils";
-import { conn } from "./planetscale";
+import { NextRequest, userAgent } from "next/server"
+
+import { LOCALHOST_GEO_DATA } from "./constants"
+import { conn } from "./planetscale"
+import { capitalize, getDomainWithoutWWW } from "./utils"
 
 /**
  * Recording clicks with geo, ua, referer and timestamp data
@@ -10,11 +11,11 @@ import { conn } from "./planetscale";
 export async function recordClick(
   domain: string,
   req: NextRequest,
-  key?: string,
+  key?: string
 ) {
-  const geo = process.env.VERCEL === "1" ? req.geo : LOCALHOST_GEO_DATA;
-  const ua = userAgent(req);
-  const referer = req.headers.get("referer");
+  const geo = process.env.VERCEL === "1" ? req.geo : LOCALHOST_GEO_DATA
+  const ua = userAgent(req)
+  const referer = req.headers.get("referer")
 
   return await Promise.allSettled([
     fetch(
@@ -48,16 +49,16 @@ export async function recordClick(
         headers: {
           Authorization: `Bearer ${process.env.TINYBIRD_API_KEY}`,
         },
-      },
+      }
     ).then((res) => res.json()),
     // increment the click count for the link if key is specified (not root click)
     ...(key && [
       conn.execute(
         "UPDATE Link SET clicks = clicks + 1 WHERE domain = ? AND `key` = ?",
-        [domain, key],
+        [domain, key]
       ),
     ]),
-  ]);
+  ])
 }
 
 export async function getClicksUsage({
@@ -65,9 +66,9 @@ export async function getClicksUsage({
   start,
   end,
 }: {
-  domain: string;
-  start?: string;
-  end?: string;
+  domain: string
+  start?: string
+  end?: string
 }) {
   const response = await fetch(
     `https://api.us-east.tinybird.co/v0/pipes/usage.json?domain=${domain}${
@@ -77,16 +78,16 @@ export async function getClicksUsage({
       headers: {
         Authorization: `Bearer ${process.env.TINYBIRD_API_KEY}`,
       },
-    },
+    }
   )
     .then((res) => res.json())
-    .then((res) => res.data);
+    .then((res) => res.data)
 
-  let clicks = 0;
+  let clicks = 0
   try {
-    clicks = response[0]["count()"];
+    clicks = response[0]["count()"]
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
-  return clicks;
+  return clicks
 }
