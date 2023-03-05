@@ -4,7 +4,7 @@ export const freePlan: SubscriptionPlan = {
   name: "Free",
   description:
     "The free plan is limited to 3 posts. Upgrade to the PRO plan for unlimited posts.",
-  stripePriceId: null,
+  stripePriceId: process.env.STRIPE_PRO_MONTHLY_PLAN_ID,
 }
 
 export const proPlan: SubscriptionPlan = {

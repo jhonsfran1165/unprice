@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { verifySignature } from "@upstash/qstash/nextjs"
-
 import {
   getConfigResponse,
   getDomainResponse,
   verifyDomain,
-} from "@/lib/api/domains"
+} from "@/oldshit/api/domains"
+import { verifySignature } from "@upstash/qstash/nextjs"
+
 import { handleDomainUpdates } from "@/lib/cron/domains"
 import prisma from "@/lib/prisma"
 

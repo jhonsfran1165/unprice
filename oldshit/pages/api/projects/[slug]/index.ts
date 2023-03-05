@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next"
+import { removeDomain } from "@/oldshit/api/domains"
+import { deleteProjectLinks } from "@/oldshit/api/links"
 import cloudinary from "cloudinary"
 
-import { removeDomain } from "@/lib/api/domains"
-import { deleteProjectLinks } from "@/lib/api/links"
 import { withProjectAuth } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { ProjectProps } from "@/lib/types"

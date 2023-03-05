@@ -2,7 +2,7 @@ import { NextFetchEvent, NextRequest, NextResponse } from "next/server"
 
 import { HOME_HOSTNAMES } from "@/lib/constants"
 import { parse } from "@/lib/middleware/utils"
-// import { recordClick } from "@/lib/tinybird"
+import { recordClick } from "@/lib/tinybird"
 import { RootDomainProps } from "@/lib/types"
 import { redis } from "@/lib/upstash"
 

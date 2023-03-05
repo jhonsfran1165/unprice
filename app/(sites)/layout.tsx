@@ -2,7 +2,7 @@ import "@/styles/globals.css"
 import { inter, satoshi } from "@/assets/fonts"
 
 import { cn } from "@/lib/utils"
-import { SiteFooter } from "@/components/shared/layout/footer"
+import { Footer } from "@/components/shared/layout/footer"
 import { ThemeProvider } from "@/components/shared/layout/theme-provider"
 import { TailwindIndicator } from "@/components/shared/tailwind-indicator"
 import { Toaster } from "@/components/ui/toaster"
@@ -28,7 +28,7 @@ export default async function RootLayout({
           <div className="flex min-h-screen flex-col">
             {/* <SiteHeader /> */}
             {children}
-            <SiteFooter />
+            <Footer />
           </div>
           <TailwindIndicator />
           <Toaster />

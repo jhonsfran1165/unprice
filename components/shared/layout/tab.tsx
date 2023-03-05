@@ -4,10 +4,16 @@ import Link from "next/link"
 import { usePathname, useSelectedLayoutSegments } from "next/navigation"
 
 import { useStore } from "@/lib/stores/layout"
-import { MainNavItem } from "@/lib/types/index"
+import { DashboardNavItem } from "@/lib/types/index"
 import { cn } from "@/lib/utils"
 
-export const Tab = ({ path, item }: { path: string; item: MainNavItem }) => {
+export const Tab = ({
+  path,
+  item,
+}: {
+  path: string
+  item: DashboardNavItem
+}) => {
   const pathname = usePathname()
   const segments = useSelectedLayoutSegments()
   let isActive = false
@@ -32,7 +38,7 @@ export const Tab = ({ path, item }: { path: string; item: MainNavItem }) => {
   return (
     <Link
       key={item.href}
-      href={item.disabled ? path : item.href}
+      href={item?.disabled ? path : item.href}
       className={cn("border-b-2 p-1 text-secondary-700", {
         "border-primary": isActive,
         "border-transparent": !isActive,

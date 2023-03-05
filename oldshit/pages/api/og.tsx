@@ -8,11 +8,11 @@ export const config = {
 }
 
 const satoshi = fetch(
-  new URL("../../styles/Satoshi-Black.ttf", import.meta.url)
+  new URL("../../assets/fonts/Satoshi-Black.ttf", import.meta.url)
 ).then((res) => res.arrayBuffer())
 
 const inter = fetch(
-  new URL("../../styles/Inter-Bold.ttf", import.meta.url)
+  new URL("../../assets/fonts/Satoshi-Black.ttf", import.meta.url)
 ).then((res) => res.arrayBuffer())
 
 export default async function handler(req: NextRequest) {

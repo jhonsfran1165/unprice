@@ -32,7 +32,7 @@ export const config = {
 export async function middleware(req: NextRequest, ev: NextFetchEvent) {
   const { domain, path, key } = parse(req)
 
-  const home = HOME_HOSTNAMES.has(domain)
+  const home = HOME_HOSTNAMES.has(domain ?? "")
 
   // 1. validate sites
   // 2. validate app and session of protected routes

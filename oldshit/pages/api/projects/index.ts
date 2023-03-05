@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
+import { addDomain, removeDomain } from "@/oldshit/api/domains"
 
-import { addDomain, removeDomain } from "@/lib/api/domains"
 import { Session, withUserAuth } from "@/lib/auth"
 import { DEFAULT_REDIRECTS, RESERVED_KEYS } from "@/lib/constants"
 import prisma from "@/lib/prisma"

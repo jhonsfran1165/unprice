@@ -9,14 +9,14 @@ export default function withValidation<T extends ZodSchema>(
   return async function (req: NextApiRequest, res: NextApiResponse) {
     try {
       // only validate if the schema is passed
-      if (validations[req.method]) {
+      if (validations[req.method ?? ""]) {
         let body = req.body ? req.body : {}
 
         if (req.method === "GET") {
           body = req.query ? req.query : {}
         }
 
-        const schema = validations[req.method]
+        const schema = validations[req.method ?? ""]
 
         await schema.parse(body)
       }

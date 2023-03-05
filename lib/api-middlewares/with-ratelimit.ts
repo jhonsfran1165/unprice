@@ -8,7 +8,7 @@ export default function withRateLimit(
   methods?: [string]
 ) {
   return async function (req: NextApiRequest, res: NextApiResponse) {
-    if (methods?.includes(req.method) || methods === undefined) {
+    if (methods?.includes(req.method ?? "") || methods === undefined) {
       const { success } = await ratelimit.limit(key)
 
       if (!success) {

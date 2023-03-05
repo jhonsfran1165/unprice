@@ -4,7 +4,7 @@ import { Icons } from "@/components/icons"
 
 export type NavItem = {
   title: string
-  href?: string
+  href: string
   disabled?: boolean
   external?: boolean
 }
@@ -59,7 +59,7 @@ type DashboardNavItem = {
   module: string
   submodule?: string
   slug: string
-  href?: string
+  href: string
   sidebarNav?: DashboardSidebarNavItem[]
   disabled?: boolean
   external?: boolean
@@ -68,7 +68,7 @@ type DashboardNavItem = {
 export type SubscriptionPlan = {
   name: string
   description: string
-  stripePriceId: string
+  stripePriceId?: string
 }
 
 export interface RootDomainProps {

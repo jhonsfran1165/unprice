@@ -233,21 +233,21 @@ export const truncate = (str: string, length: number) => {
   return `${str.slice(0, length)}...`
 }
 
-export const getParamsFromURL = (url: string) => {
-  if (!url) return {}
-  try {
-    const params = new URL(url).searchParams
-    const paramsObj: Record<string, string> = {}
-    for (const [key, value] of params.entries()) {
-      if (value && value !== "") {
-        paramsObj[key] = value
-      }
-    }
-    return paramsObj
-  } catch (e) {
-    return {}
-  }
-}
+// export const getParamsFromURL = (url: string) => {
+//   if (!url) return {}
+//   try {
+//     const params = new URL(url).searchParams
+//     const paramsObj: Record<string, string> = {}
+//     for (const [key, value] of params.entries()) {
+//       if (value && value !== "") {
+//         paramsObj[key] = value
+//       }
+//     }
+//     return paramsObj
+//   } catch (e) {
+//     return {}
+//   }
+// }
 
 export const constructURLFromUTMParams = (
   url: string,
@@ -335,7 +335,7 @@ export const getBlackListedDomains = async () => {
 export const isBlacklistedDomain = async (domain: string) => {
   const blacklistedDomains = await getBlackListedDomains()
   return new RegExp(blacklistedDomains.join("|")).test(
-    getDomainWithoutWWW(domain)
+    getDomainWithoutWWW(domain) ?? ""
   )
 }
 

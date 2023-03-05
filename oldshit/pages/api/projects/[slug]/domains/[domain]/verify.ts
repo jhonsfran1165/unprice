@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next"
-
 import {
   getConfigResponse,
   getDomainResponse,
   verifyDomain,
-} from "@/lib/api/domains"
+} from "@/oldshit/api/domains"
+
 import { withProjectAuth } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { DomainVerificationStatusProps } from "@/lib/types"

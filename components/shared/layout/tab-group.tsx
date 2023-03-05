@@ -3,14 +3,14 @@
 import { usePathname, useSelectedLayoutSegments } from "next/navigation"
 
 import { getDashboardMainNavItem } from "@/lib/config/dashboard"
-import type { MainNavItem } from "@/lib/types/index"
+import type { DashboardNavItem } from "@/lib/types/index"
 import { Tab } from "@/components/shared/layout/tab"
 
 export const TabGroup = () => {
   const pathname = usePathname()
   const segments = useSelectedLayoutSegments()
 
-  let items: MainNavItem[] = []
+  let items: DashboardNavItem[] = []
   let path: string = ""
 
   if (pathname?.startsWith("/site")) {
@@ -26,7 +26,7 @@ export const TabGroup = () => {
     })
   }
 
-  if (items.length === 0) {
+  if (items?.length === 0 || items === undefined) {
     return null
   }
 

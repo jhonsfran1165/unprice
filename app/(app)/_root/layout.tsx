@@ -18,7 +18,7 @@ export default async function AuthLayout({
   } = await supabase.auth.getSession()
 
   return (
-    <SupabaseProvider>
+    <SupabaseProvider session={session}>
       <SupabaseListener serverAccessToken={session?.access_token} />
       {children}
     </SupabaseProvider>

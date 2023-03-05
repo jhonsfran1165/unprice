@@ -7,6 +7,7 @@ import {
   ChevronsUpDown,
   Command,
   CreditCard,
+  ExternalLink,
   File,
   FileText,
   Github,
@@ -31,6 +32,7 @@ import {
 export type Icon = LucideIcon
 
 export const Icons = {
+  externalLink: ExternalLink,
   logo: Command,
   close: X,
   spinner: Loader2,
