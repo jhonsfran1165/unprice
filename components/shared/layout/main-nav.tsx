@@ -3,9 +3,10 @@
 import * as React from "react"
 import Link from "next/link"
 
-import { siteConfig } from "@/config/site"
+import { layoutConfig } from "@/lib/config/layout"
 import useSite from "@/lib/swr/use-sites"
 import { NavItem } from "@/lib/types"
+import { Session } from "@/lib/types/supabase"
 import { Icons } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -18,9 +19,10 @@ import { Separator } from "@/components/ui/separator"
 
 interface MainNavProps {
   items?: NavItem[]
+  session: Session
 }
 
-export function MainNav({ items }: MainNavProps) {
+export function MainNav({ items, session }: MainNavProps) {
   // TODO: separate site selector so we can render the navbar from server
   const { sites } = useSite({ revalidateOnFocus: false })
 
@@ -29,7 +31,7 @@ export function MainNav({ items }: MainNavProps) {
       <Link href="/" className="hidden items-center space-x-2 md:flex">
         <Icons.logo className="h-6 w-6" />
         <span className="hidden font-bold sm:inline-block">
-          {siteConfig.name}
+          {layoutConfig.name}
         </span>
       </Link>
       <Icons.divider className="hidden mx-2 h-8 w-8 text-gray-200 gap-0 md:inline-block" />
@@ -46,8 +48,8 @@ export function MainNav({ items }: MainNavProps) {
                   />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <span className="block truncate text-sm font-bold text-base-text-200">
-                  jhonsfran@gmail.com
+                <span className="block truncate text-sm font-bold text-base-text">
+                  {session?.user.email}
                 </span>
               </div>
             </Link>
@@ -64,11 +66,11 @@ export function MainNav({ items }: MainNavProps) {
             </Button>
           </div>
         </PopoverTrigger>
-        <PopoverContent align={"start"} className="p-0 bg-black">
+        <PopoverContent align={"center"} className="p-0 bg-black">
           <div className="flex flex-col">
-            <div className="pl-4 pt-2">
+            <div className="pl-6 pt-4">
               <h4 className="text-sm font-semibold">My Sites</h4>
-              <p className="text-xs text-base-skin-200">Personal Account</p>
+              <p className="text-xs text-base-text-200">Personal Account</p>
             </div>
             <Separator className="my-2" />
             <div className="flex flex-col pb-2">
@@ -78,22 +80,20 @@ export function MainNav({ items }: MainNavProps) {
                     <Link
                       key={index}
                       href={`/site/${site.id}`}
-                      className="pl-4 py-2 hover:bg-base-skin-200"
+                      className="pl-8 py-2 hover:bg-base-skin-200"
                     >
                       <div className="flex items-start space-x-2">
-                        <Avatar className="h-6 w-6">
+                        <Avatar className="h-5 w-5">
                           <AvatarImage
-                            src={
-                              site.logo ||
-                              `https://www.google.com/s2/favicons?sz=64&domain_url=${
-                                site.custom_domain || site.subdomain
-                              }`
-                            }
-                            alt={site.custom_domain || site.subdomain}
+                            src="https://github.com/shadcn.png"
+                            alt="@shadcn"
                           />
-                          <AvatarFallback>CN</AvatarFallback>
+                          <AvatarFallback>
+                            {site.custom_domain?.substring(2) ||
+                              site.subdomain?.substring(2)}
+                          </AvatarFallback>
                         </Avatar>
-                        <span className="block truncate text-sm font-bold text-gray-600">
+                        <span className="ml-4 block truncate text-sm font-bold text-base-text">
                           {site.name}
                         </span>
                       </div>

@@ -1,14 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useSelectedLayoutSegments } from "next/navigation"
+import { usePathname } from "next/navigation"
 
-import { navBarBySlug, navBarSiteBySlug } from "@/config/dashboard"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/shared/card"
 import { Icons } from "@/components/shared/icons"
 
-export function DashboardNav({ items, path }) {
+export function DashboardSideBarNav({ items, path }) {
+  const pathName = usePathname()
   return (
     <Card>
       <nav className="grid items-start gap-2">
@@ -19,7 +19,7 @@ export function DashboardNav({ items, path }) {
               <span
                 className={cn(
                   "group flex items-center rounded-md px-3 py-2 text-sm font-medium text-base-text hover:bg-base-skin-200",
-                  path === item.href ? "bg-slate-200" : "transparent",
+                  pathName === item.href ? "bg-base-skin-900" : "transparent",
                   item.disabled && "cursor-not-allowed opacity-80"
                 )}
               >

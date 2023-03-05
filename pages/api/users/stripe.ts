@@ -1,13 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { unstable_getServerSession } from "next-auth/next"
 
-import { proPlan } from "@/config/subscriptions"
-import { withMethods } from "@/lib/api-middlewares/with-methods"
-import { getUserSubscriptionPlan } from "@/lib/subscription"
-import { stripe } from "@/lib/stripe"
 import { withAuthentication } from "@/lib/api-middlewares/with-authentication"
-import { absoluteUrl } from "@/lib/utils"
+import { withMethods } from "@/lib/api-middlewares/with-methods"
 import { authOptions } from "@/lib/auth"
+import { proPlan } from "@/lib/config/subscriptions"
+import { stripe } from "@/lib/stripe"
+import { getUserSubscriptionPlan } from "@/lib/subscription"
+import { absoluteUrl } from "@/lib/utils"
 
 const billingUrl = absoluteUrl("/dashboard/billing")
 

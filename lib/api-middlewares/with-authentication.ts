@@ -24,7 +24,7 @@ export default function withAuthentication(
 ) {
   return async function (req: NextApiRequest, res: NextApiResponse) {
     if (
-      protectedMethods?.includes(req.method) ||
+      protectedMethods?.includes(req.method ?? "") ||
       protectedMethods === undefined
     ) {
       const supabase = supabaseApiClient(req, res)

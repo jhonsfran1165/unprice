@@ -1,21 +1,27 @@
-import { DashboardShell } from "@/components/shared/dashboard/shell"
-import SiteContext from "@/components/shared/layout/site-context"
-import { SiteFooter } from "@/components/shared/layout/site-footer"
-import { SiteHeader } from "@/components/shared/layout/site-header"
+import "server-only"
+import { createServerClient } from "@/lib/supabase/supabase-server"
+import { Footer } from "@/components/shared/layout/footer"
+import { Header } from "@/components/shared/layout/header"
+import HeaderContext from "@/components/shared/layout/header-context"
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const supabase = createServerClient()
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
   return (
     <>
       {/* @ts-expect-error Server Component */}
-      <SiteHeader />
-      {/* TODO: rename as dashboard header */}
-      <SiteContext />
+      <Header session={session} />
+      <HeaderContext />
       {children}
-      <SiteFooter />
+      <Footer />
     </>
   )
 }

@@ -27,24 +27,7 @@ export type SidebarNavItem = {
     }
 )
 
-// export type SiteConfig = {
-//   name: string
-//   links: {
-//     twitter: string
-//     github: string
-//   }
-// }
-
-// export type DocsConfig = {
-//   mainNav: MainNavItem[]
-//   sidebarNav: SidebarNavItem[]
-// }
-
-// export type MarketingConfig = {
-//   mainNav: MainNavItem[]
-// }
-
-type MainNavItem2 = {
+type MainNavItem = {
   title: string
   href?: string
   sidebarNav?: SidebarNavItem[]
@@ -52,10 +35,34 @@ type MainNavItem2 = {
   external?: boolean
 }
 
-export type DashboardConfig = {
-  mainNav: MainNavItem2[]
-  mainNavSites: MainNavItem2[]
-  sidebarNav: SidebarNavItem[]
+export type DashboardSidebarNavItem = {
+  title: string
+  module: string
+  submodule: string
+  slug: string
+  disabled?: boolean
+  external?: boolean
+  icon?: keyof typeof Icons
+} & (
+  | {
+      href: string
+      items?: never
+    }
+  | {
+      href?: string
+      items: NavLink[]
+    }
+)
+
+type DashboardNavItem = {
+  title: string
+  module: string
+  submodule?: string
+  slug: string
+  href?: string
+  sidebarNav?: DashboardSidebarNavItem[]
+  disabled?: boolean
+  external?: boolean
 }
 
 export type SubscriptionPlan = {
@@ -74,3 +81,15 @@ export interface RootDomainProps {
 //     stripeCurrentPeriodEnd: number
 //     isPro: boolean
 //   }
+
+interface LayoutConfig {
+  name: string
+  description: string
+  mainNav: NavItem[]
+  links: {
+    twitter: string
+    github: string
+    docs: string
+    dashboard: string
+  }
+}

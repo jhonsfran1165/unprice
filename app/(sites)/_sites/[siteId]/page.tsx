@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 
-import { siteConfig } from "@/config/site"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 import { buttonVariants } from "@/components/ui/button"
 

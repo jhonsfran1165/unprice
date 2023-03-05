@@ -6,6 +6,10 @@ import { ThemeProvider } from "@/components/shared/layout/theme-provider"
 import { TailwindIndicator } from "@/components/shared/tailwind-indicator"
 import { Toaster } from "@/components/ui/toaster"
 
+export const metadata = {
+  title: "Improve this",
+}
+
 export default async function RootLayout({
   children,
 }: {

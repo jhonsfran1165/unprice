@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import { siteConfig } from "@/config/site"
+import { layoutConfig } from "@/lib/config/layout"
 import { Icons } from "@/components/shared/icons"
 import { MainNav } from "@/components/shared/layout/main-nav"
 import { TabGroup } from "@/components/shared/layout/tab-group"
@@ -8,17 +8,17 @@ import { ThemeToggle } from "@/components/shared/layout/theme-toggle"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 import { buttonVariants } from "@/components/ui/button"
 
-export async function SiteHeader() {
+export async function Header({ session }) {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-base-skin-200 bg-clip-padding backdrop-filter backdrop-blur-xl">
       <MaxWidthWrapper className="max-w-screen-2xl">
         <div className="flex h-16 items-center space-x-2 sm:justify-between sm:space-x-0">
-          <MainNav items={siteConfig.mainNav} />
+          <MainNav items={layoutConfig.mainNav} session={session} />
           <div className="flex flex-1 items-center justify-end space-x-4">
             <nav className="flex items-center space-x-1">
               {/* TODO: use for account management */}
               <Link
-                href={siteConfig.links.twitter}
+                href={layoutConfig.links.twitter}
                 target="_blank"
                 rel="noreferrer"
               >

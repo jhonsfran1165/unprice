@@ -1,7 +1,7 @@
 "use client"
 
-import { SiteSkeleton } from "@/components/shared/layout/site-skeleton"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
+import { SiteSkeleton } from "@/components/shared/sites/site-skeleton"
 
 export default function LoadingPage() {
   return (

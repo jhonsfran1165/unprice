@@ -2,24 +2,37 @@
 
 import { usePathname, useSelectedLayoutSegments } from "next/navigation"
 
-import { dashboardConfig } from "@/config/dashboard"
+import { getDashboardMainNavItem } from "@/lib/config/dashboard"
+import type { MainNavItem } from "@/lib/types/index"
 import { Tab } from "@/components/shared/layout/tab"
 
 export const TabGroup = () => {
   const pathname = usePathname()
   const segments = useSelectedLayoutSegments()
 
-  const navItems = pathname.startsWith("/site")
-    ? dashboardConfig.mainNavSites
-    : dashboardConfig.mainNav
+  let items: MainNavItem[] = []
+  let path: string = ""
 
-  const path = pathname.startsWith("/site")
-    ? `/${segments.slice(0, 2).join("/")}`
-    : ""
+  if (pathname?.startsWith("/site")) {
+    path = `/${segments?.slice(0, 2).join("/")}` // /site/1/
+    items = getDashboardMainNavItem({
+      moduleNav: "site",
+      pathPrefix: path,
+    })
+  } else {
+    items = getDashboardMainNavItem({
+      moduleNav: "main",
+      pathPrefix: "",
+    })
+  }
+
+  if (items.length === 0) {
+    return null
+  }
 
   return (
     <nav className="flex flex-wrap items-center gap-2">
-      {navItems.map((item, index) => (
+      {items.map((item, index) => (
         <Tab key={path + index} item={item} path={path} />
       ))}
     </nav>

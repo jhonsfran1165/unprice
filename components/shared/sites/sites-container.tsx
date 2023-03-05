@@ -24,7 +24,7 @@ export default function SitesContainer() {
           ))
         ) : sites.length > 0 ? (
           // sites.map((props) => <LinkCard key={props.id} props={props} />)
-          sites.map((props) => <LinkCardPlaceholder key={props.id} />)
+          sites?.map((props) => <LinkCardPlaceholder key={props.id} />)
         ) : (
           <NoLinksPlaceholder />
         )}

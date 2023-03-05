@@ -2,7 +2,7 @@ import { ReactNode } from "react"
 
 import type { SidebarNavItem } from "@/lib/types"
 import { Card } from "@/components/shared/card"
-import { DashboardNav } from "@/components/shared/dashboard/nav"
+import { DashboardSideBarNav } from "@/components/shared/dashboard/sidebar-nav"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
@@ -11,7 +11,7 @@ export function DashboardShell({
   items,
   prefixPath,
 }: {
-  items: SidebarNavItem[]
+  items?: SidebarNavItem[]
   children: ReactNode
   prefixPath: string
 }) {
@@ -21,7 +21,7 @@ export function DashboardShell({
         {items ? (
           <div className="grid gap-5 md:grid-cols-[200px_1fr]">
             <aside className="min-w-full flex-col md:flex md:w-[200px]">
-              <DashboardNav path={prefixPath} items={items} />
+              <DashboardSideBarNav path={prefixPath} items={items} />
             </aside>
             <Card>
               <main className="flex w-full flex-1 flex-col overflow-hidden">
