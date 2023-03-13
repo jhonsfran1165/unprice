@@ -63,9 +63,9 @@ export default function Login() {
   }
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center text-base-text-200">
-      <div className="z-10 w-full max-w-md overflow-hidden rounded-2xl border border-base-text-200 shadow-xl bg-base-skin">
-        <div className="flex flex-col items-center text-base-text justify-center bg-base-skin-900 space-y-3 border-b border-base-text-200 px-4 py-6 pt-8 text-center sm:px-16">
+    <div className="flex h-screen w-screen items-center justify-center">
+      <div className="z-10 w-full max-w-md overflow-hidden rounded-2xl border shadow-sm shadow-background-solid bg-background-bgSubtle">
+        <div className="flex flex-col items-center justify-center bg-primary-bg space-y-3 border-b px-4 py-6 pt-8 text-center sm:px-16">
           <a href="https://dub.sh">
             <BlurImage
               src="/_static/logo.png"
@@ -83,12 +83,11 @@ export default function Login() {
           className="flex flex-col space-y-4 px-4 py-8 sm:px-16"
         >
           {errorMessage ? (
-            <p className="text-center text-sm text-error">{errorMessage}</p>
-          ) : (
-            <p className="text-center text-sm text-error text-opacity-0">
-              {" "}
-              No errors
+            <p className="text-center text-sm text-error-solid">
+              {errorMessage}
             </p>
+          ) : (
+            <p className="text-center text-sm text-transparent"> No errors</p>
           )}
           <div>
             <Label htmlFor="email" className="block text-xs">
@@ -102,7 +101,7 @@ export default function Login() {
               className="mt-1 block w-full"
             />
             {errors.email && (
-              <p className="text-xs pt-1 text-error" role="alert">
+              <p className="text-xs pt-1 text-error-solid" role="alert">
                 {errors.email?.message}
               </p>
             )}
@@ -119,16 +118,25 @@ export default function Login() {
               className="mt-1 block w-full"
             />
             {errors.password && (
-              <p className="text-xs pt-1 text-error" role="alert">
+              <p className="text-xs pt-1 text-error-solid" role="alert">
                 {errors.password?.message}
               </p>
             )}
           </div>
-          <Button disabled={signInClicked} title="Submit" type={"submit"}>
-            {signInClicked ? <LoadingDots color="#808080" /> : <p>Sign In</p>}
+          <Button
+            disabled={signInClicked}
+            title="Submit"
+            type={"submit"}
+            className="bg-primary-bg active:bg-primary-bgActive hover:bg-primary-bgHover border border-primary-border hover:border-primary-borderHover"
+          >
+            {signInClicked ? (
+              <LoadingDots color="#808080" />
+            ) : (
+              <p className="text-primary-textContrast">Sign In</p>
+            )}
           </Button>
           {noSuchAccount ? (
-            <p className="text-center text-sm font-normal text-error">
+            <p className="text-center text-sm font-normal text-error-solid">
               No such account.{" "}
               <Link href="/register" className="font-semibold">
                 Sign up
@@ -136,9 +144,12 @@ export default function Login() {
               instead?
             </p>
           ) : (
-            <p className="text-center text-sm font-normal text-base-text-900">
+            <p className="text-center text-sm font-normal">
               No registered?{" "}
-              <Link href="/register" className="font-semibold">
+              <Link
+                href="/register"
+                className="font-semibold text-primary-textContrast"
+              >
                 Sign up
               </Link>{" "}
               with your email.

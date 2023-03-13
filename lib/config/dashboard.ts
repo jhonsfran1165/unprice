@@ -13,8 +13,9 @@ const MainNavItems = (pathPrefix: string): DashboardNavItem[] => {
     {
       module: "main",
       slug: "main-stadistics",
-      title: "Stadistics",
+      title: "Statistics",
       href: `${pathPrefix}/stadistics`,
+      disabled: true,
     },
     {
       module: "main",

@@ -101,8 +101,8 @@ export interface Database {
           id: number
           logo: string | null
           name: string | null
-          created_at: string | null
-          updated_at: string | null
+          created_at: Date
+          updated_at: Date
           custom_domain: string | null
           subdomain: string | null
           org_id: number | null
@@ -169,4 +169,3 @@ export interface Database {
     }
   }
 }
-

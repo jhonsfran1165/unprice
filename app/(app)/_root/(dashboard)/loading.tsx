@@ -1,10 +1,5 @@
-import { DashboardShell } from "@/components/shared/dashboard/shell"
-import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
+import { SitesContainer } from "@/components/shared/sites/sites-container"
 
 export default function LoadingPage() {
-  return (
-    <MaxWidthWrapper className="pt-10">
-      <DashboardShell isLoading={true} />
-    </MaxWidthWrapper>
-  )
+  return <SitesContainer isLoading={true} />
 }

@@ -26,9 +26,7 @@ export const TabGroup = () => {
     })
   }
 
-  if (items?.length === 0 || items === undefined) {
-    return null
-  }
+  if (items.length === 0) return null
 
   return (
     <nav className="flex flex-wrap items-center gap-2">

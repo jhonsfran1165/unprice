@@ -18,16 +18,14 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(
-        "font-inter antialiased bg-base-skin text-base-text bg-[url('/_static/grid.svg')]",
-        satoshi.variable,
-        inter.variable
-      )}
+      className={cn("antialiased", satoshi.variable, inter.variable)}
       suppressHydrationWarning
     >
-      <body className="overflow-y-scroll flex flex-col justify-between">
+      <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          <div className="overflow-y-scroll flex flex-col justify-between">
+            {children}
+          </div>
           <TailwindIndicator />
           <Toaster />
         </ThemeProvider>

@@ -2,83 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* define theme here */
-/* https://www.tints.dev/primary/000000 */
-/* https://www.rapidtables.com/convert/color/hex-to-rgb.html */
+/* follow this rules */
+/* https://www.radix-ui.com/docs/colors/palette-composition/understanding-the-scale */
 @layer base {
   /* default styles */
   h1 {
-    @apply font-satoshi text-4xl md:text-6xl font-extrabold leading-[1.15] sm:leading-[1.15];
+    @apply font-satoshi text-4xl text-background-textContrast md:text-6xl font-extrabold leading-[1.15] sm:leading-[1.15];
   }
 
   h2 {
-    @apply font-satoshi text-2xl md:text-3xl font-bold;
+    @apply font-satoshi text-2xl text-background-textContrast md:text-3xl font-bold;
   }
 
   h3 {
-    @apply font-satoshi text-xl md:text-2xl font-semibold;
+    @apply font-satoshi text-xl text-background-textContrast md:text-2xl font-semibold;
   }
 
   p {
-    @apply font-inter text-base md:text-xs font-semibold;
+    @apply font-inter text-background-text text-base md:text-xs font-semibold;
   }
 
-  :root {
-    --color-primary-default: 208, 156, 0;
-    --color-primary-200: 197, 176, 112;
-    --color-primary-900: 202, 165, 56;
-
-    --color-secondary-default: 197, 54, 54;
-    --color-secondary-200: 184, 45, 45;
-    --color-secondary-900: 166, 43, 43;
-
-    --color-bg-default: 0, 0, 0;
-    --color-bg-200: 90, 90, 90;
-    --color-bg-900: 50, 51, 56;
-
-    --color-text-default: 255, 255, 255;
-    --color-text-inverted: 255, 255, 255;
-    --color-text-muted: 255, 255, 255;
-    --color-text-hover: 255, 255, 255;
-    --color-text-200: 90, 90, 90;
-    --color-text-900: 255, 255, 255;
-
-    --color-muted: 200, 200, 200;
-    --color-accent: 91, 136, 247;
-    --color-info: 7, 97, 209;
-    --color-success: 80, 227, 194;
-    --color-warning: 245, 166, 35;
-    --color-error: 230, 0, 0;
-  }
-
-  [data-theme="dark"] {
-    --color-primary-default: 208, 156, 0;
-    --color-primary-200: 197, 176, 112;
-    --color-primary-900: 202, 165, 56;
-
-    --color-secondary-default: 197, 54, 54;
-    --color-secondary-200: 184, 45, 45;
-    --color-secondary-900: 166, 43, 43;
-
-    --color-bg-default: 0, 0, 0;
-    --color-bg-200: 51, 51, 51;
-    --color-bg-900: 17, 17, 17;
-
-    --color-text-default: 255, 255, 255;
-    --color-text-inverted: 255, 255, 255;
-    --color-text-muted: 255, 255, 255;
-    --color-text-hover: 255, 255, 255;
-    --color-text-200: 90, 90, 90;
-    --color-text-900: 255, 255, 255;
-
-    --color-muted: 200, 200, 200;
-    --color-accent: 91, 136, 247;
-    --color-info: 7, 97, 209;
-    --color-success: 80, 227, 194;
-    --color-warning: 245, 166, 35;
-    --color-error: 230, 0, 0;
+  body {
+    @apply font-inter bg-background text-background-text;
   }
 }
-
-/* if you want to simplify this and read it from constants */
-/* https://github.com/shuding/nextra/pull/790/files */

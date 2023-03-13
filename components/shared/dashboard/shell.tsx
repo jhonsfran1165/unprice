@@ -1,7 +1,6 @@
 import { ReactNode } from "react"
 
 import type { SidebarNavItem } from "@/lib/types"
-import { Card } from "@/components/shared/card"
 import { DashboardShellSkeleton } from "@/components/shared/dashboard/shell-loading"
 import { DashboardSideBarNav } from "@/components/shared/dashboard/sidebar-nav"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
@@ -28,18 +27,14 @@ export function DashboardShell({
             <aside className="min-w-full flex-col md:flex md:w-[200px]">
               <DashboardSideBarNav path={prefixPath} items={items} />
             </aside>
-            <Card>
-              <main className="flex w-full flex-1 flex-col overflow-hidden">
-                {children}
-              </main>
-            </Card>
-          </div>
-        ) : (
-          <Card>
             <main className="flex w-full flex-1 flex-col overflow-hidden">
               {children}
             </main>
-          </Card>
+          </div>
+        ) : (
+          <main className="flex w-full flex-1 flex-col overflow-hidden">
+            {children}
+          </main>
         )}
       </MaxWidthWrapper>
     </ScrollArea>

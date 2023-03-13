@@ -15,10 +15,10 @@ export default function HeaderContext() {
 
   return (
     <section>
-      <div className="flex h-36 items-center border-b border-base-skin-200 bg-base-skin-900 z-30">
+      <div className="flex h-36 items-center border-b bg-primary-bgSubtle z-30">
         <MaxWidthWrapper className="max-w-screen-2xl">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl text-base-text pl-5">{title}</h1>
+            <h1 className="text-2xl pl-5">{title}</h1>
           </div>
         </MaxWidthWrapper>
       </div>

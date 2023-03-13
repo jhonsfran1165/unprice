@@ -1,10 +1,11 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname, useSelectedLayoutSegments } from "next/navigation"
 
 import { useStore } from "@/lib/stores/layout"
-import { DashboardNavItem } from "@/lib/types/index"
+import type { DashboardNavItem } from "@/lib/types/index"
 import { cn } from "@/lib/utils"
 
 export const Tab = ({
@@ -16,37 +17,48 @@ export const Tab = ({
 }) => {
   const pathname = usePathname()
   const segments = useSelectedLayoutSegments()
-  let isActive = false
+  const [isActive, setIsActive] = useState(false)
 
-  // TODO: refactor later to support multiple modules not only site
-  // this is fucking ugly thing but I need to move fast
-  // If you don't like it you can go suck a dick
-  if (pathname?.startsWith("/site") && segments.length > 2) {
-    isActive = item.href?.split("/").includes(segments[2]) || false
-  } else if (!pathname?.startsWith("/site") && segments.length == 2) {
-    isActive = item.href?.split("/").includes(segments[0]) || false
-  } else {
-    isActive = item.href === pathname || item.href === `${pathname}/`
-  }
+  useEffect(() => {
+    let active = false
+    // TODO: refactor later to support multiple modules not only site
+    // this is fucking ugly thing but I need to move fast
+    // If you don't like it you can go suck a dick
+    if (pathname?.startsWith("/site") && segments.length > 2) {
+      active = item.href?.split("/").includes(segments[2])
+    } else if (!pathname?.startsWith("/site") && segments.length == 2) {
+      active = item.href?.split("/").includes(segments[0])
+    } else {
+      active = item.href === pathname || item.href === `${pathname}/`
+    }
 
-  if (isActive) {
-    useStore.setState((state) => ({
-      contextHeader: item.title,
-    }))
-  }
+    setIsActive(active)
+
+    if (active) {
+      useStore.setState((state) => ({
+        contextHeader: item.title,
+      }))
+    }
+  }, [pathname])
 
   return (
     <Link
       key={item.href}
       href={item?.disabled ? path : item.href}
-      className={cn("border-b-2 p-1 text-secondary-700", {
-        "border-primary": isActive,
+      className={cn("border-b-2 p-1", {
+        "border-primary-solid": isActive,
         "border-transparent": !isActive,
-        "cursor-not-allowed opacity-80": item.disabled,
+        "cursor-not-allowed opacity-80 text-backgroud": item.disabled,
       })}
     >
-      <div className="rounded-md px-3 py-2 transition-all duration-75 hover:bg-base-skin-200 active:bg-base-skin-900">
-        <p className="text-sm">{item.title}</p>
+      <div className="rounded-md px-3 py-2 transition-all duration-75 hover:bg-background-bgHover active:bg-background-bgActive">
+        <p
+          className={cn("text-sm hover:text-background-textContrast", {
+            "text-background-textContrast": isActive,
+          })}
+        >
+          {item.title}
+        </p>
       </div>
     </Link>
   )

@@ -18,21 +18,46 @@ export function ThemeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <Icons.sun className="hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100" />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="active:bg-background-bgActive hover:bg-background-bgHover"
+        >
+          {theme === "light" && (
+            <Icons.sun className="hover:text-background-textContrast" />
+          )}
+          {theme === "dark" && (
+            <Icons.moon className="hover:text-background-textContrast" />
+          )}
+          {theme === "system" && (
+            <Icons.laptop className="hover:text-background-textContrast" />
+          )}
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" forceMount>
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+      <DropdownMenuContent
+        align="end"
+        forceMount
+        className="bg-background-bgSubtle"
+      >
+        <DropdownMenuItem
+          onClick={() => setTheme("light")}
+          className="hover:bg-background-bgHover hover:text-background-textContrast"
+        >
           <Icons.sun className="mr-2 h-4 w-4" />
           <span>Light</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem
+          onClick={() => setTheme("dark")}
+          className="hover:bg-background-bgHover hover:text-background-textContrast"
+        >
           <Icons.moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem
+          onClick={() => setTheme("system")}
+          className="hover:bg-background-bgHover hover:text-background-textContrast"
+        >
           <Icons.laptop className="mr-2 h-4 w-4" />
           <span>System</span>
         </DropdownMenuItem>

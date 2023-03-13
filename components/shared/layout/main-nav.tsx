@@ -6,7 +6,8 @@ import Link from "next/link"
 import { layoutConfig } from "@/lib/config/layout"
 import useSite from "@/lib/swr/use-sites"
 import { NavItem } from "@/lib/types"
-import { Session } from "@/lib/types/supabase"
+import { User } from "@/lib/types/supabase"
+import { useSupabase } from "@/components/auth/supabase-provider"
 import { Icons } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -19,16 +20,33 @@ import { Separator } from "@/components/ui/separator"
 
 interface MainNavProps {
   items?: NavItem[]
-  session: Session
 }
 
-export function MainNav({ items, session }: MainNavProps) {
+export function MainNav({ items }: MainNavProps) {
   // TODO: separate site selector so we can render the navbar from server
   const { sites } = useSite({ revalidateOnFocus: false })
+  const { supabase } = useSupabase()
+
+  const [user, setUser] = React.useState<User>()
+
+  React.useEffect(() => {
+    const fetchSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      setUser(session?.user)
+    }
+
+    fetchSession()
+  }, [])
 
   return (
     <div className="flex items-center justify-start ">
-      <Link href="/" className="hidden items-center space-x-2 md:flex">
+      <Link
+        href="/"
+        className="hidden items-center space-x-2 md:flex text-primary-text"
+      >
         <Icons.logo className="h-6 w-6" />
         <span className="hidden font-bold sm:inline-block">
           {layoutConfig.name}
@@ -48,39 +66,40 @@ export function MainNav({ items, session }: MainNavProps) {
                   />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <span className="block truncate text-sm font-bold text-base-text">
-                  {session?.user.email}
+                <span className="block truncate text-sm font-bold">
+                  {user?.email}
                 </span>
               </div>
             </Link>
             <Button
               variant="ghost"
-              className="flex items-center justify-center text-base p-2"
+              size="sm"
+              className="flex items-center justify-center text-base p-2 active:bg-background-bgActive hover:bg-background-bgHover"
             >
-              <span className="flex pointer-events-none items-center justify-center">
-                <Icons.chevronsupdown
-                  className="h-4 w-4 text-gray-400"
-                  aria-hidden="true"
-                />
-              </span>
+              <Icons.chevronsupdown
+                className="h-4 w-4 hover:text-background-textContrast"
+                aria-hidden="true"
+              />
             </Button>
           </div>
         </PopoverTrigger>
-        <PopoverContent align={"center"} className="p-0 bg-black">
+        <PopoverContent align={"center"} className="p-0 bg-background-bgSubtle">
           <div className="flex flex-col">
-            <div className="pl-6 pt-4">
-              <h4 className="text-sm font-semibold">My Sites</h4>
-              <p className="text-xs text-base-text-200">Personal Account</p>
+            <div className="pl-6 py-3 bg-primary-bg">
+              <h4 className="text-sm font-semibold text-background-textContrast">
+                My Sites
+              </h4>
+              <p className="text-xs">Personal Account</p>
             </div>
-            <Separator className="my-2" />
-            <div className="flex flex-col pb-2">
+            <Separator className="bg-background-line" />
+            <div className="flex flex-col py-2">
               {sites?.map(
                 (site, index) =>
                   site.id && (
                     <Link
                       key={index}
                       href={`/site/${site.id}`}
-                      className="pl-8 py-2 hover:bg-base-skin-200"
+                      className="pl-8 py-2 hover:bg-background-bgHover"
                     >
                       <div className="flex items-start space-x-2">
                         <Avatar className="h-5 w-5">
