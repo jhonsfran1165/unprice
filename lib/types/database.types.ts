@@ -15,18 +15,50 @@ export interface Database {
           created_at: string | null
           updated_at: string | null
           name: string | null
+          slug: string
         }
         Insert: {
           id?: number
           created_at?: string | null
           updated_at?: string | null
           name?: string | null
+          slug?: string
         }
         Update: {
           id?: number
           created_at?: string | null
           updated_at?: string | null
           name?: string | null
+          slug?: string
+        }
+      }
+      organization_profiles: {
+        Row: {
+          id: number
+          created_at: string | null
+          updated_at: string | null
+          role: string | null
+          profile_id: string
+          org_id: number
+          is_default: boolean | null
+        }
+        Insert: {
+          id?: number
+          created_at?: string | null
+          updated_at?: string | null
+          role?: string | null
+          profile_id: string
+          org_id: number
+          is_default?: boolean | null
+        }
+        Update: {
+          id?: number
+          created_at?: string | null
+          updated_at?: string | null
+          role?: string | null
+          profile_id?: string
+          org_id?: number
+          is_default?: boolean | null
         }
       }
       page: {
@@ -36,11 +68,11 @@ export interface Database {
           title: string | null
           description: string | null
           content: Json | null
-          slug: string | null
           image_url: string | null
           published: boolean | null
           org_id: number | null
           site_id: number | null
+          slug: string
         }
         Insert: {
           id?: number
@@ -48,11 +80,11 @@ export interface Database {
           title?: string | null
           description?: string | null
           content?: Json | null
-          slug?: string | null
           image_url?: string | null
           published?: boolean | null
           org_id?: number | null
           site_id?: number | null
+          slug?: string
         }
         Update: {
           id?: number
@@ -60,11 +92,11 @@ export interface Database {
           title?: string | null
           description?: string | null
           content?: Json | null
-          slug?: string | null
           image_url?: string | null
           published?: boolean | null
           org_id?: number | null
           site_id?: number | null
+          slug?: string
         }
       }
       profile: {
@@ -75,7 +107,6 @@ export interface Database {
           username: string | null
           full_name: string | null
           avatar_url: string | null
-          org_id: number
         }
         Insert: {
           id: string
@@ -84,7 +115,6 @@ export interface Database {
           username?: string | null
           full_name?: string | null
           avatar_url?: string | null
-          org_id: number
         }
         Update: {
           id?: string
@@ -93,7 +123,6 @@ export interface Database {
           username?: string | null
           full_name?: string | null
           avatar_url?: string | null
-          org_id?: number
         }
       }
       site: {
@@ -101,11 +130,12 @@ export interface Database {
           id: number
           logo: string | null
           name: string | null
-          created_at: Date
-          updated_at: Date
+          created_at: string | null
+          updated_at: string | null
           custom_domain: string | null
           subdomain: string | null
           org_id: number | null
+          slug: string
         }
         Insert: {
           id?: number
@@ -116,6 +146,7 @@ export interface Database {
           custom_domain?: string | null
           subdomain?: string | null
           org_id?: number | null
+          slug?: string
         }
         Update: {
           id?: number
@@ -126,35 +157,7 @@ export interface Database {
           custom_domain?: string | null
           subdomain?: string | null
           org_id?: number | null
-        }
-      }
-      site_users: {
-        Row: {
-          id: number
-          created_at: string | null
-          updated_at: string | null
-          role: string | null
-          user_id: string | null
-          site_id: number | null
-          org_id: number | null
-        }
-        Insert: {
-          id?: number
-          created_at?: string | null
-          updated_at?: string | null
-          role?: string | null
-          user_id?: string | null
-          site_id?: number | null
-          org_id?: number | null
-        }
-        Update: {
-          id?: number
-          created_at?: string | null
-          updated_at?: string | null
-          role?: string | null
-          user_id?: string | null
-          site_id?: number | null
-          org_id?: number | null
+          slug?: string
         }
       }
     }
@@ -169,3 +172,4 @@ export interface Database {
     }
   }
 }
+

@@ -1,10 +1,11 @@
 import Link from "next/link"
 
 import { layoutConfig } from "@/lib/config/layout"
+import { Session, User } from "@/lib/types/supabase"
 import { Icons } from "@/components/shared/icons"
+import { AccountToggle } from "@/components/shared/layout/account-toggle"
 import { MainNav } from "@/components/shared/layout/main-nav"
-import { TabGroup } from "@/components/shared/layout/tab-group"
-import { ThemeToggle } from "@/components/shared/layout/theme-toggle"
+import { TabsNav } from "@/components/shared/layout/tabs-nav"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 import { Button } from "@/components/ui/button"
 
@@ -32,14 +33,11 @@ export async function Header() {
                 </Button>
               </Link>
 
-              <ThemeToggle />
+              <AccountToggle />
             </nav>
           </div>
         </div>
-        {/* tabs -> convert only that part to server components? */}
-        <div className="-mb-0.5 flex h-12 items-center justify-start space-x-2">
-          <TabGroup />
-        </div>
+        <TabsNav />
       </MaxWidthWrapper>
     </header>
   )

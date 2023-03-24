@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function ThemeToggle() {
-  const { setTheme, theme } = useTheme()
+  const { setTheme } = useTheme()
 
   return (
     <DropdownMenu>
@@ -23,15 +23,8 @@ export function ThemeToggle() {
           size="sm"
           className="active:bg-background-bgActive hover:bg-background-bgHover"
         >
-          {theme === "light" && (
-            <Icons.sun className="hover:text-background-textContrast" />
-          )}
-          {theme === "dark" && (
-            <Icons.moon className="hover:text-background-textContrast" />
-          )}
-          {theme === "system" && (
-            <Icons.laptop className="hover:text-background-textContrast" />
-          )}
+          <Icons.sun className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 hover:text-background-textContrast" />
+          <Icons.moon className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 hover:text-background-textContrast" />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
@@ -42,21 +35,25 @@ export function ThemeToggle() {
       >
         <DropdownMenuItem
           onClick={() => setTheme("light")}
-          className="hover:bg-background-bgHover hover:text-background-textContrast"
+          className="hover:bg-background-bgHover 
+          focus:bg-background-bgHover 
+          hover:text-background-textContrast"
         >
           <Icons.sun className="mr-2 h-4 w-4" />
           <span>Light</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("dark")}
-          className="hover:bg-background-bgHover hover:text-background-textContrast"
+          className="hover:bg-background-bgHover focus:bg-background-bgHover 
+          hover:text-background-textContrast"
         >
           <Icons.moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("system")}
-          className="hover:bg-background-bgHover hover:text-background-textContrast"
+          className="hover:bg-background-bgHover 
+          focus:bg-background-bgHover hover:text-background-textContrast"
         >
           <Icons.laptop className="mr-2 h-4 w-4" />
           <span>System</span>

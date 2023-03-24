@@ -11,10 +11,10 @@ import { SitesContainer } from "@/components/shared/sites/sites-container"
 
 export default function IndexPage() {
   return (
-    <>
-      <Card className="mb-10 h-36">jhoan</Card>
+    <MaxWidthWrapper className="md:px-0 border-error">
+      <Card className="h-36"></Card>
       <Card className="my-10 h-36">jhoan</Card>
       <Card className="mb-10 h-36">jhoan</Card>
-    </>
+    </MaxWidthWrapper>
   )
 }

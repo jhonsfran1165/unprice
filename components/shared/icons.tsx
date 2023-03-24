@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
+  Cloud,
   Command,
   CreditCard,
   ExternalLink,
@@ -13,18 +14,27 @@ import {
   Github,
   HelpCircle,
   Image,
+  Keyboard,
   Laptop,
+  LifeBuoy,
   Loader2,
+  LogOut,
   LucideProps,
+  Mail,
+  MessageSquare,
   Moon,
   MoreVertical,
   Pizza,
   Plus,
+  PlusCircle,
+  Search,
   Settings,
   SunMedium,
   Trash,
   Twitter,
   User,
+  UserPlus,
+  Users,
   X,
   type Icon as LucideIcon,
 } from "lucide-react"
@@ -32,6 +42,16 @@ import {
 export type Icon = LucideIcon
 
 export const Icons = {
+  search: Search,
+  cloud: Cloud,
+  keyboard: Keyboard,
+  lifeBuoy: LifeBuoy,
+  logOut: LogOut,
+  mail: Mail,
+  messageSquare: MessageSquare,
+  plusCircle: PlusCircle,
+  userPlus: UserPlus,
+  users: Users,
   externalLink: ExternalLink,
   logo: Command,
   close: X,
@@ -67,8 +87,6 @@ export const Icons = {
       strokeLinejoin="round"
       strokeWidth="1"
       viewBox="0 0 24 24"
-      width="14"
-      height="14"
       {...props}
     >
       <path d="M16.88 3.549L7.12 20.451" />

@@ -9,6 +9,19 @@ export type NavItem = {
   external?: boolean
 }
 
+export type AppModulesNav = {
+  org: DashboardNavItem[]
+  site: DashboardNavItem[]
+} | {}
+
+
+export type GetActiveTabs = {
+  tabs: DashboardNavItem[]
+  pathPrefix: string
+  numberSegments: number
+  lastActiveSegment?: string
+}
+
 export type MainNavItem = NavItem
 
 export type SidebarNavItem = {

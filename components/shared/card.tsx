@@ -10,7 +10,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "z-10 w-full max-w-md overflow-hidden rounded-2xl border shadow-sm bg-background-bgSubtle p-6 shadow-background-solid",
+        "z-10 w-full overflow-hidden rounded-lg border bg-background-bgSubtle p-6",
         className
       )}
       {...props}

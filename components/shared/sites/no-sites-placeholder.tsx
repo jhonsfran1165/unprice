@@ -13,6 +13,7 @@ export default function NoSitesPlaceholder() {
           alt="No links yet"
           width={400}
           height={400}
+          priority={true}
           className="pointer-events-none -my-8"
         />
       </div>

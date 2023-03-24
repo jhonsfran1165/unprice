@@ -23,7 +23,7 @@ $$
 
 --- generate types and migrations supabase ---
 
-supabase gen types typescript --local > types/database.types.ts -> create types
+supabase gen types typescript --local > lib/types/database.types.ts ====> create types
 supabase db diff --use-migra -f seeding_data -> create migrations
 
 pg_dump --column-inserts --data-only postgresql://postgres:postgres@localhost:54322 > supabase/dump.sql

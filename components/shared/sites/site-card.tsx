@@ -5,7 +5,7 @@ import { timeAgo } from "@/lib/utils"
 import { Card } from "@/components/shared/card"
 import { Icons } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 
 export const SiteCard = ({ site }: { site: Site }) => {
   return (
@@ -21,25 +21,25 @@ export const SiteCard = ({ site }: { site: Site }) => {
           </div>
         </div>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center justify-center text-base p-2 active:bg-background-bgActive hover:bg-background-bgHover"
-        >
-          <Link href={`/site/${site.id}`}>
+        <Link href={`/org/${site.org_id}/site/${site.id}`}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center justify-center text-base p-2 active:bg-background-bgActive hover:bg-background-bgHover"
+          >
             <Icons.externalLink
               className="h-4 w-4 hover:text-background-textContrast"
               aria-hidden="true"
             />
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
       <div className={"h-3 pb-4"}>
         <div className={"font-semibold pl-4"}>{site.subdomain}</div>
       </div>
       <div className={"h-3 text-right pb-4"}>
         <div className={"font-semibold text-xs"}>
-          {timeAgo(site.created_at)}
+          {site?.created_at && timeAgo(new Date(site?.created_at))}
         </div>
       </div>
     </Card>

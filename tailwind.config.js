@@ -1,6 +1,9 @@
 const radixColors = require("@radix-ui/colors")
+const colors = require("tailwindcss/colors")
 const { fontFamily } = require("tailwindcss/defaultTheme")
 const { toRadixVar } = require("windy-radix-palette/vars")
+
+// https://tailwindcss.com/docs/theme#configuration-reference
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -29,13 +32,7 @@ module.exports = {
       current: "currentColor",
       black: "#000",
       white: "#fff",
-      ...radixColors.amber,
-      ...radixColors.red,
-      ...radixColors.slate,
-      ...radixColors.orange,
-      ...radixColors.green,
-      ...radixColors.blue,
-      ...radixColors.yellow,
+      // slate: colors.slate,
       success: {
         DEFAULT: toRadixVar("green", 1),
         base: toRadixVar("green", 1),
@@ -191,6 +188,15 @@ module.exports = {
       ...theme("colors"),
       DEFAULT: toRadixVar("sage", 7),
     }),
+    // Modify the default ring color so that it matches the brand color:
+    ringColor: (theme) => ({
+      ...theme("colors"),
+      DEFAULT: toRadixVar("teal", 7),
+    }),
+    ringOffsetColor: (theme) => ({
+      ...theme("colors"),
+      DEFAULT: toRadixVar("teal", 7),
+    }),
     fontSize: {
       xs: ".75rem",
       sm: ".875rem",
@@ -214,10 +220,6 @@ module.exports = {
       },
     },
     extend: {
-      // Modify the default ring color so that it matches the brand color:
-      // ringColor: {
-      // 	DEFAULT: brandColor['500'],
-      // },
       fontFamily: {
         satoshi: ["var(--font-satoshi)", ...fontFamily.sans],
         inter: ["var(--font-inter)", ...fontFamily.sans],

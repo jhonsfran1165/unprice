@@ -24,7 +24,7 @@ async function handler(
       const { data, error } = await supabase
         .from("site")
         .select("*")
-        .eq("org_id", profile?.org_id)
+        .eq("org_id", req.query.orgId)
 
       if (error) return res.status(404).json(error)
 

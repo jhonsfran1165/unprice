@@ -23,8 +23,8 @@ export function DashboardShell({
         {isLoading ? (
           <DashboardShellSkeleton />
         ) : items ? (
-          <div className="grid gap-5 md:grid-cols-[200px_1fr]">
-            <aside className="min-w-full flex-col md:flex md:w-[200px]">
+          <div className="grid gap-5 md:grid-cols-[250px_1fr]">
+            <aside className="min-w-full flex-col md:flex md:w-[250px]">
               <DashboardSideBarNav path={prefixPath} items={items} />
             </aside>
             <main className="flex w-full flex-1 flex-col overflow-hidden">

@@ -1,126 +1,149 @@
 import { cache } from "react"
 
-import { DashboardNavItem, DashboardSidebarNavItem } from "@/lib/types"
+import {
+  AppModulesNav,
+  DashboardNavItem,
+  DashboardSidebarNavItem,
+  GetActiveTabs,
+} from "@/lib/types"
 
-const MainNavItems = (pathPrefix: string): DashboardNavItem[] => {
-  return [
-    {
-      module: "main",
-      slug: "main-root",
-      title: "Sites",
-      href: `${pathPrefix}/`,
-    },
-    {
-      module: "main",
-      slug: "main-stadistics",
-      title: "Statistics",
-      href: `${pathPrefix}/stadistics`,
-      disabled: true,
-    },
-    {
-      module: "main",
-      slug: "main-settings",
-      title: "Settings",
-      href: `${pathPrefix}/settings`,
-      disabled: false,
-      sidebarNav: [
-        {
-          module: "main",
-          submodule: "settings",
-          slug: "main-settings",
-          title: "General",
-          href: `${pathPrefix}/settings`,
-          icon: "post",
-        },
-        {
-          module: "main",
-          submodule: "settings",
-          slug: "main-settings-billing",
-          title: "Billing",
-          href: `${pathPrefix}/settings/billing`,
-          icon: "post",
-        },
-      ],
-    },
-  ]
-}
+const OrgNavTabs: DashboardNavItem[] = [
+  {
+    module: "org",
+    slug: "org-root",
+    title: "Sites",
+    href: "/",
+  },
+  {
+    module: "org",
+    slug: "org-stadistics",
+    title: "Statistics",
+    href: "/stadistics",
+    disabled: true,
+  },
+  {
+    module: "org",
+    slug: "org-settings",
+    title: "Settings",
+    href: "/settings",
+    disabled: false,
+    sidebarNav: [
+      {
+        module: "org",
+        submodule: "settings",
+        slug: "org-settings",
+        title: "General",
+        href: "/settings",
+        icon: "post",
+      },
+      {
+        module: "org",
+        submodule: "settings",
+        slug: "org-settings-billing",
+        title: "Billing",
+        href: "/settings/billing",
+        icon: "post",
+      },
+    ],
+  },
+]
 
-const SiteNavItems = (pathPrefix: string): DashboardNavItem[] => {
-  return [
-    {
-      module: "site",
-      slug: "sites-root",
-      title: "Pages",
-      href: `${pathPrefix}/`,
-    },
-    {
-      module: "site",
-      slug: "sites-stadistics",
-      title: "Stadistics",
-      href: `${pathPrefix}/stadistics`,
-    },
-    {
-      module: "site",
-      slug: "sites-settings",
-      title: "Settings",
-      href: `${pathPrefix}/settings`,
-      disabled: false,
-      sidebarNav: [
-        {
-          module: "site",
-          submodule: "settings",
-          slug: "sites-settings",
-          title: "General",
-          href: `${pathPrefix}/settings`,
-          icon: "post",
-        },
-        {
-          module: "site",
-          submodule: "settings",
-          slug: "sites-settings-billing",
-          title: "Billing",
-          href: `${pathPrefix}/settings/billing`,
-          icon: "post",
-          disabled: false,
-        },
-      ],
-    },
-  ]
+const SiteNavTabs: DashboardNavItem[] = [
+  {
+    module: "site",
+    slug: "site-root",
+    title: "Sites",
+    href: "/",
+  },
+  {
+    module: "site",
+    slug: "site-stadistics",
+    title: "Statistics",
+    href: "/stadistics",
+    disabled: true,
+  },
+  {
+    module: "site",
+    slug: "site-settings",
+    title: "Settings",
+    href: "/settings",
+    disabled: false,
+    sidebarNav: [
+      {
+        module: "site",
+        submodule: "settings",
+        slug: "site-settings",
+        title: "General",
+        href: "/settings",
+        icon: "post",
+      },
+      {
+        module: "site",
+        submodule: "settings",
+        slug: "site-settings-billing",
+        title: "Billing",
+        href: "/settings/billing",
+        icon: "post",
+      },
+    ],
+  },
+]
+
+export const AppModules: AppModulesNav = {
+  org: OrgNavTabs,
+  site: SiteNavTabs,
 }
 
 export const getDashboardSidebarNavItems = cache(
   ({
     moduleNav,
     slug,
-    pathPrefix,
   }: {
     moduleNav: string
     slug: string
-    pathPrefix: string
   }): DashboardSidebarNavItem[] => {
-    const mainNavItems: DashboardNavItem[] = MainNavItems("")
-    const siteNavItems: DashboardNavItem[] = SiteNavItems(pathPrefix)
-    const items: DashboardNavItem[] = [...mainNavItems, ...siteNavItems]
+    const moduleTabs = AppModules[moduleNav]
 
-    return (
-      items?.find((item) => item.module === moduleNav && item.slug === slug)
-        ?.sidebarNav || []
-    )
+    return moduleTabs?.find((item) => item.slug === slug)?.sidebarNav || []
   }
 )
 
-export const getDashboardMainNavItem = cache(
-  ({
-    moduleNav,
+export const getActiveSegments = (segments, modules): number => {
+  const moduleKeys = Object.keys(modules)
+  let numberSegments = 0
+
+  segments.map((segment) => {
+    if (moduleKeys.includes(segment)) {
+      numberSegments++
+    }
+  })
+
+  return numberSegments
+}
+
+export const getActiveTabs = (
+  segments: string[],
+  appModules: AppModulesNav
+): GetActiveTabs => {
+  const numberSegments = getActiveSegments(segments, appModules)
+  const moduleKeys = Object.keys(appModules)
+  const ignoredRoutes = ["(dashboard)", "(auth)"]
+
+  const cleanSegments = segments.filter(
+    (segment) => !ignoredRoutes.includes(segment)
+  )
+  const pathPrefix = `/${cleanSegments?.slice(0, numberSegments * 2).join("/")}`
+
+  // reverse the order so I can get the last active
+  const lastActiveSegment = segments
+    .slice()
+    .reverse()
+    .find((segment) => moduleKeys.includes(segment))
+
+  return {
+    tabs: lastActiveSegment ? appModules[lastActiveSegment] : [],
     pathPrefix,
-  }: {
-    moduleNav: string
-    pathPrefix: string
-  }): DashboardNavItem[] => {
-    const mainNavItems: DashboardNavItem[] = MainNavItems(pathPrefix)
-    const siteNavItems: DashboardNavItem[] = SiteNavItems(pathPrefix)
-    const items: DashboardNavItem[] = [...mainNavItems, ...siteNavItems]
-
-    return items?.filter((item) => item.module === moduleNav) || []
+    numberSegments,
+    lastActiveSegment,
   }
-)
+}

@@ -1,16 +1,11 @@
-"use client"
-
-import * as React from "react"
 import Link from "next/link"
 
 import { layoutConfig } from "@/lib/config/layout"
-import useSite from "@/lib/swr/use-sites"
 import { NavItem } from "@/lib/types"
-import { User } from "@/lib/types/supabase"
-import { useSupabase } from "@/components/auth/supabase-provider"
+import { Session, User } from "@/lib/types/supabase"
 import { Icons } from "@/components/shared/icons"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { OrganizationToggle } from "@/components/shared/layout/organization-toggle"
+import SiteContext from "@/components/shared/sites/site-context"
 import {
   Popover,
   PopoverContent,
@@ -23,28 +18,10 @@ interface MainNavProps {
 }
 
 export function MainNav({ items }: MainNavProps) {
-  // TODO: separate site selector so we can render the navbar from server
-  const { sites } = useSite({ revalidateOnFocus: false })
-  const { supabase } = useSupabase()
-
-  const [user, setUser] = React.useState<User>()
-
-  React.useEffect(() => {
-    const fetchSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      setUser(session?.user)
-    }
-
-    fetchSession()
-  }, [])
-
   return (
-    <div className="flex items-center justify-start ">
+    <div className="flex items-center justify-start">
       <Link
-        href="/"
+        href="#"
         className="hidden items-center space-x-2 md:flex text-primary-text"
       >
         <Icons.logo className="h-6 w-6" />
@@ -52,77 +29,11 @@ export function MainNav({ items }: MainNavProps) {
           {layoutConfig.name}
         </span>
       </Link>
-      <Icons.divider className="hidden mx-2 h-8 w-8 text-gray-200 gap-0 md:inline-block" />
 
-      <Popover>
-        <PopoverTrigger asChild>
-          <div className="flex items-center space-x-1">
-            <Link href="/">
-              <div className="flex items-center justify-start space-x-3 px-1">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src="https://github.com/shadcn.png"
-                    alt="@shadcn"
-                  />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-                <span className="block truncate text-sm font-bold">
-                  {user?.email}
-                </span>
-              </div>
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex items-center justify-center text-base p-2 active:bg-background-bgActive hover:bg-background-bgHover"
-            >
-              <Icons.chevronsupdown
-                className="h-4 w-4 hover:text-background-textContrast"
-                aria-hidden="true"
-              />
-            </Button>
-          </div>
-        </PopoverTrigger>
-        <PopoverContent align={"center"} className="p-0 bg-background-bgSubtle">
-          <div className="flex flex-col">
-            <div className="pl-6 py-3 bg-primary-bg">
-              <h4 className="text-sm font-semibold text-background-textContrast">
-                My Sites
-              </h4>
-              <p className="text-xs">Personal Account</p>
-            </div>
-            <Separator className="bg-background-line" />
-            <div className="flex flex-col py-2">
-              {sites?.map(
-                (site, index) =>
-                  site.id && (
-                    <Link
-                      key={index}
-                      href={`/site/${site.id}`}
-                      className="pl-8 py-2 hover:bg-background-bgHover"
-                    >
-                      <div className="flex items-start space-x-2">
-                        <Avatar className="h-5 w-5">
-                          <AvatarImage
-                            src="https://github.com/shadcn.png"
-                            alt="@shadcn"
-                          />
-                          <AvatarFallback>
-                            {site.custom_domain?.substring(2) ||
-                              site.subdomain?.substring(2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="ml-4 block truncate text-sm font-bold text-base-text">
-                          {site.name}
-                        </span>
-                      </div>
-                    </Link>
-                  )
-              )}
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
+      <Icons.divider className="hidden h-6 w-6 mx-3 text-background-text gap-0 md:inline-block" />
+
+      <OrganizationToggle />
+      <SiteContext />
 
       {/* TODO: use this for the right side of the navidation */}
       {/* only show menu when is home -> for dashboard we want to show project selector

@@ -1,5 +1,6 @@
 import useSWR from "swr"
 
+import { useStore } from "@/lib/stores/layout"
 import { Site } from "@/lib/types/supabase"
 import { fetcher } from "@/lib/utils"
 
@@ -8,14 +9,19 @@ export default function useSite({
 }: {
   revalidateOnFocus?: boolean
 } = {}) {
+  const { orgId } = useStore()
   const {
     data: sites,
     error,
     isLoading,
-  } = useSWR<Site[]>("/api/sites", fetcher, {
-    dedupingInterval: 30000,
-    revalidateOnFocus,
-  })
+  } = useSWR<Site[]>(
+    orgId ? `/api/organization/${orgId}/sites` : null,
+    fetcher,
+    {
+      dedupingInterval: 30000,
+      revalidateOnFocus,
+    }
+  )
 
   return {
     sites,

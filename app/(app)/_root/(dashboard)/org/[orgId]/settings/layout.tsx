@@ -3,21 +3,20 @@ import { DashboardShell } from "@/components/shared/dashboard/shell"
 
 export default async function DashboardLayout({
   children,
-  params,
+  params: { orgId },
 }: {
   children: React.ReactNode
   params: {
-    siteId: string
+    orgId: string
   }
 }) {
   const items = getDashboardSidebarNavItems({
-    moduleNav: "site",
-    slug: "sites-settings",
-    pathPrefix: `/site/${params.siteId}`,
+    moduleNav: "org",
+    slug: "org-settings",
   })
 
   return (
-    <DashboardShell items={items} prefixPath={`/site/${params.siteId}`}>
+    <DashboardShell items={items} prefixPath={`/org/${orgId}`}>
       {children}
     </DashboardShell>
   )

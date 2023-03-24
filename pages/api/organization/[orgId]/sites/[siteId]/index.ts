@@ -28,8 +28,6 @@ async function handler(
         .eq("id", req.query.siteId)
         .single()
 
-      console.log(data)
-
       if (error) return res.status(404).json({ ...error })
 
       return res.status(200).json({ ...data })
