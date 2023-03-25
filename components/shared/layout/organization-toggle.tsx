@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input"
 export function OrganizationToggle() {
   const { orgId, orgProfiles } = useStore()
 
-  const organization = orgProfiles.find((profile) => profile.org_id === orgId)
+  const organization = orgProfiles?.find((profile) => profile.org_id === orgId)
   const { organizationProfiles } = useOrganizations({
     revalidateOnFocus: false,
   })

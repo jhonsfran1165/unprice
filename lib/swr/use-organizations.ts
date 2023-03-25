@@ -12,7 +12,7 @@ export default function useOrganizations({
     data: organizationProfiles,
     error,
     isLoading,
-  } = useSWR<[OrganizationProfilesData]>(`/api/organization`, fetcher, {
+  } = useSWR<[OrganizationProfilesData]>(`/api/org`, fetcher, {
     dedupingInterval: 30000,
     revalidateOnFocus,
   })

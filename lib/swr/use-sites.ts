@@ -14,14 +14,10 @@ export default function useSite({
     data: sites,
     error,
     isLoading,
-  } = useSWR<Site[]>(
-    orgId ? `/api/organization/${orgId}/sites` : null,
-    fetcher,
-    {
-      dedupingInterval: 30000,
-      revalidateOnFocus,
-    }
-  )
+  } = useSWR<Site[]>(orgId ? `/api/org/${orgId}/site` : null, fetcher, {
+    dedupingInterval: 30000,
+    revalidateOnFocus,
+  })
 
   return {
     sites,

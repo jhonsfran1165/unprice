@@ -52,7 +52,7 @@ const SiteNavTabs: DashboardNavItem[] = [
   {
     module: "site",
     slug: "site-root",
-    title: "Sites",
+    title: "Pages",
     href: "/",
   },
   {
@@ -132,18 +132,22 @@ export const getActiveTabs = (
   const cleanSegments = segments.filter(
     (segment) => !ignoredRoutes.includes(segment)
   )
-  const pathPrefix = `/${cleanSegments?.slice(0, numberSegments * 2).join("/")}`
 
-  // reverse the order so I can get the last active
-  const lastActiveSegment = segments
+  const activePathPrefix = `/${cleanSegments
+    ?.slice(0, numberSegments * 2)
+    .join("/")}`
+
+  // reverse the order so I can get the last active segment
+  const activeSegment = segments
     .slice()
     .reverse()
     .find((segment) => moduleKeys.includes(segment))
 
   return {
-    tabs: lastActiveSegment ? appModules[lastActiveSegment] : [],
-    pathPrefix,
+    tabs: activeSegment ? appModules[activeSegment] : [],
+    activePathPrefix,
     numberSegments,
-    lastActiveSegment,
+    activeSegment,
+    cleanSegments,
   }
 }

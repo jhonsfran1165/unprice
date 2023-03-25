@@ -67,6 +67,7 @@
     "swr": "^2.0.3",
     "tailwind-merge": "^1.8.0",
     "tailwindcss-animate": "^1.0.5",
+    "use-debounce": "^9.0.3",
     "zod": "^3.20.2",
     "zustand": "^4.3.4"
   },

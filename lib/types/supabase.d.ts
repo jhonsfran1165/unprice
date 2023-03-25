@@ -9,8 +9,7 @@ export type Page = Database["public"]["Tables"]["page"]["Row"]
 export type Profile = Database["public"]["Tables"]["profile"]["Row"]
 export type Site = Database["public"]["Tables"]["site"]["Row"]
 
-interface Org {
+// custom types
+export type OrganizationProfilesData = OrganizationProfiles & {
   organization: Organization
 }
-
-export type OrganizationProfilesData = OrganizationProfiles & Org

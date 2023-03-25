@@ -10,14 +10,5 @@ export default async function DashboardLayout({
     orgId: string
   }
 }) {
-  const items = getDashboardSidebarNavItems({
-    moduleNav: "org",
-    slug: "org-settings",
-  })
-
-  return (
-    <DashboardShell items={items} prefixPath={`/org/${orgId}`}>
-      {children}
-    </DashboardShell>
-  )
+  return <DashboardShell>{children}</DashboardShell>
 }

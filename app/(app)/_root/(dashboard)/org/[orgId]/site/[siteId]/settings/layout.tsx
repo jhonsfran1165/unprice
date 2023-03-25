@@ -11,14 +11,5 @@ export default async function DashboardLayout({
     siteId: string
   }
 }) {
-  const items = getDashboardSidebarNavItems({
-    moduleNav: "site",
-    slug: "site-settings",
-  })
-
-  return (
-    <DashboardShell items={items} prefixPath={`/org/${orgId}/site/${siteId}`}>
-      {children}
-    </DashboardShell>
-  )
+  return <DashboardShell>{children}</DashboardShell>
 }

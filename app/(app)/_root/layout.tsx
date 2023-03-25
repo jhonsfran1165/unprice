@@ -4,7 +4,7 @@ import { createServerClient } from "@/lib/supabase/supabase-server"
 import { OrganizationProfilesData } from "@/lib/types/supabase"
 import SupabaseListener from "@/components/auth//supabase-listener"
 import SupabaseProvider from "@/components/auth/supabase-provider"
-import StoreInitializer from "@/components/shared/layout/store-init"
+import StoreHandler from "@/components/shared/layout/store-handler"
 
 // do not cache this layout because it validates the session constantly
 export const revalidate = 0
@@ -29,7 +29,7 @@ export default async function AuthLayout({
   return (
     <SupabaseProvider session={session}>
       <SupabaseListener serverAccessToken={session?.access_token} />
-      <StoreInitializer
+      <StoreHandler
         orgProfiles={orgProfiles as OrganizationProfilesData[]}
         session={session}
         modulesApp={AppModules}

@@ -1,5 +1,5 @@
-import { DashboardShell } from "@/components/shared/dashboard/shell"
+import { DashboardShellSkeleton } from "@/components/shared/dashboard/shell-loading"
 
 export default function LoadingPage() {
-  return <DashboardShell isLoading={true} />
+  return <DashboardShellSkeleton />
 }

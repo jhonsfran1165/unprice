@@ -11,6 +11,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function createSlug(data: string) {
+  return data
+    .toLowerCase()
+    .trim()
+    .replace(/[\W_]+/g, "-")
+}
+
 export const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
   7

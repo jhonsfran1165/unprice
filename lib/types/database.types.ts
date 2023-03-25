@@ -16,6 +16,8 @@ export interface Database {
           updated_at: string | null
           name: string | null
           slug: string
+          image: string | null
+          type: string | null
         }
         Insert: {
           id?: number
@@ -23,6 +25,8 @@ export interface Database {
           updated_at?: string | null
           name?: string | null
           slug?: string
+          image?: string | null
+          type?: string | null
         }
         Update: {
           id?: number
@@ -30,6 +34,8 @@ export interface Database {
           updated_at?: string | null
           name?: string | null
           slug?: string
+          image?: string | null
+          type?: string | null
         }
       }
       organization_profiles: {

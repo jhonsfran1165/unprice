@@ -8,7 +8,7 @@ import {
 } from "@/lib/api-middlewares"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Profile, Session } from "@/lib/types/supabase"
-import { siteCreateSchema, siteGetSchema } from "@/lib/validations/site"
+import { orgGetSchama } from "@/lib/validations/org"
 
 async function handler(
   req: NextApiRequest,
@@ -22,20 +22,9 @@ async function handler(
     if (req.method === "GET") {
       // get all project of this organization
       const { data, error } = await supabase
-        .from("organization_profiles")
-        .select("*, organization(*)")
-        .eq("profile_id", profile?.id)
-
-      if (error) return res.status(404).json(error)
-
-      return res.status(200).json(data)
-    }
-
-    if (req.method === "POST") {
-      const { data, error } = await supabase
-        .from("site")
+        .from("organization")
         .select("*")
-        .eq("id", req.body.siteId)
+        .eq("id", req.query.orgId)
 
       if (error) return res.status(404).json(error)
 
@@ -46,7 +35,7 @@ async function handler(
   }
 }
 
-const validMethods = ["GET", "POST"]
+const validMethods = ["GET"]
 
 export default withMethods(
   // valid methods for this endpoint
@@ -54,7 +43,7 @@ export default withMethods(
   // validate payload for this methods
   withValidation(
     {
-      POST: siteCreateSchema,
+      GET: orgGetSchama,
     },
     // validate session for ["POST", "DELETE", "PUT"] endpoints only
     withAuthentication(
@@ -62,7 +51,7 @@ export default withMethods(
       // withRateLimit(handler, "sites", ["GET"]),
       handler,
       {
-        protectedMethods: ["POST", "GET"],
+        protectedMethods: ["GET"],
         needProfileDetails: true,
       }
     )

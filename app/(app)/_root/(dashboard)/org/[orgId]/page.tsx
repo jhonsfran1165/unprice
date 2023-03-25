@@ -12,14 +12,5 @@ export default async function OrgIndexPage({
     orgId: string
   }
 }) {
-  const supabase = createServerClient()
-
-  // TODO: revalidate everytime a new site is created
-  // https://beta.nextjs.org/docs/data-fetching/mutating
-  const { data: sites } = await supabase
-    .from("site")
-    .select("*")
-    .eq("org_id", orgId)
-
-  return <SitesContainer sites={sites as Site[]} />
+  return <SitesContainer />
 }

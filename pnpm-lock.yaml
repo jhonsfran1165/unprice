@@ -71,6 +71,7 @@ specifiers:
   tailwindcss: ^3.2.4
   tailwindcss-animate: ^1.0.5
   typescript: ^4.5.3
+  use-debounce: ^9.0.3
   windy-radix-palette: ^0.5.0
   windy-radix-typography: ^0.1.0
   zod: ^3.20.2
@@ -132,6 +133,7 @@ dependencies:
   swr: 2.0.3_react@18.2.0
   tailwind-merge: 1.8.1
   tailwindcss-animate: 1.0.5_tailwindcss@3.2.4
+  use-debounce: 9.0.3_react@18.2.0
   zod: 3.20.2
   zustand: 4.3.4_react@18.2.0
 
@@ -4878,6 +4880,15 @@ packages:
       '@types/react': 18.0.27
       react: 18.2.0
       tslib: 2.4.1
+    dev: false
+
+  /use-debounce/9.0.3_react@18.2.0:
+    resolution: {integrity: sha512-FhtlbDtDXILJV7Lix5OZj5yX/fW1tzq+VrvK1fnT2bUrPOGruU9Rw8NCEn+UI9wopfERBEZAOQ8lfeCJPllgnw==}
+    engines: {node: '>= 10.0.0'}
+    peerDependencies:
+      react: '>=16.8.0'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /use-isomorphic-layout-effect/1.1.2_3stiutgnnbnfnf3uowm5cip22i:

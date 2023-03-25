@@ -17,9 +17,10 @@ export type AppModulesNav = {
 
 export type GetActiveTabs = {
   tabs: DashboardNavItem[]
-  pathPrefix: string
+  activePathPrefix: string
   numberSegments: number
-  lastActiveSegment?: string
+  activeSegment?: string
+  cleanSegments: string[]
 }
 
 export type MainNavItem = NavItem

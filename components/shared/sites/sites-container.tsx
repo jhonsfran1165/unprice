@@ -1,16 +1,24 @@
+"use client"
+
+import { useEffect, useState } from "react"
+
+import useSite from "@/lib/swr/use-sites"
 import { Site } from "@/lib/types/supabase"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 import { SiteCard } from "@/components/shared/sites/site-card"
 import { SiteSkeleton } from "@/components/shared/sites/site-skeleton"
 import NoSitesPlaceholder from "./no-sites-placeholder"
 
-export function SitesContainer({
-  isLoading,
-  sites,
-}: {
-  isLoading?: boolean
-  sites?: Site[]
-}) {
+export function SitesContainer({ isLoading }: { isLoading?: boolean }) {
+  const { sites: data } = useSite({
+    revalidateOnFocus: false,
+  })
+  const [sites, setISites] = useState<Site[] | undefined>([])
+
+  useEffect(() => {
+    setISites(data)
+  }, [data])
+
   return (
     <MaxWidthWrapper className="pt-10">
       {isLoading ? (
