@@ -30,8 +30,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
-  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -104,6 +102,7 @@ export function AddOrgModal() {
 
       // TODO: add profile as well
       if (newOrg.id) router.push(`/org/${newOrg.id}`)
+      // TODO: how to close the Dialog after creation?
     } catch (error) {
       if (error instanceof Error) {
         setNoSuchAccount(true)

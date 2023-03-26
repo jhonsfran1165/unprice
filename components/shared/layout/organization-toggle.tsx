@@ -1,10 +1,11 @@
 "use client"
 
-import * as React from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 
 import { useStore } from "@/lib/stores/layout"
 import useOrganizations from "@/lib/swr/use-organizations"
+import { Organization, OrganizationProfilesData } from "@/lib/types/supabase"
 import { Icons } from "@/components/shared/icons"
 import { AddOrgModal } from "@/components/shared/modals/add-new-organization"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -23,24 +24,32 @@ import { Input } from "@/components/ui/input"
 
 export function OrganizationToggle() {
   const { orgId, orgProfiles } = useStore()
-
-  const organization = orgProfiles?.find((profile) => profile.org_id === orgId)
+  const [org, setOrg] = useState<Organization | null>()
   const { organizationProfiles } = useOrganizations({
     revalidateOnFocus: false,
+    fallbackData: orgProfiles,
   })
+
+  useEffect(() => {
+    const organization = orgProfiles?.find((org) => org.org_id === orgId)
+    setOrg(organization?.organization)
+  }, [orgId])
 
   return (
     <div className="flex items-center justify-start space-x-2">
       <Link
         className="flex w-36 space-x-3 items-center justify-start hover:text-background-textContrast"
-        href={`/org/${orgId}`}
+        href={`/org/${org?.id}`}
       >
         <Avatar className="h-8 w-8">
-          <AvatarImage src={"https://github.com/shadcn.png"} alt="@shadcn" />
-          <AvatarFallback>CN</AvatarFallback>
+          <AvatarImage
+            src={org?.image || "https://github.com/shadcn.png"}
+            alt={org?.name}
+          />
+          <AvatarFallback>{org?.name.substring(2)}</AvatarFallback>
         </Avatar>
         <span className="block w-full truncate text-sm font-bold text-center">
-          {organization?.organization.name || "admin@builder.ai"}
+          {org?.name || "admin@builder.ai"}
         </span>
       </Link>
       <DropdownMenu>
@@ -92,11 +101,14 @@ export function OrganizationToggle() {
                     <Link href={`/org/${org.org_id}`}>
                       <Avatar className="mr-2 h-5 w-5">
                         <AvatarImage
-                          src="https://github.com/shadcn.png"
-                          alt="@shadcn"
+                          src={
+                            org.organization?.image ||
+                            "https://github.com/shadcn.png"
+                          }
+                          alt={org.organization.name}
                         />
                         <AvatarFallback>
-                          {org.organization.name?.substring(2)}
+                          {org.organization.name.substring(2)}
                         </AvatarFallback>
                       </Avatar>
                       <span>{org.organization.name}</span>{" "}

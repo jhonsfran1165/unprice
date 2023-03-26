@@ -14,6 +14,10 @@ export const Tab = ({
   const tabPath = pathPrefix + tab.href
   const active = activeTab?.href === tab.href || false
 
+  if (!tab) {
+    return null
+  }
+
   return (
     <WrapperLink
       href={tab?.disabled ? "#" : tabPath}

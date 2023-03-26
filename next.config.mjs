@@ -13,6 +13,7 @@ const nextConfig = {
       "avatars.dicebear.com",
       "res.cloudinary.com",
       "pbs.twimg.com",
+      "github.com",
     ],
   },
 }

@@ -26,6 +26,7 @@ async function handler(
         .from("site")
         .select("*")
         .eq("id", req.query.siteId)
+        .eq("org_id", req.query.orgId)
         .single()
 
       if (error) return res.status(404).json({ ...error })

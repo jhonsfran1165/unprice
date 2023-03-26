@@ -44,14 +44,15 @@ function StoreHandler({
   )
 
   // initialize this only the first time from the server
+  // TODO: better change this with session?
   if (!initialized.current) {
     useStore.setState({ modulesApp, orgProfiles, session })
     initialized.current = true
   }
 
-  // // TODO: it is possible to generalize this?
   useEffect(() => {
     useStore.setState({
+      // // TODO: it is possible to generalize this?
       orgId: parseInt(cleanSegments[1]),
       siteId: parseInt(cleanSegments[3]),
       activeTabs: tabs,

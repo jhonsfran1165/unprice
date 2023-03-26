@@ -61,15 +61,22 @@ async function handler(
         .select()
         .single()
 
-      // TODO: clean null in types
-      await supabase.from("organization_profiles").insert({
-        org_id: org?.id,
-        profile_id: profile?.id,
-        role: "owner",
-        is_default: false,
-      })
-
       if (error) return res.status(404).json(error)
+
+      // TODO: use postgres functions instead
+      // https://github.com/supabase/postgrest-js/issues/237#issuecomment-739537955
+      if (profile?.id && org?.id) {
+        await supabase.from("organization_profiles").insert({
+          org_id: org.id,
+          profile_id: profile.id,
+          role: "owner",
+          is_default: false,
+        })
+      } else {
+        return res
+          .status(404)
+          .json({ error: "Something went wrong! Try again!" })
+      }
 
       return res.status(200).json(org)
     }

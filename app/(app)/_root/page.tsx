@@ -14,7 +14,7 @@ export default async function AppInitialPage() {
   }
 
   // TODO: create welcome page or register org
-  const { data: orgProfiles, error } = await supabase
+  const { data: orgProfiles } = await supabase
     .from("organization_profiles")
     .select("*, profile(*), organization(*)")
     .eq("profile_id", session?.user.id)

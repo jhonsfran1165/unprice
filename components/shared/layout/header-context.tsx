@@ -7,7 +7,7 @@ import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 export default function HeaderContext() {
   const { contextHeader } = useStore()
-  const [title, setTitle] = useState(contextHeader)
+  const [title, setTitle] = useState("")
 
   useEffect(() => {
     setTitle(contextHeader)

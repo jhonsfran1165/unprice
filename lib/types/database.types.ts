@@ -12,94 +12,94 @@ export interface Database {
       organization: {
         Row: {
           id: number
-          created_at: string | null
-          updated_at: string | null
-          name: string | null
+          created_at: string
+          updated_at: string
+          name: string
           slug: string
           image: string | null
-          type: string | null
+          type: string
         }
         Insert: {
           id?: number
-          created_at?: string | null
-          updated_at?: string | null
-          name?: string | null
+          created_at?: string
+          updated_at?: string
+          name: string
           slug?: string
           image?: string | null
-          type?: string | null
+          type?: string
         }
         Update: {
           id?: number
-          created_at?: string | null
-          updated_at?: string | null
-          name?: string | null
+          created_at?: string
+          updated_at?: string
+          name?: string
           slug?: string
           image?: string | null
-          type?: string | null
+          type?: string
         }
       }
       organization_profiles: {
         Row: {
           id: number
-          created_at: string | null
-          updated_at: string | null
-          role: string | null
+          created_at: string
+          updated_at: string
+          role: string
           profile_id: string
           org_id: number
-          is_default: boolean | null
+          is_default: boolean
         }
         Insert: {
           id?: number
-          created_at?: string | null
-          updated_at?: string | null
-          role?: string | null
+          created_at?: string
+          updated_at?: string
+          role?: string
           profile_id: string
           org_id: number
-          is_default?: boolean | null
+          is_default?: boolean
         }
         Update: {
           id?: number
-          created_at?: string | null
-          updated_at?: string | null
-          role?: string | null
+          created_at?: string
+          updated_at?: string
+          role?: string
           profile_id?: string
           org_id?: number
-          is_default?: boolean | null
+          is_default?: boolean
         }
       }
       page: {
         Row: {
           id: number
-          created_at: string | null
-          title: string | null
-          description: string | null
+          created_at: string
+          title: string
+          description: string
           content: Json | null
           image_url: string | null
-          published: boolean | null
+          published: boolean
           org_id: number | null
           site_id: number | null
           slug: string
         }
         Insert: {
           id?: number
-          created_at?: string | null
-          title?: string | null
-          description?: string | null
+          created_at?: string
+          title: string
+          description: string
           content?: Json | null
           image_url?: string | null
-          published?: boolean | null
+          published?: boolean
           org_id?: number | null
           site_id?: number | null
           slug?: string
         }
         Update: {
           id?: number
-          created_at?: string | null
-          title?: string | null
-          description?: string | null
+          created_at?: string
+          title?: string
+          description?: string
           content?: Json | null
           image_url?: string | null
-          published?: boolean | null
+          published?: boolean
           org_id?: number | null
           site_id?: number | null
           slug?: string
@@ -108,26 +108,26 @@ export interface Database {
       profile: {
         Row: {
           id: string
-          created_at: string | null
-          updated_at: string | null
-          username: string | null
-          full_name: string | null
+          created_at: string
+          updated_at: string
+          username: string
+          full_name: string
           avatar_url: string | null
         }
         Insert: {
           id: string
-          created_at?: string | null
-          updated_at?: string | null
-          username?: string | null
-          full_name?: string | null
+          created_at?: string
+          updated_at?: string
+          username: string
+          full_name: string
           avatar_url?: string | null
         }
         Update: {
           id?: string
-          created_at?: string | null
-          updated_at?: string | null
-          username?: string | null
-          full_name?: string | null
+          created_at?: string
+          updated_at?: string
+          username?: string
+          full_name?: string
           avatar_url?: string | null
         }
       }
@@ -135,33 +135,33 @@ export interface Database {
         Row: {
           id: number
           logo: string | null
-          name: string | null
-          created_at: string | null
-          updated_at: string | null
+          name: string
+          created_at: string
+          updated_at: string
           custom_domain: string | null
-          subdomain: string | null
+          subdomain: string
           org_id: number | null
           slug: string
         }
         Insert: {
           id?: number
           logo?: string | null
-          name?: string | null
-          created_at?: string | null
-          updated_at?: string | null
+          name: string
+          created_at?: string
+          updated_at?: string
           custom_domain?: string | null
-          subdomain?: string | null
+          subdomain: string
           org_id?: number | null
           slug?: string
         }
         Update: {
           id?: number
           logo?: string | null
-          name?: string | null
-          created_at?: string | null
-          updated_at?: string | null
+          name?: string
+          created_at?: string
+          updated_at?: string
           custom_domain?: string | null
-          subdomain?: string | null
+          subdomain?: string
           org_id?: number | null
           slug?: string
         }

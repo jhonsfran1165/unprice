@@ -2,19 +2,26 @@
 
 import { useEffect, useState } from "react"
 
-import { useStore } from "@/lib/stores/layout"
+import useSite from "@/lib/swr/use-site"
+import { Site } from "@/lib/types/supabase"
 import { Icons } from "@/components/shared/icons"
-import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 export default function SiteContext() {
-  const { siteId, orgProfiles } = useStore()
+  const [site, setSite] = useState<Site>()
+  const { site: data } = useSite({
+    revalidateOnFocus: false,
+  })
+
+  useEffect(() => {
+    setSite(data)
+  }, [data])
 
   return (
     <div>
-      {siteId ? (
+      {site ? (
         <div className="flex items-center justify-start">
           <Icons.divider className="hidden h-6 w-6 mx-2 text-background-text gap-0 md:inline-block" />
-          <span className="block truncate text-sm font-bold">{"Site"}</span>
+          <span className="block truncate text-sm font-bold">{site?.name}</span>
         </div>
       ) : null}
     </div>

@@ -5,16 +5,19 @@ import { fetcher } from "@/lib/utils"
 
 export default function useOrganizations({
   revalidateOnFocus = true,
+  fallbackData = [],
 }: {
   revalidateOnFocus?: boolean
+  fallbackData?: OrganizationProfilesData[]
 } = {}) {
   const {
     data: organizationProfiles,
     error,
     isLoading,
-  } = useSWR<[OrganizationProfilesData]>(`/api/org`, fetcher, {
+  } = useSWR<OrganizationProfilesData[]>(`/api/org`, fetcher, {
     dedupingInterval: 30000,
     revalidateOnFocus,
+    fallbackData,
   })
 
   return {
