@@ -7,7 +7,7 @@ export type OrganizationProfiles =
   Database["public"]["Tables"]["organization_profiles"]["Row"]
 export type Page = Database["public"]["Tables"]["page"]["Row"]
 export type Profile = Database["public"]["Tables"]["profile"]["Row"]
-export type Site = Database["public"]["Tables"]["site"]["Row"]
+export type Project = Database["public"]["Tables"]["project"]["Row"]
 
 // custom types
 export type OrganizationProfilesData = OrganizationProfiles & {

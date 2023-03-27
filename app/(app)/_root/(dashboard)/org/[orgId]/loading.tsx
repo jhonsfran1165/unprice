@@ -1,5 +1,5 @@
-import { SitesContainer } from "@/components/shared/sites/sites-container"
+import { ProjectsContainer } from "@/components/projects/project-container"
 
 export default function LoadingPage() {
-  return <SitesContainer isLoading={true} />
+  return <ProjectsContainer isLoading={true} />
 }

@@ -2,8 +2,8 @@ import "@/styles/globals.css"
 import { inter, satoshi } from "@/assets/fonts"
 
 import { cn } from "@/lib/utils"
-import { Footer } from "@/components/shared/layout/footer"
-import { ThemeProvider } from "@/components/shared/layout/theme-provider"
+import { Footer } from "@/components/layout/footer"
+import { ThemeProvider } from "@/components/layout/theme-provider"
 import { TailwindIndicator } from "@/components/shared/tailwind-indicator"
 import { Toaster } from "@/components/ui/toaster"
 

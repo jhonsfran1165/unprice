@@ -2,7 +2,7 @@ import "@/styles/globals.css"
 import { inter, satoshi } from "@/assets/fonts"
 
 import { cn } from "@/lib/utils"
-import { ThemeProvider } from "@/components/shared/layout/theme-provider"
+import { ThemeProvider } from "@/components/layout/theme-provider"
 import { TailwindIndicator } from "@/components/shared/tailwind-indicator"
 import { Toaster } from "@/components/ui/toaster"
 

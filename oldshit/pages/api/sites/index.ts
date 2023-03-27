@@ -8,7 +8,7 @@ import {
 } from "@/lib/api-middlewares"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Profile, Session } from "@/lib/types/supabase"
-import { siteCreateSchema, siteGetSchema } from "@/lib/validations/site"
+import { siteCreateSchema, siteGetSchema } from "@/lib/validations/project"
 
 async function handler(
   req: NextApiRequest,

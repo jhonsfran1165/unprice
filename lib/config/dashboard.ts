@@ -11,7 +11,7 @@ const OrgNavTabs: DashboardNavItem[] = [
   {
     module: "org",
     slug: "org-root",
-    title: "Sites",
+    title: "Projects",
     href: "/",
   },
   {
@@ -48,39 +48,39 @@ const OrgNavTabs: DashboardNavItem[] = [
   },
 ]
 
-const SiteNavTabs: DashboardNavItem[] = [
+const ProjectNavTabs: DashboardNavItem[] = [
   {
-    module: "site",
-    slug: "site-root",
+    module: "project",
+    slug: "project-root",
     title: "Pages",
     href: "/",
   },
   {
-    module: "site",
-    slug: "site-stadistics",
+    module: "project",
+    slug: "project-stadistics",
     title: "Statistics",
     href: "/stadistics",
     disabled: true,
   },
   {
-    module: "site",
-    slug: "site-settings",
+    module: "project",
+    slug: "project-settings",
     title: "Settings",
     href: "/settings",
     disabled: false,
     sidebarNav: [
       {
-        module: "site",
+        module: "project",
         submodule: "settings",
-        slug: "site-settings",
+        slug: "project-settings",
         title: "General",
         href: "/settings",
         icon: "post",
       },
       {
-        module: "site",
+        module: "project",
         submodule: "settings",
-        slug: "site-settings-billing",
+        slug: "project-settings-billing",
         title: "Billing",
         href: "/settings/billing",
         icon: "post",
@@ -91,7 +91,7 @@ const SiteNavTabs: DashboardNavItem[] = [
 
 export const AppModules: AppModulesNav = {
   org: OrgNavTabs,
-  site: SiteNavTabs,
+  project: ProjectNavTabs,
 }
 
 export const getDashboardSidebarNavItems = cache(

@@ -98,14 +98,9 @@ export default withMethods(
       PUT: orgCreatePostSchema,
     },
     // validate session for ["POST", "DELETE", "PUT"] endpoints only
-    withAuthentication(
-      // ratelimit only GET endpoint because is public
-      // withRateLimit(handler, "sites", ["GET"]),
-      handler,
-      {
-        protectedMethods: ["GET", "POST", "PUT"],
-        needProfileDetails: true,
-      }
-    )
+    withAuthentication(handler, {
+      protectedMethods: ["GET", "POST", "PUT"],
+      needProfileDetails: true,
+    })
   )
 )

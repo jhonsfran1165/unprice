@@ -8,7 +8,7 @@ import {
 } from "@/lib/api-middlewares"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Profile, Session } from "@/lib/types/supabase"
-import { orgGetSchama } from "@/lib/validations/org"
+import { projectCreateSchema } from "@/lib/validations/project"
 
 async function handler(
   req: NextApiRequest,
@@ -22,9 +22,20 @@ async function handler(
     if (req.method === "GET") {
       // get all project of this organization
       const { data, error } = await supabase
-        .from("organization")
+        .from("project")
         .select("*")
-        .eq("id", req.query.orgId)
+        .eq("org_id", req.query.orgId)
+
+      if (error) return res.status(404).json(error)
+
+      return res.status(200).json(data)
+    }
+
+    if (req.method === "POST") {
+      const { data, error } = await supabase
+        .from("project")
+        .select("*")
+        .eq("org_id", req.query.orgId)
 
       if (error) return res.status(404).json(error)
 
@@ -35,7 +46,7 @@ async function handler(
   }
 }
 
-const validMethods = ["GET"]
+const validMethods = ["GET", "POST"]
 
 export default withMethods(
   // valid methods for this endpoint
@@ -43,11 +54,11 @@ export default withMethods(
   // validate payload for this methods
   withValidation(
     {
-      GET: orgGetSchama,
+      POST: projectCreateSchema,
     },
     // validate session for ["POST", "DELETE", "PUT"] endpoints only
     withAuthentication(handler, {
-      protectedMethods: ["GET"],
+      protectedMethods: ["POST", "GET"],
       needProfileDetails: true,
     })
   )

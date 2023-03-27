@@ -11,7 +11,7 @@ export type NavItem = {
 
 export type AppModulesNav = {
   org: DashboardNavItem[]
-  site: DashboardNavItem[]
+  project: DashboardNavItem[]
 } | {}
 
 
