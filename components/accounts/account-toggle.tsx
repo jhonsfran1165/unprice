@@ -29,10 +29,10 @@ export function AccountToggle() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 w-9 rounded-full border hover:border-primary-borderHover"
+          className="h-8 w-8 rounded-full border hover:border-primary-borderHover"
         >
           {" "}
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-7 w-7">
             <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>

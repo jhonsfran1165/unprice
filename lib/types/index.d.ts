@@ -2,18 +2,10 @@ import type { Icon } from "lucide-react"
 
 import { Icons } from "@/components/icons"
 
-export type NavItem = {
-  title: string
-  href: string
-  disabled?: boolean
-  external?: boolean
-}
-
 export type AppModulesNav = {
   org: DashboardNavItem[]
   project: DashboardNavItem[]
-} | {}
-
+}
 
 export type GetActiveTabs = {
   tabs: DashboardNavItem[]
@@ -22,8 +14,6 @@ export type GetActiveTabs = {
   activeSegment?: string
   cleanSegments: string[]
 }
-
-export type MainNavItem = NavItem
 
 export type SidebarNavItem = {
   title: string
@@ -41,14 +31,6 @@ export type SidebarNavItem = {
     }
 )
 
-type MainNavItem = {
-  title: string
-  href?: string
-  sidebarNav?: SidebarNavItem[]
-  disabled?: boolean
-  external?: boolean
-}
-
 export type DashboardSidebarNavItem = {
   title: string
   module: string
@@ -57,18 +39,9 @@ export type DashboardSidebarNavItem = {
   disabled?: boolean
   external?: boolean
   icon?: keyof typeof Icons
-} & (
-  | {
-      href: string
-      items?: never
-    }
-  | {
-      href?: string
-      items: NavLink[]
-    }
-)
+}
 
-type DashboardNavItem = {
+export type DashboardNavItem = {
   title: string
   module: string
   submodule?: string
@@ -96,14 +69,20 @@ export interface RootDomainProps {
 //     isPro: boolean
 //   }
 
-interface LayoutConfig {
+export type NavItem = {
+  title: string
+  href: string
+  disabled?: boolean
+  external?: boolean
+}
+
+export interface LayoutConfig {
   name: string
   description: string
   mainNav: NavItem[]
   links: {
     twitter: string
     github: string
-    docs: string
     dashboard: string
   }
 }

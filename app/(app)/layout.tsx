@@ -18,14 +18,16 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("antialiased", satoshi.variable, inter.variable)}
+      className={cn(
+        "min-h-screen antialiased",
+        satoshi.variable,
+        inter.variable
+      )}
       suppressHydrationWarning
     >
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="overflow-y-scroll flex flex-col justify-between">
-            {children}
-          </div>
+          <div className="flex min-h-screen flex-col">{children}</div>
           <TailwindIndicator />
           <Toaster />
         </ThemeProvider>

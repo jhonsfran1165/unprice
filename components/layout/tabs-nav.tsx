@@ -29,7 +29,7 @@ export const TabsNav = () => {
   }, [activeTab])
 
   return (
-    <div className="-mb-0.5 flex h-12 items-center justify-start space-x-2">
+    <div className="bg-background-bgSubtle flex h-12 items-center justify-start space-x-2">
       <nav className="flex flex-wrap items-center gap-2">
         {tabsConfig.tabs.length > 0 &&
           tabs.map((tab, index) => (

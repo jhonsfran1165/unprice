@@ -38,10 +38,10 @@ export function OrganizationToggle() {
   return (
     <div className="flex items-center justify-start space-x-2">
       <Link
-        className="flex w-36 space-x-3 items-center justify-start hover:text-background-textContrast"
+        className="flex w-28 md:w-32 space-x-3 items-center justify-start hover:text-background-textContrast"
         href={`/org/${org?.id}`}
       >
-        <Avatar className="h-8 w-8">
+        <Avatar className="h-7 w-7">
           <AvatarImage
             src={org?.image || "https://github.com/shadcn.png"}
             alt={org?.name}

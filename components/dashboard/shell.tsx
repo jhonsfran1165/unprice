@@ -25,7 +25,7 @@ export function DashboardShell({
   }, [activeTab])
 
   return (
-    <ScrollArea className="h-screen w-full">
+    <ScrollArea>
       <MaxWidthWrapper className="max-w-screen-2xl pt-10">
         {isLoading ? (
           <DashboardShellSkeleton />
@@ -37,14 +37,10 @@ export function DashboardShell({
                 pathPrefix={activePathPrefix}
               />
             </aside>
-            <main className="flex w-full flex-1 flex-col overflow-hidden">
-              {children}
-            </main>
+            <div className="flex w-full flex-1 flex-col">{children}</div>
           </div>
         ) : (
-          <main className="flex w-full flex-1 flex-col overflow-hidden">
-            {children}
-          </main>
+          <div className="flex w-full flex-1 flex-col">{children}</div>
         )}
       </MaxWidthWrapper>
     </ScrollArea>

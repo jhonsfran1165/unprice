@@ -1,11 +1,18 @@
-import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
+import { Card } from "@/components/shared/card"
 
 export default async function IndexPage() {
   return (
-    <>
-      <MaxWidthWrapper className="pt-10">
-        <ul className="grid grid-cols-1 gap-3">Billing</ul>
-      </MaxWidthWrapper>
-    </>
+    <div className="md:px-0">
+      <Card className="h-36"></Card>
+      <Card className="my-10 h-36">jhoan</Card>
+      <Card className="mb-10 h-36">jhoan</Card>
+      <Card className="mb-10 h-36">jhoan</Card>
+      <Card className="mb-10 h-36">jhoan</Card>
+      <Card className="mb-10 h-36">jhoan</Card>
+      <Card className="mb-10 h-36">jhoan</Card>
+      <Card className="mb-10 h-36">jhoan</Card>
+      <Card className="mb-10 h-36">jhoan</Card>
+      <Card className="mb-10 h-36">jhoan</Card>
+    </div>
   )
 }

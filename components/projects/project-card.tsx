@@ -21,6 +21,7 @@ export const ProjectCard = ({ project }: { project: Project }) => {
           </div>
         </div>
 
+        {/* // TODO: change this like vercel button */}
         <Link href={`/org/${project.org_id}/project/${project.id}`}>
           <Button
             variant="ghost"

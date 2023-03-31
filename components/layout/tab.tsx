@@ -21,7 +21,7 @@ export const Tab = ({
   return (
     <WrapperLink
       href={tab?.disabled ? "#" : tabPath}
-      className={cn("border-b-2 p-1", {
+      className={cn("-mb-1 border-b-2 p-1", {
         "border-primary-solid": active,
         "border-transparent": !active,
         "cursor-not-allowed opacity-80 text-backgroud": tab.disabled,

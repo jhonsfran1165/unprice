@@ -26,6 +26,7 @@ export default async function AuthLayout({
     .select("*, profile(*), organization(*)")
     .eq("profile_id", session?.user.id)
 
+  // for now we use zustag for state manament but not sure if we can use something like https://jotai.org/ or recoil
   return (
     <SupabaseProvider session={session}>
       <SupabaseListener serverAccessToken={session?.access_token} />
