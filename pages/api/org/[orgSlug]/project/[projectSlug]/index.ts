@@ -21,12 +21,12 @@ async function handler(
     const supabase = supabaseApiClient(req, res)
 
     if (req.method === "GET") {
-      const { orgSlug, projectId } = req.query
+      const { orgSlug, projectSlug } = req.query
 
       const { data, error } = await supabase
         .from("project")
         .select("*, organization!inner(*)")
-        .eq("id", projectId)
+        .eq("slug", projectSlug)
         .eq("organization.slug", orgSlug)
         .single()
 
@@ -39,7 +39,7 @@ async function handler(
       const { data, error } = await supabase
         .from("project")
         .select("*")
-        .eq("id", req.body.projectId)
+        .eq("id", req.body.projectSlug)
 
       if (error) return res.status(404).json({ ...error })
 

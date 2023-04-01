@@ -9,40 +9,33 @@ import { Button } from "@/components/ui/button"
 
 export const ProjectCard = ({ project }: { project: ProjectsApiResult }) => {
   return (
-    <Card>
-      <div className="flex items-center space-x-1">
-        <div className="flex-1">
-          <div className="flex items-center justify-start space-x-3 px-1">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-            <h2 className="block truncate text-lg font-bold">{project.name}</h2>
+    <Link href={`/org/${project.organization.slug}/project/${project.slug}`}>
+      <Card className="hover:border-background-textContrast cursor-pointer">
+        <div className="flex items-center space-x-1">
+          <div className="flex-1">
+            <div className="flex items-center justify-start space-x-3 px-1">
+              <Avatar className="h-8 w-8">
+                <AvatarImage
+                  src="https://github.com/shadcn.png"
+                  alt="@shadcn"
+                />
+                <AvatarFallback>CN</AvatarFallback>
+              </Avatar>
+              <h2 className="block truncate text-lg font-bold">
+                {project.name}
+              </h2>
+            </div>
           </div>
         </div>
-
-        {/* // TODO: change this like vercel button */}
-        <Link href={`/org/${project.organization.slug}/project/${project.id}`}>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center justify-center text-base p-2 active:bg-background-bgActive hover:bg-background-bgHover"
-          >
-            <Icons.externalLink
-              className="h-4 w-4 hover:text-background-textContrast"
-              aria-hidden="true"
-            />
-          </Button>
-        </Link>
-      </div>
-      <div className={"h-3 pb-4"}>
-        <div className={"font-semibold pl-4"}>{project.subdomain}</div>
-      </div>
-      <div className={"h-3 text-right pb-4"}>
-        <div className={"font-semibold text-xs"}>
-          {project?.created_at && timeAgo(new Date(project?.created_at))}
+        <div className={"pt-2 h-3 pb-4"}>
+          <div className={"font-semibold pl-4"}>{project.subdomain}</div>
         </div>
-      </div>
-    </Card>
+        <div className={"h-3 text-right pb-4"}>
+          <div className={"font-semibold text-xs"}>
+            {project?.created_at && timeAgo(new Date(project?.created_at))}
+          </div>
+        </div>
+      </Card>
+    </Link>
   )
 }

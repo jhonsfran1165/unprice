@@ -11,9 +11,9 @@ export const projectCreateSchema = z.object({
 })
 
 export const projectGetSchema = z.object({
-  projectId: z
+  projectSlug: z
     .string()
-    .min(1, { message: "projectId has to be at least 1 characters" }),
+    .min(1, { message: "project slug has to be at least 1 characters" }),
 })
 
 export type projectCreateType = z.infer<typeof projectCreateSchema>

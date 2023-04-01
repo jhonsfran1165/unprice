@@ -4,20 +4,20 @@ import { createServerClient } from "@/lib/supabase/supabase-server"
 
 export default async function DashboardLayout({
   children,
-  params: { projectId, orgSlug },
+  params: { projectSlug, orgSlug },
 }: {
   children: React.ReactNode
   params: {
-    projectId: string
+    projectSlug: string
     orgSlug: string
   }
 }) {
   const supabase = createServerClient()
 
-  const { data: project } = await supabase
+  const { data: project, error } = await supabase
     .from("project")
     .select("*, organization!inner(*)")
-    .eq("id", projectId)
+    .eq("slug", projectSlug)
     .eq("organization.slug", orgSlug)
     .single()
 

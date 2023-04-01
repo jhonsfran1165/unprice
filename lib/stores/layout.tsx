@@ -6,7 +6,7 @@ import { OrganizationProfilesData, Session } from "@/lib/types/supabase"
 export const useStore = create<{
   contextHeader: string
   orgSlug: string
-  projectId: number | null
+  projectSlug: string
   session: Session | null
   orgProfiles: OrganizationProfilesData[]
   modulesApp: AppModulesNav | {}
@@ -20,7 +20,7 @@ export const useStore = create<{
 }>((set) => ({
   contextHeader: "",
   orgSlug: "",
-  projectId: null,
+  projectSlug: "",
   session: null,
   orgProfiles: [],
   modulesApp: {},
