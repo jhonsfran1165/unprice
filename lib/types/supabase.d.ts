@@ -13,3 +13,5 @@ export type Project = Database["public"]["Tables"]["project"]["Row"]
 export type OrganizationProfilesData = OrganizationProfiles & {
   organization: Organization
 }
+
+export type ProjectsApiResult = Project & { organization: Organization }

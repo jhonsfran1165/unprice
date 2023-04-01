@@ -23,7 +23,7 @@ import {
 import { Input } from "@/components/ui/input"
 
 export function OrganizationToggle() {
-  const { orgId, orgProfiles } = useStore()
+  const { orgSlug, orgProfiles } = useStore()
   const [org, setOrg] = useState<Organization | null>()
   const { organizationProfiles } = useOrganizations({
     revalidateOnFocus: false,
@@ -31,15 +31,17 @@ export function OrganizationToggle() {
   })
 
   useEffect(() => {
-    const organization = orgProfiles?.find((org) => org.org_id === orgId)
+    const organization = orgProfiles?.find(
+      (org) => org.organization.slug === orgSlug
+    )
     setOrg(organization?.organization)
-  }, [orgId])
+  }, [orgSlug])
 
   return (
     <div className="flex items-center justify-start space-x-2">
       <Link
         className="flex w-28 md:w-32 space-x-3 items-center justify-start hover:text-background-textContrast"
-        href={`/org/${org?.id}`}
+        href={`/org/${org?.slug}`}
       >
         <Avatar className="h-7 w-7">
           <AvatarImage
@@ -98,7 +100,7 @@ export function OrganizationToggle() {
                     key={index}
                     className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast px-8"
                   >
-                    <Link href={`/org/${org.org_id}`}>
+                    <Link href={`/org/${org.organization.slug}`}>
                       <Avatar className="mr-2 h-5 w-5">
                         <AvatarImage
                           src={
@@ -115,7 +117,7 @@ export function OrganizationToggle() {
                       <span className="text-primary-solid ml-2 rounded-md px-1.5 py-0.5 text-xs no-underline group-hover:no-underline ">
                         {org.is_default && "default"}
                       </span>
-                      {org.org_id === orgId && (
+                      {org.organization.slug === orgSlug && (
                         <DropdownMenuShortcut>
                           <Icons.check className={"w-4 h-4"} />
                         </DropdownMenuShortcut>

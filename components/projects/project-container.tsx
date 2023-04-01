@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 
 import useProjects from "@/lib/swr/use-projects"
-import { Project } from "@/lib/types/supabase"
+import { ProjectsApiResult } from "@/lib/types/supabase"
 import { ProjectCard } from "@/components/projects/project-card"
 import { ProjectSkeleton } from "@/components/projects/project-skeleton"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
@@ -13,7 +13,7 @@ export function ProjectsContainer({ isLoading }: { isLoading?: boolean }) {
   const { projects: data } = useProjects({
     revalidateOnFocus: false,
   })
-  const [projects, setProjects] = useState<Project[] | undefined>([])
+  const [projects, setProjects] = useState<ProjectsApiResult[] | undefined>([])
 
   useEffect(() => {
     setProjects(data)

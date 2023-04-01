@@ -7,11 +7,11 @@ export const revalidate = 0
 
 export default async function DashboardLayout({
   children,
-  params: { orgId },
+  params: { orgSlug },
 }: {
   children: React.ReactNode
   params: {
-    orgId: string
+    orgSlug: string
   }
 }) {
   const supabase = createServerClient()
@@ -20,23 +20,14 @@ export default async function DashboardLayout({
     data: { session },
   } = await supabase.auth.getSession()
 
-  const { data } = await supabase
+  const { data: orgsProfile } = await supabase
     .from("organization_profiles")
-    .select("*, organization(*)")
+    .select("*, organization!inner(slug)")
     .eq("profile_id", session?.user.id)
-
-  const orgIdsProfile = data?.map((org) => org.org_id)
-
-  // TODO: add permissions problems here
-  if (!orgIdsProfile?.includes(parseInt(orgId))) notFound()
-
-  const { data: organization } = await supabase
-    .from("organization")
-    .select("*")
-    .eq("id", orgId)
+    .eq("organization.slug", orgSlug)
     .single()
 
-  if (!organization) {
+  if (!orgsProfile) {
     notFound()
   }
 

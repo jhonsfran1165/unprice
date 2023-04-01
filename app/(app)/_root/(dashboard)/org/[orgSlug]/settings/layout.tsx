@@ -2,12 +2,10 @@ import { DashboardShell } from "@/components/dashboard/shell"
 
 export default async function DashboardLayout({
   children,
-  params: { orgId },
+  params,
 }: {
   children: React.ReactNode
-  params: {
-    orgId: string
-  }
+  params
 }) {
   return <DashboardShell>{children}</DashboardShell>
 }

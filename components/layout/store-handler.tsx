@@ -53,7 +53,7 @@ function StoreHandler({
   useEffect(() => {
     useStore.setState({
       // // TODO: it is possible to generalize this?
-      orgId: parseInt(cleanSegments[1]),
+      orgSlug: cleanSegments[1],
       projectId: parseInt(cleanSegments[3]),
       activeTabs: tabs,
       activeTab: activeTab,

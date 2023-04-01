@@ -1,13 +1,13 @@
 import Link from "next/link"
 
-import type { Project } from "@/lib/types/supabase"
+import type { ProjectsApiResult } from "@/lib/types/supabase"
 import { timeAgo } from "@/lib/utils"
 import { Card } from "@/components/shared/card"
 import { Icons } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 
-export const ProjectCard = ({ project }: { project: Project }) => {
+export const ProjectCard = ({ project }: { project: ProjectsApiResult }) => {
   return (
     <Card>
       <div className="flex items-center space-x-1">
@@ -22,7 +22,7 @@ export const ProjectCard = ({ project }: { project: Project }) => {
         </div>
 
         {/* // TODO: change this like vercel button */}
-        <Link href={`/org/${project.org_id}/project/${project.id}`}>
+        <Link href={`/org/${project.organization.slug}/project/${project.id}`}>
           <Button
             variant="ghost"
             size="sm"

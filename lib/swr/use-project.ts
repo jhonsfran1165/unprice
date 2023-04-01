@@ -9,13 +9,13 @@ export default function useProject({
 }: {
   revalidateOnFocus?: boolean
 } = {}) {
-  const { orgId, projectId } = useStore()
+  const { orgSlug, projectId } = useStore()
   const {
     data: project,
     error,
     isLoading,
   } = useSWR<Project>(
-    orgId && projectId ? `/api/org/${orgId}/project/${projectId}` : null,
+    orgSlug && projectId ? `/api/org/${orgSlug}/project/${projectId}` : null,
     fetcher,
     {
       dedupingInterval: 30000,

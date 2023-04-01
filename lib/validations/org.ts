@@ -4,14 +4,14 @@ import * as z from "zod"
 export const orgProfileGetSchema = z.object({})
 
 export const orgGetSchama = z.object({
-  orgId: z.number().min(1, {
+  orgSlug: z.string().min(1, {
     message:
       "invalid name for the organization, it has to be at least 3 characters",
   }),
 })
 
 export const orgBySlugGetSchema = z.object({
-  orgId: z.string().min(1, {
+  orgSlug: z.string().min(1, {
     message:
       "invalid name for the organization, it has to be at least 3 characters",
   }),
