@@ -11,6 +11,13 @@ export const projectCreateSchema = z.object({
 })
 
 export const projectGetSchema = z.object({
+  orgSlug: z
+    .string()
+    .min(1, {
+      message:
+        "invalid name for the organization, it has to be at least 3 characters",
+    })
+    .optional(),
   projectSlug: z
     .string()
     .min(1, { message: "project slug has to be at least 1 characters" }),

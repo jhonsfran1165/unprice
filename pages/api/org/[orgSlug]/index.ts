@@ -3,7 +3,6 @@ import { NextApiRequest, NextApiResponse } from "next"
 import {
   withAuthentication,
   withMethods,
-  // withRateLimit,
   withValidation,
 } from "@/lib/api-middlewares"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"

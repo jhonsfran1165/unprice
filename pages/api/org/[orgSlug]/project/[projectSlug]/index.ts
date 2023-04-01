@@ -3,13 +3,14 @@ import { NextApiRequest, NextApiResponse } from "next"
 import {
   withAuthentication,
   withMethods,
-  // withRateLimit,
   withValidation,
 } from "@/lib/api-middlewares"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Profile, Session } from "@/lib/types/supabase"
-
-const validMethods = ["GET", "POST", "PUT", "DELETE"]
+import {
+  projectCreateSchema,
+  projectGetSchema,
+} from "@/lib/validations/project"
 
 async function handler(
   req: NextApiRequest,
@@ -50,7 +51,21 @@ async function handler(
   }
 }
 
-export default withAuthentication(handler, {
-  protectedMethods: ["POST", "DELETE", "PUT", "GET"],
-  needProfileDetails: true,
-})
+const validMethods = ["GET", "POST"]
+
+export default withMethods(
+  // valid methods for this endpoint
+  validMethods,
+  // validate payload for this methods
+  withValidation(
+    {
+      GET: projectGetSchema,
+      POST: projectCreateSchema,
+    },
+    // validate session for ["POST", "DELETE", "PUT"] endpoints only
+    withAuthentication(handler, {
+      protectedMethods: ["POST", "GET"],
+      needProfileDetails: true,
+    })
+  )
+)
