@@ -43,18 +43,43 @@ function StoreHandler({
     (tab) => tab.slug === `${activeSegment}-${moduleTab}`
   )
 
+  const orgSlug = cleanSegments[1] || ""
+  const projectSlug = cleanSegments[3] || ""
+
+  const currentOrg = useMemo(
+    () =>
+      orgProfiles?.find((org) => org.organization.slug === orgSlug)
+        ?.organization,
+    [orgSlug, orgProfiles]
+  )
+
   // initialize this only the first time from the server
   // TODO: better change this with session?
   if (!initialized.current) {
-    useStore.setState({ modulesApp, orgProfiles, session })
+    useStore.setState({
+      modulesApp,
+      orgProfiles,
+      session,
+      contextHeader: activeTab?.title,
+      orgSlug,
+      projectSlug,
+      activeTabs: tabs,
+      activeTab: activeTab,
+      activeSegment,
+      numberSegments,
+      activePathPrefix,
+      rootPathTab,
+      moduleTab,
+      currentOrg,
+    })
     initialized.current = true
   }
 
   useEffect(() => {
     useStore.setState({
-      // // TODO: it is possible to generalize this?
-      orgSlug: cleanSegments[1] || "",
-      projectSlug: cleanSegments[3] || "",
+      // TODO: it is possible to generalize this?
+      orgSlug,
+      projectSlug,
       activeTabs: tabs,
       activeTab: activeTab,
       activeSegment,
@@ -63,6 +88,7 @@ function StoreHandler({
       rootPathTab,
       moduleTab,
       contextHeader: activeTab?.title,
+      currentOrg,
     })
   }, [pathname])
 

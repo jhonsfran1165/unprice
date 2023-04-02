@@ -1,6 +1,6 @@
 "use client"
 
-import { ReactNode, useEffect, useState } from "react"
+import { ReactNode } from "react"
 
 import { useStore } from "@/lib/stores/layout"
 import type { DashboardSidebarNavItem } from "@/lib/types"
@@ -17,12 +17,7 @@ export function DashboardShell({
   isLoading?: boolean
 }) {
   const { activeTab, activePathPrefix } = useStore()
-  const [items, setItems] = useState<DashboardSidebarNavItem[]>([])
-
-  useEffect(() => {
-    const data = activeTab?.sidebarNav || []
-    setItems(data)
-  }, [activeTab])
+  const items = activeTab?.sidebarNav || []
 
   return (
     <ScrollArea>

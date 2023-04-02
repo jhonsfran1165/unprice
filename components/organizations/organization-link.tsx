@@ -8,7 +8,7 @@ function OrganizationLink({
   isLoading,
 }: {
   isLoading: boolean
-  org: Organization | undefined
+  org?: Organization | null
 }) {
   if (isLoading || !org) {
     return (

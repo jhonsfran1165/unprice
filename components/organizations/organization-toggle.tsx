@@ -23,20 +23,14 @@ import {
 import { Input } from "@/components/ui/input"
 
 export function OrganizationToggle() {
-  const { orgSlug } = useStore()
+  const { orgSlug, currentOrg } = useStore()
   const { organizationProfiles, isLoading } = useOrganizations({
     revalidateOnFocus: false,
   })
 
-  const currentOrg = useMemo(
-    () =>
-      organizationProfiles?.find((org) => org.organization.slug === orgSlug),
-    [organizationProfiles]
-  )
-
   return (
     <div className="flex items-center justify-start space-x-2">
-      <OrganizationLink org={currentOrg?.organization} isLoading={isLoading} />
+      <OrganizationLink org={currentOrg} isLoading={isLoading} />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
