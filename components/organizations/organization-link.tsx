@@ -3,14 +3,8 @@ import Link from "next/link"
 import { Organization } from "@/lib/types/supabase"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-function OrganizationLink({
-  org,
-  isLoading,
-}: {
-  isLoading: boolean
-  org?: Organization | null
-}) {
-  if (isLoading || !org) {
+function OrganizationLink({ org }: { org?: Organization | null }) {
+  if (!org) {
     return (
       <Link
         className="flex w-28 md:w-32 space-x-3 items-center justify-start hover:text-background-textContrast"

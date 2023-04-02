@@ -30,7 +30,7 @@ export function OrganizationToggle() {
 
   return (
     <div className="flex items-center justify-start space-x-2">
-      <OrganizationLink org={currentOrg} isLoading={isLoading} />
+      <OrganizationLink org={currentOrg} />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

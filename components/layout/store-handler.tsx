@@ -43,6 +43,7 @@ function StoreHandler({
     (tab) => tab.slug === `${activeSegment}-${moduleTab}`
   )
 
+  // TODO: how to generalize this?
   const orgSlug = cleanSegments[1] || ""
   const projectSlug = cleanSegments[3] || ""
 
