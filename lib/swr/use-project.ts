@@ -6,16 +6,15 @@ import { fetcher } from "@/lib/utils"
 
 export default function useProject({
   revalidateOnFocus = true,
+  orgSlug,
+  projectSlug,
 }: {
   revalidateOnFocus?: boolean
-} = {}) {
-  const { orgSlug, projectSlug } = useStore()
-  const {
-    data: project,
-    error,
-    isLoading,
-  } = useSWR<Project>(
-    orgSlug && projectSlug
+  orgSlug: string
+  projectSlug: string
+}) {
+  const { data: project, error } = useSWR<Project>(
+    !!orgSlug && !!projectSlug
       ? `/api/org/${orgSlug}/project/${projectSlug}`
       : null,
     fetcher,
@@ -28,6 +27,6 @@ export default function useProject({
   return {
     project,
     error,
-    isLoading,
+    isLoading: !error && !project,
   }
 }

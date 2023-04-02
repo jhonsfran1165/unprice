@@ -10,11 +10,9 @@ export default function useOrganizations({
   revalidateOnFocus?: boolean
   fallbackData?: OrganizationProfilesData[]
 } = {}) {
-  const {
-    data: organizationProfiles,
-    error,
-    isLoading,
-  } = useSWR<OrganizationProfilesData[]>(`/api/org`, fetcher, {
+  const { data: organizationProfiles, error } = useSWR<
+    OrganizationProfilesData[]
+  >(`/api/org`, fetcher, {
     dedupingInterval: 30000,
     revalidateOnFocus,
     fallbackData,
@@ -23,6 +21,6 @@ export default function useOrganizations({
   return {
     organizationProfiles,
     error,
-    isLoading,
+    isLoading: !error && !organizationProfiles,
   }
 }

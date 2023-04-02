@@ -53,8 +53,8 @@ function StoreHandler({
   useEffect(() => {
     useStore.setState({
       // // TODO: it is possible to generalize this?
-      orgSlug: cleanSegments[1],
-      projectSlug: cleanSegments[3],
+      orgSlug: cleanSegments[1] || "",
+      projectSlug: cleanSegments[3] || "",
       activeTabs: tabs,
       activeTab: activeTab,
       activeSegment,

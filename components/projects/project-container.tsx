@@ -1,45 +1,35 @@
 "use client"
 
-import { useEffect, useState } from "react"
-
+import { useStore } from "@/lib/stores/layout"
 import useProjects from "@/lib/swr/use-projects"
-import { ProjectsApiResult } from "@/lib/types/supabase"
 import { ProjectCard } from "@/components/projects/project-card"
-import { ProjectSkeleton } from "@/components/projects/project-skeleton"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 import NoProjectsPlaceholder from "./no-projects-placeholder"
+import { ProjectSkeleton } from "./project-skeleton"
 
-export function ProjectsContainer({ isLoading }: { isLoading?: boolean }) {
-  const { projects: data } = useProjects({
+export function ProjectsContainer({ loading }) {
+  const { orgSlug } = useStore()
+  const { projects, isLoading } = useProjects({
+    orgSlug,
     revalidateOnFocus: false,
   })
-  const [projects, setProjects] = useState<ProjectsApiResult[] | undefined>([])
 
-  useEffect(() => {
-    setProjects(data)
-  }, [data])
+  const noProjectHolder = isLoading === false && projects?.length === 0
 
   return (
     <MaxWidthWrapper className="pt-10">
-      {isLoading ? (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
+      <ul className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        {isLoading || loading
+          ? Array.from({ length: 6 }).map((_, i) => (
               <ProjectSkeleton isLoading={true} key={i} />
-            ))}
-          </div>
-        </div>
-      ) : projects && projects.length > 0 ? (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {projects.map((project) => (
+            ))
+          : projects &&
+            projects.length > 0 &&
+            projects.map((project) => (
               <ProjectCard key={project.id} project={project} />
             ))}
-          </div>
-        </div>
-      ) : (
-        <NoProjectsPlaceholder />
-      )}
+      </ul>
+      {noProjectHolder && <NoProjectsPlaceholder />}
     </MaxWidthWrapper>
   )
 }

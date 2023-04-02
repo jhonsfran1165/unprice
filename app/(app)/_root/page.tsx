@@ -22,7 +22,7 @@ export default async function AppInitialPage() {
   const defaultOrg = orgProfiles?.find((org) => org.is_default === true)
 
   if (defaultOrg) {
-    redirect(`/org/${defaultOrg?.org_id}`)
+    redirect(`/org/${defaultOrg?.organization?.slug}`)
   }
 
   notFound()

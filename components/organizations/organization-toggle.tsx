@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useMemo } from "react"
 import Link from "next/link"
 
 import { useStore } from "@/lib/stores/layout"
 import useOrganizations from "@/lib/swr/use-organizations"
-import { Organization, OrganizationProfilesData } from "@/lib/types/supabase"
 import { AddOrgModal } from "@/components/modals/add-new-organization"
+import OrganizationLink from "@/components/organizations/organization-link"
 import { Icons } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -23,37 +23,20 @@ import {
 import { Input } from "@/components/ui/input"
 
 export function OrganizationToggle() {
-  const { orgSlug, orgProfiles } = useStore()
-  const [org, setOrg] = useState<Organization | null>()
-  const { organizationProfiles } = useOrganizations({
+  const { orgSlug } = useStore()
+  const { organizationProfiles, isLoading } = useOrganizations({
     revalidateOnFocus: false,
-    fallbackData: orgProfiles,
   })
 
-  useEffect(() => {
-    const organization = orgProfiles?.find(
-      (org) => org.organization.slug === orgSlug
-    )
-    setOrg(organization?.organization)
-  }, [orgSlug])
+  const currentOrg = useMemo(
+    () =>
+      organizationProfiles?.find((org) => org.organization.slug === orgSlug),
+    [organizationProfiles]
+  )
 
   return (
     <div className="flex items-center justify-start space-x-2">
-      <Link
-        className="flex w-28 md:w-32 space-x-3 items-center justify-start hover:text-background-textContrast"
-        href={`/org/${org?.slug}`}
-      >
-        <Avatar className="h-7 w-7">
-          <AvatarImage
-            src={org?.image || "https://github.com/shadcn.png"}
-            alt={org?.name}
-          />
-          <AvatarFallback>{org?.name.substring(2)}</AvatarFallback>
-        </Avatar>
-        <span className="block w-full truncate text-sm font-bold text-center">
-          {org?.name || "admin@builder.ai"}
-        </span>
-      </Link>
+      <OrganizationLink org={currentOrg?.organization} isLoading={isLoading} />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -92,40 +75,42 @@ export function OrganizationToggle() {
               />
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-background-line" />
-            {organizationProfiles?.map(
-              (org, index) =>
-                org.org_id && (
-                  <DropdownMenuItem
-                    asChild
-                    key={index}
-                    className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast px-8"
-                  >
-                    <Link href={`/org/${org.organization.slug}`}>
-                      <Avatar className="mr-2 h-5 w-5">
-                        <AvatarImage
-                          src={
-                            org.organization?.image ||
-                            "https://github.com/shadcn.png"
-                          }
-                          alt={org.organization.name}
-                        />
-                        <AvatarFallback>
-                          {org.organization.name.substring(2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span>{org.organization.name}</span>{" "}
-                      <span className="text-primary-solid ml-2 rounded-md px-1.5 py-0.5 text-xs no-underline group-hover:no-underline ">
-                        {org.is_default && "default"}
-                      </span>
-                      {org.organization.slug === orgSlug && (
-                        <DropdownMenuShortcut>
-                          <Icons.check className={"w-4 h-4"} />
-                        </DropdownMenuShortcut>
-                      )}
-                    </Link>
-                  </DropdownMenuItem>
-                )
-            )}
+            {isLoading
+              ? null
+              : organizationProfiles?.map(
+                  (org, index) =>
+                    org.org_id && (
+                      <DropdownMenuItem
+                        asChild
+                        key={index}
+                        className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast px-8 cursor-pointer"
+                      >
+                        <Link href={`/org/${org.organization.slug}`}>
+                          <Avatar className="mr-2 h-5 w-5">
+                            <AvatarImage
+                              src={
+                                org.organization?.image ||
+                                "https://github.com/shadcn.png"
+                              }
+                              alt={org.organization.name}
+                            />
+                            <AvatarFallback>
+                              {org.organization.name.substring(2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{org.organization.name}</span>{" "}
+                          <span className="text-primary-solid ml-2 rounded-md px-1.5 py-0.5 text-xs no-underline group-hover:no-underline ">
+                            {org.is_default && "default"}
+                          </span>
+                          {org.organization.slug === orgSlug && (
+                            <DropdownMenuShortcut>
+                              <Icons.check className={"w-4 h-4"} />
+                            </DropdownMenuShortcut>
+                          )}
+                        </Link>
+                      </DropdownMenuItem>
+                    )
+                )}
           </DropdownMenuGroup>
           <DropdownMenuSeparator className="bg-background-line" />
           <DropdownMenuGroup>

@@ -359,4 +359,3 @@ export interface Database {
     }
   }
 }
-
