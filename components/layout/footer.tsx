@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { layoutConfig } from "@/lib/config/layout"
+import { CommandDialogLayout } from "@/components/layout/command"
 import { Logo } from "@/components/layout/logo"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { Icons } from "@/components/shared/icons"
@@ -19,6 +20,7 @@ export function Footer() {
 
             <div className="flex flex-1 items-center justify-end space-x-4">
               <nav className="flex items-center space-x-1">
+                <CommandDialogLayout />
                 <Link
                   href={layoutConfig.links.twitter}
                   target="_blank"

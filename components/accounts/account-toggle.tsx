@@ -10,12 +10,8 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -61,60 +57,26 @@ export function AccountToggle() {
             <span>Settings</span>
             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
-            <Icons.keyboard className="mr-2 h-4 w-4" />
-            <span>Keyboard shortcuts</span>
-            <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
-          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator className="bg-background-line" />
         <DropdownMenuGroup>
           <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
             <Icons.users className="mr-2 h-4 w-4" />
-            <span>Team</span>
+            <span>Organization</span>
           </DropdownMenuItem>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.userPlus className="mr-2 h-4 w-4" />
-              <span>Invite users</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent className="bg-background-bgSubtle">
-                <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
-                  <Icons.mail className="mr-2 h-4 w-4" />
-                  <span>Email</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
-                  <Icons.messageSquare className="mr-2 h-4 w-4" />
-                  <span>Message</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-background-line" />
-                <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
-                  <Icons.plusCircle className="mr-2 h-4 w-4" />
-                  <span>More...</span>
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
           <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
             <Icons.add className="mr-2 h-4 w-4" />
-            <span>New Team</span>
+            <span>New Organization</span>
             <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator className="bg-background-line" />
-        <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
-          <Icons.gitHub className="mr-2 h-4 w-4" />
-          <span>GitHub</span>
-        </DropdownMenuItem>
+
         <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
           <Icons.lifeBuoy className="mr-2 h-4 w-4" />
           <span>Support</span>
         </DropdownMenuItem>
-        <DropdownMenuItem disabled>
-          <Icons.cloud className="mr-2 h-4 w-4" />
-          <span>API</span>
-        </DropdownMenuItem>
+
         <DropdownMenuSeparator className="bg-background-line" />
         <DropdownMenuItem
           onClick={async () => {

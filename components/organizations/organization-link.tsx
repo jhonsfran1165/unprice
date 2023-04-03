@@ -3,8 +3,14 @@ import Link from "next/link"
 import { Organization } from "@/lib/types/supabase"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-function OrganizationLink({ org }: { org?: Organization | null }) {
-  if (!org) {
+function OrganizationLink({
+  org,
+  isLoading,
+}: {
+  org?: Organization | null
+  isLoading: boolean
+}) {
+  if (isLoading) {
     return (
       <Link
         className="flex w-28 md:w-32 space-x-3 items-center justify-start hover:text-background-textContrast"
@@ -14,6 +20,24 @@ function OrganizationLink({ org }: { org?: Organization | null }) {
           <AvatarFallback className="bg-primary-bgSubtle">BA</AvatarFallback>
         </Avatar>
         <span className="block w-full h-4 truncate rounded-lg text-sm font-bold text-center bg-background-solidHover animate-pulse" />
+      </Link>
+    )
+  }
+
+  if (!org) {
+    return (
+      <Link
+        className="flex w-28 md:w-32 space-x-3 items-center justify-start hover:text-background-textContrast"
+        href={`/`}
+      >
+        <Avatar className="h-7 w-7">
+          {/* TODO: define url image callback */}
+          <AvatarImage src={"https://github.com/shadcn.png"} alt={"new org"} />
+          <AvatarFallback className="bg-primary-bgSubtle">BA</AvatarFallback>
+        </Avatar>
+        <span className="block w-full truncate text-sm font-bold text-center">
+          {"New Org"}
+        </span>
       </Link>
     )
   }

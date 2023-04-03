@@ -4,8 +4,10 @@ import HeaderContext from "@/components/layout/header-context"
 
 export default async function DashboardLayout({
   children,
+  params,
 }: {
   children: React.ReactNode
+  params
 }) {
   return (
     <>

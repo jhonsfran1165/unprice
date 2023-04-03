@@ -1,11 +1,9 @@
 "use client"
 
-import { useMemo } from "react"
 import Link from "next/link"
 
 import { useStore } from "@/lib/stores/layout"
 import useOrganizations from "@/lib/swr/use-organizations"
-import { AddOrgModal } from "@/components/modals/add-new-organization"
 import OrganizationLink from "@/components/organizations/organization-link"
 import { Icons } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -30,7 +28,7 @@ export function OrganizationToggle() {
 
   return (
     <div className="flex items-center justify-start space-x-2">
-      <OrganizationLink org={currentOrg} />
+      <OrganizationLink isLoading={isLoading} org={currentOrg} />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -109,7 +107,16 @@ export function OrganizationToggle() {
           <DropdownMenuSeparator className="bg-background-line" />
           <DropdownMenuGroup>
             <div className="relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none hover:text-background-textContrast">
-              <AddOrgModal />
+              <Link className="m-0 w-full" href={"/org"}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full active:bg-background-bgActive hover:bg-background-bgHover border"
+                >
+                  <Icons.add className="h-4 w-4 rotate-0 scale-100 hover:text-background-textContrast" />
+                  <span className="pl-2">Create new Organization</span>
+                </Button>
+              </Link>
             </div>
           </DropdownMenuGroup>
         </DropdownMenuContent>

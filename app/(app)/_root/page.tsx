@@ -1,6 +1,10 @@
 import { notFound, redirect } from "next/navigation"
 
 import { createServerClient } from "@/lib/supabase/supabase-server"
+import { Organization } from "@/lib/types/supabase"
+
+// do not cache this layout because it validates the session constantly
+export const revalidate = 0
 
 export default async function AppInitialPage() {
   const supabase = createServerClient()
@@ -20,9 +24,10 @@ export default async function AppInitialPage() {
     .eq("profile_id", session?.user.id)
 
   const defaultOrg = orgProfiles?.find((org) => org.is_default === true)
+    ?.organization as Organization
 
   if (defaultOrg) {
-    redirect(`/org/${defaultOrg?.organization?.slug}`)
+    redirect(`/org/${defaultOrg?.slug}`)
   }
 
   notFound()

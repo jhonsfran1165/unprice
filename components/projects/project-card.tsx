@@ -3,9 +3,7 @@ import Link from "next/link"
 import type { ProjectsApiResult } from "@/lib/types/supabase"
 import { timeAgo } from "@/lib/utils"
 import { Card } from "@/components/shared/card"
-import { Icons } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 
 export const ProjectCard = ({ project }: { project: ProjectsApiResult }) => {
   return (

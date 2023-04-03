@@ -4,7 +4,9 @@ import { useStore } from "@/lib/stores/layout"
 import { Tab } from "@/components/layout/tab"
 
 export const TabsNav = () => {
-  const { activeTabs: tabs, activePathPrefix, activeTab } = useStore()
+  const { activeTabs: tabs, activePathPrefix, activeTab, orgSlug } = useStore()
+
+  if (!orgSlug) return null
 
   return (
     <div className="bg-background-bgSubtle flex h-12 items-center justify-start space-x-2">

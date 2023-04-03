@@ -4,7 +4,9 @@ import { useStore } from "@/lib/stores/layout"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 export default function HeaderContext() {
-  const { contextHeader } = useStore()
+  const { contextHeader, orgSlug } = useStore()
+
+  if (!orgSlug) return null
 
   return (
     <section>
