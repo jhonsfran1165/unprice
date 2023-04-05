@@ -240,21 +240,21 @@ export const truncate = (str: string, length: number) => {
   return `${str.slice(0, length)}...`
 }
 
-// export const getParamsFromURL = (url: string) => {
-//   if (!url) return {}
-//   try {
-//     const params = new URL(url).searchParams
-//     const paramsObj: Record<string, string> = {}
-//     for (const [key, value] of params.entries()) {
-//       if (value && value !== "") {
-//         paramsObj[key] = value
-//       }
-//     }
-//     return paramsObj
-//   } catch (e) {
-//     return {}
-//   }
-// }
+export const getParamsFromURL = (url: string) => {
+  if (!url) return {}
+  try {
+    const params = new URL(url).searchParams
+    const paramsObj: Record<string, string> = {}
+    for (const [key, value] of params.entries()) {
+      if (value && value !== "") {
+        paramsObj[key] = value
+      }
+    }
+    return paramsObj
+  } catch (e) {
+    return {}
+  }
+}
 
 export const constructURLFromUTMParams = (
   url: string,
@@ -332,7 +332,7 @@ export const edgeConfig = createClient(
 
 export const getBlackListedDomains = async () => {
   try {
-    const domains = await edgeConfig.get("domains")
+    const domains = (await edgeConfig.get("domains")) as []
     return domains || []
   } catch (e) {
     return []
@@ -348,7 +348,7 @@ export const isBlacklistedDomain = async (domain: string) => {
 
 export const getBlackListedEmails = async () => {
   try {
-    const emails = await edgeConfig.get("emails")
+    const emails = (await edgeConfig.get("emails")) as string
     if (emails) {
       return new Set(emails)
     } else {
