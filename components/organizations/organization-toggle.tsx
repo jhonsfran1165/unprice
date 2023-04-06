@@ -82,15 +82,12 @@ export function OrganizationToggle() {
                             <AvatarImage
                               src={
                                 org.organization?.image ||
-                                "https://github.com/shadcn.png"
+                                `https://avatar.vercel.sh/${org.organization?.name}`
                               }
                               alt={org.organization.name}
                             />
-                            <AvatarFallback>
-                              {org.organization.name.substring(2)}
-                            </AvatarFallback>
                           </Avatar>
-                          <span>{org.organization.name}</span>{" "}
+                          <span>{org.organization.name}</span>
                           <span className="text-primary-solid ml-2 rounded-md px-1.5 py-0.5 text-xs no-underline group-hover:no-underline ">
                             {org.is_default && "default"}
                           </span>

@@ -17,7 +17,10 @@ function OrganizationLink({
         href={`/`}
       >
         <Avatar className="h-7 w-7">
-          <AvatarFallback className="bg-primary-bgSubtle">BA</AvatarFallback>
+          <AvatarImage
+            src={`https://avatar.vercel.sh/new-org`}
+            alt={"New org"}
+          />
         </Avatar>
         <span className="block w-full h-4 truncate rounded-lg text-sm font-bold text-center bg-background-solidHover animate-pulse" />
       </Link>
@@ -31,8 +34,13 @@ function OrganizationLink({
         href={`/`}
       >
         <Avatar className="h-7 w-7">
-          {/* TODO: define url image callback */}
-          <AvatarImage src={"https://github.com/shadcn.png"} alt={"new org"} />
+          {/* TODO: define url image callback */}{" "}
+          <Avatar className="h-7 w-7">
+            <AvatarImage
+              src={`https://avatar.vercel.sh/new-org`}
+              alt={"New org"}
+            />
+          </Avatar>
           <AvatarFallback className="bg-primary-bgSubtle">BA</AvatarFallback>
         </Avatar>
         <span className="block w-full truncate text-sm font-bold text-center">
@@ -49,7 +57,7 @@ function OrganizationLink({
     >
       <Avatar className="h-7 w-7">
         <AvatarImage
-          src={org.image || "https://github.com/shadcn.png"}
+          src={org.image || `https://avatar.vercel.sh/${org.name}`}
           alt={org.name || ""}
         />
         <AvatarFallback>{org.name.substring(2)}</AvatarFallback>

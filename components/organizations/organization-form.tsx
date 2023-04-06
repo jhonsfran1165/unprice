@@ -19,6 +19,8 @@ import CloudinaryUploadWidget from "@/components/shared/cloudinary"
 import { Icons } from "@/components/shared/icons"
 import LoadingDots from "@/components/shared/loading/loading-dots"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
+import UploadCloud from "@/components/shared/upload-cloud"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -132,6 +134,16 @@ export function OrganizationForm() {
               priority={true}
               className="pointer-events-none mt-5 mb-10"
             />
+            {/* TODO: make this work */}
+            {data && data.image_url && (
+              <Avatar className="rounded-lg w-full h-50">
+                <AvatarImage
+                  height={100}
+                  src={data.image_url}
+                  alt={"org photo cover"}
+                />
+              </Avatar>
+            )}
             <h2 className="z-10 text-xl font-semibold text-base-text">
               {"Create a new organization"}
             </h2>
@@ -195,80 +207,7 @@ export function OrganizationForm() {
                 </p>
               )}
             </div>
-            <div className="space-y-6">
-              <h2 className="font-cal text-2xl">Display Picture</h2>
-              <div
-                className={`${
-                  null ? "" : "animate-pulse bg-gray-300 h-150"
-                } relative mt-5 w-48 border-2 border-primary-hover border-dashed rounded-md`}
-              >
-                <CldUploadWidget
-                  // signatureEndpoint="/api/cloudinary"
-                  uploadPreset="next-cloudinary-unsigned"
-                  // onUpload={(e) =>
-                  //   setData({
-                  //     // ...data,
-                  //     image: e.secure_url,
-                  //   })
-                  // }
-                >
-                  {({ open }) => {
-                    function handleOnClick(e) {
-                      e.preventDefault()
-                      open()
-                    }
 
-                    return (
-                      <button
-                        onClick={handleOnClick}
-                        className="absolute w-full h-full rounded-md bg-gray-200 z-10 flex flex-col justify-center items-center opacity-0 hover:opacity-100 transition-all ease-linear duration-200"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="100"
-                          height="100"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M16 16h-3v5h-2v-5h-3l4-4 4 4zm3.479-5.908c-.212-3.951-3.473-7.092-7.479-7.092s-7.267 3.141-7.479 7.092c-2.57.463-4.521 2.706-4.521 5.408 0 3.037 2.463 5.5 5.5 5.5h3.5v-2h-3.5c-1.93 0-3.5-1.57-3.5-3.5 0-2.797 2.479-3.833 4.433-3.72-.167-4.218 2.208-6.78 5.567-6.78 3.453 0 5.891 2.797 5.567 6.78 1.745-.046 4.433.751 4.433 3.72 0 1.93-1.57 3.5-3.5 3.5h-3.5v2h3.5c3.037 0 5.5-2.463 5.5-5.5 0-2.702-1.951-4.945-4.521-5.408z" />
-                        </svg>
-                        <p>Upload another image</p>
-                      </button>
-                    )
-                  }}
-                </CldUploadWidget>
-
-                {null && (
-                  <BlurImage
-                    src={""}
-                    alt="Cover Photo"
-                    width={100}
-                    height={100}
-                    className="rounded-md w-full"
-                  />
-                )}
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="image" className="text-xs">
-                IMAGE
-              </Label>
-              <Input
-                {...register("image")}
-                id={"image"}
-                aria-invalid={errors.image ? "true" : "false"}
-                className="mt-1 w-full"
-              />
-              {errors.image && (
-                <p className="text-xs pt-1 text-error-solid" role="alert">
-                  {errors.image?.message}
-                </p>
-              )}
-              {keyExistsError && (
-                <p className="text-xs pt-1 text-error-solid" role="alert">
-                  {"the account exist"}
-                </p>
-              )}
-            </div>
             <div className="space-y-1">
               <Label htmlFor="email" className="text-xs">
                 TYPE OF ORGANIZATION
@@ -300,6 +239,89 @@ export function OrganizationForm() {
                 </p>
               )}
             </div>
+
+            <div className="space-y-6">
+              <Label htmlFor="image" className="text-xs">
+                IMAGE
+              </Label>
+              <div className="flex h-20 justify-center items-center space-x-2 animate-pulse w-full border-2 border-dashed rounded-md">
+                <CldUploadWidget
+                  signatureEndpoint="/api/cloudinary"
+                  options={{
+                    maxFiles: 1,
+                    // TODO: use avatars or something like that
+                    folder: "test",
+                  }}
+                  onUpload={(result, widget) => {
+                    const {
+                      event,
+                      info: { secure_url, thumbnail_url },
+                    } = result
+
+                    if (event === "success") {
+                      setData({
+                        ...data,
+                        image_url: secure_url,
+                        thumbnail_url: thumbnail_url,
+                      })
+                    } else {
+                      toast({
+                        title: "Error updating image",
+                        description: `Something went wrong while updating the image`,
+                        className: "bg-danger-solid text-danger-textContrast",
+                      })
+                    }
+
+                    widget.close() // Close widget immediately after successful upload
+                  }}
+                  // uploadPreset="next-cloudinary-unsigned"
+                  // onUpload={(e) =>
+                  //   setData({
+                  //     // ...data,
+                  //     image: e.secure_url,
+                  //   })
+                  // }
+                >
+                  {({ cloudinary, widget, open }) => {
+                    function handleOnClick(e) {
+                      e.preventDefault()
+                      open()
+                    }
+
+                    return (
+                      <button
+                        onClick={handleOnClick}
+                        className="flex w-full h-full justify-center items-center rounded-md transition-all ease-linear duration-200"
+                      >
+                        <UploadCloud className="h-8 w-8" />
+                      </button>
+                    )
+                  }}
+                </CldUploadWidget>
+              </div>
+            </div>
+            {/* <div>
+              <Label htmlFor="image" className="text-xs">
+                IMAGE
+              </Label>
+              <Input
+                {...register("image")}
+                id={"image"}
+                aria-invalid={errors.image ? "true" : "false"}
+                className="mt-1 w-full"
+              />
+              {errors.image && (
+                <p className="text-xs pt-1 text-error-solid" role="alert">
+                  {errors.image?.message}
+                </p>
+              )}
+              {keyExistsError && (
+                <p className="text-xs pt-1 text-error-solid" role="alert">
+                  {"the account exist"}
+                </p>
+              )}
+            </div> */}
+
             <Button
               disabled={signInClicked}
               form="add-org-form"
