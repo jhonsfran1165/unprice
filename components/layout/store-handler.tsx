@@ -44,8 +44,8 @@ function StoreHandler({
   )
 
   // TODO: how to generalize this?
-  const orgSlug = cleanSegments[1] || ""
-  const projectSlug = cleanSegments[3] || ""
+  const orgSlug = numberSegments >= 1 ? cleanSegments[1] : ""
+  const projectSlug = numberSegments >= 2 ? cleanSegments[3] : ""
 
   const currentOrg = useMemo(
     () =>

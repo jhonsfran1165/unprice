@@ -11,7 +11,8 @@ export const satoshi = localFont({
 
 export const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
+  weight: "300",
+  display: "swap",
 })
 
 export const cal = localFont({
@@ -30,7 +31,6 @@ export const calTitle = localFont({
 
 export const lora = Lora({
   variable: "--font-title",
-  subsets: ["latin"],
   weight: "600",
   display: "swap",
 })

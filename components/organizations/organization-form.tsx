@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CldUploadWidget } from "next-cloudinary"
 import { SubmitHandler, useForm } from "react-hook-form"
-import { useDebounce } from "use-debounce"
 
 import { Organization } from "@/lib/types/supabase"
 import { createSlug } from "@/lib/utils"
@@ -14,12 +13,7 @@ import {
   orgCreatePostSchema,
   type orgCreatePostType,
 } from "@/lib/validations/org"
-import BlurImage from "@/components/shared/blur-image"
-import { Card } from "@/components/shared/card"
-import CloudinaryUploadWidget from "@/components/shared/cloudinary"
-import { Icons } from "@/components/shared/icons"
 import LoadingDots from "@/components/shared/loading/loading-dots"
-import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 import UploadCloud from "@/components/shared/upload-cloud"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -36,98 +30,102 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import "./styles.css"
+import useOrganizationExist from "@/hooks/use-organization-exist"
 
 export function OrganizationForm({ org }: { org?: Organization }) {
-  const [signInClicked, setSignInClicked] = useState(false)
-  const [data, setData] = useState<Organization>(org)
-  const [noSuchAccount, setNoSuchAccount] = useState(false)
-  const [keyExistsError, setKeyExistsError] = useState(false)
-  const [errorMessage, setErrorMessage] = useState("")
-
-  const [orgName, setOrgName] = useState("")
-  const [orgSlug, setOrgSlug] = useState("")
-  const [debouncedOrgName] = useDebounce(orgName, 500)
-  const [debouncedOrgSlug] = useDebounce(orgSlug, 500)
   const router = useRouter()
-
   const { toast } = useToast()
-  // TODO: refine this slug can change
-  // reset data when sent
-  useEffect(() => {
-    const slug = debouncedOrgSlug || createSlug(debouncedOrgName)
 
-    const existOrg = async () => {
-      const data = await fetch(`/api/org`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slug,
-        }),
-      })
+  const action = org ? "edit" : "new"
 
-      const org = await data.json()
+  const [data, setData] = useState<orgCreatePostType>({
+    id: org?.id || null,
+    name: org?.name || "",
+    slug: org?.slug || "",
+    description: org?.description || null,
+    image: org?.image || null,
+    type: org?.type || "",
+  })
 
-      if (org?.slug) {
-        setKeyExistsError(true)
-      }
-
-      setValue("slug", slug, { shouldValidate: true })
-    }
-
-    setKeyExistsError(false)
-
-    slug.length > 0 && existOrg()
-  }, [debouncedOrgName, debouncedOrgSlug])
-
-  useEffect(() => {
-    setValue("image", `https://avatar.vercel.sh/${orgSlug}`)
-  }, [orgSlug])
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   const {
     register,
+    watch,
     formState: { errors },
     handleSubmit,
+    clearErrors,
+    setError,
     setValue,
+    getValues,
+    reset,
   } = useForm<orgCreatePostType>({
     resolver: zodResolver(orgCreatePostSchema),
     defaultValues: {
-      image: "",
-      slug: "",
-      name: "",
-      type: "",
-      description: "",
       ...data,
     },
   })
 
+  // watch important fields
+  const watchSlug = watch("slug", "")
+  const exist =
+    action === "new" ? useOrganizationExist({ orgSlug: watchSlug }) : false
+  const defaultImg = watchSlug
+    ? `https://avatar.vercel.sh/${watchSlug}`
+    : "https://avatar.vercel.sh/new-org"
+  const watchImage = watch("image", defaultImg)
+
+  useEffect(() => {
+    if (exist) {
+      setError("slug", {
+        type: "custom",
+        message: "this organization exists",
+      })
+    } else {
+      clearErrors("slug")
+    }
+
+    if (!getValues("image")) {
+      setValue("image", defaultImg)
+    }
+  }, [exist])
+
   const onSubmit: SubmitHandler<orgCreatePostType> = async (orgData) => {
     try {
-      setSignInClicked(true)
-      const data = await fetch(`/api/org`, {
-        method: "PUT",
+      setLoading(true)
+      const org = await fetch(`/api/org`, {
+        method: action === "new" ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orgData),
+        body: JSON.stringify({
+          ...data,
+          ...orgData,
+        }),
       })
 
-      const newOrg = await data.json()
+      const result = await org.json()
 
       // TODO: add profile as well
-      if (newOrg.slug) {
+      if (result.slug) {
         toast({
-          title: "New Organization Created",
-          description: `Organization ${newOrg.name} created successfully`,
+          title: "Organization Saved",
+          description: `Organization ${result.name} Saved successfully`,
           className: "bg-background-bgSubtle",
         })
-        router.push(`/org/${newOrg.slug}`)
+
+        if (action === "new") {
+          router.push(`/org/${result.slug}`)
+          // Refresh the current route and fetch new data from the server without
+          // losing client-side browser or React state.
+          router.refresh()
+        }
       }
-      // TODO: how to close the Dialog after creation?
     } catch (error) {
       if (error instanceof Error) {
-        setNoSuchAccount(true)
         setErrorMessage(error.message)
       }
     } finally {
-      setSignInClicked(false)
+      setLoading(false)
     }
   }
 
@@ -141,17 +139,9 @@ export function OrganizationForm({ org }: { org?: Organization }) {
         <p className="text-center text-sm text-error-solid">{errorMessage}</p>
       )}
 
-      {/* TODO: make this work */}
       <div className="flex items-center justify-center">
         <Avatar className="h-28 w-28">
-          <AvatarImage
-            src={
-              data?.image
-                ? data?.image
-                : `https://avatar.vercel.sh/${orgName || "new-org"}`
-            }
-            alt={"org photo cover"}
-          />
+          <AvatarImage src={watchImage || defaultImg} alt={"org photo cover"} />
         </Avatar>
       </div>
 
@@ -169,7 +159,12 @@ export function OrganizationForm({ org }: { org?: Organization }) {
             id={"name"}
             aria-invalid={errors.name ? "true" : "false"}
             className="mt-1 w-full"
-            onChange={(e) => setOrgName(e.target.value)}
+            onChange={(e) => {
+              setValue("name", e.target.value)
+              if (action === "new") {
+                setValue("slug", createSlug(e.target.value))
+              }
+            }}
           />
           {errors.name && (
             <p className="text-xs pt-1 text-error-solid" role="alert">
@@ -182,20 +177,15 @@ export function OrganizationForm({ org }: { org?: Organization }) {
             SLUG
           </Label>
           <Input
+            readOnly
             {...register("slug")}
             id={"slug"}
-            onChange={(e) => setOrgSlug(e.target.value)}
             aria-invalid={errors.slug ? "true" : "false"}
             className="mt-1 w-full"
           />
           {errors.slug && (
             <p className="text-xs pt-1 text-error-solid" role="alert">
               {errors.slug?.message}
-            </p>
-          )}
-          {keyExistsError && (
-            <p className="text-xs pt-1 text-error-solid" role="alert">
-              {"the account exist"}
             </p>
           )}
         </div>
@@ -206,13 +196,14 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           TYPE OF ORGANIZATION
         </Label>
         <Select
+          // {{ ...register("type") }}
           defaultValue={data?.type}
           aria-invalid={errors.type ? "true" : "false"}
           onValueChange={(value) =>
             setValue("type", value, { shouldValidate: true })
           }
         >
-          <SelectTrigger ref={{ ...register("type") }} className="w-full">
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Type of the organization" />
           </SelectTrigger>
           <SelectContent
@@ -236,7 +227,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
 
       <div className="space-y-3">
         <Label htmlFor="image" className="text-xs">
-          IMAGE
+          IMAGE (optional)
         </Label>
         <div className="flex h-14 justify-center items-center space-x-2 animate-pulse w-full border-2 border-dashed rounded-md">
           <CldUploadWidget
@@ -247,20 +238,21 @@ export function OrganizationForm({ org }: { org?: Organization }) {
               folder: "test",
               multiple: false,
             }}
-            // TODO: handle error
-            // onError
+            onError={(error) => {
+              console.log(error)
+              toast({
+                title: "Error updating image",
+                description: `Something went wrong while updating the image`,
+                className: "bg-danger-solid text-danger-textContrast",
+              })
+            }}
             onUpload={(result, widget) => {
               const {
                 event,
-                info: { secure_url, thumbnail_url },
+                info: { secure_url },
               } = result
 
               if (event === "success") {
-                setData({
-                  ...data,
-                  image: secure_url,
-                })
-
                 setValue("image", secure_url, { shouldValidate: true })
               } else {
                 toast({
@@ -296,30 +288,9 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           </p>
         )}
       </div>
-      {/* <div>
-              <Label htmlFor="image" className="text-xs">
-                IMAGE
-              </Label>
-              <Input
-                {...register("image")}
-                id={"image"}
-                aria-invalid={errors.image ? "true" : "false"}
-                className="mt-1 w-full"
-              />
-              {errors.image && (
-                <p className="text-xs pt-1 text-error-solid" role="alert">
-                  {errors.image?.message}
-                </p>
-              )}
-              {keyExistsError && (
-                <p className="text-xs pt-1 text-error-solid" role="alert">
-                  {"the account exist"}
-                </p>
-              )}
-            </div> */}
       <div className="space-y-3">
         <Label htmlFor="description" className="text-xs">
-          DESCRIPTION
+          DESCRIPTION (optional)
         </Label>
         <Textarea
           {...register("description")}
@@ -328,24 +299,34 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           placeholder="Type your description here."
           onChange={(e) => {
             e.preventDefault()
-            console.log(e.target.value)
             setValue("description", e.target.value, { shouldValidate: true })
           }}
         />
       </div>
-      <div className="flex justify-end">
+      <div className="flex justify-end space-x-2">
+        {action === "new" && (
+          <Button
+            onClick={() => reset({ ...data })}
+            title="Clear"
+            className="bg-background active:bg-background-bgActive hover:bg-background-bgHover border border-background-border hover:border-background-borderHover"
+          >
+            <p className="hover:text-background-textContrast text-background-text">
+              Clear
+            </p>
+          </Button>
+        )}
         <Button
-          disabled={signInClicked}
+          disabled={loading}
           form="add-org-form"
           title="Submit"
           type="submit"
           className="bg-primary-bg active:bg-primary-bgActive hover:bg-primary-bgHover border border-primary-border hover:border-primary-borderHover"
         >
-          {signInClicked ? (
+          {loading ? (
             <LoadingDots color="#808080" />
           ) : (
             <p className="hover:text-primary-textContrast text-primary-text">
-              Create new organization
+              Save
             </p>
           )}
         </Button>

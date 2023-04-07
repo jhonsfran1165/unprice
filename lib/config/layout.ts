@@ -1,5 +1,6 @@
 import { LayoutConfig } from "@/lib/types"
 
+// TODO: put the logo here
 export const layoutConfig: LayoutConfig = {
   name: "Builder AI",
   description: "Build your software as a service with AI tools",

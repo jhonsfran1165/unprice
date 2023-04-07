@@ -14,6 +14,7 @@ const nextConfig = {
       "res.cloudinary.com",
       "pbs.twimg.com",
       "github.com",
+      "fonts.googleapis.com",
     ],
   },
 }

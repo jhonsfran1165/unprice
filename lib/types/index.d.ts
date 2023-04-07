@@ -39,6 +39,7 @@ export type DashboardSidebarNavItem = {
   disabled?: boolean
   external?: boolean
   icon?: keyof typeof Icons
+  href: string
 }
 
 export type DashboardNavItem = {

@@ -35,19 +35,28 @@ async function handler(
     }
 
     if (req.method === "POST") {
-      const { slug } = req.body
+      const { id, slug, type, name, image, description } = req.body
 
-      const { data } = await supabase
+      const { data: org, error } = await supabase
         .from("organization")
-        .select("slug")
+        .update({
+          type,
+          name,
+          image,
+          description,
+        })
+        .eq("id", id)
         .eq("slug", slug)
+        .select()
         .single()
 
-      return res.status(200).json(data)
+      if (error) return res.status(404).json(error)
+
+      return res.status(200).json(org)
     }
 
     if (req.method === "PUT") {
-      const { slug, type, name, image } = req.body
+      const { slug, type, name, image, description } = req.body
 
       const { data: org, error } = await supabase
         .from("organization")
@@ -56,6 +65,7 @@ async function handler(
           type,
           name,
           image,
+          description,
         })
         .select()
         .single()
@@ -93,7 +103,7 @@ export default withMethods(
   withValidation(
     {
       GET: orgProfileGetSchema,
-      POST: orgBySlugPostSchema,
+      POST: orgCreatePostSchema,
       PUT: orgCreatePostSchema,
     },
     // validate session for ["POST", "DELETE", "PUT"] endpoints only
