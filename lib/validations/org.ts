@@ -38,6 +38,7 @@ export const orgCreatePostSchema = z.object({
       "invalid type for the organization, it has to be at least 3 characters",
   }),
   image: z.string().url(),
+  description: z.string(),
 })
 
 export type orgCreatePostType = z.infer<typeof orgCreatePostSchema>

@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation"
 
-import { useStore } from "@/lib/stores/layout"
 import { createServerClient } from "@/lib/supabase/supabase-server"
 
 export const revalidate = 0

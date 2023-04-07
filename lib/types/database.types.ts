@@ -37,6 +37,7 @@ export interface Database {
       organization: {
         Row: {
           created_at: string
+          description: string | null
           id: number
           image: string | null
           name: string
@@ -46,6 +47,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: number
           image?: string | null
           name: string
@@ -55,6 +57,7 @@ export interface Database {
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: number
           image?: string | null
           name?: string
@@ -359,3 +362,4 @@ export interface Database {
     }
   }
 }
+

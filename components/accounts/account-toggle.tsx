@@ -29,8 +29,10 @@ export function AccountToggle() {
         >
           {" "}
           <Avatar className="h-7 w-7">
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>CN</AvatarFallback>
+            <AvatarImage
+              src="https://avatar.vercel.sh/dadasdasd"
+              alt="@shadcn"
+            />
           </Avatar>
         </Button>
       </DropdownMenuTrigger>

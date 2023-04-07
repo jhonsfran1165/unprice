@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input"
 export function OrganizationToggle() {
   const { orgSlug, currentOrg } = useStore()
   const { organizationProfiles, isLoading } = useOrganizations({
-    revalidateOnFocus: false,
+    revalidateOnFocus: true,
   })
 
   return (
@@ -77,7 +77,10 @@ export function OrganizationToggle() {
                         key={index}
                         className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast px-8 cursor-pointer"
                       >
-                        <Link href={`/org/${org.organization.slug}`}>
+                        <Link
+                          href={`/org/${org.organization.slug}`}
+                          prefetch={false}
+                        >
                           <Avatar className="mr-2 h-5 w-5">
                             <AvatarImage
                               src={
