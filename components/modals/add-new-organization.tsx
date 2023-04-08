@@ -7,10 +7,7 @@ import { SubmitHandler, useForm } from "react-hook-form"
 import { useDebounce } from "use-debounce"
 
 import { createSlug } from "@/lib/utils"
-import {
-  orgCreatePostSchema,
-  type orgCreatePostType,
-} from "@/lib/validations/org"
+import { orgPutSchema, type orgPutType } from "@/lib/validations/org"
 import { Icons } from "@/components/shared/icons"
 import LoadingDots from "@/components/shared/loading/loading-dots"
 import { Button } from "@/components/ui/button"
@@ -79,8 +76,8 @@ export function AddOrgModal() {
     formState: { errors },
     handleSubmit,
     setValue,
-  } = useForm<orgCreatePostType>({
-    resolver: zodResolver(orgCreatePostSchema),
+  } = useForm<orgPutType>({
+    resolver: zodResolver(orgPutSchema),
     defaultValues: {
       image: "https://github.com/shadcn.png",
       slug: "",
@@ -89,7 +86,7 @@ export function AddOrgModal() {
     },
   })
 
-  const onSubmit: SubmitHandler<orgCreatePostType> = async (orgData) => {
+  const onSubmit: SubmitHandler<orgPutType> = async (orgData) => {
     try {
       setSignInClicked(true)
       const data = await fetch(`/api/org`, {

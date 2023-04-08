@@ -8,9 +8,9 @@ import {
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Profile, Session } from "@/lib/types/supabase"
 import {
-  orgBySlugPostSchema,
-  orgCreatePostSchema,
+  orgPostSchema,
   orgProfileGetSchema,
+  orgPutSchema,
 } from "@/lib/validations/org"
 
 async function handler(
@@ -103,8 +103,8 @@ export default withMethods(
   withValidation(
     {
       GET: orgProfileGetSchema,
-      POST: orgCreatePostSchema,
-      PUT: orgCreatePostSchema,
+      POST: orgPostSchema,
+      PUT: orgPutSchema,
     },
     // validate session for ["POST", "DELETE", "PUT"] endpoints only
     withAuthentication(handler, {

@@ -4,52 +4,63 @@ import * as z from "zod"
 
 export const orgProfileGetSchema = z.object({})
 
-// TODO: separate fields and use them like here https://github.com/colinhacks/zod/issues/42
+// **************************** FIELDS **************************** //
+export const orgSlug = z.string().min(1, {
+  message:
+    "invalid name for the organization, it has to be at least 3 characters",
+})
 
-export const orgGetSchama = z.object({
-  orgSlug: z.string().min(1, {
-    message:
-      "invalid name for the organization, it has to be at least 3 characters",
-  }),
+const name = z.string().min(3, {
+  message:
+    "invalid name for the organization, it has to be at least 3 characters",
+})
+
+const type = z.string().min(3, {
+  message:
+    "invalid type for the organization, it has to be at least 3 characters",
+})
+
+const id = z.number()
+const image = z.string().url()
+const description = z.string()
+const isDefault = z.boolean()
+
+// -------------------------------------------------------------
+export const orgGetSchema = z.object({
+  orgSlug,
+})
+
+export const orgDeleteSchema = z.object({
+  orgSlug,
+  id,
 })
 
 export const orgBySlugGetSchema = z.object({
-  orgSlug: z.string().min(1, {
-    message:
-      "invalid name for the organization, it has to be at least 3 characters",
-  }),
+  orgSlug,
 })
 
-export const orgBySlugPostSchema = z.object({
-  orgSlug: z.string().min(3, {
-    message:
-      "invalid slug for the organization, it has to be at least 3 characters",
-  }),
+export const orgPostSchema = z.object({
+  id: id.nullable(),
+  name,
+  slug: orgSlug,
+  type,
+  image: image.nullable(),
+  description: description.nullable(),
 })
 
-export const orgCreatePostSchema = z.object({
-  id: z.number().nullable(),
-  name: z.string().min(3, {
-    message:
-      "invalid name for the organization, it has to be at least 3 characters",
-  }),
-  slug: z.string().min(3, {
-    message:
-      "invalid slug for the organization, it has to be at least 3 characters",
-  }),
-  type: z.string().min(3, {
-    message:
-      "invalid type for the organization, it has to be at least 3 characters",
-  }),
-  image: z.string().url().nullable(),
-  description: z.string().nullable(),
+export const orgPutSchema = z.object({
+  name,
+  slug: orgSlug,
+  type,
+  image: image.nullable(),
+  description: description.nullable(),
 })
-// .transform((schema) => {
-//   schema.image = schema.image
-//     ? schema.image
-//     : `https://avatar.vercel.sh/${schema.slug}`
 
-//   return schema
-// })
+export const orgMakeDefaultSchema = z.object({
+  id,
+  is_default: isDefault,
+})
 
-export type orgCreatePostType = z.infer<typeof orgCreatePostSchema>
+export type orgMakeDefaultType = z.infer<typeof orgMakeDefaultSchema>
+export type orgPostType = z.infer<typeof orgPostSchema>
+export type orgPutType = z.infer<typeof orgPutSchema>

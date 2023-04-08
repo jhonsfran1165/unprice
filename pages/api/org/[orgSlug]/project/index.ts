@@ -7,10 +7,7 @@ import {
 } from "@/lib/api-middlewares"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Profile, Session } from "@/lib/types/supabase"
-import {
-  projectCreateSchema,
-  projectGetSchema,
-} from "@/lib/validations/project"
+import { projectGetSchema, projectPostSchema } from "@/lib/validations/project"
 
 async function handler(
   req: NextApiRequest,
@@ -60,7 +57,7 @@ export default withMethods(
   withValidation(
     {
       GET: projectGetSchema,
-      POST: projectCreateSchema,
+      POST: projectPostSchema,
     },
     // validate session for ["POST", "DELETE", "PUT"] endpoints only
     withAuthentication(handler, {

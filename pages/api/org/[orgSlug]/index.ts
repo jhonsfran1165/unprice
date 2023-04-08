@@ -7,7 +7,7 @@ import {
 } from "@/lib/api-middlewares"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Profile, Session } from "@/lib/types/supabase"
-import { orgGetSchama } from "@/lib/validations/org"
+import { orgDeleteSchema, orgGetSchema } from "@/lib/validations/org"
 
 async function handler(
   req: NextApiRequest,
@@ -32,12 +32,26 @@ async function handler(
 
       return res.status(200).json(orgsProfile)
     }
+
+    if (req.method === "DELETE") {
+      const { orgSlug, id } = req.body
+
+      const { error } = await supabase
+        .from("organization")
+        .delete()
+        .eq("id", id)
+        .eq("slug", orgSlug)
+
+      if (error) return res.status(404).json(error)
+
+      return res.status(200).json({})
+    }
   } catch (error) {
     return res.status(500).json(error)
   }
 }
 
-const validMethods = ["GET"]
+const validMethods = ["GET", "DELETE"]
 
 export default withMethods(
   // valid methods for this endpoint
@@ -45,11 +59,11 @@ export default withMethods(
   // validate payload for this methods
   withValidation(
     {
-      GET: orgGetSchama,
+      GET: orgGetSchema,
+      DELETE: orgDeleteSchema,
     },
-    // validate session for ["POST", "DELETE", "PUT"] endpoints only
     withAuthentication(handler, {
-      protectedMethods: ["GET"],
+      protectedMethods: ["GET", "DELETE"],
       needProfileDetails: true,
     })
   )

@@ -27,10 +27,9 @@ export function AccountToggle() {
           size="sm"
           className="h-8 w-8 rounded-full border hover:border-primary-borderHover"
         >
-          {" "}
           <Avatar className="h-7 w-7">
             <AvatarImage
-              src="https://avatar.vercel.sh/dadasdasd"
+              src={"https://avatar.vercel.sh/dadasdasd"}
               alt="@shadcn"
             />
           </Avatar>

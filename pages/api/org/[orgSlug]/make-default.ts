@@ -7,7 +7,7 @@ import {
 } from "@/lib/api-middlewares"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Profile, Session } from "@/lib/types/supabase"
-import { orgBySlugGetSchema } from "@/lib/validations/org"
+import { orgMakeDefaultSchema } from "@/lib/validations/org"
 
 async function handler(
   req: NextApiRequest,
@@ -18,14 +18,25 @@ async function handler(
   try {
     const supabase = supabaseApiClient(req, res)
 
-    if (req.method === "GET") {
-      const { orgSlug } = req.query
+    if (req.method === "POST") {
+      const { id, is_default } = req.body
 
-      const { data } = await supabase
-        .from("organization")
-        .select("slug")
-        .eq("slug", orgSlug)
+      const { error: updateDefault } = await supabase
+        .from("organization_profiles")
+        .update({ is_default: false })
+        .eq("profile_id", session?.user.id)
+        .eq("is_default", is_default)
+
+      const { data, error: newDefault } = await supabase
+        .from("organization_profiles")
+        .update({ is_default: is_default })
+        .eq("profile_id", session?.user.id)
+        .eq("org_id", id)
+        .select("org_id")
         .single()
+
+      if (newDefault || updateDefault)
+        return res.status(404).json({ ...updateDefault, ...newDefault })
 
       return res.status(200).json(data)
     }
@@ -34,7 +45,7 @@ async function handler(
   }
 }
 
-const validMethods = ["GET"]
+const validMethods = ["POST"]
 
 export default withMethods(
   // valid methods for this endpoint
@@ -42,11 +53,11 @@ export default withMethods(
   // validate payload for this methods
   withValidation(
     {
-      GET: orgBySlugGetSchema,
+      POST: orgMakeDefaultSchema,
     },
     // validate session for ["POST", "DELETE", "PUT"] endpoints only
     withAuthentication(handler, {
-      protectedMethods: ["GET"],
+      protectedMethods: ["POST"],
       needProfileDetails: true,
     })
   )

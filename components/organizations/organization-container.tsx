@@ -1,5 +1,3 @@
-"use client"
-
 import { OrganizationForm } from "@/components/organizations/organization-form"
 import BlurImage from "@/components/shared/blur-image"
 import { Card } from "@/components/shared/card"
@@ -24,9 +22,9 @@ export function OrganizationContainer() {
             </h2>
             <br />
             <p className="text-sm text-justify p-5 md:p-0">
-              {
-                "Organizations are a set of users where you can use to create new projects, they are separated from orther organizations. Billings, projects and settings are totally independet."
-              }
+              Organizations are a set of users where you can use to create new
+              projects, they are separated from orther organizations. Billings,
+              projects and settings are totally independet.
             </p>
           </div>
         </div>

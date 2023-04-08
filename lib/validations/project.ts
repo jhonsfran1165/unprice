@@ -1,24 +1,30 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 
-export const projectCreateSchema = z.object({
-  name: z
-    .string()
-    .min(3, { message: "projectName has to be at least 3 characters" }),
-  description: z
-    .string()
-    .min(6, { message: "description must be at least 6 characters" }),
+import { orgSlug } from "@/lib/validations/org"
+
+// --------------------------------------------------------------------
+const name = z
+  .string()
+  .min(3, { message: "projectName has to be at least 3 characters" })
+
+const description = z
+  .string()
+  .min(6, { message: "description must be at least 6 characters" })
+
+const projectSlug = z
+  .string()
+  .min(1, { message: "project slug has to be at least 1 characters" })
+  .optional()
+
+export const projectPostSchema = z.object({
+  name,
+  description,
 })
 
 export const projectGetSchema = z.object({
-  orgSlug: z.string().min(1, {
-    message:
-      "invalid name for the organization, it has to be at least 3 characters",
-  }),
-  projectSlug: z
-    .string()
-    .min(1, { message: "project slug has to be at least 1 characters" })
-    .optional(),
+  orgSlug,
+  projectSlug,
 })
 
-export type projectCreateType = z.infer<typeof projectCreateSchema>
+export type projectPostType = z.infer<typeof projectPostSchema>

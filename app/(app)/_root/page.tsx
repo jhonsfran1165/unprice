@@ -28,6 +28,8 @@ export default async function AppInitialPage() {
 
   if (defaultOrg) {
     redirect(`/org/${defaultOrg?.slug}`)
+  } else {
+    redirect(`/org`)
   }
 
   notFound()

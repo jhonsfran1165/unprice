@@ -2,17 +2,16 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import useOrganizationExist from "@/hooks/use-organization-exist"
 import { useToast } from "@/hooks/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CldUploadWidget } from "next-cloudinary"
 import { SubmitHandler, useForm } from "react-hook-form"
+import { mutate } from "swr"
 
 import { Organization } from "@/lib/types/supabase"
 import { createSlug } from "@/lib/utils"
-import {
-  orgCreatePostSchema,
-  type orgCreatePostType,
-} from "@/lib/validations/org"
+import { orgPostSchema, orgPostType } from "@/lib/validations/org"
 import LoadingDots from "@/components/shared/loading/loading-dots"
 import UploadCloud from "@/components/shared/upload-cloud"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -30,7 +29,6 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import "./styles.css"
-import useOrganizationExist from "@/hooks/use-organization-exist"
 
 export function OrganizationForm({ org }: { org?: Organization }) {
   const router = useRouter()
@@ -38,7 +36,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
 
   const action = org ? "edit" : "new"
 
-  const [data, setData] = useState<orgCreatePostType>({
+  const [data, setData] = useState<orgPostType>({
     id: org?.id || null,
     name: org?.name || "",
     slug: org?.slug || "",
@@ -60,8 +58,8 @@ export function OrganizationForm({ org }: { org?: Organization }) {
     setValue,
     getValues,
     reset,
-  } = useForm<orgCreatePostType>({
-    resolver: zodResolver(orgCreatePostSchema),
+  } = useForm<orgPostType>({
+    resolver: zodResolver(orgPostSchema),
     defaultValues: {
       ...data,
     },
@@ -74,7 +72,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
   const defaultImg = watchSlug
     ? `https://avatar.vercel.sh/${watchSlug}`
     : "https://avatar.vercel.sh/new-org"
-  const watchImage = watch("image", defaultImg)
+  const watchImage = watch("image")
 
   useEffect(() => {
     if (exist) {
@@ -85,13 +83,9 @@ export function OrganizationForm({ org }: { org?: Organization }) {
     } else {
       clearErrors("slug")
     }
-
-    if (!getValues("image")) {
-      setValue("image", defaultImg)
-    }
   }, [exist])
 
-  const onSubmit: SubmitHandler<orgCreatePostType> = async (orgData) => {
+  const onSubmit: SubmitHandler<orgPostType> = async (orgData) => {
     try {
       setLoading(true)
       const org = await fetch(`/api/org`, {
@@ -110,8 +104,11 @@ export function OrganizationForm({ org }: { org?: Organization }) {
         toast({
           title: "Organization Saved",
           description: `Organization ${result.name} Saved successfully`,
-          className: "bg-background-bgSubtle",
+          className: "bg-info-bgActive text-info-text border-info-solid",
         })
+        // mutate swr endpoints for org
+        mutate(`/api/org`)
+        mutate(`/api/org/${result.slug}`)
 
         if (action === "new") {
           router.push(`/org/${result.slug}`)
@@ -139,14 +136,20 @@ export function OrganizationForm({ org }: { org?: Organization }) {
         <p className="text-center text-sm text-error-solid">{errorMessage}</p>
       )}
 
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center space-x-5">
         <Avatar className="h-28 w-28">
           <AvatarImage src={watchImage || defaultImg} alt={"org photo cover"} />
         </Avatar>
+        <div className="flex flex-col space-y-2">
+          <h3>Organization</h3>
+          <p className="text-sm font-light">
+            Use organization for bundle users a projects together, be aware that
+            every organization is totally separated from the others.
+          </p>
+        </div>
       </div>
-
       <div className="flex justify-center items-center space-y-5 h-10">
-        <Separator className="bg-background-border mx-10" />
+        <Separator className="bg-background-border" />
       </div>
 
       <div className="flex flex-col md:flex-row space-y-6 md:space-x-4 md:space-y-0">
@@ -158,11 +161,16 @@ export function OrganizationForm({ org }: { org?: Organization }) {
             {...register("name")}
             id={"name"}
             aria-invalid={errors.name ? "true" : "false"}
-            className="mt-1 w-full"
+            className="mt-1 w-full bg-background"
             onChange={(e) => {
               setValue("name", e.target.value)
               if (action === "new") {
                 setValue("slug", createSlug(e.target.value))
+                if (
+                  getValues("image")?.startsWith("https://avatar.vercel.sh")
+                ) {
+                  setValue("image", defaultImg)
+                }
               }
             }}
           />
@@ -181,7 +189,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
             {...register("slug")}
             id={"slug"}
             aria-invalid={errors.slug ? "true" : "false"}
-            className="mt-1 w-full"
+            className="mt-1 w-full bg-background"
           />
           {errors.slug && (
             <p className="text-xs pt-1 text-error-solid" role="alert">
@@ -196,14 +204,13 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           TYPE OF ORGANIZATION
         </Label>
         <Select
-          // {{ ...register("type") }}
-          defaultValue={data?.type}
+          defaultValue={data?.type || "personal"}
           aria-invalid={errors.type ? "true" : "false"}
           onValueChange={(value) =>
             setValue("type", value, { shouldValidate: true })
           }
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full bg-background">
             <SelectValue placeholder="Type of the organization" />
           </SelectTrigger>
           <SelectContent
@@ -243,7 +250,8 @@ export function OrganizationForm({ org }: { org?: Organization }) {
               toast({
                 title: "Error updating image",
                 description: `Something went wrong while updating the image`,
-                className: "bg-danger-solid text-danger-textContrast",
+                className:
+                  "bg-danger-bgActive text-danger-text border-danger-solid",
               })
             }}
             onUpload={(result, widget) => {
@@ -258,7 +266,8 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                 toast({
                   title: "Error updating image",
                   description: `Something went wrong while updating the image`,
-                  className: "bg-danger-solid text-danger-textContrast",
+                  className:
+                    "bg-danger-bgActive text-danger-text border-danger-solid",
                 })
               }
 
@@ -274,7 +283,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
               return (
                 <button
                   onClick={handleOnClick}
-                  className="flex w-full h-full justify-center items-center rounded-md transition-all ease-linear duration-200"
+                  className="bg-background flex w-full h-full justify-center items-center rounded-md transition-all ease-linear duration-200"
                 >
                   <UploadCloud className="h-8 w-8" />
                 </button>
@@ -297,6 +306,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           id={"description"}
           aria-invalid={errors.description ? "true" : "false"}
           placeholder="Type your description here."
+          className="bg-background"
           onChange={(e) => {
             e.preventDefault()
             setValue("description", e.target.value, { shouldValidate: true })
@@ -308,11 +318,9 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           <Button
             onClick={() => reset({ ...data })}
             title="Clear"
-            className="bg-background active:bg-background-bgActive hover:bg-background-bgHover border border-background-border hover:border-background-borderHover"
+            className="w-28 bg-background active:bg-background-bgActive hover:bg-background-bgHover border border-background-border hover:border-background-borderHover hover:text-background-textContrast text-background-text"
           >
-            <p className="hover:text-background-textContrast text-background-text">
-              Clear
-            </p>
+            {"Clear"}
           </Button>
         )}
         <Button
@@ -320,15 +328,9 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           form="add-org-form"
           title="Submit"
           type="submit"
-          className="bg-primary-bg active:bg-primary-bgActive hover:bg-primary-bgHover border border-primary-border hover:border-primary-borderHover"
+          className="w-28 bg-primary-bg active:bg-primary-bgActive hover:bg-primary-bgHover border border-primary-border hover:border-primary-borderHover hover:text-primary-textContrast text-primary-text"
         >
-          {loading ? (
-            <LoadingDots color="#808080" />
-          ) : (
-            <p className="hover:text-primary-textContrast text-primary-text">
-              Save
-            </p>
-          )}
+          {loading ? <LoadingDots color="#808080" /> : "Save"}
         </Button>
       </div>
     </form>

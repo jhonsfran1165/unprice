@@ -6,7 +6,7 @@ import { useStore } from "@/lib/stores/layout"
 import useOrganizations from "@/lib/swr/use-organizations"
 import OrganizationLink from "@/components/organizations/organization-link"
 import { Icons } from "@/components/shared/icons"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -79,7 +79,7 @@ export function OrganizationToggle() {
                       >
                         <Link
                           href={`/org/${org.organization.slug}`}
-                          prefetch={false}
+                          prefetch={true}
                         >
                           <Avatar className="mr-2 h-5 w-5">
                             <AvatarImage
