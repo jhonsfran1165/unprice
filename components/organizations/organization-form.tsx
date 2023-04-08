@@ -41,8 +41,8 @@ export function OrganizationForm({ org }: { org?: Organization }) {
     name: org?.name || "",
     slug: org?.slug || "",
     description: org?.description || null,
-    image: org?.image || null,
-    type: org?.type || "",
+    image: org?.image || "https://avatar.vercel.sh/new-org",
+    type: org?.type || "personal",
   })
 
   const [loading, setLoading] = useState(false)
@@ -66,12 +66,9 @@ export function OrganizationForm({ org }: { org?: Organization }) {
   })
 
   // watch important fields
-  const watchSlug = watch("slug", "")
+  const watchSlug = watch("slug")
   const exist =
     action === "new" ? useOrganizationExist({ orgSlug: watchSlug }) : false
-  const defaultImg = watchSlug
-    ? `https://avatar.vercel.sh/${watchSlug}`
-    : "https://avatar.vercel.sh/new-org"
   const watchImage = watch("image")
 
   useEffect(() => {
@@ -138,7 +135,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
 
       <div className="flex items-center justify-center space-x-5">
         <Avatar className="h-28 w-28">
-          <AvatarImage src={watchImage || defaultImg} alt={"org photo cover"} />
+          <AvatarImage src={watchImage || ""} alt={"org photo cover"} />
         </Avatar>
         <div className="flex flex-col space-y-2">
           <h3>Organization</h3>
@@ -165,11 +162,12 @@ export function OrganizationForm({ org }: { org?: Organization }) {
             onChange={(e) => {
               setValue("name", e.target.value)
               if (action === "new") {
-                setValue("slug", createSlug(e.target.value))
+                const slug = createSlug(e.target.value)
+                setValue("slug", slug)
                 if (
                   getValues("image")?.startsWith("https://avatar.vercel.sh")
                 ) {
-                  setValue("image", defaultImg)
+                  setValue("image", `https://avatar.vercel.sh/${slug}`)
                 }
               }
             }}
