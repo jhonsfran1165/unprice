@@ -83,15 +83,15 @@ export const RESERVED_KEYS = new Set([
 ])
 export const DEFAULT_REDIRECTS = {
   home: "https://dub.sh",
-  signin: "https://app.dub.sh/login",
-  login: "https://app.dub.sh/login",
-  register: "https://app.dub.sh/register",
-  signup: "https://app.dub.sh/register",
-  app: "https://app.dub.sh",
-  dashboard: "https://app.dub.sh",
-  links: "https://app.dub.sh/links",
-  settings: "https://app.dub.sh/settings",
-  welcome: "https://app.dub.sh/welcome",
+  signin: "https://builderai.vercel.app/login",
+  login: "https://builderai.vercel.app/login",
+  register: "https://builderai.vercel.app/register",
+  signup: "https://builderai.vercel.app/register",
+  app: "https://builderai.vercel.app",
+  dashboard: "https://builderai.vercel.app",
+  links: "https://builderai.vercel.app/links",
+  settings: "https://builderai.vercel.app/settings",
+  welcome: "https://builderai.vercel.app/welcome",
   slack: "https://dub.slack.com",
   discord: "https://twitter.com/dubdotsh", // placeholder for now
 }

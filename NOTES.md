@@ -40,3 +40,5 @@ https://github.com/shadcn/ui/issues/52
 https://blog.logrocket.com/applying-dynamic-styles-tailwind-css/
 
 https://next-cloudinary.spacejelly.dev/components/cldimage/basic-usage
+
+https://supabase.com/docs/reference/cli/start
