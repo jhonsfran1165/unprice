@@ -57,7 +57,7 @@ export const Boundary = ({
     >
       <div
         className={cn(
-          "absolute -top-2.5 flex gap-x-1 text-[9px] uppercase leading-4 tracking-widest",
+          "tracking-widest absolute -top-2.5 flex gap-x-1 text-[9px] uppercase leading-4",
           {
             "left-0 lg:left-0 z-20": size === "none",
             "left-3 lg:left-5": size === "small",

@@ -14,7 +14,7 @@ export default async function DashboardLayout({
       {/* @ts-expect-error Server Component */}
       <Header />
       <HeaderContext />
-      <main className="flex flex-col flex-grow">{children}</main>
+      <main className="flex grow flex-col">{children}</main>
       <Footer />
     </>
   )

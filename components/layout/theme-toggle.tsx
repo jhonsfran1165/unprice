@@ -21,10 +21,10 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="sm"
-          className="active:bg-background-bgActive hover:bg-background-bgHover"
+          className="hover:bg-background-bgHover active:bg-background-bgActive"
         >
-          <Icons.sun className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 hover:text-background-textContrast" />
-          <Icons.moon className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 hover:text-background-textContrast" />
+          <Icons.sun className="rotate-0 scale-100 transition-all hover:text-background-textContrast dark:-rotate-90 dark:scale-0" />
+          <Icons.moon className="absolute rotate-90 scale-0 transition-all hover:text-background-textContrast dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
@@ -36,16 +36,16 @@ export function ThemeToggle() {
         <DropdownMenuItem
           onClick={() => setTheme("light")}
           className="hover:bg-background-bgHover 
-          focus:bg-background-bgHover 
-          hover:text-background-textContrast"
+          hover:text-background-textContrast 
+          focus:bg-background-bgHover"
         >
           <Icons.sun className="mr-2 h-4 w-4" />
           <span>Light</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("dark")}
-          className="hover:bg-background-bgHover focus:bg-background-bgHover 
-          hover:text-background-textContrast"
+          className="hover:bg-background-bgHover hover:text-background-textContrast 
+          focus:bg-background-bgHover"
         >
           <Icons.moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
@@ -53,7 +53,7 @@ export function ThemeToggle() {
         <DropdownMenuItem
           onClick={() => setTheme("system")}
           className="hover:bg-background-bgHover 
-          focus:bg-background-bgHover hover:text-background-textContrast"
+          hover:text-background-textContrast focus:bg-background-bgHover"
         >
           <Icons.laptop className="mr-2 h-4 w-4" />
           <span>System</span>

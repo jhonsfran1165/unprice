@@ -88,7 +88,7 @@ export function OrganizationMakeDefault({
               }}
               id={"is_default"}
               {...register("is_default")}
-              className="bg-background border-background-solid ring-background-solid data-[state=unchecked]:bg-background data-[state=checked]:bg-primary-solid"
+              className="border-background-solid bg-background ring-background-solid data-[state=unchecked]:bg-background data-[state=checked]:bg-primary-solid"
             />
             <Label htmlFor="is_default">
               {isDefault ? "Is default" : "Make default"}

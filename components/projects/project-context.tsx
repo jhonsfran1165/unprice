@@ -15,8 +15,8 @@ export default function ProjectContext() {
   return (
     <>
       {isLoading ? null : (
-        <div className="hidden md:flex items-center justify-start">
-          <Icons.divider className="hidden h-6 w-6 mx-2 text-background-text gap-0 md:inline-block" />
+        <div className="hidden items-center justify-start md:flex">
+          <Icons.divider className="mx-2 hidden h-6 w-6 gap-0 text-background-text md:inline-block" />
           <span className="block truncate text-sm font-bold">
             {project?.name}
           </span>

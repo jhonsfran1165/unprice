@@ -1,14 +1,15 @@
-import { Session, withUserAuth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiRequest, NextApiResponse } from "next"
+
+import { Session, withUserAuth } from "@/lib/auth"
+import prisma from "@/lib/prisma"
 
 export default withUserAuth(
   async (req: NextApiRequest, res: NextApiResponse, session: Session) => {
-    const { slug } = req.query as { slug: string };
+    const { slug } = req.query as { slug: string }
     if (!slug || typeof slug !== "string") {
       return res
         .status(400)
-        .json({ error: "Missing or misconfigured project slug" });
+        .json({ error: "Missing or misconfigured project slug" })
     }
     if (req.method === "POST") {
       const invite = await prisma.projectInvite.findFirst({
@@ -22,11 +23,11 @@ export default withUserAuth(
           expires: true,
           projectId: true,
         },
-      });
+      })
       if (!invite) {
-        return res.status(404).json({ error: "Invalid invitation" });
+        return res.status(404).json({ error: "Invalid invitation" })
       } else if (invite.expires < new Date()) {
-        return res.status(410).json({ error: "Invitation expired" });
+        return res.status(410).json({ error: "Invitation expired" })
       } else {
         const response = await Promise.all([
           prisma.projectUsers.create({
@@ -44,9 +45,9 @@ export default withUserAuth(
               },
             },
           }),
-        ]);
-        return res.status(200).json(response);
+        ])
+        return res.status(200).json(response)
       }
     }
-  },
-);
+  }
+)

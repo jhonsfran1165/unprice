@@ -16,7 +16,7 @@ export function Card({
       {...props}
     >
       <div className="flex flex-col justify-between space-y-4">
-        <div className="space-y-2 [&>p]:text-base-text [&>h4]:!mt-0 [&>h3]:!mt-0">
+        <div className="[&>p]:text-base-text space-y-2 [&>h4]:!mt-0 [&>h3]:!mt-0">
           {children}
         </div>
       </div>

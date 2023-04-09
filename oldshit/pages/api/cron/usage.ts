@@ -1,6 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { verifySignature } from "@upstash/qstash/nextjs";
-import { updateUsage } from "@/lib/cron/usage";
+import type { NextApiRequest, NextApiResponse } from "next"
+import { verifySignature } from "@upstash/qstash/nextjs"
+
+import { updateUsage } from "@/lib/cron/usage"
 
 /**
  * Cron to update the usage stats of each project.
@@ -9,10 +10,10 @@ import { updateUsage } from "@/lib/cron/usage";
 
 async function handler(_req: NextApiRequest, res: NextApiResponse) {
   try {
-    const results = await updateUsage();
-    res.status(200).json(results);
+    const results = await updateUsage()
+    res.status(200).json(results)
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message })
   }
 }
 
@@ -22,10 +23,10 @@ async function handler(_req: NextApiRequest, res: NextApiResponse) {
  * To test out the endpoint manually (wihtout using QStash), you can do `export default handler` instead and
  * hit this endpoint via http://localhost:3000/api/cron/domains
  */
-export default verifySignature(handler);
+export default verifySignature(handler)
 
 export const config = {
   api: {
     bodyParser: false,
   },
-};
+}

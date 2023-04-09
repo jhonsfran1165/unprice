@@ -10,10 +10,10 @@ export default function HeaderContext() {
 
   return (
     <section>
-      <div className="flex h-36 items-center border-b bg-primary-bgSubtle z-30">
+      <div className="z-30 flex h-36 items-center border-b bg-primary-bgSubtle">
         <MaxWidthWrapper className="max-w-screen-2xl">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl pl-5">{contextHeader}</h1>
+            <h1 className="pl-5 text-2xl">{contextHeader}</h1>
           </div>
         </MaxWidthWrapper>
       </div>

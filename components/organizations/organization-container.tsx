@@ -17,11 +17,11 @@ export function OrganizationContainer() {
               priority={true}
               className="pointer-events-none mt-5 mb-10"
             />
-            <h2 className="z-10 text-xl font-semibold text-base-text">
+            <h2 className="text-base-text z-10 text-xl font-semibold">
               {"Create a new organization"}
             </h2>
             <br />
-            <p className="text-sm text-justify p-5 md:p-0">
+            <p className="p-5 text-justify text-sm md:p-0">
               Organizations are a set of users where you can use to create new
               projects, they are separated from orther organizations. Billings,
               projects and settings are totally independet.

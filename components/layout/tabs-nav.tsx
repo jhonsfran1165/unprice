@@ -9,7 +9,7 @@ export const TabsNav = () => {
   if (!orgSlug) return null
 
   return (
-    <div className="bg-background-bgSubtle flex h-12 items-center justify-start space-x-2">
+    <div className="flex h-12 items-center justify-start space-x-2 bg-background-bgSubtle">
       <nav className="flex flex-wrap items-center gap-2">
         {tabs.length > 0 &&
           tabs.map((tab, index) => (

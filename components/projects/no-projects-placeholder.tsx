@@ -5,7 +5,7 @@ export default function NoProjectsPlaceholder() {
   return (
     <Card>
       <div className="flex flex-col items-center justify-center py-12">
-        <h2 className="z-10 text-xl font-semibold text-base-text">
+        <h2 className="text-base-text z-10 text-xl font-semibold">
           {"You don't have any projects yet!"}
         </h2>
         <BlurImage

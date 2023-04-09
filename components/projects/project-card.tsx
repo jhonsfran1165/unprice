@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 export const ProjectCard = ({ project }: { project: ProjectsApiResult }) => {
   return (
     <Link href={`/org/${project.organization.slug}/project/${project.slug}`}>
-      <Card className="hover:border-background-textContrast cursor-pointer">
+      <Card className="cursor-pointer hover:border-background-textContrast">
         <div className="flex items-center space-x-1">
           <div className="flex-1">
             <div className="flex items-center justify-start space-x-3 px-1">
@@ -25,11 +25,11 @@ export const ProjectCard = ({ project }: { project: ProjectsApiResult }) => {
             </div>
           </div>
         </div>
-        <div className={"pt-2 h-3 pb-4"}>
-          <div className={"font-semibold pl-4"}>{project.subdomain}</div>
+        <div className={"h-3 pt-2 pb-4"}>
+          <div className={"pl-4 font-semibold"}>{project.subdomain}</div>
         </div>
-        <div className={"h-3 text-right pb-4"}>
-          <div className={"font-semibold text-xs"}>
+        <div className={"h-3 pb-4 text-right"}>
+          <div className={"text-xs font-semibold"}>
             {project?.created_at && timeAgo(new Date(project?.created_at))}
           </div>
         </div>

@@ -7,7 +7,7 @@ import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 export async function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-clip-padding bg-background-bgSubtle backdrop-filter backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full border-b bg-background-bgSubtle bg-clip-padding backdrop-blur-xl">
       <MaxWidthWrapper className="max-w-screen-2xl">
         <MainNav />
         <TabsNav />

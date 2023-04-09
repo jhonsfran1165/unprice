@@ -38,22 +38,22 @@ export function AccountToggle() {
       <DropdownMenuContent
         align="end"
         forceMount
-        className="bg-background-bgSubtle w-56"
+        className="w-56 bg-background-bgSubtle"
       >
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-background-line" />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
+          <DropdownMenuItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
             <Icons.user className="mr-2 h-4 w-4" />
             <span>Profile</span>
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
+          <DropdownMenuItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
             <Icons.billing className="mr-2 h-4 w-4" />
             <span>Billing</span>
             <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
+          <DropdownMenuItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
             <Icons.settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
@@ -61,11 +61,11 @@ export function AccountToggle() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator className="bg-background-line" />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
+          <DropdownMenuItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
             <Icons.users className="mr-2 h-4 w-4" />
             <span>Organization</span>
           </DropdownMenuItem>
-          <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
+          <DropdownMenuItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
             <Icons.add className="mr-2 h-4 w-4" />
             <span>New Organization</span>
             <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
@@ -73,7 +73,7 @@ export function AccountToggle() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator className="bg-background-line" />
 
-        <DropdownMenuItem className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast">
+        <DropdownMenuItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
           <Icons.lifeBuoy className="mr-2 h-4 w-4" />
           <span>Support</span>
         </DropdownMenuItem>
@@ -83,7 +83,7 @@ export function AccountToggle() {
           onClick={async () => {
             await supabase.auth.signOut()
           }}
-          className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast"
+          className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover"
         >
           <Icons.logOut className="mr-2 h-4 w-4" />
           <span>Log out</span>

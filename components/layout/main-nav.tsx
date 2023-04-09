@@ -10,10 +10,10 @@ import { Icons } from "@/components/shared/icons"
 
 export function MainNav() {
   return (
-    <div className="bg-background-bgSubtle flex h-16 items-center space-x-2 sm:justify-between sm:space-x-0">
+    <div className="flex h-16 items-center space-x-2 bg-background-bgSubtle sm:justify-between sm:space-x-0">
       <div className="flex items-center justify-start">
         <Logo />
-        <Icons.divider className="hidden h-6 w-6 mx-3 text-background-text gap-0 md:inline-block" />
+        <Icons.divider className="mx-3 hidden h-6 w-6 gap-0 text-background-text md:inline-block" />
         <OrganizationToggle />
         <ProjectContext />
       </div>
@@ -29,7 +29,7 @@ export function MainNav() {
                         key={index}
                         href={item.href}
                         className={cn(
-                          "flex items-center rounded-md border font-normal text-xs px-2 py-1 hover:bg-background-bgHover active:bg-background-bgActive hover:text-background-textContrast",
+                          "flex items-center rounded-md border px-2 py-1 text-xs font-normal hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive",
                           item.disabled && "cursor-not-allowed opacity-80"
                         )}
                       >

@@ -1,21 +1,22 @@
-import cloudinary from "cloudinary";
-import { DEFAULT_REDIRECTS, RESERVED_KEYS } from "@/lib/constants";
-import prisma from "@/lib/prisma";
-import { LinkProps } from "@/lib/types";
-import { redis } from "@/lib/upstash";
-import { getParamsFromURL, nanoid, truncate } from "@/lib/utils";
+import cloudinary from "cloudinary"
+
+import { DEFAULT_REDIRECTS, RESERVED_KEYS } from "@/lib/constants"
+import prisma from "@/lib/prisma"
+import { LinkProps } from "@/lib/types"
+import { redis } from "@/lib/upstash"
+import { getParamsFromURL, nanoid, truncate } from "@/lib/utils"
 
 const getFiltersFromStatus = (status: string) => {
   if (status === "all" || status === "none") {
     return {
       archived: undefined,
       expiresAt: undefined,
-    };
+    }
   }
-  const selectedStatus = status.split(",");
-  const activeSelected = selectedStatus.includes("active");
-  const expiredSelected = selectedStatus.includes("expired");
-  const archivedSelected = selectedStatus.includes("archived");
+  const selectedStatus = status.split(",")
+  const activeSelected = selectedStatus.includes("active")
+  const expiredSelected = selectedStatus.includes("expired")
+  const archivedSelected = selectedStatus.includes("archived")
   return {
     AND: [
       {
@@ -51,8 +52,8 @@ const getFiltersFromStatus = (status: string) => {
         ],
       },
     ],
-  };
-};
+  }
+}
 
 export async function getLinksForProject({
   domain,
@@ -60,12 +61,12 @@ export async function getLinksForProject({
   sort = "createdAt",
   userId,
 }: {
-  domain: string;
-  status?: string;
-  sort?: "createdAt" | "clicks"; // always descending for both
-  userId?: string;
+  domain: string
+  status?: string
+  sort?: "createdAt" | "clicks" // always descending for both
+  userId?: string
 }): Promise<LinkProps[]> {
-  const filters = getFiltersFromStatus(status);
+  const filters = getFiltersFromStatus(status)
   return await prisma.link.findMany({
     where: {
       domain,
@@ -76,7 +77,7 @@ export async function getLinksForProject({
       [sort]: "desc",
     },
     take: 100,
-  });
+  })
 }
 
 export async function getLinkCountForProject(domain: string) {
@@ -85,12 +86,12 @@ export async function getLinkCountForProject(domain: string) {
       domain,
       archived: false,
     },
-  });
+  })
 }
 
 export async function getRandomKey(domain: string): Promise<string> {
   /* recursively get random key till it gets one that's avaialble */
-  const key = nanoid();
+  const key = nanoid()
   const response = await prisma.link.findUnique({
     where: {
       domain_key: {
@@ -98,12 +99,12 @@ export async function getRandomKey(domain: string): Promise<string> {
         key,
       },
     },
-  });
+  })
   if (response) {
     // by the off chance that key already exists
-    return getRandomKey(domain);
+    return getRandomKey(domain)
   } else {
-    return key;
+    return key
   }
 }
 
@@ -112,7 +113,7 @@ export async function checkIfKeyExists(domain: string, key: string) {
     domain === "dub.sh" &&
     (RESERVED_KEYS.has(key) || DEFAULT_REDIRECTS[key])
   ) {
-    return true; // reserved keys for dub.sh
+    return true // reserved keys for dub.sh
   }
   const link = await prisma.link.findUnique({
     where: {
@@ -121,8 +122,8 @@ export async function checkIfKeyExists(domain: string, key: string) {
         key,
       },
     },
-  });
-  return !!link;
+  })
+  return !!link
 }
 
 export async function addLink(link: LinkProps) {
@@ -138,16 +139,16 @@ export async function addLink(link: LinkProps) {
     proxy,
     ios,
     android,
-  } = link;
-  const hasPassword = password && password.length > 0 ? true : false;
-  const exat = expiresAt ? new Date(expiresAt).getTime() / 1000 : null;
-  const uploadedImage = image && image.startsWith("data:image") ? true : false;
+  } = link
+  const hasPassword = password && password.length > 0 ? true : false
+  const exat = expiresAt ? new Date(expiresAt).getTime() / 1000 : null
+  const uploadedImage = image && image.startsWith("data:image") ? true : false
 
-  const exists = await checkIfKeyExists(domain, key);
-  if (exists) return null;
+  const exists = await checkIfKeyExists(domain, key)
+  if (exists) return null
 
   const { utm_source, utm_medium, utm_campaign, utm_term, utm_content } =
-    getParamsFromURL(url);
+    getParamsFromURL(url)
 
   let [response, _] = await Promise.all([
     prisma.link.create({
@@ -176,16 +177,16 @@ export async function addLink(link: LinkProps) {
         nx: true,
         // if the key has an expiry, set exat
         ...(exat && { exat }),
-      },
+      }
     ),
-  ]);
+  ])
   if (proxy && image) {
     const { secure_url } = await cloudinary.v2.uploader.upload(image, {
       public_id: key,
       folder: domain,
       overwrite: true,
       invalidate: true,
-    });
+    })
     response = await prisma.link.update({
       where: {
         id: response.id,
@@ -193,9 +194,9 @@ export async function addLink(link: LinkProps) {
       data: {
         image: secure_url,
       },
-    });
+    })
   }
-  return response;
+  return response
 }
 
 export async function editLink(link: LinkProps, oldKey: string) {
@@ -212,18 +213,18 @@ export async function editLink(link: LinkProps, oldKey: string) {
     proxy,
     ios,
     android,
-  } = link;
-  const hasPassword = password && password.length > 0 ? true : false;
-  const exat = expiresAt ? new Date(expiresAt).getTime() : null;
-  const changedKey = key !== oldKey;
-  const uploadedImage = image && image.startsWith("data:image") ? true : false;
+  } = link
+  const hasPassword = password && password.length > 0 ? true : false
+  const exat = expiresAt ? new Date(expiresAt).getTime() : null
+  const changedKey = key !== oldKey
+  const uploadedImage = image && image.startsWith("data:image") ? true : false
 
   if (changedKey) {
-    const exists = await checkIfKeyExists(domain, key);
-    if (exists) return null;
+    const exists = await checkIfKeyExists(domain, key)
+    if (exists) return null
   }
   const { utm_source, utm_medium, utm_campaign, utm_term, utm_content } =
-    getParamsFromURL(url);
+    getParamsFromURL(url)
 
   const [response, ...effects] = await Promise.all([
     prisma.link.update({
@@ -265,7 +266,7 @@ export async function editLink(link: LinkProps, oldKey: string) {
       {
         // if the key has an expiry, set exat
         ...(exat && { exat }),
-      },
+      }
     ),
     // if key is changed: rename resource in Cloudinary, delete the old key in Redis and change the clicks key name
     ...(changedKey
@@ -278,10 +279,10 @@ export async function editLink(link: LinkProps, oldKey: string) {
           redis.del(`${domain}:${oldKey}`),
         ]
       : []),
-  ]);
+  ])
   if (proxy && image) {
-    const { secure_url } = effects[0];
-    response.image = secure_url;
+    const { secure_url } = effects[0]
+    response.image = secure_url
     await prisma.link.update({
       where: {
         id,
@@ -289,10 +290,10 @@ export async function editLink(link: LinkProps, oldKey: string) {
       data: {
         image: secure_url,
       },
-    });
+    })
   }
 
-  return response;
+  return response
 }
 
 export async function deleteLink(domain: string, key: string) {
@@ -309,13 +310,13 @@ export async function deleteLink(domain: string, key: string) {
       invalidate: true,
     }),
     redis.del(`${domain}:${key}`),
-  ]);
+  ])
 }
 
 export async function archiveLink(
   domain: string,
   key: string,
-  archived = true,
+  archived = true
 ) {
   return await prisma.link.update({
     where: {
@@ -327,14 +328,14 @@ export async function archiveLink(
     data: {
       archived,
     },
-  });
+  })
 }
 
 /* Change the domain for every link and its respective stats when the project domain is changed */
 export async function changeDomainForLinks(
   projectId: string,
   domain: string,
-  newDomain: string,
+  newDomain: string
 ) {
   const links = await prisma.link.findMany({
     where: {
@@ -342,15 +343,15 @@ export async function changeDomainForLinks(
         id: projectId,
       },
     },
-  });
-  const pipeline = redis.pipeline();
+  })
+  const pipeline = redis.pipeline()
   links.forEach(({ key }) => {
-    pipeline.rename(`${domain}:${key}`, `${newDomain}:${key}`);
-  });
+    pipeline.rename(`${domain}:${key}`, `${newDomain}:${key}`)
+  })
   try {
-    return await pipeline.exec();
+    return await pipeline.exec()
   } catch (e) {
-    return null;
+    return null
   }
 }
 
@@ -358,7 +359,7 @@ export async function changeDomainForLinks(
 export async function changeDomainForImages(
   projectId: string,
   domain: string,
-  newDomain: string,
+  newDomain: string
 ) {
   const links = await prisma.link.findMany({
     where: {
@@ -366,7 +367,7 @@ export async function changeDomainForImages(
         id: projectId,
       },
     },
-  });
+  })
   try {
     return await Promise.all(
       links.map(({ key }) =>
@@ -375,12 +376,12 @@ export async function changeDomainForImages(
           `${newDomain}/${key}`,
           {
             invalidate: true,
-          },
-        ),
-      ),
-    );
+          }
+        )
+      )
+    )
   } catch (e) {
-    return null;
+    return null
   }
 }
 
@@ -392,14 +393,14 @@ export async function deleteProjectLinks(domain: string) {
         domain,
       },
     },
-  });
-  const pipeline = redis.pipeline();
+  })
+  const pipeline = redis.pipeline()
   links.forEach(({ key }) => {
-    pipeline.del(`${domain}:${key}`);
-  });
+    pipeline.del(`${domain}:${key}`)
+  })
   try {
-    return await pipeline.exec();
+    return await pipeline.exec()
   } catch (e) {
-    return null;
+    return null
   }
 }

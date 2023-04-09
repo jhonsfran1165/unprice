@@ -13,7 +13,7 @@ function OrganizationLink({
   if (isLoading) {
     return (
       <Link
-        className="flex w-28 md:w-32 space-x-3 items-center justify-start hover:text-background-textContrast"
+        className="flex w-28 items-center justify-start space-x-3 hover:text-background-textContrast md:w-32"
         href={`/`}
       >
         <Avatar className="h-7 w-7">
@@ -22,7 +22,7 @@ function OrganizationLink({
             alt={"New org"}
           />
         </Avatar>
-        <span className="block w-full h-4 truncate rounded-lg text-sm font-bold text-center bg-background-solidHover animate-pulse" />
+        <span className="block h-4 w-full animate-pulse truncate rounded-lg bg-background-solidHover text-center text-sm font-bold" />
       </Link>
     )
   }
@@ -30,7 +30,7 @@ function OrganizationLink({
   if (!org) {
     return (
       <Link
-        className="flex w-28 md:w-32 space-x-3 items-center justify-start hover:text-background-textContrast"
+        className="flex w-28 items-center justify-start space-x-3 hover:text-background-textContrast md:w-32"
         href={`/`}
       >
         <Avatar className="h-7 w-7">
@@ -43,7 +43,7 @@ function OrganizationLink({
           </Avatar>
           <AvatarFallback className="bg-primary-bgSubtle">BA</AvatarFallback>
         </Avatar>
-        <span className="block w-full truncate text-sm font-bold text-center">
+        <span className="block w-full truncate text-center text-sm font-bold">
           {"New Org"}
         </span>
       </Link>
@@ -52,7 +52,7 @@ function OrganizationLink({
 
   return (
     <Link
-      className="flex w-28 md:w-32 space-x-3 items-center justify-start hover:text-background-textContrast"
+      className="flex w-28 items-center justify-start space-x-3 hover:text-background-textContrast md:w-32"
       href={`/org/${org.slug}`}
     >
       <Avatar className="h-7 w-7">
@@ -62,7 +62,7 @@ function OrganizationLink({
         />
         <AvatarFallback>{org.name.substring(2)}</AvatarFallback>
       </Avatar>
-      <span className="block w-full truncate text-sm font-bold text-center">
+      <span className="block w-full truncate text-center text-sm font-bold">
         {org.name}
       </span>
     </Link>

@@ -9,7 +9,11 @@
     "lint": "next lint",
     "preview": "next build && next start",
     "design": "tailwind-config-viewer -p 4000 -o",
-    "turbo": "next dev --turbo"
+    "turbo": "next dev --turbo",
+    "build:turbo": "turbo run build",
+    "dev:turbo": "turbo run dev",
+    "lint:turbo": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "dependencies": {
     "@hookform/resolvers": "^2.9.10",

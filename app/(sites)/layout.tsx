@@ -19,7 +19,7 @@ export default async function RootLayout({
       </head>
       <body
         className={cn(
-          "min-h-screen font-inter antialiased bg-base-bg text-base-text",
+          "bg-base-bg text-base-text min-h-screen font-inter antialiased",
           satoshi.variable,
           inter.variable
         )}

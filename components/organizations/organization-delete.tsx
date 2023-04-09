@@ -73,7 +73,7 @@ export function OrganizationDelete({
         <Button
           title="Delete"
           onClick={deleteOrg}
-          className="w-28 bg-danger-bg active:bg-danger-bgActive hover:bg-danger-bgHover border border-danger-border hover:border-danger-borderHover hover:text-danger-textContrast text-danger-text"
+          className="w-28 border border-danger-border bg-danger-bg text-danger-text hover:border-danger-borderHover hover:bg-danger-bgHover hover:text-danger-textContrast active:bg-danger-bgActive"
         >
           {loading ? <LoadingDots color="#808080" /> : "Delete"}
         </Button>

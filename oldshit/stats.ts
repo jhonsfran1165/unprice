@@ -1,4 +1,4 @@
-export type IntervalProps = "1h" | "24h" | "7d" | "30d" | "90d";
+export type IntervalProps = "1h" | "24h" | "7d" | "30d" | "90d"
 
 export const intervalData = {
   "1h": {
@@ -54,44 +54,44 @@ export const intervalData = {
         day: "numeric",
       }),
   },
-};
+}
 
-export type LocationTabs = "country" | "city" | "region";
+export type LocationTabs = "country" | "city" | "region"
 
-export type DeviceTabs = "device" | "browser" | "os" | "bot" | "ua";
+export type DeviceTabs = "device" | "browser" | "os" | "bot" | "ua"
 
 export const uaToBot = (ua: string): string => {
-  if (!ua) return "Unknown Bot";
+  if (!ua) return "Unknown Bot"
   if (ua.includes("curl")) {
-    return "Curl Request";
+    return "Curl Request"
   } else if (ua.includes("Slackbot")) {
-    return "Slack Bot";
+    return "Slack Bot"
   } else if (ua.includes("Twitterbot")) {
-    return "Twitter Bot";
+    return "Twitter Bot"
   } else if (ua.includes("facebookexternalhit")) {
-    return "Facebook Bot";
+    return "Facebook Bot"
   } else if (ua.includes("LinkedInBot")) {
-    return "LinkedIn Bot";
+    return "LinkedIn Bot"
   } else if (ua.includes("WhatsApp")) {
-    return "WhatsApp Bot";
+    return "WhatsApp Bot"
   } else if (ua.includes("TelegramBot")) {
-    return "Telegram Bot";
+    return "Telegram Bot"
   } else if (ua.includes("Discordbot")) {
-    return "Discord Bot";
+    return "Discord Bot"
   } else if (ua.includes("Googlebot")) {
-    return "Google Bot";
+    return "Google Bot"
   } else if (ua.includes("Baiduspider")) {
-    return "Baidu Bot";
+    return "Baidu Bot"
   } else if (ua.includes("bingbot")) {
-    return "Bing Bot";
+    return "Bing Bot"
   } else if (ua.includes("YandexBot")) {
-    return "Yandex Bot";
+    return "Yandex Bot"
   } else if (ua.includes("DuckDuckBot")) {
-    return "DuckDuckGo Bot";
+    return "DuckDuckGo Bot"
   } else {
-    return "Unknown Bot";
+    return "Unknown Bot"
   }
-};
+}
 
 const VALID_TINYBIRD_ENDPOINTS = new Set([
   "timeseries",
@@ -103,7 +103,7 @@ const VALID_TINYBIRD_ENDPOINTS = new Set([
   "os",
   "bot",
   "referer",
-]);
+])
 
 export const getStats = async ({
   domain,
@@ -111,33 +111,31 @@ export const getStats = async ({
   endpoint,
   interval,
 }: {
-  domain: string;
-  key: string;
-  endpoint: string;
-  interval?: string;
+  domain: string
+  key: string
+  endpoint: string
+  interval?: string
 }) => {
   if (!VALID_TINYBIRD_ENDPOINTS.has(endpoint)) {
-    return null;
+    return null
   }
 
-  let url = new URL(
-    `https://api.us-east.tinybird.co/v0/pipes/${endpoint}.json`,
-  );
-  url.searchParams.append("domain", domain);
-  url.searchParams.append("key", key);
+  let url = new URL(`https://api.us-east.tinybird.co/v0/pipes/${endpoint}.json`)
+  url.searchParams.append("domain", domain)
+  url.searchParams.append("key", key)
   if (interval) {
     url.searchParams.append(
       "start",
       new Date(Date.now() - intervalData[interval].milliseconds)
         .toISOString()
         .replace("T", " ")
-        .replace("Z", ""),
-    );
+        .replace("Z", "")
+    )
     url.searchParams.append(
       "end",
-      new Date(Date.now()).toISOString().replace("T", " ").replace("Z", ""),
-    );
-    url.searchParams.append("granularity", intervalData[interval].granularity);
+      new Date(Date.now()).toISOString().replace("T", " ").replace("Z", "")
+    )
+    url.searchParams.append("granularity", intervalData[interval].granularity)
   }
 
   return await fetch(url, {
@@ -147,6 +145,6 @@ export const getStats = async ({
   })
     .then((res) => res.json())
     .then(({ data }) => {
-      return data;
-    });
-};
+      return data
+    })
+}

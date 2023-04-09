@@ -12,12 +12,14 @@ export default function useOrganizationExist({
   useEffect(() => {
     const existOrg = async () => {
       try {
-        const data = await fetch(`/api/org/${debouncedSlug}/exist`)
-        const org = await data.json()
-        if (org?.slug) {
-          setExist(true)
-        } else {
-          setExist(false)
+        if (debouncedSlug) {
+          const data = await fetch(`/api/org/${debouncedSlug}/exist`)
+          const org = await data.json()
+          if (org?.slug) {
+            setExist(true)
+          } else {
+            setExist(false)
+          }
         }
       } catch (error) {
         setExist(false)

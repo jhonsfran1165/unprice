@@ -64,8 +64,8 @@ export default function Register() {
 
   return (
     <div className="flex h-screen w-screen items-center justify-center">
-      <div className="z-10 w-full max-w-md overflow-hidden rounded-2xl border shadow-sm shadow-background-solid bg-background-bgSubtle">
-        <div className="flex flex-col items-center bg-primary-bg justify-center space-y-3 border-b px-4 py-6 pt-8 text-center sm:px-16">
+      <div className="z-10 w-full max-w-md overflow-hidden rounded-2xl border bg-background-bgSubtle shadow-sm shadow-background-solid">
+        <div className="flex flex-col items-center justify-center space-y-3 border-b bg-primary-bg px-4 py-6 pt-8 text-center sm:px-16">
           <a href="https://dub.sh">
             <BlurImage
               src="/_static/logo.png"
@@ -101,7 +101,7 @@ export default function Register() {
               className="mt-1 block w-full"
             />
             {errors.email && (
-              <p className="text-xs pt-1 text-error-solid" role="alert">
+              <p className="pt-1 text-xs text-error-solid" role="alert">
                 {errors.email?.message}
               </p>
             )}
@@ -118,7 +118,7 @@ export default function Register() {
               className="mt-1 block w-full"
             />
             {errors.password && (
-              <p className="text-xs pt-1 text-error-solid" role="alert">
+              <p className="pt-1 text-xs text-error-solid" role="alert">
                 {errors.password?.message}
               </p>
             )}
@@ -135,7 +135,7 @@ export default function Register() {
               className="mt-1 block w-full"
             />
             {errors.confirmPassword && (
-              <p className="text-xs pt-1 text-error-solid" role="alert">
+              <p className="pt-1 text-xs text-error-solid" role="alert">
                 {errors.confirmPassword?.message}
               </p>
             )}
@@ -144,7 +144,7 @@ export default function Register() {
             disabled={SignUpClicked}
             title="Submit"
             type={"submit"}
-            className="bg-primary-bg active:bg-primary-bgActive hover:bg-primary-bgHover border border-primary-border hover:border-primary-borderHover"
+            className="border border-primary-border bg-primary-bg hover:border-primary-borderHover hover:bg-primary-bgHover active:bg-primary-bgActive"
           >
             {SignUpClicked ? (
               <LoadingDots color="#808080" />

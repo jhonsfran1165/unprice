@@ -29,7 +29,7 @@ export const ProjectSkeleton = ({ isLoading }: { isLoading?: boolean }) => (
       </div>
     </div>
     <div className={"h-3 pb-4"}>
-      <div className={"font-semibold pl-4"}>
+      <div className={"pl-4 font-semibold"}>
         {" "}
         <div
           className={cn("h-4 rounded-lg bg-background-solidHover", {
@@ -38,7 +38,7 @@ export const ProjectSkeleton = ({ isLoading }: { isLoading?: boolean }) => (
         />
       </div>
     </div>
-    <div className={"h-3 text-right pb-4 flex justify-end"}>
+    <div className={"flex h-3 justify-end pb-4 text-right"}>
       <div
         className={cn("h-4 w-10 rounded-lg bg-background-solidHover", {
           "animate-pulse": isLoading,

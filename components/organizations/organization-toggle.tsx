@@ -34,7 +34,7 @@ export function OrganizationToggle() {
           <Button
             variant="ghost"
             size="sm"
-            className="flex items-center justify-center text-base p-1 active:bg-background-bgActive focus:bg-background-bgHover hover:bg-background-bgHover"
+            className="flex items-center justify-center p-1 text-base hover:bg-background-bgHover focus:bg-background-bgHover active:bg-background-bgActive"
           >
             <Icons.chevronsupdown
               className="h-4 w-4 hover:text-background-textContrast"
@@ -45,7 +45,7 @@ export function OrganizationToggle() {
         <DropdownMenuContent
           align="center"
           forceMount
-          className="bg-background-bgSubtle w-72"
+          className="w-72 bg-background-bgSubtle"
         >
           <DropdownMenuLabel className="text-center">
             My Organizations
@@ -62,7 +62,7 @@ export function OrganizationToggle() {
                   e.stopPropagation()
                 }
                 type="text"
-                className="text-sm z-50 h-8 bg-background-bgHover"
+                className="z-50 h-8 bg-background-bgHover text-sm"
                 placeholder="search"
               />
             </DropdownMenuItem>
@@ -75,7 +75,7 @@ export function OrganizationToggle() {
                       <DropdownMenuItem
                         asChild
                         key={index}
-                        className="focus:bg-background-bgHover hover:bg-background-bgHover hover:text-background-textContrast px-8 cursor-pointer"
+                        className="cursor-pointer px-8 hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover"
                       >
                         <Link
                           href={`/org/${org.organization.slug}`}
@@ -91,12 +91,12 @@ export function OrganizationToggle() {
                             />
                           </Avatar>
                           <span>{org.organization.name}</span>
-                          <span className="text-primary-solid ml-2 rounded-md px-1.5 py-0.5 text-xs no-underline group-hover:no-underline ">
+                          <span className="ml-2 rounded-md px-1.5 py-0.5 text-xs text-primary-solid no-underline group-hover:no-underline ">
                             {org.is_default && "default"}
                           </span>
                           {org.organization.slug === orgSlug && (
                             <DropdownMenuShortcut>
-                              <Icons.check className={"w-4 h-4"} />
+                              <Icons.check className={"h-4 w-4"} />
                             </DropdownMenuShortcut>
                           )}
                         </Link>
@@ -111,7 +111,7 @@ export function OrganizationToggle() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full active:bg-background-bgActive hover:bg-background-bgHover border"
+                  className="w-full border hover:bg-background-bgHover active:bg-background-bgActive"
                 >
                   <Icons.add className="h-4 w-4 rotate-0 scale-100 hover:text-background-textContrast" />
                   <span className="pl-2">Create new Organization</span>

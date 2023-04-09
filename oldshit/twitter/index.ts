@@ -1,7 +1,7 @@
-import { getTweet } from "./get-tweet";
+import { getTweet } from "./get-tweet"
 
 export default function getTweetsMetadata(ids: string[]) {
-  return Promise.all(ids.map((id) => getTweet(id)));
+  return Promise.all(ids.map((id) => getTweet(id)))
 }
 
 export const homepageTweets = [
@@ -14,4 +14,4 @@ export const homepageTweets = [
   "1581017931043196928",
   "1586262340949139456",
   "1580479816071270401",
-];
+]

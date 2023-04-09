@@ -116,7 +116,7 @@ export function AddOrgModal() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full active:bg-background-bgActive hover:bg-background-bgHover border"
+          className="w-full border hover:bg-background-bgHover active:bg-background-bgActive"
         >
           <Icons.add className="h-4 w-4 rotate-0 scale-100 hover:text-background-textContrast" />
           <span className="pl-2">Create new Organization</span>
@@ -126,7 +126,7 @@ export function AddOrgModal() {
         <DialogHeader>
           <DialogTitle>Edit profile</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when you're done.
+            Make changes to your profile here. Click save when you are done.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -154,7 +154,7 @@ export function AddOrgModal() {
               onChange={(e) => setOrgName(e.target.value)}
             />
             {errors.name && (
-              <p className="text-xs pt-1 text-error-solid" role="alert">
+              <p className="pt-1 text-xs text-error-solid" role="alert">
                 {errors.name?.message}
               </p>
             )}
@@ -171,12 +171,12 @@ export function AddOrgModal() {
               className="mt-1 w-full"
             />
             {errors.slug && (
-              <p className="text-xs pt-1 text-error-solid" role="alert">
+              <p className="pt-1 text-xs text-error-solid" role="alert">
                 {errors.slug?.message}
               </p>
             )}
             {keyExistsError && (
-              <p className="text-xs pt-1 text-error-solid" role="alert">
+              <p className="pt-1 text-xs text-error-solid" role="alert">
                 {"the account exist"}
               </p>
             )}
@@ -192,12 +192,12 @@ export function AddOrgModal() {
               className="mt-1 w-full"
             />
             {errors.image && (
-              <p className="text-xs pt-1 text-error-solid" role="alert">
+              <p className="pt-1 text-xs text-error-solid" role="alert">
                 {errors.image?.message}
               </p>
             )}
             {keyExistsError && (
-              <p className="text-xs pt-1 text-error-solid" role="alert">
+              <p className="pt-1 text-xs text-error-solid" role="alert">
                 {"the account exist"}
               </p>
             )}
@@ -228,7 +228,7 @@ export function AddOrgModal() {
               </SelectContent>
             </Select>
             {errors.type && (
-              <p className="text-xs pt-1 text-error-solid" role="alert">
+              <p className="pt-1 text-xs text-error-solid" role="alert">
                 {errors.type?.message}
               </p>
             )}
@@ -240,7 +240,7 @@ export function AddOrgModal() {
             form="add-org-form"
             title="Submit"
             type="submit"
-            className="bg-primary-bg active:bg-primary-bgActive hover:bg-primary-bgHover border border-primary-border hover:border-primary-borderHover"
+            className="border border-primary-border bg-primary-bg hover:border-primary-borderHover hover:bg-primary-bgHover active:bg-primary-bgActive"
           >
             {signInClicked ? (
               <LoadingDots color="#808080" />

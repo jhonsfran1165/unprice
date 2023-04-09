@@ -249,6 +249,6 @@ const COUNTRIES: { [key: string]: string } = {
   SX: "Sint Maarten (Dutch part)",
   SS: "South Sudan",
   XK: "Kosovo",
-};
+}
 
-export default COUNTRIES;
+export default COUNTRIES

@@ -1,6 +1,6 @@
 export const getPlanFromUsageLimit = (usageLimit: number) => {
-  return PRO_TIERS.find((tier) => tier.quota === usageLimit)?.name || "Free";
-};
+  return PRO_TIERS.find((tier) => tier.quota === usageLimit)?.name || "Free"
+}
 
 export const PRO_TIERS = [
   {
@@ -123,4 +123,4 @@ export const PRO_TIERS = [
       },
     },
   },
-];
+]

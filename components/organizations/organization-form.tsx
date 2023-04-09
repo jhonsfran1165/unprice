@@ -67,8 +67,8 @@ export function OrganizationForm({ org }: { org?: Organization }) {
 
   // watch important fields
   const watchSlug = watch("slug")
-  const exist =
-    action === "new" ? useOrganizationExist({ orgSlug: watchSlug }) : false
+  const OrgExist = useOrganizationExist({ orgSlug: watchSlug })
+  const exist = action === "new" ? OrgExist : false
   const watchImage = watch("image")
 
   useEffect(() => {
@@ -145,12 +145,12 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           </p>
         </div>
       </div>
-      <div className="flex justify-center items-center space-y-5 h-10">
+      <div className="flex h-10 items-center justify-center space-y-5">
         <Separator className="bg-background-border" />
       </div>
 
-      <div className="flex flex-col md:flex-row space-y-6 md:space-x-4 md:space-y-0">
-        <div className="space-y-3 w-full">
+      <div className="flex flex-col space-y-6 md:flex-row md:space-x-4 md:space-y-0">
+        <div className="w-full space-y-3">
           <Label htmlFor="name" className="text-xs">
             NAME
           </Label>
@@ -173,13 +173,13 @@ export function OrganizationForm({ org }: { org?: Organization }) {
             }}
           />
           {errors.name && (
-            <p className="text-xs pt-1 text-error-solid" role="alert">
+            <p className="pt-1 text-xs text-error-solid" role="alert">
               {errors.name?.message}
             </p>
           )}
         </div>
 
-        <div className="space-y-3 w-full">
+        <div className="w-full space-y-3">
           <Label htmlFor="slug" className="text-xs">
             SLUG
           </Label>
@@ -191,7 +191,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
             className="mt-1 w-full bg-background"
           />
           {errors.slug && (
-            <p className="text-xs pt-1 text-error-solid" role="alert">
+            <p className="pt-1 text-xs text-error-solid" role="alert">
               {errors.slug?.message}
             </p>
           )}
@@ -225,7 +225,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           </SelectContent>
         </Select>
         {errors.type && (
-          <p className="text-xs pt-1 text-error-solid" role="alert">
+          <p className="pt-1 text-xs text-error-solid" role="alert">
             {errors.type?.message}
           </p>
         )}
@@ -235,7 +235,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
         <Label htmlFor="image" className="text-xs">
           IMAGE (optional)
         </Label>
-        <div className="flex h-14 justify-center items-center space-x-2 animate-pulse w-full border-2 border-dashed rounded-md">
+        <div className="flex h-14 w-full animate-pulse items-center justify-center space-x-2 rounded-md border-2 border-dashed">
           <CldUploadWidget
             signatureEndpoint="/api/cloudinary"
             options={{
@@ -282,7 +282,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
               return (
                 <button
                   onClick={handleOnClick}
-                  className="bg-background flex w-full h-full justify-center items-center rounded-md transition-all ease-linear duration-200"
+                  className="flex h-full w-full items-center justify-center rounded-md bg-background transition-all duration-200 ease-linear"
                 >
                   <UploadCloud className="h-8 w-8" />
                 </button>
@@ -291,7 +291,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           </CldUploadWidget>
         </div>
         {errors.image && (
-          <p className="text-xs pt-1 text-error-solid" role="alert">
+          <p className="pt-1 text-xs text-error-solid" role="alert">
             {errors.image?.message}
           </p>
         )}
@@ -317,7 +317,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           <Button
             onClick={() => reset({ ...data })}
             title="Clear"
-            className="w-28 bg-background active:bg-background-bgActive hover:bg-background-bgHover border border-background-border hover:border-background-borderHover hover:text-background-textContrast text-background-text"
+            className="w-28 border border-background-border bg-background text-background-text hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive"
           >
             {"Clear"}
           </Button>
@@ -327,7 +327,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           form="add-org-form"
           title="Submit"
           type="submit"
-          className="w-28 bg-primary-bg active:bg-primary-bgActive hover:bg-primary-bgHover border border-primary-border hover:border-primary-borderHover hover:text-primary-textContrast text-primary-text"
+          className="w-28 border border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive"
         >
           {loading ? <LoadingDots color="#808080" /> : "Save"}
         </Button>
