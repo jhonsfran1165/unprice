@@ -82,7 +82,7 @@ export const RESERVED_KEYS = new Set([
   "demo",
 ])
 export const DEFAULT_REDIRECTS = {
-  home: "https://dub.sh",
+  home: "https://builderai.vercel.app",
   signin: "https://builderai.vercel.app/login",
   login: "https://builderai.vercel.app/login",
   register: "https://builderai.vercel.app/register",
@@ -92,8 +92,6 @@ export const DEFAULT_REDIRECTS = {
   links: "https://builderai.vercel.app/links",
   settings: "https://builderai.vercel.app/settings",
   welcome: "https://builderai.vercel.app/welcome",
-  slack: "https://dub.slack.com",
-  discord: "https://twitter.com/dubdotsh", // placeholder for now
 }
 
 export const FREE_PLAN_PROJECT_LIMIT = 5
@@ -117,8 +115,8 @@ export const SPECIAL_APEX_DOMAINS = {
 
 export const DEFAULT_LINK_PROPS = {
   key: "github",
-  url: "https://github.com/steven-tey/dub",
-  domain: "dub.sh",
+  url: "",
+  domain: "",
   archived: false,
   expiresAt: null,
   password: null,

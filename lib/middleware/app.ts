@@ -5,7 +5,7 @@ import { parse } from "@/lib/middleware/utils"
 import type { Database } from "@/lib/types/database.types"
 
 export default async function AppMiddleware(req: NextRequest) {
-  const { path, domain } = parse(req)
+  const { path } = parse(req)
   const res = NextResponse.next()
   const url = req.nextUrl
   const supabase = createMiddlewareSupabaseClient<Database>({ req, res })
@@ -23,6 +23,7 @@ export default async function AppMiddleware(req: NextRequest) {
   }
 
   url.pathname = `/_root${path}`
+  console.log(url)
 
   return NextResponse.rewrite(url)
 }
