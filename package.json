@@ -1,7 +1,6 @@
 {
-  "name": "next-template",
+  "name": "builderai",
   "version": "0.0.1",
-  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,9 +9,9 @@
     "preview": "next build && next start",
     "design": "tailwind-config-viewer -p 4000 -o",
     "turbo": "next dev --turbo",
-    "build:turbo": "turbo run build",
-    "dev:turbo": "turbo run dev",
-    "lint:turbo": "turbo run lint",
+    "build:turbo": "npx turbo run build",
+    "dev:turbo": "npx turbo run dev",
+    "lint:turbo": "npx turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "dependencies": {
@@ -52,7 +51,7 @@
     "@upstash/ratelimit": "^0.3.5",
     "@upstash/redis": "^1.20.0",
     "@vercel/edge-config": "0.1.5",
-    "@vercel/og": "^0.1.0",
+    "@vercel/og": "^0.5.1",
     "class-variance-authority": "^0.4.0",
     "cloudinary": "^1.35.0",
     "clsx": "^1.2.1",

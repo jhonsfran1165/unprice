@@ -22,8 +22,7 @@ export default async function AppMiddleware(req: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  url.pathname = `/_root${path}`
-  console.log(url)
+  url.pathname = `/root${path}`
 
   return NextResponse.rewrite(url)
 }

@@ -12,7 +12,6 @@ export const revalidate = 0
 export default async function AuthLayout({
   children,
 }: {
-  r
   children: React.ReactNode
 }) {
   const supabase = createServerClient()
