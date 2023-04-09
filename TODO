@@ -1,0 +1,10 @@
+[*] finish siteId selector comoponent
+[] finish nav and side navigation functionality
+[] fix scroll 
+[] fix all things that can be rendered from server
+[] fix nav bar same as vercel
+[] finish dashboard configuration for sites
+[] create site list card
+[] personal account layout
+[] start with siteid layout
+[] configure locales https://beta.nextjs.org/docs/guides/internationalization

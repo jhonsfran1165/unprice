@@ -1,6 +1,6 @@
 import { FAVICON_FOLDER } from "@/lib/constants"
 
-export default function Meta({
+export default function DefaultMetaTags({
   title = "Dub - Link Management for Modern Marketing Teams",
   description = "Dub is an open-source link management tool for modern marketing teams to create, share, and track short links.",
   image = "https://dub.sh/_static/thumbnail.png",
@@ -12,6 +12,8 @@ export default function Meta({
   return (
     <>
       <title>{title}</title>
+      {/* mobile optimize */}
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta name="description" content={description} />
       <link
         rel="apple-touch-icon"

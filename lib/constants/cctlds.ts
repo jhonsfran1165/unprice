@@ -271,6 +271,6 @@ const ccTLDs = new Set([
   "ye",
   "zm",
   "zw",
-]);
+])
 
-export default ccTLDs;
+export default ccTLDs

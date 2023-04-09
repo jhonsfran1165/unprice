@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* follow this rules */
+/* https://www.radix-ui.com/docs/colors/palette-composition/understanding-the-scale */
+@layer base {
+  /* default styles */
+  h1 {
+    @apply font-satoshi text-4xl text-background-textContrast md:text-6xl font-extrabold leading-[1.15] sm:leading-[1.15];
+  }
+
+  h2 {
+    @apply font-satoshi text-2xl text-background-textContrast md:text-3xl font-bold;
+  }
+
+  h3 {
+    @apply font-satoshi text-xl text-background-textContrast md:text-2xl font-semibold;
+  }
+
+  p {
+    @apply font-inter text-background-text text-base md:text-xs font-semibold;
+  }
+
+  body {
+    @apply font-inter bg-background text-background-text;
+  }
+}
