@@ -38,7 +38,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
   // 2. validate app and session of protected routes
   // 3. validate analytics
 
-  if (domain === "app.dub.sh" || domain === "app.localhost:3000") {
+  if (domain === "builderai.vercel.app" || domain === "app.localhost:3000") {
     return AppMiddleware(req)
   }
 
