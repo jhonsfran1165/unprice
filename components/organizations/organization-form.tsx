@@ -41,7 +41,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
     name: org?.name || "",
     slug: org?.slug || "",
     description: org?.description || null,
-    image: org?.image || "https://avatar.vercel.sh/new-org",
+    image: org?.image || "",
     type: org?.type || "personal",
   })
 
@@ -165,7 +165,8 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                 const slug = createSlug(e.target.value)
                 setValue("slug", slug)
                 if (
-                  getValues("image")?.startsWith("https://avatar.vercel.sh")
+                  getValues("image")?.startsWith("https://avatar.vercel.sh") ||
+                  getValues("image") === ""
                 ) {
                   setValue("image", `https://avatar.vercel.sh/${slug}`)
                 }
