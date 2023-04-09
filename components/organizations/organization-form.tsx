@@ -178,6 +178,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
             </p>
           )}
         </div>
+
         <div className="space-y-3 w-full">
           <Label htmlFor="slug" className="text-xs">
             SLUG
