@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true, // Recommended for the `pages` directory, default in `app`.
-  // swcMinify: true,
+  reactStrictMode: true,
+  swcMinify: true,
   experimental: {
     appDir: true,
   },
@@ -16,6 +16,12 @@ const nextConfig = {
       "github.com",
       "fonts.googleapis.com",
     ],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback.fs = false
+    }
+    return config
   },
 }
 

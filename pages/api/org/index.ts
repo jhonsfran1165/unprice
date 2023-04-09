@@ -56,6 +56,16 @@ async function handler(
     }
 
     if (req.method === "PUT") {
+      // TODO: use postgres functions instead
+      // https://github.com/supabase/postgrest-js/issues/237#issuecomment-739537955
+
+      const { data: orgProfiles } = await supabase
+        .from("organization_profiles")
+        .select("is_default")
+        .eq("profile_id", profile?.id)
+        .eq("is_default", true)
+        .single()
+
       const { slug, type, name, image, description } = req.body
 
       const { data: org, error } = await supabase
@@ -72,14 +82,12 @@ async function handler(
 
       if (error) return res.status(404).json(error)
 
-      // TODO: use postgres functions instead
-      // https://github.com/supabase/postgrest-js/issues/237#issuecomment-739537955
       if (profile?.id && org?.id) {
         await supabase.from("organization_profiles").insert({
           org_id: org.id,
           profile_id: profile.id,
           role: "owner",
-          is_default: false,
+          is_default: !orgProfiles?.is_default,
         })
       } else {
         return res

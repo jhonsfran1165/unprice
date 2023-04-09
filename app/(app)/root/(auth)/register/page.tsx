@@ -51,8 +51,9 @@ export default function Register() {
 
       if (error) throw error
 
-      router.push("/welcome")
+      router.push("/org?action=welcome")
     } catch (error) {
+      console.log(error)
       if (error instanceof Error) {
         setAlreadyExistAccount(true)
         setErrorMessage(error.message)

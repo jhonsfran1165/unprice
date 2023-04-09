@@ -20,12 +20,14 @@ export const config = {
      * Match all paths except for:
      * 1. /api/ routes
      * 2. /_next/ (Next.js internals)
-     * 3. /_proxy/, /_auth/, /_root/ (special pages for OG tags proxying, password protection, and placeholder _root pages)
-     * 4. /_static (inside /public)
-     * 5. /_vercel (Vercel internals)
-     * 6. all root files inside /public (e.g. /favicon.ico)
+     * 3. /_proxy/, /_auth/ (special pages for OG tags proxying, password protection)
+     * 4. root/ app directory
+     * 5. sites/ sites directory
+     * 6. /_static (inside /public)
+     * 7. /_vercel (Vercel internals)
+     * 8. all root files inside /public (e.g. /favicon.ico)
      */
-    "/((?!api/|_next/|_proxy/|_auth/|_root/|_static|_vercel|[\\w-]+\\.\\w+).*)",
+    "/((?!api/|_next/|_proxy/|_auth/|root/|sites/|_static|_vercel|[\\w-]+\\.\\w+).*)",
   ],
 }
 
@@ -38,11 +40,19 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
   // 2. validate app and session of protected routes
   // 3. validate analytics
 
-  if (domain === "builderai.vercel.app" || domain === "app.localhost:3000") {
+  if (
+    domain === "builderai.io" ||
+    domain === "builderai.vercel.app" ||
+    domain === "app.localhost:3000" ||
+    domain?.endsWith("jhonsfran.vercel.app")
+  ) {
     return AppMiddleware(req)
   }
 
-  if (domain === "api.dub.sh" || domain === "api.localhost:3000") {
+  if (
+    domain === "api.builderai.vercel.app" ||
+    domain === "api.localhost:3000"
+  ) {
     return ApiMiddleware(req)
   }
 
