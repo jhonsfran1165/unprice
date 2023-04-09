@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation"
 import useOrganizationExist from "@/hooks/use-organization-exist"
 import { useToast } from "@/hooks/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { AnimatePresence, motion } from "framer-motion"
 import { CldUploadWidget } from "next-cloudinary"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { mutate } from "swr"
 
+import { SWIPE_REVEAL_ANIMATION_SETTINGS } from "@/lib/constants"
 import { Organization } from "@/lib/types/supabase"
 import { createSlug } from "@/lib/utils"
 import { orgPostSchema, orgPostType } from "@/lib/validations/org"
@@ -30,6 +32,8 @@ import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import "./styles.css"
 
+// TODO: clean this up for a better validation of exist account - maybe better use zod
+// watch elements to validate and clean errors at the same time
 export function OrganizationForm({ org }: { org?: Organization }) {
   const router = useRouter()
   const { toast } = useToast()
@@ -72,6 +76,8 @@ export function OrganizationForm({ org }: { org?: Organization }) {
   const watchImage = watch("image")
 
   useEffect(() => {
+    setErrorMessage("")
+
     if (exist) {
       setError("slug", {
         type: "custom",
@@ -113,11 +119,11 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           // losing client-side browser or React state.
           router.refresh()
         }
+      } else {
+        throw result
       }
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message)
-      }
+      setErrorMessage(error.message)
     } finally {
       setLoading(false)
     }
@@ -129,10 +135,6 @@ export function OrganizationForm({ org }: { org?: Organization }) {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col space-y-6 px-4 py-5 sm:px-10"
     >
-      {errorMessage && (
-        <p className="text-center text-sm text-error-solid">{errorMessage}</p>
-      )}
-
       <div className="flex items-center justify-center space-x-5">
         <Avatar className="h-28 w-28">
           <AvatarImage src={watchImage || ""} alt={"org photo cover"} />
@@ -145,6 +147,20 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           </p>
         </div>
       </div>
+
+      <AnimatePresence>
+        {errorMessage && (
+          <motion.div
+            className="flex w-full flex-col space-y-2"
+            {...SWIPE_REVEAL_ANIMATION_SETTINGS}
+          >
+            <p className="text-center text-sm text-error-solid">
+              {errorMessage}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex h-10 items-center justify-center space-y-5">
         <Separator className="bg-background-border" />
       </div>
@@ -324,7 +340,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           </Button>
         )}
         <Button
-          disabled={loading}
+          disabled={loading || exist}
           form="add-org-form"
           title="Submit"
           type="submit"
