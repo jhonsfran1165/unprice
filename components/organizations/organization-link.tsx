@@ -10,7 +10,7 @@ function OrganizationLink({
   org?: Organization | null
   isLoading: boolean
 }) {
-  if (isLoading) {
+  if (isLoading || !org) {
     return (
       <Link
         className="flex w-28 items-center justify-start space-x-3 hover:text-background-textContrast md:w-32"
@@ -22,30 +22,13 @@ function OrganizationLink({
             alt={"New org"}
           />
         </Avatar>
-        <span className="block h-4 w-full animate-pulse truncate rounded-lg bg-background-solidHover text-center text-sm font-bold" />
-      </Link>
-    )
-  }
-
-  if (!org) {
-    return (
-      <Link
-        className="flex w-28 items-center justify-start space-x-3 hover:text-background-textContrast md:w-32"
-        href={`/`}
-      >
-        <Avatar className="h-7 w-7">
-          {/* TODO: define url image callback */}{" "}
-          <Avatar className="h-7 w-7">
-            <AvatarImage
-              src={`https://avatar.vercel.sh/new-org`}
-              alt={"New org"}
-            />
-          </Avatar>
-          <AvatarFallback className="bg-primary-bgSubtle">BA</AvatarFallback>
-        </Avatar>
-        <span className="block w-full truncate text-center text-sm font-bold">
-          {"New Org"}
-        </span>
+        {isLoading ? (
+          <span className="block h-4 w-full animate-pulse truncate rounded-lg bg-background-solidHover text-center text-sm font-bold" />
+        ) : (
+          <span className="block w-full truncate text-center text-sm font-bold">
+            {"New Org"}
+          </span>
+        )}
       </Link>
     )
   }
@@ -57,7 +40,7 @@ function OrganizationLink({
     >
       <Avatar className="h-7 w-7">
         <AvatarImage
-          src={org.image || `https://avatar.vercel.sh/${org.name}`}
+          src={org.image || `https://avatar.vercel.sh/${org.slug}`}
           alt={org.name || ""}
         />
         <AvatarFallback>{org.name.substring(2)}</AvatarFallback>

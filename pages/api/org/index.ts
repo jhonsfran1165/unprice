@@ -8,8 +8,8 @@ import {
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Profile, Session } from "@/lib/types/supabase"
 import {
+  orgGetSchema,
   orgPostSchema,
-  orgProfileGetSchema,
   orgPutSchema,
 } from "@/lib/validations/org"
 
@@ -110,7 +110,7 @@ export default withMethods(
   // validate payload for this methods
   withValidation(
     {
-      GET: orgProfileGetSchema,
+      GET: orgGetSchema,
       POST: orgPostSchema,
       PUT: orgPutSchema,
     },

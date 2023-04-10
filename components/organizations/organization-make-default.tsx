@@ -10,6 +10,11 @@ import {
   orgMakeDefaultSchema,
   type orgMakeDefaultType,
 } from "@/lib/validations/org"
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
@@ -79,20 +84,55 @@ export function OrganizationMakeDefault({
       <div className="flex justify-end">
         <form id="add-org-form" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex items-center space-x-2">
-            <Switch
-              type={"submit"}
-              disabled={isDefault}
-              defaultChecked={isDefault}
-              onCheckedChange={(value) => {
-                setValue("is_default", value)
-              }}
-              id={"is_default"}
-              {...register("is_default")}
-              className="border-background-solid bg-background ring-background-solid data-[state=unchecked]:bg-background data-[state=checked]:bg-primary-solid"
-            />
-            <Label htmlFor="is_default">
-              {isDefault ? "Is default" : "Make default"}
-            </Label>
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <div className="flex flex-row items-center justify-center space-x-3">
+                  <Switch
+                    type={"submit"}
+                    disabled={isDefault}
+                    defaultChecked={isDefault}
+                    onCheckedChange={(value) => {
+                      setValue("is_default", value)
+                    }}
+                    id={"is_default"}
+                    {...register("is_default")}
+                    className="border-background-solid bg-background ring-background-solid data-[state=unchecked]:bg-background data-[state=checked]:bg-primary-solid"
+                  />
+                  <Label htmlFor="is_default">
+                    {isDefault ? "" : "Make default"}
+                  </Label>
+                </div>
+              </HoverCardTrigger>
+              <HoverCardContent
+                align="end"
+                className="w-80 border-background-border bg-background-bgSubtle text-background-text"
+              >
+                <div className="flex justify-between space-x-4">
+                  {isDefault ? (
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-semibold">
+                        This organization is default
+                      </h4>
+                      <p className="text-sm font-light">
+                        {
+                          "You can't change a default organization. If you want to make any other organization default, you can go directly to that organization and update it as default"
+                        }
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-semibold">
+                        Make this organization default
+                      </h4>
+                      <p className="text-sm font-light">
+                        This action will update all your organization and will
+                        update this as default
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </HoverCardContent>
+            </HoverCard>
           </div>
         </form>
       </div>

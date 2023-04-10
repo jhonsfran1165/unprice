@@ -371,4 +371,3 @@ export interface Database {
     }
   }
 }
-
