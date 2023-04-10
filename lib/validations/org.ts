@@ -2,8 +2,6 @@ import useOrganizationExist from "@/hooks/use-organization-exist"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 
-export const orgProfileGetSchema = z.object({})
-
 // **************************** FIELDS **************************** //
 export const orgSlug = z.string().min(1, {
   message:

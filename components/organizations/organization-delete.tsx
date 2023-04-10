@@ -34,12 +34,12 @@ export function ConfirmAction({ confirmAction, trigger }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="font-light border border-background-border bg-background-bg text-background-text hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive">
+          <AlertDialogCancel className="border border-background-border bg-background-bg font-light text-background-text hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={confirmAction}
-            className="font-light border border-danger-border bg-danger-bg text-danger-text hover:border-danger-borderHover hover:bg-danger-bgHover hover:text-danger-textContrast active:bg-danger-bgActive"
+            className="border border-danger-border bg-danger-bg font-light text-danger-text hover:border-danger-borderHover hover:bg-danger-bgHover hover:text-danger-textContrast active:bg-danger-bgActive"
           >
             Continue
           </AlertDialogAction>

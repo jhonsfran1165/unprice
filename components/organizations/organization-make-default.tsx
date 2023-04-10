@@ -86,7 +86,7 @@ export function OrganizationMakeDefault({
           <div className="flex items-center space-x-2">
             <HoverCard>
               <HoverCardTrigger asChild>
-                <div className="flex flex-row justify-center items-center space-x-3">
+                <div className="flex flex-row items-center justify-center space-x-3">
                   <Switch
                     type={"submit"}
                     disabled={isDefault}
@@ -114,9 +114,9 @@ export function OrganizationMakeDefault({
                         This organization is default
                       </h4>
                       <p className="text-sm font-light">
-                        You can't change a default organization. If you want to
-                        make any other organization default, you can go directly
-                        to that organization and update it as default
+                        {
+                          "You can't change a default organization. If you want to make any other organization default, you can go directly to that organization and update it as default"
+                        }
                       </p>
                     </div>
                   ) : (
