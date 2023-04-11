@@ -88,6 +88,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
     }
   }, [exist])
 
+  // TODO: create function for handling post errors and fetch
   const onSubmit: SubmitHandler<orgPostType> = async (orgData) => {
     try {
       setLoading(true)
@@ -109,6 +110,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           description: `Organization ${result.name} Saved successfully`,
           className: "bg-info-bgActive text-info-text border-info-solid",
         })
+
         // mutate swr endpoints for org
         mutate(`/api/org`)
         mutate(`/api/org/${result.slug}`)
