@@ -42,6 +42,7 @@ export interface Database {
           image: string | null
           name: string
           slug: string
+          stripeId: string | null
           type: string
           updated_at: string
         }
@@ -52,6 +53,7 @@ export interface Database {
           image?: string | null
           name: string
           slug?: string
+          stripeId?: string | null
           type?: string
           updated_at?: string
         }
@@ -62,6 +64,7 @@ export interface Database {
           image?: string | null
           name?: string
           slug?: string
+          stripeId?: string | null
           type?: string
           updated_at?: string
         }
@@ -93,6 +96,50 @@ export interface Database {
           profile_id?: string
           role?: string
           updated_at?: string
+        }
+      }
+      organization_subscription: {
+        Row: {
+          created_at: string | null
+          currency: string
+          id: number
+          interval: number
+          org_id: number | null
+          period_ends_at: string
+          period_starts_at: string
+          price_id: string
+          status: string
+          trial_ends_at: string | null
+          trial_starts_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency: string
+          id?: number
+          interval: number
+          org_id?: number | null
+          period_ends_at: string
+          period_starts_at: string
+          price_id: string
+          status: string
+          trial_ends_at?: string | null
+          trial_starts_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string
+          id?: number
+          interval?: number
+          org_id?: number | null
+          period_ends_at?: string
+          period_starts_at?: string
+          price_id?: string
+          status?: string
+          trial_ends_at?: string | null
+          trial_starts_at?: string | null
+          updated_at?: string | null
         }
       }
       page: {
@@ -371,3 +418,4 @@ export interface Database {
     }
   }
 }
+

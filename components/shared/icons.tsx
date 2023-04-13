@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   ArrowRight,
   Check,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
@@ -36,6 +37,7 @@ import {
   UserPlus,
   Users,
   X,
+  XCircle,
   type Icon as LucideIcon,
 } from "lucide-react"
 
@@ -69,6 +71,8 @@ export const Icons = {
   user: User,
   arrowRight: ArrowRight,
   help: HelpCircle,
+  checkCircle: CheckCircle,
+  xCircle: XCircle,
   pizza: Pizza,
   gitHub: Github,
   check: Check,

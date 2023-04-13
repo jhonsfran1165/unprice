@@ -42,3 +42,5 @@ https://blog.logrocket.com/applying-dynamic-styles-tailwind-css/
 https://next-cloudinary.spacejelly.dev/components/cldimage/basic-usage
 
 https://supabase.com/docs/reference/cli/start
+
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
