@@ -48,3 +48,5 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 https://www.cybertec-postgresql.com/en/view-permissions-and-row-level-security-in-postgresql/
 
 https://www.stackducky.com/supabase/supabase-create-view
+
+https://makerkit.dev/blog/tutorials/guide-nextjs-stripe

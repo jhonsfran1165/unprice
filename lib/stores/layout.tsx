@@ -1,11 +1,7 @@
 import { create } from "zustand"
 
 import { AppModulesNav, DashboardNavItem } from "@/lib/types"
-import {
-  Organization,
-  OrganizationViewData,
-  Session,
-} from "@/lib/types/supabase"
+import { OrganizationViewData, Session } from "@/lib/types/supabase"
 
 export const useStore = create<{
   contextHeader: string
@@ -21,7 +17,7 @@ export const useStore = create<{
   rootPathTab: string
   moduleTab: string
   numberSegments: number
-  orgData: Organization | null
+  orgData: OrganizationViewData | null
 }>((set) => ({
   contextHeader: "",
   orgSlug: "",

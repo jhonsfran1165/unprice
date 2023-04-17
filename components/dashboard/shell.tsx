@@ -1,6 +1,7 @@
 "use client"
 
 import { ReactNode } from "react"
+import { usePathname } from "next/navigation"
 
 import { useStore } from "@/lib/stores/layout"
 import { DashboardShellSkeleton } from "@/components/dashboard/shell-skeleton"
@@ -16,6 +17,7 @@ export function DashboardShell({
   isLoading?: boolean
 }) {
   const { activeTab, activePathPrefix } = useStore()
+  const pathName = usePathname()
   const items = activeTab?.sidebarNav || []
 
   return (
@@ -27,6 +29,7 @@ export function DashboardShell({
           <div className="grid gap-5 md:grid-cols-[250px_1fr]">
             <aside className="min-w-full flex-col md:flex md:w-[250px]">
               <DashboardSideBarNav
+                pathName={pathName ?? ""}
                 items={items}
                 pathPrefix={activePathPrefix}
               />

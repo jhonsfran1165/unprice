@@ -32,9 +32,9 @@ function StoreHandler({
   }, [segments, modulesApp])
 
   const rootPathTab =
-    pathname?.replace(activePathPrefix, "") === ""
+    pathname?.replace("/root", "")?.replace(activePathPrefix, "") === ""
       ? "/"
-      : pathname?.replace(activePathPrefix, "")
+      : pathname?.replace("/root", "")?.replace(activePathPrefix, "")
 
   const moduleTab =
     rootPathTab?.split("/").filter((path) => path !== "")[0] || "root"
@@ -48,8 +48,8 @@ function StoreHandler({
   const projectSlug = numberSegments >= 2 ? cleanSegments[3] : ""
 
   const orgData = useMemo(
-    () => orgProfiles?.find((org) => org.org_slug === orgSlug)?.organization,
-    [orgSlug, orgProfiles]
+    () => orgProfiles?.find((org) => org.org_slug === orgSlug),
+    [orgSlug, JSON.stringify(orgProfiles)] as OrganizationViewData
   )
 
   // initialize this only the first time from the server

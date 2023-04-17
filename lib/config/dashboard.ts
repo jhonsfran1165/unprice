@@ -135,7 +135,7 @@ export const getActiveTabs = (
 ): GetActiveTabs => {
   const numberSegments = getActiveSegments(segments, appModules)
   const moduleKeys = Object.keys(appModules)
-  const ignoredRoutes = ["(dashboard)", "(auth)"]
+  const ignoredRoutes = ["(dashboard)", "(auth)", "root"]
 
   const cleanSegments = segments.filter(
     (segment) => !ignoredRoutes.includes(segment)
