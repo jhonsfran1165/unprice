@@ -78,8 +78,8 @@ const Pricing = () => {
         </p>
       </div>
 
-      <div className="flex justify-center mx-auto my-14 items-center w-96 relative">
-        <div className="flex flex-row justify-center items-center">
+      <div className="relative mx-auto my-14 flex w-96 items-center justify-center">
+        <div className="flex flex-row items-center justify-center">
           <p className="mr-2">Billed Monthly</p>
           <Confetti
             active={period === "yearly"}
@@ -93,7 +93,7 @@ const Pricing = () => {
           />
           <p className="ml-">Billed Annually</p>
         </div>
-        <span className="absolute -top-5 -right-16 rounded-full border px-3 py-1 text-xs bg-info-solid text-info-textContrast">
+        <span className="absolute -top-5 -right-16 rounded-full border bg-info-solid px-3 py-1 text-xs text-info-textContrast">
           🎁 1 months FREE
         </span>
       </div>
@@ -116,21 +116,21 @@ const Pricing = () => {
                 className={`relative rounded-2xl bg-background-bgSubtle ${
                   plan === "Pro"
                     ? "border-2 border-primary-solid shadow-primary-line"
-                    : "border border-gray-200"
+                    : "border-gray-200 border"
                 } shadow-lg`}
               >
                 {plan === "Pro" && (
-                  <div className="absolute -top-5 left-0 right-0 mx-auto w-32 rounded-full bg-gradient-to-r from-primary-solid to-secondary-solid px-3 py-2 text-sm font-medium text-primary-textContrast">
+                  <div className="absolute inset-x-0 -top-5 mx-auto w-32 rounded-full bg-gradient-to-r from-primary-solid to-secondary-solid px-3 py-2 text-sm font-medium text-primary-textContrast">
                     Popular
                   </div>
                 )}
                 <div className="p-5">
-                  <h3 className="my-3 text-center font-display text-3xl font-bold">
+                  <h3 className="font-display my-3 text-center text-3xl font-bold">
                     {plan}
                   </h3>
                   <p className="text-gray-500">{tagline}</p>
                   {plan === "Enterprise" ? (
-                    <p className="my-5 font-display text-6xl font-semibold">
+                    <p className="font-display my-5 text-6xl font-semibold">
                       Custom
                     </p>
                   ) : (
@@ -153,7 +153,7 @@ const Pricing = () => {
                     {period === "yearly" ? "month, billed annually" : "month"}
                   </p>
                 </div>
-                <div className="flex flex-row h-20 items-center justify-center border-t border-b space-x-1">
+                <div className="flex h-20 flex-row items-center justify-center space-x-1 border-y">
                   {plan === "Pro" ? (
                     <div className="flex flex-col items-center space-y-1">
                       <Slider
@@ -211,7 +211,7 @@ const Pricing = () => {
                 <ul className="my-10 space-y-5 px-10">
                   {features.map(({ text, footnote, negative }) => (
                     <li key={text} className="flex space-x-5">
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         {negative ? (
                           <Icons.xCircle className="h-6 w-6 text-danger-solid" />
                         ) : (
@@ -252,7 +252,7 @@ const Pricing = () => {
                 </Button> */}
                   <Button
                     className={cn(
-                      "block w-full rounded-full py-2 transition-all font-semibold",
+                      "block w-full rounded-full py-2 font-semibold transition-all",
                       {
                         "border border-primary-border bg-gradient-to-r from-primary-solid to-secondary-solid text-black hover:bg-clip-text hover:text-primary-solid":
                           plan === "Pro",

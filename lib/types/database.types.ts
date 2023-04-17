@@ -469,4 +469,3 @@ export interface Database {
     }
   }
 }
-

@@ -103,12 +103,12 @@ export function OrganizationToggle() {
           </DropdownMenuGroup>
           <DropdownMenuSeparator className="bg-background-line" />
           <DropdownMenuGroup>
-            <div className="relative flex justify-center cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none hover:text-background-textContrast">
+            <div className="relative flex cursor-default select-none items-center justify-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none hover:text-background-textContrast">
               <Link className="m-0" href={"/org"}>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="border w-56 border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive"
+                  className="w-56 border border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive"
                 >
                   <Icons.add className="h-4 w-4 rotate-0 scale-100 hover:text-background-textContrast" />
                   <span className="pl-2 text-sm">Create new Organization</span>
