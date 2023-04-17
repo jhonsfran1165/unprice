@@ -2,12 +2,12 @@ import { Readable } from "node:stream"
 import { NextApiRequest, NextApiResponse } from "next"
 import Stripe from "stripe"
 
-import prisma from "@/lib/prisma"
+import { onCheckoutCompleted } from "@/lib/api/stripe"
+import { PRO_TIERS } from "@/lib/config/subscriptions"
 import { stripe } from "@/lib/stripe"
-import { PRO_TIERS } from "@/lib/stripe/constants"
 import supabaseAdmin from "@/lib/supabase/supabase-admin"
 import { redis } from "@/lib/upstash"
-import { log } from "@/lib/utils"
+import { getEnv, log } from "@/lib/utils"
 
 // Stripe requires the raw body to construct the event.
 export const config = {
@@ -24,12 +24,22 @@ async function buffer(readable: Readable) {
   return Buffer.concat(chunks)
 }
 
+// https://stripe.com/docs/billing/subscriptions/overview#subscription-events
 const relevantEvents = new Set([
   "checkout.session.completed",
   "customer.subscription.updated",
   "customer.subscription.deleted",
 ])
 
+export enum StripeWebhooks {
+  AsyncPaymentSuccess = "checkout.session.async_payment_succeeded",
+  Completed = "checkout.session.completed",
+  PaymentFailed = "checkout.session.async_payment_failed",
+  SubscriptionDeleted = "customer.subscription.deleted",
+  SubscriptionUpdated = "customer.subscription.updated",
+}
+
+// TODO: work in progress - finish this when projects is done
 export default async function webhookHandler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -49,143 +59,154 @@ export default async function webhookHandler(
     }
     if (relevantEvents.has(event.type)) {
       try {
-        if (event.type === "checkout.session.completed") {
-          const checkoutSession = event.data.object as Stripe.Checkout.Session
+        switch (event.type) {
+          case StripeWebhooks.Completed:
+            {
+              const checkoutSession = event.data
+                .object as Stripe.Checkout.Session
 
-          // when the user subscribes to a plan, set their stripe customer ID
-          // in the database for easy identification in future webhook events
+              // when the user subscribes to a plan, set their stripe customer ID
+              // in the database for easy identification in future webhook events
+              const orgId = checkoutSession.client_reference_id
+              const subscriptionId =
+                checkoutSession?.subscription?.toString() || ""
+              const stripeId = checkoutSession.customer?.toString()
 
-          await prisma.user.update({
-            where: {
-              id: checkoutSession.client_reference_id,
-            },
-            data: {
-              stripeId: checkoutSession.customer?.toString(),
-              billingCycleStart: new Date().getDate(),
-            },
-          })
-        } else if (event.type === "customer.subscription.updated") {
-          const subscriptionUpdated = event.data.object as Stripe.Subscription
-          const newPriceId = subscriptionUpdated.items.data[0].price.id
-          const env =
-            process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
-              ? "production"
-              : "test"
-          const tier = PRO_TIERS.find(
-            (tier) =>
-              tier.price.monthly.priceIds[env] === newPriceId ||
-              tier.price.yearly.priceIds[env] === newPriceId
-          )
-          const usageLimit = tier?.quota
-          const stripeId = subscriptionUpdated.customer.toString()
-
-          // If a user upgrades/downgrades their subscription, update their usage limit in the database.
-          // We also need to update the ownerUsageLimit field for all their projects.
-
-          const { projects } = await prisma.user.findUnique({
-            where: {
-              stripeId,
-            },
-            select: {
-              projects: {
-                where: {
-                  role: "owner",
-                },
-                select: {
-                  projectId: true,
-                },
-              },
-            },
-          })
-
-          await Promise.all([
-            prisma.user.update({
-              where: {
+              await onCheckoutCompleted({
+                orgId,
+                subscriptionId,
                 stripeId,
-              },
-              data: {
-                usageLimit,
-                billingCycleStart: new Date().getDate(),
-              },
-            }),
-            Promise.all(
-              projects.map(async ({ projectId }) => {
-                return await prisma.project.update({
-                  where: {
-                    id: projectId,
-                  },
-                  data: {
-                    ownerUsageLimit: usageLimit,
-                  },
-                })
               })
-            ),
-          ])
-        } else if (event.type === "customer.subscription.deleted") {
-          const subscriptionDeleted = event.data.object as Stripe.Subscription
+            }
+            break
 
-          const stripeId = subscriptionDeleted.customer.toString()
+            // case StripeWebhooks.SubscriptionUpdated:
+            //   {
+            //     const subscriptionUpdated = event.data
+            //       .object as Stripe.Subscription
+            //     const newPriceId = subscriptionUpdated.items.data[0].price.id
+            //     const env = getEnv()
+            //     const tier = PRO_TIERS.find(
+            //       (tier) =>
+            //         tier.price.monthly.priceIds[env] === newPriceId ||
+            //         tier.price.yearly.priceIds[env] === newPriceId
+            //     )
+            //     const usageLimit = tier?.quota
+            //     const stripeId = subscriptionUpdated.customer.toString()
 
-          // If a user deletes their subscription, reset their usage limit in the database to 1000.
-          // We also need to reset the ownerUsageLimit field for all their projects to 1000.
+            //     // If a user upgrades/downgrades their subscription, update their usage limit in the database.
+            //     // We also need to update the ownerUsageLimit field for all their projects.
 
-          const { email, usage, projects } = await prisma.user.findUnique({
-            where: {
-              stripeId,
-            },
-            select: {
-              email: true,
-              usage: true,
-              projects: {
-                where: {
-                  role: "owner",
-                },
-                select: {
-                  projectId: true,
-                  project: {
-                    select: {
-                      domain: true,
-                    },
-                  },
-                },
-              },
-            },
-          })
+            //     const { projects } = await prisma.user.findUnique({
+            //       where: {
+            //         stripeId,
+            //       },
+            //       select: {
+            //         projects: {
+            //           where: {
+            //             role: "owner",
+            //           },
+            //           select: {
+            //             projectId: true,
+            //           },
+            //         },
+            //       },
+            //     })
 
-          const response = await Promise.all([
-            prisma.user.update({
-              where: {
-                stripeId,
-              },
-              data: {
-                usageLimit: 1000,
-              },
-            }),
-            Promise.all(
-              projects.map(async ({ projectId, project: { domain } }) => {
-                return await Promise.all([
-                  prisma.project.update({
-                    where: {
-                      id: projectId,
-                    },
-                    data: {
-                      ownerUsageLimit: 1000,
-                      ownerExceededUsage: usage > 1000,
-                    },
-                  }),
-                  redis.del(`root:${domain}`), // remove root domain redirect
-                ])
-              })
-            ),
-            log(
-              ":cry: User *`" + email + "`* deleted their subscription",
-              "links"
-            ),
-          ])
-          console.log(response)
-        } else {
-          throw new Error("Unhandled relevant event!")
+            //     await Promise.all([
+            //       prisma.user.update({
+            //         where: {
+            //           stripeId,
+            //         },
+            //         data: {
+            //           usageLimit,
+            //           billingCycleStart: new Date().getDate(),
+            //         },
+            //       }),
+            //       Promise.all(
+            //         projects.map(async ({ projectId }) => {
+            //           return await prisma.project.update({
+            //             where: {
+            //               id: projectId,
+            //             },
+            //             data: {
+            //               ownerUsageLimit: usageLimit,
+            //             },
+            //           })
+            //         })
+            //       ),
+            //     ])
+            //   }
+            break
+          default:
+            throw new Error("Unhandled relevant event!")
         }
+
+        // else if (event.type === "customer.subscription.deleted") {
+        //   const subscriptionDeleted = event.data.object as Stripe.Subscription
+
+        //   const stripeId = subscriptionDeleted.customer.toString()
+
+        //   // If a user deletes their subscription, reset their usage limit in the database to 1000.
+        //   // We also need to reset the ownerUsageLimit field for all their projects to 1000.
+
+        //   const { email, usage, projects } = await prisma.user.findUnique({
+        //     where: {
+        //       stripeId,
+        //     },
+        //     select: {
+        //       email: true,
+        //       usage: true,
+        //       projects: {
+        //         where: {
+        //           role: "owner",
+        //         },
+        //         select: {
+        //           projectId: true,
+        //           project: {
+        //             select: {
+        //               domain: true,
+        //             },
+        //           },
+        //         },
+        //       },
+        //     },
+        //   })
+
+        //   const response = await Promise.all([
+        //     prisma.user.update({
+        //       where: {
+        //         stripeId,
+        //       },
+        //       data: {
+        //         usageLimit: 1000,
+        //       },
+        //     }),
+        //     Promise.all(
+        //       projects.map(async ({ projectId, project: { domain } }) => {
+        //         return await Promise.all([
+        //           prisma.project.update({
+        //             where: {
+        //               id: projectId,
+        //             },
+        //             data: {
+        //               ownerUsageLimit: 1000,
+        //               ownerExceededUsage: usage > 1000,
+        //             },
+        //           }),
+        //           redis.del(`root:${domain}`), // remove root domain redirect
+        //         ])
+        //       })
+        //     ),
+        //     log(
+        //       ":cry: User *`" + email + "`* deleted their subscription",
+        //       "links"
+        //     ),
+        //   ])
+        //   console.log(response)
+        // } else {
+        //   throw new Error("Unhandled relevant event!")
+        // }
       } catch (error) {
         console.log(error)
         return res

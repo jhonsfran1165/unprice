@@ -23,6 +23,6 @@
   }
 
   body {
-    @apply font-inter bg-background text-background-text;
+    @apply font-inter bg-background-base text-background-text;
   }
 }

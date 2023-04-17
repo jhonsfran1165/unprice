@@ -39,13 +39,13 @@ export function OrganizationMakeDefault({
     },
   })
 
-  const onSubmit: SubmitHandler<orgMakeDefaultType> = async (orgData) => {
+  const onSubmit: SubmitHandler<orgMakeDefaultType> = async (formData) => {
     try {
       const data = await fetch(`/api/org/${orgSlug}/make-default`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...orgData,
+          ...formData,
         }),
       })
       const result = await data.json()

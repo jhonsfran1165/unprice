@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next"
+import Stripe from "stripe"
 
 import {
   withAuthentication,
@@ -9,7 +10,7 @@ import { stripe } from "@/lib/stripe"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Organization, Profile, Session } from "@/lib/types/supabase"
 import { getAppRootUrl } from "@/lib/utils"
-import { orgPostSchema } from "@/lib/validations/stripe"
+import { stripePostSchema } from "@/lib/validations/stripe"
 
 async function handler(
   req: NextApiRequest,
@@ -21,7 +22,7 @@ async function handler(
     const supabase = supabaseApiClient(req, res)
 
     if (req.method === "POST") {
-      const { orgSlug, priceId, trialDays, metadata } = req.body
+      const { orgSlug, stripePriceId, trialDays, metadata, currency } = req.body
 
       const { data: orgsProfile, error } = await supabase
         .from("organization_profiles")
@@ -32,17 +33,12 @@ async function handler(
 
       const org = orgsProfile?.organization as Organization
 
-      // TODO: only owners can do this
-      const stripeSession = await stripe.checkout.sessions.create({
-        customer_email: session?.user.email,
+      const sessionData = {
         payment_method_types: ["card"],
         billing_address_collection: "required",
         success_url: `${getAppRootUrl()}/org/${orgSlug}/settings/billing`,
         cancel_url: `${getAppRootUrl()}/org/${orgSlug}`,
-        line_items: [{ price: priceId, quantity: 1 }],
-        automatic_tax: {
-          enabled: true,
-        },
+        line_items: [{ price: stripePriceId, quantity: 1 }],
         allow_promotion_codes: true,
         subscription_data: {
           trial_from_plan: true,
@@ -53,12 +49,24 @@ async function handler(
             ...metadata,
           },
         },
-        tax_id_collection: {
-          enabled: true,
-        },
+        // TODO: activate after activating stripe or activate only in prod
+        // tax_id_collection: {
+        //   enabled: true,
+        // },
+        // automatic_tax: {
+        //   enabled: true,
+        // },
         mode: "subscription",
-        client_reference_id: org?.slug,
-      })
+        client_reference_id: org?.id.toString(),
+      } as Stripe.Checkout.SessionCreateParams
+
+      if (org.stripe_id) {
+        sessionData["customer"] = org.stripe_id
+      } else {
+        sessionData["customer_email"] = session?.user.email
+      }
+      // TODO: only owners can do this
+      const stripeSession = await stripe.checkout.sessions.create(sessionData)
 
       if (error) return res.status(404).json(error)
 
@@ -77,7 +85,7 @@ export default withMethods(
   // validate payload for this methods
   withValidation(
     {
-      POST: orgPostSchema,
+      POST: stripePostSchema,
     },
     withAuthentication(handler, {
       protectedMethods: ["POST"],

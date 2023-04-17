@@ -21,14 +21,14 @@ import {
 import { Input } from "@/components/ui/input"
 
 export function OrganizationToggle() {
-  const { orgSlug, currentOrg } = useStore()
+  const { orgSlug, orgData } = useStore()
   const { organizationProfiles, isLoading } = useOrganizations({
     revalidateOnFocus: true,
   })
 
   return (
     <div className="flex items-center justify-start space-x-2">
-      <OrganizationLink isLoading={isLoading} org={currentOrg} />
+      <OrganizationLink isLoading={isLoading} org={orgData} />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

@@ -12,7 +12,8 @@
     "build:turbo": "npx turbo run build",
     "dev:turbo": "npx turbo run dev",
     "lint:turbo": "npx turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "stripe": "stripe listen --forward-to http://localhost:3000/api/stripe/webhook"
   },
   "dependencies": {
     "@hookform/resolvers": "^2.9.10",

@@ -9,7 +9,7 @@ import { stripe } from "@/lib/stripe"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Organization, Profile, Session } from "@/lib/types/supabase"
 import { getAppRootUrl } from "@/lib/utils"
-import { orgPostSchema } from "@/lib/validations/stripe"
+import { stripePortalPostSchema } from "@/lib/validations/stripe"
 
 async function handler(
   req: NextApiRequest,
@@ -33,8 +33,8 @@ async function handler(
       const org = orgsProfile?.organization as Organization
 
       const { url } = await stripe.billingPortal.sessions.create({
-        customer: org?.stripeId || "",
-        return_url: `${getAppRootUrl()}/org/${orgSlug}/settings`,
+        customer: org.stripe_id || "",
+        return_url: `${getAppRootUrl()}/org/${orgSlug}/settings/billing`,
       })
 
       if (error) return res.status(404).json(error)
@@ -54,7 +54,7 @@ export default withMethods(
   // validate payload for this methods
   withValidation(
     {
-      POST: orgPostSchema,
+      POST: stripePortalPostSchema,
     },
     withAuthentication(handler, {
       protectedMethods: ["POST"],

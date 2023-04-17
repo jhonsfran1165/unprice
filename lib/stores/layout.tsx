@@ -3,7 +3,7 @@ import { create } from "zustand"
 import { AppModulesNav, DashboardNavItem } from "@/lib/types"
 import {
   Organization,
-  OrganizationProfilesData,
+  OrganizationViewData,
   Session,
 } from "@/lib/types/supabase"
 
@@ -12,7 +12,7 @@ export const useStore = create<{
   orgSlug: string
   projectSlug: string
   session: Session | null
-  orgProfiles: OrganizationProfilesData[]
+  orgProfiles: OrganizationViewData[]
   modulesApp: AppModulesNav | {}
   activeTabs: DashboardNavItem[]
   activeTab: DashboardNavItem | null
@@ -21,7 +21,7 @@ export const useStore = create<{
   rootPathTab: string
   moduleTab: string
   numberSegments: number
-  currentOrg: Organization | null
+  orgData: Organization | null
 }>((set) => ({
   contextHeader: "",
   orgSlug: "",
@@ -36,5 +36,5 @@ export const useStore = create<{
   activePathPrefix: "/",
   rootPathTab: "/",
   moduleTab: "",
-  currentOrg: null,
+  orgData: null,
 }))

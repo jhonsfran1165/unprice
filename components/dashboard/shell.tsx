@@ -3,7 +3,6 @@
 import { ReactNode } from "react"
 
 import { useStore } from "@/lib/stores/layout"
-import type { DashboardSidebarNavItem } from "@/lib/types"
 import { DashboardShellSkeleton } from "@/components/dashboard/shell-skeleton"
 import { DashboardSideBarNav } from "@/components/dashboard/sidebar-nav"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"

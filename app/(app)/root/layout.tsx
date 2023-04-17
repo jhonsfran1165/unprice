@@ -1,7 +1,7 @@
 import "server-only"
 import { AppModules } from "@/lib/config/dashboard"
 import { createServerClient } from "@/lib/supabase/supabase-server"
-import { OrganizationProfilesData } from "@/lib/types/supabase"
+import { OrganizationViewData } from "@/lib/types/supabase"
 import SupabaseListener from "@/components/auth//supabase-listener"
 import SupabaseProvider from "@/components/auth/supabase-provider"
 import StoreHandler from "@/components/layout/store-handler"
@@ -20,9 +20,9 @@ export default async function AuthLayout({
     data: { session },
   } = await supabase.auth.getSession()
 
-  const { data: orgProfiles } = await supabase
-    .from("organization_profiles")
-    .select("*, profile(*), organization(*)")
+  const { data: dataOrgs } = await supabase
+    .from("data_orgs")
+    .select("*")
     .eq("profile_id", session?.user.id)
 
   // for now we use zustag for state manament but not sure if we can use something like https://jotai.org/ or recoil
@@ -30,7 +30,7 @@ export default async function AuthLayout({
     <SupabaseProvider session={session}>
       <SupabaseListener serverAccessToken={session?.access_token} />
       <StoreHandler
-        orgProfiles={orgProfiles as OrganizationProfilesData[]}
+        orgProfiles={dataOrgs as OrganizationViewData[]}
         session={session}
         modulesApp={AppModules}
       />

@@ -61,7 +61,7 @@ module.exports = {
         textContrast: toRadixVar("green", 12),
       },
       danger: {
-        DEFAULT: toRadixVar("red", 1),
+        DEFAULT: toRadixVar("red", 9),
         base: toRadixVar("red", 1),
         bgSubtle: toRadixVar("red", 2),
         bg: toRadixVar("red", 3),

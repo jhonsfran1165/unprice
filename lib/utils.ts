@@ -11,6 +11,44 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export const fetchAPI = async ({
+  url,
+  data,
+  method = "GET",
+}: {
+  url: string
+  method: string
+  data?: any
+}) => {
+  let payload = {}
+
+  if (method !== "GET") {
+    payload = {
+      method,
+      headers: new Headers({ "Content-Type": "application/json" }),
+      credentials: "same-origin",
+      body: JSON.stringify(data),
+    }
+  }
+
+  const res: Response = await fetch(url, payload)
+
+  if (!res.ok) {
+    console.log("Error in postData", { url, data, res })
+
+    throw Error(res.statusText)
+  }
+
+  return res.json()
+}
+
+export const getEnv = (): string => {
+  const env =
+    process.env.NEXT_PUBLIC_VERCEL_ENV === "production" ? "production" : "test"
+
+  return env
+}
+
 export const getAppRootUrl = () => {
   let url =
     process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
@@ -124,6 +162,12 @@ export const getDateTimeLocal = (timestamp?: Date): string => {
     .split(":")
     .slice(0, 2)
     .join(":")
+}
+
+export const toDateTime = (secs: number) => {
+  var t = new Date("1970-01-01T00:30:00Z") // Unix epoch start.
+  t.setSeconds(secs)
+  return t
 }
 
 export const getFirstAndLastDay = (day: number) => {

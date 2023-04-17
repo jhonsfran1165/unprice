@@ -1,5 +1,5 @@
 import { createServerClient } from "@/lib/supabase/supabase-server"
-import { Organization } from "@/lib/types/supabase"
+import { Organization, OrganizationViewData } from "@/lib/types/supabase"
 import { OrganizationDelete } from "@/components/organizations/organization-delete"
 import { OrganizationForm } from "@/components/organizations/organization-form"
 import { OrganizationMakeDefault } from "@/components/organizations/organization-make-default"
@@ -22,26 +22,19 @@ export default async function OrgSettingsIndexPage({
     data: { session },
   } = await supabase.auth.getSession()
 
-  const { data: orgsProfile } = await supabase
-    .from("organization_profiles")
+  const { data: dataOrg } = await supabase
+    .from("data_orgs")
     .select("*, organization!inner(*)")
     .eq("profile_id", session?.user.id)
+    .eq("org_slug", orgSlug)
     .eq("organization.slug", orgSlug)
     .single()
 
-  const org = orgsProfile?.organization as Organization
-  const isDefault = orgsProfile?.is_default
+  const org = dataOrg?.organization as Organization
 
   return (
     <div className="md:px-0">
       <Card className="mb-10">
-        {/* <div className="flex flex-col space-y-6 px-4 py-5 sm:px-10">
-          <h3>Delete Organization</h3>
-          <p className="text-sm">
-            The project will be permanently deleted, including its deployments
-            and domains. This action is irreversible and can not be undone.
-          </p>
-        </div>   */}
         <OrganizationForm org={org} />
       </Card>
 
@@ -49,7 +42,7 @@ export default async function OrgSettingsIndexPage({
         <OrganizationMakeDefault
           orgSlug={org.slug}
           id={org.id}
-          isDefault={isDefault}
+          isDefault={dataOrg?.is_default ?? false}
         />
       </Card>
 
@@ -57,7 +50,7 @@ export default async function OrgSettingsIndexPage({
         <OrganizationDelete
           orgSlug={org.slug}
           id={org.id}
-          isDefault={isDefault}
+          isDefault={dataOrg?.is_default ?? false}
         />
       </Card>
     </div>

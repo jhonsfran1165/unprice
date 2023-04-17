@@ -6,7 +6,7 @@ import { usePathname, useSelectedLayoutSegments } from "next/navigation"
 import { getActiveTabs } from "@/lib/config/dashboard"
 import { useStore } from "@/lib/stores/layout"
 import { AppModulesNav } from "@/lib/types"
-import { OrganizationProfilesData, Session } from "@/lib/types/supabase"
+import { OrganizationViewData, Session } from "@/lib/types/supabase"
 
 function StoreHandler({
   session,
@@ -14,7 +14,7 @@ function StoreHandler({
   modulesApp,
 }: {
   session: Session | null
-  orgProfiles: OrganizationProfilesData[]
+  orgProfiles: OrganizationViewData[]
   modulesApp: AppModulesNav
 }) {
   const pathname = usePathname()
@@ -47,10 +47,8 @@ function StoreHandler({
   const orgSlug = numberSegments >= 1 ? cleanSegments[1] : ""
   const projectSlug = numberSegments >= 2 ? cleanSegments[3] : ""
 
-  const currentOrg = useMemo(
-    () =>
-      orgProfiles?.find((org) => org.organization.slug === orgSlug)
-        ?.organization,
+  const orgData = useMemo(
+    () => orgProfiles?.find((org) => org.org_slug === orgSlug)?.organization,
     [orgSlug, orgProfiles]
   )
 
@@ -71,7 +69,7 @@ function StoreHandler({
       activePathPrefix,
       rootPathTab,
       moduleTab,
-      currentOrg,
+      orgData,
     })
     initialized.current = true
   }
@@ -89,7 +87,7 @@ function StoreHandler({
       rootPathTab,
       moduleTab,
       contextHeader: activeTab?.title,
-      currentOrg,
+      orgData,
     })
   }, [pathname])
 

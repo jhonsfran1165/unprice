@@ -1,6 +1,6 @@
 import useSWR from "swr"
 
-import { OrganizationProfilesData } from "@/lib/types/supabase"
+import { OrganizationViewData } from "@/lib/types/supabase"
 import { fetcher } from "@/lib/utils"
 
 export default function useOrganizations({
@@ -8,15 +8,17 @@ export default function useOrganizations({
   fallbackData = [],
 }: {
   revalidateOnFocus?: boolean
-  fallbackData?: OrganizationProfilesData[]
+  fallbackData?: OrganizationViewData[]
 } = {}) {
-  const { data: organizationProfiles, error } = useSWR<
-    OrganizationProfilesData[]
-  >(`/api/org`, fetcher, {
-    dedupingInterval: 30000,
-    revalidateOnFocus,
-    fallbackData,
-  })
+  const { data: organizationProfiles, error } = useSWR<OrganizationViewData[]>(
+    `/api/org`,
+    fetcher,
+    {
+      dedupingInterval: 30000,
+      revalidateOnFocus,
+      fallbackData,
+    }
+  )
 
   return {
     organizationProfiles,
