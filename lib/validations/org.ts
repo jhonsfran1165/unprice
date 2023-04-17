@@ -24,9 +24,7 @@ const description = z.string()
 const isDefault = z.boolean()
 
 // -------------------------------------------------------------
-export const orgGetSchema = z.object({
-  orgSlug,
-})
+export const orgGetSchema = z.object({})
 
 export const orgDeleteSchema = z.object({
   orgSlug,

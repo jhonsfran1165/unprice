@@ -21,14 +21,14 @@ import {
 import { Input } from "@/components/ui/input"
 
 export function OrganizationToggle() {
-  const { orgSlug, currentOrg } = useStore()
+  const { orgSlug, orgData } = useStore()
   const { organizationProfiles, isLoading } = useOrganizations({
     revalidateOnFocus: true,
   })
 
   return (
     <div className="flex items-center justify-start space-x-2">
-      <OrganizationLink isLoading={isLoading} org={currentOrg} />
+      <OrganizationLink isLoading={isLoading} org={orgData?.organization} />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -77,24 +77,21 @@ export function OrganizationToggle() {
                         key={index}
                         className="cursor-pointer px-8 hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover"
                       >
-                        <Link
-                          href={`/org/${org.organization.slug}`}
-                          prefetch={true}
-                        >
+                        <Link href={`/org/${org.org_slug}`} prefetch={true}>
                           <Avatar className="mr-2 h-5 w-5">
                             <AvatarImage
                               src={
-                                org.organization?.image ||
-                                `https://avatar.vercel.sh/${org.organization?.name}`
+                                org.org_image ||
+                                `https://avatar.vercel.sh/${org.org_slug}`
                               }
-                              alt={org.organization.name}
+                              alt={org.org_slug}
                             />
                           </Avatar>
-                          <span>{org.organization.name}</span>
+                          <span>{org.org_slug}</span>
                           <span className="ml-2 rounded-md px-1.5 py-0.5 text-xs text-primary-solid no-underline group-hover:no-underline ">
                             {org.is_default && "default"}
                           </span>
-                          {org.organization.slug === orgSlug && (
+                          {org.org_slug === orgSlug && (
                             <DropdownMenuShortcut>
                               <Icons.check className={"h-4 w-4"} />
                             </DropdownMenuShortcut>
@@ -106,15 +103,15 @@ export function OrganizationToggle() {
           </DropdownMenuGroup>
           <DropdownMenuSeparator className="bg-background-line" />
           <DropdownMenuGroup>
-            <div className="relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none hover:text-background-textContrast">
-              <Link className="m-0 w-full" href={"/org"}>
+            <div className="relative flex cursor-default select-none items-center justify-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none hover:text-background-textContrast">
+              <Link className="m-0" href={"/org"}>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full border hover:bg-background-bgHover active:bg-background-bgActive"
+                  className="w-56 border border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive"
                 >
                   <Icons.add className="h-4 w-4 rotate-0 scale-100 hover:text-background-textContrast" />
-                  <span className="pl-2">Create new Organization</span>
+                  <span className="pl-2 text-sm">Create new Organization</span>
                 </Button>
               </Link>
             </div>

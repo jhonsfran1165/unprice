@@ -12,7 +12,7 @@ import { mutate } from "swr"
 
 import { SWIPE_REVEAL_ANIMATION_SETTINGS } from "@/lib/constants"
 import { Organization } from "@/lib/types/supabase"
-import { createSlug } from "@/lib/utils"
+import { createSlug, fetchAPI } from "@/lib/utils"
 import { orgPostSchema, orgPostType } from "@/lib/validations/org"
 import LoadingDots from "@/components/shared/loading/loading-dots"
 import UploadCloud from "@/components/shared/upload-cloud"
@@ -88,39 +88,40 @@ export function OrganizationForm({ org }: { org?: Organization }) {
     }
   }, [exist])
 
-  const onSubmit: SubmitHandler<orgPostType> = async (orgData) => {
+  // TODO: create function for handling post errors and fetch
+  const onSubmit: SubmitHandler<orgPostType> = async (dataForm) => {
     try {
       setLoading(true)
-      const org = await fetch(`/api/org`, {
-        method: action === "new" ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const method = action === "new" ? "PUT" : "POST"
+      const org = await fetchAPI({
+        url: "/api/org",
+        method,
+        data: {
           ...data,
-          ...orgData,
-        }),
+          ...dataForm,
+        },
       })
 
-      const result = await org.json()
-
       // TODO: add profile as well
-      if (result.slug) {
+      if (org.slug) {
         toast({
           title: "Organization Saved",
-          description: `Organization ${result.name} Saved successfully`,
+          description: `Organization ${org.name} Saved successfully`,
           className: "bg-info-bgActive text-info-text border-info-solid",
         })
+
         // mutate swr endpoints for org
         mutate(`/api/org`)
-        mutate(`/api/org/${result.slug}`)
+        mutate(`/api/org/${org.slug}`)
 
         if (action === "new") {
-          router.push(`/org/${result.slug}`)
+          router.push(`/org/${org.slug}`)
           // Refresh the current route and fetch new data from the server without
           // losing client-side browser or React state.
           router.refresh()
         }
       } else {
-        throw result
+        throw org
       }
     } catch (error) {
       setErrorMessage(error.message)

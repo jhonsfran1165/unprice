@@ -65,7 +65,7 @@ export default function Login() {
   return (
     <div className="flex h-screen w-screen items-center justify-center">
       <div className="z-10 w-full max-w-md overflow-hidden rounded-2xl border bg-background-bgSubtle shadow-sm shadow-background-solid">
-        <div className="flex flex-col items-center justify-center space-y-3 border-b bg-primary-bg px-4 py-6 pt-8 text-center sm:px-16">
+        <div className="flex flex-col items-center justify-center space-y-3 border-b bg-primary-solid px-4 py-6 pt-8 text-center sm:px-16">
           <a href="https://dub.sh">
             <BlurImage
               src="/_static/logo.png"
@@ -75,8 +75,10 @@ export default function Login() {
               height={20}
             />
           </a>
-          <h3 className="text-xl font-semibold">Sign In</h3>
-          <p className="text-sm">Use your email address to sign in.</p>
+          <h3 className="text-3xl font-semibold text-black">Sign In</h3>
+          <p className="text-lg text-black opacity-60">
+            Use your email address to sign in.
+          </p>
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -98,7 +100,7 @@ export default function Login() {
               type={"email"}
               id={"email"}
               aria-invalid={errors.email ? "true" : "false"}
-              className="mt-1 block w-full"
+              className="mt-1 block w-full bg-background"
             />
             {errors.email && (
               <p className="pt-1 text-xs text-error-solid" role="alert">
@@ -115,7 +117,7 @@ export default function Login() {
               type={"password"}
               id={"password"}
               aria-invalid={errors.password ? "true" : "false"}
-              className="mt-1 block w-full"
+              className="mt-1 block w-full bg-background"
             />
             {errors.password && (
               <p className="pt-1 text-xs text-error-solid" role="alert">
@@ -127,12 +129,12 @@ export default function Login() {
             disabled={signInClicked}
             title="Submit"
             type={"submit"}
-            className="border border-primary-border bg-primary-bg hover:border-primary-borderHover hover:bg-primary-bgHover active:bg-primary-bgActive"
+            className="border border-primary-border bg-primary-solid hover:border-primary-borderHover hover:bg-primary-solidHover active:bg-primary-bgActive"
           >
             {signInClicked ? (
               <LoadingDots color="#808080" />
             ) : (
-              <p className="text-primary-textContrast">Sign In</p>
+              <p className="font-semibold text-black">Sign In</p>
             )}
           </Button>
           {noSuchAccount ? (

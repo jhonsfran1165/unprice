@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next"
+import cloudinary from "cloudinary"
 
 import {
   withAuthentication,
@@ -21,26 +22,31 @@ async function handler(
     if (req.method === "GET") {
       const { orgSlug } = req.query
 
-      const { data: orgsProfile, error } = await supabase
-        .from("organization_profiles")
-        .select("*, organization!inner(*)")
+      const { data: dataOrg, error } = await supabase
+        .from("data_orgs")
+        .select("*")
         .eq("profile_id", session?.user.id)
-        .eq("organization.slug", orgSlug)
+        .eq("org_slug", orgSlug)
         .single()
 
       if (error) return res.status(404).json(error)
 
-      return res.status(200).json(orgsProfile)
+      return res.status(200).json(dataOrg)
     }
 
     if (req.method === "DELETE") {
       const { orgSlug, id } = req.body
 
-      const { error } = await supabase
+      const { data: deletedOrg, error } = await supabase
         .from("organization")
         .delete()
         .eq("id", id)
         .eq("slug", orgSlug)
+        .select("image")
+        .single()
+
+      // TODO: delete cloudinary url
+      // cloudinary.v2.uploader.destroy(deletedOrg?.image)
 
       if (error) return res.status(404).json(error)
 

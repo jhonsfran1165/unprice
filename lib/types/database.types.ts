@@ -42,6 +42,7 @@ export interface Database {
           image: string | null
           name: string
           slug: string
+          stripe_id: string | null
           type: string
           updated_at: string
         }
@@ -52,6 +53,7 @@ export interface Database {
           image?: string | null
           name: string
           slug?: string
+          stripe_id?: string | null
           type?: string
           updated_at?: string
         }
@@ -62,6 +64,7 @@ export interface Database {
           image?: string | null
           name?: string
           slug?: string
+          stripe_id?: string | null
           type?: string
           updated_at?: string
         }
@@ -93,6 +96,68 @@ export interface Database {
           profile_id?: string
           role?: string
           updated_at?: string
+        }
+      }
+      organization_subscriptions: {
+        Row: {
+          cancel_at: string | null
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
+          created: string
+          currency: string | null
+          current_period_end: string
+          current_period_start: string
+          ended_at: string | null
+          id: string
+          interval: Database["public"]["Enums"]["subscription_interval"] | null
+          interval_count: number | null
+          metadata: Json | null
+          org_id: number | null
+          price_id: string | null
+          quantity: number | null
+          status: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end: string | null
+          trial_start: string | null
+        }
+        Insert: {
+          cancel_at?: string | null
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created?: string
+          currency?: string | null
+          current_period_end?: string
+          current_period_start?: string
+          ended_at?: string | null
+          id: string
+          interval?: Database["public"]["Enums"]["subscription_interval"] | null
+          interval_count?: number | null
+          metadata?: Json | null
+          org_id?: number | null
+          price_id?: string | null
+          quantity?: number | null
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end?: string | null
+          trial_start?: string | null
+        }
+        Update: {
+          cancel_at?: string | null
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created?: string
+          currency?: string | null
+          current_period_end?: string
+          current_period_start?: string
+          ended_at?: string | null
+          id?: string
+          interval?: Database["public"]["Enums"]["subscription_interval"] | null
+          interval_count?: number | null
+          metadata?: Json | null
+          org_id?: number | null
+          price_id?: string | null
+          quantity?: number | null
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end?: string | null
+          trial_start?: string | null
         }
       }
       page: {
@@ -196,13 +261,46 @@ export interface Database {
       }
     }
     Views: {
-      [_ in never]: never
+      data_orgs: {
+        Row: {
+          is_default: boolean | null
+          org_id: number | null
+          org_image: string | null
+          org_slug: string | null
+          org_stripe_id: string | null
+          org_type: string | null
+          profile_id: string | null
+          role: string | null
+          status_subscription:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
+          subscription_canceled_at: string | null
+          subscription_ended_at: string | null
+          subscription_interval:
+            | Database["public"]["Enums"]["subscription_interval"]
+            | null
+          subscription_interval_count: number | null
+          subscription_metadata: Json | null
+          subscription_period_ends: string | null
+          subscription_period_starts: string | null
+          subscription_trial_ends: string | null
+          subscription_trial_starts: string | null
+        }
+      }
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      subscription_interval: "day" | "week" | "month" | "year"
+      subscription_status:
+        | "trialing"
+        | "active"
+        | "canceled"
+        | "incomplete"
+        | "incomplete_expired"
+        | "past_due"
+        | "unpaid"
     }
     CompositeTypes: {
       [_ in never]: never

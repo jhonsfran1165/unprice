@@ -23,11 +23,10 @@ async function handler(
     const supabase = supabaseApiClient(req, res)
 
     if (req.method === "GET") {
-      // get all project of this organization
       const { data, error } = await supabase
-        .from("organization_profiles")
-        .select("*, organization(*)")
-        .eq("profile_id", profile?.id)
+        .from("data_orgs")
+        .select("*")
+        .eq("profile_id", session?.user.id)
 
       if (error) return res.status(404).json(error)
 

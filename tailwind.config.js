@@ -1,5 +1,3 @@
-const radixColors = require("@radix-ui/colors")
-const colors = require("tailwindcss/colors")
 const { fontFamily } = require("tailwindcss/defaultTheme")
 const { toRadixVar } = require("windy-radix-palette/vars")
 
@@ -32,7 +30,21 @@ module.exports = {
       current: "currentColor",
       black: "#000",
       white: "#fff",
-      // slate: colors.slate,
+      gray: {
+        DEFAULT: toRadixVar("gray", 1),
+        base: toRadixVar("gray", 1),
+        bgSubtle: toRadixVar("gray", 2),
+        bg: toRadixVar("gray", 3),
+        bgHover: toRadixVar("gray", 4),
+        bgActive: toRadixVar("gray", 5),
+        line: toRadixVar("gray", 6),
+        border: toRadixVar("gray", 7),
+        borderHover: toRadixVar("gray", 8),
+        solid: toRadixVar("gray", 9),
+        solidHover: toRadixVar("gray", 10),
+        text: toRadixVar("gray", 11),
+        textContrast: toRadixVar("gray", 12),
+      },
       success: {
         DEFAULT: toRadixVar("green", 1),
         base: toRadixVar("green", 1),
@@ -49,7 +61,7 @@ module.exports = {
         textContrast: toRadixVar("green", 12),
       },
       danger: {
-        DEFAULT: toRadixVar("red", 1),
+        DEFAULT: toRadixVar("red", 9),
         base: toRadixVar("red", 1),
         bgSubtle: toRadixVar("red", 2),
         bg: toRadixVar("red", 3),
@@ -169,19 +181,19 @@ module.exports = {
         textContrast: toRadixVar("amber", 12),
       },
       secondary: {
-        DEFAULT: toRadixVar("amber", 1),
-        base: toRadixVar("amber", 1),
-        bgSubtle: toRadixVar("amber", 2),
-        bg: toRadixVar("amber", 3),
-        bgHover: toRadixVar("amber", 4),
-        bgActive: toRadixVar("amber", 5),
-        line: toRadixVar("amber", 6),
-        border: toRadixVar("amber", 7),
-        borderHover: toRadixVar("amber", 8),
-        solid: toRadixVar("amber", 9),
-        solidHover: toRadixVar("amber", 10),
-        text: toRadixVar("amber", 11),
-        textContrast: toRadixVar("amber", 12),
+        DEFAULT: toRadixVar("crimson", 1),
+        base: toRadixVar("crimson", 1),
+        bgSubtle: toRadixVar("crimson", 2),
+        bg: toRadixVar("crimson", 3),
+        bgHover: toRadixVar("crimson", 4),
+        bgActive: toRadixVar("crimson", 5),
+        line: toRadixVar("crimson", 6),
+        border: toRadixVar("crimson", 7),
+        borderHover: toRadixVar("crimson", 8),
+        solid: toRadixVar("crimson", 9),
+        solidHover: toRadixVar("crimson", 10),
+        text: toRadixVar("crimson", 11),
+        textContrast: toRadixVar("crimson", 12),
       },
     },
     borderColor: (theme) => ({
