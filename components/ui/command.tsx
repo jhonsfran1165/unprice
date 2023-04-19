@@ -133,7 +133,7 @@ const CommandShortcut = ({
   return (
     <span
       className={cn(
-        "ml-auto text-xs tracking-widest text-muted-foreground",
+        "tracking-widest ml-auto text-xs text-muted-foreground",
         className
       )}
       {...props}

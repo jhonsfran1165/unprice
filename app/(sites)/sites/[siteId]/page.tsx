@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 
-import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 import { buttonVariants } from "@/components/ui/button"
+import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 export default function Page() {
   return (

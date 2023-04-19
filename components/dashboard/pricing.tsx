@@ -21,6 +21,8 @@ import {
 import { Icons } from "@/components/shared/icons"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
+import { toast } from "../ui/use-toast"
+
 const Pricing = () => {
   const [tier, setTier] = useState(0)
   const { orgSlug, orgData, orgProfiles } = useStore()
@@ -57,7 +59,11 @@ const Pricing = () => {
       const stripe = await getStripe()
       stripe?.redirectToCheckout({ sessionId })
     } catch (error) {
-      return alert((error as Error)?.message)
+      toast({
+        title: "Error saving org",
+        description: error.message,
+        className: "danger",
+      })
     } finally {
       setPriceIdLoading(false)
     }
@@ -113,7 +119,7 @@ const Pricing = () => {
             }) => (
               <div
                 key={plan}
-                className={`relative rounded-2xl bg-background-bgSubtle ${
+                className={`rounded-2xl relative bg-background-bgSubtle ${
                   plan === "Pro"
                     ? "border-2 border-primary-solid shadow-primary-line"
                     : "border-gray-200 border"

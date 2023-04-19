@@ -65,7 +65,7 @@ export default function Register() {
 
   return (
     <div className="flex h-screen w-screen items-center justify-center">
-      <div className="z-10 w-full max-w-md overflow-hidden rounded-2xl border bg-background-bgSubtle shadow-sm shadow-background-solid">
+      <div className="rounded-2xl z-10 w-full max-w-md overflow-hidden border bg-background-bgSubtle shadow-sm shadow-background-solid">
         <div className="flex flex-col items-center justify-center space-y-3 border-b bg-primary-bg px-4 py-6 pt-8 text-center sm:px-16">
           <a href="https://dub.sh">
             <BlurImage

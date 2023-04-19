@@ -44,7 +44,7 @@ export function OrganizationSwitch() {
             role="combobox"
             aria-expanded={open}
             aria-label="Select an organization"
-            className="justify-between button-ghost p-1"
+            className="button-ghost justify-between p-1"
           >
             <Icons.chevronsupdown
               className="ml-auto h-4 w-4 shrink-0 opacity-60"
@@ -67,7 +67,7 @@ export function OrganizationSwitch() {
                     }}
                   >
                     <Link
-                      className="w-full flex"
+                      className="flex w-full"
                       href={`/org/${org.org_slug}`}
                       prefetch={true}
                     >
@@ -107,7 +107,7 @@ export function OrganizationSwitch() {
                     setOpen(false)
                   }}
                 >
-                  <Link className="flex m-0" href={"/org"}>
+                  <Link className="m-0 flex" href={"/org"}>
                     <Icons.plusCircle className="mr-2 h-5 w-5" />
                     Create Team
                   </Link>

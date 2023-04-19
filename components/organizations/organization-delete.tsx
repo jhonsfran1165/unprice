@@ -90,7 +90,11 @@ export function OrganizationDelete({
         router.refresh()
       }
     } catch (error) {
-      console.log(error)
+      toast({
+        title: "Error deleting org",
+        description: error.message,
+        className: "danger",
+      })
     } finally {
       setlLoading(false)
     }
@@ -98,7 +102,7 @@ export function OrganizationDelete({
 
   const trigger = (
     <div className="flex justify-end">
-      <Button title="Delete" className="w-28 button-danger">
+      <Button title="Delete" className="button-danger w-28">
         {loading ? <LoadingDots color="#808080" /> : "Delete"}
       </Button>
     </div>

@@ -126,6 +126,12 @@ export function OrganizationForm({ org }: { org?: Organization }) {
       }
     } catch (error) {
       setErrorMessage(error.message)
+
+      toast({
+        title: "Error deleting org",
+        description: error.message,
+        className: "danger",
+      })
     } finally {
       setLoading(false)
     }
@@ -334,7 +340,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           <Button
             onClick={() => reset({ ...data })}
             title="Clear"
-            className="w-28 button-default"
+            className="button-default w-28"
           >
             {"Clear"}
           </Button>
@@ -344,7 +350,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           form="add-org-form"
           title="Submit"
           type="submit"
-          className="w-28 button-primary"
+          className="button-primary w-28"
         >
           {loading ? <LoadingDots color="#808080" /> : "Save"}
         </Button>

@@ -29,7 +29,7 @@ export function MainNav() {
                         key={index}
                         href={item.href}
                         className={cn(
-                          "flex items-center rounded-md border px-2 py-1 text-xs font-normal button-ghost",
+                          "button-ghost flex items-center rounded-md border px-2 py-1 text-xs font-normal",
                           item.disabled && "cursor-not-allowed opacity-80"
                         )}
                       >

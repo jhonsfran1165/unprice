@@ -4,10 +4,10 @@ import { ReactNode } from "react"
 import { usePathname } from "next/navigation"
 
 import { useStore } from "@/lib/stores/layout"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { DashboardShellSkeleton } from "@/components/dashboard/shell-skeleton"
 import { DashboardSideBarNav } from "@/components/dashboard/sidebar-nav"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 export function DashboardShell({
   children,

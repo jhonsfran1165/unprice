@@ -113,7 +113,7 @@ export function AddOrgModal() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="w-full button-ghost">
+        <Button variant="ghost" size="sm" className="button-ghost w-full">
           <Icons.add className="h-4 w-4 rotate-0 scale-100 hover:text-background-textContrast" />
           <span className="pl-2">Create new Organization</span>
         </Button>

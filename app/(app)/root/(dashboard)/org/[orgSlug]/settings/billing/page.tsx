@@ -50,7 +50,7 @@ export default async function IndexPage({
             and domains. This action is irreversible and can not be undone.
           </p>
           <Separator />
-          <Button className="w-28 button-primary">
+          <Button className="button-primary w-28">
             <Link href={`/org/${orgSlug}/settings/billing?action=upgrade`}>
               Upgrade
             </Link>

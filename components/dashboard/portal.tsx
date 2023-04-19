@@ -12,7 +12,7 @@ export default function StripePortal() {
 
   return (
     <Button
-      className="w-28 button-primary"
+      className="button-primary w-28"
       onClick={async () => {
         try {
           // setClicked(true);

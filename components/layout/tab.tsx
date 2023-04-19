@@ -27,7 +27,7 @@ export const Tab = ({
         "cursor-not-allowed opacity-80 text-backgroud": tab.disabled,
       })}
     >
-      <div className="rounded-md px-3 py-2 transition-all duration-75 button-ghost">
+      <div className="button-ghost rounded-md px-3 py-2 transition-all duration-75">
         <p
           className={cn("text-sm hover:text-background-textContrast", {
             "text-background-textContrast": active,
