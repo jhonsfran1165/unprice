@@ -1,7 +1,6 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useToast } from "@/hooks/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { SubmitHandler, set, useForm } from "react-hook-form"
 import { mutate } from "swr"
@@ -10,6 +9,7 @@ import {
   orgMakeDefaultSchema,
   type orgMakeDefaultType,
 } from "@/lib/validations/org"
+import { useToast } from "@/hooks/use-toast"
 import {
   HoverCard,
   HoverCardContent,
@@ -54,7 +54,7 @@ export function OrganizationMakeDefault({
         toast({
           title: "Organization Saved",
           description: `Organization is now default`,
-          className: "bg-info-bgActive text-info-text border-info-solid",
+          className: "info",
         })
 
         // mutate swr endpoints for org
@@ -66,7 +66,7 @@ export function OrganizationMakeDefault({
       toast({
         title: "Organization not saved",
         description: error?.message,
-        className: "bg-danger-bgActive text-danger-text border-danger-solid",
+        className: "danger",
       })
       setValue("is_default", false)
     }
@@ -80,7 +80,7 @@ export function OrganizationMakeDefault({
         is important to see it up correctly. Go to settings in the organization
         you want to make default.
       </p>
-      <Separator className="bg-background-border" />
+      <Separator />
       <div className="flex justify-end">
         <form id="add-org-form" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex items-center space-x-2">
@@ -96,17 +96,13 @@ export function OrganizationMakeDefault({
                     }}
                     id={"is_default"}
                     {...register("is_default")}
-                    className="border-background-solid bg-background ring-background-solid data-[state=unchecked]:bg-background data-[state=checked]:bg-primary-solid"
                   />
                   <Label htmlFor="is_default">
                     {isDefault ? "" : "Make default"}
                   </Label>
                 </div>
               </HoverCardTrigger>
-              <HoverCardContent
-                align="end"
-                className="w-80 border-background-border bg-background-bgSubtle text-background-text"
-              >
+              <HoverCardContent align="end" className="w-80">
                 <div className="flex justify-between space-x-4">
                   {isDefault ? (
                     <div className="space-y-1">

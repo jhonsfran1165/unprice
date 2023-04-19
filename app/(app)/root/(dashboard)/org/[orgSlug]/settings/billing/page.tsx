@@ -49,7 +49,7 @@ export default async function IndexPage({
             The project will be permanently deleted, including its deployments
             and domains. This action is irreversible and can not be undone.
           </p>
-          <Separator className="bg-background-border" />
+          <Separator />
           <Button className="w-28 button-primary">
             <Link href={`/org/${orgSlug}/settings/billing?action=upgrade`}>
               Upgrade
@@ -64,7 +64,7 @@ export default async function IndexPage({
             The project will be permanently deleted, including its deployments
             and domains. This action is irreversible and can not be undone.
           </p>
-          <Separator className="bg-background-border" />
+          <Separator />
           <StripePortal />
         </div>
       </Card>

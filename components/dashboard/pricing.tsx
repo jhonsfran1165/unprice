@@ -256,8 +256,7 @@ const Pricing = () => {
                       {
                         "border border-primary-border bg-gradient-to-r from-primary-solid to-secondary-solid text-black hover:bg-clip-text hover:text-primary-solid":
                           plan === "Pro",
-                        "border border-background-border bg-background-bg text-background-text hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive":
-                          plan !== "Pro",
+                        "button-default": plan !== "Pro",
                       }
                     )}
                     onClick={async () => {

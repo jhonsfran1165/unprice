@@ -43,39 +43,36 @@ export function CommandDialogLayout() {
         </kbd>
       </p>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput
-          className="bg-background-bgSubtle"
-          placeholder="Type a command or search..."
-        />
-        <CommandList className="bg-background-bgSubtle">
+        <CommandInput placeholder="Type a command or search..." />
+        <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Suggestions">
-            <CommandItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
+            <CommandItem>
               <Calendar className="mr-2 h-4 w-4" />
               <span>Calendar</span>
             </CommandItem>
-            <CommandItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
+            <CommandItem>
               <Smile className="mr-2 h-4 w-4" />
               <span>Search Emoji</span>
             </CommandItem>
-            <CommandItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
+            <CommandItem>
               <Calculator className="mr-2 h-4 w-4" />
               <span>Calculator</span>
             </CommandItem>
           </CommandGroup>
           <CommandSeparator />
           <CommandGroup heading="Settings">
-            <CommandItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
+            <CommandItem>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
               <CommandShortcut>⌘P</CommandShortcut>
             </CommandItem>
-            <CommandItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
+            <CommandItem>
               <CreditCard className="mr-2 h-4 w-4" />
               <span>Billing</span>
               <CommandShortcut>⌘B</CommandShortcut>
             </CommandItem>
-            <CommandItem className="hover:bg-background-bgHover hover:text-background-textContrast focus:bg-background-bgHover">
+            <CommandItem>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
               <CommandShortcut>⌘S</CommandShortcut>

@@ -5,6 +5,8 @@ import ms from "ms"
 import { customAlphabet } from "nanoid"
 import { twMerge } from "tailwind-merge"
 
+import { useToast } from "@/hooks/use-toast"
+
 import { SECOND_LEVEL_DOMAINS, SPECIAL_APEX_DOMAINS, ccTLDs } from "./constants"
 
 export function cn(...inputs: ClassValue[]) {
@@ -20,6 +22,7 @@ export const fetchAPI = async ({
   method: string
   data?: any
 }) => {
+  const { toast } = useToast()
   let payload = {}
 
   if (method !== "GET") {
@@ -34,7 +37,11 @@ export const fetchAPI = async ({
   const res: Response = await fetch(url, payload)
 
   if (!res.ok) {
-    console.log("Error in postData", { url, data, res })
+    toast({
+      title: "Error deleting org",
+      description: res.statusText,
+      className: "danger",
+    })
 
     throw Error(res.statusText)
   }

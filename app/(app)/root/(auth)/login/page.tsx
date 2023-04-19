@@ -10,12 +10,12 @@ import {
   authLoginValidationSchema,
   type authLoginValidationType,
 } from "@/lib/validations/auth"
-import { useSupabase } from "@/components/auth/supabase-provider"
-import BlurImage from "@/components/shared/blur-image"
-import LoadingDots from "@/components/shared/loading/loading-dots"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useSupabase } from "@/components/auth/supabase-provider"
+import BlurImage from "@/components/shared/blur-image"
+import LoadingDots from "@/components/shared/loading/loading-dots"
 
 export default function Login() {
   const [signInClicked, setSignInClicked] = useState(false)
@@ -129,7 +129,7 @@ export default function Login() {
             disabled={signInClicked}
             title="Submit"
             type={"submit"}
-            className="border border-primary-border bg-primary-solid hover:border-primary-borderHover hover:bg-primary-solidHover active:bg-primary-bgActive"
+            className="button-primary"
           >
             {signInClicked ? (
               <LoadingDots color="#808080" />

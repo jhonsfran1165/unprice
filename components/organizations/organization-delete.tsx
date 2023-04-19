@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useToast } from "@/hooks/use-toast"
 import { mutate } from "swr"
 
-import LoadingDots from "@/components/shared/loading/loading-dots"
+import { fetchAPI } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,13 +19,14 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import LoadingDots from "@/components/shared/loading/loading-dots"
 
 // TODO: move this to a component
 export function ConfirmAction({ confirmAction, trigger }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent className="border border-background-border bg-background text-background-text">
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription className="font-light">
@@ -34,13 +35,10 @@ export function ConfirmAction({ confirmAction, trigger }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="border border-background-border bg-background-bg font-light text-background-text hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive">
+          <AlertDialogCancel className="button-default">
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={confirmAction}
-            className="border border-danger-border bg-danger-bg font-light text-danger-text hover:border-danger-borderHover hover:bg-danger-bgHover hover:text-danger-textContrast active:bg-danger-bgActive"
-          >
+          <AlertDialogAction onClick={confirmAction} className="button-danger">
             Continue
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -72,32 +70,27 @@ export function OrganizationDelete({
           title: "Error deleting org",
           description:
             "This organization is the default one. Please check another organization as default before perform this action.",
-          className:
-            "bg-warning-bgActive text-warning-text border-warning-solid",
+          className: "button-warning",
         })
         return null
       }
 
-      const data = await fetch(`/api/org/${orgSlug}`, {
+      const org = await fetchAPI({
+        url: `/api/org/${orgSlug}`,
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orgSlug, id }),
+        data: { orgSlug, id },
       })
 
-      const org = await data.json()
+      if (org) {
+        // mutate swr endpoints for org
+        mutate(`/api/org`)
+        mutate(`/api/org/${orgSlug}`)
 
-      // mutate swr endpoints for org
-      mutate(`/api/org`)
-      mutate(`/api/org/${orgSlug}`)
-
-      router.push("/")
-      router.refresh()
+        router.push("/")
+        router.refresh()
+      }
     } catch (error) {
-      toast({
-        title: "Error deleting org",
-        description: error?.message,
-        className: "bg-danger-bgActive text-danger-text border-danger-solid",
-      })
+      console.log(error)
     } finally {
       setlLoading(false)
     }
@@ -105,11 +98,7 @@ export function OrganizationDelete({
 
   const trigger = (
     <div className="flex justify-end">
-      <Button
-        title="Delete"
-        // onClick={deleteOrg}
-        className="w-28 border border-danger-border bg-danger-bg text-danger-text hover:border-danger-borderHover hover:bg-danger-bgHover hover:text-danger-textContrast active:bg-danger-bgActive"
-      >
+      <Button title="Delete" className="w-28 button-danger">
         {loading ? <LoadingDots color="#808080" /> : "Delete"}
       </Button>
     </div>
@@ -122,7 +111,7 @@ export function OrganizationDelete({
         The project will be permanently deleted, including its deployments and
         domains. This action is irreversible and can not be undone.
       </p>
-      <Separator className="bg-background-border" />
+      <Separator />
 
       <ConfirmAction confirmAction={deleteOrg} trigger={trigger} />
     </div>

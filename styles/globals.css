@@ -35,24 +35,52 @@
 
 /* alias classes to override ui */
 @layer utilities {
+  .primary {
+    @apply border border-primary-border bg-primary-bg text-primary-text;
+  }
+
+  .secondary {
+    @apply border border-secondary-border bg-secondary-bg text-secondary-text;
+  }
+
+  .warning {
+    @apply border border-warning-border bg-warning-bg text-warning-text;
+  }
+
+  .default {
+    @apply border border-background-border bg-background-bg text-background-text;
+  }
+
+  .danger {
+    @apply border border-danger-border bg-danger-bg text-danger-text;
+  }
+
+  .info {
+    @apply border border-info-border bg-info-bg text-info-text;
+  }
+
   .button-ghost {
     @apply bg-transparent text-background-text hover:border-background-borderHover hover:bg-background-bg hover:text-background-textContrast active:bg-background-bgActive;
   }
 
   .button-default {
-    @apply border border-background-border bg-background-bg text-background-text hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
+    @apply default hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
   }
 
-  .button-destructive {
-    @apply border border-danger-border bg-danger-bg text-danger-text hover:border-danger-borderHover hover:bg-danger-bgHover hover:text-danger-textContrast active:bg-danger-bgActive;
+  .button-danger {
+    @apply danger hover:border-danger-borderHover hover:bg-danger-bgHover hover:text-danger-textContrast active:bg-danger-bgActive;
   }
 
   .button-primary {
-    @apply border border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive;
+    @apply primary hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive;
+  }
+
+  .button-warning {
+    @apply warning hover:border-warning-borderHover hover:bg-warning-bgHover hover:text-warning-textContrast active:bg-warning-bgActive;
   }
 
   .button-secondary {
-    @apply border border-secondary-border bg-secondary-bg text-secondary-text hover:border-secondary-borderHover hover:bg-secondary-bgHover hover:text-secondary-textContrast active:bg-secondary-bgActive;
+    @apply secondary hover:border-secondary-borderHover hover:bg-secondary-bgHover hover:text-secondary-textContrast active:bg-secondary-bgActive;
   }
 }
 

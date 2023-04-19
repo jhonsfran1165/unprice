@@ -108,7 +108,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
         toast({
           title: "Organization Saved",
           description: `Organization ${org.name} Saved successfully`,
-          className: "bg-info-bgActive text-info-text border-info-solid",
+          className: "info",
         })
 
         // mutate swr endpoints for org
@@ -186,7 +186,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                   getValues("image")?.startsWith("https://avatar.vercel.sh") ||
                   getValues("image") === ""
                 ) {
-                  setValue("image", `https://avatar.vercel.sh/${slug}`)
+                  setValue("image", `https://avatar.vercel.sh/${slug}.png`)
                 }
               }
             }}
@@ -268,8 +268,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
               toast({
                 title: "Error updating image",
                 description: `Something went wrong while updating the image`,
-                className:
-                  "bg-danger-bgActive text-danger-text border-danger-solid",
+                className: "danger",
               })
             }}
             onUpload={(result, widget) => {
@@ -284,8 +283,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                 toast({
                   title: "Error updating image",
                   description: `Something went wrong while updating the image`,
-                  className:
-                    "bg-danger-bgActive text-danger-text border-danger-solid",
+                  className: "danger",
                 })
               }
 
@@ -336,7 +334,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           <Button
             onClick={() => reset({ ...data })}
             title="Clear"
-            className="w-28 border border-background-border bg-background text-background-text hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive"
+            className="w-28 button-default"
           >
             {"Clear"}
           </Button>

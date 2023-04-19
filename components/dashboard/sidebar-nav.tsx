@@ -30,7 +30,7 @@ export function DashboardSideBarNav({
           >
             <span
               className={cn(
-                "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive",
+                "group flex items-center rounded-md px-3 py-2 text-sm font-medium button-ghost",
                 {
                   "text-background-textContrast": active,
                   transparent: !active,

@@ -10,12 +10,12 @@ import {
   authRegisterValidationSchema,
   type authRegisterValidationType,
 } from "@/lib/validations/auth"
-import { useSupabase } from "@/components/auth/supabase-provider"
-import BlurImage from "@/components/shared/blur-image"
-import LoadingDots from "@/components/shared/loading/loading-dots"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useSupabase } from "@/components/auth/supabase-provider"
+import BlurImage from "@/components/shared/blur-image"
+import LoadingDots from "@/components/shared/loading/loading-dots"
 
 export default function Register() {
   const [SignUpClicked, setSignUpClicked] = useState(false)
@@ -145,7 +145,7 @@ export default function Register() {
             disabled={SignUpClicked}
             title="Submit"
             type={"submit"}
-            className="border border-primary-border bg-primary-bg hover:border-primary-borderHover hover:bg-primary-bgHover active:bg-primary-bgActive"
+            className="button-primary"
           >
             {SignUpClicked ? (
               <LoadingDots color="#808080" />
