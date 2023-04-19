@@ -131,11 +131,7 @@ export default function Login() {
             type={"submit"}
             className="button-primary"
           >
-            {signInClicked ? (
-              <LoadingDots color="#808080" />
-            ) : (
-              <p className="font-semibold text-black">Sign In</p>
-            )}
+            {signInClicked ? <LoadingDots color="#808080" /> : "Sign In"}
           </Button>
           {noSuchAccount ? (
             <p className="text-center text-sm font-normal text-error-solid">

@@ -1,6 +1,5 @@
 import { OrganizationForm } from "@/components/organizations/organization-form"
 import BlurImage from "@/components/shared/blur-image"
-import { Card } from "@/components/shared/card"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 export function OrganizationContainer() {
@@ -29,9 +28,7 @@ export function OrganizationContainer() {
           </div>
         </div>
         {/* TODO: create breadcrum */}
-        <Card>
-          <OrganizationForm />
-        </Card>
+        <OrganizationForm />
       </div>
     </MaxWidthWrapper>
   )

@@ -1,5 +1,13 @@
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import BlurImage from "@/components/shared/blur-image"
-import { Card } from "@/components/shared/card"
 
 export default function NoProjectsPlaceholder() {
   return (
@@ -17,7 +25,9 @@ export default function NoProjectsPlaceholder() {
           className="pointer-events-none -my-8"
         />
       </div>
-      {/* TODO: create button projects */}
+      <CardFooter className="flex items-center justify-center">
+        <Button className="button-primary w-80">Create a new project</Button>
+      </CardFooter>
     </Card>
   )
 }

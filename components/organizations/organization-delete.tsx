@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { mutate } from "swr"
 
 import { fetchAPI } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +17,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { toast } from "@/components/ui/use-toast"
 import LoadingDots from "@/components/shared/loading/loading-dots"
 
 // TODO: move this to a component
@@ -57,7 +65,6 @@ export function OrganizationDelete({
   id: number
   isDefault?: boolean
 }) {
-  const { toast } = useToast()
   const router = useRouter()
   const [loading, setlLoading] = useState(false)
 
@@ -109,15 +116,20 @@ export function OrganizationDelete({
   )
 
   return (
-    <div className="flex flex-col space-y-6 px-4 py-5 sm:px-10">
-      <h3>Delete Organization</h3>
-      <p className="text-sm font-light">
-        The project will be permanently deleted, including its deployments and
-        domains. This action is irreversible and can not be undone.
-      </p>
-      <Separator />
-
-      <ConfirmAction confirmAction={deleteOrg} trigger={trigger} />
-    </div>
+    <Card className="mb-10 border-danger-solid">
+      <CardHeader>
+        <CardTitle className="text-2xl">Delete Organization</CardTitle>
+        <CardDescription>
+          The project will be permanently deleted, including its deployments and
+          domains. This action is irreversible and can not be undone.
+        </CardDescription>
+      </CardHeader>
+      <div className="flex items-center justify-center px-6 pb-6">
+        <Separator />
+      </div>
+      <CardFooter>
+        <ConfirmAction confirmAction={deleteOrg} trigger={trigger} />
+      </CardFooter>
+    </Card>
   )
 }

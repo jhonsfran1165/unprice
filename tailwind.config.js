@@ -48,8 +48,8 @@ module.exports = {
         foreground: toRadixVar("sand", 11),
       },
       card: {
-        DEFAULT: toRadixVar("amber", 9),
-        foreground: toRadixVar("amber", 11),
+        DEFAULT: toRadixVar("sand", 2),
+        foreground: toRadixVar("sand", 11),
       },
 
       transparent: "transparent",

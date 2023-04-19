@@ -1,9 +1,25 @@
+import { Suspense } from "react"
+import { BellRing, Check } from "lucide-react"
+
 import { createServerClient } from "@/lib/supabase/supabase-server"
 import { Organization, OrganizationViewData } from "@/lib/types/supabase"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { Switch } from "@/components/ui/switch"
 import { OrganizationDelete } from "@/components/organizations/organization-delete"
 import { OrganizationForm } from "@/components/organizations/organization-form"
 import { OrganizationMakeDefault } from "@/components/organizations/organization-make-default"
-import { Card } from "@/components/shared/card"
+
+// import { Card } from "@/components/shared/card"
 
 // TODO: introduce example framer motion
 // https://www.josephcollicoat.com/articles/animating-text-with-the-intersection-observer-api-and-framer-motion
@@ -33,26 +49,24 @@ export default async function OrgSettingsIndexPage({
   const org = dataOrg?.organization as Organization
 
   return (
-    <div className="md:px-0">
-      <Card className="mb-10">
-        <OrganizationForm org={org} />
-      </Card>
+    <div className="md:px-0 space-y-10">
+      <OrganizationForm org={org} />
 
-      <Card className="mb-10">
-        <OrganizationMakeDefault
-          orgSlug={org.slug}
-          id={org.id}
-          isDefault={dataOrg?.is_default ?? false}
-        />
-      </Card>
+      <OrganizationMakeDefault
+        orgSlug={org.slug}
+        id={org.id}
+        isDefault={dataOrg?.is_default ?? false}
+      />
 
-      <Card className="mb-10 border-danger-solid">
-        <OrganizationDelete
-          orgSlug={org.slug}
-          id={org.id}
-          isDefault={dataOrg?.is_default ?? false}
-        />
-      </Card>
+      <OrganizationDelete
+        orgSlug={org.slug}
+        id={org.id}
+        isDefault={dataOrg?.is_default ?? false}
+      />
+
+      {/* <Suspense fallback={<div>Loading...</div>}>
+        <CardDemo />
+      </Suspense> */}
     </div>
   )
 }

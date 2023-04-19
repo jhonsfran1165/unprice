@@ -5,19 +5,26 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { SubmitHandler, set, useForm } from "react-hook-form"
 import { mutate } from "swr"
 
+import { fetchAPI } from "@/lib/utils"
 import {
   orgMakeDefaultSchema,
   type orgMakeDefaultType,
 } from "@/lib/validations/org"
-import { useToast } from "@/hooks/use-toast"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
+import { toast } from "@/components/ui/use-toast"
+import { Icons } from "@/components/shared/icons"
 
 export function OrganizationMakeDefault({
   orgSlug,
@@ -28,7 +35,6 @@ export function OrganizationMakeDefault({
   id: number
   isDefault?: boolean
 }) {
-  const { toast } = useToast()
   const router = useRouter()
 
   const { register, handleSubmit, setValue } = useForm<orgMakeDefaultType>({
@@ -41,14 +47,13 @@ export function OrganizationMakeDefault({
 
   const onSubmit: SubmitHandler<orgMakeDefaultType> = async (formData) => {
     try {
-      const data = await fetch(`/api/org/${orgSlug}/make-default`, {
+      const result = await fetchAPI({
+        url: `/api/org/${orgSlug}/make-default`,
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        data: {
           ...formData,
-        }),
+        },
       })
-      const result = await data.json()
 
       if (result?.org_id) {
         toast({
@@ -73,65 +78,73 @@ export function OrganizationMakeDefault({
   }
 
   return (
-    <div className="flex flex-col space-y-6 px-4 py-5 sm:px-10">
-      <h3>Default Organization</h3>
-      <p className="text-sm font-light">
-        The default organization acts as the root organization for you users, it
-        is important to see it up correctly. Go to settings in the organization
-        you want to make default.
-      </p>
-      <Separator />
-      <div className="flex justify-end">
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-2xl">Default Organization</CardTitle>
+        <CardDescription>
+          The default organization acts as the root organization for you users,
+          it is important to see it up correctly. Go to settings in the
+          organization you want to make default.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent>
         <form id="add-org-form" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex items-center space-x-2">
-            <HoverCard>
-              <HoverCardTrigger asChild>
-                <div className="flex flex-row items-center justify-center space-x-3">
-                  <Switch
-                    type={"submit"}
-                    disabled={isDefault}
-                    defaultChecked={isDefault}
-                    onCheckedChange={(value) => {
-                      setValue("is_default", value)
-                    }}
-                    id={"is_default"}
-                    {...register("is_default")}
-                  />
-                  <Label htmlFor="is_default">
-                    {isDefault ? "" : "Make default"}
-                  </Label>
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <div className="flex w-full items-center space-x-4 rounded-md border p-4">
+                <Icons.help />
+                <div className="flex-1 space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    Enable as default
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {isDefault
+                      ? "This organization is default"
+                      : "This organization is not default"}
+                  </p>
                 </div>
-              </HoverCardTrigger>
-              <HoverCardContent align="end" className="w-80">
-                <div className="flex justify-between space-x-4">
-                  {isDefault ? (
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-semibold">
-                        This organization is default
-                      </h4>
-                      <p className="text-sm font-light">
-                        {
-                          "You can't change a default organization. If you want to make any other organization default, you can go directly to that organization and update it as default"
-                        }
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-semibold">
-                        Make this organization default
-                      </h4>
-                      <p className="text-sm font-light">
-                        This action will update all your organization and will
-                        update this as default
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </HoverCardContent>
-            </HoverCard>
-          </div>
+                <Switch
+                  type={"submit"}
+                  disabled={isDefault}
+                  defaultChecked={isDefault}
+                  onCheckedChange={(value) => {
+                    setValue("is_default", value)
+                  }}
+                  id={"is_default"}
+                  {...register("is_default")}
+                />
+              </div>
+            </HoverCardTrigger>
+            <HoverCardContent align="end" className="w-80">
+              <div className="flex justify-between space-x-4">
+                {isDefault ? (
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-semibold">
+                      This organization is default
+                    </h4>
+                    <p className="text-sm font-light">
+                      {
+                        "You can't change a default organization. If you want to make any other organization default, you can go directly to that organization and update it as default"
+                      }
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-semibold">
+                      Make this organization default
+                    </h4>
+                    <p className="text-sm font-light">
+                      This action will update all your organization and will
+                      update this as default
+                    </p>
+                  </div>
+                )}
+              </div>
+            </HoverCardContent>
+          </HoverCard>
         </form>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
