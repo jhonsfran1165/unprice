@@ -8,11 +8,7 @@ module.exports = {
   // mode: "jit", // mode just in time
   darkMode: ["class", '[data-theme="dark"]'],
   // prefix: 'builderai-', // activate to use prefixes here
-  content: [
-    "app/**/*.{ts,tsx}",
-    "pages/**/*.{ts,tsx}",
-    "components/**/*.{ts,tsx}",
-  ],
+  content: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
   // disble hover on mobiles
   future: {
     hoverOnlyWhenSupported: true,
@@ -26,6 +22,36 @@ module.exports = {
       "2xl": "1536px", // extra large screens
     },
     colors: {
+      border: toRadixVar("sand", 7),
+      input: toRadixVar("sand", 6),
+      ring: toRadixVar("sand", 6),
+      background: toRadixVar("sand", 3),
+      foreground: toRadixVar("sand", 11),
+      secondary: {
+        DEFAULT: toRadixVar("amber", 9),
+        foreground: toRadixVar("sand", 11),
+      },
+      destructive: {
+        DEFAULT: toRadixVar("red", 9),
+        foreground: toRadixVar("red", 3),
+      },
+      muted: {
+        DEFAULT: toRadixVar("gray", 9),
+        foreground: toRadixVar("gray", 3),
+      },
+      accent: {
+        DEFAULT: toRadixVar("sand", 3),
+        foreground: toRadixVar("sand", 11),
+      },
+      popover: {
+        DEFAULT: toRadixVar("sand", 2),
+        foreground: toRadixVar("sand", 11),
+      },
+      card: {
+        DEFAULT: toRadixVar("amber", 9),
+        foreground: toRadixVar("amber", 11),
+      },
+
       transparent: "transparent",
       current: "currentColor",
       black: "#000",
@@ -106,34 +132,19 @@ module.exports = {
         textContrast: toRadixVar("blue", 12),
       },
       error: {
-        DEFAULT: toRadixVar("tomato", 1),
-        base: toRadixVar("tomato", 1),
-        bgSubtle: toRadixVar("tomato", 2),
-        bg: toRadixVar("tomato", 3),
-        bgHover: toRadixVar("tomato", 4),
-        bgActive: toRadixVar("tomato", 5),
-        line: toRadixVar("tomato", 6),
-        border: toRadixVar("tomato", 7),
-        borderHover: toRadixVar("tomato", 8),
-        solid: toRadixVar("tomato", 9),
-        solidHover: toRadixVar("tomato", 10),
-        text: toRadixVar("tomato", 11),
-        textContrast: toRadixVar("tomato", 12),
-      },
-      accent: {
-        DEFAULT: toRadixVar("orange", 1),
-        base: toRadixVar("orange", 1),
-        bgSubtle: toRadixVar("orange", 2),
-        bg: toRadixVar("orange", 3),
-        bgHover: toRadixVar("orange", 4),
-        bgActive: toRadixVar("orange", 5),
-        line: toRadixVar("orange", 6),
-        border: toRadixVar("orange", 7),
-        borderHover: toRadixVar("orange", 8),
-        solid: toRadixVar("orange", 9),
-        solidHover: toRadixVar("orange", 10),
-        text: toRadixVar("orange", 11),
-        textContrast: toRadixVar("orange", 12),
+        DEFAULT: toRadixVar("red", 1),
+        base: toRadixVar("red", 1),
+        bgSubtle: toRadixVar("red", 2),
+        bg: toRadixVar("red", 3),
+        bgHover: toRadixVar("red", 4),
+        bgActive: toRadixVar("red", 5),
+        line: toRadixVar("red", 6),
+        border: toRadixVar("red", 7),
+        borderHover: toRadixVar("red", 8),
+        solid: toRadixVar("red", 9),
+        solidHover: toRadixVar("red", 10),
+        text: toRadixVar("red", 11),
+        textContrast: toRadixVar("red", 12),
       },
       muted: {
         DEFAULT: toRadixVar("gray", 1),
@@ -166,7 +177,8 @@ module.exports = {
         textContrast: toRadixVar("sand", 12),
       },
       primary: {
-        DEFAULT: toRadixVar("amber", 1),
+        DEFAULT: toRadixVar("amber", 9),
+        foreground: toRadixVar("amber", 12),
         base: toRadixVar("amber", 1),
         bgSubtle: toRadixVar("amber", 2),
         bg: toRadixVar("amber", 3),
@@ -196,6 +208,12 @@ module.exports = {
         textContrast: toRadixVar("crimson", 12),
       },
     },
+    borderRadius: {
+      lg: "0.5rem",
+      md: "calc(0.5rem - 2px)",
+      sm: "calc(0.5rem - 4px)",
+      full: "9999px",
+    },
     borderColor: (theme) => ({
       ...theme("colors"),
       DEFAULT: toRadixVar("sand", 7),
@@ -203,11 +221,11 @@ module.exports = {
     // Modify the default ring color so that it matches the brand color:
     ringColor: (theme) => ({
       ...theme("colors"),
-      DEFAULT: toRadixVar("sand", 7),
+      DEFAULT: toRadixVar("sand", 9),
     }),
     ringOffsetColor: (theme) => ({
       ...theme("colors"),
-      DEFAULT: toRadixVar("sand", 7),
+      DEFAULT: toRadixVar("sand", 9),
     }),
     fontSize: {
       xs: ".75rem",
@@ -226,9 +244,9 @@ module.exports = {
     },
     container: {
       center: true,
-      padding: "1.5rem",
+      padding: "2rem",
       screens: {
-        "2xl": "1536px",
+        "2xl": "1400px",
       },
     },
     extend: {

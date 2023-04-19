@@ -12,7 +12,7 @@ export default function StripePortal() {
 
   return (
     <Button
-      className="w-28 border border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive"
+      className="w-28 button-primary"
       onClick={async () => {
         try {
           // setClicked(true);

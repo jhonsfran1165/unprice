@@ -1,11 +1,11 @@
 import Link from "next/link"
 
 import { createServerClient } from "@/lib/supabase/supabase-server"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import StripePortal from "@/components/dashboard/portal"
 import Pricing from "@/components/dashboard/pricing"
 import { Card } from "@/components/shared/card"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 
 export default async function IndexPage({
   params: { orgSlug },
@@ -50,7 +50,7 @@ export default async function IndexPage({
             and domains. This action is irreversible and can not be undone.
           </p>
           <Separator className="bg-background-border" />
-          <Button className="w-28 border border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive">
+          <Button className="w-28 button-primary">
             <Link href={`/org/${orgSlug}/settings/billing?action=upgrade`}>
               Upgrade
             </Link>

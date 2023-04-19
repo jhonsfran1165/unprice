@@ -5,6 +5,10 @@
 /* follow this rules */
 /* https://www.radix-ui.com/docs/colors/palette-composition/understanding-the-scale */
 @layer base {
+  * {
+    @apply border-border;
+  }
+
   /* default styles */
   h1 {
     @apply font-satoshi text-4xl text-background-textContrast md:text-6xl font-extrabold leading-[1.15] sm:leading-[1.15];
@@ -24,5 +28,43 @@
 
   body {
     @apply font-inter bg-background-base text-background-text;
+    /* @apply bg-background text-foreground; */
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* alias classes to override ui */
+@layer utilities {
+  .button-ghost {
+    @apply bg-transparent text-background-text hover:border-background-borderHover hover:bg-background-bg hover:text-background-textContrast active:bg-background-bgActive;
+  }
+
+  .button-default {
+    @apply border border-background-border bg-background-bg text-background-text hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
+  }
+
+  .button-destructive {
+    @apply border border-danger-border bg-danger-bg text-danger-text hover:border-danger-borderHover hover:bg-danger-bgHover hover:text-danger-textContrast active:bg-danger-bgActive;
+  }
+
+  .button-primary {
+    @apply border border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive;
+  }
+
+  .button-secondary {
+    @apply border border-secondary-border bg-secondary-bg text-secondary-text hover:border-secondary-borderHover hover:bg-secondary-bgHover hover:text-secondary-textContrast active:bg-secondary-bgActive;
+  }
+}
+
+/** Prevent scrolling on body when modal is open */
+body[style*="pointer-events: none"] .overflow-auto,
+body[style*="pointer-events: none"] .overflow-y-auto,
+body[style*="pointer-events: none"] .overflow-x-auto {
+  overflow: hidden !important;
+}
+
+@media (max-width: 640px) {
+  .container {
+    @apply px-4;
   }
 }

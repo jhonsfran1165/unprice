@@ -16,13 +16,11 @@ export type Profile = Database["public"]["Tables"]["profile"]["Row"]
 export type Project = Database["public"]["Tables"]["project"]["Row"]
 
 // views
-export type DataOrgsView = Database["public"]["View"]["data_orgs"]["Row"]
+export type DataOrgsView = Database["public"]["Views"]["data_orgs"]["Row"]
 
 // custom types
-export type OrganizationViewData =
-  | (DataOrgsView & {
-      organization: Organization
-    })
-  | DataOrgsView
+export type OrganizationViewData = DataOrgsView & {
+  organization: Organization
+}
 
 export type ProjectsApiResult = Project & { organization: Organization }

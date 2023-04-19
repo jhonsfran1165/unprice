@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import useOrganizationExist from "@/hooks/use-organization-exist"
-import { useToast } from "@/hooks/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AnimatePresence, motion } from "framer-motion"
 import { CldUploadWidget } from "next-cloudinary"
@@ -14,8 +12,8 @@ import { SWIPE_REVEAL_ANIMATION_SETTINGS } from "@/lib/constants"
 import { Organization } from "@/lib/types/supabase"
 import { createSlug, fetchAPI } from "@/lib/utils"
 import { orgPostSchema, orgPostType } from "@/lib/validations/org"
-import LoadingDots from "@/components/shared/loading/loading-dots"
-import UploadCloud from "@/components/shared/upload-cloud"
+import useOrganizationExist from "@/hooks/use-organization-exist"
+import { useToast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,6 +28,9 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import LoadingDots from "@/components/shared/loading/loading-dots"
+import UploadCloud from "@/components/shared/upload-cloud"
+
 import "./styles.css"
 
 // TODO: clean this up for a better validation of exist account - maybe better use zod
@@ -345,7 +346,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           form="add-org-form"
           title="Submit"
           type="submit"
-          className="w-28 border border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive"
+          className="w-28 button-primary"
         >
           {loading ? <LoadingDots color="#808080" /> : "Save"}
         </Button>

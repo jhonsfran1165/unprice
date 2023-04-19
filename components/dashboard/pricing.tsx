@@ -9,8 +9,6 @@ import { PRO_TIERS, pricingSubscriptions } from "@/lib/config/subscriptions"
 import { useStore } from "@/lib/stores/layout"
 import { getStripe } from "@/lib/stripe/client"
 import { cn, fetchAPI, nFormatter } from "@/lib/utils"
-import { Icons } from "@/components/shared/icons"
-import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
@@ -20,6 +18,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Icons } from "@/components/shared/icons"
+import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 const Pricing = () => {
   const [tier, setTier] = useState(0)
@@ -247,7 +247,7 @@ const Pricing = () => {
                   href={ctaLink}
                   
                 > */}
-                  {/* <Button className="w-28 border border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive">
+                  {/* <Button className="w-28 button-primary">
 
                 </Button> */}
                   <Button

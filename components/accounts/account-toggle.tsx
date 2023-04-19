@@ -1,7 +1,5 @@
 "use client"
 
-import { useSupabase } from "@/components/auth/supabase-provider"
-import { Icons } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,6 +12,8 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useSupabase } from "@/components/auth/supabase-provider"
+import { Icons } from "@/components/shared/icons"
 
 export function AccountToggle() {
   const { supabase } = useSupabase()
@@ -29,7 +29,7 @@ export function AccountToggle() {
         >
           <Avatar className="h-7 w-7">
             <AvatarImage
-              src={"https://avatar.vercel.sh/dadasdasd"}
+              src={"https://avatar.vercel.sh/dadasdasd.png"}
               alt="@shadcn"
             />
           </Avatar>
