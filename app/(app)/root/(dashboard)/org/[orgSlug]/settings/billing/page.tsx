@@ -1,11 +1,17 @@
 import Link from "next/link"
 
 import { createServerClient } from "@/lib/supabase/supabase-server"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import StripePortal from "@/components/dashboard/portal"
 import Pricing from "@/components/dashboard/pricing"
-import { Card } from "@/components/shared/card"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 
 export default async function IndexPage({
   params: { orgSlug },
@@ -41,32 +47,45 @@ export default async function IndexPage({
     )
   }
   return (
-    <div className="md:px-0">
-      <Card className="mb-10">
-        <div className="flex flex-col space-y-6 px-4 py-5 sm:px-10">
-          <h3>Upgrade Subscrition</h3>
-          <p className="text-sm font-light">
+    <div className="space-y-10 md:px-0">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex text-xl">Upgrade Subscrition</CardTitle>
+          <CardDescription>
             The project will be permanently deleted, including its deployments
             and domains. This action is irreversible and can not be undone.
-          </p>
-          <Separator className="bg-background-border" />
-          <Button className="w-28 border border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive">
+          </CardDescription>
+        </CardHeader>
+
+        <div className="flex items-center justify-center px-6 pb-6">
+          <Separator />
+        </div>
+
+        <CardFooter>
+          <Button className="button-primary w-28">
             <Link href={`/org/${orgSlug}/settings/billing?action=upgrade`}>
               Upgrade
             </Link>
           </Button>
-        </div>
+        </CardFooter>
       </Card>
-      <Card className="mb-10">
-        <div className="flex flex-col space-y-6 px-4 py-5 sm:px-10">
-          <h3>Manage Subscrition</h3>
-          <p className="text-sm font-light">
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex text-xl">Manage Subscrition</CardTitle>
+          <CardDescription>
             The project will be permanently deleted, including its deployments
             and domains. This action is irreversible and can not be undone.
-          </p>
-          <Separator className="bg-background-border" />
-          <StripePortal />
+          </CardDescription>
+        </CardHeader>
+
+        <div className="flex items-center justify-center px-6 pb-6">
+          <Separator />
         </div>
+
+        <CardFooter>
+          <StripePortal />
+        </CardFooter>
       </Card>
     </div>
   )

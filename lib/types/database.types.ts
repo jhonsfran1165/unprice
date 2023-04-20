@@ -228,6 +228,7 @@ export interface Database {
         Row: {
           created_at: string
           custom_domain: string | null
+          description: string | null
           id: number
           logo: string | null
           name: string
@@ -239,6 +240,7 @@ export interface Database {
         Insert: {
           created_at?: string
           custom_domain?: string | null
+          description?: string | null
           id?: number
           logo?: string | null
           name: string
@@ -250,6 +252,7 @@ export interface Database {
         Update: {
           created_at?: string
           custom_domain?: string | null
+          description?: string | null
           id?: number
           logo?: string | null
           name?: string

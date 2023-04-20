@@ -1,6 +1,7 @@
-import useOrganizationExist from "@/hooks/use-organization-exist"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+
+import useOrganizationExist from "@/hooks/use-organization-exist"
 
 // **************************** FIELDS **************************** //
 export const orgSlug = z.string().min(1, {

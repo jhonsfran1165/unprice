@@ -4,7 +4,7 @@ import { layoutConfig } from "@/lib/config/layout"
 import { cn } from "@/lib/utils"
 import { AccountToggle } from "@/components/accounts/account-toggle"
 import { Logo } from "@/components/layout/logo"
-import { OrganizationToggle } from "@/components/organizations/organization-toggle"
+import { OrganizationSwitch } from "@/components/organizations/organization-switch"
 import ProjectContext from "@/components/projects/project-context"
 import { Icons } from "@/components/shared/icons"
 
@@ -14,7 +14,7 @@ export function MainNav() {
       <div className="flex items-center justify-start">
         <Logo />
         <Icons.divider className="mx-3 hidden h-6 w-6 gap-0 text-background-text md:inline-block" />
-        <OrganizationToggle />
+        <OrganizationSwitch />
         <ProjectContext />
       </div>
       <div className="flex flex-1 items-center justify-end space-x-4">
@@ -29,7 +29,7 @@ export function MainNav() {
                         key={index}
                         href={item.href}
                         className={cn(
-                          "flex items-center rounded-md border px-2 py-1 text-xs font-normal hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive",
+                          "button-ghost flex items-center rounded-md border px-2 py-1 text-xs font-normal",
                           item.disabled && "cursor-not-allowed opacity-80"
                         )}
                       >

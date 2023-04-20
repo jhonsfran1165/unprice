@@ -49,7 +49,7 @@ function StoreHandler({
 
   const orgData = useMemo(
     () => orgProfiles?.find((org) => org.org_slug === orgSlug),
-    [orgSlug, JSON.stringify(orgProfiles)] as OrganizationViewData
+    [orgSlug, JSON.stringify(orgProfiles)]
   )
 
   // initialize this only the first time from the server

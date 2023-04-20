@@ -15,6 +15,7 @@ const nextConfig = {
       "pbs.twimg.com",
       "github.com",
       "fonts.googleapis.com",
+      "images.unsplash.com",
     ],
   },
   webpack: (config, { isServer }) => {

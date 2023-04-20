@@ -1,39 +1,88 @@
 import Link from "next/link"
+import { ChevronDown, Circle, Plus, Star } from "lucide-react"
 
 import type { ProjectsApiResult } from "@/lib/types/supabase"
 import { timeAgo } from "@/lib/utils"
-import { Card } from "@/components/shared/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Separator } from "@/components/ui/separator"
 
-export const ProjectCard = ({ project }: { project: ProjectsApiResult }) => {
+export function ProjectCard({ project }: { project: ProjectsApiResult }) {
   return (
-    <Link href={`/org/${project.organization.slug}/project/${project.slug}`}>
-      <Card className="cursor-pointer hover:border-background-textContrast">
-        <div className="flex items-center space-x-1">
-          <div className="flex-1">
-            <div className="flex items-center justify-start space-x-3 px-1">
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src="https://github.com/shadcn.png"
-                  alt="@shadcn"
-                />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-              <h2 className="block truncate text-lg font-bold">
-                {project.name}
-              </h2>
-            </div>
+    <Card>
+      <CardHeader className="grid grid-cols-[1fr_110px] items-start gap-4 space-y-0">
+        <div className="space-y-1">
+          <CardTitle>{project.name}</CardTitle>
+          <CardDescription>{project.description}</CardDescription>
+        </div>
+        <div className="flex items-center space-x-1 rounded-md bg-primary text-black">
+          <Link
+            href={`/org/${project.organization.slug}/project/${project.slug}`}
+          >
+            <Button variant="default" className="px-3">
+              <Star className="mr-2 h-4 w-4" />
+              Star
+            </Button>
+          </Link>
+          <Separator orientation="vertical" className="h-[20px]" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="default" className="px-2">
+                <ChevronDown className="h-4 w-4 text-primary-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              alignOffset={-5}
+              className="w-[200px]"
+              forceMount
+            >
+              <DropdownMenuLabel>Suggested Lists</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem checked>
+                Future Ideas
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>My Stack</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Inspiration</DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Plus className="mr-2 h-4 w-4" /> Create List
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="flex space-x-4 text-sm text-muted-foreground">
+          <div className="flex items-center">
+            <Circle className="fill-sky-400 text-sky-400 mr-1 h-3 w-3" />
+            {project.subdomain}
           </div>
-        </div>
-        <div className={"h-3 pt-2 pb-4"}>
-          <div className={"pl-4 font-semibold"}>{project.subdomain}</div>
-        </div>
-        <div className={"h-3 pb-4 text-right"}>
-          <div className={"text-xs font-semibold"}>
+          <div className="flex items-center">
+            <Star className="mr-1 h-3 w-3" />
+            10k
+          </div>
+          <div>
+            Created{" "}
             {project?.created_at && timeAgo(new Date(project?.created_at))}
           </div>
         </div>
-      </Card>
-    </Link>
+      </CardContent>
+    </Card>
   )
 }

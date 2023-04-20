@@ -1,12 +1,12 @@
 import Link from "next/link"
 
 import { layoutConfig } from "@/lib/config/layout"
+import { Button } from "@/components/ui/button"
 import { CommandDialogLayout } from "@/components/layout/command"
 import { Logo } from "@/components/layout/logo"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { Icons } from "@/components/shared/icons"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
-import { Button } from "@/components/ui/button"
 
 export function Footer() {
   return (
@@ -26,11 +26,7 @@ export function Footer() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-background-bgHover active:bg-background-bgActive"
-                  >
+                  <Button variant="ghost" size="sm" className="button-ghost">
                     <Icons.twitter className="h-5 w-5 fill-current hover:text-background-textContrast" />
                     <span className="sr-only">User</span>
                   </Button>
@@ -40,11 +36,7 @@ export function Footer() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-background-bgHover active:bg-background-bgActive"
-                  >
+                  <Button variant="ghost" size="sm" className="button-ghost">
                     <Icons.gitHub className="h-5 w-5 fill-current hover:text-background-textContrast" />
                     <span className="sr-only">User</span>
                   </Button>

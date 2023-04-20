@@ -9,8 +9,6 @@ import { PRO_TIERS, pricingSubscriptions } from "@/lib/config/subscriptions"
 import { useStore } from "@/lib/stores/layout"
 import { getStripe } from "@/lib/stripe/client"
 import { cn, fetchAPI, nFormatter } from "@/lib/utils"
-import { Icons } from "@/components/shared/icons"
-import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
@@ -20,6 +18,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { toast } from "@/components/ui/use-toast"
+import { Icons } from "@/components/shared/icons"
+import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 const Pricing = () => {
   const [tier, setTier] = useState(0)
@@ -57,7 +58,11 @@ const Pricing = () => {
       const stripe = await getStripe()
       stripe?.redirectToCheckout({ sessionId })
     } catch (error) {
-      return alert((error as Error)?.message)
+      toast({
+        title: "Error saving org",
+        description: error.message,
+        className: "danger",
+      })
     } finally {
       setPriceIdLoading(false)
     }
@@ -86,7 +91,7 @@ const Pricing = () => {
             config={{ elementCount: 200, spread: 90 }}
           />
           <Switch
-            className="border-background-solid bg-background ring-background-solid data-[state=unchecked]:bg-background data-[state=checked]:bg-primary-solid"
+            className="bg-background-basering-background-solid data-[state=unchecked]:bg-background-basedata-[state=checked]:bg-primary-solid border-background-solid"
             onCheckedChange={(value) => {
               setAnnualBilling(value)
             }}
@@ -247,7 +252,7 @@ const Pricing = () => {
                   href={ctaLink}
                   
                 > */}
-                  {/* <Button className="w-28 border border-primary-border bg-primary-bg text-primary-text hover:border-primary-borderHover hover:bg-primary-bgHover hover:text-primary-textContrast active:bg-primary-bgActive">
+                  {/* <Button className="w-28 button-primary">
 
                 </Button> */}
                   <Button
@@ -256,8 +261,7 @@ const Pricing = () => {
                       {
                         "border border-primary-border bg-gradient-to-r from-primary-solid to-secondary-solid text-black hover:bg-clip-text hover:text-primary-solid":
                           plan === "Pro",
-                        "border border-background-border bg-background-bg text-background-text hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive":
-                          plan !== "Pro",
+                        "button-default": plan !== "Pro",
                       }
                     )}
                     onClick={async () => {

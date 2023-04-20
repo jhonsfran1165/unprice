@@ -4,6 +4,7 @@ import { useStore } from "@/lib/stores/layout"
 import useProjects from "@/lib/swr/use-projects"
 import { ProjectCard } from "@/components/projects/project-card"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
+
 import NoProjectsPlaceholder from "./no-projects-placeholder"
 import { ProjectSkeleton } from "./project-skeleton"
 

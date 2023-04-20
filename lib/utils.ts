@@ -34,8 +34,6 @@ export const fetchAPI = async ({
   const res: Response = await fetch(url, payload)
 
   if (!res.ok) {
-    console.log("Error in postData", { url, data, res })
-
     throw Error(res.statusText)
   }
 

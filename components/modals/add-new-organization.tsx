@@ -8,8 +8,6 @@ import { useDebounce } from "use-debounce"
 
 import { createSlug } from "@/lib/utils"
 import { orgPutSchema, type orgPutType } from "@/lib/validations/org"
-import { Icons } from "@/components/shared/icons"
-import LoadingDots from "@/components/shared/loading/loading-dots"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -30,6 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Icons } from "@/components/shared/icons"
+import LoadingDots from "@/components/shared/loading/loading-dots"
 
 export function AddOrgModal() {
   const [signInClicked, setSignInClicked] = useState(false)
@@ -113,16 +113,12 @@ export function AddOrgModal() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full border hover:bg-background-bgHover active:bg-background-bgActive"
-        >
+        <Button variant="ghost" size="sm" className="button-ghost w-full">
           <Icons.add className="h-4 w-4 rotate-0 scale-100 hover:text-background-textContrast" />
           <span className="pl-2">Create new Organization</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-background-bgSubtle text-background-text">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit profile</DialogTitle>
           <DialogDescription>
@@ -216,10 +212,7 @@ export function AddOrgModal() {
               <SelectTrigger className="">
                 <SelectValue placeholder="Type of the organization" />
               </SelectTrigger>
-              <SelectContent
-                position={"popper"}
-                className="w-80 bg-background-bgSubtle text-background-text"
-              >
+              <SelectContent position={"popper"} className="w-80">
                 <SelectGroup>
                   <SelectItem value="personal">Personal</SelectItem>
                   <SelectItem value="bussiness">Bussines</SelectItem>
@@ -240,7 +233,7 @@ export function AddOrgModal() {
             form="add-org-form"
             title="Submit"
             type="submit"
-            className="border border-primary-border bg-primary-bg hover:border-primary-borderHover hover:bg-primary-bgHover active:bg-primary-bgActive"
+            className="button-primary"
           >
             {signInClicked ? (
               <LoadingDots color="#808080" />

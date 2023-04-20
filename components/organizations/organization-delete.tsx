@@ -2,10 +2,9 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useToast } from "@/hooks/use-toast"
 import { mutate } from "swr"
 
-import LoadingDots from "@/components/shared/loading/loading-dots"
+import { fetchAPI } from "@/lib/utils"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,14 +17,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { toast } from "@/components/ui/use-toast"
+import LoadingDots from "@/components/shared/loading/loading-dots"
 
 // TODO: move this to a component
 export function ConfirmAction({ confirmAction, trigger }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent className="border border-background-border bg-background text-background-text">
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription className="font-light">
@@ -34,13 +43,10 @@ export function ConfirmAction({ confirmAction, trigger }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="border border-background-border bg-background-bg font-light text-background-text hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive">
+          <AlertDialogCancel className="button-default">
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={confirmAction}
-            className="border border-danger-border bg-danger-bg font-light text-danger-text hover:border-danger-borderHover hover:bg-danger-bgHover hover:text-danger-textContrast active:bg-danger-bgActive"
-          >
+          <AlertDialogAction onClick={confirmAction} className="button-danger">
             Continue
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -59,7 +65,6 @@ export function OrganizationDelete({
   id: number
   isDefault?: boolean
 }) {
-  const { toast } = useToast()
   const router = useRouter()
   const [loading, setlLoading] = useState(false)
 
@@ -72,31 +77,30 @@ export function OrganizationDelete({
           title: "Error deleting org",
           description:
             "This organization is the default one. Please check another organization as default before perform this action.",
-          className:
-            "bg-warning-bgActive text-warning-text border-warning-solid",
+          className: "button-warning",
         })
         return null
       }
 
-      const data = await fetch(`/api/org/${orgSlug}`, {
+      const org = await fetchAPI({
+        url: `/api/org/${orgSlug}`,
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orgSlug, id }),
+        data: { orgSlug, id },
       })
 
-      const org = await data.json()
+      if (org) {
+        // mutate swr endpoints for org
+        mutate(`/api/org`)
+        mutate(`/api/org/${orgSlug}`)
 
-      // mutate swr endpoints for org
-      mutate(`/api/org`)
-      mutate(`/api/org/${orgSlug}`)
-
-      router.push("/")
-      router.refresh()
+        router.push("/")
+        router.refresh()
+      }
     } catch (error) {
       toast({
         title: "Error deleting org",
-        description: error?.message,
-        className: "bg-danger-bgActive text-danger-text border-danger-solid",
+        description: error.message,
+        className: "danger",
       })
     } finally {
       setlLoading(false)
@@ -105,26 +109,27 @@ export function OrganizationDelete({
 
   const trigger = (
     <div className="flex justify-end">
-      <Button
-        title="Delete"
-        // onClick={deleteOrg}
-        className="w-28 border border-danger-border bg-danger-bg text-danger-text hover:border-danger-borderHover hover:bg-danger-bgHover hover:text-danger-textContrast active:bg-danger-bgActive"
-      >
+      <Button title="Delete" className="button-danger w-28">
         {loading ? <LoadingDots color="#808080" /> : "Delete"}
       </Button>
     </div>
   )
 
   return (
-    <div className="flex flex-col space-y-6 px-4 py-5 sm:px-10">
-      <h3>Delete Organization</h3>
-      <p className="text-sm font-light">
-        The project will be permanently deleted, including its deployments and
-        domains. This action is irreversible and can not be undone.
-      </p>
-      <Separator className="bg-background-border" />
-
-      <ConfirmAction confirmAction={deleteOrg} trigger={trigger} />
-    </div>
+    <Card className="mb-10 border-danger-solid">
+      <CardHeader>
+        <CardTitle className="text-xl">Delete Organization</CardTitle>
+        <CardDescription>
+          The project will be permanently deleted, including its deployments and
+          domains. This action is irreversible and can not be undone.
+        </CardDescription>
+      </CardHeader>
+      <div className="flex items-center justify-center px-6 pb-6">
+        <Separator />
+      </div>
+      <CardFooter>
+        <ConfirmAction confirmAction={deleteOrg} trigger={trigger} />
+      </CardFooter>
+    </Card>
   )
 }
