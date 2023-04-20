@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils"
-import { Card } from "@/components/shared/card"
+
+// import { Card } from "@/components/shared/card"
 
 export const ProjectSkeleton = ({ isLoading }: { isLoading?: boolean }) => (
-  <Card>
+  <div>
     <div className="flex items-center space-x-1">
       <div className="flex-1">
         <div className="flex items-center justify-start space-x-3 px-1">
@@ -45,5 +46,5 @@ export const ProjectSkeleton = ({ isLoading }: { isLoading?: boolean }) => (
         })}
       />
     </div>
-  </Card>
+  </div>
 )

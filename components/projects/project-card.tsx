@@ -30,11 +30,11 @@ export function ProjectCard({ project }: { project: ProjectsApiResult }) {
           <CardTitle>{project.name}</CardTitle>
           <CardDescription>{project.description}</CardDescription>
         </div>
-        <div className="flex items-center space-x-1 rounded-md bg-primary text-black">
+        <div className="flex items-center space-x-1 rounded-md border border-primary-border bg-primary-bg w-auto">
           <Link
             href={`/org/${project.organization.slug}/project/${project.slug}`}
           >
-            <Button variant="default" className="px-3">
+            <Button className="px-3 button-primary border-none">
               <Star className="mr-2 h-4 w-4" />
               Star
             </Button>
@@ -42,8 +42,8 @@ export function ProjectCard({ project }: { project: ProjectsApiResult }) {
           <Separator orientation="vertical" className="h-[20px]" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="default" className="px-2">
-                <ChevronDown className="h-4 w-4 text-primary-foreground" />
+              <Button className="px-1 button-primary border-none">
+                <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent

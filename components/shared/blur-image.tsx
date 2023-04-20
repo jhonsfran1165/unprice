@@ -22,10 +22,6 @@ export default function BlurImage(props: ImageProps) {
       onError={() => {
         setSrc(`https://avatar.vercel.sh/${props.alt}`) // if the image fails to load, use the default avatar
       }}
-      style={{
-        width: props.width || 100,
-        height: props.height || 100,
-      }}
     />
   )
 }

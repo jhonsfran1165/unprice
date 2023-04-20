@@ -23,7 +23,7 @@ const Menubar = React.forwardRef<
   <MenubarPrimitive.Root
     ref={ref}
     className={cn(
-      "bg-background-basep-1 flex h-10 items-center space-x-1 rounded-md border",
+      "flex h-10 items-center space-x-1 rounded-md border bg-background p-1",
       className
     )}
     {...props}
@@ -207,7 +207,7 @@ const MenubarShortcut = ({
   return (
     <span
       className={cn(
-        "tracking-widest ml-auto text-xs text-muted-foreground",
+        "ml-auto text-xs tracking-widest text-muted-foreground",
         className
       )}
       {...props}

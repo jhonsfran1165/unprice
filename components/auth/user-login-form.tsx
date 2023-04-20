@@ -17,9 +17,9 @@ import { toast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/components/auth/supabase-provider"
 import { Icons } from "@/components/shared/icons"
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface LoginFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+export function LoginForm({ className, ...props }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const router = useRouter()
 

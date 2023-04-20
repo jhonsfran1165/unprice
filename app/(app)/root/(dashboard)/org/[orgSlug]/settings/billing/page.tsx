@@ -10,8 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import StripePortal from "@/components/dashboard/portal"
-import Pricing from "@/components/dashboard/pricing"
+import StripePortal from "@/components/subscriptions/portal"
+import Pricing from "@/components/subscriptions/pricing"
 
 export default async function IndexPage({
   params: { orgSlug },
@@ -36,8 +36,6 @@ export default async function IndexPage({
     .eq("profile_id", session?.user.id)
     .eq("org_slug", orgSlug)
     .single()
-
-  console.log(dataOrg)
 
   if (action === "upgrade") {
     return (

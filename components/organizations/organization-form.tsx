@@ -13,7 +13,7 @@ import { Organization } from "@/lib/types/supabase"
 import { createSlug, fetchAPI } from "@/lib/utils"
 import { orgPostSchema, orgPostType } from "@/lib/validations/org"
 import useOrganizationExist from "@/hooks/use-organization-exist"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -189,7 +189,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                 {...register("name")}
                 id={"name"}
                 aria-invalid={errors.name ? "true" : "false"}
-                className="mt-1 w-full bg-background"
+                className="mt-1 w-full"
                 onChange={(e) => {
                   setValue("name", e.target.value)
                   if (action === "new") {
@@ -222,7 +222,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                 {...register("slug")}
                 id={"slug"}
                 aria-invalid={errors.slug ? "true" : "false"}
-                className="mt-1 w-full bg-background"
+                className="mt-1 w-full"
               />
               {errors.slug && (
                 <p className="pt-1 text-xs text-error-solid" role="alert">
@@ -243,13 +243,13 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                 setValue("type", value, { shouldValidate: true })
               }
             >
-              <SelectTrigger className="w-full bg-background">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Type of the organization" />
               </SelectTrigger>
               <SelectContent
                 position={"popper"}
                 sideOffset={2}
-                className="SelectContent bg-background-bgSubtle text-background-text"
+                className="SelectContent-bgSubtle text-background-text"
               >
                 <SelectGroup>
                   <SelectItem value="personal">Personal</SelectItem>
@@ -314,7 +314,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                   return (
                     <button
                       onClick={handleOnClick}
-                      className="bg-background-basetransition-all flex h-full w-full items-center justify-center rounded-md duration-200 ease-linear"
+                      className="bg-background-base transition-all flex h-full w-full items-center justify-center rounded-md duration-200 ease-linear"
                     >
                       <UploadCloud className="h-8 w-8" />
                     </button>
@@ -337,7 +337,6 @@ export function OrganizationForm({ org }: { org?: Organization }) {
               id={"description"}
               aria-invalid={errors.description ? "true" : "false"}
               placeholder="Type your description here."
-              className="bg-background"
               onChange={(e) => {
                 e.preventDefault()
                 setValue("description", e.target.value, {

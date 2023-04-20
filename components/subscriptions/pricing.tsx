@@ -91,7 +91,6 @@ const Pricing = () => {
             config={{ elementCount: 200, spread: 90 }}
           />
           <Switch
-            className="bg-background-basering-background-solid data-[state=unchecked]:bg-background-basedata-[state=checked]:bg-primary-solid border-background-solid"
             onCheckedChange={(value) => {
               setAnnualBilling(value)
             }}
@@ -165,7 +164,7 @@ const Pricing = () => {
                         // defaultValue={[tier]}
                         max={PRO_TIERS.length - 1}
                         // step={PRO_TIERS.length - 1}
-                        className="w-[60%] border-primary-solid bg-primary ring-primary-solid"
+                        className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
                       />
                       <div className="flex items-center">
                         <p className="text-sm">
