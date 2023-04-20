@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation"
 
 import { useStore } from "@/lib/stores/layout"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { DashboardShellSkeleton } from "@/components/dashboard/shell-skeleton"
-import { DashboardSideBarNav } from "@/components/dashboard/sidebar-nav"
+import { DashboardShellSkeleton } from "@/components/layout/shell-skeleton"
+import { DashboardSideBarNav } from "@/components/layout/sidebar-nav"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 export function DashboardShell({

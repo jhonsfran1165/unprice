@@ -1,159 +1,80 @@
-"use client"
-
-import { useState } from "react"
+import { Metadata } from "next"
+import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { SubmitHandler, useForm } from "react-hook-form"
+import { Command } from "lucide-react"
 
-import {
-  authLoginValidationSchema,
-  type authLoginValidationType,
-} from "@/lib/validations/auth"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useSupabase } from "@/components/auth/supabase-provider"
-import BlurImage from "@/components/shared/blur-image"
-import LoadingDots from "@/components/shared/loading/loading-dots"
+import { cn } from "@/lib/utils"
+import { buttonVariants } from "@/components/ui/button"
+import { UserAuthForm } from "@/components/auth/user-auth-form"
 
-export default function Login() {
-  const [signInClicked, setSignInClicked] = useState(false)
-  const [noSuchAccount, setNoSuchAccount] = useState(false)
-  const [errorMessage, setErrorMessage] = useState("")
+export const metadata: Metadata = {
+  title: "Authentication",
+  description: "Authentication forms built using the components.",
+}
 
-  const router = useRouter()
-
-  const { supabase } = useSupabase()
-
-  const {
-    register,
-    formState: { errors },
-    handleSubmit,
-  } = useForm<authLoginValidationType>({
-    resolver: zodResolver(authLoginValidationSchema),
-    defaultValues: {
-      email: "",
-    },
-  })
-
-  const onSubmit: SubmitHandler<authLoginValidationType> = async ({
-    email,
-    password,
-  }) => {
-    try {
-      setSignInClicked(true)
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) throw error
-
-      router.push("/")
-    } catch (error) {
-      if (error instanceof Error) {
-        setNoSuchAccount(true)
-        setErrorMessage(error.message)
-      }
-    } finally {
-      setSignInClicked(false)
-    }
-  }
-
+export default function AuthenticationPage() {
   return (
-    <div className="flex h-screen w-screen items-center justify-center">
-      <div className="rounded-2xl z-10 w-full max-w-md overflow-hidden border bg-background-bgSubtle shadow-sm shadow-background-solid">
-        <div className="flex flex-col items-center justify-center space-y-3 border-b bg-primary-solid px-4 py-6 pt-8 text-center sm:px-16">
-          <a href="https://dub.sh">
-            <BlurImage
-              src="/_static/logo.png"
-              alt="Dub.sh logo"
-              className="h-10 w-10 rounded-full"
-              width={20}
-              height={20}
-            />
-          </a>
-          <h3 className="text-3xl font-semibold text-black">Sign In</h3>
-          <p className="text-lg text-black opacity-60">
-            Use your email address to sign in.
+    <div className="container relative grid h-screen flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0">
+      <Link
+        href="/register"
+        className={cn(
+          buttonVariants({ variant: "ghost", size: "sm" }),
+          "absolute right-4 top-4 md:right-8 md:top-8"
+        )}
+      >
+        Login
+      </Link>
+      <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
+        <div
+          className="absolute inset-0 bg-cover"
+          style={{
+            backgroundImage:
+              "url(https://images.unsplash.com/photo-1590069261209-f8e9b8642343?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1376&q=80)",
+          }}
+        />
+        <div className="relative z-20 flex items-center text-lg font-medium">
+          <Command className="mr-2 h-6 w-6" /> BuilderAI
+        </div>
+        <div className="relative z-20 mt-auto">
+          <blockquote className="space-y-2">
+            <p className="text-lg">
+              &ldquo;This library has saved me countless hours of work and
+              helped me deliver stunning designs to my clients faster than ever
+              before. Highly recommended!&rdquo;
+            </p>
+            <footer className="text-sm">Sofia Davis</footer>
+          </blockquote>
+        </div>
+      </div>
+      <div className="lg:p-8">
+        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+          <div className="flex flex-col space-y-2 text-center">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Create an account
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Enter your email below to create your account
+            </p>
+          </div>
+          <UserAuthForm />
+          <p className="px-8 text-center text-sm text-muted-foreground">
+            By clicking continue, you agree to our{" "}
+            <Link
+              href="/terms"
+              className="underline underline-offset-4 hover:text-primary"
+            >
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/privacy"
+              className="underline underline-offset-4 hover:text-primary"
+            >
+              Privacy Policy
+            </Link>
+            .
           </p>
         </div>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col space-y-4 px-4 py-8 sm:px-16"
-        >
-          {errorMessage ? (
-            <p className="text-center text-sm text-error-solid">
-              {errorMessage}
-            </p>
-          ) : (
-            <p className="text-center text-sm text-transparent"> No errors</p>
-          )}
-          <div>
-            <Label htmlFor="email" className="block text-xs">
-              EMAIL ADDRESS
-            </Label>
-            <Input
-              {...register("email")}
-              type={"email"}
-              id={"email"}
-              aria-invalid={errors.email ? "true" : "false"}
-              className="mt-1 block w-full bg-background"
-            />
-            {errors.email && (
-              <p className="pt-1 text-xs text-error-solid" role="alert">
-                {errors.email?.message}
-              </p>
-            )}
-          </div>
-          <div>
-            <Label htmlFor="password" className="block text-xs">
-              PASSWORD
-            </Label>
-            <Input
-              {...register("password")}
-              type={"password"}
-              id={"password"}
-              aria-invalid={errors.password ? "true" : "false"}
-              className="mt-1 block w-full bg-background"
-            />
-            {errors.password && (
-              <p className="pt-1 text-xs text-error-solid" role="alert">
-                {errors.password?.message}
-              </p>
-            )}
-          </div>
-          <Button
-            disabled={signInClicked}
-            title="Submit"
-            type={"submit"}
-            className="button-primary"
-          >
-            {signInClicked ? <LoadingDots color="#808080" /> : "Sign In"}
-          </Button>
-          {noSuchAccount ? (
-            <p className="text-center text-sm font-normal text-error-solid">
-              No such account.{" "}
-              <Link href="/register" className="font-semibold">
-                Sign up
-              </Link>{" "}
-              instead?
-            </p>
-          ) : (
-            <p className="text-center text-sm font-normal">
-              No registered?{" "}
-              <Link
-                href="/register"
-                className="font-semibold text-primary-textContrast"
-              >
-                Sign up
-              </Link>{" "}
-              with your email.
-            </p>
-          )}
-        </form>
       </div>
     </div>
   )

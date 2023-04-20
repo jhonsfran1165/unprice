@@ -47,10 +47,10 @@ export default async function IndexPage({
     )
   }
   return (
-    <div className="md:px-0 space-y-10">
+    <div className="space-y-10 md:px-0">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl flex">Upgrade Subscrition</CardTitle>
+          <CardTitle className="flex text-xl">Upgrade Subscrition</CardTitle>
           <CardDescription>
             The project will be permanently deleted, including its deployments
             and domains. This action is irreversible and can not be undone.
@@ -72,7 +72,7 @@ export default async function IndexPage({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl flex">Manage Subscrition</CardTitle>
+          <CardTitle className="flex text-xl">Manage Subscrition</CardTitle>
           <CardDescription>
             The project will be permanently deleted, including its deployments
             and domains. This action is irreversible and can not be undone.

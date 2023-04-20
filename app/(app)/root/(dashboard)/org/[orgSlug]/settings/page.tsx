@@ -49,7 +49,7 @@ export default async function OrgSettingsIndexPage({
   const org = dataOrg?.organization as Organization
 
   return (
-    <div className="md:px-0 space-y-10">
+    <div className="space-y-10 md:px-0">
       <OrganizationForm org={org} />
 
       <OrganizationMakeDefault

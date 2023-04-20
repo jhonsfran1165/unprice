@@ -472,4 +472,3 @@ export interface Database {
     }
   }
 }
-

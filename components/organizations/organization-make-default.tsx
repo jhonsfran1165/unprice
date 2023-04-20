@@ -80,7 +80,7 @@ export function OrganizationMakeDefault({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">Default Organization</CardTitle>
+        <CardTitle className="text-xl">Default Organization</CardTitle>
         <CardDescription>
           The default organization acts as the root organization for you users,
           it is important to see it up correctly. Go to settings in the

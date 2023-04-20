@@ -18,10 +18,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { toast } from "@/components/ui/use-toast"
 import { Icons } from "@/components/shared/icons"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
-
-import { toast } from "../ui/use-toast"
 
 const Pricing = () => {
   const [tier, setTier] = useState(0)
@@ -92,7 +91,7 @@ const Pricing = () => {
             config={{ elementCount: 200, spread: 90 }}
           />
           <Switch
-            className="border-background-solid bg-background ring-background-solid data-[state=unchecked]:bg-background data-[state=checked]:bg-primary-solid"
+            className="bg-background-basering-background-solid data-[state=unchecked]:bg-background-basedata-[state=checked]:bg-primary-solid border-background-solid"
             onCheckedChange={(value) => {
               setAnnualBilling(value)
             }}
@@ -119,7 +118,7 @@ const Pricing = () => {
             }) => (
               <div
                 key={plan}
-                className={`rounded-2xl relative bg-background-bgSubtle ${
+                className={`relative rounded-2xl bg-background-bgSubtle ${
                   plan === "Pro"
                     ? "border-2 border-primary-solid shadow-primary-line"
                     : "border-gray-200 border"

@@ -28,7 +28,7 @@
 
   body {
     @apply font-inter bg-background-base text-background-text;
-    /* @apply bg-background text-foreground; */
+    /* @apply bg-background-basetext-foreground; */
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }

@@ -151,7 +151,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           <AvatarImage src={watchImage || ""} alt={"org photo cover"} />
         </Avatar>
         <CardHeader>
-          <CardTitle className="text-2xl flex">Organization</CardTitle>
+          <CardTitle className="flex text-xl">Organization</CardTitle>
           <CardDescription>
             Use organization for bundle users a projects together, be aware that
             every organization is totally separated from the others.
@@ -314,7 +314,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                   return (
                     <button
                       onClick={handleOnClick}
-                      className="flex h-full w-full items-center justify-center rounded-md bg-background transition-all duration-200 ease-linear"
+                      className="bg-background-basetransition-all flex h-full w-full items-center justify-center rounded-md duration-200 ease-linear"
                     >
                       <UploadCloud className="h-8 w-8" />
                     </button>

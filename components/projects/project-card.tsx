@@ -70,7 +70,7 @@ export function ProjectCard({ project }: { project: ProjectsApiResult }) {
       <CardContent>
         <div className="flex space-x-4 text-sm text-muted-foreground">
           <div className="flex items-center">
-            <Circle className="mr-1 h-3 w-3 fill-sky-400 text-sky-400" />
+            <Circle className="fill-sky-400 text-sky-400 mr-1 h-3 w-3" />
             {project.subdomain}
           </div>
           <div className="flex items-center">

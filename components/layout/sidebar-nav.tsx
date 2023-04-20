@@ -28,19 +28,24 @@ export function DashboardSideBarNav({
             key={index}
             href={item.disabled ? "#" : pathPrefix + item.href}
           >
-            <span
+            <div
               className={cn(
                 "button-ghost group flex items-center rounded-md px-3 py-2 text-sm font-medium",
                 {
-                  "text-background-textContrast": active,
                   transparent: !active,
                   "cursor-not-allowed opacity-80": item.disabled,
                 }
               )}
             >
               <Icon className="mr-2 h-4 w-4 text-primary-solid" />
-              <span>{item.title}</span>
-            </span>
+              <span
+                className={cn({
+                  "text-background-textContrast": active,
+                })}
+              >
+                {item.title}
+              </span>
+            </div>
           </WrapperLink>
         )
       })}

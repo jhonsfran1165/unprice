@@ -118,7 +118,7 @@ export function OrganizationDelete({
   return (
     <Card className="mb-10 border-danger-solid">
       <CardHeader>
-        <CardTitle className="text-2xl">Delete Organization</CardTitle>
+        <CardTitle className="text-xl">Delete Organization</CardTitle>
         <CardDescription>
           The project will be permanently deleted, including its deployments and
           domains. This action is irreversible and can not be undone.
