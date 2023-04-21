@@ -1,25 +1,8 @@
-import { Suspense } from "react"
-import { BellRing, Check } from "lucide-react"
-
 import { createServerClient } from "@/lib/supabase/supabase-server"
-import { Organization, OrganizationViewData } from "@/lib/types/supabase"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
+import { Organization } from "@/lib/types/supabase"
 import { OrganizationDelete } from "@/components/organizations/organization-delete"
 import { OrganizationForm } from "@/components/organizations/organization-form"
 import { OrganizationMakeDefault } from "@/components/organizations/organization-make-default"
-
-// import { Card } from "@/components/shared/card"
 
 // TODO: introduce example framer motion
 // https://www.josephcollicoat.com/articles/animating-text-with-the-intersection-observer-api-and-framer-motion
@@ -46,8 +29,6 @@ export default async function OrgSettingsIndexPage({
     .eq("organization.slug", orgSlug)
     .single()
 
-  console.log(error)
-
   const org = dataOrg?.organization as Organization
 
   return (
@@ -65,10 +46,6 @@ export default async function OrgSettingsIndexPage({
         id={org.id}
         isDefault={dataOrg?.is_default ?? false}
       />
-
-      {/* <Suspense fallback={<div>Loading...</div>}>
-        <CardDemo />
-      </Suspense> */}
     </div>
   )
 }

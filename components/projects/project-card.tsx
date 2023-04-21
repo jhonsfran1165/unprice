@@ -28,14 +28,11 @@ import { Icons } from "../shared/icons"
 export function ProjectCard({ project }: { project: ProjectsApiResult }) {
   return (
     <Card>
-      <CardHeader className="grid grid-cols-[1fr_110px] items-start gap-4 space-y-0">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <div className="space-y-1">
           <CardTitle>{project.name}</CardTitle>
-          <CardDescription className="w-40 text-sm md:truncate">
-            {project.description}
-          </CardDescription>
         </div>
-        <div className="flex items-center justify-end space-x-1">
+        <div className="flex items-center justify-end">
           <Link
             href={`/org/${project.organization.slug}/project/${project.slug}`}
           >
@@ -72,6 +69,9 @@ export function ProjectCard({ project }: { project: ProjectsApiResult }) {
         </div>
       </CardHeader>
       <CardContent>
+        <p className="line-clamp-2">{project.description}</p>
+      </CardContent>
+      <CardFooter className="flex items-center justify-end text-xs">
         <div className="flex space-x-4 text-sm text-muted-foreground">
           <div className="flex items-center">
             <Icons.cloud className="fill-sky-400 text-sky-400 mr-1 h-3 w-3" />
@@ -81,10 +81,11 @@ export function ProjectCard({ project }: { project: ProjectsApiResult }) {
             <Star className="mr-1 h-3 w-3" />
             10k
           </div>
+          <div className="flex items-center text-xs font-light">
+            Created{" "}
+            {project?.created_at && timeAgo(new Date(project?.created_at))}
+          </div>
         </div>
-      </CardContent>
-      <CardFooter className="flex justify-end text-xs">
-        Created {project?.created_at && timeAgo(new Date(project?.created_at))}
       </CardFooter>
     </Card>
   )

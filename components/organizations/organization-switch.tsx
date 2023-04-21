@@ -109,7 +109,7 @@ export function OrganizationSwitch() {
                 >
                   <Link className="m-0 flex" href={"/org"}>
                     <Icons.plusCircle className="mr-2 h-5 w-5" />
-                    Create Team
+                    Create Organization
                   </Link>
                 </CommandItem>
               </CommandGroup>
