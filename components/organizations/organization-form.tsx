@@ -293,7 +293,7 @@ export function OrganizationForm({ org }: { org: Organization }) {
                   return (
                     <button
                       onClick={handleOnClick}
-                      className="transition-all flex h-full w-full items-center justify-center rounded-md duration-200 ease-linear"
+                      className="flex h-full w-full items-center justify-center rounded-md transition-all duration-200 ease-linear"
                     >
                       <Icons.uploadCloud className="h-8 w-8" />
                     </button>

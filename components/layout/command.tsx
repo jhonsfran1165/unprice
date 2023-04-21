@@ -38,7 +38,7 @@ export function CommandDialogLayout() {
   return (
     <div className="mr-5">
       <p className="text-sm">
-        <kbd className="text-slate-600 rounded pointer-events-none inline-flex h-5 select-none items-center gap-1 border px-1.5 font-mono text-[10px] font-medium opacity-100">
+        <kbd className="text-slate-600 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100">
           press <span className="text-xs">⌘</span>K
         </kbd>
       </p>

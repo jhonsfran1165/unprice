@@ -18,7 +18,7 @@ export default function ProjectContext() {
         <div className="hidden items-center justify-start md:flex">
           <Separator
             orientation="vertical"
-            className="ml-5 mr-5 hidden h-6 gap-0 text-background-textContrast md:inline-block rotate-[30deg]"
+            className="mx-5 hidden h-6 rotate-[30deg] gap-0 text-background-textContrast md:inline-block"
           />
           <span className="block truncate text-sm font-bold">
             {project?.name}

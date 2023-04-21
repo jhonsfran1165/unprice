@@ -15,7 +15,7 @@ export function MainNav() {
         <Logo />
         <Separator
           orientation="vertical"
-          className="ml-6 mr-5 hidden h-6 gap-0 text-background-textContrast md:inline-block rotate-[30deg]"
+          className="ml-6 mr-5 hidden h-6 rotate-[30deg] gap-0 text-background-textContrast md:inline-block"
         />
         <OrganizationSwitch />
         <ProjectContext />

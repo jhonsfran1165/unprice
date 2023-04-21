@@ -24,8 +24,8 @@ export const ProjectSkeleton = ({ isLoading }: { isLoading?: boolean }) => (
           <Skeleton className="h-2 w-20" />
         </CardDescription>
       </div>
-      <div className="flex justify-end items-center space-x-1">
-        <Skeleton className="w-[100px] h-[40px]" />
+      <div className="flex items-center justify-end space-x-1">
+        <Skeleton className="h-[40px] w-[100px]" />
       </div>
     </CardHeader>
     <CardContent>
@@ -38,7 +38,7 @@ export const ProjectSkeleton = ({ isLoading }: { isLoading?: boolean }) => (
         </div>
       </div>
     </CardContent>
-    <CardFooter className="text-xs flex justify-end">
+    <CardFooter className="flex justify-end text-xs">
       <Skeleton className="h-2 w-20" />
     </CardFooter>
   </Card>

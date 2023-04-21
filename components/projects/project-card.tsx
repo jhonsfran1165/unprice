@@ -31,22 +31,22 @@ export function ProjectCard({ project }: { project: ProjectsApiResult }) {
       <CardHeader className="grid grid-cols-[1fr_110px] items-start gap-4 space-y-0">
         <div className="space-y-1">
           <CardTitle>{project.name}</CardTitle>
-          <CardDescription className="w-40 md:truncate text-sm">
+          <CardDescription className="w-40 text-sm md:truncate">
             {project.description}
           </CardDescription>
         </div>
-        <div className="flex justify-end items-center space-x-1">
+        <div className="flex items-center justify-end space-x-1">
           <Link
             href={`/org/${project.organization.slug}/project/${project.slug}`}
           >
-            <Button variant={"ghost"} className="px-2 button-ghost">
+            <Button variant={"ghost"} className="button-ghost px-2">
               <Icons.externalLink className="h-4 w-4 text-primary" />
             </Button>
           </Link>
           <Separator orientation="vertical" className="h-[20px]" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant={"ghost"} className="px-2 button-ghost">
+              <Button variant={"ghost"} className="button-ghost px-2">
                 <ChevronDown className="h-4 w-4 text-primary" />
               </Button>
             </DropdownMenuTrigger>
@@ -83,7 +83,7 @@ export function ProjectCard({ project }: { project: ProjectsApiResult }) {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="text-xs flex justify-end">
+      <CardFooter className="flex justify-end text-xs">
         Created {project?.created_at && timeAgo(new Date(project?.created_at))}
       </CardFooter>
     </Card>

@@ -41,7 +41,7 @@ export default function AuthenticationContainer({ action }) {
           sizes={"(max-width: 768px) 100vw,(max-width: 1200px) 50vw,33vw"}
         />
         <div className="relative z-20 flex items-center text-lg font-medium">
-          <Logo className="text-primary h-10 w-auto text-2xl" />
+          <Logo className="h-10 w-auto text-2xl text-primary" />
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
