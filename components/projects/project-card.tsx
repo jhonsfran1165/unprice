@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -22,28 +23,31 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 
+import { Icons } from "../shared/icons"
+
 export function ProjectCard({ project }: { project: ProjectsApiResult }) {
   return (
     <Card>
       <CardHeader className="grid grid-cols-[1fr_110px] items-start gap-4 space-y-0">
         <div className="space-y-1">
           <CardTitle>{project.name}</CardTitle>
-          <CardDescription>{project.description}</CardDescription>
+          <CardDescription className="w-40 md:truncate text-sm">
+            {project.description}
+          </CardDescription>
         </div>
-        <div className="flex items-center space-x-1 rounded-md border border-primary-border bg-primary-bg w-auto">
+        <div className="flex justify-end items-center space-x-1">
           <Link
             href={`/org/${project.organization.slug}/project/${project.slug}`}
           >
-            <Button className="px-3 button-primary border-none">
-              <Star className="mr-2 h-4 w-4" />
-              Star
+            <Button variant={"ghost"} className="px-2 button-ghost">
+              <Icons.externalLink className="h-4 w-4 text-primary" />
             </Button>
           </Link>
           <Separator orientation="vertical" className="h-[20px]" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="px-1 button-primary border-none">
-                <ChevronDown className="h-4 w-4" />
+              <Button variant={"ghost"} className="px-2 button-ghost">
+                <ChevronDown className="h-4 w-4 text-primary" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -70,19 +74,18 @@ export function ProjectCard({ project }: { project: ProjectsApiResult }) {
       <CardContent>
         <div className="flex space-x-4 text-sm text-muted-foreground">
           <div className="flex items-center">
-            <Circle className="fill-sky-400 text-sky-400 mr-1 h-3 w-3" />
+            <Icons.cloud className="fill-sky-400 text-sky-400 mr-1 h-3 w-3" />
             {project.subdomain}
           </div>
           <div className="flex items-center">
             <Star className="mr-1 h-3 w-3" />
             10k
           </div>
-          <div>
-            Created{" "}
-            {project?.created_at && timeAgo(new Date(project?.created_at))}
-          </div>
         </div>
       </CardContent>
+      <CardFooter className="text-xs flex justify-end">
+        Created {project?.created_at && timeAgo(new Date(project?.created_at))}
+      </CardFooter>
     </Card>
   )
 }

@@ -2,18 +2,21 @@ import Link from "next/link"
 
 import { layoutConfig } from "@/lib/config/layout"
 import { cn } from "@/lib/utils"
+import { Separator } from "@/components/ui/separator"
 import { AccountToggle } from "@/components/accounts/account-toggle"
 import { Logo } from "@/components/layout/logo"
 import { OrganizationSwitch } from "@/components/organizations/organization-switch"
 import ProjectContext from "@/components/projects/project-context"
-import { Icons } from "@/components/shared/icons"
 
 export function MainNav() {
   return (
     <div className="flex h-16 items-center space-x-2 bg-background-bgSubtle sm:justify-between sm:space-x-0">
       <div className="flex items-center justify-start">
         <Logo />
-        <Icons.divider className="mx-3 hidden h-6 w-6 gap-0 text-background-text md:inline-block" />
+        <Separator
+          orientation="vertical"
+          className="ml-6 mr-5 hidden h-6 gap-0 text-background-textContrast md:inline-block rotate-[30deg]"
+        />
         <OrganizationSwitch />
         <ProjectContext />
       </div>

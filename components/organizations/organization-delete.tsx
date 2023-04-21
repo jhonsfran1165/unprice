@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/components/ui/use-toast"
-import LoadingDots from "@/components/shared/loading/loading-dots"
+import { Icons } from "@/components/shared/icons"
 
 // TODO: move this to a component
 export function ConfirmAction({ confirmAction, trigger }) {
@@ -109,8 +109,9 @@ export function OrganizationDelete({
 
   const trigger = (
     <div className="flex justify-end">
-      <Button title="Delete" className="button-danger w-28">
-        {loading ? <LoadingDots color="#808080" /> : "Delete"}
+      <Button disabled={loading} title="Delete" className="button-danger w-28">
+        {loading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+        Delete
       </Button>
     </div>
   )

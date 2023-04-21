@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { AnimatePresence, motion } from "framer-motion"
 import { CldUploadWidget } from "next-cloudinary"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { mutate } from "swr"
 
-import { SWIPE_REVEAL_ANIMATION_SETTINGS } from "@/lib/constants"
 import { Organization } from "@/lib/types/supabase"
 import { createSlug, fetchAPI } from "@/lib/utils"
 import { orgPostSchema, orgPostType } from "@/lib/validations/org"
@@ -36,14 +34,13 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
-import LoadingDots from "@/components/shared/loading/loading-dots"
-import UploadCloud from "@/components/shared/upload-cloud"
+import { Icons } from "@/components/shared/icons"
 
 import "./styles.css"
 
 // TODO: clean this up for a better validation of exist account - maybe better use zod
 // watch elements to validate and clean errors at the same time
-export function OrganizationForm({ org }: { org?: Organization }) {
+export function OrganizationForm({ org }: { org: Organization }) {
   const router = useRouter()
 
   const action = org ? "edit" : "new"
@@ -58,7 +55,6 @@ export function OrganizationForm({ org }: { org?: Organization }) {
   })
 
   const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState("")
 
   const {
     register,
@@ -84,8 +80,6 @@ export function OrganizationForm({ org }: { org?: Organization }) {
   const watchImage = watch("image")
 
   useEffect(() => {
-    setErrorMessage("")
-
     if (exist) {
       setError("slug", {
         type: "custom",
@@ -132,10 +126,8 @@ export function OrganizationForm({ org }: { org?: Organization }) {
         throw org
       }
     } catch (error) {
-      setErrorMessage(error.message)
-
       toast({
-        title: "Error deleting org",
+        title: "Error saving org",
         description: error.message,
         className: "danger",
       })
@@ -167,19 +159,6 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col space-y-6"
         >
-          <AnimatePresence>
-            {errorMessage && (
-              <motion.div
-                className="flex w-full flex-col space-y-2"
-                {...SWIPE_REVEAL_ANIMATION_SETTINGS}
-              >
-                <p className="text-center text-sm text-error-solid">
-                  {errorMessage}
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           <div className="flex flex-col space-y-6 md:flex-row md:space-x-4 md:space-y-0">
             <div className="w-full space-y-3">
               <Label htmlFor="name" className="text-xs">
@@ -314,9 +293,9 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                   return (
                     <button
                       onClick={handleOnClick}
-                      className="bg-background-base transition-all flex h-full w-full items-center justify-center rounded-md duration-200 ease-linear"
+                      className="transition-all flex h-full w-full items-center justify-center rounded-md duration-200 ease-linear"
                     >
-                      <UploadCloud className="h-8 w-8" />
+                      <Icons.uploadCloud className="h-8 w-8" />
                     </button>
                   )
                 }}
@@ -365,7 +344,8 @@ export function OrganizationForm({ org }: { org?: Organization }) {
             type="submit"
             className="button-primary w-28"
           >
-            {loading ? <LoadingDots color="#808080" /> : "Save"}
+            {loading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+            Save
           </Button>
         </div>
       </CardFooter>

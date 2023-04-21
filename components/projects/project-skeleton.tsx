@@ -1,50 +1,45 @@
 import { cn } from "@/lib/utils"
-
-// import { Card } from "@/components/shared/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Icons } from "@/components/shared/icons"
 
 export const ProjectSkeleton = ({ isLoading }: { isLoading?: boolean }) => (
-  <div>
-    <div className="flex items-center space-x-1">
-      <div className="flex-1">
-        <div className="flex items-center justify-start space-x-3 px-1">
-          <div
-            className={cn(
-              "h-8 w-8 shrink-0 overflow-hidden rounded-full bg-background-solidHover",
-              {
-                "animate-pulse": isLoading,
-              }
-            )}
-          />
-          <div
-            className={cn("h-4 w-full rounded-lg bg-background-solidHover", {
-              "animate-pulse": isLoading,
-            })}
-          />
-
-          <div
-            className={cn("h-4 w-10 rounded-lg bg-background-solidHover", {
-              "animate-pulse": isLoading,
-            })}
-          />
+  <Card>
+    <CardHeader className="grid grid-cols-[1fr_110px] items-start gap-4 space-y-0">
+      <div className="space-y-1">
+        <CardTitle>
+          <Skeleton className="h-4 w-[150px]" />
+          <br />
+        </CardTitle>
+        <CardDescription className="space-y-2">
+          <Skeleton className="h-2 w-[100px]" />
+          <Skeleton className="h-2 w-20" />
+          <Skeleton className="h-2 w-20" />
+        </CardDescription>
+      </div>
+      <div className="flex justify-end items-center space-x-1">
+        <Skeleton className="w-[100px] h-[40px]" />
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="flex space-x-4 text-sm text-muted-foreground">
+        <div className="flex items-center">
+          <Skeleton className="h-2 w-20" />
+        </div>
+        <div className="flex items-center">
+          <Skeleton className="h-2 w-20" />
         </div>
       </div>
-    </div>
-    <div className={"h-3 pb-4"}>
-      <div className={"pl-4 font-semibold"}>
-        {" "}
-        <div
-          className={cn("h-4 rounded-lg bg-background-solidHover", {
-            "animate-pulse": isLoading,
-          })}
-        />
-      </div>
-    </div>
-    <div className={"flex h-3 justify-end pb-4 text-right"}>
-      <div
-        className={cn("h-4 w-10 rounded-lg bg-background-solidHover", {
-          "animate-pulse": isLoading,
-        })}
-      />
-    </div>
-  </div>
+    </CardContent>
+    <CardFooter className="text-xs flex justify-end">
+      <Skeleton className="h-2 w-20" />
+    </CardFooter>
+  </Card>
 )

@@ -134,6 +134,12 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
         type="button"
         className="button-ghost"
         disabled={isLoading}
+        onClick={async () => {
+          setIsLoading(true)
+          await supabase.auth.signInWithOAuth({
+            provider: "github",
+          })
+        }}
       >
         {isLoading ? (
           <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />

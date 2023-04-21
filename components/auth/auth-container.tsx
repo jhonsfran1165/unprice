@@ -2,8 +2,8 @@ import Link from "next/link"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
-import { LoginForm } from "@/components/auth/user-login-form"
-import { RegisterForm } from "@/components/auth/user-register-form"
+import { LoginForm } from "@/components/auth/login-form"
+import { RegisterForm } from "@/components/auth/register-form"
 import { Logo } from "@/components/layout/logo"
 import BlurImage from "@/components/shared/blur-image"
 

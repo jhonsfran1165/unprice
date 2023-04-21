@@ -2,7 +2,7 @@
 
 import { useStore } from "@/lib/stores/layout"
 import useProject from "@/lib/swr/use-project"
-import { Icons } from "@/components/shared/icons"
+import { Separator } from "@/components/ui/separator"
 
 export default function ProjectContext() {
   const { orgSlug, projectSlug } = useStore()
@@ -16,7 +16,10 @@ export default function ProjectContext() {
     <>
       {isLoading ? null : (
         <div className="hidden items-center justify-start md:flex">
-          <Icons.divider className="mx-2 hidden h-6 w-6 gap-0 text-background-text md:inline-block" />
+          <Separator
+            orientation="vertical"
+            className="ml-5 mr-5 hidden h-6 gap-0 text-background-textContrast md:inline-block rotate-[30deg]"
+          />
           <span className="block truncate text-sm font-bold">
             {project?.name}
           </span>

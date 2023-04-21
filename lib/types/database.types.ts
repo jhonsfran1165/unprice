@@ -273,6 +273,7 @@ export interface Database {
           org_stripe_id: string | null
           org_type: string | null
           profile_id: string | null
+          profiles_org_id: number | null
           role: string | null
           status_subscription:
             | Database["public"]["Enums"]["subscription_status"]

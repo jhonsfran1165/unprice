@@ -33,6 +33,7 @@ import {
   SunMedium,
   Trash,
   Twitter,
+  UploadCloud,
   User,
   UserPlus,
   Users,
@@ -81,6 +82,7 @@ export const Icons = {
   laptop: Laptop,
   twitter: Twitter,
   chevronsupdown: ChevronsUpDown,
+  uploadCloud: UploadCloud,
   divider: (props: LucideProps) => (
     <svg
       fill="none"

@@ -30,6 +30,7 @@ export function ProjectsContainer({ loading }) {
             projects.map((project) => (
               <ProjectCard key={project.id} project={project} />
             ))}
+        <ProjectSkeleton isLoading={true} key={0} />
       </ul>
       {noProjectHolder && <NoProjectsPlaceholder />}
     </MaxWidthWrapper>
