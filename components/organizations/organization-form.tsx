@@ -40,7 +40,7 @@ import "./styles.css"
 
 // TODO: clean this up for a better validation of exist account - maybe better use zod
 // watch elements to validate and clean errors at the same time
-export function OrganizationForm({ org }: { org: Organization }) {
+export function OrganizationForm({ org }: { org?: Organization }) {
   const router = useRouter()
 
   const action = org ? "edit" : "new"

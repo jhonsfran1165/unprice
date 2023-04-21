@@ -1,6 +1,3 @@
-import Link from "next/link"
-
-import { layoutConfig } from "@/lib/config/layout"
 import { MainNav } from "@/components/layout/main-nav"
 import { TabsNav } from "@/components/layout/tabs-nav"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"

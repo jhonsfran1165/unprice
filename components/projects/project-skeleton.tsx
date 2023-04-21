@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils"
 import {
   Card,
   CardContent,
@@ -8,7 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Icons } from "@/components/shared/icons"
 
 export const ProjectSkeleton = ({ isLoading }: { isLoading?: boolean }) => (
   <Card>
