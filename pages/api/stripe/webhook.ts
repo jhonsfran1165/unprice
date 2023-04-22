@@ -211,7 +211,7 @@ export default async function webhookHandler(
         console.log(error)
         return res
           .status(400)
-          .send('Webhook error: "Webhook handler failed. View logs."')
+          .send(`Webhook error: Webhook handler failed. ${error}`)
       }
     } else {
       return res.status(400).send(`🤷‍♀️ Unhandled event type: ${event.type}`)

@@ -143,7 +143,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
           <AvatarImage src={watchImage || ""} alt={"org photo cover"} />
         </Avatar>
         <CardHeader className="w-full">
-          <CardTitle className="flex text-xl">Organization</CardTitle>
+          <CardTitle className="flex">Organization</CardTitle>
           <CardDescription>
             Use organization for bundle users a projects together, be aware that
             every organization is totally separated from the others.

@@ -27,7 +27,6 @@ export function OrganizationContainer() {
             </p>
           </div>
         </div>
-        {/* TODO: create breadcrum */}
         <OrganizationForm />
       </div>
     </MaxWidthWrapper>

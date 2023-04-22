@@ -1,5 +1,9 @@
 "use client"
 
+import { useEffect, useState } from "react"
+
+import { useStore } from "@/lib/stores/layout"
+import { Profile } from "@/lib/types/supabase"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,12 +20,27 @@ import { useSupabase } from "@/components/auth/supabase-provider"
 import { Icons } from "@/components/shared/icons"
 
 export function AccountToggle() {
+  const [profile, setProfile] = useState<Profile>()
+  const { session } = useStore()
+  const userId = session?.user.id
   const { supabase } = useSupabase()
+
+  useEffect(() => {
+    const getProfile = async () => {
+      const { data } = await supabase
+        .from("profile")
+        .select("*")
+        .eq("id", userId)
+        .single()
+      setProfile(data ?? undefined)
+    }
+
+    getProfile()
+  }, [userId])
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {/* TODO: connect this with profile info */}
         <Button
           variant="ghost"
           size="sm"
@@ -29,8 +48,10 @@ export function AccountToggle() {
         >
           <Avatar className="h-7 w-7">
             <AvatarImage
-              src={"https://avatar.vercel.sh/dadasdasd.png"}
-              alt="@shadcn"
+              src={
+                profile?.avatar_url ?? `https://avatar.vercel.sh/account.png`
+              }
+              alt={profile?.username}
             />
           </Avatar>
         </Button>
