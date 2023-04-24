@@ -10,6 +10,7 @@ import {
   User,
 } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import {
   CommandDialog,
   CommandEmpty,
@@ -36,12 +37,19 @@ export function CommandDialogLayout() {
   }, [])
 
   return (
-    <div className="mr-5">
-      <p className="text-sm">
-        <kbd className="text-slate-600 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100">
-          press <span className="text-xs">⌘</span>K
+    <div>
+      <Button
+        size="sm"
+        variant="outline"
+        className="relative w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64 h-8 px-3"
+        onClick={() => setOpen(true)}
+      >
+        <span className="hidden lg:inline-flex">Search...</span>
+        <span className="inline-flex lg:hidden">Search...</span>
+        <kbd className="pointer-events-none absolute right-1.5 top-1.3 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+          <span className="text-xs">⌘</span>K
         </kbd>
-      </p>
+      </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>

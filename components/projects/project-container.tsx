@@ -22,9 +22,7 @@ export function ProjectsContainer({ loading }) {
     <MaxWidthWrapper className="pt-10">
       <ul className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         {loadingProgress
-          ? Array.from({ length: 6 }).map((_, i) => (
-              <ProjectSkeleton isLoading={true} key={i} />
-            ))
+          ? Array.from({ length: 6 }).map((_, i) => <ProjectSkeleton key={i} />)
           : projects &&
             projects.length > 0 &&
             projects.map((project) => (

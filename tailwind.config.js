@@ -63,7 +63,7 @@ module.exports = {
         foreground: toRadixVar("red", 3),
       },
       muted: {
-        DEFAULT: toRadixVar("gray", 6),
+        DEFAULT: toRadixVar("gray", 7),
         foreground: toRadixVar("gray", 11),
       },
       accent: {
