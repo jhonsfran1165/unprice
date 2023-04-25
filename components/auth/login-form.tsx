@@ -109,7 +109,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
             disabled={isLoading}
             form="login-form"
             type="submit"
-            className="font-semibold text-background-base"
+            className="font-semibold text-black"
           >
             {isLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />

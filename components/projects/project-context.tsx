@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link"
+
 import { useStore } from "@/lib/stores/layout"
 import useProject from "@/lib/swr/use-project"
 import { Separator } from "@/components/ui/separator"
@@ -20,9 +22,11 @@ export default function ProjectContext() {
             orientation="vertical"
             className="mx-5 hidden h-6 rotate-[30deg] gap-0 text-background-textContrast md:inline-block"
           />
-          <span className="block truncate text-sm font-bold">
-            {project?.name}
-          </span>
+          <Link href={`/org/${orgSlug}/project/${project?.slug}`}>
+            <span className="block truncate text-sm font-bold">
+              {project?.name}
+            </span>
+          </Link>
         </div>
       )}
     </>
