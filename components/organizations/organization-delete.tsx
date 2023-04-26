@@ -62,7 +62,7 @@ export function OrganizationDelete({
   isDefault = false,
 }: {
   orgSlug: string
-  id: number
+  id: string
   isDefault?: boolean
 }) {
   const router = useRouter()

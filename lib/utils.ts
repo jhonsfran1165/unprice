@@ -34,7 +34,8 @@ export const fetchAPI = async ({
   const res: Response = await fetch(url, payload)
 
   if (!res.ok) {
-    throw Error(res.statusText)
+    const message = await res.json()
+    throw Error(JSON.stringify(message))
   }
 
   return res.json()

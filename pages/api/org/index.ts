@@ -5,6 +5,7 @@ import {
   withMethods,
   withValidation,
 } from "@/lib/api-middlewares"
+import supabaseAdmin from "@/lib/supabase/supabase-admin"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Profile, Session } from "@/lib/types/supabase"
 import {
@@ -45,11 +46,10 @@ async function handler(
           description,
         })
         .eq("id", id)
-        .eq("slug", slug)
         .select()
         .single()
 
-      if (error) return res.status(404).json(error)
+      if (error) return res.status(500).json(error)
 
       return res.status(200).json(org)
     }
@@ -66,20 +66,23 @@ async function handler(
         .single()
 
       const { slug, type, name, image, description } = req.body
+      const { error } = await supabase.from("organization").insert({
+        slug,
+        type,
+        name,
+        image,
+        description,
+      })
 
-      const { data: org, error } = await supabase
+      if (error) return res.status(500).json(error)
+
+      // because the profile is not created yet in the organization
+      // we have to use supabase admin to bypass rls on this organization table
+      const { data: org } = await supabaseAdmin
         .from("organization")
-        .insert({
-          slug,
-          type,
-          name,
-          image,
-          description,
-        })
-        .select()
+        .select("*")
+        .eq("slug", slug)
         .single()
-
-      if (error) return res.status(404).json(error)
 
       if (profile?.id && org?.id) {
         await supabase.from("organization_profiles").insert({

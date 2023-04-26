@@ -12,7 +12,7 @@ import { toDateTime } from "@/lib/utils"
 
 const buildSubscriptionData = (
   subscription: Stripe.Subscription,
-  orgId: number
+  orgId: string
 ): OrganizationSubscriptions => {
   const subscriptionData: OrganizationSubscriptions = {
     id: subscription.id,

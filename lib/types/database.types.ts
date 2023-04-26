@@ -38,7 +38,7 @@ export interface Database {
         Row: {
           created_at: string
           description: string | null
-          id: number
+          id: string
           image: string | null
           name: string
           slug: string
@@ -49,7 +49,7 @@ export interface Database {
         Insert: {
           created_at?: string
           description?: string | null
-          id?: number
+          id?: string
           image?: string | null
           name: string
           slug?: string
@@ -60,7 +60,7 @@ export interface Database {
         Update: {
           created_at?: string
           description?: string | null
-          id?: number
+          id?: string
           image?: string | null
           name?: string
           slug?: string
@@ -72,27 +72,27 @@ export interface Database {
       organization_profiles: {
         Row: {
           created_at: string
-          id: number
+          id: string
           is_default: boolean
-          org_id: number
+          org_id: string
           profile_id: string
           role: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          id?: number
+          id?: string
           is_default?: boolean
-          org_id: number
+          org_id: string
           profile_id: string
           role?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          id?: number
+          id?: string
           is_default?: boolean
-          org_id?: number
+          org_id?: string
           profile_id?: string
           role?: string
           updated_at?: string
@@ -112,7 +112,7 @@ export interface Database {
           interval: Database["public"]["Enums"]["subscription_interval"] | null
           interval_count: number | null
           metadata: Json | null
-          org_id: number | null
+          org_id: string | null
           price_id: string | null
           quantity: number | null
           status: Database["public"]["Enums"]["subscription_status"] | null
@@ -128,11 +128,11 @@ export interface Database {
           current_period_end?: string
           current_period_start?: string
           ended_at?: string | null
-          id: string
+          id?: string
           interval?: Database["public"]["Enums"]["subscription_interval"] | null
           interval_count?: number | null
           metadata?: Json | null
-          org_id?: number | null
+          org_id?: string | null
           price_id?: string | null
           quantity?: number | null
           status?: Database["public"]["Enums"]["subscription_status"] | null
@@ -152,7 +152,7 @@ export interface Database {
           interval?: Database["public"]["Enums"]["subscription_interval"] | null
           interval_count?: number | null
           metadata?: Json | null
-          org_id?: number | null
+          org_id?: string | null
           price_id?: string | null
           quantity?: number | null
           status?: Database["public"]["Enums"]["subscription_status"] | null
@@ -165,10 +165,10 @@ export interface Database {
           content: Json | null
           created_at: string
           description: string
-          id: number
+          id: string
           image_url: string | null
-          org_id: number | null
-          project_id: number | null
+          org_id: string | null
+          project_id: string | null
           published: boolean
           slug: string
           title: string
@@ -177,10 +177,10 @@ export interface Database {
           content?: Json | null
           created_at?: string
           description: string
-          id?: number
+          id?: string
           image_url?: string | null
-          org_id?: number | null
-          project_id?: number | null
+          org_id?: string | null
+          project_id?: string | null
           published?: boolean
           slug?: string
           title: string
@@ -189,10 +189,10 @@ export interface Database {
           content?: Json | null
           created_at?: string
           description?: string
-          id?: number
+          id?: string
           image_url?: string | null
-          org_id?: number | null
-          project_id?: number | null
+          org_id?: string | null
+          project_id?: string | null
           published?: boolean
           slug?: string
           title?: string
@@ -229,10 +229,10 @@ export interface Database {
           created_at: string
           custom_domain: string | null
           description: string | null
-          id: number
+          id: string
           logo: string | null
           name: string
-          org_id: number | null
+          org_id: string | null
           slug: string
           subdomain: string
           updated_at: string
@@ -241,10 +241,10 @@ export interface Database {
           created_at?: string
           custom_domain?: string | null
           description?: string | null
-          id?: number
+          id?: string
           logo?: string | null
           name: string
-          org_id?: number | null
+          org_id?: string | null
           slug?: string
           subdomain: string
           updated_at?: string
@@ -253,10 +253,10 @@ export interface Database {
           created_at?: string
           custom_domain?: string | null
           description?: string | null
-          id?: number
+          id?: string
           logo?: string | null
           name?: string
-          org_id?: number | null
+          org_id?: string | null
           slug?: string
           subdomain?: string
           updated_at?: string
@@ -267,13 +267,13 @@ export interface Database {
       data_orgs: {
         Row: {
           is_default: boolean | null
-          org_id: number | null
+          org_id: string | null
           org_image: string | null
           org_slug: string | null
           org_stripe_id: string | null
           org_type: string | null
           profile_id: string | null
-          profiles_org_id: number | null
+          profiles_org_id: string | null
           role: string | null
           status_subscription:
             | Database["public"]["Enums"]["subscription_status"]
@@ -293,7 +293,21 @@ export interface Database {
       }
     }
     Functions: {
-      [_ in never]: never
+      is_member_of: {
+        Args: {
+          _user_id: string
+          _organization_id: string
+        }
+        Returns: boolean
+      }
+      is_role_of: {
+        Args: {
+          _user_id: string
+          _org_id: string
+          _role: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       subscription_interval: "day" | "week" | "month" | "year"
@@ -473,3 +487,4 @@ export interface Database {
     }
   }
 }
+

@@ -19,7 +19,7 @@ const type = z.string().min(3, {
     "invalid type for the organization, it has to be at least 3 characters",
 })
 
-const id = z.number()
+const id = z.string()
 const image = z.string().url()
 const description = z.string()
 const isDefault = z.boolean()

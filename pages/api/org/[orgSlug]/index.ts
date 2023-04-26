@@ -37,18 +37,16 @@ async function handler(
     if (req.method === "DELETE") {
       const { orgSlug, id } = req.body
 
-      const { data: deletedOrg, error } = await supabase
+      const { data, error } = await supabase
         .from("organization")
         .delete()
         .eq("id", id)
         .eq("slug", orgSlug)
-        .select("image")
-        .single()
 
       // TODO: delete cloudinary url
       // cloudinary.v2.uploader.destroy(deletedOrg?.image)
 
-      if (error) return res.status(404).json(error)
+      if (error) return res.status(500).json(error)
 
       return res.status(200).json({})
     }
