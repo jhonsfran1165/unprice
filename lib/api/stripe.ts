@@ -63,7 +63,7 @@ const onCheckoutCompleted = async ({
 }: {
   subscriptionId: string
   stripeId?: string
-  orgId: string | null
+  orgId: string
 }) => {
   const { data: orgData, error: noOrgError } = await supabaseAdmin
     .from("organization")
@@ -80,10 +80,7 @@ const onCheckoutCompleted = async ({
   // TODO: validate this
   const status = subscription.status as OrganizationSubscriptionStatus
   // TODO: change id to string for organization
-  const subscriptionData = buildSubscriptionData(
-    subscription,
-    parseInt(orgId || "")
-  )
+  const subscriptionData = buildSubscriptionData(subscription, orgId)
 
   // TODO: validate if there is a stripe id
   if (orgData.stripe_id && orgData.stripe_id !== stripeId)

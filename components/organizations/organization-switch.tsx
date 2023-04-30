@@ -33,6 +33,8 @@ export function OrganizationSwitch() {
     revalidateOnFocus: true,
   })
 
+  console.log(organizationProfiles)
+
   return (
     <div className="flex items-center justify-start space-x-2">
       <OrganizationLink org={orgData?.organization} />

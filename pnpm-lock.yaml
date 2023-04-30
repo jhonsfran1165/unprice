@@ -51,6 +51,7 @@ specifiers:
   cloudinary: ^1.35.0
   clsx: ^1.2.1
   cmdk: ^0.1.22
+  date-fns: ^2.29.3
   encoding: ^0.1.13
   eslint: ^8.32.0
   eslint-config-next: 13.3.0
@@ -82,6 +83,7 @@ specifiers:
   tailwindcss-animate: ^1.0.5
   typescript: ^4.9.4
   use-debounce: ^9.0.3
+  uuid: ^9.0.0
   windy-radix-palette: ^0.5.0
   windy-radix-typography: ^0.1.0
   zod: ^3.20.2
@@ -130,6 +132,7 @@ dependencies:
   cloudinary: 1.35.0
   clsx: 1.2.1
   cmdk: 0.1.22_5ndqzdd6t4rivxsukjv3i3ak2q
+  date-fns: 2.29.3
   encoding: 0.1.13
   framer-motion: 9.0.2_biqbaboplfbrettd7655fr4n2y
   lucide-react: 0.105.0-alpha.4_react@18.2.0
@@ -139,7 +142,7 @@ dependencies:
   next-cloudinary: 4.3.0_next@13.3.0+react@18.2.0
   next-themes: 0.2.1_yucv4tfv7v7nrkw2uguegj6e7e
   react: 18.2.0
-  react-day-picker: 8.7.1_react@18.2.0
+  react-day-picker: 8.7.1_r6j3756ioqf5pjc2u22wj25rla
   react-dom: 18.2.0_react@18.2.0
   react-dom-confetti: 0.2.0_react@18.2.0
   react-hook-form: 7.43.0_react@18.2.0
@@ -150,6 +153,7 @@ dependencies:
   tailwind-merge: 1.8.1
   tailwindcss-animate: 1.0.5_tailwindcss@3.2.4
   use-debounce: 9.0.3_react@18.2.0
+  uuid: 9.0.0
   zod: 3.20.2
   zustand: 4.3.4_react@18.2.0
 
@@ -2617,6 +2621,11 @@ packages:
     dev: false
     optional: true
 
+  /date-fns/2.29.3:
+    resolution: {integrity: sha512-dDCnyH2WnnKusqvZZ6+jA1O51Ibt8ZMRNkDZdyAyK4YfbDwa/cEmuztzG5pk6hqlp9aSBPYcjOlktquahGwGeA==}
+    engines: {node: '>=0.11'}
+    dev: false
+
   /debug/2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
     peerDependencies:
@@ -4805,12 +4814,13 @@ packages:
       strip-json-comments: 2.0.1
     dev: false
 
-  /react-day-picker/8.7.1_react@18.2.0:
+  /react-day-picker/8.7.1_r6j3756ioqf5pjc2u22wj25rla:
     resolution: {integrity: sha512-Gv426AW8b151CZfh3aP5RUGztLwHB/EyJgWZ5iMgtzbFBkjHfG6Y66CIQFMWGLnYjsQ9DYSJRmJ5S0Pg5HWKjA==}
     peerDependencies:
       date-fns: ^2.28.0
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
+      date-fns: 2.29.3
       react: 18.2.0
     dev: false
 
@@ -5625,6 +5635,11 @@ packages:
 
   /util-deprecate/1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  /uuid/9.0.0:
+    resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
+    hasBin: true
+    dev: false
 
   /vm2/3.9.14:
     resolution: {integrity: sha512-HgvPHYHeQy8+QhzlFryvSteA4uQLBCOub02mgqdR+0bN/akRZ48TGB1v0aCv7ksyc0HXx16AZtMHKS38alc6TA==}

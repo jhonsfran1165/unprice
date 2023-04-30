@@ -32,16 +32,16 @@ export default function AuthenticationContainer({ action }) {
       >
         {config.linkName}
       </Link>
-      <div className="relative hidden h-full flex-col bg-muted p-10 lg:flex">
+      <div className="hidden h-full flex-col bg-muted lg:flex p-10">
         {/* TODO: fix this */}
         <BlurImage
           src="https://images.unsplash.com/photo-1590069261209-f8e9b8642343?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
           alt="Builderai logo"
-          fill={true}
-          priority={true}
-          sizes={"(max-width: 768px) 100vw,(max-width: 1200px) 50vw,33vw"}
+          width={800}
+          height={800}
+          className="absolute top-0 left-0 object-cover h-screen w-1/2"
         />
-        <div className="relative z-20 flex items-center text-lg font-medium">
+        <div className="absolute z-20 flex items-center text-lg font-medium">
           <Logo className="h-10 w-auto text-2xl text-primary" />
         </div>
         <div className="relative z-20 mt-auto">

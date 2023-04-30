@@ -129,8 +129,8 @@ export function OrganizationForm({ org }: { org?: Organization }) {
       const dataError = JSON.parse(error?.message ?? error)
 
       toast({
-        title: `Error ${dataError.code} saving org`,
-        description: dataError.message,
+        title: `Error ${dataError?.code ?? ""} saving org`,
+        description: dataError.message ?? "",
         className: "danger",
       })
     } finally {

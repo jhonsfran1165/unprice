@@ -19,12 +19,16 @@ export default async function DashboardLayout({
     data: { session },
   } = await supabase.auth.getSession()
 
-  const { data: dataOrg } = await supabase
+  console.log(session)
+
+  const { data: dataOrg, error } = await supabase
     .from("data_orgs")
     .select("*")
     .eq("profile_id", session?.user.id)
     .eq("org_slug", orgSlug)
     .single()
+
+  console.log(error)
 
   if (!dataOrg) {
     notFound()

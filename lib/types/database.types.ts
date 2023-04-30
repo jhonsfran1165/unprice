@@ -43,7 +43,7 @@ export interface Database {
           name: string
           slug: string
           stripe_id: string | null
-          type: string
+          type: Database["public"]["Enums"]["organization_type"] | null
           updated_at: string
         }
         Insert: {
@@ -54,7 +54,7 @@ export interface Database {
           name: string
           slug?: string
           stripe_id?: string | null
-          type?: string
+          type?: Database["public"]["Enums"]["organization_type"] | null
           updated_at?: string
         }
         Update: {
@@ -65,7 +65,7 @@ export interface Database {
           name?: string
           slug?: string
           stripe_id?: string | null
-          type?: string
+          type?: Database["public"]["Enums"]["organization_type"] | null
           updated_at?: string
         }
       }
@@ -76,7 +76,7 @@ export interface Database {
           is_default: boolean
           org_id: string
           profile_id: string
-          role: string
+          role: Database["public"]["Enums"]["organization_roles"] | null
           updated_at: string
         }
         Insert: {
@@ -85,7 +85,7 @@ export interface Database {
           is_default?: boolean
           org_id: string
           profile_id: string
-          role?: string
+          role?: Database["public"]["Enums"]["organization_roles"] | null
           updated_at?: string
         }
         Update: {
@@ -94,7 +94,7 @@ export interface Database {
           is_default?: boolean
           org_id?: string
           profile_id?: string
-          role?: string
+          role?: Database["public"]["Enums"]["organization_roles"] | null
           updated_at?: string
         }
       }
@@ -271,10 +271,10 @@ export interface Database {
           org_image: string | null
           org_slug: string | null
           org_stripe_id: string | null
-          org_type: string | null
+          org_type: Database["public"]["Enums"]["organization_type"] | null
           profile_id: string | null
           profiles_org_id: string | null
-          role: string | null
+          role: Database["public"]["Enums"]["organization_roles"] | null
           status_subscription:
             | Database["public"]["Enums"]["subscription_status"]
             | null
@@ -293,10 +293,72 @@ export interface Database {
       }
     }
     Functions: {
+      config_org: {
+        Args: {
+          user_id: string
+          org_id: string
+          slug: string
+          type: Database["public"]["Enums"]["organization_type"]
+          name: string
+          image: string
+          description: string
+          role_user: Database["public"]["Enums"]["organization_roles"]
+          tier: string
+          is_default: boolean
+        }
+        Returns: string
+      }
+      delete_claim: {
+        Args: {
+          uid: string
+          claim: string
+        }
+        Returns: string
+      }
+      get_claim: {
+        Args: {
+          uid: string
+          claim: string
+        }
+        Returns: Json
+      }
+      get_claims: {
+        Args: {
+          uid: string
+        }
+        Returns: Json
+      }
+      get_my_jwt_claim: {
+        Args: {
+          claim: string
+        }
+        Returns: Json
+      }
+      get_my_jwt_claims: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      has_role_org: {
+        Args: {
+          org_id: string
+          role: string
+        }
+        Returns: boolean
+      }
+      is_claims_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_member_of: {
         Args: {
           _user_id: string
           _organization_id: string
+        }
+        Returns: boolean
+      }
+      is_member_org: {
+        Args: {
+          org_id: string
         }
         Returns: boolean
       }
@@ -308,8 +370,31 @@ export interface Database {
         }
         Returns: boolean
       }
+      jwt_expired_exception: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      no_admin_exception: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      no_owner_exception: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      set_claim: {
+        Args: {
+          uid: string
+          claim: string
+          value: Json
+        }
+        Returns: string
+      }
     }
     Enums: {
+      organization_roles: "OWNER" | "MEMBER"
+      organization_tiers: "FREE" | "PRO" | "CUSTOM"
+      organization_type: "STARTUP" | "PERSONAL" | "BUSSINESS"
       subscription_interval: "day" | "week" | "month" | "year"
       subscription_status:
         | "trialing"

@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next"
+import { v4 as uuidv4 } from "uuid"
 
 import {
   withAuthentication,
@@ -35,7 +36,7 @@ async function handler(
     }
 
     if (req.method === "POST") {
-      const { id, slug, type, name, image, description } = req.body
+      const { id, type, name, image, description } = req.body
 
       const { data: org, error } = await supabase
         .from("organization")
@@ -55,49 +56,31 @@ async function handler(
     }
 
     if (req.method === "PUT") {
-      // TODO: use postgres functions instead
-      // https://github.com/supabase/postgrest-js/issues/237#issuecomment-739537955
-
-      const { data: orgProfiles } = await supabase
-        .from("organization_profiles")
-        .select("is_default")
-        .eq("profile_id", profile?.id)
-        .eq("is_default", true)
-        .single()
-
       const { slug, type, name, image, description } = req.body
-      const { error } = await supabase.from("organization").insert({
+      const uuid = uuidv4()
+
+      const { data: dasdasd } = await supabase.auth.getSession()
+
+      console.log(dasdasd)
+      // we use here admin supabase to bypass all RLS
+      const { data, error } = await supabaseAdmin.rpc("config_org", {
+        user_id: session?.user.id ?? "",
+        org_id: uuid,
         slug,
-        type,
+        type: type.toUpperCase(),
         name,
         image,
         description,
+        role_user: "OWNER",
+        tier: "FREE",
+        is_default: true,
       })
+
+      console.log(error)
 
       if (error) return res.status(500).json(error)
 
-      // because the profile is not created yet in the organization
-      // we have to use supabase admin to bypass rls on this organization table
-      const { data: org } = await supabaseAdmin
-        .from("organization")
-        .select("*")
-        .eq("slug", slug)
-        .single()
-
-      if (profile?.id && org?.id) {
-        await supabase.from("organization_profiles").insert({
-          org_id: org.id,
-          profile_id: profile.id,
-          role: "owner",
-          is_default: !orgProfiles?.is_default,
-        })
-      } else {
-        return res
-          .status(404)
-          .json({ error: "Something went wrong! Try again!" })
-      }
-
-      return res.status(200).json(org)
+      return res.status(200).json({ slug: slug })
     }
   } catch (error) {
     return res.status(500).json(error)

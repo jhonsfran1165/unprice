@@ -21,13 +21,15 @@ export default async function OrgSettingsIndexPage({
     data: { session },
   } = await supabase.auth.getSession()
 
-  const { data: dataOrg } = await supabase
+  const { data: dataOrg, error } = await supabase
     .from("data_orgs")
     .select("*, organization!inner(*)")
     .eq("profile_id", session?.user.id)
     .eq("org_slug", orgSlug)
     .eq("organization.slug", orgSlug)
     .single()
+
+  console.log(error)
 
   const org = dataOrg?.organization as Organization
 

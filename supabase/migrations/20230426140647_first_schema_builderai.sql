@@ -1,7 +1,8 @@
-CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION create_profile_auth();
 
 create type "public"."subscription_interval" as enum ('day', 'week', 'month', 'year');
-
+create type organization_roles as enum ('OWNER', 'MEMBER');
+create type organization_type as enum ('STARTUP', 'PERSONAL', 'BUSSINESS');
+create type organization_tiers as enum ('FREE', 'PRO', 'CUSTOM');
 create type "public"."subscription_status" as enum ('trialing', 'active', 'canceled', 'incomplete', 'incomplete_expired', 'past_due', 'unpaid');
 
 create table "public"."organization" (
@@ -11,7 +12,7 @@ create table "public"."organization" (
     "name" character varying not null,
     "slug" character varying not null default uuid_generate_v4(),
     "image" character varying,
-    "type" text not null default 'personal'::text,
+    "type" organization_type,
     "description" text,
     "stripe_id" text
 );
@@ -23,7 +24,7 @@ create table "public"."organization_profiles" (
     "id" uuid not null default uuid_generate_v4(),
     "created_at" timestamp with time zone not null default now(),
     "updated_at" timestamp with time zone not null default now(),
-    "role" text not null default 'member'::text,
+    "role" organization_roles,
     "profile_id" uuid not null,
     "org_id" uuid not null,
     "is_default" boolean not null default false
@@ -182,6 +183,8 @@ AS $function$BEGIN
 END;
 $function$
 ;
+
+CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION create_profile_auth();
 
 create or replace view "public"."data_orgs" as  SELECT DISTINCT profiles.role,
     profiles.profile_id,
