@@ -1,6 +1,11 @@
 import { create } from "zustand"
 
-import { AppModulesNav, DashboardNavItem } from "@/lib/types"
+import {
+  AppClaims,
+  AppModulesNav,
+  AppOrgClaim,
+  DashboardNavItem,
+} from "@/lib/types"
 import { OrganizationViewData, Session } from "@/lib/types/supabase"
 
 export const useStore = create<{
@@ -8,7 +13,6 @@ export const useStore = create<{
   orgSlug: string
   projectSlug: string
   session: Session | null
-  orgProfiles: OrganizationViewData[]
   modulesApp: AppModulesNav | {}
   activeTabs: DashboardNavItem[]
   activeTab: DashboardNavItem | null
@@ -17,13 +21,13 @@ export const useStore = create<{
   rootPathTab: string
   moduleTab: string
   numberSegments: number
-  orgData: OrganizationViewData | null
+  orgData: AppOrgClaim | null
+  appClaims: AppClaims | null
 }>((set) => ({
   contextHeader: "",
   orgSlug: "",
   projectSlug: "",
   session: null,
-  orgProfiles: [],
   modulesApp: {},
   activeTabs: [],
   activeTab: null,
@@ -33,4 +37,5 @@ export const useStore = create<{
   rootPathTab: "/",
   moduleTab: "",
   orgData: null,
+  appClaims: null,
 }))

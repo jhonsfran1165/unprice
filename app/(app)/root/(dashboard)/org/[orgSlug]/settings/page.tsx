@@ -29,8 +29,6 @@ export default async function OrgSettingsIndexPage({
     .eq("organization.slug", orgSlug)
     .single()
 
-  console.log(error)
-
   const org = dataOrg?.organization as Organization
 
   return (

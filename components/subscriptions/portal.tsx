@@ -7,7 +7,7 @@ import { fetchAPI } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 export default function StripePortal() {
-  const { orgSlug, orgData, orgProfiles } = useStore()
+  const { orgSlug } = useStore()
   const router = useRouter()
 
   return (

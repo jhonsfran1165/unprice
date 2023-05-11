@@ -59,3 +59,14 @@ https://upstash.com/blog/quota-based-saas
 
 https://supabase.com/docs/reference/javascript/v1/auth-update
 https://supabase.com/docs/reference/javascript/auth-signup
+
+https://github.com/orgs/supabase/discussions/1148
+
+plan: "TRIAL"
+user_level: 100
+group_name: "Super Guild!"
+joined_on: "2022-05-20T14:28:18.217Z"
+group_manager: false
+items: ["toothpick", "string", "ring"]
+
+https://supabase.com/docs/guides/auth/row-level-security#policies-with-security-definer-functions

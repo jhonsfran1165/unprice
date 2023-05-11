@@ -5,17 +5,17 @@ import { usePathname, useSelectedLayoutSegments } from "next/navigation"
 
 import { getActiveTabs } from "@/lib/config/dashboard"
 import { useStore } from "@/lib/stores/layout"
-import { AppModulesNav } from "@/lib/types"
+import { AppClaims, AppModulesNav } from "@/lib/types"
 import { OrganizationViewData, Session } from "@/lib/types/supabase"
 
 function StoreHandler({
   session,
-  orgProfiles,
   modulesApp,
+  appClaims,
 }: {
   session: Session | null
-  orgProfiles: OrganizationViewData[]
   modulesApp: AppModulesNav
+  appClaims: AppClaims
 }) {
   const pathname = usePathname()
   const segments = useSelectedLayoutSegments()
@@ -47,17 +47,18 @@ function StoreHandler({
   const orgSlug = numberSegments >= 1 ? cleanSegments[1] : ""
   const projectSlug = numberSegments >= 2 ? cleanSegments[3] : ""
 
-  const orgData = useMemo(
-    () => orgProfiles?.find((org) => org.org_slug === orgSlug),
-    [orgSlug, JSON.stringify(orgProfiles)]
-  )
+  const orgData = useMemo(() => {
+    for (var key in appClaims["organizations"]) {
+      if (appClaims["organizations"][key]?.slug === orgSlug)
+        return appClaims["organizations"][key]
+    }
+  }, [orgSlug, JSON.stringify(appClaims)])
 
   // initialize this only the first time from the server
   // TODO: better change this with session?
   if (!initialized.current) {
     useStore.setState({
       modulesApp,
-      orgProfiles,
       session,
       contextHeader: activeTab?.title,
       orgSlug,
@@ -70,6 +71,7 @@ function StoreHandler({
       rootPathTab,
       moduleTab,
       orgData,
+      appClaims,
     })
     initialized.current = true
   }
@@ -88,8 +90,9 @@ function StoreHandler({
       moduleTab,
       contextHeader: activeTab?.title,
       orgData,
+      appClaims,
     })
-  }, [pathname])
+  }, [pathname, JSON.stringify(appClaims)])
 
   return null
 }

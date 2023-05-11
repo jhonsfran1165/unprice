@@ -1,9 +1,7 @@
-import { notFound, redirect } from "next/navigation"
+import { redirect } from "next/navigation"
 
 import { createServerClient } from "@/lib/supabase/supabase-server"
-import { Organization } from "@/lib/types/supabase"
 
-// do not cache this layout because it validates the session constantly
 export const revalidate = 0
 
 export default async function AppInitialPage() {
@@ -17,20 +15,22 @@ export default async function AppInitialPage() {
     redirect("/login")
   }
 
-  // TODO: create welcome page or register org
-  const { data: orgProfiles } = await supabase
-    .from("organization_profiles")
-    .select("*, profile(*), organization(*)")
-    .eq("profile_id", session?.user.id)
+  // would be better to rely on jwt to avoid extra calls to the database but
+  // the refresh token issue for jwt is a problem
+  const { data: claim } = await supabase.rpc("get_claim", {
+    user_id: session?.user.id ?? "",
+    claim: "organizations",
+  })
 
-  const defaultOrg = orgProfiles?.find((org) => org.is_default === true)
-    ?.organization as Organization
+  const orgId = Object.keys(claim ?? {}).find(
+    (key) => claim && claim[key].is_default === true
+  )
+
+  const defaultOrg = claim && orgId ? claim[orgId] : null
 
   if (defaultOrg) {
     redirect(`/org/${defaultOrg?.slug}`)
   } else {
     redirect(`/org`)
   }
-
-  notFound()
 }

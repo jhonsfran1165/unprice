@@ -1,10 +1,30 @@
 import type { Icon } from "lucide-react"
 
+import type {
+  OrganizationRoles,
+  OrganizationTypes,
+  SubscriptionTiers,
+} from "@/lib/types/supabase"
 import { Icons } from "@/components/icons"
 
 export type AppModulesNav = {
   org: DashboardNavItem[]
   project: DashboardNavItem[]
+}
+
+export type AppOrgClaim = {
+  role: OrganizationRoles
+  slug: string
+  tier: SubscriptionTiers
+  is_default: boolean
+  image: string
+  type: OrganizationTypes
+}
+
+export type AppClaims = {
+  organizations: {
+    [orgId: string]: AppOrgClaim
+  }
 }
 
 export type GetActiveTabs = {

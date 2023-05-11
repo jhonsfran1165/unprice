@@ -59,9 +59,6 @@ async function handler(
       const { slug, type, name, image, description } = req.body
       const uuid = uuidv4()
 
-      const { data: dasdasd } = await supabase.auth.getSession()
-
-      console.log(dasdasd)
       // we use here admin supabase to bypass all RLS
       const { data, error } = await supabaseAdmin.rpc("config_org", {
         user_id: session?.user.id ?? "",
@@ -72,11 +69,7 @@ async function handler(
         image,
         description,
         role_user: "OWNER",
-        tier: "FREE",
-        is_default: true,
       })
-
-      console.log(error)
 
       if (error) return res.status(500).json(error)
 

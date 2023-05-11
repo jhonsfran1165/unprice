@@ -43,8 +43,6 @@ async function handler(
         .eq("id", id)
         .eq("slug", orgSlug)
 
-      console.log("fsdfdsf", error)
-
       // TODO: delete cloudinary url
       // cloudinary.v2.uploader.destroy(deletedOrg?.image)
       if (error) return res.status(500).json(error)

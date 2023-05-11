@@ -19,7 +19,8 @@ CREATE VIEW public.data_orgs WITH (security_invoker) AS
     org.slug AS org_slug,
     org.image AS org_image,
     org.type AS org_type,
-    org.stripe_id AS org_stripe_id
+    org.stripe_id AS org_stripe_id,
+    coalesce(subscription."tier"::text, 'FREE'::text) as tier
    FROM public.organization_profiles profiles
      LEFT JOIN public.organization_subscriptions subscription ON subscription.org_id = profiles.org_id
      LEFT JOIN public.organization org ON org.id = profiles.org_id;
@@ -106,3 +107,6 @@ jsonb_set(
     )
   )
 )
+
+
+SET SESSION request.jwt.claims to '{"sub":"SOMEUUID" }'; set role authenticated; select auth.uid();

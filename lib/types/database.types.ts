@@ -116,6 +116,7 @@ export interface Database {
           price_id: string | null
           quantity: number | null
           status: Database["public"]["Enums"]["subscription_status"] | null
+          tier: Database["public"]["Enums"]["organization_tiers"] | null
           trial_end: string | null
           trial_start: string | null
         }
@@ -136,6 +137,7 @@ export interface Database {
           price_id?: string | null
           quantity?: number | null
           status?: Database["public"]["Enums"]["subscription_status"] | null
+          tier?: Database["public"]["Enums"]["organization_tiers"] | null
           trial_end?: string | null
           trial_start?: string | null
         }
@@ -156,6 +158,7 @@ export interface Database {
           price_id?: string | null
           quantity?: number | null
           status?: Database["public"]["Enums"]["subscription_status"] | null
+          tier?: Database["public"]["Enums"]["organization_tiers"] | null
           trial_end?: string | null
           trial_start?: string | null
         }
@@ -289,24 +292,45 @@ export interface Database {
           subscription_period_starts: string | null
           subscription_trial_ends: string | null
           subscription_trial_starts: string | null
+          tier: string | null
         }
       }
     }
     Functions: {
-      config_org: {
+      config_org:
+        | {
+            Args: {
+              user_id: string
+              org_id: string
+              slug: string
+              type: Database["public"]["Enums"]["organization_type"]
+              name: string
+              image: string
+              description: string
+              role_user: Database["public"]["Enums"]["organization_roles"]
+              tier: string
+              is_default: boolean
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              user_id: string
+              org_id: string
+              slug: string
+              type: Database["public"]["Enums"]["organization_type"]
+              name: string
+              image: string
+              description: string
+              role_user: Database["public"]["Enums"]["organization_roles"]
+            }
+            Returns: string
+          }
+      custom_exception: {
         Args: {
-          user_id: string
-          org_id: string
-          slug: string
-          type: Database["public"]["Enums"]["organization_type"]
-          name: string
-          image: string
-          description: string
-          role_user: Database["public"]["Enums"]["organization_roles"]
-          tier: string
-          is_default: boolean
+          message: string
         }
-        Returns: string
+        Returns: boolean
       }
       delete_claim: {
         Args: {
@@ -317,14 +341,14 @@ export interface Database {
       }
       get_claim: {
         Args: {
-          uid: string
+          user_id: string
           claim: string
         }
         Returns: Json
       }
       get_claims: {
         Args: {
-          uid: string
+          user_id: string
         }
         Returns: Json
       }

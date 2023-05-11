@@ -108,7 +108,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
       if (org.slug) {
         toast({
           title: "Organization Saved",
-          description: `Organization ${org.name} Saved successfully`,
+          description: `Organization ${org.slug} Saved successfully`,
           className: "info",
         })
 

@@ -1,5 +1,6 @@
 import { AppModules } from "@/lib/config/dashboard"
 import { createServerClient } from "@/lib/supabase/supabase-server"
+import { AppClaims } from "@/lib/types"
 import { OrganizationViewData } from "@/lib/types/supabase"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
@@ -19,15 +20,12 @@ export default async function DashboardLayout({
     data: { session },
   } = await supabase.auth.getSession()
 
-  const { data: dataOrgs, error } = await supabase
-    .from("data_orgs")
-    .select("*, organization!inner(*)")
-    .eq("profile_id", session?.user.id)
+  const appClaims = session?.user.app_metadata as AppClaims
 
   return (
     <>
       <StoreHandler
-        orgProfiles={dataOrgs as OrganizationViewData[]}
+        appClaims={appClaims}
         session={session}
         modulesApp={AppModules}
       />

@@ -19,18 +19,21 @@ export default async function DashboardLayout({
     data: { session },
   } = await supabase.auth.getSession()
 
-  console.log(session)
+  const { data: claim, error } = await supabase.rpc("get_claim", {
+    user_id: session?.user.id ?? "",
+    claim: "organizations",
+  })
 
-  const { data: dataOrg, error } = await supabase
-    .from("data_orgs")
-    .select("*")
-    .eq("profile_id", session?.user.id)
-    .eq("org_slug", orgSlug)
-    .single()
+  // TODO: if error throws an error
 
-  console.log(error)
+  // we don't rely on the JWT for checking if the organization belongs to the user
+  // because JWT has the problem with refreshing token.
+  // this adds unnecessary request to the database, with more reason if this is a centrla layout
+  // but for now it is okay
+  const orgExist =
+    claim && Object.keys(claim).find((key) => claim[key].slug === orgSlug)
 
-  if (!dataOrg) {
+  if (!orgExist) {
     notFound()
   }
 
