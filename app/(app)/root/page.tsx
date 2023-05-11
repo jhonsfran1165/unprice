@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 
 import { createServerClient } from "@/lib/supabase/supabase-server"
+import { AppClaims } from "@/lib/types"
 
 export const revalidate = 0
 
@@ -15,21 +16,16 @@ export default async function AppInitialPage() {
     redirect("/login")
   }
 
-  // would be better to rely on jwt to avoid extra calls to the database but
-  // the refresh token issue for jwt is a problem
-  const { data: claim } = await supabase.rpc("get_claim", {
-    user_id: session?.user.id ?? "",
-    claim: "organizations",
-  })
+  const appClaims = session?.user.app_metadata as AppClaims
+  let defaultOrgSlug = ""
 
-  const orgId = Object.keys(claim ?? {}).find(
-    (key) => claim && claim[key].is_default === true
-  )
+  for (var key in appClaims["organizations"]) {
+    if (appClaims["organizations"][key]?.is_default)
+      defaultOrgSlug = appClaims["organizations"][key].slug
+  }
 
-  const defaultOrg = claim && orgId ? claim[orgId] : null
-
-  if (defaultOrg) {
-    redirect(`/org/${defaultOrg?.slug}`)
+  if (defaultOrgSlug) {
+    redirect(`/org/${defaultOrgSlug}`)
   } else {
     redirect(`/org`)
   }

@@ -80,6 +80,7 @@ function StoreHandler({
     useStore.setState({
       // TODO: it is possible to generalize this?
       orgSlug,
+      session,
       projectSlug,
       activeTabs: tabs,
       activeTab: activeTab,

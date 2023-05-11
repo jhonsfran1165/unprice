@@ -1,7 +1,6 @@
 import { AppModules } from "@/lib/config/dashboard"
 import { createServerClient } from "@/lib/supabase/supabase-server"
 import { AppClaims } from "@/lib/types"
-import { OrganizationViewData } from "@/lib/types/supabase"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
 import HeaderContext from "@/components/layout/header-context"
