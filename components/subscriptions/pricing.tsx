@@ -51,7 +51,14 @@ const Pricing = () => {
       const response = await fetchAPI({
         url: "/api/stripe/create-checkout-session",
         method: "POST",
-        data: { stripePriceId, orgSlug, currency: "USD" },
+        data: {
+          stripePriceId,
+          orgSlug,
+          currency: "USD",
+          metadata: {
+            tier: tier,
+          },
+        },
       })
 
       const { id: sessionId } = response

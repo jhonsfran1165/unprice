@@ -7,6 +7,7 @@ import {
   OrganizationSubscriptionInterval,
   OrganizationSubscriptionStatus,
   OrganizationSubscriptions,
+  SubscriptionTiers,
 } from "@/lib/types/supabase"
 import { toDateTime } from "@/lib/utils"
 
@@ -51,6 +52,7 @@ const buildSubscriptionData = (
       ?.interval as OrganizationSubscriptionInterval,
     interval_count:
       subscription.items.data[0].price.recurring?.interval_count ?? null,
+    tier: subscription?.metadata?.tier as SubscriptionTiers,
   }
 
   return subscriptionData
