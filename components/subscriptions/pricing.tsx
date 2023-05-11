@@ -24,7 +24,7 @@ import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 const Pricing = () => {
   const [tier, setTier] = useState(0)
-  const { orgSlug, orgData, orgProfiles } = useStore()
+  const { orgSlug } = useStore()
 
   const [priceIdLoading, setPriceIdLoading] = useState(false)
   const [annualBilling, setAnnualBilling] = useState(false)
