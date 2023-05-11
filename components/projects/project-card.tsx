@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ChevronDown, Circle, Plus, Star } from "lucide-react"
+import { ChevronDown, Plus, Star } from "lucide-react"
 
 import type { ProjectsApiResult } from "@/lib/types/supabase"
 import { timeAgo } from "@/lib/utils"
@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -32,7 +31,7 @@ export function ProjectCard({ project }: { project: ProjectsApiResult }) {
         <div className="space-y-1">
           <CardTitle>{project.slug}</CardTitle>
         </div>
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end rounded-md border">
           <Link
             href={`/org/${project.organization.slug}/project/${project.slug}`}
           >
@@ -70,7 +69,7 @@ export function ProjectCard({ project }: { project: ProjectsApiResult }) {
       </CardHeader>
       <CardContent>
         <p className="line-clamp-2">{project.description}</p>
-        <div className="flex space-x-4 text-sm text-muted-foreground mt-5">
+        <div className="mt-5 flex space-x-4 text-sm text-muted-foreground">
           <div className="flex items-center">
             <Icons.cloud className="fill-sky-400 text-sky-400 mr-1 h-3 w-3" />
             {project.subdomain}

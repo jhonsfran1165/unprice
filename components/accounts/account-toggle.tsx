@@ -20,23 +20,9 @@ import { useSupabase } from "@/components/auth/supabase-provider"
 import { Icons } from "@/components/shared/icons"
 
 export function AccountToggle() {
-  const [profile, setProfile] = useState<Profile>()
-  const { session } = useStore()
-  const userId = session?.user.id
   const { supabase } = useSupabase()
-
-  useEffect(() => {
-    const getProfile = async () => {
-      const { data } = await supabase
-        .from("profile")
-        .select("*")
-        .eq("id", userId)
-        .single()
-      setProfile(data ?? undefined)
-    }
-
-    getProfile()
-  }, [userId])
+  const { session } = useStore()
+  const user_metadata = session?.user.user_metadata
 
   return (
     <DropdownMenu>
@@ -49,15 +35,18 @@ export function AccountToggle() {
           <Avatar className="h-8 w-8">
             <AvatarImage
               src={
-                profile?.avatar_url ?? `https://avatar.vercel.sh/account.png`
+                user_metadata?.avatar_url ??
+                `https://avatar.vercel.sh/account.png`
               }
-              alt={profile?.username}
+              alt={user_metadata?.username}
             />
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" forceMount className="w-56">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          Welcome, {user_metadata?.user_name}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>

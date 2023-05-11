@@ -15,6 +15,14 @@ export type Page = Database["public"]["Tables"]["page"]["Row"]
 export type Profile = Database["public"]["Tables"]["profile"]["Row"]
 export type Project = Database["public"]["Tables"]["project"]["Row"]
 
+export type OrganizationRoles =
+  Database["public"]["Enums"]["organization_roles"]
+
+export type OrganizationTypes = Database["public"]["Enums"]["organization_type"]
+
+export type SubscriptionTiers =
+  Database["public"]["Enums"]["organization_tiers"]
+
 // views
 export type DataOrgsView = Database["public"]["Views"]["data_orgs"]["Row"]
 

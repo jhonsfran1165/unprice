@@ -1,9 +1,8 @@
-import { notFound, redirect } from "next/navigation"
+import { redirect } from "next/navigation"
 
 import { createServerClient } from "@/lib/supabase/supabase-server"
-import { Organization } from "@/lib/types/supabase"
+import { AppClaims } from "@/lib/types"
 
-// do not cache this layout because it validates the session constantly
 export const revalidate = 0
 
 export default async function AppInitialPage() {
@@ -17,20 +16,17 @@ export default async function AppInitialPage() {
     redirect("/login")
   }
 
-  // TODO: create welcome page or register org
-  const { data: orgProfiles } = await supabase
-    .from("organization_profiles")
-    .select("*, profile(*), organization(*)")
-    .eq("profile_id", session?.user.id)
+  const appClaims = session?.user.app_metadata as AppClaims
+  let defaultOrgSlug = ""
 
-  const defaultOrg = orgProfiles?.find((org) => org.is_default === true)
-    ?.organization as Organization
+  for (var key in appClaims["organizations"]) {
+    if (appClaims["organizations"][key]?.is_default)
+      defaultOrgSlug = appClaims["organizations"][key].slug
+  }
 
-  if (defaultOrg) {
-    redirect(`/org/${defaultOrg?.slug}`)
+  if (defaultOrgSlug) {
+    redirect(`/org/${defaultOrgSlug}`)
   } else {
     redirect(`/org`)
   }
-
-  notFound()
 }

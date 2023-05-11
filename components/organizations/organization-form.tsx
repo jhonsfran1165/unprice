@@ -108,7 +108,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
       if (org.slug) {
         toast({
           title: "Organization Saved",
-          description: `Organization ${org.name} Saved successfully`,
+          description: `Organization ${org.slug} Saved successfully`,
           className: "info",
         })
 
@@ -126,9 +126,11 @@ export function OrganizationForm({ org }: { org?: Organization }) {
         throw org
       }
     } catch (error) {
+      const dataError = JSON.parse(error?.message ?? error)
+
       toast({
-        title: "Error saving org",
-        description: error.message,
+        title: `Error ${dataError?.code ?? ""} saving org`,
+        description: dataError.message ?? "",
         className: "danger",
       })
     } finally {

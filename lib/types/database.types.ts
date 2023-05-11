@@ -38,63 +38,63 @@ export interface Database {
         Row: {
           created_at: string
           description: string | null
-          id: number
+          id: string
           image: string | null
           name: string
           slug: string
           stripe_id: string | null
-          type: string
+          type: Database["public"]["Enums"]["organization_type"] | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           description?: string | null
-          id?: number
+          id?: string
           image?: string | null
           name: string
           slug?: string
           stripe_id?: string | null
-          type?: string
+          type?: Database["public"]["Enums"]["organization_type"] | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           description?: string | null
-          id?: number
+          id?: string
           image?: string | null
           name?: string
           slug?: string
           stripe_id?: string | null
-          type?: string
+          type?: Database["public"]["Enums"]["organization_type"] | null
           updated_at?: string
         }
       }
       organization_profiles: {
         Row: {
           created_at: string
-          id: number
+          id: string
           is_default: boolean
-          org_id: number
+          org_id: string
           profile_id: string
-          role: string
+          role: Database["public"]["Enums"]["organization_roles"] | null
           updated_at: string
         }
         Insert: {
           created_at?: string
-          id?: number
+          id?: string
           is_default?: boolean
-          org_id: number
+          org_id: string
           profile_id: string
-          role?: string
+          role?: Database["public"]["Enums"]["organization_roles"] | null
           updated_at?: string
         }
         Update: {
           created_at?: string
-          id?: number
+          id?: string
           is_default?: boolean
-          org_id?: number
+          org_id?: string
           profile_id?: string
-          role?: string
+          role?: Database["public"]["Enums"]["organization_roles"] | null
           updated_at?: string
         }
       }
@@ -112,10 +112,11 @@ export interface Database {
           interval: Database["public"]["Enums"]["subscription_interval"] | null
           interval_count: number | null
           metadata: Json | null
-          org_id: number | null
+          org_id: string | null
           price_id: string | null
           quantity: number | null
           status: Database["public"]["Enums"]["subscription_status"] | null
+          tier: Database["public"]["Enums"]["organization_tiers"] | null
           trial_end: string | null
           trial_start: string | null
         }
@@ -128,14 +129,15 @@ export interface Database {
           current_period_end?: string
           current_period_start?: string
           ended_at?: string | null
-          id: string
+          id?: string
           interval?: Database["public"]["Enums"]["subscription_interval"] | null
           interval_count?: number | null
           metadata?: Json | null
-          org_id?: number | null
+          org_id?: string | null
           price_id?: string | null
           quantity?: number | null
           status?: Database["public"]["Enums"]["subscription_status"] | null
+          tier?: Database["public"]["Enums"]["organization_tiers"] | null
           trial_end?: string | null
           trial_start?: string | null
         }
@@ -152,10 +154,11 @@ export interface Database {
           interval?: Database["public"]["Enums"]["subscription_interval"] | null
           interval_count?: number | null
           metadata?: Json | null
-          org_id?: number | null
+          org_id?: string | null
           price_id?: string | null
           quantity?: number | null
           status?: Database["public"]["Enums"]["subscription_status"] | null
+          tier?: Database["public"]["Enums"]["organization_tiers"] | null
           trial_end?: string | null
           trial_start?: string | null
         }
@@ -165,10 +168,10 @@ export interface Database {
           content: Json | null
           created_at: string
           description: string
-          id: number
+          id: string
           image_url: string | null
-          org_id: number | null
-          project_id: number | null
+          org_id: string | null
+          project_id: string | null
           published: boolean
           slug: string
           title: string
@@ -177,10 +180,10 @@ export interface Database {
           content?: Json | null
           created_at?: string
           description: string
-          id?: number
+          id?: string
           image_url?: string | null
-          org_id?: number | null
-          project_id?: number | null
+          org_id?: string | null
+          project_id?: string | null
           published?: boolean
           slug?: string
           title: string
@@ -189,10 +192,10 @@ export interface Database {
           content?: Json | null
           created_at?: string
           description?: string
-          id?: number
+          id?: string
           image_url?: string | null
-          org_id?: number | null
-          project_id?: number | null
+          org_id?: string | null
+          project_id?: string | null
           published?: boolean
           slug?: string
           title?: string
@@ -229,10 +232,10 @@ export interface Database {
           created_at: string
           custom_domain: string | null
           description: string | null
-          id: number
+          id: string
           logo: string | null
           name: string
-          org_id: number | null
+          org_id: string | null
           slug: string
           subdomain: string
           updated_at: string
@@ -241,10 +244,10 @@ export interface Database {
           created_at?: string
           custom_domain?: string | null
           description?: string | null
-          id?: number
+          id?: string
           logo?: string | null
           name: string
-          org_id?: number | null
+          org_id?: string | null
           slug?: string
           subdomain: string
           updated_at?: string
@@ -253,10 +256,10 @@ export interface Database {
           created_at?: string
           custom_domain?: string | null
           description?: string | null
-          id?: number
+          id?: string
           logo?: string | null
           name?: string
-          org_id?: number | null
+          org_id?: string | null
           slug?: string
           subdomain?: string
           updated_at?: string
@@ -267,14 +270,14 @@ export interface Database {
       data_orgs: {
         Row: {
           is_default: boolean | null
-          org_id: number | null
+          org_id: string | null
           org_image: string | null
           org_slug: string | null
           org_stripe_id: string | null
-          org_type: string | null
+          org_type: Database["public"]["Enums"]["organization_type"] | null
           profile_id: string | null
-          profiles_org_id: number | null
-          role: string | null
+          profiles_org_id: string | null
+          role: Database["public"]["Enums"]["organization_roles"] | null
           status_subscription:
             | Database["public"]["Enums"]["subscription_status"]
             | null
@@ -289,13 +292,133 @@ export interface Database {
           subscription_period_starts: string | null
           subscription_trial_ends: string | null
           subscription_trial_starts: string | null
+          tier: string | null
         }
       }
     }
     Functions: {
-      [_ in never]: never
+      config_org:
+        | {
+            Args: {
+              user_id: string
+              org_id: string
+              slug: string
+              type: Database["public"]["Enums"]["organization_type"]
+              name: string
+              image: string
+              description: string
+              role_user: Database["public"]["Enums"]["organization_roles"]
+              tier: string
+              is_default: boolean
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              user_id: string
+              org_id: string
+              slug: string
+              type: Database["public"]["Enums"]["organization_type"]
+              name: string
+              image: string
+              description: string
+              role_user: Database["public"]["Enums"]["organization_roles"]
+            }
+            Returns: string
+          }
+      custom_exception: {
+        Args: {
+          message: string
+        }
+        Returns: boolean
+      }
+      delete_claim: {
+        Args: {
+          uid: string
+          claim: string
+        }
+        Returns: string
+      }
+      get_claim: {
+        Args: {
+          user_id: string
+          claim: string
+        }
+        Returns: Json
+      }
+      get_claims: {
+        Args: {
+          user_id: string
+        }
+        Returns: Json
+      }
+      get_my_jwt_claim: {
+        Args: {
+          claim: string
+        }
+        Returns: Json
+      }
+      get_my_jwt_claims: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      has_role_org: {
+        Args: {
+          org_id: string
+          role: string
+        }
+        Returns: boolean
+      }
+      is_claims_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_member_of: {
+        Args: {
+          _user_id: string
+          _organization_id: string
+        }
+        Returns: boolean
+      }
+      is_member_org: {
+        Args: {
+          org_id: string
+        }
+        Returns: boolean
+      }
+      is_role_of: {
+        Args: {
+          _user_id: string
+          _org_id: string
+          _role: string
+        }
+        Returns: boolean
+      }
+      jwt_expired_exception: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      no_admin_exception: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      no_owner_exception: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      set_claim: {
+        Args: {
+          uid: string
+          claim: string
+          value: Json
+        }
+        Returns: string
+      }
     }
     Enums: {
+      organization_roles: "OWNER" | "MEMBER"
+      organization_tiers: "FREE" | "PRO" | "CUSTOM"
+      organization_type: "STARTUP" | "PERSONAL" | "BUSSINESS"
       subscription_interval: "day" | "week" | "month" | "year"
       subscription_status:
         | "trialing"

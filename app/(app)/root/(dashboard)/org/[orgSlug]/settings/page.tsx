@@ -23,7 +23,7 @@ export default async function OrgSettingsIndexPage({
 
   const { data: dataOrg, error } = await supabase
     .from("data_orgs")
-    .select("*, organization(*)")
+    .select("*, organization!inner(*)")
     .eq("profile_id", session?.user.id)
     .eq("org_slug", orgSlug)
     .eq("organization.slug", orgSlug)

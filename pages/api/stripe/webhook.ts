@@ -67,7 +67,7 @@ export default async function webhookHandler(
 
               // when the user subscribes to a plan, set their stripe customer ID
               // in the database for easy identification in future webhook events
-              const orgId = checkoutSession.client_reference_id
+              const orgId = checkoutSession.client_reference_id ?? ""
               const subscriptionId =
                 checkoutSession?.subscription?.toString() || ""
               const stripeId = checkoutSession.customer?.toString()

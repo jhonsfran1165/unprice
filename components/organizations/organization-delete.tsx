@@ -19,7 +19,6 @@ import {
 import { Button } from "@/components/ui/button"
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -62,7 +61,7 @@ export function OrganizationDelete({
   isDefault = false,
 }: {
   orgSlug: string
-  id: number
+  id: string
   isDefault?: boolean
 }) {
   const router = useRouter()
@@ -88,7 +87,7 @@ export function OrganizationDelete({
         data: { orgSlug, id },
       })
 
-      if (org) {
+      if (org.slug) {
         // mutate swr endpoints for org
         mutate(`/api/org`)
         mutate(`/api/org/${orgSlug}`)
@@ -97,9 +96,11 @@ export function OrganizationDelete({
         router.refresh()
       }
     } catch (error) {
+      const dataError = JSON.parse(error?.message ?? error)
+
       toast({
-        title: "Error deleting org",
-        description: error.message,
+        title: `Error ${dataError?.code ?? ""} deleting org`,
+        description: dataError.message ?? "",
         className: "danger",
       })
     } finally {

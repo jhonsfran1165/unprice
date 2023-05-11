@@ -24,7 +24,7 @@ export const ProjectSkeleton = () => (
         <Skeleton className="h-3 w-40" />
         <Skeleton className="h-3 w-40" />
       </div>
-      <div className="flex space-x-4 text-sm text-muted-foreground mt-5">
+      <div className="mt-5 flex space-x-4 text-sm text-muted-foreground">
         <div className="flex items-center">
           <Skeleton className="h-[21px] w-24" />
         </div>

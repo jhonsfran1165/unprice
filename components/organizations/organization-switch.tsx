@@ -5,6 +5,7 @@ import Link from "next/link"
 
 import { useStore } from "@/lib/stores/layout"
 import useOrganizations from "@/lib/swr/use-organizations"
+import { AppOrgClaim } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -27,15 +28,21 @@ import OrganizationLink from "@/components/organizations/organization-link"
 import { Icons } from "@/components/shared/icons"
 
 export function OrganizationSwitch() {
-  const { orgSlug, orgData } = useStore()
+  const { orgSlug, orgData, appClaims } = useStore()
   const [open, setOpen] = useState(false)
-  const { organizationProfiles } = useOrganizations({
-    revalidateOnFocus: true,
-  })
+
+  // TODO: is it a good idea?
+  // const { organizationProfiles } = useOrganizations({
+  //   revalidateOnFocus: true,
+  // })
+
+  // rely on claims from JWT is less expensive in terms of request to the db
+  // we refresh the token when we see changes in the app metadata
+  const organizationProfiles = appClaims?.organizations
 
   return (
     <div className="flex items-center justify-start space-x-2">
-      <OrganizationLink org={orgData?.organization} />
+      <OrganizationLink org={orgData} />
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -58,45 +65,50 @@ export function OrganizationSwitch() {
               <CommandInput placeholder="Search organization..." />
               <CommandEmpty>No organization found.</CommandEmpty>
               <CommandGroup>
-                {organizationProfiles?.map((org) => (
-                  <CommandItem
-                    key={org.org_id}
-                    className="text-sm"
-                    onSelect={() => {
-                      setOpen(false)
-                    }}
-                  >
-                    <Link
-                      className="flex w-full"
-                      href={`/org/${org.org_slug}`}
-                      prefetch={true}
+                {Object.keys(organizationProfiles ?? {}).map((orgId) => {
+                  const org =
+                    organizationProfiles && organizationProfiles[orgId]
+
+                  if (!org) return null
+
+                  return (
+                    <CommandItem
+                      key={orgId}
+                      className="text-sm"
+                      onSelect={() => {
+                        setOpen(false)
+                      }}
                     >
-                      <Avatar className="mr-2 h-5 w-5">
-                        <AvatarImage
-                          src={
-                            org.org_image ||
-                            `https://avatar.vercel.sh/${org.org_slug}`
-                          }
-                          alt={org.org_slug || ""}
-                        />
-                      </Avatar>
-                      <span className="mr-2">{org.org_slug}</span>
-                      {org.is_default && (
-                        <Badge variant={"outline"}>default</Badge>
-                      )}
-                      {org.org_slug === orgSlug && (
-                        <Icons.check
-                          className={cn(
-                            "ml-auto h-4 w-4",
-                            org.org_slug === orgSlug
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                      )}
-                    </Link>
-                  </CommandItem>
-                ))}
+                      <Link
+                        className="flex w-full"
+                        href={`/org/${org.slug}`}
+                        prefetch={true}
+                      >
+                        <Avatar className="mr-2 h-5 w-5">
+                          <AvatarImage
+                            src={
+                              org.image ||
+                              `https://avatar.vercel.sh/${org.slug}`
+                            }
+                            alt={org.slug || ""}
+                          />
+                        </Avatar>
+                        <span className="mr-2">{org.slug}</span>
+                        {org.is_default && (
+                          <Badge variant={"outline"}>default</Badge>
+                        )}
+                        {org.slug === orgSlug && (
+                          <Icons.check
+                            className={cn(
+                              "ml-auto h-4 w-4",
+                              org.slug === orgSlug ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                        )}
+                      </Link>
+                    </CommandItem>
+                  )
+                })}
               </CommandGroup>
             </CommandList>
             <CommandSeparator />

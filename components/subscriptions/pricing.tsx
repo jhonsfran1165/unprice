@@ -24,7 +24,7 @@ import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 const Pricing = () => {
   const [tier, setTier] = useState(0)
-  const { orgSlug, orgData, orgProfiles } = useStore()
+  const { orgSlug } = useStore()
 
   const [priceIdLoading, setPriceIdLoading] = useState(false)
   const [annualBilling, setAnnualBilling] = useState(false)
@@ -51,7 +51,14 @@ const Pricing = () => {
       const response = await fetchAPI({
         url: "/api/stripe/create-checkout-session",
         method: "POST",
-        data: { stripePriceId, orgSlug, currency: "USD" },
+        data: {
+          stripePriceId,
+          orgSlug,
+          currency: "USD",
+          metadata: {
+            tier: tier,
+          },
+        },
       })
 
       const { id: sessionId } = response

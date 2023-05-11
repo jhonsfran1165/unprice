@@ -104,11 +104,29 @@ export function RegisterForm({ className, ...props }: RegisterFormProps) {
               </p>
             )}
           </div>
+          <div className="grid gap-1">
+            <Label className="sr-only" htmlFor="password">
+              Confirm assword
+            </Label>
+            <Input
+              {...register("confirmPassword")}
+              id="confirmPassword"
+              placeholder="confirmPassword"
+              type="password"
+              disabled={isLoading}
+              aria-invalid={errors.password ? "true" : "false"}
+            />
+            {errors.confirmPassword && (
+              <p className="pl-1 pt-1 text-xs text-error-solid" role="alert">
+                {errors.confirmPassword?.message}
+              </p>
+            )}
+          </div>
           <Button
             disabled={isLoading}
             form="register-form"
             type="submit"
-            className="font-semibold text-background-base"
+            className="font-semibold text-black"
           >
             {isLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
