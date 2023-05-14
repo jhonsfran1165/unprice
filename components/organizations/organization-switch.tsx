@@ -4,8 +4,6 @@ import { useState } from "react"
 import Link from "next/link"
 
 import { useStore } from "@/lib/stores/layout"
-import useOrganizations from "@/lib/swr/use-organizations"
-import { AppOrgClaim } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -30,11 +28,6 @@ import { Icons } from "@/components/shared/icons"
 export function OrganizationSwitch() {
   const { orgSlug, orgData, appClaims } = useStore()
   const [open, setOpen] = useState(false)
-
-  // TODO: is it a good idea?
-  // const { organizationProfiles } = useOrganizations({
-  //   revalidateOnFocus: true,
-  // })
 
   // rely on claims from JWT is less expensive in terms of request to the db
   // we refresh the token when we see changes in the app metadata
@@ -72,17 +65,17 @@ export function OrganizationSwitch() {
                   if (!org) return null
 
                   return (
-                    <CommandItem
+                    <Link
                       key={orgId}
-                      className="text-sm"
-                      onSelect={() => {
-                        setOpen(false)
-                      }}
+                      className="w-full"
+                      href={`/org/${org.slug}`}
+                      prefetch={true}
                     >
-                      <Link
-                        className="flex w-full"
-                        href={`/org/${org.slug}`}
-                        prefetch={true}
+                      <CommandItem
+                        className="text-sm"
+                        onSelect={() => {
+                          setOpen(false)
+                        }}
                       >
                         <Avatar className="mr-2 h-5 w-5">
                           <AvatarImage
@@ -93,7 +86,7 @@ export function OrganizationSwitch() {
                             alt={org.slug || ""}
                           />
                         </Avatar>
-                        <span className="mr-2">{org.slug}</span>
+                        <span className="mr-2 w-1/3 truncate">{org.slug}</span>
                         {org.is_default && (
                           <Badge variant={"outline"}>default</Badge>
                         )}
@@ -105,8 +98,8 @@ export function OrganizationSwitch() {
                             )}
                           />
                         )}
-                      </Link>
-                    </CommandItem>
+                      </CommandItem>
+                    </Link>
                   )
                 })}
               </CommandGroup>

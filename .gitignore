@@ -33,5 +33,6 @@ yarn-error.log*
 .turbo
 
 .contentlayer
+.env
 
 oldshit/*

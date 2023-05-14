@@ -7,6 +7,7 @@ import { CldUploadWidget } from "next-cloudinary"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { mutate } from "swr"
 
+import { OrganizationTypes } from "@/lib/config/layout"
 import { Organization } from "@/lib/types/supabase"
 import { createSlug, fetchAPI } from "@/lib/utils"
 import { orgPostSchema, orgPostType } from "@/lib/validations/org"
@@ -40,7 +41,7 @@ import "./styles.css"
 
 // TODO: clean this up for a better validation of exist account - maybe better use zod
 // watch elements to validate and clean errors at the same time
-export function OrganizationForm({ org }: { org?: Organization }) {
+export function OrganizationForm({ org }: { org?: Organization | null }) {
   const router = useRouter()
 
   const action = org ? "edit" : "new"
@@ -51,7 +52,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
     slug: org?.slug || "",
     description: org?.description || null,
     image: org?.image || "",
-    type: org?.type || "personal",
+    type: org?.type || "PERSONAL",
   })
 
   const [loading, setLoading] = useState(false)
@@ -90,11 +91,13 @@ export function OrganizationForm({ org }: { org?: Organization }) {
     }
   }, [exist])
 
-  // TODO: create function for handling post errors and fetch
   const onSubmit: SubmitHandler<orgPostType> = async (dataForm) => {
     try {
       setLoading(true)
       const method = action === "new" ? "PUT" : "POST"
+
+      // We use api endpoint instead of supabase directly because we use supabaseAdmin
+      // in order to be able to bypass the RLS
       const org = await fetchAPI({
         url: "/api/org",
         method,
@@ -104,11 +107,10 @@ export function OrganizationForm({ org }: { org?: Organization }) {
         },
       })
 
-      // TODO: add profile as well
       if (org.slug) {
         toast({
-          title: "Organization Saved",
-          description: `Organization ${org.slug} Saved successfully`,
+          title: "Organization saved",
+          description: `Organization ${org.slug} saved successfully`,
           className: "info",
         })
 
@@ -169,7 +171,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
               <Input
                 {...register("name")}
                 id={"name"}
-                aria-invalid={errors.name ? "true" : "false"}
+                aria-invalid={Boolean(errors.name)}
                 className="mt-1 w-full"
                 onChange={(e) => {
                   setValue("name", e.target.value)
@@ -202,7 +204,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                 readOnly
                 {...register("slug")}
                 id={"slug"}
-                aria-invalid={errors.slug ? "true" : "false"}
+                aria-invalid={Boolean(errors.slug)}
                 className="mt-1 w-full"
               />
               {errors.slug && (
@@ -218,11 +220,12 @@ export function OrganizationForm({ org }: { org?: Organization }) {
               TYPE OF ORGANIZATION
             </Label>
             <Select
-              defaultValue={data?.type || "personal"}
-              aria-invalid={errors.type ? "true" : "false"}
-              onValueChange={(value) =>
-                setValue("type", value, { shouldValidate: true })
-              }
+              defaultValue={data?.type || "PERSONAL"}
+              aria-invalid={Boolean(errors.type)}
+              onValueChange={(value) => {
+                const type = OrganizationTypes[value]
+                setValue("type", type, { shouldValidate: true })
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Type of the organization" />
@@ -233,9 +236,13 @@ export function OrganizationForm({ org }: { org?: Organization }) {
                 className="SelectContent-bgSubtle text-background-text"
               >
                 <SelectGroup>
-                  <SelectItem value="personal">Personal</SelectItem>
-                  <SelectItem value="bussiness">Bussines</SelectItem>
-                  <SelectItem value="startup">Startup</SelectItem>
+                  {Object.keys(OrganizationTypes).map((key, index) => {
+                    return (
+                      <SelectItem key={key + index} value={key}>
+                        {key}
+                      </SelectItem>
+                    )
+                  })}
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -316,7 +323,7 @@ export function OrganizationForm({ org }: { org?: Organization }) {
             <Textarea
               {...register("description")}
               id={"description"}
-              aria-invalid={errors.description ? "true" : "false"}
+              aria-invalid={Boolean(errors.description)}
               placeholder="Type your description here."
               onChange={(e) => {
                 e.preventDefault()

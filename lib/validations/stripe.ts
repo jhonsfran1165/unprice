@@ -11,8 +11,23 @@ export const stripePriceId = z.string().min(1, {
     "invalid stripePriceId for the subscription, it has to be at least 3 characters",
 })
 
-// TODO: add trialDays, metadata
-export const stripePostSchema = z.object({ orgSlug, stripePriceId })
-export const stripePortalPostSchema = z.object({ orgSlug })
+export const organizationTiersSchema = z.union([
+  z.literal("FREE"),
+  z.literal("PRO"),
+  z.literal("CUSTOM"),
+])
 
+const trialDays = z.number().default(0)
+const metadata = z.object({ tier: organizationTiersSchema }).nullable()
+const currency = z.union([z.literal("USD"), z.literal("COP"), z.literal("EU")])
+
+export const stripePostSchema = z.object({
+  orgSlug,
+  stripePriceId,
+  trialDays,
+  metadata,
+  currency,
+})
+
+export const stripePortalPostSchema = z.object({ orgSlug })
 export type stripePostType = z.infer<typeof stripePostSchema>

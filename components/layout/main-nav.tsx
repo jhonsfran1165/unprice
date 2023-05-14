@@ -30,7 +30,7 @@ export function MainNav() {
                   (item, index) =>
                     item.href && (
                       <Link
-                        key={index}
+                        key={item.href}
                         href={item.href}
                         className={cn(
                           "button-ghost flex items-center rounded-md border px-2 py-1 text-xs font-normal",

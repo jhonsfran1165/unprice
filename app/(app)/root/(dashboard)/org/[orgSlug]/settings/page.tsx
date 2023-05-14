@@ -1,11 +1,11 @@
+import { notFound } from "next/navigation"
+
 import { createServerClient } from "@/lib/supabase/supabase-server"
 import { Organization } from "@/lib/types/supabase"
 import { OrganizationDelete } from "@/components/organizations/organization-delete"
 import { OrganizationForm } from "@/components/organizations/organization-form"
 import { OrganizationMakeDefault } from "@/components/organizations/organization-make-default"
 
-// TODO: introduce example framer motion
-// https://www.josephcollicoat.com/articles/animating-text-with-the-intersection-observer-api-and-framer-motion
 export const revalidate = 0
 
 export default async function OrgSettingsIndexPage({
@@ -29,7 +29,13 @@ export default async function OrgSettingsIndexPage({
     .eq("organization.slug", orgSlug)
     .single()
 
+  // org default has to be saved inside user metadata
+  console.log(error)
+
   const org = dataOrg?.organization as Organization
+
+  if (!org) notFound()
+  if (error) notFound()
 
   return (
     <div className="space-y-10 md:px-0">

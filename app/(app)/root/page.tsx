@@ -17,11 +17,17 @@ export default async function AppInitialPage() {
   }
 
   const appClaims = session?.user.app_metadata as AppClaims
+  const orgClaims = appClaims?.organizations
   let defaultOrgSlug = ""
 
-  for (var key in appClaims["organizations"]) {
-    if (appClaims["organizations"][key]?.is_default)
-      defaultOrgSlug = appClaims["organizations"][key].slug
+  for (const key in orgClaims) {
+    if (Object.prototype.hasOwnProperty.call(orgClaims, key)) {
+      const org = orgClaims[key]
+
+      if (org.is_default) {
+        defaultOrgSlug = org.slug
+      }
+    }
   }
 
   if (defaultOrgSlug) {

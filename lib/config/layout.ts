@@ -16,3 +16,9 @@ export const layoutConfig: LayoutConfig = {
     dashboard: "/dashboard",
   },
 }
+
+export enum OrganizationTypes {
+  STARTUP = "STARTUP",
+  PERSONAL = "PERSONAL",
+  BUSSINESS = "BUSSINESS",
+}

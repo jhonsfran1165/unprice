@@ -235,7 +235,7 @@ export interface Database {
           id: string
           logo: string | null
           name: string
-          org_id: string | null
+          org_id: string
           slug: string
           subdomain: string
           updated_at: string
@@ -247,7 +247,7 @@ export interface Database {
           id?: string
           logo?: string | null
           name: string
-          org_id?: string | null
+          org_id: string
           slug?: string
           subdomain: string
           updated_at?: string
@@ -259,7 +259,7 @@ export interface Database {
           id?: string
           logo?: string | null
           name?: string
-          org_id?: string | null
+          org_id?: string
           slug?: string
           subdomain?: string
           updated_at?: string
@@ -297,35 +297,19 @@ export interface Database {
       }
     }
     Functions: {
-      config_org:
-        | {
-            Args: {
-              user_id: string
-              org_id: string
-              slug: string
-              type: Database["public"]["Enums"]["organization_type"]
-              name: string
-              image: string
-              description: string
-              role_user: Database["public"]["Enums"]["organization_roles"]
-              tier: string
-              is_default: boolean
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              user_id: string
-              org_id: string
-              slug: string
-              type: Database["public"]["Enums"]["organization_type"]
-              name: string
-              image: string
-              description: string
-              role_user: Database["public"]["Enums"]["organization_roles"]
-            }
-            Returns: string
-          }
+      config_org: {
+        Args: {
+          user_id: string
+          org_id: string
+          slug: string
+          type: Database["public"]["Enums"]["organization_type"]
+          name: string
+          image: string
+          description: string
+          role_user: Database["public"]["Enums"]["organization_roles"]
+        }
+        Returns: string
+      }
       custom_exception: {
         Args: {
           message: string
@@ -373,24 +357,9 @@ export interface Database {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      is_member_of: {
-        Args: {
-          _user_id: string
-          _organization_id: string
-        }
-        Returns: boolean
-      }
       is_member_org: {
         Args: {
           org_id: string
-        }
-        Returns: boolean
-      }
-      is_role_of: {
-        Args: {
-          _user_id: string
-          _org_id: string
-          _role: string
         }
         Returns: boolean
       }
@@ -596,3 +565,4 @@ export interface Database {
     }
   }
 }
+

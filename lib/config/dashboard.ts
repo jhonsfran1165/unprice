@@ -27,6 +27,7 @@ const OrgNavTabs: DashboardNavItem[] = [
     title: "Settings",
     href: "/settings",
     disabled: false,
+    tier: "FREE",
     sidebarNav: [
       {
         module: "org",
@@ -35,6 +36,7 @@ const OrgNavTabs: DashboardNavItem[] = [
         title: "General",
         href: "/settings",
         icon: "settings",
+        tier: "PRO",
       },
       {
         module: "org",

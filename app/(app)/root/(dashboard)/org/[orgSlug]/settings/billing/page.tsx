@@ -24,19 +24,6 @@ export default async function IndexPage({
     action: string
   }
 }) {
-  const supabase = createServerClient()
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  const { data: dataOrg } = await supabase
-    .from("data_orgs")
-    .select("*")
-    .eq("profile_id", session?.user.id)
-    .eq("org_slug", orgSlug)
-    .single()
-
   if (action === "upgrade") {
     return (
       <div className="md:px-0">

@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 
-import useOrganizationExist from "@/hooks/use-organization-exist"
+import type { OrganizationTypes } from "@/lib/types/supabase"
 
 // **************************** FIELDS **************************** //
 export const orgSlug = z.string().min(1, {
@@ -14,11 +14,9 @@ const name = z.string().min(3, {
     "invalid name for the organization, it has to be at least 3 characters",
 })
 
-const type = z.string().min(3, {
-  message:
-    "invalid type for the organization, it has to be at least 3 characters",
-})
-
+const type = z
+  .union([z.literal("STARTUP"), z.literal("PERSONAL"), z.literal("BUSSINESS")])
+  .nullable()
 const id = z.string()
 const image = z.string().url()
 const description = z.string()

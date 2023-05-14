@@ -26,6 +26,8 @@ $$
 supabase gen types typescript --local > lib/types/database.types.ts ====> create types
 supabase db diff --use-migra -f seeding_data -> create migrations
 
+pnpm supabase-to-zod --input ib/types/database.types.ts --output schemas.ts
+
 pg_dump --column-inserts --data-only postgresql://postgres:postgres@localhost:54322 > supabase/dump.sql
 
 ---
@@ -70,3 +72,7 @@ group_manager: false
 items: ["toothpick", "string", "ring"]
 
 https://supabase.com/docs/guides/auth/row-level-security#policies-with-security-definer-functions
+
+# zod validation example
+
+https://gist.github.com/pom421/ea34eeb778b0d94fe85352dc27aada96

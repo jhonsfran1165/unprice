@@ -64,12 +64,13 @@ async function handler(
         user_id: session?.user.id ?? "",
         org_id: uuid,
         slug,
-        type: type.toUpperCase(),
+        type: type?.toUpperCase(),
         name,
         image,
         description,
         role_user: "OWNER",
       })
+      console.log(error, "error")
 
       if (error) return res.status(500).json(error)
 

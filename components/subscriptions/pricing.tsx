@@ -56,7 +56,7 @@ const Pricing = () => {
           orgSlug,
           currency: "USD",
           metadata: {
-            tier: tier,
+            tier: "PRO",
           },
         },
       })

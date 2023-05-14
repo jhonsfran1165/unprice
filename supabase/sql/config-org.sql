@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION config_org(user_id uuid, org_id uuid, slug text, type organization_type, name text, image text, description text, role_user organization_roles) RETURNS text
   LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
   AS $$
-  DECLARE is_default boolean = coalesce((select NOT(EXISTS(select 1 from organization_profiles where profile_id = user_id AND is_default != true))), false);
+  DECLARE is_default boolean = coalesce((select NOT(EXISTS(select 1 from organization_profiles where profile_id = user_id AND is_default = true))), false);
   BEGIN
     IF session_user = 'authenticator' THEN        
       INSERT INTO "organization" (id, slug, type, name, image, description) VALUES (org_id, slug, type, name, image, description);

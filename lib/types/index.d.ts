@@ -58,6 +58,7 @@ export type DashboardSidebarNavItem = {
   slug: string
   disabled?: boolean
   external?: boolean
+  tier?: string
   icon?: keyof typeof Icons
   href: string
 }
@@ -68,6 +69,7 @@ export type DashboardNavItem = {
   submodule?: string
   slug: string
   href: string
+  tier?: string
   sidebarNav?: DashboardSidebarNavItem[]
   disabled?: boolean
   external?: boolean
