@@ -22,3 +22,13 @@ export enum OrganizationTypes {
   PERSONAL = "PERSONAL",
   BUSSINESS = "BUSSINESS",
 }
+
+export const OrganizationRoles = {
+  MEMBER: {
+    description:
+      "Can view and make changes on pages. No chnages allowed on the organizaiton",
+  },
+  OWNER: {
+    description: "Admin-level access to all resources.",
+  },
+}

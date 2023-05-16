@@ -122,4 +122,3 @@ using (has_role_org((org_id)::text, '"OWNER"'::text))
 with check (has_role_org((org_id)::text, '"OWNER"'::text));
 
 
-

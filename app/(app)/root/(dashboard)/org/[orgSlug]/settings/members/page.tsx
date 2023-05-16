@@ -32,7 +32,6 @@ export default async function IndexPage({
     .select("*, profile!inner(*)")
     .eq("org_id", orgId)
 
-  console.log(error)
   console.log(profiles)
 
   return <DemoTeamMembers profiles={profiles} />

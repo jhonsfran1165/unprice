@@ -189,10 +189,12 @@ CREATE OR REPLACE FUNCTION delete_claim(uid uuid, claim text) RETURNS "text"
     END;
 $$;
 
-CREATE OR REPLACE FUNCTION update_claims_user() RETURNS trigger
+
+CREATE OR REPLACE FUNCTION update_claims_org_user() RETURNS trigger
 LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
   AS $$
   DECLARE _org_id uuid;
+  DECLARE _data record;
   BEGIN
     IF TG_TABLE_NAME::regclass::text = 'organization' THEN
       _org_id = coalesce(new.id, old.id);
@@ -200,31 +202,32 @@ LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
       _org_id = coalesce(new.org_id, old.org_id);
     END IF;
 
-    UPDATE auth.users set raw_app_meta_data = raw_app_meta_data || json_build_object('organizations', COALESCE((
-      SELECT json_object_agg(org_id, value) FROM (
-        SELECT org_id, json_build_object('role', role, 'tier', tier, 'slug', org_slug, 'is_default', is_default, 'image', org_image, 'type', org_type) as value 
-        FROM data_orgs
-        WHERE profile_id IN (SELECT profile_id from organization_profiles where org_id = _org_id)
-        GROUP by org_id, role, tier, org_slug, is_default, org_image, org_type) as data), '{}'))::jsonb
-    WHERE id IN (SELECT profile_id from organization_profiles where org_id = _org_id);
+    -- _data is a structure that contains an element for each column in the select list
+    FOR _data IN (SELECT profile_id, json_object_agg(org_id, value) as json_data FROM (SELECT profile_id, org_id, json_build_object('role', role, 'tier', tier, 'slug', org_slug, 'is_default', is_default, 'image', org_image, 'type', org_type) as value 
+        FROM data_orgs WHERE profile_id IN (SELECT profile_id from organization_profiles where org_id = _org_id)) as data group by profile_id)
+    LOOP
+      UPDATE auth.users 
+      SET raw_app_meta_data = COALESCE(raw_app_meta_data, '{}') || COALESCE(jsonb_build_object('organizations', COALESCE(_data.json_data, '{}')::jsonb), '{}')
+      WHERE id = _data.profile_id;
+    END LOOP;
   RETURN null;
 END
 $$;
 
-CREATE OR REPLACE FUNCTION delete_claims_user() RETURNS trigger
-LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
-  AS $$
-  DECLARE _org_id uuid = coalesce(new.org_id, old.org_id);
-  BEGIN
-    UPDATE auth.users set raw_app_meta_data = raw_app_meta_data || json_build_object('organizations', COALESCE((
-      SELECT (raw_app_meta_data->'organizations') - _org_id::text
-      FROM auth.users WHERE raw_app_meta_data->'organizations' ? _org_id::text), '{}'))::jsonb
-    WHERE id IN (SELECT id from auth.users WHERE raw_app_meta_data->'organizations' ? _org_id::text);
-  RETURN null;
-END
-$$;
+-- CREATE OR REPLACE FUNCTION delete_claims_user() RETURNS trigger
+-- LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
+--   AS $$
+--   DECLARE _org_id uuid = coalesce(new.org_id, old.org_id);
+--   BEGIN
+--     UPDATE auth.users set raw_app_meta_data = raw_app_meta_data || json_build_object('organizations', COALESCE((
+--       SELECT (raw_app_meta_data->'organizations') - _org_id::text
+--       FROM auth.users WHERE raw_app_meta_data->'organizations' ? _org_id::text), '{}'))::jsonb
+--     WHERE id IN (SELECT id from auth.users WHERE raw_app_meta_data->'organizations' ? _org_id::text);
+--   RETURN null;
+-- END
+-- $$;
 
-CREATE OR REPLACE FUNCTION delete_claims_user() RETURNS trigger
+CREATE OR REPLACE FUNCTION delete_claims_org_user() RETURNS trigger
 LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
   AS $$
   DECLARE _org_id uuid = coalesce(new.org_id, old.org_id);

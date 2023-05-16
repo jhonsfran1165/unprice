@@ -53,12 +53,13 @@ function StoreHandler({
   const orgSlug = numberSegments >= 1 ? cleanSegments[1] : ""
   const projectSlug = numberSegments >= 2 ? cleanSegments[3] : ""
 
-  const orgData = useMemo(() => {
+  const { orgId, orgData } = useMemo(() => {
     for (var key in appClaims["organizations"]) {
-      if (appClaims["organizations"][key]?.slug === orgSlug)
-        return appClaims["organizations"][key]
+      if (appClaims["organizations"][key]?.slug === orgSlug) {
+        return { orgId: key, orgData: appClaims["organizations"][key] }
+      }
     }
-  }, [orgSlug, JSON.stringify(appClaims)])
+  }, [orgSlug, JSON.stringify(appClaims)]) || { orgId: "", orgData: null }
 
   // TODO: use this to handle access to PRO modules inside the app
   const haveAccess = () => {
@@ -78,6 +79,7 @@ function StoreHandler({
       session,
       contextHeader: activeTab?.title,
       orgSlug,
+      orgId,
       projectSlug,
       activeTabs: tabs,
       activeTab: activeTab,
@@ -96,6 +98,7 @@ function StoreHandler({
     useStore.setState({
       // TODO: it is possible to generalize this?
       orgSlug,
+      orgId,
       session,
       projectSlug,
       activeTabs: tabs,

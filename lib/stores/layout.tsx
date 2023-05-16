@@ -11,6 +11,7 @@ import { OrganizationViewData, Session } from "@/lib/types/supabase"
 export const useStore = create<{
   contextHeader: string
   orgSlug: string
+  orgId: string
   projectSlug: string
   session: Session | null
   modulesApp: AppModulesNav | {}
@@ -26,6 +27,7 @@ export const useStore = create<{
 }>((set) => ({
   contextHeader: "",
   orgSlug: "",
+  orgId: "",
   projectSlug: "",
   session: null,
   modulesApp: {},

@@ -96,7 +96,7 @@ export function OrganizationDelete({
         router.refresh()
       }
     } catch (error) {
-      const dataError = JSON.parse(error?.message ?? error)
+      const dataError = JSON.parse(error?.message ?? error).error
 
       toast({
         title: `Error ${dataError?.code ?? ""} deleting org`,

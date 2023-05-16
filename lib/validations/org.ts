@@ -14,9 +14,11 @@ const name = z.string().min(3, {
     "invalid name for the organization, it has to be at least 3 characters",
 })
 
+const role = z.union([z.literal("MEMBER"), z.literal("OWNER")]).nullable()
 const type = z
   .union([z.literal("STARTUP"), z.literal("PERSONAL"), z.literal("BUSSINESS")])
   .nullable()
+
 const id = z.string()
 const image = z.string().url()
 const description = z.string()
@@ -56,6 +58,12 @@ export const orgMakeDefaultSchema = z.object({
   is_default: isDefault,
 })
 
+export const orgChangeRoleSchema = z.object({
+  id,
+  role: role,
+})
+
 export type orgMakeDefaultType = z.infer<typeof orgMakeDefaultSchema>
+export type orgChangeRoleType = z.infer<typeof orgChangeRoleSchema>
 export type orgPostType = z.infer<typeof orgPostSchema>
 export type orgPutType = z.infer<typeof orgPutSchema>

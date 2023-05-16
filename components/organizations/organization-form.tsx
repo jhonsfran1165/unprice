@@ -128,7 +128,7 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
         throw org
       }
     } catch (error) {
-      const dataError = JSON.parse(error?.message ?? error)
+      const dataError = JSON.parse(error?.message ?? error).error
 
       toast({
         title: `Error ${dataError?.code ?? ""} saving org`,
