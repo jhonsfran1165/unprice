@@ -52,16 +52,17 @@ function StoreHandler({
   // TODO: how to generalize this?
   const orgSlug = numberSegments >= 1 ? cleanSegments[1] : ""
   const projectSlug = numberSegments >= 2 ? cleanSegments[3] : ""
+  const orgClaims = appClaims?.organizations
 
   const { orgId, orgData } = useMemo(() => {
-    for (var key in appClaims["organizations"]) {
-      if (appClaims["organizations"][key]?.slug === orgSlug) {
-        return { orgId: key, orgData: appClaims["organizations"][key] }
+    for (const key in orgClaims) {
+      if (orgClaims[key]?.slug === orgSlug) {
+        return { orgId: key, orgData: orgClaims[key] }
       }
     }
-  }, [orgSlug, JSON.stringify(appClaims)]) || { orgId: "", orgData: null }
+  }, [orgSlug, JSON.stringify(orgClaims)]) || { orgId: "", orgData: null }
 
-  // TODO: use this to handle access to PRO modules inside the app
+  // TODO: use this to handle access to PRO modules inside the app && permissions per roles
   const haveAccess = () => {
     const accessTab = orgData?.tier === activeTab?.tier || !activeTab?.tier
     const accessSideBar =
@@ -70,7 +71,7 @@ function StoreHandler({
     return accessTab && accessSideBar
   }
 
-  console.log(haveAccess())
+  // console.log(haveAccess())
   // initialize this only the first time from the server
   // TODO: better change this with session?
   if (!initialized.current) {

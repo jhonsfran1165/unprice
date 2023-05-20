@@ -70,7 +70,6 @@ async function handler(
         description,
         role_user: "OWNER",
       })
-      console.log(error, "error")
 
       if (error) return res.status(500).json(error)
 

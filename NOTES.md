@@ -76,3 +76,12 @@ https://supabase.com/docs/guides/auth/row-level-security#policies-with-security-
 # zod validation example
 
 https://gist.github.com/pom421/ea34eeb778b0d94fe85352dc27aada96
+
+# implement TRPC
+
+# https://github.com/chronark/access for roles
+
+<!-- https://github.com/clerkinc/use-stripe-subscription-demo -->
+<!-- https://www.tinybird.co/blog-posts/dev-qa-global-api-latency-chronark -->
+
+see clerk

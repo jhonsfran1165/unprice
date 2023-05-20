@@ -20,6 +20,7 @@ const type = z
   .nullable()
 
 const id = z.string()
+const profileId = z.string()
 const image = z.string().url()
 const description = z.string()
 const isDefault = z.boolean()
@@ -61,6 +62,7 @@ export const orgMakeDefaultSchema = z.object({
 export const orgChangeRoleSchema = z.object({
   id,
   role: role,
+  profileId,
 })
 
 export type orgMakeDefaultType = z.infer<typeof orgMakeDefaultSchema>

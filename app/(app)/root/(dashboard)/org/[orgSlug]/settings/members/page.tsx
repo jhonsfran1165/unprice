@@ -1,6 +1,6 @@
 import { createServerClient } from "@/lib/supabase/supabase-server"
 import { AppClaims } from "@/lib/types"
-import { DemoTeamMembers } from "@/components/subscriptions/members"
+import { MembersList } from "@/components/subscriptions/members"
 
 export default async function IndexPage({
   params: { orgSlug },
@@ -32,7 +32,5 @@ export default async function IndexPage({
     .select("*, profile!inner(*)")
     .eq("org_id", orgId)
 
-  console.log(profiles)
-
-  return <DemoTeamMembers profiles={profiles} />
+  return <MembersList profiles={profiles || []} />
 }

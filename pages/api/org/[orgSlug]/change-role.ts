@@ -19,12 +19,36 @@ async function handler(
     const supabase = supabaseApiClient(req, res)
 
     if (req.method === "POST") {
-      const { id, role } = req.body
+      const { id, role, profileId } = req.body
+
+      // every organization has to have at least one owner
+      const { data: findRoles } = await supabase
+        .from("organization_profiles")
+        .select("profile_id")
+        .eq("org_id", id)
+        .eq("role", "OWNER")
+
+      if (!findRoles) {
+        return res.status(404).json({
+          error: {
+            message: "This organization has no owner. Contact support.",
+          },
+        })
+      }
+
+      if (findRoles.length === 1 && findRoles[0].profile_id === profileId) {
+        return res.status(500).json({
+          error: {
+            message:
+              "This profile is the only owner in the organization. Every organization has to have at least one owner.",
+          },
+        })
+      }
 
       const { data, error } = await supabase
         .from("organization_profiles")
         .update({ role: role })
-        .eq("profile_id", session?.user.id)
+        .eq("profile_id", profileId)
         .eq("org_id", id)
         .select("org_id")
         .single()

@@ -8,10 +8,12 @@ import StoreHandler from "@/components/layout/store-handler"
 
 export const revalidate = 0
 
-export default async function DashboardLayout(props) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const supabase = createServerClient()
-
-  // console.log(props.childProp)
 
   const {
     data: { session },
@@ -29,7 +31,7 @@ export default async function DashboardLayout(props) {
       {/* @ts-expect-error Server Component */}
       <Header />
       <HeaderContext />
-      <main className="flex grow flex-col">{props.children}</main>
+      <main className="flex grow flex-col">{children}</main>
       <Footer />
     </>
   )

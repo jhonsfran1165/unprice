@@ -29,8 +29,7 @@ export default async function OrgSettingsIndexPage({
     .eq("organization.slug", orgSlug)
     .single()
 
-  // org default has to be saved inside user metadata
-  console.log(error)
+  // TODO: org default has to be saved inside user metadata
 
   const org = dataOrg?.organization as Organization
 

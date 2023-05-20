@@ -7,6 +7,7 @@ import { mutate } from "swr"
 
 import { OrganizationRoles } from "@/lib/config/layout"
 import { useStore } from "@/lib/stores/layout"
+import { OrganizationProfiles, Profile } from "@/lib/types/supabase"
 import { fetchAPI } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -30,17 +31,24 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
 
-export function DemoTeamMembers({ profiles }) {
+export type MembersListProps = OrganizationProfiles & {
+  profile: Profile | Profile[] | null
+}
+
+export function MembersList({
+  profiles,
+}: {
+  profiles: MembersListProps[] | null
+}) {
   const statesProfilesRoles = {}
+
+  // TODO: do we need to use an empty state here?
+  if (!profiles) {
+    return null
+  }
+
   profiles.forEach((profile) => {
     statesProfilesRoles[profile.id] = false
   })
@@ -48,9 +56,8 @@ export function DemoTeamMembers({ profiles }) {
   const { orgSlug, orgId } = useStore()
   const [open, setOpen] = useState(statesProfilesRoles)
 
-  console.log(statesProfilesRoles)
   const router = useRouter()
-  const changeRole = async (role) => {
+  const changeRole = async (role: string, profileId: string) => {
     try {
       const result = await fetchAPI({
         url: `/api/org/${orgSlug}/change-role`,
@@ -58,6 +65,7 @@ export function DemoTeamMembers({ profiles }) {
         data: {
           id: orgId,
           role,
+          profileId: profileId,
         },
       })
 
@@ -73,12 +81,12 @@ export function DemoTeamMembers({ profiles }) {
         mutate(`/api/org/${orgSlug}`)
         router.refresh()
       }
-    } catch (error) {
-      const dataError = JSON.parse(error?.message ?? error).error
-      console.log(dataError)
+    } catch (e) {
+      // TODO: refactor all toast with this
+      const { error } = JSON.parse(e?.message ?? e)
       toast({
-        title: `Error ${dataError?.code ?? ""} saving org`,
-        description: dataError.message ?? "",
+        title: `Error ${error?.code || ""}`,
+        description: error?.message || "",
         className: "danger",
       })
     }
@@ -93,75 +101,88 @@ export function DemoTeamMembers({ profiles }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
-        {profiles.map((profile) => (
-          <div
-            key={profile.id}
-            className="flex items-center justify-between space-x-4"
-          >
-            <div className="flex items-center space-x-4">
-              <Avatar>
-                <AvatarImage src="https://avatar.vercel.sh/account.png" />
-                <AvatarFallback>OM</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-medium leading-none">
-                  {profile.profile.full_name}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {profile.profile.username}
-                </p>
-              </div>
-            </div>
-            <Popover
-              open={open[profile.id]}
-              onOpenChange={(value) => {
-                setOpen({ ...open, [profile.id]: value })
-              }}
+        {profiles.map((profile) => {
+          const profileUser = profile.profile
+
+          if (!profileUser || profileUser instanceof Array) {
+            return null
+          }
+
+          // TODO: add invitation feat
+          return (
+            <div
+              key={profile.id}
+              className="flex items-center justify-between space-x-4"
             >
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="ml-auto"
-                  aria-label="Select a role"
-                  size="sm"
-                >
-                  {profile.role}{" "}
-                  <ChevronDown
-                    className="ml-2 h-4 w-4 text-muted-foreground"
-                    aria-hidden="true"
+              <div className="flex items-center space-x-4">
+                <Avatar>
+                  <AvatarImage
+                    src={`${
+                      profileUser?.avatar_url ||
+                      "https://avatar.vercel.sh/account.png"
+                    }`}
                   />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0" align="end">
-                <Command>
-                  <CommandInput placeholder="Select new role..." />
-                  <CommandList>
-                    <CommandEmpty>No roles found.</CommandEmpty>
-                    <CommandGroup>
-                      {Object.keys(OrganizationRoles).map((role, index) => {
-                        return (
-                          <CommandItem
-                            key={role}
-                            onSelect={async () => {
-                              setOpen({ ...open, [profile.id]: false })
-                              await changeRole(role)
-                            }}
-                            className="teamaspace-y-1 flex flex-col items-start px-4 py-2"
-                          >
-                            <p>{}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {OrganizationRoles[role].description}
-                            </p>
-                          </CommandItem>
-                        )
-                      })}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-        ))}
+                  <AvatarFallback>OM</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium leading-none">
+                    {profileUser.full_name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {profileUser.username}
+                  </p>
+                </div>
+              </div>
+              <Popover
+                open={open[profile.id]}
+                onOpenChange={(value) => {
+                  setOpen({ ...open, [profile.id]: value })
+                }}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="ml-auto"
+                    aria-label="Select a role"
+                    size="sm"
+                  >
+                    {profile.role}{" "}
+                    <ChevronDown
+                      className="ml-2 h-4 w-4 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0" align="end">
+                  <Command>
+                    <CommandInput placeholder="Select new role..." />
+                    <CommandList>
+                      <CommandEmpty>No roles found.</CommandEmpty>
+                      <CommandGroup>
+                        {Object.keys(OrganizationRoles).map((role, index) => {
+                          return (
+                            <CommandItem
+                              key={role}
+                              onSelect={async () => {
+                                setOpen({ ...open, [profile.id]: false })
+                                await changeRole(role, profileUser.id)
+                              }}
+                              className="teamaspace-y-1 flex flex-col items-start px-4 py-2"
+                            >
+                              <p className="text-sm text-muted-foreground">
+                                {OrganizationRoles[role].description}
+                              </p>
+                            </CommandItem>
+                          )
+                        })}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+          )
+        })}
       </CardContent>
     </Card>
   )

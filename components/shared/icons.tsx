@@ -7,6 +7,7 @@ import {
   ChevronRight,
   ChevronsUpDown,
   Cloud,
+  Cog,
   Command,
   CreditCard,
   ExternalLink,
@@ -32,6 +33,7 @@ import {
   Settings,
   SunMedium,
   Trash,
+  Trello,
   Twitter,
   UploadCloud,
   User,
@@ -46,6 +48,7 @@ export type Icon = LucideIcon
 
 export const Icons = {
   search: Search,
+  trello: Trello,
   cloud: Cloud,
   keyboard: Keyboard,
   lifeBuoy: LifeBuoy,
@@ -65,6 +68,7 @@ export const Icons = {
   page: File,
   media: Image,
   settings: Settings,
+  cog: Cog,
   billing: CreditCard,
   ellipsis: MoreVertical,
   add: Plus,

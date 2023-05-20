@@ -76,21 +76,33 @@ export type DashboardNavItem = {
 }
 
 export type SubscriptionPlan = {
-  name: string
-  description: string
-  stripePriceId?: string
+  plan: SubscriptionTiers
+  tagline: string
+  clicksLimit?: string
+  features: {
+    text: string
+    footnote?: string
+    negative?: boolean
+  }[]
+  cta: string
+  ctaLink: string
+  limits: {
+    views: number
+    organizations: number
+    projects: number
+    users: number
+  }
+  price: {
+    [id: string]: {
+      amount: number
+      currency: string
+      priceIds: {
+        test: string
+        production: string
+      }
+    }
+  }
 }
-
-export interface RootDomainProps {
-  target: string
-  rewrite?: boolean
-}
-
-// export type UserSubscriptionPlan = SubscriptionPlan &
-//   Pick<User, "stripeCustomerId" | "stripeSubscriptionId"> & {
-//     stripeCurrentPeriodEnd: number
-//     isPro: boolean
-//   }
 
 export type NavItem = {
   title: string

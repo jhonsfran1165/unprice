@@ -24,8 +24,6 @@ async function handler(
     if (req.method === "POST") {
       const { orgSlug, stripePriceId, trialDays, metadata, currency } = req.body
 
-      console.log(req.body)
-
       const { data: org, error } = await supabase
         .from("organization")
         .select("*")
@@ -69,7 +67,6 @@ async function handler(
         sessionData["customer_email"] = session?.user.email
       }
 
-      console.log(session.user.app_metadata.organizations[org.id].role)
       const stripeSession = await stripe.checkout.sessions.create(sessionData)
 
       if (error) return res.status(500).json(error)
