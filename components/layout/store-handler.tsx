@@ -6,7 +6,8 @@ import { usePathname, useSelectedLayoutSegments } from "next/navigation"
 import { getActiveTabs } from "@/lib/config/dashboard"
 import { useStore } from "@/lib/stores/layout"
 import { AppClaims, AppModulesNav } from "@/lib/types"
-import { OrganizationViewData, Session } from "@/lib/types/supabase"
+import { Session } from "@/lib/types/supabase"
+import { useSupabase } from "@/components/auth/supabase-provider"
 
 function StoreHandler({
   session,
@@ -20,6 +21,7 @@ function StoreHandler({
   const pathname = usePathname()
   const segments = useSelectedLayoutSegments()
   const initialized = useRef(false)
+  const { supabase } = useSupabase()
 
   const {
     tabs,
@@ -53,6 +55,7 @@ function StoreHandler({
   const orgSlug = numberSegments >= 1 ? cleanSegments[1] : ""
   const projectSlug = numberSegments >= 2 ? cleanSegments[3] : ""
   const orgClaims = appClaims?.organizations
+  const currentOrgClaim = appClaims?.current_org
 
   const { orgId, orgData } = useMemo(() => {
     for (const key in orgClaims) {
@@ -94,6 +97,20 @@ function StoreHandler({
     })
     initialized.current = true
   }
+
+  useEffect(() => {
+    const setClaimOrg = async () => {
+      await supabase.rpc("set_my_claim", {
+        claim: "current_org",
+        value: { org_slug: orgSlug, org_id: orgId },
+      })
+
+      const { error } = await supabase.auth.refreshSession()
+      if (error) await supabase.auth.signOut()
+    }
+
+    orgSlug && currentOrgClaim.org_slug !== orgSlug && setClaimOrg()
+  }, [orgSlug])
 
   useEffect(() => {
     useStore.setState({

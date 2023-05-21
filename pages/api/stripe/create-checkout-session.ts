@@ -8,7 +8,7 @@ import {
 } from "@/lib/api-middlewares"
 import { stripe } from "@/lib/stripe"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
-import { Organization, Profile, Session } from "@/lib/types/supabase"
+import { Profile, Session } from "@/lib/types/supabase"
 import { getAppRootUrl } from "@/lib/utils"
 import { stripePostSchema } from "@/lib/validations/stripe"
 
@@ -36,7 +36,9 @@ async function handler(
       const sessionData = {
         payment_method_types: ["card"],
         billing_address_collection: "required",
-        success_url: `${getAppRootUrl()}/org/${orgSlug}/settings/billing`,
+        success_url: `${getAppRootUrl()}/org/${orgSlug}/project/${
+          metadata?.projectSlug
+        }/settings/billing`,
         cancel_url: `${getAppRootUrl()}/org/${orgSlug}`,
         line_items: [{ price: stripePriceId, quantity: 1 }],
         allow_promotion_codes: true,

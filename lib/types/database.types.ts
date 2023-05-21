@@ -383,6 +383,13 @@ export interface Database {
         }
         Returns: string
       }
+      set_my_claim: {
+        Args: {
+          claim: string
+          value: Json
+        }
+        Returns: string
+      }
     }
     Enums: {
       organization_roles: "OWNER" | "MEMBER"

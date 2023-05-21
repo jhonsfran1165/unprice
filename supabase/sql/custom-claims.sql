@@ -100,6 +100,33 @@ CREATE OR REPLACE FUNCTION is_member_org(org_id text) RETURNS "bool"
   END;
 $$;
 
+CREATE OR REPLACE FUNCTION is_current_org(org_id text) RETURNS "bool"
+  LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
+  AS $$
+  BEGIN
+
+    IF session_user = 'authenticator' THEN
+
+      IF extract(epoch from now()) > coalesce((current_setting('request.jwt.claims', true)::jsonb)->>'exp', '0')::numeric THEN
+        SELECT jwt_expired_exception(); -- jwt expired
+      END IF; 
+
+      IF coalesce((current_setting('request.jwt.claims', true)::jsonb)->'app_metadata'->'claims_admin', 'false')::bool THEN
+        return true; -- user has claims_admin set to true (only a few users have this)
+      
+      ELSEIF coalesce((coalesce(current_setting('request.jwt.claims', true), '{}')::jsonb -> 'app_metadata' -> 'current_org' -> 'org_id')::text, ''::text) = '"' || org_id::text || '"' THEN
+        return true; -- user is the owner of their organization
+
+      ELSE
+        return false;
+      END IF;
+
+    ELSE -- not a user session, probably being called from a trigger or something
+      return true;
+    END IF;
+  END;
+$$;
+
 CREATE OR REPLACE FUNCTION has_role_org(org_id text, role text) RETURNS "bool"
   LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
   AS $$
@@ -172,6 +199,17 @@ CREATE OR REPLACE FUNCTION set_claim(uid uuid, claim text, value jsonb) RETURNS 
             json_build_object(claim, value)::jsonb where id = uid;
         return 'OK';
       END IF;
+    END;
+$$;
+
+CREATE OR REPLACE FUNCTION set_my_claim(claim text, value jsonb) RETURNS "text"
+    LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
+    AS $$
+    BEGIN
+      update auth.users set raw_app_meta_data = 
+        raw_app_meta_data || 
+          json_build_object(claim, value)::jsonb where id = auth.uid();
+      return 'OK';
     END;
 $$;
 

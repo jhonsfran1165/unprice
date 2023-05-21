@@ -22,6 +22,10 @@ export type AppOrgClaim = {
 }
 
 export type AppClaims = {
+  current_org: {
+    org_id: string
+    org_slug: string
+  }
   organizations: {
     [orgId: string]: AppOrgClaim
   }
@@ -75,6 +79,15 @@ export type DashboardNavItem = {
   external?: boolean
 }
 
+export type PriceSubscription = {
+  amount: number
+  currency: string
+  priceIds: {
+    test: string
+    production: string
+  }
+}
+
 export type SubscriptionPlan = {
   plan: SubscriptionTiers
   tagline: string
@@ -92,16 +105,7 @@ export type SubscriptionPlan = {
     projects: number
     users: number
   }
-  price: {
-    [id: string]: {
-      amount: number
-      currency: string
-      priceIds: {
-        test: string
-        production: string
-      }
-    }
-  }
+  price: { [id: string]: PriceSubscription }
 }
 
 export type NavItem = {

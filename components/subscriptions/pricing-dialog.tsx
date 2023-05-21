@@ -1,20 +1,7 @@
-import Link from "next/link"
-
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
-
-import Pricing from "./pricing"
+import Pricing from "@/components/subscriptions/pricing"
 
 export function PricingDialog({ cta }: { cta: string }) {
   return (
@@ -22,9 +9,9 @@ export function PricingDialog({ cta }: { cta: string }) {
       <DialogTrigger asChild>
         <Button className="contents primary border-none px-2">{cta}</Button>
       </DialogTrigger>
-      <DialogContent className="min-w-[1200px] h-5/6">
+      <DialogContent className="min-w-[80%] h-5/6">
         <ScrollArea>
-          <Pricing />
+          <Pricing type="private" />
         </ScrollArea>
       </DialogContent>
     </Dialog>

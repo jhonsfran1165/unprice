@@ -18,6 +18,14 @@ export default async function AppInitialPage() {
 
   const appClaims = session?.user.app_metadata as AppClaims
   const orgClaims = appClaims?.organizations
+  const currentOrg = appClaims?.current_org
+
+  // TODO: use current_org from database to set RLS in multitenant
+  // TODO: delete default organization parameter
+  if (currentOrg.org_slug) {
+    redirect(`/org/${currentOrg.org_slug}`)
+  }
+
   let defaultOrgSlug = ""
 
   for (const key in orgClaims) {

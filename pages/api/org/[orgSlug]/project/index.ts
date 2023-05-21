@@ -23,8 +23,7 @@ async function handler(
 
       const { data: projects, error } = await supabase
         .from("project")
-        .select("*, organization!inner(*)")
-        .eq("organization.slug", orgSlug)
+        .select("*, organization!inner(slug)")
 
       if (error) return res.status(404).json(error)
 

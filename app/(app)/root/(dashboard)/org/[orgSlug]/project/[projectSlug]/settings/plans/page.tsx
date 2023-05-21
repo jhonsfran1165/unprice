@@ -1,22 +1,12 @@
 "use client"
 
-import Link from "next/link"
 import { Package } from "lucide-react"
 
+import { pricingSubscriptions } from "@/lib/config/subscriptions"
 import { useStore } from "@/lib/stores/layout"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import StripePortal from "@/components/subscriptions/portal"
-import Pricing from "@/components/subscriptions/pricing"
 import { PricingDialog } from "@/components/subscriptions/pricing-dialog"
 
 export default function IndexPage({
@@ -33,13 +23,6 @@ export default function IndexPage({
 }) {
   const { orgData } = useStore()
 
-  if (action === "upgrade") {
-    return (
-      <div className="md:px-0">
-        <Pricing />
-      </div>
-    )
-  }
   return (
     <div className="space-y-10 md:px-0">
       <div>
@@ -65,10 +48,13 @@ export default function IndexPage({
                 <h4 className="font-semibold">{orgData?.tier}</h4>
               </div>
               <div className="text-sm justify-start w-full py-3 ml-8">
+                2/2 custom domains <br />
                 2/2 organizations <br />
                 1/5 users <br />
-                5K clicks per month <br />
-                15 May - 15 June, 2023
+                water print for builderai <br />
+                5K views per month <br />
+                <br />
+                billing cycle: <b>15 May - 15 June, 2023</b>
               </div>
               <div className="py-4">
                 Fre plan is perfect for testing pages and increase awaerness,
@@ -94,10 +80,13 @@ export default function IndexPage({
                 <h4 className="font-semibold">PRO</h4>
               </div>
               <div className="text-sm justify-start w-full py-3 ml-8">
+                2/2 custom domains <br />
                 2/2 organizations <br />
                 1/5 users <br />
-                5K clicks per month <br />
-                15 May - 15 June, 2023
+                water print for builderai <br />
+                5K views per month <br />
+                <br />
+                billing cycle: <b>15 May - 15 June, 2023</b>
               </div>
               <div className="py-4">
                 Fre plan is perfect for testing pages and increase awaerness,
@@ -111,10 +100,13 @@ export default function IndexPage({
                 <h4 className="font-semibold">CUSTOM</h4>
               </div>
               <div className="text-sm justify-start w-full py-3 ml-8">
+                2/2 custom domains <br />
                 2/2 organizations <br />
                 1/5 users <br />
-                5K clicks per month <br />
-                15 May - 15 June, 2023
+                water print for builderai <br />
+                5K views per month <br />
+                <br />
+                billing cycle: <b>15 May - 15 June, 2023</b>
               </div>
 
               <div className="py-4">

@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
 import Confetti from "react-dom-confetti"
 
 import { pricingSubscriptions } from "@/lib/config/subscriptions"
 import { useStore } from "@/lib/stores/layout"
 import { getStripe } from "@/lib/stripe/client"
+import { PriceSubscription } from "@/lib/types"
 import { cn, fetchAPI, nFormatter } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -21,10 +21,8 @@ import { toast } from "@/components/ui/use-toast"
 import { Icons } from "@/components/shared/icons"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
-const Pricing = () => {
-  const [tier, setTier] = useState(0)
-  const { orgSlug } = useStore()
-
+const Pricing = ({ type = "public" }: { type: string }) => {
+  const { orgSlug, orgData, projectSlug } = useStore()
   const [priceIdLoading, setPriceIdLoading] = useState(false)
   const [annualBilling, setAnnualBilling] = useState(false)
   const period = useMemo(
@@ -32,19 +30,15 @@ const Pricing = () => {
     [annualBilling]
   )
 
-  // TODO: CONFIGURE current PLAN
-  const currentPlan = "Free"
-
-  const searchParams = useSearchParams()
-
-  const handleCheckout = async (stripePriceId: string) => {
+  const handleCheckout = async (
+    plan: string,
+    price: PriceSubscription,
+    limits: object
+  ) => {
     setPriceIdLoading(true)
-    // if (!user) {
-    //   return router.push('/signin');
-    // }
-    // if (subscription) {
-    //   return router.push('/account');
-    // }
+
+    // TODO: get the proper environment
+    const stripePriceId = price.priceIds.test
 
     try {
       const response = await fetchAPI({
@@ -53,9 +47,12 @@ const Pricing = () => {
         data: {
           stripePriceId,
           orgSlug,
-          currency: "USD",
+          currency: price.currency,
           metadata: {
-            tier: "PRO",
+            tier: plan,
+            amount: price.amount,
+            ...limits,
+            projectSlug,
           },
         },
       })
@@ -65,7 +62,7 @@ const Pricing = () => {
       stripe?.redirectToCheckout({ sessionId })
     } catch (error) {
       toast({
-        title: "Error saving org",
+        title: "Error creating session stripe",
         description: error.message,
         className: "danger",
       })
@@ -110,7 +107,16 @@ const Pricing = () => {
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
         {pricingSubscriptions.map(
-          ({ plan, tagline, clicksLimit, features, cta, ctaLink, price }) => (
+          ({
+            plan,
+            tagline,
+            clicksLimit,
+            features,
+            cta,
+            ctaLink,
+            price,
+            limits,
+          }) => (
             <div
               key={plan}
               className={`relative rounded-2xl bg-background-bgSubtle ${
@@ -124,6 +130,13 @@ const Pricing = () => {
                   Popular
                 </div>
               )}
+
+              {plan === orgData?.tier && (
+                <div className="absolute inset-x-0 -top-5 mx-auto w-32 rounded-full bg-background-bg px-3 py-2 text-sm font-medium border border-background-line">
+                  Current Plan
+                </div>
+              )}
+
               <div className="p-5">
                 <h3 className="font-display my-3 text-center text-3xl font-bold">
                   {plan}
@@ -205,29 +218,39 @@ const Pricing = () => {
               </ul>
               <div className="border-t" />
               <div className="p-5">
-                {/* <Link
-                  href={ctaLink}
-                  
-                > */}
-                {/* <Button className="w-28 button-primary">
-
-                </Button> */}
-                <Button
-                  className={cn(
-                    "block w-full rounded-full py-2 font-semibold transition-all",
-                    {
-                      "border border-primary-border bg-gradient-to-r from-primary-solid to-secondary-solid text-black hover:bg-clip-text hover:text-primary-solid":
-                        plan === "PRO",
-                      "button-default": plan !== "PRO",
-                    }
-                  )}
-                  onClick={async () => {
-                    handleCheckout(price[period].priceIds.test)
-                  }}
-                >
-                  {cta}
-                </Button>
-                {/* </Link> */}
+                {type === "private" ? (
+                  <Button
+                    disabled={priceIdLoading || plan === orgData?.tier}
+                    className={cn(
+                      "block w-full rounded-full py-2 font-semibold transition-all",
+                      {
+                        "border border-primary-border bg-gradient-to-r from-primary-solid to-secondary-solid text-black hover:bg-clip-text hover:text-primary-solid":
+                          plan === "PRO",
+                        "button-default": plan !== "PRO",
+                      }
+                    )}
+                    onClick={async () => {
+                      handleCheckout(plan, price[period], limits)
+                    }}
+                  >
+                    {cta}
+                  </Button>
+                ) : (
+                  <Link href={ctaLink}>
+                    <Button
+                      className={cn(
+                        "block w-full rounded-full py-2 font-semibold transition-all",
+                        {
+                          "border border-primary-border bg-gradient-to-r from-primary-solid to-secondary-solid text-black hover:bg-clip-text hover:text-primary-solid":
+                            plan === "PRO",
+                          "button-default": plan !== "PRO",
+                        }
+                      )}
+                    >
+                      {cta}
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           )

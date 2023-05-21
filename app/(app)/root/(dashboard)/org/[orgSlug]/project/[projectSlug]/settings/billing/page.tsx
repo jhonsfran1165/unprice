@@ -1,6 +1,5 @@
 import Link from "next/link"
 
-import { createServerClient } from "@/lib/supabase/supabase-server"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -28,7 +27,7 @@ export default async function IndexPage({
   if (action === "upgrade") {
     return (
       <div className="md:px-0">
-        <Pricing />
+        <Pricing type="ptivate" />
       </div>
     )
   }
