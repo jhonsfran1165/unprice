@@ -60,7 +60,7 @@ async function handler(
         //   enabled: true,
         // },
         mode: "subscription",
-        client_reference_id: org?.id.toString(),
+        client_reference_id: org.id.toString(),
       } as Stripe.Checkout.SessionCreateParams
 
       if (org.stripe_id) {

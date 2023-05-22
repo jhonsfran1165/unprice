@@ -1,4 +1,5 @@
 import Stripe from "stripe"
+import { v4 as uuidv4 } from "uuid"
 
 import { stripe } from "@/lib/stripe"
 // we need to override RLS here, for that we use supabase admin
@@ -13,11 +14,14 @@ import { toDateTime } from "@/lib/utils"
 
 const buildSubscriptionData = (
   subscription: Stripe.Subscription,
-  orgId: string
+  orgId: string,
+  projectId: string
 ): OrganizationSubscriptions => {
   const subscriptionData: OrganizationSubscriptions = {
-    id: subscription.id,
+    id: uuidv4(),
+    stripe_subscription_id: subscription.id,
     org_id: orgId,
+    project_id: projectId,
     metadata: subscription.metadata,
     status: subscription.status as OrganizationSubscriptionStatus,
     price_id: subscription.items.data[0].price.id,
@@ -78,11 +82,25 @@ const onCheckoutCompleted = async ({
     expand: ["default_payment_method"],
   })
 
+  const { data: projectData, error: errorProject } = await supabaseAdmin
+    .from("project")
+    .select("id")
+    .eq("slug", subscription.metadata?.projectSlug)
+    .eq("org_id", orgId)
+    .single()
+
+  // TODO: handle errors
+  if (errorProject) throw errorProject
+  if (!projectData) return null
+
   // status can either be PAID or AWAITING_PAYMENT (if asynchronous)
   // TODO: validate this
   const status = subscription.status as OrganizationSubscriptionStatus
-  // TODO: change id to string for organization
-  const subscriptionData = buildSubscriptionData(subscription, orgId)
+  const subscriptionData = buildSubscriptionData(
+    subscription,
+    orgId,
+    projectData.id
+  )
 
   // TODO: validate if there is a stripe id
   if (orgData.stripe_id && orgData.stripe_id !== stripeId)

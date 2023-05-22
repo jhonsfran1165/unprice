@@ -114,8 +114,10 @@ export interface Database {
           metadata: Json | null
           org_id: string | null
           price_id: string | null
+          project_id: string | null
           quantity: number | null
           status: Database["public"]["Enums"]["subscription_status"] | null
+          stripe_subscription_id: string | null
           tier: Database["public"]["Enums"]["organization_tiers"] | null
           trial_end: string | null
           trial_start: string | null
@@ -135,8 +137,10 @@ export interface Database {
           metadata?: Json | null
           org_id?: string | null
           price_id?: string | null
+          project_id?: string | null
           quantity?: number | null
           status?: Database["public"]["Enums"]["subscription_status"] | null
+          stripe_subscription_id?: string | null
           tier?: Database["public"]["Enums"]["organization_tiers"] | null
           trial_end?: string | null
           trial_start?: string | null
@@ -156,8 +160,10 @@ export interface Database {
           metadata?: Json | null
           org_id?: string | null
           price_id?: string | null
+          project_id?: string | null
           quantity?: number | null
           status?: Database["public"]["Enums"]["subscription_status"] | null
+          stripe_subscription_id?: string | null
           tier?: Database["public"]["Enums"]["organization_tiers"] | null
           trial_end?: string | null
           trial_start?: string | null
@@ -355,6 +361,12 @@ export interface Database {
       }
       is_claims_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_current_org: {
+        Args: {
+          org_id: string
+        }
         Returns: boolean
       }
       is_member_org: {

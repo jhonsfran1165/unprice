@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react"
 import { usePathname, useSelectedLayoutSegments } from "next/navigation"
+import { mutate } from "swr"
 
 import { getActiveTabs } from "@/lib/config/dashboard"
 import { useStore } from "@/lib/stores/layout"
@@ -107,6 +108,10 @@ function StoreHandler({
 
       const { error } = await supabase.auth.refreshSession()
       if (error) await supabase.auth.signOut()
+
+      mutate(`/api/org`)
+      mutate(`/api/org/${orgSlug}`)
+      mutate(`/api/org/${orgSlug}/project`)
     }
 
     orgSlug && currentOrgClaim.org_slug !== orgSlug && setClaimOrg()

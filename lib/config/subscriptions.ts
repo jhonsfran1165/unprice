@@ -54,6 +54,7 @@ export const pricingSubscriptions: SubscriptionPlan[] = [
   {
     plan: "PRO",
     tagline: "For larger teams with increased usage",
+    clicksLimit: "Up to 1K link clicks/mo",
     features: [
       {
         text: "Free custom domains",

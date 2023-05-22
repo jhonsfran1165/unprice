@@ -45,7 +45,7 @@ https://next-cloudinary.spacejelly.dev/components/cldimage/basic-usage
 
 https://supabase.com/docs/reference/cli/start
 
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
+stripe listen --forward-to localhost:3000/api/stripe/webhook
 
 https://www.cybertec-postgresql.com/en/view-permissions-and-row-level-security-in-postgresql/
 
@@ -84,4 +84,4 @@ https://gist.github.com/pom421/ea34eeb778b0d94fe85352dc27aada96
 <!-- https://github.com/clerkinc/use-stripe-subscription-demo -->
 <!-- https://www.tinybird.co/blog-posts/dev-qa-global-api-latency-chronark -->
 
-see clerk
+see clerk organization

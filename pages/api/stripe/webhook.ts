@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next"
 import Stripe from "stripe"
 
 import { onCheckoutCompleted } from "@/lib/api/stripe"
-import { PRO_TIERS } from "@/lib/config/subscriptions"
+// import { PRO_TIERS } from "@/lib/config/subscriptions"
 import { stripe } from "@/lib/stripe"
 import supabaseAdmin from "@/lib/supabase/supabase-admin"
 import { redis } from "@/lib/upstash"
@@ -211,7 +211,9 @@ export default async function webhookHandler(
         console.log(error)
         return res
           .status(400)
-          .send(`Webhook error: Webhook handler failed. ${error}`)
+          .send(
+            `Webhook error: Webhook handler failed. ${JSON.stringify(error)}`
+          )
       }
     } else {
       return res.status(400).send(`🤷‍♀️ Unhandled event type: ${event.type}`)

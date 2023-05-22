@@ -119,36 +119,40 @@ const Pricing = ({ type = "public" }: { type: string }) => {
           }) => (
             <div
               key={plan}
-              className={`relative rounded-2xl bg-background-bgSubtle ${
-                plan === "PRO"
-                  ? "border-2 border-primary-solid shadow-primary-line"
-                  : "border-gray-200 border"
-              } shadow-lg`}
+              className={cn(
+                "relative rounded-2xl bg-background-bgSubtle shadow-lg border",
+                {
+                  "border-2 border-primary-solid shadow-primary-line":
+                    plan === "PRO",
+                  "border-background-borderHover border-2":
+                    plan === orgData?.tier,
+                }
+              )}
             >
               {plan === "PRO" && (
-                <div className="absolute inset-x-0 -top-5 mx-auto w-32 rounded-full bg-gradient-to-r from-primary-solid to-secondary-solid px-3 py-2 text-sm font-medium text-primary-textContrast">
+                <div className="absolute inset-x-0 -top-5 mx-auto w-32 rounded-full bg-gradient-to-r from-primary-solid to-secondary-solid px-3 py-2 text-sm font-bold text-black">
                   Popular
                 </div>
               )}
 
               {plan === orgData?.tier && (
-                <div className="absolute inset-x-0 -top-5 mx-auto w-32 rounded-full bg-background-bg px-3 py-2 text-sm font-medium border border-background-line">
+                <div className="absolute inset-x-0 -top-5 mx-auto w-32 rounded-full bg-background-bg px-3 py-2 text-sm font-bold border border-background-line">
                   Current Plan
                 </div>
               )}
 
               <div className="p-5">
-                <h3 className="font-display my-3 text-center text-3xl font-bold">
+                <h3 className="font-display my-3 text-center text-2xl font-bold">
                   {plan}
                 </h3>
                 <p className="text-gray-500">{tagline}</p>
                 {plan === "CUSTOM" ? (
-                  <p className="font-display my-5 text-6xl font-semibold">
+                  <p className="font-display my-5 text-5xl font-semibold">
                     Custom
                   </p>
                 ) : (
                   <div className="my-5 flex justify-center">
-                    <p className="font-display text-6xl font-semibold">
+                    <p className="font-display text-5xl font-semibold">
                       $
                       {plan === "PRO"
                         ? period === "yearly"
@@ -171,7 +175,7 @@ const Pricing = ({ type = "public" }: { type: string }) => {
                       <TooltipTrigger asChild>
                         <Icons.help className="h-4 w-4" />
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent className="w-80">
                         <p>
                           If you exceed your monthly usage, your existing links
                           will still work, but you need to upgrade to view their
@@ -185,17 +189,20 @@ const Pricing = ({ type = "public" }: { type: string }) => {
               </div>
               <ul className="my-10 space-y-5 px-10">
                 {features.map(({ text, footnote, negative }) => (
-                  <li key={text} className="flex space-x-5">
+                  <li
+                    key={text}
+                    className="flex justify-content items-center space-x-2"
+                  >
                     <div className="shrink-0">
                       {negative ? (
-                        <Icons.xCircle className="h-6 w-6 text-danger-solid" />
+                        <Icons.xCircle className="h-4 w-4 text-danger-solid" />
                       ) : (
-                        <Icons.checkCircle className="h-6 w-6 text-success-solid" />
+                        <Icons.checkCircle className="h-4 w-4 text-success-solid" />
                       )}
                     </div>
                     {footnote ? (
                       <div className="flex items-center">
-                        <p className={""}>{text}</p>
+                        <p className={"justify-start"}>{text}</p>
 
                         <TooltipProvider>
                           <Tooltip>

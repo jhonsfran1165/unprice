@@ -1,15 +1,16 @@
 import useSWR from "swr"
 
+import { useStore } from "@/lib/stores/layout"
 import { ProjectsApiResult } from "@/lib/types/supabase"
 import { fetcher } from "@/lib/utils"
 
 export default function useProjects({
   revalidateOnFocus = true,
-  orgSlug,
 }: {
   revalidateOnFocus?: boolean
-  orgSlug: string
 }) {
+  const { orgSlug } = useStore()
+
   const { data: projects, error } = useSWR<ProjectsApiResult[]>(
     !!orgSlug ? `/api/org/${orgSlug}/project` : null,
     fetcher,
