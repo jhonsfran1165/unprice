@@ -36,6 +36,28 @@ async function handler(
     }
 
     if (req.method === "POST") {
+      const { slug, type, name, image, description } = req.body
+      const uuid = uuidv4()
+
+      // we use here admin supabase to bypass all RLS
+      const { error } = await supabaseAdmin.rpc("config_org", {
+        user_id: session?.user.id ?? "",
+        org_id: uuid,
+        slug,
+        type: type?.toUpperCase(),
+        name,
+        image,
+        description,
+        role_user: "OWNER",
+      })
+
+      if (error) return res.status(500).json(error)
+
+      return res.status(200).json({ slug: slug })
+    }
+
+    if (req.method === "PUT") {
+
       const { id, type, name, image, description } = req.body
 
       const { data: org, error } = await supabase
@@ -53,27 +75,6 @@ async function handler(
       if (error) return res.status(500).json(error)
 
       return res.status(200).json(org)
-    }
-
-    if (req.method === "PUT") {
-      const { slug, type, name, image, description } = req.body
-      const uuid = uuidv4()
-
-      // we use here admin supabase to bypass all RLS
-      const { data, error } = await supabaseAdmin.rpc("config_org", {
-        user_id: session?.user.id ?? "",
-        org_id: uuid,
-        slug,
-        type: type?.toUpperCase(),
-        name,
-        image,
-        description,
-        role_user: "OWNER",
-      })
-
-      if (error) return res.status(500).json(error)
-
-      return res.status(200).json({ slug: slug })
     }
   } catch (error) {
     return res.status(500).json(error)

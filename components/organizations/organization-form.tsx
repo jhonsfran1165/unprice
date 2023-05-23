@@ -94,7 +94,7 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
   const onSubmit: SubmitHandler<orgPostType> = async (dataForm) => {
     try {
       setLoading(true)
-      const method = action === "new" ? "PUT" : "POST"
+      const method = action === "new" ? "POST" : "PUT"
 
       // We use api endpoint instead of supabase directly because we use supabaseAdmin
       // in order to be able to bypass the RLS
@@ -132,7 +132,7 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
 
       toast({
         title: `Error ${dataError?.code ?? ""} saving org`,
-        description: dataError.message ?? "",
+        description: dataError?.message ?? "",
         className: "danger",
       })
     } finally {
