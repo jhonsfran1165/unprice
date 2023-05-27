@@ -35,7 +35,7 @@ export default async function IndexPage({
     <div className="space-y-10 md:px-0">
       <Card>
         <CardHeader>
-          <CardTitle>Upgrade Subscrition</CardTitle>
+          <CardTitle>Usage</CardTitle>
           <CardDescription>
             The project will be permanently deleted, including its deployments
             and domains. This action is irreversible and can not be undone.
@@ -46,15 +46,7 @@ export default async function IndexPage({
           <Separator />
         </div>
 
-        <CardFooter>
-          <Button className="button-primary w-28">
-            <Link
-              href={`/org/${orgSlug}/project/${projectSlug}/settings/billing?action=upgrade`}
-            >
-              Upgrade
-            </Link>
-          </Button>
-        </CardFooter>
+        <CardFooter>{/* // TODO: create usage card here */}</CardFooter>
       </Card>
 
       <Card>

@@ -41,6 +41,14 @@ const OrgNavTabs: DashboardNavItem[] = [
       {
         module: "org",
         submodule: "settings",
+        slug: "org-settings-billing",
+        title: "Billing",
+        href: "/settings/billing",
+        icon: "billing",
+      },
+      {
+        module: "org",
+        submodule: "settings",
         slug: "org-settings-members",
         title: "Members",
         href: "/settings/members",

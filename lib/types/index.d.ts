@@ -91,6 +91,7 @@ export type PriceSubscription = {
 export type SubscriptionPlan = {
   plan: SubscriptionTiers
   tagline: string
+  copy: string
   clicksLimit?: string
   features: {
     text: string

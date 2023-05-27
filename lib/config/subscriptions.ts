@@ -6,6 +6,7 @@ export const pricingSubscriptions: SubscriptionPlan[] = [
     plan: "FREE",
     tagline: "For startups & side projects",
     clicksLimit: "Up to 1K link clicks/mo",
+    copy: "Ideal for testing and creating pages",
     features: [
       {
         text: "Free custom domains",
@@ -55,6 +56,7 @@ export const pricingSubscriptions: SubscriptionPlan[] = [
     plan: "PRO",
     tagline: "For larger teams with increased usage",
     clicksLimit: "Up to 1K link clicks/mo",
+    copy: "The best way to start creating driven data pages for whatever you want to use",
     features: [
       {
         text: "Free custom domains",
@@ -103,6 +105,7 @@ export const pricingSubscriptions: SubscriptionPlan[] = [
     plan: "CUSTOM",
     tagline: "For businesses with custom needs",
     clicksLimit: "Unlimited link clicks",
+    copy: "Ideal for testing and creating pages",
     features: [
       {
         text: "Free custom domains",

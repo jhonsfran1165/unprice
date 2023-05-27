@@ -123,13 +123,13 @@ const Pricing = ({ type = "public" }: { type: string }) => {
                 "relative rounded-2xl bg-background-bgSubtle shadow-lg border",
                 {
                   "border-2 border-primary-solid shadow-primary-line":
-                    plan === "PRO",
+                    orgData?.tier !== "PRO" && plan === "PRO",
                   "border-background-borderHover border-2":
                     plan === orgData?.tier,
                 }
               )}
             >
-              {plan === "PRO" && (
+              {orgData?.tier !== "PRO" && plan === "PRO" && (
                 <div className="absolute inset-x-0 -top-5 mx-auto w-32 rounded-full bg-gradient-to-r from-primary-solid to-secondary-solid px-3 py-2 text-sm font-bold text-black">
                   Popular
                 </div>

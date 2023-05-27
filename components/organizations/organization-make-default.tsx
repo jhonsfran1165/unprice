@@ -45,6 +45,9 @@ export function OrganizationMakeDefault({
     },
   })
 
+  // TODO: test server actions here
+  // https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions
+
   const onSubmit: SubmitHandler<orgMakeDefaultType> = async (formData) => {
     try {
       const result = await fetchAPI({

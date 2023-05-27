@@ -1,8 +1,8 @@
-import { Suspense } from "react"
+// import { Suspense } from "react"
 
 import { createServerClient } from "@/lib/supabase/supabase-server"
 import { AppClaims } from "@/lib/types"
-import { MembersList } from "@/components/organizations/members"
+import { BillingProjects } from "@/components/organizations/billing-projects"
 
 export default async function IndexPage({
   params: { orgSlug },
@@ -29,14 +29,14 @@ export default async function IndexPage({
     }
   }
 
-  const { data: profiles, error } = await supabase
-    .from("organization_profiles")
-    .select("*, profile!inner(*)")
+  const { data: projects, error } = await supabase
+    .from("project")
+    .select("*")
     .eq("org_id", orgId)
 
   return (
     // <Suspense fallback={"testingsssssss"}>
-    <MembersList profiles={profiles || []} />
+    <BillingProjects projects={projects || []} />
     // </Suspense>
   )
 }

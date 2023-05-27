@@ -47,7 +47,7 @@ export default function AuthenticationContainer({ action }) {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;This library has saved me countless hours of work and
+              &ldquo;This application has saved me countless hours of work and
               helped me deliver stunning designs to my clients faster than ever
               before. Highly recommended!&rdquo;
             </p>

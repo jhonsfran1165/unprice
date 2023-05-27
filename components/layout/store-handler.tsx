@@ -114,6 +114,7 @@ function StoreHandler({
       mutate(`/api/org/${orgSlug}/project`)
     }
 
+    // TODO: check if the orgSlug is part of the organizations of this user
     orgSlug && currentOrgClaim.org_slug !== orgSlug && setClaimOrg()
   }, [orgSlug])
 
