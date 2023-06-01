@@ -227,7 +227,6 @@ const Pricing = ({ type = "public" }: { type: string }) => {
               <div className="p-5">
                 {type === "private" ? (
                   <Button
-                    disabled={priceIdLoading || plan === orgData?.tier}
                     className={cn(
                       "block w-full rounded-full py-2 font-semibold transition-all",
                       {
@@ -237,6 +236,14 @@ const Pricing = ({ type = "public" }: { type: string }) => {
                       }
                     )}
                     onClick={async () => {
+                      if (priceIdLoading || plan === orgData?.tier) {
+                        toast({
+                          title: "Current plan",
+                          description: "This is your current plan",
+                          className: "info",
+                        })
+                        return null
+                      }
                       handleCheckout(plan, price[period], limits)
                     }}
                   >

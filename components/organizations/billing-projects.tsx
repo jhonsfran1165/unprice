@@ -1,16 +1,12 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronDown } from "lucide-react"
 import { mutate } from "swr"
 
-import { OrganizationRoles } from "@/lib/config/layout"
 import { useStore } from "@/lib/stores/layout"
-import { OrganizationProfiles, Profile, Project } from "@/lib/types/supabase"
+import { Project } from "@/lib/types/supabase"
 import { fetchAPI } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -18,20 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/components/ui/use-toast"
 
 export function BillingProjects({ projects }: { projects: Project[] | null }) {
