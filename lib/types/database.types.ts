@@ -284,6 +284,28 @@ export interface Database {
           profile_id: string | null
           profiles_org_id: string | null
           role: Database["public"]["Enums"]["organization_roles"] | null
+          tier: string | null
+        }
+      }
+      data_projects: {
+        Row: {
+          is_default: boolean | null
+          org_id: string | null
+          org_image: string | null
+          org_slug: string | null
+          org_stripe_id: string | null
+          org_type: Database["public"]["Enums"]["organization_type"] | null
+          profile_id: string | null
+          profiles_org_id: string | null
+          project_created_at: string | null
+          project_description: string | null
+          project_domain: string | null
+          project_id: string | null
+          project_logo: string | null
+          project_name: string | null
+          project_slug: string | null
+          project_subdomain: string | null
+          role: Database["public"]["Enums"]["organization_roles"] | null
           status_subscription:
             | Database["public"]["Enums"]["subscription_status"]
             | null

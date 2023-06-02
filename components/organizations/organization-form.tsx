@@ -140,6 +140,7 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
     }
   }
 
+  // TODO: refactor with shandcn form
   return (
     <Card>
       <div className="flex items-center justify-center p-6">

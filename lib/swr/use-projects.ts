@@ -1,7 +1,7 @@
 import useSWR from "swr"
 
 import { useStore } from "@/lib/stores/layout"
-import { ProjectsApiResult } from "@/lib/types/supabase"
+import { DataProjectsView } from "@/lib/types/supabase"
 import { fetcher } from "@/lib/utils"
 
 export default function useProjects({
@@ -11,7 +11,7 @@ export default function useProjects({
 }) {
   const { orgSlug } = useStore()
 
-  const { data: projects, error } = useSWR<ProjectsApiResult[]>(
+  const { data: projects, error } = useSWR<DataProjectsView[]>(
     !!orgSlug ? `/api/org/${orgSlug}/project` : null,
     fetcher,
     {

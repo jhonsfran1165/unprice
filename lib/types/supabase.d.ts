@@ -25,10 +25,10 @@ export type SubscriptionTiers =
 
 // views
 export type DataOrgsView = Database["public"]["Views"]["data_orgs"]["Row"]
+export type DataProjectsView =
+  Database["public"]["Views"]["data_projects"]["Row"]
 
 // custom types
 export type OrganizationViewData = DataOrgsView & {
   organization: Organization
 }
-
-export type ProjectsApiResult = Project & { organization: Organization }

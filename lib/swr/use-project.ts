@@ -1,7 +1,7 @@
 import useSWR from "swr"
 
 import { useStore } from "@/lib/stores/layout"
-import { Project } from "@/lib/types/supabase"
+import { DataProjectsView } from "@/lib/types/supabase"
 import { fetcher } from "@/lib/utils"
 
 export default function useProject({
@@ -13,7 +13,7 @@ export default function useProject({
   orgSlug: string
   projectSlug: string
 }) {
-  const { data: project, error } = useSWR<Project>(
+  const { data: project, error } = useSWR<DataProjectsView>(
     !!orgSlug && !!projectSlug
       ? `/api/org/${orgSlug}/project/${projectSlug}`
       : null,

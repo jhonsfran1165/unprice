@@ -32,12 +32,19 @@ export default async function IndexPage({
   // TODO: handle if there is no organization with that slug
   // -----------------------------------------------
 
+  // const { data: projects, error } = await supabase
+  //   .from("project")
+  //   .select("*")
+  //   .eq("org_id", orgId)
+
   const { data: projects, error } = await supabase
-    .from("project")
+    .from("data_projects")
     .select("*")
-    .eq("org_id", orgId)
+    .eq("profile_id", session?.user.id)
+    .eq("org_slug", orgSlug)
 
   // TODO: handle error
+  // TODO: review all pages and use revalidation or client hydration where it most fit
 
   return <BillingProjects projects={projects || []} />
 }

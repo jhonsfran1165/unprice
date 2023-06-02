@@ -23,7 +23,7 @@ export function ProjectsContainer({ loading }) {
           : projects &&
             projects.length > 0 &&
             projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard key={project.project_id} project={project} />
             ))}
       </ul>
       {noProjectHolder && <NoProjectsPlaceholder />}

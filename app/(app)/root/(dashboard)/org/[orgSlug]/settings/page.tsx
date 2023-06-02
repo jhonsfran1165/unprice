@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 
 import { createServerClient } from "@/lib/supabase/supabase-server"
+import { AppClaims } from "@/lib/types"
 import { Organization } from "@/lib/types/supabase"
 import { OrganizationDelete } from "@/components/organizations/organization-delete"
 import { OrganizationForm } from "@/components/organizations/organization-form"
@@ -21,35 +22,46 @@ export default async function OrgSettingsIndexPage({
     data: { session },
   } = await supabase.auth.getSession()
 
-  const { data: dataOrg, error } = await supabase
-    .from("data_orgs")
-    .select("*, organization!inner(*)")
-    .eq("profile_id", session?.user.id)
-    .eq("org_slug", orgSlug)
-    .eq("organization.slug", orgSlug)
+  // TODO: use a function to get this data
+  const appClaims = session?.user.app_metadata as AppClaims
+  const orgClaims = appClaims?.organizations
+
+  const { data: organization, error } = await supabase
+    .from("organization")
+    .select("*")
+    .eq("slug", orgSlug)
     .single()
 
-  // TODO: org default has to be saved inside user metadata
-
-  const org = dataOrg?.organization as Organization
-
-  if (!org) notFound()
+  if (!organization) notFound()
+  // TODO: handle the error properly
   if (error) notFound()
+
+  let defaultOrgSlug = ""
+
+  for (const key in orgClaims) {
+    if (Object.prototype.hasOwnProperty.call(orgClaims, key)) {
+      const org = orgClaims[key]
+
+      if (org.is_default) {
+        defaultOrgSlug = org.slug
+      }
+    }
+  }
 
   return (
     <div className="space-y-10 md:px-0">
-      <OrganizationForm org={org} />
+      <OrganizationForm org={organization} />
 
       <OrganizationMakeDefault
-        orgSlug={org.slug}
-        id={org.id}
-        isDefault={dataOrg?.is_default ?? false}
+        orgSlug={organization.slug}
+        id={organization.id}
+        isDefault={defaultOrgSlug === organization.slug}
       />
 
       <OrganizationDelete
-        orgSlug={org.slug}
-        id={org.id}
-        isDefault={dataOrg?.is_default ?? false}
+        orgSlug={organization.slug}
+        id={organization.id}
+        isDefault={defaultOrgSlug === organization.slug}
       />
     </div>
   )

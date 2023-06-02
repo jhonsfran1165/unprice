@@ -21,16 +21,18 @@ async function handler(
     if (req.method === "GET") {
       const { orgSlug, projectSlug } = req.query
 
-      const { data, error } = await supabase
-        .from("project")
-        .select("*, organization!inner(*)")
-        .eq("slug", projectSlug)
-        .eq("organization.slug", orgSlug)
+      // TODO: use orgId instead
+      const { data: dataProjects, error } = await supabase
+        .from("data_projects")
+        .select("*")
+        .eq("profile_id", session?.user.id)
+        .eq("org_slug", orgSlug)
+        .eq("project_slug", projectSlug)
         .single()
 
-      if (error) return res.status(404).json({ ...error })
+      if (error) return res.status(404).json(error)
 
-      return res.status(200).json({ ...data })
+      return res.status(200).json(dataProjects)
     }
 
     if (req.method === "POST") {

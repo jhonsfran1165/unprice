@@ -8,9 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
 export default function ProjectContext() {
-  const { orgSlug, projectSlug, orgData } = useStore()
+  const { orgSlug, projectSlug } = useStore()
   const { project, isLoading } = useProject({
-    revalidateOnFocus: false,
+    revalidateOnFocus: true,
     orgSlug,
     projectSlug,
   })
@@ -24,11 +24,13 @@ export default function ProjectContext() {
             orientation="vertical"
             className="mx-5 hidden h-6 rotate-[30deg] gap-0 text-background-textContrast md:inline-block"
           />
-          <Link href={`/org/${orgSlug}/project/${project?.slug}`}>
+          <Link
+            href={`/org/${project?.org_slug}/project/${project?.project_slug}`}
+          >
             <span className="block truncate text-sm font-bold">
-              {project?.name}
+              {project?.project_name}
               <Badge className="mx-2 primary h-5 text-xs">
-                {orgData?.tier}
+                {project?.tier}
               </Badge>
             </span>
           </Link>
