@@ -22,7 +22,7 @@ export default async function AppInitialPage() {
 
   // TODO: use current_org from database to set RLS in multitenant
   // TODO: delete default organization parameter
-  if (currentOrg.org_slug) {
+  if (currentOrg?.org_slug) {
     redirect(`/org/${currentOrg.org_slug}`)
   }
 
