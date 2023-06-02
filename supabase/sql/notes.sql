@@ -18,10 +18,7 @@ CREATE VIEW public.data_orgs WITH (security_invoker) AS
 DROP VIEW public.data_projects; 
 
 CREATE VIEW public.data_projects WITH (security_invoker) AS
-  SELECT DISTINCT profiles.role,
-    profiles.profile_id,
-    profiles.org_id as profiles_org_id,
-    profiles.is_default,
+  SELECT DISTINCT 
     subscription.status AS status_subscription,
     subscription."interval" AS subscription_interval,
     subscription."metadata" AS subscription_metadata,
@@ -46,10 +43,9 @@ CREATE VIEW public.data_projects WITH (security_invoker) AS
     proj.logo AS project_logo,
     proj.created_at AS project_created_at,
     coalesce(subscription."tier"::text, 'FREE'::text) as tier
-   FROM public.organization_profiles profiles
-     LEFT JOIN public.organization org ON org.id = profiles.org_id
-     LEFT JOIN public.project proj ON proj.org_id = org.id
-     LEFT JOIN public.organization_subscriptions subscription ON subscription.project_id = proj.id;
+   FROM public.organization org
+     JOIN public.project proj ON proj.org_id = org.id
+     LEFT JOIN public.organization_subscriptions subscription ON subscription.org_id = org.id AND subscription.project_id = proj.id;
 
 
 create or alter type subscription_interval as enum ('day', 'week', 'month', 'year');

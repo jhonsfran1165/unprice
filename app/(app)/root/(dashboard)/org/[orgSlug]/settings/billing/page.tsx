@@ -40,7 +40,6 @@ export default async function IndexPage({
   const { data: projects, error } = await supabase
     .from("data_projects")
     .select("*")
-    .eq("profile_id", session?.user.id)
     .eq("org_slug", orgSlug)
 
   // TODO: handle error

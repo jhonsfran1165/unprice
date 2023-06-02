@@ -24,7 +24,6 @@ async function handler(
       const { data: dataProjects, error } = await supabase
         .from("data_projects")
         .select("*")
-        .eq("profile_id", session?.user.id)
         .eq("org_slug", orgSlug)
 
       if (error) return res.status(404).json(error)
