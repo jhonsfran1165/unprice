@@ -11,8 +11,9 @@ export default async function IndexPage({
     orgSlug: string
   }
 }) {
+  // -----------------------------------------------
+  // TODO: convert this in a function? - it is used on lots of things
   const supabase = createServerClient()
-
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -28,15 +29,15 @@ export default async function IndexPage({
       }
     }
   }
+  // TODO: handle if there is no organization with that slug
+  // -----------------------------------------------
 
   const { data: projects, error } = await supabase
     .from("project")
     .select("*")
     .eq("org_id", orgId)
 
-  return (
-    // <Suspense fallback={"testingsssssss"}>
-    <BillingProjects projects={projects || []} />
-    // </Suspense>
-  )
+  // TODO: handle error
+
+  return <BillingProjects projects={projects || []} />
 }

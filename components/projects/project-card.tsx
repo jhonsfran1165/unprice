@@ -21,8 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
-
-import { Icons } from "../shared/icons"
+import { Icons } from "@/components/shared/icons"
 
 export function ProjectCard({ project }: { project: ProjectsApiResult }) {
   return (
