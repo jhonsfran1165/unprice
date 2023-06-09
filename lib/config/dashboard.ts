@@ -13,6 +13,9 @@ const OrgNavTabs: DashboardNavItem[] = [
     slug: "org-root",
     title: "Projects",
     href: "/",
+    headerActions: [
+      { title: "Add", href: '/add' }
+    ]
   },
   {
     module: "org",
@@ -111,6 +114,12 @@ const ProjectNavTabs: DashboardNavItem[] = [
         icon: "trello",
       },
     ],
+  },
+  {
+    module: "project",
+    slug: "project-add",
+    title: "Add",
+    href: "/add",
   },
 ]
 

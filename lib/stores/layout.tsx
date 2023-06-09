@@ -5,6 +5,7 @@ import {
   AppModulesNav,
   AppOrgClaim,
   DashboardNavItem,
+  HeaderActions,
 } from "@/lib/types"
 import {
   DataProjectsView,
@@ -29,6 +30,7 @@ export const useStore = create<{
   numberSegments: number
   orgData: AppOrgClaim | null
   appClaims: AppClaims | null
+  headerActions: HeaderActions[]
 }>((set) => ({
   contextHeader: "",
   orgSlug: "",
@@ -46,4 +48,5 @@ export const useStore = create<{
   moduleTab: "",
   orgData: null,
   appClaims: null,
+  headerActions: []
 }))

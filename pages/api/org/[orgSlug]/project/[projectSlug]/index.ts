@@ -20,6 +20,7 @@ async function handler(
 
     if (req.method === "GET") {
       const { orgSlug, projectSlug } = req.query
+      console.log("🚀 ~ file: index.ts:23 ~ orgSlug:", orgSlug)
 
       // TODO: use orgId instead
       const { data: dataProjects, error } = await supabase

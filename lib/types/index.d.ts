@@ -80,6 +80,7 @@ export type DashboardNavItem = {
   href: string
   tier?: string
   sidebarNav?: DashboardSidebarNavItem[]
+  headerActions?: HeaderActions[]
   disabled?: boolean
   external?: boolean
 }
@@ -119,6 +120,12 @@ export type NavItem = {
   href: string
   disabled?: boolean
   external?: boolean
+}
+
+export type HeaderActions = {
+  title: string
+  href: string
+  disabled?: boolean
 }
 
 export interface LayoutConfig {

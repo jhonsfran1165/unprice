@@ -11,7 +11,7 @@ export const revalidate = 0
 export default async function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode,
 }) {
   const supabase = createServerClient()
 

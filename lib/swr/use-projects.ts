@@ -5,11 +5,12 @@ import { DataProjectsView } from "@/lib/types/supabase"
 import { fetcher } from "@/lib/utils"
 
 export default function useProjects({
-  revalidateOnFocus = true,
+  revalidateOnFocus = false,
 }: {
   revalidateOnFocus?: boolean
 }) {
   const { orgSlug } = useStore()
+  console.log("🚀 ~ file: use-projects.ts:13 ~ orgSlug:", orgSlug)
 
   const { data: projects, error } = useSWR<DataProjectsView[]>(
     !!orgSlug ? `/api/org/${orgSlug}/project` : null,
@@ -19,6 +20,9 @@ export default function useProjects({
       revalidateOnFocus,
     }
   )
+
+  console.log("🚀 ~ file: use-projects.ts:16 ~ error:", error)
+
 
   return {
     projects,

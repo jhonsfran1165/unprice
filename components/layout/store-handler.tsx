@@ -128,6 +128,8 @@ function StoreHandler({
     }
   }, [haveAccessProject, haveAccessOrg])
 
+  console.log("🚀 ~ file: store-handler.tsx:153 ~ activeTab:", activeTab)
+
   // initialize this only the first time from the server
   // TODO: better change this with session?
   if (!initialized.current) {
@@ -148,6 +150,7 @@ function StoreHandler({
       moduleTab,
       orgData,
       appClaims,
+      headerActions: activeTab?.headerActions,
     })
     initialized.current = true
   }

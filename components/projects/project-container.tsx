@@ -6,6 +6,7 @@ import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 import NoProjectsPlaceholder from "./no-projects-placeholder"
 import { ProjectSkeleton } from "./project-skeleton"
+import { AddProjectDialog } from "./add-project-dialog"
 
 export function ProjectsContainer({ loading }) {
   const { projects, isLoading } = useProjects({
@@ -17,7 +18,8 @@ export function ProjectsContainer({ loading }) {
 
   return (
     <MaxWidthWrapper className="pt-10">
-      <ul className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+      <AddProjectDialog cta="Add new project" />
+      <ul className="mt-10 grid grid-cols-1 gap-3 lg:grid-cols-3">
         {loadingProgress
           ? Array.from({ length: 6 }).map((_, i) => <ProjectSkeleton key={i} />)
           : projects &&

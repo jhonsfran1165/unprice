@@ -82,10 +82,19 @@ export async function fetcher<JSON = any>(
   input: RequestInfo,
   init?: RequestInit
 ): Promise<JSON> {
-  const res = await fetch(input, init)
+  console.log("🚀 ~ file: utils.ts:85 ~ init:", init)
+  console.log("🚀 ~ file: utils.ts:85 ~ input:", input)
+  let res;
+
+  try {
+    res = await fetch(input, init)
+  } catch (error) {
+    console.log("🚀 ~ file: utils.ts:90 ~ error:", error)
+  }
 
   if (!res.ok) {
     const json = await res.json()
+    console.log("🚀 ~ file: utils.ts:95 ~ json:", json)
     if (json.error) {
       const error = new Error(json.error) as SWRError
       error.status = res.status
