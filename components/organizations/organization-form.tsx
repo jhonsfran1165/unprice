@@ -128,7 +128,6 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
         throw org
       }
     } catch (e) {
-      // TODO: refactor all toast with this
       const { error } = JSON.parse(e?.message ?? e)
       toast({
         title: `Error ${error?.code || ""}`,
