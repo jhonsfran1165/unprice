@@ -20,8 +20,6 @@ export default async function AppInitialPage() {
   const orgClaims = appClaims?.organizations
   const currentOrg = appClaims?.current_org
 
-  // TODO: use current_org from database to set RLS in multitenant
-  // TODO: delete default organization parameter
   if (currentOrg?.org_slug) {
     redirect(`/org/${currentOrg.org_slug}`)
   }

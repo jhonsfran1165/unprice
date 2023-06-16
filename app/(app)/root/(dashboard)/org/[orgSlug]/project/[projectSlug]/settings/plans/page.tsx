@@ -12,5 +12,8 @@ export default function IndexPage({
     action: string
   }
 }) {
+  // TODO: split this component and create currentplan component
+  // and available plans loadComponents. Then use all static elements
+  // in this page so we can render from server
   return <SubscriptionPlans />
 }

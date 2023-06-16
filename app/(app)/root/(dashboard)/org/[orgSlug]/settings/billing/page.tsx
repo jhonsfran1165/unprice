@@ -1,5 +1,3 @@
-// import { Suspense } from "react"
-
 import { createServerClient } from "@/lib/supabase/supabase-server"
 import { AppClaims } from "@/lib/types"
 import { BillingProjects } from "@/components/organizations/billing-projects"
@@ -11,8 +9,6 @@ export default async function IndexPage({
     orgSlug: string
   }
 }) {
-  // -----------------------------------------------
-  // TODO: convert this in a function? - it is used on lots of things
   const supabase = createServerClient()
   const {
     data: { session },
@@ -29,21 +25,16 @@ export default async function IndexPage({
       }
     }
   }
-  // TODO: handle if there is no organization with that slug
-  // -----------------------------------------------
 
-  // const { data: projects, error } = await supabase
-  //   .from("project")
-  //   .select("*")
-  //   .eq("org_id", orgId)
-
+  // We use orgId just to ensure we filter the right projects but even if we don't
+  // use it, there is RLS in the database that will check that for us
   const { data: projects, error } = await supabase
     .from("data_projects")
     .select("*")
     .eq("org_slug", orgSlug)
+    .eq("org_id", orgId)
 
-  // TODO: handle error
-  // TODO: review all pages and use revalidation or client hydration where it most fit
+  // TODO: handle error and not found
 
   return <BillingProjects projects={projects || []} />
 }

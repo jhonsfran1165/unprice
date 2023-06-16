@@ -4,10 +4,10 @@ import { layoutConfig } from "@/lib/config/layout"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 import { AccountToggle } from "@/components/accounts/account-toggle"
-import { CommandDialogLayout } from "@/components/layout/command"
 import { Logo } from "@/components/layout/logo"
 import { OrganizationSwitch } from "@/components/organizations/organization-switch"
 import ProjectContext from "@/components/projects/project-context"
+import { CommandDialogLayout } from "@/components/shared/command"
 
 export function MainNav() {
   return (

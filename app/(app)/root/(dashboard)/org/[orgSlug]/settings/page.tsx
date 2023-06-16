@@ -2,7 +2,6 @@ import { notFound } from "next/navigation"
 
 import { createServerClient } from "@/lib/supabase/supabase-server"
 import { AppClaims } from "@/lib/types"
-import { Organization } from "@/lib/types/supabase"
 import { OrganizationDelete } from "@/components/organizations/organization-delete"
 import { OrganizationForm } from "@/components/organizations/organization-form"
 import { OrganizationMakeDefault } from "@/components/organizations/organization-make-default"
@@ -22,7 +21,6 @@ export default async function OrgSettingsIndexPage({
     data: { session },
   } = await supabase.auth.getSession()
 
-  // TODO: use a function to get this data
   const appClaims = session?.user.app_metadata as AppClaims
   const orgClaims = appClaims?.organizations
 

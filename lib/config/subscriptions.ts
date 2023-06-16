@@ -1,6 +1,6 @@
 import { SubscriptionPlan } from "@/lib/types"
 
-// TODO: add types
+// TODO: set stripe prices
 export const pricingSubscriptions: SubscriptionPlan[] = [
   {
     plan: "FREE",
@@ -26,7 +26,7 @@ export const pricingSubscriptions: SubscriptionPlan[] = [
       { text: "SSO/SAML", negative: true },
     ],
     cta: "Start for free",
-    ctaLink: "https://app.dub.sh/register",
+    ctaLink: "https://app.builder.sh/register",
     limits: {
       views: 10000,
       organizations: 2,
@@ -75,7 +75,7 @@ export const pricingSubscriptions: SubscriptionPlan[] = [
       { text: "SSO/SAML", negative: true },
     ],
     cta: "Get started",
-    ctaLink: "https://app.dub.sh/register",
+    ctaLink: "https://app.builder.sh/register",
     limits: {
       views: 10000,
       organizations: 2,
@@ -124,7 +124,8 @@ export const pricingSubscriptions: SubscriptionPlan[] = [
       { text: "SSO/SAML" },
     ],
     cta: "Contact us",
-    ctaLink: "mailto:steven@dub.sh?subject=Interested%20in%20Dub%20Enterprise",
+    ctaLink:
+      "mailto:jhonsfran@builder.sh?subject=Interested%20in%20Dub%20Enterprise",
     limits: {
       views: 10000,
       organizations: 2,

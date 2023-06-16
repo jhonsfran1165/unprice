@@ -70,7 +70,6 @@ export function BillingProjects({
         router.refresh()
       }
     } catch (e) {
-      // TODO: refactor all toast with this
       const { error } = JSON.parse(e?.message ?? e)
       toast({
         title: `Error ${error?.code || ""}`,

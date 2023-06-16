@@ -36,7 +36,6 @@ const OrgNavTabs: DashboardNavItem[] = [
         title: "General",
         href: "/settings",
         icon: "settings",
-        tier: "PRO",
       },
       {
         module: "org",
@@ -64,6 +63,14 @@ const ProjectNavTabs: DashboardNavItem[] = [
     slug: "project-root",
     title: "Pages",
     href: "/",
+  },
+  {
+    module: "org",
+    slug: "project-pro",
+    title: "Pro module",
+    href: "/pro",
+    disabled: false,
+    tier: "PRO",
   },
   {
     module: "project",

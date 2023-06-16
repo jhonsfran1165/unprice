@@ -1,14 +1,23 @@
 "use client"
 
 import { useEffect, useMemo, useRef } from "react"
-import { usePathname, useSelectedLayoutSegments } from "next/navigation"
+import {
+  usePathname,
+  useRouter,
+  useSelectedLayoutSegments,
+} from "next/navigation"
 import { mutate } from "swr"
 
 import { getActiveTabs } from "@/lib/config/dashboard"
 import { useStore } from "@/lib/stores/layout"
+import useProject from "@/lib/swr/use-project"
 import { AppClaims, AppModulesNav } from "@/lib/types"
 import { Session } from "@/lib/types/supabase"
 import { useSupabase } from "@/components/auth/supabase-provider"
+import { ConfirmAction } from "@/components/shared/confirm-action"
+
+import { Button } from "../ui/button"
+import { toast } from "../ui/use-toast"
 
 function StoreHandler({
   session,
@@ -20,6 +29,7 @@ function StoreHandler({
   appClaims: AppClaims
 }) {
   const pathname = usePathname()
+  const router = useRouter()
   const segments = useSelectedLayoutSegments()
   const initialized = useRef(false)
   const { supabase } = useSupabase()
@@ -66,8 +76,14 @@ function StoreHandler({
     }
   }, [orgSlug, JSON.stringify(orgClaims)]) || { orgId: "", orgData: null }
 
+  const { project: projectData } = useProject({
+    revalidateOnFocus: true,
+    orgSlug,
+    projectSlug,
+  })
+
   // TODO: use this to handle access to PRO modules inside the app && permissions per roles
-  const haveAccess = () => {
+  const haveAccessOrg = () => {
     const accessTab = orgData?.tier === activeTab?.tier || !activeTab?.tier
     const accessSideBar =
       orgData?.tier === activeSideBar?.tier || !activeSideBar?.tier
@@ -75,7 +91,33 @@ function StoreHandler({
     return accessTab && accessSideBar
   }
 
-  // console.log(haveAccess())
+  const haveAccessProject = useMemo(() => {
+    const accessTab = projectData?.tier === activeTab?.tier || !activeTab?.tier
+    const accessSideBar =
+      projectData?.tier === activeSideBar?.tier || !activeSideBar?.tier
+
+    return accessTab && accessSideBar
+  }, [projectData?.tier, activeTab?.tier, activeSideBar?.tier])
+
+  const trigger = (
+    <div className="flex justify-end">
+      <Button title="Delete" className="button-danger w-28">
+        Go back
+      </Button>
+    </div>
+  )
+
+  // TODO: improve this
+  if (!haveAccessProject) {
+    toast({
+      title: "PRO module",
+      description: "You don't access to this module",
+      className: "danger",
+    })
+
+    router.push("/")
+  }
+
   // initialize this only the first time from the server
   // TODO: better change this with session?
   if (!initialized.current) {
@@ -86,6 +128,7 @@ function StoreHandler({
       orgSlug,
       orgId,
       projectSlug,
+      projectData,
       activeTabs: tabs,
       activeTab: activeTab,
       activeSegment,
@@ -137,6 +180,12 @@ function StoreHandler({
       appClaims,
     })
   }, [pathname, JSON.stringify(appClaims)])
+
+  useEffect(() => {
+    useStore.setState({
+      projectData,
+    })
+  }, [projectSlug, JSON.stringify(projectData)])
 
   return null
 }

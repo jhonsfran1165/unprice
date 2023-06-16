@@ -60,10 +60,11 @@ const Pricing = ({ type = "public" }: { type: string }) => {
       const { id: sessionId } = response
       const stripe = await getStripe()
       stripe?.redirectToCheckout({ sessionId })
-    } catch (error) {
+    } catch (e) {
+      const { error } = JSON.parse(e?.message ?? e)
       toast({
-        title: "Error creating session stripe",
-        description: error.message,
+        title: `Error ${error?.code || ""}`,
+        description: error?.message || "",
         className: "danger",
       })
     } finally {

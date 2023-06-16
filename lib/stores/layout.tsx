@@ -6,13 +6,18 @@ import {
   AppOrgClaim,
   DashboardNavItem,
 } from "@/lib/types"
-import { OrganizationViewData, Session } from "@/lib/types/supabase"
+import {
+  DataProjectsView,
+  OrganizationViewData,
+  Session,
+} from "@/lib/types/supabase"
 
 export const useStore = create<{
   contextHeader: string
   orgSlug: string
   orgId: string
   projectSlug: string
+  projectData: DataProjectsView | null
   session: Session | null
   modulesApp: AppModulesNav | {}
   activeTabs: DashboardNavItem[]
@@ -29,6 +34,7 @@ export const useStore = create<{
   orgSlug: "",
   orgId: "",
   projectSlug: "",
+  projectData: null,
   session: null,
   modulesApp: {},
   activeTabs: [],

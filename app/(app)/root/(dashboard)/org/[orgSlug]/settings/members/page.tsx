@@ -34,12 +34,5 @@ export default async function IndexPage({
     .select("*, profile!inner(*)")
     .eq("org_id", orgId)
 
-  console.log(error)
-  console.log(profiles)
-
-  return (
-    // <Suspense fallback={"testingsssssss"}>
-    <MembersList profiles={profiles || []} />
-    // </Suspense>
-  )
+  return <MembersList profiles={profiles || []} />
 }
