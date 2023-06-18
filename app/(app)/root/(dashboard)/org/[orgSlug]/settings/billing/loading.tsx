@@ -4,7 +4,6 @@ export default function LoadingPage() {
   return (
     <div className="space-y-10 md:px-0">
       <ShellSkeleton />
-      <ShellSkeleton />
     </div>
   )
 }

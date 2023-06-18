@@ -3,28 +3,28 @@
 import Link from "next/link"
 
 import { useStore } from "@/lib/stores/layout"
-import useProject from "@/lib/swr/use-project"
+import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
 export default function ProjectContext() {
-  const { orgSlug, projectSlug } = useStore()
-  const { project, isLoading } = useProject({
-    revalidateOnFocus: false,
-    orgSlug,
-    projectSlug,
-  })
+  const { projectData } = useStore()
 
   return (
     <>
-      {isLoading ? null : (
+      {!projectData ? null : (
         <div className="hidden items-center justify-start md:flex">
           <Separator
             orientation="vertical"
             className="mx-5 hidden h-6 rotate-[30deg] gap-0 text-background-textContrast md:inline-block"
           />
-          <Link href={`/org/${orgSlug}/project/${project?.slug}`}>
+          <Link
+            href={`/org/${projectData?.org_slug}/project/${projectData?.project_slug}`}
+          >
             <span className="block truncate text-sm font-bold">
-              {project?.name}
+              {projectData?.project_name}
+              <Badge className="primary mx-2 h-5 text-xs">
+                {projectData?.tier}
+              </Badge>
             </span>
           </Link>
         </div>

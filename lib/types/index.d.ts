@@ -22,6 +22,10 @@ export type AppOrgClaim = {
 }
 
 export type AppClaims = {
+  current_org: {
+    org_id: string
+    org_slug: string
+  }
   organizations: {
     [orgId: string]: AppOrgClaim
   }
@@ -33,6 +37,11 @@ export type GetActiveTabs = {
   numberSegments: number
   activeSegment?: string
   cleanSegments: string[]
+}
+
+export interface RootDomainProps {
+  target: string
+  rewrite?: boolean
 }
 
 export type SidebarNavItem = {
@@ -58,6 +67,7 @@ export type DashboardSidebarNavItem = {
   slug: string
   disabled?: boolean
   external?: boolean
+  tier?: string
   icon?: keyof typeof Icons
   href: string
 }
@@ -68,27 +78,41 @@ export type DashboardNavItem = {
   submodule?: string
   slug: string
   href: string
+  tier?: string
   sidebarNav?: DashboardSidebarNavItem[]
   disabled?: boolean
   external?: boolean
 }
 
+export type PriceSubscription = {
+  amount: number
+  currency: string
+  priceIds: {
+    test: string
+    production: string
+  }
+}
+
 export type SubscriptionPlan = {
-  name: string
-  description: string
-  stripePriceId?: string
+  plan: SubscriptionTiers
+  tagline: string
+  copy: string
+  clicksLimit?: string
+  features: {
+    text: string
+    footnote?: string
+    negative?: boolean
+  }[]
+  cta: string
+  ctaLink: string
+  limits: {
+    views: number
+    organizations: number
+    projects: number
+    users: number
+  }
+  price: { [id: string]: PriceSubscription }
 }
-
-export interface RootDomainProps {
-  target: string
-  rewrite?: boolean
-}
-
-// export type UserSubscriptionPlan = SubscriptionPlan &
-//   Pick<User, "stripeCustomerId" | "stripeSubscriptionId"> & {
-//     stripeCurrentPeriodEnd: number
-//     isPro: boolean
-//   }
 
 export type NavItem = {
   title: string

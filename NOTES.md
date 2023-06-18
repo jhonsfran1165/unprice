@@ -26,6 +26,8 @@ $$
 supabase gen types typescript --local > lib/types/database.types.ts ====> create types
 supabase db diff --use-migra -f seeding_data -> create migrations
 
+pnpm supabase-to-zod --input ib/types/database.types.ts --output schemas.ts
+
 pg_dump --column-inserts --data-only postgresql://postgres:postgres@localhost:54322 > supabase/dump.sql
 
 ---
@@ -43,7 +45,7 @@ https://next-cloudinary.spacejelly.dev/components/cldimage/basic-usage
 
 https://supabase.com/docs/reference/cli/start
 
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
+stripe listen --forward-to localhost:3000/api/stripe/webhook
 
 https://www.cybertec-postgresql.com/en/view-permissions-and-row-level-security-in-postgresql/
 
@@ -70,3 +72,16 @@ group_manager: false
 items: ["toothpick", "string", "ring"]
 
 https://supabase.com/docs/guides/auth/row-level-security#policies-with-security-definer-functions
+
+# zod validation example
+
+https://gist.github.com/pom421/ea34eeb778b0d94fe85352dc27aada96
+
+# implement TRPC
+
+# https://github.com/chronark/access for roles
+
+<!-- https://github.com/clerkinc/use-stripe-subscription-demo -->
+<!-- https://www.tinybird.co/blog-posts/dev-qa-global-api-latency-chronark -->
+
+see clerk organization

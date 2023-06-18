@@ -5,17 +5,6 @@ import { useRouter } from "next/navigation"
 import { mutate } from "swr"
 
 import { fetchAPI } from "@/lib/utils"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -26,35 +15,9 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/components/ui/use-toast"
+import { ConfirmAction } from "@/components/shared/confirm-action"
 import { Icons } from "@/components/shared/icons"
 
-// TODO: move this to a component
-export function ConfirmAction({ confirmAction, trigger }) {
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription className="font-light">
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel className="button-default">
-            Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction onClick={confirmAction} className="button-danger">
-            Continue
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
-
-// TODO: confirm dialog
 export function OrganizationDelete({
   orgSlug,
   id,
@@ -95,12 +58,12 @@ export function OrganizationDelete({
         router.push("/")
         router.refresh()
       }
-    } catch (error) {
-      const dataError = JSON.parse(error?.message ?? error)
+    } catch (e) {
+      const { error } = JSON.parse(e?.message ?? e)
 
       toast({
-        title: `Error ${dataError?.code ?? ""} deleting org`,
-        description: dataError.message ?? "",
+        title: `Error ${error?.code || ""}`,
+        description: error?.message || "",
         className: "danger",
       })
     } finally {

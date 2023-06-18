@@ -8,7 +8,7 @@ import {
 } from "@/lib/api-middlewares"
 import { stripe } from "@/lib/stripe"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
-import { Organization, Profile, Session } from "@/lib/types/supabase"
+import { Profile, Session } from "@/lib/types/supabase"
 import { getAppRootUrl } from "@/lib/utils"
 import { stripePostSchema } from "@/lib/validations/stripe"
 
@@ -24,22 +24,25 @@ async function handler(
     if (req.method === "POST") {
       const { orgSlug, stripePriceId, trialDays, metadata, currency } = req.body
 
-      const { data: orgsProfile, error } = await supabase
-        .from("organization_profiles")
-        .select("*, organization!inner(*)")
-        .eq("profile_id", session?.user.id)
-        .eq("organization.slug", orgSlug)
+      const { data: org, error } = await supabase
+        .from("organization")
+        .select("*")
+        .eq("slug", orgSlug)
         .single()
 
-      const org = orgsProfile?.organization as Organization
+      if (!org)
+        return res.status(404).json({ message: "organization not found" })
 
       const sessionData = {
         payment_method_types: ["card"],
         billing_address_collection: "required",
-        success_url: `${getAppRootUrl()}/org/${orgSlug}/settings/billing`,
+        success_url: `${getAppRootUrl()}/org/${orgSlug}/project/${
+          metadata?.projectSlug
+        }/settings/billing`,
         cancel_url: `${getAppRootUrl()}/org/${orgSlug}`,
         line_items: [{ price: stripePriceId, quantity: 1 }],
         allow_promotion_codes: true,
+        currency,
         subscription_data: {
           trial_from_plan: true,
           trial_period_days: trialDays,
@@ -57,7 +60,7 @@ async function handler(
         //   enabled: true,
         // },
         mode: "subscription",
-        client_reference_id: org?.id.toString(),
+        client_reference_id: org.id.toString(),
       } as Stripe.Checkout.SessionCreateParams
 
       if (org.stripe_id) {
@@ -65,10 +68,10 @@ async function handler(
       } else {
         sessionData["customer_email"] = session?.user.email
       }
-      // TODO: only owners can do this
+
       const stripeSession = await stripe.checkout.sessions.create(sessionData)
 
-      if (error) return res.status(404).json(error)
+      if (error) return res.status(500).json(error)
 
       return res.status(200).json(stripeSession)
     }

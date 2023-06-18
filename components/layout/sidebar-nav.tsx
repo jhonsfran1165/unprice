@@ -25,7 +25,7 @@ export function DashboardSideBarNav({
         return (
           <WrapperLink
             className={""}
-            key={index}
+            key={item.slug}
             href={item.disabled ? "#" : pathPrefix + item.href}
           >
             <div

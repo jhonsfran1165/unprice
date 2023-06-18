@@ -9,11 +9,7 @@ import {
 import supabaseAdmin from "@/lib/supabase/supabase-admin"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
 import { Profile, Session } from "@/lib/types/supabase"
-import {
-  orgGetSchema,
-  orgPostSchema,
-  orgPutSchema,
-} from "@/lib/validations/org"
+import { orgPostSchema, orgPutSchema } from "@/lib/validations/org"
 
 async function handler(
   req: NextApiRequest,
@@ -23,17 +19,6 @@ async function handler(
 ) {
   try {
     const supabase = supabaseApiClient(req, res)
-
-    if (req.method === "GET") {
-      const { data, error } = await supabase
-        .from("data_orgs")
-        .select("*")
-        .eq("profile_id", session?.user.id)
-
-      if (error) return res.status(404).json(error)
-
-      return res.status(200).json(data)
-    }
 
     if (req.method === "POST") {
       const { id, type, name, image, description } = req.body
@@ -64,7 +49,7 @@ async function handler(
         user_id: session?.user.id ?? "",
         org_id: uuid,
         slug,
-        type: type.toUpperCase(),
+        type: type?.toUpperCase(),
         name,
         image,
         description,
@@ -80,7 +65,7 @@ async function handler(
   }
 }
 
-const validMethods = ["GET", "POST", "PUT"]
+const validMethods = ["POST", "PUT"]
 
 export default withMethods(
   // valid methods for this endpoint
@@ -88,13 +73,12 @@ export default withMethods(
   // validate payload for this methods
   withValidation(
     {
-      GET: orgGetSchema,
       POST: orgPostSchema,
       PUT: orgPutSchema,
     },
     // validate session for ["POST", "DELETE", "PUT"] endpoints only
     withAuthentication(handler, {
-      protectedMethods: ["GET", "POST", "PUT"],
+      protectedMethods: ["POST", "PUT"],
       needProfileDetails: true,
     })
   )

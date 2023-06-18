@@ -1,6 +1,5 @@
 "use client"
 
-import { useStore } from "@/lib/stores/layout"
 import useProjects from "@/lib/swr/use-projects"
 import { ProjectCard } from "@/components/projects/project-card"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
@@ -9,10 +8,8 @@ import NoProjectsPlaceholder from "./no-projects-placeholder"
 import { ProjectSkeleton } from "./project-skeleton"
 
 export function ProjectsContainer({ loading }) {
-  const { orgSlug } = useStore()
   const { projects, isLoading } = useProjects({
-    orgSlug,
-    revalidateOnFocus: false,
+    revalidateOnFocus: true,
   })
 
   const loadingProgress = isLoading || loading
@@ -26,7 +23,7 @@ export function ProjectsContainer({ loading }) {
           : projects &&
             projects.length > 0 &&
             projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard key={project.project_id} project={project} />
             ))}
       </ul>
       {noProjectHolder && <NoProjectsPlaceholder />}

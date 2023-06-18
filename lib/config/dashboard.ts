@@ -27,6 +27,7 @@ const OrgNavTabs: DashboardNavItem[] = [
     title: "Settings",
     href: "/settings",
     disabled: false,
+    tier: "FREE",
     sidebarNav: [
       {
         module: "org",
@@ -64,6 +65,14 @@ const ProjectNavTabs: DashboardNavItem[] = [
     href: "/",
   },
   {
+    module: "org",
+    slug: "project-pro",
+    title: "Pro module",
+    href: "/pro",
+    disabled: false,
+    tier: "PRO",
+  },
+  {
     module: "project",
     slug: "project-stadistics",
     title: "Statistics",
@@ -83,7 +92,7 @@ const ProjectNavTabs: DashboardNavItem[] = [
         slug: "project-settings",
         title: "General",
         href: "/settings",
-        icon: "post",
+        icon: "settings",
       },
       {
         module: "project",
@@ -91,7 +100,15 @@ const ProjectNavTabs: DashboardNavItem[] = [
         slug: "project-settings-billing",
         title: "Billing",
         href: "/settings/billing",
-        icon: "post",
+        icon: "billing",
+      },
+      {
+        module: "project",
+        submodule: "settings",
+        slug: "project-settings-plans",
+        title: "Plans",
+        href: "/settings/plans",
+        icon: "trello",
       },
     ],
   },

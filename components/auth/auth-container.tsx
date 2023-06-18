@@ -33,7 +33,6 @@ export default function AuthenticationContainer({ action }) {
         {config.linkName}
       </Link>
       <div className="hidden h-full flex-col bg-muted p-10 lg:flex">
-        {/* TODO: fix this */}
         <BlurImage
           src="https://images.unsplash.com/photo-1590069261209-f8e9b8642343?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
           alt="Builderai logo"
@@ -47,7 +46,7 @@ export default function AuthenticationContainer({ action }) {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;This library has saved me countless hours of work and
+              &ldquo;This application has saved me countless hours of work and
               helped me deliver stunning designs to my clients faster than ever
               before. Highly recommended!&rdquo;
             </p>

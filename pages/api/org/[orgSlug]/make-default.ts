@@ -25,7 +25,6 @@ async function handler(
         .from("organization_profiles")
         .update({ is_default: false })
         .eq("profile_id", session?.user.id)
-        .eq("is_default", is_default)
 
       const { data, error: newDefault } = await supabase
         .from("organization_profiles")

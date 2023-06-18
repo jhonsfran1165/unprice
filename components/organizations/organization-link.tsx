@@ -14,7 +14,7 @@ function OrganizationLink({ org }: { org?: AppOrgClaim | null }) {
           src={org?.image || "https://avatar.vercel.sh/new-org.png"}
           alt={org?.slug}
         />
-        <AvatarFallback>{org?.slug.substring(2)}</AvatarFallback>
+        <AvatarFallback>{org?.slug?.substring(2)}</AvatarFallback>
       </Avatar>
       <span className="block w-full truncate text-center text-sm font-bold">
         {org?.slug ?? "new org"}

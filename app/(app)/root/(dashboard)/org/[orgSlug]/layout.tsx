@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 
 import { createServerClient } from "@/lib/supabase/supabase-server"
+import { AppClaims } from "@/lib/types"
 
 export const revalidate = 0
 
@@ -19,19 +20,17 @@ export default async function DashboardLayout({
     data: { session },
   } = await supabase.auth.getSession()
 
-  const { data: claim, error } = await supabase.rpc("get_claim", {
-    user_id: session?.user.id ?? "",
-    claim: "organizations",
-  })
+  const appClaims = session?.user.app_metadata as AppClaims
+  const orgClaims = appClaims?.organizations
+  let orgExist = false
 
-  // TODO: if error throws an error
-
-  // we don't rely on the JWT for checking if the organization belongs to the user
-  // because JWT has the problem with refreshing token.
-  // this adds unnecessary request to the database, with more reason if this is a centrla layout
-  // but for now it is okay
-  const orgExist =
-    claim && Object.keys(claim).find((key) => claim[key].slug === orgSlug)
+  for (const key in orgClaims) {
+    if (Object.prototype.hasOwnProperty.call(orgClaims, key)) {
+      if (orgClaims[key].slug === orgSlug) {
+        orgExist = true
+      }
+    }
+  }
 
   if (!orgExist) {
     notFound()

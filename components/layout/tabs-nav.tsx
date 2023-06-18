@@ -14,7 +14,7 @@ export const TabsNav = () => {
         {tabs.length > 0 &&
           tabs.map((tab, index) => (
             <Tab
-              key={index}
+              key={tab.slug}
               tab={tab}
               pathPrefix={activePathPrefix}
               activeTab={activeTab}

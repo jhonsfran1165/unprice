@@ -1,12 +1,5 @@
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardFooter } from "@/components/ui/card"
 import BlurImage from "@/components/shared/blur-image"
 
 export default function NoProjectsPlaceholder() {

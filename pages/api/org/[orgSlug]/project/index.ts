@@ -21,14 +21,14 @@ async function handler(
     if (req.method === "GET") {
       const { orgSlug } = req.query
 
-      const { data: projects, error } = await supabase
-        .from("project")
-        .select("*, organization!inner(*)")
-        .eq("organization.slug", orgSlug)
+      const { data: dataProjects, error } = await supabase
+        .from("data_projects")
+        .select("*")
+        .eq("org_slug", orgSlug)
 
       if (error) return res.status(404).json(error)
 
-      return res.status(200).json(projects)
+      return res.status(200).json(dataProjects)
     }
 
     if (req.method === "POST") {

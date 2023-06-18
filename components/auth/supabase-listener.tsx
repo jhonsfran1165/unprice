@@ -15,6 +15,7 @@ export default function SupabaseListener({
 }) {
   const { supabase } = useSupabase()
   const router = useRouter()
+
   const handleRefreshToken = async (payload) => {
     // refreshing supabase JWT
     const { error } = await supabase.auth.refreshSession()

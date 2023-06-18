@@ -19,21 +19,6 @@ async function handler(
   try {
     const supabase = supabaseApiClient(req, res)
 
-    if (req.method === "GET") {
-      const { orgSlug } = req.query
-
-      const { data: dataOrg, error } = await supabase
-        .from("data_orgs")
-        .select("*")
-        .eq("profile_id", session?.user.id)
-        .eq("org_slug", orgSlug)
-        .single()
-
-      if (error) return res.status(404).json(error)
-
-      return res.status(200).json(dataOrg)
-    }
-
     if (req.method === "DELETE") {
       const { orgSlug, id } = req.body
 

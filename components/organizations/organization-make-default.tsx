@@ -67,12 +67,15 @@ export function OrganizationMakeDefault({
         mutate(`/api/org/${orgSlug}`)
         router.refresh()
       }
-    } catch (error) {
+    } catch (e) {
+      const { error } = JSON.parse(e?.message ?? e)
+
       toast({
-        title: "Organization not saved",
-        description: error?.message,
+        title: `Error ${error?.code || ""}`,
+        description: error?.message || "",
         className: "danger",
       })
+
       setValue("is_default", false)
     }
   }

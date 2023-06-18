@@ -1,90 +1,40 @@
-import Link from "next/link"
-
 import { createServerClient } from "@/lib/supabase/supabase-server"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import StripePortal from "@/components/subscriptions/portal"
-import Pricing from "@/components/subscriptions/pricing"
+import { AppClaims } from "@/lib/types"
+import { BillingProjects } from "@/components/organizations/billing-projects"
 
 export default async function IndexPage({
   params: { orgSlug },
-  searchParams: { action },
 }: {
   params: {
     orgSlug: string
   }
-  searchParams: {
-    action: string
-  }
 }) {
   const supabase = createServerClient()
-
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  const { data: dataOrg } = await supabase
-    .from("data_orgs")
-    .select("*")
-    .eq("profile_id", session?.user.id)
-    .eq("org_slug", orgSlug)
-    .single()
+  const appClaims = session?.user.app_metadata as AppClaims
+  const orgClaims = appClaims?.organizations
+  let orgId = ""
 
-  if (action === "upgrade") {
-    return (
-      <div className="md:px-0">
-        <Pricing />
-      </div>
-    )
+  for (const key in orgClaims) {
+    if (Object.prototype.hasOwnProperty.call(orgClaims, key)) {
+      if (orgClaims[key].slug === orgSlug) {
+        orgId = key
+      }
+    }
   }
-  return (
-    <div className="space-y-10 md:px-0">
-      <Card>
-        <CardHeader>
-          <CardTitle>Upgrade Subscrition</CardTitle>
-          <CardDescription>
-            The project will be permanently deleted, including its deployments
-            and domains. This action is irreversible and can not be undone.
-          </CardDescription>
-        </CardHeader>
 
-        <div className="flex items-center justify-center px-6 pb-6">
-          <Separator />
-        </div>
+  // We use orgId just to ensure we filter the right projects but even if we don't
+  // use it, there is RLS in the database that will check that for us
+  const { data: projects, error } = await supabase
+    .from("data_projects")
+    .select("*")
+    .eq("org_slug", orgSlug)
+    .eq("org_id", orgId)
 
-        <CardFooter>
-          <Button className="button-primary w-28">
-            <Link href={`/org/${orgSlug}/settings/billing?action=upgrade`}>
-              Upgrade
-            </Link>
-          </Button>
-        </CardFooter>
-      </Card>
+  // TODO: handle error and not found
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Manage Subscrition</CardTitle>
-          <CardDescription>
-            The project will be permanently deleted, including its deployments
-            and domains. This action is irreversible and can not be undone.
-          </CardDescription>
-        </CardHeader>
-
-        <div className="flex items-center justify-center px-6 pb-6">
-          <Separator />
-        </div>
-
-        <CardFooter>
-          <StripePortal />
-        </CardFooter>
-      </Card>
-    </div>
-  )
+  return <BillingProjects projects={projects || []} />
 }

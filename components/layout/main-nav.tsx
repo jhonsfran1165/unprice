@@ -4,10 +4,10 @@ import { layoutConfig } from "@/lib/config/layout"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 import { AccountToggle } from "@/components/accounts/account-toggle"
-import { CommandDialogLayout } from "@/components/layout/command"
 import { Logo } from "@/components/layout/logo"
 import { OrganizationSwitch } from "@/components/organizations/organization-switch"
 import ProjectContext from "@/components/projects/project-context"
+import { CommandDialogLayout } from "@/components/shared/command"
 
 export function MainNav() {
   return (
@@ -30,7 +30,7 @@ export function MainNav() {
                   (item, index) =>
                     item.href && (
                       <Link
-                        key={index}
+                        key={item.href}
                         href={item.href}
                         className={cn(
                           "button-ghost flex items-center rounded-md border px-2 py-1 text-xs font-normal",

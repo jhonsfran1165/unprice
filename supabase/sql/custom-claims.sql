@@ -90,8 +90,32 @@ CREATE OR REPLACE FUNCTION is_member_org(org_id text) RETURNS "bool"
       ELSEIF (coalesce(current_setting('request.jwt.claims', true), '{}')::jsonb -> 'app_metadata' -> 'organizations' -> org_id) IS NOT NULL THEN
         return true; -- user is the owner of their organization
 
-      ELSEIF (coalesce((select raw_app_meta_data-> 'organizations' -> org_id -> 'role' from auth.users where id = auth.uid())::text, ''::text)) IS NOT NULL THEN
-        return true; -- user can create org and the jwt is not up to date
+      ELSE
+        return false;
+      END IF;
+
+    ELSE -- not a user session, probably being called from a trigger or something
+      return true;
+    END IF;
+  END;
+$$;
+
+CREATE OR REPLACE FUNCTION is_current_org(org_id text) RETURNS "bool"
+  LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
+  AS $$
+  BEGIN
+
+    IF session_user = 'authenticator' THEN
+
+      IF extract(epoch from now()) > coalesce((current_setting('request.jwt.claims', true)::jsonb)->>'exp', '0')::numeric THEN
+        SELECT jwt_expired_exception(); -- jwt expired
+      END IF; 
+
+      IF coalesce((current_setting('request.jwt.claims', true)::jsonb)->'app_metadata'->'claims_admin', 'false')::bool THEN
+        return true; -- user has claims_admin set to true (only a few users have this)
+      
+      ELSEIF coalesce((coalesce(current_setting('request.jwt.claims', true), '{}')::jsonb -> 'app_metadata' -> 'current_org' -> 'org_id')::text, ''::text) = '"' || org_id::text || '"' THEN
+        return true; -- user is the owner of their organization
 
       ELSE
         return false;
@@ -118,9 +142,6 @@ CREATE OR REPLACE FUNCTION has_role_org(org_id text, role text) RETURNS "bool"
         
       ELSEIF coalesce((coalesce(current_setting('request.jwt.claims', true), '{}')::jsonb -> 'app_metadata' -> 'organizations' -> org_id -> 'role')::text, ''::text) = role THEN
         return true; -- user is the owner of their organization
-
-      ELSEIF coalesce((select raw_app_meta_data-> 'organizations' -> org_id -> 'role' from auth.users where id = auth.uid())::text, ''::text)::text = role THEN
-        return true; -- user can create org and the jwt is not up to date
 
       ELSE
         SELECT no_owner_exception(); -- user does NOT have claims_admin set to true
@@ -181,6 +202,17 @@ CREATE OR REPLACE FUNCTION set_claim(uid uuid, claim text, value jsonb) RETURNS 
     END;
 $$;
 
+CREATE OR REPLACE FUNCTION set_my_claim(claim text, value jsonb) RETURNS "text"
+    LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
+    AS $$
+    BEGIN
+      update auth.users set raw_app_meta_data = 
+        raw_app_meta_data || 
+          json_build_object(claim, value)::jsonb where id = auth.uid();
+      return 'OK';
+    END;
+$$;
+
 CREATE OR REPLACE FUNCTION delete_claim(uid uuid, claim text) RETURNS "text"
     LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
     AS $$
@@ -195,10 +227,12 @@ CREATE OR REPLACE FUNCTION delete_claim(uid uuid, claim text) RETURNS "text"
     END;
 $$;
 
-CREATE OR REPLACE FUNCTION update_claims_user() RETURNS trigger
+
+CREATE OR REPLACE FUNCTION update_claims_org_user() RETURNS trigger
 LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
   AS $$
   DECLARE _org_id uuid;
+  DECLARE _data record;
   BEGIN
     IF TG_TABLE_NAME::regclass::text = 'organization' THEN
       _org_id = coalesce(new.id, old.id);
@@ -206,26 +240,44 @@ LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
       _org_id = coalesce(new.org_id, old.org_id);
     END IF;
 
-    UPDATE auth.users set raw_app_meta_data = raw_app_meta_data || json_build_object('organizations', COALESCE((
-      SELECT json_object_agg(org_id, value) FROM (
-        SELECT org_id, json_build_object('role', role, 'tier', tier, 'slug', org_slug, 'is_default', is_default, 'image', org_image, 'type', org_type) as value 
-        FROM data_orgs
-        WHERE profile_id IN (SELECT profile_id from organization_profiles where org_id = _org_id)
-        GROUP by org_id, role, tier, org_slug, is_default, org_image, org_type) as data), '{}'))::jsonb
-    WHERE id IN (SELECT profile_id from organization_profiles where org_id = _org_id);
+    -- _data is a structure that contains an element for each column in the select list
+    FOR _data IN (SELECT profile_id, json_object_agg(org_id, value) as json_data FROM (SELECT profile_id, org_id, json_build_object('role', role, 'tier', tier, 'slug', org_slug, 'is_default', is_default, 'image', org_image, 'type', org_type) as value 
+        FROM data_orgs WHERE profile_id IN (SELECT profile_id from organization_profiles where org_id = _org_id)) as data group by profile_id)
+    LOOP
+      UPDATE auth.users 
+      SET raw_app_meta_data = COALESCE(raw_app_meta_data, '{}') || COALESCE(jsonb_build_object('organizations', COALESCE(_data.json_data, '{}')::jsonb), '{}')
+      WHERE id = _data.profile_id;
+    END LOOP;
   RETURN null;
 END
 $$;
 
-CREATE OR REPLACE FUNCTION delete_claims_user() RETURNS trigger
+-- CREATE OR REPLACE FUNCTION delete_claims_user() RETURNS trigger
+-- LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
+--   AS $$
+--   DECLARE _org_id uuid = coalesce(new.org_id, old.org_id);
+--   BEGIN
+--     UPDATE auth.users set raw_app_meta_data = raw_app_meta_data || json_build_object('organizations', COALESCE((
+--       SELECT (raw_app_meta_data->'organizations') - _org_id::text
+--       FROM auth.users WHERE raw_app_meta_data->'organizations' ? _org_id::text), '{}'))::jsonb
+--     WHERE id IN (SELECT id from auth.users WHERE raw_app_meta_data->'organizations' ? _org_id::text);
+--   RETURN null;
+-- END
+-- $$;
+
+CREATE OR REPLACE FUNCTION delete_claims_org_user() RETURNS trigger
 LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
   AS $$
   DECLARE _org_id uuid = coalesce(new.org_id, old.org_id);
+  DECLARE _data record;
   BEGIN
-    UPDATE auth.users set raw_app_meta_data = raw_app_meta_data || json_build_object('organizations', COALESCE((
-      SELECT (raw_app_meta_data->'organizations') - _org_id::text
-      FROM auth.users WHERE raw_app_meta_data->'organizations' ? _org_id::text), '{}'))::jsonb
-    WHERE id IN (SELECT id from auth.users WHERE raw_app_meta_data->'organizations' ? _org_id::text);
+    -- _data is a structure that contains an element for each column in the select list
+    FOR _data IN (SELECT id, (raw_app_meta_data->'organizations') - _org_id::text as value FROM auth.users WHERE raw_app_meta_data->'organizations' ? _org_id::text)
+    LOOP
+      UPDATE auth.users 
+      SET raw_app_meta_data = raw_app_meta_data || json_build_object('organizations', COALESCE(_data.value, '{}'))::jsonb
+      WHERE id = _data.id;
+    END LOOP;
   RETURN null;
 END
 $$;
