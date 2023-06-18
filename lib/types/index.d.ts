@@ -39,6 +39,11 @@ export type GetActiveTabs = {
   cleanSegments: string[]
 }
 
+export interface RootDomainProps {
+  target: string
+  rewrite?: boolean
+}
+
 export type SidebarNavItem = {
   title: string
   disabled?: boolean
