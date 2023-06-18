@@ -1,16 +1,6 @@
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardFooter } from "@/components/ui/card"
 import BlurImage from "@/components/shared/blur-image"
-// TODO: add empty state
-import { EmptyState } from "@/components/shared/empty-state"
-import { Pricing } from "@/components/shared/pricing"
 
 export default function NoProjectsPlaceholder() {
   return (

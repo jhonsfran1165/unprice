@@ -7,10 +7,14 @@ export default function SubscriptionPlansDescription({
   plan,
   cta,
   isCurrentPlan,
+  billingStart,
+  billingEnd,
 }: {
   plan?: SubscriptionPlan
   cta: string
   isCurrentPlan: boolean
+  billingStart?: string
+  billingEnd?: string
 }) {
   if (!plan) return null
 
@@ -40,7 +44,10 @@ export default function SubscriptionPlansDescription({
         {/* TODO: add billing */}
         {isCurrentPlan && (
           <div className="mt-4">
-            billing cycle: <b>15 May - 15 June, 2023</b>
+            billing cycle:{" "}
+            <b>
+              {billingStart} - {billingEnd}
+            </b>
           </div>
         )}
       </div>

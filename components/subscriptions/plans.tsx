@@ -1,7 +1,10 @@
 "use client"
 
+import { useMemo } from "react"
+
 import { pricingSubscriptions } from "@/lib/config/subscriptions"
 import { useStore } from "@/lib/stores/layout"
+import { getDateTimeLocal, getFirstAndLastDay } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import SubscriptionPlansDescription from "@/components/subscriptions/plan-description"
@@ -12,6 +15,28 @@ export default function SubscriptionPlans() {
   const currentPlan = pricingSubscriptions.find(
     (plan) => plan.plan === projectData?.tier
   )
+
+  const startDate = new Date(
+    projectData?.subscription_period_starts ?? getDateTimeLocal()
+  )
+
+  const [billingStart, billingEnd] = useMemo(() => {
+    if (startDate) {
+      const { firstDay, lastDay } = getFirstAndLastDay(startDate.getDay())
+      const start = firstDay.toLocaleDateString("en-us", {
+        month: "short",
+        day: "numeric",
+        year: "2-digit",
+      })
+      const end = lastDay.toLocaleDateString("en-us", {
+        month: "short",
+        day: "numeric",
+        year: "2-digit",
+      })
+      return [start, end]
+    }
+    return []
+  }, [startDate])
 
   return (
     <div className="space-y-10 md:px-0">
@@ -39,6 +64,8 @@ export default function SubscriptionPlans() {
               plan={currentPlan}
               cta="View features"
               isCurrentPlan={true}
+              billingStart={billingStart}
+              billingEnd={billingEnd}
             />
           </div>
         </CardContent>

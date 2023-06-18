@@ -13,11 +13,8 @@ import { useStore } from "@/lib/stores/layout"
 import useProject from "@/lib/swr/use-project"
 import { AppClaims, AppModulesNav } from "@/lib/types"
 import { Session } from "@/lib/types/supabase"
+import { toast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/components/auth/supabase-provider"
-import { ConfirmAction } from "@/components/shared/confirm-action"
-
-import { Button } from "../ui/button"
-import { toast } from "../ui/use-toast"
 
 function StoreHandler({
   session,
@@ -83,40 +80,53 @@ function StoreHandler({
   })
 
   // TODO: use this to handle access to PRO modules inside the app && permissions per roles
-  const haveAccessOrg = () => {
-    const accessTab = orgData?.tier === activeTab?.tier || !activeTab?.tier
+  const haveAccessOrg = useMemo(() => {
+    const accessTab =
+      orgData?.tier === activeTab?.tier ||
+      !activeTab?.tier ||
+      activeTab?.tier === "FREE"
     const accessSideBar =
-      orgData?.tier === activeSideBar?.tier || !activeSideBar?.tier
+      orgData?.tier === activeSideBar?.tier ||
+      !activeSideBar?.tier ||
+      activeTab?.tier === "FREE"
 
     return accessTab && accessSideBar
-  }
+  }, [orgData?.tier, activeTab?.tier, activeSideBar?.tier])
 
   const haveAccessProject = useMemo(() => {
-    const accessTab = projectData?.tier === activeTab?.tier || !activeTab?.tier
+    const accessTab =
+      projectData?.tier === activeTab?.tier ||
+      !activeTab?.tier ||
+      activeTab?.tier === "FREE"
     const accessSideBar =
-      projectData?.tier === activeSideBar?.tier || !activeSideBar?.tier
+      projectData?.tier === activeSideBar?.tier ||
+      !activeSideBar?.tier ||
+      activeTab?.tier === "FREE"
 
     return accessTab && accessSideBar
   }, [projectData?.tier, activeTab?.tier, activeSideBar?.tier])
 
-  const trigger = (
-    <div className="flex justify-end">
-      <Button title="Delete" className="button-danger w-28">
-        Go back
-      </Button>
-    </div>
-  )
+  // TODO: improve this - also control this from API
+  useEffect(() => {
+    if (orgSlug && !haveAccessOrg) {
+      toast({
+        title: "PRO module",
+        description: "You don't access to this module - org",
+        className: "danger",
+      })
+    }
 
-  // TODO: improve this
-  if (!haveAccessProject) {
-    toast({
-      title: "PRO module",
-      description: "You don't access to this module",
-      className: "danger",
-    })
+    if (projectSlug && !haveAccessProject) {
+      toast({
+        title: "PRO module",
+        description: "You don't access to this module - project",
+        className: "danger",
+      })
 
-    router.push("/")
-  }
+      // TODO: we could use some special page for redirect
+      router.push("/")
+    }
+  }, [haveAccessProject, haveAccessOrg])
 
   // initialize this only the first time from the server
   // TODO: better change this with session?

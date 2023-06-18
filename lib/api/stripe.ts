@@ -25,9 +25,7 @@ const buildSubscriptionData = (
     metadata: subscription.metadata,
     status: subscription.status as OrganizationSubscriptionStatus,
     price_id: subscription.items.data[0].price.id,
-    // TODO: check quantity on subscription
-    // @ts-ignore
-    quantity: subscription.quantity,
+    quantity: 1,
     cancel_at_period_end: subscription.cancel_at_period_end,
     cancel_at: subscription.cancel_at
       ? toDateTime(subscription.cancel_at).toISOString()

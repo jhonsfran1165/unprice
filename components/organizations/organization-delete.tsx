@@ -18,9 +18,6 @@ import { toast } from "@/components/ui/use-toast"
 import { ConfirmAction } from "@/components/shared/confirm-action"
 import { Icons } from "@/components/shared/icons"
 
-// TODO: move this to a component
-
-// TODO: confirm dialog
 export function OrganizationDelete({
   orgSlug,
   id,

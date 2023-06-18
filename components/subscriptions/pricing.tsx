@@ -37,8 +37,11 @@ const Pricing = ({ type = "public" }: { type: string }) => {
   ) => {
     setPriceIdLoading(true)
 
-    // TODO: get the proper environment
-    const stripePriceId = price.priceIds.test
+    let stripePriceId = price.priceIds.test
+
+    if (process.env.NODE_ENV === "production") {
+      stripePriceId = price.priceIds.production
+    }
 
     try {
       const response = await fetchAPI({
