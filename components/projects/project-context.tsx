@@ -22,7 +22,7 @@ export default function ProjectContext() {
           >
             <span className="block truncate text-sm font-bold">
               {projectData?.project_name}
-              <Badge className="mx-2 primary h-5 text-xs">
+              <Badge className="primary mx-2 h-5 text-xs">
                 {projectData?.tier}
               </Badge>
             </span>

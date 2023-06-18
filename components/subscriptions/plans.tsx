@@ -16,11 +16,11 @@ export default function SubscriptionPlans() {
     (plan) => plan.plan === projectData?.tier
   )
 
-  const startDate = new Date(
-    projectData?.subscription_period_starts ?? getDateTimeLocal()
-  )
-
   const [billingStart, billingEnd] = useMemo(() => {
+    const startDate = new Date(
+      projectData?.subscription_period_starts ?? getDateTimeLocal()
+    )
+
     if (startDate) {
       const { firstDay, lastDay } = getFirstAndLastDay(startDate.getDay())
       const start = firstDay.toLocaleDateString("en-us", {
@@ -36,13 +36,13 @@ export default function SubscriptionPlans() {
       return [start, end]
     }
     return []
-  }, [startDate])
+  }, [projectData?.subscription_period_starts])
 
   return (
     <div className="space-y-10 md:px-0">
       <div>
         <h3>Subscription plans</h3>
-        <p className="font-medium pt-4 text-sm">
+        <p className="pt-4 text-sm font-medium">
           The project will be permanently deleted, including its deployments and
           domains. This action is irreversible and can not be undone.
         </p>
@@ -52,14 +52,14 @@ export default function SubscriptionPlans() {
         <CardHeader className="pb-4">
           <CardTitle>Current Plan</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col md:flex-row md:space-y-0 space-y-4">
-          <div className="flex justify-start w-1/2">
+        <CardContent className="flex flex-col space-y-4 md:flex-row md:space-y-0">
+          <div className="flex w-1/2 justify-start">
             You are currently on the plan{" "}
-            <Badge className="mx-2 primary h-6">
+            <Badge className="primary mx-2 h-6">
               {currentPlan?.plan || "FREE"}
             </Badge>
           </div>
-          <div className="flex flex-col justify-end w-1/2 items-center px-6 pb-6">
+          <div className="flex w-1/2 flex-col items-center justify-end px-6 pb-6">
             <SubscriptionPlansDescription
               plan={currentPlan}
               cta="View features"
@@ -74,11 +74,11 @@ export default function SubscriptionPlans() {
         <CardHeader className="pb-4">
           <CardTitle>Available plans</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col md:flex-row md:space-y-0 space-y-4">
-          <div className="flex justify-start w-1/2">
+        <CardContent className="flex flex-col space-y-4 md:flex-row md:space-y-0">
+          <div className="flex w-1/2 justify-start">
             These are the new plans you can pick to upgrade subscriptions
           </div>
-          <div className="flex flex-col justify-end w-1/2 items-center px-6 pb-6">
+          <div className="flex w-1/2 flex-col items-center justify-end px-6 pb-6">
             {pricingSubscriptions
               .filter((plan) => plan.plan !== projectData?.tier)
               .map((plan) => {

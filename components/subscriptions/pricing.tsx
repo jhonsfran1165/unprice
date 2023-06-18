@@ -124,7 +124,7 @@ const Pricing = ({ type = "public" }: { type: string }) => {
             <div
               key={plan}
               className={cn(
-                "relative rounded-2xl bg-background-bgSubtle shadow-lg border",
+                "relative rounded-2xl border bg-background-bgSubtle shadow-lg",
                 {
                   "border-2 border-primary-solid shadow-primary-line":
                     orgData?.tier !== "PRO" && plan === "PRO",
@@ -140,7 +140,7 @@ const Pricing = ({ type = "public" }: { type: string }) => {
               )}
 
               {plan === orgData?.tier && (
-                <div className="absolute inset-x-0 -top-5 mx-auto w-32 rounded-full bg-background-bg px-3 py-2 text-sm font-bold border border-background-line">
+                <div className="absolute inset-x-0 -top-5 mx-auto w-32 rounded-full border border-background-line bg-background-bg px-3 py-2 text-sm font-bold">
                   Current Plan
                 </div>
               )}
@@ -195,7 +195,7 @@ const Pricing = ({ type = "public" }: { type: string }) => {
                 {features.map(({ text, footnote, negative }) => (
                   <li
                     key={text}
-                    className="flex justify-content items-center space-x-2"
+                    className="justify-content flex items-center space-x-2"
                   >
                     <div className="shrink-0">
                       {negative ? (

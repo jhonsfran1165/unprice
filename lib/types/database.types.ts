@@ -602,4 +602,3 @@ export interface Database {
     }
   }
 }
-

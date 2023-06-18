@@ -1,14 +1,8 @@
-"use client"
-
-import { useMemo } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { ChevronDown, Plus, Star } from "lucide-react"
-import { mutate } from "swr"
+import { ChevronDown } from "lucide-react"
 
-import { useStore } from "@/lib/stores/layout"
-import { DataOrgsView, DataProjectsView, Project } from "@/lib/types/supabase"
-import { fetchAPI, getDateTimeLocal, getFirstAndLastDay } from "@/lib/utils"
+import { DataProjectsView } from "@/lib/types/supabase"
+import { getDateTimeLocal, getFirstAndLastDay } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -23,13 +17,11 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
-import { toast } from "@/components/ui/use-toast"
 import { Icons } from "@/components/shared/icons"
 
 export function BillingProjects({
@@ -40,43 +32,6 @@ export function BillingProjects({
   // TODO: do we need to use an empty state here?
   if (!projects) {
     return null
-  }
-
-  const { orgSlug, orgId } = useStore()
-
-  const router = useRouter()
-  const changeRole = async (role: string, profileId: string) => {
-    try {
-      const result = await fetchAPI({
-        url: `/api/org/${orgSlug}/change-role`,
-        method: "POST",
-        data: {
-          id: orgId,
-          role,
-          profileId: profileId,
-        },
-      })
-
-      if (result?.org_id) {
-        toast({
-          title: "Organization Saved",
-          description: `User was changed sucessfully`,
-          className: "info",
-        })
-
-        // mutate swr endpoints for org
-        mutate(`/api/org`)
-        mutate(`/api/org/${orgSlug}`)
-        router.refresh()
-      }
-    } catch (e) {
-      const { error } = JSON.parse(e?.message ?? e)
-      toast({
-        title: `Error ${error?.code || ""}`,
-        description: error?.message || "",
-        className: "danger",
-      })
-    }
   }
 
   return (
@@ -93,32 +48,25 @@ export function BillingProjects({
           const startDate = new Date(
             project.subscription_period_starts ?? getDateTimeLocal()
           )
-          const [billingStart, billingEnd] = useMemo(() => {
-            if (startDate) {
-              const { firstDay, lastDay } = getFirstAndLastDay(
-                startDate.getDay()
-              )
-              const start = firstDay.toLocaleDateString("en-us", {
-                month: "short",
-                day: "numeric",
-                year: "2-digit",
-              })
-              const end = lastDay.toLocaleDateString("en-us", {
-                month: "short",
-                day: "numeric",
-                year: "2-digit",
-              })
-              return [start, end]
-            }
-            return []
-          }, [startDate])
+
+          const { firstDay, lastDay } = getFirstAndLastDay(startDate.getDay())
+          const billingStart = firstDay.toLocaleDateString("en-us", {
+            month: "short",
+            day: "numeric",
+            year: "2-digit",
+          })
+          const billingEnd = lastDay.toLocaleDateString("en-us", {
+            month: "short",
+            day: "numeric",
+            year: "2-digit",
+          })
 
           return (
             <div
               key={project.project_id}
               className="flex items-center justify-between space-x-4 space-y-6"
             >
-              <div className="flex items-center space-x-4 w-full">
+              <div className="flex w-full items-center space-x-4">
                 <Avatar>
                   <AvatarImage
                     src={`${
@@ -131,11 +79,11 @@ export function BillingProjects({
                 <div className="w-full">
                   <div className="flex items-center text-lg font-medium leading-none">
                     {project.project_name}
-                    <Badge className="mx-2 primary h-5 text-xs">
+                    <Badge className="primary mx-2 h-5 text-xs">
                       {project.tier}{" "}
                     </Badge>
                   </div>
-                  <div className="text-xs text-muted-foreground my-1">
+                  <div className="my-1 text-xs text-muted-foreground">
                     billing cycle:{" "}
                     <b>
                       {billingStart} - {billingEnd}

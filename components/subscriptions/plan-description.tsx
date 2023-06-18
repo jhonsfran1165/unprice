@@ -24,11 +24,11 @@ export default function SubscriptionPlansDescription({
 
   return (
     <>
-      <div className="flex justify-start w-full">
+      <div className="flex w-full justify-start">
         <Package className="mr-2 h-6 w-6" />
         <h4 className="font-semibold">{planName}</h4>
       </div>
-      <div className="text-sm justify-start w-full py-3 ml-16">
+      <div className="ml-16 w-full justify-start py-3 text-sm">
         {Object.keys(limits ?? {}).map((key) => {
           // TODO: add usage here
           return isCurrentPlan ? (

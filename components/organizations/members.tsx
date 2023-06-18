@@ -44,20 +44,21 @@ export function MembersList({
   profiles: MembersListProps[] | null
 }) {
   const statesProfilesRoles = {}
+  const { orgSlug, orgId } = useStore()
+  const router = useRouter()
+
+  profiles &&
+    profiles.forEach((profile) => {
+      statesProfilesRoles[profile.id] = false
+    })
+
+  const [open, setOpen] = useState(statesProfilesRoles)
 
   // TODO: do we need to use an empty state here?
   if (!profiles) {
     return null
   }
 
-  profiles.forEach((profile) => {
-    statesProfilesRoles[profile.id] = false
-  })
-
-  const { orgSlug, orgId } = useStore()
-  const [open, setOpen] = useState(statesProfilesRoles)
-
-  const router = useRouter()
   const changeRole = async (role: string, profileId: string) => {
     try {
       const result = await fetchAPI({
@@ -102,16 +103,16 @@ export function MembersList({
       </CardHeader>
       <CardContent className="grid gap-6">
         <Tabs defaultValue="account" className="w-full border-none">
-          <TabsList className="w-full grid grid-cols-2 bg-background-bgSubtle border-b border-background-border rounded-none">
+          <TabsList className="grid w-full grid-cols-2 rounded-none border-b border-background-border bg-background-bgSubtle">
             <TabsTrigger
               value="account"
-              className="button-ghost data-[state=active]:bg-background data-[state=active]:text-background-textContrast data-[state=active]:-mb-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary-solid data-[state=inactive]:border-transparent"
+              className="button-ghost data-[state=active]:-mb-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary-solid data-[state=inactive]:border-transparent data-[state=active]:bg-background data-[state=active]:text-background-textContrast"
             >
               Members
             </TabsTrigger>
             <TabsTrigger
               value="password"
-              className="button-ghost data-[state=active]:bg-background data-[state=active]:text-background-textContrast data-[state=active]:-mb-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary-solid data-[state=inactive]:border-transparent"
+              className="button-ghost data-[state=active]:-mb-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary-solid data-[state=inactive]:border-transparent data-[state=active]:bg-background data-[state=active]:text-background-textContrast"
             >
               Invitations
             </TabsTrigger>
@@ -203,7 +204,7 @@ export function MembersList({
             })}
           </TabsContent>
           <TabsContent value="password" className="p-6">
-            Change your password here. After saving, you'll be logged out.
+            {"Change your password here. After saving, you'll be logged out."}
           </TabsContent>
         </Tabs>
       </CardContent>

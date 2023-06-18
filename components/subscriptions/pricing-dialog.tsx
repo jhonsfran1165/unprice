@@ -7,9 +7,9 @@ export function PricingDialog({ cta }: { cta: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="contents primary border-none px-2">{cta}</Button>
+        <Button className="primary contents border-none px-2">{cta}</Button>
       </DialogTrigger>
-      <DialogContent className="min-w-[95%] lg:min-w-[90%] h-5/6">
+      <DialogContent className="h-5/6 min-w-[95%] lg:min-w-[90%]">
         <ScrollArea>
           <Pricing type="private" />
         </ScrollArea>
