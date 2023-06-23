@@ -15,15 +15,14 @@ export default function SupabaseListener({
 }) {
   const { supabase } = useSupabase()
   const router = useRouter()
-
-  const handleRefreshToken = async (payload) => {
+  const handleRefreshToken = async (_payload: any) => {
     // refreshing supabase JWT
     const { error } = await supabase.auth.refreshSession()
     // if refresh token is expired or something else then logout
     if (error) await supabase.auth.signOut()
   }
 
-  // hacky aproach to refresh JWT token once organization tables change
+  // hacky approach to refresh JWT token once organization tables change
   useEffect(() => {
     const channel = supabase
       .channel("*")
@@ -68,6 +67,7 @@ export default function SupabaseListener({
     return () => {
       supabase.removeChannel(channel)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase])
 
   useEffect(() => {

@@ -89,6 +89,7 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
     } else {
       clearErrors("slug")
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exist])
 
   const onSubmit: SubmitHandler<orgPostType> = async (dataForm) => {
@@ -119,10 +120,10 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
         mutate(`/api/org/${org.slug}`)
 
         if (action === "new") {
-          router.push(`/org/${org.slug}`)
           // Refresh the current route and fetch new data from the server without
           // losing client-side browser or React state.
           router.refresh()
+          router.push(`/org/${org.slug}`)
         }
       } else {
         throw org
