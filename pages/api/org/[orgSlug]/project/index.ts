@@ -34,14 +34,21 @@ async function handler(
     if (req.method === "POST") {
       const { orgSlug } = req.query
 
-      const { data: projects, error } = await supabase
+      const { data: orgData, error: orgError } = await supabase
+        .from("organization")
+        .select("id, slug")
+        .eq("slug", orgSlug)
+        .limit(1)
+        .single()
+
+      if (orgError) return res.status(500).json(orgError)
+
+      const { data, error } = await supabase
         .from("project")
-        .select("*, organization!inner(*)")
-        .eq("organization.slug", orgSlug)
+        .insert({ ...req.body, org_id: orgData.id })
 
-      if (error) return res.status(404).json(error)
-
-      return res.status(200).json(projects)
+      if (error) return res.status(500).json(error)
+      return res.status(200).json({ data: 'success' })
     }
   } catch (error) {
     return res.status(500).json(error)

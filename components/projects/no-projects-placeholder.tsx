@@ -1,8 +1,15 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardFooter } from "@/components/ui/card"
 import BlurImage from "@/components/shared/blur-image"
 
+import { ProjectDialog } from "./project-dialog"
+import { useState } from "react"
+
 export default function NoProjectsPlaceholder() {
+  const [open, setOpen] = useState(false);
+
   return (
     <Card>
       <div className="flex flex-col items-center justify-center py-12">
@@ -19,7 +26,15 @@ export default function NoProjectsPlaceholder() {
         />
       </div>
       <CardFooter className="flex items-center justify-center">
-        <Button className="button-primary w-80">Create a new project</Button>
+        <ProjectDialog
+          open={open}
+          setOpen={setOpen}
+          dialogTrigger={
+            <Button className="button-primary w-80">
+              Create a new project
+            </Button>
+          }
+        />
       </CardFooter>
     </Card>
   )

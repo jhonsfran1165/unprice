@@ -11,20 +11,29 @@ const name = z
 const description = z
   .string()
   .min(6, { message: "description must be at least 6 characters" })
+  .nullable()
+  .or(z.literal(''))
 
-const projectSlug = z
+const slug = z
   .string()
   .min(1, { message: "project slug has to be at least 1 characters" })
   .optional()
 
+const custom_domain = z.string()
+const subdomain = z.string()
+const logo = z.string().optional()
+
 export const projectPostSchema = z.object({
   name,
   description,
+  slug,
+  custom_domain,
+  subdomain,
+  logo,
 })
 
 export const projectGetSchema = z.object({
   orgSlug,
-  projectSlug,
 })
 
 export type projectPostType = z.infer<typeof projectPostSchema>
