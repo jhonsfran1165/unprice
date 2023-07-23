@@ -2,9 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  experimental: {
-    appDir: true,
-  },
   images: {
     domains: [
       "www.google.com",
@@ -17,12 +14,6 @@ const nextConfig = {
       "fonts.googleapis.com",
       "images.unsplash.com",
     ],
-  },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback.fs = false
-    }
-    return config
   },
 }
 

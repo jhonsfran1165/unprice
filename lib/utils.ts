@@ -23,7 +23,7 @@ export const getOrgsFromClaims = ({
   allOrgIds: Array<string>
   currentOrgId: string
 } => {
-  const orgClaims = appClaims?.organizations
+  const orgClaims = appClaims.organizations
   const allOrgIds: Array<string> = []
 
   let defaultOrgSlug = ""
@@ -36,10 +36,10 @@ export const getOrgsFromClaims = ({
 
     // just verify is the current org is part of the orgs of the user
     if (
-      appClaims?.current_org?.org_slug === org.slug &&
+      appClaims.current_org?.org_slug === org.slug &&
       Object.prototype.hasOwnProperty.call(
         orgClaims,
-        appClaims?.current_org?.org_id
+        appClaims.current_org?.org_id
       )
     ) {
       currentOrgExist = true

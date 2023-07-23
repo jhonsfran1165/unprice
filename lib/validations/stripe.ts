@@ -1,8 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 
 import { orgSlug } from "@/lib/validations/org"
-import useOrganizationExist from "@/hooks/use-organization-exist"
 
 // -------------------------------------------------------------
 

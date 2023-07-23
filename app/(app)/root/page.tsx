@@ -6,7 +6,7 @@ import { getOrgsFromClaims } from "@/lib/utils"
 
 export const revalidate = 0
 
-export default async function AppInitialPage() {
+export default async function RootPage() {
   const supabase = createServerClient()
 
   const {

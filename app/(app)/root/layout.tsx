@@ -9,7 +9,7 @@ import "server-only"
 // do not cache this layout because it validates the session constantly
 export const revalidate = 0
 
-export default async function AuthLayout({
+export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode
@@ -21,17 +21,23 @@ export default async function AuthLayout({
   } = await supabase.auth.getSession()
 
   const appClaims = session?.user.app_metadata as AppClaims
-  const { currentOrgId, allOrgIds } = getOrgsFromClaims({ appClaims })
 
-  // for now we use zustag for state management but not sure if we can use something like https://jotai.org/ or recoil for the page builder
-  return (
-    <SupabaseProvider session={session}>
+  const renderSupabaseListener = () => {
+    const { currentOrgId, allOrgIds } = getOrgsFromClaims({ appClaims })
+    return (
       <SupabaseListener
         serverAccessToken={session?.access_token}
         orgId={currentOrgId}
         orgIdsUser={allOrgIds}
         profileId={session?.user.id}
       />
+    )
+  }
+
+  // for now we use zustag for state management but not sure if we can use something like https://jotai.org/ or recoil for the page builder
+  return (
+    <SupabaseProvider session={session}>
+      {appClaims && renderSupabaseListener()}
       {children}
     </SupabaseProvider>
   )
