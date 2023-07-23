@@ -167,9 +167,9 @@ function StoreHandler({
       mutate(`/api/org/${orgSlug}/project`)
     }
 
-    // TODO: check if the orgSlug is part of the organizations of this user
+    // every organization that passes until here is validated from the server to see if it belongs to the organization
     orgSlug && currentOrgClaim?.org_slug !== orgSlug && setClaimOrg()
-  }, [orgSlug])
+  }, [currentOrgClaim?.org_slug, orgId, orgSlug, supabase])
 
   useEffect(() => {
     useStore.setState({

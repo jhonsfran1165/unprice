@@ -51,11 +51,12 @@ export function OrganizationDelete({
       })
 
       if (org.slug) {
+        router.push("/")
+
         // mutate swr endpoints for org
         mutate(`/api/org`)
         mutate(`/api/org/${orgSlug}`)
 
-        router.push("/")
         router.refresh()
       }
     } catch (e) {

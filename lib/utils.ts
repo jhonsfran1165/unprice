@@ -5,10 +5,65 @@ import ms from "ms"
 import { customAlphabet } from "nanoid"
 import { twMerge } from "tailwind-merge"
 
+import { AppClaims, AppOrgClaim } from "@/lib/types"
+
 import { SECOND_LEVEL_DOMAINS, SPECIAL_APEX_DOMAINS, ccTLDs } from "./constants"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+export const getOrgsFromClaims = ({
+  appClaims,
+}: {
+  appClaims: AppClaims
+}): {
+  defaultOrgSlug: string
+  currentOrg: AppOrgClaim
+  allOrgIds: Array<string>
+  currentOrgId: string
+} => {
+  const orgClaims = appClaims.organizations
+  const allOrgIds: Array<string> = []
+
+  let defaultOrgSlug = ""
+  let currentOrgId = ""
+  let currentOrgExist = false
+  let currentOrg = {} as AppOrgClaim
+
+  for (const key in orgClaims) {
+    const org = orgClaims[key]
+
+    // just verify is the current org is part of the orgs of the user
+    if (
+      appClaims.current_org?.org_slug === org.slug &&
+      Object.prototype.hasOwnProperty.call(
+        orgClaims,
+        appClaims.current_org?.org_id
+      )
+    ) {
+      currentOrgExist = true
+      currentOrg = org
+      currentOrgId = key
+    }
+
+    if (Object.prototype.hasOwnProperty.call(orgClaims, key)) {
+      allOrgIds.push(key)
+
+      if (org.is_default) {
+        defaultOrgSlug = org.slug
+      }
+    }
+  }
+
+  if (!currentOrgExist) throw Error("The current org doesn't exist.")
+
+  return {
+    defaultOrgSlug,
+    currentOrg,
+    allOrgIds,
+    currentOrgId,
+  }
 }
 
 export const fetchAPI = async ({

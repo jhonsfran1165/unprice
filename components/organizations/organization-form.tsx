@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import useOrganizationExist from "@/hooks/use-organization-exist"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CldUploadWidget } from "next-cloudinary"
 import { SubmitHandler, useForm } from "react-hook-form"
@@ -11,7 +12,6 @@ import { OrganizationTypes } from "@/lib/config/layout"
 import { Organization } from "@/lib/types/supabase"
 import { createSlug, fetchAPI } from "@/lib/utils"
 import { orgPostSchema, orgPostType } from "@/lib/validations/org"
-import useOrganizationExist from "@/hooks/use-organization-exist"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -89,6 +89,7 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
     } else {
       clearErrors("slug")
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exist])
 
   const onSubmit: SubmitHandler<orgPostType> = async (dataForm) => {
@@ -119,10 +120,10 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
         mutate(`/api/org/${org.slug}`)
 
         if (action === "new") {
-          router.push(`/org/${org.slug}`)
           // Refresh the current route and fetch new data from the server without
           // losing client-side browser or React state.
           router.refresh()
+          router.push(`/org/${org.slug}`)
         }
       } else {
         throw org

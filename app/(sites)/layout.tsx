@@ -1,6 +1,6 @@
-import "@/styles/globals.css"
 import { inter, satoshi } from "@/assets/fonts"
 
+import "@/styles/globals.css"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
 import { Footer } from "@/components/layout/footer"

@@ -12,7 +12,6 @@ import {
   SitesMiddleware,
 } from "@/lib/middleware"
 import { parse } from "@/lib/middleware/utils"
-import type { Database } from "@/lib/types/database.types"
 
 export const config = {
   matcher: [

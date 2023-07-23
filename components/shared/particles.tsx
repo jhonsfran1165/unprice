@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react"
 
-import useMousePosition from "@/hooks/use-mouse-position"
+import useMousePosition from "@/lib/hooks/use-mouse-position"
 
 interface ParticlesProps {
   className?: string

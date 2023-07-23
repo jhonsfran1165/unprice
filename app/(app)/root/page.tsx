@@ -2,10 +2,11 @@ import { redirect } from "next/navigation"
 
 import { createServerClient } from "@/lib/supabase/supabase-server"
 import { AppClaims } from "@/lib/types"
+import { getOrgsFromClaims } from "@/lib/utils"
 
 export const revalidate = 0
 
-export default async function AppInitialPage() {
+export default async function RootPage() {
   const supabase = createServerClient()
 
   const {
@@ -17,23 +18,10 @@ export default async function AppInitialPage() {
   }
 
   const appClaims = session?.user.app_metadata as AppClaims
-  const orgClaims = appClaims?.organizations
-  const currentOrg = appClaims?.current_org
+  const { currentOrg, defaultOrgSlug } = getOrgsFromClaims({ appClaims })
 
-  if (currentOrg?.org_slug) {
-    redirect(`/org/${currentOrg.org_slug}`)
-  }
-
-  let defaultOrgSlug = ""
-
-  for (const key in orgClaims) {
-    if (Object.prototype.hasOwnProperty.call(orgClaims, key)) {
-      const org = orgClaims[key]
-
-      if (org.is_default) {
-        defaultOrgSlug = org.slug
-      }
-    }
+  if (currentOrg?.slug) {
+    redirect(`/org/${currentOrg?.slug}`)
   }
 
   if (defaultOrgSlug) {
