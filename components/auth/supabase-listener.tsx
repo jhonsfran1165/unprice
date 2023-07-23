@@ -10,8 +10,14 @@ import { useSupabase } from "./supabase-provider"
 // in order to re-render when the user's session changes
 export default function SupabaseListener({
   serverAccessToken,
+  orgId,
+  orgIdsUser,
+  profileId,
 }: {
   serverAccessToken?: string
+  orgId: string
+  orgIdsUser: Array<string>
+  profileId?: string
 }) {
   const { supabase } = useSupabase()
   const router = useRouter()
@@ -25,13 +31,14 @@ export default function SupabaseListener({
   // hacky approach to refresh JWT token once organization tables change
   useEffect(() => {
     const channel = supabase
-      .channel("*")
+      .channel("org-db-changes")
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "organization_subscriptions",
+          filter: `org_id=in.(${orgIdsUser.join(", ")})`,
         },
         handleRefreshToken
       )
@@ -41,6 +48,7 @@ export default function SupabaseListener({
           event: "UPDATE",
           schema: "public",
           table: "organization_subscriptions",
+          filter: `org_id=in.(${orgIdsUser.join(", ")})`,
         },
         handleRefreshToken
       )
@@ -50,6 +58,7 @@ export default function SupabaseListener({
           event: "UPDATE",
           schema: "public",
           table: "organization_profiles",
+          filter: profileId ? `profile_id=eq.${profileId}` : "",
         },
         handleRefreshToken
       )
@@ -59,6 +68,7 @@ export default function SupabaseListener({
           event: "*",
           schema: "public",
           table: "organization",
+          filter: `id=eq.${orgId}`,
         },
         handleRefreshToken
       )
@@ -67,7 +77,7 @@ export default function SupabaseListener({
     return () => {
       supabase.removeChannel(channel)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase])
 
   useEffect(() => {

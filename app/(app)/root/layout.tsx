@@ -1,7 +1,10 @@
-import "server-only"
 import { createServerClient } from "@/lib/supabase/supabase-server"
+import { AppClaims } from "@/lib/types"
+import { getOrgsFromClaims } from "@/lib/utils"
 import SupabaseListener from "@/components/auth//supabase-listener"
 import SupabaseProvider from "@/components/auth/supabase-provider"
+
+import "server-only"
 
 // do not cache this layout because it validates the session constantly
 export const revalidate = 0
@@ -17,10 +20,18 @@ export default async function AuthLayout({
     data: { session },
   } = await supabase.auth.getSession()
 
+  const appClaims = session?.user.app_metadata as AppClaims
+  const { currentOrgId, allOrgIds } = getOrgsFromClaims({ appClaims })
+
   // for now we use zustag for state management but not sure if we can use something like https://jotai.org/ or recoil for the page builder
   return (
     <SupabaseProvider session={session}>
-      <SupabaseListener serverAccessToken={session?.access_token} />
+      <SupabaseListener
+        serverAccessToken={session?.access_token}
+        orgId={currentOrgId}
+        orgIdsUser={allOrgIds}
+        profileId={session?.user.id}
+      />
       {children}
     </SupabaseProvider>
   )

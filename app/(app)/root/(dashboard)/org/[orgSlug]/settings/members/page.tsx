@@ -1,5 +1,3 @@
-import { Suspense } from "react"
-
 import { createServerClient } from "@/lib/supabase/supabase-server"
 import { AppClaims } from "@/lib/types"
 import { MembersList } from "@/components/organizations/members"
