@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import useOrganizationExist from "@/hooks/use-organization-exist"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CldUploadWidget } from "next-cloudinary"
 import { SubmitHandler, useForm } from "react-hook-form"
@@ -12,6 +11,7 @@ import { OrganizationTypes } from "@/lib/config/layout"
 import { Organization } from "@/lib/types/supabase"
 import { createSlug, fetchAPI } from "@/lib/utils"
 import { orgPostSchema, orgPostType } from "@/lib/validations/org"
+import useOrganizationExist from "@/hooks/use-organization-exist"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,6 +35,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
+import { useSupabase } from "@/components/auth/supabase-provider"
 import { Icons } from "@/components/shared/icons"
 
 import "./styles.css"
@@ -43,6 +44,7 @@ import "./styles.css"
 // watch elements to validate and clean errors at the same time
 export function OrganizationForm({ org }: { org?: Organization | null }) {
   const router = useRouter()
+  const { supabase } = useSupabase()
 
   const action = org ? "edit" : "new"
 
@@ -115,15 +117,20 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
           className: "info",
         })
 
-        // mutate swr endpoints for org
-        mutate(`/api/org`)
-        mutate(`/api/org/${org.slug}`)
-
         if (action === "new") {
+          // refreshing supabase JWT
+          const { error } = await supabase.auth.refreshSession()
+          // if refresh token is expired or something else then logout
+          if (error) await supabase.auth.signOut()
+
           // Refresh the current route and fetch new data from the server without
           // losing client-side browser or React state.
           router.refresh()
           router.push(`/org/${org.slug}`)
+        } else {
+          // mutate swr endpoints for org
+          mutate(`/api/org`)
+          mutate(`/api/org/${org.slug}`)
         }
       } else {
         throw org

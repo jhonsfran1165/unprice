@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { mutate } from "swr"
 
 import { fetchAPI } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/components/ui/use-toast"
+import { useSupabase } from "@/components/auth/supabase-provider"
 import { ConfirmAction } from "@/components/shared/confirm-action"
 import { Icons } from "@/components/shared/icons"
 
@@ -29,6 +29,7 @@ export function OrganizationDelete({
 }) {
   const router = useRouter()
   const [loading, setlLoading] = useState(false)
+  const { supabase } = useSupabase()
 
   const deleteOrg = async () => {
     try {
@@ -50,14 +51,15 @@ export function OrganizationDelete({
         data: { orgSlug, id },
       })
 
+      console.log(org)
+
       if (org.slug) {
+        // refreshing supabase JWT
+        const { error } = await supabase.auth.refreshSession()
+        // if refresh token is expired or something else then logout
+        if (error) await supabase.auth.signOut()
+
         router.push("/")
-
-        // mutate swr endpoints for org
-        mutate(`/api/org`)
-        mutate(`/api/org/${orgSlug}`)
-
-        router.refresh()
       }
     } catch (e) {
       const { error } = JSON.parse(e?.message ?? e)

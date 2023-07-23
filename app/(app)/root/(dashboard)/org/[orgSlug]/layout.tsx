@@ -32,6 +32,8 @@ export default async function DashboardLayout({
     }
   }
 
+  console.log(orgExist)
+
   if (!orgExist) {
     notFound()
   }
