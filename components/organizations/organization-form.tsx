@@ -3,11 +3,9 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CldUploadWidget } from "next-cloudinary"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { mutate } from "swr"
 
-import { OrganizationTypes } from "@/lib/config/layout"
 import { Organization } from "@/lib/types/supabase"
 import { createSlug, fetchAPI } from "@/lib/utils"
 import { orgPostSchema, orgPostType } from "@/lib/validations/org"
@@ -22,18 +20,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/components/auth/supabase-provider"
 import { Icons } from "@/components/shared/icons"
@@ -59,6 +56,13 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
 
   const [loading, setLoading] = useState(false)
 
+  const form = useForm<orgPostType>({
+    resolver: zodResolver(orgPostSchema),
+    defaultValues: {
+      ...data,
+    },
+  })
+
   const {
     register,
     watch,
@@ -69,12 +73,7 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
     setValue,
     getValues,
     reset,
-  } = useForm<orgPostType>({
-    resolver: zodResolver(orgPostSchema),
-    defaultValues: {
-      ...data,
-    },
-  })
+  } = form
 
   // watch important fields
   const watchSlug = watch("slug")
@@ -147,7 +146,6 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
     }
   }
 
-  // TODO: refactor with shandcn form
   return (
     <Card>
       <div className="flex items-center justify-center p-6">
@@ -166,182 +164,82 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
         <Separator />
       </div>
       <CardContent>
-        <form
-          id="add-org-form"
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col space-y-6"
-        >
-          <div className="flex flex-col space-y-6 md:flex-row md:space-x-4 md:space-y-0">
-            <div className="w-full space-y-3">
-              <Label htmlFor="name" className="text-xs">
-                NAME
-              </Label>
-              <Input
-                {...register("name")}
-                id={"name"}
-                aria-invalid={Boolean(errors.name)}
-                className="mt-1 w-full"
-                onChange={(e) => {
-                  setValue("name", e.target.value)
-                  if (action === "new") {
-                    const slug = createSlug(e.target.value)
-                    setValue("slug", slug)
-                    if (
-                      getValues("image")?.startsWith(
-                        "https://avatar.vercel.sh"
-                      ) ||
-                      getValues("image") === ""
-                    ) {
-                      setValue("image", `https://avatar.vercel.sh/${slug}.png`)
-                    }
-                  }
-                }}
-              />
-              {errors.name && (
-                <p className="pt-1 text-xs text-error-solid" role="alert">
-                  {errors.name?.message}
-                </p>
-              )}
+        <Form {...form}>
+          {/* <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8"> */}
+          <form
+            id="add-org-form"
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col space-y-6"
+          >
+            <div className="flex flex-col space-y-6 md:flex-row md:space-x-4 md:space-y-0">
+              <div className="w-full space-y-3">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>NAME</FormLabel>
+
+                      <FormDescription className="text-xs">
+                        This is the name of the new organization.
+                      </FormDescription>
+
+                      <FormControl>
+                        <Input
+                          placeholder="organization name"
+                          {...field}
+                          onChange={(e) => {
+                            setValue("name", e.target.value)
+                            if (action === "new") {
+                              const slug = createSlug(e.target.value)
+                              setValue("slug", slug)
+                              if (
+                                getValues("image")?.startsWith(
+                                  "https://avatar.vercel.sh"
+                                ) ||
+                                getValues("image") === ""
+                              ) {
+                                setValue(
+                                  "image",
+                                  `https://avatar.vercel.sh/${slug}.png`
+                                )
+                              }
+                            }
+                          }}
+                        />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="w-full space-y-3">
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SLUG</FormLabel>
+
+                      <FormDescription className="text-xs">
+                        This is the slug of the new organization. It fills
+                        automatically.
+                      </FormDescription>
+
+                      <FormControl>
+                        <Input placeholder="slug name" {...field} readOnly />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-
-            <div className="w-full space-y-3">
-              <Label htmlFor="slug" className="text-xs">
-                SLUG
-              </Label>
-              <Input
-                readOnly
-                {...register("slug")}
-                id={"slug"}
-                aria-invalid={Boolean(errors.slug)}
-                className="mt-1 w-full"
-              />
-              {errors.slug && (
-                <p className="pt-1 text-xs text-error-solid" role="alert">
-                  {errors.slug?.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <Label htmlFor="type" className="text-xs">
-              TYPE OF ORGANIZATION
-            </Label>
-            <Select
-              defaultValue={data?.type || "PERSONAL"}
-              aria-invalid={Boolean(errors.type)}
-              onValueChange={(value) => {
-                const type = OrganizationTypes[value]
-                setValue("type", type, { shouldValidate: true })
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Type of the organization" />
-              </SelectTrigger>
-              <SelectContent
-                position={"popper"}
-                sideOffset={2}
-                className="SelectContent-bgSubtle text-background-text"
-              >
-                <SelectGroup>
-                  {Object.keys(OrganizationTypes).map((key, index) => {
-                    return (
-                      <SelectItem key={key + index} value={key}>
-                        {key}
-                      </SelectItem>
-                    )
-                  })}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            {errors.type && (
-              <p className="pt-1 text-xs text-error-solid" role="alert">
-                {errors.type?.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-3">
-            <Label htmlFor="image" className="text-xs">
-              IMAGE (optional)
-            </Label>
-            <div className="flex h-14 w-full animate-pulse items-center justify-center space-x-2 rounded-md border-2 border-dashed">
-              <CldUploadWidget
-                signatureEndpoint="/api/cloudinary"
-                options={{
-                  maxFiles: 1,
-                  // TODO: use avatars or something like that
-                  folder: "test",
-                  multiple: false,
-                }}
-                onError={(error) => {
-                  console.log(error)
-                  toast({
-                    title: "Error updating image",
-                    description: `Something went wrong while updating the image`,
-                    className: "danger",
-                  })
-                }}
-                onUpload={(result, widget) => {
-                  const {
-                    event,
-                    info: { secure_url },
-                  } = result
-
-                  if (event === "success") {
-                    setValue("image", secure_url, { shouldValidate: true })
-                  } else {
-                    toast({
-                      title: "Error updating image",
-                      description: `Something went wrong while updating the image`,
-                      className: "danger",
-                    })
-                  }
-
-                  widget.close() // Close widget immediately after successful upload
-                }}
-              >
-                {({ open }) => {
-                  function handleOnClick(e) {
-                    e.preventDefault()
-                    open()
-                  }
-
-                  return (
-                    <button
-                      onClick={handleOnClick}
-                      className="flex h-full w-full items-center justify-center rounded-md transition-all duration-200 ease-linear"
-                    >
-                      <Icons.uploadCloud className="h-8 w-8" />
-                    </button>
-                  )
-                }}
-              </CldUploadWidget>
-            </div>
-            {errors.image && (
-              <p className="pt-1 text-xs text-error-solid" role="alert">
-                {errors.image?.message}
-              </p>
-            )}
-          </div>
-          <div className="space-y-3">
-            <Label htmlFor="description" className="text-xs">
-              DESCRIPTION (optional)
-            </Label>
-            <Textarea
-              {...register("description")}
-              id={"description"}
-              aria-invalid={Boolean(errors.description)}
-              placeholder="Type your description here."
-              onChange={(e) => {
-                e.preventDefault()
-                setValue("description", e.target.value, {
-                  shouldValidate: true,
-                })
-              }}
-            />
-          </div>
-        </form>
+          </form>
+        </Form>
       </CardContent>
       <CardFooter>
         <div className="flex justify-end space-x-2">
@@ -368,4 +266,226 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
       </CardFooter>
     </Card>
   )
+
+  // // TODO: refactor with shandcn form
+  // return (
+  //   <Card>
+  //     <div className="flex items-center justify-center p-6">
+  //       <Avatar className="h-20 w-20">
+  //         <AvatarImage src={watchImage || ""} alt={"org photo cover"} />
+  //       </Avatar>
+  //       <CardHeader className="w-full">
+  //         <CardTitle className="flex">Organization</CardTitle>
+  //         <CardDescription>
+  //           Use organization for bundle users a projects together, be aware that
+  //           every organization is totally separated from the others.
+  //         </CardDescription>
+  //       </CardHeader>
+  //     </div>
+  //     <div className="flex items-center justify-center px-6 pb-6">
+  //       <Separator />
+  //     </div>
+  //     <CardContent>
+  //       <form
+  //         id="add-org-form"
+  //         onSubmit={handleSubmit(onSubmit)}
+  //         className="flex flex-col space-y-6"
+  //       >
+  //         <div className="flex flex-col space-y-6 md:flex-row md:space-x-4 md:space-y-0">
+  //           <div className="w-full space-y-3">
+  //             <Label htmlFor="name" className="text-xs">
+  //               NAME
+  //             </Label>
+  //             <Input
+  //               {...register("name")}
+  //               id={"name"}
+  //               aria-invalid={Boolean(errors.name)}
+  //               className="mt-1 w-full"
+  //               onChange={(e) => {
+  //                 setValue("name", e.target.value)
+  //                 if (action === "new") {
+  //                   const slug = createSlug(e.target.value)
+  //                   setValue("slug", slug)
+  //                   if (
+  //                     getValues("image")?.startsWith(
+  //                       "https://avatar.vercel.sh"
+  //                     ) ||
+  //                     getValues("image") === ""
+  //                   ) {
+  //                     setValue("image", `https://avatar.vercel.sh/${slug}.png`)
+  //                   }
+  //                 }
+  //               }}
+  //             />
+  //             {errors.name && (
+  //               <p className="pt-1 text-xs text-error-solid" role="alert">
+  //                 {errors.name?.message}
+  //               </p>
+  //             )}
+  //           </div>
+
+  //           <div className="w-full space-y-3">
+  //             <Label htmlFor="slug" className="text-xs">
+  //               SLUG
+  //             </Label>
+  //             <Input
+  //               readOnly
+  //               {...register("slug")}
+  //               id={"slug"}
+  //               aria-invalid={Boolean(errors.slug)}
+  //               className="mt-1 w-full"
+  //             />
+  //             {errors.slug && (
+  //               <p className="pt-1 text-xs text-error-solid" role="alert">
+  //                 {errors.slug?.message}
+  //               </p>
+  //             )}
+  //           </div>
+  //         </div>
+
+  //         <div className="space-y-3">
+  //           <Label htmlFor="type" className="text-xs">
+  //             TYPE OF ORGANIZATION
+  //           </Label>
+  //           <Select
+  //             defaultValue={data?.type || "PERSONAL"}
+  //             aria-invalid={Boolean(errors.type)}
+  //             onValueChange={(value) => {
+  //               const type = OrganizationTypes[value]
+  //               setValue("type", type, { shouldValidate: true })
+  //             }}
+  //           >
+  //             <SelectTrigger className="w-full">
+  //               <SelectValue placeholder="Type of the organization" />
+  //             </SelectTrigger>
+  //             <SelectContent
+  //               position={"popper"}
+  //               sideOffset={2}
+  //               className="SelectContent-bgSubtle text-background-text"
+  //             >
+  //               <SelectGroup>
+  //                 {Object.keys(OrganizationTypes).map((key, index) => {
+  //                   return (
+  //                     <SelectItem key={key + index} value={key}>
+  //                       {key}
+  //                     </SelectItem>
+  //                   )
+  //                 })}
+  //               </SelectGroup>
+  //             </SelectContent>
+  //           </Select>
+  //           {errors.type && (
+  //             <p className="pt-1 text-xs text-error-solid" role="alert">
+  //               {errors.type?.message}
+  //             </p>
+  //           )}
+  //         </div>
+
+  //         <div className="space-y-3">
+  //           <Label htmlFor="image" className="text-xs">
+  //             IMAGE (optional)
+  //           </Label>
+  //           <div className="flex h-14 w-full animate-pulse items-center justify-center space-x-2 rounded-md border-2 border-dashed">
+  //             <CldUploadWidget
+  //               signatureEndpoint="/api/cloudinary"
+  //               options={{
+  //                 maxFiles: 1,
+  //                 // TODO: use avatars or something like that
+  //                 folder: "test",
+  //                 multiple: false,
+  //               }}
+  //               onError={(error) => {
+  //                 console.log(error)
+  //                 toast({
+  //                   title: "Error updating image",
+  //                   description: `Something went wrong while updating the image`,
+  //                   className: "danger",
+  //                 })
+  //               }}
+  //               onUpload={(result, widget) => {
+  //                 const {
+  //                   event,
+  //                   info: { secure_url },
+  //                 } = result
+
+  //                 if (event === "success") {
+  //                   setValue("image", secure_url, { shouldValidate: true })
+  //                 } else {
+  //                   toast({
+  //                     title: "Error updating image",
+  //                     description: `Something went wrong while updating the image`,
+  //                     className: "danger",
+  //                   })
+  //                 }
+
+  //                 widget.close() // Close widget immediately after successful upload
+  //               }}
+  //             >
+  //               {({ open }) => {
+  //                 function handleOnClick(e) {
+  //                   e.preventDefault()
+  //                   open()
+  //                 }
+
+  //                 return (
+  //                   <button
+  //                     onClick={handleOnClick}
+  //                     className="flex h-full w-full items-center justify-center rounded-md transition-all duration-200 ease-linear"
+  //                   >
+  //                     <Icons.uploadCloud className="h-8 w-8" />
+  //                   </button>
+  //                 )
+  //               }}
+  //             </CldUploadWidget>
+  //           </div>
+  //           {errors.image && (
+  //             <p className="pt-1 text-xs text-error-solid" role="alert">
+  //               {errors.image?.message}
+  //             </p>
+  //           )}
+  //         </div>
+  //         <div className="space-y-3">
+  //           <Label htmlFor="description" className="text-xs">
+  //             DESCRIPTION (optional)
+  //           </Label>
+  //           <Textarea
+  //             {...register("description")}
+  //             id={"description"}
+  //             aria-invalid={Boolean(errors.description)}
+  //             placeholder="Type your description here."
+  //             onChange={(e) => {
+  //               e.preventDefault()
+  //               setValue("description", e.target.value, {
+  //                 shouldValidate: true,
+  //               })
+  //             }}
+  //           />
+  //         </div>
+  //       </form>
+  //     </CardContent>
+  //     <CardFooter>
+  //       <div className="flex justify-end space-x-2">
+  //         {action === "new" && (
+  //           <Button
+  //             onClick={() => reset({ ...data })}
+  //             title="Clear"
+  //             className="button-default w-28"
+  //           >
+  //             {"Clear"}
+  //           </Button>
+  //         )}
+  //         <Button
+  //           disabled={loading || exist}
+  //           form="add-org-form"
+  //           title="Submit"
+  //           type="submit"
+  //           className="button-primary w-28"
+  //         >
+  //           {loading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+  //           Save
+  //         </Button>
+  //       </div>
+  //     </CardFooter>
+  //   </Card>
+  // )
 }
