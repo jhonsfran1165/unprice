@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { SubmitHandler, set, useForm } from "react-hook-form"
+import { SubmitHandler, useForm } from "react-hook-form"
 import { mutate } from "swr"
 
 import { fetchAPI } from "@/lib/utils"

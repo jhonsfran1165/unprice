@@ -1,11 +1,12 @@
 import { inter, satoshi } from "@/assets/fonts"
 
-import "@/styles/globals.css"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
 import { Footer } from "@/components/layout/footer"
 import { ThemeProvider } from "@/components/layout/theme-provider"
 import { TailwindIndicator } from "@/components/shared/tailwind-indicator"
+
+import "@/styles/globals.css"
 
 export default async function RootLayout({
   children,

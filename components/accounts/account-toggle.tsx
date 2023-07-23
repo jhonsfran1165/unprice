@@ -1,10 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-
 import { useStore } from "@/lib/stores/layout"
-import { Profile } from "@/lib/types/supabase"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,

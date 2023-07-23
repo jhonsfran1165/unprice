@@ -1,10 +1,11 @@
-import "@/styles/globals.css"
 import { inter, satoshi } from "@/assets/fonts"
 
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/layout/theme-provider"
 import { TailwindIndicator } from "@/components/shared/tailwind-indicator"
+
+import "@/styles/globals.css"
 
 export const metadata = {
   title: "Improve this",

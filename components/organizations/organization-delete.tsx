@@ -51,8 +51,6 @@ export function OrganizationDelete({
         data: { orgSlug, id },
       })
 
-      console.log(org)
-
       if (org.slug) {
         // refreshing supabase JWT
         const { error } = await supabase.auth.refreshSession()
