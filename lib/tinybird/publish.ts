@@ -5,7 +5,6 @@ const tb = new Tinybird({ token: process.env.TINYBIRD_TOKEN! })
 
 export const publishPageView = tb.buildIngestEndpoint({
   datasource: "page_views__v1",
-  // @ts-ignore
   event: z.object({
     id: z.string(),
     domain: z.string(),
