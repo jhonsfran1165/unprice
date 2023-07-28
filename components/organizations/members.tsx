@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { ChevronDown } from "lucide-react"
 import { mutate } from "swr"
 
-import { OrganizationRoles } from "@/lib/config/layout"
+import { ORGANIZATION_ROLES } from "@/lib/config/layout"
 import { useStore } from "@/lib/stores/layout"
 import { OrganizationProfiles, Profile } from "@/lib/types/supabase"
 import { fetchAPI } from "@/lib/utils"
@@ -176,7 +176,7 @@ export function MembersList({
                         <CommandList>
                           <CommandEmpty>No roles found.</CommandEmpty>
                           <CommandGroup>
-                            {Object.keys(OrganizationRoles).map(
+                            {Object.keys(ORGANIZATION_ROLES).map(
                               (role, index) => {
                                 return (
                                   <CommandItem
@@ -188,7 +188,7 @@ export function MembersList({
                                     className="teamaspace-y-1 flex flex-col items-start px-4 py-2"
                                   >
                                     <p className="text-sm text-muted-foreground">
-                                      {OrganizationRoles[role].description}
+                                      {ORGANIZATION_ROLES[role].description}
                                     </p>
                                   </CommandItem>
                                 )

@@ -23,11 +23,12 @@ export default async function AppLayout({
   const appClaims = session?.user.app_metadata as AppClaims
 
   const renderSupabaseListener = () => {
-    const { currentOrgId, allOrgIds } = getOrgsFromClaims({ appClaims })
+    if (!appClaims) return null
+
+    const { allOrgIds } = getOrgsFromClaims({ appClaims })
     return (
       <SupabaseListener
         serverAccessToken={session?.access_token}
-        orgId={currentOrgId}
         orgIdsUser={allOrgIds}
         profileId={session?.user.id}
       />
@@ -37,7 +38,7 @@ export default async function AppLayout({
   // for now we use zustag for state management but not sure if we can use something like https://jotai.org/ or recoil for the page builder
   return (
     <SupabaseProvider session={session}>
-      {appClaims && renderSupabaseListener()}
+      {renderSupabaseListener()}
       {children}
     </SupabaseProvider>
   )

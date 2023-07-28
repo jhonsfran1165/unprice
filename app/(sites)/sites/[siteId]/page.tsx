@@ -1,8 +1,5 @@
 "use client"
 
-import Link from "next/link"
-
-import { buttonVariants } from "@/components/ui/button"
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper"
 
 export default function Page() {

@@ -2,16 +2,15 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import useOrganizationExist from "@/hooks/use-organization-exist"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CldUploadWidget } from "next-cloudinary"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { mutate } from "swr"
 
-import { OrganizationTypes } from "@/lib/config/layout"
+import { ORGANIZATION_TYPES } from "@/lib/config/layout"
 import { Organization } from "@/lib/types/supabase"
 import { createSlug, fetchAPI } from "@/lib/utils"
 import { orgPostSchema, orgPostType } from "@/lib/validations/org"
+import useOrganizationExist from "@/hooks/use-organization-exist"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -22,12 +21,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -35,6 +40,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
+import { useSupabase } from "@/components/auth/supabase-provider"
 import { Icons } from "@/components/shared/icons"
 
 import "./styles.css"
@@ -43,36 +49,37 @@ import "./styles.css"
 // watch elements to validate and clean errors at the same time
 export function OrganizationForm({ org }: { org?: Organization | null }) {
   const router = useRouter()
+  const { supabase } = useSupabase()
 
   const action = org ? "edit" : "new"
 
-  const [data, setData] = useState<orgPostType>({
+  const [data, _] = useState<orgPostType>({
     id: org?.id || null,
     name: org?.name || "",
     slug: org?.slug || "",
-    description: org?.description || null,
+    description: org?.description || "",
     image: org?.image || "",
     type: org?.type || "PERSONAL",
   })
 
   const [loading, setLoading] = useState(false)
 
+  const form = useForm<orgPostType>({
+    resolver: zodResolver(orgPostSchema),
+    defaultValues: {
+      ...data,
+    },
+  })
+
   const {
-    register,
     watch,
-    formState: { errors },
     handleSubmit,
     clearErrors,
     setError,
     setValue,
     getValues,
     reset,
-  } = useForm<orgPostType>({
-    resolver: zodResolver(orgPostSchema),
-    defaultValues: {
-      ...data,
-    },
-  })
+  } = form
 
   // watch important fields
   const watchSlug = watch("slug")
@@ -95,10 +102,12 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
   const onSubmit: SubmitHandler<orgPostType> = async (dataForm) => {
     try {
       setLoading(true)
-      const method = action === "new" ? "PUT" : "POST"
+      const method = action === "new" ? "POST" : "PUT"
 
-      // We use api endpoint instead of supabase directly because we use supabaseAdmin
-      // in order to be able to bypass the RLS
+      // We use next js api endpoint here instead of supabase client directly because we use supabaseAdmin
+      // keys in order to be able to bypass the RLS for creating new organizations.
+      // When creating new organizations, a users has to be authenticated and create orgs, profiles and other things
+      // for that we created a postgres function so it can be an atomic transaction in case of failure
       const org = await fetchAPI({
         url: "/api/org",
         method,
@@ -115,15 +124,22 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
           className: "info",
         })
 
-        // mutate swr endpoints for org
-        mutate(`/api/org`)
-        mutate(`/api/org/${org.slug}`)
-
         if (action === "new") {
+          // refreshing supabase JWT after creating a new organization
+          // we handle authorization to other orgs with the JWT payload
+          const { error } = await supabase.auth.refreshSession()
+          // if refresh token is expired or something else then logout
+          if (error) await supabase.auth.signOut()
+
           // Refresh the current route and fetch new data from the server without
           // losing client-side browser or React state.
           router.refresh()
+          // redirect to the new created org
           router.push(`/org/${org.slug}`)
+        } else {
+          // if update we only mutate swr endpoints for the update org so we fetch those changes
+          mutate(`/api/org`)
+          mutate(`/api/org/${org.slug}`)
         }
       } else {
         throw org
@@ -140,7 +156,6 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
     }
   }
 
-  // TODO: refactor with shandcn form
   return (
     <Card>
       <div className="flex items-center justify-center p-6">
@@ -159,182 +174,128 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
         <Separator />
       </div>
       <CardContent>
-        <form
-          id="add-org-form"
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col space-y-6"
-        >
-          <div className="flex flex-col space-y-6 md:flex-row md:space-x-4 md:space-y-0">
-            <div className="w-full space-y-3">
-              <Label htmlFor="name" className="text-xs">
-                NAME
-              </Label>
-              <Input
-                {...register("name")}
-                id={"name"}
-                aria-invalid={Boolean(errors.name)}
-                className="mt-1 w-full"
-                onChange={(e) => {
-                  setValue("name", e.target.value)
-                  if (action === "new") {
-                    const slug = createSlug(e.target.value)
-                    setValue("slug", slug)
-                    if (
-                      getValues("image")?.startsWith(
-                        "https://avatar.vercel.sh"
-                      ) ||
-                      getValues("image") === ""
-                    ) {
-                      setValue("image", `https://avatar.vercel.sh/${slug}.png`)
-                    }
-                  }
-                }}
-              />
-              {errors.name && (
-                <p className="pt-1 text-xs text-error-solid" role="alert">
-                  {errors.name?.message}
-                </p>
-              )}
+        <Form {...form}>
+          <form
+            id="add-org-form"
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col space-y-6"
+          >
+            <div className="flex flex-col space-y-6 md:flex-row md:space-x-4 md:space-y-0">
+              {/* name field */}
+              <div className="w-full space-y-3">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>NAME</FormLabel>
+
+                      <FormControl>
+                        <Input
+                          placeholder="organization name"
+                          {...field}
+                          onChange={(e) => {
+                            setValue("name", e.target.value)
+                            if (action === "new") {
+                              const slug = createSlug(e.target.value)
+                              setValue("slug", slug)
+                              if (
+                                getValues("image")?.startsWith(
+                                  "https://avatar.vercel.sh"
+                                ) ||
+                                getValues("image") === ""
+                              ) {
+                                setValue(
+                                  "image",
+                                  `https://avatar.vercel.sh/${slug}.png`
+                                )
+                              }
+                            }
+                          }}
+                        />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* slug field */}
+              <div className="w-full space-y-3">
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SLUG</FormLabel>
+
+                      <FormControl>
+                        <Input placeholder="slug name" {...field} readOnly />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
+            {/* org type field */}
+            <div className="space-y-3">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>TYPE OF ORGANIZATION</FormLabel>
 
-            <div className="w-full space-y-3">
-              <Label htmlFor="slug" className="text-xs">
-                SLUG
-              </Label>
-              <Input
-                readOnly
-                {...register("slug")}
-                id={"slug"}
-                aria-invalid={Boolean(errors.slug)}
-                className="mt-1 w-full"
-              />
-              {errors.slug && (
-                <p className="pt-1 text-xs text-error-solid" role="alert">
-                  {errors.slug?.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <Label htmlFor="type" className="text-xs">
-              TYPE OF ORGANIZATION
-            </Label>
-            <Select
-              defaultValue={data?.type || "PERSONAL"}
-              aria-invalid={Boolean(errors.type)}
-              onValueChange={(value) => {
-                const type = OrganizationTypes[value]
-                setValue("type", type, { shouldValidate: true })
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Type of the organization" />
-              </SelectTrigger>
-              <SelectContent
-                position={"popper"}
-                sideOffset={2}
-                className="SelectContent-bgSubtle text-background-text"
-              >
-                <SelectGroup>
-                  {Object.keys(OrganizationTypes).map((key, index) => {
-                    return (
-                      <SelectItem key={key + index} value={key}>
-                        {key}
-                      </SelectItem>
-                    )
-                  })}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            {errors.type && (
-              <p className="pt-1 text-xs text-error-solid" role="alert">
-                {errors.type?.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-3">
-            <Label htmlFor="image" className="text-xs">
-              IMAGE (optional)
-            </Label>
-            <div className="flex h-14 w-full animate-pulse items-center justify-center space-x-2 rounded-md border-2 border-dashed">
-              <CldUploadWidget
-                signatureEndpoint="/api/cloudinary"
-                options={{
-                  maxFiles: 1,
-                  // TODO: use avatars or something like that
-                  folder: "test",
-                  multiple: false,
-                }}
-                onError={(error) => {
-                  console.log(error)
-                  toast({
-                    title: "Error updating image",
-                    description: `Something went wrong while updating the image`,
-                    className: "danger",
-                  })
-                }}
-                onUpload={(result, widget) => {
-                  const {
-                    event,
-                    info: { secure_url },
-                  } = result
-
-                  if (event === "success") {
-                    setValue("image", secure_url, { shouldValidate: true })
-                  } else {
-                    toast({
-                      title: "Error updating image",
-                      description: `Something went wrong while updating the image`,
-                      className: "danger",
-                    })
-                  }
-
-                  widget.close() // Close widget immediately after successful upload
-                }}
-              >
-                {({ open }) => {
-                  function handleOnClick(e) {
-                    e.preventDefault()
-                    open()
-                  }
-
-                  return (
-                    <button
-                      onClick={handleOnClick}
-                      className="flex h-full w-full items-center justify-center rounded-md transition-all duration-200 ease-linear"
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value ?? undefined}
                     >
-                      <Icons.uploadCloud className="h-8 w-8" />
-                    </button>
-                  )
-                }}
-              </CldUploadWidget>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a verified email to display" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.keys(ORGANIZATION_TYPES).map((key, index) => {
+                          return (
+                            <SelectItem key={key + index} value={key}>
+                              {key}
+                            </SelectItem>
+                          )
+                        })}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            {errors.image && (
-              <p className="pt-1 text-xs text-error-solid" role="alert">
-                {errors.image?.message}
-              </p>
-            )}
-          </div>
-          <div className="space-y-3">
-            <Label htmlFor="description" className="text-xs">
-              DESCRIPTION (optional)
-            </Label>
-            <Textarea
-              {...register("description")}
-              id={"description"}
-              aria-invalid={Boolean(errors.description)}
-              placeholder="Type your description here."
-              onChange={(e) => {
-                e.preventDefault()
-                setValue("description", e.target.value, {
-                  shouldValidate: true,
-                })
-              }}
-            />
-          </div>
-        </form>
+
+            {/* TODO: add img loader - deleted for now */}
+
+            <div className="space-y-3">
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>DESCRIPTION</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Add some details about this organization"
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </form>
+        </Form>
       </CardContent>
       <CardFooter>
         <div className="flex justify-end space-x-2">

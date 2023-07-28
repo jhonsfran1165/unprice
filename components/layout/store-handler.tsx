@@ -126,7 +126,7 @@ function StoreHandler({
       // TODO: we could use some special page for redirect
       router.push("/")
     }
-  }, [haveAccessProject, haveAccessOrg])
+  }, [haveAccessProject, haveAccessOrg, orgSlug, projectSlug])
 
   // initialize this only the first time from the server
   // TODO: better change this with session?

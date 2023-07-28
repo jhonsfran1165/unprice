@@ -1,7 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 
-import type { OrganizationTypes } from "@/lib/types/supabase"
+import { ORGANIZATION_ROLES, ORGANIZATION_TYPES } from "@/lib/config/layout"
 
 // **************************** FIELDS **************************** //
 export const orgSlug = z.string().min(1, {
@@ -14,16 +13,26 @@ const name = z.string().min(3, {
     "invalid name for the organization, it has to be at least 3 characters",
 })
 
-const role = z.union([z.literal("MEMBER"), z.literal("OWNER")]).nullable()
-const type = z
-  .union([z.literal("STARTUP"), z.literal("PERSONAL"), z.literal("BUSSINESS")])
-  .nullable()
+const ORG_TYPES = Object.keys(ORGANIZATION_TYPES) as unknown as readonly [
+  string,
+  ...string[]
+]
+
+const ORG_ROLES = Object.keys(ORGANIZATION_ROLES) as unknown as readonly [
+  string,
+  ...string[]
+]
+
+const role = z.enum(ORG_ROLES)
+const type = z.enum(ORG_TYPES)
 
 const id = z.string()
 const profileId = z.string()
 const image = z.string().url()
-const description = z.string()
 const isDefault = z.boolean()
+const description = z.string().min(0).max(160, {
+  message: "description must not be longer than 160 characters.",
+})
 
 // -------------------------------------------------------------
 export const orgGetSchema = z.object({})
@@ -43,7 +52,7 @@ export const orgPostSchema = z.object({
   slug: orgSlug,
   type,
   image: image.nullable(),
-  description: description.nullable(),
+  description: description,
 })
 
 export const orgPutSchema = z.object({
@@ -51,7 +60,7 @@ export const orgPutSchema = z.object({
   slug: orgSlug,
   type,
   image: image.nullable(),
-  description: description.nullable(),
+  description: description,
 })
 
 export const orgMakeDefaultSchema = z.object({

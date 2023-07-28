@@ -22,13 +22,14 @@ export const getOrgsFromClaims = ({
   currentOrg: AppOrgClaim
   allOrgIds: Array<string>
   currentOrgId: string
+  currentOrgSet: boolean
 } => {
   const orgClaims = appClaims.organizations
   const allOrgIds: Array<string> = []
 
   let defaultOrgSlug = ""
   let currentOrgId = ""
-  let currentOrgExist = false
+  let currentOrgSet = false
   let currentOrg = {} as AppOrgClaim
 
   for (const key in orgClaims) {
@@ -42,7 +43,7 @@ export const getOrgsFromClaims = ({
         appClaims.current_org?.org_id
       )
     ) {
-      currentOrgExist = true
+      currentOrgSet = true
       currentOrg = org
       currentOrgId = key
     }
@@ -56,13 +57,12 @@ export const getOrgsFromClaims = ({
     }
   }
 
-  if (!currentOrgExist) throw Error("The current org doesn't exist.")
-
   return {
     defaultOrgSlug,
     currentOrg,
     allOrgIds,
     currentOrgId,
+    currentOrgSet,
   }
 }
 

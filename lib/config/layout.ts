@@ -17,13 +17,22 @@ export const layoutConfig: LayoutConfig = {
   },
 }
 
-export enum OrganizationTypes {
-  STARTUP = "STARTUP",
-  PERSONAL = "PERSONAL",
-  BUSSINESS = "BUSSINESS",
+export const ORGANIZATION_TYPES = {
+  STARTUP: {
+    description: "",
+  },
+  PERSONAL: {
+    description: "",
+  },
+  BUSSINESS: {
+    description: "",
+  },
+  OTHER: {
+    description: "",
+  },
 }
 
-export const OrganizationRoles = {
+export const ORGANIZATION_ROLES = {
   MEMBER: {
     description:
       "Can view and make changes on pages. No chnages allowed on the organizaiton",
@@ -31,4 +40,4 @@ export const OrganizationRoles = {
   OWNER: {
     description: "Admin-level access to all resources.",
   },
-}
+} as const

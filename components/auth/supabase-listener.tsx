@@ -10,12 +10,10 @@ import { useSupabase } from "./supabase-provider"
 // in order to re-render when the user's session changes
 export default function SupabaseListener({
   serverAccessToken,
-  orgId,
   orgIdsUser,
   profileId,
 }: {
   serverAccessToken?: string
-  orgId: string
   orgIdsUser: Array<string>
   profileId?: string
 }) {
@@ -68,7 +66,7 @@ export default function SupabaseListener({
           event: "*",
           schema: "public",
           table: "organization",
-          filter: `id=eq.${orgId}`,
+          filter: `id=in.(${orgIdsUser.join(", ")})`,
         },
         handleRefreshToken
       )

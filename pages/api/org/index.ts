@@ -8,19 +8,18 @@ import {
 } from "@/lib/api-middlewares"
 import supabaseAdmin from "@/lib/supabase/supabase-admin"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
-import { Profile, Session } from "@/lib/types/supabase"
+import { Session } from "@/lib/types/supabase"
 import { orgPostSchema, orgPutSchema } from "@/lib/validations/org"
 
 async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
-  session?: Session,
-  profile?: Profile
+  session?: Session
 ) {
   try {
     const supabase = supabaseApiClient(req, res)
 
-    if (req.method === "POST") {
+    if (req.method === "PUT") {
       const { id, type, name, image, description } = req.body
 
       const { data: org, error } = await supabase
@@ -40,12 +39,12 @@ async function handler(
       return res.status(200).json(org)
     }
 
-    if (req.method === "PUT") {
+    if (req.method === "POST") {
       const { slug, type, name, image, description } = req.body
       const uuid = uuidv4()
 
       // we use here admin supabase to bypass all RLS
-      const { data, error } = await supabaseAdmin.rpc("config_org", {
+      const { error } = await supabaseAdmin.rpc("config_org", {
         user_id: session?.user.id ?? "",
         org_id: uuid,
         slug,
