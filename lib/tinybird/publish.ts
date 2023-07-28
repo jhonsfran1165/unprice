@@ -1,7 +1,10 @@
 import { Tinybird } from "@chronark/zod-bird"
 import { z } from "zod"
 
-const tb = new Tinybird({ token: process.env.TINYBIRD_TOKEN! })
+const tb = new Tinybird({
+  token: process.env.TINYBIRD_TOKEN!,
+  baseUrl: process.env.TINYBIRD_URL!,
+})
 
 export const publishPageView = tb.buildIngestEndpoint({
   datasource: "page_views__v1",

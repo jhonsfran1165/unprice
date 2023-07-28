@@ -14,7 +14,7 @@ export function OrganizationContainer() {
               width={250}
               height={250}
               priority={true}
-              className="pointer-events-none mt-5 mb-10"
+              className="pointer-events-none mb-10 mt-5"
             />
             <h2 className="text-base-text z-10 text-xl font-semibold">
               {"Create a new organization"}

@@ -104,7 +104,7 @@ const Pricing = ({ type = "public" }: { type: string }) => {
           />
           <p className="pl-2">Billed Annually</p>
         </div>
-        <span className="absolute -top-5 -right-16 rounded-full border bg-info-solid px-3 py-1 text-xs text-info-textContrast">
+        <span className="absolute -right-16 -top-5 rounded-full border bg-info-solid px-3 py-1 text-xs text-info-textContrast">
           🎁 2 month FREE
         </span>
       </div>

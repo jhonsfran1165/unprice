@@ -38,7 +38,7 @@ export default function AuthenticationContainer({ action }) {
           alt="Builderai logo"
           width={800}
           height={800}
-          className="absolute top-0 left-0 h-screen w-1/2 object-cover"
+          className="absolute left-0 top-0 h-screen w-1/2 object-cover"
         />
         <div className="absolute z-20 flex items-center text-lg font-medium">
           <Logo className="h-10 w-auto text-2xl text-primary" />
