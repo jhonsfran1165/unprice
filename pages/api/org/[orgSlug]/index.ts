@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import cloudinary from "cloudinary"
 
 import {
   withAuthentication,
@@ -7,15 +6,9 @@ import {
   withValidation,
 } from "@/lib/api-middlewares"
 import { supabaseApiClient } from "@/lib/supabase/supabase-api"
-import { Profile, Session } from "@/lib/types/supabase"
 import { orgDeleteSchema, orgGetSchema } from "@/lib/validations/org"
 
-async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  session?: Session,
-  profile?: Profile
-) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const supabase = supabaseApiClient(req, res)
 
@@ -28,8 +21,6 @@ async function handler(
         .eq("id", id)
         .eq("slug", orgSlug)
 
-      // TODO: delete cloudinary url
-      // cloudinary.v2.uploader.destroy(deletedOrg?.image)
       if (error) return res.status(500).json(error)
 
       return res.status(200).json({ slug: orgSlug })
