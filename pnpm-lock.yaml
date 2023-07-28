@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@chronark/zod-bird':
+    specifier: ^0.1.1
+    version: 0.1.1
   '@hookform/resolvers':
     specifier: ^2.9.10
     version: 2.9.10(react-hook-form@7.43.0)
@@ -477,6 +480,12 @@ packages:
       '@babel/helper-string-parser': 7.19.4
       '@babel/helper-validator-identifier': 7.19.1
       to-fast-properties: 2.0.0
+
+  /@chronark/zod-bird@0.1.1:
+    resolution: {integrity: sha512-6UD9yhNIsvIP0FUqNuZ+bByQLc0IY2eQpeQn55CsqvZziGKQuPGqJzyq6o283fDgkKXTbXmQ7zC/LDBX6yrBhA==}
+    dependencies:
+      zod: 3.21.4
+    dev: false
 
   /@emotion/is-prop-valid@0.8.8:
     resolution: {integrity: sha512-u5WtneEAr5IDG2Wv65yhunPSMLIpuKsbuOktRojfrEiEvRyC85LgPMZI63cr7NUqT8ZIGdSVg8ZKGxIug4lXcA==}

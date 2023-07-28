@@ -3,7 +3,7 @@ import { NextRequest } from "next/server"
 import { HOME_HOSTNAMES } from "@/lib/constants"
 
 export const parse = (req: NextRequest) => {
-  let domain = req.headers.get("host")
+  let domain = req.headers.get("host") ?? "localhost"
   // if (HOME_HOSTNAMES.has(domain)) domain = "dub.sh";
   const path = req.nextUrl.pathname
   const ip = req.ip ?? "127.0.0.1"

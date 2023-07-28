@@ -45,7 +45,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
     domain === "app.localhost:3000" ||
     domain?.endsWith("jhonsfran.vercel.app")
   ) {
-    return AppMiddleware(req)
+    return AppMiddleware(req, ev)
   }
 
   if (
