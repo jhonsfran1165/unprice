@@ -13,7 +13,7 @@ export async function recordPageView({
   req,
   key,
 }: {
-  domain?: string
+  domain: string
   req: NextRequest
   key?: string
 }) {
@@ -25,7 +25,7 @@ export async function recordPageView({
   const pageViewObject = {
     id: pageViewId,
     time: new Date(Date.now()).toISOString(),
-    domain,
+    domain: domain || "Unknown",
     key: key || "_root",
     country: geo?.country || "Unknown",
     city: geo?.city || "Unknown",

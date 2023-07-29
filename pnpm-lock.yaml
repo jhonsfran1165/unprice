@@ -195,8 +195,8 @@ dependencies:
     specifier: ^9.0.0
     version: 9.0.0
   zod:
-    specifier: ^3.20.2
-    version: 3.20.2
+    specifier: ^3.21.4
+    version: 3.21.4
   zustand:
     specifier: ^4.3.4
     version: 4.3.4(react@18.2.0)
@@ -212,8 +212,8 @@ devDependencies:
     specifier: ^0.1.8
     version: 0.1.8
   '@types/node':
-    specifier: ^17.0.45
-    version: 17.0.45
+    specifier: ^20.2.1
+    version: 20.2.1
   '@types/react':
     specifier: ^18.0.27
     version: 18.0.27
@@ -2172,8 +2172,8 @@ packages:
     resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==}
     dev: true
 
-  /@types/node@17.0.45:
-    resolution: {integrity: sha512-w+tIMs3rq2afQdsPJlODhoUEKzFP1ayaoyl1CcnwtIlsVe7K7bA1NGm4s3PraqTLlXnbIN84zuBlxBWo1u9BLw==}
+  /@types/node@20.2.1:
+    resolution: {integrity: sha512-DqJociPbZP1lbZ5SQPk4oag6W7AyaGMO6gSfRwq3PWl4PXTwJpRQJhDq4W0kzrg3w6tJ1SwlvGZ5uKFHY13LIg==}
 
   /@types/phoenix@1.5.4:
     resolution: {integrity: sha512-L5eZmzw89eXBKkiqVBcJfU1QGx9y+wurRIEgt0cuLH0hwNtVUxtx+6cu0R2STwWj468sjXyBYPYDtGclUd1kjQ==}
@@ -5708,7 +5708,7 @@ packages:
     resolution: {integrity: sha512-9zdcWApF4Yg2WG4GVv1qnvAv+h5KD103gKwbTsTyk5G3lf9h4vN0FXGQ5d5eWKP9itAjt0D5gZtWG7cLPzyLxw==}
     engines: {node: '>=12.*'}
     dependencies:
-      '@types/node': 17.0.45
+      '@types/node': 20.2.1
       qs: 6.11.1
     dev: false
 
@@ -6336,10 +6336,6 @@ packages:
 
   /yoga-wasm-web@0.3.3:
     resolution: {integrity: sha512-N+d4UJSJbt/R3wqY7Coqs5pcV0aUj2j9IaQ3rNj9bVCLld8tTGKRa2USARjnvZJWVx1NDmQev8EknoczaOQDOA==}
-    dev: false
-
-  /zod@3.20.2:
-    resolution: {integrity: sha512-1MzNQdAvO+54H+EaK5YpyEy0T+Ejo/7YLHS93G3RnYWh5gaotGHwGeN/ZO687qEDU2y4CdStQYXVHIgrUl5UVQ==}
     dev: false
 
   /zod@3.21.4:

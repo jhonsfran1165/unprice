@@ -334,7 +334,7 @@ export const getDomainWithoutWWW = (url: string) => {
       return new URL(`https://${url}`).hostname.replace(/^www\./, "")
     }
   } catch (e) {
-    return null
+    return undefined
   }
 }
 
