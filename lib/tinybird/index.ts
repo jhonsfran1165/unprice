@@ -22,6 +22,14 @@ export async function recordPageView({
   const referer = req.headers.get("referer")
   const pageViewId = nanoid()
 
+  // let country, locale;
+  // try {
+  //     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  //     locale = (navigator.languages && navigator.languages.length) ? navigator.languages[0] : navigator.userLanguage || navigator.language || navigator.browserLanguage || 'en';
+  // } catch (error) {
+  //     // ignore error
+  // }
+
   const pageViewObject = {
     id: pageViewId,
     time: new Date(Date.now()).toISOString(),
@@ -44,6 +52,10 @@ export async function recordPageView({
     device_model: ua.device.model || "Unknown",
     cpu_architecture: ua.cpu?.architecture || "Unknown",
     bot: ua.isBot,
+    // ip: req.headers.get("x-real-ip"),
+    // mobile: req.headers.get("sec-ch-ua-mobile"),
+    // platform: req.headers.get("sec-ch-ua-platform"),
+    // useragent: req.headers.get("user-agent"),
     referer: referer ? getDomainWithoutWWW(referer) : "(direct)",
     referer_url: referer || "(direct)",
   }

@@ -50,7 +50,6 @@
     "@stripe/stripe-js": "^1.52.1",
     "@supabase/auth-helpers-nextjs": "^0.5.4",
     "@supabase/supabase-js": "^2.7.0",
-    "@tailwindcss/line-clamp": "^0.4.2",
     "@tailwindcss/typography": "^0.5.9",
     "@upstash/ratelimit": "^0.3.5",
     "@upstash/redis": "^1.20.0",

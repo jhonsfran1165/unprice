@@ -104,9 +104,6 @@ dependencies:
   '@supabase/supabase-js':
     specifier: ^2.7.0
     version: 2.7.0(encoding@0.1.13)
-  '@tailwindcss/line-clamp':
-    specifier: ^0.4.2
-    version: 0.4.2(tailwindcss@3.3.3)
   '@tailwindcss/typography':
     specifier: ^0.5.9
     version: 0.5.9(tailwindcss@3.3.3)
@@ -2143,14 +2140,6 @@ packages:
     resolution: {integrity: sha512-sJ902EfIzn1Fa+qYmjdQqh8tPsoxyBz+8yBKC2HKUxyezKJFwPGOn7pv4WY6QuQW//ySQi5lJjA/ZT9sNWWNTg==}
     dependencies:
       tslib: 2.6.0
-    dev: false
-
-  /@tailwindcss/line-clamp@0.4.2(tailwindcss@3.3.3):
-    resolution: {integrity: sha512-HFzAQuqYCjyy/SX9sLGB1lroPzmcnWv1FHkIpmypte10hptf4oPUfucryMKovZh2u0uiS9U5Ty3GghWfEJGwVw==}
-    peerDependencies:
-      tailwindcss: '>=2.0.0 || >=3.0.0 || >=3.0.0-alpha.1'
-    dependencies:
-      tailwindcss: 3.3.3
     dev: false
 
   /@tailwindcss/typography@0.5.9(tailwindcss@3.3.3):
