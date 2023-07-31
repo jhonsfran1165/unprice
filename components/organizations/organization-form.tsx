@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { mutate } from "swr"
 
+import { trackEvent } from "@/lib/analytics/track-event"
 import { ORGANIZATION_TYPES } from "@/lib/config/layout"
 import { Organization } from "@/lib/types/supabase"
 import { createSlug, fetchAPI } from "@/lib/utils"
@@ -141,6 +142,7 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
           mutate(`/api/org`)
           mutate(`/api/org/${org.slug}`)
         }
+        await trackEvent("initGuidedSelling", { pageUrl: "" })
       } else {
         throw org
       }

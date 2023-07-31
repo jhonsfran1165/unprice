@@ -1,23 +1,29 @@
-import { Tinybird } from "@chronark/zod-bird"
 import { z } from "zod"
 
-const tb = new Tinybird({
-  token: process.env.TINYBIRD_TOKEN!,
-  baseUrl: process.env.TINYBIRD_URL!,
-})
+import { tb } from "@/lib/tinybird/client"
 
-export const publishPageView = tb.buildIngestEndpoint({
-  datasource: "page_views__v1",
+// TODO: build pipe so I can start create the dashboard
+
+export const publishPageHits = tb.buildIngestEndpoint({
+  datasource: "page_views__v3",
   event: z.object({
-    id: z.string(),
+    session_id: z.string(),
     domain: z.string(),
-    time: z.string(),
+    subdomain: z.string(),
+    path: z.string(),
+    locale: z.string(),
+    href: z.string(),
+    ip: z.string(),
+    time: z.number().int(),
+    timestamp: z.string(),
+    referer: z.string().optional().default("(direct)"),
+    referer_url: z.string().optional().default("(direct)"),
     country: z.string().optional().default("Unknown"),
     city: z.string().optional().default("Unknown"),
     region: z.string().optional().default("Unknown"),
     latitude: z.string().optional().default("Unknown"),
     longitude: z.string().optional().default("Unknown"),
-    ua: z.string().optional().default("Unknown"),
+    useragent: z.string().optional().default("Unknown"),
     browser: z.string().optional().default("Unknown"),
     browser_version: z.string().optional().default("Unknown"),
     engine: z.string().optional().default("Unknown"),
@@ -29,7 +35,5 @@ export const publishPageView = tb.buildIngestEndpoint({
     device_model: z.string().optional().default("Unknown"),
     cpu_architecture: z.string().optional().default("Unknown"),
     bot: z.boolean().optional(),
-    referer: z.string().optional().default("(direct)"),
-    referer_url: z.string().optional().default("(direct)"),
   }),
 })

@@ -1,7 +1,6 @@
-import { Tinybird } from "@chronark/zod-bird"
 import { z } from "zod"
 
-const tb = new Tinybird({ token: process.env.TINYBIRD_TOKEN! })
+import { tb } from "@/lib/tinybird/client"
 
 export const getTotalAvgPageDuration = tb.buildPipe({
   pipe: "get_total_average_page_duration__v1",
@@ -13,6 +12,9 @@ export const getTotalAvgPageDuration = tb.buildPipe({
     pageNumber: z.string(),
     avg_duration: z.number(),
   }),
+  // opts: {
+  //   revalidate: 60, // 60 seconds cache validation
+  // },
 })
 
 export const getViewPageDuration = tb.buildPipe({

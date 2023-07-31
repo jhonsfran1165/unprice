@@ -9,6 +9,7 @@ import {
 import { mutate } from "swr"
 
 import { getActiveTabs } from "@/lib/config/dashboard"
+import { useTrackPage } from "@/lib/hooks/use-track-page"
 import { useStore } from "@/lib/stores/layout"
 import useProject from "@/lib/swr/use-project"
 import { AppClaims, AppModulesNav } from "@/lib/types"
@@ -16,6 +17,7 @@ import { Session } from "@/lib/types/supabase"
 import { toast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/components/auth/supabase-provider"
 
+// TODO: separation of concerns for this
 function StoreHandler({
   session,
   modulesApp,
@@ -30,6 +32,8 @@ function StoreHandler({
   const segments = useSelectedLayoutSegments()
   const initialized = useRef(false)
   const { supabase } = useSupabase()
+
+  const [page] = useTrackPage()
 
   const {
     tabs,
@@ -189,6 +193,10 @@ function StoreHandler({
       orgData,
       appClaims,
     })
+  }, [pathname, JSON.stringify(appClaims)])
+
+  useEffect(() => {
+    page()
   }, [pathname, JSON.stringify(appClaims)])
 
   useEffect(() => {
