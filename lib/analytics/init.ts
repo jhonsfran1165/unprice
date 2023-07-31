@@ -35,13 +35,8 @@ const localhostTest = (userConfig = {}) => ({
 })
 
 /* Initialize analytics & load plugins */
+// TODO: add debugger to localhost plugin to avoid verbose console
 export const analytics = Analytics({
   app: "awesome-app",
-  plugins: [
-    localhostTest(),
-    tinybirdPlugin({
-      token:
-        "p.eyJ1IjogIjgyM2JjODk1LTg1ODktNGZlNC1hMTRlLWQ0MmIxNjNhNjA2NCIsICJpZCI6ICJmZWUzMmQ3MS00MGZlLTRiN2YtYTg4ZS1mNjY1MjM2Y2FiNmQifQ.MCRBRA0s48yblrMcUo5Q7w0qMluQfrE4PTjaWxGT_yA",
-    }),
-  ],
+  plugins: [localhostTest(), tinybirdPlugin()],
 })
