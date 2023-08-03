@@ -6,7 +6,7 @@ import { newId } from "@/lib/utils/id-edge"
 import {
   analyticApiSchema,
   payloadEventSchema,
-  payloadPageViewSchema,
+  payloadPageSchema,
 } from "@/lib/validations/analytic"
 
 export const config = {
@@ -31,7 +31,7 @@ export default async function handler(req: NextRequest, ev: NextFetchEvent) {
           ev.waitUntil(
             recordPageView({
               req,
-              pagePayload: payloadPageViewSchema.parse(eventPayload),
+              pagePayload: payloadPageSchema.parse(eventPayload),
               id: pageViewId,
             }).catch((error) => console.log(error))
           )

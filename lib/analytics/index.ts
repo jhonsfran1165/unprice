@@ -50,10 +50,10 @@ export const analytics = Analytics({
   app: "builderai",
   plugins: [
     localhostTest({
-      enabled: true,
+      enabled: false,
     }),
     tinybirdPlugin({
-      enabled: true,
+      enabled: process.env.NEXT_PUBLIC_TINYBIRD_ENABLED!!,
     }),
   ],
 })

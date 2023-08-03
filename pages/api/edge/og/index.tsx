@@ -10,12 +10,12 @@ export const config = {
 }
 
 const satoshi = fetch(
-  new URL("../../../assets/fonts/Satoshi-Black.ttf", import.meta.url)
+  new URL("../../../../assets/fonts/Satoshi-Black.ttf", import.meta.url)
 ).then((res) => res.arrayBuffer())
 
 // TODO: change this
 const inter = fetch(
-  new URL("../../../assets/fonts/Satoshi-Black.ttf", import.meta.url)
+  new URL("../../../../assets/fonts/Satoshi-Black.ttf", import.meta.url)
 ).then((res) => res.arrayBuffer())
 
 export default async function handler(req: NextRequest) {

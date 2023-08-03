@@ -8,10 +8,7 @@ import {
   publishPageViews,
 } from "@/lib/tinybird"
 import { capitalize, getDomainWithoutWWW } from "@/lib/utils"
-import {
-  PayloadEventType,
-  PayloadPageViewType,
-} from "@/lib/validations/analytic"
+import { PayloadEventType, PayloadPageType } from "@/lib/validations/analytic"
 
 /**
  * Recording clicks with geo, ua, referer and timestamp data
@@ -69,7 +66,7 @@ export async function recordPageView({
   pagePayload,
   id,
 }: {
-  pagePayload: PayloadPageViewType
+  pagePayload: PayloadPageType
   req: NextRequest
   id: string
 }) {

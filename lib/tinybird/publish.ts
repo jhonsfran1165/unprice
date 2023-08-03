@@ -2,7 +2,7 @@ import { tb } from "@/lib/tinybird"
 import {
   ClickHitsSchema,
   eventSchema,
-  pageViewSchema,
+  pageSchema,
 } from "@/lib/validations/analytic"
 
 export const publishClickHits = tb.buildIngestEndpoint({
@@ -12,7 +12,7 @@ export const publishClickHits = tb.buildIngestEndpoint({
 
 export const publishPageViews = tb.buildIngestEndpoint({
   datasource: "page_views__v1",
-  event: pageViewSchema,
+  event: pageSchema,
 })
 
 export const publishEvents = tb.buildIngestEndpoint({

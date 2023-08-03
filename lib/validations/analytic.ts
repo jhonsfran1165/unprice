@@ -14,7 +14,7 @@ export const payloadEventSchema = z.object({
   payload: z.any(),
 })
 
-export const payloadPageViewSchema = z.object({
+export const payloadPageSchema = z.object({
   session_id: z.string(),
   title: z.string(),
   url: z.string(),
@@ -32,10 +32,8 @@ export const payloadPageViewSchema = z.object({
   project_slug: z.string().optional(),
 })
 
-// TODO: add version
-// TODO: send details as json payload
-export const pageViewSchema = z.object({
-  ...payloadPageViewSchema.shape,
+export const pageSchema = z.object({
+  ...payloadPageSchema.shape,
   id: z.string(),
   domain: z.string().optional().default("Unknown"),
   subdomain: z.string().optional().default("Unknown"),
@@ -99,5 +97,5 @@ export const eventSchema = z.object({
 })
 
 // Infer type for typescript
-export type PayloadPageViewType = z.infer<typeof payloadPageViewSchema>
+export type PayloadPageType = z.infer<typeof payloadPageSchema>
 export type PayloadEventType = z.infer<typeof payloadEventSchema>
