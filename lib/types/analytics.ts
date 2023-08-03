@@ -1,7 +1,8 @@
-interface TestingEvent {
-  pageUrl: string
+interface OrganizationCreated {
+  org_id: string
+  org_slug: string
 }
 
 export interface AnalyticEventMap {
-  initGuidedSelling: TestingEvent
+  organizationCreated: OrganizationCreated
 }

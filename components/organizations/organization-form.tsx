@@ -142,7 +142,10 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
           mutate(`/api/org`)
           mutate(`/api/org/${org.slug}`)
         }
-        await trackEvent("initGuidedSelling", { pageUrl: "" })
+        await trackEvent("organizationCreated", {
+          org_id: org.id,
+          org_slug: org.slug,
+        })
       } else {
         throw org
       }

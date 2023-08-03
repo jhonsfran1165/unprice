@@ -17,7 +17,7 @@ import { Session } from "@/lib/types/supabase"
 import { toast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/components/auth/supabase-provider"
 
-// TODO: separation of concerns for this
+// TODO: separation of concerns for this and clean
 function StoreHandler({
   session,
   modulesApp,
@@ -30,6 +30,7 @@ function StoreHandler({
   const pathname = usePathname()
   const router = useRouter()
   const segments = useSelectedLayoutSegments()
+  const startTimeRef = useRef(Date.now())
   const initialized = useRef(false)
   const { supabase } = useSupabase()
 
@@ -196,7 +197,21 @@ function StoreHandler({
   }, [pathname, JSON.stringify(appClaims)])
 
   useEffect(() => {
-    page()
+    // wouldn't be better to track pages on middleware level instead of here?
+    // that could also reduce the api edge calls - anyways just to give an example
+    // of how this could work - also for the dashboard part the analytics data is important
+    // from the super admin perspective
+    // TODO: maybe it has more sense to measure page duration here and from middleware page hits?
+    // and filter pages from the plugin for those important pages?
+    startTimeRef.current = Date.now() // update the start time for the new page
+
+    // when component unmounts, calculate duration and track page view
+    return () => {
+      const endTime = Date.now()
+      const duration = Math.round(endTime - startTimeRef.current)
+      // Do not track on uninitialized pages
+      initialized.current && page({ orgSlug, orgId, projectSlug, duration })
+    }
   }, [pathname, JSON.stringify(appClaims)])
 
   useEffect(() => {

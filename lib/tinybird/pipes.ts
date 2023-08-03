@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { tb } from "@/lib/tinybird/client"
+import { tb } from "@/lib/tinybird"
 
 export const getTotalAvgPageDuration = tb.buildPipe({
   pipe: "get_total_average_page_duration__v1",

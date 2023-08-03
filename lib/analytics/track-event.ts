@@ -1,4 +1,4 @@
-import { analytics } from "@/lib/analytics/init"
+import { analytics } from "@/lib/analytics"
 import { AnalyticEventMap } from "@/lib/types/analytics"
 
 // server version of use-track-event

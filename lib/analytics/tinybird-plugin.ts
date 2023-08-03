@@ -1,35 +1,48 @@
 import { getDomainWithoutWWW, timezones } from "@/lib/utils"
-import { newId } from "@/lib/utils/id"
 
 const isServer = typeof window === "undefined"
 
-const config = {
-  token: null,
-  baseUrl: "https://api.tinybird.co",
-  globalScript: "Tinybird",
-}
-
-export const tinybirdPlugin = (pluginConfig = {}) => {
+export const tinybirdPlugin = (config = {}) => {
   let isLoaded = false
 
   return {
     NAMESPACE: "tinybird",
-    config: {
-      ...config,
-      ...pluginConfig,
-    },
+    config,
     initialize: () => {
       if (isServer) return false
       isLoaded = true
     },
     /* Track event on server and client */
-    // TODO: move all this to and edge enpoint so we can track pages and more
-    track: ({ payload }: { payload: any }) => {},
-    page: ({ payload }) => {
-      let country, locale
+    track: ({ payload: { properties, anonymousId, event } }) => {
+      try {
+        return fetch("/api/edge/analytics", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "trackEvent",
+            eventPayload: {
+              event_name: event,
+              session_id: anonymousId,
+              payload: properties,
+            },
+          }),
+        })
+      } catch (e) {
+        console.log(`Failed analytic event track: ${e}`)
+      }
+    },
+    page: ({ payload: { properties, anonymousId } }) => {
+      let country: string = "Unknown"
+      let locale: string = "Unknown"
+
+      const referer = document.referrer
+
       try {
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
         country = timezones[timezone]
+
         // TODO: replace this from locale when i18n implemented
         locale =
           navigator.languages && navigator.languages.length
@@ -39,24 +52,38 @@ export const tinybirdPlugin = (pluginConfig = {}) => {
         // ignore error
       }
 
-      const time = Date.now()
-      const pageViewId = newId("page")
-      const referer = document.referrer
+      const {
+        title,
+        url,
+        path,
+        search,
+        width,
+        height,
+        referrer,
+        orgSlug,
+        orgId,
+        projectSlug,
+        duration,
+      } = properties
 
-      // TODO: add route parameters like segments
-      const pageViewObject = {
-        ...payload.properties, // TODO: get properties explicitly
-        id: pageViewId,
-        time,
-        href: window.location.href,
-        timestamp: new Date(time).toISOString(),
-        domain: window.location.host || "Unknown",
-        subdomain: window.location.host.split(".")[0] || "Unknown",
-        country: country || "Unknown",
-        locale: locale || "Unknown",
-        session_id: payload.anonymousId,
+      // we send this data from client because from api we lost context
+      const payload = {
+        title,
+        url,
+        path,
+        search,
+        width,
+        height,
+        referrer,
+        duration,
+        country: country,
+        locale: locale,
+        session_id: anonymousId,
         referer: referer ? getDomainWithoutWWW(referer) : "(direct)",
         referer_url: referer || "(direct)",
+        org_slug: orgSlug,
+        org_id: orgId,
+        project_slug: projectSlug,
       }
 
       try {
@@ -65,18 +92,21 @@ export const tinybirdPlugin = (pluginConfig = {}) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(pageViewObject),
+          body: JSON.stringify({
+            action: "trackPage",
+            eventPayload: payload,
+          }),
         })
       } catch (e) {
-        console.log(`Failed to log to Dub Slack. Error: ${e}`)
+        console.log(`Failed analytic track: ${e}`)
       }
     },
     /* Verify script loaded */
     loaded: () => {
-      return true
+      return isLoaded
     },
     ready: () => {
-      console.log("ready: localhostTestPlugin")
+      console.log("ready: tinybirdPlugin")
     },
   }
 }

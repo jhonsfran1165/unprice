@@ -1,22 +1,22 @@
-import baseX from "base-x";
+import baseX from "base-x"
 
 function encodeBase58(buf: Buffer): string {
-  const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 
-  return baseX(alphabet).encode(buf);
+  return baseX(alphabet).encode(buf)
 }
 /**
  * Generate ids similar to stripe
  */
 export class IdGenerator<TPrefixes extends string> {
-  private prefixes: Record<TPrefixes, string>;
+  private prefixes: Record<TPrefixes, string>
 
   /**
    * Create a new id generator with fully typed prefixes
    * @param prefixes - Relevant prefixes for your domain
    */
   constructor(prefixes: Record<TPrefixes, string>) {
-    this.prefixes = prefixes;
+    this.prefixes = prefixes
   }
 
   /**
@@ -28,8 +28,8 @@ export class IdGenerator<TPrefixes extends string> {
     return [
       this.prefixes[prefix],
       encodeBase58(Buffer.from(crypto.randomUUID().replace(/-/g, ""), "hex")),
-    ].join("_");
-  };
+    ].join("_")
+  }
 }
 
 export const newId = new IdGenerator({
@@ -41,4 +41,5 @@ export const newId = new IdGenerator({
   user: "user",
   tenant: "tenant",
   apiKey: "api",
-}).id;
+  page: "page",
+}).id

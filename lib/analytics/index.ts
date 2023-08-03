@@ -34,9 +34,26 @@ const localhostTest = (userConfig = {}) => ({
   },
 })
 
+/**
+ * One of the most important thing in a saas is the ability to measure
+ * how well is performing. The lack of analytics is always a problem
+ * specially for startups that are trying to validate their product.
+ * Also build a saas with good analytics is hard and depends on great measure
+ * on the features and the nature of the business. That is why I used an opinionated
+ * way to track events and pages views. This way you can implement your own provider
+ * This library has a lot of plugins if you want to use but for me tinybird is the most
+ * scalable way to do it.
+ */
 /* Initialize analytics & load plugins */
 // TODO: add debugger to localhost plugin to avoid verbose console
 export const analytics = Analytics({
-  app: "awesome-app",
-  plugins: [localhostTest(), tinybirdPlugin()],
+  app: "builderai",
+  plugins: [
+    localhostTest({
+      enabled: true,
+    }),
+    tinybirdPlugin({
+      enabled: true,
+    }),
+  ],
 })
