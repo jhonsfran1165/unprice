@@ -1,6 +1,6 @@
 import { useCallback } from "react"
 
-import { analytics } from "@/lib/analytics/init"
+import { analytics } from "@/lib/analytics"
 import { AnalyticEventMap } from "@/lib/types/analytics"
 
 // avoid re creation on trackEvent on re-renders
