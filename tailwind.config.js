@@ -123,6 +123,12 @@ module.exports = {
         satoshi: ["var(--font-satoshi)", ...fontFamily.sans],
         inter: ["var(--font-inter)", ...fontFamily.sans],
       },
+      backgroundImage: {
+        "gradient-conic":
+          "conic-gradient(var(--conic-position), var(--tw-gradient-stops))",
+        "gradient-radial-top":
+          "radial-gradient(100% 60% at 100% 0%, var(--tw-gradient-stops))",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: 0 },
@@ -146,6 +152,5 @@ module.exports = {
     require("windy-radix-palette"),
     require("@tailwindcss/typography"),
     require("windy-radix-typography"),
-    require("@tailwindcss/line-clamp"),
   ],
 }

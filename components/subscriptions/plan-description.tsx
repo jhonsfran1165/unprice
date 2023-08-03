@@ -51,7 +51,7 @@ export default function SubscriptionPlansDescription({
           </div>
         )}
       </div>
-      <div className="pt-4 pb-8">
+      <div className="pb-8 pt-4">
         {copy} <PricingDialog cta={cta} />
       </div>
     </>

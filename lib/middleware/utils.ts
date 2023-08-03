@@ -3,12 +3,13 @@ import { NextRequest } from "next/server"
 import { HOME_HOSTNAMES } from "@/lib/constants"
 
 export const parse = (req: NextRequest) => {
-  let domain = req.headers.get("host")
+  let domain = req.headers.get("host") ?? "localhost"
+  const suddomain = domain.split(".")[0]
   // if (HOME_HOSTNAMES.has(domain)) domain = "dub.sh";
   const path = req.nextUrl.pathname
   const ip = req.ip ?? "127.0.0.1"
   const key = decodeURIComponent(path.split("/")[1]) // to handle foreign languages like Hebrew
-  return { domain, path, key, ip }
+  return { domain, path, key, ip, suddomain }
 }
 
 export const detectBot = (req: NextRequest) => {

@@ -91,7 +91,7 @@ export const HighlighterItem: React.FC<
 > = ({ children, className = "" }) => {
   return (
     <div
-      className={`bg-zinc-800 before:bg-primary-500 relative overflow-hidden rounded-xl p-px before:pointer-events-none before:absolute before:-left-48 before:-top-48 before:z-30 before:h-96 before:w-96 before:translate-x-[var(--mouse-x)] before:translate-y-[var(--mouse-y)] before:rounded-full before:opacity-0 before:blur-[100px] before:transition-opacity before:duration-500 after:absolute after:inset-0 after:z-10 after:rounded-[inherit] after:opacity-0 after:transition-opacity after:duration-500 after:[background:_radial-gradient(250px_circle_at_var(--mouse-x)_var(--mouse-y),theme(colors.primary),transparent)] before:hover:opacity-20 after:group-hover:opacity-100 ${className}`}
+      className={`bg-zinc-800 before:bg-primary-500 relative overflow-hidden rounded-xl p-px before:pointer-events-none before:absolute before:-left-48 before:-top-48 before:z-30 before:h-96 before:w-96 before:translate-x-[var(--mouse-x)] before:translate-y-[var(--mouse-y)] before:rounded-full before:opacity-0 before:blur-[100px] before:transition-opacity before:duration-500 after:absolute after:inset-0 after:z-10 after:rounded-[inherit] after:opacity-0 after:transition-opacity after:duration-500 after:[background:_radial-gradient(250px_circle_at_var(--mouse-x)_var(--mouse-y),theme(colors.primary.solid),transparent)] before:hover:opacity-20 after:group-hover:opacity-100 ${className}`}
     >
       {children}
     </div>
