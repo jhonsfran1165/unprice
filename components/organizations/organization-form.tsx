@@ -46,8 +46,6 @@ import { Icons } from "@/components/shared/icons"
 
 import "./styles.css"
 
-// TODO: clean this up for a better validation of exist account - maybe better use zod
-// watch elements to validate and clean errors at the same time
 export function OrganizationForm({ org }: { org?: Organization | null }) {
   const router = useRouter()
   const { supabase } = useSupabase()
@@ -107,7 +105,7 @@ export function OrganizationForm({ org }: { org?: Organization | null }) {
 
       // We use next js api endpoint here instead of supabase client directly because we use supabaseAdmin
       // keys in order to be able to bypass the RLS for creating new organizations.
-      // When creating new organizations, a users has to be authenticated and create orgs, profiles and other things
+      // When creating new organizations, a user has to be authenticated and create orgs, profiles and other things
       // for that we created a postgres function so it can be an atomic transaction in case of failure
       const org = await fetchAPI({
         url: "/api/org",

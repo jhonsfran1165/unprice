@@ -1,6 +1,5 @@
 import { NextFetchEvent, NextResponse, type NextRequest } from "next/server"
 
-import { LOCALHOST_GEO_DATA, getGeoData } from "@/lib//utils/geo"
 import {
   DEFAULT_REDIRECTS,
   HOME_HOSTNAMES,
@@ -39,8 +38,6 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
   // 1. validate sites
   // 2. validate app and session of protected routes
   // 3. validate analytics
-
-  console.log(req.geo)
 
   if (
     domain === "builderai.io" ||

@@ -68,7 +68,6 @@ export default async function handler(req: NextRequest, ev: NextFetchEvent) {
     }
 
     // TODO: send log
-
     return NextResponse.json({ error: "Error sending stats" }, { status: 400 })
   }
 }

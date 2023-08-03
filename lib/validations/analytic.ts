@@ -59,6 +59,36 @@ export const pageViewSchema = z.object({
   mobile: z.string().optional().default("Unknown"),
 })
 
+export const ClickHitsSchema = z.object({
+  id: z.string(),
+  key: z.string(),
+  domain: z.string().optional().default("Unknown"),
+  subdomain: z.string().optional().default("Unknown"),
+  time: z.number().int(),
+  timestamp: z.string(),
+  country: z.string().optional().default("Unknown"),
+  city: z.string().optional().default("Unknown"),
+  region: z.string().optional().default("Unknown"),
+  latitude: z.string().optional().default("Unknown"),
+  longitude: z.string().optional().default("Unknown"),
+  useragent: z.string().optional().default("Unknown"),
+  browser: z.string().optional().default("Unknown"),
+  browser_version: z.string().optional().default("Unknown"),
+  engine: z.string().optional().default("Unknown"),
+  engine_version: z.string().optional().default("Unknown"),
+  os: z.string().optional().default("Unknown"),
+  os_version: z.string().optional().default("Unknown"),
+  device: z.string().optional().default("Desktop"),
+  device_vendor: z.string().optional().default("Unknown"),
+  device_model: z.string().optional().default("Unknown"),
+  cpu_architecture: z.string().optional().default("Unknown"),
+  referer: z.string().optional().default("(direct)"),
+  referer_url: z.string().optional().default("(direct)"),
+  bot: z.boolean().optional(),
+  ip: z.string().optional().default("Unknown"),
+  mobile: z.string().optional().default("Unknown"),
+})
+
 export const eventSchema = z.object({
   ...payloadEventSchema.shape,
   id: z.string(),

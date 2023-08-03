@@ -2,8 +2,12 @@ import { NextRequest, userAgent } from "next/server"
 
 import { LOCALHOST_GEO_DATA } from "@/lib/constants"
 import { detectBot, parse } from "@/lib/middleware/utils"
-import { publishEvents, publishPageViews } from "@/lib/tinybird"
-import { capitalize, getDomainWithoutWWW, nanoid } from "@/lib/utils"
+import {
+  publishClickHits,
+  publishEvents,
+  publishPageViews,
+} from "@/lib/tinybird"
+import { capitalize, getDomainWithoutWWW } from "@/lib/utils"
 import {
   PayloadEventType,
   PayloadPageViewType,
@@ -13,42 +17,33 @@ import {
  * Recording clicks with geo, ua, referer and timestamp data
  * If key is not specified, record click as the root click ("_root", e.g. dub.sh, vercel.fyi)
  **/
-// TODO: fix record click in middleware
 export async function recordClickHits({
-  domain,
   req,
-  key,
+  id,
 }: {
-  domain: string
   req: NextRequest
-  key?: string
+  id: string
 }) {
-  const geo = process.env.VERCEL === "1" ? req.geo : LOCALHOST_GEO_DATA
+  const { domain, ip, key } = parse(req)
+  const isBot = detectBot(req)
   const ua = userAgent(req)
+  const geo = process.env.VERCEL === "1" ? req.geo : LOCALHOST_GEO_DATA
   const referer = req.headers.get("referer")
-  const pageViewId = nanoid()
+  const time = Date.now() // in milliseconds
+  const timestamp = new Date(time).toISOString()
 
-  console.log(pageViewId)
-
-  // let country, locale;
-  // try {
-  //     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  //     locale = (navigator.languages && navigator.languages.length) ? navigator.languages[0] : navigator.userLanguage || navigator.language || navigator.browserLanguage || 'en';
-  // } catch (error) {
-  //     // ignore error
-  // }
-
-  const pageViewObject = {
-    id: pageViewId,
-    time: new Date(Date.now()).toISOString(),
-    domain: domain || "Unknown",
+  const clickHitObject = {
+    id,
+    time,
+    timestamp,
+    domain,
     key: key || "_root",
     country: geo?.country || "Unknown",
     city: geo?.city || "Unknown",
     region: geo?.region || "Unknown",
     latitude: geo?.latitude || "Unknown",
     longitude: geo?.longitude || "Unknown",
-    ua: ua.ua || "Unknown",
+    useragent: ua.ua || "Unknown",
     browser: ua.browser.name || "Unknown",
     browser_version: ua.browser.version || "Unknown",
     engine: ua.engine.name || "Unknown",
@@ -59,16 +54,14 @@ export async function recordClickHits({
     device_vendor: ua.device.vendor || "Unknown",
     device_model: ua.device.model || "Unknown",
     cpu_architecture: ua.cpu?.architecture || "Unknown",
-    bot: ua.isBot,
-    // ip: req.headers.get("x-real-ip"),
-    // mobile: req.headers.get("sec-ch-ua-mobile"),
-    // platform: req.headers.get("sec-ch-ua-platform"),
-    // useragent: req.headers.get("user-agent"),
+    bot: isBot,
     referer: referer ? getDomainWithoutWWW(referer) : "(direct)",
     referer_url: referer || "(direct)",
+    ip: req.headers.get("x-real-ip") || ip,
+    mobile: req.headers.get("sec-ch-ua-mobile") || "",
   }
 
-  // return await publishClickHits(pageViewObject)
+  return await publishClickHits(clickHitObject)
 }
 
 export async function recordPageView({
@@ -87,8 +80,6 @@ export async function recordPageView({
 
   const time = Date.now() // in milliseconds
   const timestamp = new Date(time).toISOString()
-
-  console.log(pagePayload)
 
   const {
     session_id,

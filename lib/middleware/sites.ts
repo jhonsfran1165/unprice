@@ -2,7 +2,6 @@ import { NextFetchEvent, NextRequest, NextResponse } from "next/server"
 
 import { HOME_HOSTNAMES } from "@/lib/constants"
 import { parse } from "@/lib/middleware/utils"
-// import { recordClickHits } from "@/lib/tinybird"
 import { RootDomainProps } from "@/lib/types"
 import { redis } from "@/lib/upstash"
 
@@ -19,7 +18,7 @@ export default async function RootMiddleware(
   if (HOME_HOSTNAMES.has(domain) || domain.endsWith(".vercel.app")) {
     return NextResponse.next()
   } else {
-    // ev.waitUntil(recordClickHits(domain, req, key)) // record clicks on root page (if domain is not home)
+    // TODO: record clicks
 
     const { target, rewrite } =
       (await redis.get<RootDomainProps>(`sites:${domain}`)) || {}
