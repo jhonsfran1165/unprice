@@ -32,13 +32,15 @@ export const payloadPageViewSchema = z.object({
   project_slug: z.string().optional(),
 })
 
+// TODO: add version
+// TODO: send details as json payload
 export const pageViewSchema = z.object({
   ...payloadPageViewSchema.shape,
   id: z.string(),
   domain: z.string().optional().default("Unknown"),
   subdomain: z.string().optional().default("Unknown"),
   time: z.number().int(),
-  timestamp: z.string(),
+  timestamp: z.string().datetime(),
   city: z.string().optional().default("Unknown"),
   region: z.string().optional().default("Unknown"),
   latitude: z.string().optional().default("Unknown"),
@@ -65,7 +67,7 @@ export const ClickHitsSchema = z.object({
   domain: z.string().optional().default("Unknown"),
   subdomain: z.string().optional().default("Unknown"),
   time: z.number().int(),
-  timestamp: z.string(),
+  timestamp: z.string().datetime(),
   country: z.string().optional().default("Unknown"),
   city: z.string().optional().default("Unknown"),
   region: z.string().optional().default("Unknown"),
@@ -82,8 +84,6 @@ export const ClickHitsSchema = z.object({
   device_vendor: z.string().optional().default("Unknown"),
   device_model: z.string().optional().default("Unknown"),
   cpu_architecture: z.string().optional().default("Unknown"),
-  referer: z.string().optional().default("(direct)"),
-  referer_url: z.string().optional().default("(direct)"),
   bot: z.boolean().optional(),
   ip: z.string().optional().default("Unknown"),
   mobile: z.string().optional().default("Unknown"),
@@ -95,7 +95,7 @@ export const eventSchema = z.object({
   domain: z.string().optional().default("Unknown"),
   subdomain: z.string().optional().default("Unknown"),
   time: z.number().int(),
-  timestamp: z.string(),
+  timestamp: z.string().datetime(),
 })
 
 // Infer type for typescript
