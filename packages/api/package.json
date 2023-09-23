@@ -1,0 +1,56 @@
+{
+  "name": "@builderai/api",
+  "private": true,
+  "version": "0.1.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./env": "./src/env.mjs",
+    "./edge": "./src/edge.ts",
+    "./lambda": "./src/lambda.ts",
+    "./transformer": "./src/transformer.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "src/*"
+      ]
+    }
+  },
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "eslint .",
+    "format": "prettier --check \"**/*.{mjs,ts,json}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@builderai/auth": "^0.1.0",
+    "@builderai/config": "^0.1.0",
+    "@builderai/db": "^0.1.0",
+    "@builderai/stripe": "^0.1.0",
+    "@dinero.js/currencies": "2.0.0-alpha.14",
+    "@t3-oss/env-nextjs": "^0.6.0",
+    "@trpc/client": "10.32.1-alpha-actions-2-2023-08-14-10-36-36.53+ccbe40fde",
+    "@trpc/server": "10.32.1-alpha-actions-2-2023-08-14-10-36-36.53+ccbe40fde",
+    "dinero.js": "2.0.0-alpha.14",
+    "superjson": "1.13.1",
+    "undici": "^5.24.0",
+    "zod": "^3.22.1",
+    "zod-form-data": "^2.0.1"
+  },
+  "devDependencies": {
+    "@builderai/eslint-config": "^0.2.0",
+    "@builderai/prettier-config": "^0.1.0",
+    "@builderai/tsconfig": "^0.1.0",
+    "eslint": "^8.47.0",
+    "prettier": "^3.0.2",
+    "typescript": "^5.1.6"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@builderai/eslint-config/base"
+    ]
+  },
+  "prettier": "@builderai/prettier-config"
+}

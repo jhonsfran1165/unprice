@@ -11,6 +11,14 @@ coverage
 # next.js
 .next/
 out/
+next-env.d.ts
+
+# expo
+.expo/
+dist/
+expo-env.d.ts
+
+# production
 build
 
 # misc
@@ -24,18 +32,14 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local env files
-.env.local
 .env
-.env.development.local
-.env.test.local
-.env.production.local
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
 
 # turbo
 .turbo
-
-.contentlayer
-.env
-
-oldshit/*
-
-.tinyb

@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1695221733660,
+      "tag": "0000_lucky_iron_patriot",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1695224734972,
+      "tag": "0001_flawless_squirrel_girl",
+      "breakpoints": true
+    }
+  ]
+}
