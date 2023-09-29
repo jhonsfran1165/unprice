@@ -91,7 +91,7 @@ export function SidebarNav() {
               <span
                 className={cn(
                   "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                  pathname === item.href ? "bg-accent" : "transparent",
+                  pathname === item.href ? "bg-muted" : "transparent",
                   "disabled" in item && "cursor-not-allowed opacity-80"
                 )}
               >

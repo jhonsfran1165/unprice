@@ -7,7 +7,7 @@ import { siteConfig } from "@builderai/config"
 import { buttonVariants } from "@builderai/ui/button"
 import * as Icons from "@builderai/ui/icons"
 
-import { SiteFooter } from "~/components/footer"
+import { Footer } from "~/components/layout/footer"
 import { MobileDropdown } from "~/components/mobile-nav"
 import { MainNav } from "../(dashboard)/_components/main-nav"
 
@@ -31,7 +31,7 @@ export default function MarketingLayout(props: { children: ReactNode }) {
       </nav>
 
       <main className="flex-1">{props.children}</main>
-      <SiteFooter />
+      <Footer />
     </div>
   )
 }

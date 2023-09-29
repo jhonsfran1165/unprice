@@ -3,7 +3,7 @@ import Link from "next/link"
 import { siteConfig } from "@builderai/config"
 import * as Icons from "@builderai/ui/icons"
 
-import { SiteFooter } from "~/components/footer"
+import { Footer } from "~/components/layout/footer"
 
 export default function AuthLayout(props: { children: React.ReactNode }) {
   return (
@@ -17,7 +17,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                 "url(https://images.unsplash.com/photo-1590069261209-f8e9b8642343?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1376&q=80)",
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background to-background/60 md:to-background/40" />
+          <div className="to-background/60 md:to-background/40 absolute inset-0 bg-gradient-to-t from-background" />
           <Link
             href="/"
             className="absolute left-8 top-8 z-20 flex items-center text-lg font-bold tracking-tight"
@@ -31,7 +31,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
           {props.children}
         </div>
       </div>
-      <SiteFooter className="border-none" />
+      <Footer className="border-none" />
     </>
   )
 }

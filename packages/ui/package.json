@@ -65,6 +65,7 @@
   "prettier": "@builderai/prettier-config",
   "exports": {
     ".": "./src/index.ts",
+    "./skeleton": "./src/skeleton.tsx",
     "./avatar": "./src/avatar.tsx",
     "./button": "./src/button.tsx",
     "./calendar": "./src/calendar.tsx",

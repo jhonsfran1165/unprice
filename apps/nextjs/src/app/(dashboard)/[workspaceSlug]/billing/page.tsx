@@ -29,7 +29,6 @@ export default function BillingPage() {
 async function SubscriptionCard() {
   const subscription = await api.auth.mySubscription.query()
 
-  console.log(subscription)
   return (
     <Card>
       <CardHeader>

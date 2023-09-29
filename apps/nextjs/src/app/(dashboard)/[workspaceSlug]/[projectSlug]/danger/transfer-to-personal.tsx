@@ -57,7 +57,7 @@ export function TransferProjectToPersonal() {
 
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="secondary">Cancel</Button>
+                <Button variant="outline">Cancel</Button>
               </DialogClose>
               <Button
                 variant="destructive"

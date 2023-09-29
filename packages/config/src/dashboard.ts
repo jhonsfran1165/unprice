@@ -1,11 +1,4 @@
-import { cache } from "react"
-
-import {
-  AppModulesNav,
-  DashboardNavItem,
-  DashboardSidebarNavItem,
-  GetActiveTabs,
-} from "@/lib/types"
+import type { AppModulesNav, DashboardNavItem } from "./types"
 
 const OrgNavTabs: DashboardNavItem[] = [
   {
@@ -115,64 +108,64 @@ const ProjectNavTabs: DashboardNavItem[] = [
 ]
 
 export const AppModules: AppModulesNav = {
-  org: OrgNavTabs,
+  workspace: OrgNavTabs,
   project: ProjectNavTabs,
 }
 
-export const getDashboardSidebarNavItems = cache(
-  ({
-    moduleNav,
-    slug,
-  }: {
-    moduleNav: string
-    slug: string
-  }): DashboardSidebarNavItem[] => {
-    const moduleTabs = AppModules[moduleNav]
+// export const getDashboardSidebarNavItems = cache(
+//   ({
+//     moduleNav,
+//     slug,
+//   }: {
+//     moduleNav: string
+//     slug: string
+//   }): DashboardSidebarNavItem[] => {
+//     const moduleTabs = AppModules[moduleNav]
 
-    return moduleTabs?.find((item) => item.slug === slug)?.sidebarNav || []
-  }
-)
+//     return moduleTabs?.find((item) => item.slug === slug)?.sidebarNav || []
+//   }
+// )
 
-export const getActiveSegments = (segments, modules): number => {
-  const moduleKeys = Object.keys(modules)
-  let numberSegments = 0
+// export const getActiveSegments = (segments, modules): number => {
+//   const moduleKeys = Object.keys(modules)
+//   let numberSegments = 0
 
-  segments.map((segment) => {
-    if (moduleKeys.includes(segment)) {
-      numberSegments++
-    }
-  })
+//   segments.map((segment) => {
+//     if (moduleKeys.includes(segment)) {
+//       numberSegments++
+//     }
+//   })
 
-  return numberSegments
-}
+//   return numberSegments
+// }
 
-export const getActiveTabs = (
-  segments: string[],
-  appModules: AppModulesNav
-): GetActiveTabs => {
-  const numberSegments = getActiveSegments(segments, appModules)
-  const moduleKeys = Object.keys(appModules)
-  const ignoredRoutes = ["(dashboard)", "(auth)", "root"]
+// export const getActiveTabs = (
+//   segments: string[],
+//   appModules: AppModulesNav
+// ): GetActiveTabs => {
+//   const numberSegments = getActiveSegments(segments, appModules)
+//   const moduleKeys = Object.keys(appModules)
+//   const ignoredRoutes = ["(dashboard)", "(auth)", "root"]
 
-  const cleanSegments = segments.filter(
-    (segment) => !ignoredRoutes.includes(segment)
-  )
+//   const cleanSegments = segments.filter(
+//     (segment) => !ignoredRoutes.includes(segment)
+//   )
 
-  const activePathPrefix = `/${cleanSegments
-    ?.slice(0, numberSegments * 2)
-    .join("/")}`
+//   const activePathPrefix = `/${cleanSegments
+//     ?.slice(0, numberSegments * 2)
+//     .join("/")}`
 
-  // reverse the order so I can get the last active segment
-  const activeSegment = segments
-    .slice()
-    .reverse()
-    .find((segment) => moduleKeys.includes(segment))
+//   // reverse the order so I can get the last active segment
+//   const activeSegment = segments
+//     .slice()
+//     .reverse()
+//     .find((segment) => moduleKeys.includes(segment))
 
-  return {
-    tabs: activeSegment ? appModules[activeSegment] : [],
-    activePathPrefix,
-    numberSegments,
-    activeSegment,
-    cleanSegments,
-  }
-}
+//   return {
+//     tabs: activeSegment ? appModules[activeSegment] : [],
+//     activePathPrefix,
+//     numberSegments,
+//     activeSegment,
+//     cleanSegments,
+//   }
+// }

@@ -6,12 +6,20 @@ import { generateTheme } from "./generate-theme"
 export default {
   darkMode: ["class"],
   content: ["src/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
+  // disble hover on mobiles
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     container: {
       center: true,
       padding: "2rem",
       screens: {
-        "2xl": "1400px",
+        sm: "640px", // mobile phones
+        md: "768px", // tablets
+        lg: "1024px", // desktops
+        xl: "1280px", // large screens
+        "2xl": "1536px", // extra large screens
       },
     },
     extend: {

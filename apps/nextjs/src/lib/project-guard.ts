@@ -24,8 +24,6 @@ export async function userCanAccess({
     notFound()
   }
 
-  console.log(projectData.workspace.slug, workspaceSlug)
-
   // don't have access
   if (projectData.workspace.slug !== workspaceSlug) {
     redirect(`/${workspaceSlug}`)

@@ -38,6 +38,14 @@ const grayScalePairs = {
   black: "graydark",
 } as Record<string, string>
 
+const foregroundPairs = {
+  sky: "black",
+  mint: "black",
+  lime: "black",
+  yellow: "black",
+  amber: "black",
+} as Record<string, string>
+
 const themeNames = {
   sunset: {
     success: "green",
@@ -58,9 +66,11 @@ const themeNames = {
 }
 
 const generateVariantRadixColors = (color: string) => {
+  // there are some colors that only works on especial foreground
+  const foreground = foregroundPairs[color] ?? "white"
   return {
     DEFAULT: `var(--${color}-9)`,
-    foreground: `var(--${color}-12)`,
+    foreground: `${foreground}`,
     base: `var(--${color}-1)`,
     bgSubtle: `var(--${color}-2)`,
     bg: `var(--${color}-3)`,
@@ -83,14 +93,14 @@ export const generateTheme = (
   themeName: keyof typeof themeNames
 ): RecursiveKeyValuePair => {
   const theme = themeNames[themeName]
-  const background = grayScalePairs[theme.primary] ?? "gray"
+  const grayscale = grayScalePairs[theme.primary] ?? "gray"
 
   return {
     transparent: "transparent",
     current: "currentColor",
     black: "#000",
     white: "#fff",
-    gray: generateVariantRadixColors(background),
+    gray: generateVariantRadixColors(grayscale),
     success: generateVariantRadixColors(theme.success),
     danger: generateVariantRadixColors(theme.destructive),
     warning: generateVariantRadixColors(theme.warning),
@@ -98,34 +108,34 @@ export const generateTheme = (
     error: generateVariantRadixColors(theme.destructive),
     // shadcn variables
     background: {
-      ...generateVariantRadixColors(background),
-      DEFAULT: `var(--${background}-1)`,
+      ...generateVariantRadixColors(grayscale),
+      DEFAULT: `var(--${grayscale}-1)`,
     },
     primary: generateVariantRadixColors(theme.primary),
     secondary: generateVariantRadixColors(theme.secondary),
-    border: `var(--${background}-6)`,
-    input: `var(--${background}-6)`,
-    ring: `var(--${background}-1)`,
-    foreground: `var(--${background}-11)`,
+    border: `var(--${grayscale}-6)`,
+    input: `var(--${grayscale}-6)`,
+    ring: `var(--${grayscale}-1)`,
+    foreground: `var(--${grayscale}-11)`,
     destructive: {
       DEFAULT: `var(--${theme.destructive}-9)`,
       foreground: `var(--${theme.destructive}-3)`,
     },
     muted: {
-      DEFAULT: `var(--${background}-2)`,
-      foreground: `var(--${background}-11)`,
+      DEFAULT: `var(--${grayscale}-2)`,
+      foreground: `var(--${grayscale}-11)`,
     },
     accent: {
-      DEFAULT: `var(--${background}-5)`,
-      foreground: `var(--${background}-12)`,
+      DEFAULT: `var(--${grayscale}-5)`,
+      foreground: `var(--${grayscale}-12)`,
     },
     popover: {
-      DEFAULT: `var(--${background}-2)`,
-      foreground: `var(--${background}-11)`,
+      DEFAULT: `var(--${grayscale}-1)`,
+      foreground: `var(--${grayscale}-11)`,
     },
     card: {
-      DEFAULT: `var(--${background}-2)`,
-      foreground: `var(--${background}-11)`,
+      DEFAULT: `var(--${grayscale}-1)`,
+      foreground: `var(--${grayscale}-11)`,
     },
   }
 }

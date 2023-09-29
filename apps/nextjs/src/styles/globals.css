@@ -36,23 +36,23 @@
 
   /* default styles */
   h1 {
-    @apply text-background-textContrast font-cal text-4xl font-extrabold leading-[1.15] sm:leading-[1.15] md:text-6xl;
+    @apply font-cal text-4xl font-extrabold leading-[1.15] text-background-textContrast sm:leading-[1.15] md:text-6xl;
   }
 
   h2 {
-    @apply text-background-textContrast font-cal text-2xl font-bold md:text-3xl;
+    @apply font-cal text-2xl font-bold text-background-textContrast md:text-3xl;
   }
 
   h3 {
-    @apply text-background-textContrast font-cal text-xl font-semibold md:text-2xl;
+    @apply font-cal text-xl font-semibold text-background-textContrast md:text-2xl;
   }
 
   p {
-    @apply font-inter text-background-text text-base font-semibold md:text-xs;
+    @apply font-inter text-base font-semibold text-background-text md:text-xs;
   }
 
   body {
-    @apply font-inter bg-background-base text-background-text;
+    @apply bg-background-base font-inter text-background-text;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
@@ -66,31 +66,31 @@
 /* alias classes to override shadcn ui */
 @layer utilities {
   .primary {
-    @apply border-primary-border bg-primary-bg text-primary-text border;
+    @apply border border-primary-border bg-primary-bg text-primary-text;
   }
 
   .secondary {
-    @apply border-secondary-border bg-secondary-bg text-secondary-text border;
+    @apply border border-secondary-border bg-secondary-bg text-secondary-text;
   }
 
   .warning {
-    @apply border-warning-border bg-warning-bg text-warning-text border;
+    @apply border border-warning-border bg-warning-bg text-warning-text;
   }
 
   .default {
-    @apply border-background-border bg-background-bg text-background-text border;
+    @apply border border-background-border bg-background-bg text-background-text;
   }
 
   .danger {
-    @apply border-danger-border bg-danger-bg text-danger-text border;
+    @apply border border-danger-border bg-danger-bg text-danger-text;
   }
 
   .info {
-    @apply border-info-border bg-info-bg text-info-text border;
+    @apply border border-info-border bg-info-bg text-info-text;
   }
 
   .button-ghost {
-    @apply text-background-text hover:border-background-borderHover hover:bg-background-bg hover:text-background-textContrast active:bg-background-bgActive bg-transparent;
+    @apply bg-transparent text-background-text hover:border-background-borderHover hover:bg-background-bg hover:text-background-textContrast active:bg-background-bgActive;
   }
 
   .button-default {
@@ -98,19 +98,19 @@
   }
 
   .button-danger {
-    @apply danger hover:border-danger-borderHover hover:bg-danger-solid active:bg-danger-bgActive hover:text-white;
+    @apply danger hover:border-danger-borderHover hover:bg-danger-solid hover:text-white active:bg-danger-bgActive;
   }
 
   .button-primary {
-    @apply primary hover:border-primary-borderHover hover:bg-primary-solid active:bg-primary-bgActive hover:text-black;
+    @apply primary hover:border-primary-borderHover hover:bg-primary-solid hover:text-black active:bg-primary-bgActive;
   }
 
   .button-warning {
-    @apply warning hover:border-warning-borderHover hover:bg-warning-solid active:bg-warning-bgActive hover:text-white;
+    @apply warning hover:border-warning-borderHover hover:bg-warning-solid hover:text-white active:bg-warning-bgActive;
   }
 
   .button-secondary {
-    @apply secondary hover:border-secondary-borderHover hover:bg-secondary-solid active:bg-secondary-bgActive hover:text-white;
+    @apply secondary hover:border-secondary-borderHover hover:bg-secondary-solid hover:text-white active:bg-secondary-bgActive;
   }
 }
 
