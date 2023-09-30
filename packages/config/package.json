@@ -19,7 +19,9 @@
     "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@builderai/ui": "^0.1.0"
+  },
   "devDependencies": {
     "@builderai/eslint-config": "0.2.0",
     "@builderai/prettier-config": "^0.1.0",

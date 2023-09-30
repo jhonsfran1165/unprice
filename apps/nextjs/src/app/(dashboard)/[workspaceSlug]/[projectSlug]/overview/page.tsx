@@ -15,12 +15,12 @@ import {
 } from "@builderai/ui/card"
 import * as Icons from "@builderai/ui/icons"
 
+import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 import { Overview } from "~/app/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
 import { userCanAccess } from "~/lib/project-guard"
 import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
-import { DashboardShell } from "../../../_components/dashboard-shell"
 
 export const runtime = "edge"
 

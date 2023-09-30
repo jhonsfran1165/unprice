@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 
 import { db } from "@builderai/db"
 
@@ -26,6 +26,7 @@ export async function userCanAccess({
 
   // don't have access
   if (projectData.workspace.slug !== workspaceSlug) {
-    redirect(`/${workspaceSlug}`)
+    // redirect(`/${workspaceSlug}`)
+    notFound()
   }
 }

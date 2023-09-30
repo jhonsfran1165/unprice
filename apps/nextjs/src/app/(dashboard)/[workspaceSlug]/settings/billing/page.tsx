@@ -6,8 +6,8 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 
+import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 import { api } from "~/trpc/server"
-import { DashboardShell } from "../../_components/dashboard-shell"
 import { SubscriptionForm } from "./subscription-form"
 
 export const runtime = "edge"

@@ -1,13 +1,13 @@
-import { Button } from "@builderai/ui/button";
+import { Button } from "@builderai/ui/button"
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@builderai/ui/card";
+} from "@builderai/ui/card"
 
-import { DashboardShell } from "../../_components/dashboard-shell";
+import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 
 export default function Loading() {
   return (
@@ -30,5 +30,5 @@ export default function Loading() {
         </CardFooter>
       </Card>
     </DashboardShell>
-  );
+  )
 }

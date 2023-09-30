@@ -1,4 +1,4 @@
-import { DashboardShell } from "../../../_components/dashboard-shell";
+import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 
 export default function Loading() {
   return (
@@ -9,5 +9,5 @@ export default function Loading() {
     >
       <div className="h-[600px] animate-pulse rounded-lg bg-muted"></div>
     </DashboardShell>
-  );
+  )
 }

@@ -7,7 +7,7 @@ import { siteConfig } from "@builderai/config"
 import { buttonVariants } from "@builderai/ui/button"
 import * as Icons from "@builderai/ui/icons"
 
-import { Footer } from "~/components/layout/footer"
+import Footer from "~/components/layout/footer"
 import { MobileDropdown } from "~/components/mobile-nav"
 import { MainNav } from "../(dashboard)/_components/main-nav"
 

@@ -32,7 +32,7 @@ export default async function Page(props: {
         )
       }
     >
-      <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {projects.map((project) => (
           <li key={project.id}>
             <ProjectCard
@@ -45,7 +45,7 @@ export default async function Page(props: {
 
       {projects.length === 0 && (
         <div className="relative">
-          <ul className="grid select-none grid-cols-1 gap-4 opacity-40 md:grid-cols-3">
+          <ul className="grid select-none grid-cols-1 gap-4 opacity-40 lg:grid-cols-3">
             <ProjectCard.Skeleton pulse={false} />
             <ProjectCard.Skeleton pulse={false} />
             <ProjectCard.Skeleton pulse={false} />

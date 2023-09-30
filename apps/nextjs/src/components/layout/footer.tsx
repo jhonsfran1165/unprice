@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 
-import { layoutConfig } from "@builderai/config"
+import { siteConfig } from "@builderai/config"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Github, Twitter } from "@builderai/ui/icons"
@@ -25,7 +25,7 @@ const ThemeToggle = dynamic(() => import("~/components/layout/theme-toggle"), {
   ),
 })
 
-export function Footer(props: { className?: string }) {
+export default function Footer(props: { className?: string }) {
   return (
     <footer className={cn(props.className)}>
       <div className="z-30 mt-10 flex flex-col items-center justify-between gap-4 border-t bg-background-bgSubtle py-4 md:h-16 md:flex-row md:py-0">
@@ -38,7 +38,7 @@ export function Footer(props: { className?: string }) {
             <div className="flex flex-1 items-center justify-end">
               <nav className="flex items-center">
                 <Link
-                  href={layoutConfig.links.twitter}
+                  href={siteConfig.links.twitter}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -48,7 +48,7 @@ export function Footer(props: { className?: string }) {
                   </Button>
                 </Link>
                 <Link
-                  href={layoutConfig.links.github}
+                  href={siteConfig.links.github}
                   target="_blank"
                   rel="noreferrer"
                 >

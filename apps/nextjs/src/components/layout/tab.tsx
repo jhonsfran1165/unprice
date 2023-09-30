@@ -15,10 +15,6 @@ export const Tab = ({
   const tabPath = pathPrefix + tab.href
   const active = activeTab?.href === tab.href || false
 
-  if (!tab) {
-    return null
-  }
-
   return (
     <WrapperLink
       href={tab?.disabled ? "#" : tabPath}
@@ -28,7 +24,7 @@ export const Tab = ({
         "cursor-not-allowed": tab?.disabled,
       })}
     >
-      <div className="button-ghost rounded-md px-3 py-2 transition-all duration-75">
+      <div className="button-ghost rounded-md px-3 py-2 transition-all duration-200">
         <p
           className={cn(
             "text-sm text-background-text hover:text-background-textContrast",

@@ -27,7 +27,10 @@ import { useToast } from "@builderai/ui/use-toast"
 import { api } from "~/trpc/client"
 
 export function DeleteProject() {
-  const { projectSlug } = useParams() as { projectSlug: string }
+  const { projectSlug, workspaceSlug } = useParams() as {
+    projectSlug: string
+    workspaceSlug: string
+  }
   const toaster = useToast()
   const router = useRouter()
 
@@ -58,7 +61,7 @@ export function DeleteProject() {
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="ghost">Cancel</Button>
+                <Button variant="outline">Cancel</Button>
               </DialogClose>
               <Button
                 className="button-danger"
@@ -72,7 +75,7 @@ export function DeleteProject() {
                       slug: projectSlug,
                     })
                     toaster.toast({ title: "Project deleted" })
-                    router.push(`/dashboard`)
+                    router.push(`/${workspaceSlug}`)
                   } catch (err) {
                     if (err instanceof TRPCClientError) {
                       toaster.toast({

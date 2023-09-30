@@ -271,6 +271,10 @@ importers:
         version: 5.1.6
 
   packages/config:
+    dependencies:
+      '@builderai/ui':
+        specifier: ^0.1.0
+        version: link:../ui
     devDependencies:
       '@builderai/eslint-config':
         specifier: 0.2.0

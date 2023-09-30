@@ -1,5 +1,4 @@
-import { Component, CreditCard, Globe } from "lucide-react"
-
+import { Component, CreditCard, Globe } from "@builderai/ui/icons"
 import * as Icons from "@builderai/ui/icons"
 
 export const marketingFeatures = [

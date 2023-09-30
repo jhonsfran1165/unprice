@@ -1,50 +1,52 @@
-import type { AppModulesNav, DashboardNavItem } from "./types"
+import * as Icons from "@builderai/ui/icons"
 
-const OrgNavTabs: DashboardNavItem[] = [
+import type { DashboardNavItem, ModulesAppNav } from "./types"
+
+const WorkspaceNavTabs: DashboardNavItem[] = [
   {
-    module: "org",
-    slug: "org-root",
-    title: "Projects",
+    module: "workspace",
+    titleTab: "Projects",
+    id: "workspace-overview",
     href: "/",
   },
   {
-    module: "org",
-    slug: "org-stadistics",
+    module: "workspace",
+    id: "workspace-stadistics",
     title: "Statistics",
     href: "/stadistics",
     disabled: true,
   },
   {
-    module: "org",
-    slug: "org-settings",
+    module: "workspace",
+    id: "workspace-settings",
     title: "Settings",
     href: "/settings",
     disabled: false,
     tier: "FREE",
     sidebarNav: [
       {
-        module: "org",
+        module: "workspace",
         submodule: "settings",
-        slug: "org-settings",
+        id: "workspace-settings",
         title: "General",
         href: "/settings",
-        icon: "settings",
+        icon: Icons.Settings,
       },
       {
-        module: "org",
+        module: "workspace",
         submodule: "settings",
-        slug: "org-settings-billing",
+        id: "workspace-settings-billing",
         title: "Billing",
         href: "/settings/billing",
-        icon: "billing",
+        icon: Icons.CreditCard,
       },
       {
-        module: "org",
+        module: "workspace",
         submodule: "settings",
-        slug: "org-settings-members",
-        title: "Members",
-        href: "/settings/members",
-        icon: "users",
+        id: "workspace-settings-danger",
+        title: "Danger",
+        href: "/settings/danger",
+        icon: Icons.Warning,
       },
     ],
   },
@@ -53,13 +55,13 @@ const OrgNavTabs: DashboardNavItem[] = [
 const ProjectNavTabs: DashboardNavItem[] = [
   {
     module: "project",
-    slug: "project-root",
-    title: "Pages",
+    id: "project-overview",
+    title: "Dashboard",
     href: "/",
   },
   {
-    module: "org",
-    slug: "project-pro",
+    module: "project",
+    id: "project-pro",
     title: "Pro module",
     href: "/pro",
     disabled: false,
@@ -67,14 +69,20 @@ const ProjectNavTabs: DashboardNavItem[] = [
   },
   {
     module: "project",
-    slug: "project-stadistics",
+    id: "project-stadistics",
     title: "Statistics",
     href: "/stadistics",
     disabled: true,
   },
   {
     module: "project",
-    slug: "project-settings",
+    id: "project-apikey",
+    title: "Api Keys",
+    href: "/apikeys",
+  },
+  {
+    module: "project",
+    id: "project-settings",
     title: "Settings",
     href: "/settings",
     disabled: false,
@@ -82,90 +90,24 @@ const ProjectNavTabs: DashboardNavItem[] = [
       {
         module: "project",
         submodule: "settings",
-        slug: "project-settings",
+        id: "project-settings",
         title: "General",
         href: "/settings",
-        icon: "settings",
+        icon: Icons.Settings,
       },
       {
         module: "project",
         submodule: "settings",
-        slug: "project-settings-billing",
-        title: "Billing",
-        href: "/settings/billing",
-        icon: "billing",
-      },
-      {
-        module: "project",
-        submodule: "settings",
-        slug: "project-settings-plans",
-        title: "Plans",
-        href: "/settings/plans",
-        icon: "trello",
+        id: "project-settings-danger",
+        title: "Danger",
+        href: "/settings/danger",
+        icon: Icons.Warning,
       },
     ],
   },
 ]
 
-export const AppModules: AppModulesNav = {
-  workspace: OrgNavTabs,
+export const ModulesApp: ModulesAppNav = {
+  workspace: WorkspaceNavTabs,
   project: ProjectNavTabs,
 }
-
-// export const getDashboardSidebarNavItems = cache(
-//   ({
-//     moduleNav,
-//     slug,
-//   }: {
-//     moduleNav: string
-//     slug: string
-//   }): DashboardSidebarNavItem[] => {
-//     const moduleTabs = AppModules[moduleNav]
-
-//     return moduleTabs?.find((item) => item.slug === slug)?.sidebarNav || []
-//   }
-// )
-
-// export const getActiveSegments = (segments, modules): number => {
-//   const moduleKeys = Object.keys(modules)
-//   let numberSegments = 0
-
-//   segments.map((segment) => {
-//     if (moduleKeys.includes(segment)) {
-//       numberSegments++
-//     }
-//   })
-
-//   return numberSegments
-// }
-
-// export const getActiveTabs = (
-//   segments: string[],
-//   appModules: AppModulesNav
-// ): GetActiveTabs => {
-//   const numberSegments = getActiveSegments(segments, appModules)
-//   const moduleKeys = Object.keys(appModules)
-//   const ignoredRoutes = ["(dashboard)", "(auth)", "root"]
-
-//   const cleanSegments = segments.filter(
-//     (segment) => !ignoredRoutes.includes(segment)
-//   )
-
-//   const activePathPrefix = `/${cleanSegments
-//     ?.slice(0, numberSegments * 2)
-//     .join("/")}`
-
-//   // reverse the order so I can get the last active segment
-//   const activeSegment = segments
-//     .slice()
-//     .reverse()
-//     .find((segment) => moduleKeys.includes(segment))
-
-//   return {
-//     tabs: activeSegment ? appModules[activeSegment] : [],
-//     activePathPrefix,
-//     numberSegments,
-//     activeSegment,
-//     cleanSegments,
-//   }
-// }

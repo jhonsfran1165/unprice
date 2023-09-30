@@ -1,12 +1,4 @@
-import { LayoutConfig } from "./types";
-
-export const siteConfig = {
-  name: "Acme Corp",
-  description:
-    "Next.js starter kit that includes everything you need to build a modern web application. Mobile application preconfigured, ready to go.",
-  github: "https://github.com/juliusmarminge/acme-corp",
-  twitter: "https://twitter.com/jullerino",
-}
+import type { SiteConfig } from "./types"
 
 export const navItems = [
   {
@@ -27,9 +19,8 @@ export const navItems = [
   },
 ] satisfies { href: string; title: string }[]
 
-
 // TODO: put the logo here
-export const layoutConfig: LayoutConfig = {
+export const siteConfig: SiteConfig = {
   name: "Builder AI",
   description: "Build your software as a service with AI tools",
   mainNav: [

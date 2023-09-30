@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@builderai/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@builderai/ui/card"
 
-import { DashboardShell } from "../../_components/dashboard-shell";
+import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 
 export default function Loading() {
   return (
@@ -12,7 +12,7 @@ export default function Loading() {
       <LoadingCard title="Subscription" />
       <LoadingCard title="Usage" />
     </DashboardShell>
-  );
+  )
 }
 
 function LoadingCard(props: { title: string }) {
@@ -25,5 +25,5 @@ function LoadingCard(props: { title: string }) {
         <div className="h-24 animate-pulse rounded bg-muted" />
       </CardContent>
     </Card>
-  );
+  )
 }

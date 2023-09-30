@@ -1,9 +1,13 @@
-export type AppModulesNav = {
+import type { JsxElement } from "typescript"
+
+import type { LucideIcon } from "@builderai/ui/icons"
+
+export interface ModulesAppNav {
   workspace: DashboardNavItem[]
   project: DashboardNavItem[]
 }
 
-export type GetActiveTabs = {
+export interface GetActiveTabs {
   tabs: DashboardNavItem[]
   activePathPrefix: string
   numberSegments: number
@@ -16,34 +20,34 @@ export interface RootDomainProps {
   rewrite?: boolean
 }
 
-export type DashboardSidebarNavItem = {
-  title: string
+export interface DashboardSidebarNavItem {
+  title?: string
   module: string
   submodule: string
-  slug: string
+  id: string
   disabled?: boolean
   external?: boolean
   tier?: string
-  icon?: any
+  icon: LucideIcon
   href: string
 }
 
-export type DashboardNavItem = {
-  title: string
+export interface DashboardNavItem {
+  title?: string
   titleTab?: string
   module: string
   submodule?: string
-  slug: string
+  id: string
   href: string
   tier?: string
   sidebarNav?: DashboardSidebarNavItem[]
   disabled?: boolean
   external?: boolean
-  headerDisabled?: boolean
   tabsDisabled?: boolean
+  div?: JsxElement
 }
 
-export type PriceSubscription = {
+export interface PriceSubscription {
   amount: number
   currency: string
   priceIds: {
@@ -52,14 +56,14 @@ export type PriceSubscription = {
   }
 }
 
-export type NavItem = {
+export interface NavItem {
   title: string
   href: string
   disabled?: boolean
   external?: boolean
 }
 
-export interface LayoutConfig {
+export interface SiteConfig {
   name: string
   description: string
   mainNav: NavItem[]
