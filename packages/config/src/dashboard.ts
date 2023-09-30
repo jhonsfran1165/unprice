@@ -7,7 +7,7 @@ const WorkspaceNavTabs: DashboardNavItem[] = [
     module: "workspace",
     titleTab: "Projects",
     id: "workspace-overview",
-    href: "/",
+    href: "/overview",
   },
   {
     module: "workspace",
@@ -38,6 +38,7 @@ const WorkspaceNavTabs: DashboardNavItem[] = [
         id: "workspace-settings-billing",
         title: "Billing",
         href: "/settings/billing",
+        disabled: true,
         icon: Icons.CreditCard,
       },
       {
@@ -57,7 +58,13 @@ const ProjectNavTabs: DashboardNavItem[] = [
     module: "project",
     id: "project-overview",
     title: "Dashboard",
-    href: "/",
+    href: "/overview",
+    breadcrumbs: {
+      overview: "Overview",
+      analytics: "Analytics",
+      reports: "Reports",
+      notifications: "Notifications",
+    },
   },
   {
     module: "project",

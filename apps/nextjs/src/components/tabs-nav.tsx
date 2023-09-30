@@ -7,7 +7,7 @@ import { cn } from "@builderai/ui"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 import { Skeleton } from "@builderai/ui/skeleton"
 
-import { Tab } from "~/components/layout/tab"
+import { Tab } from "~/components/tab"
 import { layoutState } from "~/stores/layout"
 
 export const TabsNav = (props: { className?: string }) => {

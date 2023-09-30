@@ -1,7 +1,7 @@
+import Link from "next/link"
+
 import type { DashboardNavItem } from "@builderai/config"
 import { cn } from "@builderai/ui"
-
-import { WrapperLink } from "~/components/wrapper-link"
 
 export const Tab = ({
   tab,
@@ -16,13 +16,14 @@ export const Tab = ({
   const active = activeTab?.href === tab.href || false
 
   return (
-    <WrapperLink
-      href={tab?.disabled ? "#" : tabPath}
+    <Link
       className={cn("border-b-2 p-1", {
         "border-primary-solid": active,
         "border-transparent": !active,
-        "cursor-not-allowed": tab?.disabled,
+        "cursor-not-allowed opacity-80": tab.disabled,
       })}
+      href={tab.disabled ? "#" : tabPath}
+      aria-disabled={tab.disabled}
     >
       <div className="button-ghost rounded-md px-3 py-2 transition-all duration-200">
         <p
@@ -37,6 +38,6 @@ export const Tab = ({
           {tab?.titleTab ?? tab.title}
         </p>
       </div>
-    </WrapperLink>
+    </Link>
   )
 }

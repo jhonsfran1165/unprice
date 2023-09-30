@@ -1,12 +1,4 @@
 import Link from "next/link"
-import {
-  CreditCard,
-  LogIn,
-  LogOut,
-  PlusCircle,
-  Settings,
-  User,
-} from "lucide-react"
 
 import { currentUser } from "@builderai/auth"
 import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
@@ -21,10 +13,10 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
+import { CreditCard, LogIn, LogOut, Settings, User } from "@builderai/ui/icons"
 
 export async function UserNav() {
   const user = await currentUser()
-  // if (!user) redirect("/signin");
 
   if (!user) {
     return (
@@ -54,7 +46,7 @@ export async function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.profileImageUrl} alt={user.username ?? ""} />
+            <AvatarImage src={user.imageUrl} alt={user.username ?? ""} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
@@ -73,27 +65,25 @@ export async function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href={`/${user.id}/settings`}>
+            <Link href={`/${user.username}/settings`}>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
               <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href={`/${user.id}/billing`}>
+            <Link href={`/${user.username}/billing`}>
               <CreditCard className="mr-2 h-4 w-4" />
               <span>Billing</span>
               <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem disabled>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem disabled>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            <span>New Team</span>
+            <Link href={`/${user.username}/settings`}>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

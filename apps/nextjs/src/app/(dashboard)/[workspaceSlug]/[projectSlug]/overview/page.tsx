@@ -1,7 +1,6 @@
 import { Suspense } from "react"
 import Link from "next/link"
 import { formatRelative } from "date-fns"
-import { Activity, CreditCard, DollarSign, Users } from "lucide-react"
 
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
@@ -13,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
+import { Activity, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 import * as Icons from "@builderai/ui/icons"
 
 import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"

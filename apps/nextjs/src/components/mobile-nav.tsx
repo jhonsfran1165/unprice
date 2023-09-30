@@ -9,8 +9,8 @@ import * as Icons from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 
-import { Search } from "~/components/layout/search"
-import ThemeToggle from "~/components/layout/theme-toggle"
+import { Search } from "~/components/search"
+import ThemeToggle from "~/components/theme-toggle"
 
 export function MobileDropdown() {
   const [isOpen, setIsOpen] = React.useState(false)

@@ -10,7 +10,6 @@ import {
 } from "@tanstack/react-table"
 import { TRPCClientError } from "@trpc/client"
 import { format, formatRelative } from "date-fns"
-import { Eye, EyeOff } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
@@ -22,6 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
+import { Eye, EyeOff } from "@builderai/ui/icons"
 import * as Icons from "@builderai/ui/icons"
 import { Label } from "@builderai/ui/label"
 import {

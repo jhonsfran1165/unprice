@@ -1,5 +1,5 @@
-import Footer from "~/components/layout/footer"
-import HeaderContext from "~/components/layout/header-context"
+import Footer from "~/components/footer"
+import HeaderContext from "~/components/header-context"
 import Header from "./_components/header"
 
 export default function DashboardLayout(props: { children: React.ReactNode }) {

@@ -1,5 +1,3 @@
-import type { JsxElement } from "typescript"
-
 import type { LucideIcon } from "@builderai/ui/icons"
 
 export interface ModulesAppNav {
@@ -44,7 +42,7 @@ export interface DashboardNavItem {
   disabled?: boolean
   external?: boolean
   tabsDisabled?: boolean
-  div?: JsxElement
+  breadcrumbs?: Record<string, string>
 }
 
 export interface PriceSubscription {

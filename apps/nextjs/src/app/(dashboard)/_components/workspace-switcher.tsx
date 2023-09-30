@@ -1,10 +1,9 @@
 "use client"
 
-import { toDecimal } from "dinero.js"
-import { Check, ChevronsUpDown, PlusCircle } from "lucide-react"
+import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import * as React from "react"
+import { toDecimal } from "dinero.js"
 
 import { useOrganization, useOrganizationList, useUser } from "@builderai/auth"
 import type { PurchaseOrg } from "@builderai/db/schema"
@@ -37,6 +36,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
+import { Check, ChevronsUpDown, PlusCircle } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 import {
@@ -74,7 +74,7 @@ export function WorkspaceSwitcher() {
         role="combobox"
         aria-expanded={switcherOpen}
         aria-label="Select a workspace"
-        className="w-52 button-ghost justify-between p-1"
+        className="button-ghost w-52 justify-between p-1"
       >
         <Avatar className="mr-2 h-5 w-5">
           <AvatarFallback>Ac</AvatarFallback>

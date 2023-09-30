@@ -60,7 +60,20 @@ async function OrganizationSettingsPage() {
   await new Promise((resolve) => setTimeout(resolve, 1000))
 
   return (
-    <DashboardShell title="Organization" description="Manage your organization">
+    <DashboardShell
+      title="Organization"
+      description="Manage your organization"
+      headerAction={
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="self-end">Invite member</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <InviteMemberForm />
+          </DialogContent>
+        </Dialog>
+      }
+    >
       {/* TODO: Use URL instead of clientside tabs */}
       <Tabs defaultValue="general">
         <TabsList className="mb-2 w-full justify-start">
@@ -76,15 +89,6 @@ async function OrganizationSettingsPage() {
           />
         </TabsContent>
         <TabsContent value="members" className="flex flex-col space-y-4">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="self-end">Invite member</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <InviteMemberForm />
-            </DialogContent>
-          </Dialog>
-
           <Suspense fallback={<LoadingCard title="Members" description="" />}>
             <OrganizationMembers
               membersPromise={api.organization.listMembers.query()}
@@ -96,6 +100,7 @@ async function OrganizationSettingsPage() {
   )
 }
 
+// TODO: build this by my own or personalize
 function UserSettingsPage() {
   return (
     <DashboardShell title="Account" description="Manage your account details">
@@ -103,11 +108,12 @@ function UserSettingsPage() {
         appearance={{
           variables: {
             borderRadius: "var(--radius)",
-            // colorBackground: "var(--background)",
+            colorPrimary: "#ffc53d",
+            colorText: "#fdfdfc",
           },
           elements: {
             // Main card element
-            card: "shadow-none bg-background text-foreground",
+            card: "shadow-none bg-background-bg text-background-text",
             navbar: "hidden",
             navbarMobileMenuButton: "hidden",
             headerTitle: "hidden",

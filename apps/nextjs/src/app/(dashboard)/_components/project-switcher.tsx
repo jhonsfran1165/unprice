@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Check, ChevronsUpDown, LayoutGrid } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { useOrganization } from "@builderai/auth"
@@ -16,6 +15,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@builderai/ui/command"
+import { Check, ChevronsUpDown, LayoutGrid } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 
 import { getRandomPatternStyle } from "~/lib/generate-pattern"

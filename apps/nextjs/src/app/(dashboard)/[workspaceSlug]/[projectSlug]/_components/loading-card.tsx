@@ -4,13 +4,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@builderai/ui/card";
-import * as Icons from "@builderai/ui/icons";
+} from "@builderai/ui/card"
+import * as Icons from "@builderai/ui/icons"
 
 export function LoadingCard(props: {
-  title: string;
-  description: string;
-  className?: string;
+  title: string
+  description: string
+  className?: string
 }) {
   return (
     <Card className={props.className}>
@@ -22,5 +22,5 @@ export function LoadingCard(props: {
         <Icons.Spinner className="m-6 h-16 w-16 animate-spin" />
       </CardContent>
     </Card>
-  );
+  )
 }

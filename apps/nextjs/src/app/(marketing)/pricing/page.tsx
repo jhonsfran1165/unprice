@@ -1,6 +1,5 @@
-import { toDecimal } from "dinero.js";
-import { CheckCircle2 } from "lucide-react";
-import { Balancer } from "react-wrap-balancer";
+import { toDecimal } from "dinero.js"
+import { Balancer } from "react-wrap-balancer"
 
 import {
   Card,
@@ -8,18 +7,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@builderai/ui/card";
+} from "@builderai/ui/card"
+import { CheckCircle2 } from "@builderai/ui/icons"
 
-import { currencySymbol } from "~/lib/currency";
-import type { RouterOutputs } from "~/trpc/server";
-import { api } from "~/trpc/server";
-import { SubscribeNow } from "./subscribe-now";
+import { currencySymbol } from "~/lib/currency"
+import type { RouterOutputs } from "~/trpc/server"
+import { api } from "~/trpc/server"
+import { SubscribeNow } from "./subscribe-now"
 
 // FIXME: Run this in Edge runtime - currently got some weird transforming error with Dinero.js + Superjson
 // export const runtime = "edge";
 
 export default async function PricingPage() {
-  const plans = await api.stripe.plans.query();
+  const plans = await api.stripe.plans.query()
 
   return (
     <main className="flex w-full flex-col items-center justify-center pt-16">
@@ -36,11 +36,11 @@ export default async function PricingPage() {
         </div>
       </div>
     </main>
-  );
+  )
 }
 
 function PricingCard(props: {
-  plan: RouterOutputs["stripe"]["plans"][number];
+  plan: RouterOutputs["stripe"]["plans"][number]
 }) {
   return (
     <Card>
@@ -49,7 +49,7 @@ function PricingCard(props: {
         <div className="text-2xl font-bold">
           {toDecimal(
             props.plan.price,
-            ({ value, currency }) => `${currencySymbol(currency.code)}${value}`,
+            ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
           )}
           <span className="text-base font-normal"> / month</span>
         </div>{" "}
@@ -72,5 +72,5 @@ function PricingCard(props: {
         <SubscribeNow planId={props.plan.priceId} />
       </CardFooter>
     </Card>
-  );
+  )
 }

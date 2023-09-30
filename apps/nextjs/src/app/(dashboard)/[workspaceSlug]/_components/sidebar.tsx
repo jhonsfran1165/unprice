@@ -28,8 +28,8 @@ export function SidebarNav() {
                 item.href && (
                   <Link
                     key={index}
-                    href={fullPath}
-                    aria-disabled={"disabled" in item}
+                    href={item.disabled ? "#" : fullPath}
+                    aria-disabled={item.disabled}
                   >
                     <span
                       className={cn(
@@ -38,8 +38,7 @@ export function SidebarNav() {
                           transparent: !active,
                           "bg-background-bgSubtle": active,
                           "cursor-not-allowed opacity-80": item.disabled,
-                        },
-                        "disabled" in item && "cursor-not-allowed opacity-80"
+                        }
                       )}
                     >
                       <Icon className="mr-2 h-4 w-4" />

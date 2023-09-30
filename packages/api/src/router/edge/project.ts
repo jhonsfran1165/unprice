@@ -41,7 +41,7 @@ export const projectRouter = createTRPCRouter({
       })
 
       // TODO: Don't hardcode the limit to PRO
-      if (projects[0] && projects[0].count > PROJECT_LIMITS.PRO) {
+      if (projects[0] && projects[0].count >= PROJECT_LIMITS.PRO) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "Limit reached" })
       }
 

@@ -3,7 +3,6 @@
 import React from "react"
 import { TRPCClientError } from "@trpc/client"
 import { add, format } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
 
 import type { CreateApiKey } from "@builderai/db/schema"
 import { createApiKeySchema } from "@builderai/db/schema"
@@ -18,6 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
+import { Calendar as CalendarIcon } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 import { useToast } from "@builderai/ui/use-toast"
