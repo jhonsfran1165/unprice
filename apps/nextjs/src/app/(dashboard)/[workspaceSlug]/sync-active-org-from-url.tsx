@@ -25,14 +25,14 @@ export function SyncActiveOrgFromUrl() {
 
     if (org) {
       void setActive(org)
+      router.push(`/${workspaceSlug}`)
     } else {
       void setActive({ organization: null })
+      router.push(`/${workspaceSlug}`)
     }
 
-    router.push(`/${workspaceSlug}`)
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspaceSlug, isLoaded])
+  }, [workspaceSlug])
 
   return null
 }

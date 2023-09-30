@@ -3,7 +3,7 @@ import Link from "next/link"
 import { siteConfig } from "@builderai/config"
 import * as Icons from "@builderai/ui/icons"
 
-import { Footer } from "~/components/footer"
+import Footer from "~/components/footer"
 
 export default function AuthLayout(props: { children: React.ReactNode }) {
   return (

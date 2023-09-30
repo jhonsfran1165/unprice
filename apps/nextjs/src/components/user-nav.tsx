@@ -78,7 +78,7 @@ export async function UserNav() {
               <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem disabled>
+          <DropdownMenuItem asChild>
             <Link href={`/${user.username}/settings`}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>

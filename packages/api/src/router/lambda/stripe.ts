@@ -39,7 +39,7 @@ export const stripeRouter = createTRPCRouter({
         })
       }
 
-      const returnUrl = process.env.NEXTJS_URL + "/dashboard"
+      const returnUrl = process.env.NEXTJS_URL + "/"
 
       if (workspace && workspace.plan !== "FREE" && workspace.stripeId) {
         /**
@@ -112,7 +112,7 @@ export const stripeRouter = createTRPCRouter({
       const { userId } = opts.ctx.auth
       const { orgName, planId } = opts.input
 
-      const returnUrl = process.env.NEXTJS_URL + "/dashboard"
+      const returnUrl = process.env.NEXTJS_URL + "/"
 
       if (!returnUrl) {
         throw new TRPCError({

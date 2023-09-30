@@ -2,7 +2,7 @@ import type { SiteConfig } from "./types"
 
 export const navItems = [
   {
-    href: "/dashboard",
+    href: "/",
     title: "Overview",
   },
   {
@@ -10,11 +10,11 @@ export const navItems = [
     title: "Pricing",
   },
   {
-    href: "/dashboard",
+    href: "/",
     title: "Products",
   },
   {
-    href: "/dashboard",
+    href: "/",
     title: "Settings",
   },
 ] satisfies { href: string; title: string }[]
@@ -32,7 +32,7 @@ export const siteConfig: SiteConfig = {
   links: {
     twitter: "https://twitter.com/shadcn",
     github: "https://github.com/shadcn/ui",
-    dashboard: "/dashboard",
+    dashboard: "/",
   },
 }
 

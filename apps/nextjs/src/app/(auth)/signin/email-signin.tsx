@@ -79,7 +79,7 @@ export function EmailSignIn() {
       magicFlow.cancelMagicLinkFlow()
       if (response?.status === "complete") {
         await setActive({ session: response.createdSessionId })
-        router.push(`/dashboard`)
+        router.push(`/`)
       }
     } else {
       if (!signUpLoaded) return null
@@ -112,7 +112,7 @@ export function EmailSignIn() {
 
       if (response?.status === "complete") {
         await setActive({ session: response.createdSessionId })
-        router.push(`/dashboard`)
+        router.push(`/`)
         return
       }
     }

@@ -19,10 +19,13 @@ export default function Header() {
       <MaxWidthWrapper className="max-w-screen-2xl">
         <div className="flex h-16 items-center space-x-2 bg-background-bgSubtle sm:justify-between sm:space-x-0">
           <div className="flex items-center justify-start">
-            <Link href="/">
-              <Icons.Logo />
+            <Link href="/" className="flex items-center">
+              <Icons.Logo className="mr-2 h-6 w-6" />
+              <span className="text-lg font-bold tracking-tight">
+                {siteConfig.name}
+              </span>
             </Link>
-            <span className="mx-2 text-lg font-bold text-muted-foreground">
+            <span className="mx-4 text-lg font-bold text-muted-foreground">
               /
             </span>
             <WorkspaceSwitcher />
