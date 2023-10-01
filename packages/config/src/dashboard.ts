@@ -38,7 +38,6 @@ const WorkspaceNavTabs: DashboardNavItem[] = [
         id: "workspace-settings-billing",
         title: "Billing",
         href: "/settings/billing",
-        disabled: true,
         icon: Icons.CreditCard,
       },
       {

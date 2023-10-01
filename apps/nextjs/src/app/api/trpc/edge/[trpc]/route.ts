@@ -1,10 +1,10 @@
-import type { NextRequest } from "next/server";
-import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import type { NextRequest } from "next/server"
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
 
-import { createTRPCContext } from "@builderai/api";
-import { edgeRouter } from "@builderai/api/edge";
+import { createTRPCContext } from "@builderai/api"
+import { edgeRouter } from "@builderai/api/edge"
 
-export const runtime = "edge";
+export const runtime = "edge"
 
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
@@ -13,9 +13,9 @@ const handler = (req: NextRequest) =>
     req: req,
     createContext: () => createTRPCContext({ req }),
     onError: ({ error, path }) => {
-      console.log("Error in tRPC handler (edge) on path", path);
-      console.error(error);
+      console.log("Error in tRPC handler (edge) on path", path)
+      console.error(error)
     },
-  });
+  })
 
-export { handler as GET, handler as POST };
+export { handler as GET, handler as POST }

@@ -63,7 +63,7 @@ export function activateRLS(db: NeonDatabase<typeof schema>, tenantId: string) {
         sql`SELECT set_config('app.tenantId', '${sql.raw(tenantId)}', FALSE)`
       )
 
-      // set role to authenticated to target the RLS
+      // set role to neon_superuser to target the RLS
       await tx.execute(sql`set SESSION role 'neon_superuser'`)
     })
   }
@@ -84,6 +84,10 @@ export function deactivateRLS(db: NeonDatabase<typeof schema>) {
   return (): Promise<void> => {
     return db.transaction(async (tx) => {
       await tx.execute(sql`RESET SESSION AUTHORIZATION`)
+
+      // set role to authenticated to bypass RLS again
+      await tx.execute(sql`set SESSION role 'authenticated'`)
+
       // unset tenantId
       await tx.execute(
         sql`SELECT set_config('app.tenantId', '${sql.raw("")}', FALSE)`

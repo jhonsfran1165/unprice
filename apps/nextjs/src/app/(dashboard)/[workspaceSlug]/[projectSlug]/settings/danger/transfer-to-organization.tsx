@@ -48,10 +48,10 @@ import { api } from "~/trpc/client"
 export function TransferProjectToOrganization(props: {
   orgsPromise: Promise<RouterOutputs["auth"]["listOrganizations"]>
 }) {
-  const { workspaceSlug, projectSlug } = useParams() as {
-    workspaceSlug: string
-    projectSlug: string
-  }
+  const params = useParams()
+
+  const workspaceSlug = params.workspaceSlug as string
+  const projectSlug = params.projectSlug as string
   const orgs = use(props.orgsPromise)
 
   const toaster = useToast()

@@ -114,7 +114,7 @@ export function WorkspaceSwitcher() {
                 {normalizedObject.name?.substring(0, 2)}
               </AvatarFallback>
             </Avatar>
-            {normalizedObject.name}
+            <span className="z-10 font-semibold">{normalizedObject.name}</span>
             <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -132,7 +132,7 @@ export function WorkspaceSwitcher() {
                     setSwitcherOpen(false)
                     router.push(`/${user.username}`)
                   }}
-                  className="cursor-pointer text-sm"
+                  className="cursor-pointer text-sm font-semibold"
                 >
                   <Avatar className="mr-2 h-5 w-5">
                     <AvatarImage
@@ -162,7 +162,7 @@ export function WorkspaceSwitcher() {
                       setSwitcherOpen(false)
                       router.push(`/${org.slug}`)
                     }}
-                    className="cursor-pointer text-sm"
+                    className="cursor-pointer text-sm font-semibold"
                   >
                     <Avatar className="mr-2 h-5 w-5">
                       <AvatarImage

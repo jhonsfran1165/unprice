@@ -18,8 +18,6 @@ import {
 import { Check, ChevronsUpDown, LayoutGrid } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 
-import { getRandomPatternStyle } from "~/lib/generate-pattern"
-
 export function ProjectSwitcher(props: {
   projectsPromise: Promise<RouterOutputs["project"]["listByActiveWorkspace"]>
 }) {
@@ -30,9 +28,9 @@ export function ProjectSwitcher(props: {
 
   const [switcherOpen, setSwitcherOpen] = React.useState(false)
 
-  const { projectSlug } = useParams() as {
-    projectSlug: string
-  }
+  const params = useParams()
+
+  const projectSlug = params.projectSlug as string
 
   const activeProject = projects.find((p) => p.slug === projectSlug)
 
@@ -67,10 +65,7 @@ export function ProjectSwitcher(props: {
             aria-label="Select a project"
             className="relative w-52 justify-between"
           >
-            <div
-              style={getRandomPatternStyle(projectSlug)}
-              className="absolute inset-1 opacity-25"
-            />
+            <div className="absolute inset-1 opacity-25" />
             <span className="z-10 font-semibold">{activeProject?.name}</span>
             <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -89,10 +84,7 @@ export function ProjectSwitcher(props: {
                   }}
                   className="text-sm font-semibold"
                 >
-                  <div
-                    style={getRandomPatternStyle(project.id)}
-                    className="absolute inset-1 opacity-25"
-                  />
+                  <div className="absolute inset-1 opacity-25" />
                   {project.name}
                   <Check
                     className={cn(

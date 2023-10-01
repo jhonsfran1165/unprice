@@ -5,14 +5,6 @@ export interface ModulesAppNav {
   project: DashboardNavItem[]
 }
 
-export interface GetActiveTabs {
-  tabs: DashboardNavItem[]
-  activePathPrefix: string
-  numberSegments: number
-  activeSegment?: string
-  cleanSegments: string[]
-}
-
 export interface RootDomainProps {
   target: string
   rewrite?: boolean
@@ -43,15 +35,6 @@ export interface DashboardNavItem {
   external?: boolean
   tabsDisabled?: boolean
   breadcrumbs?: Record<string, string>
-}
-
-export interface PriceSubscription {
-  amount: number
-  currency: string
-  priceIds: {
-    test: string
-    production: string
-  }
 }
 
 export interface NavItem {

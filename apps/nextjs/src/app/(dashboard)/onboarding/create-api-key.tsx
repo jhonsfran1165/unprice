@@ -31,7 +31,7 @@ export function CreateApiKey() {
         }}
         initial="hidden"
         animate="show"
-        className="flex flex-col rounded-xl bg-background/60 p-8"
+        className="bg-background/60 flex flex-col rounded-xl p-8"
       >
         <motion.h1
           className="mb-4 font-cal text-2xl font-bold transition-colors sm:text-3xl"

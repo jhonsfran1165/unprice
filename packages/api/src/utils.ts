@@ -22,9 +22,12 @@ export const hasAccessToProject = async ({
   // if tenant provided look to that otherwise set it as tenantId from the context
   const tenant = tenantId ? tenantId : ctx.tenantId
 
-  const condition = projectId
-    ? eq(project.id, projectId)
-    : projectSlug && eq(project.slug, projectSlug)
+  // some queries activate RLS but this has to bypass RLS
+  await ctx.deactivateRLS()
+
+  const condition =
+    (projectId && eq(project.id, projectId)) ??
+    (projectSlug && eq(project.slug, projectSlug))
 
   if (!condition) {
     throw new TRPCError({

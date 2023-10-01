@@ -10,11 +10,11 @@ import { Skeleton } from "@builderai/ui/skeleton"
 import { Tab } from "~/components/tab"
 import { layoutState } from "~/stores/layout"
 
-export const TabsNav = (props: { className?: string }) => {
-  const activePathPrefix = layoutState.activePathPrefix.use()
+export function TabsNav(props: { className?: string }) {
   const canRenderTabs = layoutState.canRenderTabs.use()
   const tabs = layoutState.activeModuleTabs.use()
   const activeModuleTab = layoutState.activeModuleTab.use()
+  const activePathPrefix = layoutState.activePathPrefix.use()
 
   return (
     <Show if={canRenderTabs} else={null} wrap={AnimatePresence}>

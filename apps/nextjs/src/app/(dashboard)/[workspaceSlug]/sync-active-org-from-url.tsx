@@ -12,7 +12,9 @@ import { useOrganizationList } from "@builderai/auth"
  * and set it to that.
  */
 export function SyncActiveOrgFromUrl() {
-  const { workspaceSlug } = useParams() as { workspaceSlug: string }
+  const params = useParams()
+
+  const workspaceSlug = params.workspaceSlug as string
   const { setActive, organizationList, isLoaded } = useOrganizationList()
   const router = useRouter()
 

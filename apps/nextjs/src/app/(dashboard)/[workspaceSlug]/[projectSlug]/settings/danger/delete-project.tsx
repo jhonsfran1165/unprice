@@ -27,10 +27,10 @@ import { useToast } from "@builderai/ui/use-toast"
 import { api } from "~/trpc/client"
 
 export function DeleteProject() {
-  const { projectSlug, workspaceSlug } = useParams() as {
-    projectSlug: string
-    workspaceSlug: string
-  }
+  const params = useParams()
+
+  const workspaceSlug = params.workspaceSlug as string
+  const projectSlug = params.projectSlug as string
   const toaster = useToast()
   const router = useRouter()
 

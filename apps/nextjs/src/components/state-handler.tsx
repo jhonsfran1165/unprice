@@ -19,10 +19,10 @@ export function LegendStateHandler() {
   // const initialized = useRef(false)
   const path = usePathname()
 
-  const { workspaceSlug, projectSlug } = useParams() as {
-    workspaceSlug: string
-    projectSlug: string
-  }
+  const params = useParams()
+
+  const workspaceSlug = params.workspaceSlug as string
+  const projectSlug = params.projectSlug as string
 
   // just need the path of the current module
   const ignoredRoutes = [

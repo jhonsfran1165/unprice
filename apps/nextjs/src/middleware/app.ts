@@ -34,6 +34,14 @@ export default async function AppMiddleware(
     // if the url has a workspace defined lets validate it
     const workspaceSlug = parts[0]
 
+    if (auth.sessionClaims.username === workspaceSlug) {
+      return NextResponse.next()
+    }
+
+    if (tenantId === workspaceSlug) {
+      return NextResponse.next()
+    }
+
     // if the user has a org set
     if (auth.orgSlug && tenantId !== workspaceSlug) {
       // User is accessing an org that's not their active one
