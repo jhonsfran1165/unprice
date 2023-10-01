@@ -6,7 +6,8 @@ import type { HandleOAuthCallbackParams } from "@builderai/auth"
 import { useClerk } from "@builderai/auth"
 import * as Icons from "@builderai/ui/icons"
 
-export const runtime = "edge"
+// TODO: activate later. It is  hitting limits on vercel
+// export const runtime = "edge"
 
 export default function SSOCallback(props: {
   searchParams: HandleOAuthCallbackParams

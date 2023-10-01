@@ -1,7 +1,8 @@
 import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 import { DeleteWorkspace } from "./delete-workspace"
 
-export const runtime = "edge"
+// TODO: activate later. It is  hitting limits on vercel
+// export const runtime = "edge"
 
 export default function DangerZonePage() {
   return (

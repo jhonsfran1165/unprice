@@ -10,7 +10,8 @@ import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 import { api } from "~/trpc/server"
 import { SubscriptionForm } from "./subscription-form"
 
-export const runtime = "edge"
+// TODO: activate later. It is  hitting limits on vercel
+// export const runtime = "edge"
 
 export default function BillingPage() {
   return (

@@ -4,7 +4,8 @@ import Link from "next/link"
 import { EmailSignIn } from "./email-signin"
 import { OAuthSignIn } from "./oauth-signin"
 
-export const runtime = "edge"
+// TODO: activate later. It is  hitting limits on vercel
+// export const runtime = "edge"
 
 export default function AuthenticationPage() {
   return (
