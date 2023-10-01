@@ -7,7 +7,8 @@ import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 import { api } from "~/trpc/server"
 import { ProjectCard } from "../_components/project-card"
 
-export const runtime = "edge"
+// TODO: activate later. It is  hitting limits on vercel
+// export const runtime = "edge"
 
 export default async function Page(props: {
   params: { workspaceSlug: string }

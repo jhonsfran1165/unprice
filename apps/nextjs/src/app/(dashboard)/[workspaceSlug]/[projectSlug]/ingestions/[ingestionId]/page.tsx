@@ -13,7 +13,8 @@ import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 import { userCanAccess } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 
-export const runtime = "edge"
+// TODO: activate later. It is  hitting limits on vercel
+// export const runtime = "edge"
 
 export default async function IngestionPage(props: {
   params: { workspaceSlug: string; projectSlug: string; ingestionId: string }

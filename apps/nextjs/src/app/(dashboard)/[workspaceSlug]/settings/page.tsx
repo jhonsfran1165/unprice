@@ -14,7 +14,8 @@ import { OrganizationImage } from "./_components/organization-image"
 import { OrganizationMembers } from "./_components/organization-members"
 import { OrganizationName } from "./_components/organization-name"
 
-export const runtime = "edge"
+// TODO: activate later. It is  hitting limits on vercel
+// export const runtime = "edge"
 
 export default function WorkspaceSettingsPage() {
   const { orgId, userId } = auth()

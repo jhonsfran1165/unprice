@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
-import { Activity, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 import * as Icons from "@builderai/ui/icons"
+import { Activity, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 
 import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 import { Overview } from "~/app/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
@@ -22,7 +22,8 @@ import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
 
-export const runtime = "edge"
+// TODO: activate later. It is  hitting limits on vercel
+// export const runtime = "edge"
 
 export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
