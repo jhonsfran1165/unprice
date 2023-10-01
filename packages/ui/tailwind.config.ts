@@ -2,11 +2,11 @@
  * This file is not used for any compilation purpose, it is only used
  * for Tailwind Intellisense & Autocompletion in the source files
  */
-import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss"
 
-import baseConfig from "@builderai/tailwind-config";
+import baseConfig from "@builderai/tailwind-config"
 
 export default {
   content: baseConfig.content,
   presets: [baseConfig],
-} satisfies Config;
+} satisfies Config

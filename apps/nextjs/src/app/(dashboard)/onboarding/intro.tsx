@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Balancer } from "react-wrap-balancer";
+import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
+import { Balancer } from "react-wrap-balancer"
 
-import { Button } from "@builderai/ui/button";
+import { Button } from "@builderai/ui/button"
 
-import { useDebounce } from "~/lib/use-debounce";
+import { useDebounce } from "~/lib/use-debounce"
 
 export default function Intro() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const showText = useDebounce(true, 800);
+  const showText = useDebounce(true, 800)
 
   return (
     <motion.div
@@ -79,5 +79,5 @@ export default function Intro() {
         </motion.div>
       )}
     </motion.div>
-  );
+  )
 }

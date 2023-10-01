@@ -38,7 +38,7 @@ export default function Home() {
           <Balancer>Your all-in-one, enterprise ready starting point</Balancer>
         </h1>
         <p
-          className="mt-6 animate-fade-up text-center text-muted-foreground/80 opacity-0 md:text-xl"
+          className="text-muted-foreground/80 mt-6 animate-fade-up text-center opacity-0 md:text-xl"
           style={{ animationDelay: "0.30s", animationFillMode: "forwards" }}
         >
           <Balancer>

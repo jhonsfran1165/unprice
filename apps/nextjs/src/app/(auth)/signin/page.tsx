@@ -1,10 +1,10 @@
-import type { Route } from "next";
-import Link from "next/link";
+import type { Route } from "next"
+import Link from "next/link"
 
-import { EmailSignIn } from "./email-signin";
-import { OAuthSignIn } from "./oauth-signin";
+import { EmailSignIn } from "./email-signin"
+import { OAuthSignIn } from "./oauth-signin"
 
-export const runtime = "edge";
+export const runtime = "edge"
 
 export default function AuthenticationPage() {
   return (
@@ -52,5 +52,5 @@ export default function AuthenticationPage() {
         .
       </p>
     </div>
-  );
+  )
 }

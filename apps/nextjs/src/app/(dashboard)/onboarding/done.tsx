@@ -41,7 +41,7 @@ export function Done(props: { workspaceSlug: string }) {
         }}
         initial="hidden"
         animate="show"
-        className="flex flex-col space-y-4 rounded-xl bg-background/60 p-8"
+        className="bg-background/60 flex flex-col space-y-4 rounded-xl p-8"
       >
         <h1 className="font-cal text-2xl font-bold transition-colors sm:text-3xl">
           You are all set!
