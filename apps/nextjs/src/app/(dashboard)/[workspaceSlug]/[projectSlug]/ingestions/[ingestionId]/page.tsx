@@ -13,7 +13,9 @@ import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 import { userCanAccess } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 
-export const runtime = "edge"
+// TODO: vercel is complaining about this function Error:
+// The Edge Function "[workspaceSlug]/[projectSlug]/ingestions/[ingestionId]" size is 1.31 MB and your plan size limit is 1 MB. Learn More: https://vercel.link/edge-function-size
+// export const runtime = "edge"
 
 export default async function IngestionPage(props: {
   params: { workspaceSlug: string; projectSlug: string; ingestionId: string }
