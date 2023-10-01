@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import {
   useParams,
   usePathname,
@@ -9,14 +9,19 @@ import {
 import { enableReactComponents } from "@legendapp/state/config/enableReactComponents"
 import { enableReactUse } from "@legendapp/state/config/enableReactUse"
 
+import type { ModulesAppNav } from "@builderai/config"
+
 import { layoutState } from "~/stores/layout"
 
 enableReactComponents()
 enableReactUse() // This adds the use() function to observables
 
-export function LegendStateHandler() {
-  // const canRender = useCanRender()
-  // const initialized = useRef(false)
+export function LegendStateHandler({
+  modulesApp,
+}: {
+  modulesApp: ModulesAppNav
+}) {
+  const initialized = useRef(false)
   const path = usePathname()
 
   const params = useParams()
@@ -46,14 +51,17 @@ export function LegendStateHandler() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path])
 
-  // // configure persistance only once
-  // if (!initialized.current && canRender) {
-  //   // Persist this observable
-  //   persistObservable(layoutState, {
-  //     local: "layoutState", // Unique name
-  //   })
-  //   initialized.current = true
-  // }
+  // configure persistance only once
+  if (!initialized.current) {
+    // set the nav menus
+    layoutState.modulesApp.set(modulesApp)
+
+    // // Persist this observable
+    // persistObservable(layoutState, {
+    //   local: "layoutState", // Unique name
+    // })
+    initialized.current = true
+  }
 
   return null
 }

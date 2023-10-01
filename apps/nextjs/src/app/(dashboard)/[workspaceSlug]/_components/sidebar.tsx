@@ -7,20 +7,26 @@ import { AnimatePresence } from "framer-motion"
 
 import { cn } from "@builderai/ui"
 
+import { useCanRender } from "~/lib/use-can-render"
 import { layoutState } from "~/stores/layout"
 
 export function SidebarNav() {
   const path = usePathname()
+  const canRender = useCanRender()
+
   const items = layoutState.activeModuleTab.sidebarNav.use()
   const activePathPrefix = layoutState.activePathPrefix.use()
 
   return (
-    <Show if={items} else={null} wrap={AnimatePresence}>
+    <Show
+      if={canRender && items?.length > 0}
+      else={null}
+      wrap={AnimatePresence}
+    >
       {() => (
         <aside className="flex-col sm:flex sm:w-[250px]">
           <nav className="grid items-start gap-2">
             {items.map((item, index) => {
-              const Icon = item.icon
               const fullPath = activePathPrefix + item.href
               const active = fullPath === path
 
@@ -41,7 +47,7 @@ export function SidebarNav() {
                         }
                       )}
                     >
-                      <Icon className="mr-2 h-4 w-4" />
+                      {item.icon}
                       <span
                         className={cn({
                           "text-background-textContrast": active,

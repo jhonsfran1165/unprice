@@ -30,7 +30,7 @@ const WorkspaceNavTabs: DashboardNavItem[] = [
         id: "workspace-settings",
         title: "General",
         href: "/settings",
-        icon: Icons.Settings,
+        icon: <Icons.Settings className="mr-2 h-4 w-4" />,
       },
       {
         module: "workspace",
@@ -38,7 +38,7 @@ const WorkspaceNavTabs: DashboardNavItem[] = [
         id: "workspace-settings-billing",
         title: "Billing",
         href: "/settings/billing",
-        icon: Icons.CreditCard,
+        icon: <Icons.CreditCard className="mr-2 h-4 w-4" />,
       },
       {
         module: "workspace",
@@ -46,7 +46,7 @@ const WorkspaceNavTabs: DashboardNavItem[] = [
         id: "workspace-settings-danger",
         title: "Danger",
         href: "/settings/danger",
-        icon: Icons.Warning,
+        icon: <Icons.Warning className="mr-2 h-4 w-4" />,
       },
     ],
   },
@@ -99,7 +99,7 @@ const ProjectNavTabs: DashboardNavItem[] = [
         id: "project-settings",
         title: "General",
         href: "/settings",
-        icon: Icons.Settings,
+        icon: <Icons.Settings className="mr-2 h-4 w-4" />,
       },
       {
         module: "project",
@@ -107,13 +107,13 @@ const ProjectNavTabs: DashboardNavItem[] = [
         id: "project-settings-danger",
         title: "Danger",
         href: "/settings/danger",
-        icon: Icons.Warning,
+        icon: <Icons.Warning className="mr-2 h-4 w-4" />,
       },
     ],
   },
 ]
 
-export const ModulesApp: ModulesAppNav = {
+export const getModulesApp = (): ModulesAppNav => ({
   workspace: WorkspaceNavTabs,
   project: ProjectNavTabs,
-}
+})

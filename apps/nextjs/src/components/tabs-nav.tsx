@@ -22,7 +22,7 @@ export function TabsNav(props: { className?: string }) {
   const activePathPrefix = layoutState.activePathPrefix.use()
 
   return (
-    <Show if={canRender && tabs.length > 0} else={null} wrap={AnimatePresence}>
+    <Show if={canRender && tabs?.length > 0} else={null} wrap={AnimatePresence}>
       {() => (
         <div
           className={

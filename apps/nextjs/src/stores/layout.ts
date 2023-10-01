@@ -2,7 +2,6 @@ import type { ObservableBaseFns } from "@legendapp/state"
 import { computed, observable } from "@legendapp/state"
 
 import type { DashboardNavItem, ModulesAppNav } from "@builderai/config"
-import { ModulesApp } from "@builderai/config"
 
 export interface Layout {
   contextHeader: string
@@ -10,11 +9,10 @@ export interface Layout {
   projectSlug: string
   activeModule: string
   activeSegments: string[]
-  modulesApp: ModulesAppNav
+  modulesApp?: ModulesAppNav
   activeModuleTab?: DashboardNavItem
   activeModuleTabs: ObservableBaseFns<readonly DashboardNavItem[]>
   activePathPrefix: string
-  canRenderHeaderContext: boolean
 }
 
 export const layoutState = observable<Layout>({
@@ -24,7 +22,6 @@ export const layoutState = observable<Layout>({
   activeModule: "",
   activePathPrefix: "",
   activeSegments: [],
-  modulesApp: ModulesApp,
   activeModuleTabs: computed((): readonly DashboardNavItem[] => {
     const workspaceSlug = layoutState.workspaceSlug.get()
     const projectSlug = layoutState.projectSlug.get()
@@ -44,7 +41,7 @@ export const layoutState = observable<Layout>({
       activeModuleTabs = layoutState.modulesApp.workspace.get()
     }
 
-    const activeModuleTab = activeModuleTabs.find(
+    const activeModuleTab = activeModuleTabs?.find(
       (tab) => tab.id === `${activeModule}-${activeSegment}`
     )
 
@@ -56,15 +53,5 @@ export const layoutState = observable<Layout>({
     })
 
     return activeModuleTabs
-  }),
-  canRenderHeaderContext: computed((): boolean => {
-    const workspaceSlug = layoutState.workspaceSlug.get()
-    const projectSlug = layoutState.projectSlug.get()
-
-    if (!projectSlug && !workspaceSlug) {
-      return false
-    }
-
-    return true
   }),
 })

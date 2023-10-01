@@ -63,9 +63,7 @@ export default function Header() {
           </div>
         </div>
 
-        <Suspense>
-          <TabsNav />
-        </Suspense>
+        <TabsNav />
       </MaxWidthWrapper>
     </header>
   )
