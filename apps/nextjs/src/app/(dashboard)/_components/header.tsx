@@ -21,7 +21,7 @@ export default function Header() {
           <div className="flex items-center justify-start">
             <Link href="/" className="flex items-center">
               <Icons.Logo className="mr-2 h-6 w-6" />
-              <span className="text-lg font-bold tracking-tight">
+              <span className="hidden text-lg font-bold tracking-tight md:block">
                 {siteConfig.name}
               </span>
             </Link>
@@ -62,7 +62,10 @@ export default function Header() {
             <UserNav />
           </div>
         </div>
-        <TabsNav />
+
+        <Suspense>
+          <TabsNav />
+        </Suspense>
       </MaxWidthWrapper>
     </header>
   )

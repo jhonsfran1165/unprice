@@ -14,7 +14,6 @@ export interface Layout {
   activeModuleTab?: DashboardNavItem
   activeModuleTabs: ObservableBaseFns<readonly DashboardNavItem[]>
   activePathPrefix: string
-  canRenderTabs: boolean
   canRenderHeaderContext: boolean
 }
 
@@ -57,16 +56,6 @@ export const layoutState = observable<Layout>({
     })
 
     return activeModuleTabs
-  }),
-  canRenderTabs: computed((): boolean => {
-    const workspaceSlug = layoutState.workspaceSlug.get()
-    const projectSlug = layoutState.projectSlug.get()
-
-    if (!projectSlug && !workspaceSlug) {
-      return false
-    }
-
-    return true
   }),
   canRenderHeaderContext: computed((): boolean => {
     const workspaceSlug = layoutState.workspaceSlug.get()

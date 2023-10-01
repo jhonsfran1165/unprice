@@ -9,6 +9,10 @@ export async function userCanAccess({
   projectSlug: string
   workspaceSlug: string
 }) {
+  if (!projectSlug || !workspaceSlug) {
+    return
+  }
+
   // some queries activate RLS but this has to bypass RLS
   await deactivateRLS(db)()
 
@@ -29,7 +33,6 @@ export async function userCanAccess({
 
   // don't have access
   if (projectData.workspace.slug !== workspaceSlug) {
-    // redirect(`/${workspaceSlug}`)
     notFound()
   }
 }

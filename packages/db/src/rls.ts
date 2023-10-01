@@ -33,6 +33,12 @@ export function authTxn(db: NeonDatabase<typeof schema>, tenantId: string) {
 
       // unset role for the default on so bypass RLS again
       await tx.execute(sql`SET LOCAL role 'authenticated'`)
+
+      await tx.execute(sql`RESET SESSION AUTHORIZATION`)
+
+      // set role to authenticated to bypass RLS again
+      await tx.execute(sql`set SESSION role 'authenticated'`)
+
       // unset tenantId
       await tx.execute(
         sql`SELECT set_config('app.tenantId', '${sql.raw("")}', TRUE)`

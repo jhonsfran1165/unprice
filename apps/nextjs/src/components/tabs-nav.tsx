@@ -1,23 +1,28 @@
 "use client"
 
+import { enableReactComponents } from "@legendapp/state/config/enableReactComponents"
+import { enableReactUse } from "@legendapp/state/config/enableReactUse"
 import { Show } from "@legendapp/state/react"
 import { AnimatePresence } from "framer-motion"
 
 import { cn } from "@builderai/ui"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
-import { Skeleton } from "@builderai/ui/skeleton"
 
 import { Tab } from "~/components/tab"
+import { useCanRender } from "~/lib/use-can-render"
 import { layoutState } from "~/stores/layout"
 
+enableReactComponents()
+enableReactUse()
+
 export function TabsNav(props: { className?: string }) {
-  const canRenderTabs = layoutState.canRenderTabs.use()
+  const canRender = useCanRender()
   const tabs = layoutState.activeModuleTabs.use()
   const activeModuleTab = layoutState.activeModuleTab.use()
   const activePathPrefix = layoutState.activePathPrefix.use()
 
   return (
-    <Show if={canRenderTabs} else={null} wrap={AnimatePresence}>
+    <Show if={canRender && tabs.length > 0} else={null} wrap={AnimatePresence}>
       {() => (
         <div
           className={
@@ -37,7 +42,7 @@ export function TabsNav(props: { className?: string }) {
                     />
                   ))
                 : Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="mx-2 h-[21px] w-[54px]" />
+                    <Tab key={i} tab={null} />
                   ))}
             </nav>
             <ScrollBar orientation="horizontal" className="invisible" />

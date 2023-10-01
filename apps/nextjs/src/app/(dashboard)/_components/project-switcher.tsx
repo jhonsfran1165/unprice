@@ -42,10 +42,10 @@ export function ProjectSwitcher(props: {
         size="sm"
         role="combobox"
         aria-expanded={switcherOpen}
-        aria-label="Select a workspace"
-        className="w-52 justify-between opacity-50"
+        aria-label="project"
+        className="w-44 justify-between opacity-50"
       >
-        Select a project
+        project
         <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0" />
       </Button>
     )
@@ -63,7 +63,7 @@ export function ProjectSwitcher(props: {
             role="combobox"
             aria-expanded={switcherOpen}
             aria-label="Select a project"
-            className="relative w-52 justify-between"
+            className="relative w-44 justify-between"
           >
             <div className="absolute inset-1 opacity-25" />
             <span className="z-10 font-semibold">{activeProject?.name}</span>

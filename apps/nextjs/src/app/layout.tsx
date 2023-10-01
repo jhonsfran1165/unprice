@@ -8,7 +8,6 @@ import { siteConfig } from "@builderai/config"
 import { cn } from "@builderai/ui"
 import { Toaster } from "@builderai/ui/toaster"
 
-import { LegendStateHandler } from "~/components/state-handler"
 import { TailwindIndicator } from "~/components/tailwind-indicator"
 import { ThemeProvider } from "~/components/theme-provider"
 import { cal, inter, satoshi } from "~/styles/fonts"
@@ -51,7 +50,6 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
               {props.children}
               <TailwindIndicator />
-              <LegendStateHandler />
             </ThemeProvider>
             {/* <Analytics /> */}
             <Toaster />

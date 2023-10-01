@@ -73,13 +73,13 @@ export function WorkspaceSwitcher() {
         size="sm"
         role="combobox"
         aria-expanded={switcherOpen}
-        aria-label="Select a workspace"
-        className="button-ghost w-52 justify-between p-1"
+        aria-label="workspace"
+        className="button-ghost w-44 justify-between p-1"
       >
         <Avatar className="mr-2 h-5 w-5">
           <AvatarFallback>Ac</AvatarFallback>
         </Avatar>
-        Select a workspace
+        workspace
         <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0" />
       </Button>
     )
@@ -106,7 +106,7 @@ export function WorkspaceSwitcher() {
             role="combobox"
             aria-expanded={switcherOpen}
             aria-label="Select a workspace"
-            className="w-52 justify-between"
+            className="w-44 justify-between"
           >
             <Avatar className="mr-2 h-5 w-5">
               <AvatarImage src={normalizedObject?.image ?? ""} />
