@@ -53,7 +53,7 @@ export default function Home() {
         >
           <a
             className={cn(buttonVariants({ variant: "default" }))}
-            href={siteConfig.github}
+            href={siteConfig.links.github}
             target="_blank"
             rel="noopener noreferrer"
           >
