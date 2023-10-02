@@ -22,7 +22,6 @@ export default authMiddleware({
   signInUrl: "/signin",
   publicRoutes: [
     "/signout",
-    "/onboarding",
     "/opengraph-image.png",
     "/signin(.*)",
     "/sso-callback(.*)",

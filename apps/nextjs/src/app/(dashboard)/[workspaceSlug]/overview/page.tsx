@@ -3,7 +3,7 @@ import { Balancer } from "react-wrap-balancer"
 
 import { Button } from "@builderai/ui/button"
 
-import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
+import { DashboardShell } from "~/components/dashboard-shell"
 import { api } from "~/trpc/server"
 import { ProjectCard } from "../_components/project-card"
 
@@ -21,7 +21,6 @@ export default async function Page(props: {
     <DashboardShell
       title="Projects"
       description="Projects for this workspace will show up here"
-      breadcrumb
       headerAction={
         limitReached ? (
           <Button className="min-w-max" variant={"ghost"}>

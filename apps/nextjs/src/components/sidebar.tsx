@@ -10,7 +10,7 @@ import { cn } from "@builderai/ui"
 import { useCanRender } from "~/lib/use-can-render"
 import { layoutState } from "~/stores/layout"
 
-export function SidebarNav() {
+export default function SidebarNav() {
   const path = usePathname()
   const canRender = useCanRender()
 

@@ -6,8 +6,9 @@ import { Button } from "@builderai/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
+import { DashboardShell } from "~/components/dashboard-shell"
+import { getActiveTenantId } from "~/lib/get-tenant"
 import { api } from "~/trpc/server"
-import { DashboardShell } from "../../_components/dashboard-shell"
 import { LoadingCard } from "../[projectSlug]/_components/loading-card"
 import { InviteMemberForm } from "./_components/invite-member-dialog"
 import { OrganizationImage } from "./_components/organization-image"
@@ -18,9 +19,7 @@ import { OrganizationName } from "./_components/organization-name"
 // export const runtime = "edge"
 
 export default function WorkspaceSettingsPage() {
-  const { orgId, userId } = auth()
-  const tenantId = orgId ?? userId ?? ""
-  const isOrg = tenantId.startsWith("org_")
+  const isOrg = getActiveTenantId().startsWith("org_")
 
   if (isOrg)
     return (
@@ -104,7 +103,13 @@ async function OrganizationSettingsPage() {
 // TODO: build this by my own or personalize
 function UserSettingsPage() {
   return (
-    <DashboardShell title="Account" description="Manage your account details">
+    <DashboardShell
+      title="Account"
+      description="Manage your account details"
+      sideBarNav
+      breadcrumb
+      headerTitle={"Personal Settings"}
+    >
       <UserProfile
         appearance={{
           variables: {

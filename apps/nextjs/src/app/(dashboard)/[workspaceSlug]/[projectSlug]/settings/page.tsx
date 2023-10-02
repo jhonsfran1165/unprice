@@ -1,4 +1,4 @@
-import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
+import { DashboardShell } from "~/components/dashboard-shell"
 import { api } from "~/trpc/server"
 import { RenameProject } from "./_components/rename-project"
 
@@ -14,8 +14,10 @@ export default async function ProjectSettingsPage(props: {
   return (
     <DashboardShell
       title="Project"
+      headerTitle={"Project Settings"}
       description="Manage your project"
       className="space-y-4"
+      sideBarNav
     >
       <RenameProject
         currentName={project.name ?? ""}

@@ -15,8 +15,8 @@ import {
 import * as Icons from "@builderai/ui/icons"
 import { Activity, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 
-import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
 import { Overview } from "~/app/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
+import { DashboardShell } from "~/components/dashboard-shell"
 import { userCanAccess } from "~/lib/project-guard"
 import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"

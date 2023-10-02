@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@builderai/ui/table"
 
-import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
+import { DashboardShell } from "~/components/dashboard-shell"
 import { userCanAccess } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 

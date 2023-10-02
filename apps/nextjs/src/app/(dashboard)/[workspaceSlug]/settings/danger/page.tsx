@@ -1,4 +1,4 @@
-import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
+import { DashboardShell } from "~/components/dashboard-shell"
 import { DeleteWorkspace } from "./delete-workspace"
 
 // TODO: activate later. It is  hitting limits on vercel

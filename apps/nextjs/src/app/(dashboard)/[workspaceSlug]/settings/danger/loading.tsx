@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 
-import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
+import { DashboardShell } from "~/components/dashboard-shell"
 
 export default function Loading() {
   return (

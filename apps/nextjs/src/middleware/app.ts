@@ -4,6 +4,8 @@ import { NextResponse } from "next/server"
 import type { AuthObject } from "@builderai/auth/server"
 import { clerkClient } from "@builderai/auth/server"
 
+const skipRoutes = ["onboarding"]
+
 export default async function AppMiddleware(
   req: NextRequest,
   auth: AuthObject
@@ -20,32 +22,35 @@ export default async function AppMiddleware(
   }
 
   // get tenant id from clerk data
-  const tenantId = auth.orgSlug
+  const tenantSlug = auth.orgSlug
     ? auth.orgSlug
     : (auth.sessionClaims.username as string)
 
-  if (req.nextUrl.pathname === "/") {
+  if (req.nextUrl.pathname === "/" || req.nextUrl.pathname === "") {
     // / should redirect to the user's dashboard
     // use their current workspace, i.e. /:orgSlug or /:userSlug
-    url.pathname = `/${tenantId}`
+    url.pathname = `/${tenantSlug}`
 
     return NextResponse.redirect(url)
   } else {
     // if the url has a workspace defined lets validate it
-    const workspaceSlug = parts[0]
+    const workspaceSlug = parts[0] ?? ""
 
-    if (auth.sessionClaims.username === workspaceSlug) {
+    // user trying to access to its personal workspace or its organization
+    // let them pass
+    if (
+      auth.sessionClaims.username === workspaceSlug ||
+      tenantSlug === workspaceSlug
+    ) {
       return NextResponse.next()
     }
 
-    if (tenantId === workspaceSlug) {
-      return NextResponse.next()
-    }
+    // do not validate this URLS
+    if (skipRoutes.includes(workspaceSlug)) return NextResponse.next()
 
-    // if the user has a org set
-    if (auth.orgSlug && tenantId !== workspaceSlug) {
-      // User is accessing an org that's not their active one
-      // Check if they have access to it
+    // User is accessing an org that's not their active one
+    // Check if they have access to it
+    if (auth.orgSlug && tenantSlug !== workspaceSlug) {
       const orgs = await clerkClient.users.getOrganizationMembershipList({
         userId: auth.userId ?? "",
       })
@@ -66,8 +71,8 @@ export default async function AppMiddleware(
       return NextResponse.next()
     }
 
-    if (tenantId !== workspaceSlug) {
-      // User is accessing a user that's not them
+    // User is accessing a user that's not them
+    if (tenantSlug !== workspaceSlug) {
       url.pathname = `/`
       return NextResponse.redirect(url)
     }

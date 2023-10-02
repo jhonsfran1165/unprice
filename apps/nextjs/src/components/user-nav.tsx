@@ -13,7 +13,8 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
-import { CreditCard, LogIn, LogOut, Settings, User } from "@builderai/ui/icons"
+import { CreditCard, LogOut, Settings, User } from "@builderai/ui/icons"
+import { Skeleton } from "@builderai/ui/skeleton"
 
 export async function UserNav() {
   const user = await currentUser()
@@ -24,7 +25,7 @@ export async function UserNav() {
         <Button variant="ghost" className="relative h-8 w-8 rounded">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-transparent">
-              <LogIn className="h-6 w-6" />
+              <Skeleton className="aspect-square h-full w-full" />
             </AvatarFallback>
           </Avatar>
         </Button>

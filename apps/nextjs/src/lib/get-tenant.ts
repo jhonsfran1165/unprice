@@ -1,5 +1,3 @@
-import { notFound } from "next/navigation"
-
 import { auth } from "@builderai/auth"
 
 /**
@@ -7,7 +5,21 @@ import { auth } from "@builderai/auth"
  *
  * The auth check should already be done at a higher level, and we're just returning 404 to make typescript happy.
  */
-export function getTenantId(): string {
+export function getActiveTenantId(): string {
   const { userId, orgId } = auth()
-  return orgId ?? userId ?? notFound()
+  return orgId ?? userId ?? ""
+}
+
+export function getActiveTenantSlug(): string {
+  const { sessionClaims, orgSlug } = auth()
+
+  const tenantSlug = orgSlug ? orgSlug : (sessionClaims?.username as string)
+
+  return tenantSlug
+}
+
+export function getTenantOrgsSlug(): object {
+  const { sessionClaims } = auth()
+
+  return sessionClaims ?? {}
 }

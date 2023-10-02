@@ -1,6 +1,6 @@
 import { Button } from "@builderai/ui/button"
 
-import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
+import { DashboardShell } from "~/components/dashboard-shell"
 import { ProjectCard } from "./_components/project-card"
 
 export default function Loading() {

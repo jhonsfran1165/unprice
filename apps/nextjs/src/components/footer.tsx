@@ -5,6 +5,7 @@ import { siteConfig } from "@builderai/config"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Github, Twitter } from "@builderai/ui/icons"
+import { Skeleton } from "@builderai/ui/skeleton"
 
 import { Logo } from "~/components/logo"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
@@ -12,15 +13,8 @@ import MaxWidthWrapper from "~/components/max-width-wrapper"
 const ThemeToggle = dynamic(() => import("~/components/theme-toggle"), {
   ssr: false,
   loading: () => (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="gap-1 px-2 text-lg font-semibold md:text-base"
-    >
-      <div className="bg-blue h-6 w-6 animate-pulse rounded-full" />
-      <span className="bg-blue w-14 animate-pulse rounded capitalize">
-        &nbsp;
-      </span>
+    <Button variant="ghost" size="sm" className="button-ghost">
+      <Skeleton className="h-6 w-6 rounded-full" />
     </Button>
   ),
 })

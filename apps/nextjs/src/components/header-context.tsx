@@ -7,7 +7,7 @@ import MaxWidthWrapper from "~/components/max-width-wrapper"
 import { useCanRender } from "~/lib/use-can-render"
 import { layoutState } from "~/stores/layout"
 
-export default function HeaderContext() {
+export default function HeaderContext({ title }: { title?: string }) {
   const canRender = useCanRender()
   const contextHeader = layoutState.contextHeader.use()
 
@@ -18,7 +18,9 @@ export default function HeaderContext() {
           <div className="z-30 flex h-36 items-center border-b bg-background text-background-textContrast">
             <MaxWidthWrapper className="max-w-screen-2xl">
               <div className="flex items-center justify-between">
-                <h1 className="pl-5 text-2xl">{contextHeader}</h1>
+                <h1 className="text-4xl font-normal">
+                  {title ?? contextHeader}
+                </h1>
               </div>
             </MaxWidthWrapper>
           </div>

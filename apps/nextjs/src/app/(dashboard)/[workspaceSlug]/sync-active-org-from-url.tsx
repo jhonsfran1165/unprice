@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 
 import { useOrganizationList } from "@builderai/auth"
 
@@ -16,7 +16,6 @@ export function SyncActiveOrgFromUrl() {
 
   const workspaceSlug = params.workspaceSlug as string
   const { setActive, organizationList, isLoaded } = useOrganizationList()
-  const router = useRouter()
 
   React.useEffect(() => {
     if (!isLoaded) return
@@ -27,14 +26,12 @@ export function SyncActiveOrgFromUrl() {
 
     if (org) {
       void setActive(org)
-      router.push(`/${workspaceSlug}`)
     } else {
       void setActive({ organization: null })
-      router.push(`/${workspaceSlug}`)
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspaceSlug])
+  }, [workspaceSlug, isLoaded])
 
   return null
 }

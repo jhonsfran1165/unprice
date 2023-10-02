@@ -9,7 +9,7 @@ import { cn } from "@builderai/ui"
 import { useCanRender } from "~/lib/use-can-render"
 import { layoutState } from "~/stores/layout"
 
-export function Breadcrumbs() {
+export default function Breadcrumbs() {
   const canRender = useCanRender()
   const breadcrumbs = layoutState.activeModuleTab.breadcrumbs.use()
   const activePathPrefix = layoutState.activePathPrefix.use()
@@ -19,7 +19,7 @@ export function Breadcrumbs() {
   return (
     <Show if={canRender && breadcrumbs} else={null} wrap={AnimatePresence}>
       {() => (
-        <div className="mb-4 inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+        <div className="mb-4 inline-flex h-10 items-center rounded-md bg-muted p-1 text-muted-foreground">
           {Object.entries(breadcrumbs).map(([key, value]) => {
             const isActive =
               key === activeSegmentPath ||

@@ -8,9 +8,9 @@ import { buttonVariants } from "@builderai/ui/button"
 import * as Icons from "@builderai/ui/icons"
 
 import Footer from "~/components/footer"
+import { MainNav } from "~/components/main-nav"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
 import { MobileDropdown } from "~/components/mobile-nav"
-import { MainNav } from "../(dashboard)/_components/main-nav"
 
 export default function MarketingLayout(props: { children: ReactNode }) {
   return (

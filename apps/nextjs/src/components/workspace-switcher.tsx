@@ -46,6 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@builderai/ui/select"
+import { Skeleton } from "@builderai/ui/skeleton"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { currencySymbol } from "~/lib/currency"
@@ -58,13 +59,14 @@ export function WorkspaceSwitcher() {
   const [switcherOpen, setSwitcherOpen] = React.useState(false)
   const [newOrgDialogOpen, setNewOrgDialogOpen] = React.useState(false)
 
+  const { user, isSignedIn, isLoaded } = useUser()
   const orgs = useOrganizationList()
   const org = useOrganization()
 
-  const { user, isSignedIn, isLoaded } = useUser()
   if (isLoaded && !isSignedIn) throw new Error("How did you get here???")
 
   const activeOrg = org.organization ?? user
+
   if (!orgs.isLoaded || !org.isLoaded || !activeOrg) {
     // Skeleton loader
     return (
@@ -73,14 +75,16 @@ export function WorkspaceSwitcher() {
         size="sm"
         role="combobox"
         aria-expanded={switcherOpen}
-        aria-label="workspace"
-        className="button-ghost w-44 justify-between p-1"
+        aria-label="Select a workspace"
+        className="w-44 justify-between"
       >
         <Avatar className="mr-2 h-5 w-5">
-          <AvatarFallback>Ac</AvatarFallback>
+          <AvatarFallback>
+            <Skeleton className="aspect-square h-full w-full" />
+          </AvatarFallback>
         </Avatar>
-        workspace
-        <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0" />
+        <Skeleton className="h-[20px] w-full" />
+        <Skeleton className="ml-2 h-4 w-4 shrink-0" />
       </Button>
     )
   }

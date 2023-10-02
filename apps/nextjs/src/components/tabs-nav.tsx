@@ -15,14 +15,14 @@ import { layoutState } from "~/stores/layout"
 enableReactComponents()
 enableReactUse()
 
-export function TabsNav(props: { className?: string }) {
+export default function TabsNav(props: { className?: string }) {
   const canRender = useCanRender()
   const tabs = layoutState.activeModuleTabs.use()
   const activeModuleTab = layoutState.activeModuleTab.use()
   const activePathPrefix = layoutState.activePathPrefix.use()
 
   return (
-    <Show if={canRender && tabs?.length > 0} else={null} wrap={AnimatePresence}>
+    <Show if={canRender} else={null} wrap={AnimatePresence}>
       {() => (
         <div
           className={
@@ -32,18 +32,14 @@ export function TabsNav(props: { className?: string }) {
         >
           <ScrollArea className="h-13 -mb-0.5 max-w-[600px] lg:max-w-none">
             <nav className="flex items-center gap-2">
-              {tabs.length > 0
-                ? tabs.map((tab, index) => (
-                    <Tab
-                      key={tab.module + tab.id + index}
-                      tab={tab}
-                      pathPrefix={activePathPrefix}
-                      activeTab={activeModuleTab}
-                    />
-                  ))
-                : Array.from({ length: 4 }).map((_, i) => (
-                    <Tab key={i} tab={null} />
-                  ))}
+              {tabs.map((tab, index) => (
+                <Tab
+                  key={tab.module + tab.id + index}
+                  tab={tab}
+                  pathPrefix={activePathPrefix}
+                  activeTab={activeModuleTab}
+                />
+              ))}
             </nav>
             <ScrollBar orientation="horizontal" className="invisible" />
           </ScrollArea>

@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 
-import { DashboardShell } from "~/app/(dashboard)/_components/dashboard-shell"
+import { DashboardShell } from "~/components/dashboard-shell"
 import { userCanAccess } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 import { DeleteProject } from "./delete-project"
@@ -29,6 +29,8 @@ export default async function DangerZonePage(props: {
       title="Danger Zone"
       description="Do dangerous stuff here"
       className="space-y-4"
+      headerTitle={"Project Settings"}
+      sideBarNav
     >
       <Suspense
         fallback={
