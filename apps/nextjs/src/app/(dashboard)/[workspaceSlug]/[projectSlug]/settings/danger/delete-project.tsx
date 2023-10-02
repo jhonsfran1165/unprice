@@ -75,6 +75,8 @@ export function DeleteProject() {
                       slug: projectSlug,
                     })
                     toaster.toast({ title: "Project deleted" })
+
+                    router.refresh()
                     router.push(`/${workspaceSlug}`)
                   } catch (err) {
                     if (err instanceof TRPCClientError) {

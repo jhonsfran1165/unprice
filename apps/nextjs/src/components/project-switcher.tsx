@@ -53,7 +53,9 @@ export function ProjectSwitcher(props: {
 
   return (
     <>
-      <span className="mx-4 text-lg font-bold text-muted-foreground">/</span>
+      <span className="mx-4 hidden text-lg font-bold text-muted-foreground md:block">
+        /
+      </span>
 
       <Popover open={switcherOpen} onOpenChange={setSwitcherOpen}>
         <PopoverTrigger asChild>
@@ -63,7 +65,7 @@ export function ProjectSwitcher(props: {
             role="combobox"
             aria-expanded={switcherOpen}
             aria-label="Select a project"
-            className="relative w-44 justify-between"
+            className="relative hidden w-44 justify-between md:block"
           >
             <div className="absolute inset-1 opacity-25" />
             <span className="z-10 font-semibold">{activeProject?.name}</span>

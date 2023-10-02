@@ -9,6 +9,7 @@ import { Skeleton } from "@builderai/ui/skeleton"
 
 import { Logo } from "~/components/logo"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
+import { Search } from "~/components/search"
 
 const ThemeToggle = dynamic(() => import("~/components/theme-toggle"), {
   ssr: false,
@@ -22,15 +23,17 @@ const ThemeToggle = dynamic(() => import("~/components/theme-toggle"), {
 export default function Footer(props: { className?: string }) {
   return (
     <footer className={cn(props.className)}>
-      <div className="z-30 mt-10 flex flex-col items-center justify-between gap-4 border-t bg-background-bgSubtle py-4 md:h-16 md:flex-row md:py-0">
+      <div className="z-30 mt-10 flex items-center justify-between gap-4 border-t bg-background-bgSubtle py-4 md:h-16 md:flex-row md:py-0">
         <MaxWidthWrapper className="max-w-screen-2xl">
-          <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-            <div className="flex flex-col items-center gap-4 px-8 text-primary-text md:flex-row md:gap-2 md:px-0">
+          <div className="flex items-center gap-4 md:flex-row md:gap-2 md:px-0">
+            <div className="flex items-center gap-4 text-primary-text md:flex-row md:gap-2 md:px-0">
               <Logo />
             </div>
 
             <div className="flex flex-1 items-center justify-end">
               <nav className="flex items-center">
+                <Search />
+
                 <Link
                   href={siteConfig.links.twitter}
                   target="_blank"
