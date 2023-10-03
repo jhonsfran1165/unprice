@@ -2,7 +2,6 @@ import { notFound } from "next/navigation"
 
 import { auth } from "@builderai/auth"
 
-import Header from "~/components/header"
 import { Onboarding } from "./multi-step-form"
 
 // TODO: activate later. It is  hitting limits on vercel
@@ -18,10 +17,9 @@ export default function OnboardingPage() {
   }
 
   return (
-    <>
-      <Header showTabs={false} />
+    <div className="border-t">
       <Onboarding workspaceSlug={workspaceSlug} />
       <div className="absolute inset-0 top-12 -z-10 bg-cover bg-center" />
-    </>
+    </div>
   )
 }

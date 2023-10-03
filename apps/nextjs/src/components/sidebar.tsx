@@ -2,68 +2,60 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Show } from "@legendapp/state/react"
-import { AnimatePresence } from "framer-motion"
 
+import type { DashboardSidebarRoute } from "@builderai/config"
 import { cn } from "@builderai/ui"
+import * as Icons from "@builderai/ui/icons"
 
-import { useCanRender } from "~/lib/use-can-render"
-import { layoutState } from "~/stores/layout"
+import { useGetPaths } from "~/lib/use-get-path"
 
-export default function SidebarNav() {
+export default function SidebarNav(props: {
+  dashboardSidebarRoutes: DashboardSidebarRoute[]
+  activeSubModuleRoute: DashboardSidebarRoute | null
+}) {
   const path = usePathname()
-  const canRender = useCanRender()
-
-  const items = layoutState.activeModuleTab.sidebarNav.use()
-  const activePathPrefix = layoutState.activePathPrefix.use()
+  const activePathPrefix = useGetPaths()
+  const sidebarRoutes = props.dashboardSidebarRoutes
 
   return (
-    <Show
-      if={canRender && items?.length > 0}
-      else={null}
-      wrap={AnimatePresence}
-    >
-      {() => (
-        <aside className="flex-col sm:flex sm:w-[250px]">
-          <nav className="grid items-start gap-2">
-            {items.map((item, index) => {
-              const fullPath = activePathPrefix + item.href
-              const active = fullPath === path
-              const Icon = item.icon
+    <aside className="flex-col sm:flex sm:w-[250px]">
+      <nav className="grid items-start gap-2">
+        {sidebarRoutes.map((route, index) => {
+          const fullPath = activePathPrefix + route.href
+          const active = fullPath === path
+          const Icon = Icons[route.icon] as React.ElementType
 
-              return (
-                item.href && (
-                  <Link
-                    key={index}
-                    href={item.disabled ? "#" : fullPath}
-                    aria-disabled={item.disabled}
+          return (
+            route.href && (
+              <Link
+                key={index}
+                href={route.disabled ? "#" : fullPath}
+                aria-disabled={route.disabled}
+              >
+                <span
+                  className={cn(
+                    "group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 hover:border-background-borderHover hover:bg-background-bg hover:text-background-textContrast active:bg-background-bgActive",
+                    {
+                      transparent: !active,
+                      "bg-background-bgSubtle": active,
+                      "cursor-not-allowed opacity-80": route.disabled,
+                    }
+                  )}
+                >
+                  <Icon className="mr-2 h-4 w-4" />
+                  <span
+                    className={cn({
+                      "text-background-textContrast": active,
+                    })}
                   >
-                    <span
-                      className={cn(
-                        "group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 hover:border-background-borderHover hover:bg-background-bg hover:text-background-textContrast active:bg-background-bgActive",
-                        {
-                          transparent: !active,
-                          "bg-background-bgSubtle": active,
-                          "cursor-not-allowed opacity-80": item.disabled,
-                        }
-                      )}
-                    >
-                      <Icon className="mr-2 h-4 w-4" />
-                      <span
-                        className={cn({
-                          "text-background-textContrast": active,
-                        })}
-                      >
-                        {item.title}
-                      </span>
-                    </span>
-                  </Link>
-                )
-              )
-            })}
-          </nav>
-        </aside>
-      )}
-    </Show>
+                    {route.title}
+                  </span>
+                </span>
+              </Link>
+            )
+          )
+        })}
+      </nav>
+    </aside>
   )
 }

@@ -10,6 +10,9 @@ export default function DangerZonePage() {
       title="Danger Zone"
       description="Do dangerous stuff here"
       className="space-y-6"
+      module="workspace"
+      submodule="settings"
+      routeSlug="danger"
     >
       <DeleteWorkspace />
     </DashboardShell>

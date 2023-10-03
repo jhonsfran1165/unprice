@@ -65,7 +65,7 @@ export function ProjectSwitcher(props: {
             role="combobox"
             aria-expanded={switcherOpen}
             aria-label="Select a project"
-            className="relative hidden w-44 justify-between md:block"
+            className="relative w-44 justify-between"
           >
             <div className="absolute inset-1 opacity-25" />
             <span className="z-10 font-semibold">{activeProject?.name}</span>
@@ -76,28 +76,29 @@ export function ProjectSwitcher(props: {
           <Command>
             <CommandList>
               <CommandInput placeholder="Search project..." />
-
-              {projects.map((project) => (
-                <CommandItem
-                  key={project.id}
-                  onSelect={() => {
-                    setSwitcherOpen(false)
-                    router.push(`/${project.workspace.slug}/${project.slug}`)
-                  }}
-                  className="text-sm font-semibold"
-                >
-                  <div className="absolute inset-1 opacity-25" />
-                  {project.name}
-                  <Check
-                    className={cn(
-                      "ml-auto h-4 w-4",
-                      project.id === activeProject?.id
-                        ? "opacity-100"
-                        : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
+              <CommandGroup heading="All projects">
+                {projects.map((project) => (
+                  <CommandItem
+                    key={project.id}
+                    onSelect={() => {
+                      setSwitcherOpen(false)
+                      router.push(`/${project.workspace.slug}/${project.slug}`)
+                    }}
+                    className="cursor-pointer text-sm font-semibold"
+                  >
+                    <div className="absolute inset-1 opacity-25" />
+                    {project.name}
+                    <Check
+                      className={cn(
+                        "ml-auto h-4 w-4",
+                        project.id === activeProject?.id
+                          ? "opacity-100"
+                          : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
             </CommandList>
             <CommandSeparator />
             <CommandList>

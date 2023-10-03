@@ -29,8 +29,9 @@ export default async function DangerZonePage(props: {
       title="Danger Zone"
       description="Do dangerous stuff here"
       className="space-y-4"
-      headerTitle={"Project Settings"}
-      sideBarNav
+      submodule="settings"
+      module="project"
+      routeSlug="danger"
     >
       <Suspense
         fallback={

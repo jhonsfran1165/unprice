@@ -22,7 +22,9 @@ export default async function ApiKeysPage(props: {
     <DashboardShell
       title="API Keys"
       description="Manage your API Keys"
-      headerAction={<NewApiKeyDialog projectSlug={props.params.projectSlug} />}
+      module="project"
+      routeSlug="apikeys"
+      action={<NewApiKeyDialog projectSlug={props.params.projectSlug} />}
     >
       <DataTable data={apiKeys} />
     </DashboardShell>

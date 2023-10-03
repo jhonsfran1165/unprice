@@ -14,10 +14,11 @@ export default async function ProjectSettingsPage(props: {
   return (
     <DashboardShell
       title="Project"
-      headerTitle={"Project Settings"}
+      module="project"
+      submodule="settings"
+      routeSlug="settings"
       description="Manage your project"
       className="space-y-4"
-      sideBarNav
     >
       <RenameProject
         currentName={project.name ?? ""}

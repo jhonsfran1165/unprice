@@ -14,7 +14,10 @@ export default function Loading() {
     <DashboardShell
       title="Danger Zone"
       description="Do dangerous stuff here"
-      className="space-y-6"
+      className="space-y-4"
+      submodule="settings"
+      module="project"
+      routeSlug="danger"
     >
       <Card>
         <CardHeader>

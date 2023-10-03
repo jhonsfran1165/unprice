@@ -1,64 +1,71 @@
-import * as Icons from "@builderai/ui/icons"
+import type { DashboardRoute, DashboardSidebarRoute, ModulesApp } from "./types"
 
-import type { DashboardNavItem, ModulesAppNav } from "./types"
-
-const WorkspaceNavTabs: DashboardNavItem[] = [
+const WorkspaceRouter: DashboardRoute[] = [
   {
     module: "workspace",
     titleTab: "Projects",
-    id: "workspace-overview",
+    slug: "overview",
     href: "/overview",
   },
   {
     module: "workspace",
-    id: "workspace-stadistics",
-    title: "Statistics",
+    titleTab: "Statistics",
+    slug: "stadistics",
+    dashboardHeader: {
+      title: "Statistics",
+    },
     href: "/stadistics",
     disabled: true,
   },
   {
     module: "workspace",
-    id: "workspace-settings",
-    title: "Settings",
+    titleTab: "Settings",
+    slug: "settings",
+    dashboardHeader: {
+      title: "Settings",
+    },
     href: "/settings",
     disabled: false,
     tier: "FREE",
-    sidebarNav: [
+    dashboardSidebarRoutes: [
       {
         module: "workspace",
         submodule: "settings",
-        id: "workspace-settings",
+        slug: "settings",
         title: "General",
         href: "/settings",
-        icon: Icons.Settings,
+        icon: "Settings",
       },
       {
         module: "workspace",
         submodule: "settings",
-        id: "workspace-settings-billing",
+        slug: "billing",
         title: "Billing",
         href: "/settings/billing",
-        icon: Icons.CreditCard,
+        icon: "CreditCard",
       },
       {
         module: "workspace",
         submodule: "settings",
-        id: "workspace-settings-danger",
+        slug: "danger",
         title: "Danger",
         href: "/settings/danger",
-        icon: Icons.Warning,
+        icon: "CreditCard",
       },
     ],
   },
 ]
 
-const ProjectNavTabs: DashboardNavItem[] = [
+const ProjectRouter: DashboardRoute[] = [
   {
     module: "project",
-    id: "project-overview",
-    title: "Dashboard",
+    slug: "overview",
+    titleTab: "Dashboard",
+    dashboardHeader: {
+      title: "Dashboard",
+    },
     href: "/overview",
-    breadcrumbs: {
+    breadcrumbRoutes: {
       overview: "Overview",
       analytics: "Analytics",
       reports: "Reports",
@@ -67,53 +74,112 @@ const ProjectNavTabs: DashboardNavItem[] = [
   },
   {
     module: "project",
-    id: "project-pro",
-    title: "Pro module",
+    slug: "pro",
+    titleTab: "Pro Module",
+    dashboardHeader: {
+      title: "Pro Module",
+    },
     href: "/pro",
     disabled: false,
     tier: "PRO",
   },
   {
     module: "project",
-    id: "project-stadistics",
-    title: "Statistics",
-    href: "/stadistics",
+    slug: "statistics",
+    titleTab: "Statistics",
+    dashboardHeader: {
+      title: "Statistics",
+    },
+    href: "/statistics",
     disabled: true,
   },
   {
     module: "project",
-    id: "project-apikey",
-    title: "Api Keys",
+    slug: "apikey",
+    titleTab: "Api Keys",
+    dashboardHeader: {
+      title: "Api Keys",
+    },
     href: "/apikeys",
   },
   {
     module: "project",
-    id: "project-settings",
-    title: "Settings",
+    slug: "settings",
+    titleTab: "Settings",
+    dashboardHeader: {
+      title: "Settings",
+    },
     href: "/settings",
     disabled: false,
-    sidebarNav: [
+    dashboardSidebarRoutes: [
       {
         module: "project",
         submodule: "settings",
-        id: "project-settings",
+        slug: "settings",
         title: "General",
         href: "/settings",
-        icon: Icons.Settings,
+        icon: "Settings",
       },
       {
         module: "project",
         submodule: "settings",
-        id: "project-settings-danger",
+        slug: "danger",
         title: "Danger",
         href: "/settings/danger",
-        icon: Icons.Warning,
+        icon: "CreditCard",
       },
     ],
   },
 ]
 
-export const getModulesApp = (): ModulesAppNav => ({
-  workspace: WorkspaceNavTabs,
-  project: ProjectNavTabs,
-})
+// TODO: do not export directly
+export const allModuleRoutesApp: {
+  workspace: DashboardRoute[]
+  project: DashboardRoute[]
+} = {
+  workspace: WorkspaceRouter,
+  project: ProjectRouter,
+}
+
+export type ModuleApp = keyof typeof allModuleRoutesApp
+
+export const getModulesApp = ({
+  module,
+  submodule,
+  routeSlug,
+}: {
+  module: ModuleApp
+  routeSlug: string
+  submodule?: string
+}): ModulesApp => {
+  const moduleRoutes = allModuleRoutesApp[module]
+
+  const submoduleRoutes = moduleRoutes.reduce(
+    (routes: DashboardSidebarRoute[], item) => {
+      if (item?.dashboardSidebarRoutes) {
+        const moduleRoutes =
+          item.dashboardSidebarRoutes?.filter(
+            (item) => item.submodule === submodule
+          ) ?? []
+        return routes.concat(moduleRoutes)
+      }
+      return routes
+    },
+    []
+  )
+
+  const activeSubmoduleRoute =
+    submoduleRoutes?.find((item) => item.slug === routeSlug) ?? null
+
+  const activeModuleRoute =
+    moduleRoutes?.find(
+      (item) => item.slug === routeSlug || item.slug === submodule
+    ) ?? null
+
+  return {
+    moduleRoutes,
+    submoduleRoutes,
+    activeModuleRoute: activeModuleRoute,
+    activeSubModuleRoute: activeSubmoduleRoute,
+  }
+}

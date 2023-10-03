@@ -21,7 +21,9 @@ export default async function Page(props: {
     <DashboardShell
       title="Projects"
       description="Projects for this workspace will show up here"
-      headerAction={
+      module="workspace"
+      routeSlug="overview"
+      action={
         limitReached ? (
           <Button className="min-w-max" variant={"ghost"}>
             Project limit reached

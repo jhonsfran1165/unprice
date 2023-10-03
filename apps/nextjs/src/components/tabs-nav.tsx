@@ -1,50 +1,79 @@
 "use client"
 
-import { enableReactComponents } from "@legendapp/state/config/enableReactComponents"
-import { enableReactUse } from "@legendapp/state/config/enableReactUse"
-import { Show } from "@legendapp/state/react"
-import { AnimatePresence } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 
+import type { DashboardRoute } from "@builderai/config"
 import { cn } from "@builderai/ui"
+import * as Icons from "@builderai/ui/icons"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 
 import { Tab } from "~/components/tab"
-import { useCanRender } from "~/lib/use-can-render"
-import { layoutState } from "~/stores/layout"
+import { useGetPaths } from "~/lib/use-get-path"
+import useScroll from "~/lib/use-scroll"
 
-enableReactComponents()
-enableReactUse()
+export default function TabsNav(props: {
+  className?: string
+  moduleRoutes: DashboardRoute[]
+  activeRoute: DashboardRoute | null
+}) {
+  const activePathPrefix = useGetPaths()
+  const scrolled = useScroll(60)
 
-export default function TabsNav(props: { className?: string }) {
-  const canRender = useCanRender()
-  const tabs = layoutState.activeModuleTabs.use()
-  const activeModuleTab = layoutState.activeModuleTab.use()
-  const activePathPrefix = layoutState.activePathPrefix.use()
+  const routes = props.moduleRoutes
+  const activeRoute = props.activeRoute
 
   return (
-    <Show if={canRender} else={null} wrap={AnimatePresence}>
-      {() => (
-        <div
-          className={
-            (cn("flex h-12 items-center justify-start bg-background-bgSubtle"),
-            props.className)
-          }
-        >
-          <ScrollArea className="h-13 -mb-0.5 max-w-[600px] lg:max-w-none">
-            <nav className="flex items-center gap-2">
-              {tabs.map((tab, index) => (
-                <Tab
-                  key={tab.module + tab.id + index}
-                  tab={tab}
-                  pathPrefix={activePathPrefix}
-                  activeTab={activeModuleTab}
-                />
-              ))}
-            </nav>
-            <ScrollBar orientation="horizontal" className="invisible" />
-          </ScrollArea>
-        </div>
+    <div
+      className={cn(
+        "sticky inset-x-0 top-0 z-30 flex h-12 w-full items-center justify-start border-b bg-background-bgSubtle px-2 transition-all",
+        props.className,
+        {
+          "bg-background backdrop-blur-lg": scrolled,
+        }
       )}
-    </Show>
+    >
+      <ScrollArea className="h-13 -mb-0.5 max-w-[600px] lg:max-w-none">
+        <nav className="flex w-auto items-center gap-2">
+          <AnimatePresence mode="wait">
+            {scrolled ? (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ rotate: 180, scale: 1 }}
+                exit={{
+                  rotate: -180,
+                  scale: 0,
+                }}
+                transition={{
+                  stiffness: 260,
+                  damping: 20,
+                  ease: "easeOut",
+                  duration: 0.2,
+                }}
+              >
+                <Icons.Logo className={"mr-4 h-6 w-6"} />
+              </motion.div>
+            ) : (
+              <Icons.Logo
+                className={cn(
+                  "mx-2 h-6 w-6 text-transparent transition-all animate-out duration-1000",
+                  {
+                    hidden: !scrolled,
+                  }
+                )}
+              />
+            )}
+          </AnimatePresence>
+          {routes.map((route, index) => (
+            <Tab
+              key={route.module + route?.submodule + route.slug + index}
+              route={route}
+              activePathPrefix={activePathPrefix}
+              activeRoute={activeRoute}
+            />
+          ))}
+        </nav>
+        <ScrollBar orientation="horizontal" className="invisible" />
+      </ScrollArea>
+    </div>
   )
 }

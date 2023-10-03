@@ -19,6 +19,9 @@ export default function BillingPage() {
       title="Billing"
       description="Manage your subscription and billing details"
       className="space-y-4"
+      module="workspace"
+      submodule="settings"
+      routeSlug="billing"
     >
       <SubscriptionCard />
 

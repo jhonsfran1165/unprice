@@ -1,8 +1,10 @@
-import type { LucideIcon } from "@builderai/ui/icons"
+import type * as Icons from "@builderai/ui/icons"
 
-export interface ModulesAppNav {
-  workspace: DashboardNavItem[]
-  project: DashboardNavItem[]
+export interface ModulesApp {
+  moduleRoutes: DashboardRoute[]
+  submoduleRoutes: DashboardSidebarRoute[]
+  activeModuleRoute: DashboardRoute | null
+  activeSubModuleRoute: DashboardSidebarRoute | null
 }
 
 export interface RootDomainProps {
@@ -10,34 +12,42 @@ export interface RootDomainProps {
   rewrite?: boolean
 }
 
-export interface DashboardSidebarNavItem {
+export interface DashboardSidebarRoute {
   title?: string
   module: string
   submodule: string
-  id: string
+  slug: string
   disabled?: boolean
   external?: boolean
   tier?: string
-  icon: LucideIcon
+  icon: keyof typeof Icons
   href: string
 }
 
-export interface DashboardNavItem {
-  title?: string
-  titleTab?: string
+export interface DashboardHeader {
+  title: string
+  actionLink?: string
+  actionColor?: string
+}
+
+export type BreadcrumbRoutes = Record<string, string>
+
+export interface DashboardRoute {
+  dashboardHeader?: DashboardHeader
+  titleTab: string
   module: string
   submodule?: string
-  id: string
+  slug: string
   href: string
   tier?: string
-  sidebarNav?: DashboardSidebarNavItem[]
+  dashboardSidebarRoutes?: DashboardSidebarRoute[]
   disabled?: boolean
   external?: boolean
   tabsDisabled?: boolean
-  breadcrumbs?: Record<string, string>
+  breadcrumbRoutes?: BreadcrumbRoutes
 }
 
-export interface NavItem {
+export interface Route {
   title: string
   href: string
   disabled?: boolean
@@ -47,7 +57,7 @@ export interface NavItem {
 export interface SiteConfig {
   name: string
   description: string
-  mainNav: NavItem[]
+  mainNav: Route[]
   links: {
     twitter: string
     github: string

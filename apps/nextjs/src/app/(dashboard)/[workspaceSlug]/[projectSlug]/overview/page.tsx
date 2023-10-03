@@ -39,7 +39,8 @@ export default async function DashboardPage(props: {
     <DashboardShell
       title="Overview"
       description="Get an overview of how the project is going"
-      breadcrumb
+      module="project"
+      routeSlug="overview"
       className="space-y-4"
     >
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

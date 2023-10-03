@@ -31,6 +31,8 @@ export default async function IngestionPage(props: {
   return (
     <DashboardShell
       title="Ingestion"
+      module="project"
+      routeSlug="ingestions"
       description="Ingestion details"
       className="space-y-4"
     >

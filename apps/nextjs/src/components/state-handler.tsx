@@ -9,18 +9,12 @@ import {
 import { enableReactComponents } from "@legendapp/state/config/enableReactComponents"
 import { enableReactUse } from "@legendapp/state/config/enableReactUse"
 
-import type { ModulesAppNav } from "@builderai/config"
-
 import { layoutState } from "~/stores/layout"
 
 enableReactComponents()
 enableReactUse() // This adds the use() function to observables
 
-export function LegendStateHandler({
-  modulesApp,
-}: {
-  modulesApp: ModulesAppNav
-}) {
+export function LegendStateHandler() {
   const initialized = useRef(false)
   const path = usePathname()
 
@@ -47,15 +41,11 @@ export function LegendStateHandler({
   useEffect(() => {
     layoutState.workspaceSlug.set(workspaceSlug)
     layoutState.projectSlug.set(projectSlug)
-    layoutState.activeSegments.set(cleanSegments)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path])
 
   // configure persistance only once
   if (!initialized.current) {
-    // set the nav menus
-    layoutState.modulesApp.set(modulesApp)
-
     // // Persist this observable
     // persistObservable(layoutState, {
     //   local: "layoutState", // Unique name

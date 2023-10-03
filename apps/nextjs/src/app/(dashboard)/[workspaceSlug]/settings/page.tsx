@@ -28,6 +28,9 @@ export default function WorkspaceSettingsPage() {
           <DashboardShell
             title="Organization"
             description="Manage your organization"
+            module="workspace"
+            submodule="settings"
+            routeSlug="settings"
           >
             <Tabs defaultValue="general">
               <TabsList className="mb-2 w-full justify-start">
@@ -63,7 +66,10 @@ async function OrganizationSettingsPage() {
     <DashboardShell
       title="Organization"
       description="Manage your organization"
-      headerAction={
+      module="workspace"
+      submodule="settings"
+      routeSlug="settings"
+      action={
         <Dialog>
           <DialogTrigger asChild>
             <Button className="self-end">Invite member</Button>
@@ -106,9 +112,9 @@ function UserSettingsPage() {
     <DashboardShell
       title="Account"
       description="Manage your account details"
-      sideBarNav
-      breadcrumb
-      headerTitle={"Personal Settings"}
+      module="workspace"
+      submodule="settings"
+      routeSlug="settings"
     >
       <UserProfile
         appearance={{
