@@ -1,3 +1,5 @@
+import type { LucideIcon } from "@builderai/ui/icons"
+
 export interface ModulesAppNav {
   workspace: DashboardNavItem[]
   project: DashboardNavItem[]
@@ -16,7 +18,7 @@ export interface DashboardSidebarNavItem {
   disabled?: boolean
   external?: boolean
   tier?: string
-  icon: JSX.Element
+  icon: LucideIcon
   href: string
 }
 

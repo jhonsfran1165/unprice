@@ -77,6 +77,4 @@ export default async function AppMiddleware(
       return NextResponse.redirect(url)
     }
   }
-
-  return NextResponse.next()
 }

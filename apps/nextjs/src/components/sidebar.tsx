@@ -29,6 +29,7 @@ export default function SidebarNav() {
             {items.map((item, index) => {
               const fullPath = activePathPrefix + item.href
               const active = fullPath === path
+              const Icon = item.icon
 
               return (
                 item.href && (
@@ -47,7 +48,7 @@ export default function SidebarNav() {
                         }
                       )}
                     >
-                      {item.icon}
+                      <Icon className="mr-2 h-4 w-4" />
                       <span
                         className={cn({
                           "text-background-textContrast": active,
