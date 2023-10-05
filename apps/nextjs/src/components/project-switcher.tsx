@@ -65,7 +65,7 @@ export function ProjectSwitcher(props: {
             role="combobox"
             aria-expanded={switcherOpen}
             aria-label="Select a project"
-            className="relative w-44 justify-between"
+            className="relative w-32 justify-between md:w-44"
           >
             <div className="absolute inset-1 opacity-25" />
             <span className="z-10 font-semibold">{activeProject?.name}</span>
@@ -84,7 +84,12 @@ export function ProjectSwitcher(props: {
                       setSwitcherOpen(false)
                       router.push(`/${project.workspace.slug}/${project.slug}`)
                     }}
-                    className="cursor-pointer text-sm font-semibold"
+                    className={cn(
+                      "cursor-pointer text-sm font-semibold",
+                      project.id === activeProject?.id
+                        ? "bg-background-bgSubtle"
+                        : "bg-transparent"
+                    )}
                   >
                     <div className="absolute inset-1 opacity-25" />
                     {project.name}

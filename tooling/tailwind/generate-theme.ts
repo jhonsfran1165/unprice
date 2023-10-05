@@ -127,7 +127,7 @@ export const generateTheme = (
       foreground: `var(--${grayscale}-11)`,
     },
     accent: {
-      DEFAULT: `var(--${grayscale}-5)`,
+      DEFAULT: `var(--${grayscale}-3)`,
       foreground: `var(--${grayscale}-12)`,
     },
     popover: {

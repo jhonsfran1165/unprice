@@ -16,7 +16,7 @@ export default function TabsNav(props: {
   moduleRoutes: DashboardRoute[]
   activeRoute: DashboardRoute | null
 }) {
-  const activePathPrefix = useGetPaths()
+  const { baseUrl } = useGetPaths()
   const scrolled = useScroll(60)
 
   const routes = props.moduleRoutes
@@ -25,14 +25,14 @@ export default function TabsNav(props: {
   return (
     <div
       className={cn(
-        "sticky inset-x-0 top-0 z-30 flex h-12 w-full items-center justify-start border-b bg-background-bgSubtle px-2 transition-all",
+        "sticky inset-x-0 top-0 z-30 flex h-12 w-full items-center justify-start border-b px-2 transition-all",
         props.className,
         {
           "bg-background backdrop-blur-lg": scrolled,
         }
       )}
     >
-      <ScrollArea className="h-13 -mb-0.5 max-w-[600px] lg:max-w-none">
+      <ScrollArea className="-mb-1.5 h-12 max-w-[600px] lg:max-w-none">
         <nav className="flex w-auto items-center gap-2">
           <AnimatePresence mode="wait">
             {scrolled ? (
@@ -65,9 +65,9 @@ export default function TabsNav(props: {
           </AnimatePresence>
           {routes.map((route, index) => (
             <Tab
-              key={route.module + route?.submodule + route.slug + index}
+              key={baseUrl + route.slug + index}
               route={route}
-              activePathPrefix={activePathPrefix}
+              baseUrl={baseUrl}
               activeRoute={activeRoute}
             />
           ))}

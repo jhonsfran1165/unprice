@@ -1,7 +1,7 @@
 import { Balancer } from "react-wrap-balancer"
 
 import { api } from "~/trpc/server"
-import { ProjectCard } from "../_components/project-card"
+import { ProjectCard } from "../../_components/project-card"
 
 // TODO: activate later. It is  hitting limits on vercel
 // export const runtime = "edge"
@@ -10,7 +10,8 @@ export default async function Page(props: {
   params: { workspaceSlug: string }
 }) {
   // TODO: get limits of this project for this workspace
-  const { projects } = await api.project.listByActiveWorkspace.query()
+  const { projects, limitReached } =
+    await api.project.listByActiveWorkspace.query()
 
   return (
     <>
@@ -24,6 +25,7 @@ export default async function Page(props: {
           </li>
         ))}
       </ul>
+
       {projects.length === 0 && (
         <div className="relative">
           <ul className="grid select-none grid-cols-1 gap-4 opacity-40 lg:grid-cols-3">

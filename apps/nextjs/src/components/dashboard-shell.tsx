@@ -1,7 +1,8 @@
 import React, { cache } from "react"
 
-import type { ModuleApp } from "@builderai/config"
+import type { ModuleApp, SubModuleApp } from "@builderai/config"
 import { getModulesApp } from "@builderai/config"
+import { Button } from "@builderai/ui/button"
 
 import Breadcrumbs from "~/components/breadcrumbs"
 import HeaderContext from "~/components/header-context"
@@ -12,12 +13,10 @@ import TabsNav from "~/components/tabs-nav"
 const cachedGetModulesApp = cache(getModulesApp)
 
 // TODO: add dashboard skeleton and try to pass parameters here to avoid import dynamic
-export function DashboardShell(props: {
+export function DashboardShell<T extends ModuleApp>(props: {
   title: string
-  module: ModuleApp
-  submodule?: string
-  routeSlug: string
-  description: React.ReactNode
+  module: T
+  submodule: SubModuleApp<T>
   action?: React.ReactNode
   children: React.ReactNode
   className?: string
@@ -26,56 +25,50 @@ export function DashboardShell(props: {
   const modules = cachedGetModulesApp({
     module: props.module,
     submodule: props.submodule,
-    routeSlug: props.routeSlug,
   })
 
-  const {
-    activeModuleRoute,
-    moduleRoutes,
-    activeSubModuleRoute,
-    submoduleRoutes,
-  } = modules
+  const { activeModuleRoute, moduleRoutes } = modules
 
-  const dashboardHeader = activeModuleRoute?.dashboardHeader
-  const breadcrumbRoutes = activeModuleRoute?.breadcrumbRoutes
+  const moduleTabRoutes = moduleRoutes
+  const activeModuleTabRoute = activeModuleRoute
 
   return (
     <>
       {moduleRoutes.length > 0 && (
-        <TabsNav moduleRoutes={moduleRoutes} activeRoute={activeModuleRoute} />
+        <TabsNav
+          moduleRoutes={moduleTabRoutes}
+          activeRoute={activeModuleTabRoute}
+        />
       )}
-      {dashboardHeader && <HeaderContext dashboardHeader={dashboardHeader} />}
+      {props.title && (
+        <HeaderContext title={props.title} action={props.action} />
+      )}
 
       <MaxWidthWrapper className="my-10 max-w-screen-2xl">
         <div className="flex flex-col gap-12 sm:flex-1 sm:flex-row">
-          {submoduleRoutes.length > 0 && (
-            <SidebarNav
-              dashboardSidebarRoutes={submoduleRoutes}
-              activeSubModuleRoute={activeSubModuleRoute}
-            />
-          )}
+          <SidebarNav
+            route={props.submodule as string}
+            activeModuleTabRoute={activeModuleTabRoute}
+          />
+          {/* TODO: put all this in another component to change give a route */}
           <div className="flex flex-1 flex-col">
             <div className="mb-4 flex items-center justify-between">
               <div className="space-y-1">
                 <h1 className="font-cal text-xl font-semibold leading-none">
-                  {props.title}
+                  {activeModuleRoute?.title}
                 </h1>
-                {typeof props.description === "string" ? (
-                  <h2 className="text-base text-muted-foreground">
-                    {props.description}
-                  </h2>
-                ) : (
-                  props.description
-                )}
+                <h2 className="text-base text-muted-foreground">
+                  {activeModuleRoute?.description}
+                </h2>
               </div>
-              {props.action}
+              {activeModuleRoute?.action && (
+                <Button>{activeModuleRoute.action.title}</Button>
+              )}
             </div>
-            {breadcrumbRoutes && (
-              <Breadcrumbs
-                breadcrumbRoutes={breadcrumbRoutes}
-                routeSlug={props.routeSlug}
-              />
-            )}
+            <Breadcrumbs
+              route={props.submodule as string}
+              activeModuleTabRoute={activeModuleTabRoute}
+            />
             <div className={props.className}>{props.children}</div>
           </div>
         </div>

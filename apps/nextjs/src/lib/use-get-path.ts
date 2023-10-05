@@ -1,17 +1,30 @@
-import { useParams } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 
-export function useGetPaths(): string {
+export function useGetPaths(): {
+  baseUrl: string
+  restUrl: string
+  pathname: string
+} {
   const params = useParams()
-
+  const pathname = usePathname()
   const workspaceSlug = params.workspaceSlug as string
   const projectSlug = params.projectSlug as string
+  let restUrl: string[] = []
 
-  let activePathPrefix = ""
+  let baseUrl = ""
   if (projectSlug) {
-    activePathPrefix = `/${workspaceSlug}/${projectSlug}`
+    baseUrl = `/${workspaceSlug}/${projectSlug}`
+    const [, , , ...rest] = pathname.split("/")
+    restUrl = rest
   } else if (workspaceSlug) {
-    activePathPrefix = `/${workspaceSlug}`
+    baseUrl = `/${workspaceSlug}`
+    const [, , ...rest] = pathname.split("/")
+    restUrl = rest
   }
 
-  return activePathPrefix
+  return {
+    baseUrl,
+    restUrl: restUrl.join("/"),
+    pathname,
+  }
 }

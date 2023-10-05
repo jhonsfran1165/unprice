@@ -90,27 +90,27 @@
   }
 
   .button-ghost {
-    @apply bg-transparent text-background-text hover:border-background-borderHover hover:bg-background-bg hover:text-background-textContrast active:bg-background-bgActive;
+    @apply bg-transparent text-background-text hover:bg-background-bgSubtle hover:text-background-textContrast active:bg-background-bgActive;
   }
 
   .button-default {
-    @apply default hover:border-background-borderHover hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
+    @apply default hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
   }
 
   .button-danger {
-    @apply danger hover:border-danger-borderHover hover:bg-danger-solid hover:text-white active:bg-danger-bgActive;
+    @apply danger hover:border-danger-borderHover hover:bg-danger-solid hover:text-danger-foreground active:bg-danger-bgActive;
   }
 
   .button-primary {
-    @apply primary hover:border-primary-borderHover hover:bg-primary-solid hover:text-black active:bg-primary-bgActive;
+    @apply primary hover:border-primary-borderHover hover:bg-primary-solid hover:text-primary-foreground active:bg-primary-bgActive;
   }
 
   .button-warning {
-    @apply warning hover:border-warning-borderHover hover:bg-warning-solid hover:text-white active:bg-warning-bgActive;
+    @apply warning hover:border-warning-borderHover hover:bg-warning-solid hover:text-warning-foreground active:bg-warning-bgActive;
   }
 
   .button-secondary {
-    @apply secondary hover:border-secondary-borderHover hover:bg-secondary-solid hover:text-white active:bg-secondary-bgActive;
+    @apply secondary hover:border-secondary-borderHover hover:bg-secondary-solid hover:text-secondary-foreground active:bg-secondary-bgActive;
   }
 }
 

@@ -14,14 +14,13 @@ export interface RootDomainProps {
 
 export interface DashboardSidebarRoute {
   title?: string
-  module: string
-  submodule: string
   slug: string
   disabled?: boolean
   external?: boolean
   tier?: string
   icon: keyof typeof Icons
   href: string
+  breadcrumbRoutes?: BreadcrumbRoutes
 }
 
 export interface DashboardHeader {
@@ -31,16 +30,22 @@ export interface DashboardHeader {
 }
 
 export type BreadcrumbRoutes = Record<string, string>
+export type SidebarRoutes = Record<string, DashboardSidebarRoute>
 
 export interface DashboardRoute {
   dashboardHeader?: DashboardHeader
   titleTab: string
-  module: string
-  submodule?: string
+  title?: string
+  action?: {
+    title: string
+    type: string
+  }
+  description?: string
+  submodule: string
   slug: string
   href: string
   tier?: string
-  dashboardSidebarRoutes?: DashboardSidebarRoute[]
+  sidebarRoutes?: SidebarRoutes
   disabled?: boolean
   external?: boolean
   tabsDisabled?: boolean

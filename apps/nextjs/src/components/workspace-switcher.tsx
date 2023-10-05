@@ -110,7 +110,7 @@ export function WorkspaceSwitcher() {
             role="combobox"
             aria-expanded={switcherOpen}
             aria-label="Select a workspace"
-            className="w-44 justify-between"
+            className="w-40 justify-between md:w-44"
           >
             <Avatar className="mr-2 h-5 w-5">
               <AvatarImage src={normalizedObject?.image ?? ""} />
@@ -136,7 +136,12 @@ export function WorkspaceSwitcher() {
                     setSwitcherOpen(false)
                     router.push(`/${user.username}`)
                   }}
-                  className="cursor-pointer text-sm font-semibold"
+                  className={cn(
+                    "cursor-pointer text-sm font-semibold",
+                    org.organization === null
+                      ? "bg-background-bgSubtle"
+                      : "bg-transparent"
+                  )}
                 >
                   <Avatar className="mr-2 h-5 w-5">
                     <AvatarImage
@@ -166,7 +171,12 @@ export function WorkspaceSwitcher() {
                       setSwitcherOpen(false)
                       router.push(`/${org.slug}`)
                     }}
-                    className="cursor-pointer text-sm font-semibold"
+                    className={cn(
+                      "cursor-pointer text-sm font-semibold",
+                      normalizedObject?.id === org.id
+                        ? "bg-background-bgSubtle"
+                        : "bg-transparent"
+                    )}
                   >
                     <Avatar className="mr-2 h-5 w-5">
                       <AvatarImage

@@ -6,14 +6,14 @@ import { Skeleton } from "@builderai/ui/skeleton"
 
 export const Tab = ({
   route,
-  activePathPrefix,
+  baseUrl,
   activeRoute,
 }: {
   route: DashboardRoute
   activeRoute: DashboardRoute | null
-  activePathPrefix: string
+  baseUrl: string
 }) => {
-  const tabPath = `${activePathPrefix}` + route.href
+  const tabPath = `${baseUrl}` + route.href
   const active = activeRoute ? activeRoute.href === route.href : false
 
   return (

@@ -7,8 +7,8 @@ import { api } from "~/trpc/server"
 
 export default function Header() {
   return (
-    <header className="top-0 mx-auto w-full bg-background-bgSubtle px-6">
-      <div className="flex h-16 items-center space-x-2 bg-background-bgSubtle sm:justify-between sm:space-x-0">
+    <header className="top-0 mx-auto w-full px-6">
+      <div className="flex h-16 items-center space-x-2 sm:justify-between sm:space-x-0">
         <div className="flex items-center justify-start">
           <Logo />
           <span className="mx-4 text-lg font-bold text-muted-foreground">

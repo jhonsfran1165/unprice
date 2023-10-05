@@ -6,7 +6,6 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 
-import { DashboardShell } from "~/components/dashboard-shell"
 import { api } from "~/trpc/server"
 import { SubscriptionForm } from "./subscription-form"
 
@@ -15,18 +14,10 @@ import { SubscriptionForm } from "./subscription-form"
 
 export default function BillingPage() {
   return (
-    <DashboardShell
-      title="Billing"
-      description="Manage your subscription and billing details"
-      className="space-y-4"
-      module="workspace"
-      submodule="settings"
-      routeSlug="billing"
-    >
+    <>
       <SubscriptionCard />
-
       <UsageCard />
-    </DashboardShell>
+    </>
   )
 }
 
