@@ -1,4 +1,4 @@
-import type { DashboardRoute, ModulesApp, SidebarRoutes } from "./types"
+import type { DashboardRoute, ModulesApp } from "./types"
 
 const submodulesWorkspace = ["overview", "statistics", "settings"] as const
 
@@ -7,29 +7,23 @@ const WorkspaceRoutes: Record<
   DashboardRoute
 > = {
   overview: {
-    submodule: "overview",
+    icon: "AppWindow",
     titleTab: "Projects",
     title: "Projects",
     description: "Projects for this workspace will show up here",
-    slug: "overview",
     href: "/overview",
-    breadcrumbRoutes: {
-      analytics: "Analytics",
-      reports: "Reports",
-      notifications: "Notifications",
+    subTabs: {
+      analytics: { title: "Analytics", icon: "Database" },
     },
   },
   statistics: {
+    icon: "BarChart2",
     titleTab: "Statistics",
-    submodule: "",
-    slug: "stadistics",
-    dashboardHeader: {
-      title: "Statistics",
-    },
     href: "/stadistics",
     disabled: true,
   },
   settings: {
+    icon: "Settings",
     titleTab: "Settings",
     action: {
       title: "dasdasd",
@@ -37,29 +31,17 @@ const WorkspaceRoutes: Record<
     },
     title: "General Settings",
     description: "Be careful dickhead",
-    submodule: "settings",
-    slug: "settings",
-    dashboardHeader: {
-      title: "Settings",
-    },
     href: "/settings",
     disabled: false,
     tier: "FREE",
-    breadcrumbRoutes: {
-      analytics: "Analytics",
-      reports: "Reports",
-      notifications: "Notifications",
-    },
-    sidebarRoutes: {
-      settings: {
+    sidebarMenu: {
+      overview: {
         slug: "settings",
         title: "General",
         href: "/settings/overview",
         icon: "Settings",
-        breadcrumbRoutes: {
-          analytics: "Analytics",
-          reports: "Reports",
-          notifications: "Notifications",
+        subTabs: {
+          members: { title: "Members", icon: "User2" },
         },
       },
       billing: {
@@ -67,10 +49,8 @@ const WorkspaceRoutes: Record<
         title: "Billing",
         href: "/settings/billing",
         icon: "CreditCard",
-        breadcrumbRoutes: {
-          analytics: "Analytics",
-          reports: "Reports",
-          notifications: "Notifications",
+        subTabs: {
+          analytics: { title: "Analytics", icon: "Database" },
         },
       },
       danger: {
@@ -78,10 +58,8 @@ const WorkspaceRoutes: Record<
         title: "Danger",
         href: "/settings/danger",
         icon: "CreditCard",
-        breadcrumbRoutes: {
-          analytics: "Analytics",
-          reports: "Reports",
-          notifications: "Notifications",
+        subTabs: {
+          analytics: { title: "Analytics", icon: "Database" },
         },
       },
     },
@@ -94,6 +72,7 @@ const submodulesProject = [
   "statistics",
   "apikeys",
   "settings",
+  "ingestions",
 ] as const
 
 const ProjectRoutes: Record<
@@ -101,69 +80,52 @@ const ProjectRoutes: Record<
   DashboardRoute
 > = {
   overview: {
-    slug: "project-overview",
-    submodule: "overview",
     description: "Projects for this workspace will show up here",
     titleTab: "Dashboard",
-    dashboardHeader: {
-      title: "Dashboard",
-    },
+    title: "Dashboard",
+    icon: "Dashboard",
     href: "/overview",
-    breadcrumbRoutes: {
-      overview: "Overview",
-      analytics: "Analytics",
-      reports: "Reports",
-      notifications: "Notifications",
+    subTabs: {
+      analytics: { title: "Analytics", icon: "Database" },
     },
   },
   pro: {
-    submodule: "pro",
-    slug: "project-pro",
     titleTab: "Pro Module",
-    dashboardHeader: {
-      title: "Pro Module",
-    },
+    title: "Dashboard",
+    icon: "Receipt",
     href: "/pro",
     disabled: false,
     tier: "PRO",
   },
   statistics: {
-    slug: "project-statistics",
-    submodule: "statistics",
     titleTab: "Statistics",
-    dashboardHeader: {
-      title: "Statistics",
-    },
+    icon: "BarChart2",
     href: "/statistics",
     disabled: true,
   },
+  ingestions: {
+    titleTab: "ingestions",
+    icon: "BarChartIcon",
+    href: "/ingestions",
+    disabled: true,
+  },
   apikeys: {
-    slug: "project-apikeys",
-    submodule: "apikeys",
-    title: "Projects",
-    description: "Projects for this workspace will show up here",
+    title: "Api Keys",
+    description: "Api Keys for you my friend",
     titleTab: "Api Keys",
-    dashboardHeader: {
-      title: "Api Keys",
-    },
     href: "/apikeys",
+    icon: "Key",
   },
   settings: {
-    slug: "project-settings",
-    submodule: "settings",
     titleTab: "Settings",
-    dashboardHeader: {
-      title: "Settings",
-    },
     href: "/settings",
-    disabled: false,
+    description: "Control your project here",
     title: "Settings",
-    breadcrumbRoutes: {
-      analytics: "Analytics",
-      reports: "Reports",
-      notifications: "Notifications",
+    icon: "Settings",
+    subTabs: {
+      analytics: { title: "Analytics", icon: "Database" },
     },
-    sidebarRoutes: {
+    sidebarMenu: {
       settings: {
         slug: "settings",
         title: "General",
@@ -207,18 +169,11 @@ export const getModulesApp = <T extends ModuleApp>({
   submodule: SubModuleApp<T>
 }): ModulesApp => {
   const moduleConfig = allModuleRoutesApp[module]
-  const moduleRoutes = Object.values(moduleConfig)
-  const activeModuleRoute = (moduleConfig[submodule] as DashboardRoute) ?? null
-
-  const submoduleConfig =
-    activeModuleRoute?.sidebarRoutes ?? ({} as SidebarRoutes)
-  const submoduleRoutes = Object.values(submoduleConfig)
-  const activeSubmoduleRoute = null
+  const moduleTabs = Object.values(moduleConfig)
+  const activeTab = (moduleConfig[submodule] as DashboardRoute) ?? null
 
   return {
-    moduleRoutes,
-    submoduleRoutes,
-    activeModuleRoute: activeModuleRoute,
-    activeSubModuleRoute: activeSubmoduleRoute,
+    moduleTabs,
+    activeTab,
   }
 }

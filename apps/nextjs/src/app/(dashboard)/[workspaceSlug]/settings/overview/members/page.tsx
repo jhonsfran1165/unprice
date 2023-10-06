@@ -4,9 +4,9 @@ import { notFound } from "next/navigation"
 import { auth, clerkClient, UserProfile } from "@builderai/auth"
 
 import { getActiveTenantId } from "~/lib/get-tenant"
-import { OrganizationImage } from "../_components/organization-image"
-import { OrganizationName } from "../_components/organization-name"
-import { LoadingCard } from "../../[projectSlug]/_components/loading-card"
+import { api } from "~/trpc/server"
+import { OrganizationMembers } from "../../_components/organization-members"
+import { LoadingCard } from "../../../[projectSlug]/_components/loading-card"
 
 // TODO: activate later. It is  hitting limits on vercel
 // export const runtime = "edge"
@@ -79,21 +79,19 @@ async function OrganizationSettingsPage() {
     //     <TabsTrigger value="members">Members</TabsTrigger>
     //   </TabsList>
     //   <TabsContent value="general" className="space-y-4">
+    //     <OrganizationName orgSlug={org.slug ?? org.name} name={org.name} />
+    //     <OrganizationImage
+    //       orgSlug={org.slug ?? org.name}
+    //       name={org.name}
+    //       image={org.imageUrl}
+    //     />
+    //   </TabsContent>
+    //   <TabsContent value="members" className="flex flex-col space-y-4">
     <Suspense fallback={<LoadingCard title="Members" description="" />}>
-      <OrganizationName orgSlug={org.slug ?? org.name} name={org.name} />
-      <OrganizationImage
-        orgSlug={org.slug ?? org.name}
-        name={org.name}
-        image={org.imageUrl}
+      <OrganizationMembers
+        membersPromise={api.organization.listMembers.query()}
       />
     </Suspense>
-
-    // </TabsContent>
-    // <TabsContent value="members" className="flex flex-col space-y-4">
-    //   <Suspense fallback={<LoadingCard title="Members" description="" />}>
-    //     <OrganizationMembers
-    //       membersPromise={api.organization.listMembers.query()}
-    //     />
     //   </TabsContent>
     // </Tabs>
     // </DashboardShell>

@@ -16,7 +16,6 @@ import * as Icons from "@builderai/ui/icons"
 import { Activity, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 
 import { Overview } from "~/app/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
-import { DashboardShell } from "~/components/dashboard-shell"
 import { userCanAccess } from "~/lib/project-guard"
 import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
@@ -36,13 +35,7 @@ export default async function DashboardPage(props: {
   })
 
   return (
-    <DashboardShell
-      title="Overview"
-      description="Get an overview of how the project is going"
-      module="project"
-      routeSlug="overview"
-      className="space-y-4"
-    >
+    <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -118,7 +111,7 @@ export default async function DashboardPage(props: {
           />
         </Suspense>
       </div>
-    </DashboardShell>
+    </>
   )
 }
 

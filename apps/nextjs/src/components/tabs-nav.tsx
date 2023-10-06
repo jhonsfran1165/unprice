@@ -13,13 +13,13 @@ import useScroll from "~/lib/use-scroll"
 
 export default function TabsNav(props: {
   className?: string
-  moduleRoutes: DashboardRoute[]
+  moduleTabs: DashboardRoute[]
   activeRoute: DashboardRoute | null
 }) {
   const { baseUrl } = useGetPaths()
   const scrolled = useScroll(60)
 
-  const routes = props.moduleRoutes
+  const routes = props.moduleTabs
   const activeRoute = props.activeRoute
 
   return (
@@ -65,7 +65,7 @@ export default function TabsNav(props: {
           </AnimatePresence>
           {routes.map((route, index) => (
             <Tab
-              key={baseUrl + route.slug + index}
+              key={baseUrl + route.href + index}
               route={route}
               baseUrl={baseUrl}
               activeRoute={activeRoute}

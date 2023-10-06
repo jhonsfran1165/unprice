@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import type { DashboardRoute } from "@builderai/config"
 import { cn } from "@builderai/ui"
+import * as Icons from "@builderai/ui/icons"
 import { Skeleton } from "@builderai/ui/skeleton"
 
 export const Tab = ({
@@ -15,6 +16,7 @@ export const Tab = ({
 }) => {
   const tabPath = `${baseUrl}` + route.href
   const active = activeRoute ? activeRoute.href === route.href : false
+  const Icon = route?.icon && (Icons[route.icon] as React.ElementType)
 
   return (
     <Link
@@ -29,13 +31,14 @@ export const Tab = ({
       <div className="button-ghost rounded-md px-3 py-2 transition-all duration-200">
         <p
           className={cn(
-            "whitespace-nowrap text-sm text-background-text hover:text-background-textContrast",
+            "flex items-center justify-center whitespace-nowrap text-sm text-background-text hover:text-background-textContrast",
             {
               "text-background-textContrast": active,
               "text-accent hover:text-background-solid": route.disabled,
             }
           )}
         >
+          {Icon && <Icon className="mr-2 h-4 w-4" />}
           {route.titleTab}
         </p>
       </div>

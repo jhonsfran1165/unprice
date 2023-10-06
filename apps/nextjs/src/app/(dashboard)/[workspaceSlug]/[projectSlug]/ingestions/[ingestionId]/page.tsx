@@ -9,7 +9,6 @@ import {
   TableRow,
 } from "@builderai/ui/table"
 
-import { DashboardShell } from "~/components/dashboard-shell"
 import { userCanAccess } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 
@@ -29,13 +28,7 @@ export default async function IngestionPage(props: {
   })
 
   return (
-    <DashboardShell
-      title="Ingestion"
-      module="project"
-      routeSlug="ingestions"
-      description="Ingestion details"
-      className="space-y-4"
-    >
+    <>
       <Table>
         <TableHeader>
           <TableRow className="pointer-events-none bg-muted">
@@ -62,6 +55,6 @@ export default async function IngestionPage(props: {
       <pre className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
         {JSON.stringify(ingestion.schema, null, 4)}
       </pre>
-    </DashboardShell>
+    </>
   )
 }

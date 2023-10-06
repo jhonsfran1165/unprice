@@ -13,7 +13,10 @@ export default async function ApiKeysPage(props: {
 
   return (
     <>
-      <NewApiKeyDialog projectSlug={props.params.projectSlug} />
+      <div className="flex w-full justify-end">
+        <NewApiKeyDialog projectSlug={props.params.projectSlug} />
+      </div>
+
       <DataTable data={apiKeys} />
     </>
   )

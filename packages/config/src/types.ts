@@ -1,10 +1,8 @@
 import type * as Icons from "@builderai/ui/icons"
 
 export interface ModulesApp {
-  moduleRoutes: DashboardRoute[]
-  submoduleRoutes: DashboardSidebarRoute[]
-  activeModuleRoute: DashboardRoute | null
-  activeSubModuleRoute: DashboardSidebarRoute | null
+  moduleTabs: DashboardRoute[]
+  activeTab: DashboardRoute | null
 }
 
 export interface RootDomainProps {
@@ -20,36 +18,33 @@ export interface DashboardSidebarRoute {
   tier?: string
   icon: keyof typeof Icons
   href: string
-  breadcrumbRoutes?: BreadcrumbRoutes
+  subTabs?: SubTabsRoutes
 }
 
-export interface DashboardHeader {
+export interface SubTabRoute {
   title: string
-  actionLink?: string
-  actionColor?: string
+  icon?: keyof typeof Icons
 }
 
-export type BreadcrumbRoutes = Record<string, string>
+export type SubTabsRoutes = Record<string, SubTabRoute>
 export type SidebarRoutes = Record<string, DashboardSidebarRoute>
 
 export interface DashboardRoute {
-  dashboardHeader?: DashboardHeader
   titleTab: string
   title?: string
   action?: {
     title: string
     type: string
   }
+  icon?: keyof typeof Icons
   description?: string
-  submodule: string
-  slug: string
   href: string
   tier?: string
-  sidebarRoutes?: SidebarRoutes
+  sidebarMenu?: SidebarRoutes
   disabled?: boolean
   external?: boolean
   tabsDisabled?: boolean
-  breadcrumbRoutes?: BreadcrumbRoutes
+  subTabs?: SubTabsRoutes
 }
 
 export interface Route {

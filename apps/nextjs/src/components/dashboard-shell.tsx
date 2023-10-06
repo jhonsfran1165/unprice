@@ -4,10 +4,10 @@ import type { ModuleApp, SubModuleApp } from "@builderai/config"
 import { getModulesApp } from "@builderai/config"
 import { Button } from "@builderai/ui/button"
 
-import Breadcrumbs from "~/components/breadcrumbs"
 import HeaderContext from "~/components/header-context"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
 import SidebarNav from "~/components/sidebar"
+import SubTabs from "~/components/sub-tabs"
 import TabsNav from "~/components/tabs-nav"
 
 const cachedGetModulesApp = cache(getModulesApp)
@@ -27,18 +27,14 @@ export function DashboardShell<T extends ModuleApp>(props: {
     submodule: props.submodule,
   })
 
-  const { activeModuleRoute, moduleRoutes } = modules
+  const { activeTab, moduleTabs } = modules
 
-  const moduleTabRoutes = moduleRoutes
-  const activeModuleTabRoute = activeModuleRoute
+  // TODO: support subtabs for both tabs and sidebar
 
   return (
     <>
-      {moduleRoutes.length > 0 && (
-        <TabsNav
-          moduleRoutes={moduleTabRoutes}
-          activeRoute={activeModuleTabRoute}
-        />
+      {moduleTabs.length > 0 && (
+        <TabsNav moduleTabs={moduleTabs} activeRoute={activeTab} />
       )}
       {props.title && (
         <HeaderContext title={props.title} action={props.action} />
@@ -46,29 +42,21 @@ export function DashboardShell<T extends ModuleApp>(props: {
 
       <MaxWidthWrapper className="my-10 max-w-screen-2xl">
         <div className="flex flex-col gap-12 sm:flex-1 sm:flex-row">
-          <SidebarNav
-            route={props.submodule as string}
-            activeModuleTabRoute={activeModuleTabRoute}
-          />
+          <SidebarNav route={props.submodule as string} activeTab={activeTab} />
           {/* TODO: put all this in another component to change give a route */}
           <div className="flex flex-1 flex-col">
             <div className="mb-4 flex items-center justify-between">
               <div className="space-y-1">
                 <h1 className="font-cal text-xl font-semibold leading-none">
-                  {activeModuleRoute?.title}
+                  {activeTab?.title}
                 </h1>
                 <h2 className="text-base text-muted-foreground">
-                  {activeModuleRoute?.description}
+                  {activeTab?.description}
                 </h2>
               </div>
-              {activeModuleRoute?.action && (
-                <Button>{activeModuleRoute.action.title}</Button>
-              )}
+              {activeTab?.action && <Button>{activeTab.action.title}</Button>}
             </div>
-            <Breadcrumbs
-              route={props.submodule as string}
-              activeModuleTabRoute={activeModuleTabRoute}
-            />
+            <SubTabs route={props.submodule as string} activeTab={activeTab} />
             <div className={props.className}>{props.children}</div>
           </div>
         </div>

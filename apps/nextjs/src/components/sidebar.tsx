@@ -10,18 +10,17 @@ import { useGetPaths } from "~/lib/use-get-path"
 
 export default function SidebarNav({
   route,
-  activeModuleTabRoute,
+  activeTab,
 }: {
   route: string
-  activeModuleTabRoute: DashboardRoute | null
+  activeTab: DashboardRoute | null
 }) {
   const { baseUrl, restUrl } = useGetPaths() // get hte prefix of the dynamic slugs
 
   // give a path prefix calculate sidebar tabs
   const activeSideBarRouteSlug = restUrl.replace(`${route}/`, "").split("/")[0]!
 
-  const sideBarData =
-    activeModuleTabRoute?.sidebarRoutes ?? ({} as SidebarRoutes)
+  const sideBarData = activeTab?.sidebarMenu ?? ({} as SidebarRoutes)
   const activeSideBarRoutes = Object.values(sideBarData)
 
   if (activeSideBarRoutes.length === 0) return null
