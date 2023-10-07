@@ -10,9 +10,9 @@ export interface RootDomainProps {
   rewrite?: boolean
 }
 
-export interface DashboardSidebarRoute {
+export interface SidebarRoute {
   title: string
-  action?: ActionRoute
+  action?: JSX.Element
   description?: string
   disabled?: boolean
   tier?: string
@@ -24,16 +24,12 @@ export interface DashboardSidebarRoute {
 export interface SubTabRoute {
   title: string
   icon?: keyof typeof Icons
-  action?: ActionRoute
+  action?: JSX.Element
   description?: string
 }
 
 export type SubTabsRoutes = Record<string, SubTabRoute>
-export type SidebarRoutes = Record<string, DashboardSidebarRoute>
-export interface ActionRoute {
-  title: string
-  type: string
-}
+export type SidebarRoutes = Record<string, SidebarRoute>
 
 type ConditionalProps =
   | {
@@ -72,10 +68,8 @@ export interface SiteConfig {
   }
 }
 
-export function isSidebarRoutes(
-  item: object | undefined
-): item is SidebarRoutes {
-  return (item as SidebarRoutes) !== undefined
+export function isSidebarRoute(item: object | undefined): item is SidebarRoute {
+  return (item as SidebarRoute) !== undefined
 }
 export function isSubTabsRoutes(
   item: object | undefined

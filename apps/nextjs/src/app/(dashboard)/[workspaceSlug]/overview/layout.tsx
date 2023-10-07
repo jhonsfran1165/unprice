@@ -15,7 +15,6 @@ export default async function WorkspaceLayout(props: {
   return (
     <DashboardShell
       title="Projects"
-      className="space-y-6"
       module="workspace"
       submodule="overview"
       action={

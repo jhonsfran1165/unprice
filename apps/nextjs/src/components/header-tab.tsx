@@ -1,8 +1,6 @@
-"use client"
-
 import MaxWidthWrapper from "~/components/max-width-wrapper"
 
-export default function HeaderContext({
+export default function HeaderTab({
   title,
   action,
 }: {

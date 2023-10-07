@@ -1,3 +1,4 @@
+import HeaderSubTab from "~/components/header-subtab"
 import { api } from "~/trpc/server"
 import { DataTable } from "./data-table"
 import { NewApiKeyDialog } from "./new-api-key-dialog"
@@ -13,9 +14,11 @@ export default async function ApiKeysPage(props: {
 
   return (
     <>
-      <div className="flex w-full justify-end">
-        <NewApiKeyDialog projectSlug={props.params.projectSlug} />
-      </div>
+      <HeaderSubTab
+        title="Api keys generated"
+        description="All the apis of the system"
+        action={<NewApiKeyDialog projectSlug={props.params.projectSlug} />}
+      />
 
       <DataTable data={apiKeys} />
     </>

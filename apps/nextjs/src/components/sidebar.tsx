@@ -9,16 +9,17 @@ import * as Icons from "@builderai/ui/icons"
 import { useGetPaths } from "~/lib/use-get-path"
 
 export default function SidebarNav({
-  route,
+  submodule,
   sidebarMenu,
 }: {
-  route: string
+  submodule: string
   sidebarMenu: SidebarRoutes
 }) {
-  const { baseUrl, restUrl } = useGetPaths() // get href prefix of the dynamic slugs
+  const { baseUrl, restSegmentsPerRoute } = useGetPaths() // get href prefix of the dynamic slugs
 
   // give a path prefix calculate sidebar tabs
-  const activeSideBarRouteSlug = restUrl.replace(`${route}/`, "").split("/")[0]!
+  const restSegments = restSegmentsPerRoute(submodule)
+  const activeSideBarRouteSlug = restSegments[0]!
   const activeSideBarRoutes = Object.values(sidebarMenu)
 
   if (activeSideBarRoutes.length === 0) return null
@@ -27,7 +28,7 @@ export default function SidebarNav({
     <nav className="grid items-start gap-2">
       {activeSideBarRoutes.map((item, index) => {
         const fullPath = baseUrl + item.href
-        const active = item.href === `/${route}/${activeSideBarRouteSlug}`
+        const active = item.href === `/${submodule}/${activeSideBarRouteSlug}`
         const Icon = Icons[item.icon] as React.ElementType
 
         return (

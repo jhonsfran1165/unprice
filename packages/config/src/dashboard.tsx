@@ -58,6 +58,11 @@ const WorkspaceRoutes: Record<
         href: "/settings/billing",
         icon: "CreditCard",
         subTabs: {
+          billing: {
+            title: "Billing",
+            icon: "AppWindow",
+            description: "Cabeza de AppWindow",
+          },
           analytics: { title: "Analytics", icon: "Database" },
         },
       },
@@ -66,6 +71,11 @@ const WorkspaceRoutes: Record<
         href: "/settings/danger",
         icon: "Warning",
         subTabs: {
+          danger: {
+            title: "Billing",
+            icon: "AppWindow",
+            description: "Cabeza de AppWindow",
+          },
           analytics: { title: "Analytics", icon: "Database" },
         },
       },
@@ -91,6 +101,7 @@ const ProjectRoutes: Record<
     icon: "Dashboard",
     href: "/overview",
     subTabs: {
+      overview: { title: "Analytics", icon: "Database" },
       analytics: { title: "Analytics", icon: "Database" },
     },
   },
@@ -112,6 +123,23 @@ const ProjectRoutes: Record<
     icon: "BarChartIcon",
     href: "/ingestions",
     disabled: true,
+    sidebarMenu: {
+      overview: {
+        title: "General",
+        href: "/overview",
+        icon: "Settings",
+        subTabs: {
+          overview: { title: "Analytics", icon: "Database" },
+          analytics: { title: "Analytics", icon: "Database" },
+          Settings: { title: "Settings", icon: "Settings" },
+        },
+      },
+      danger: {
+        title: "Danger",
+        href: "/danger",
+        icon: "CreditCard",
+      },
+    },
   },
   apikeys: {
     titleTab: "Api Keys",
@@ -128,6 +156,7 @@ const ProjectRoutes: Record<
         href: "/settings/overview",
         icon: "Settings",
         subTabs: {
+          overview: { title: "Analytics", icon: "Database" },
           analytics: { title: "Analytics", icon: "Database" },
           Settings: { title: "Settings", icon: "Settings" },
         },

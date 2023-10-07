@@ -1,24 +1,19 @@
-"use client"
-
-import type { ActionRoute } from "@builderai/config"
-import { Button } from "@builderai/ui/button"
-
-export default function HeaderSection({
+export default function HeaderSubTab({
   title,
   action,
   description,
 }: {
   title: string
   description?: string
-  action?: ActionRoute
+  action?: React.ReactNode
 }) {
   return (
     <div className="mb-4 flex items-center justify-between">
-      <div className="space-y-1">
+      <div className="space-y-2">
         <h1 className="font-cal text-xl font-semibold leading-none">{title}</h1>
         <h2 className="text-base text-muted-foreground">{description}</h2>
       </div>
-      {action && <Button>{action.title}</Button>}
+      {action}
     </div>
   )
 }

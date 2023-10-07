@@ -9,7 +9,6 @@ import {
   TableRow,
 } from "@builderai/ui/table"
 
-import { userCanAccess } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 
 // TODO: activate later. It is  hitting limits on vercel
@@ -18,11 +17,6 @@ import { api } from "~/trpc/server"
 export default async function IngestionPage(props: {
   params: { workspaceSlug: string; projectSlug: string; ingestionId: string }
 }) {
-  await userCanAccess({
-    projectSlug: props.params.projectSlug,
-    workspaceSlug: props.params.workspaceSlug,
-  })
-
   const ingestion = await api.ingestion.byId.query({
     id: props.params.ingestionId,
   })

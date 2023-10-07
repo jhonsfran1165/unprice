@@ -1,8 +1,8 @@
 import Link from "next/link"
 
 import type { DashboardRoute } from "@builderai/config"
+import { createIcon } from "@builderai/config"
 import { cn } from "@builderai/ui"
-import * as Icons from "@builderai/ui/icons"
 import { Skeleton } from "@builderai/ui/skeleton"
 
 export const Tab = ({
@@ -16,7 +16,7 @@ export const Tab = ({
 }) => {
   const tabPath = `${baseUrl}` + route.href
   const active = activeRoute ? activeRoute.href === route.href : false
-  const Icon = route?.icon && (Icons[route.icon] as React.ElementType)
+  const Icon = route?.icon && createIcon(route?.icon)
 
   return (
     <Link

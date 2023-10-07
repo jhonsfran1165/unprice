@@ -6,10 +6,9 @@ export default function ProjectSettingsLayout(props: {
 }) {
   return (
     <DashboardShell
-      title="Project"
+      title="General Settings"
       module="project"
       submodule="settings"
-      className="space-y-4"
     >
       {props.children}
     </DashboardShell>

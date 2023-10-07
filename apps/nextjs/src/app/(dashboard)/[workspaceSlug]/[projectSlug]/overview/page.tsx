@@ -16,7 +16,6 @@ import * as Icons from "@builderai/ui/icons"
 import { Activity, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 
 import { Overview } from "~/app/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
-import { userCanAccess } from "~/lib/project-guard"
 import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
@@ -24,15 +23,10 @@ import { LoadingCard } from "../_components/loading-card"
 // TODO: activate later. It is  hitting limits on vercel
 // export const runtime = "edge"
 
-export default async function DashboardPage(props: {
+export default function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
 }) {
   const { projectSlug, workspaceSlug } = props.params
-
-  await userCanAccess({
-    projectSlug: props.params.projectSlug,
-    workspaceSlug: props.params.workspaceSlug,
-  })
 
   return (
     <>

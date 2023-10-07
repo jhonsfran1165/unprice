@@ -2,13 +2,14 @@ import React, { cache } from "react"
 
 import type { ModuleApp, SubModuleApp } from "@builderai/config"
 import { getModulesApp } from "@builderai/config"
+import { cn } from "@builderai/ui"
 
-import HeaderContext from "~/components/header-context"
+import HeaderTab from "~/components/header-tab"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
+import SidebarMenuSubTabs from "~/components/menu-siderbar-subtabs"
+import MenuSubTabs from "~/components/menu-subtabs"
 import SidebarNav from "~/components/sidebar"
-import SubTabs from "~/components/sub-tabs"
 import TabsNav from "~/components/tabs-nav"
-import SidebarSubTabs from "./siderbar-sub-tabs"
 
 const cachedGetModulesApp = cache(getModulesApp)
 
@@ -37,33 +38,41 @@ export function DashboardShell<T extends ModuleApp>(props: {
       {moduleTabs.length > 0 && (
         <TabsNav moduleTabs={moduleTabs} activeRoute={activeTab} />
       )}
-      {props.title && (
-        <HeaderContext title={props.title} action={props.action} />
-      )}
+
+      {props.title && <HeaderTab title={props.title} action={props.action} />}
 
       <MaxWidthWrapper className="my-10 max-w-screen-2xl">
+        {/* sidebar menu config */}
         {activeTab?.sidebarMenu && (
           <div className="flex flex-col gap-12 sm:flex-1 sm:flex-row">
             <aside className="flex flex-col sm:flex sm:w-1/4">
               <SidebarNav
-                route={props.submodule as string}
+                submodule={props.submodule as string}
                 sidebarMenu={activeTab.sidebarMenu}
               />
             </aside>
             <div className="flex flex-1 flex-col sm:w-3/4">
-              <SidebarSubTabs
-                route={props.submodule as string}
+              <SidebarMenuSubTabs
+                submodule={props.submodule as string}
                 sideBarRoutes={activeTab.sidebarMenu}
               />
-              <div className={props.className}>{props.children}</div>
+              <div className={cn("space-y-6", props.className)}>
+                {props.children}
+              </div>
             </div>
           </div>
         )}
 
+        {/* without sidebar menu config */}
         {!activeTab?.sidebarMenu && (
           <div className="flex flex-1 flex-col">
-            <SubTabs route={props.submodule as string} activeTab={activeTab} />
-            <div className={props.className}>{props.children}</div>
+            <MenuSubTabs
+              submodule={props.submodule as string}
+              activeTab={activeTab}
+            />
+            <div className={cn("space-y-6", props.className)}>
+              {props.children}
+            </div>
           </div>
         )}
       </MaxWidthWrapper>

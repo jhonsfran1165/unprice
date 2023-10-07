@@ -19,9 +19,6 @@ export default function TabsNav(props: {
   const { baseUrl } = useGetPaths()
   const scrolled = useScroll(60)
 
-  const routes = props.moduleTabs
-  const activeRoute = props.activeRoute
-
   return (
     <div
       className={cn(
@@ -63,12 +60,12 @@ export default function TabsNav(props: {
               />
             )}
           </AnimatePresence>
-          {routes.map((route, index) => (
+          {props.moduleTabs.map((route, index) => (
             <Tab
               key={baseUrl + route.href + index}
               route={route}
               baseUrl={baseUrl}
-              activeRoute={activeRoute}
+              activeRoute={props.activeRoute}
             />
           ))}
         </nav>

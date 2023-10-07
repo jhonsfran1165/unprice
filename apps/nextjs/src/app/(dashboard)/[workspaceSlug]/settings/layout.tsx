@@ -10,8 +10,7 @@ export default function WorkspaceLayout(props: {
 }) {
   return (
     <DashboardShell
-      title="Danger Zone"
-      className="space-y-6"
+      title="General Settings"
       module="workspace"
       submodule="settings"
       action={

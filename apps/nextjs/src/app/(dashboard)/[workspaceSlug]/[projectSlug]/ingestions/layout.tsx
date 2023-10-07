@@ -5,12 +5,7 @@ export default function ProjectSettingsLayout(props: {
   params: { workspaceSlug: string }
 }) {
   return (
-    <DashboardShell
-      title="Ingestion"
-      module="project"
-      submodule="ingestions"
-      className="space-y-4"
-    >
+    <DashboardShell title="Ingestion" module="project" submodule="ingestions">
       {props.children}
     </DashboardShell>
   )
