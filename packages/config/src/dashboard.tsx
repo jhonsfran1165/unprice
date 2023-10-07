@@ -9,11 +9,18 @@ const WorkspaceRoutes: Record<
   overview: {
     icon: "AppWindow",
     titleTab: "Projects",
-    title: "Projects",
-    description: "Projects for this workspace will show up here",
     href: "/overview",
     subTabs: {
-      analytics: { title: "Analytics", icon: "Database" },
+      overview: {
+        title: "Projects",
+        icon: "AppWindow",
+        description: "Cabeza de AppWindow",
+      },
+      analytics: {
+        title: "Analytics",
+        icon: "Database",
+        description: "Cabeza de nepe",
+      },
     },
   },
   statistics: {
@@ -25,27 +32,28 @@ const WorkspaceRoutes: Record<
   settings: {
     icon: "Settings",
     titleTab: "Settings",
-    action: {
-      title: "dasdasd",
-      type: "primary",
-    },
-    title: "General Settings",
-    description: "Be careful dickhead",
     href: "/settings",
     disabled: false,
     tier: "FREE",
     sidebarMenu: {
       overview: {
-        slug: "settings",
         title: "General",
         href: "/settings/overview",
         icon: "Settings",
         subTabs: {
-          members: { title: "Members", icon: "User2" },
+          overview: {
+            title: "Organization",
+            icon: "AppWindow",
+            description: "Cabeza de AppWindow",
+          },
+          members: {
+            title: "Members",
+            icon: "User2",
+            description: "Cabeza de AppWindow",
+          },
         },
       },
       billing: {
-        slug: "billing",
         title: "Billing",
         href: "/settings/billing",
         icon: "CreditCard",
@@ -54,10 +62,9 @@ const WorkspaceRoutes: Record<
         },
       },
       danger: {
-        slug: "danger",
         title: "Danger",
         href: "/settings/danger",
-        icon: "CreditCard",
+        icon: "Warning",
         subTabs: {
           analytics: { title: "Analytics", icon: "Database" },
         },
@@ -80,9 +87,7 @@ const ProjectRoutes: Record<
   DashboardRoute
 > = {
   overview: {
-    description: "Projects for this workspace will show up here",
     titleTab: "Dashboard",
-    title: "Dashboard",
     icon: "Dashboard",
     href: "/overview",
     subTabs: {
@@ -91,7 +96,6 @@ const ProjectRoutes: Record<
   },
   pro: {
     titleTab: "Pro Module",
-    title: "Dashboard",
     icon: "Receipt",
     href: "/pro",
     disabled: false,
@@ -110,8 +114,6 @@ const ProjectRoutes: Record<
     disabled: true,
   },
   apikeys: {
-    title: "Api Keys",
-    description: "Api Keys for you my friend",
     titleTab: "Api Keys",
     href: "/apikeys",
     icon: "Key",
@@ -119,21 +121,18 @@ const ProjectRoutes: Record<
   settings: {
     titleTab: "Settings",
     href: "/settings",
-    description: "Control your project here",
-    title: "Settings",
     icon: "Settings",
-    subTabs: {
-      analytics: { title: "Analytics", icon: "Database" },
-    },
     sidebarMenu: {
-      settings: {
-        slug: "settings",
+      overview: {
         title: "General",
         href: "/settings/overview",
         icon: "Settings",
+        subTabs: {
+          analytics: { title: "Analytics", icon: "Database" },
+          Settings: { title: "Settings", icon: "Settings" },
+        },
       },
       danger: {
-        slug: "danger",
         title: "Danger",
         href: "/settings/danger",
         icon: "CreditCard",

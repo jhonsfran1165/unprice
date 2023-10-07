@@ -20,7 +20,7 @@ export const Tab = ({
 
   return (
     <Link
-      className={cn("border-b-2 p-1", {
+      className={cn("border-b-2 py-1", {
         "border-primary-solid": active,
         "border-transparent": !active,
         "cursor-not-allowed opacity-80": route.disabled,

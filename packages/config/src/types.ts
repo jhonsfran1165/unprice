@@ -1,4 +1,4 @@
-import type * as Icons from "@builderai/ui/icons"
+import * as Icons from "@builderai/ui/icons"
 
 export interface ModulesApp {
   moduleTabs: DashboardRoute[]
@@ -11,10 +11,10 @@ export interface RootDomainProps {
 }
 
 export interface DashboardSidebarRoute {
-  title?: string
-  slug: string
+  title: string
+  action?: ActionRoute
+  description?: string
   disabled?: boolean
-  external?: boolean
   tier?: string
   icon: keyof typeof Icons
   href: string
@@ -24,34 +24,41 @@ export interface DashboardSidebarRoute {
 export interface SubTabRoute {
   title: string
   icon?: keyof typeof Icons
+  action?: ActionRoute
+  description?: string
 }
 
 export type SubTabsRoutes = Record<string, SubTabRoute>
 export type SidebarRoutes = Record<string, DashboardSidebarRoute>
+export interface ActionRoute {
+  title: string
+  type: string
+}
 
-export interface DashboardRoute {
+type ConditionalProps =
+  | {
+      sidebarMenu?: SidebarRoutes
+      subTabs?: never
+    }
+  | {
+      sidebarMenu?: never
+      subTabs?: SubTabsRoutes
+    }
+
+export type DashboardRoute = {
   titleTab: string
-  title?: string
-  action?: {
-    title: string
-    type: string
-  }
-  icon?: keyof typeof Icons
-  description?: string
   href: string
   tier?: string
-  sidebarMenu?: SidebarRoutes
   disabled?: boolean
-  external?: boolean
-  tabsDisabled?: boolean
-  subTabs?: SubTabsRoutes
-}
+  icon?: keyof typeof Icons
+  // we can use this for further customization from here
+  // testing?: JSX.Element
+} & ConditionalProps
 
 export interface Route {
   title: string
   href: string
   disabled?: boolean
-  external?: boolean
 }
 
 export interface SiteConfig {
@@ -64,3 +71,17 @@ export interface SiteConfig {
     dashboard: string
   }
 }
+
+export function isSidebarRoutes(
+  item: object | undefined
+): item is SidebarRoutes {
+  return (item as SidebarRoutes) !== undefined
+}
+export function isSubTabsRoutes(
+  item: object | undefined
+): item is SubTabsRoutes {
+  return (item as SubTabsRoutes) !== undefined
+}
+
+export const createIcon = (name: keyof typeof Icons): Icons.LucideIcon =>
+  Icons[name] as Icons.LucideIcon

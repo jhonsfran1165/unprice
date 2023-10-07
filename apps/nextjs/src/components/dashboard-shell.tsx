@@ -2,17 +2,17 @@ import React, { cache } from "react"
 
 import type { ModuleApp, SubModuleApp } from "@builderai/config"
 import { getModulesApp } from "@builderai/config"
-import { Button } from "@builderai/ui/button"
 
 import HeaderContext from "~/components/header-context"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
 import SidebarNav from "~/components/sidebar"
 import SubTabs from "~/components/sub-tabs"
 import TabsNav from "~/components/tabs-nav"
+import SidebarSubTabs from "./siderbar-sub-tabs"
 
 const cachedGetModulesApp = cache(getModulesApp)
 
-// TODO: add dashboard skeleton and try to pass parameters here to avoid import dynamic
+// TODO: add dashboard skeleton
 export function DashboardShell<T extends ModuleApp>(props: {
   title: string
   module: T
@@ -29,7 +29,8 @@ export function DashboardShell<T extends ModuleApp>(props: {
 
   const { activeTab, moduleTabs } = modules
 
-  // TODO: support subtabs for both tabs and sidebar
+  // TODO: handle this error
+  if (!activeTab) return null
 
   return (
     <>
@@ -41,25 +42,30 @@ export function DashboardShell<T extends ModuleApp>(props: {
       )}
 
       <MaxWidthWrapper className="my-10 max-w-screen-2xl">
-        <div className="flex flex-col gap-12 sm:flex-1 sm:flex-row">
-          <SidebarNav route={props.submodule as string} activeTab={activeTab} />
-          {/* TODO: put all this in another component to change give a route */}
-          <div className="flex flex-1 flex-col">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="space-y-1">
-                <h1 className="font-cal text-xl font-semibold leading-none">
-                  {activeTab?.title}
-                </h1>
-                <h2 className="text-base text-muted-foreground">
-                  {activeTab?.description}
-                </h2>
-              </div>
-              {activeTab?.action && <Button>{activeTab.action.title}</Button>}
+        {activeTab?.sidebarMenu && (
+          <div className="flex flex-col gap-12 sm:flex-1 sm:flex-row">
+            <aside className="flex flex-col sm:flex sm:w-1/4">
+              <SidebarNav
+                route={props.submodule as string}
+                sidebarMenu={activeTab.sidebarMenu}
+              />
+            </aside>
+            <div className="flex flex-1 flex-col sm:w-3/4">
+              <SidebarSubTabs
+                route={props.submodule as string}
+                sideBarRoutes={activeTab.sidebarMenu}
+              />
+              <div className={props.className}>{props.children}</div>
             </div>
+          </div>
+        )}
+
+        {!activeTab?.sidebarMenu && (
+          <div className="flex flex-1 flex-col">
             <SubTabs route={props.submodule as string} activeTab={activeTab} />
             <div className={props.className}>{props.children}</div>
           </div>
-        </div>
+        )}
       </MaxWidthWrapper>
     </>
   )
