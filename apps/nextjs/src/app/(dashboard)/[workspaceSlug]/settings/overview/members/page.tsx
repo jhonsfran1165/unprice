@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
 
-import { auth, clerkClient, UserProfile } from "@builderai/auth"
+import { auth, UserProfile } from "@builderai/auth"
 
 import { getActiveTenantId } from "~/lib/get-tenant"
 import { api } from "~/trpc/server"
@@ -49,9 +49,9 @@ async function OrganizationSettingsPage() {
   const { orgId } = auth()
   if (!orgId) notFound()
 
-  const org = await clerkClient.organizations.getOrganization({
-    organizationId: orgId,
-  })
+  // const org = await clerkClient.organizations.getOrganization({
+  //   organizationId: orgId,
+  // })
 
   await new Promise((resolve) => setTimeout(resolve, 1000))
 

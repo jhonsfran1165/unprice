@@ -10,8 +10,7 @@ export default async function Page(props: {
   params: { workspaceSlug: string }
 }) {
   // TODO: get limits of this project for this workspace
-  const { projects, limitReached } =
-    await api.project.listByActiveWorkspace.query()
+  const { projects } = await api.project.listByActiveWorkspace.query()
 
   return (
     <>
