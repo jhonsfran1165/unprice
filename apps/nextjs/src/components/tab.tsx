@@ -33,8 +33,7 @@ export const Tab = ({
           className={cn(
             "flex items-center justify-center whitespace-nowrap text-sm text-background-text hover:text-background-textContrast",
             {
-              "text-background-textContrast": active,
-              "text-accent hover:text-background-solid": route.disabled,
+              "opacity-50 hover:text-background-solid": route.disabled,
             }
           )}
         >

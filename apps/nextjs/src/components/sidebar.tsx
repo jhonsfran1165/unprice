@@ -25,7 +25,7 @@ export default function SidebarNav({
   if (activeSideBarRoutes.length === 0) return null
 
   return (
-    <nav className="grid items-start gap-2">
+    <nav className="sticky top-20 flex min-h-[500px] flex-col gap-2 rounded-md px-4 py-4">
       {activeSideBarRoutes.map((item, index) => {
         const fullPath = baseUrl + item.href
         const active = item.href === `/${submodule}/${activeSideBarRouteSlug}`

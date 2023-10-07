@@ -80,11 +80,11 @@ export function WorkspaceSwitcher() {
       >
         <Avatar className="mr-2 h-5 w-5">
           <AvatarFallback>
-            <Skeleton className="aspect-square h-full w-full" />
+            <Skeleton className="aspect-square h-full w-full bg-background-borderHover" />
           </AvatarFallback>
         </Avatar>
-        <Skeleton className="h-[20px] w-full" />
-        <Skeleton className="ml-2 h-4 w-4 shrink-0" />
+        <Skeleton className="h-[20px] w-full bg-background-borderHover" />
+        <Skeleton className="ml-2 h-4 w-4 shrink-0 bg-background-borderHover" />
       </Button>
     )
   }

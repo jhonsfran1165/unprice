@@ -22,10 +22,10 @@ export default function TabsNav(props: {
   return (
     <div
       className={cn(
-        "sticky inset-x-0 top-0 z-30 flex h-12 w-full items-center justify-start border-b px-2 transition-all",
+        "sticky inset-x-0 top-0 z-30 flex h-12 w-full items-center justify-start border-b bg-background-bg px-2 transition-all",
         props.className,
         {
-          "bg-background backdrop-blur-lg": scrolled,
+          "backdrop-blur-lg": scrolled,
         }
       )}
     >

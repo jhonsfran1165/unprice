@@ -1,10 +1,11 @@
 "use client"
 
 import type { SidebarRoutes } from "@builderai/config"
+import { createIcon } from "@builderai/config"
 
 import HeaderSubTab from "~/components/header-subtab"
-import SubTabs from "~/components/subtabs"
 import { useGetPaths } from "~/lib/use-get-path"
+import SubTab from "./subtab"
 
 export default function SidebarMenuSubTabs({
   submodule,
@@ -37,11 +38,27 @@ export default function SidebarMenuSubTabs({
           action={activeSidebarTab?.action}
         />
       )}
-      <SubTabs
-        activeRouteSlug={activeSidebarSlug}
-        activeSubTabs={activeSubTabs}
-        baseUrl={baseUrlSubTab}
-      />
+
+      <div className="mb-4 inline-flex h-10 items-center rounded-md bg-background-bg p-1 text-muted-foreground">
+        {Object.entries(activeSubTabs).map(([index, item]) => {
+          const Icon = item?.icon && createIcon(item?.icon)
+          const href =
+            activeSidebarSlug === index
+              ? `${baseUrlSubTab}`
+              : `${baseUrlSubTab}/${index}`
+
+          return (
+            <SubTab
+              key={index}
+              href={href}
+              className="rounded-sm"
+              classNameActive=" bg-background text-background-text shadow-lg border"
+              icon={Icon && <Icon className="mr-2 h-4 w-4" />}
+              title={item.title}
+            />
+          )
+        })}
+      </div>
     </>
   )
 }

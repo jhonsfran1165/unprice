@@ -21,6 +21,7 @@ export function DashboardShell<T extends ModuleApp>(props: {
   action?: React.ReactNode
   children: React.ReactNode
   className?: string
+  description?: string
   isLoading?: boolean
 }) {
   const modules = cachedGetModulesApp({
@@ -33,15 +34,23 @@ export function DashboardShell<T extends ModuleApp>(props: {
   // TODO: handle this error
   if (!activeTab) return null
 
+  // TODO: support nested modules with dynamic routes
+
   return (
     <>
       {moduleTabs.length > 0 && (
         <TabsNav moduleTabs={moduleTabs} activeRoute={activeTab} />
       )}
 
-      {props.title && <HeaderTab title={props.title} action={props.action} />}
+      {props.title && (
+        <HeaderTab
+          title={props.title}
+          action={props.action}
+          description={props.description}
+        />
+      )}
 
-      <MaxWidthWrapper className="my-10 max-w-screen-2xl">
+      <MaxWidthWrapper className="max-w-screen-2xl">
         {/* sidebar menu config */}
         {activeTab?.sidebarMenu && (
           <div className="flex flex-col gap-12 sm:flex-1 sm:flex-row">

@@ -126,7 +126,7 @@ const ProjectRoutes: Record<
     sidebarMenu: {
       overview: {
         title: "General",
-        href: "/overview",
+        href: "/ingestions/overview",
         icon: "Settings",
         subTabs: {
           overview: { title: "Analytics", icon: "Database" },
@@ -136,7 +136,7 @@ const ProjectRoutes: Record<
       },
       danger: {
         title: "Danger",
-        href: "/danger",
+        href: "/ingestions/danger",
         icon: "CreditCard",
       },
     },

@@ -16,6 +16,7 @@ export default async function WorkspaceLayout(props: {
     <DashboardShell
       title="Projects"
       module="workspace"
+      description="Organize project"
       submodule="overview"
       action={
         limitReached ? (
