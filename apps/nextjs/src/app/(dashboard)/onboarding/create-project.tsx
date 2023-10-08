@@ -28,7 +28,7 @@ export function CreateProject(props: { workspaceSlug: string }) {
         className="bg-background/60 flex flex-col rounded-xl p-8"
       >
         <motion.h1
-          className="mb-4 font-cal text-2xl font-bold transition-colors sm:text-3xl"
+          className="mb-4 text-2xl font-bold transition-colors sm:text-3xl"
           variants={{
             hidden: { opacity: 0, x: 250 },
             show: {

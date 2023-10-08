@@ -33,7 +33,7 @@ export default function Intro() {
           className="mx-5 flex flex-col items-center space-y-6 text-center sm:mx-auto"
         >
           <motion.h1
-            className="font-cal text-4xl font-bold transition-colors sm:text-5xl"
+            className="text-4xl font-bold transition-colors sm:text-5xl"
             variants={{
               hidden: { opacity: 0, y: 50 },
               show: {

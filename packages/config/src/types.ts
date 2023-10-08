@@ -1,10 +1,5 @@
 import * as Icons from "@builderai/ui/icons"
 
-export interface ModulesApp {
-  moduleTabs: DashboardRoute[]
-  activeTab: DashboardRoute | null
-}
-
 export interface RootDomainProps {
   target: string
   rewrite?: boolean

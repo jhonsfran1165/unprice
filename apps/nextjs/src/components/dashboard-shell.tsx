@@ -136,7 +136,7 @@ export function DashboardShell<T extends ModuleApp>(props: {
 //           <div className="flex flex-1 flex-col">
 //             <div className="mb-4 flex items-center justify-between">
 //               <div className="space-y-1">
-//                 <h1 className="font-cal text-xl font-semibold leading-none">
+//                 <h1 className="font-primary text-xl font-semibold leading-none">
 //                   {props.title}
 //                 </h1>
 //                 {typeof props.description === "string" ? (

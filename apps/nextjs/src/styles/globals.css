@@ -36,23 +36,23 @@
 
   /* default styles */
   h1 {
-    @apply font-cal text-4xl font-extrabold leading-[1.15] text-background-textContrast sm:leading-[1.15] md:text-6xl;
+    @apply font-primary text-4xl font-extrabold leading-[1.15] text-background-textContrast sm:leading-[1.15] md:text-6xl;
   }
 
   h2 {
-    @apply font-cal text-2xl font-bold text-background-textContrast md:text-3xl;
+    @apply font-primary text-2xl font-bold text-background-textContrast md:text-3xl;
   }
 
   h3 {
-    @apply font-cal text-xl font-semibold text-background-textContrast md:text-2xl;
+    @apply font-primary text-xl font-semibold text-background-textContrast md:text-2xl;
   }
 
   p {
-    @apply font-inter text-base font-semibold text-background-text md:text-xs;
+    @apply font-secondary text-base font-semibold text-background-text md:text-xs;
   }
 
   body {
-    @apply bg-background-base font-inter text-background-text;
+    @apply font-secondary bg-background-base text-background-text;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;

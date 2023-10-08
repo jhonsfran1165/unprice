@@ -23,7 +23,7 @@ const ThemeToggle = dynamic(() => import("~/components/theme-toggle"), {
 export default function Footer(props: { className?: string }) {
   return (
     <footer className={cn(props.className)}>
-      <div className="z-30 mt-10 flex items-center justify-between gap-4 border-t bg-background py-4 md:h-16 md:flex-row md:py-0">
+      <div className="z-30 mt-10 flex items-center justify-between gap-4 border-t bg-background-bg py-4 md:h-16 md:flex-row md:py-0">
         <MaxWidthWrapper className="max-w-screen-2xl">
           <div className="flex items-center gap-4 md:flex-row md:gap-2 md:px-0">
             <div className="flex items-center gap-4 text-primary-text md:flex-row md:gap-2 md:px-0">

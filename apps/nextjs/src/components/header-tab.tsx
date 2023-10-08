@@ -12,7 +12,7 @@ export default function HeaderTab({
   return (
     <section>
       <MaxWidthWrapper className="max-w-screen-2xl py-10">
-        <div className="flex h-36 items-center rounded-md border px-10">
+        <div className="flex h-36 items-center rounded-md border px-10 backdrop-blur-sm">
           <div className="flex w-full items-center justify-between">
             <div className="space-y-2">
               <h1 className="text-4xl font-normal text-background-textContrast">

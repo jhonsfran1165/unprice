@@ -23,10 +23,7 @@ export default function TabsNav(props: {
     <div
       className={cn(
         "sticky inset-x-0 top-0 z-30 flex h-12 w-full items-center justify-start border-b bg-background-bg px-2 transition-all",
-        props.className,
-        {
-          "backdrop-blur-lg": scrolled,
-        }
+        props.className
       )}
     >
       <ScrollArea className="-mb-1.5 h-12 max-w-[600px] lg:max-w-none">

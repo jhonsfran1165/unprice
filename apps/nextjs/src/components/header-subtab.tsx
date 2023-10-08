@@ -8,9 +8,9 @@ export default function HeaderSubTab({
   action?: React.ReactNode
 }) {
   return (
-    <div className="mb-4 flex items-center justify-between">
+    <div className="mb-6 flex items-center justify-between">
       <div className="space-y-2">
-        <h1 className="font-cal text-xl font-semibold leading-none">{title}</h1>
+        <h1 className="text-xl font-semibold leading-none">{title}</h1>
         <h2 className="text-base text-muted-foreground">{description}</h2>
       </div>
       {action}

@@ -24,7 +24,7 @@ export default async function PricingPage() {
   return (
     <main className="flex w-full flex-col items-center justify-center pt-16">
       <div className="z-10 min-h-[50vh] w-full max-w-7xl px-5 xl:px-0">
-        <h1 className="font-cal text-7xl/[5rem]">Pricing</h1>
+        <h1 className="text-7xl/[5rem]">Pricing</h1>
         <Balancer className="text-2xl">
           Simple pricing for all your needs. No hidden fees, no surprises.
         </Balancer>

@@ -10,7 +10,7 @@ import { Toaster } from "@builderai/ui/toaster"
 
 import { TailwindIndicator } from "~/components/tailwind-indicator"
 import { ThemeProvider } from "~/components/theme-provider"
-import { cal, inter, satoshi } from "~/styles/fonts"
+import { fontMapper } from "~/styles/fonts"
 
 export const metadata = {
   title: {
@@ -41,10 +41,9 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         <html lang="en" suppressHydrationWarning>
           <body
             className={cn(
-              "min-h-screen font-inter antialiased",
-              satoshi.variable,
-              cal.variable,
-              inter.variable
+              "font-secondary min-h-screen antialiased",
+              fontMapper["font-primary"],
+              fontMapper["font-secondary"]
             )}
           >
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

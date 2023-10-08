@@ -1,4 +1,4 @@
-import type { DashboardRoute, ModulesApp } from "./types"
+import type { DashboardRoute } from "./types"
 
 const submodulesWorkspace = ["overview", "statistics", "settings"] as const
 
@@ -32,7 +32,7 @@ const WorkspaceRoutes: Record<
   settings: {
     icon: "Settings",
     titleTab: "Settings",
-    href: "/settings",
+    href: "/settings/overview",
     disabled: false,
     tier: "FREE",
     sidebarMenu: {
@@ -57,27 +57,11 @@ const WorkspaceRoutes: Record<
         title: "Billing",
         href: "/settings/billing",
         icon: "CreditCard",
-        subTabs: {
-          billing: {
-            title: "Billing",
-            icon: "AppWindow",
-            description: "Cabeza de AppWindow",
-          },
-          analytics: { title: "Analytics", icon: "Database" },
-        },
       },
       danger: {
         title: "Danger",
         href: "/settings/danger",
         icon: "Warning",
-        subTabs: {
-          danger: {
-            title: "Billing",
-            icon: "AppWindow",
-            description: "Cabeza de AppWindow",
-          },
-          analytics: { title: "Analytics", icon: "Database" },
-        },
       },
     },
   },
@@ -100,10 +84,6 @@ const ProjectRoutes: Record<
     titleTab: "Dashboard",
     icon: "Dashboard",
     href: "/overview",
-    subTabs: {
-      overview: { title: "Analytics", icon: "Database" },
-      analytics: { title: "Analytics", icon: "Database" },
-    },
   },
   pro: {
     titleTab: "Pro Module",
@@ -128,11 +108,6 @@ const ProjectRoutes: Record<
         title: "General",
         href: "/ingestions/overview",
         icon: "Settings",
-        subTabs: {
-          overview: { title: "Analytics", icon: "Database" },
-          analytics: { title: "Analytics", icon: "Database" },
-          Settings: { title: "Settings", icon: "Settings" },
-        },
       },
       danger: {
         title: "Danger",
@@ -155,11 +130,6 @@ const ProjectRoutes: Record<
         title: "General",
         href: "/settings/overview",
         icon: "Settings",
-        subTabs: {
-          overview: { title: "Analytics", icon: "Database" },
-          analytics: { title: "Analytics", icon: "Database" },
-          Settings: { title: "Settings", icon: "Settings" },
-        },
       },
       danger: {
         title: "Danger",
@@ -188,6 +158,11 @@ const allModuleRoutesApp: {
 export type ModuleApp = keyof typeof allModuleRoutesApp
 export type SubModuleApp<T extends ModuleApp> =
   keyof (typeof allModuleRoutesApp)[T]
+
+export interface ModulesApp {
+  moduleTabs: DashboardRoute[]
+  activeTab: DashboardRoute | null
+}
 
 export const getModulesApp = <T extends ModuleApp>({
   module,

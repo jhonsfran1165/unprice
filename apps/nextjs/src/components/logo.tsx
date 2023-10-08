@@ -7,7 +7,7 @@ export function Logo({ className = "" }) {
       <Icons.Logo className={cn("h-6 w-6", className)} />
       <span
         className={cn(
-          "hidden whitespace-nowrap font-satoshi text-lg font-bold tracking-tight sm:inline-block md:block",
+          "hidden whitespace-nowrap text-lg font-bold tracking-tight sm:inline-block md:block",
           className
         )}
       >

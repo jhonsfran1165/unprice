@@ -131,11 +131,11 @@ export const generateTheme = (
       foreground: `var(--${grayscale}-12)`,
     },
     popover: {
-      DEFAULT: `var(--${grayscale}-1)`,
+      DEFAULT: `var(--${grayscale}-2)`,
       foreground: `var(--${grayscale}-11)`,
     },
     card: {
-      DEFAULT: `var(--${grayscale}-1)`,
+      DEFAULT: `var(--${grayscale}-2)`,
       foreground: `var(--${grayscale}-11)`,
     },
   }

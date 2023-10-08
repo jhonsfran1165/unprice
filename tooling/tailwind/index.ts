@@ -35,9 +35,8 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        satoshi: ["var(--font-satoshi)", ...fontFamily.sans],
-        cal: ["var(--font-cal)", ...fontFamily.sans],
-        inter: ["var(--font-inter)", ...fontFamily.sans],
+        primary: ["var(--font-primary)", ...fontFamily.sans],
+        secondary: ["var(--font-secondary)", ...fontFamily.sans],
       },
       keyframes: {
         "fade-up": {

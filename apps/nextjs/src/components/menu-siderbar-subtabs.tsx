@@ -31,15 +31,7 @@ export default function SidebarMenuSubTabs({
 
   return (
     <>
-      {activeSidebarTab?.title && (
-        <HeaderSubTab
-          title={activeSidebarTab.title}
-          description={activeSidebarTab?.description}
-          action={activeSidebarTab?.action}
-        />
-      )}
-
-      <div className="mb-4 inline-flex h-10 items-center rounded-md bg-background-bg p-1 text-muted-foreground">
+      <div className="mb-8 inline-flex h-10 items-center rounded-md bg-background-bg p-1 text-muted-foreground">
         {Object.entries(activeSubTabs).map(([index, item]) => {
           const Icon = item?.icon && createIcon(item?.icon)
           const href =
@@ -52,13 +44,20 @@ export default function SidebarMenuSubTabs({
               key={index}
               href={href}
               className="rounded-sm"
-              classNameActive=" bg-background text-background-text shadow-lg border"
+              classNameActive="bg-background text-background-text shadow-md border"
               icon={Icon && <Icon className="mr-2 h-4 w-4" />}
               title={item.title}
             />
           )
         })}
       </div>
+      {activeSidebarTab?.title && (
+        <HeaderSubTab
+          title={activeSidebarTab.title}
+          description={activeSidebarTab?.description}
+          action={activeSidebarTab?.action}
+        />
+      )}
     </>
   )
 }

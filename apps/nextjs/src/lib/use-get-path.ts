@@ -4,7 +4,7 @@ export function useGetPaths(): {
   baseUrl: string
   restUrl: string
   pathname: string
-  restSegmentsPerRoute: (route: string) => string[]
+  restSegmentsPerRoute: (route?: string) => string[]
 } {
   const params = useParams()
   const pathname = usePathname()
@@ -29,7 +29,7 @@ export function useGetPaths(): {
   }
 
   // give a path segment calculate the rest of segments
-  const restSegmentsPerRoute = (route: string) =>
+  const restSegmentsPerRoute = (route?: string) =>
     restUrl.join("/").replace(`${route}/`, "").split("/")
 
   return {

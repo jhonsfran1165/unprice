@@ -43,7 +43,7 @@ export function Done(props: { workspaceSlug: string }) {
         animate="show"
         className="bg-background/60 flex flex-col space-y-4 rounded-xl p-8"
       >
-        <h1 className="font-cal text-2xl font-bold transition-colors sm:text-3xl">
+        <h1 className="text-2xl font-bold transition-colors sm:text-3xl">
           You are all set!
         </h1>
         <p className="max-w-md text-muted-foreground transition-colors sm:text-lg">
