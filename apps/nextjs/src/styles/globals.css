@@ -52,7 +52,7 @@
   }
 
   body {
-    @apply font-secondary bg-background-base text-background-text;
+    @apply bg-background-base font-secondary text-background-text;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
@@ -78,7 +78,7 @@
   }
 
   .default {
-    @apply border border-background-border bg-background text-background-text;
+    @apply border border-background-border bg-transparent text-background-text;
   }
 
   .danger {
@@ -90,7 +90,7 @@
   }
 
   .button-ghost {
-    @apply bg-transparent text-background-text hover:bg-background-bgSubtle hover:text-background-textContrast active:bg-background-bgActive;
+    @apply bg-transparent text-background-text hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
   }
 
   .button-default {

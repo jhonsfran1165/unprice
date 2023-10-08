@@ -30,7 +30,7 @@ export default function SidebarMenuSubTabs({
   if (!activeSubTabs) return null
 
   return (
-    <>
+    <div className="flex flex-col py-4">
       <div className="mb-8 inline-flex h-10 items-center rounded-md bg-background-bg p-1 text-muted-foreground">
         {Object.entries(activeSubTabs).map(([index, item]) => {
           const Icon = item?.icon && createIcon(item?.icon)
@@ -58,6 +58,6 @@ export default function SidebarMenuSubTabs({
           action={activeSidebarTab?.action}
         />
       )}
-    </>
+    </div>
   )
 }

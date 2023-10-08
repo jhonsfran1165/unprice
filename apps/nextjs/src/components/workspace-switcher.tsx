@@ -80,11 +80,11 @@ export function WorkspaceSwitcher() {
       >
         <Avatar className="mr-2 h-5 w-5">
           <AvatarFallback>
-            <Skeleton className="aspect-square h-full w-full bg-background-borderHover" />
+            <Skeleton className="aspect-square h-full w-full bg-background-bgHover" />
           </AvatarFallback>
         </Avatar>
-        <Skeleton className="h-[20px] w-full bg-background-borderHover" />
-        <Skeleton className="ml-2 h-4 w-4 shrink-0 bg-background-borderHover" />
+        <Skeleton className="h-[20px] w-full bg-background-bgHover" />
+        <Skeleton className="ml-2 h-4 w-4 shrink-0 bg-background-bgHover" />
       </Button>
     )
   }
@@ -139,7 +139,7 @@ export function WorkspaceSwitcher() {
                   className={cn(
                     "cursor-pointer text-sm font-semibold",
                     org.organization === null
-                      ? "bg-background-bgSubtle"
+                      ? "bg-background-bgActive"
                       : "bg-transparent"
                   )}
                 >
@@ -174,7 +174,7 @@ export function WorkspaceSwitcher() {
                     className={cn(
                       "cursor-pointer text-sm font-semibold",
                       normalizedObject?.id === org.id
-                        ? "bg-background-bgSubtle"
+                        ? "bg-background-bgActive"
                         : "bg-transparent"
                     )}
                   >

@@ -110,28 +110,28 @@ export const generateTheme = (
     // shadcn variables
     background: {
       ...generateVariantRadixColors(grayscale),
-      DEFAULT: `var(--${grayscale}-1)`,
+      DEFAULT: `var(--${grayscale}-2)`,
     },
     primary: generateVariantRadixColors(theme.primary),
     secondary: generateVariantRadixColors(theme.secondary),
     border: `var(--${grayscale}-5)`,
     input: `var(--${grayscale}-6)`,
-    ring: `var(--${grayscale}-1)`,
+    ring: `var(--${grayscale}-8)`,
     foreground: `var(--${grayscale}-11)`,
     destructive: {
       DEFAULT: `var(--${theme.destructive}-9)`,
       foreground: `var(--${theme.destructive}-3)`,
     },
     muted: {
-      DEFAULT: `var(--${grayscale}-2)`,
+      DEFAULT: `var(--${grayscale}-5)`,
       foreground: `var(--${grayscale}-11)`,
     },
     accent: {
-      DEFAULT: `var(--${grayscale}-3)`,
+      DEFAULT: `var(--${grayscale}-6)`,
       foreground: `var(--${grayscale}-12)`,
     },
     popover: {
-      DEFAULT: `var(--${grayscale}-2)`,
+      DEFAULT: `var(--${grayscale}-3)`,
       foreground: `var(--${grayscale}-11)`,
     },
     card: {

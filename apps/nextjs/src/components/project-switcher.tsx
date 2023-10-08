@@ -87,7 +87,7 @@ export function ProjectSwitcher(props: {
                     className={cn(
                       "cursor-pointer text-sm font-semibold",
                       project.id === activeProject?.id
-                        ? "bg-background-bgSubtle"
+                        ? "bg-background-bgActive"
                         : "bg-transparent"
                     )}
                   >
