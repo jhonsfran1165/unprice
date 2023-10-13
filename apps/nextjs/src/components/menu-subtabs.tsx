@@ -39,7 +39,7 @@ export default function MenuSubTabs({
             <SubTab
               key={index}
               className="rounded-t-lg border border-transparent px-6 py-3 text-base font-semibold"
-              classNameActive="border-background-border border-b-background border-b-2 text-background-text"
+              classNameActive="border-background-border border-b-background-base border-b-2 text-background-text"
               href={href}
               icon={Icon && <Icon className="mr-2 h-4 w-4" />}
               title={item.title}

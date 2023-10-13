@@ -10,6 +10,9 @@ export const env = createEnv({
     CLERK_SECRET_KEY: z.string().min(1),
     CLERK_WEBHOOK_SECRET: z.string().min(1),
     STRIPE_WEBHOOK_SECRET: z.string(),
+    PROJECT_ID_VERCEL: z.string(),
+    TEAM_ID_VERCEL: z.string(),
+    VERCEL_AUTH_BEARER_TOKEN: z.string(),
   },
   client: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),

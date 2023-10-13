@@ -20,7 +20,7 @@ export default async function WorkspaceLayout(props: {
       submodule="overview"
       action={
         limitReached ? (
-          <Button className="min-w-max" variant={"ghost"}>
+          <Button className="min-w-max" variant="ghost">
             Project limit reached
           </Button>
         ) : (

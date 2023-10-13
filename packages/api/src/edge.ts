@@ -1,5 +1,6 @@
 import { apiKeyRouter } from "./router/edge/apikey"
 import { authRouter } from "./router/edge/auth"
+import { domainRouter } from "./router/edge/domain"
 import { organizationsRouter } from "./router/edge/organization"
 import { projectRouter } from "./router/edge/project"
 import { createTRPCRouter } from "./trpc"
@@ -10,4 +11,5 @@ export const edgeRouter = createTRPCRouter({
   project: projectRouter,
   auth: authRouter,
   apikey: apiKeyRouter,
+  domain: domainRouter,
 })

@@ -1,6 +1,11 @@
 import type { DashboardRoute } from "./types"
 
-const submodulesWorkspace = ["overview", "statistics", "settings"] as const
+const submodulesWorkspace = [
+  "overview",
+  "statistics",
+  "settings",
+  "domains",
+] as const
 
 const WorkspaceRoutes: Record<
   (typeof submodulesWorkspace)[number],
@@ -28,6 +33,11 @@ const WorkspaceRoutes: Record<
     titleTab: "Statistics",
     href: "/stadistics",
     disabled: true,
+  },
+  domains: {
+    icon: "Globe",
+    titleTab: "Domains",
+    href: "/domains",
   },
   settings: {
     icon: "Settings",
