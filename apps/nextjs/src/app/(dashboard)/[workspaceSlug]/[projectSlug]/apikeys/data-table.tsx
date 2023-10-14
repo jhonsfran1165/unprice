@@ -1,10 +1,13 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table"
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table"
 import { TRPCClientError } from "@trpc/client"
@@ -16,12 +19,14 @@ import { Button } from "@builderai/ui/button"
 import { Checkbox } from "@builderai/ui/checkbox"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
 import * as Icons from "@builderai/ui/icons"
 import { Eye, EyeOff } from "@builderai/ui/icons"
+import { Input } from "@builderai/ui/input"
 import { Label } from "@builderai/ui/label"
 import {
   Table,
@@ -33,7 +38,7 @@ import {
 } from "@builderai/ui/table"
 import { useToast } from "@builderai/ui/use-toast"
 
-import { api, apiRQ } from "~/trpc/client"
+import { apiRQ } from "~/trpc/client"
 
 export type ApiKeyColumn = RouterOutputs["apikey"]["listApiKeys"][number]
 
@@ -63,6 +68,12 @@ const columns = (projectSlug: string) => [
         aria-label="Select"
       />
     ),
+    enableSorting: false,
+    enableHiding: false,
+  }),
+  columnHelper.accessor("name", {
+    cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+    header: "Name",
   }),
   columnHelper.accessor("key", {
     cell: function Key(t) {
@@ -123,6 +134,12 @@ const columns = (projectSlug: string) => [
     header: "Created At",
   }),
   columnHelper.accessor("expiresAt", {
+    filterFn: (rows, id, filterValue) => {
+      if (filterValue === "all") {
+        return true
+      }
+      return rows.original.revokedAt === filterValue
+    },
     cell: (t) => {
       if (t.row.original.revokedAt !== null) {
         return (
@@ -161,15 +178,42 @@ const columns = (projectSlug: string) => [
     header: "Last Used At",
   }),
   columnHelper.display({
+    enableSorting: false,
+    enableHiding: false,
     id: "actions",
     header: function ActionsHeader(t) {
       const toaster = useToast()
       const apiUtils = apiRQ.useContext()
-
       const { rows } = t.table.getSelectedRowModel()
-      // TODO: improve this
-      const apiKey = rows.find((row) => row.original.projectId)?.original
+      const projectId = t.table.getRowModel().rows[0]?.original.projectId
       const ids = rows.map((row) => row.original.id)
+
+      const revokeApiKeys = apiRQ.apikey.revokeApiKeys.useMutation({
+        onSettled: async () => {
+          await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
+        },
+        onSuccess: (data) => {
+          toaster.toast({
+            title: `Revoked ${data.numRevoked} API keys`,
+          })
+          t.table.toggleAllRowsSelected(false)
+        },
+        onError: (err) => {
+          if (err instanceof TRPCClientError) {
+            toaster.toast({
+              title: err.message,
+              variant: "destructive",
+            })
+          } else {
+            toaster.toast({
+              title: "Failed to revoke API Keys",
+              variant: "destructive",
+            })
+          }
+        },
+      })
+
+      if (!projectId) return null
 
       return (
         <DropdownMenu>
@@ -181,32 +225,11 @@ const columns = (projectSlug: string) => [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
-              onClick={async () => {
-                try {
-                  const res = await api.apikey.revokeApiKeys.mutate({
-                    ids,
-                    projectId: apiKey?.projectId ?? "",
-                  })
-
-                  await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
-
-                  toaster.toast({
-                    title: `Revoked ${res.numRevoked} API keys`,
-                  })
-                  t.table.toggleAllRowsSelected(false)
-                } catch (err) {
-                  if (err instanceof TRPCClientError) {
-                    toaster.toast({
-                      title: err.message,
-                      variant: "destructive",
-                    })
-                  } else {
-                    toaster.toast({
-                      title: "Failed to revoke API Keys",
-                      variant: "destructive",
-                    })
-                  }
-                }
+              onClick={() => {
+                revokeApiKeys.mutate({
+                  ids,
+                  projectId: projectId,
+                })
               }}
               className="text-destructive"
             >
@@ -220,6 +243,59 @@ const columns = (projectSlug: string) => [
       const apiKey = t.row.original
       const apiUtils = apiRQ.useContext()
       const toaster = useToast()
+      const projectId = t.table.getRowModel().rows[0]?.original.projectId
+
+      const revokeApiKeys = apiRQ.apikey.revokeApiKeys.useMutation({
+        onSettled: async () => {
+          await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
+        },
+        onSuccess: () => {
+          toaster.toast({
+            title: "API key revoked",
+          })
+          t.table.toggleAllRowsSelected(false)
+        },
+        onError: (err) => {
+          if (err instanceof TRPCClientError) {
+            toaster.toast({
+              title: err.message,
+              variant: "destructive",
+            })
+          } else {
+            toaster.toast({
+              title: "Failed to revoke API Keys",
+              variant: "destructive",
+            })
+          }
+        },
+      })
+
+      const rollApiKey = apiRQ.apikey.rollApiKey.useMutation({
+        onSettled: async () => {
+          await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
+        },
+        onSuccess: () => {
+          toaster.toast({
+            title: "API key rolled",
+          })
+          t.table.toggleAllRowsSelected(false)
+        },
+        onError: (err) => {
+          if (err instanceof TRPCClientError) {
+            toaster.toast({
+              title: err.message,
+              variant: "destructive",
+            })
+          } else {
+            toaster.toast({
+              title: "Failed to rolled API Key",
+              variant: "destructive",
+            })
+          }
+        },
+      })
+
+      if (!projectId) return null
 
       return (
         <DropdownMenu>
@@ -231,28 +307,11 @@ const columns = (projectSlug: string) => [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
-              onClick={async () => {
-                try {
-                  await api.apikey.revokeApiKeys.mutate({
-                    ids: [apiKey.id],
-                    projectId: apiKey.projectId,
-                  })
-                  t.row.toggleSelected(false)
-                  await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
-                  toaster.toast({ title: "API Key revoked" })
-                } catch (err) {
-                  if (err instanceof TRPCClientError) {
-                    toaster.toast({
-                      title: err.message,
-                      variant: "destructive",
-                    })
-                  } else {
-                    toaster.toast({
-                      title: "Failed to revoke API Key",
-                      variant: "destructive",
-                    })
-                  }
-                }
+              onClick={() => {
+                revokeApiKeys.mutate({
+                  ids: [apiKey.id],
+                  projectId: projectId,
+                })
               }}
               className="text-destructive"
             >
@@ -261,24 +320,9 @@ const columns = (projectSlug: string) => [
 
             <DropdownMenuItem
               onClick={async () => {
-                try {
-                  await api.apikey.rollApiKey.mutate({ id: apiKey.id })
-                  // TODO: refetch only by projectSlug
-                  await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
-                  toaster.toast({ title: "API Key rolled" })
-                } catch (err) {
-                  if (err instanceof TRPCClientError) {
-                    toaster.toast({
-                      title: err.message,
-                      variant: "destructive",
-                    })
-                  } else {
-                    toaster.toast({
-                      title: "Failed to roll API Key",
-                      variant: "destructive",
-                    })
-                  }
-                }
+                rollApiKey.mutate({
+                  id: apiKey.id,
+                })
               }}
               className="text-destructive"
             >
@@ -297,8 +341,10 @@ export function DataTable(props: {
 }) {
   const [rowSelection, setRowSelection] = useState({})
   const [showRevoked, setShowRevoked] = useState(true)
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
-  const { isLoading, data } = apiRQ.apikey.listApiKeys.useQuery(
+  const { data } = apiRQ.apikey.listApiKeys.useQuery(
     {
       projectSlug: props.projectSlug,
     },
@@ -318,34 +364,77 @@ export function DataTable(props: {
     data: data,
     columns: columnsData,
     getCoreRowModel: getCoreRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    enableRowSelection: (row) => {
-      return row.original.revokedAt === null
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 10,
+        pageIndex: 0,
+      },
     },
     state: {
       rowSelection,
+      columnFilters,
+      columnVisibility,
     },
   })
 
-  const filteredRows = showRevoked
-    ? table.getRowModel()?.rows
-    : table.getRowModel()?.rows.filter((row) => row.original.revokedAt === null)
-
-  if (isLoading) return "dasdasdasd"
-
   return (
     <div>
-      <div className="flex items-center gap-2 py-2">
-        <Label>Show revoked</Label>
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter names..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="flex w-1/2 bg-background-base"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="ml-5">
+              Show Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                )
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="mb-2 flex items-center justify-end gap-2 py-2">
+        <Label>Show revoked keys</Label>
         <Checkbox
           checked={showRevoked}
-          onCheckedChange={(c) => setShowRevoked(!!c)}
+          onCheckedChange={(c) => {
+            const checked = !!c
+            table.getColumn("expiresAt")?.setFilterValue(checked ? "all" : null)
+            setShowRevoked(checked)
+          }}
           className="max-w-sm"
         />
       </div>
       <div className="rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-background">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -363,9 +452,9 @@ export function DataTable(props: {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-            {filteredRows.length ? (
-              filteredRows.map((row) => (
+          <TableBody className="bg-background-base">
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
@@ -402,6 +491,28 @@ export function DataTable(props: {
             )}
           </TableBody>
         </Table>
+      </div>
+      <div className="flex-1 py-4 text-sm text-muted-foreground">
+        {table.getFilteredSelectedRowModel().rows.length} of{" "}
+        {table.getFilteredRowModel().rows.length} row(s) selected.
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
       </div>
     </div>
   )

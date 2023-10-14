@@ -78,7 +78,7 @@
   }
 
   .default {
-    @apply border border-background-border bg-transparent text-background-text;
+    @apply border border-background-border bg-background-base text-background-text;
   }
 
   .danger {

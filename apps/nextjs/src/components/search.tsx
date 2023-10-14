@@ -40,8 +40,8 @@ export function Search() {
     <div>
       <Button
         size="sm"
-        variant="outline"
-        className="relative hidden h-8 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:flex md:w-40 lg:w-64"
+        variant="ghost"
+        className="relative hidden h-8 w-full justify-start rounded-[0.5rem] border text-sm text-muted-foreground sm:pr-12 md:flex md:w-40 lg:w-64"
         onClick={() => setOpen(true)}
       >
         <span className="hidden lg:inline-flex">Search...</span>

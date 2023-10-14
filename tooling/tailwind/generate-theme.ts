@@ -123,7 +123,7 @@ export const generateTheme = (
       foreground: `var(--${theme.destructive}-3)`,
     },
     muted: {
-      DEFAULT: `var(--${grayscale}-5)`,
+      DEFAULT: `var(--${grayscale}-3)`,
       foreground: `var(--${grayscale}-11)`,
     },
     accent: {

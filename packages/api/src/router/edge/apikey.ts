@@ -30,10 +30,11 @@ export const apiKeyRouter = createTRPCRouter({
       const apiKeys = await opts.ctx.txRLS(({ txRLS }) => {
         return txRLS.query.apikey.findMany({
           where: (apikey, { eq }) => eq(apikey.projectId, project.id),
-          orderBy: (apikey, { asc }) => [
-            asc(apikey.revokedAt),
-            asc(apikey.expiresAt),
-            asc(apikey.createdAt),
+          orderBy: (apikey, { desc }) => [
+            desc(apikey.revokedAt),
+            desc(apikey.lastUsed),
+            desc(apikey.expiresAt),
+            desc(apikey.createdAt),
           ],
         })
       })
