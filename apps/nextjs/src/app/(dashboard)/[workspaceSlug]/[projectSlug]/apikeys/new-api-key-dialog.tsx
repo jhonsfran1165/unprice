@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 
 import { Button } from "@builderai/ui/button"
 import {
@@ -13,12 +12,12 @@ import {
   DialogTrigger,
 } from "@builderai/ui/dialog"
 
+import { apiRQ } from "~/trpc/client"
 import { CreateApiKeyForm } from "../../_components/create-api-key-form"
 
 export function NewApiKeyDialog(props: { projectSlug: string }) {
-  const router = useRouter()
-
   const [dialogOpen, setDialogOpen] = React.useState(false)
+  const apiUtils = apiRQ.useContext()
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -34,9 +33,11 @@ export function NewApiKeyDialog(props: { projectSlug: string }) {
         </DialogHeader>
         <CreateApiKeyForm
           projectSlug={props.projectSlug}
-          onSuccess={() => {
+          onSuccess={async () => {
             setDialogOpen(false)
-            router.refresh()
+            await apiUtils.apikey.listApiKeys.invalidate({
+              projectSlug: props.projectSlug,
+            })
           }}
         />
       </DialogContent>

@@ -24,7 +24,9 @@ export const api = experimental_createTRPCNextAppDirServer<AppRouter>({
             const h = new Map(headers())
             h.delete("connection")
             h.delete("transfer-encoding")
-            h.set("x-trpc-source", "server")
+            h.set("x-trpc-source", "rsc-http")
+            // 'x-trpc-source': 'rsc-http',
+            // 'x-trpc-source': 'rsc-invoke',
             return Object.fromEntries(h.entries())
           },
         }),

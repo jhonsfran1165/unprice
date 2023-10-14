@@ -1,11 +1,11 @@
 import type { HTTPBatchLinkOptions, HTTPHeaders, TRPCLink } from "@trpc/client"
-import { httpBatchLink } from "@trpc/client"
+import { experimental_nextHttpLink } from "@trpc/next/app-dir/links/nextHttp"
 
 import type { AppRouter } from "@builderai/api"
 
 export { transformer } from "@builderai/api/transformer"
 
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""
   const vc = process.env.VERCEL_URL
   if (vc) return `https://${vc}`
@@ -23,12 +23,14 @@ export const endingLink = (opts?: {
       headers: opts?.headers,
     } satisfies Partial<HTTPBatchLinkOptions>
 
-    const edgeLink = httpBatchLink({
+    const edgeLink = experimental_nextHttpLink({
       ...sharedOpts,
+      batch: true,
       url: `${getBaseUrl()}/api/trpc/edge`,
     })(runtime)
-    const lambdaLink = httpBatchLink({
+    const lambdaLink = experimental_nextHttpLink({
       ...sharedOpts,
+      batch: true,
       url: `${getBaseUrl()}/api/trpc/lambda`,
     })(runtime)
 

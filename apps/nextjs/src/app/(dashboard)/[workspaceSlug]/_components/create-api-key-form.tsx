@@ -49,6 +49,7 @@ export function CreateApiKeyForm(props: {
         description: `Project ${data.name} created successfully.`,
       })
     } catch (err) {
+      console.log(err)
       if (err instanceof TRPCClientError) {
         toaster.toast({
           title: err.message,

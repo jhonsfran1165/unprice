@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useMemo, useState } from "react"
 import {
   createColumnHelper,
   flexRender,
@@ -21,8 +20,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
-import { Eye, EyeOff } from "@builderai/ui/icons"
 import * as Icons from "@builderai/ui/icons"
+import { Eye, EyeOff } from "@builderai/ui/icons"
 import { Label } from "@builderai/ui/label"
 import {
   Table,
@@ -34,13 +33,13 @@ import {
 } from "@builderai/ui/table"
 import { useToast } from "@builderai/ui/use-toast"
 
-import { api } from "~/trpc/client"
+import { api, apiRQ } from "~/trpc/client"
 
 export type ApiKeyColumn = RouterOutputs["apikey"]["listApiKeys"][number]
 
 const columnHelper = createColumnHelper<ApiKeyColumn>()
 
-const columns = [
+const columns = (projectSlug: string) => [
   columnHelper.display({
     id: "select",
     header: ({ table }) => (
@@ -164,8 +163,8 @@ const columns = [
   columnHelper.display({
     id: "actions",
     header: function ActionsHeader(t) {
-      const router = useRouter()
       const toaster = useToast()
+      const apiUtils = apiRQ.useContext()
 
       const { rows } = t.table.getSelectedRowModel()
       // TODO: improve this
@@ -188,7 +187,9 @@ const columns = [
                     ids,
                     projectId: apiKey?.projectId ?? "",
                   })
-                  router.refresh()
+
+                  await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
+
                   toaster.toast({
                     title: `Revoked ${res.numRevoked} API keys`,
                   })
@@ -217,7 +218,7 @@ const columns = [
     },
     cell: function Actions(t) {
       const apiKey = t.row.original
-      const router = useRouter()
+      const apiUtils = apiRQ.useContext()
       const toaster = useToast()
 
       return (
@@ -237,7 +238,7 @@ const columns = [
                     projectId: apiKey.projectId,
                   })
                   t.row.toggleSelected(false)
-                  router.refresh()
+                  await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
                   toaster.toast({ title: "API Key revoked" })
                 } catch (err) {
                   if (err instanceof TRPCClientError) {
@@ -262,7 +263,8 @@ const columns = [
               onClick={async () => {
                 try {
                   await api.apikey.rollApiKey.mutate({ id: apiKey.id })
-                  router.refresh()
+                  // TODO: refetch only by projectSlug
+                  await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
                   toaster.toast({ title: "API Key rolled" })
                 } catch (err) {
                   if (err instanceof TRPCClientError) {
@@ -289,13 +291,32 @@ const columns = [
   }),
 ]
 
-export function DataTable(props: { data: ApiKeyColumn[] }) {
+export function DataTable(props: {
+  data: ApiKeyColumn[]
+  projectSlug: string
+}) {
   const [rowSelection, setRowSelection] = useState({})
   const [showRevoked, setShowRevoked] = useState(true)
 
+  const { isLoading, data } = apiRQ.apikey.listApiKeys.useQuery(
+    {
+      projectSlug: props.projectSlug,
+    },
+    {
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      initialData: props.data,
+    }
+  )
+
+  const columnsData = useMemo(
+    () => columns(props.projectSlug),
+    [props.projectSlug]
+  )
+
   const table = useReactTable({
-    data: props.data,
-    columns,
+    data: data,
+    columns: columnsData,
     getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: setRowSelection,
     enableRowSelection: (row) => {
@@ -307,8 +328,10 @@ export function DataTable(props: { data: ApiKeyColumn[] }) {
   })
 
   const filteredRows = showRevoked
-    ? table.getRowModel().rows
+    ? table.getRowModel()?.rows
     : table.getRowModel()?.rows.filter((row) => row.original.revokedAt === null)
+
+  if (isLoading) return "dasdasdasd"
 
   return (
     <div>
