@@ -12,7 +12,7 @@ export default function ApiKeysLoading() {
       />
 
       {/* TODO: create loading state */}
-      <DataTable data={[]} projectSlug={""} />
+      <DataTable data={[]} projectSlug={""} loading={true} />
     </>
   )
 }

@@ -5,7 +5,8 @@ import { UserNav } from "~/components/user-nav"
 import { WorkspaceSwitcher } from "~/components/workspace-switcher"
 import { api } from "~/trpc/server"
 
-export default function Header() {
+export default async function Header() {
+  const activeProjects = await api.project.listByActiveWorkspace.query()
   return (
     <header className="top-0 mx-auto w-full bg-background-bg px-6">
       <div className="flex h-16 items-center space-x-2 sm:justify-between sm:space-x-0">
@@ -15,9 +16,7 @@ export default function Header() {
             /
           </span>
           <WorkspaceSwitcher />
-          <ProjectSwitcher
-            projectsPromise={api.project.listByActiveWorkspace.query()}
-          />
+          <ProjectSwitcher activeProjects={activeProjects} />
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <MainNav />

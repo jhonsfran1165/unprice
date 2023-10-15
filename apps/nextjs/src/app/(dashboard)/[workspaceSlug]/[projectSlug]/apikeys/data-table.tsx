@@ -28,6 +28,7 @@ import * as Icons from "@builderai/ui/icons"
 import { Eye, EyeOff } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Label } from "@builderai/ui/label"
+import { Skeleton } from "@builderai/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -338,22 +339,26 @@ const columns = (projectSlug: string) => [
 export function DataTable(props: {
   data: ApiKeyColumn[]
   projectSlug: string
+  loading: boolean
 }) {
   const [rowSelection, setRowSelection] = useState({})
   const [showRevoked, setShowRevoked] = useState(true)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
-  const { data } = apiRQ.apikey.listApiKeys.useQuery(
+  const { data, isFetching } = apiRQ.apikey.listApiKeys.useQuery(
     {
       projectSlug: props.projectSlug,
     },
     {
       refetchOnMount: false,
       refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
       initialData: props.data,
     }
   )
+
+  const loadingData = props.loading || isFetching
 
   const columnsData = useMemo(
     () => columns(props.projectSlug),
@@ -396,7 +401,7 @@ export function DataTable(props: {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="ml-5">
-              Show Columns
+              <Icons.Settings className="mr-2 h-4 w-4" /> Show Columns
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -453,7 +458,9 @@ export function DataTable(props: {
             ))}
           </TableHeader>
           <TableBody className="bg-background-base">
-            {table.getRowModel().rows?.length ? (
+            {loadingData ? (
+              <DataTableSkeleton />
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -517,3 +524,30 @@ export function DataTable(props: {
     </div>
   )
 }
+
+const DataTableSkeleton = () =>
+  Array.from({ length: 4 }).map((_, i) => (
+    <TableRow key={i}>
+      <TableCell>
+        <Skeleton className="my-1 h-[20px] w-[20px]" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-[20px] w-[100px]" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-[20px] w-[300px]" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-[20px] w-[100px]" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-[20px] w-[100px]" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-[20px] w-[100px]" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="mx-3 h-[20px] w-[5px]" />
+      </TableCell>
+    </TableRow>
+  ))

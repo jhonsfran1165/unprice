@@ -33,12 +33,12 @@ async function SubscriptionCard() {
         {subscription ? (
           <p>
             You are currently on the <strong>{subscription.plan}</strong> plan.
-            Your subscription will renew on{" "}
-            <strong>
-              {subscription.billingPeriodEnd &&
-                new Date(subscription.billingPeriodEnd).toDateString()}
-            </strong>
-            .
+            {subscription.billingPeriodEnd && (
+              <strong>
+                Your subscription will renew on{" "}
+                {new Date(subscription.billingPeriodEnd).toDateString()}
+              </strong>
+            )}
           </p>
         ) : (
           <p>You are not subscribed to any plan.</p>

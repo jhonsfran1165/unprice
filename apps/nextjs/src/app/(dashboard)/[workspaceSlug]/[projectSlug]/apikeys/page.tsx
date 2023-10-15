@@ -20,7 +20,11 @@ export default async function ApiKeysPage(props: {
         action={<NewApiKeyDialog projectSlug={props.params.projectSlug} />}
       />
 
-      <DataTable data={apiKeys} projectSlug={props.params.projectSlug} />
+      <DataTable
+        data={apiKeys}
+        projectSlug={props.params.projectSlug}
+        loading={false}
+      />
     </>
   )
 }

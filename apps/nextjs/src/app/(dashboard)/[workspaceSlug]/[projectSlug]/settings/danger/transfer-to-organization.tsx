@@ -66,7 +66,7 @@ export function TransferProjectToOrganization(props: {
 
   async function onSubmit(data: TransferToWorkspace) {
     try {
-      if (!projectSlug) throw new Error("No project ID")
+      if (!projectSlug) throw new Error("No project ID provided")
 
       await api.project.transferToWorkspace.mutate(data)
       toaster.toast({ title: "Project transferred" })

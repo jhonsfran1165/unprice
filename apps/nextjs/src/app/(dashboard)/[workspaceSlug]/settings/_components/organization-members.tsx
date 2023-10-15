@@ -49,76 +49,81 @@ export function OrganizationMembers(props: {
 
   // TODO: DataTable with actions
   return (
-    <Table>
-      <TableHeader>
-        <TableRow className="pointer-events-none bg-muted">
-          <TableHead>Name</TableHead>
-          <TableHead>Joined at</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead className="w-16"></TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {members.map((member) => (
-          <TableRow key={member.id}>
-            <TableCell className="flex items-center gap-2">
-              <Avatar>
-                <AvatarImage src={member.avatarUrl} alt={member.name} />
-                <AvatarFallback>{member.name[0]}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span>{member.name}</span>
-                <span className="text-sm text-muted-foreground">
-                  {member.email}
-                </span>
-              </div>
-            </TableCell>
-            <TableCell>{formatRelative(member.joinedAt, new Date())}</TableCell>
-            <TableCell>{formatMemberRole(member.role)}</TableCell>
-            <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
-                    <Icons.Ellipsis className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    disabled={orgRole !== "admin"}
-                    onClick={async () => {
-                      try {
-                        const res = await api.organization.deleteMember.mutate({
-                          userId: member.id,
-                        })
-                        router.refresh()
-                        toaster.toast({
-                          title: `Deleted ${res.memberName} from the organization`,
-                        })
-                      } catch (err) {
-                        if (err instanceof TRPCClientError) {
-                          toaster.toast({
-                            title: err.message,
-                            variant: "destructive",
-                          })
-                        } else {
-                          toaster.toast({
-                            title: "Failed to delete member",
-                            variant: "destructive",
-                          })
-                        }
-                      }
-                    }}
-                    className="text-destructive"
-                  >
-                    Delete member
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader className="bg-background">
+          <TableRow className="pointer-events-none bg-muted">
+            <TableHead>Name</TableHead>
+            <TableHead>Joined at</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead className="w-16"></TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody className="bg-background-base">
+          {members.map((member) => (
+            <TableRow key={member.id}>
+              <TableCell className="flex items-center gap-2">
+                <Avatar>
+                  <AvatarImage src={member.avatarUrl} alt={member.name} />
+                  <AvatarFallback>{member.name[0]}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span>{member.name}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {member.email}
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell>
+                {formatRelative(member.joinedAt, new Date())}
+              </TableCell>
+              <TableCell>{formatMemberRole(member.role)}</TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <Icons.Ellipsis className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      disabled={orgRole !== "admin"}
+                      onClick={async () => {
+                        try {
+                          const res =
+                            await api.organization.deleteMember.mutate({
+                              userId: member.id,
+                            })
+                          router.refresh()
+                          toaster.toast({
+                            title: `Deleted ${res.memberName} from the organization`,
+                          })
+                        } catch (err) {
+                          if (err instanceof TRPCClientError) {
+                            toaster.toast({
+                              title: err.message,
+                              variant: "destructive",
+                            })
+                          } else {
+                            toaster.toast({
+                              title: "Failed to delete member",
+                              variant: "destructive",
+                            })
+                          }
+                        }
+                      }}
+                      className="text-destructive"
+                    >
+                      Delete member
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }

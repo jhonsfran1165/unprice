@@ -25,30 +25,37 @@ import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import type { RouterOutputs } from "~/trpc/client"
+import { apiRQ } from "~/trpc/client"
 
 export function RenameProject(props: {
-  currentName: string
-  projectSlug: string
+  project: RouterOutputs["project"]["bySlug"]
 }) {
   const { toast } = useToast()
-
-  const form = useZodForm({
-    schema: renameProjectSchema,
-    defaultValues: {
-      projectSlug: props.projectSlug,
-      name: props.currentName,
+  const apiUtils = apiRQ.useContext()
+  const { data, refetch } = apiRQ.project.bySlug.useQuery(
+    {
+      slug: props.project.slug,
     },
-  })
+    {
+      initialData: props.project,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    }
+  )
 
-  async function onSubmit(data: RenameProject) {
-    try {
-      await api.project.rename.mutate(data)
+  const renameProject = apiRQ.project.rename.useMutation({
+    onSettled: async () => {
+      await refetch()
+      await apiUtils.project.listByActiveWorkspace.invalidate(undefined)
+    },
+    onSuccess: () => {
       toast({
         title: "Project name updated",
-        description: "Your project's name has been updated.",
       })
-    } catch (err) {
+    },
+    onError: (err) => {
       if (err instanceof TRPCClientError) {
         toast({
           title: err.message,
@@ -60,42 +67,57 @@ export function RenameProject(props: {
           variant: "destructive",
         })
       }
-    }
-  }
+    },
+  })
+
+  const form = useZodForm({
+    schema: renameProjectSchema,
+    defaultValues: {
+      projectSlug: data.slug,
+      name: data.name ?? "",
+    },
+  })
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Project name</CardTitle>
-        <CardDescription>
-          Change the display name of your project
-        </CardDescription>
-      </CardHeader>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Project name</CardTitle>
+          <CardDescription>
+            Change the display name of your project
+          </CardDescription>
+        </CardHeader>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-          <CardContent>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="my-project" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="ml-auto">
-              Save
-            </Button>
-          </CardFooter>
-        </form>
-      </Form>
-    </Card>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit((data: RenameProject) => {
+              renameProject.mutate(data)
+            })}
+            className="space-y-2"
+          >
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="my-project" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="ml-auto">
+                Save
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
+      </Card>
+    </>
   )
 }

@@ -10,7 +10,5 @@ export default async function ProjectSettingsPage(props: {
   const { projectSlug } = props.params
   const project = await api.project.bySlug.query({ slug: projectSlug })
 
-  return (
-    <RenameProject currentName={project.name ?? ""} projectSlug={projectSlug} />
-  )
+  return <RenameProject project={project} />
 }

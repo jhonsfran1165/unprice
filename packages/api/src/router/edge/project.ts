@@ -87,7 +87,7 @@ export const projectRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      return await opts.ctx.txRLS(({ txRLS }) => {
+      const projectRenamed = await opts.ctx.txRLS(({ txRLS }) => {
         return txRLS
           .update(project)
           .set({
@@ -96,6 +96,8 @@ export const projectRouter = createTRPCRouter({
           .where(eq(project.id, projectData.id))
           .returning()
       })
+
+      return projectRenamed[0]
     }),
 
   delete: protectedOrgAdminProcedure

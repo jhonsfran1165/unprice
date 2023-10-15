@@ -17,13 +17,24 @@ import {
 } from "@builderai/ui/command"
 import { Check, ChevronsUpDown, LayoutGrid } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
+import { Skeleton } from "@builderai/ui/skeleton"
+
+import { apiRQ } from "~/trpc/client"
 
 export function ProjectSwitcher(props: {
-  projectsPromise: Promise<RouterOutputs["project"]["listByActiveWorkspace"]>
+  activeProjects: RouterOutputs["project"]["listByActiveWorkspace"]
 }) {
   const router = useRouter()
 
-  const { projects } = React.use(props.projectsPromise)
+  const { data, isFetching } = apiRQ.project.listByActiveWorkspace.useQuery(
+    undefined,
+    {
+      initialData: props.activeProjects,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    }
+  )
   const { organization } = useOrganization()
 
   const [switcherOpen, setSwitcherOpen] = React.useState(false)
@@ -32,10 +43,11 @@ export function ProjectSwitcher(props: {
 
   const projectSlug = params.projectSlug as string
 
-  const activeProject = projects.find((p) => p.slug === projectSlug)
+  const activeProject = data.projects.find((p) => p.slug === projectSlug)
 
   if (!projectSlug) return null
-  if (!activeProject) {
+
+  if (!activeProject || isFetching) {
     return (
       <Button
         variant="ghost"
@@ -45,8 +57,8 @@ export function ProjectSwitcher(props: {
         aria-label="project"
         className="w-44 justify-between opacity-50"
       >
-        project
-        <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0" />
+        <Skeleton className="h-[20px] w-full bg-background-bgHover" />
+        <Skeleton className="ml-2 h-4 w-4 shrink-0 bg-background-bgHover" />
       </Button>
     )
   }
@@ -77,7 +89,7 @@ export function ProjectSwitcher(props: {
             <CommandList>
               <CommandInput placeholder="Search project..." />
               <CommandGroup heading="All projects">
-                {projects.map((project) => (
+                {data.projects.map((project) => (
                   <CommandItem
                     key={project.id}
                     onSelect={() => {

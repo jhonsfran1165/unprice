@@ -29,7 +29,7 @@ export default async function AppMiddleware(
   if (req.nextUrl.pathname === "/" || req.nextUrl.pathname === "") {
     // / should redirect to the user's dashboard
     // use their current workspace, i.e. /:orgSlug or /:userSlug
-    url.pathname = `/${tenantSlug}`
+    url.pathname = `/${tenantSlug}/overview`
 
     return NextResponse.redirect(url)
   } else {
