@@ -2,6 +2,7 @@ import "@builderai/api/env"
 import "@builderai/stripe/env"
 import "./src/env.mjs"
 
+import withBundleAnalyzer from "@next/bundle-analyzer"
 import withMDX from "@next/mdx"
 
 /** @type {import("next").NextConfig} */
@@ -27,4 +28,6 @@ const config = {
   typescript: { ignoreBuildErrors: true },
 }
 
-export default withMDX()(config)
+export default withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+})(withMDX()(config))

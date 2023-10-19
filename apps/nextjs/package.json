@@ -53,6 +53,7 @@
     "@builderai/prettier-config": "^0.1.0",
     "@builderai/tailwind-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
+    "@next/bundle-analyzer": "^13.5.4",
     "@radix-ui/colors": "3.0.0-rc.4",
     "@tanstack/eslint-plugin-query": "^4.36.1",
     "@tanstack/react-query-devtools": "^4.36.1",
