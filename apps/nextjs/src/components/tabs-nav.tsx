@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 
-import type { DashboardRoute } from "@builderai/config"
+import type { DashboardRoute } from "@builderai/config/types"
 import { cn } from "@builderai/ui"
 import { Logo } from "@builderai/ui/icons"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"

@@ -2,8 +2,8 @@
 
 import * as React from "react"
 
-import type { OAuthStrategy } from "@builderai/auth"
 import { useSignIn } from "@builderai/auth"
+import type { OAuthStrategy } from "@builderai/auth/types"
 import { Button } from "@builderai/ui/button"
 import { GitHub, Google, Spinner } from "@builderai/ui/icons"
 import { useToast } from "@builderai/ui/use-toast"

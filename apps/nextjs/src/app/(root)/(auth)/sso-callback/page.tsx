@@ -2,8 +2,8 @@
 
 import { useEffect } from "react"
 
-import type { HandleOAuthCallbackParams } from "@builderai/auth"
 import { useClerk } from "@builderai/auth"
+import type { HandleOAuthCallbackParams } from "@builderai/auth/types"
 import { Spinner } from "@builderai/ui/icons"
 
 // TODO: activate later. It is  hitting limits on vercel

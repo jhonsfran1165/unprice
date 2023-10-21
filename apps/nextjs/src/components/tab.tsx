@@ -1,7 +1,7 @@
 import Link from "next/link"
 
-import type { DashboardRoute } from "@builderai/config"
 import { createIcon } from "@builderai/config"
+import type { DashboardRoute } from "@builderai/config/types"
 import { cn } from "@builderai/ui"
 import { Skeleton } from "@builderai/ui/skeleton"
 

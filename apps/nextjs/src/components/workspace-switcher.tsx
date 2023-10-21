@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { Suspense, use, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toDecimal } from "dinero.js"
@@ -56,8 +56,8 @@ import { api } from "~/trpc/client"
 export function WorkspaceSwitcher() {
   const router = useRouter()
 
-  const [switcherOpen, setSwitcherOpen] = React.useState(false)
-  const [newOrgDialogOpen, setNewOrgDialogOpen] = React.useState(false)
+  const [switcherOpen, setSwitcherOpen] = useState(false)
+  const [newOrgDialogOpen, setNewOrgDialogOpen] = useState(false)
 
   const { user, isSignedIn, isLoaded } = useUser()
   const orgs = useOrganizationList()
@@ -221,15 +221,15 @@ export function WorkspaceSwitcher() {
         </PopoverContent>
       </Popover>
 
-      <React.Suspense>
+      <Suspense>
         <NewOrganizationDialog closeDialog={() => setNewOrgDialogOpen(false)} />
-      </React.Suspense>
+      </Suspense>
     </Dialog>
   )
 }
 
 function NewOrganizationDialog(props: { closeDialog: () => void }) {
-  const plans = React.use(api.stripe.plans.query())
+  const plans = use(api.stripe.plans.query())
 
   const form = useZodForm({ schema: purchaseWorkspaceSchema })
 

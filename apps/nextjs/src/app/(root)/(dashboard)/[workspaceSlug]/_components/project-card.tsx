@@ -1,8 +1,8 @@
 import Link from "next/link"
 
 import type { RouterOutputs } from "@builderai/api"
-import type { ProjectTier } from "@builderai/config"
 import { PROJECT_TIER } from "@builderai/config"
+import type { ProjectTier } from "@builderai/config/types"
 import { cn } from "@builderai/ui"
 import {
   Card,

@@ -1,7 +1,7 @@
 "use client"
 
-import type { DashboardRoute } from "@builderai/config"
 import { createIcon } from "@builderai/config"
+import type { DashboardRoute } from "@builderai/config/types"
 
 import { useGetPaths } from "~/lib/use-get-path"
 import HeaderSubTab from "./header-subtab"
