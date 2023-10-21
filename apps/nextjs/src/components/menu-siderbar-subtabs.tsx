@@ -1,7 +1,7 @@
 "use client"
 
-import { createIcon } from "@builderai/config"
 import type { SidebarRoutes } from "@builderai/config/types"
+import { createIcon } from "@builderai/config/types"
 
 import HeaderSubTab from "~/components/header-subtab"
 import { useGetPaths } from "~/lib/use-get-path"

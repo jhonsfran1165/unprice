@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "exports": {
     ".": "./src/index.ts",
-    "./types": "./src/types.tsx"
+    "./types": "./src/types.ts"
   },
   "typesVersions": {
     "*": {
