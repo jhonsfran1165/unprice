@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion"
 
 import type { DashboardRoute } from "@builderai/config"
 import { cn } from "@builderai/ui"
-import * as Icons from "@builderai/ui/icons"
+import { Logo } from "@builderai/ui/icons"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 
 import { Tab } from "~/components/tab"
@@ -44,10 +44,10 @@ export default function TabsNav(props: {
                   duration: 0.2,
                 }}
               >
-                <Icons.Logo className={"mr-4 h-6 w-6"} />
+                <Logo className={"mr-4 h-6 w-6"} />
               </motion.div>
             ) : (
-              <Icons.Logo
+              <Logo
                 className={cn(
                   "mx-2 h-6 w-6 text-transparent transition-all animate-out duration-1000",
                   {

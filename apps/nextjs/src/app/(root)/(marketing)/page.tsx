@@ -10,12 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
-import * as Icons from "@builderai/ui/icons"
+import { GitHub } from "@builderai/ui/icons"
 
 import { marketingFeatures } from "~/app/(root)/config"
 
 // TODO: activate later. It is  hitting limits on vercel
-// export const runtime = "edge"
+export const runtime = "edge"
 
 export default function Home() {
   return (
@@ -58,7 +58,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Icons.GitHub className="mr-1 h-4 w-4" />
+            <GitHub className="mr-1 h-4 w-4" />
             <span>Star on GitHub</span>
           </a>
         </div>

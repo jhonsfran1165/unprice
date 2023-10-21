@@ -5,7 +5,7 @@ import * as React from "react"
 import type { OAuthStrategy } from "@builderai/auth"
 import { useSignIn } from "@builderai/auth"
 import { Button } from "@builderai/ui/button"
-import * as Icons from "@builderai/ui/icons"
+import { GitHub, Google, Spinner } from "@builderai/ui/icons"
 import { useToast } from "@builderai/ui/use-toast"
 
 export function OAuthSignIn() {
@@ -41,9 +41,9 @@ export function OAuthSignIn() {
         onClick={() => oauthSignIn("oauth_github")}
       >
         {isLoading === "oauth_github" ? (
-          <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />
+          <Spinner className="mr-2 h-4 w-4 animate-spin" />
         ) : (
-          <Icons.GitHub className="mr-2 h-4 w-4" />
+          <GitHub className="mr-2 h-4 w-4" />
         )}
         Github
       </Button>
@@ -53,9 +53,9 @@ export function OAuthSignIn() {
         onClick={() => oauthSignIn("oauth_google")}
       >
         {isLoading === "oauth_google" ? (
-          <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />
+          <Spinner className="mr-2 h-4 w-4 animate-spin" />
         ) : (
-          <Icons.Google className="mr-2 h-4 w-4" />
+          <Google className="mr-2 h-4 w-4" />
         )}
         Google
       </Button>

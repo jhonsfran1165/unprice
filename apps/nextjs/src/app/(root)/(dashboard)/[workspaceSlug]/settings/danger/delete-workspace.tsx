@@ -22,7 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@builderai/ui/dialog"
-import * as Icons from "@builderai/ui/icons"
+import { Warning } from "@builderai/ui/icons"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { api } from "~/trpc/client"
@@ -59,7 +59,7 @@ export function DeleteWorkspace() {
               <DialogDescription>{description}</DialogDescription>
             </DialogHeader>
             <div className="flex items-center font-bold text-destructive">
-              <Icons.Warning className="mr-2 h-6 w-6" />
+              <Warning className="mr-2 h-6 w-6" />
               <p>This action can not be reverted</p>
             </div>
             <DialogFooter>

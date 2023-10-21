@@ -1,7 +1,7 @@
 import Link from "next/link"
 
 import { siteConfig } from "@builderai/config"
-import * as Icons from "@builderai/ui/icons"
+import { Logo } from "@builderai/ui/icons"
 
 import Footer from "~/components/footer"
 
@@ -22,7 +22,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
             href="/"
             className="absolute left-8 top-8 z-20 flex items-center text-lg font-bold tracking-tight"
           >
-            <Icons.Logo className="mr-2 h-6 w-6" />
+            <Logo className="mr-2 h-6 w-6" />
             <span>{siteConfig.name}</span>
           </Link>
         </div>

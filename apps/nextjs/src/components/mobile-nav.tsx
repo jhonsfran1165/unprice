@@ -5,7 +5,7 @@ import Link from "next/link"
 
 import { navItems, siteConfig } from "@builderai/config"
 import { Button } from "@builderai/ui/button"
-import * as Icons from "@builderai/ui/icons"
+import { Logo } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 
@@ -30,7 +30,7 @@ export function MobileDropdown() {
           variant="ghost"
           className="mr-2 px-0 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
         >
-          <Icons.Logo className="mr-2 h-6 w-6" />
+          <Logo className="mr-2 h-6 w-6" />
           <span className="text-lg font-bold tracking-tight">
             {siteConfig.name}
           </span>

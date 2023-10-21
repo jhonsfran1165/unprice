@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
-import * as Icons from "@builderai/ui/icons"
+import { Spinner } from "@builderai/ui/icons"
 
 export function LoadingCard(props: {
   title: string
@@ -19,7 +19,7 @@ export function LoadingCard(props: {
         <CardDescription>{props.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex items-center justify-center">
-        <Icons.Spinner className="m-6 h-16 w-16 animate-spin" />
+        <Spinner className="m-6 h-16 w-16 animate-spin" />
       </CardContent>
     </Card>
   )

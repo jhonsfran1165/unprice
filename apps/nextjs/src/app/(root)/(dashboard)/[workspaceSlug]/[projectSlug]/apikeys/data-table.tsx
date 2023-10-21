@@ -24,8 +24,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
-import * as Icons from "@builderai/ui/icons"
-import { Eye, EyeOff } from "@builderai/ui/icons"
+import {
+  Copy,
+  CopyDone,
+  Ellipsis,
+  Eye,
+  EyeOff,
+  Settings,
+} from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Label } from "@builderai/ui/label"
 import { Skeleton } from "@builderai/ui/skeleton"
@@ -122,7 +128,7 @@ const columns = (projectSlug: string) => [
               }}
             >
               <span className="sr-only">Copy key</span>
-              {copied ? <Icons.CopyDone /> : <Icons.Copy />}
+              {copied ? <CopyDone /> : <Copy />}
             </Button>
           </div>
         </div>
@@ -221,7 +227,7 @@ const columns = (projectSlug: string) => [
           <DropdownMenuTrigger asChild disabled={ids.length < 1}>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <Icons.Ellipsis className="h-4 w-4" />
+              <Ellipsis className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -303,7 +309,7 @@ const columns = (projectSlug: string) => [
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <Icons.Ellipsis className="h-4 w-4" />
+              <Ellipsis className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -401,7 +407,7 @@ export function DataTable(props: {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="ml-5">
-              <Icons.Settings className="mr-2 h-4 w-4" /> Show Columns
+              <Settings className="mr-2 h-4 w-4" /> Show Columns
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

@@ -1,5 +1,14 @@
-import { Component, CreditCard, Globe } from "@builderai/ui/icons"
-import * as Icons from "@builderai/ui/icons"
+import {
+  ClerkWide,
+  Component,
+  CreditCard,
+  Drizzle,
+  Globe,
+  Mdx,
+  Nextjs,
+  React,
+  TRPC,
+} from "@builderai/ui/icons"
 
 export const marketingFeatures = [
   {
@@ -22,7 +31,7 @@ export const marketingFeatures = [
     ),
   },
   {
-    icon: <Icons.ClerkWide className="h-10" />,
+    icon: <ClerkWide className="h-10" />,
     title: "Authentication",
     body: (
       <>
@@ -40,7 +49,7 @@ export const marketingFeatures = [
     ),
   },
   {
-    icon: <Icons.Mdx className="h-10" />,
+    icon: <Mdx className="h-10" />,
     title: "MDX",
     body: (
       <>
@@ -52,8 +61,8 @@ export const marketingFeatures = [
   {
     icon: (
       <div className="flex gap-3 self-start">
-        <Icons.Nextjs className="h-10 w-10" />
-        <Icons.React className="h-10 w-10" />
+        <Nextjs className="h-10 w-10" />
+        <React className="h-10 w-10" />
       </div>
     ),
     title: "Next.js 13 & React 18",
@@ -68,9 +77,9 @@ export const marketingFeatures = [
   {
     icon: (
       <div className="flex gap-3 self-start">
-        <Icons.TRPC className="h-10 w-10" />
-        <Icons.Drizzle className="h-10 w-10" />
-        <Icons.Drizzle className="h-10 w-10" />
+        <TRPC className="h-10 w-10" />
+        <Drizzle className="h-10 w-10" />
+        <Drizzle className="h-10 w-10" />
       </div>
     ),
     title: "Full-stack Typesafety",

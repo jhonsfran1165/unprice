@@ -12,8 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
-import * as Icons from "@builderai/ui/icons"
-import { Activity, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
+import {
+  Activity,
+  ChevronRight,
+  CreditCard,
+  DollarSign,
+  Users,
+} from "@builderai/ui/icons"
 
 import { Overview } from "~/app/(root)/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
 import type { RouterOutputs } from "~/trpc/server"
@@ -151,7 +156,7 @@ function IngestionCard(props: {
           </div>
         </div>
 
-        <Icons.ChevronRight className="ml-2 h-4 w-4" />
+        <ChevronRight className="ml-2 h-4 w-4" />
       </div>
     </Link>
   )
@@ -188,7 +193,7 @@ async function RecentIngestions(props: {
       <CardFooter>
         <Button size="sm" className="ml-auto">
           View all
-          <Icons.ChevronRight className="ml-1 h-4 w-4" />
+          <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
       </CardFooter>
     </Card>

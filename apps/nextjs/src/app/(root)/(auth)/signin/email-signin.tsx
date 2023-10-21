@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 
 import { useSignIn, useSignUp } from "@builderai/auth"
 import { Button } from "@builderai/ui/button"
-import * as Icons from "@builderai/ui/icons"
+import { Spinner } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
 
@@ -144,7 +144,7 @@ export function EmailSignIn() {
         />
       </div>
       <Button className="button-primary" disabled={isLoading}>
-        {isLoading && <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />}
+        {isLoading && <Spinner className="mr-2 h-4 w-4 animate-spin" />}
         Sign In with Email
       </Button>
     </form>

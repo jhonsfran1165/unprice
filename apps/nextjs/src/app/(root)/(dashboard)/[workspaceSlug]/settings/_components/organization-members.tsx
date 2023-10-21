@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
-import * as Icons from "@builderai/ui/icons"
+import { Ellipsis } from "@builderai/ui/icons"
 import {
   Table,
   TableBody,
@@ -83,7 +83,7 @@ export function OrganizationMembers(props: {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
                       <span className="sr-only">Open menu</span>
-                      <Icons.Ellipsis className="h-4 w-4" />
+                      <Ellipsis className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
