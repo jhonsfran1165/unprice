@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useEffect } from "react"
 import { useParams } from "next/navigation"
 
 import { useOrganizationList } from "@builderai/auth"
@@ -17,7 +17,7 @@ export function SyncActiveOrgFromUrl() {
   const workspaceSlug = params.workspaceSlug as string
   const { setActive, organizationList, isLoaded } = useOrganizationList()
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isLoaded) return
 
     const org = organizationList?.find(
