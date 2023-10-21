@@ -3,8 +3,6 @@ import Footer from "~/components/footer"
 import Header from "~/components/header"
 import { ReactQueryProvider } from "~/trpc/provider"
 
-export const runtime = "edge"
-
 export default function DashboardLayout(props: { children: React.ReactNode }) {
   return (
     <ReactQueryProvider>

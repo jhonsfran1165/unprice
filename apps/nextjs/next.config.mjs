@@ -21,6 +21,7 @@ const config = {
   experimental: {
     mdxRs: true,
     serverActions: true,
+    optimizePackageImports: ["@builderai/ui"],
   },
   swcMinify: true,
   /** We already do linting and typechecking as separate tasks in CI */
