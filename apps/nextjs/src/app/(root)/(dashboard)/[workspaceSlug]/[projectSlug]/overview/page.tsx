@@ -15,7 +15,7 @@ import {
 import * as Icons from "@builderai/ui/icons"
 import { Activity, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 
-import { Overview } from "~/app/root/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
+import { Overview } from "~/app/(root)/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
 import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"

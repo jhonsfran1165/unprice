@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "pnpm with-env next build",
+    "analyze": "ANALYZE=true pnpm --filter nextjs run build",
     "preview": "pnpm with-env next start",
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev": "pnpm with-env next dev",
