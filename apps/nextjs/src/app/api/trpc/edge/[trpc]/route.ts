@@ -4,8 +4,7 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
 import { createTRPCContext } from "@builderai/api"
 import { edgeRouter } from "@builderai/api/edge"
 
-// TODO: activate later. It is  hitting limits on vercel
-// export const runtime = "edge"
+export const runtime = "edge"
 
 const handler = (req: NextRequest) =>
   fetchRequestHandler({

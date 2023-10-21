@@ -1,5 +1,4 @@
-// TODO: activate later. It is  hitting limits on vercel
-// export const runtime = "edge"
+export const runtime = "edge"
 
 export default function Page() {
   // TODO: get limits of this project for this workspace

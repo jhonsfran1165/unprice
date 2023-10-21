@@ -5,7 +5,6 @@ import { createTRPCContext } from "@builderai/api"
 import { lambdaRouter } from "@builderai/api/lambda"
 
 // Stripe is incompatible with Edge runtimes due to using Node.js events
-// export const runtime = "edge";
 
 const handler = (req: NextRequest) =>
   fetchRequestHandler({

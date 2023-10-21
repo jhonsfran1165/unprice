@@ -4,8 +4,7 @@ import { auth } from "@builderai/auth"
 
 import { Onboarding } from "./multi-step-form"
 
-// TODO: activate later. It is  hitting limits on vercel
-// export const runtime = "edge"
+export const runtime = "edge"
 
 export default function OnboardingPage() {
   const { orgSlug, sessionClaims } = auth()

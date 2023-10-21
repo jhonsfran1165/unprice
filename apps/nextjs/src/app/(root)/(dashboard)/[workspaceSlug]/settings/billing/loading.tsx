@@ -8,8 +8,7 @@ import {
 } from "@builderai/ui/card"
 import { Skeleton } from "@builderai/ui/skeleton"
 
-// TODO: activate later. It is  hitting limits on vercel
-// export const runtime = "edge"
+export const runtime = "edge"
 
 export default function WorkSpaceSettingsDangerLoading() {
   return (

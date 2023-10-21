@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation"
 import { SignOutButton } from "@builderai/auth"
 import { Button } from "@builderai/ui/button"
 
-// TODO: activate later. It is  hitting limits on vercel
-// export const runtime = "edge"
+export const runtime = "edge"
 
 export default function AuthenticationPage() {
   const router = useRouter()

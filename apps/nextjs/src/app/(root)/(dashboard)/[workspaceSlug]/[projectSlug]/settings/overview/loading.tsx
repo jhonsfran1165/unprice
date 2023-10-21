@@ -1,6 +1,3 @@
-// TODO: activate later. It is  hitting limits on vercel
-// export const runtime = "edge"
-
 import { Button } from "@builderai/ui/button"
 import {
   Card,
@@ -12,6 +9,8 @@ import {
 } from "@builderai/ui/card"
 import { Label } from "@builderai/ui/label"
 import { Skeleton } from "@builderai/ui/skeleton"
+
+export const runtime = "edge"
 
 export default function ProjectSettingsLoading() {
   return (

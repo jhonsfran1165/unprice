@@ -14,7 +14,6 @@ import { GitHub } from "@builderai/ui/icons"
 
 import { marketingFeatures } from "~/app/(root)/config"
 
-// TODO: activate later. It is  hitting limits on vercel
 export const runtime = "edge"
 
 export default function Home() {
