@@ -1,36 +1,58 @@
 import type { LucideProps } from "lucide-react"
-import * as Lucide from "lucide-react"
+import {
+  Activity,
+  AlertTriangle,
+  Building,
+  ClipboardCheck,
+  Command,
+  CreditCard,
+  HelpCircle,
+  Loader2,
+  MoreVertical,
+  Plus,
+  SunMedium,
+} from "lucide-react"
 
-export * from "lucide-react"
+export {
+  Activity,
+  Calculator,
+  Calendar,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  ChevronsUpDown,
+  Component,
+  Copy,
+  CreditCard,
+  DollarSign,
+  Eye,
+  EyeOff,
+  Github,
+  Globe,
+  LayoutGrid,
+  LogOut,
+  Moon,
+  PlusCircle,
+  Settings,
+  Smile,
+  Twitter,
+  User,
+  Users,
+} from "lucide-react"
 
 export type Icon = (props: LucideProps) => JSX.Element
 
-export const Logo = Lucide.Command
-export const Github = Lucide.Github
-export const Dashboard = Lucide.Activity
-export const Close = Lucide.X
-export const Spinner = Lucide.Loader2
-export const ChevronLeft = Lucide.ChevronLeft
-export const ChevronRight = Lucide.ChevronRight
-export const Trash = Lucide.Trash
-export const Post = Lucide.FileText
-export const Page = Lucide.File
-export const Settings = Lucide.Settings
-export const Billing = Lucide.CreditCard
-export const Ellipsis = Lucide.MoreVertical
-export const Organization = Lucide.Building
-export const Add = Lucide.Plus
-export const Warning = Lucide.AlertTriangle
-export const User = Lucide.User
-export const ArrowRight = Lucide.ArrowRight
-export const Help = Lucide.HelpCircle
-export const Twitter = Lucide.Twitter
-export const Check = Lucide.Check
-export const Copy = Lucide.Copy
-export const CopyDone = Lucide.ClipboardCheck
-export const Sun = Lucide.SunMedium
-export const Moon = Lucide.Moon
-export const Key = Lucide.Key
+export const Logo = Command
+export const Dashboard = Activity
+export const Spinner = Loader2
+export const Billing = CreditCard
+export const Ellipsis = MoreVertical
+export const Organization = Building
+export const Add = Plus
+export const Warning = AlertTriangle
+export const Help = HelpCircle
+export const CopyDone = ClipboardCheck
+export const Sun = SunMedium
 
 export const System: Icon = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
