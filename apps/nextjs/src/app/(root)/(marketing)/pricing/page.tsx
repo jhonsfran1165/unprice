@@ -15,6 +15,8 @@ import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
 import { SubscribeNow } from "./subscribe-now"
 
+export const dynamic = "force-dynamic"
+
 // FIXME: Run this in Edge runtime - currently got some weird transforming error with Dinero.js + Superjson
 // export const runtime = "edge";
 
