@@ -6,8 +6,6 @@ import HeaderSubTab from "~/components/header-subtab"
 import { api } from "~/trpc/server"
 import ApiKeysSkeleton from "./data-table-skeleton"
 
-export const runtime = "edge"
-
 const DataTable = dynamic(() => import("./data-table"), {
   ssr: false,
   loading: ApiKeysSkeleton,
