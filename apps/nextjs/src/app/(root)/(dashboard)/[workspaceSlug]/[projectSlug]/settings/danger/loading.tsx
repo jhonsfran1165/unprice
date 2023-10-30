@@ -10,6 +10,18 @@ import {
 export default function ProjectSettingsLoading() {
   return (
     <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Transfer to Organization</CardTitle>
+          <CardDescription className="flex items-center">
+            Transfer this project to an organization
+          </CardDescription>
+        </CardHeader>
+        <CardFooter className="flex justify-between">
+          <Button variant="destructive">Transfer to Organization</Button>
+        </CardFooter>
+      </Card>
+
       <Card className="animate-pulse bg-muted">
         <CardHeader>
           <CardTitle>Transfer to Personal</CardTitle>
@@ -23,6 +35,7 @@ export default function ProjectSettingsLoading() {
           </Button>
         </CardFooter>
       </Card>
+
       <Card className="animate-pulse bg-muted">
         <CardHeader>
           <CardTitle>Delete project</CardTitle>
