@@ -25,40 +25,32 @@ import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { useZodForm } from "~/lib/zod-form"
-import type { RouterOutputs } from "~/trpc/client"
-import { apiRQ } from "~/trpc/client"
+import { api } from "~/trpc/client"
 
 export function RenameProject(props: {
-  project: RouterOutputs["project"]["bySlug"]
+  currentName: string
+  projectSlug: string
 }) {
   const { toast } = useToast()
-  const apiUtils = apiRQ.useContext()
-  const { data, refetch } = apiRQ.project.bySlug.useQuery(
-    {
-      slug: props.project.slug,
-    },
-    {
-      initialData: props.project,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-    }
-  )
 
-  const renameProject = apiRQ.project.rename.useMutation({
-    onSettled: async () => {
-      await refetch()
-      await apiUtils.project.listByActiveWorkspace.invalidate(undefined)
+  const form = useZodForm({
+    schema: renameProjectSchema,
+    defaultValues: {
+      projectSlug: props.projectSlug,
+      name: props.currentName,
     },
-    onSuccess: () => {
+  })
+
+  async function onSubmit(data: RenameProject) {
+    try {
+      await api.project.rename.mutate(data)
       toast({
         title: "Project name updated",
       })
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
+    } catch (error) {
+      if (error instanceof TRPCClientError) {
         toast({
-          title: err.message,
+          title: error.message,
           variant: "destructive",
         })
       } else {
@@ -67,16 +59,8 @@ export function RenameProject(props: {
           variant: "destructive",
         })
       }
-    },
-  })
-
-  const form = useZodForm({
-    schema: renameProjectSchema,
-    defaultValues: {
-      projectSlug: data.slug,
-      name: data.name ?? "",
-    },
-  })
+    }
+  }
 
   return (
     <>
@@ -89,12 +73,7 @@ export function RenameProject(props: {
         </CardHeader>
 
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit((data: RenameProject) => {
-              renameProject.mutate(data)
-            })}
-            className="space-y-2"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
             <CardContent>
               <FormField
                 control={form.control}
