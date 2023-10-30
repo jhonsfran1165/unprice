@@ -1,7 +1,15 @@
+import { userCanAccess } from "~/lib/project-guard"
 import { DeleteProject } from "./delete-project"
 import { TransferProjectToPersonal } from "./transfer-to-personal"
 
-export default function DangerZonePage() {
+export default async function DangerZonePage(props: {
+  params: { workspaceSlug: string; projectSlug: string }
+}) {
+  await userCanAccess({
+    projectSlug: props.params.projectSlug,
+    workspaceSlug: props.params.workspaceSlug,
+  })
+
   return (
     // <DashboardShell
     //   title="Danger Zone"

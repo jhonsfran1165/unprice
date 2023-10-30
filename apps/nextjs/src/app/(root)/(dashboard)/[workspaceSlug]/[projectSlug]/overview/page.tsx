@@ -21,6 +21,7 @@ import {
 } from "@builderai/ui/icons"
 import { cn } from "@builderai/ui/utils"
 
+import { userCanAccess } from "~/lib/project-guard"
 import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
@@ -35,10 +36,15 @@ const Overview = dynamic(
   { ssr: false }
 )
 
-export default function DashboardPage(props: {
+export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
 }) {
   const { projectSlug, workspaceSlug } = props.params
+
+  await userCanAccess({
+    projectSlug,
+    workspaceSlug,
+  })
 
   return (
     <>
