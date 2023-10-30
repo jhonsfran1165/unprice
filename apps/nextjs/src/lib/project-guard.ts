@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import { db, deactivateRLS } from "@builderai/db"
+import { db } from "@builderai/db"
 
 export async function userCanAccess({
   projectSlug,
@@ -12,9 +12,6 @@ export async function userCanAccess({
   if (!projectSlug || !workspaceSlug) {
     return
   }
-
-  // some queries activate RLS but this has to bypass RLS
-  await deactivateRLS(db)()
 
   const projectData = await db.query.project.findFirst({
     with: {
