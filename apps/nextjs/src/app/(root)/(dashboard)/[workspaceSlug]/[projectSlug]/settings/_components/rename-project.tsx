@@ -25,21 +25,16 @@ import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { useZodForm } from "~/lib/zod-form"
-import type { RouterOutputs } from "~/trpc/client"
 import { apiRQ } from "~/trpc/client"
 
-export function RenameProject(props: {
-  project: RouterOutputs["project"]["bySlug"]
-}) {
+export function RenameProject(props: { projectSlug: string }) {
   const { toast } = useToast()
   const apiUtils = apiRQ.useContext()
   const { data, refetch } = apiRQ.project.bySlug.useQuery(
     {
-      slug: props.project.slug,
+      slug: props.projectSlug,
     },
     {
-      initialData: props.project,
-      refetchOnMount: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     }
@@ -73,8 +68,8 @@ export function RenameProject(props: {
   const form = useZodForm({
     schema: renameProjectSchema,
     defaultValues: {
-      projectSlug: data.slug,
-      name: data.name ?? "",
+      projectSlug: data?.slug,
+      name: data?.name ?? "",
     },
   })
 
