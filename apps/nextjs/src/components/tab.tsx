@@ -2,8 +2,8 @@ import Link from "next/link"
 
 import type { DashboardRoute } from "@builderai/config/types"
 import { createIcon } from "@builderai/config/types"
-import { cn } from "@builderai/ui"
 import { Skeleton } from "@builderai/ui/skeleton"
+import { cn } from "@builderai/ui/utils"
 
 export const Tab = ({
   route,

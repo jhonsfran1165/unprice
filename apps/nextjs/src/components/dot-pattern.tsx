@@ -1,6 +1,6 @@
 import { useId } from "react"
 
-import { cn } from "@builderai/ui"
+import { cn } from "@builderai/ui/utils"
 
 interface DotPatternProps {
   width?: number | string | undefined

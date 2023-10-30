@@ -3,12 +3,12 @@
 import * as React from "react"
 import { addDays, format } from "date-fns"
 
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import type { DateRange } from "@builderai/ui/calendar"
 import { Calendar } from "@builderai/ui/calendar"
 import { Calendar as CalendarIcon } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
+import { cn } from "@builderai/ui/utils"
 
 export function CalendarDateRangePicker({
   className,

@@ -8,7 +8,6 @@ import { toDecimal } from "dinero.js"
 import { useOrganization, useOrganizationList, useUser } from "@builderai/auth"
 import type { PurchaseOrg } from "@builderai/db/schema"
 import { purchaseWorkspaceSchema } from "@builderai/db/schema"
-import { cn } from "@builderai/ui"
 import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
 import { Button } from "@builderai/ui/button"
 import {
@@ -46,14 +45,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@builderai/ui/select"
-import { Skeleton } from "@builderai/ui/skeleton"
 import { useToast } from "@builderai/ui/use-toast"
+import { cn } from "@builderai/ui/utils"
 
 import { currencySymbol } from "~/lib/currency"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
+import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 
-export function WorkspaceSwitcher() {
+export default function WorkspaceSwitcher() {
   const router = useRouter()
 
   const [switcherOpen, setSwitcherOpen] = useState(false)
@@ -69,24 +69,7 @@ export function WorkspaceSwitcher() {
 
   if (!orgs.isLoaded || !org.isLoaded || !activeOrg) {
     // Skeleton loader
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        role="combobox"
-        aria-expanded={switcherOpen}
-        aria-label="Select a workspace"
-        className="w-44 justify-between"
-      >
-        <Avatar className="mr-2 h-5 w-5">
-          <AvatarFallback>
-            <Skeleton className="aspect-square h-full w-full bg-background-bgHover" />
-          </AvatarFallback>
-        </Avatar>
-        <Skeleton className="h-[20px] w-full bg-background-bgHover" />
-        <Skeleton className="ml-2 h-4 w-4 shrink-0 bg-background-bgHover" />
-      </Button>
-    )
+    return <WorkspaceSwitcherSkeleton />
   }
 
   const normalizedObject = {

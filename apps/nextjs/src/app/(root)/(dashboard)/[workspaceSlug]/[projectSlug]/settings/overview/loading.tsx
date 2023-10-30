@@ -10,8 +10,6 @@ import {
 import { Label } from "@builderai/ui/label"
 import { Skeleton } from "@builderai/ui/skeleton"
 
-export const runtime = "edge"
-
 export default function ProjectSettingsLoading() {
   return (
     <Card className="animate-pulse bg-muted">

@@ -18,6 +18,9 @@ const config = {
     "@builderai/config",
   ],
   pageExtensions: ["ts", "tsx", "mdx"],
+  images: {
+    domains: ["images.unsplash.com"],
+  },
   experimental: {
     mdxRs: true,
     serverActions: true,
@@ -32,3 +35,5 @@ const config = {
 export default withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 })(withMDX()(config))
+
+// TODO: https://www.flavienbonvin.com/reduce-next-js-bundle/

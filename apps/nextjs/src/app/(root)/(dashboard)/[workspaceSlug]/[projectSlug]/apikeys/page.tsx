@@ -1,9 +1,23 @@
+import dynamic from "next/dynamic"
+
+import { Button } from "@builderai/ui/button"
+
 import HeaderSubTab from "~/components/header-subtab"
 import { api } from "~/trpc/server"
-import { DataTable } from "./data-table"
-import { NewApiKeyDialog } from "./new-api-key-dialog"
+import ApiKeysSkeleton from "./data-table-skeleton"
 
-// TODO: use edge, not possible cuz custom files in the api
+export const runtime = "edge"
+
+const DataTable = dynamic(() => import("./data-table"), {
+  ssr: false,
+  loading: ApiKeysSkeleton,
+})
+
+const NewApiKeyDialog = dynamic(() => import("./new-api-key-dialog"), {
+  ssr: false,
+  loading: () => <Button className="button-primary">Create API Key</Button>,
+})
+
 export default async function ApiKeysPage(props: {
   params: { projectSlug: string; workspaceSlug: string }
 }) {
@@ -20,11 +34,7 @@ export default async function ApiKeysPage(props: {
         action={<NewApiKeyDialog projectSlug={props.params.projectSlug} />}
       />
 
-      <DataTable
-        data={apiKeys}
-        projectSlug={props.params.projectSlug}
-        loading={false}
-      />
+      <DataTable data={apiKeys} projectSlug={props.params.projectSlug} />
     </>
   )
 }

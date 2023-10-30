@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server"
 import { File } from "undici"
-import { z } from "zod"
+import * as z from "zod"
 import { zfd } from "zod-form-data"
 
 import { ingestion } from "@builderai/db/schema"

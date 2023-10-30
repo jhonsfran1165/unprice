@@ -7,8 +7,6 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 
-export const runtime = "edge"
-
 export default function ProjectSettingsLoading() {
   return (
     <>

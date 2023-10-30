@@ -1,11 +1,11 @@
 "use client"
 
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, domAnimation, LazyMotion, m } from "framer-motion"
 
 import type { DashboardRoute } from "@builderai/config/types"
-import { cn } from "@builderai/ui"
 import { Logo } from "@builderai/ui/icons"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
+import { cn } from "@builderai/ui/utils"
 
 import { Tab } from "~/components/tab"
 import { useGetPaths } from "~/lib/use-get-path"
@@ -30,22 +30,24 @@ export default function TabsNav(props: {
         <nav className="flex w-auto items-center gap-2">
           <AnimatePresence mode="wait">
             {scrolled ? (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ rotate: 180, scale: 1 }}
-                exit={{
-                  rotate: -180,
-                  scale: 0,
-                }}
-                transition={{
-                  stiffness: 260,
-                  damping: 20,
-                  ease: "easeOut",
-                  duration: 0.2,
-                }}
-              >
-                <Logo className={"mr-4 h-6 w-6"} />
-              </motion.div>
+              <LazyMotion features={domAnimation}>
+                <m.div
+                  initial={{ scale: 0 }}
+                  animate={{ rotate: 180, scale: 1 }}
+                  exit={{
+                    rotate: -180,
+                    scale: 0,
+                  }}
+                  transition={{
+                    stiffness: 260,
+                    damping: 20,
+                    ease: "easeOut",
+                    duration: 0.2,
+                  }}
+                >
+                  <Logo className={"mr-4 h-6 w-6"} />
+                </m.div>
+              </LazyMotion>
             ) : (
               <Logo
                 className={cn(

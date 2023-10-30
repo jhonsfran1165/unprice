@@ -2,13 +2,12 @@ import dynamic from "next/dynamic"
 import Link from "next/link"
 
 import { siteConfig } from "@builderai/config"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Github, Twitter } from "@builderai/ui/icons"
 import { Skeleton } from "@builderai/ui/skeleton"
+import { cn } from "@builderai/ui/utils"
 
 import { Logo } from "~/components/logo"
-import { Search } from "~/components/search"
 
 const ThemeToggle = dynamic(() => import("~/components/theme-toggle"), {
   ssr: false,
@@ -17,6 +16,10 @@ const ThemeToggle = dynamic(() => import("~/components/theme-toggle"), {
       <Skeleton className="h-6 w-6 rounded-full" />
     </Button>
   ),
+})
+
+const Search = dynamic(() => import("~/components/search"), {
+  ssr: false,
 })
 
 export default function Footer(props: { className?: string }) {

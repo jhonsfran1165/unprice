@@ -14,7 +14,6 @@ import { TRPCClientError } from "@trpc/client"
 import { format, formatRelative } from "date-fns"
 
 import type { RouterOutputs } from "@builderai/api"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Checkbox } from "@builderai/ui/checkbox"
 import {
@@ -34,7 +33,6 @@ import {
 } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Label } from "@builderai/ui/label"
-import { Skeleton } from "@builderai/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -44,8 +42,10 @@ import {
   TableRow,
 } from "@builderai/ui/table"
 import { useToast } from "@builderai/ui/use-toast"
+import { cn } from "@builderai/ui/utils"
 
 import { apiRQ } from "~/trpc/client"
+import { DataTableSkeleton } from "./data-table-skeleton"
 
 export type ApiKeyColumn = RouterOutputs["apikey"]["listApiKeys"][number]
 
@@ -137,7 +137,7 @@ const columns = (projectSlug: string) => [
     header: "Key",
   }),
   columnHelper.accessor("createdAt", {
-    cell: (t) => format(t.getValue(), "yyyy-MM-dd"),
+    cell: (t) => format(new Date(t.getValue()), "yyyy-MM-dd"),
     header: "Created At",
   }),
   columnHelper.accessor("expiresAt", {
@@ -152,7 +152,9 @@ const columns = (projectSlug: string) => [
         return (
           <div className="flex flex-col text-destructive">
             <span>Revoked</span>
-            <span>{format(t.row.original.revokedAt, "yyyy-MM-dd")}</span>
+            <span>
+              {format(new Date(t.row.original.revokedAt), "yyyy-MM-dd")}
+            </span>
           </div>
         )
       }
@@ -166,7 +168,7 @@ const columns = (projectSlug: string) => [
         return (
           <div className="flex flex-col text-destructive">
             <span>Expired</span>
-            <span>{format(value, "yyyy-MM-dd")}</span>
+            <span>{format(new Date(value), "yyyy-MM-dd")}</span>
           </div>
         )
       }
@@ -342,10 +344,9 @@ const columns = (projectSlug: string) => [
   }),
 ]
 
-export function DataTable(props: {
+export default function DataTable(props: {
   data: ApiKeyColumn[]
   projectSlug: string
-  loading: boolean
 }) {
   const [rowSelection, setRowSelection] = useState({})
   const [showRevoked, setShowRevoked] = useState(true)
@@ -363,8 +364,6 @@ export function DataTable(props: {
       initialData: props.data,
     }
   )
-
-  const loadingData = props.loading || isFetching
 
   const columnsData = useMemo(
     () => columns(props.projectSlug),
@@ -464,7 +463,7 @@ export function DataTable(props: {
             ))}
           </TableHeader>
           <TableBody className="bg-background-base">
-            {loadingData ? (
+            {isFetching ? (
               <DataTableSkeleton />
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
@@ -480,7 +479,7 @@ export function DataTable(props: {
                     }
                     return false
                   })()}
-                  className={cn("group")}
+                  className={"group"}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -530,30 +529,3 @@ export function DataTable(props: {
     </div>
   )
 }
-
-const DataTableSkeleton = () =>
-  Array.from({ length: 4 }).map((_, i) => (
-    <TableRow key={i}>
-      <TableCell>
-        <Skeleton className="my-1 h-[20px] w-[20px]" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-[20px] w-[100px]" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-[20px] w-[300px]" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-[20px] w-[100px]" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-[20px] w-[100px]" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-[20px] w-[100px]" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="mx-3 h-[20px] w-[5px]" />
-      </TableCell>
-    </TableRow>
-  ))

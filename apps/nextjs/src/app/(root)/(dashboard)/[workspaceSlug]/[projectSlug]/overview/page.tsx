@@ -2,7 +2,6 @@ import { Suspense } from "react"
 import Link from "next/link"
 import { formatRelative } from "date-fns"
 
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Card,
@@ -19,14 +18,14 @@ import {
   DollarSign,
   Users,
 } from "@builderai/ui/icons"
+import { cn } from "@builderai/ui/utils"
 
 import { Overview } from "~/app/(root)/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
 import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
 
-// TODO: activate later. It is  hitting limits on vercel
-// export const runtime = "edge"
+export const runtime = "edge"
 
 export default function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }

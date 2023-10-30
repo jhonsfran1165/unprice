@@ -22,7 +22,7 @@ import {
   User,
 } from "@builderai/ui/icons"
 
-export function Search() {
+export default function Search() {
   const [open, setOpen] = React.useState(false)
 
   React.useEffect(() => {

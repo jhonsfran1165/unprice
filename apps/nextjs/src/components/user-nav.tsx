@@ -1,6 +1,8 @@
+"use client"
+
 import Link from "next/link"
 
-import { currentUser } from "@builderai/auth"
+import { useUser } from "@builderai/auth"
 import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
 import { Button } from "@builderai/ui/button"
 import {
@@ -16,10 +18,10 @@ import {
 import { CreditCard, LogOut, Settings, User } from "@builderai/ui/icons"
 import { Skeleton } from "@builderai/ui/skeleton"
 
-export async function UserNav() {
-  const user = await currentUser()
+export default function UserNav() {
+  const { user, isLoaded } = useUser()
 
-  if (!user) {
+  if (!user || !isLoaded) {
     return (
       <Link href="/signin">
         <Button variant="ghost" className="relative h-8 w-8 rounded">

@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import { z } from "zod"
+import * as z from "zod"
 
 import { eq, sql } from "@builderai/db"
 import { apikey, createApiKeySchema } from "@builderai/db/schema"

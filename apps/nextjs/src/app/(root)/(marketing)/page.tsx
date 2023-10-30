@@ -1,7 +1,6 @@
 import { Balancer } from "react-wrap-balancer"
 
 import { siteConfig } from "@builderai/config"
-import { cn } from "@builderai/ui"
 import { buttonVariants } from "@builderai/ui/button"
 import {
   Card,
@@ -11,10 +10,9 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 import { GitHub } from "@builderai/ui/icons"
+import { cn } from "@builderai/ui/utils"
 
 import { marketingFeatures } from "~/app/(root)/config"
-
-export const runtime = "edge"
 
 export default function Home() {
   return (

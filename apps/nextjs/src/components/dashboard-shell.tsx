@@ -1,8 +1,8 @@
 import React, { cache } from "react"
 
+import type { ModuleApp, SubModuleApp } from "@builderai/config"
 import { getModulesApp } from "@builderai/config"
-import type { ModuleApp, SubModuleApp } from "@builderai/config/types"
-import { cn } from "@builderai/ui"
+import { cn } from "@builderai/ui/utils"
 
 import HeaderTab from "~/components/header-tab"
 import MaxWidthWrapper from "~/components/max-width-wrapper"

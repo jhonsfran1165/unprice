@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation"
 
 import type { RouterOutputs } from "@builderai/api"
 import { useOrganization } from "@builderai/auth"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Command,
@@ -17,11 +16,12 @@ import {
 } from "@builderai/ui/command"
 import { Check, ChevronsUpDown, LayoutGrid } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
-import { Skeleton } from "@builderai/ui/skeleton"
+import { cn } from "@builderai/ui/utils"
 
 import { apiRQ } from "~/trpc/client"
+import { ProjectSwitcherSkeleton } from "./project-switcher-skeleton"
 
-export function ProjectSwitcher(props: {
+export default function ProjectSwitcher(props: {
   activeProjects: RouterOutputs["project"]["listByActiveWorkspace"]
 }) {
   const router = useRouter()
@@ -48,19 +48,7 @@ export function ProjectSwitcher(props: {
   if (!projectSlug) return null
 
   if (!activeProject || isFetching) {
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        role="combobox"
-        aria-expanded={switcherOpen}
-        aria-label="project"
-        className="w-44 justify-between opacity-50"
-      >
-        <Skeleton className="h-[20px] w-full bg-background-bgHover" />
-        <Skeleton className="ml-2 h-4 w-4 shrink-0 bg-background-bgHover" />
-      </Button>
-    )
+    return <ProjectSwitcherSkeleton />
   }
 
   return (

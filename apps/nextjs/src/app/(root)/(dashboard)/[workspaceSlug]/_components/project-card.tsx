@@ -3,13 +3,13 @@ import Link from "next/link"
 import type { RouterOutputs } from "@builderai/api"
 import { PROJECT_TIER } from "@builderai/config"
 import type { ProjectTier } from "@builderai/config/types"
-import { cn } from "@builderai/ui"
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
+import { cn } from "@builderai/ui/utils"
 
 import { getRandomPatternStyle } from "~/lib/generate-pattern"
 

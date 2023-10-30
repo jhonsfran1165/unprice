@@ -1,6 +1,7 @@
+import { Button } from "@builderai/ui/button"
+
 import HeaderSubTab from "~/components/header-subtab"
-import { DataTable } from "./data-table"
-import { NewApiKeyDialog } from "./new-api-key-dialog"
+import ApiKeysSkeleton from "./data-table-skeleton"
 
 export default function ApiKeysLoading() {
   return (
@@ -8,11 +9,10 @@ export default function ApiKeysLoading() {
       <HeaderSubTab
         title="Api keys generated"
         description="All the apis of the system"
-        action={<NewApiKeyDialog projectSlug={""} />}
+        action={<Button className="button-primary">Create API Key</Button>}
       />
 
-      {/* TODO: create loading state */}
-      <DataTable data={[]} projectSlug={""} loading={true} />
+      <ApiKeysSkeleton />
     </>
   )
 }

@@ -5,12 +5,13 @@ import "~/styles/globals.css"
 
 import { ClerkProvider } from "@builderai/auth"
 import { siteConfig } from "@builderai/config"
-import { cn } from "@builderai/ui"
 import { Toaster } from "@builderai/ui/toaster"
+import { cn } from "@builderai/ui/utils"
 
 import { TailwindIndicator } from "~/components/tailwind-indicator"
 import { ThemeProvider } from "~/components/theme-provider"
 import { fontMapper } from "~/styles/fonts"
+import { ReactQueryProvider } from "~/trpc/provider"
 
 export const metadata = {
   title: {
@@ -47,7 +48,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             )}
           >
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              {props.children}
+              <ReactQueryProvider>{props.children}</ReactQueryProvider>
               <TailwindIndicator />
             </ThemeProvider>
             {/* <Analytics /> */}

@@ -17,6 +17,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                 "url(https://images.unsplash.com/photo-1590069261209-f8e9b8642343?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1376&q=80)",
             }}
           />
+
           <div className="to-background/60 md:to-background/40 absolute inset-0 bg-gradient-to-t from-background" />
           <Link
             href="/"

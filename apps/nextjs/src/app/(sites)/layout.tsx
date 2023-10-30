@@ -1,4 +1,4 @@
-// import { cn } from "@builderai/ui"
+// import { cn } from "@builderai/ui/utils"
 
 // import { fontMapper } from "~/styles/fonts"
 
@@ -31,8 +31,8 @@ import "~/styles/globals.css"
 
 import { ClerkProvider } from "@builderai/auth"
 import { siteConfig } from "@builderai/config"
-import { cn } from "@builderai/ui"
 import { Toaster } from "@builderai/ui/toaster"
+import { cn } from "@builderai/ui/utils"
 
 import { TailwindIndicator } from "~/components/tailwind-indicator"
 import { ThemeProvider } from "~/components/theme-provider"

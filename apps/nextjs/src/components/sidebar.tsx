@@ -3,10 +3,10 @@
 import Link from "next/link"
 
 import type { SidebarRoutes } from "@builderai/config/types"
-import { cn } from "@builderai/ui"
 // TODO: this is adding too much bundle size
 // import * as Icons from "@builderai/ui/icons"
 import { Settings } from "@builderai/ui/icons"
+import { cn } from "@builderai/ui/utils"
 
 import { useGetPaths } from "~/lib/use-get-path"
 

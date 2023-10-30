@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 
-import { cn } from "@builderai/ui"
+import { cn } from "@builderai/ui/utils"
 
 export default function MaxWidthWrapper({
   className,

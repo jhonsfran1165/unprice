@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useState } from "react"
 
 import { Button } from "@builderai/ui/button"
 import {
@@ -15,8 +15,8 @@ import {
 import { apiRQ } from "~/trpc/client"
 import { CreateApiKeyForm } from "../../_components/create-api-key-form"
 
-export function NewApiKeyDialog(props: { projectSlug: string }) {
-  const [dialogOpen, setDialogOpen] = React.useState(false)
+export default function NewApiKeyDialog(props: { projectSlug: string }) {
+  const [dialogOpen, setDialogOpen] = useState(false)
   const apiUtils = apiRQ.useContext()
 
   return (
