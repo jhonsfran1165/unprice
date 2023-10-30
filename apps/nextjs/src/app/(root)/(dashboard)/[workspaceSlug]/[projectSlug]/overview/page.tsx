@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { formatRelative } from "date-fns"
 
@@ -20,12 +21,19 @@ import {
 } from "@builderai/ui/icons"
 import { cn } from "@builderai/ui/utils"
 
-import { Overview } from "~/app/(root)/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
 import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
 
 export const runtime = "edge"
+
+const Overview = dynamic(
+  () =>
+    import(
+      "~/app/(root)/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
+    ),
+  { ssr: false }
+)
 
 export default function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }

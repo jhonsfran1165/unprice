@@ -34,6 +34,7 @@ const config = {
 
 export default withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
+  openAnalyzer: false,
 })(withMDX()(config))
 
 // TODO: https://www.flavienbonvin.com/reduce-next-js-bundle/
