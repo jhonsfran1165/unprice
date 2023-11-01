@@ -1,6 +1,7 @@
 // import { LegendStateHandler } from "~/components/state-handler"
 
 import DotPattern from "~/components/dot-pattern"
+import Footer from "~/components/footer"
 import { SyncActiveOrgFromUrl } from "~/components/sync-active-org-from-url"
 import { ReactQueryProvider } from "~/trpc/provider"
 
@@ -17,7 +18,7 @@ export default function DashboardLayout(props: {
         <div className="flex grow flex-col">
           <main className="flex flex-1 flex-col">{props.children}</main>
         </div>
-        {/* <Footer /> */}
+        <Footer />
       </div>
     </ReactQueryProvider>
   )
