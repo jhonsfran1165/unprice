@@ -17,7 +17,7 @@ import type {
 } from "@builderai/auth/api"
 import { getAuth } from "@builderai/auth/server"
 import { activateRLS, authTxn, db, deactivateRLS, eq } from "@builderai/db"
-import { apikey } from "@builderai/db/schema"
+import { apikey } from "@builderai/db/schema/apikey"
 
 import { transformer } from "./transformer"
 

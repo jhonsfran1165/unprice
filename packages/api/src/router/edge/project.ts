@@ -10,7 +10,7 @@ import {
   renameProjectSchema,
   transferToPersonalProjectSchema,
   transferToWorkspaceSchema,
-} from "@builderai/db/schema"
+} from "@builderai/db/schema/project"
 import { generateSlug, newIdEdge } from "@builderai/db/utils"
 
 import {

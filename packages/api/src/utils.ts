@@ -1,8 +1,9 @@
 import { TRPCError } from "@trpc/server"
 
 import { and, eq } from "@builderai/db"
-import type { SelectProject, SelectWorkspace } from "@builderai/db/schema"
-import { project } from "@builderai/db/schema"
+import type { SelectProject } from "@builderai/db/schema/project"
+import { project } from "@builderai/db/schema/project"
+import type { SelectWorkspace } from "@builderai/db/schema/workspace"
 
 import type { Context } from "./trpc"
 

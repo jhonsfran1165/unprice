@@ -4,8 +4,8 @@ import { useState } from "react"
 import { TRPCClientError } from "@trpc/client"
 import { add, format } from "date-fns"
 
-import type { CreateApiKey } from "@builderai/db/schema"
-import { createApiKeySchema } from "@builderai/db/schema"
+import type { CreateApiKey } from "@builderai/db/schema/apikey"
+import { createApiKeySchema } from "@builderai/db/schema/apikey"
 import { Button } from "@builderai/ui/button"
 import { Calendar } from "@builderai/ui/calendar"
 import {

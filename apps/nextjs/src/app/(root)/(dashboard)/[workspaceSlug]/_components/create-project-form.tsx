@@ -4,8 +4,8 @@ import { useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
-import type { CreateProject } from "@builderai/db/schema"
-import { createProjectSchema } from "@builderai/db/schema"
+import type { CreateProject } from "@builderai/db/schema/project"
+import { createProjectSchema } from "@builderai/db/schema/project"
 import { Button } from "@builderai/ui/button"
 import {
   Form,

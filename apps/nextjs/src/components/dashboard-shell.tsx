@@ -14,16 +14,11 @@ import TabsNav from "~/components/tabs-nav"
 
 const cachedGetModulesApp = cache(getModulesApp)
 
-const SidebarNav = dynamic(() => import("~/components/sidebar"), {
-  ssr: false,
-})
+const SidebarNav = dynamic(() => import("~/components/sidebar"), {})
 
 // TODO: add loading state
 const SidebarMenuSubTabs = dynamic(
-  () => import("~/components/menu-siderbar-subtabs"),
-  {
-    ssr: false,
-  }
+  () => import("~/components/menu-siderbar-subtabs")
 )
 
 // TODO: add dashboard skeleton

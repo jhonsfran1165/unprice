@@ -4,8 +4,8 @@ import { use } from "react"
 import Link from "next/link"
 import { toDecimal } from "dinero.js"
 
-import type { PurchaseOrg } from "@builderai/db/schema"
-import { purchaseWorkspaceSchema } from "@builderai/db/schema"
+import type { PurchaseOrg } from "@builderai/db/schema/workspace"
+import { purchaseWorkspaceSchema } from "@builderai/db/schema/workspace"
 import { Button } from "@builderai/ui/button"
 import {
   DialogContent,

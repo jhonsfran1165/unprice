@@ -3,7 +3,7 @@ import type Stripe from "stripe"
 import { clerkClient } from "@builderai/auth"
 import { stripePriceToSubscriptionPlan } from "@builderai/config"
 import { db, eq } from "@builderai/db"
-import { workspace } from "@builderai/db/schema"
+import { workspace } from "@builderai/db/schema/workspace"
 import { generateSlug, newId } from "@builderai/db/utils"
 
 import { stripe } from "."

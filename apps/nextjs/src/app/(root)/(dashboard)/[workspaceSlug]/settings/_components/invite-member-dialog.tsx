@@ -3,8 +3,8 @@
 import { TRPCClientError } from "@trpc/client"
 
 import { MEMBERSHIP } from "@builderai/config"
-import type { InviteOrgMember } from "@builderai/db/schema"
-import { inviteOrgMemberSchema } from "@builderai/db/schema"
+import type { InviteOrgMember } from "@builderai/db/schema/workspace"
+import { inviteOrgMemberSchema } from "@builderai/db/schema/workspace"
 import { Button } from "@builderai/ui/button"
 import {
   Form,

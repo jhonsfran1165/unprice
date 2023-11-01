@@ -4,8 +4,8 @@ import { use } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
-import type { TransferToWorkspace } from "@builderai/db/schema"
-import { transferToWorkspaceSchema } from "@builderai/db/schema"
+import type { TransferToWorkspace } from "@builderai/db/schema/project"
+import { transferToWorkspaceSchema } from "@builderai/db/schema/project"
 import { Button } from "@builderai/ui/button"
 import {
   Card,

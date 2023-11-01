@@ -2,8 +2,8 @@
 
 import { TRPCClientError } from "@trpc/client"
 
-import type { RenameProject } from "@builderai/db/schema"
-import { renameProjectSchema } from "@builderai/db/schema"
+import type { RenameProject } from "@builderai/db/schema/project"
+import { renameProjectSchema } from "@builderai/db/schema/project"
 import { Button } from "@builderai/ui/button"
 import {
   Card,

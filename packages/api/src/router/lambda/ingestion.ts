@@ -3,7 +3,7 @@ import { File } from "undici"
 import * as z from "zod"
 import { zfd } from "zod-form-data"
 
-import { ingestion } from "@builderai/db/schema"
+import { ingestion } from "@builderai/db/schema/ingestion"
 import { newIdEdge } from "@builderai/db/utils"
 
 import {

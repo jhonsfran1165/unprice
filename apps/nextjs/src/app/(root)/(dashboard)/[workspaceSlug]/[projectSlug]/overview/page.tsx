@@ -23,7 +23,8 @@ import { cn } from "@builderai/ui/utils"
 import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
-import { Overview } from "../_components/overview"
+
+// import { Overview } from "../_components/overview"
 
 export const runtime = "edge"
 
@@ -95,9 +96,9 @@ export default async function DashboardPage(props: {
             <CardTitle>Overview</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <Suspense>
+            {/* <Suspense>
               <Overview />
-            </Suspense>
+            </Suspense> */}
           </CardContent>
         </Card>
 

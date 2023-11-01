@@ -1,6 +1,6 @@
 import type { WebhookEvent } from "@builderai/auth/server"
 import { db, eq } from "@builderai/db"
-import { workspace } from "@builderai/db/schema"
+import { workspace } from "@builderai/db/schema/workspace"
 import { generateSlug, workspaceIdFromTenantId } from "@builderai/db/utils"
 
 export async function handleEvent(event: WebhookEvent) {
