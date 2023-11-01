@@ -1,6 +1,7 @@
 import React, { cache } from "react"
+
 // import SidebarNav from "~/components/sidebar"
-import dynamic from "next/dynamic"
+// import dynamic from "next/dynamic"
 
 import type { ModuleApp, SubModuleApp } from "@builderai/config"
 import { getModulesApp } from "@builderai/config"
@@ -9,17 +10,17 @@ import { cn } from "@builderai/ui/utils"
 import HeaderTab from "~/components/header-tab"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
 // import SidebarMenuSubTabs from "~/components/menu-siderbar-subtabs"
-import MenuSubTabs from "~/components/menu-subtabs"
+// import MenuSubTabs from "~/components/menu-subtabs"
 import TabsNav from "~/components/tabs-nav"
 
 const cachedGetModulesApp = cache(getModulesApp)
 
-const SidebarNav = dynamic(() => import("~/components/sidebar"), {})
+// const SidebarNav = dynamic(() => import("~/components/sidebar"), {})
 
-// TODO: add loading state
-const SidebarMenuSubTabs = dynamic(
-  () => import("~/components/menu-siderbar-subtabs")
-)
+// // TODO: add loading state
+// const SidebarMenuSubTabs = dynamic(
+//   () => import("~/components/menu-siderbar-subtabs")
+// )
 
 // TODO: add dashboard skeleton
 export function DashboardShell<T extends ModuleApp>(props: {
@@ -63,16 +64,16 @@ export function DashboardShell<T extends ModuleApp>(props: {
         {activeTab?.sidebarMenu && (
           <div className="flex flex-col gap-12 sm:flex-1 sm:flex-row">
             <aside className="flex flex-col sm:flex sm:w-1/4">
-              <SidebarNav
+              {/* <SidebarNav
                 submodule={props.submodule as string}
                 sidebarMenu={activeTab.sidebarMenu}
-              />
+              /> */}
             </aside>
             <div className="flex flex-1 flex-col sm:w-3/4">
-              <SidebarMenuSubTabs
+              {/* <SidebarMenuSubTabs
                 submodule={props.submodule as string}
                 sideBarRoutes={activeTab.sidebarMenu}
-              />
+              /> */}
               <div className={cn("space-y-6", props.className)}>
                 {props.children}
               </div>
@@ -83,10 +84,10 @@ export function DashboardShell<T extends ModuleApp>(props: {
         {/* without sidebar menu config */}
         {!activeTab?.sidebarMenu && (
           <div className="flex flex-1 flex-col">
-            <MenuSubTabs
+            {/* <MenuSubTabs
               submodule={props.submodule as string}
               activeTab={activeTab}
-            />
+            /> */}
             <div className={cn("space-y-6", props.className)}>
               {props.children}
             </div>

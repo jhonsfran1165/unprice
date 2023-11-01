@@ -3,9 +3,14 @@ import dynamic from "next/dynamic"
 import type { DashboardRoute } from "@builderai/config/types"
 import { cn } from "@builderai/ui/utils"
 
-const TabsShell = dynamic(() => import("./tabs-shell"), {
-  ssr: false,
-})
+import Tab from "~/components/tab"
+
+const TabsShell = dynamic(() => import("./tabs-shell"))
+
+// const Tab = dynamic(() => import("~/components/tab"), {
+//   ssr: false,
+//   loading: () => <TabSkeleton />,
+// })
 
 export default function TabsNav(props: {
   className?: string
@@ -19,10 +24,16 @@ export default function TabsNav(props: {
         props.className
       )}
     >
-      <TabsShell
-        moduleTabs={props.moduleTabs}
-        activeRoute={props.activeRoute}
-      />
+      <TabsShell moduleTabs={props.moduleTabs} activeRoute={props.activeRoute}>
+        {props.moduleTabs.map((route, index) => (
+          <Tab
+            key={route.href + index}
+            route={route}
+            baseUrl={""}
+            activeRoute={props.activeRoute}
+          />
+        ))}
+      </TabsShell>
     </div>
   )
 }
