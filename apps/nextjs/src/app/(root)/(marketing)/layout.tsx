@@ -23,7 +23,9 @@ export default function MarketingLayout(props: { children: ReactNode }) {
               {siteConfig.name}
             </span>
           </div>
-          <MobileDropdown />
+          <Suspense>
+            <MobileDropdown />
+          </Suspense>
           <MainNav />
           <div className="ml-auto flex items-center space-x-4">
             <Suspense>

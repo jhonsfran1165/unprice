@@ -1,8 +1,6 @@
-"use client"
-
 import Link from "next/link"
 
-import { useUser } from "@builderai/auth"
+import { currentUser } from "@builderai/auth"
 import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
 import { Button } from "@builderai/ui/button"
 import {
@@ -16,23 +14,14 @@ import {
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
 import { CreditCard, LogOut, Settings, User } from "@builderai/ui/icons"
-import { Skeleton } from "@builderai/ui/skeleton"
 
-export default function UserNav() {
-  const { user, isLoaded } = useUser()
+import UserNavSkeleton from "./user-nav-skeleton"
 
-  if (!user || !isLoaded) {
-    return (
-      <Link href="/signin">
-        <Button variant="ghost" className="relative h-8 w-8 rounded">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-transparent">
-              <Skeleton className="aspect-square h-full w-full" />
-            </AvatarFallback>
-          </Avatar>
-        </Button>
-      </Link>
-    )
+export default async function UserNav() {
+  const user = await currentUser()
+
+  if (!user) {
+    return <UserNavSkeleton />
   }
 
   const fullname = `${user.firstName} ${user.lastName}`

@@ -1,4 +1,6 @@
 import React, { cache } from "react"
+// import SidebarNav from "~/components/sidebar"
+import dynamic from "next/dynamic"
 
 import type { ModuleApp, SubModuleApp } from "@builderai/config"
 import { getModulesApp } from "@builderai/config"
@@ -6,12 +8,23 @@ import { cn } from "@builderai/ui/utils"
 
 import HeaderTab from "~/components/header-tab"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
-import SidebarMenuSubTabs from "~/components/menu-siderbar-subtabs"
+// import SidebarMenuSubTabs from "~/components/menu-siderbar-subtabs"
 import MenuSubTabs from "~/components/menu-subtabs"
-import SidebarNav from "~/components/sidebar"
 import TabsNav from "~/components/tabs-nav"
 
 const cachedGetModulesApp = cache(getModulesApp)
+
+const SidebarNav = dynamic(() => import("~/components/sidebar"), {
+  ssr: false,
+})
+
+// TODO: add loading state
+const SidebarMenuSubTabs = dynamic(
+  () => import("~/components/menu-siderbar-subtabs"),
+  {
+    ssr: false,
+  }
+)
 
 // TODO: add dashboard skeleton
 export function DashboardShell<T extends ModuleApp>(props: {

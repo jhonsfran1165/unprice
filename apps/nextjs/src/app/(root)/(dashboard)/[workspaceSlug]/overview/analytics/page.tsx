@@ -1,7 +1,10 @@
 import { Balancer } from "react-wrap-balancer"
 
 import { api } from "~/trpc/server"
-import { ProjectCard } from "../../_components/project-card"
+import {
+  ProjectCard,
+  ProjectCardSkeleton,
+} from "../../_components/project-card"
 
 // TODO: activate later. It is  hitting limits on vercel
 // export const runtime = "edge"
@@ -28,9 +31,9 @@ export default async function Page(props: {
       {projects.length === 0 && (
         <div className="relative">
           <ul className="grid select-none grid-cols-1 gap-4 opacity-40 lg:grid-cols-3">
-            <ProjectCard.Skeleton pulse={false} />
-            <ProjectCard.Skeleton pulse={false} />
-            <ProjectCard.Skeleton pulse={false} />
+            <ProjectCardSkeleton pulse={false} />
+            <ProjectCardSkeleton pulse={false} />
+            <ProjectCardSkeleton pulse={false} />
           </ul>
           <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center">
             <Balancer>

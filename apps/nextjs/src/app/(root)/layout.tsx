@@ -11,7 +11,6 @@ import { cn } from "@builderai/ui/utils"
 import { TailwindIndicator } from "~/components/tailwind-indicator"
 import { ThemeProvider } from "~/components/theme-provider"
 import { fontMapper } from "~/styles/fonts"
-import { ReactQueryProvider } from "~/trpc/provider"
 
 export const metadata = {
   title: {
@@ -48,7 +47,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             )}
           >
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              <ReactQueryProvider>{props.children}</ReactQueryProvider>
+              {props.children}
               <TailwindIndicator />
             </ThemeProvider>
             {/* <Analytics /> */}

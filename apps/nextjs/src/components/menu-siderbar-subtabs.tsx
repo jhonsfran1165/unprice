@@ -1,11 +1,18 @@
 "use client"
 
+import dynamic from "next/dynamic"
+
 import type { SidebarRoutes } from "@builderai/config/types"
 import { createIcon } from "@builderai/config/types"
 
 import HeaderSubTab from "~/components/header-subtab"
+import { TabSkeleton } from "~/components/tab-skeleton"
 import { useGetPaths } from "~/lib/use-get-path"
-import SubTab from "./subtab"
+
+const SubTab = dynamic(() => import("~/components/subtab"), {
+  ssr: false,
+  loading: () => <TabSkeleton />,
+})
 
 export default function SidebarMenuSubTabs({
   submodule,

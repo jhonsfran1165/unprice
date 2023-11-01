@@ -14,6 +14,8 @@ import { cn } from "@builderai/ui/utils"
 
 import { marketingFeatures } from "~/app/(root)/config"
 
+export const runtime = "edge"
+
 export default function Home() {
   return (
     <main className="flex min-h-screen w-full flex-col items-center justify-center pt-48">

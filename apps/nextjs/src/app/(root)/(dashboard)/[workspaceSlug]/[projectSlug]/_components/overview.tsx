@@ -2,6 +2,7 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 
+// TODO: use another chart library
 // TODO: delete later https://github.com/recharts/recharts/issues/3615#issuecomment-1636923358
 const error = console.error
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,7 +64,7 @@ const data = [
   },
 ]
 
-export default function Overview() {
+export function Overview() {
   return (
     <ResponsiveContainer width="100%" height={400}>
       <BarChart data={data}>

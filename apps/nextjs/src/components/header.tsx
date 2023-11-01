@@ -1,25 +1,11 @@
-import dynamic from "next/dynamic"
+import { Suspense } from "react"
 
 import { Logo } from "~/components/logo"
 import { MainNav } from "~/components/main-nav"
-import UserNavSkeleton from "~/components/user-nav-skeleton"
-import { WorkspaceSwitcherSkeleton } from "~/components/workspace-switcher-skeleton"
+import { ProjectSwitcher } from "~/components/project-switcher"
 import { api } from "~/trpc/server"
-
-const WorkspaceSwitcher = dynamic(
-  () => import("~/components/workspace-switcher"),
-  { ssr: false, loading: WorkspaceSwitcherSkeleton }
-)
-
-const ProjectSwitcher = dynamic(() => import("~/components/project-switcher"), {
-  ssr: false,
-  loading: WorkspaceSwitcherSkeleton,
-})
-
-const UserNav = dynamic(() => import("~/components/user-nav"), {
-  ssr: false,
-  loading: UserNavSkeleton,
-})
+import UserNav from "./user-nav"
+import { WorkspaceSwitcher } from "./workspace-switcher"
 
 export default async function Header() {
   const activeProjects = await api.project.listByActiveWorkspace.query()
@@ -33,7 +19,9 @@ export default async function Header() {
             /
           </span>
           <WorkspaceSwitcher />
-          <ProjectSwitcher activeProjects={activeProjects} />
+          <Suspense>
+            <ProjectSwitcher activeProjects={activeProjects} />
+          </Suspense>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <MainNav />

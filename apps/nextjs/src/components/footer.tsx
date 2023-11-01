@@ -10,7 +10,6 @@ import { cn } from "@builderai/ui/utils"
 import { Logo } from "~/components/logo"
 
 const ThemeToggle = dynamic(() => import("~/components/theme-toggle"), {
-  ssr: false,
   loading: () => (
     <Button variant="ghost" size="sm" className="button-ghost">
       <Skeleton className="h-6 w-6 rounded-full" />
@@ -18,9 +17,7 @@ const ThemeToggle = dynamic(() => import("~/components/theme-toggle"), {
   ),
 })
 
-const Search = dynamic(() => import("~/components/search"), {
-  ssr: false,
-})
+const Search = dynamic(() => import("~/components/search"), {})
 
 export default function Footer(props: { className?: string }) {
   return (

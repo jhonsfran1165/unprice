@@ -1,5 +1,6 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { AnimatePresence, domAnimation, LazyMotion, m } from "framer-motion"
 
 import type { DashboardRoute } from "@builderai/config/types"
@@ -7,11 +8,16 @@ import { Logo } from "@builderai/ui/icons"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 import { cn } from "@builderai/ui/utils"
 
-import { Tab } from "~/components/tab"
 import { useGetPaths } from "~/lib/use-get-path"
 import useScroll from "~/lib/use-scroll"
+import { TabSkeleton } from "./tab-skeleton"
 
-export default function Tabs(props: {
+const Tab = dynamic(() => import("~/components/tab"), {
+  ssr: false,
+  loading: () => <TabSkeleton />,
+})
+
+export default function TabsShell(props: {
   moduleTabs: DashboardRoute[]
   activeRoute: DashboardRoute | null
 }) {

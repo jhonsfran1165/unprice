@@ -1,8 +1,8 @@
 import Link from "next/link"
 
 import type { RouterOutputs } from "@builderai/api"
+import type { ProjectTier } from "@builderai/config"
 import { PROJECT_TIER } from "@builderai/config"
-import type { ProjectTier } from "@builderai/config/types"
 import {
   Card,
   CardDescription,
@@ -49,9 +49,7 @@ export function ProjectCard(props: {
   )
 }
 
-ProjectCard.Skeleton = function ProjectCardSkeleton(props: {
-  pulse?: boolean
-}) {
+export function ProjectCardSkeleton(props: { pulse?: boolean }) {
   const { pulse = true } = props
   return (
     <Card>

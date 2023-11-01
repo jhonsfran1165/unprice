@@ -1,5 +1,4 @@
 import { Suspense } from "react"
-import dynamic from "next/dynamic"
 import Link from "next/link"
 import { formatRelative } from "date-fns"
 
@@ -21,30 +20,22 @@ import {
 } from "@builderai/ui/icons"
 import { cn } from "@builderai/ui/utils"
 
-import { userCanAccess } from "~/lib/project-guard"
 import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
+import { Overview } from "../_components/overview"
 
 export const runtime = "edge"
-
-const Overview = dynamic(
-  () =>
-    import(
-      "~/app/(root)/(dashboard)/[workspaceSlug]/[projectSlug]/_components/overview"
-    ),
-  { ssr: false }
-)
 
 export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
 }) {
   const { projectSlug, workspaceSlug } = props.params
 
-  await userCanAccess({
-    projectSlug,
-    workspaceSlug,
-  })
+  // await userCanAccess({
+  //   projectSlug,
+  //   workspaceSlug,
+  // })
 
   return (
     <>
@@ -104,7 +95,9 @@ export default async function DashboardPage(props: {
             <CardTitle>Overview</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <Overview />
+            <Suspense>
+              <Overview />
+            </Suspense>
           </CardContent>
         </Card>
 

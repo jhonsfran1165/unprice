@@ -2,7 +2,6 @@ import Link from "next/link"
 
 import type { DashboardRoute } from "@builderai/config/types"
 import { createIcon } from "@builderai/config/types"
-import { Skeleton } from "@builderai/ui/skeleton"
 import { cn } from "@builderai/ui/utils"
 
 export const Tab = ({
@@ -45,18 +44,4 @@ export const Tab = ({
   )
 }
 
-Tab.Skeleton = function TabsNavSkeleton() {
-  return (
-    <div className={"border-b-2 border-transparent p-1"}>
-      <div className="button-ghost rounded-md px-3 py-2 transition-all duration-200">
-        <p
-          className={cn(
-            "whitespace-nowrap text-sm text-background-text hover:text-background-textContrast"
-          )}
-        >
-          <Skeleton className="h-[18px] w-[70px]" />
-        </p>
-      </div>
-    </div>
-  )
-}
+export default Tab

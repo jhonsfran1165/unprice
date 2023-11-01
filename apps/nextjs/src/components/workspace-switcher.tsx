@@ -26,7 +26,7 @@ const NewOrganizationDialog = dynamic(() => import("./new-workspace"), {
   ssr: false,
 })
 
-export default function WorkspaceSwitcher() {
+export function WorkspaceSwitcher() {
   const router = useRouter()
 
   const [switcherOpen, setSwitcherOpen] = useState(false)
@@ -177,7 +177,9 @@ export default function WorkspaceSwitcher() {
         </PopoverContent>
       </Popover>
 
-      <NewOrganizationDialog closeDialog={() => setNewOrgDialogOpen(false)} />
+      {switcherOpen && (
+        <NewOrganizationDialog closeDialog={() => setNewOrgDialogOpen(false)} />
+      )}
     </Dialog>
   )
 }

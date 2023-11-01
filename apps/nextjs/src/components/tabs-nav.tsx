@@ -1,11 +1,9 @@
-"use client"
-
 import dynamic from "next/dynamic"
 
 import type { DashboardRoute } from "@builderai/config/types"
 import { cn } from "@builderai/ui/utils"
 
-const Tabs = dynamic(() => import("./tabs"), {
+const TabsShell = dynamic(() => import("./tabs-shell"), {
   ssr: false,
 })
 
@@ -21,7 +19,10 @@ export default function TabsNav(props: {
         props.className
       )}
     >
-      <Tabs moduleTabs={props.moduleTabs} activeRoute={props.activeRoute} />
+      <TabsShell
+        moduleTabs={props.moduleTabs}
+        activeRoute={props.activeRoute}
+      />
     </div>
   )
 }

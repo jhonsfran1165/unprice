@@ -21,7 +21,7 @@ import { cn } from "@builderai/ui/utils"
 import { apiRQ } from "~/trpc/client"
 import { ProjectSwitcherSkeleton } from "./project-switcher-skeleton"
 
-export default function ProjectSwitcher(props: {
+export function ProjectSwitcher(props: {
   activeProjects: RouterOutputs["project"]["listByActiveWorkspace"]
 }) {
   const router = useRouter()
