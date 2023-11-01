@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 
 import type { RouterOutputs } from "@builderai/api"
@@ -37,7 +37,7 @@ export function ProjectSwitcher(props: {
   )
   const { organization } = useOrganization()
 
-  const [switcherOpen, setSwitcherOpen] = React.useState(false)
+  const [switcherOpen, setSwitcherOpen] = useState(false)
 
   const params = useParams()
 
