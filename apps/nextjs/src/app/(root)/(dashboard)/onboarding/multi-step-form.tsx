@@ -1,12 +1,13 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { useSearchParams } from "next/navigation"
 import { AnimatePresence } from "framer-motion"
 
-import { CreateApiKey } from "./create-api-key"
-import { CreateProject } from "./create-project"
-import { Done } from "./done"
-import Intro from "./intro"
+const Intro = dynamic(() => import("./intro"))
+const Done = dynamic(() => import("./done"))
+const CreateProject = dynamic(() => import("./create-project"))
+const CreateApiKey = dynamic(() => import("./create-api-key"))
 
 export function Onboarding(props: { workspaceSlug: string }) {
   const search = useSearchParams()

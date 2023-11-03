@@ -2,7 +2,7 @@ import { DashboardShell } from "~/components/dashboard-shell"
 
 export default function DomainsLayout(props: {
   children: React.ReactNode
-  params: { workspaceSlug: string }
+  params: { workspaceSlug: string; projectSlug: string }
 }) {
   return (
     <DashboardShell

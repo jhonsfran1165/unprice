@@ -22,7 +22,7 @@ import { useToast } from "@builderai/ui/use-toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export const CreateProjectForm = (props: {
+const CreateProjectForm = (props: {
   workspaceSlug: string
   // defaults to redirecting to the project page
   onSuccess?: (project: CreateProject & { slug: string }) => void
@@ -132,3 +132,5 @@ export const CreateProjectForm = (props: {
     </Form>
   )
 }
+
+export default CreateProjectForm

@@ -14,7 +14,7 @@ export default function MenuSubTabs({
   submodule: string
   activeTab: DashboardRoute
 }) {
-  const { baseUrl, restSegmentsPerRoute } = useGetPaths()
+  const { baseUrl, restSegmentsPerRoute, pathname } = useGetPaths()
 
   const restSegments = restSegmentsPerRoute(submodule)
   const activeSlug = restSegments[0]!
@@ -34,10 +34,12 @@ export default function MenuSubTabs({
             submodule === index
               ? `${baseUrlSubTab}`
               : `${baseUrlSubTab}/${index}`
+          const active = href === pathname
 
           return (
             <SubTab
               key={index}
+              active={active}
               className="rounded-t-lg border border-transparent px-6 py-3 text-base font-semibold"
               classNameActive="border-background-border border-b-background-base border-b-2 text-background-text"
               href={href}

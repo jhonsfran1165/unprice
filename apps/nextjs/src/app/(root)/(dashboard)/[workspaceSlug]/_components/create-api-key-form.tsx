@@ -25,7 +25,7 @@ import { useToast } from "@builderai/ui/use-toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export function CreateApiKeyForm(props: {
+export default function CreateApiKeyForm(props: {
   projectSlug: string
   onSuccess?: (key: string) => void
 }) {

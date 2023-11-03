@@ -3,7 +3,25 @@ import Link from "next/link"
 
 import { siteConfig } from "@builderai/config"
 import { Button } from "@builderai/ui/button"
-import { Github, Twitter } from "@builderai/ui/icons"
+import {
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@builderai/ui/command"
+import {
+  Calculator,
+  Calendar,
+  CreditCard,
+  Github,
+  Settings,
+  Smile,
+  Twitter,
+  User,
+} from "@builderai/ui/icons"
 import { Skeleton } from "@builderai/ui/skeleton"
 import { cn } from "@builderai/ui/utils"
 
@@ -33,7 +51,44 @@ export default function Footer(props: { className?: string }) {
 
       <div className="flex flex-1 items-center justify-end">
         <nav className="flex items-center">
-          <Search />
+          <Search>
+            <CommandInput placeholder="Type a command or search..." />
+            <CommandList>
+              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandGroup heading="Suggestions">
+                <CommandItem>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  <span>Calendar</span>
+                </CommandItem>
+                <CommandItem>
+                  <Smile className="mr-2 h-4 w-4" />
+                  <span>Search Emoji</span>
+                </CommandItem>
+                <CommandItem>
+                  <Calculator className="mr-2 h-4 w-4" />
+                  <span>Calculator</span>
+                </CommandItem>
+              </CommandGroup>
+              <CommandSeparator />
+              <CommandGroup heading="Settings">
+                <CommandItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                  <CommandShortcut>⌘P</CommandShortcut>
+                </CommandItem>
+                <CommandItem>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  <span>Billing</span>
+                  <CommandShortcut>⌘B</CommandShortcut>
+                </CommandItem>
+                <CommandItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                  <CommandShortcut>⌘S</CommandShortcut>
+                </CommandItem>
+              </CommandGroup>
+            </CommandList>
+          </Search>
 
           <Link
             href={siteConfig.links.twitter}

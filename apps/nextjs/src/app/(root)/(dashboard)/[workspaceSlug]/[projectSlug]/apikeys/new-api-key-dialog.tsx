@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 
 import { Button } from "@builderai/ui/button"
 import {
@@ -13,7 +14,10 @@ import {
 } from "@builderai/ui/dialog"
 
 import { apiRQ } from "~/trpc/client"
-import { CreateApiKeyForm } from "../../_components/create-api-key-form"
+
+const CreateApiKeyForm = dynamic(
+  () => import("../../_components/create-api-key-form")
+)
 
 export default function NewApiKeyDialog(props: { projectSlug: string }) {
   const [dialogOpen, setDialogOpen] = useState(false)

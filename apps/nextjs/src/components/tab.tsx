@@ -1,18 +1,21 @@
+"use client"
+
 import Link from "next/link"
 
 import type { DashboardRoute } from "@builderai/config/types"
 import { createIcon } from "@builderai/config/types"
 import { cn } from "@builderai/ui/utils"
 
+import { useGetPaths } from "~/lib/use-get-path"
+
 export const Tab = ({
   route,
-  baseUrl,
   activeRoute,
 }: {
   route: DashboardRoute
   activeRoute: DashboardRoute | null
-  baseUrl: string
 }) => {
+  const { baseUrl } = useGetPaths()
   const tabPath = `${baseUrl}` + route.href
   const active = activeRoute ? activeRoute.href === route.href : false
   const Icon = route?.icon && createIcon(route?.icon)

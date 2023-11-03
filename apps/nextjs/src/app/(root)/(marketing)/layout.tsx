@@ -3,9 +3,10 @@ import { Suspense } from "react"
 import Link from "next/link"
 
 import { auth } from "@builderai/auth"
-import { siteConfig } from "@builderai/config"
-import { buttonVariants } from "@builderai/ui/button"
+import { navItems, siteConfig } from "@builderai/config"
+import { Button, buttonVariants } from "@builderai/ui/button"
 import { ChevronRight, Logo } from "@builderai/ui/icons"
+import { ScrollArea } from "@builderai/ui/scroll-area"
 
 import Footer from "~/components/footer"
 import { MainNav } from "~/components/main-nav"
@@ -24,7 +25,34 @@ export default function MarketingLayout(props: { children: ReactNode }) {
             </span>
           </div>
           <Suspense>
-            <MobileDropdown />
+            {/* TODO: fix this -> pass as much props as possible to MobileDropdown */}
+            <MobileDropdown
+              mobileButton={
+                <Button
+                  variant="ghost"
+                  className="mr-2 px-0 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+                >
+                  <Logo className="mr-2 h-6 w-6" />
+                  <span className="text-lg font-bold tracking-tight">
+                    {siteConfig.name}
+                  </span>
+                </Button>
+              }
+              navTabs={
+                <ScrollArea className="py-8">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      // className="mt-2 flex items-center text-lg font-semibold sm:text-sm"
+                      className="flex py-1 text-base font-medium text-muted-foreground transition-colors hover:text-primary"
+                    >
+                      {item.title}
+                    </Link>
+                  ))}
+                </ScrollArea>
+              }
+            />
           </Suspense>
           <MainNav />
           <div className="ml-auto flex items-center space-x-4">

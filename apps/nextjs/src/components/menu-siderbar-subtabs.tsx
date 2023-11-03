@@ -10,7 +10,6 @@ import { TabSkeleton } from "~/components/tab-skeleton"
 import { useGetPaths } from "~/lib/use-get-path"
 
 const SubTab = dynamic(() => import("~/components/subtab"), {
-  ssr: false,
   loading: () => <TabSkeleton />,
 })
 
@@ -21,7 +20,7 @@ export default function SidebarMenuSubTabs({
   submodule: string
   sideBarRoutes: SidebarRoutes
 }) {
-  const { baseUrl, restSegmentsPerRoute } = useGetPaths()
+  const { baseUrl, restSegmentsPerRoute, pathname } = useGetPaths()
 
   // give a path prefix calculate sub tab
   const restSegments = restSegmentsPerRoute(submodule)
@@ -46,10 +45,13 @@ export default function SidebarMenuSubTabs({
               ? `${baseUrlSubTab}`
               : `${baseUrlSubTab}/${index}`
 
+          const active = href === pathname
+
           return (
             <SubTab
               key={index}
               href={href}
+              active={active}
               className="rounded-sm"
               classNameActive="bg-background text-background-text shadow-md border"
               icon={Icon && <Icon className="mr-2 h-4 w-4" />}

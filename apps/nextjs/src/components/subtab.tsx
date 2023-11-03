@@ -1,7 +1,4 @@
-"use client"
-
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 
 import { cn } from "@builderai/ui/utils"
 
@@ -11,16 +8,15 @@ export default function SubTab({
   title,
   className,
   classNameActive,
+  active,
 }: {
   title: string
   href: string
   className?: string
+  active: boolean
   classNameActive?: string
   icon?: React.ReactNode
 }) {
-  const pathname = usePathname()
-  const active = href === pathname
-
   return (
     <Link
       href={`${href}`}

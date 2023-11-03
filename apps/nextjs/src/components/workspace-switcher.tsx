@@ -90,7 +90,7 @@ export function WorkspaceSwitcher() {
 
                     await orgs.setActive?.({ organization: null })
                     setSwitcherOpen(false)
-                    router.push(`/${user.username}`)
+                    router.push(`/${user.username}/overview`)
                   }}
                   className={cn(
                     "cursor-pointer text-sm font-semibold",
@@ -125,7 +125,7 @@ export function WorkspaceSwitcher() {
                     onSelect={async () => {
                       await orgs.setActive({ organization: org })
                       setSwitcherOpen(false)
-                      router.push(`/${org.slug}`)
+                      router.push(`/${org.slug}/overview`)
                     }}
                     className={cn(
                       "cursor-pointer text-sm font-semibold",

@@ -65,6 +65,7 @@
   "prettier": "@builderai/prettier-config",
   "exports": {
     ".": "./src/index.ts",
+    "./loading-animation": "./src/loading-animation.tsx",
     "./utils": "./src/utils/index.ts",
     "./skeleton": "./src/skeleton.tsx",
     "./avatar": "./src/avatar.tsx",

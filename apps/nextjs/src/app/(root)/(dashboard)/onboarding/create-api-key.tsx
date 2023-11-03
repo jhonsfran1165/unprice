@@ -1,11 +1,14 @@
 import { useEffect } from "react"
+import dynamic from "next/dynamic"
 import { useRouter, useSearchParams } from "next/navigation"
 import { domAnimation, LazyMotion, m } from "framer-motion"
 import { Balancer } from "react-wrap-balancer"
 
-import { CreateApiKeyForm } from "../[workspaceSlug]/_components/create-api-key-form"
+const CreateApiKeyForm = dynamic(
+  () => import("../[workspaceSlug]/_components/create-api-key-form")
+)
 
-export function CreateApiKey() {
+export default function CreateApiKey() {
   const router = useRouter()
   const projectSlug = useSearchParams().get("projectSlug")
 

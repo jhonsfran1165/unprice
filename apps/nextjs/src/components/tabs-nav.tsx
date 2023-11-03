@@ -1,16 +1,8 @@
-import dynamic from "next/dynamic"
-
 import type { DashboardRoute } from "@builderai/config/types"
+import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 import { cn } from "@builderai/ui/utils"
 
-import Tab from "~/components/tab"
-
-const TabsShell = dynamic(() => import("./tabs-shell"))
-
-// const Tab = dynamic(() => import("~/components/tab"), {
-//   ssr: false,
-//   loading: () => <TabSkeleton />,
-// })
+import Tab from "./tab"
 
 export default function TabsNav(props: {
   className?: string
@@ -24,16 +16,18 @@ export default function TabsNav(props: {
         props.className
       )}
     >
-      <TabsShell moduleTabs={props.moduleTabs} activeRoute={props.activeRoute}>
-        {props.moduleTabs.map((route, index) => (
-          <Tab
-            key={route.href + index}
-            route={route}
-            baseUrl={""}
-            activeRoute={props.activeRoute}
-          />
-        ))}
-      </TabsShell>
+      <ScrollArea className="-mb-1.5 h-12 max-w-[600px] lg:max-w-none">
+        <nav className="flex w-auto items-center gap-2">
+          {props.moduleTabs.map((route, index) => (
+            <Tab
+              key={route.href + index}
+              route={route}
+              activeRoute={props.activeRoute}
+            />
+          ))}
+        </nav>
+        <ScrollBar orientation="horizontal" className="invisible" />
+      </ScrollArea>
     </div>
   )
 }

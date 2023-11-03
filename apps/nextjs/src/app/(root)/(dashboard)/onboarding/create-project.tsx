@@ -1,12 +1,15 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { domAnimation, LazyMotion, m } from "framer-motion"
 import { Balancer } from "react-wrap-balancer"
 
-import { CreateProjectForm } from "../[workspaceSlug]/_components/create-project-form"
+const CreateProjectForm = dynamic(
+  () => import("../[workspaceSlug]/_components/create-project-form")
+)
 
-export function CreateProject(props: { workspaceSlug: string }) {
+export default function CreateProject(props: { workspaceSlug: string }) {
   const router = useRouter()
 
   return (

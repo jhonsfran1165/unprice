@@ -1,5 +1,6 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { AnimatePresence, domAnimation, LazyMotion, m } from "framer-motion"
 
 import type { DashboardRoute } from "@builderai/config/types"
@@ -9,11 +10,16 @@ import { cn } from "@builderai/ui/utils"
 
 import { useGetPaths } from "~/lib/use-get-path"
 import useScroll from "~/lib/use-scroll"
+import { TabSkeleton } from "./tab-skeleton"
+
+const Tab = dynamic(() => import("~/components/tab"), {
+  ssr: false,
+  loading: () => <TabSkeleton />,
+})
 
 export default function TabsShell(props: {
   moduleTabs: DashboardRoute[]
   activeRoute: DashboardRoute | null
-  children: React.ReactNode
 }) {
   const { baseUrl } = useGetPaths()
   const scrolled = useScroll(60)
@@ -52,7 +58,14 @@ export default function TabsShell(props: {
             />
           )}
         </AnimatePresence>
-        {props.children}
+        {props.moduleTabs.map((route, index) => (
+          <Tab
+            key={baseUrl + route.href + index}
+            route={route}
+            baseUrl={baseUrl}
+            activeRoute={props.activeRoute}
+          />
+        ))}
       </nav>
       <ScrollBar orientation="horizontal" className="invisible" />
     </ScrollArea>

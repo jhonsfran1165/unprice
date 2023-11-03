@@ -3,7 +3,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { domAnimation, LazyMotion, m } from "framer-motion"
 
-export function Done(props: { workspaceSlug: string }) {
+export default function Done(props: { workspaceSlug: string }) {
   const router = useRouter()
   const search = useSearchParams()
   const step = search.get("step")
