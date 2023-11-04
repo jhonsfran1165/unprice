@@ -3,7 +3,7 @@ import dynamic from "next/dynamic"
 import { Button } from "@builderai/ui/button"
 
 import HeaderSubTab from "~/components/header-subtab"
-import { userCanAccess } from "~/lib/project-guard"
+import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 import ApiKeysSkeleton from "./data-table-skeleton"
 
@@ -20,7 +20,7 @@ const NewApiKeyDialog = dynamic(() => import("./new-api-key-dialog"), {
 export default async function ApiKeysPage(props: {
   params: { projectSlug: string; workspaceSlug: string }
 }) {
-  await userCanAccess({
+  await userCanAccessProject({
     projectSlug: props.params.projectSlug,
     workspaceSlug: props.params.workspaceSlug,
   })

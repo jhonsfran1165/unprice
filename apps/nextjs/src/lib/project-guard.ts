@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation"
 
-import { db, deactivateRLS } from "@builderai/db"
+import { db } from "@builderai/db"
 
-export async function userCanAccess({
+export async function userCanAccessProject({
   projectSlug,
   workspaceSlug,
 }: {
@@ -13,10 +13,13 @@ export async function userCanAccess({
     return
   }
 
-  // clean context db connection
-  await deactivateRLS(db)()
+  // TODO: review this process - clean context db connection
+  // await deactivateRLS(db)()
 
   const projectData = await db.query.project.findFirst({
+    columns: {
+      slug: true,
+    },
     with: {
       workspace: {
         columns: {
@@ -27,12 +30,8 @@ export async function userCanAccess({
     where: (project, { eq }) => eq(project.slug, projectSlug),
   })
 
-  if (!projectData) {
-    notFound()
-  }
-
   // don't have access
-  if (projectData.workspace.slug !== workspaceSlug) {
+  if (!projectData || projectData.workspace.slug !== workspaceSlug) {
     notFound()
   }
 }

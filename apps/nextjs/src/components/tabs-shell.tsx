@@ -62,7 +62,6 @@ export default function TabsShell(props: {
           <Tab
             key={baseUrl + route.href + index}
             route={route}
-            baseUrl={baseUrl}
             activeRoute={props.activeRoute}
           />
         ))}

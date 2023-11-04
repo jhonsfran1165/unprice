@@ -6,14 +6,6 @@ import type { RenameProject } from "@builderai/db/schema/project"
 import { renameProjectSchema } from "@builderai/db/schema/project"
 import { Button } from "@builderai/ui/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
-import {
   Form,
   FormControl,
   FormField,
@@ -25,18 +17,22 @@ import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { useZodForm } from "~/lib/zod-form"
+import type { RouterOutputs } from "~/trpc/client"
 import { apiRQ } from "~/trpc/client"
 
-export function RenameProject(props: { projectSlug: string }) {
+export function RenameProjectForm(props: {
+  project: RouterOutputs["project"]["bySlug"]
+}) {
   const { toast } = useToast()
   const apiUtils = apiRQ.useContext()
   const { data, refetch } = apiRQ.project.bySlug.useQuery(
     {
-      slug: props.projectSlug,
+      slug: props.project.slug,
     },
     {
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
+      initialData: props.project,
     }
   )
 
@@ -74,43 +70,32 @@ export function RenameProject(props: { projectSlug: string }) {
   })
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Project name</CardTitle>
-        <CardDescription>
-          Change the display name of your project
-        </CardDescription>
-      </CardHeader>
-
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit((data: RenameProject) => {
-            renameProject.mutate(data)
-          })}
-          className="space-y-2"
-        >
-          <CardContent>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="my-project" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="ml-auto">
-              Save
-            </Button>
-          </CardFooter>
-        </form>
-      </Form>
-    </Card>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit((data: RenameProject) => {
+          renameProject.mutate(data)
+        })}
+        className="space-y-2"
+      >
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="my-project" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex pt-4">
+          <Button type="submit" className="ml-auto">
+            Save
+          </Button>
+        </div>
+      </form>
+    </Form>
   )
 }

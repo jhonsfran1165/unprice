@@ -11,6 +11,7 @@ const loadingVariants = cva(
         // we might want to inverse both styles
         default: "bg-primary-foreground",
         inverse: "bg-primary",
+        destructive: "bg-destructive",
       },
       size: {
         default: "h-1 w-1",

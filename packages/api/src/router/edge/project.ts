@@ -271,6 +271,8 @@ export const projectRouter = createTRPCRouter({
     }),
 
   listByActiveWorkspace: protectedOrgProcedure.query(async (opts) => {
+    // wait 3 seconds to simulate a slow query
+    // await new Promise((resolve) => setTimeout(resolve, 3000))
     const projects = await opts.ctx.txRLS(({ txRLS }) =>
       txRLS.query.project.findMany({
         columns: {
@@ -300,6 +302,8 @@ export const projectRouter = createTRPCRouter({
   bySlug: protectedOrgProcedure
     .input(z.object({ slug: z.string() }))
     .query(async (opts) => {
+      // wait 3 seconds to simulate a slow query
+      await new Promise((resolve) => setTimeout(resolve, 3000))
       const { slug: projectSlug } = opts.input
 
       const { project: projectData } = await hasAccessToProject({

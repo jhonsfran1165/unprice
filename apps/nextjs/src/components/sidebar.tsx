@@ -4,8 +4,7 @@ import Link from "next/link"
 
 import type { SidebarRoutes } from "@builderai/config/types"
 // TODO: this is adding too much bundle size
-// import * as Icons from "@builderai/ui/icons"
-import { Settings } from "@builderai/ui/icons"
+import * as Icons from "@builderai/ui/icons"
 import { cn } from "@builderai/ui/utils"
 
 import { useGetPaths } from "~/lib/use-get-path"
@@ -32,8 +31,7 @@ export default function SidebarNav({
       {activeSideBarRoutes.map((item, index) => {
         const fullPath = baseUrl + item.href
         const active = item.href === `/${submodule}/${activeSideBarRouteSlug}`
-        // const Icon = Icons[item.icon] as React.ElementType
-        const Icon = Settings
+        const Icon = Icons[item.icon] as React.ElementType
 
         return (
           item.href && (

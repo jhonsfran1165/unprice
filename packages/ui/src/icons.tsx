@@ -15,6 +15,9 @@ import {
 
 export {
   Activity,
+  AppWindow,
+  BarChart2,
+  BarChartIcon,
   Calculator,
   Calendar,
   Check,
@@ -24,19 +27,23 @@ export {
   Component,
   Copy,
   CreditCard,
+  Database,
   DollarSign,
   Eye,
   EyeOff,
   Github,
   Globe,
+  Key,
   LayoutGrid,
   LogOut,
   Moon,
   PlusCircle,
+  Receipt,
   Settings,
   Smile,
   Twitter,
   User,
+  User2,
   Users,
 } from "lucide-react"
 

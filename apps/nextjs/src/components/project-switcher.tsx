@@ -82,7 +82,9 @@ export function ProjectSwitcher(props: {
                     key={project.id}
                     onSelect={() => {
                       setSwitcherOpen(false)
-                      router.push(`/${project.workspace.slug}/${project.slug}`)
+                      router.push(
+                        `/${project.workspace.slug}/${project.slug}/overview`
+                      )
                     }}
                     className={cn(
                       "cursor-pointer text-sm font-semibold",
@@ -110,7 +112,7 @@ export function ProjectSwitcher(props: {
               <CommandGroup>
                 <CommandItem
                   onSelect={() => {
-                    router.push(`/${organization?.slug}`)
+                    router.push(`/${organization?.slug}/overview`)
                     setSwitcherOpen(false)
                   }}
                   className="cursor-pointer"

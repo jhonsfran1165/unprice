@@ -22,6 +22,7 @@ export const Tab = ({
 
   return (
     <Link
+      scroll={false}
       className={cn("border-b-2 py-1", {
         "border-primary-solid": active,
         "border-transparent": !active,
