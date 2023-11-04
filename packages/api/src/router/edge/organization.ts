@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import * as z from "zod"
+import { z } from "zod"
 
 import { clerkClient } from "@builderai/auth"
 import { inviteOrgMemberSchema } from "@builderai/db/schema/workspace"

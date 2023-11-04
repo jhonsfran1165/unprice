@@ -21,7 +21,6 @@ export default async function DangerZonePage(props: {
 }) {
   await userCanAccessProject({
     projectSlug: props.params.projectSlug,
-    workspaceSlug: props.params.workspaceSlug,
   })
 
   return (

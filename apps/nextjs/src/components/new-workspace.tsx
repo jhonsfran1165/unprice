@@ -1,7 +1,7 @@
 "use client"
 
-import { use } from "react"
 import Link from "next/link"
+import { TRPCClientError } from "@trpc/client"
 import { toDecimal } from "dinero.js"
 
 import type { PurchaseOrg } from "@builderai/db/schema/workspace"
@@ -34,37 +34,43 @@ import { useToast } from "@builderai/ui/use-toast"
 
 import { currencySymbol } from "~/lib/currency"
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
+import { apiRQ } from "~/trpc/client"
 
 export default function NewOrganizationDialog(props: {
   closeDialog: () => void
 }) {
-  const plans = use(api.stripe.plans.query())
-
+  const { toast } = useToast()
+  const plans = apiRQ.stripe.plans.useQuery()
   const form = useZodForm({ schema: purchaseWorkspaceSchema })
 
-  const toaster = useToast()
-
-  async function handleCreateOrg(data: PurchaseOrg) {
-    const response = await api.stripe.purchaseOrg
-      .mutate(data)
-      .catch(() => ({ success: false as const }))
-
-    if (response.success) window.location.href = response.url
-    else
-      toaster.toast({
-        title: "Error",
-        description:
-          "There was an error setting up your organization. Please try again.",
-        variant: "destructive",
-      })
-  }
+  const stripePurchase = apiRQ.stripe.purchaseOrg.useMutation({
+    onSettled: (data) => {
+      if (data?.success) window.location.href = data.url
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        toast({
+          title: err.message,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description:
+            "There was an error setting up your organization. Please try again.",
+          variant: "destructive",
+        })
+      }
+    },
+  })
 
   return (
     <DialogContent>
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(handleCreateOrg)}
+          onSubmit={form.handleSubmit((data: PurchaseOrg) => {
+            stripePurchase.mutate(data)
+          })}
           className="space-y-4"
         >
           <DialogHeader>
@@ -112,7 +118,7 @@ export default function NewOrganizationDialog(props: {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {plans.map((plan) => (
+                    {plans?.data?.map((plan) => (
                       <SelectItem key={plan.priceId} value={plan.priceId}>
                         <span className="font-medium">{plan.name}</span> -{" "}
                         <span className="text-muted-foreground">

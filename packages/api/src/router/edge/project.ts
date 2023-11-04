@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import * as z from "zod"
+import { z } from "zod"
 
 import { clerkClient } from "@builderai/auth"
 import { eq, sql } from "@builderai/db"
@@ -113,6 +113,23 @@ export const projectRouter = createTRPCRouter({
       await opts.ctx.txRLS(({ txRLS }) => {
         return txRLS.delete(project).where(eq(project.id, projectData.id))
       })
+    }),
+
+  canAccessProject: protectedOrgAdminProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async (opts) => {
+      const { slug: projectSlug } = opts.input
+
+      try {
+        const { project: projectData } = await hasAccessToProject({
+          projectSlug,
+          ctx: opts.ctx,
+        })
+
+        return { haveAccess: projectData.slug === projectSlug }
+      } catch (error) {
+        return { haveAccess: false }
+      }
     }),
 
   transferToPersonal: protectedOrgAdminProcedure
@@ -271,8 +288,6 @@ export const projectRouter = createTRPCRouter({
     }),
 
   listByActiveWorkspace: protectedOrgProcedure.query(async (opts) => {
-    // wait 3 seconds to simulate a slow query
-    await new Promise((resolve) => setTimeout(resolve, 10000))
     const projects = await opts.ctx.txRLS(({ txRLS }) =>
       txRLS.query.project.findMany({
         columns: {
@@ -302,8 +317,6 @@ export const projectRouter = createTRPCRouter({
   bySlug: protectedOrgProcedure
     .input(z.object({ slug: z.string() }))
     .query(async (opts) => {
-      // wait 3 seconds to simulate a slow query
-      await new Promise((resolve) => setTimeout(resolve, 3000))
       const { slug: projectSlug } = opts.input
 
       const { project: projectData } = await hasAccessToProject({

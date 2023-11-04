@@ -25,8 +25,6 @@ import type { RouterOutputs } from "~/trpc/server"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
 
-// import { Overview } from "../_components/overview"
-
 export const runtime = "edge"
 
 export default async function DashboardPage(props: {
@@ -36,7 +34,6 @@ export default async function DashboardPage(props: {
 
   await userCanAccessProject({
     projectSlug,
-    workspaceSlug,
   })
 
   return (

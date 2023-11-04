@@ -6,7 +6,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core"
 import { createSelectSchema } from "drizzle-zod"
-import * as z from "zod"
+import { z } from "zod"
 
 import { MEMBERSHIP, PLANS } from "@builderai/config"
 

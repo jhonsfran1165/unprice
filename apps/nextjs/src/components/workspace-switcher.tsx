@@ -22,9 +22,7 @@ import { cn } from "@builderai/ui/utils"
 
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 
-const NewOrganizationDialog = dynamic(() => import("./new-workspace"), {
-  ssr: false,
-})
+const NewOrganizationDialog = dynamic(() => import("./new-workspace"))
 
 export function WorkspaceSwitcher() {
   const router = useRouter()

@@ -6,7 +6,7 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core"
-import * as z from "zod"
+import { z } from "zod"
 
 import { project } from "./project"
 import { commonColumns } from "./shared"

@@ -1,7 +1,7 @@
 import * as currencies from "@dinero.js/currencies"
 import { TRPCError } from "@trpc/server"
 import { dinero } from "dinero.js"
-import * as z from "zod"
+import { z } from "zod"
 
 import { currentUser } from "@builderai/auth"
 import { PLANS } from "@builderai/config"

@@ -18,7 +18,6 @@ export default async function ProjectSettingsPage(props: {
 }) {
   await userCanAccessProject({
     projectSlug: props.params.projectSlug,
-    workspaceSlug: props.params.workspaceSlug,
   })
 
   return (
