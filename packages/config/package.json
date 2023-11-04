@@ -21,7 +21,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@builderai/ui": "^0.1.0"
+    "@builderai/ui": "^0.1.0",
+    "@t3-oss/env-nextjs": "^0.6.0"
   },
   "devDependencies": {
     "@builderai/eslint-config": "0.2.0",

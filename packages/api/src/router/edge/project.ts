@@ -272,7 +272,7 @@ export const projectRouter = createTRPCRouter({
 
   listByActiveWorkspace: protectedOrgProcedure.query(async (opts) => {
     // wait 3 seconds to simulate a slow query
-    // await new Promise((resolve) => setTimeout(resolve, 3000))
+    await new Promise((resolve) => setTimeout(resolve, 10000))
     const projects = await opts.ctx.txRLS(({ txRLS }) =>
       txRLS.query.project.findMany({
         columns: {

@@ -1,17 +1,19 @@
 // import { LegendStateHandler } from "~/components/state-handler"
 
+import { headers } from "next/headers"
+
 import DotPattern from "~/components/dot-pattern"
 import Footer from "~/components/footer"
 import Header from "~/components/header"
 import { SyncActiveOrgFromUrl } from "~/components/sync-active-org-from-url"
-import { ReactQueryProvider } from "~/trpc/provider"
+import { TRPCReactProvider } from "~/trpc/provider"
 
 export default function DashboardLayout(props: {
   children: React.ReactNode
   params: { workspaceSlug: string; projectSlug: string }
 }) {
   return (
-    <ReactQueryProvider>
+    <TRPCReactProvider headers={headers()}>
       <div className="flex min-h-screen flex-col">
         <SyncActiveOrgFromUrl />
         <DotPattern width={40} height={40} x={-1} y={-1} />
@@ -21,6 +23,6 @@ export default function DashboardLayout(props: {
         </div>
         <Footer />
       </div>
-    </ReactQueryProvider>
+    </TRPCReactProvider>
   )
 }

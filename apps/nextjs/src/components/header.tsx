@@ -2,7 +2,6 @@ import { Suspense } from "react"
 
 import { Logo } from "~/components/logo"
 import { MainNav } from "~/components/main-nav"
-import { api } from "~/trpc/server"
 import { ProjectSwitcher } from "./project-switcher"
 import { ProjectSwitcherSkeleton } from "./project-switcher-skeleton"
 import UserNav from "./user-nav"
@@ -23,9 +22,7 @@ export default async function Header() {
             <WorkspaceSwitcher />
           </Suspense>
           <Suspense fallback={<ProjectSwitcherSkeleton />}>
-            <ProjectSwitcher
-              activeProjects={await api.project.listByActiveWorkspace.query()}
-            />
+            <ProjectSwitcher />
           </Suspense>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">

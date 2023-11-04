@@ -11,7 +11,6 @@ import { Label } from "@builderai/ui/label"
 import { Skeleton } from "@builderai/ui/skeleton"
 
 import { userCanAccessProject } from "~/lib/project-guard"
-import { api } from "~/trpc/server"
 import { RenameProjectForm } from "../_components/rename-project"
 
 export default async function ProjectSettingsPage(props: {
@@ -33,17 +32,16 @@ export default async function ProjectSettingsPage(props: {
       <CardContent>
         <Suspense
           fallback={
-            <>
-              <Label>asdasd</Label>
+            <div className="space-y-2">
+              <Label>Name</Label>
               <Skeleton className="h-[38px] w-full" />
-            </>
+              <div className="flex pt-4">
+                <Skeleton className="primary ml-auto h-[38px] w-[56px]" />
+              </div>
+            </div>
           }
         >
-          <RenameProjectForm
-            project={await api.project.bySlug.query({
-              slug: props.params.projectSlug,
-            })}
-          />
+          <RenameProjectForm projectSlug={props.params.projectSlug} />
         </Suspense>
       </CardContent>
     </Card>

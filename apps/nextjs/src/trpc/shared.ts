@@ -1,5 +1,5 @@
 import type { HTTPBatchLinkOptions, HTTPHeaders, TRPCLink } from "@trpc/client"
-import { experimental_nextHttpLink } from "@trpc/next/app-dir/links/nextHttp"
+import { unstable_httpBatchStreamLink } from "@trpc/client"
 
 import type { AppRouter } from "@builderai/api"
 
@@ -23,14 +23,12 @@ export const endingLink = (opts?: {
       headers: opts?.headers,
     } satisfies Partial<HTTPBatchLinkOptions>
 
-    const edgeLink = experimental_nextHttpLink({
+    const edgeLink = unstable_httpBatchStreamLink({
       ...sharedOpts,
-      batch: true,
       url: `${getBaseUrl()}/api/trpc/edge`,
     })(runtime)
-    const lambdaLink = experimental_nextHttpLink({
+    const lambdaLink = unstable_httpBatchStreamLink({
       ...sharedOpts,
-      batch: true,
       url: `${getBaseUrl()}/api/trpc/lambda`,
     })(runtime)
 

@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 
-import type { RouterOutputs } from "@builderai/api"
 import { useOrganization } from "@builderai/auth"
 import { Button } from "@builderai/ui/button"
 import {
@@ -21,20 +20,9 @@ import { cn } from "@builderai/ui/utils"
 import { apiRQ } from "~/trpc/client"
 import { ProjectSwitcherSkeleton } from "./project-switcher-skeleton"
 
-export function ProjectSwitcher(props: {
-  activeProjects: RouterOutputs["project"]["listByActiveWorkspace"]
-}) {
+export function ProjectSwitcher() {
   const router = useRouter()
-
-  const { data, isFetching } = apiRQ.project.listByActiveWorkspace.useQuery(
-    undefined,
-    {
-      initialData: props.activeProjects,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-    }
-  )
+  const [data] = apiRQ.project.listByActiveWorkspace.useSuspenseQuery()
   const { organization } = useOrganization()
 
   const [switcherOpen, setSwitcherOpen] = useState(false)
@@ -47,7 +35,7 @@ export function ProjectSwitcher(props: {
 
   if (!projectSlug) return null
 
-  if (!activeProject || isFetching) {
+  if (!activeProject) {
     return <ProjectSwitcherSkeleton />
   }
 

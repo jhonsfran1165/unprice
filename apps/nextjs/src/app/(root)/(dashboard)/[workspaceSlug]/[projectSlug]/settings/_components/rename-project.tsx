@@ -17,29 +17,19 @@ import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { useZodForm } from "~/lib/zod-form"
-import type { RouterOutputs } from "~/trpc/client"
 import { apiRQ } from "~/trpc/client"
 
-export function RenameProjectForm(props: {
-  project: RouterOutputs["project"]["bySlug"]
-}) {
+export function RenameProjectForm(props: { projectSlug: string }) {
   const { toast } = useToast()
-  const apiUtils = apiRQ.useContext()
-  const { data, refetch } = apiRQ.project.bySlug.useQuery(
-    {
-      slug: props.project.slug,
-    },
-    {
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-      initialData: props.project,
-    }
-  )
+  const apiUtils = apiRQ.useUtils()
+  const [data] = apiRQ.project.bySlug.useSuspenseQuery({
+    slug: props.projectSlug,
+  })
 
   const renameProject = apiRQ.project.rename.useMutation({
     onSettled: async () => {
-      await refetch()
       await apiUtils.project.listByActiveWorkspace.invalidate(undefined)
+      await apiUtils.project.bySlug.invalidate({ slug: props.projectSlug })
     },
     onSuccess: () => {
       toast({
