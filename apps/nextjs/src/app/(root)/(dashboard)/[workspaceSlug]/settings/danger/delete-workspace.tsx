@@ -25,15 +25,41 @@ import {
 import { Warning } from "@builderai/ui/icons"
 import { useToast } from "@builderai/ui/use-toast"
 
-import { api } from "~/trpc/client"
+import { apiRQ } from "~/trpc/client"
 
 export function DeleteWorkspace() {
   const toaster = useToast()
   const router = useRouter()
   const { orgId } = useAuth()
+  const apiUtils = apiRQ.useUtils()
 
   const title = "Delete workspace"
   const description = "This will delete the workspace and all of its data."
+
+  const deleteOrganization = apiRQ.organization.deleteOrganization.useMutation({
+    onSettled: async () => {
+      await apiUtils.project.listByActiveWorkspace.refetch()
+      router.push("/")
+    },
+    onSuccess: () => {
+      toaster.toast({
+        title: "Workspace deleted",
+      })
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        toaster.toast({
+          title: err.message,
+          variant: "destructive",
+        })
+      } else {
+        toaster.toast({
+          title: "The workspace could not be deleted",
+          variant: "destructive",
+        })
+      }
+    },
+  })
 
   return (
     <Card>
@@ -68,24 +94,8 @@ export function DeleteWorkspace() {
               </DialogClose>
               <Button
                 variant="destructive"
-                onClick={async () => {
-                  try {
-                    await api.organization.deleteOrganization.mutate()
-                    toaster.toast({ title: "Workspace deleted" })
-                    router.push(`/dashboard`)
-                  } catch (err) {
-                    if (err instanceof TRPCClientError) {
-                      toaster.toast({
-                        title: err.message,
-                        variant: "destructive",
-                      })
-                    } else {
-                      toaster.toast({
-                        title: "The workspace could not be deleted",
-                        variant: "destructive",
-                      })
-                    }
-                  }
+                onClick={() => {
+                  deleteOrganization.mutate()
                 }}
               >
                 {`I'm sure. Delete this workspace`}

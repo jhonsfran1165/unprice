@@ -45,7 +45,6 @@ import { useToast } from "@builderai/ui/use-toast"
 import { cn } from "@builderai/ui/utils"
 
 import { apiRQ } from "~/trpc/client"
-import { DataTableSkeleton } from "./data-table-skeleton"
 
 export type ApiKeyColumn = RouterOutputs["apikey"]["listApiKeys"][number]
 
@@ -192,7 +191,7 @@ const columns = (projectSlug: string) => [
     id: "actions",
     header: function ActionsHeader(t) {
       const toaster = useToast()
-      const apiUtils = apiRQ.useContext()
+      const apiUtils = apiRQ.useUtils()
       const { rows } = t.table.getSelectedRowModel()
       const projectId = t.table.getRowModel().rows[0]?.original.projectId
       const ids = rows.map((row) => row.original.id)
@@ -250,7 +249,7 @@ const columns = (projectSlug: string) => [
     },
     cell: function Actions(t) {
       const apiKey = t.row.original
-      const apiUtils = apiRQ.useContext()
+      const apiUtils = apiRQ.useUtils()
       const toaster = useToast()
       const projectId = t.table.getRowModel().rows[0]?.original.projectId
 
@@ -344,26 +343,15 @@ const columns = (projectSlug: string) => [
   }),
 ]
 
-export default function DataTable(props: {
-  data: ApiKeyColumn[]
-  projectSlug: string
-}) {
+export default function DataTable(props: { projectSlug: string }) {
   const [rowSelection, setRowSelection] = useState({})
   const [showRevoked, setShowRevoked] = useState(true)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
-  const { data, isFetching } = apiRQ.apikey.listApiKeys.useQuery(
-    {
-      projectSlug: props.projectSlug,
-    },
-    {
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-      initialData: props.data,
-    }
-  )
+  const [data] = apiRQ.apikey.listApiKeys.useSuspenseQuery({
+    projectSlug: props.projectSlug,
+  })
 
   const columnsData = useMemo(
     () => columns(props.projectSlug),
@@ -391,6 +379,8 @@ export default function DataTable(props: {
       columnVisibility,
     },
   })
+
+  // TODO: add pagination and abstract this logic table for being used in other places
 
   return (
     <div>
@@ -463,9 +453,7 @@ export default function DataTable(props: {
             ))}
           </TableHeader>
           <TableBody className="bg-background-base">
-            {isFetching ? (
-              <DataTableSkeleton />
-            ) : table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

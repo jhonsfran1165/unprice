@@ -1,6 +1,5 @@
 "use client"
 
-import { use } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
@@ -42,20 +41,18 @@ import {
 import { useToast } from "@builderai/ui/use-toast"
 
 import { useZodForm } from "~/lib/zod-form"
-import type { RouterOutputs } from "~/trpc/client"
-import { api } from "~/trpc/client"
+import { apiRQ } from "~/trpc/client"
 
-export function TransferProjectToOrganization(props: {
-  orgsPromise: Promise<RouterOutputs["auth"]["listOrganizations"]>
-}) {
+export function TransferProjectToOrganization() {
   const params = useParams()
 
+  const [orgs] = apiRQ.auth.listOrganizations.useSuspenseQuery()
   const workspaceSlug = params.workspaceSlug as string
   const projectSlug = params.projectSlug as string
-  const orgs = use(props.orgsPromise)
 
   const toaster = useToast()
   const router = useRouter()
+  const apiUtils = apiRQ.useUtils()
 
   const form = useZodForm({
     schema: transferToWorkspaceSchema,
@@ -64,15 +61,17 @@ export function TransferProjectToOrganization(props: {
     },
   })
 
-  async function onSubmit(data: TransferToWorkspace) {
-    try {
-      if (!projectSlug) throw new Error("No project ID provided")
-
-      await api.project.transferToWorkspace.mutate(data)
-      toaster.toast({ title: "Project transferred" })
-      router.refresh()
+  const transferToWorkspace = apiRQ.project.transferToWorkspace.useMutation({
+    onSettled: async () => {
+      await apiUtils.project.listByActiveWorkspace.refetch()
       router.push(`/${workspaceSlug}`)
-    } catch (err) {
+    },
+    onSuccess: () => {
+      toaster.toast({
+        title: "Project transferred",
+      })
+    },
+    onError: (err) => {
       if (err instanceof TRPCClientError) {
         toaster.toast({
           title: err.message,
@@ -84,7 +83,12 @@ export function TransferProjectToOrganization(props: {
           variant: "destructive",
         })
       }
-    }
+    },
+  })
+
+  async function onSubmit(data: TransferToWorkspace) {
+    if (!projectSlug) throw new Error("No project ID provided")
+    transferToWorkspace.mutate(data)
   }
 
   const title = "Transfer to Organization"

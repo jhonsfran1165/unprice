@@ -11,7 +11,6 @@ import {
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
 
 import { userCanAccessProject } from "~/lib/project-guard"
-import { api } from "~/trpc/server"
 import { DeleteProject } from "./delete-project"
 import { TransferProjectToOrganization } from "./transfer-to-organization"
 import { TransferProjectToPersonal } from "./transfer-to-personal"
@@ -49,9 +48,7 @@ export default async function DangerZonePage(props: {
           </Card>
         }
       >
-        <TransferProjectToOrganization
-          orgsPromise={api.auth.listOrganizations.query()}
-        />
+        <TransferProjectToOrganization />
       </Suspense>
     </>
   )

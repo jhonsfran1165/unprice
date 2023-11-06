@@ -118,8 +118,11 @@ export default function NewOrganizationDialog(props: {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {plans?.data?.map((plan) => (
-                      <SelectItem key={plan.priceId} value={plan.priceId}>
+                    {plans?.data?.map((plan, index) => (
+                      <SelectItem
+                        key={plan.priceId + index}
+                        value={plan.priceId}
+                      >
                         <span className="font-medium">{plan.name}</span> -{" "}
                         <span className="text-muted-foreground">
                           {toDecimal(

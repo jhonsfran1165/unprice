@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 
@@ -53,6 +53,8 @@ export function WorkspaceSwitcher() {
         : "",
     image: activeOrg.imageUrl,
   }
+
+  console.log(switcherOpen)
 
   return (
     <Dialog open={newOrgDialogOpen} onOpenChange={setNewOrgDialogOpen}>
@@ -175,9 +177,9 @@ export function WorkspaceSwitcher() {
         </PopoverContent>
       </Popover>
 
-      {switcherOpen && (
+      <Suspense>
         <NewOrganizationDialog closeDialog={() => setNewOrgDialogOpen(false)} />
-      )}
+      </Suspense>
     </Dialog>
   )
 }

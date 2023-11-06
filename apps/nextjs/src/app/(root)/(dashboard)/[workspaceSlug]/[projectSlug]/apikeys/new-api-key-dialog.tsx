@@ -21,7 +21,7 @@ const CreateApiKeyForm = dynamic(
 
 export default function NewApiKeyDialog(props: { projectSlug: string }) {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const apiUtils = apiRQ.useContext()
+  const apiUtils = apiRQ.useUtils()
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

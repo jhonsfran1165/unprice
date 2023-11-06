@@ -1,16 +1,12 @@
+import { Suspense } from "react"
 import dynamic from "next/dynamic"
 
 import { Button } from "@builderai/ui/button"
 
 import HeaderSubTab from "~/components/header-subtab"
 import { userCanAccessProject } from "~/lib/project-guard"
-import { api } from "~/trpc/server"
+import DataTable from "./data-table"
 import ApiKeysSkeleton from "./data-table-skeleton"
-
-const DataTable = dynamic(() => import("./data-table"), {
-  ssr: false,
-  loading: ApiKeysSkeleton,
-})
 
 const NewApiKeyDialog = dynamic(() => import("./new-api-key-dialog"), {
   ssr: false,
@@ -22,12 +18,6 @@ export default async function ApiKeysPage(props: {
 }) {
   await userCanAccessProject({
     projectSlug: props.params.projectSlug,
-    workspaceSlug: props.params.workspaceSlug,
-  })
-
-  // TODO: handling error
-  const apiKeys = await api.apikey.listApiKeys.query({
-    projectSlug: props.params.projectSlug,
   })
 
   return (
@@ -37,8 +27,9 @@ export default async function ApiKeysPage(props: {
         description="All the apis of the system"
         action={<NewApiKeyDialog projectSlug={props.params.projectSlug} />}
       />
-
-      <DataTable data={apiKeys} projectSlug={props.params.projectSlug} />
+      <Suspense fallback={<ApiKeysSkeleton />}>
+        <DataTable projectSlug={props.params.projectSlug} />
+      </Suspense>
     </>
   )
 }

@@ -24,15 +24,40 @@ import {
 import { Warning } from "@builderai/ui/icons"
 import { useToast } from "@builderai/ui/use-toast"
 
-import { api } from "~/trpc/client"
+import { apiRQ } from "~/trpc/client"
 
 export function DeleteProject() {
   const params = useParams()
-
+  const apiUtils = apiRQ.useUtils()
   const workspaceSlug = params.workspaceSlug as string
   const projectSlug = params.projectSlug as string
   const toaster = useToast()
   const router = useRouter()
+
+  const deleteProject = apiRQ.project.delete.useMutation({
+    onSettled: async () => {
+      await apiUtils.project.bySlug.invalidate({ slug: projectSlug })
+      router.push(`/${workspaceSlug}/overview`)
+    },
+    onSuccess: () => {
+      toaster.toast({
+        title: "Project deleted",
+      })
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        toaster.toast({
+          title: err.message,
+          variant: "destructive",
+        })
+      } else {
+        toaster.toast({
+          title: "Project could not be deleted",
+          variant: "destructive",
+        })
+      }
+    },
+  })
 
   const title = "Delete project"
   const description = "This will delete the project and all of its data."
@@ -66,31 +91,12 @@ export function DeleteProject() {
               <Button
                 className="button-danger"
                 variant="destructive"
-                onClick={async () => {
-                  try {
-                    if (!projectSlug)
-                      throw new Error("No project Slug provided")
+                onClick={() => {
+                  if (!projectSlug) throw new Error("No project Slug provided")
 
-                    await api.project.delete.mutate({
-                      slug: projectSlug,
-                    })
-                    toaster.toast({ title: "Project deleted" })
-
-                    router.refresh()
-                    router.push(`/${workspaceSlug}`)
-                  } catch (err) {
-                    if (err instanceof TRPCClientError) {
-                      toaster.toast({
-                        title: err.message,
-                        variant: "destructive",
-                      })
-                    } else {
-                      toaster.toast({
-                        title: "Project could not be deleted",
-                        variant: "destructive",
-                      })
-                    }
-                  }
+                  deleteProject.mutate({
+                    slug: projectSlug,
+                  })
                 }}
               >
                 {`I'm sure. Delete this project`}
