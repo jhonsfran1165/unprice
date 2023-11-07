@@ -7,7 +7,7 @@ import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experime
 import { loggerLink } from "@trpc/client"
 import superjson from "superjson"
 
-import { apiRQ } from "./client"
+import { api } from "./client"
 import { endingLink, transformer } from "./shared"
 
 export function TRPCReactProvider(props: {
@@ -26,7 +26,7 @@ export function TRPCReactProvider(props: {
   )
 
   const [trpcClient] = useState(() =>
-    apiRQ.createClient({
+    api.createClient({
       transformer,
       links: [
         loggerLink({
@@ -46,13 +46,13 @@ export function TRPCReactProvider(props: {
   )
 
   return (
-    <apiRQ.Provider client={trpcClient} queryClient={queryClient}>
+    <api.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <ReactQueryStreamedHydration transformer={superjson}>
           {props.children}
         </ReactQueryStreamedHydration>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
-    </apiRQ.Provider>
+    </api.Provider>
   )
 }

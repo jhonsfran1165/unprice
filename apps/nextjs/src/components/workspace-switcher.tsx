@@ -54,8 +54,6 @@ export function WorkspaceSwitcher() {
     image: activeOrg.imageUrl,
   }
 
-  console.log(switcherOpen)
-
   return (
     <Dialog open={newOrgDialogOpen} onOpenChange={setNewOrgDialogOpen}>
       <Popover open={switcherOpen} onOpenChange={setSwitcherOpen}>

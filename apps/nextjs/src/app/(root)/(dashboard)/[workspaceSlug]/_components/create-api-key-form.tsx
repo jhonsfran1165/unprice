@@ -30,7 +30,7 @@ export default function CreateApiKeyForm(props: {
   onSuccess?: (key: string) => void
 }) {
   const toaster = useToast()
-
+  const apiUtils = api.useUtils()
   const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   const form = useZodForm({
@@ -38,18 +38,22 @@ export default function CreateApiKeyForm(props: {
     defaultValues: { projectSlug: props.projectSlug },
   })
 
-  async function onSubmit(data: CreateApiKey) {
-    try {
-      await api.apikey.createApiKey.mutate(data)
+  const createApkiKey = api.apikey.createApiKey.useMutation({
+    onSettled: async () => {
+      await apiUtils.apikey.listApiKeys.invalidate({
+        projectSlug: props.projectSlug,
+      })
+    },
+    onSuccess: (data) => {
+      toaster.toast({
+        title: "API Key Created",
+        description: `ApiKey ${data[0]?.name} created successfully.`,
+      })
 
       form.reset()
       props.onSuccess?.("")
-      toaster.toast({
-        title: "API Key Created",
-        description: `Project ${data.name} created successfully.`,
-      })
-    } catch (err) {
-      console.log(err)
+    },
+    onError: (err) => {
       if (err instanceof TRPCClientError) {
         toaster.toast({
           title: err.message,
@@ -63,12 +67,17 @@ export default function CreateApiKeyForm(props: {
             "An issue occurred while creating your key. Please try again.",
         })
       }
-    }
-  }
+    },
+  })
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit((data: CreateApiKey) =>
+          createApkiKey.mutate(data)
+        )}
+        className="space-y-4"
+      >
         <FormField
           control={form.control}
           name="name"

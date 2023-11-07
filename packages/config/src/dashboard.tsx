@@ -111,7 +111,7 @@ const ProjectRoutes: Record<
   ingestions: {
     titleTab: "ingestions",
     icon: "BarChartIcon",
-    href: "/ingestions",
+    href: "/ingestions/overview",
     disabled: true,
     sidebarMenu: {
       overview: {
@@ -133,7 +133,7 @@ const ProjectRoutes: Record<
   },
   settings: {
     titleTab: "Settings",
-    href: "/settings",
+    href: "/settings/overview",
     icon: "Settings",
     sidebarMenu: {
       overview: {

@@ -23,7 +23,7 @@ import {
 } from "@builderai/ui/dialog"
 import { useToast } from "@builderai/ui/use-toast"
 
-import { apiRQ } from "~/trpc/client"
+import { api } from "~/trpc/client"
 
 export function TransferProjectToPersonal() {
   const params = useParams()
@@ -32,32 +32,31 @@ export function TransferProjectToPersonal() {
   const projectSlug = params.projectSlug as string
 
   const toaster = useToast()
-  const apiUtils = apiRQ.useUtils()
+  const apiUtils = api.useUtils()
   const router = useRouter()
 
-  const transferProjectToPersonal =
-    apiRQ.project.transferToPersonal.useMutation({
-      onSettled: async () => {
-        await apiUtils.project.bySlug.invalidate({ slug: projectSlug })
-        router.push(`/${workspaceSlug}/overview`)
-      },
-      onSuccess: () => {
-        toaster.toast({ title: "Project transferred" })
-      },
-      onError: (err) => {
-        if (err instanceof TRPCClientError) {
-          toaster.toast({
-            title: err.message,
-            variant: "destructive",
-          })
-        } else {
-          toaster.toast({
-            title: "Project could not be transferred",
-            variant: "destructive",
-          })
-        }
-      },
-    })
+  const transferProjectToPersonal = api.project.transferToPersonal.useMutation({
+    onSettled: async () => {
+      await apiUtils.project.bySlug.invalidate({ slug: projectSlug })
+      router.push(`/${workspaceSlug}/overview`)
+    },
+    onSuccess: () => {
+      toaster.toast({ title: "Project transferred" })
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        toaster.toast({
+          title: err.message,
+          variant: "destructive",
+        })
+      } else {
+        toaster.toast({
+          title: "Project could not be transferred",
+          variant: "destructive",
+        })
+      }
+    },
+  })
 
   const title = "Transfer to Personal"
   const description = "Transfer this project to your personal workspace"

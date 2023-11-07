@@ -44,7 +44,7 @@ import {
 import { useToast } from "@builderai/ui/use-toast"
 import { cn } from "@builderai/ui/utils"
 
-import { apiRQ } from "~/trpc/client"
+import { api } from "~/trpc/client"
 
 export type ApiKeyColumn = RouterOutputs["apikey"]["listApiKeys"][number]
 
@@ -191,12 +191,12 @@ const columns = (projectSlug: string) => [
     id: "actions",
     header: function ActionsHeader(t) {
       const toaster = useToast()
-      const apiUtils = apiRQ.useUtils()
+      const apiUtils = api.useUtils()
       const { rows } = t.table.getSelectedRowModel()
       const projectId = t.table.getRowModel().rows[0]?.original.projectId
       const ids = rows.map((row) => row.original.id)
 
-      const revokeApiKeys = apiRQ.apikey.revokeApiKeys.useMutation({
+      const revokeApiKeys = api.apikey.revokeApiKeys.useMutation({
         onSettled: async () => {
           await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
         },
@@ -249,11 +249,11 @@ const columns = (projectSlug: string) => [
     },
     cell: function Actions(t) {
       const apiKey = t.row.original
-      const apiUtils = apiRQ.useUtils()
+      const apiUtils = api.useUtils()
       const toaster = useToast()
       const projectId = t.table.getRowModel().rows[0]?.original.projectId
 
-      const revokeApiKeys = apiRQ.apikey.revokeApiKeys.useMutation({
+      const revokeApiKeys = api.apikey.revokeApiKeys.useMutation({
         onSettled: async () => {
           await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
         },
@@ -278,7 +278,7 @@ const columns = (projectSlug: string) => [
         },
       })
 
-      const rollApiKey = apiRQ.apikey.rollApiKey.useMutation({
+      const rollApiKey = api.apikey.rollApiKey.useMutation({
         onSettled: async () => {
           await apiUtils.apikey.listApiKeys.refetch({ projectSlug })
         },
@@ -349,7 +349,7 @@ export default function DataTable(props: { projectSlug: string }) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
-  const [data] = apiRQ.apikey.listApiKeys.useSuspenseQuery({
+  const [data] = api.apikey.listApiKeys.useSuspenseQuery({
     projectSlug: props.projectSlug,
   })
 

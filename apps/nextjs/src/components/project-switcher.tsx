@@ -17,12 +17,12 @@ import { Check, ChevronsUpDown, LayoutGrid } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 import { cn } from "@builderai/ui/utils"
 
-import { apiRQ } from "~/trpc/client"
+import { api } from "~/trpc/client"
 import { ProjectSwitcherSkeleton } from "./project-switcher-skeleton"
 
 export function ProjectSwitcher() {
   const router = useRouter()
-  const [data] = apiRQ.project.listByActiveWorkspace.useSuspenseQuery()
+  const [data] = api.project.listByActiveWorkspace.useSuspenseQuery()
   const { organization } = useOrganization()
 
   const [switcherOpen, setSwitcherOpen] = useState(false)

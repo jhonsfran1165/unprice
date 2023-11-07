@@ -17,16 +17,16 @@ import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { useZodForm } from "~/lib/zod-form"
-import { apiRQ } from "~/trpc/client"
+import { api } from "~/trpc/client"
 
 export function RenameProjectForm(props: { projectSlug: string }) {
   const { toast } = useToast()
-  const apiUtils = apiRQ.useUtils()
-  const [data] = apiRQ.project.bySlug.useSuspenseQuery({
+  const apiUtils = api.useUtils()
+  const [data] = api.project.bySlug.useSuspenseQuery({
     slug: props.projectSlug,
   })
 
-  const renameProject = apiRQ.project.rename.useMutation({
+  const renameProject = api.project.rename.useMutation({
     onSettled: async () => {
       await apiUtils.project.listByActiveWorkspace.invalidate(undefined)
       await apiUtils.project.bySlug.invalidate({ slug: props.projectSlug })

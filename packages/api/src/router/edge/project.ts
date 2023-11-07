@@ -74,7 +74,7 @@ export const projectRouter = createTRPCRouter({
       // deactivate RLS
       await opts.ctx.deactivateRLS()
 
-      return { projectId, projectSlug }
+      return { projectId, projectSlug, name, url }
     }),
 
   rename: protectedOrgAdminProcedure

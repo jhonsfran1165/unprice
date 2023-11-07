@@ -4,7 +4,6 @@ import { notFound } from "next/navigation"
 import { auth, UserProfile } from "@builderai/auth"
 
 import { getActiveTenantId } from "~/lib/get-tenant"
-import { api } from "~/trpc/server"
 import { OrganizationMembers } from "../../_components/organization-members"
 import { LoadingCard } from "../../../[projectSlug]/_components/loading-card"
 
@@ -53,8 +52,6 @@ async function OrganizationSettingsPage() {
   //   organizationId: orgId,
   // })
 
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-
   return (
     // <DashboardShell
     //   title="Organization"
@@ -88,9 +85,7 @@ async function OrganizationSettingsPage() {
     //   </TabsContent>
     //   <TabsContent value="members" className="flex flex-col space-y-4">
     <Suspense fallback={<LoadingCard title="Members" description="" />}>
-      <OrganizationMembers
-        membersPromise={api.organization.listMembers.query()}
-      />
+      <OrganizationMembers />
     </Suspense>
     //   </TabsContent>
     // </Tabs>

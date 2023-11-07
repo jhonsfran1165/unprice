@@ -29,47 +29,52 @@ const CreateProjectForm = (props: {
 }) => {
   const router = useRouter()
   const toaster = useToast()
+  const apiUtils = api.useUtils()
   const [isPending, startTransition] = useTransition()
 
   const form = useZodForm({
     schema: createProjectSchema,
-    defaultValues: {
-      name: "sample project",
-      url: "https://example.com",
+  })
+
+  const createProject = api.project.create.useMutation({
+    onSettled: async () => {
+      await apiUtils.project.listByActiveWorkspace.invalidate()
+    },
+    onSuccess: (data) => {
+      if (props.onSuccess) {
+        props.onSuccess({
+          ...data,
+          slug: data.projectSlug,
+        })
+      } else {
+        router.push(`/${props.workspaceSlug}/${data.projectSlug}/overview`)
+      }
+
+      toaster.toast({
+        title: "Project created",
+        description: `Project ${data.name} created successfully.`,
+      })
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        toaster.toast({
+          title: err.message,
+          variant: "destructive",
+        })
+      } else {
+        toaster.toast({
+          title: "Error creating project",
+          variant: "destructive",
+          description:
+            "An issue occurred while creating your project. Please try again.",
+        })
+      }
     },
   })
 
   const onSubmit = (data: CreateProject) => {
     startTransition(async () => {
-      try {
-        const { projectSlug } = await api.project.create.mutate(data)
-        if (props.onSuccess) {
-          props.onSuccess({
-            ...data,
-            slug: projectSlug,
-          })
-        } else {
-          router.push(`/${props.workspaceSlug}/${projectSlug}/overview`)
-        }
-        toaster.toast({
-          title: "Project created",
-          description: `Project ${data.name} created successfully.`,
-        })
-      } catch (err) {
-        if (err instanceof TRPCClientError) {
-          toaster.toast({
-            title: err.message,
-            variant: "destructive",
-          })
-        } else {
-          toaster.toast({
-            title: "Error creating project",
-            variant: "destructive",
-            description:
-              "An issue occurred while creating your project. Please try again.",
-          })
-        }
-      }
+      createProject.mutate(data)
     })
   }
 
@@ -90,7 +95,7 @@ const CreateProjectForm = (props: {
             <FormItem>
               <FormLabel>Name *</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Acme Corp" />
+                <Input {...field} placeholder="builderai" />
               </FormControl>
               <FormDescription>
                 A name to identify your app in the dashboard.
@@ -107,7 +112,7 @@ const CreateProjectForm = (props: {
             <FormItem>
               <FormLabel>URL</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="https://acme-corp.com" />
+                <Input {...field} placeholder="https://builderai.com" />
               </FormControl>
               <FormDescription>The URL of your app</FormDescription>
               <FormMessage />
@@ -124,6 +129,7 @@ const CreateProjectForm = (props: {
             type="submit"
             className="w-full sm:w-auto"
           >
+            {/* // TODO: improve this adding a loading animation */}
             {/* {!isPending ? "Confirm" : <LoadingAnimation />} */}
             {!isPending ? "Create Project" : "Loading..."}
           </Button>

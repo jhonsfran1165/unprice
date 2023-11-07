@@ -1,11 +1,9 @@
 "use client"
 
-import { use } from "react"
 import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 import { formatRelative } from "date-fns"
 
-import type { RouterOutputs } from "@builderai/api"
 import { useAuth } from "@builderai/auth"
 import { MEMBERSHIP } from "@builderai/config"
 import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
@@ -38,14 +36,36 @@ function formatMemberRole(role: string) {
   return role
 }
 
-export function OrganizationMembers(props: {
-  membersPromise: Promise<RouterOutputs["organization"]["listMembers"]>
-}) {
-  const members = use(props.membersPromise)
+export function OrganizationMembers() {
+  const [members] = api.organization.listMembers.useSuspenseQuery()
+  const apiUtils = api.useUtils()
   const toaster = useToast()
   const router = useRouter()
-
   const { orgRole } = useAuth()
+
+  const deleteMember = api.organization.deleteMember.useMutation({
+    onSettled: async () => {
+      await apiUtils.organization.listMembers.invalidate()
+    },
+    onSuccess: (data) => {
+      toaster.toast({
+        title: `Deleted ${data.memberName} from the organization`,
+      })
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        toaster.toast({
+          title: err.message,
+          variant: "destructive",
+        })
+      } else {
+        toaster.toast({
+          title: "Failed to delete member",
+          variant: "destructive",
+        })
+      }
+    },
+  })
 
   // TODO: DataTable with actions
   return (
@@ -89,29 +109,10 @@ export function OrganizationMembers(props: {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
                       disabled={orgRole !== "admin"}
-                      onClick={async () => {
-                        try {
-                          const res =
-                            await api.organization.deleteMember.mutate({
-                              userId: member.id,
-                            })
-                          router.refresh()
-                          toaster.toast({
-                            title: `Deleted ${res.memberName} from the organization`,
-                          })
-                        } catch (err) {
-                          if (err instanceof TRPCClientError) {
-                            toaster.toast({
-                              title: err.message,
-                              variant: "destructive",
-                            })
-                          } else {
-                            toaster.toast({
-                              title: "Failed to delete member",
-                              variant: "destructive",
-                            })
-                          }
-                        }
+                      onClick={() => {
+                        deleteMember.mutate({
+                          userId: member.id,
+                        })
                       }}
                       className="text-destructive"
                     >

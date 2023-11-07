@@ -3,8 +3,7 @@ import { Balancer } from "react-wrap-balancer"
 import { api } from "~/trpc/server"
 import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
 
-// TODO: activate later. It is  hitting limits on vercel
-// export const runtime = "edge"
+export const runtime = "edge"
 
 export default async function Page(props: {
   params: { workspaceSlug: string }

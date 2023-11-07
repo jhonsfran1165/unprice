@@ -25,18 +25,18 @@ import {
 import { Warning } from "@builderai/ui/icons"
 import { useToast } from "@builderai/ui/use-toast"
 
-import { apiRQ } from "~/trpc/client"
+import { api } from "~/trpc/client"
 
 export function DeleteWorkspace() {
   const toaster = useToast()
   const router = useRouter()
   const { orgId } = useAuth()
-  const apiUtils = apiRQ.useUtils()
+  const apiUtils = api.useUtils()
 
   const title = "Delete workspace"
   const description = "This will delete the workspace and all of its data."
 
-  const deleteOrganization = apiRQ.organization.deleteOrganization.useMutation({
+  const deleteOrganization = api.organization.deleteOrganization.useMutation({
     onSettled: async () => {
       await apiUtils.project.listByActiveWorkspace.refetch()
       router.push("/")

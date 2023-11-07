@@ -35,14 +35,14 @@ export const InviteMemberForm = () => {
     schema: inviteOrgMemberSchema,
   })
 
-  async function onSubmit(data: InviteOrgMember) {
-    try {
-      const member = await api.organization.inviteMember.mutate(data)
+  const inviteMember = api.organization.inviteMember.useMutation({
+    onSuccess: (data) => {
       toaster.toast({
         title: "Member invited",
-        description: `An invitation to ${member.name} has been sent.`,
+        description: `An invitation to ${data.name} has been sent.`,
       })
-    } catch (err) {
+    },
+    onError: (err) => {
       if (err instanceof TRPCClientError) {
         toaster.toast({
           title: err.message,
@@ -52,15 +52,20 @@ export const InviteMemberForm = () => {
         toaster.toast({
           title: "Invitation failed",
           variant: "destructive",
-          description: `An issue occured while inviting ${data.email}. Make sure they have an account, and try again.`,
+          description: `An issue occurred while inviting the member. Make sure they have an account, and try again.`,
         })
       }
-    }
-  }
+    },
+  })
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit((data: InviteOrgMember) =>
+          inviteMember.mutate(data)
+        )}
+        className="space-y-4"
+      >
         <FormField
           control={form.control}
           name="email"

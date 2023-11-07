@@ -57,14 +57,17 @@ export const apiKeyRouter = createTRPCRouter({
       // Generate the key
       const apiKey = newIdEdge("apikey_key")
 
-      return await opts.ctx.db.insert(apikey).values({
-        id: apiKeyId,
-        name: opts.input.name,
-        key: apiKey,
-        expiresAt: opts.input.expiresAt,
-        projectId: project.id,
-        tenantId: opts.ctx.tenantId,
-      })
+      return await opts.ctx.db
+        .insert(apikey)
+        .values({
+          id: apiKeyId,
+          name: opts.input.name,
+          key: apiKey,
+          expiresAt: opts.input.expiresAt,
+          projectId: project.id,
+          tenantId: opts.ctx.tenantId,
+        })
+        .returning()
     }),
 
   revokeApiKeys: protectedOrgAdminProcedure

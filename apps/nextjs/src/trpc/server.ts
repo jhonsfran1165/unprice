@@ -15,8 +15,7 @@ export const api = experimental_createTRPCNextAppDirServer<AppRouter>({
       links: [
         loggerLink({
           enabled: (opts) =>
-            (process.env.NODE_ENV === "development" &&
-              process.env.DEBUG === "on") ||
+            process.env.NODE_ENV === "development" ||
             (opts.direction === "down" && opts.result instanceof Error),
         }),
         endingLink({
@@ -24,9 +23,7 @@ export const api = experimental_createTRPCNextAppDirServer<AppRouter>({
             const h = new Map(headers())
             h.delete("connection")
             h.delete("transfer-encoding")
-            h.set("x-trpc-source", "rsc-http")
-            // 'x-trpc-source': 'rsc-http',
-            // 'x-trpc-source': 'rsc-invoke',
+            h.set("x-trpc-source", "nextjs-rsc")
             return Object.fromEntries(h.entries())
           },
         }),

@@ -41,18 +41,18 @@ import {
 import { useToast } from "@builderai/ui/use-toast"
 
 import { useZodForm } from "~/lib/zod-form"
-import { apiRQ } from "~/trpc/client"
+import { api } from "~/trpc/client"
 
 export function TransferProjectToOrganization() {
   const params = useParams()
 
-  const [orgs] = apiRQ.auth.listOrganizations.useSuspenseQuery()
+  const [orgs] = api.auth.listOrganizations.useSuspenseQuery()
   const workspaceSlug = params.workspaceSlug as string
   const projectSlug = params.projectSlug as string
 
   const toaster = useToast()
   const router = useRouter()
-  const apiUtils = apiRQ.useUtils()
+  const apiUtils = api.useUtils()
 
   const form = useZodForm({
     schema: transferToWorkspaceSchema,
@@ -61,7 +61,7 @@ export function TransferProjectToOrganization() {
     },
   })
 
-  const transferToWorkspace = apiRQ.project.transferToWorkspace.useMutation({
+  const transferToWorkspace = api.project.transferToWorkspace.useMutation({
     onSettled: async () => {
       await apiUtils.project.listByActiveWorkspace.refetch()
       router.push(`/${workspaceSlug}`)

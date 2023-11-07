@@ -101,7 +101,6 @@ export function EmailSignIn() {
         redirectUrl: `${window.location.origin}/`,
       })
         .catch((error) => {
-          console.log(error)
           toast({
             variant: "destructive",
             title: "Error",

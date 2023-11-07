@@ -24,17 +24,17 @@ import {
 import { Warning } from "@builderai/ui/icons"
 import { useToast } from "@builderai/ui/use-toast"
 
-import { apiRQ } from "~/trpc/client"
+import { api } from "~/trpc/client"
 
 export function DeleteProject() {
   const params = useParams()
-  const apiUtils = apiRQ.useUtils()
+  const apiUtils = api.useUtils()
   const workspaceSlug = params.workspaceSlug as string
   const projectSlug = params.projectSlug as string
   const toaster = useToast()
   const router = useRouter()
 
-  const deleteProject = apiRQ.project.delete.useMutation({
+  const deleteProject = api.project.delete.useMutation({
     onSettled: async () => {
       await apiUtils.project.bySlug.invalidate({ slug: projectSlug })
       router.push(`/${workspaceSlug}/overview`)

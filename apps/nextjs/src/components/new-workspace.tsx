@@ -34,16 +34,16 @@ import { useToast } from "@builderai/ui/use-toast"
 
 import { currencySymbol } from "~/lib/currency"
 import { useZodForm } from "~/lib/zod-form"
-import { apiRQ } from "~/trpc/client"
+import { api } from "~/trpc/client"
 
 export default function NewOrganizationDialog(props: {
   closeDialog: () => void
 }) {
   const { toast } = useToast()
-  const plans = apiRQ.stripe.plans.useQuery()
+  const plans = api.stripe.plans.useQuery()
   const form = useZodForm({ schema: purchaseWorkspaceSchema })
 
-  const stripePurchase = apiRQ.stripe.purchaseOrg.useMutation({
+  const stripePurchase = api.stripe.purchaseOrg.useMutation({
     onSettled: (data) => {
       if (data?.success) window.location.href = data.url
     },

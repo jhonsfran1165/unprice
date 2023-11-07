@@ -5,11 +5,11 @@ import { TRPCClientError } from "@trpc/client"
 import { Button } from "@builderai/ui/button"
 import { useToast } from "@builderai/ui/use-toast"
 
-import { apiRQ } from "~/trpc/client"
+import { api } from "~/trpc/client"
 
 export function SubscriptionForm(props: { hasSubscription: boolean }) {
   const toaster = useToast()
-  const createSession = apiRQ.stripe.createSession.useMutation({
+  const createSession = api.stripe.createSession.useMutation({
     onSettled: (data) => {
       if (data?.url) window.location.href = data?.url
     },

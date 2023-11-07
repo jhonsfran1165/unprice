@@ -12,16 +12,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@builderai/ui/dialog"
+import { Spinner } from "@builderai/ui/icons"
 
-import { apiRQ } from "~/trpc/client"
+import { api } from "~/trpc/client"
 
 const CreateApiKeyForm = dynamic(
-  () => import("../../_components/create-api-key-form")
+  () => import("../../_components/create-api-key-form"),
+  {
+    loading: () => (
+      <div className="m-auto flex justify-center align-middle">
+        <Spinner className="m-6 h-16 w-16 animate-spin" />
+      </div>
+    ),
+  }
 )
 
 export default function NewApiKeyDialog(props: { projectSlug: string }) {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const apiUtils = apiRQ.useUtils()
+  const apiUtils = api.useUtils()
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
