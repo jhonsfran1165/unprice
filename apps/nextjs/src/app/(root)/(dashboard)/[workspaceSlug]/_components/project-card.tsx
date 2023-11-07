@@ -32,7 +32,10 @@ export function ProjectCard(props: {
   const { project } = props
   const projectTier = (project.tier as ProjectTier) ?? ("FREE" as ProjectTier)
   return (
-    <Link href={`/${props.workspaceSlug}/${project.slug}/overview`}>
+    <Link
+      prefetch={false}
+      href={`/${props.workspaceSlug}/${project.slug}/overview`}
+    >
       <Card className="overflow-hidden">
         <div className="h-32" style={project.styles} />
         <CardHeader>
