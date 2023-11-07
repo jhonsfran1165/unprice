@@ -8,7 +8,7 @@ import { loggerLink } from "@trpc/client"
 import superjson from "superjson"
 
 import { api } from "./client"
-import { endingLink, transformer } from "./shared"
+import { endingLinkClient, transformer } from "./shared"
 
 export function TRPCReactProvider(props: {
   children: React.ReactNode
@@ -34,7 +34,7 @@ export function TRPCReactProvider(props: {
             process.env.NODE_ENV === "development" ||
             (opts.direction === "down" && opts.result instanceof Error),
         }),
-        endingLink({
+        endingLinkClient({
           headers: () => {
             const headers = new Map(props.headers)
             headers.set("x-trpc-source", "nextjs-react")

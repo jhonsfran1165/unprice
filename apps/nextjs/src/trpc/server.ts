@@ -6,7 +6,7 @@ import { experimental_createTRPCNextAppDirServer } from "@trpc/next/app-dir/serv
 
 import type { AppRouter } from "@builderai/api"
 
-import { endingLink, transformer } from "./shared"
+import { endingLinkServer, transformer } from "./shared"
 
 export const api = experimental_createTRPCNextAppDirServer<AppRouter>({
   config() {
@@ -18,12 +18,12 @@ export const api = experimental_createTRPCNextAppDirServer<AppRouter>({
             process.env.NODE_ENV === "development" ||
             (opts.direction === "down" && opts.result instanceof Error),
         }),
-        endingLink({
+        endingLinkServer({
           headers: () => {
             const h = new Map(headers())
-            h.delete("connection")
-            h.delete("transfer-encoding")
-            h.set("x-trpc-source", "nextjs-rsc")
+            // h.delete("connection")
+            // h.delete("transfer-encoding")
+            h.set("x-trpc-source", "rsc-http")
             return Object.fromEntries(h.entries())
           },
         }),
