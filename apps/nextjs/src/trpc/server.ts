@@ -1,6 +1,6 @@
 "use server"
 
-import { cookies, headers } from "next/headers"
+import { headers } from "next/headers"
 import { loggerLink } from "@trpc/client"
 import { experimental_createTRPCNextAppDirServer } from "@trpc/next/app-dir/server"
 
@@ -21,7 +21,8 @@ export const api = experimental_createTRPCNextAppDirServer<AppRouter>({
         endingLinkServer({
           headers: () => {
             const h = new Map(headers())
-            h.set("cookie", cookies().toString())
+            h.delete("connection")
+            h.delete("transfer-encoding")
             h.set("x-trpc-source", "rsc-http")
             return Object.fromEntries(h.entries())
           },
