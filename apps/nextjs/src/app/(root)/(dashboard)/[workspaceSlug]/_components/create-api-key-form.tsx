@@ -35,7 +35,7 @@ export default function CreateApiKeyForm(props: {
 
   const form = useZodForm({
     schema: createApiKeySchema,
-    defaultValues: { projectSlug: props.projectSlug },
+    defaultValues: { projectSlug: props.projectSlug, name: "New Token" },
   })
 
   const createApkiKey = api.apikey.createApiKey.useMutation({

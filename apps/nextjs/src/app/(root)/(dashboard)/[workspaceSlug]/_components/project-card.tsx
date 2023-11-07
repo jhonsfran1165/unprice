@@ -11,8 +11,6 @@ import {
 } from "@builderai/ui/card"
 import { cn } from "@builderai/ui/utils"
 
-import { getRandomPatternStyle } from "~/lib/generate-pattern"
-
 function ProjectTierIndicator(props: { tier: ProjectTier }) {
   return (
     <span
@@ -36,7 +34,7 @@ export function ProjectCard(props: {
   return (
     <Link href={`/${props.workspaceSlug}/${project.slug}/overview`}>
       <Card className="overflow-hidden">
-        <div className="h-32" style={getRandomPatternStyle(project.id)} />
+        <div className="h-32" style={project.styles} />
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>{project.name}</span>

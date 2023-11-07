@@ -53,8 +53,6 @@ async function OrganizationSettingsPage() {
     organizationId: orgId,
   })
 
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-
   return (
     // <DashboardShell
     //   title="Organization"

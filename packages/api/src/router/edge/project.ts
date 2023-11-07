@@ -20,6 +20,7 @@ import {
   protectedProcedure,
 } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
+import { getRandomPatternStyle } from "../../utils/generate-pattern"
 
 const PROJECT_LIMITS = {
   FREE: 1,
@@ -309,7 +310,10 @@ export const projectRouter = createTRPCRouter({
 
     // FIXME: Don't hardcode the limit to PRO
     return {
-      projects,
+      projects: projects.map((project) => ({
+        ...project,
+        styles: getRandomPatternStyle(project.id),
+      })),
       limit: PROJECT_LIMITS.PRO,
       limitReached: projects.length >= PROJECT_LIMITS.PRO,
     }
