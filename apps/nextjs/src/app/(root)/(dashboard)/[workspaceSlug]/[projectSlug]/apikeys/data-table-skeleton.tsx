@@ -39,7 +39,7 @@ export const DataTableSkeleton = () =>
     </TableRow>
   ))
 
-export default function ApiKeysSkeleton() {
+export function ApiKeysSkeleton() {
   return (
     <div>
       <div className="flex items-center py-4">

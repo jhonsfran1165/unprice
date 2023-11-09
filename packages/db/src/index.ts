@@ -10,5 +10,13 @@ export * from "./rls"
 // activate connection caching
 neonConfig.fetchConnectionCache = true
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL! })
-export const db = drizzleNeon(pool, { schema })
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL!,
+  idleTimeoutMillis: 0,
+  connectionTimeoutMillis: 0,
+})
+
+export const db = drizzleNeon(pool, {
+  schema,
+  logger: !!process.env.DATABASE_LOGGER,
+})

@@ -343,7 +343,7 @@ const columns = (projectSlug: string) => [
   }),
 ]
 
-export default function DataTable(props: { projectSlug: string }) {
+export function DataTableApiKeys(props: { projectSlug: string }) {
   const [rowSelection, setRowSelection] = useState({})
   const [showRevoked, setShowRevoked] = useState(true)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])

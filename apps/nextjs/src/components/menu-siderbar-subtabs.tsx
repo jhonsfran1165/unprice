@@ -11,6 +11,7 @@ import { useGetPaths } from "~/lib/use-get-path"
 
 const SubTab = dynamic(() => import("~/components/subtab"), {
   loading: () => <TabSkeleton />,
+  ssr: false,
 })
 
 export default function SidebarMenuSubTabs({

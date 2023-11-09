@@ -6,6 +6,7 @@
     ".": "./src/index.ts",
     "./env": "./src/env.mjs",
     "./edge": "./src/edge.ts",
+    "./root": "./src/root.ts",
     "./lambda": "./src/lambda.ts",
     "./transformer": "./src/transformer.ts"
   },
@@ -30,8 +31,8 @@
     "@builderai/stripe": "^0.1.0",
     "@dinero.js/currencies": "2.0.0-alpha.14",
     "@t3-oss/env-nextjs": "^0.6.0",
-    "@trpc/client": "11.0.0-alpha-next-2023-11-03-11-28-35.97",
-    "@trpc/server": "11.0.0-alpha-next-2023-11-03-11-28-35.97",
+    "@trpc/client": "next",
+    "@trpc/server": "next",
     "dinero.js": "2.0.0-alpha.14",
     "superjson": "1.13.1",
     "undici": "^5.24.0",

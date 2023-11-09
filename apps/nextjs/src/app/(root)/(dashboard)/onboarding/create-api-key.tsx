@@ -5,7 +5,10 @@ import { domAnimation, LazyMotion, m } from "framer-motion"
 import { Balancer } from "react-wrap-balancer"
 
 const CreateApiKeyForm = dynamic(
-  () => import("../[workspaceSlug]/_components/create-api-key-form")
+  () => import("../[workspaceSlug]/_components/create-api-key-form"),
+  {
+    ssr: false,
+  }
 )
 
 export default function CreateApiKey() {

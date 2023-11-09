@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@builderai/db": "^0.1.0",
-    "@clerk/nextjs": "^4.23.2",
+    "@clerk/nextjs": "^4.26.2",
     "encoding": "^0.1.13",
     "svix": "^1.11.0"
   },

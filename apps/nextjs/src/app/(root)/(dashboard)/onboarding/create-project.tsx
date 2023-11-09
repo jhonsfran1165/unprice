@@ -6,7 +6,10 @@ import { domAnimation, LazyMotion, m } from "framer-motion"
 import { Balancer } from "react-wrap-balancer"
 
 const CreateProjectForm = dynamic(
-  () => import("../[workspaceSlug]/_components/create-project-form")
+  () => import("../[workspaceSlug]/_components/create-project-form"),
+  {
+    ssr: false,
+  }
 )
 
 export default function CreateProject(props: { workspaceSlug: string }) {

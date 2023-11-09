@@ -22,9 +22,9 @@
     "@builderai/eslint-config": "^0.2.0",
     "@builderai/prettier-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
-    "eslint": "^8.47.0",
-    "prettier": "^3.0.2",
-    "typescript": "^5.1.6"
+    "eslint": "^8.52.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "eslintConfig": {
     "root": true,

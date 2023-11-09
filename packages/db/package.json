@@ -33,7 +33,7 @@
     "@builderai/config": "^0.1.0",
     "@neondatabase/serverless": "^0.6.0",
     "base-x": "^4.0.0",
-    "drizzle-orm": "^0.28.5",
+    "drizzle-orm": "^0.28.6",
     "drizzle-zod": "^0.5.1",
     "net": "^1.0.2",
     "postgres": "^3.3.5",

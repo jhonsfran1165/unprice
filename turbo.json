@@ -7,7 +7,13 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "next-env.d.ts",
+        ".expo/**",
+        ".output/**"
+      ]
     },
     "dev": {
       "persistent": true,
@@ -34,6 +40,7 @@
   },
   "globalEnv": [
     "CLERK_SECRET_KEY",
+    "CLERK_WEBHOOK_SECRET",
     "DATABASE_URL",
     "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
     "NEXTJS_URL",

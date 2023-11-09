@@ -12,14 +12,34 @@ import { initTRPC, TRPCError } from "@trpc/server"
 import { ZodError } from "zod"
 
 import type {
+  AuthObject,
   SignedInAuthObject,
   SignedOutAuthObject,
-} from "@builderai/auth/api"
+} from "@builderai/auth/server"
 import { getAuth } from "@builderai/auth/server"
 import { activateRLS, authTxn, db, deactivateRLS, eq } from "@builderai/db"
 import { apikey } from "@builderai/db/schema/apikey"
 
 import { transformer } from "./transformer"
+
+// TODO: delete when clerk is updated
+type AuthObjectWithDeprecatedResources<T extends AuthObject> = Omit<
+  T,
+  "user" | "organization" | "session"
+> & {
+  /**
+   * @deprecated This will be removed in the next major version
+   */
+  user: T["user"]
+  /**
+   * @deprecated This will be removed in the next major version
+   */
+  organization: T["organization"]
+  /**
+   * @deprecated This will be removed in the next major version
+   */
+  session: T["session"]
+}
 
 /**
  * 1. CONTEXT
@@ -31,7 +51,9 @@ import { transformer } from "./transformer"
  *
  */
 interface CreateContextOptions {
-  auth: SignedInAuthObject | SignedOutAuthObject | null
+  auth: AuthObjectWithDeprecatedResources<
+    SignedInAuthObject | SignedOutAuthObject
+  >
   apiKey?: string | null
   req?: NextRequest
   tenantId: string // clerk tenant id asociated to the workspace
@@ -65,9 +87,14 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
  */
 export const createTRPCContext = (opts: { req: NextRequest }) => {
   const auth = getAuth(opts.req)
+
   const { userId, orgId } = auth
-  const apiKey = opts.req.headers.get("x-builderai-api-key")
   const tenantId = orgId ?? userId ?? ""
+
+  const apiKey = opts.req.headers.get("x-builderai-api-key")
+  const source = opts.req?.headers.get("x-trpc-source") ?? "unknown"
+  const pathname = opts.req?.nextUrl.pathname ?? "unknown"
+  console.log(">>> tRPC Request from", source, "by", userId, "to", pathname)
 
   return createInnerTRPCContext({
     auth,
@@ -230,7 +257,7 @@ export const formdataMiddleware = t.middleware(async (opts) => {
   if (!formData) throw new TRPCError({ code: "BAD_REQUEST" })
 
   return opts.next({
-    rawInput: formData,
+    input: formData,
   })
 })
 /**

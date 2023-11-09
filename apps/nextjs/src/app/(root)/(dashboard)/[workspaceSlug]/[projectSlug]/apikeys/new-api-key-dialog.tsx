@@ -19,6 +19,7 @@ import { api } from "~/trpc/client"
 const CreateApiKeyForm = dynamic(
   () => import("../../_components/create-api-key-form"),
   {
+    ssr: false,
     loading: () => (
       <div className="m-auto flex justify-center align-middle">
         <Spinner className="m-6 h-16 w-16 animate-spin" />

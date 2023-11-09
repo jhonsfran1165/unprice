@@ -26,8 +26,6 @@ export function SyncActiveOrgFromUrl() {
 
     if (org) {
       void setActive(org)
-    } else {
-      void setActive({ organization: null })
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

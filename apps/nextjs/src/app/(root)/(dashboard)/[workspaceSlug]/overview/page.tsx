@@ -1,4 +1,8 @@
+import Link from "next/link"
 import { Balancer } from "react-wrap-balancer"
+
+import { Button } from "@builderai/ui/button"
+import { Add, Warning } from "@builderai/ui/icons"
 
 import { api } from "~/trpc/server"
 import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
@@ -9,10 +13,30 @@ export default async function WorkspaceOverviewPage(props: {
   params: { workspaceSlug: string }
 }) {
   // TODO: get limits of this project for this workspace
-  const { projects } = await api.project.listByActiveWorkspace.query()
+  // TODO: add react-boundary error boundary
+  const { projects, limitReached } =
+    await api.project.listByActiveWorkspace.query()
+
+  console.log("*******************************************")
 
   return (
     <>
+      <div className="flex w-full justify-end">
+        {limitReached ? (
+          <Button className="min-w-max" variant="ghost">
+            <Warning className="h-5 w-5" />
+            <span className="pl-2">Project limit reached</span>
+          </Button>
+        ) : (
+          <Link href={`/onboarding`}>
+            <Button className="min-w-max">
+              <Add className="h-5 w-5" />
+              <span className="pl-2">Create a new project</span>
+            </Button>
+          </Link>
+        )}
+      </div>
+
       <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {projects.map((project) => (
           <li key={project.id}>

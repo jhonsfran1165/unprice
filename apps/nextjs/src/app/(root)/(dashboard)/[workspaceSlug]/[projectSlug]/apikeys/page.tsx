@@ -5,8 +5,8 @@ import { Button } from "@builderai/ui/button"
 
 import HeaderSubTab from "~/components/header-subtab"
 import { userCanAccessProject } from "~/lib/project-guard"
-import DataTable from "./data-table"
-import ApiKeysSkeleton from "./data-table-skeleton"
+import { DataTableApiKeys } from "./data-table"
+import { ApiKeysSkeleton } from "./data-table-skeleton"
 
 const NewApiKeyDialog = dynamic(() => import("./new-api-key-dialog"), {
   ssr: false,
@@ -28,7 +28,9 @@ export default async function ApiKeysPage(props: {
         action={<NewApiKeyDialog projectSlug={props.params.projectSlug} />}
       />
       <Suspense fallback={<ApiKeysSkeleton />}>
-        <DataTable projectSlug={props.params.projectSlug} />
+        <DataTableApiKeys
+          projectSlug={props.params.projectSlug}
+        ></DataTableApiKeys>
       </Suspense>
     </>
   )

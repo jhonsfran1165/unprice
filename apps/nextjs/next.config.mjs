@@ -23,7 +23,6 @@ const config = {
   },
   experimental: {
     mdxRs: true,
-    serverActions: true,
     optimizePackageImports: ["@builderai/ui"],
   },
   swcMinify: true,

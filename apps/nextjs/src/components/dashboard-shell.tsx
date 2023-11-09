@@ -29,6 +29,13 @@ export function DashboardShell<T extends ModuleApp>(props: {
     submodule: props.submodule,
   })
 
+  const newElement = React.cloneElement(
+    <React.Fragment>{props?.children ?? ""}</React.Fragment>,
+    {
+      extraProp: "Some extra prop",
+    }
+  )
+
   const { activeTab, moduleTabs } = modules
 
   // TODO: handle this error
@@ -79,9 +86,7 @@ export function DashboardShell<T extends ModuleApp>(props: {
               submodule={props.submodule as string}
               activeTab={activeTab}
             />
-            <div className={cn("space-y-6", props.className)}>
-              {props.children}
-            </div>
+            <div className={cn("space-y-6", props.className)}>{newElement}</div>
           </div>
         )}
       </MaxWidthWrapper>

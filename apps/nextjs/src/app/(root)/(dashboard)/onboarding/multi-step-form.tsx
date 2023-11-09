@@ -4,10 +4,18 @@ import dynamic from "next/dynamic"
 import { useSearchParams } from "next/navigation"
 import { AnimatePresence } from "framer-motion"
 
-const Intro = dynamic(() => import("./intro"))
-const Done = dynamic(() => import("./done"))
-const CreateProject = dynamic(() => import("./create-project"))
-const CreateApiKey = dynamic(() => import("./create-api-key"))
+const Intro = dynamic(() => import("./intro"), {
+  ssr: false,
+})
+const Done = dynamic(() => import("./done"), {
+  ssr: false,
+})
+const CreateProject = dynamic(() => import("./create-project"), {
+  ssr: false,
+})
+const CreateApiKey = dynamic(() => import("./create-api-key"), {
+  ssr: false,
+})
 
 export function Onboarding(props: { workspaceSlug: string }) {
   const search = useSearchParams()

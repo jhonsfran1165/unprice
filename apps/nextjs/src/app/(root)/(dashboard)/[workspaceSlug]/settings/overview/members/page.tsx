@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
 
+// 483.1 kB - 128.1 kB (gzip)
 import { auth, UserProfile } from "@builderai/auth"
 
 import { getActiveTenantId } from "~/lib/get-tenant"
