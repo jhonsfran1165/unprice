@@ -4,6 +4,8 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
 import { createTRPCContext } from "@builderai/api"
 import { lambdaRouter } from "@builderai/api/lambda"
 
+export const preferredRegion = ["fra1"]
+
 /**
  * Configure basic CORS headers
  * You should extend this to match your needs

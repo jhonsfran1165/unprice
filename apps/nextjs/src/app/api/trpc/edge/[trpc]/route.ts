@@ -5,6 +5,7 @@ import { createTRPCContext } from "@builderai/api"
 import { edgeRouter } from "@builderai/api/edge"
 
 export const runtime = "edge"
+export const preferredRegion = ["fra1"]
 
 /**
  * Configure basic CORS headers

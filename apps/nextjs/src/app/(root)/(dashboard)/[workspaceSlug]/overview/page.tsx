@@ -8,16 +8,14 @@ import { api } from "~/trpc/server"
 import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
 
 export const runtime = "edge"
+export const revalidate = 0
 
 export default async function WorkspaceOverviewPage(props: {
   params: { workspaceSlug: string }
 }) {
-  // TODO: get limits of this project for this workspace
   // TODO: add react-boundary error boundary
   const { projects, limitReached } =
     await api.project.listByActiveWorkspace.query()
-
-  console.log("*******************************************")
 
   return (
     <>
