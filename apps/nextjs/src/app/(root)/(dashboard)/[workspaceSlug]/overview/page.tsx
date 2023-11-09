@@ -8,7 +8,7 @@ import { api } from "~/trpc/server"
 import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
 
 export const runtime = "edge"
-export const revalidate = 0
+export const dynamic = "force-dynamic"
 
 export default async function WorkspaceOverviewPage(props: {
   params: { workspaceSlug: string }
