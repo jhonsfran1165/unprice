@@ -4,7 +4,7 @@ import { Balancer } from "react-wrap-balancer"
 import { Button } from "@builderai/ui/button"
 import { Add, Warning } from "@builderai/ui/icons"
 
-import { api } from "~/trpc/server"
+import { api } from "~/trpc/server2"
 import {
   ProjectCard,
   ProjectCardSkeleton,

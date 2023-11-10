@@ -22,7 +22,7 @@ import { cn } from "@builderai/ui/utils"
 
 import { userCanAccessProject } from "~/lib/project-guard"
 import type { RouterOutputs } from "~/trpc/server"
-import { api } from "~/trpc/server"
+import { api } from "~/trpc/server2"
 import { LoadingCard } from "../_components/loading-card"
 
 export const runtime = "edge"

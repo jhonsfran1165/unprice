@@ -7,12 +7,22 @@ import { newIdEdge } from "@builderai/db/utils"
 
 import {
   createTRPCRouter,
+  protectedApiProcedure,
   protectedOrgAdminProcedure,
   protectedOrgProcedure,
 } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
 
 export const apiKeyRouter = createTRPCRouter({
+  testing: protectedApiProcedure.query(async (opts) => {
+    const data = opts.ctx.apiKey
+
+    const project = await opts.ctx.db.query.project.findMany({
+      where: (project, { eq }) => eq(project.id, data.projectId),
+    })
+
+    return project
+  }),
   listApiKeys: protectedOrgAdminProcedure
     .input(
       z.object({

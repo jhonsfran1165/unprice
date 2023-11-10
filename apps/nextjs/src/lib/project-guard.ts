@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import { api } from "~/trpc/server"
+import { api } from "~/trpc/server2"
 
 export async function userCanAccessProject({
   projectSlug,

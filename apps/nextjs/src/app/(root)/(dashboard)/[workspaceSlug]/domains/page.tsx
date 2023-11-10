@@ -1,4 +1,4 @@
-import { api } from "~/trpc/server"
+import { api } from "~/trpc/server2"
 
 export const runtime = "edge"
 

@@ -68,6 +68,8 @@ export const api = createTRPCClient<AppRouter>({
   ],
 })
 
+export { type RouterInputs, type RouterOutputs } from "@builderai/api"
+
 // export const createCaller = cache(async () =>
 //   appRouter.createCaller(await createTRPCContext({})),
 // ); //Probably don't use this one

@@ -11,8 +11,8 @@ import {
 import { CheckCircle2 } from "@builderai/ui/icons"
 
 import { currencySymbol } from "~/lib/currency"
-import type { RouterOutputs } from "~/trpc/server"
-import { api } from "~/trpc/server"
+import type { RouterOutputs } from "~/trpc/server2"
+import { api } from "~/trpc/server2"
 import { SubscribeNow } from "./subscribe-now"
 
 export const dynamic = "force-dynamic"
