@@ -4,7 +4,7 @@ import { Balancer } from "react-wrap-balancer"
 import { Button } from "@builderai/ui/button"
 import { Add, Warning } from "@builderai/ui/icons"
 
-import { api2 } from "~/trpc/server"
+import { api } from "~/trpc/server2"
 import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
 
 export const runtime = "edge"
@@ -15,7 +15,7 @@ export default async function WorkspaceOverviewPage(props: {
 }) {
   // TODO: add react-boundary error boundary
   const { projects, limitReached } =
-    await api2.project.listByActiveWorkspace.query()
+    await api.project.listByActiveWorkspace.query()
 
   return (
     <>
