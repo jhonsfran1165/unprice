@@ -9,10 +9,9 @@ import {
   TableRow,
 } from "@builderai/ui/table"
 
-import { api } from "~/trpc/server2"
+import { api } from "~/trpc/server"
 
-// TODO: activate later. It is  hitting limits on vercel
-// export const runtime = "edge"
+export const runtime = "edge"
 
 export default async function IngestionPage(props: {
   params: { workspaceSlug: string; projectSlug: string; ingestionId: string }

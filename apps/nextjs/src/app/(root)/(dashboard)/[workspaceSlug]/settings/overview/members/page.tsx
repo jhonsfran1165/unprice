@@ -8,8 +8,7 @@ import { getActiveTenantId } from "~/lib/get-tenant"
 import { OrganizationMembers } from "../../_components/organization-members"
 import { LoadingCard } from "../../../[projectSlug]/_components/loading-card"
 
-// TODO: activate later. It is  hitting limits on vercel
-// export const runtime = "edge"
+export const runtime = "edge"
 
 export default function WorkspaceSettingsPage() {
   const isOrg = getActiveTenantId().startsWith("org_")

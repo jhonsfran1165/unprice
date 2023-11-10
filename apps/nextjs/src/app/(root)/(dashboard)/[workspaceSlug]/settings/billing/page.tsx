@@ -6,10 +6,9 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 
-import { api } from "~/trpc/server2"
+import { api } from "~/trpc/server"
 import { SubscriptionForm } from "./subscription-form"
 
-// TODO: activate later. It is  hitting limits on vercel
 export const runtime = "edge"
 
 export default function BillingPage() {

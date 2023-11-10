@@ -40,7 +40,10 @@ export default function NewOrganizationDialog(props: {
   closeDialog: () => void
 }) {
   const { toast } = useToast()
-  const plans = api.stripe.plans.useQuery()
+  const plans = api.stripe.plans.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  })
+
   const form = useZodForm({ schema: purchaseWorkspaceSchema })
 
   const stripePurchase = api.stripe.purchaseOrg.useMutation({

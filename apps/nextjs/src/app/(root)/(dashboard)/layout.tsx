@@ -6,7 +6,7 @@ import DotPattern from "~/components/dot-pattern"
 import Footer from "~/components/footer"
 import Header from "~/components/header"
 import { SyncActiveOrgFromUrl } from "~/components/sync-active-org-from-url"
-import { TRPCReactProvider } from "~/trpc/react"
+import { TRPCReactProvider } from "~/trpc/client"
 
 export default function DashboardLayout(props: {
   children: React.ReactNode

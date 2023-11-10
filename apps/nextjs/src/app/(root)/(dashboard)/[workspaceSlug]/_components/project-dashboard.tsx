@@ -1,25 +1,21 @@
+"use client"
+
 import Link from "next/link"
-import { Balancer } from "react-wrap-balancer"
+import Balancer from "react-wrap-balancer"
 
 import { Button } from "@builderai/ui/button"
 import { Add, Warning } from "@builderai/ui/icons"
 
-import { api } from "~/trpc/server"
-import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
+import { api } from "~/trpc/client"
+import { ProjectCard, ProjectCardSkeleton } from "./project-card"
 
-export const runtime = "edge"
-
-export default async function WorkspaceOverviewPage(props: {
-  params: { workspaceSlug: string }
-}) {
-  // TODO: add react-boundary error boundary
-  const { projects, limitReached } =
-    await api.project.listByActiveWorkspace.query()
+export const Projects = ({ workspaceSlug }: { workspaceSlug: string }) => {
+  const [data] = api.project.listByActiveWorkspace.useSuspenseQuery()
 
   return (
     <>
       <div className="flex w-full justify-end">
-        {limitReached ? (
+        {data.limitReached ? (
           <Button className="min-w-max" variant="ghost">
             <Warning className="h-5 w-5" />
             <span className="pl-2">Project limit reached</span>
@@ -35,17 +31,14 @@ export default async function WorkspaceOverviewPage(props: {
       </div>
 
       <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {projects.map((project) => (
+        {data.projects.map((project) => (
           <li key={project.id}>
-            <ProjectCard
-              project={project}
-              workspaceSlug={props.params.workspaceSlug}
-            />
+            <ProjectCard project={project} workspaceSlug={workspaceSlug} />
           </li>
         ))}
       </ul>
 
-      {projects.length === 0 && (
+      {data.projects.length === 0 && (
         <div className="relative">
           <ul className="grid select-none grid-cols-1 gap-4 opacity-40 lg:grid-cols-3">
             <ProjectCardSkeleton pulse={false} />
