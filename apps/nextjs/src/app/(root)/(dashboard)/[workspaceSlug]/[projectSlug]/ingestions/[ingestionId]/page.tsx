@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@builderai/ui/table"
 
-import { api } from "~/trpc/server"
+import { api } from "~/trpc/server2"
 
 // TODO: activate later. It is  hitting limits on vercel
 // export const runtime = "edge"
