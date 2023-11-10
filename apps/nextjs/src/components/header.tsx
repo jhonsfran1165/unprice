@@ -9,7 +9,7 @@ import UserNavSkeleton from "./user-nav-skeleton"
 import { WorkspaceSwitcher } from "./workspace-switcher"
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 
-export default function Header({ projectSlug }: { projectSlug: string }) {
+export default function Header() {
   return (
     <header className="top-0 mx-auto w-full bg-background-bg px-6">
       <div className="flex h-16 items-center space-x-2 sm:justify-between sm:space-x-0">
@@ -21,11 +21,9 @@ export default function Header({ projectSlug }: { projectSlug: string }) {
           <Suspense fallback={<WorkspaceSwitcherSkeleton />}>
             <WorkspaceSwitcher />
           </Suspense>
-          {projectSlug && (
-            <Suspense fallback={<ProjectSwitcherSkeleton />}>
-              <ProjectSwitcher />
-            </Suspense>
-          )}
+          <Suspense fallback={<ProjectSwitcherSkeleton />}>
+            <ProjectSwitcher />
+          </Suspense>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <MainNav />
