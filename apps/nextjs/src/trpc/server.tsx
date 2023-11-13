@@ -12,10 +12,7 @@ import {
 
 import type { AppRouter } from "@builderai/api"
 
-import { getBaseUrl, transformer } from "./shared"
-
-// lambdas keys must match the first part of the path
-const lambdas = ["stripe", "ingestion"]
+import { getBaseUrl, lambdas, transformer } from "./shared"
 
 export const endingLinkServer = (opts?: {
   headers?: HTTPHeaders | (() => HTTPHeaders)
@@ -29,6 +26,7 @@ export const endingLinkServer = (opts?: {
       ...sharedOpts,
       url: `${getBaseUrl()}/api/trpc/edge`,
     })(runtime)
+
     const lambdaLink = unstable_httpBatchStreamLink({
       ...sharedOpts,
       url: `${getBaseUrl()}/api/trpc/lambda`,

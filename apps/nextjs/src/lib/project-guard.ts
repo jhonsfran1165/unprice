@@ -15,8 +15,7 @@ export async function userCanAccessProject({
     slug: projectSlug,
   })
 
-  // TODO: create don't have access component
   if (!haveAccess) {
-    notFound()
+    throw new Error("You don't have access to this project")
   }
 }

@@ -21,11 +21,6 @@ const WorkspaceRoutes: Record<
         icon: "AppWindow",
         description: "Cabeza de AppWindow",
       },
-      analytics: {
-        title: "Analytics",
-        icon: "Database",
-        description: "Cabeza de nepe",
-      },
     },
   },
   statistics: {

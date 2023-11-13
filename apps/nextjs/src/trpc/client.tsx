@@ -1,29 +1,25 @@
+"use client"
 
-"use client";
-
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";
+import { useState } from "react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental"
 import type {
   HTTPBatchStreamLinkOptions,
   HTTPHeaders,
-  TRPCLink
-} from "@trpc/react-query";
+  TRPCLink,
+} from "@trpc/react-query"
 import {
   createTRPCReact,
   loggerLink,
   unstable_httpBatchStreamLink,
-} from "@trpc/react-query";
-import { useState } from "react";
+} from "@trpc/react-query"
 
-import type { AppRouter } from "@builderai/api";
+import type { AppRouter } from "@builderai/api"
 
-import { getBaseUrl, transformer } from "./shared";
+import { getBaseUrl, lambdas, transformer } from "./shared"
 
-export const api = createTRPCReact<AppRouter>();
-
-// lambdas keys must match the first part of the path
-const lambdas = ["stripe", "ingestion"]
+export const api = createTRPCReact<AppRouter>()
 
 export const endingLinkClient = (opts?: {
   headers?: HTTPHeaders | (() => HTTPHeaders)
@@ -67,8 +63,8 @@ export function TRPCReactProvider(props: {
             staleTime: 5 * 1000,
           },
         },
-      }),
-  );
+      })
+  )
 
   const [trpcClient] = useState(() =>
     api.createClient({
@@ -87,8 +83,8 @@ export function TRPCReactProvider(props: {
           },
         }),
       ],
-    }),
-  );
+    })
+  )
 
   return (
     <api.Provider client={trpcClient} queryClient={queryClient}>
@@ -99,5 +95,5 @@ export function TRPCReactProvider(props: {
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </api.Provider>
-  );
+  )
 }

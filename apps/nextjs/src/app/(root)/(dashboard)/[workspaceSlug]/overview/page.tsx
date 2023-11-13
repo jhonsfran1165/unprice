@@ -12,7 +12,6 @@ export const runtime = "edge"
 export default async function WorkspaceOverviewPage(props: {
   params: { workspaceSlug: string }
 }) {
-  // TODO: add react-boundary error boundary
   const { projects, limitReached } =
     await api.project.listByActiveWorkspace.query()
 
