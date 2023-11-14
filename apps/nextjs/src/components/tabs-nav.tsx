@@ -16,7 +16,7 @@ export default function TabsNav(props: {
         props.className
       )}
     >
-      <ScrollArea className="-mb-1.5 h-12 max-w-[600px] lg:max-w-none">
+      <ScrollArea className="-mb-1.5 h-12 lg:max-w-none">
         <nav className="flex w-auto items-center gap-2">
           {props.moduleTabs.map((route, index) => (
             <Tab

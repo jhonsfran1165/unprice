@@ -1,8 +1,8 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
+import { clerkClient } from "@builderai/auth"
 import type { AuthObject } from "@builderai/auth/server"
-import { clerkClient } from "@builderai/auth/server"
 
 const skipRoutes = ["onboarding"]
 

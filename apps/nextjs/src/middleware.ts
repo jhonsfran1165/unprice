@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
-import { authMiddleware } from "@builderai/auth/server"
+import { authMiddleware } from "@builderai/auth"
 
 import AppMiddleware from "~/middleware/app"
 import { parse } from "~/middleware/utils"

@@ -49,7 +49,7 @@ export const api = createTRPCClient<AppRouter>({
   links: [
     loggerLink({
       enabled: (op) =>
-        process.env.NODE_ENV === "development" ||
+        process.env.TRPC_LOGGER === "true" ||
         (op.direction === "down" && op.result instanceof Error),
     }),
     endingLinkServer({
@@ -59,7 +59,6 @@ export const api = createTRPCClient<AppRouter>({
         h.delete("transfer-encoding")
         h.set("x-trpc-source", "server")
 
-        console.log(h.entries())
         return Object.fromEntries(h.entries())
       },
     }),

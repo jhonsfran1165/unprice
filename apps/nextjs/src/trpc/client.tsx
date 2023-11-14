@@ -72,7 +72,7 @@ export function TRPCReactProvider(props: {
       links: [
         loggerLink({
           enabled: (opts) =>
-            process.env.NODE_ENV === "development" ||
+            process.env.TRPC_LOGGER === "true" ||
             (opts.direction === "down" && opts.result instanceof Error),
         }),
         endingLinkClient({
