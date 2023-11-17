@@ -1,6 +1,7 @@
 import { toDecimal } from "dinero.js"
 import { Balancer } from "react-wrap-balancer"
 
+import type { RouterOutputs } from "@builderai/api"
 import {
   Card,
   CardDescription,
@@ -11,8 +12,7 @@ import {
 import { CheckCircle2 } from "@builderai/ui/icons"
 
 import { currencySymbol } from "~/lib/currency"
-import type { RouterOutputs } from "~/trpc/server"
-import { api } from "~/trpc/server"
+import { api } from "~/trpc/server-http"
 import { SubscribeNow } from "./subscribe-now"
 
 export const dynamic = "force-dynamic"

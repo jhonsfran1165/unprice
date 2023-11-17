@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@builderai/ui/table"
 
-import { api } from "~/trpc/server"
+import { api } from "~/trpc/server-http"
 
 export const runtime = "edge"
 export const preferredRegion = ["fra1"]

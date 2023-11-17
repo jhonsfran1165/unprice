@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import Link from "next/link"
 import { formatRelative } from "date-fns"
 
+import type { RouterOutputs } from "@builderai/api"
 import { Button } from "@builderai/ui/button"
 import {
   Card,
@@ -21,8 +22,7 @@ import {
 import { cn } from "@builderai/ui/utils"
 
 import { userCanAccessProject } from "~/lib/project-guard"
-import type { RouterOutputs } from "~/trpc/server"
-import { api } from "~/trpc/server"
+import { api } from "~/trpc/server-http"
 import { LoadingCard } from "../_components/loading-card"
 
 export const runtime = "edge"

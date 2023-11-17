@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 
 import type { ProjectTier } from "@builderai/config"
 
-import { api } from "~/trpc/server"
+import { api } from "~/trpc/server-http"
 
 export async function userCanAccessProject({
   projectSlug,
