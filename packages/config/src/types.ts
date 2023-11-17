@@ -38,8 +38,8 @@ type ConditionalProps =
 
 export type DashboardRoute = {
   titleTab: string
+  isNew?: boolean
   href: string
-  tier?: string
   disabled?: boolean
   icon?: keyof typeof Icons
   // we can use this for further customization from here

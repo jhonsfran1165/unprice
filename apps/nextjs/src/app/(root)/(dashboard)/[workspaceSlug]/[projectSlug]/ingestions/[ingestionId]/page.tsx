@@ -12,6 +12,7 @@ import {
 import { api } from "~/trpc/server"
 
 export const runtime = "edge"
+export const preferredRegion = ["fra1"]
 
 export default async function IngestionPage(props: {
   params: { workspaceSlug: string; projectSlug: string; ingestionId: string }

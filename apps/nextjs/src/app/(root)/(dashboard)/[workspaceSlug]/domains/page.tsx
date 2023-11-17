@@ -1,5 +1,6 @@
 import { api } from "~/trpc/server"
 
+export const preferredRegion = ["fra1"]
 export const runtime = "edge"
 
 export default async function PageDomains() {

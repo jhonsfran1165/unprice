@@ -9,6 +9,7 @@ import {
 import { api } from "~/trpc/server"
 import { SubscriptionForm } from "./subscription-form"
 
+export const preferredRegion = ["fra1"]
 export const runtime = "edge"
 
 export default function BillingPage() {

@@ -39,7 +39,6 @@ const WorkspaceRoutes: Record<
     titleTab: "Settings",
     href: "/settings/overview",
     disabled: false,
-    tier: "FREE",
     sidebarMenu: {
       overview: {
         title: "General",
@@ -95,7 +94,7 @@ const ProjectRoutes: Record<
     icon: "Receipt",
     href: "/pro",
     disabled: false,
-    tier: "PRO",
+    isNew: true,
   },
   statistics: {
     titleTab: "Statistics",

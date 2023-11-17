@@ -1,6 +1,8 @@
 import "react-image-crop/dist/ReactCrop.css"
 import "~/styles/globals.css"
 
+import { headers } from "next/headers"
+
 // import { Analytics } from "@vercel/analytics/react"
 
 import { ClerkProvider } from "@builderai/auth"
@@ -11,6 +13,7 @@ import { cn } from "@builderai/ui/utils"
 import { TailwindIndicator } from "~/components/tailwind-indicator"
 import { ThemeProvider } from "~/components/theme-provider"
 import { fontMapper } from "~/styles/fonts"
+import { TRPCReactProvider } from "~/trpc/client"
 
 export const metadata = {
   title: {
@@ -47,7 +50,9 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             )}
           >
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              {props.children}
+              <TRPCReactProvider headers={headers()}>
+                {props.children}
+              </TRPCReactProvider>
               <TailwindIndicator />
             </ThemeProvider>
             {/* <Analytics /> */}

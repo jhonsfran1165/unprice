@@ -6,6 +6,7 @@ import { SignOutButton } from "@builderai/auth"
 import { Button } from "@builderai/ui/button"
 
 export const runtime = "edge"
+export const preferredRegion = ["fra1"]
 
 export default function AuthenticationPage() {
   const router = useRouter()

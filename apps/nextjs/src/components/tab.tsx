@@ -7,6 +7,7 @@ import { createIcon } from "@builderai/config/types"
 import { cn } from "@builderai/ui/utils"
 
 import { useGetPaths } from "~/lib/use-get-path"
+import { Ping } from "./ping"
 
 export const Tab = ({
   route,
@@ -31,6 +32,13 @@ export const Tab = ({
       href={route.disabled ? "#" : tabPath}
       aria-disabled={route?.disabled}
     >
+      {route?.isNew && (
+        <div className="relative">
+          <div className="absolute right-1 top-1">
+            <Ping />
+          </div>
+        </div>
+      )}
       <div className="button-ghost rounded-md px-3 py-2 transition-all duration-200">
         <p
           className={cn(

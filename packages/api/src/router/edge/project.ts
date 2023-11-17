@@ -22,6 +22,7 @@ import {
 import { hasAccessToProject } from "../../utils"
 import { getRandomPatternStyle } from "../../utils/generate-pattern"
 
+// TODO: Don't hardcode the limit to PRO
 const PROJECT_LIMITS = {
   FREE: 1,
   PRO: 3,
@@ -117,9 +118,9 @@ export const projectRouter = createTRPCRouter({
     }),
 
   canAccessProject: protectedOrgAdminProcedure
-    .input(z.object({ slug: z.string() }))
+    .input(z.object({ slug: z.string(), needsToBeInTier: z.string() }))
     .query(async (opts) => {
-      const { slug: projectSlug } = opts.input
+      const { slug: projectSlug, needsToBeInTier: tier } = opts.input
 
       try {
         const { project: projectData } = await hasAccessToProject({
@@ -127,9 +128,19 @@ export const projectRouter = createTRPCRouter({
           ctx: opts.ctx,
         })
 
-        return { haveAccess: projectData.slug === projectSlug }
+        if (tier === "FREE") {
+          return {
+            haveAccess: true,
+            isInTier: true,
+          }
+        }
+
+        return {
+          haveAccess: projectData.slug === projectSlug,
+          isInTier: tier === projectData.tier,
+        }
       } catch (error) {
-        return { haveAccess: false }
+        return { haveAccess: false, isInTier: false }
       }
     }),
 

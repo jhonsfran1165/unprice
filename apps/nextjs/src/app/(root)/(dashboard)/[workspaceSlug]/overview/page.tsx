@@ -7,6 +7,7 @@ import { Add, Warning } from "@builderai/ui/icons"
 import { api } from "~/trpc/server"
 import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
 
+export const preferredRegion = ["fra1"]
 export const runtime = "edge"
 
 export default async function WorkspaceOverviewPage(props: {

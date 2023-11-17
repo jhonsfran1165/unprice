@@ -8,6 +8,7 @@ import { OrganizationImage } from "../_components/organization-image"
 import { OrganizationName } from "../_components/organization-name"
 import { LoadingCard } from "../../[projectSlug]/_components/loading-card"
 
+export const preferredRegion = ["fra1"]
 export const runtime = "edge"
 
 export default function WorkspaceSettingsPage() {

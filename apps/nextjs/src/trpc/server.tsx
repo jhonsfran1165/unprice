@@ -67,9 +67,25 @@ export const api = createTRPCClient<AppRouter>({
 
 export { type RouterInputs, type RouterOutputs } from "@builderai/api"
 
-// export const createCaller = cache(async () =>
-//   appRouter.createCaller(await createTRPCContext({})),
-// ); //Probably don't use this one
+// TODO: invoke direclty from server so we can use server actions
+// export const createCaller = () => {
+//   const authObj = auth()
+//   const { userId, orgId } = authObj
+//   const tenantId = orgId ?? userId ?? ""
+//   const apiKey = headers().get("x-builderai-api-key")
+
+//   return appRouter.createCaller({
+//     auth: authObj,
+//     tenantId,
+//     apiKey,
+//     db,
+//     // db helpers for emulating RLS
+//     txRLS: authTxn(db, tenantId),
+//     // these two increase the number of times you call your db
+//     activateRLS: activateRLS(db, tenantId),
+//     deactivateRLS: deactivateRLS(db),
+//   })
+// } //Probably don't use this one
 
 // export const helpers = createServerSideHelpers({
 //   router: appRouter,
