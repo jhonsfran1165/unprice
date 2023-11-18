@@ -433,7 +433,7 @@ export function DataTableApiKeys(props: { projectSlug: string }) {
         />
       </div>
       <div className="rounded-md border">
-        <Table>
+        <Table className="bg-background-base">
           <TableHeader className="bg-background">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -480,7 +480,7 @@ export function DataTableApiKeys(props: { projectSlug: string }) {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow className="justify-center bg-background-base">
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"

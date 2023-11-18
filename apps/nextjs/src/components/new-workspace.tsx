@@ -44,7 +44,13 @@ export default function NewOrganizationDialog(props: {
     refetchOnWindowFocus: false,
   })
 
-  const form = useZodForm({ schema: purchaseWorkspaceSchema })
+  const form = useZodForm({
+    schema: purchaseWorkspaceSchema,
+    defaultValues: {
+      planId: plans?.data?.[0]?.priceId,
+      orgName: "",
+    },
+  })
 
   const stripePurchase = api.stripe.purchaseOrg.useMutation({
     onSettled: (data) => {

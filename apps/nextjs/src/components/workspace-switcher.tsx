@@ -33,8 +33,12 @@ export function WorkspaceSwitcher() {
   const [newOrgDialogOpen, setNewOrgDialogOpen] = useState(false)
 
   const { user, isSignedIn, isLoaded } = useUser()
-  const orgs = useOrganizationList()
   const org = useOrganization()
+  const orgs = useOrganizationList({
+    userMemberships: {
+      infinite: true,
+    },
+  })
 
   if (isLoaded && !isSignedIn) throw new Error("How did you get here???")
 
@@ -119,7 +123,7 @@ export function WorkspaceSwitcher() {
               </CommandGroup>
 
               <CommandGroup heading="Organizations">
-                {orgs.organizationList?.map(({ organization: org }) => (
+                {orgs.userMemberships.data?.map(({ organization: org }) => (
                   <CommandItem
                     key={org.name}
                     onSelect={async () => {

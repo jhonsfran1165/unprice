@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { z } from "zod"
 
 import { useOrganization } from "@builderai/auth"
 import { Button } from "@builderai/ui/button"
@@ -12,14 +13,57 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@builderai/ui/form"
+import { Spinner } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
-import { Label } from "@builderai/ui/label"
 import { useToast } from "@builderai/ui/use-toast"
+
+import { useZodForm } from "~/lib/zod-form"
+
+export const renameOrgSchema = z.object({
+  name: z.string().min(4, "Name must be at least 5 characters"),
+})
+
+export type OrgForm = z.infer<typeof renameOrgSchema>
 
 export function OrganizationName(props: { name: string; orgSlug: string }) {
   const { organization } = useOrganization()
-  const [updating, setUpdating] = React.useState(false)
+  const [isUpdating, setIsUpdating] = React.useState(false)
   const { toast } = useToast()
+
+  const form = useZodForm({
+    schema: renameOrgSchema,
+    defaultValues: {
+      name: props.name,
+    },
+  })
+
+  const handleSubmit = async (data: OrgForm) => {
+    const { name } = data
+
+    try {
+      setIsUpdating(true)
+      await organization?.update({ name, slug: props.orgSlug })
+      toast({
+        title: "Organization name updated",
+        description: "Your organization name has been updated.",
+      })
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: JSON.stringify(error),
+      })
+    } finally {
+      setIsUpdating(false)
+    }
+  }
 
   return (
     <Card>
@@ -28,36 +72,34 @@ export function OrganizationName(props: { name: string; orgSlug: string }) {
         <CardDescription>Change the name of your organization</CardDescription>
       </CardHeader>
 
-      <form
-        className="flex flex-col space-y-2"
-        onSubmit={async (e) => {
-          e.preventDefault()
-          const name = new FormData(e.currentTarget).get("name")
-          if (!name || typeof name !== "string") return
-          setUpdating(true)
-          await organization?.update({ name, slug: props.orgSlug })
-          setUpdating(false)
-          toast({
-            title: "Organization name updated",
-            description: "Your organization name has been updated.",
-          })
-        }}
-      >
-        <CardContent>
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" name="name" defaultValue={props.name} />
-        </CardContent>
-        <CardFooter>
-          <Button type="submit" className="ml-auto">
-            {updating && (
-              <div className="mr-1" role="status">
-                <div className="h-3 w-3 animate-spin rounded-full border-2 border-background border-r-transparent" />
-              </div>
-            )}
-            Save
-          </Button>
-        </CardFooter>
-      </form>
+      <Form {...form}>
+        <form
+          className="flex flex-col space-y-2"
+          onSubmit={form.handleSubmit(handleSubmit)}
+        >
+          <CardContent>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="builderai" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" className="ml-auto" disabled={isUpdating}>
+              {isUpdating && <Spinner className="mr-2 h-4 w-4 animate-spin" />}
+              Save
+            </Button>
+          </CardFooter>
+        </form>
+      </Form>
     </Card>
   )
 }

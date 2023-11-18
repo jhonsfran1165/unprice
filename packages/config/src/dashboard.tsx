@@ -138,7 +138,7 @@ const ProjectRoutes: Record<
       danger: {
         title: "Danger",
         href: "/settings/danger",
-        icon: "CreditCard",
+        icon: "Warning",
       },
     },
   },

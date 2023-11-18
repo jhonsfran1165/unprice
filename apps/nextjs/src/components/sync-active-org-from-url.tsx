@@ -15,12 +15,16 @@ export function SyncActiveOrgFromUrl() {
   const params = useParams()
 
   const workspaceSlug = params.workspaceSlug as string
-  const { setActive, organizationList, isLoaded } = useOrganizationList()
+  const { setActive, userMemberships, isLoaded } = useOrganizationList({
+    userMemberships: {
+      infinite: true,
+    },
+  })
 
   useEffect(() => {
     if (!isLoaded) return
 
-    const org = organizationList?.find(
+    const org = userMemberships.data?.find(
       ({ organization }) => organization.slug === workspaceSlug
     )
 

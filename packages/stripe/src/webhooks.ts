@@ -4,7 +4,7 @@ import { clerkClient } from "@builderai/auth"
 import { stripePriceToSubscriptionPlan } from "@builderai/config"
 import { db, eq } from "@builderai/db"
 import { workspace } from "@builderai/db/schema/workspace"
-import { generateSlug, newId } from "@builderai/db/utils"
+import { generateSlug, workspaceIdFromTenantId } from "@builderai/db/utils"
 
 import { stripe } from "."
 
@@ -66,8 +66,10 @@ export async function handleEvent(event: Stripe.DiscriminatedEvent) {
         slug: orgSlug,
       })
 
+      const workspaceId = workspaceIdFromTenantId(organization.id)
+
       await db.insert(workspace).values({
-        id: newId("workspace"),
+        id: workspaceId,
         stripeId,
         subscriptionId: subscription.id,
         plan: subscriptionPlan?.key,

@@ -17,6 +17,7 @@ function ProjectTierIndicator(props: { tier: ProjectTier }) {
       className={cn(
         "ml-2 rounded-md px-2 py-1 text-xs no-underline group-hover:no-underline",
         props.tier === PROJECT_TIER.FREE && "bg-teal-100 dark:bg-teal-600",
+        props.tier === PROJECT_TIER.STANDARD && "bg-blue-100 dark:bg-blue-800",
         props.tier === PROJECT_TIER.PRO && "bg-red-100 dark:bg-red-800"
       )}
     >

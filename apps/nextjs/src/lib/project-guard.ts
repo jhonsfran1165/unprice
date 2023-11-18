@@ -6,10 +6,10 @@ import { api } from "~/trpc/server-http"
 
 export async function userCanAccessProject({
   projectSlug,
-  needsToBeInTier = "FREE",
+  needsToBeInTier = ["FREE"],
 }: {
   projectSlug: string
-  needsToBeInTier?: ProjectTier
+  needsToBeInTier?: ProjectTier[]
 }) {
   if (!projectSlug) {
     notFound()

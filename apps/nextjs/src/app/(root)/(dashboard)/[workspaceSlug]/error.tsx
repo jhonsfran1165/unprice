@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@builderai/ui/button"
 
@@ -16,6 +17,7 @@ export default function Error({
     // Log the error to an error reporting service
     console.error(error)
   }, [error])
+  const router = useRouter()
 
   return (
     <div className="mt-20 flex flex-col items-center space-x-4">
@@ -35,6 +37,14 @@ export default function Error({
         }
       >
         Try again
+      </Button>
+      <Button
+        onClick={
+          // Attempt to recover by trying to re-render the segment
+          () => router.back()
+        }
+      >
+        Back
       </Button>
     </div>
   )

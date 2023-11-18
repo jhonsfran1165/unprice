@@ -10,7 +10,6 @@ export async function handleEvent(event: WebhookEvent) {
       const { id, first_name, username } = event.data
 
       // use the same id for this workspace so it's easy to identify the tenant inside the app
-      // don't think there is going to be coalitions
       const workspaceId = workspaceIdFromTenantId(id)
 
       const orgSlug = username ?? generateSlug(2)
@@ -46,7 +45,7 @@ export async function handleEvent(event: WebhookEvent) {
         throw new Error("Id not provided when trying to delete user")
       }
 
-      await db.delete(workspace).where(eq(workspace.id, id))
+      await db.delete(workspace).where(eq(workspace.tenantId, id))
 
       break
     }
@@ -70,25 +69,32 @@ export async function handleEvent(event: WebhookEvent) {
       const orgSlug = slug ? slug : generateSlug(2)
       const workspaceId = workspaceIdFromTenantId(id)
 
-      await db
-        .insert(workspace)
-        .values({
+      const workspaceData = await db.query.workspace.findFirst({
+        columns: {
+          id: true,
+        },
+        where: (workspace, { eq, and }) => and(eq(workspace.id, workspaceId)),
+      })
+
+      if (workspaceData) {
+        await db
+          .update(workspace)
+          .set({
+            name: name ?? orgSlug,
+            slug: orgSlug,
+            tenantId: id,
+            isPersonal: false,
+          })
+          .where(eq(workspace.id, workspaceData.id))
+      } else {
+        await db.insert(workspace).values({
           id: workspaceId,
           tenantId: id,
           slug: orgSlug,
           name: name ?? orgSlug,
           isPersonal: false,
         })
-        .onConflictDoUpdate({
-          target: workspace.id,
-          set: {
-            tenantId: id,
-            slug: orgSlug,
-            name: name ?? orgSlug,
-            isPersonal: false,
-          },
-          where: eq(workspace.id, workspaceId),
-        })
+      }
 
       break
     }

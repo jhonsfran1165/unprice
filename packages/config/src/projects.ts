@@ -8,6 +8,7 @@ export const MEMBERSHIP = {
 export const PROJECT_TIER = {
   FREE: "FREE",
   PRO: "PRO",
+  STANDARD: "STANDARD",
 } as const
 
 export const PLANS_APP = Object.keys(PLANS) as unknown as readonly [

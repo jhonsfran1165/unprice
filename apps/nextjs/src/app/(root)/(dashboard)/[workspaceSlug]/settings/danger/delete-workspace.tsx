@@ -30,7 +30,7 @@ import { api } from "~/trpc/client"
 export function DeleteWorkspace() {
   const toaster = useToast()
   const router = useRouter()
-  const { orgId } = useAuth()
+  const { orgId, userId } = useAuth()
   const apiUtils = api.useUtils()
 
   const title = "Delete workspace"
@@ -38,13 +38,16 @@ export function DeleteWorkspace() {
 
   const deleteOrganization = api.organization.deleteOrganization.useMutation({
     onSettled: async () => {
-      await apiUtils.project.listByActiveWorkspace.refetch()
-      router.push("/")
+      await apiUtils.project.listByActiveWorkspace.invalidate()
+      router.refresh()
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toaster.toast({
         title: "Workspace deleted",
       })
+      // Push to the user's personal workspace after deleting so clerk can
+      // fetch new data
+      router.push(`/${userId}/overview`)
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {

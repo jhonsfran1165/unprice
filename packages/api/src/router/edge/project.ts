@@ -50,6 +50,7 @@ export const projectRouter = createTRPCRouter({
       const workspace = await opts.ctx.db.query.workspace.findFirst({
         columns: {
           id: true,
+          plan: true,
         },
         where: (workspace, { eq }) => eq(workspace.tenantId, tenantId),
       })
@@ -71,6 +72,7 @@ export const projectRouter = createTRPCRouter({
         url,
         workspaceId: workspace.id,
         tenantId: opts.ctx.tenantId,
+        tier: workspace.plan,
       })
 
       // deactivate RLS
@@ -118,7 +120,7 @@ export const projectRouter = createTRPCRouter({
     }),
 
   canAccessProject: protectedOrgAdminProcedure
-    .input(z.object({ slug: z.string(), needsToBeInTier: z.string() }))
+    .input(z.object({ slug: z.string(), needsToBeInTier: z.array(z.string()) }))
     .query(async (opts) => {
       const { slug: projectSlug, needsToBeInTier: tier } = opts.input
 
@@ -128,7 +130,7 @@ export const projectRouter = createTRPCRouter({
           ctx: opts.ctx,
         })
 
-        if (tier === "FREE") {
+        if (tier.includes("FREE")) {
           return {
             haveAccess: true,
             isInTier: true,
@@ -137,7 +139,7 @@ export const projectRouter = createTRPCRouter({
 
         return {
           haveAccess: projectData.slug === projectSlug,
-          isInTier: tier === projectData.tier,
+          isInTier: tier.includes(projectData.tier ?? "FREE"),
         }
       } catch (error) {
         return { haveAccess: false, isInTier: false }
