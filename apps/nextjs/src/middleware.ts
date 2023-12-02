@@ -5,12 +5,18 @@ import { authMiddleware } from "@builderai/auth"
 
 import AppMiddleware from "~/middleware/app"
 import { parse } from "~/middleware/utils"
+import SitesMiddleware from "./middleware/sites"
 
 const before = (req: NextRequest) => {
   const url = req.nextUrl.clone()
+  const { domain, path, suddomain } = parse(req)
 
   if (url.pathname.includes("api/trpc")) {
     return NextResponse.next()
+  }
+
+  if (suddomain === "sites" || domain === "sites.localhost:3000") {
+    return SitesMiddleware(req)
   }
 
   // TODO: add middleware to check the subdomain
@@ -21,6 +27,7 @@ const before = (req: NextRequest) => {
 export default authMiddleware({
   signInUrl: "/signin",
   publicRoutes: [
+    // "/",
     "/signout",
     "/opengraph-image.png",
     "/signin(.*)",
@@ -29,6 +36,7 @@ export default authMiddleware({
     "/pricing(.*)",
     "/privacy(.*)",
     "/api(.*)",
+    "/p(.*)",
   ],
   beforeAuth: before,
   debug: false,
@@ -58,20 +66,15 @@ export default authMiddleware({
 
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _vercel (Vercel internals)
+     * - _next (next internals)
+     * - some-file.extension (static files)
+     * - ignore pages starting with /p/ (next.js dynamic pages)
+     */
     "/((?!.+\\.[\\w]+$|_next).*)",
     "/",
-    "/(api|trpc)(.*)",
-    /*
-     * Match all paths except for:
-     * 1. /api/ routes
-     * 2. /_next/ (Next.js internals)
-     * 3. /_proxy/, /_auth/ (special pages for OG tags proxying, password protection)
-     * 4. root/ app directory
-     * 5. sites/ sites directory
-     * 6. /_static (inside /public)
-     * 7. /_vercel (Vercel internals)
-     * 8. all root files inside /public (e.g. /favicon.ico)
-     */
-    "/((?!api/|_next/|_proxy/|_auth/|root/|sites/|_static|_vercel|[\\w-]+\\.\\w+).*)",
+    "/(api|trpc|p)(.*)",
   ],
 }

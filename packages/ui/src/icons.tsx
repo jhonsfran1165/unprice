@@ -18,6 +18,7 @@ export {
   AppWindow,
   BarChart2,
   BarChartIcon,
+  BotIcon,
   Calculator,
   Calendar,
   Check,

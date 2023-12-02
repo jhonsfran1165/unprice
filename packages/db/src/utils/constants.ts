@@ -3,6 +3,7 @@ export const dbNameSpaces = {
   ingestion: "ingest",
   project: "proj",
   user: "user",
+  canva: "canva",
   apikey: "api",
   apikey_key: "builderai_live",
   page: "page",

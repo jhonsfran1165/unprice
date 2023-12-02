@@ -19,6 +19,58 @@
 @tailwind components;
 @tailwind utilities;
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.tlui-help-menu {
+  display: none !important;
+}
+
+.tlui-debug-panel {
+  display: none !important;
+}
+
+/* .tldraw__editor {
+	position: fixed;
+	inset: 0px;
+	overflow: hidden;
+} */
+
+/* .input__wrapper {
+	position: relative;
+	flex-grow: 2;
+} */
+
+.lockup__link {
+  position: absolute;
+  z-index: var(--layer-panels);
+  bottom: 0px;
+  right: 0px;
+}
+
+.lockup__link__mobile {
+  bottom: 60px;
+}
+
+.question__button {
+  all: unset;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background-color: none;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.lockup__link img {
+  height: 40px;
+  padding: 8px;
+}
+
 @layer base {
   :root {
     --ring: 215deg 20.2% 65.1%;

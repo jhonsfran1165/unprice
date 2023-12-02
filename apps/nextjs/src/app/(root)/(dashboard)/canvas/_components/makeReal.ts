@@ -1,0 +1,135 @@
+import type { Editor } from "@tldraw/tldraw"
+import { createShapeId, getSvgAsImage } from "@tldraw/tldraw"
+
+import { newIdEdge } from "@builderai/db/utils"
+
+import { getHtmlFromOpenAI } from "./getHtmlFromOpenAI"
+import type { PreviewShape } from "./shapes/PreviewPage"
+
+export async function makeReal(editor: Editor, apiKey: string) {
+  const pageId = newIdEdge("page")
+  const newShapeId = createShapeId(pageId)
+  const selectedShapes = editor.getSelectedShapes()
+
+  if (selectedShapes.length === 0) {
+    throw Error("First select something to make real.")
+  }
+
+  const { maxX, midY } = editor.getSelectionPageBounds() ?? { maxX: 0, midY: 0 }
+
+  const previousPreviews = selectedShapes.filter((shape) => {
+    return shape.type === "preview"
+  }) as PreviewShape[]
+
+  if (previousPreviews.length > 1) {
+    throw Error(`You can only have one previous design selected.`)
+  }
+
+  const previousHtml =
+    previousPreviews.length === 1
+      ? previousPreviews[0]?.props.html
+      : "No previous design has been provided this time."
+
+  const svg = await editor.getSvg(selectedShapes)
+  if (!svg) throw Error(`Could not get the SVG.`)
+
+  const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+
+  const blob = await getSvgAsImage(svg, IS_SAFARI, {
+    type: "png",
+    quality: 1,
+    scale: 1,
+  })
+
+  const dataUrl = await blobToBase64(blob!)
+
+  editor.createShape<PreviewShape>({
+    id: newShapeId,
+    type: "preview",
+    x: maxX + 60, // to the right of the selection
+    y: midY - (540 * 2) / 3 / 2, // half the height of the preview's initial shape
+    props: { html: "", source: dataUrl },
+  })
+
+  // track('make-real', {
+
+  const textFromShapes = getSelectionAsText(editor)
+  try {
+    const json = await getHtmlFromOpenAI({
+      image: dataUrl,
+      html: previousHtml ?? "",
+      apiKey,
+      text: textFromShapes,
+      includesPreviousDesign: previousPreviews.length > 0,
+      theme: editor.user.getUserPreferences().isDarkMode ? "dark" : "light",
+    })
+
+    console.log(json)
+
+    if (json.error) {
+      throw Error(`${json.error.message?.slice(0, 100)}...`)
+    }
+
+    const message = json.choices[0].message.content
+    const start = message.indexOf("<!DOCTYPE html>")
+    const end = message.indexOf("</html>")
+    const html = message.slice(start, end + "</html>".length)
+
+    if (html.length < 100) {
+      console.warn(message)
+      throw Error("Could not generate a design from those wireframes.")
+    }
+
+    editor.updateShape<PreviewShape>({
+      id: newShapeId,
+      type: "preview",
+      props: {
+        html,
+        source: dataUrl,
+        linkUploadVersion: 1,
+        uploadedShapeId: newShapeId,
+      },
+    })
+
+    return {
+      id: newShapeId,
+      html,
+    }
+  } catch (e) {
+    editor.deleteShape(newShapeId)
+    throw e
+  }
+}
+
+export function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, _) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result as string)
+    reader.readAsDataURL(blob)
+  })
+}
+
+function getSelectionAsText(editor: Editor) {
+  const selectedShapeIds = editor.getSelectedShapeIds()
+  const selectedShapeDescendantIds =
+    editor.getShapeAndDescendantIds(selectedShapeIds)
+
+  const texts = Array.from(selectedShapeDescendantIds)
+    .map((id) => {
+      const shape = editor.getShape(id)
+      if (!shape) return null
+      if (
+        shape.type === "text" ||
+        shape.type === "geo" ||
+        shape.type === "arrow" ||
+        shape.type === "note"
+      ) {
+        // @ts-expect-error
+        return shape.props.text
+      }
+      return null
+    })
+    .filter((v) => v !== null && v !== "")
+
+  return texts.join("\n")
+}

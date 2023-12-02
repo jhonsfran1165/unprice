@@ -90,7 +90,7 @@ const ProjectRoutes: Record<
     href: "/overview",
   },
   pro: {
-    titleTab: "Pro Module",
+    titleTab: "Canvas",
     icon: "Receipt",
     href: "/pro",
     disabled: false,

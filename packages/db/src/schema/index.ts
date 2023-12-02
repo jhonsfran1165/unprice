@@ -1,5 +1,7 @@
 export * from "./apikey"
+export * from "./canva"
 export * from "./enums"
 export * from "./ingestion"
+export * from "./page"
 export * from "./project"
 export * from "./workspace"

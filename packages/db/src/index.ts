@@ -18,5 +18,5 @@ const pool = new Pool({
 
 export const db = drizzleNeon(pool, {
   schema,
-  logger: !!process.env.DATABASE_LOGGER,
+  logger: process.env.DRIZZLE_LOG === "true",
 })

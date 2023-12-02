@@ -4,7 +4,7 @@ import { NextResponse } from "next/server"
 import { clerkClient } from "@builderai/auth"
 import type { AuthObject } from "@builderai/auth/server"
 
-const skipRoutes = ["onboarding"]
+const skipRoutes = ["onboarding", "canvas", "sites"]
 
 export default async function AppMiddleware(
   req: NextRequest,

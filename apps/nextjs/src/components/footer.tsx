@@ -41,7 +41,7 @@ export default function Footer(props: { className?: string }) {
   return (
     <footer
       className={cn(
-        "z-30 mx-auto mt-10 flex w-full items-center justify-between gap-4 border-t bg-background-bg px-6 md:h-16 md:flex-row md:py-0",
+        "z-30 mx-auto flex w-full items-center justify-between gap-4 border-t bg-background-bg px-6 md:h-16 md:flex-row md:py-0",
         props.className
       )}
     >

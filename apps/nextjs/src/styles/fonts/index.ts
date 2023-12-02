@@ -13,4 +13,5 @@ export const cal = localFont({
 export const fontMapper = {
   "font-primary": cal.variable,
   "font-secondary": inter.variable,
+  inter: inter.variable,
 }
