@@ -3,7 +3,7 @@ import "@tldraw/tldraw/tldraw.css"
 import dynamic from "next/dynamic"
 
 const Editor = dynamic(
-  async () => (await import("../_components/Editor")).default,
+  async () => (await import("../_components/tldraw-editor")).default,
   {
     ssr: false,
   }

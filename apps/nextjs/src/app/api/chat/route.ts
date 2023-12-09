@@ -20,8 +20,6 @@ export async function POST(req: NextRequest) {
   const { messages, html } = json
   const { userId } = getAuth(req)
 
-  console.log(html)
-
   if (!userId) {
     return new Response("Unauthorized", {
       status: 401,
@@ -99,8 +97,6 @@ export async function GET(req: NextRequest) {
   }
 
   const data = await redis.hgetall(`chat:${id}`)
-
-  console.log(data)
 
   if (!data) {
     return new Response("Not found", {

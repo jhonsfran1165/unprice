@@ -2,26 +2,27 @@ import { useCallback } from "react"
 import { useEditor, useToasts } from "@tldraw/tldraw"
 
 import { api } from "~/trpc/client"
-import { makeReal } from "./makeReal"
+import { makeReal } from "./makereal"
+import { editorProjectSlug } from "./tldraw-editor"
 
 export function useMakeReal() {
   const editor = useEditor()
   const toast = useToasts()
+  const projectSlug = editorProjectSlug.get()
   const createPage = api.page.create.useMutation()
 
   return useCallback(async () => {
     // TODO: not hard code this
-    const apiKey = "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"
+    const apiKey = process.env.OPENAI_API_KEY ?? ""
 
     try {
-      const { html, id } = await makeReal(editor, apiKey)
-
-      console.log(html)
+      const { html, id, version } = await makeReal(editor, apiKey)
 
       createPage.mutate({
         id,
         html,
-        projectSlug: "cuddly-monkey",
+        version,
+        projectSlug: projectSlug,
       })
     } catch (e: any) {
       console.error(e)

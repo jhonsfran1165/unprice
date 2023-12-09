@@ -19,7 +19,7 @@ export const pageRouter = createTRPCRouter({
   create: protectedOrgProcedure
     .input(createPageSchema)
     .mutation(async (opts) => {
-      const { projectSlug, html, id } = opts.input
+      const { projectSlug, html, id, version } = opts.input
 
       const { project } = await hasAccessToProject({
         projectSlug,
@@ -35,6 +35,7 @@ export const pageRouter = createTRPCRouter({
           id: pageId,
           slug: pageSlug,
           html,
+          version,
           projectId: project.id,
           tenantId: opts.ctx.tenantId,
         })
@@ -43,7 +44,7 @@ export const pageRouter = createTRPCRouter({
   update: protectedOrgProcedure
     .input(updatePageSchema)
     .mutation(async (opts) => {
-      const { projectSlug, html, id } = opts.input
+      const { projectSlug, html, id, version } = opts.input
 
       const { project } = await hasAccessToProject({
         projectSlug,
@@ -54,18 +55,20 @@ export const pageRouter = createTRPCRouter({
         .update(page)
         .set({
           html,
+          version,
         })
         .where(and(eq(page.id, id), eq(page.projectId, project.id)))
         .returning()
     }),
 
   getById: publicProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), version: z.number() }))
     .query(async (opts) => {
-      const { id } = opts.input
+      const { id, version } = opts.input
 
       const page = await opts.ctx.db.query.page.findFirst({
-        where: (page, { eq }) => eq(page.id, id),
+        where: (page, { eq, and }) =>
+          and(eq(page.id, id), eq(page.version, version)),
       })
 
       return page

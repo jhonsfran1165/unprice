@@ -3,7 +3,7 @@ import type { UseChatHelpers } from "ai/react"
 import { Button } from "@builderai/ui/button"
 import { Dashboard, Nextjs } from "@builderai/ui/icons"
 
-import { PromptForm } from "./propmt-form"
+import { PromptForm } from "./prompt-form"
 
 export interface ChatPanelProps
   extends Pick<

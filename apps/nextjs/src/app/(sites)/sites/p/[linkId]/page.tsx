@@ -19,17 +19,19 @@ export default async function LinkPage({
   searchParams,
 }: {
   params: { linkId: string }
-  searchParams: { preview?: string }
+  searchParams: { preview?: string; version: string }
 }) {
   const { linkId } = params
 
   const isPreview = !!searchParams.preview
+  const version = parseInt(searchParams.version)
 
   const result = await api.page.getById.query({
     id: linkId,
+    version,
   })
 
-  if (!result) notFound()
+  if (!result) return notFound()
 
   let html: string = result.html ?? ""
 

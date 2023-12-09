@@ -23,5 +23,15 @@ export const metadata = {
 }
 
 export default function SitesLayout(props: { children: React.ReactNode }) {
-  return props.children
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+        />
+      </head>
+      {props.children}
+    </html>
+  )
 }

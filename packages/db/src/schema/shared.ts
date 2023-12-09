@@ -8,3 +8,7 @@ export const commonColumns = {
   // This can be either a user_xxx or org_xxx id
   tenantId: text("tenant_id").notNull(),
 }
+
+export const id = {
+  id: text("id").primaryKey().notNull(),
+}

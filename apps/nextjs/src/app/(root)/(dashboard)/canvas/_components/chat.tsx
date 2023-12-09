@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-import type { TLShapeId } from "@tldraw/tldraw"
-import { useEditor } from "@tldraw/tldraw"
 import type { Message } from "ai/react"
 import { useChat } from "ai/react"
 
@@ -18,33 +16,32 @@ import { BotIcon } from "@builderai/ui/icons"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import { toast } from "@builderai/ui/use-toast"
 
-import { ChatScrollAnchor } from "../../components/chat-scroll-anchor"
 import { ChatList } from "./chat-list"
 import { ChatPanel } from "./chat-panel"
+import { ChatScrollAnchor } from "./chat-scroll-anchor"
 import { EmptyChat } from "./empty-chat"
+import type { PreviewShape } from "./preview-page-shape"
 
 export interface ChatProps extends React.ComponentProps<"div"> {
   initialMessages?: Message[]
-  shapeId: TLShapeId
+  shape: PreviewShape
 }
 
-export function ChatDemo({ shapeId }: ChatProps) {
-  const [initialMessages, setInitialMessages] = useState()
+export function ChatDemo({ shape, initialMessages: initial }: ChatProps) {
+  const [initialMessages, setInitialMessages] = useState(initial)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  const editor = useEditor()
-  const id = shapeId.replace(/^shape:/, "").replace("page_", "")
-
-  const html = editor.getShape(shapeId)?.props.html
+  const id = shape.id.replace(/^shape:/, "").replace("page_", "")
+  const html = shape?.props?.html || ""
 
   useEffect(() => {
     const getChats = async () => {
       const res = await fetch(`/api/chat?id=${id}`)
-      const data = await res.json()
+      const data = (await res.json()) as { messages: Message[] }
       setInitialMessages(data.messages)
     }
 
     void getChats()
-  }, [])
+  }, [id])
 
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({

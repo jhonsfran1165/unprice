@@ -2,12 +2,13 @@
 
 import { useEffect, useLayoutEffect, useState } from "react"
 import type {
-  Editor,
   StoreSnapshot,
+  TLEditorComponents,
   TLRecord,
   TLStoreWithStatus,
 } from "@tldraw/tldraw"
 import {
+  atom,
   createTLStore,
   defaultShapeUtils,
   throttle,
@@ -15,37 +16,25 @@ import {
 } from "@tldraw/tldraw"
 
 import { api } from "~/trpc/client"
-import { ExportButton, SaveButton } from "../_components/ExportButton"
-import type { LiveImageShape } from "../_components/shapes/LiveImage"
-import { LiveImageShapeUtil } from "../_components/shapes/LiveImage"
-import { PreviewShapeUtil } from "../_components/shapes/PreviewPage"
-import Completion from "./completion"
+import { CodeEditor } from "./code-editor"
+import { ExportButton } from "./makereal-button"
+import { PreviewShapeUtil, showingEditor } from "./preview-page-shape"
 
-const shapeUtils = [PreviewShapeUtil, LiveImageShapeUtil]
+export const editorProjectSlug = atom("editorProjectSlug", "")
+const shapeUtils = [PreviewShapeUtil]
+
+const components: TLEditorComponents = {
+  InFrontOfTheCanvas: CodeEditor,
+}
 
 export default function EditorCanvas({ canvasId }: { canvasId: string }) {
   const [storeWithStatus, setStoreWithStatus] = useState<TLStoreWithStatus>({
     status: "loading",
   })
 
-  const onEditorMount = (editor: Editor) => {
-    // If there isn't a live image shape, create one
-    if (
-      !editor
-        .getCurrentPageShapes()
-        .some((shape) => shape.type === "live-image")
-    ) {
-      editor.createShape<LiveImageShape>({
-        type: "live-image",
-        x: 120,
-        y: 180,
-      })
-    }
-  }
-
   const updateCanva = api.canva.update.useMutation({
-    onSuccess: (data) => {
-      console.log("data saved")
+    onSuccess: () => {
+      console.log("canvas saved")
     },
   })
 
@@ -60,6 +49,7 @@ export default function EditorCanvas({ canvasId }: { canvasId: string }) {
   )
 
   useLayoutEffect(() => {
+    editorProjectSlug.set(canva?.project.slug ?? "")
     const snapshot = canva?.content as StoreSnapshot<TLRecord>
 
     if (snapshot) {
@@ -92,7 +82,7 @@ export default function EditorCanvas({ canvasId }: { canvasId: string }) {
     const cleanupFn = store.listen(
       throttle((entry) => {
         // instead of saving the whole store, we can save the entry and merge it with the snapshot from the database
-        console.log(entry)
+        // console.log(entry)
         const snapshot = store.getSnapshot()
         console.log("saving data...")
         // TODO: change the state to saving
@@ -108,26 +98,29 @@ export default function EditorCanvas({ canvasId }: { canvasId: string }) {
     )
 
     return () => cleanupFn()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeWithStatus, canvasId])
 
   // TODO: get data from server with react-query
 
+  const showing = showingEditor.get()
+
   return (
     <main className="z-0 flex h-[calc(100vh-8rem)] w-full flex-col items-center">
       <Tldraw
-        onMount={onEditorMount}
+        // onMount={onEditorMount}
         store={storeWithStatus}
         inferDarkMode
         initialState="select"
         components={{
-          Background: () => <div className="bg-background-base" />,
+          ...components,
+          Background: () => <div />,
         }}
         shapeUtils={shapeUtils}
+        hideUi={showing}
         shareZone={
           <>
             <ExportButton />
-            <SaveButton />
-            <Completion />
           </>
         }
       ></Tldraw>{" "}

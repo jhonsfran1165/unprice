@@ -4,7 +4,7 @@ import { createShapeId, getSvgAsImage } from "@tldraw/tldraw"
 import { newIdEdge } from "@builderai/db/utils"
 
 import { getHtmlFromOpenAI } from "./getHtmlFromOpenAI"
-import type { PreviewShape } from "./shapes/PreviewPage"
+import type { PreviewShape } from "./preview-page-shape"
 
 export async function makeReal(editor: Editor, apiKey: string) {
   const pageId = newIdEdge("page")
@@ -64,8 +64,6 @@ export async function makeReal(editor: Editor, apiKey: string) {
       theme: editor.user.getUserPreferences().isDarkMode ? "dark" : "light",
     })
 
-    console.log(json)
-
     if (json.error) {
       throw Error(`${json.error.message?.slice(0, 100)}...`)
     }
@@ -80,13 +78,14 @@ export async function makeReal(editor: Editor, apiKey: string) {
       throw Error("Could not generate a design from those wireframes.")
     }
 
+    // Change this to keep using the previous preview shape instead of creating a new one
     editor.updateShape<PreviewShape>({
       id: newShapeId,
       type: "preview",
       props: {
         html,
         source: dataUrl,
-        linkUploadVersion: 1,
+        version: 1,
         uploadedShapeId: newShapeId,
       },
     })
@@ -94,6 +93,7 @@ export async function makeReal(editor: Editor, apiKey: string) {
     return {
       id: newShapeId,
       html,
+      version: 1,
     }
   } catch (e) {
     editor.deleteShape(newShapeId)
