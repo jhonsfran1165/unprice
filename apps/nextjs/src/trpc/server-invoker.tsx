@@ -24,6 +24,7 @@ export const api = createTRPCClient<AppRouter>({
       // requests are cached for 5 seconds
       revalidate: 5,
       router: appRouter,
+      // eslint-disable-next-line @typescript-eslint/require-await
       createContext: async () => {
         const authObj = auth()
         const { userId, orgId } = authObj
