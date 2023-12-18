@@ -233,8 +233,8 @@ const columns = (projectSlug: string) => [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
-              onClick={() => {
-                revokeApiKeys.mutate({
+              onClick={async () => {
+                await revokeApiKeys.mutateAsync({
                   ids,
                   projectId: projectId,
                 })
@@ -315,8 +315,8 @@ const columns = (projectSlug: string) => [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
-              onClick={() => {
-                revokeApiKeys.mutate({
+              onClick={async () => {
+                await revokeApiKeys.mutateAsync({
                   ids: [apiKey.id],
                   projectId: projectId,
                 })
@@ -328,7 +328,7 @@ const columns = (projectSlug: string) => [
 
             <DropdownMenuItem
               onClick={async () => {
-                rollApiKey.mutate({
+                await rollApiKey.mutateAsync({
                   id: apiKey.id,
                 })
               }}

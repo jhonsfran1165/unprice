@@ -9,7 +9,7 @@ export default function ProjectSettingsLayout(props: {
     <DashboardShell
       title="Cnavas"
       module="project"
-      submodule="pro"
+      submodule="canvas"
       action={<NewCanvaDialog />}
     >
       {props.children}

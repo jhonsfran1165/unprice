@@ -1,11 +1,6 @@
 import type { DashboardRoute } from "./types"
 
-const submodulesWorkspace = [
-  "overview",
-  "statistics",
-  "settings",
-  "domains",
-] as const
+const submodulesWorkspace = ["overview", "settings", "domains"] as const
 
 const WorkspaceRoutes: Record<
   (typeof submodulesWorkspace)[number],
@@ -22,12 +17,6 @@ const WorkspaceRoutes: Record<
         description: "Cabeza de AppWindow",
       },
     },
-  },
-  statistics: {
-    icon: "BarChart2",
-    titleTab: "Statistics",
-    href: "/stadistics",
-    disabled: true,
   },
   domains: {
     icon: "Globe",
@@ -73,11 +62,11 @@ const WorkspaceRoutes: Record<
 
 const submodulesProject = [
   "overview",
-  "pro",
-  "statistics",
+  "canvas",
+  "prices",
   "apikeys",
   "settings",
-  "ingestions",
+  "usage",
 ] as const
 
 const ProjectRoutes: Record<
@@ -89,21 +78,22 @@ const ProjectRoutes: Record<
     icon: "Dashboard",
     href: "/overview",
   },
-  pro: {
+  canvas: {
     titleTab: "Canvas",
     icon: "Receipt",
-    href: "/pro",
+    href: "/canvas",
     disabled: false,
     isNew: true,
   },
-  statistics: {
+  prices: {
     titleTab: "Statistics",
     icon: "BarChart2",
     href: "/statistics",
-    disabled: true,
+    disabled: false,
+    isNew: true,
   },
-  ingestions: {
-    titleTab: "ingestions",
+  usage: {
+    titleTab: "usage",
     icon: "BarChartIcon",
     href: "/ingestions/overview",
     disabled: true,
