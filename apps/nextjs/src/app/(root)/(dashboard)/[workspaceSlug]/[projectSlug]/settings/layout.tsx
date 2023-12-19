@@ -1,4 +1,4 @@
-import { DashboardShell } from "~/components/dashboard-shell"
+import { DashboardShell } from "~/components/layout2/dashboard-shell"
 
 export default function ProjectSettingsLayout(props: {
   children: React.ReactNode

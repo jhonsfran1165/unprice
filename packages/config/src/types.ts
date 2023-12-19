@@ -41,7 +41,7 @@ export type DashboardRoute = {
   isNew?: boolean
   href: string
   disabled?: boolean
-  icon?: keyof typeof Icons
+  icon: keyof typeof Icons
   // we can use this for further customization from here
   // testing?: JSX.Element
 } & ConditionalProps

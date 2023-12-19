@@ -1,7 +1,7 @@
 // import { Button } from "@builderai/ui/button"
 // import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
 
-import { DashboardShell } from "~/components/dashboard-shell"
+import { DashboardShell } from "~/components/layout2/dashboard-shell"
 
 // import { InviteMemberForm } from "./_components/invite-member-dialog"
 

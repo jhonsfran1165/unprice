@@ -16,7 +16,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="border-t">
+    <div className="flex w-full flex-col items-center justify-center border-t">
       <Onboarding workspaceSlug={workspaceSlug} />
       {/* <div className="absolute inset-0 top-12 -z-10 bg-cover bg-center" /> */}
     </div>

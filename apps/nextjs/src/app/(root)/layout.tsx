@@ -8,6 +8,7 @@ import { headers } from "next/headers"
 import { ClerkProvider } from "@builderai/auth"
 import { siteConfig } from "@builderai/config"
 import { Toaster } from "@builderai/ui/toaster"
+import { TooltipProvider } from "@builderai/ui/tooltip"
 import { cn } from "@builderai/ui/utils"
 
 import { TailwindIndicator } from "~/components/tailwind-indicator"
@@ -50,14 +51,16 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           </head>
           <body
             className={cn(
-              "min-h-screen font-secondary antialiased",
+              "font-secondary antialiased",
               fontMapper["font-primary"],
               fontMapper["font-secondary"]
             )}
           >
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
               <TRPCReactProvider headers={headers()}>
-                {props.children}
+                <TooltipProvider delayDuration={300}>
+                  {props.children}
+                </TooltipProvider>
               </TRPCReactProvider>
               <TailwindIndicator />
             </ThemeProvider>

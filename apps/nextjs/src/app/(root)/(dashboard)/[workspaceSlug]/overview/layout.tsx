@@ -1,4 +1,4 @@
-import { DashboardShell } from "~/components/dashboard-shell"
+import { DashboardShell } from "~/components/layout2/dashboard-shell"
 
 export default function WorkspaceLayout(props: {
   children: React.ReactNode

@@ -37,13 +37,19 @@ export default async function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-6 w-6">
             <AvatarImage src={user.imageUrl} alt={user.username ?? ""} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent
+        className="w-56"
+        align="end"
+        forceMount
+        side="right"
+        sideOffset={20}
+      >
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">

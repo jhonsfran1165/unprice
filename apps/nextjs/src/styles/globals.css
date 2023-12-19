@@ -23,6 +23,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* TODO: delete me */
 .tlui-help-menu {
   display: none !important;
 }
@@ -163,6 +164,10 @@
 
   .button-secondary {
     @apply secondary hover:border-secondary-borderHover hover:bg-secondary-solid hover:text-secondary-foreground active:bg-secondary-bgActive;
+  }
+
+  .height-nav {
+    height: calc(100vh - 3.5rem);
   }
 }
 
