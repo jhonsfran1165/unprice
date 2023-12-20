@@ -24,7 +24,7 @@ export default async function DashboardPage(props: {
 
   await userCanAccessProject({
     projectSlug,
-    needsToBeInTier: ["PRO", "STANDARD"],
+    needsToBeInTier: ["PRO", "STANDARD", "FREE"],
   })
 
   const { plans } = await api.plan.listByProject.query({

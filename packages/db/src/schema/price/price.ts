@@ -1,9 +1,7 @@
-import { eq, relations } from "drizzle-orm"
-import type { NeonDatabase } from "drizzle-orm/neon-serverless"
+import { relations } from "drizzle-orm"
 import { createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import type * as schema from "../../schema"
 import { project } from "../project"
 import { plan } from "./price.sql"
 
@@ -26,10 +24,6 @@ export const Plan = createSelectSchema(plan, {
 
 export const createPlanSchema = Plan.pick({
   slug: true,
-  id: true,
-  content: true,
-  tenantId: true,
-  projectId: true,
   title: true,
   currency: true,
 }).extend({
@@ -51,35 +45,3 @@ export const updatePlanSchema = Plan.pick({
 })
 
 export type UpdatePlan = z.infer<typeof updatePlanSchema>
-
-export const createPlan = async (
-  tx: NeonDatabase<typeof schema>,
-  input: CreatePlan
-) => {
-  const result = await tx.insert(plan).values({
-    id: input.id,
-    slug: input.slug,
-    tenantId: input.tenantId,
-    projectId: input.projectId,
-    title: input.title,
-  })
-
-  return result
-}
-
-export const updatePlan = async (
-  tx: NeonDatabase<typeof schema>,
-  input: UpdatePlan
-) => {
-  const result = await tx
-    .update(plan)
-    .set({
-      slug: input.slug,
-      title: input.title,
-      tenantId: input.tenantId,
-      projectId: input.projectId,
-    })
-    .where(eq(plan.id, input.id))
-
-  return result
-}

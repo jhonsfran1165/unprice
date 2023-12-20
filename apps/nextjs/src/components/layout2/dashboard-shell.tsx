@@ -58,7 +58,7 @@ export function DashboardShell<T extends ModuleApp>(props: {
           />
         )}
 
-        <MaxWidthWrapper className="max-w-screen-4xl">
+        <MaxWidthWrapper className="max-w-screen-2xl">
           {/* sidebar menu config */}
           {activeTab?.sidebarMenu && (
             <div className="flex flex-col gap-12 sm:flex-1 sm:flex-row">
