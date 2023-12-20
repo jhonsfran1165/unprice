@@ -32,7 +32,7 @@ export const stripe = pgTable(
 )
 
 export const plan = pgTable(
-  "plan",
+  "plans",
   {
     ...projectID,
     ...tenantID,
@@ -60,6 +60,7 @@ export const version = pgTable(
     slug: text("slug").notNull().unique(),
     version: integer("version").notNull().unique().default(1),
     features: json("features"), // array of feature ids
+    addons: json("features"), // array of feature ids
   },
   (table) => ({
     versionProjectInx: uniqueIndex("version_project_id_idx").on(
@@ -80,8 +81,6 @@ export const feature = pgTable(
     ...timestamps,
     slug: text("slug").notNull().unique(),
     title: varchar("title", { length: 50 }).notNull(),
-    description: text("description"),
-    type: typeFeatureEnum("type").default("flat"),
   },
   (table) => ({
     featureProjectInx: uniqueIndex("feature_project_id_idx").on(

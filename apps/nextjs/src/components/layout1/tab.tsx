@@ -6,8 +6,8 @@ import type { DashboardRoute } from "@builderai/config/types"
 import { createIcon } from "@builderai/config/types"
 import { cn } from "@builderai/ui/utils"
 
+import { Ping } from "~/components/ping"
 import { useGetPaths } from "~/lib/use-get-path"
-import { Ping } from "./ping"
 
 export const Tab = ({
   route,

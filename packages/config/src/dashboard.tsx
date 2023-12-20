@@ -63,7 +63,7 @@ const WorkspaceRoutes: Record<
 const submodulesProject = [
   "overview",
   "canvas",
-  "prices",
+  "plans",
   "apikeys",
   "settings",
   "usage",
@@ -85,10 +85,10 @@ const ProjectRoutes: Record<
     disabled: false,
     isNew: true,
   },
-  prices: {
-    titleTab: "Statistics",
-    icon: "BarChart2",
-    href: "/statistics",
+  plans: {
+    titleTab: "Plans",
+    icon: "Calculator",
+    href: "/plans",
     disabled: false,
     isNew: true,
   },

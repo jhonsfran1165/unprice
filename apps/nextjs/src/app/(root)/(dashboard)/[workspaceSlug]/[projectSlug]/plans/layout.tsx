@@ -1,5 +1,5 @@
 import { DashboardShell } from "~/components/layout2/dashboard-shell"
-import { NewCanvaDialog } from "./_components/new-canva"
+import { NewPlanDialog } from "./_components/new-plan"
 
 export default function ProjectSettingsLayout(props: {
   children: React.ReactNode
@@ -7,10 +7,10 @@ export default function ProjectSettingsLayout(props: {
 }) {
   return (
     <DashboardShell
-      title="Canvas"
+      title="Plans"
       module="project"
-      submodule="canvas"
-      action={<NewCanvaDialog />}
+      submodule="plans"
+      action={<NewPlanDialog />}
     >
       {props.children}
     </DashboardShell>

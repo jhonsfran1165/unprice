@@ -1,28 +1,11 @@
 import { eq, relations } from "drizzle-orm"
 import type { NeonDatabase } from "drizzle-orm/neon-serverless"
-import { index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core"
 import { createSelectSchema } from "drizzle-zod"
-import type { z } from "zod"
+import { z } from "zod"
 
 import type * as schema from "../../schema"
-import { projectID, tenantID, timestamps } from "../../utils/sql"
 import { project } from "../project"
-
-export const plan = pgTable(
-  "plan",
-  {
-    ...projectID,
-    ...tenantID,
-    ...timestamps,
-    slug: text("slug").notNull().unique(),
-    title: text("title"),
-  },
-  (table) => ({
-    planProjectInx: index("plan_project_id_idx").on(table.projectId),
-    planInx: uniqueIndex("plan_key_slug").on(table.slug),
-    planTenantIdInx: index("plan_tenant_uidx").on(table.tenantId),
-  })
-)
+import { plan } from "./price.sql"
 
 export const planRelations = relations(plan, ({ one }) => ({
   project: one(project, {
@@ -47,6 +30,10 @@ export const createPlanSchema = Plan.pick({
   content: true,
   tenantId: true,
   projectId: true,
+  title: true,
+  currency: true,
+}).extend({
+  projectSlug: z.string(),
 })
 
 export type CreatePlan = z.infer<typeof createPlanSchema>
@@ -57,6 +44,7 @@ export const updatePlanSchema = Plan.pick({
   content: true,
   tenantId: true,
   projectId: true,
+  title: true,
 }).partial({
   slug: true,
   projectSlug: true,
@@ -71,9 +59,9 @@ export const createPlan = async (
   const result = await tx.insert(plan).values({
     id: input.id,
     slug: input.slug,
-    content: input.content,
     tenantId: input.tenantId,
     projectId: input.projectId,
+    title: input.title,
   })
 
   return result
@@ -87,7 +75,7 @@ export const updatePlan = async (
     .update(plan)
     .set({
       slug: input.slug,
-      content: input.content,
+      title: input.title,
       tenantId: input.tenantId,
       projectId: input.projectId,
     })

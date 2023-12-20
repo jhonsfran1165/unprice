@@ -3,14 +3,16 @@ import { index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
+import { id, tenantID, timestamps } from "../utils/sql"
 import { projectTier } from "./enums"
-import { commonColumns } from "./shared"
 import { workspace } from "./workspace"
 
 export const project = pgTable(
   "project",
   {
-    ...commonColumns,
+    ...id,
+    ...tenantID,
+    ...timestamps,
     slug: text("slug").notNull().unique(), // we love random words
     name: text("name"),
     workspaceId: text("workspace_id")

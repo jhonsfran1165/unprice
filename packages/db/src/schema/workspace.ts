@@ -10,7 +10,7 @@ import { z } from "zod"
 
 import { MEMBERSHIP, PLANS } from "@builderai/config"
 
-import { plan } from "./enums"
+import { plans } from "./enums"
 import { commonColumns } from "./shared"
 
 export const workspace = pgTable(
@@ -36,7 +36,7 @@ export const workspace = pgTable(
     billingPeriodStart: timestamp("billing_period_start", { mode: "date" }),
     // if null, you should fall back to end of month
     billingPeriodEnd: timestamp("billing_period_end", { mode: "date" }),
-    plan: plan("plan").default(PLANS.FREE.key),
+    plans: plans("plans").default(PLANS.FREE.key),
   },
   (table) => {
     return {

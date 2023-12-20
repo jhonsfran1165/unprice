@@ -120,6 +120,55 @@
       "when": 1701618481505,
       "tag": "0016_needy_ken_ellis",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1703106898710,
+      "tag": "0017_little_red_skull",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1703107356528,
+      "tag": "0018_wonderful_tarantula",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1703107404841,
+      "tag": "0019_ordinary_morgan_stark",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1703107667541,
+      "tag": "0020_easy_the_twelve",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1703107968087,
+      "tag": "0021_sleepy_bushwacker",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1703108027829,
+      "tag": "0022_messy_vengeance",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1703108137971,
+      "tag": "0023_young_hulk",
+      "breakpoints": true
     }
   ]
 }

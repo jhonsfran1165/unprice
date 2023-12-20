@@ -8,8 +8,8 @@ import HeaderTab from "~/components/header-tab"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
 import MenuSubTabs from "~/components/menu-subtabs"
 import SidebarNav from "~/components/sidebar"
-import TabsNav from "~/components/tabs-nav"
 import SidebarMenuSubTabs from "./menu-siderbar-subtabs"
+import TabsNav from "./tabs-nav"
 
 const cachedGetModulesApp = cache(getModulesApp)
 
