@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm"
 import {
   index,
   integer,
@@ -10,26 +11,27 @@ import {
 } from "drizzle-orm/pg-core"
 
 import { projectID, tenantID, timestamps } from "../../utils/sql"
+import { project } from "../project"
 
 export const currencyEnum = pgEnum("currency", ["USD", "EUR", "GBP"])
 export const stageEnum = pgEnum("stage", ["prod", "test", "dev"])
 
-export const stripe = pgTable(
-  "stripe",
-  {
-    ...projectID,
-    ...tenantID,
-    ...timestamps,
-    slug: text("slug").notNull().unique(),
-    token: text("token").notNull().unique(),
-    stage: stageEnum("stage").default("dev"),
-  },
-  (table) => ({
-    planProjectInx: uniqueIndex("plan_project_id_idx").on(table.projectId),
-    planInx: uniqueIndex("plan_key_slug").on(table.slug),
-    planTenantIdInx: index("plan_tenant_uidx").on(table.tenantId),
-  })
-)
+// export const stripe = pgTable(
+//   "stripe",
+//   {
+//     ...projectID,
+//     ...tenantID,
+//     ...timestamps,
+//     slug: text("slug").notNull().unique(),
+//     token: text("token").notNull().unique(),
+//     stage: stageEnum("stage").default("dev"),
+//   },
+//   (table) => ({
+//     planProjectInx: uniqueIndex("plan_project_id_idx").on(table.projectId),
+//     planInx: uniqueIndex("plan_key_slug").on(table.slug),
+//     planTenantIdInx: index("plan_tenant_uidx").on(table.tenantId),
+//   })
+// )
 
 export const plan = pgTable(
   "plans",
@@ -90,3 +92,10 @@ export const feature = pgTable(
     featureTenantIdInx: uniqueIndex("feature_tenant_uidx").on(table.tenantId),
   })
 )
+
+export const planRelations = relations(plan, ({ one }) => ({
+  project: one(project, {
+    fields: [plan.projectId],
+    references: [project.id],
+  }),
+}))

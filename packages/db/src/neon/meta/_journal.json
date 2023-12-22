@@ -169,6 +169,20 @@
       "when": 1703108137971,
       "tag": "0023_young_hulk",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1703151347353,
+      "tag": "0024_lame_echo",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1703152524304,
+      "tag": "0025_brief_zuras",
+      "breakpoints": true
     }
   ]
 }

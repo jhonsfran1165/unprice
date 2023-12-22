@@ -15,7 +15,7 @@ const cachedGetModulesApp = cache(getModulesApp)
 
 // TODO: add dashboard skeleton
 export function DashboardShell<T extends ModuleApp>(props: {
-  title: string
+  title?: string
   module: T
   submodule: SubModuleApp<T>
   action?: React.ReactNode
@@ -23,6 +23,8 @@ export function DashboardShell<T extends ModuleApp>(props: {
   className?: string
   description?: string
   isLoading?: boolean
+  hideSidebar?: boolean
+  hideTabs?: boolean
 }) {
   const modules = cachedGetModulesApp({
     module: props.module,
@@ -45,7 +47,7 @@ export function DashboardShell<T extends ModuleApp>(props: {
 
   return (
     <div className="flex grow flex-row">
-      {moduleTabs.length > 0 && (
+      {!props.hideTabs && moduleTabs.length > 0 && (
         <TabsNav moduleTabs={moduleTabs} activeRoute={activeTab} />
       )}
 
@@ -62,17 +64,21 @@ export function DashboardShell<T extends ModuleApp>(props: {
           {/* sidebar menu config */}
           {activeTab?.sidebarMenu && (
             <div className="flex flex-col gap-12 sm:flex-1 sm:flex-row">
-              <aside className="flex flex-col sm:flex sm:w-1/4">
-                <SidebarNav
-                  submodule={props.submodule as string}
-                  sidebarMenu={activeTab.sidebarMenu}
-                />
-              </aside>
+              {!props.hideSidebar && (
+                <aside className="flex flex-col sm:flex sm:w-1/4">
+                  <SidebarNav
+                    submodule={props.submodule as string}
+                    sidebarMenu={activeTab.sidebarMenu}
+                  />
+                </aside>
+              )}
               <div className="flex flex-1 flex-col sm:w-3/4">
-                <SidebarMenuSubTabs
-                  submodule={props.submodule as string}
-                  sideBarRoutes={activeTab.sidebarMenu}
-                />
+                {!props.hideSidebar && (
+                  <SidebarMenuSubTabs
+                    submodule={props.submodule as string}
+                    sideBarRoutes={activeTab.sidebarMenu}
+                  />
+                )}
                 <div className={cn("space-y-6", props.className)}>
                   {props.children}
                 </div>
@@ -83,10 +89,12 @@ export function DashboardShell<T extends ModuleApp>(props: {
           {/* without sidebar menu config */}
           {!activeTab?.sidebarMenu && (
             <div className="flex flex-1 flex-col">
-              <MenuSubTabs
-                submodule={props.submodule as string}
-                activeTab={activeTab}
-              />
+              {!props.hideSidebar && (
+                <MenuSubTabs
+                  submodule={props.submodule as string}
+                  activeTab={activeTab}
+                />
+              )}
               <div className={cn("space-y-6", props.className)}>
                 {newElement}
               </div>

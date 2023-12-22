@@ -54,8 +54,6 @@ export function NewPlanDialog() {
     },
   })
 
-  console.log(currencyEnum.enumValues)
-
   const createPlan = api.plan.create.useMutation({
     onSettled: (data) => {
       router.refresh()
@@ -128,7 +126,7 @@ export function NewPlanDialog() {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex justify-between">
-                    <FormLabel>Currency</FormLabel>
+                    <FormLabel>Subscription plan *</FormLabel>
                   </div>
                   <Select onValueChange={field.onChange}>
                     <FormControl>

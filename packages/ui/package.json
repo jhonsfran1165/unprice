@@ -72,6 +72,7 @@
     "./loading-animation": "./src/loading-animation.tsx",
     "./utils": "./src/utils/index.ts",
     "./skeleton": "./src/skeleton.tsx",
+    "./badge": "./src/badge.tsx",
     "./tooltip": "./src/tooltip.tsx",
     "./separator": "./src/separator.tsx",
     "./text-area": "./src/text-area.tsx",

@@ -1,16 +1,7 @@
-import { relations } from "drizzle-orm"
 import { createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { project } from "../project"
 import { plan } from "./price.sql"
-
-export const planRelations = relations(plan, ({ one }) => ({
-  project: one(project, {
-    fields: [plan.projectId],
-    references: [project.id],
-  }),
-}))
 
 export const Plan = createSelectSchema(plan, {
   id: (schema) => schema.id.cuid2(),

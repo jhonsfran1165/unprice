@@ -10,18 +10,18 @@ import { z } from "zod"
 
 import { MEMBERSHIP, PLANS } from "@builderai/config"
 
+import { id, tenantID, timestamps } from "../utils/sql"
 import { plans } from "./enums"
-import { commonColumns } from "./shared"
 
 export const workspace = pgTable(
   "workspace",
   {
-    ...commonColumns,
+    ...id,
+    ...tenantID,
+    ...timestamps,
     slug: text("slug").notNull().unique(), // we love random words
     name: text("name"),
 
-    // override tenant ID here because in workspace tenantId has to be unique
-    // so we have a 1:1 relationship with clerk data
     tenantId: text("tenant_id").unique().notNull(),
 
     // wether or not is a personal workspace - meaning asociated to a user or an organization

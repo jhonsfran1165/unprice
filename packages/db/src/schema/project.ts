@@ -3,23 +3,18 @@ import { index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { id, tenantID, timestamps } from "../utils/sql"
+import { tenantID, timestamps, workspaceID } from "../utils/sql"
 import { projectTier } from "./enums"
 import { workspace } from "./workspace"
 
 export const project = pgTable(
   "project",
   {
-    ...id,
+    ...workspaceID,
     ...tenantID,
     ...timestamps,
     slug: text("slug").notNull().unique(), // we love random words
     name: text("name"),
-    workspaceId: text("workspace_id")
-      .notNull()
-      .references(() => workspace.id, {
-        onDelete: "cascade",
-      }),
     tier: projectTier("tier").default("FREE"),
     url: text("url"),
     // domain: text("url"),
