@@ -18,7 +18,7 @@ export default function HeaderTab({
               <h1 className="text-4xl font-normal text-background-textContrast">
                 {title}
               </h1>
-              <h3 className="text-base text-muted-foreground">{description}</h3>
+              <h4 className="text-base text-muted-foreground">{description}</h4>
             </div>
 
             {action}

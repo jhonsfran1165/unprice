@@ -11,7 +11,9 @@ import {
   TableRow,
 } from "@builderai/ui/table"
 
+import HeaderTab from "~/components/header-tab"
 import { DashboardShell } from "~/components/layout2/dashboard-shell"
+import TabsNav from "~/components/layout2/tabs-nav"
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server-http"
 import { NewPlanDialog } from "./_components/new-plan"
@@ -31,10 +33,20 @@ export default async function PlansPage(props: {
   })
   return (
     <DashboardShell
-      title="Plans"
-      module="project"
-      submodule="plans"
-      action={<NewPlanDialog />}
+      header={
+        <HeaderTab
+          title="Plans"
+          description="Create and manage your plans"
+          action={<NewPlanDialog />}
+        />
+      }
+      tabs={
+        <TabsNav
+          module="project"
+          submodule="plans"
+          basePath={`/${workspaceSlug}/${projectSlug}`}
+        />
+      }
     >
       <Table className="rounded-md border bg-background-base">
         <TableHeader>
@@ -57,7 +69,7 @@ export default async function PlansPage(props: {
                 <TableCell>
                   <Link
                     prefetch={false}
-                    href={`/${workspaceSlug}/${projectSlug}/plans/${plan.id}/overview`}
+                    href={`/${workspaceSlug}/${projectSlug}/plans/${plan.id}/latest/overview`}
                   >
                     <Button className="min-w-max">
                       <Eye className="h-5 w-5" />

@@ -1,58 +1,64 @@
 "use client"
 
+import { cache } from "react"
 import dynamic from "next/dynamic"
 
-import type { SidebarRoutes } from "@builderai/config/types"
+import type { ModuleApp, SubModuleApp } from "@builderai/config"
+import { getModulesApp } from "@builderai/config"
 import { createIcon } from "@builderai/config/types"
 
-import HeaderSubTab from "~/components/header-subtab"
 import { TabSkeleton } from "~/components/tab-skeleton"
 import { useGetPaths } from "~/lib/use-get-path"
+
+const cachedGetModulesApp = cache(getModulesApp)
 
 const SubTab = dynamic(() => import("~/components/subtab"), {
   loading: () => <TabSkeleton />,
   ssr: false,
 })
 
-export default function SidebarMenuSubTabs({
-  submodule,
-  sideBarRoutes,
-}: {
-  submodule: string
-  sideBarRoutes: SidebarRoutes
+export default function SidebarMenuSubTabsv<T extends ModuleApp>(props: {
+  className?: string
+  submodule: SubModuleApp<T>
+  module: T
+  basePath: string
 }) {
-  const { baseUrl, restSegmentsPerRoute, pathname } = useGetPaths()
+  const modules = cachedGetModulesApp({
+    module: props.module,
+    submodule: props.submodule,
+  })
 
-  // give a path prefix calculate sub tab
-  const restSegments = restSegmentsPerRoute(submodule)
-  const activeSidebarSlug = restSegments[0]!
-  const activeSidebarTabSlug = restSegments[1]!
+  const { activeTab } = modules
+  const { lastSegment, secondToLastSegment } = useGetPaths()
 
-  const activeSubTab = sideBarRoutes?.[activeSidebarSlug]
-  const activeSubTabs = activeSubTab?.subTabs
+  // get sidebar from the two last segments
   const activeSidebarTab =
-    activeSubTabs?.[activeSidebarTabSlug] ?? activeSubTabs?.[activeSidebarSlug]
-  const baseUrlSubTab = `${baseUrl}/${submodule}/${activeSidebarSlug}`
+    (activeTab &&
+      (activeTab.sidebarMenu?.[lastSegment]?.subTabs ??
+        activeTab.sidebarMenu?.[secondToLastSegment ?? ""]?.subTabs)) ??
+    []
 
-  if (!activeSubTabs) return null
+  const baseUrlSubTab = props.basePath + activeTab?.href
+
+  if (activeSidebarTab.length === 0) return null
+
+  console.log({ activeTab })
 
   return (
-    <div className="flex flex-col py-4">
+    <div className="flex flex-col">
       <div className="mb-8 inline-flex h-10 items-center rounded-md bg-background-bg p-1 text-muted-foreground">
-        {Object.entries(activeSubTabs).map(([index, item]) => {
+        {Object.entries(activeSidebarTab ?? {}).map(([index, item]) => {
           const Icon = item?.icon && createIcon(item?.icon)
-          const href =
-            activeSidebarSlug === index
-              ? `${baseUrlSubTab}`
-              : `${baseUrlSubTab}/${index}`
 
-          const active = href === pathname
+          const href =
+            `/${props.submodule as string}/${index}` === activeTab?.href
+              ? baseUrlSubTab
+              : `${baseUrlSubTab}/${index}`
 
           return (
             <SubTab
               key={index}
               href={href}
-              active={active}
               className="rounded-sm"
               classNameActive="bg-background text-background-text shadow-md border"
               icon={Icon && <Icon className="mr-2 h-4 w-4" />}
@@ -61,13 +67,6 @@ export default function SidebarMenuSubTabs({
           )
         })}
       </div>
-      {activeSidebarTab?.title && (
-        <HeaderSubTab
-          title={activeSidebarTab.title}
-          description={activeSidebarTab?.description}
-          action={activeSidebarTab?.action}
-        />
-      )}
     </div>
   )
 }

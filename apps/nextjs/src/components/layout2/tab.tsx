@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 import type { DashboardRoute } from "@builderai/config/types"
 import { createIcon } from "@builderai/config/types"
@@ -13,18 +14,16 @@ import {
 import { cn } from "@builderai/ui/utils"
 
 import { Ping } from "~/components/ping"
-import { useGetPaths } from "~/lib/use-get-path"
 
 export const Tab = ({
   route,
-  activeRoute,
+  href,
 }: {
   route: DashboardRoute
-  activeRoute: DashboardRoute | null
+  href: string
 }) => {
-  const { baseUrl } = useGetPaths()
-  const tabPath = `${baseUrl}` + route.href
-  const active = activeRoute ? activeRoute.href === route.href : false
+  const pathname = usePathname()
+  const active = pathname === href
   const Icon = route.icon && createIcon(route?.icon)
 
   return (
@@ -35,7 +34,7 @@ export const Tab = ({
           className={cn("", {
             "cursor-not-allowed opacity-80": route.disabled,
           })}
-          href={route.disabled ? "#" : tabPath}
+          href={route.disabled ? "#" : href}
           aria-disabled={route?.disabled}
           prefetch={false}
         >

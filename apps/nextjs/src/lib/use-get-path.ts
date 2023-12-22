@@ -4,6 +4,8 @@ export function useGetPaths(): {
   baseUrl: string
   restUrl: string
   pathname: string
+  lastSegment: string
+  secondToLastSegment?: string
   restSegmentsPerRoute: (route?: string) => string[]
 } {
   const params = useParams()
@@ -12,13 +14,18 @@ export function useGetPaths(): {
   const projectSlug = params.projectSlug as string
   const ingestionId = params.ingestionId as string
   const planId = params.planId as string
+  const planVersion = params.planVersion as string
   let restUrl: string[] = []
 
   let baseUrl = ""
 
-  if (planId) {
+  if (planVersion) {
+    baseUrl = `/${workspaceSlug}/${projectSlug}/plans/${planId}/${planVersion}}`
+    const [, , , , , , ...rest] = pathname.split("/")
+    restUrl = rest
+  } else if (planId) {
     baseUrl = `/${workspaceSlug}/${projectSlug}/plans/${planId}`
-    const [, , , , , ...rest] = pathname.split("/")
+    const [, , , , , , ...rest] = pathname.split("/")
     restUrl = rest
   } else if (ingestionId) {
     baseUrl = `/${workspaceSlug}/${projectSlug}/${ingestionId}`
@@ -34,6 +41,10 @@ export function useGetPaths(): {
     restUrl = rest
   }
 
+  const segments = pathname.split("/").filter(Boolean) // Split and remove empty segments
+  const lastSegment = segments.pop()! // Get the last segment
+  const secondToLastSegment = segments.pop()
+
   // give a path segment calculate the rest of segments
   const restSegmentsPerRoute = (route?: string) =>
     restUrl.join("/").replace(`${route}/`, "").split("/")
@@ -42,6 +53,8 @@ export function useGetPaths(): {
     baseUrl,
     restUrl: restUrl.join("/"),
     pathname,
+    lastSegment,
+    secondToLastSegment,
     restSegmentsPerRoute,
   }
 }

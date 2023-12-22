@@ -1,42 +1,48 @@
 "use client"
 
+import { cache } from "react"
 import Link from "next/link"
 
-import type { SidebarRoutes } from "@builderai/config/types"
+import type { ModuleApp, SubModuleApp } from "@builderai/config"
+import { getModulesApp } from "@builderai/config"
 // TODO: this is adding too much bundle size
 import * as Icons from "@builderai/ui/icons"
 import { cn } from "@builderai/ui/utils"
 
 import { useGetPaths } from "~/lib/use-get-path"
 
-export default function SidebarNav({
-  submodule,
-  sidebarMenu,
-}: {
-  submodule: string
-  sidebarMenu: SidebarRoutes
-}) {
-  const { baseUrl, restSegmentsPerRoute } = useGetPaths() // get href prefix of the dynamic slugs
+const cachedGetModulesApp = cache(getModulesApp)
 
-  // give a path prefix calculate sidebar tabs
-  const restSegments = restSegmentsPerRoute(submodule)
-  const activeSideBarRouteSlug = restSegments[0]!
-  const activeSideBarRoutes = Object.values(sidebarMenu)
+export default function SidebarNav<T extends ModuleApp>(props: {
+  className?: string
+  submodule: SubModuleApp<T>
+  module: T
+  basePath: string
+}) {
+  const modules = cachedGetModulesApp({
+    module: props.module,
+    submodule: props.submodule,
+  })
+
+  const { activeTab } = modules
+  const { pathname } = useGetPaths() // get href prefix of the dynamic slugs
+  const activeSideBarRoutes = Object.values(activeTab?.sidebarMenu ?? {})
 
   if (activeSideBarRoutes.length === 0) return null
 
   // TODO: support mobile version
   return (
-    <nav className="sticky top-20 flex flex-col gap-2 rounded-md px-4 py-4 md:min-h-[500px]">
+    <nav className="sticky top-20 flex flex-col gap-2 rounded-md px-2 md:min-h-[500px]">
       {activeSideBarRoutes.map((item, index) => {
-        const fullPath = baseUrl + item.href
-        const active = item.href === `/${submodule}/${activeSideBarRouteSlug}`
+        const fullPath = props.basePath + item.href
+        const active = pathname === fullPath
         const Icon = Icons[item.icon] as React.ElementType
 
         return (
           item.href && (
             <Link
               key={index}
+              prefetch={false}
               href={item.disabled ? "#" : fullPath}
               aria-disabled={item.disabled}
             >

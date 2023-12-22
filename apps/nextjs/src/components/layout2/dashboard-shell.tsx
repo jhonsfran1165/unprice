@@ -1,84 +1,35 @@
-import React, { cache } from "react"
+import React from "react"
 
-import type { ModuleApp, SubModuleApp } from "@builderai/config"
-import { getModulesApp } from "@builderai/config"
 import { cn } from "@builderai/ui/utils"
 
-import HeaderTab from "~/components/header-tab"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
-import MenuSubTabs from "~/components/menu-subtabs"
-import SidebarNav from "~/components/sidebar"
-import SidebarMenuSubTabs from "./menu-siderbar-subtabs"
-import TabsNav from "./tabs-nav"
-
-const cachedGetModulesApp = cache(getModulesApp)
 
 // TODO: add dashboard skeleton
-export function DashboardShell<T extends ModuleApp>(props: {
-  title?: string
-  module: T
-  submodule: SubModuleApp<T>
-  action?: React.ReactNode
+export function DashboardShell(props: {
   children: React.ReactNode
   className?: string
-  description?: string
-  isLoading?: boolean
-  hideSidebar?: boolean
-  hideTabs?: boolean
+  header?: React.ReactNode
+  tabs?: React.ReactNode
+  sidebar?: React.ReactNode
+  sidebartabs?: React.ReactNode
+  subtabs?: React.ReactNode
 }) {
-  const modules = cachedGetModulesApp({
-    module: props.module,
-    submodule: props.submodule,
-  })
-
-  const newElement = React.cloneElement(
-    <React.Fragment>{props?.children ?? ""}</React.Fragment>,
-    {
-      extraProp: "Some extra prop",
-    }
-  )
-
-  const { activeTab, moduleTabs } = modules
-
-  // TODO: handle this error
-  if (!activeTab) return null
-
-  // TODO: support nested modules with dynamic routes
-
   return (
     <div className="flex grow flex-row">
-      {!props.hideTabs && moduleTabs.length > 0 && (
-        <TabsNav moduleTabs={moduleTabs} activeRoute={activeTab} />
-      )}
+      {props.tabs && props.tabs}
 
-      <main className="h-full flex-grow overflow-auto overflow-y-auto border pb-10">
-        {props.title && (
-          <HeaderTab
-            title={props.title}
-            action={props.action}
-            description={props.description}
-          />
-        )}
+      <main className="hide-scrollbar h-full flex-grow overflow-auto overflow-y-auto pb-10">
+        {props.header && props.header}
 
         <MaxWidthWrapper className="max-w-screen-2xl">
           {/* sidebar menu config */}
-          {activeTab?.sidebarMenu && (
-            <div className="flex flex-col gap-12 sm:flex-1 sm:flex-row">
-              {!props.hideSidebar && (
-                <aside className="flex flex-col sm:flex sm:w-1/4">
-                  <SidebarNav
-                    submodule={props.submodule as string}
-                    sidebarMenu={activeTab.sidebarMenu}
-                  />
-                </aside>
-              )}
+          {props.sidebar && (
+            <div className="flex flex-col gap-2 sm:flex-1 sm:flex-row">
+              <aside className="flex flex-col sm:flex sm:w-1/4">
+                {props.sidebar}
+              </aside>
               <div className="flex flex-1 flex-col sm:w-3/4">
-                {!props.hideSidebar && (
-                  <SidebarMenuSubTabs
-                    submodule={props.submodule as string}
-                    sideBarRoutes={activeTab.sidebarMenu}
-                  />
-                )}
+                {props.sidebartabs && props.sidebartabs}
                 <div className={cn("space-y-6", props.className)}>
                   {props.children}
                 </div>
@@ -87,16 +38,12 @@ export function DashboardShell<T extends ModuleApp>(props: {
           )}
 
           {/* without sidebar menu config */}
-          {!activeTab?.sidebarMenu && (
+
+          {!props.sidebar && (
             <div className="flex flex-1 flex-col">
-              {!props.hideSidebar && (
-                <MenuSubTabs
-                  submodule={props.submodule as string}
-                  activeTab={activeTab}
-                />
-              )}
+              {props.subtabs && props.subtabs}
               <div className={cn("space-y-6", props.className)}>
-                {newElement}
+                {props?.children}
               </div>
             </div>
           )}
