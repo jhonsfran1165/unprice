@@ -1,7 +1,3 @@
-"use client"
-
-import { useDroppable } from "@dnd-kit/core"
-
 import { Button } from "@builderai/ui/button"
 import {
   Dialog,
@@ -12,65 +8,44 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@builderai/ui/dialog"
+import { FileStack } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Label } from "@builderai/ui/label"
 
 export function FeatureGroupEmptyPlaceholder() {
-  const { isOver, setNodeRef } = useDroppable({
-    id: "droppable",
-  })
-  const style = {
-    color: isOver ? "green" : undefined,
-  }
-
   return (
-    <div ref={setNodeRef} style={style}>
-      <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
-        <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            className="h-10 w-10 text-muted-foreground"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="12" cy="11" r="1" />
-            <path d="M11 17a1 1 0 0 1 2 0c0 .5-.34 3-.5 4.5a.5.5 0 0 1-1 0c-.16-1.5-.5-4-.5-4.5ZM8 14a5 5 0 1 1 8 0" />
-            <path d="M17 18.5a9 9 0 1 0-10 0" />
-          </svg>
+    <div className="flex h-[500px] flex-1 items-center justify-center rounded-md border border-dashed">
+      <div className="mx-auto flex flex-col items-center justify-center text-center">
+        <FileStack className="h-8 w-8" />
 
-          <h3 className="mt-4 text-lg font-semibold">No features added</h3>
-          <p className="mb-4 mt-2 text-sm text-muted-foreground">
-            You have not added any feature. Add one below.
-          </p>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="sm" className="relative">
-                Add Feature
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Feature</DialogTitle>
-                <DialogDescription>
-                  Copy and paste the podcast feed URL to import.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="url">Podcast URL</Label>
-                  <Input id="url" placeholder="https://example.com/feed.xml" />
-                </div>
+        <h3 className="mt-4 text-lg font-semibold">No features added</h3>
+        <p className="mb-4 mt-2 text-sm text-muted-foreground">
+          You have not added any feature. Add one below.
+        </p>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button size="sm" className="relative">
+              Add Feature
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Feature</DialogTitle>
+              <DialogDescription>
+                Copy and paste the podcast feed URL to import.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="url">Podcast URL</Label>
+                <Input id="url" placeholder="https://example.com/feed.xml" />
               </div>
-              <DialogFooter>
-                <Button>Import Podcast</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+            </div>
+            <DialogFooter>
+              <Button>Import Podcast</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

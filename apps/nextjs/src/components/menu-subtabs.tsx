@@ -1,8 +1,12 @@
+"use client"
+
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+
 import type { SubTabsRoutes } from "@builderai/config/types"
 import { createIcon } from "@builderai/config/types"
+import { buttonVariants } from "@builderai/ui/button"
 import { cn } from "@builderai/ui/utils"
-
-import SubTab from "./subtab"
 
 export default function MenuSubTabs({
   basePath,
@@ -13,32 +17,36 @@ export default function MenuSubTabs({
   activeSubTabs?: SubTabsRoutes
   className?: string
 }) {
+  const pathname = usePathname()
+
   if (!activeSubTabs) return null
 
   return (
-    <>
-      <div
-        className={cn(
-          "mb-10 inline-flex h-12 items-center border-b text-muted-foreground",
-          className
-        )}
-      >
-        {Object.entries(activeSubTabs).map(([index, item]) => {
-          const Icon = item?.icon && createIcon(item?.icon)
-          const href = `${basePath}/${index}`
+    <div className={cn("mb-15 group flex flex-row space-x-2 py-2", className)}>
+      {Object.entries(activeSubTabs).map(([index, item]) => {
+        const Icon = item?.icon && createIcon(item?.icon)
+        const href = `${basePath}/${index}`
+        const active = href === pathname
 
-          return (
-            <SubTab
-              key={index}
-              className="rounded-t-lg border border-transparent px-6 py-3 text-base font-semibold"
-              classNameActive="border-background-border bg-background border-b-background-base border-b-2 text-background-text"
-              href={href}
-              icon={Icon && <Icon className="mr-2 h-4 w-4" />}
-              title={item.title}
-            />
-          )
-        })}
-      </div>
-    </>
+        return (
+          <Link
+            key={index}
+            href={href}
+            className={cn(
+              buttonVariants({
+                variant: active ? "outline" : "ghost",
+                size: "sm",
+              }),
+              {
+                "bg-background-bgHover text-background-text": active,
+              }
+            )}
+          >
+            {Icon && <Icon className="mr-2 h-4 w-4" />}
+            <span className={"ml-auto"}>{item.title}</span>
+          </Link>
+        )
+      })}
+    </div>
   )
 }

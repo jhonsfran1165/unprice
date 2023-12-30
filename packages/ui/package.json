@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-avatar": "^1.0.3",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.4",
@@ -28,7 +29,9 @@
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
     "lucide-react": "0.268.0",
+    "react-resizable-panels": "^1.0.5",
     "tailwind-merge": "^1.14.0",
+    "vaul": "^0.8.0",
     "zod": "^3.22.1"
   },
   "peerDependencies": {
@@ -72,6 +75,9 @@
     "./loading-animation": "./src/loading-animation.tsx",
     "./utils": "./src/utils/index.ts",
     "./skeleton": "./src/skeleton.tsx",
+    "./resizable": "./src/resizable.tsx",
+    "./drawer": "./src/drawer.tsx",
+    "./accordion": "./src/accordion.tsx",
     "./badge": "./src/badge.tsx",
     "./tooltip": "./src/tooltip.tsx",
     "./separator": "./src/separator.tsx",

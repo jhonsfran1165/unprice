@@ -1,14 +1,14 @@
 import type { UniqueIdentifier } from "@dnd-kit/core"
-import { useSortable } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
-import { cva } from "class-variance-authority"
-import { GripVertical } from "lucide-react"
 
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
-import { Card, CardContent, CardHeader } from "@builderai/ui/card"
+import { Trash2 } from "@builderai/ui/icons"
+import { cn } from "@builderai/ui/utils"
 
 import type { defaultCols } from "./drag-drop"
+import { Draggable } from "./draggable"
+import { FeatureForm } from "./feature-form"
+import type { Id } from "./types"
 
 export type ColumnId = (typeof defaultCols)[number]["id"]
 
@@ -21,6 +21,7 @@ export interface Task {
 interface TaskCardProps {
   task: Task
   isOverlay?: boolean
+  deleteTask: (id: Id) => void
 }
 
 export type TaskType = "Task"
@@ -30,64 +31,45 @@ export interface TaskDragData {
   task: Task
 }
 
-export function TaskCard({ task, isOverlay }: TaskCardProps) {
-  const {
-    setNodeRef,
-    attributes,
-    listeners,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: task.id,
-    data: {
-      type: "Task",
-      task,
-    } satisfies TaskDragData,
-    attributes: {
-      roleDescription: "Task",
-    },
-  })
-
-  const style = {
-    transition,
-    transform: CSS.Translate.toString(transform),
-  }
-
-  const variants = cva("", {
-    variants: {
-      dragging: {
-        over: "ring-2 opacity-30",
-        overlay: "ring-2 ring-primary",
-      },
-    },
-  })
-
+export function TaskCard({ task, deleteTask }: TaskCardProps) {
   return (
-    <Card
-      ref={setNodeRef}
-      style={style}
-      className={variants({
-        dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
-      })}
-    >
-      <CardHeader className="space-between relative flex flex-row border-b-2 border-secondary px-3 py-3">
-        <Button
-          variant={"ghost"}
-          {...attributes}
-          {...listeners}
-          className="-ml-2 h-auto cursor-grab p-1 text-secondary-foreground/50"
-        >
-          <span className="sr-only">Move task</span>
-          <GripVertical />
-        </Button>
-        <Badge variant={"outline"} className="ml-auto font-semibold">
-          Task
-        </Badge>
-      </CardHeader>
-      <CardContent className="whitespace-pre-wrap px-3 pb-6 pt-3 text-left">
-        {task.content}
-      </CardContent>
-    </Card>
+    <Draggable name={task.content} taskId={task.id.toString()}>
+      <div
+        className={cn(
+          "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent"
+        )}
+      >
+        <div className="flex w-full flex-col gap-1">
+          <div className="flex items-center">
+            <div className="flex items-center gap-2">
+              <div className="font-semibold">{task.content}</div>
+            </div>
+            <div className={"ml-auto flex items-center"}>
+              <Badge className="mr-2">metered</Badge>
+              <FeatureForm />
+              <Button
+                onClick={() => deleteTask(task.id)}
+                variant="ghost"
+                size={"icon"}
+                className="h-8 w-8"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">delete of plan</span>
+              </Button>
+            </div>
+          </div>
+          <div className="text-xs font-medium">{task.content}</div>
+        </div>
+        <div className="line-clamp-2 text-xs text-muted-foreground">
+          {"jakshdk jasdkjhasdk jhaskdjh askdjhasdkjhadkjahsdk ajsdhkasjhsdaks jdhaskjdhaskdjhaskdj askdjhasdkjhasd askjhdas".substring(
+            0,
+            300
+          )}
+        </div>
+        <div className={cn("ml-auto flex items-center text-xs")}>
+          1000 calls per $5 USD
+        </div>
+      </div>
+    </Draggable>
   )
 }

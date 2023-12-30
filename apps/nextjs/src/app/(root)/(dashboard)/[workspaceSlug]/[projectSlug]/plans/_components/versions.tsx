@@ -12,19 +12,7 @@ import { cn } from "@builderai/ui/utils"
 
 export type Versions = (typeof versions)[number]
 
-export const versions = [
-  "v10",
-  "v9",
-  "v8",
-  "v7",
-  "v6",
-  "v5",
-  "v4",
-  "v3",
-  "v2",
-  "v1",
-  "v0",
-]
+export const versions = ["v0", "v10"]
 
 interface VersionProps extends React.HTMLAttributes<HTMLDivElement> {
   versions: Versions[]
@@ -41,7 +29,7 @@ export function Versions({
   return (
     <div
       className={cn(
-        "inset-x-0 right-0 top-0 z-30 block w-16 items-center justify-start overflow-y-auto rounded-sm border-l bg-background px-2 py-20 transition-all md:right-4",
+        "inset-x-0 right-0 top-0 z-30 block w-12 items-center justify-start overflow-y-auto rounded-sm border-l bg-background px-2 py-20 transition-all md:right-4",
         className
       )}
     >
@@ -60,8 +48,9 @@ export function Versions({
                       className={cn(
                         buttonVariants({
                           variant: active ? "secondary" : "ghost",
-                          size: "sm",
-                        })
+                          size: "icon",
+                        }),
+                        "h-8 w-8 text-xs"
                       )}
                     >
                       {version}

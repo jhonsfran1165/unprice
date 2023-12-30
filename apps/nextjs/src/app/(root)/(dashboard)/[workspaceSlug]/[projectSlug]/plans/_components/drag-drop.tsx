@@ -14,46 +14,35 @@ import { createPortal } from "react-dom"
 
 import { Button } from "@builderai/ui/button"
 import { Add } from "@builderai/ui/icons"
-import { ScrollArea } from "@builderai/ui/scroll-area"
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@builderai/ui/resizable"
 import { Separator } from "@builderai/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
 import { BoardColumn } from "./BoardColumn"
 import type { ColumnId } from "./feature-card"
 import { TaskCard } from "./feature-card"
-import { FeatureGroupEmptyPlaceholder } from "./feature-group-place-holder"
 import type { Column, Id, Task } from "./types"
+
+function generateId() {
+  /* Generate a random number between 0 and 10000 */
+  return Math.floor(Math.random() * 10001)
+}
 
 export const defaultCols: Column[] = [
   {
-    id: "todo",
-    title: "Todo",
-  },
-  {
-    id: "doing",
-    title: "Work in progress",
-  },
-  {
-    id: "done",
-    title: "Done",
+    id: "base",
+    title: "Base Features",
   },
 ]
 
 const defaultTasks: Task[] = [
   {
-    id: "1",
-    columnId: "todo",
-    content: "List admin APIs for dashboard",
-  },
-  {
-    id: "2",
-    columnId: "done",
-    content: "Deliver dashboard prototype",
-  },
-  {
-    id: "3",
-    columnId: "doing",
-    content: "Design and implement responsive UI",
+    id: "0",
+    columnId: "base",
+    content: "Feature test",
   },
 ]
 
@@ -231,90 +220,67 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
       onDragEnd={onDragEnd}
       onDragOver={onDragOver}
     >
-      <div className="grid grid-cols-12">
-        <div className="col-span-9 border-l">
-          <div className="h-full px-4 py-6 lg:px-8">
-            <Tabs defaultValue="music" className="h-full space-y-6">
-              <div className="space-between flex items-center">
-                <TabsList>
-                  <TabsTrigger value="music" className="relative">
-                    Features
-                  </TabsTrigger>
-                  <TabsTrigger value="podcasts">Addons</TabsTrigger>
-                  <TabsTrigger value="live" disabled>
-                    Preview
-                  </TabsTrigger>
-                </TabsList>
-                <div className="ml-auto mr-4">
-                  <Button>
-                    <Add className="mr-2 h-4 w-4" />
-                    Add feature group
-                  </Button>
-                </div>
+      <ResizablePanelGroup direction="horizontal" className="h-full w-full">
+        <ResizablePanel defaultSize={80} minSize={50}>
+          <div className="p-4">
+            <div className="flex flex-row items-center justify-between">
+              <div className="flex w-full flex-col align-middle">
+                <h2 className="text-xl font-semibold tracking-tight">
+                  Add the features of your plan
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Base features of the plan
+                </p>
               </div>
-              <TabsContent
-                value="music"
-                className="border-none p-0 outline-none"
-              >
-                <ScrollArea>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <h2 className="text-2xl font-semibold tracking-tight">
-                        Base package
-                      </h2>
-                      <p className="text-sm text-muted-foreground">
-                        Base features of the plan
-                      </p>
-                    </div>
-                  </div>
-                  <Separator className="my-4" />
-                  {"document" in window &&
-                    createPortal(
-                      <DragOverlay>
-                        {activeTask && <TaskCard task={activeTask} isOverlay />}
-                      </DragOverlay>,
-                      document.body
-                    )}
-                  <FeatureGroupEmptyPlaceholder />
-                  <SortableContext items={columnsId}>
-                    {columns.map((col) => (
-                      <BoardColumn
-                        key={col.id}
-                        column={col}
-                        tasks={tasks.filter((task) => task.columnId === col.id)}
-                      />
-                    ))}
-                  </SortableContext>
-                </ScrollArea>
-              </TabsContent>
-              <TabsContent
-                value="podcasts"
-                className="h-full flex-col border-none p-0 data-[state=active]:flex"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <h2 className="text-2xl font-semibold tracking-tight">
-                      Addons Feature
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                      Addons that a user can add to the plan
-                    </p>
-                  </div>
-                </div>
-                <Separator className="my-4" />
-                <FeatureGroupEmptyPlaceholder />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
+              <div className="flex w-full justify-end">
+                <Button
+                  onClick={() => {
+                    createNewColumn()
+                  }}
+                  variant={"outline"}
+                  size={"sm"}
+                >
+                  <Add className="mr-2 h-4 w-4" />
+                  Add feature group
+                </Button>
+              </div>
+            </div>
 
-        <div className="col-span-3 border-l">{children}</div>
-      </div>
+            {"document" in window &&
+              createPortal(
+                <DragOverlay>
+                  {activeTask && (
+                    <TaskCard
+                      deleteTask={deleteTask}
+                      task={activeTask}
+                      isOverlay
+                    />
+                  )}
+                </DragOverlay>,
+                document.body
+              )}
+          </div>
+          <Separator />
+          <div className="flex flex-col gap-4 p-4">
+            <SortableContext items={columnsId}>
+              {columns.map((col) => (
+                <BoardColumn
+                  key={col.id}
+                  deleteColumn={deleteColumn}
+                  updateColumn={updateColumn}
+                  deleteTask={deleteTask}
+                  column={col}
+                  tasks={tasks.filter((task) => task.columnId === col.id)}
+                />
+              ))}
+            </SortableContext>
+          </div>
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={30} minSize={20}>
+          {children}
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </DndContext>
   )
-}
-
-function generateId() {
-  /* Generate a random number between 0 and 10000 */
-  return Math.floor(Math.random() * 10001)
 }

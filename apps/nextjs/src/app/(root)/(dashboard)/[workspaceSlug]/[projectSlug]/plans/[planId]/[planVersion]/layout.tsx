@@ -3,8 +3,9 @@ import Link from "next/link"
 
 import type { SubTabsRoutes } from "@builderai/config/types"
 import { Badge } from "@builderai/ui/badge"
+import { Button } from "@builderai/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@builderai/ui/card"
-import { ChevronLeft } from "@builderai/ui/icons"
+import { Add, ChevronLeft } from "@builderai/ui/icons"
 
 import { DashboardShell } from "~/components/layout2/dashboard-shell"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
@@ -45,31 +46,33 @@ export default async function PriceLayout(props: {
     <>
       <DashboardShell
         header={
-          <MaxWidthWrapper className="max-w-screen-2xl pt-10">
-            <div className="mb-6 flex justify-start align-middle">
+          <MaxWidthWrapper className="max-w-screen-2xl pt-8">
+            <div className="mb-6 flex justify-between align-middle">
               <Link
-                className="ghost flex items-center justify-start align-middle text-sm"
+                className="flex items-center justify-start align-middle text-sm"
                 prefetch={false}
                 href={`/${workspaceSlug}/${projectSlug}/plans`}
               >
-                <Badge variant={"outline"} className="ghost py-1">
+                <Badge variant={"outline"} className="py-1">
                   <ChevronLeft className="h-4 w-4" />
                   back
                 </Badge>
               </Link>
+              <Button>
+                <Add className="mr-2 h-4 w-4" />
+                Create a new version
+              </Button>
             </div>
+
             <Card className="mb-10">
               <CardHeader className="flex flex-row items-center justify-between space-y-4 pb-2">
                 <CardTitle className="flex text-2xl font-medium">
-                  {plan?.title.toUpperCase()}
-                  <Badge className="ml-2" variant={"outline"}>
-                    version: {planVersion}
-                  </Badge>
+                  {`${plan?.title.toUpperCase()}:${planVersion.toUpperCase()}`}
                 </CardTitle>
 
                 <div className="flex space-x-2">
-                  <Badge>{plan?.currency}</Badge>
-                  <Badge>monthly</Badge>
+                  <Badge variant={"outline"}>{plan?.currency}</Badge>
+                  <Badge variant={"outline"}>monthly</Badge>
                 </div>
               </CardHeader>
 
@@ -84,7 +87,6 @@ export default async function PriceLayout(props: {
         }
         subtabs={
           <MenuSubTabs
-            className="mb-0"
             basePath={`/${workspaceSlug}/${projectSlug}/plans/${planId}/${planVersion}`}
             activeSubTabs={subtabs}
           />
