@@ -1,6 +1,5 @@
 "use client"
 
-import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import { Add, Search } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
@@ -8,42 +7,37 @@ import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 import { cn } from "@builderai/ui/utils"
 
-import { Draggable } from "./draggable"
-import { SheetDemo } from "./feature-config-form"
+import type { Feature } from "./feature-card"
+import { FeatureCard } from "./feature-card"
 
-export type Features = (typeof features)[number]
-
-export const features = [
-  "Recently Added",
-  "Recently Played",
-  "Top Songs",
-  "Top Albums",
-  "Top Artists",
-  "Logic Discography",
-  "Bedtime Beats",
-  "Feeling Happy",
-  "I miss Y2K Pop",
-  "Runtober",
-  "Mellow Days",
-  "Eminem Essentials",
-  "Eminem Essentials",
-  "Eminem Essentials",
-  "Eminem Essentials",
-  "Eminem Essentials",
-  "Eminem Essentials",
-  "Eminem Essentials",
-  "Eminem Essentials",
-  "Eminem Essentials",
-  "Eminem Essentials",
-  "Eminem Essentials",
-  "Eminem Essentials",
+export const features: Feature[] = [
+  {
+    id: "0",
+    content: "Feature test 1",
+    type: "metered",
+  },
+  {
+    id: "1",
+    content: "Feature test 2",
+    type: "metered",
+  },
+  {
+    id: "2",
+    content: "Feature test 3",
+    type: "metered",
+  },
+  {
+    id: "3",
+    content: "Feature test 4",
+    type: "metered",
+  },
 ]
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-  features: Features[]
+interface FeaturesProps extends React.HTMLAttributes<HTMLDivElement> {
+  features: Feature[]
 }
 
-export function Features({ className, features }: SidebarProps) {
+export function Features({ className, features }: FeaturesProps) {
   return (
     <div className={cn(className)}>
       <div className="flex items-center px-4 py-2">
@@ -64,34 +58,8 @@ export function Features({ className, features }: SidebarProps) {
       <ScrollArea className="h-[500px] w-full">
         <div className="px-4 py-2">
           <div className="space-y-2">
-            {features?.map((playlist, i) => (
-              <Draggable
-                name={playlist}
-                taskId={i.toString()}
-                key={`${playlist}-${i}`}
-              >
-                <div
-                  className={
-                    "flex flex-col items-start gap-4 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent"
-                  }
-                >
-                  <div className="flex w-full flex-col gap-1">
-                    <div className="flex items-center">
-                      <div className="font-semibold">{playlist}</div>
-                      <div className={cn("ml-auto")}>
-                        <SheetDemo />
-                      </div>
-                    </div>
-                    <div className="text-xs font-medium">
-                      1000 calls per $5 USD
-                    </div>
-                  </div>
-
-                  <div className="flex w-full items-center justify-end gap-2">
-                    <Badge variant={"outline"}>metered</Badge>
-                  </div>
-                </div>
-              </Draggable>
+            {features?.map((feature) => (
+              <FeatureCard isFeature key={feature.id} feature={feature} />
             ))}
           </div>
         </div>

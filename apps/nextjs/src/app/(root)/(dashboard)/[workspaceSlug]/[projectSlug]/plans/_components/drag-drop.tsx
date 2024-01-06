@@ -1,17 +1,28 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import type { DragEndEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/core"
+import type {
+  DragEndEvent,
+  DragOverEvent,
+  DragStartEvent,
+  DropAnimation,
+} from "@dnd-kit/core"
 import {
+  defaultDropAnimationSideEffects,
   DndContext,
   DragOverlay,
   PointerSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
-import { arrayMove, SortableContext } from "@dnd-kit/sortable"
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
 import { createPortal } from "react-dom"
 
+import { Accordion } from "@builderai/ui/accordion"
 import { Button } from "@builderai/ui/button"
 import { Add } from "@builderai/ui/icons"
 import {
@@ -22,9 +33,9 @@ import {
 import { Separator } from "@builderai/ui/separator"
 
 import { BoardColumn } from "./BoardColumn"
-import type { ColumnId } from "./feature-card"
-import { TaskCard } from "./feature-card"
-import type { Column, Id, Task } from "./types"
+import type { Feature } from "./feature-card"
+import { FeatureCard } from "./feature-card"
+import type { Column, Id } from "./types"
 
 function generateId() {
   /* Generate a random number between 0 and 10000 */
@@ -38,23 +49,29 @@ export const defaultCols: Column[] = [
   },
 ]
 
-const defaultTasks: Task[] = [
-  {
-    id: "0",
-    columnId: "base",
-    content: "Feature test",
-  },
-]
+const defaultFeatures: Feature[] = []
+
+const dropAnimation: DropAnimation = {
+  sideEffects: defaultDropAnimationSideEffects({
+    styles: {
+      active: {
+        opacity: "0.5",
+      },
+    },
+  }),
+}
 
 export default function DragDrop({ children }: { children: React.ReactNode }) {
   const [columns, setColumns] = useState<Column[]>(defaultCols)
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns])
 
-  const [tasks, setTasks] = useState<Task[]>(defaultTasks)
+  const [features, setFeatures] = useState<Feature[]>(defaultFeatures)
+
+  console.log("features", features)
 
   const [activeColumn, setActiveColumn] = useState<Column | null>(null)
 
-  const [activeTask, setActiveTask] = useState<Task | null>(null)
+  const [activeFeature, setActiveFeature] = useState<Feature | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -64,28 +81,18 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
     })
   )
 
-  function createTask(columnId: Id) {
-    const newTask: Task = {
-      id: generateId(),
-      columnId,
-      content: `Task ${tasks.length + 1}`,
-    }
-
-    setTasks([...tasks, newTask])
+  function deleteFeature(id: Id) {
+    const newFeature = features.filter((feature) => feature.id !== id)
+    setFeatures(newFeature)
   }
 
-  function deleteTask(id: Id) {
-    const newTasks = tasks.filter((task) => task.id !== id)
-    setTasks(newTasks)
-  }
-
-  function updateTask(id: Id, content: string) {
-    const newTasks = tasks.map((task) => {
-      if (task.id !== id) return task
-      return { ...task, content }
+  function updateFeature(id: Id, content: string) {
+    const newFeature = features.map((feature) => {
+      if (feature.id !== id) return feature
+      return { ...feature, content }
     })
 
-    setTasks(newTasks)
+    setFeatures(newFeature)
   }
 
   function createNewColumn() {
@@ -101,8 +108,8 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
     const filteredColumns = columns.filter((col) => col.id !== id)
     setColumns(filteredColumns)
 
-    const newTasks = tasks.filter((t) => t.columnId !== id)
-    setTasks(newTasks)
+    const newFeature = features.filter((t) => t.columnId !== id)
+    setFeatures(newFeature)
   }
 
   function updateColumn(id: Id, title: string) {
@@ -115,14 +122,13 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
   }
 
   function onDragStart(event: DragStartEvent) {
-    console.log(event)
     if (event.active.data.current?.type === "Column") {
       setActiveColumn(event.active.data.current.column)
       return
     }
 
-    if (event.active.data.current?.type === "Task") {
-      setActiveTask(event.active.data.current.task)
+    if (event.active.data.current?.type === "Feature") {
+      setActiveFeature(event.active.data.current.feature)
       return
     }
   }
@@ -130,7 +136,7 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
   function onDragEnd(event: DragEndEvent) {
     console.log("DRAG END")
     setActiveColumn(null)
-    setActiveTask(null)
+    setActiveFeature(null)
 
     const { active, over } = event
     if (!over) return
@@ -166,49 +172,57 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
     const activeData = active.data.current
     const overData = over.data.current
 
-    const isActiveATask = activeData?.type === "Task"
-    const isOverATask = activeData?.type === "Task"
+    const isActiveAFeature = activeData?.type === "Feature"
+    const isOverAFeature = activeData?.type === "Feature"
 
-    console.log("DRAG OVER", { isOverATask, isActiveATask })
+    console.log("DRAG OVER", { activeData, overData, features })
 
-    if (!isActiveATask) return
+    if (features.length === 0 && activeFeature) {
+      setFeatures([{ ...activeFeature, columnId: overId }])
+    }
 
-    // Im dropping a Task over another Task
-    if (isActiveATask && isOverATask) {
-      setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((t) => t.id === activeId)
-        const overIndex = tasks.findIndex((t) => t.id === overId)
-        const activeTask = tasks[activeIndex]
-        const overTask = tasks[overIndex]
+    if (!isActiveAFeature) return
+
+    // Im dropping a Feature over another Feature
+    if (isActiveAFeature && isOverAFeature) {
+      setFeatures((features) => {
+        const activeIndex = features.findIndex((t) => t.id === activeId)
+        const overIndex = features.findIndex((t) => t.id === overId)
+        const activeFeature = features[activeIndex]
+        const overFeature = features[overIndex]
         if (
-          activeTask &&
-          overTask &&
-          activeTask.columnId !== overTask.columnId
+          activeFeature &&
+          overFeature &&
+          activeFeature.columnId !== overFeature.columnId
         ) {
-          activeTask.columnId = overTask.columnId
-          return arrayMove(tasks, activeIndex, overIndex - 1)
+          activeFeature.columnId = overFeature.columnId
+          return arrayMove(features, activeIndex, overIndex - 1)
         }
 
-        return arrayMove(tasks, activeIndex, overIndex)
+        return arrayMove(features, activeIndex, overIndex)
       })
     }
 
     const isOverAColumn = overData?.type === "Column"
 
-    console.log("DRAG OVER", { isOverAColumn, isActiveATask })
+    console.log("DRAG OVER", { isOverAColumn, isActiveAFeature })
 
-    // Im dropping a Task over a column
-    if (isActiveATask && isOverAColumn) {
-      setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((t) => t.id === activeId)
-        const activeTask = tasks[activeIndex]
+    console.log(
+      "isActiveAFeature && isOverAColumn",
+      isActiveAFeature && isOverAColumn
+    )
+    // Im dropping a Feature over a column
+    if (isActiveAFeature && isOverAColumn) {
+      setFeatures((features) => {
+        const activeIndex = features.findIndex((t) => t.id === activeId)
+        const activeFeature = features[activeIndex]
 
-        if (activeTask) {
-          activeTask.columnId = overId as ColumnId
-          return arrayMove(tasks, activeIndex, activeIndex)
+        if (activeFeature) {
+          activeFeature.columnId = overId
+          return arrayMove(features, activeIndex, activeIndex)
         }
 
-        return [...tasks, activeData.task]
+        return [...features, activeData.feature]
       })
     }
   }
@@ -245,36 +259,41 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
                 </Button>
               </div>
             </div>
-
-            {"document" in window &&
-              createPortal(
-                <DragOverlay>
-                  {activeTask && (
-                    <TaskCard
-                      deleteTask={deleteTask}
-                      task={activeTask}
-                      isOverlay
-                    />
-                  )}
-                </DragOverlay>,
-                document.body
-              )}
           </div>
           <Separator />
           <div className="flex flex-col gap-4 p-4">
-            <SortableContext items={columnsId}>
-              {columns.map((col) => (
-                <BoardColumn
-                  key={col.id}
-                  deleteColumn={deleteColumn}
-                  updateColumn={updateColumn}
-                  deleteTask={deleteTask}
-                  column={col}
-                  tasks={tasks.filter((task) => task.columnId === col.id)}
-                />
-              ))}
-            </SortableContext>
+            <Accordion type="multiple">
+              <SortableContext
+                items={columnsId}
+                strategy={verticalListSortingStrategy}
+              >
+                {columns.map((col) => (
+                  <BoardColumn
+                    key={col.id}
+                    deleteColumn={deleteColumn}
+                    updateColumn={updateColumn}
+                    deleteFeature={deleteFeature}
+                    column={col}
+                    features={features.filter(
+                      (feature) => feature.columnId === col.id
+                    )}
+                  />
+                ))}
+              </SortableContext>
+            </Accordion>
           </div>
+          {"document" in window &&
+            createPortal(
+              <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
+                {activeFeature && (
+                  <FeatureCard
+                    deleteFeature={deleteFeature}
+                    feature={activeFeature}
+                  />
+                )}
+              </DragOverlay>,
+              document.body
+            )}
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={30} minSize={20}>

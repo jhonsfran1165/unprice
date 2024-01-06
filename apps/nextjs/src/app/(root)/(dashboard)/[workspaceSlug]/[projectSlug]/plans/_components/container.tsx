@@ -108,7 +108,7 @@ function ColumnContainer({
       <div className="flex w-full flex-grow flex-col gap-4 overflow-y-auto overflow-x-hidden p-2">
         <SortableContext items={tasksIds}>
           {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
+            <TaskCard key={task.id} task={task} isOverlay />
           ))}
         </SortableContext>
       </div>

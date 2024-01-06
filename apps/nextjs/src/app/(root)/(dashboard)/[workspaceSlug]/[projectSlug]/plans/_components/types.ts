@@ -1,11 +1,13 @@
-export type Id = string | number
+import type { UniqueIdentifier } from "@dnd-kit/core"
 
-export type Column = {
+export type Id = UniqueIdentifier
+
+export interface Column {
   id: Id
   title: string
 }
 
-export type Task = {
+export interface Task {
   id: Id
   columnId: Id
   content: string

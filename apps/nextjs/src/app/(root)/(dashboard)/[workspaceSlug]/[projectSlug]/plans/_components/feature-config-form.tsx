@@ -1,5 +1,5 @@
 import { Button } from "@builderai/ui/button"
-import { Settings } from "@builderai/ui/icons"
+import { Pencil } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Label } from "@builderai/ui/label"
 import {
@@ -18,7 +18,7 @@ export function SheetDemo() {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" size={"icon"} className="h-8 w-8">
-          <Settings className="h-4 w-4" />
+          <Pencil className="h-4 w-4" />
           <span className="sr-only">configure</span>
         </Button>
       </SheetTrigger>

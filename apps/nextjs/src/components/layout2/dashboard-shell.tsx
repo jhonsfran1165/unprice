@@ -18,7 +18,7 @@ export function DashboardShell(props: {
     <div className="flex grow flex-row">
       {props.tabs && props.tabs}
 
-      <main className="hide-scrollbar h-full flex-grow overflow-auto overflow-y-auto pb-10">
+      <main className="hide-scrollbar h-full flex-grow overflow-auto overflow-y-auto border pb-10">
         {props.header && props.header}
 
         <MaxWidthWrapper className="max-w-screen-2xl">

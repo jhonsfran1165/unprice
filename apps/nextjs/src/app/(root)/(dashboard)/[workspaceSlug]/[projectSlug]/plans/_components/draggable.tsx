@@ -2,30 +2,37 @@ import React from "react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
-import type { TaskDragData } from "./feature-card"
+import { cn } from "@builderai/ui/utils"
+
+import type { Feature, TaskDragData } from "./feature-card"
 
 export function Draggable(props: {
   children: React.ReactNode
-  taskId: string
-  name: string
+  feature: Feature
   className?: string
-  isOverlay?: boolean
+  isFeature?: boolean
 }) {
-  const { setNodeRef, attributes, listeners, transform, transition } =
-    useSortable({
-      id: props.taskId,
-      data: {
-        type: "Task",
-        task: {
-          id: props.taskId,
-          columnId: "features",
-          content: props.name,
-        },
-      } satisfies TaskDragData,
-      attributes: {
-        roleDescription: "Task",
-      },
-    })
+  const {
+    setNodeRef,
+    setActivatorNodeRef,
+    listeners,
+    isDragging,
+    isSorting,
+    over,
+    overIndex,
+    attributes,
+    transform,
+    transition,
+  } = useSortable({
+    id: props.feature.id.toString(),
+    data: {
+      type: "Feature",
+      feature: props.feature,
+    } satisfies TaskDragData,
+    attributes: {
+      roleDescription: "Feature",
+    },
+  })
 
   const style = {
     transition,
@@ -39,7 +46,10 @@ export function Draggable(props: {
       style={style}
       {...attributes}
       {...listeners}
-      className={props.className}
+      className={cn(props.className, {
+        "cursor-pointer": props.isFeature,
+        "cursor-default": !props.isFeature,
+      })}
     >
       {props.children}
     </div>
