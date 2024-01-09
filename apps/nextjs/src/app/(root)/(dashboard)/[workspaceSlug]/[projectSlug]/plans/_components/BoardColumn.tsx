@@ -18,6 +18,7 @@ import { Button } from "@builderai/ui/button"
 import { Trash2 } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
+import { cn } from "@builderai/ui/utils"
 
 import { DroppableContainer } from "./droppable"
 import type { Feature } from "./feature-card"
@@ -39,6 +40,7 @@ interface BoardColumnProps {
   column: Column
   features: Feature[]
   isOverlay?: boolean
+  disabled?: boolean
   deleteColumn: (id: Id) => void
   deleteFeature: (id: Id) => void
   updateColumn: (id: Id, title: string) => void
@@ -48,6 +50,7 @@ export function BoardColumn({
   column,
   features,
   isOverlay,
+  disabled,
   deleteColumn,
   updateColumn,
   deleteFeature,
@@ -58,14 +61,11 @@ export function BoardColumn({
 
   const [isEditing, setIsEditing] = useState(false)
 
-  console.log("features", features)
-
   const {
-    active,
     attributes,
     isDragging,
+    isOver,
     listeners,
-    over,
     setNodeRef,
     transition,
     transform,
@@ -81,23 +81,17 @@ export function BoardColumn({
     animateLayoutChanges,
   })
 
-  // const isOverContainer = over
-  //   ? (column.id === over.id && active?.data.current?.type !== "Column") ||
-  //     features.includes(over.id)
-  //   : false
-
   const style = {
     transition,
     transform: CSS.Translate.toString(transform),
-    opacity: isDragging ? 0.5 : undefined,
+    opacity: isDragging ? 0.5 : 1,
   }
 
   const variants = cva(
-    "h-[500px] max-h-[500px] w-full border rounded-sm flex flex-col flex-shrink-0 snap-center space-y-2 bg-background-base",
+    "w-full border rounded-sm flex flex-col flex-shrink-0 snap-center space-y-2",
     {
       variants: {
         dragging: {
-          default: "border-2 border-transparent",
           over: "ring-2 opacity-30",
           overlay: "ring-2 ring-primary",
         },
@@ -107,14 +101,17 @@ export function BoardColumn({
 
   return (
     <AccordionItem
-      ref={setNodeRef}
-      // ref={disabled ? undefined : setNodeRef}
+      ref={disabled ? undefined : setNodeRef}
       value={column.id.toString()}
-      className="border-b-0"
       style={style}
+      className={cn(
+        variants({
+          dragging: isOverlay ? "overlay" : isOver ? "over" : undefined,
+        })
+      )}
     >
       <AccordionTrigger className="p-2">
-        <div className=" flex w-full flex-row items-center justify-between space-x-2 space-y-0  font-semibold">
+        <div className="flex w-full flex-row items-center justify-between space-x-2 space-y-0 font-semibold">
           <Button
             variant={"ghost"}
             size={"sm"}
@@ -163,15 +160,15 @@ export function BoardColumn({
           </Button>
         </div>
       </AccordionTrigger>
-      <AccordionContent>
-        <ScrollArea className="flex flex-col">
-          <DroppableContainer
-            className="my-2 h-[600px] rounded-md border bg-background"
-            column={column}
-          >
-            <div className="flex flex-col gap-2 p-2">
-              {features.length === 0 && <FeatureGroupEmptyPlaceholder />}
-              <SortableContext items={featuresIds}>
+      <AccordionContent className="p-2">
+        {/* TODO: add variant for empty state and to get min height */}
+        {/* TODO: fix scroll */}
+        <DroppableContainer column={column} isEmpty={features.length === 0}>
+          <ScrollArea>
+            {features.length === 0 && <FeatureGroupEmptyPlaceholder />}
+            {/* here we can pass the features from the drap and drop as a children */}
+            <SortableContext items={featuresIds}>
+              <div className="flex flex-col gap-2">
                 {features.map((feature) => (
                   <FeatureCard
                     deleteFeature={deleteFeature}
@@ -179,10 +176,10 @@ export function BoardColumn({
                     feature={feature}
                   />
                 ))}
-              </SortableContext>
-            </div>
-          </DroppableContainer>
-        </ScrollArea>
+              </div>
+            </SortableContext>
+          </ScrollArea>
+        </DroppableContainer>
       </AccordionContent>
     </AccordionItem>
   )

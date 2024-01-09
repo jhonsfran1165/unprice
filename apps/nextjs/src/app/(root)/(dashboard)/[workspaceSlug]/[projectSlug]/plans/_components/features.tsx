@@ -31,6 +31,41 @@ export const features: Feature[] = [
     content: "Feature test 4",
     type: "metered",
   },
+  {
+    id: "4",
+    content: "Feature test 5",
+    type: "metered",
+  },
+  {
+    id: "5",
+    content: "Feature test 6",
+    type: "metered",
+  },
+  {
+    id: "6",
+    content: "Feature test 7",
+    type: "metered",
+  },
+  {
+    id: "7",
+    content: "Feature test 8",
+    type: "metered",
+  },
+  {
+    id: "8",
+    content: "Feature test 9",
+    type: "metered",
+  },
+  {
+    id: "9",
+    content: "Feature test 10",
+    type: "metered",
+  },
+  {
+    id: "10",
+    content: "Feature test 11",
+    type: "metered",
+  },
 ]
 
 interface FeaturesProps extends React.HTMLAttributes<HTMLDivElement> {

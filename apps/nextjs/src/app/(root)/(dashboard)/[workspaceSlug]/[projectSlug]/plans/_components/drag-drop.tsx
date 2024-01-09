@@ -262,7 +262,8 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
           </div>
           <Separator />
           <div className="flex flex-col gap-4 p-4">
-            <Accordion type="multiple">
+            <Accordion type="multiple" className="space-y-2">
+              {/* context for columns */}
               <SortableContext
                 items={columnsId}
                 strategy={verticalListSortingStrategy}
