@@ -14,7 +14,7 @@ import { Label } from "@builderai/ui/label"
 
 export function FeatureGroupEmptyPlaceholder() {
   return (
-    <div className="flex h-[500px] items-center justify-center rounded-md border border-dashed">
+    <div className="flex h-[500px] w-full items-center justify-center rounded-md border border-dashed">
       <div className="mx-auto flex flex-col items-center justify-center text-center">
         <FileStack className="h-8 w-8" />
 

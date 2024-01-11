@@ -32,17 +32,14 @@ export function DroppableContainer(props: {
     opacity: isOver ? 0.7 : 1,
   }
 
-  const variants = cva(
-    "flex items-center justify-center rounded-md border border-dashed",
-    {
-      variants: {
-        variant: {
-          empty: "h-auto",
-          default: "h-[500px]",
-        },
+  const variants = cva("w-full", {
+    variants: {
+      variant: {
+        empty: "h-auto",
+        default: "h-[500px]",
       },
-    }
-  )
+    },
+  })
 
   return (
     <div

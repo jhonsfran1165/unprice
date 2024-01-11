@@ -45,6 +45,13 @@ export default async function PriceLayout(props: {
   return (
     <>
       <DashboardShell
+        tabs={
+          <Versions
+            versions={versions}
+            selectedVersion={planVersion}
+            basePath={`/${workspaceSlug}/${projectSlug}/plans/${planId}`}
+          />
+        }
         header={
           <MaxWidthWrapper className="max-w-screen-2xl pt-8">
             <div className="mb-6 flex justify-between align-middle">
@@ -94,12 +101,6 @@ export default async function PriceLayout(props: {
       >
         {props.children}
       </DashboardShell>
-
-      <Versions
-        versions={versions}
-        selectedVersion={planVersion}
-        basePath={`/${workspaceSlug}/${projectSlug}/plans/${planId}`}
-      />
     </>
   )
 }

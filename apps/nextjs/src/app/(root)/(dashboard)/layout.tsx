@@ -9,7 +9,7 @@ export default function DashboardLayout(props: {
     <div className="flex h-screen flex-col">
       <SyncActiveOrgFromUrl />
       <Header />
-      <div className="flex flex-1 overflow-hidden">{props.children}</div>
+      <div className="flex-1 overflow-hidden">{props.children}</div>
     </div>
   )
 }

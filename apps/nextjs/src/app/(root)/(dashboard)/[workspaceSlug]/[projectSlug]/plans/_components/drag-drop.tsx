@@ -30,6 +30,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@builderai/ui/resizable"
+import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 
 import { BoardColumn } from "./BoardColumn"
@@ -261,28 +262,33 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <Separator />
-          <div className="flex flex-col gap-4 p-4">
-            <Accordion type="multiple" className="space-y-2">
-              {/* context for columns */}
-              <SortableContext
-                items={columnsId}
-                strategy={verticalListSortingStrategy}
-              >
-                {columns.map((col) => (
-                  <BoardColumn
-                    key={col.id}
-                    deleteColumn={deleteColumn}
-                    updateColumn={updateColumn}
-                    deleteFeature={deleteFeature}
-                    column={col}
-                    features={features.filter(
-                      (feature) => feature.columnId === col.id
-                    )}
-                  />
-                ))}
-              </SortableContext>
-            </Accordion>
+          <div className="flex flex-col">
+            <ScrollArea className="grow">
+              <div className="flex flex-col gap-4 p-4">
+                <Accordion type="multiple" className="space-y-2">
+                  {/* context for columns */}
+                  <SortableContext
+                    items={columnsId}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {columns.map((col) => (
+                      <BoardColumn
+                        key={col.id}
+                        deleteColumn={deleteColumn}
+                        updateColumn={updateColumn}
+                        deleteFeature={deleteFeature}
+                        column={col}
+                        features={features.filter(
+                          (feature) => feature.columnId === col.id
+                        )}
+                      />
+                    ))}
+                  </SortableContext>
+                </Accordion>
+              </div>
+            </ScrollArea>
           </div>
+
           {"document" in window &&
             createPortal(
               <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
