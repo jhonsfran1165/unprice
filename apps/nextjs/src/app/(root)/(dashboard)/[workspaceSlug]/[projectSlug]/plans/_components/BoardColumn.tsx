@@ -20,7 +20,6 @@ import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import { cn } from "@builderai/ui/utils"
 
-import { DroppableContainer } from "./droppable"
 import type { Feature } from "./feature-card"
 import { FeatureCard } from "./feature-card"
 import { FeatureGroupEmptyPlaceholder } from "./feature-group-place-holder"
@@ -56,7 +55,7 @@ export function BoardColumn({
   deleteFeature,
 }: BoardColumnProps) {
   const featuresIds = useMemo(() => {
-    return features.map((task) => task.id)
+    return features.map((feature) => feature.id)
   }, [features])
 
   const [isEditing, setIsEditing] = useState(false)
@@ -69,6 +68,7 @@ export function BoardColumn({
     setNodeRef,
     transition,
     transform,
+    setActivatorNodeRef,
   } = useSortable({
     id: column.id,
     data: {
@@ -102,6 +102,7 @@ export function BoardColumn({
   return (
     <AccordionItem
       ref={disabled ? undefined : setNodeRef}
+      {...attributes}
       value={column.id.toString()}
       style={style}
       className={cn(
@@ -115,8 +116,8 @@ export function BoardColumn({
           <Button
             variant={"ghost"}
             size={"sm"}
-            {...attributes}
             {...listeners}
+            ref={setActivatorNodeRef}
             className="cursor-grab px-1 py-1"
           >
             <span className="sr-only">{`Move group: ${column.title}`}</span>
@@ -151,11 +152,8 @@ export function BoardColumn({
           <Button
             variant={"ghost"}
             size={"sm"}
-            {...attributes}
-            {...listeners}
             onClick={() => deleteColumn(column.id)}
           >
-            <span className="sr-only">{`Move group: ${column.title}`}</span>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -163,23 +161,23 @@ export function BoardColumn({
       <AccordionContent className="p-2">
         {/* TODO: add variant for empty state and to get min height */}
         {/* TODO: fix scroll */}
-        <DroppableContainer column={column} isEmpty={features.length === 0}>
-          <ScrollArea>
-            {features.length === 0 && <FeatureGroupEmptyPlaceholder />}
-            {/* here we can pass the features from the drap and drop as a children */}
-            <SortableContext items={featuresIds}>
-              <div className="flex flex-col gap-2">
-                {features.map((feature) => (
-                  <FeatureCard
-                    deleteFeature={deleteFeature}
-                    key={feature.id}
-                    feature={feature}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </ScrollArea>
-        </DroppableContainer>
+        {/* <DroppableContainer column={column} isEmpty={features.length === 0}> */}
+        <ScrollArea className="h-[500px] overflow-y-auto" {...listeners}>
+          {features.length === 0 && <FeatureGroupEmptyPlaceholder />}
+          {/* here we can pass the features from the drap and drop as a children */}
+          <SortableContext items={featuresIds}>
+            <div className="flex flex-col gap-2">
+              {features.map((feature) => (
+                <FeatureCard
+                  deleteFeature={deleteFeature}
+                  key={feature.id}
+                  feature={feature}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </ScrollArea>
+        {/* </DroppableContainer> */}
       </AccordionContent>
     </AccordionItem>
   )

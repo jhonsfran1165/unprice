@@ -1,6 +1,5 @@
 import { userCanAccessProject } from "~/lib/project-guard"
 import DragDrop from "../../../_components/drag-drop"
-import { Features, features } from "../../../_components/features"
 
 export const runtime = "edge"
 export const preferredRegion = ["fra1"]
@@ -22,10 +21,8 @@ export default async function DashboardPage(props: {
   })
 
   return (
-    <div className="mb-10 flex-grow rounded-lg border bg-background">
-      <DragDrop>
-        <Features features={features} />
-      </DragDrop>
+    <div className="flex flex-1 flex-col rounded-lg border bg-background">
+      <DragDrop />
     </div>
   )
 }

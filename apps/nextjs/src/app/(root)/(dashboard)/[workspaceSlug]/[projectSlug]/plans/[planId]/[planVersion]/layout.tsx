@@ -53,7 +53,7 @@ export default async function PriceLayout(props: {
           />
         }
         header={
-          <MaxWidthWrapper className="max-w-screen-2xl pt-8">
+          <MaxWidthWrapper className="max-w-screen-2xl">
             <div className="mb-6 flex justify-between align-middle">
               <Link
                 className="flex items-center justify-start align-middle text-sm"

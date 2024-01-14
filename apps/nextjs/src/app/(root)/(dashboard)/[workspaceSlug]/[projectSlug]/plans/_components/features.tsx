@@ -3,70 +3,12 @@
 import { Button } from "@builderai/ui/button"
 import { Add, Search } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
-import { ScrollArea } from "@builderai/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 import { cn } from "@builderai/ui/utils"
 
 import type { Feature } from "./feature-card"
 import { FeatureCard } from "./feature-card"
-
-export const features: Feature[] = [
-  {
-    id: "0",
-    content: "Feature test 1",
-    type: "metered",
-  },
-  {
-    id: "1",
-    content: "Feature test 2",
-    type: "metered",
-  },
-  {
-    id: "2",
-    content: "Feature test 3",
-    type: "metered",
-  },
-  {
-    id: "3",
-    content: "Feature test 4",
-    type: "metered",
-  },
-  {
-    id: "4",
-    content: "Feature test 5",
-    type: "metered",
-  },
-  {
-    id: "5",
-    content: "Feature test 6",
-    type: "metered",
-  },
-  {
-    id: "6",
-    content: "Feature test 7",
-    type: "metered",
-  },
-  {
-    id: "7",
-    content: "Feature test 8",
-    type: "metered",
-  },
-  {
-    id: "8",
-    content: "Feature test 9",
-    type: "metered",
-  },
-  {
-    id: "9",
-    content: "Feature test 10",
-    type: "metered",
-  },
-  {
-    id: "10",
-    content: "Feature test 11",
-    type: "metered",
-  },
-]
 
 interface FeaturesProps extends React.HTMLAttributes<HTMLDivElement> {
   features: Feature[]
@@ -74,7 +16,7 @@ interface FeaturesProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Features({ className, features }: FeaturesProps) {
   return (
-    <div className={cn(className)}>
+    <div className={cn("flex flex-1 flex-col overflow-y-auto", className)}>
       <div className="flex items-center px-4 py-2">
         <h1 className="text-xl font-bold">Features</h1>
       </div>
@@ -90,7 +32,7 @@ export function Features({ className, features }: FeaturesProps) {
           <Add className="h-5 w-5" />
         </Button>
       </div>
-      <ScrollArea className="h-[500px] w-full">
+      <ScrollArea className="max-h-[750px] flex-1 overflow-y-auto">
         <div className="px-4 py-2">
           <div className="space-y-2">
             {features?.map((feature) => (
@@ -98,6 +40,7 @@ export function Features({ className, features }: FeaturesProps) {
             ))}
           </div>
         </div>
+        <ScrollBar orientation="vertical" />
       </ScrollArea>
     </div>
   )

@@ -40,8 +40,8 @@ export const coordinateGetter: KeyboardCoordinateGetter = (
       if (data) {
         const { type, children } = data
 
-        if (type === "container" && children?.length > 0) {
-          if (active.data.current?.type !== "container") {
+        if (type === "Column" && children?.length > 0) {
+          if (active.data.current?.type !== "Column") {
             return
           }
         }
@@ -93,7 +93,7 @@ export const coordinateGetter: KeyboardCoordinateGetter = (
           }
         }
 
-        if (newDroppable.data.current?.type === "container") {
+        if (newDroppable.data.current?.type === "Column") {
           return {
             x: newRect.left + 20,
             y: newRect.top + 74,

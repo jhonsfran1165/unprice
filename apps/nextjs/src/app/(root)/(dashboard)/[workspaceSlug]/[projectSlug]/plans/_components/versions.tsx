@@ -29,7 +29,7 @@ export function Versions({
   return (
     <div
       className={cn(
-        "inset-x-0 right-0 top-0 z-30 block w-12 items-center justify-start overflow-y-auto rounded-sm bg-background-bg px-2 py-20 transition-all md:right-4",
+        "inset-x-0 right-0 top-0 z-30 block w-12 items-center justify-start rounded-sm bg-background-bg px-2 py-20 transition-all md:right-4",
         className
       )}
     >

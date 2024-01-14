@@ -6,10 +6,10 @@ export default function DashboardLayout(props: {
   params: { workspaceSlug: string; projectSlug: string }
 }) {
   return (
-    <div className="flex h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col">
       <SyncActiveOrgFromUrl />
       <Header />
-      <div className="flex-1 overflow-hidden">{props.children}</div>
+      <div className="flex flex-1 overflow-hidden">{props.children}</div>
     </div>
   )
 }

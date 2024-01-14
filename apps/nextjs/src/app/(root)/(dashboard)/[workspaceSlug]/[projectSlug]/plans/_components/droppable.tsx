@@ -15,6 +15,7 @@ export function DroppableContainer(props: {
   column: Column
   disabled?: boolean
   isEmpty?: boolean
+  type?: string
 }) {
   const { attributes, listeners, setNodeRef, transition, transform, isOver } =
     useSortable({
@@ -36,7 +37,7 @@ export function DroppableContainer(props: {
     variants: {
       variant: {
         empty: "h-auto",
-        default: "h-[500px]",
+        default: "h-[500px] overflow-y-auto",
       },
     },
   })

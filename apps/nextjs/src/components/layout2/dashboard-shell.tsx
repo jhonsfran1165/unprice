@@ -15,13 +15,18 @@ export function DashboardShell(props: {
   subtabs?: React.ReactNode
 }) {
   return (
-    <div className="flex h-screen flex-row">
+    <div
+      className={cn(
+        "flex h-[calc(100vh-3.5rem)] grow flex-row",
+        props.className
+      )}
+    >
       {props.tabs && props.tabs}
 
-      <main className="flex w-full flex-col overflow-auto overflow-y-auto border pb-10">
+      <main className="flex flex-1 flex-col overflow-y-auto border py-4">
         {props.header && props.header}
 
-        <MaxWidthWrapper className="max-w-screen-2xl grow">
+        <MaxWidthWrapper className="flex max-w-screen-2xl flex-1 flex-col">
           {/* sidebar menu config */}
           {props.sidebar && (
             <div className="flex flex-col gap-2 sm:flex-1 sm:flex-row">
@@ -40,7 +45,7 @@ export function DashboardShell(props: {
           {/* without sidebar menu config */}
 
           {!props.sidebar && (
-            <div className="flex h-full flex-col">
+            <div className="flex flex-1 flex-col">
               {props.subtabs && props.subtabs}
               {/* <div className={cn("grow", props.className)}> */}
               {props?.children}
