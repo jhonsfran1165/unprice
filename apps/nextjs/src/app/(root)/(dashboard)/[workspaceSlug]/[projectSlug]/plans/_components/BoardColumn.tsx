@@ -20,9 +20,9 @@ import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import { cn } from "@builderai/ui/utils"
 
-import type { Feature } from "./feature-card"
-import { FeatureCard } from "./feature-card"
+import type { Feature } from "./feature"
 import { FeatureGroupEmptyPlaceholder } from "./feature-group-place-holder"
+import { SortableFeature } from "./sortable-feature"
 import type { Column, Id } from "./types"
 
 export type ColumnType = "Column"
@@ -168,7 +168,7 @@ export function BoardColumn({
           <SortableContext items={featuresIds}>
             <div className="flex flex-col gap-2">
               {features.map((feature) => (
-                <FeatureCard
+                <SortableFeature
                   deleteFeature={deleteFeature}
                   key={feature.id}
                   feature={feature}

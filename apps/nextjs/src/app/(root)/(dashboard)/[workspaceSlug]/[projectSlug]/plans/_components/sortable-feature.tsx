@@ -1,14 +1,15 @@
-import React from "react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
 import { cn } from "@builderai/ui/utils"
 
-import type { Feature, TaskDragData } from "./feature-card"
+import type { Feature, TaskDragData } from "./feature"
+import { FeatureCard } from "./feature"
+import type { Id } from "./types"
 
-export function SortableItem(props: {
-  children: React.ReactNode
+export function SortableFeature(props: {
   feature: Feature
+  deleteFeature?: (id: Id) => void
   className?: string
   isFeature?: boolean
 }) {
@@ -38,7 +39,7 @@ export function SortableItem(props: {
 
   // TODO: Add a custom drag overlay
   return (
-    <div
+    <FeatureCard
       ref={setNodeRef}
       style={style}
       {...attributes}
@@ -47,8 +48,9 @@ export function SortableItem(props: {
         "cursor-pointer": props.isFeature,
         "cursor-default": !props.isFeature,
       })}
-    >
-      {props.children}
-    </div>
+      deleteFeature={props.deleteFeature}
+      feature={props.feature}
+      isFeature={props.isFeature}
+    />
   )
 }

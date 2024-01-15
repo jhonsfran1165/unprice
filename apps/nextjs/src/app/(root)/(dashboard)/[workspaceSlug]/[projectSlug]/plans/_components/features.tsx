@@ -7,8 +7,8 @@ import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 import { cn } from "@builderai/ui/utils"
 
-import type { Feature } from "./feature-card"
-import { FeatureCard } from "./feature-card"
+import type { Feature } from "./feature"
+import { SortableFeature } from "./sortable-feature"
 
 interface FeaturesProps extends React.HTMLAttributes<HTMLDivElement> {
   features: Feature[]
@@ -36,7 +36,7 @@ export function Features({ className, features }: FeaturesProps) {
         <div className="px-4 py-2">
           <div className="space-y-2">
             {features?.map((feature) => (
-              <FeatureCard isFeature key={feature.id} feature={feature} />
+              <SortableFeature isFeature key={feature.id} feature={feature} />
             ))}
           </div>
         </div>

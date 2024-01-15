@@ -22,6 +22,7 @@ import {
 import {
   arrayMove,
   SortableContext,
+  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { createPortal } from "react-dom"
@@ -38,10 +39,9 @@ import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 
 import { BoardColumn } from "./BoardColumn"
-import type { Feature } from "./feature-card"
-import { FeatureCard } from "./feature-card"
+import type { Feature } from "./feature"
+import { FeatureCard } from "./feature"
 import { Features } from "./features"
-import { coordinateGetter } from "./multipleContainerKeyboardCoordinates"
 import type { Column, Id } from "./types"
 
 function generateId() {
@@ -155,10 +155,21 @@ export default function DragDrop() {
   const [clonedItems, setClonedItems] = useState<Items | null>(null)
 
   const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor),
+    useSensor(MouseSensor, {
+      // Require the mouse to move by 10 pixels before activating
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor, {
+      // Press delay of 250ms, with tolerance of 5px of movement
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {
-      coordinateGetter,
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   )
 
@@ -388,6 +399,7 @@ export default function DragDrop() {
                   Add feature group
                 </Button>
               </div>
+              ap
             </div>
           </div>
           <Separator />
