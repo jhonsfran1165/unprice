@@ -1,4 +1,4 @@
-import { useSortable } from "@dnd-kit/sortable"
+import { useDraggable } from "@dnd-kit/core"
 import { CSS } from "@dnd-kit/utilities"
 
 import { cn } from "@builderai/ui/utils"
@@ -18,13 +18,9 @@ export function SortableFeature(props: {
     setActivatorNodeRef, // use if there is a handle different from the node
     listeners,
     isDragging,
-    isSorting,
-    over,
-    overIndex,
     attributes,
     transform,
-    transition,
-  } = useSortable({
+  } = useDraggable({
     id: props.feature.id.toString(),
     data: {
       type: "Feature",
@@ -33,7 +29,6 @@ export function SortableFeature(props: {
   })
 
   const style = {
-    transition,
     transform: CSS.Translate.toString(transform),
   }
 

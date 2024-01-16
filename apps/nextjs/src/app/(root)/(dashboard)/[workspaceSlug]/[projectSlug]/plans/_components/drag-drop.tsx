@@ -15,6 +15,7 @@ import {
   KeyboardSensor,
   MeasuringStrategy,
   MouseSensor,
+  pointerWithin,
   TouchSensor,
   useSensor,
   useSensors,
@@ -278,6 +279,8 @@ export default function DragDrop() {
 
     const { active, over } = event
 
+    console.log("DRAG END", { event })
+
     if (!over) return
 
     const activeId = active.id
@@ -301,6 +304,7 @@ export default function DragDrop() {
     const { active, over } = event
 
     console.log("DRAG OVER", { event })
+
     if (!over) return
 
     const activeId = active.id
@@ -316,11 +320,17 @@ export default function DragDrop() {
     const isActiveAFeature = activeData?.type === "Feature"
     const isOverAFeature = activeData?.type === "Feature"
 
+    // only process features
+    if (!isActiveAFeature) return
+
+    // Im dragging a Feature over another Feature
+    // or Im dragging a Feature over a column
+
+    // if this is the first feature in the list
+    // just add it to the list
     if (features.length === 0 && activeFeature) {
       setFeatures([{ ...activeFeature, columnId: overId }])
     }
-
-    if (!isActiveAFeature) return
 
     // Im dropping a Feature over another Feature
     if (isActiveAFeature && isOverAFeature) {
@@ -329,6 +339,24 @@ export default function DragDrop() {
         const overIndex = features.findIndex((t) => t.id === overId)
         const activeFeature = features[activeIndex]
         const overFeature = features[overIndex]
+
+        // could be possible that the active feature is not in the list
+        // meaning that the feature is being dragged from the search
+        // and it's not in the list yet
+        if (!activeFeature) {
+          return [
+            ...features,
+            { ...activeData.feature, columnId: overData?.feature?.columnId },
+          ]
+        }
+
+        console.log("activeFeature", activeFeature)
+        console.log("overFeature", overFeature)
+
+        // if the active feature is in the list
+        // and the over feature is in the list
+        // and the active feature is not in the same column as the over feature
+        // then we need to move the active feature to the same column as the over feature
         if (
           activeFeature &&
           overFeature &&
@@ -338,7 +366,13 @@ export default function DragDrop() {
           return arrayMove(features, activeIndex, overIndex - 1)
         }
 
+        // if the active feature is in the list
+        // and the over feature is in the list
+        // and the active feature is in the same column as the over feature
+        // then we need to move the active feature to the same column as the over feature
         return arrayMove(features, activeIndex, overIndex)
+
+        // return arrayMove(features, activeIndex, overIndex)
       })
     }
 
@@ -374,6 +408,7 @@ export default function DragDrop() {
       onDragEnd={onDragEnd}
       onDragOver={onDragOver}
       onDragCancel={onDragCancel}
+      collisionDetection={pointerWithin}
     >
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={80} minSize={50}>
@@ -399,7 +434,6 @@ export default function DragDrop() {
                   Add feature group
                 </Button>
               </div>
-              ap
             </div>
           </div>
           <Separator />
@@ -433,12 +467,7 @@ export default function DragDrop() {
           {"document" in window &&
             createPortal(
               <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
-                {activeFeature && (
-                  <FeatureCard
-                    deleteFeature={deleteFeature}
-                    feature={activeFeature}
-                  />
-                )}
+                {activeFeature && <FeatureCard feature={activeFeature} />}
               </DragOverlay>,
               document.body
             )}

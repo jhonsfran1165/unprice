@@ -102,7 +102,6 @@ export function BoardColumn({
   return (
     <AccordionItem
       ref={disabled ? undefined : setNodeRef}
-      {...attributes}
       value={column.id.toString()}
       style={style}
       className={cn(
@@ -114,9 +113,10 @@ export function BoardColumn({
       <AccordionTrigger className="p-2">
         <div className="flex w-full flex-row items-center justify-between space-x-2 space-y-0 font-semibold">
           <Button
+            {...attributes}
+            {...listeners}
             variant={"ghost"}
             size={"sm"}
-            {...listeners}
             ref={setActivatorNodeRef}
             className="cursor-grab px-1 py-1"
           >
@@ -158,12 +158,11 @@ export function BoardColumn({
           </Button>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="p-2">
+      <AccordionContent className="z-50 p-2" {...attributes} {...listeners}>
         {/* TODO: add variant for empty state and to get min height */}
         {/* TODO: fix scroll */}
         {/* <DroppableContainer column={column} isEmpty={features.length === 0}> */}
-        <ScrollArea className="h-[500px] overflow-y-auto" {...listeners}>
-          {features.length === 0 && <FeatureGroupEmptyPlaceholder />}
+        <ScrollArea className="h-[500px] overflow-y-auto">
           {/* here we can pass the features from the drap and drop as a children */}
           <SortableContext items={featuresIds}>
             <div className="flex flex-col gap-2">
@@ -174,6 +173,7 @@ export function BoardColumn({
                   feature={feature}
                 />
               ))}
+              {features.length === 0 && <FeatureGroupEmptyPlaceholder />}
             </div>
           </SortableContext>
         </ScrollArea>
