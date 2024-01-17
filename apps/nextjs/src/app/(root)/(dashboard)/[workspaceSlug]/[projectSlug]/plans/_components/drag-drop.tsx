@@ -318,7 +318,9 @@ export default function DragDrop() {
     const overData = over.data.current
 
     const isActiveAFeature = activeData?.type === "Feature"
-    const isOverAFeature = activeData?.type === "Feature"
+    const isActiveAColumn = activeData?.type === "Column"
+    const isOverAFeature = overData?.type === "Feature"
+    const isOverAColumn = overData?.type === "Column"
 
     // only process features
     if (!isActiveAFeature) return
@@ -328,30 +330,26 @@ export default function DragDrop() {
 
     // if this is the first feature in the list
     // just add it to the list
-    if (features.length === 0 && activeFeature) {
-      setFeatures([{ ...activeFeature, columnId: overId }])
-    }
+    // if (features.length === 0 && activeFeature) {
+    //   const hasColumnId = overData?.feature?.columnId
+
+    //   if (!hasColumnId) return
+
+    //   setFeatures([{ ...activeFeature, columnId: hasColumnId }])
+    // }
 
     // Im dropping a Feature over another Feature
     if (isActiveAFeature && isOverAFeature) {
+      // if the over feature has a column id then we don't need to do anything
+      // because the over is in the search
+      if (!overData?.feature?.columnId) return
+
+      // if the over feature has a column id then we need to move the active feature
       setFeatures((features) => {
         const activeIndex = features.findIndex((t) => t.id === activeId)
         const overIndex = features.findIndex((t) => t.id === overId)
         const activeFeature = features[activeIndex]
         const overFeature = features[overIndex]
-
-        // could be possible that the active feature is not in the list
-        // meaning that the feature is being dragged from the search
-        // and it's not in the list yet
-        if (!activeFeature) {
-          return [
-            ...features,
-            { ...activeData.feature, columnId: overData?.feature?.columnId },
-          ]
-        }
-
-        console.log("activeFeature", activeFeature)
-        console.log("overFeature", overFeature)
 
         // if the active feature is in the list
         // and the over feature is in the list
@@ -364,32 +362,41 @@ export default function DragDrop() {
         ) {
           activeFeature.columnId = overFeature.columnId
           return arrayMove(features, activeIndex, overIndex - 1)
+        } else if (!activeFeature) {
+          return arrayMove(
+            [
+              ...features,
+              { ...activeData.feature, columnId: overFeature.columnId },
+            ],
+            activeIndex,
+            overIndex
+          )
+        } else {
+          return arrayMove(features, activeIndex, overIndex)
         }
-
-        // if the active feature is in the list
-        // and the over feature is in the list
-        // and the active feature is in the same column as the over feature
-        // then we need to move the active feature to the same column as the over feature
-        return arrayMove(features, activeIndex, overIndex)
-
-        // return arrayMove(features, activeIndex, overIndex)
       })
     }
-
-    const isOverAColumn = overData?.type === "Column"
 
     // Im dropping a Feature over a column
     if (isActiveAFeature && isOverAColumn) {
       setFeatures((features) => {
+        // if feature is null, then we are dragging from the search for the first time
+        // and we need to add the feature to the list
+        if (features.length === 0) {
+          return [{ ...activeData.feature, columnId: overData?.column?.id }]
+        }
+
         const activeIndex = features.findIndex((t) => t.id === activeId)
         const activeFeature = features[activeIndex]
 
+        // if the active feature is in the list then we need to move it to the new column
         if (activeFeature) {
           activeFeature.columnId = overId
           return arrayMove(features, activeIndex, activeIndex)
+        } else {
+          // if the active feature is not in the list then we need to add it to the list
+          return [...features, { ...activeData.feature, columnId: overId }]
         }
-
-        return [...features, { ...activeData.feature, columnId: overId }]
       })
     }
   }
