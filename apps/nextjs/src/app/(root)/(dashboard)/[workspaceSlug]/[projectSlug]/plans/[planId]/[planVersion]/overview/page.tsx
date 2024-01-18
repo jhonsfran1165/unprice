@@ -21,7 +21,7 @@ export default async function DashboardPage(props: {
   })
 
   return (
-    <div className="flex flex-1 flex-col rounded-lg border bg-background">
+    <div className="flex flex-1 flex-col overflow-hidden rounded-lg border bg-background">
       <DragDrop />
     </div>
   )

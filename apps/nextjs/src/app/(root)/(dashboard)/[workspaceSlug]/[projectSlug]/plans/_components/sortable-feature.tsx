@@ -1,35 +1,34 @@
+import type { UniqueIdentifier } from "@dnd-kit/core"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
 import { cn } from "@builderai/ui/utils"
 
-import type { Feature, TaskDragData } from "./feature"
+import type { DragData, Feature } from "./feature"
 import { FeatureCard } from "./feature"
-import type { Id } from "./types"
 
 export function SortableFeature(props: {
   feature: Feature
-  deleteFeature?: (id: Id) => void
+  deleteFeature?: (id: UniqueIdentifier) => void
   className?: string
   isFeature?: boolean
 }) {
   const {
     setNodeRef,
-    setActivatorNodeRef, // use if there is a handle different from the node
     listeners,
     isDragging,
     attributes,
     transform,
-    isSorting,
-    over,
-    overIndex,
     transition,
   } = useSortable({
     id: props.feature.id.toString(),
     data: {
       type: "Feature",
       feature: props.feature,
-    } satisfies TaskDragData,
+    } satisfies DragData,
+    attributes: {
+      roleDescription: "Feature",
+    },
   })
 
   const style = {
@@ -37,7 +36,6 @@ export function SortableFeature(props: {
     transform: CSS.Translate.toString(transform),
   }
 
-  // TODO: Add a custom drag overlay
   return (
     <FeatureCard
       ref={setNodeRef}
@@ -45,8 +43,9 @@ export function SortableFeature(props: {
       {...attributes}
       {...listeners}
       className={cn(props.className, {
-        "cursor-pointer": props.isFeature,
-        "cursor-default": !props.isFeature,
+        "cursor-move": !props.isFeature,
+        "cursor-grab": props.isFeature,
+        "border-dashed opacity-80": isDragging && !props.isFeature,
       })}
       deleteFeature={props.deleteFeature}
       feature={props.feature}

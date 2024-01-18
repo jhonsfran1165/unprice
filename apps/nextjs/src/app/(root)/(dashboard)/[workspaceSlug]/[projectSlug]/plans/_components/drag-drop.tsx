@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import type {
   DragEndEvent,
   DragOverEvent,
@@ -12,7 +12,6 @@ import {
   defaultDropAnimationSideEffects,
   DndContext,
   DragOverlay,
-  KeyboardSensor,
   MeasuringStrategy,
   MouseSensor,
   pointerWithin,
@@ -23,7 +22,6 @@ import {
 import {
   arrayMove,
   SortableContext,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { createPortal } from "react-dom"
@@ -36,14 +34,13 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@builderai/ui/resizable"
-import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 
 import { BoardColumn } from "./BoardColumn"
 import type { Feature } from "./feature"
 import { FeatureCard } from "./feature"
 import { Features } from "./features"
-import type { Column, Id } from "./types"
+import type { Column } from "./types"
 
 function generateId() {
   /* Generate a random number between 0 and 10000 */
@@ -127,33 +124,25 @@ export const dbFeatures: Feature[] = [
   },
 ]
 
-type Items = Record<UniqueIdentifier, Feature[]>
-
-const initialItems = {
-  base: [],
-}
-
-const itemCount = 3
-export const TRASH_ID = "void"
-const PLACEHOLDER_ID = "placeholder"
-const empty: UniqueIdentifier[] = []
-
 export default function DragDrop() {
   const [columns, setColumns] = useState<Column[]>(defaultCols)
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns])
 
-  const [items, setItems] = useState<Items>(initialItems)
+  const [features, setFeatures] = useState<Feature[]>(defaultFeatures)
 
-  const [containers, setContainers] = useState(
-    Object.keys(items) as UniqueIdentifier[]
-  )
+  const featuresIds = useMemo(() => {
+    return features.map((feature) => feature.id)
+  }, [features])
 
-  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
-  const lastOverId = useRef<UniqueIdentifier | null>(null)
-  const recentlyMovedToNewContainer = useRef(false)
-  const isSortingContainer = activeId ? containers.includes(activeId) : false
+  const searchableFeatures = useMemo(() => {
+    return dbFeatures.filter((feature) => {
+      return !featuresIds.includes(feature.id)
+    })
+  }, [featuresIds])
 
-  const [clonedItems, setClonedItems] = useState<Items | null>(null)
+  const [activeFeature, setActiveFeature] = useState<Feature | null>(null)
+
+  const [clonedFeatures, setClonedFeatures] = useState<Feature[] | null>(null)
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -168,62 +157,21 @@ export default function DragDrop() {
         delay: 250,
         tolerance: 5,
       },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
     })
   )
 
   const onDragCancel = () => {
-    if (clonedItems) {
+    if (clonedFeatures) {
       // Reset items to their original state in case items have been
       // Dragged across containers
-      setItems(clonedItems)
+      setClonedFeatures(features)
     }
 
-    setActiveId(null)
-    setClonedItems(null)
+    setClonedFeatures(null)
   }
 
-  useEffect(() => {
-    requestAnimationFrame(() => {
-      recentlyMovedToNewContainer.current = false
-    })
-  }, [items])
-
-  const [features, setFeatures] = useState<Feature[]>(defaultFeatures)
-
-  const itemsIds = useMemo(
-    () =>
-      features
-        .map((feature) => {
-          return feature.id
-        })
-        .flat(),
-    [features]
-  )
-
-  const searchableFeatures = useMemo(() => {
-    return dbFeatures.filter((feature) => {
-      return !itemsIds.includes(feature.id)
-    })
-  }, [itemsIds])
-
-  const [activeColumn, setActiveColumn] = useState<Column | null>(null)
-
-  const [activeFeature, setActiveFeature] = useState<Feature | null>(null)
-
-  function deleteFeature(id: Id) {
+  function deleteFeature(id: UniqueIdentifier) {
     const newFeature = features.filter((feature) => feature.id !== id)
-    setFeatures(newFeature)
-  }
-
-  function updateFeature(id: Id, content: string) {
-    const newFeature = features.map((feature) => {
-      if (feature.id !== id) return feature
-      return { ...feature, content }
-    })
-
     setFeatures(newFeature)
   }
 
@@ -236,7 +184,7 @@ export default function DragDrop() {
     setColumns([...columns, columnToAdd])
   }
 
-  function deleteColumn(id: Id) {
+  function deleteColumn(id: UniqueIdentifier) {
     const filteredColumns = columns.filter((col) => col.id !== id)
     setColumns(filteredColumns)
 
@@ -244,7 +192,7 @@ export default function DragDrop() {
     setFeatures(newFeature)
   }
 
-  function updateColumn(id: Id, title: string) {
+  function updateColumn(id: UniqueIdentifier, title: string) {
     const newColumns = columns.map((col) => {
       if (col.id !== id) return col
       return { ...col, title }
@@ -254,32 +202,20 @@ export default function DragDrop() {
   }
 
   function onDragStart(event: DragStartEvent) {
-    // we don't need to validate if item is over a column or a feature
-    // we don't support nested features
-    // we only support features inside columns
-    setActiveId(event.active.id)
-    setClonedItems(items)
-
-    console.log("DRAG START", { event })
-
-    if (event.active.data.current?.type === "Column") {
-      setActiveColumn(event.active.data.current.column)
-      return
-    }
+    // just copy the features in case the user cancels the drag
+    setClonedFeatures(features)
 
     if (event.active.data.current?.type === "Feature") {
-      setActiveFeature(event.active.data.current.feature)
+      setActiveFeature(event.active.data.current.feature as Feature)
       return
     }
   }
 
   function onDragEnd(event: DragEndEvent) {
-    setActiveColumn(null)
     setActiveFeature(null)
+    setClonedFeatures(null)
 
     const { active, over } = event
-
-    console.log("DRAG END", { event })
 
     if (!over) return
 
@@ -288,12 +224,12 @@ export default function DragDrop() {
 
     if (activeId === overId) return
 
-    const isActiveAColumn = active.data.current?.type === "Column"
-    if (!isActiveAColumn) return
+    const isActiveColumn = active.data.current?.type === "Column"
+    if (!isActiveColumn) return
 
+    // For Column we only need to re-order the list
     setColumns((columns) => {
       const activeColumnIndex = columns.findIndex((col) => col.id === activeId)
-
       const overColumnIndex = columns.findIndex((col) => col.id === overId)
 
       return arrayMove(columns, activeColumnIndex, overColumnIndex)
@@ -303,48 +239,36 @@ export default function DragDrop() {
   function onDragOver(event: DragOverEvent) {
     const { active, over } = event
 
-    console.log("DRAG OVER", { event })
-
+    // only process if there is an over item
     if (!over) return
 
+    // over represents the item that is being dragged over
+    // active represents the item that is being dragged
     const activeId = active.id
     const overId = over.id
 
     if (activeId === overId) return
 
-    // if (!hasDraggableData(active) || !hasDraggableData(over)) return;
-
     const activeData = active.data.current
     const overData = over.data.current
 
-    const isActiveAFeature = activeData?.type === "Feature"
-    const isActiveAColumn = activeData?.type === "Column"
+    const isActiveFeature = activeData?.type === "Feature"
     const isOverAFeature = overData?.type === "Feature"
     const isOverAColumn = overData?.type === "Column"
 
     // only process features
-    if (!isActiveAFeature) return
+    if (!isActiveFeature) return
 
-    // Im dragging a Feature over another Feature
-    // or Im dragging a Feature over a column
+    // I'm dropping a Feature over another Feature
+    // the over feature can be inside a column or not
+    if (isActiveFeature && isOverAFeature) {
+      const overFeature = overData.feature as Feature
 
-    // if this is the first feature in the list
-    // just add it to the list
-    // if (features.length === 0 && activeFeature) {
-    //   const hasColumnId = overData?.feature?.columnId
-
-    //   if (!hasColumnId) return
-
-    //   setFeatures([{ ...activeFeature, columnId: hasColumnId }])
-    // }
-
-    // Im dropping a Feature over another Feature
-    if (isActiveAFeature && isOverAFeature) {
       // if the over feature has a column id then we don't need to do anything
-      // because the over is in the search
-      if (!overData?.feature?.columnId) return
+      // because the over feature is in the search
+      if (!overFeature?.columnId) return
 
-      // if the over feature has a column id then we need to move the active feature
+      // if the over feature has a column id then we need to move the active feature to the same column
       setFeatures((features) => {
         const activeIndex = features.findIndex((t) => t.id === activeId)
         const overIndex = features.findIndex((t) => t.id === overId)
@@ -362,30 +286,26 @@ export default function DragDrop() {
         ) {
           activeFeature.columnId = overFeature.columnId
           return arrayMove(features, activeIndex, overIndex - 1)
-        } else if (!activeFeature) {
+        } else if (!activeFeature && overFeature) {
+          // if the active feature is not in the list then we need to add it to the list
           return arrayMove(
             [
               ...features,
-              { ...activeData.feature, columnId: overFeature.columnId },
+              { ...activeData.feature, columnId: overFeature?.columnId },
             ],
             activeIndex,
             overIndex
-          )
+          ) as Feature[]
         } else {
+          // otherwise we only re-order the list
           return arrayMove(features, activeIndex, overIndex)
         }
       })
     }
 
-    // Im dropping a Feature over a column
-    if (isActiveAFeature && isOverAColumn) {
+    // I'm dropping a Feature over a column
+    if (isActiveFeature && isOverAColumn) {
       setFeatures((features) => {
-        // if feature is null, then we are dragging from the search for the first time
-        // and we need to add the feature to the list
-        if (features.length === 0) {
-          return [{ ...activeData.feature, columnId: overData?.column?.id }]
-        }
-
         const activeIndex = features.findIndex((t) => t.id === activeId)
         const activeFeature = features[activeIndex]
 
@@ -395,13 +315,17 @@ export default function DragDrop() {
           return arrayMove(features, activeIndex, activeIndex)
         } else {
           // if the active feature is not in the list then we need to add it to the list
-          return [...features, { ...activeData.feature, columnId: overId }]
+          return [
+            ...features,
+            {
+              ...activeData.feature,
+              columnId: overId,
+            },
+          ] as Feature[]
         }
       })
     }
   }
-
-  console.log("features", features)
 
   return (
     <DndContext
@@ -444,31 +368,27 @@ export default function DragDrop() {
             </div>
           </div>
           <Separator />
-          <div className="flex flex-col">
-            <ScrollArea className="max-h-[800px] flex-1 overflow-y-auto">
-              <div className="flex flex-col gap-4 p-4">
-                <Accordion type="multiple" className="space-y-2">
-                  {/* context for columns */}
-                  <SortableContext
-                    items={columnsId}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {columns.map((col) => (
-                      <BoardColumn
-                        key={col.id}
-                        deleteColumn={deleteColumn}
-                        updateColumn={updateColumn}
-                        deleteFeature={deleteFeature}
-                        column={col}
-                        features={features.filter(
-                          (feature) => feature.columnId === col.id
-                        )}
-                      />
-                    ))}
-                  </SortableContext>
-                </Accordion>
-              </div>
-            </ScrollArea>
+          <div className="flex flex-col p-3">
+            <Accordion type="multiple" className="space-y-2">
+              {/* context for columns */}
+              <SortableContext
+                items={columnsId}
+                strategy={verticalListSortingStrategy}
+              >
+                {columns.map((col) => (
+                  <BoardColumn
+                    key={col.id}
+                    deleteColumn={deleteColumn}
+                    updateColumn={updateColumn}
+                    deleteFeature={deleteFeature}
+                    column={col}
+                    features={features.filter(
+                      (feature) => feature.columnId === col.id
+                    )}
+                  />
+                ))}
+              </SortableContext>
+            </Accordion>
           </div>
 
           {"document" in window &&

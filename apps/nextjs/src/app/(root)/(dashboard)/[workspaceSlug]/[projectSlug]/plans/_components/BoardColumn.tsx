@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import type { UniqueIdentifier } from "@dnd-kit/core"
 import type { AnimateLayoutChanges } from "@dnd-kit/sortable"
 import {
   defaultAnimateLayoutChanges,
@@ -6,7 +7,6 @@ import {
   useSortable,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { cva } from "class-variance-authority"
 import { GripVertical } from "lucide-react"
 
 import {
@@ -23,7 +23,7 @@ import { cn } from "@builderai/ui/utils"
 import type { Feature } from "./feature"
 import { FeatureGroupEmptyPlaceholder } from "./feature-group-place-holder"
 import { SortableFeature } from "./sortable-feature"
-import type { Column, Id } from "./types"
+import type { Column } from "./types"
 
 export type ColumnType = "Column"
 
@@ -40,9 +40,9 @@ interface BoardColumnProps {
   features: Feature[]
   isOverlay?: boolean
   disabled?: boolean
-  deleteColumn: (id: Id) => void
-  deleteFeature: (id: Id) => void
-  updateColumn: (id: Id, title: string) => void
+  deleteColumn: (id: UniqueIdentifier) => void
+  deleteFeature: (id: UniqueIdentifier) => void
+  updateColumn: (id: UniqueIdentifier, title: string) => void
 }
 
 export function BoardColumn({
@@ -63,7 +63,6 @@ export function BoardColumn({
   const {
     attributes,
     isDragging,
-    isOver,
     listeners,
     setNodeRef,
     transition,
@@ -76,7 +75,7 @@ export function BoardColumn({
       column,
     } satisfies ColumnDragData,
     attributes: {
-      roleDescription: `Column: ${column.title}`,
+      roleDescription: "Column",
     },
     animateLayoutChanges,
   })
@@ -84,20 +83,7 @@ export function BoardColumn({
   const style = {
     transition,
     transform: CSS.Translate.toString(transform),
-    opacity: isDragging ? 0.5 : 1,
   }
-
-  const variants = cva(
-    "w-full border rounded-sm flex flex-col flex-shrink-0 snap-center space-y-2",
-    {
-      variants: {
-        dragging: {
-          over: "ring-2 opacity-30",
-          overlay: "ring-2 ring-primary",
-        },
-      },
-    }
-  )
 
   return (
     <AccordionItem
@@ -105,12 +91,13 @@ export function BoardColumn({
       value={column.id.toString()}
       style={style}
       className={cn(
-        variants({
-          dragging: isOverlay ? "overlay" : isOver ? "over" : undefined,
-        })
+        "flex w-full flex-shrink-0 snap-center flex-col space-y-2 rounded-sm border",
+        {
+          "border-dashed opacity-80": isDragging && !isOverlay,
+        }
       )}
     >
-      <AccordionTrigger className="p-2">
+      <AccordionTrigger className="h-12 p-2">
         <div className="flex w-full flex-row items-center justify-between space-x-2 space-y-0 font-semibold">
           <Button
             {...attributes}
@@ -158,26 +145,26 @@ export function BoardColumn({
           </Button>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="z-50 p-2" {...attributes} {...listeners}>
-        {/* TODO: add variant for empty state and to get min height */}
-        {/* TODO: fix scroll */}
-        {/* <DroppableContainer column={column} isEmpty={features.length === 0}> */}
-        <ScrollArea className="h-[500px] overflow-y-auto">
-          {/* here we can pass the features from the drap and drop as a children */}
-          <SortableContext items={featuresIds}>
-            <div className="flex flex-col gap-2">
-              {features.map((feature) => (
-                <SortableFeature
-                  deleteFeature={deleteFeature}
-                  key={feature.id}
-                  feature={feature}
-                />
-              ))}
-              {features.length === 0 && <FeatureGroupEmptyPlaceholder />}
-            </div>
-          </SortableContext>
-        </ScrollArea>
-        {/* </DroppableContainer> */}
+      <AccordionContent className="h-[500px] max-h-[500px] snap-center">
+        {features.length === 0 ? (
+          <div className="h-full px-3">
+            <FeatureGroupEmptyPlaceholder />
+          </div>
+        ) : (
+          <ScrollArea className="h-full px-3">
+            <SortableContext items={featuresIds}>
+              <div className="space-y-2">
+                {features.map((feature) => (
+                  <SortableFeature
+                    deleteFeature={deleteFeature}
+                    key={feature.id}
+                    feature={feature}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </ScrollArea>
+        )}
       </AccordionContent>
     </AccordionItem>
   )

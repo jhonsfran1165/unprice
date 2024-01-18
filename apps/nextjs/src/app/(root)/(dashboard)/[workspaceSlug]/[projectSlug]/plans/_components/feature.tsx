@@ -9,7 +9,6 @@ import { cn } from "@builderai/ui/utils"
 
 import { SheetDemo } from "./feature-config-form"
 import { FeatureForm } from "./feature-form"
-import type { Id } from "./types"
 
 export interface Feature {
   id: UniqueIdentifier
@@ -21,12 +20,12 @@ export interface Feature {
 interface FeatureCardProps {
   feature: Feature
   isFeature?: boolean
-  deleteFeature?: (id: Id) => void
+  deleteFeature?: (id: UniqueIdentifier) => void
 }
 
 export type FeatureType = "Feature"
 
-export interface TaskDragData {
+export interface DragData {
   type: FeatureType
   feature: Feature
 }
@@ -47,7 +46,8 @@ const FeatureCard = forwardRef<
       ref={ref}
       {...props}
       className={cn(
-        "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent"
+        "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent",
+        props.className
       )}
     >
       <div className="flex w-full flex-col gap-1">
@@ -78,8 +78,8 @@ const FeatureCard = forwardRef<
           <div className="line-clamp-2 text-xs text-muted-foreground">
             {"jakshdk jasdkjhasdk jhaskdjh askdjhasdkjhadkjahsdk ajsdhkasjhsdaks jdhaskjdhaskdjhaskdj askdjhasdkjhasd askjhdas".substring(
               0,
-              300
-            )}
+              50
+            ) + "..."}
           </div>
           <div className={cn("ml-auto flex items-center text-xs")}>
             1000 calls per $5 USD
