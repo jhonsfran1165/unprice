@@ -1,12 +1,17 @@
 import type { UniqueIdentifier } from "@dnd-kit/core"
 
-export interface Column {
+export type GroupType = "Group"
+
+export type FeatureType = "Feature"
+
+export interface Feature {
   id: UniqueIdentifier
-  title: string
+  groupId?: UniqueIdentifier
+  content: string
+  type: string
 }
 
-export interface Task {
+export interface Group {
   id: UniqueIdentifier
-  columnId: UniqueIdentifier
-  content: string
+  title: string
 }

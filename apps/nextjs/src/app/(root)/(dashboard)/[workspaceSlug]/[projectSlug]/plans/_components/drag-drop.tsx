@@ -34,22 +34,24 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@builderai/ui/resizable"
+import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 
-import { BoardColumn } from "./BoardColumn"
-import type { Feature } from "./feature"
 import { FeatureCard } from "./feature"
+import { FeatureGroup } from "./feature-group"
+import { FeatureGroupEmptyPlaceholder } from "./feature-group-place-holder"
 import { Features } from "./features"
-import type { Column } from "./types"
+import { SortableFeature } from "./sortable-feature"
+import type { Feature, FeatureType, Group, GroupType } from "./types"
 
 function generateId() {
-  /* Generate a random number between 0 and 10000 */
-  return Math.floor(Math.random() * 10001)
+  // generate a random id
+  return Math.random().toString(36).substr(2, 9)
 }
 
-export const defaultCols: Column[] = [
+export const defaultGrops: Group[] = [
   {
-    id: "base",
+    id: generateId(),
     title: "Base Features",
   },
 ]
@@ -125,8 +127,10 @@ export const dbFeatures: Feature[] = [
 ]
 
 export default function DragDrop() {
-  const [columns, setColumns] = useState<Column[]>(defaultCols)
-  const columnsId = useMemo(() => columns.map((col) => col.id), [columns])
+  const [groups, setGroups] = useState<Group[]>(defaultGrops)
+  const groupIds = useMemo(() => groups.map((g) => g.id), [groups])
+
+  console.log("groups", groups)
 
   const [features, setFeatures] = useState<Feature[]>(defaultFeatures)
 
@@ -175,30 +179,30 @@ export default function DragDrop() {
     setFeatures(newFeature)
   }
 
-  function createNewColumn() {
-    const columnToAdd: Column = {
+  function createNewGroup() {
+    const groupToAdd: Group = {
       id: generateId(),
-      title: `Column ${columns.length + 1}`,
+      title: `Group ${groups.length + 1}`,
     }
 
-    setColumns([...columns, columnToAdd])
+    setGroups([...groups, groupToAdd])
   }
 
-  function deleteColumn(id: UniqueIdentifier) {
-    const filteredColumns = columns.filter((col) => col.id !== id)
-    setColumns(filteredColumns)
+  function deleteGroup(id: UniqueIdentifier) {
+    const filteredGroups = groups.filter((g) => g.id !== id)
+    setGroups(filteredGroups)
 
-    const newFeature = features.filter((t) => t.columnId !== id)
+    const newFeature = features.filter((t) => t.groupId !== id)
     setFeatures(newFeature)
   }
 
-  function updateColumn(id: UniqueIdentifier, title: string) {
-    const newColumns = columns.map((col) => {
-      if (col.id !== id) return col
-      return { ...col, title }
+  function updateGroup(id: UniqueIdentifier, title: string) {
+    const newGroups = groups.map((g) => {
+      if (g.id !== id) return g
+      return { ...g, title }
     })
 
-    setColumns(newColumns)
+    setGroups(newGroups)
   }
 
   function onDragStart(event: DragStartEvent) {
@@ -224,15 +228,16 @@ export default function DragDrop() {
 
     if (activeId === overId) return
 
-    const isActiveColumn = active.data.current?.type === "Column"
-    if (!isActiveColumn) return
+    // get string from GroupType
+    const isActiveGroup = active.data.current?.type === ("Group" as GroupType)
+    if (!isActiveGroup) return
 
-    // For Column we only need to re-order the list
-    setColumns((columns) => {
-      const activeColumnIndex = columns.findIndex((col) => col.id === activeId)
-      const overColumnIndex = columns.findIndex((col) => col.id === overId)
+    // For Group we only need to re-order the list
+    setGroups((groups) => {
+      const activeGroupIndex = groups.findIndex((g) => g.id === activeId)
+      const overGroupIndex = groups.findIndex((g) => g.id === overId)
 
-      return arrayMove(columns, activeColumnIndex, overColumnIndex)
+      return arrayMove(groups, activeGroupIndex, overGroupIndex)
     })
   }
 
@@ -252,23 +257,23 @@ export default function DragDrop() {
     const activeData = active.data.current
     const overData = over.data.current
 
-    const isActiveFeature = activeData?.type === "Feature"
-    const isOverAFeature = overData?.type === "Feature"
-    const isOverAColumn = overData?.type === "Column"
+    const isActiveFeature = activeData?.type === ("Feature" as FeatureType)
+    const isOverAFeature = overData?.type === ("Feature" as FeatureType)
+    const isOverAGroup = overData?.type === ("Group" as GroupType)
 
     // only process features
     if (!isActiveFeature) return
 
     // I'm dropping a Feature over another Feature
-    // the over feature can be inside a column or not
+    // the over feature can be inside a group or not
     if (isActiveFeature && isOverAFeature) {
       const overFeature = overData.feature as Feature
 
-      // if the over feature has a column id then we don't need to do anything
+      // if the over feature has a group id then we don't need to do anything
       // because the over feature is in the search
-      if (!overFeature?.columnId) return
+      if (!overFeature?.groupId) return
 
-      // if the over feature has a column id then we need to move the active feature to the same column
+      // if the over feature has a group id then we need to move the active feature to the same group
       setFeatures((features) => {
         const activeIndex = features.findIndex((t) => t.id === activeId)
         const overIndex = features.findIndex((t) => t.id === overId)
@@ -277,21 +282,21 @@ export default function DragDrop() {
 
         // if the active feature is in the list
         // and the over feature is in the list
-        // and the active feature is not in the same column as the over feature
-        // then we need to move the active feature to the same column as the over feature
+        // and the active feature is not in the same group as the over feature
+        // then we need to move the active feature to the same group as the over feature
         if (
           activeFeature &&
           overFeature &&
-          activeFeature.columnId !== overFeature.columnId
+          activeFeature.groupId !== overFeature.groupId
         ) {
-          activeFeature.columnId = overFeature.columnId
+          activeFeature.groupId = overFeature.groupId
           return arrayMove(features, activeIndex, overIndex - 1)
         } else if (!activeFeature && overFeature) {
           // if the active feature is not in the list then we need to add it to the list
           return arrayMove(
             [
               ...features,
-              { ...activeData.feature, columnId: overFeature?.columnId },
+              { ...activeData.feature, groupId: overFeature?.groupId },
             ],
             activeIndex,
             overIndex
@@ -303,15 +308,15 @@ export default function DragDrop() {
       })
     }
 
-    // I'm dropping a Feature over a column
-    if (isActiveFeature && isOverAColumn) {
+    // I'm dropping a Feature over a group
+    if (isActiveFeature && isOverAGroup) {
       setFeatures((features) => {
         const activeIndex = features.findIndex((t) => t.id === activeId)
         const activeFeature = features[activeIndex]
 
-        // if the active feature is in the list then we need to move it to the new column
+        // if the active feature is in the list then we need to move it to the new group
         if (activeFeature) {
-          activeFeature.columnId = overId
+          activeFeature.groupId = overId
           return arrayMove(features, activeIndex, activeIndex)
         } else {
           // if the active feature is not in the list then we need to add it to the list
@@ -319,7 +324,7 @@ export default function DragDrop() {
             ...features,
             {
               ...activeData.feature,
-              columnId: overId,
+              groupId: overId,
             },
           ] as Feature[]
         }
@@ -356,7 +361,7 @@ export default function DragDrop() {
               <div className="flex w-full justify-end">
                 <Button
                   onClick={() => {
-                    createNewColumn()
+                    createNewGroup()
                   }}
                   variant={"outline"}
                   size={"sm"}
@@ -370,22 +375,46 @@ export default function DragDrop() {
           <Separator />
           <div className="flex flex-col p-3">
             <Accordion type="multiple" className="space-y-2">
-              {/* context for columns */}
+              {/* context for groups */}
+              {/* // TODO: improve the way you pass the features  maybe with a dict*/}
               <SortableContext
-                items={columnsId}
+                items={groupIds}
                 strategy={verticalListSortingStrategy}
               >
-                {columns.map((col) => (
-                  <BoardColumn
-                    key={col.id}
-                    deleteColumn={deleteColumn}
-                    updateColumn={updateColumn}
-                    deleteFeature={deleteFeature}
-                    column={col}
-                    features={features.filter(
-                      (feature) => feature.columnId === col.id
+                {groups.map((g) => (
+                  <FeatureGroup
+                    key={g.id}
+                    deleteGroup={deleteGroup}
+                    updateGroup={updateGroup}
+                    group={g}
+                  >
+                    {features.filter((feature) => feature.groupId === g.id)
+                      .length === 0 ? (
+                      <div className="h-full px-3">
+                        <FeatureGroupEmptyPlaceholder />
+                      </div>
+                    ) : (
+                      <ScrollArea className="h-full px-3">
+                        <SortableContext
+                          items={features
+                            .filter((feature) => feature.groupId === g.id)
+                            .map((f) => f.id)}
+                        >
+                          <div className="space-y-2">
+                            {features
+                              .filter((feature) => feature.groupId === g.id)
+                              .map((feature) => (
+                                <SortableFeature
+                                  deleteFeature={deleteFeature}
+                                  key={feature.id}
+                                  feature={feature}
+                                />
+                              ))}
+                          </div>
+                        </SortableContext>
+                      </ScrollArea>
                     )}
-                  />
+                  </FeatureGroup>
                 ))}
               </SortableContext>
             </Accordion>

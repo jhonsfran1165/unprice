@@ -9,21 +9,13 @@ import { cn } from "@builderai/ui/utils"
 
 import { SheetDemo } from "./feature-config-form"
 import { FeatureForm } from "./feature-form"
-
-export interface Feature {
-  id: UniqueIdentifier
-  columnId?: UniqueIdentifier
-  content: string
-  type: string
-}
+import type { Feature, FeatureType } from "./types"
 
 interface FeatureCardProps {
   feature: Feature
   isFeature?: boolean
   deleteFeature?: (id: UniqueIdentifier) => void
 }
-
-export type FeatureType = "Feature"
 
 export interface DragData {
   type: FeatureType
