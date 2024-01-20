@@ -9,17 +9,13 @@ import { cn } from "@builderai/ui/utils"
 
 import { SheetDemo } from "./feature-config-form"
 import { FeatureForm } from "./feature-form"
-import type { Feature, FeatureType } from "./types"
+import type { Feature } from "./types"
 
 interface FeatureCardProps {
   feature: Feature
   isFeature?: boolean
+  isOverlay?: boolean
   deleteFeature?: (id: UniqueIdentifier) => void
-}
-
-export interface DragData {
-  type: FeatureType
-  feature: Feature
 }
 
 // A common pitfall when using the DragOverlay
@@ -29,10 +25,14 @@ export interface DragData {
 // since there will be an id collision between the
 // two components both calling useDraggable with the same id,
 // since useSortable is an abstraction on top of useDraggable.
+// To avoid this, make sure that the component that calls useSortable
+// is not rendered inside the DragOverlay so basically this component renders the DragOverlay
+// and for the sortable feature we have a separate component that wraps the feature card
+// and calls useSortable
 const FeatureCard = forwardRef<
   ElementRef<"div">,
   ComponentPropsWithoutRef<"div"> & FeatureCardProps
->(({ feature, deleteFeature, isFeature, ...props }, ref) => {
+>(({ feature, deleteFeature, isFeature, isOverlay = false, ...props }, ref) => {
   return (
     <div
       ref={ref}
@@ -49,7 +49,7 @@ const FeatureCard = forwardRef<
           </div>
           <div className={"ml-auto flex items-center"}>
             <Badge className="mr-2">{feature.type}</Badge>
-            {isFeature ? <SheetDemo /> : <FeatureForm />}
+            {!isOverlay && (isFeature ? <SheetDemo /> : <FeatureForm />)}
             {deleteFeature && (
               <Button
                 onClick={() => deleteFeature(feature.id)}

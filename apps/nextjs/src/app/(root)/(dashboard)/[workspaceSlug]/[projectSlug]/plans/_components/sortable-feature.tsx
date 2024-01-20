@@ -4,14 +4,20 @@ import { CSS } from "@dnd-kit/utilities"
 
 import { cn } from "@builderai/ui/utils"
 
-import type { DragData, Feature } from "./feature"
 import { FeatureCard } from "./feature"
+import type { Feature, FeatureType } from "./types"
+
+export interface DragData {
+  type: FeatureType
+  feature: Feature
+}
 
 export function SortableFeature(props: {
   feature: Feature
   deleteFeature?: (id: UniqueIdentifier) => void
   className?: string
   isFeature?: boolean
+  disabled?: boolean
 }) {
   const {
     setNodeRef,
@@ -21,7 +27,7 @@ export function SortableFeature(props: {
     transform,
     transition,
   } = useSortable({
-    id: props.feature.id.toString(),
+    id: props.feature.id,
     data: {
       type: "Feature",
       feature: props.feature,
@@ -38,7 +44,7 @@ export function SortableFeature(props: {
 
   return (
     <FeatureCard
-      ref={setNodeRef}
+      ref={props.disabled ? undefined : setNodeRef}
       style={style}
       {...attributes}
       {...listeners}

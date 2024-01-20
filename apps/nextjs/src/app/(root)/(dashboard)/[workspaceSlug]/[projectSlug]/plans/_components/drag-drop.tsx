@@ -39,7 +39,7 @@ import { Separator } from "@builderai/ui/separator"
 
 import { FeatureCard } from "./feature"
 import { FeatureGroup } from "./feature-group"
-import { FeatureGroupEmptyPlaceholder } from "./feature-group-place-holder"
+import { FeatureGroupEmptyPlaceholder } from "./feature-group-placeholder"
 import { Features } from "./features"
 import { SortableFeature } from "./sortable-feature"
 import type { Feature, FeatureType, Group, GroupType } from "./types"
@@ -127,27 +127,55 @@ export const dbFeatures: Feature[] = [
 ]
 
 export default function DragDrop() {
+  // each feature has a group id, which represent the plan groupings you implement
+  // example of groups: Base Features, Pay as you go, etc
   const [groups, setGroups] = useState<Group[]>(defaultGrops)
   const groupIds = useMemo(() => groups.map((g) => g.id), [groups])
 
-  console.log("groups", groups)
+  // when the drag and drop starts we need to handle the state of the plan
+  const [activeFeature, setActiveFeature] = useState<Feature | null>(null)
+  const [clonedFeatures, setClonedFeatures] = useState<Feature[] | null>(null)
 
+  // store all the features in the current plan
   const [features, setFeatures] = useState<Feature[]>(defaultFeatures)
+
+  // store the plan configuration
+  // plan_config: { "colum_id": name: "Base Features", features: [Feature1, Feature2] }
+  const planConfig = useMemo(() => {
+    return features.reduce(
+      (acc, feature) => {
+        if (!feature.groupId) return acc
+        const group = acc[feature.groupId]
+        if (group) {
+          group.features.push(feature)
+        } else {
+          acc[feature.groupId] = {
+            name: groups.find((g) => g.id === feature.groupId)?.title ?? "",
+            features: [feature],
+          }
+        }
+        return acc
+      },
+      {} as Record<string, { name: string; features: Feature[] }>
+    )
+  }, [features, groups])
 
   const featuresIds = useMemo(() => {
     return features.map((feature) => feature.id)
   }, [features])
 
+  // we have to filter the features that are already in the
+  // plan so we don't show them in the search
   const searchableFeatures = useMemo(() => {
     return dbFeatures.filter((feature) => {
       return !featuresIds.includes(feature.id)
     })
   }, [featuresIds])
 
-  const [activeFeature, setActiveFeature] = useState<Feature | null>(null)
-
-  const [clonedFeatures, setClonedFeatures] = useState<Feature[] | null>(null)
-
+  // sensor are the way we can control how the drag and drop works
+  // we have some components inside the feature that are interactive like buttons
+  // so we need to delay the drag and drop when the user clicks on those buttons
+  // otherwise the drag and drop will start when the user clicks on the buttons
   const sensors = useSensors(
     useSensor(MouseSensor, {
       // Require the mouse to move by 10 pixels before activating
@@ -174,12 +202,12 @@ export default function DragDrop() {
     setClonedFeatures(null)
   }
 
-  function deleteFeature(id: UniqueIdentifier) {
+  const deleteFeature = (id: UniqueIdentifier) => {
     const newFeature = features.filter((feature) => feature.id !== id)
     setFeatures(newFeature)
   }
 
-  function createNewGroup() {
+  const createNewGroup = () => {
     const groupToAdd: Group = {
       id: generateId(),
       title: `Group ${groups.length + 1}`,
@@ -188,7 +216,7 @@ export default function DragDrop() {
     setGroups([...groups, groupToAdd])
   }
 
-  function deleteGroup(id: UniqueIdentifier) {
+  const deleteGroup = (id: UniqueIdentifier) => {
     const filteredGroups = groups.filter((g) => g.id !== id)
     setGroups(filteredGroups)
 
@@ -196,7 +224,7 @@ export default function DragDrop() {
     setFeatures(newFeature)
   }
 
-  function updateGroup(id: UniqueIdentifier, title: string) {
+  const updateGroup = (id: UniqueIdentifier, title: string) => {
     const newGroups = groups.map((g) => {
       if (g.id !== id) return g
       return { ...g, title }
@@ -205,7 +233,7 @@ export default function DragDrop() {
     setGroups(newGroups)
   }
 
-  function onDragStart(event: DragStartEvent) {
+  const onDragStart = (event: DragStartEvent) => {
     // just copy the features in case the user cancels the drag
     setClonedFeatures(features)
 
@@ -215,7 +243,7 @@ export default function DragDrop() {
     }
   }
 
-  function onDragEnd(event: DragEndEvent) {
+  const onDragEnd = (event: DragEndEvent) => {
     setActiveFeature(null)
     setClonedFeatures(null)
 
@@ -241,7 +269,7 @@ export default function DragDrop() {
     })
   }
 
-  function onDragOver(event: DragOverEvent) {
+  const onDragOver = (event: DragOverEvent) => {
     const { active, over } = event
 
     // only process if there is an over item
@@ -334,6 +362,7 @@ export default function DragDrop() {
 
   return (
     <DndContext
+      id={"plan-features"}
       sensors={sensors}
       measuring={{
         droppable: {
@@ -347,7 +376,7 @@ export default function DragDrop() {
       collisionDetection={pointerWithin}
     >
       <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={80} minSize={50}>
+        <ResizablePanel defaultSize={70} minSize={50}>
           <div className="p-4">
             <div className="flex flex-row items-center justify-between">
               <div className="flex w-full flex-col align-middle">
@@ -375,8 +404,6 @@ export default function DragDrop() {
           <Separator />
           <div className="flex flex-col p-3">
             <Accordion type="multiple" className="space-y-2">
-              {/* context for groups */}
-              {/* // TODO: improve the way you pass the features  maybe with a dict*/}
               <SortableContext
                 items={groupIds}
                 strategy={verticalListSortingStrategy}
@@ -388,28 +415,25 @@ export default function DragDrop() {
                     updateGroup={updateGroup}
                     group={g}
                   >
-                    {features.filter((feature) => feature.groupId === g.id)
-                      .length === 0 ? (
+                    {!planConfig[g.id]?.features ? (
                       <div className="h-full px-3">
                         <FeatureGroupEmptyPlaceholder />
                       </div>
                     ) : (
                       <ScrollArea className="h-full px-3">
                         <SortableContext
-                          items={features
-                            .filter((feature) => feature.groupId === g.id)
-                            .map((f) => f.id)}
+                          items={
+                            planConfig[g.id]?.features.map((f) => f.id) ?? []
+                          }
                         >
                           <div className="space-y-2">
-                            {features
-                              .filter((feature) => feature.groupId === g.id)
-                              .map((feature) => (
-                                <SortableFeature
-                                  deleteFeature={deleteFeature}
-                                  key={feature.id}
-                                  feature={feature}
-                                />
-                              ))}
+                            {planConfig[g.id]?.features.map((f) => (
+                              <SortableFeature
+                                deleteFeature={deleteFeature}
+                                key={f.id}
+                                feature={f}
+                              />
+                            ))}
                           </div>
                         </SortableContext>
                       </ScrollArea>
@@ -420,10 +444,13 @@ export default function DragDrop() {
             </Accordion>
           </div>
 
-          {"document" in window &&
+          {typeof window !== "undefined" &&
+            "document" in window &&
             createPortal(
               <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
-                {activeFeature && <FeatureCard feature={activeFeature} />}
+                {activeFeature && (
+                  <FeatureCard isOverlay feature={activeFeature} />
+                )}
               </DragOverlay>,
               document.body
             )}

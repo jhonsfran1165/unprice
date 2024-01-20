@@ -7,8 +7,8 @@ import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 import { cn } from "@builderai/ui/utils"
 
-import type { Feature } from "./feature"
 import { SortableFeature } from "./sortable-feature"
+import type { Feature } from "./types"
 
 interface FeaturesProps extends React.HTMLAttributes<HTMLDivElement> {
   features: Feature[]
