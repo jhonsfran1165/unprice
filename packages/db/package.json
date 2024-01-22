@@ -5,7 +5,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./schema/apikey": "./src/schema/apikey.ts",
-    "./schema/enums": "./src/schema/enums.ts",
+    "./schema/enums": "./src/utils/enums.ts",
     "./schema/ingestion": "./src/schema/ingestion.ts",
     "./schema/project": "./src/schema/project.ts",
     "./schema/page": "./src/schema/page.ts",

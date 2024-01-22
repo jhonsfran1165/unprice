@@ -10,8 +10,8 @@ import { z } from "zod"
 
 import { MEMBERSHIP, PLANS } from "@builderai/config"
 
+import { plans } from "../utils/enums"
 import { id, tenantID, timestamps } from "../utils/sql"
-import { plans } from "./enums"
 
 export const workspace = pgTable(
   "workspace",

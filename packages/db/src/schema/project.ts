@@ -3,8 +3,8 @@ import { index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
+import { projectTier } from "../utils/enums"
 import { tenantID, timestamps, workspaceID } from "../utils/sql"
-import { projectTier } from "./enums"
 import { workspace } from "./workspace"
 
 export const project = pgTable(

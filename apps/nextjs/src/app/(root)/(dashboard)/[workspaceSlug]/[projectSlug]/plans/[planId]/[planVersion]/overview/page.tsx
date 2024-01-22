@@ -12,7 +12,6 @@ export default async function DashboardPage(props: {
     planVersion: string
   }
 }) {
-  console.log("props", props)
   const { projectSlug, workspaceSlug, planId, planVersion } = props.params
 
   await userCanAccessProject({
@@ -22,7 +21,7 @@ export default async function DashboardPage(props: {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden rounded-lg border bg-background">
-      <DragDrop />
+      <DragDrop projectSlug={projectSlug} />
     </div>
   )
 }

@@ -8,13 +8,15 @@ import {
 } from "drizzle-orm/pg-core"
 import { z } from "zod"
 
+import { projectID, tenantID, timestamps } from "../utils/sql"
 import { project } from "./project"
-import { commonColumns } from "./shared"
 
 export const apikey = pgTable(
   "apikey",
   {
-    ...commonColumns,
+    ...projectID,
+    ...tenantID,
+    ...timestamps,
     expiresAt: timestamp("expires_at", { mode: "date" }),
     lastUsed: timestamp("last_used", { mode: "date" }),
     revokedAt: timestamp("revoked_at", { mode: "date" }),

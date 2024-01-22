@@ -3,18 +3,15 @@ import {
   index,
   integer,
   json,
-  pgEnum,
   pgTable,
   text,
   uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core"
 
+import { currencyEnum } from "../../utils/enums"
 import { projectID, tenantID, timestamps } from "../../utils/sql"
 import { project } from "../project"
-
-export const currencyEnum = pgEnum("currency", ["USD", "EUR", "GBP"])
-export const stageEnum = pgEnum("stage", ["prod", "test", "dev"])
 
 // export const stripe = pgTable(
 //   "stripe",
@@ -61,8 +58,8 @@ export const version = pgTable(
       .references(() => plan.id),
     slug: text("slug").notNull().unique(),
     version: integer("version").notNull().unique().default(1),
-    features: json("features"), // array of feature ids
-    addons: json("features"), // array of feature ids
+    features: json("features"), // array of config features
+    addons: json("features"), // array of config features
   },
   (table) => ({
     versionProjectInx: uniqueIndex("version_project_id_idx").on(
@@ -72,8 +69,6 @@ export const version = pgTable(
     versionTenantIdInx: uniqueIndex("version_tenant_uidx").on(table.tenantId),
   })
 )
-
-export const typeFeatureEnum = pgEnum("type", ["flat", "metered", "hybrid"])
 
 export const feature = pgTable(
   "feature",
@@ -96,6 +91,20 @@ export const feature = pgTable(
 export const planRelations = relations(plan, ({ one }) => ({
   project: one(project, {
     fields: [plan.projectId],
+    references: [project.id],
+  }),
+}))
+
+export const featureRelations = relations(feature, ({ one }) => ({
+  project: one(project, {
+    fields: [feature.projectId],
+    references: [project.id],
+  }),
+}))
+
+export const versionRelations = relations(version, ({ one }) => ({
+  project: one(project, {
+    fields: [version.projectId],
     references: [project.id],
   }),
 }))

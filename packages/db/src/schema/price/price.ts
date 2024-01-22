@@ -1,7 +1,7 @@
 import { createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { plan } from "./price.sql"
+import { feature, plan } from "./price.sql"
 
 export const Plan = createSelectSchema(plan, {
   id: (schema) => schema.id.cuid2(),
@@ -36,3 +36,34 @@ export const updatePlanSchema = Plan.pick({
 })
 
 export type UpdatePlan = z.infer<typeof updatePlanSchema>
+
+export const Feature = createSelectSchema(feature, {
+  id: (schema) => schema.id.cuid2(),
+  slug: (schema) =>
+    schema.slug
+      .trim()
+      .toLowerCase()
+      .min(3)
+      .regex(/^[a-z0-9\-]+$/),
+})
+
+export const updateFeatureSchema = Feature.pick({
+  slug: true,
+  id: true,
+  projectId: true,
+  title: true,
+}).partial({
+  slug: true,
+  projectSlug: true,
+})
+
+export const createFeatureSchema = Feature.pick({
+  slug: true,
+  title: true,
+}).extend({
+  projectSlug: z.string(),
+})
+
+export type CreateFeature = z.infer<typeof createFeatureSchema>
+export type UpdateFeature = z.infer<typeof updateFeatureSchema>
+export type Feature = z.infer<typeof Feature>

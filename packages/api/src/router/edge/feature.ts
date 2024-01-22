@@ -3,52 +3,48 @@ import { z } from "zod"
 
 import { and, eq } from "@builderai/db"
 import {
-  canva,
-  createCanvaSchema,
-  updateCanvaSchema,
-} from "@builderai/db/schema/canva"
+  createFeatureSchema,
+  feature,
+  updateFeatureSchema,
+} from "@builderai/db/schema/price"
 import { newIdEdge } from "@builderai/db/utils"
 
-import {
-  createTRPCRouter,
-  protectedOrgProcedure,
-  publicProcedure,
-} from "../../trpc"
+import { createTRPCRouter, protectedOrgProcedure } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
 
-export const canvaRouter = createTRPCRouter({
+export const featureRouter = createTRPCRouter({
   create: protectedOrgProcedure
-    .input(createCanvaSchema)
+    .input(createFeatureSchema)
     .mutation(async (opts) => {
-      const { projectSlug, content, slug } = opts.input
+      const { projectSlug, slug, title } = opts.input
 
       const { project } = await hasAccessToProject({
         projectSlug,
         ctx: opts.ctx,
       })
 
-      const canvaId = newIdEdge("canva")
+      const featureId = newIdEdge("feature")
 
-      const canvaData = await opts.ctx.db
-        .insert(canva)
+      const featureDate = await opts.ctx.db
+        .insert(feature)
         .values({
-          id: canvaId,
+          id: featureId,
           slug,
-          content,
+          title,
           projectId: project.id,
           tenantId: opts.ctx.tenantId,
         })
         .returning()
 
-      return canvaData[0]
+      return featureDate[0]
     }),
   update: protectedOrgProcedure
-    .input(updateCanvaSchema)
+    .input(updateFeatureSchema)
     .mutation(async (opts) => {
-      const { content, id } = opts.input
+      const { title, id } = opts.input
 
-      const canvaData = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.canva.findFirst({
+      const featureData = await opts.ctx.txRLS(({ txRLS }) => {
+        return txRLS.query.feature.findFirst({
           with: {
             project: {
               columns: {
@@ -56,38 +52,38 @@ export const canvaRouter = createTRPCRouter({
               },
             },
           },
-          where: (canva, { eq }) => eq(canva.id, id),
+          where: (feature, { eq }) => eq(feature.id, id),
         })
       })
 
-      if (!canvaData) {
+      if (!featureData) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Canva not found",
+          message: "Feature not found",
         })
       }
 
       const { project } = await hasAccessToProject({
-        projectSlug: canvaData.project.slug,
+        projectSlug: featureData.project.slug,
         ctx: opts.ctx,
       })
 
       return await opts.ctx.db
-        .update(canva)
+        .update(feature)
         .set({
-          content,
+          title,
         })
-        .where(and(eq(canva.id, id), eq(canva.projectId, project.id)))
+        .where(and(eq(feature.id, id), eq(feature.projectId, project.id)))
         .returning()
     }),
 
-  getById: publicProcedure
+  getById: protectedOrgProcedure
     .input(z.object({ id: z.string() }))
     .query(async (opts) => {
       const { id } = opts.input
 
       return await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.canva.findFirst({
+        return txRLS.query.feature.findFirst({
           with: {
             project: {
               columns: {
@@ -95,7 +91,7 @@ export const canvaRouter = createTRPCRouter({
               },
             },
           },
-          where: (canva, { eq }) => eq(canva.id, id),
+          where: (feature, { eq }) => eq(feature.id, id),
         })
       })
     }),
@@ -110,14 +106,14 @@ export const canvaRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const canvas = await opts.ctx.txRLS(({ txRLS }) =>
-        txRLS.query.canva.findMany({
-          where: (canva, { eq }) => eq(canva.projectId, project.id),
+      const feature = await opts.ctx.txRLS(({ txRLS }) =>
+        txRLS.query.feature.findMany({
+          where: (feature, { eq }) => eq(feature.projectId, project.id),
         })
       )
 
       return {
-        canvas,
+        feature,
       }
     }),
 })

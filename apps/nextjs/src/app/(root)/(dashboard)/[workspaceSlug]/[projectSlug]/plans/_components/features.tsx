@@ -1,20 +1,22 @@
 "use client"
 
 import { Button } from "@builderai/ui/button"
-import { Add, Search } from "@builderai/ui/icons"
+import { Search } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 import { cn } from "@builderai/ui/utils"
 
+import { FeatureForm } from "./feature-form"
 import { SortableFeature } from "./sortable-feature"
 import type { Feature } from "./types"
 
 interface FeaturesProps extends React.HTMLAttributes<HTMLDivElement> {
   features: Feature[]
+  projectSlug: string
 }
 
-export function Features({ className, features }: FeaturesProps) {
+export function Features({ className, features, projectSlug }: FeaturesProps) {
   return (
     <div className={cn("flex flex-1 flex-col overflow-y-auto", className)}>
       <div className="flex items-center px-4 py-2">
@@ -29,14 +31,21 @@ export function Features({ className, features }: FeaturesProps) {
           </div>
         </form>
         <Button className="h-8 w-8" size={"icon"} variant={"ghost"}>
-          <Add className="h-5 w-5" />
+          {/* <Add className="h-5 w-5" /> */}
+          {/* // TODO: support change icon */}
+          <FeatureForm projectSlug={projectSlug} />
         </Button>
       </div>
       <ScrollArea className="max-h-[750px] flex-1 overflow-y-auto">
         <div className="px-4 py-2">
           <div className="space-y-2">
             {features?.map((feature) => (
-              <SortableFeature isFeature key={feature.id} feature={feature} />
+              <SortableFeature
+                isFeature
+                key={feature.id}
+                feature={feature}
+                projectSlug={projectSlug}
+              />
             ))}
           </div>
         </div>

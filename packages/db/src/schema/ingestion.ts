@@ -1,14 +1,16 @@
 import { relations } from "drizzle-orm"
 import { index, json, pgTable, text } from "drizzle-orm/pg-core"
 
+import { projectID, tenantID, timestamps } from "../utils/sql"
 import { apikey } from "./apikey"
 import { project } from "./project"
-import { commonColumns } from "./shared"
 
 export const ingestion = pgTable(
   "ingestion",
   {
-    ...commonColumns,
+    ...projectID,
+    ...tenantID,
+    ...timestamps,
     projectId: text("project_id")
       .notNull()
       .references(() => project.id, {

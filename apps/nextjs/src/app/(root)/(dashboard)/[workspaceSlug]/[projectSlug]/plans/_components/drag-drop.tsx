@@ -126,7 +126,8 @@ export const dbFeatures: Feature[] = [
   },
 ]
 
-export default function DragDrop() {
+// TODO: do not pass projectSlug to different components - props hell!!
+export default function DragDrop({ projectSlug }: { projectSlug: string }) {
   // each feature has a group id, which represent the plan groupings you implement
   // example of groups: Base Features, Pay as you go, etc
   const [groups, setGroups] = useState<Group[]>(defaultGrops)
@@ -429,6 +430,7 @@ export default function DragDrop() {
                           <div className="space-y-2">
                             {planConfig[g.id]?.features.map((f) => (
                               <SortableFeature
+                                projectSlug={projectSlug}
                                 deleteFeature={deleteFeature}
                                 key={f.id}
                                 feature={f}
@@ -447,9 +449,13 @@ export default function DragDrop() {
           {typeof window !== "undefined" &&
             "document" in window &&
             createPortal(
-              <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
+              <DragOverlay adjustScale={true} dropAnimation={dropAnimation}>
                 {activeFeature && (
-                  <FeatureCard isOverlay feature={activeFeature} />
+                  <FeatureCard
+                    isOverlay
+                    feature={activeFeature}
+                    projectSlug={projectSlug}
+                  />
                 )}
               </DragOverlay>,
               document.body
@@ -457,7 +463,7 @@ export default function DragDrop() {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={30} minSize={20}>
-          <Features features={searchableFeatures} />
+          <Features features={searchableFeatures} projectSlug={projectSlug} />
         </ResizablePanel>
       </ResizablePanelGroup>
     </DndContext>

@@ -18,6 +18,7 @@ export function SortableFeature(props: {
   className?: string
   isFeature?: boolean
   disabled?: boolean
+  projectSlug: string
 }) {
   const {
     setNodeRef,
@@ -44,6 +45,7 @@ export function SortableFeature(props: {
 
   return (
     <FeatureCard
+      projectSlug={props.projectSlug}
       ref={props.disabled ? undefined : setNodeRef}
       style={style}
       {...attributes}
