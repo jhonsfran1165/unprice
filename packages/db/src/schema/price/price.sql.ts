@@ -24,7 +24,7 @@ import { project } from "../project"
 //     stage: stageEnum("stage").default("dev"),
 //   },
 //   (table) => ({
-//     planProjectInx: uniqueIndex("plan_project_id_idx").on(table.projectId),
+//     planProjectInx: index("plan_project_id_idx").on(table.projectId),
 //     planInx: uniqueIndex("plan_key_slug").on(table.slug),
 //     planTenantIdInx: index("plan_tenant_uidx").on(table.tenantId),
 //   })
@@ -41,7 +41,7 @@ export const plan = pgTable(
     currency: currencyEnum("currency").default("EUR"),
   },
   (table) => ({
-    planProjectInx: uniqueIndex("plan_project_id_idx").on(table.projectId),
+    planProjectInx: index("plan_project_id_idx").on(table.projectId),
     planInx: uniqueIndex("plan_key_slug").on(table.slug),
     planTenantIdInx: index("plan_tenant_uidx").on(table.tenantId),
   })
@@ -62,11 +62,9 @@ export const version = pgTable(
     addons: json("features"), // array of config features
   },
   (table) => ({
-    versionProjectInx: uniqueIndex("version_project_id_idx").on(
-      table.projectId
-    ),
+    versionProjectInx: index("version_project_id_idx").on(table.projectId),
     versionInx: uniqueIndex("version_key_slug").on(table.slug),
-    versionTenantIdInx: uniqueIndex("version_tenant_uidx").on(table.tenantId),
+    versionTenantIdInx: index("version_tenant_uidx").on(table.tenantId),
   })
 )
 
@@ -80,11 +78,9 @@ export const feature = pgTable(
     title: varchar("title", { length: 50 }).notNull(),
   },
   (table) => ({
-    featureProjectInx: uniqueIndex("feature_project_id_idx").on(
-      table.projectId
-    ),
+    featureProjectInx: index("feature_project_id_idx").on(table.projectId),
     featureInx: uniqueIndex("feature_key_slug").on(table.slug),
-    featureTenantIdInx: uniqueIndex("feature_tenant_uidx").on(table.tenantId),
+    featureTenantIdInx: index("feature_tenant_uidx").on(table.tenantId),
   })
 )
 

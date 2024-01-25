@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef, ElementRef } from "react"
 import { forwardRef } from "react"
 import type { UniqueIdentifier } from "@dnd-kit/core"
 
+import type { Feature } from "@builderai/db/schema/price"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import { Trash2 } from "@builderai/ui/icons"
@@ -9,7 +10,6 @@ import { cn } from "@builderai/ui/utils"
 
 import { FeatureConfigForm } from "./feature-config-form"
 import { FeatureForm } from "./feature-form"
-import type { Feature } from "./types"
 
 interface FeatureCardProps {
   feature: Feature
@@ -57,10 +57,10 @@ const FeatureCard = forwardRef<
         <div className="flex w-full flex-col gap-1">
           <div className="flex items-center">
             <div className="flex items-center gap-2">
-              <div className="font-semibold">{feature.content}</div>
+              <div className="font-semibold">{feature.title}</div>
             </div>
             <div className={"ml-auto flex items-center"}>
-              <Badge className="mr-2">{feature.type}</Badge>
+              <Badge className="mr-2">{feature.slug}</Badge>
               {!isOverlay &&
                 (isFeature ? (
                   <FeatureForm projectSlug={projectSlug} />
@@ -80,7 +80,7 @@ const FeatureCard = forwardRef<
               )}
             </div>
           </div>
-          <div className="text-xs font-medium">{feature.content}</div>
+          <div className="text-xs font-medium">{feature.title}</div>
         </div>
         {!isFeature && (
           <>

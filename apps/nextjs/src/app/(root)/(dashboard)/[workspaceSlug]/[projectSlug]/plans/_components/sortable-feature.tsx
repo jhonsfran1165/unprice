@@ -2,10 +2,11 @@ import type { UniqueIdentifier } from "@dnd-kit/core"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
+import type { Feature } from "@builderai/db/schema/price"
 import { cn } from "@builderai/ui/utils"
 
 import { FeatureCard } from "./feature"
-import type { Feature, FeatureType } from "./types"
+import type { FeatureType } from "./types"
 
 export interface DragData {
   type: FeatureType

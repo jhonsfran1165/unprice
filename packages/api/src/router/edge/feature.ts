@@ -96,6 +96,37 @@ export const featureRouter = createTRPCRouter({
       })
     }),
 
+  searchBy: protectedOrgProcedure
+    .input(
+      z.object({
+        projectSlug: z.string(),
+        search: z.string().optional(),
+      })
+    )
+    .query(async (opts) => {
+      const { projectSlug, search } = opts.input
+      const filter = `%${search}%`
+
+      const { project } = await hasAccessToProject({
+        projectSlug,
+        ctx: opts.ctx,
+      })
+
+      const feature = await opts.ctx.txRLS(({ txRLS }) =>
+        txRLS.query.feature.findMany({
+          where: (feature, { eq, and, or, like }) =>
+            and(
+              eq(feature.projectId, project.id),
+              or(like(feature.slug, filter), like(feature.title, filter))
+            ),
+        })
+      )
+
+      return {
+        feature,
+      }
+    }),
+
   listByProject: protectedOrgProcedure
     .input(z.object({ projectSlug: z.string() }))
     .query(async (opts) => {

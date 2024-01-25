@@ -165,14 +165,6 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
     return features.map((feature) => feature.id)
   }, [features])
 
-  // we have to filter the features that are already in the
-  // plan so we don't show them in the search
-  const searchableFeatures = useMemo(() => {
-    return dbFeatures.filter((feature) => {
-      return !featuresIds.includes(feature.id)
-    })
-  }, [featuresIds])
-
   // sensor are the way we can control how the drag and drop works
   // we have some components inside the feature that are interactive like buttons
   // so we need to delay the drag and drop when the user clicks on those buttons
@@ -463,7 +455,10 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={30} minSize={20}>
-          <Features features={searchableFeatures} projectSlug={projectSlug} />
+          <Features
+            selectedFeaturesIds={featuresIds}
+            projectSlug={projectSlug}
+          />
         </ResizablePanel>
       </ResizablePanelGroup>
     </DndContext>
