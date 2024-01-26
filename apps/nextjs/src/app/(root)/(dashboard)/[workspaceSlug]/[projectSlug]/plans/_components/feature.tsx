@@ -63,7 +63,11 @@ const FeatureCard = forwardRef<
               <Badge className="mr-2">{feature.slug}</Badge>
               {!isOverlay &&
                 (isFeature ? (
-                  <FeatureForm projectSlug={projectSlug} />
+                  <FeatureForm
+                    projectSlug={projectSlug}
+                    mode="edit"
+                    feature={feature}
+                  />
                 ) : (
                   <FeatureConfigForm projectSlug={projectSlug} />
                 ))}

@@ -73,8 +73,8 @@ export default function CreateApiKeyForm(props: {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data: CreateApiKey) =>
-          createApkiKey.mutate(data)
+        onSubmit={form.handleSubmit(
+          async (data: CreateApiKey) => await createApkiKey.mutateAsync(data)
         )}
         className="space-y-4"
       >

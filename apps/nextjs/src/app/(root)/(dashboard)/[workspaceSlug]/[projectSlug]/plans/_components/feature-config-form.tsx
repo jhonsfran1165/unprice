@@ -87,8 +87,9 @@ export function FeatureConfigForm({ projectSlug }: { projectSlug: string }) {
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit((data: CreateFeature) =>
-              createFeature.mutate(data)
+            onSubmit={form.handleSubmit(
+              async (data: CreateFeature) =>
+                await createFeature.mutateAsync(data)
             )}
             className="space-y-4"
           >

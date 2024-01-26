@@ -42,6 +42,7 @@ export {
   LogOut,
   Moon,
   Pencil,
+  Plus,
   PlusCircle,
   Receipt,
   Search,

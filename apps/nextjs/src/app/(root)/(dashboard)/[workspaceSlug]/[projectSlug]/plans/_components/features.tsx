@@ -3,7 +3,6 @@
 import { useState } from "react"
 import type { UniqueIdentifier } from "@dnd-kit/core"
 
-import { Button } from "@builderai/ui/button"
 import { Search } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
@@ -57,11 +56,7 @@ export function Features({
             />
           </div>
         </form>
-        <Button className="h-8 w-8" size={"icon"} variant={"ghost"}>
-          {/* <Add className="h-5 w-5" /> */}
-          {/* // TODO: support change icon */}
-          <FeatureForm projectSlug={projectSlug} />
-        </Button>
+        <FeatureForm projectSlug={projectSlug} mode={"create"} />
       </div>
       <ScrollArea className="max-h-[750px] flex-1 overflow-y-auto">
         <div className="px-4 py-2">

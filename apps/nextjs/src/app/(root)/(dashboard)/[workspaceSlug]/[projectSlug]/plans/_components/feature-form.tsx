@@ -1,6 +1,6 @@
 import { TRPCClientError } from "@trpc/client"
 
-import type { CreateFeature } from "@builderai/db/schema/price"
+import type { CreateFeature, Feature } from "@builderai/db/schema/price"
 import { createFeatureSchema } from "@builderai/db/schema/price"
 import { Button } from "@builderai/ui/button"
 import {
@@ -12,7 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
-import { Pencil } from "@builderai/ui/icons"
+import { Pencil, Plus } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import {
   Sheet,
@@ -31,35 +31,36 @@ import { api } from "~/trpc/client"
 // TODO: support edit mode - see RenameProjectForm
 export function FeatureForm({
   projectSlug,
-  featureId,
+  feature,
+  mode = "create",
 }: {
   projectSlug: string
-  featureId?: string
+  feature?: Feature
+  mode?: "create" | "edit"
 }) {
   const toaster = useToast()
   const apiUtils = api.useUtils()
 
-  // const [data] = api.feature.getById.useSuspenseQuery({
-  //   id: featureId ?? "",
-  // })
-
-  // console.log(data)
+  const defaultValues =
+    mode === "edit"
+      ? feature
+      : { projectSlug: projectSlug, title: "", slug: "" }
 
   const form = useZodForm({
     schema: createFeatureSchema,
-    defaultValues: { projectSlug: projectSlug, title: "New Feature" },
+    defaultValues,
   })
 
   const createFeature = api.feature.create.useMutation({
     onSettled: async () => {
-      await apiUtils.feature.listByProject.invalidate({
+      await apiUtils.feature.searchBy.invalidate({
         projectSlug: projectSlug,
       })
     },
-    onSuccess: (feature) => {
+    onSuccess: (data) => {
       toaster.toast({
         title: "Feature Created",
-        description: `Feature ${feature?.title} created successfully.`,
+        description: `Feature ${data?.title} created successfully.`,
       })
 
       form.reset()
@@ -85,8 +86,9 @@ export function FeatureForm({
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" size={"icon"} className="h-8 w-8">
-          <Pencil className="h-4 w-4" />
-          <span className="sr-only">edit</span>
+          {mode === "edit" && <Pencil className="h-4 w-4" />}
+          {mode === "create" && <Plus className="h-4 w-4" />}
+          <span className="sr-only">configure</span>
         </Button>
       </SheetTrigger>
       <SheetContent>
@@ -99,8 +101,8 @@ export function FeatureForm({
         <Form {...form}>
           <form
             id="add-feature"
-            onSubmit={form.handleSubmit((data: CreateFeature) => {
-              createFeature.mutate(data)
+            onSubmit={form.handleSubmit(async (data: CreateFeature) => {
+              await createFeature.mutateAsync(data)
             })}
             className="space-y-4"
           >
@@ -146,7 +148,8 @@ export function FeatureForm({
                 <div className="h-3 w-3 animate-spin rounded-full border-2 border-background border-r-transparent" />
               </div>
             )}
-            Create Feature
+            {mode === "edit" && "Save"}
+            {mode === "create" && "Create"}
           </Button>
         </SheetFooter>
       </SheetContent>
