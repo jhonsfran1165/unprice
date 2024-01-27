@@ -3,7 +3,11 @@ import { TRPCClientError } from "@trpc/client"
 import { z } from "zod"
 
 import { FEATURE_TYPES } from "@builderai/db/schema/enums"
-import type { CreateFeature, Feature } from "@builderai/db/schema/price"
+import type {
+  CreateFeature,
+  Feature,
+  UpdateFeature,
+} from "@builderai/db/schema/price"
 import {
   createFeatureSchema,
   updateFeatureSchema,
@@ -72,27 +76,30 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
 
   const featureExist = api.feature.featureExist.useMutation()
 
-  const forSchema = mode === "edit" ? updateFeatureSchema : createFeatureSchema
+  // async validation only when creating a new feature
+  const forSchema =
+    mode === "edit"
+      ? updateFeatureSchema
+      : createFeatureSchema.extend({
+          slug: z
+            .string()
+            .min(3)
+            .refine(async (slug) => {
+              const data = await featureExist.mutateAsync({
+                projectSlug: projectSlug,
+                slug: slug,
+              })
+
+              if (data.feature?.id) {
+                return false
+              }
+
+              return true
+            }, "Slug already exists. Change the title of your feature."),
+        })
 
   const form = useZodForm({
-    // async validation for the slug
-    schema: forSchema.extend({
-      slug: z
-        .string()
-        .min(3)
-        .refine(async (slug) => {
-          const data = await featureExist.mutateAsync({
-            projectSlug: projectSlug,
-            slug: slug,
-          })
-
-          if (data.feature?.id) {
-            return false
-          }
-
-          return true
-        }, "Slug already exists. Change the title of your feature."),
-    }),
+    schema: forSchema,
     defaultValues,
   })
 
@@ -178,16 +185,20 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
         <Form {...form}>
           <form
             id="add-feature"
-            onSubmit={form.handleSubmit(async (data: CreateFeature) => {
-              if (mode === "edit") {
-                await updateFeature.mutateAsync({
-                  ...data,
-                  id: feature.id,
-                })
-                return
+            onSubmit={form.handleSubmit(
+              async (data: CreateFeature | UpdateFeature) => {
+                if (mode === "edit") {
+                  await updateFeature.mutateAsync({
+                    ...(data as UpdateFeature),
+                    id: feature.id,
+                  })
+                  return
+                } else if (mode === "create") {
+                  await createFeature.mutateAsync(data as CreateFeature)
+                  return
+                }
               }
-              await createFeature.mutateAsync(data)
-            })}
+            )}
             className="space-y-6"
           >
             <div className="flex justify-between gap-2">
@@ -225,7 +236,12 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
                     <FormItem>
                       <FormLabel>Slug</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Slug" readOnly />
+                        <Input
+                          {...field}
+                          placeholder="Slug"
+                          readOnly
+                          disabled
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
