@@ -1,7 +1,14 @@
+import Link from "next/link"
 import { TRPCClientError } from "@trpc/client"
+import { z } from "zod"
 
+import { FEATURE_TYPES } from "@builderai/db/schema/enums"
 import type { CreateFeature, Feature } from "@builderai/db/schema/price"
-import { createFeatureSchema } from "@builderai/db/schema/price"
+import {
+  createFeatureSchema,
+  updateFeatureSchema,
+} from "@builderai/db/schema/price"
+import { createSlug } from "@builderai/db/utils"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -15,6 +22,14 @@ import {
 import { Pencil, Plus } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@builderai/ui/select"
+import { Separator } from "@builderai/ui/separator"
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -23,31 +38,61 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@builderai/ui/sheet"
+import { Textarea } from "@builderai/ui/text-area"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-// TODO: support edit mode - see RenameProjectForm
-export function FeatureForm({
-  projectSlug,
-  feature,
-  mode = "create",
-}: {
-  projectSlug: string
-  feature?: Feature
-  mode?: "create" | "edit"
-}) {
+type FeatureFormProps =
+  | {
+      projectSlug: string
+      mode: "create"
+      feature?: Feature
+    }
+  | {
+      projectSlug: string
+      mode: "edit"
+      feature: Feature
+    }
+
+export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
   const toaster = useToast()
   const apiUtils = api.useUtils()
 
   const defaultValues =
     mode === "edit"
       ? feature
-      : { projectSlug: projectSlug, title: "", slug: "" }
+      : {
+          projectSlug: projectSlug,
+          title: "",
+          slug: "",
+          description: "",
+        }
+
+  const featureExist = api.feature.featureExist.useMutation()
+
+  const forSchema = mode === "edit" ? updateFeatureSchema : createFeatureSchema
 
   const form = useZodForm({
-    schema: createFeatureSchema,
+    // async validation for the slug
+    schema: forSchema.extend({
+      slug: z
+        .string()
+        .min(3)
+        .refine(async (slug) => {
+          const data = await featureExist.mutateAsync({
+            projectSlug: projectSlug,
+            slug: slug,
+          })
+
+          if (data.feature?.id) {
+            return false
+          }
+
+          return true
+        }, "Slug already exists. Change the title of your feature."),
+    }),
     defaultValues,
   })
 
@@ -59,11 +104,11 @@ export function FeatureForm({
     },
     onSuccess: (data) => {
       toaster.toast({
-        title: "Feature Created",
-        description: `Feature ${data?.title} created successfully.`,
+        title: "Feature Saved",
+        description: `Feature ${data?.title} saved successfully.`,
       })
 
-      form.reset()
+      form.reset(defaultValues)
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {
@@ -73,10 +118,41 @@ export function FeatureForm({
         })
       } else {
         toaster.toast({
-          title: "Error creating Feature",
+          title: "Error saving Feature",
           variant: "destructive",
           description:
-            "An issue occurred while creating your Feature. Please try again.",
+            "An issue occurred while saving your Feature. Please try again.",
+        })
+      }
+    },
+  })
+
+  const updateFeature = api.feature.update.useMutation({
+    onSettled: async () => {
+      await apiUtils.feature.searchBy.invalidate({
+        projectSlug: projectSlug,
+      })
+    },
+    onSuccess: (data) => {
+      toaster.toast({
+        title: "Feature Saved",
+        description: `Feature ${data?.title} saved successfully.`,
+      })
+
+      form.reset(defaultValues)
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        toaster.toast({
+          title: err.message,
+          variant: "destructive",
+        })
+      } else {
+        toaster.toast({
+          title: "Error saving Feature",
+          variant: "destructive",
+          description:
+            "An issue occurred while saving your Feature. Please try again.",
         })
       }
     },
@@ -98,26 +174,96 @@ export function FeatureForm({
             Make changes to your profile here. Click save when you're done.
           </SheetDescription>
         </SheetHeader>
+        <Separator className="my-4" />
         <Form {...form}>
           <form
             id="add-feature"
             onSubmit={form.handleSubmit(async (data: CreateFeature) => {
+              if (mode === "edit") {
+                await updateFeature.mutateAsync({
+                  ...data,
+                  id: feature.id,
+                })
+                return
+              }
               await createFeature.mutateAsync(data)
             })}
-            className="space-y-4"
+            className="space-y-6"
           >
+            <div className="flex justify-between gap-2">
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Title for your feature"
+                          onChange={(e) => {
+                            form.setValue("title", e.target.value)
+                            if (mode === "create") {
+                              const slug = createSlug(e.target.value)
+                              form.setValue("slug", slug)
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Slug</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Slug" readOnly />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
             <FormField
               control={form.control}
-              name="title"
+              name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="New Feature" />
-                  </FormControl>
-                  <FormDescription>
-                    Enter the title of the feature.
-                  </FormDescription>
+                  <div className="flex justify-between">
+                    <FormLabel>Subscription plan *</FormLabel>
+                    <Link
+                      prefetch={false}
+                      href="/pricing"
+                      target="_blank"
+                      className="text-xs text-muted-foreground hover:underline"
+                    >
+                      What&apos;s included in each plan?
+                    </Link>
+                  </div>
+                  <Select onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a plan" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {FEATURE_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          <span className="font-medium">{type}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -125,15 +271,15 @@ export function FeatureForm({
 
             <FormField
               control={form.control}
-              name="slug"
+              name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name *</FormLabel>
+                  <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="new-feature" />
+                    <Textarea {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormDescription>
-                    Enter a unique name for your feature.
+                    Enter a short description of the feature.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -142,10 +288,14 @@ export function FeatureForm({
           </form>
         </Form>
         <SheetFooter>
-          <Button form="add-feature" type="submit">
+          <Button
+            form="add-feature"
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
             {form.formState.isSubmitting && (
-              <div className="mr-1" role="status">
-                <div className="h-3 w-3 animate-spin rounded-full border-2 border-background border-r-transparent" />
+              <div className="mr-2" role="status">
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-r-transparent" />
               </div>
             )}
             {mode === "edit" && "Save"}

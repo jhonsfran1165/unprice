@@ -60,7 +60,7 @@ const FeatureCard = forwardRef<
               <div className="font-semibold">{feature.title}</div>
             </div>
             <div className={"ml-auto flex items-center"}>
-              <Badge className="mr-2">{feature.slug}</Badge>
+              <Badge className="mr-2">{feature.type}</Badge>
               {!isOverlay &&
                 (isFeature ? (
                   <FeatureForm
@@ -89,10 +89,7 @@ const FeatureCard = forwardRef<
         {!isFeature && (
           <>
             <div className="line-clamp-2 text-xs text-muted-foreground">
-              {"jakshdk jasdkjhasdk jhaskdjh askdjhasdkjhadkjahsdk ajsdhkasjhsdaks jdhaskjdhaskdjhaskdj askdjhasdkjhasd askjhdas".substring(
-                0,
-                50
-              ) + "..."}
+              {feature.description?.substring(0, 50) + "..."}
             </div>
             <div className={cn("ml-auto flex items-center text-xs")}>
               1000 calls per $5 USD

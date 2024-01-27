@@ -39,6 +39,7 @@ export function Features({
     return !selectedFeaturesIds.includes(feature.id)
   })
 
+  // TODO: handle empty state and loading state
   return (
     <div className={cn("flex flex-1 flex-col overflow-y-auto", className)}>
       <div className="flex items-center px-4 py-2">
@@ -53,6 +54,12 @@ export function Features({
               placeholder="Search"
               className="h-8 pl-8"
               onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }
+              }}
             />
           </div>
         </form>
@@ -61,14 +68,25 @@ export function Features({
       <ScrollArea className="max-h-[750px] flex-1 overflow-y-auto">
         <div className="px-4 py-2">
           <div className="space-y-2">
-            {searchableFeatures?.map((feature) => (
-              <SortableFeature
-                isFeature
-                key={feature.id}
-                feature={feature}
-                projectSlug={projectSlug}
-              />
-            ))}
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-r-transparent" />
+                <div className="text-muted-foreground">Loading...</div>
+              </div>
+            ) : searchableFeatures?.length === 0 ? (
+              <div className="text-center text-muted-foreground">
+                No features found.
+              </div>
+            ) : (
+              searchableFeatures?.map((feature) => (
+                <SortableFeature
+                  isFeature
+                  key={feature.id}
+                  feature={feature}
+                  projectSlug={projectSlug}
+                />
+              ))
+            )}
           </div>
         </div>
         <ScrollBar orientation="vertical" />

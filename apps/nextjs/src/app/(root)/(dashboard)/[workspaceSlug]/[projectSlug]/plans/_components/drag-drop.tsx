@@ -42,7 +42,7 @@ import { FeatureGroup } from "./feature-group"
 import { FeatureGroupEmptyPlaceholder } from "./feature-group-placeholder"
 import { Features } from "./features"
 import { SortableFeature } from "./sortable-feature"
-import type { Feature, FeatureType, Group, GroupType } from "./types"
+import type { FeaturePlan, FeatureType, Group, GroupType } from "./types"
 
 function generateId() {
   // generate a random id
@@ -56,7 +56,7 @@ export const defaultGrops: Group[] = [
   },
 ]
 
-const defaultFeatures: Feature[] = []
+const defaultFeatures: FeaturePlan[] = []
 
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -68,64 +68,6 @@ const dropAnimation: DropAnimation = {
   }),
 }
 
-export const dbFeatures: Feature[] = [
-  {
-    id: "0",
-    content: "Feature test 1",
-    type: "metered",
-  },
-  {
-    id: "1",
-    content: "Feature test 2",
-    type: "metered",
-  },
-  {
-    id: "2",
-    content: "Feature test 3",
-    type: "metered",
-  },
-  {
-    id: "3",
-    content: "Feature test 4",
-    type: "metered",
-  },
-  {
-    id: "4",
-    content: "Feature test 5",
-    type: "metered",
-  },
-  {
-    id: "5",
-    content: "Feature test 6",
-    type: "metered",
-  },
-  {
-    id: "6",
-    content: "Feature test 7",
-    type: "metered",
-  },
-  {
-    id: "7",
-    content: "Feature test 8",
-    type: "metered",
-  },
-  {
-    id: "8",
-    content: "Feature test 9",
-    type: "metered",
-  },
-  {
-    id: "9",
-    content: "Feature test 10",
-    type: "metered",
-  },
-  {
-    id: "10",
-    content: "Feature test 11",
-    type: "metered",
-  },
-]
-
 // TODO: do not pass projectSlug to different components - props hell!!
 export default function DragDrop({ projectSlug }: { projectSlug: string }) {
   // each feature has a group id, which represent the plan groupings you implement
@@ -134,11 +76,13 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
   const groupIds = useMemo(() => groups.map((g) => g.id), [groups])
 
   // when the drag and drop starts we need to handle the state of the plan
-  const [activeFeature, setActiveFeature] = useState<Feature | null>(null)
-  const [clonedFeatures, setClonedFeatures] = useState<Feature[] | null>(null)
+  const [activeFeature, setActiveFeature] = useState<FeaturePlan | null>(null)
+  const [clonedFeatures, setClonedFeatures] = useState<FeaturePlan[] | null>(
+    null
+  )
 
   // store all the features in the current plan
-  const [features, setFeatures] = useState<Feature[]>(defaultFeatures)
+  const [features, setFeatures] = useState<FeaturePlan[]>(defaultFeatures)
 
   // store the plan configuration
   // plan_config: { "colum_id": name: "Base Features", features: [Feature1, Feature2] }
@@ -157,7 +101,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
         }
         return acc
       },
-      {} as Record<string, { name: string; features: Feature[] }>
+      {} as Record<string, { name: string; features: FeaturePlan[] }>
     )
   }, [features, groups])
 
@@ -231,7 +175,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
     setClonedFeatures(features)
 
     if (event.active.data.current?.type === "Feature") {
-      setActiveFeature(event.active.data.current.feature as Feature)
+      setActiveFeature(event.active.data.current.feature as FeaturePlan)
       return
     }
   }
@@ -288,7 +232,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
     // I'm dropping a Feature over another Feature
     // the over feature can be inside a group or not
     if (isActiveFeature && isOverAFeature) {
-      const overFeature = overData.feature as Feature
+      const overFeature = overData.feature as FeaturePlan
 
       // if the over feature has a group id then we don't need to do anything
       // because the over feature is in the search
@@ -321,7 +265,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
             ],
             activeIndex,
             overIndex
-          ) as Feature[]
+          ) as FeaturePlan[]
         } else {
           // otherwise we only re-order the list
           return arrayMove(features, activeIndex, overIndex)
@@ -347,11 +291,13 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
               ...activeData.feature,
               groupId: overId,
             },
-          ] as Feature[]
+          ] as FeaturePlan[]
         }
       })
     }
   }
+
+  console.log("planConfig", planConfig)
 
   return (
     <DndContext
@@ -441,7 +387,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
           {typeof window !== "undefined" &&
             "document" in window &&
             createPortal(
-              <DragOverlay adjustScale={true} dropAnimation={dropAnimation}>
+              <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
                 {activeFeature && (
                   <FeatureCard
                     isOverlay

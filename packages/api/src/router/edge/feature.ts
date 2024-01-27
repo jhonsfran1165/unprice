@@ -5,6 +5,7 @@ import { and, eq } from "@builderai/db"
 import {
   createFeatureSchema,
   feature,
+  featureBase,
   updateFeatureSchema,
 } from "@builderai/db/schema/price"
 import { newIdEdge } from "@builderai/db/utils"
@@ -36,12 +37,12 @@ export const featureRouter = createTRPCRouter({
         })
         .returning()
 
-      return featureDate[0]
+      return featureBase.parse(featureDate[0])
     }),
   update: protectedOrgProcedure
     .input(updateFeatureSchema)
     .mutation(async (opts) => {
-      const { title, id } = opts.input
+      const { title, id, description, type } = opts.input
 
       const featureData = await opts.ctx.txRLS(({ txRLS }) => {
         return txRLS.query.feature.findFirst({
@@ -68,15 +69,74 @@ export const featureRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      return await opts.ctx.db
+      const data = await opts.ctx.db
         .update(feature)
         .set({
           title,
+          description,
+          type,
         })
         .where(and(eq(feature.id, id), eq(feature.projectId, project.id)))
         .returning()
-    }),
 
+      return featureBase.parse(data[0])
+    }),
+  featureExist: protectedOrgProcedure
+    .input(z.object({ slug: z.string(), projectSlug: z.string() }))
+    .mutation(async (opts) => {
+      const { slug, projectSlug } = opts.input
+
+      const { project } = await hasAccessToProject({
+        projectSlug,
+        ctx: opts.ctx,
+      })
+
+      const feature = await opts.ctx.txRLS(({ txRLS }) => {
+        return txRLS.query.feature.findFirst({
+          with: {
+            project: {
+              columns: {
+                slug: true,
+              },
+            },
+          },
+          where: (feature, { eq, and }) =>
+            and(eq(feature.projectId, project.id), eq(feature.slug, slug)),
+        })
+      })
+
+      return {
+        feature,
+      }
+    }),
+  getBySlug: protectedOrgProcedure
+    .input(z.object({ slug: z.string(), projectSlug: z.string() }))
+    .query(async (opts) => {
+      const { slug, projectSlug } = opts.input
+
+      const { project } = await hasAccessToProject({
+        projectSlug,
+        ctx: opts.ctx,
+      })
+
+      const feature = await opts.ctx.txRLS(({ txRLS }) => {
+        return txRLS.query.feature.findFirst({
+          with: {
+            project: {
+              columns: {
+                slug: true,
+              },
+            },
+          },
+          where: (feature, { eq, and }) =>
+            and(eq(feature.projectId, project.id), eq(feature.slug, slug)),
+        })
+      })
+
+      return {
+        feature: featureBase.parse(feature),
+      }
+    }),
   getById: protectedOrgProcedure
     .input(z.object({ id: z.string() }))
     .query(async (opts) => {
@@ -112,18 +172,19 @@ export const featureRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const feature = await opts.ctx.txRLS(({ txRLS }) =>
+      const features = await opts.ctx.txRLS(({ txRLS }) =>
         txRLS.query.feature.findMany({
-          where: (feature, { eq, and, or, like }) =>
+          where: (feature, { eq, and, or, ilike }) =>
             and(
               eq(feature.projectId, project.id),
-              or(like(feature.slug, filter), like(feature.title, filter))
+              or(ilike(feature.slug, filter), ilike(feature.title, filter))
             ),
         })
       )
 
+      // TODO: avoid selecting all columns
       return {
-        feature,
+        feature: features.map((feature) => featureBase.parse(feature)),
       }
     }),
 
@@ -137,14 +198,14 @@ export const featureRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const feature = await opts.ctx.txRLS(({ txRLS }) =>
+      const features = await opts.ctx.txRLS(({ txRLS }) =>
         txRLS.query.feature.findMany({
           where: (feature, { eq }) => eq(feature.projectId, project.id),
         })
       )
 
       return {
-        feature,
+        feature: features.map((feature) => featureBase.parse(feature)),
       }
     }),
 })

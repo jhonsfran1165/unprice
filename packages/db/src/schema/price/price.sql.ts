@@ -9,7 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core"
 
-import { currencyEnum } from "../../utils/enums"
+import { currencyEnum, typeFeatureEnum } from "../../utils/enums"
 import { projectID, tenantID, timestamps } from "../../utils/sql"
 import { project } from "../project"
 
@@ -76,6 +76,8 @@ export const feature = pgTable(
     ...timestamps,
     slug: text("slug").notNull().unique(),
     title: varchar("title", { length: 50 }).notNull(),
+    description: text("description"),
+    type: typeFeatureEnum("type").default("flat"),
   },
   (table) => ({
     featureProjectInx: index("feature_project_id_idx").on(table.projectId),
