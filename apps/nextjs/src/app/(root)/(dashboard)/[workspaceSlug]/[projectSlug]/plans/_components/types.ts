@@ -8,6 +8,7 @@ export type FeatureType = "Feature"
 
 export type FeaturePlan = Feature & {
   groupId?: UniqueIdentifier
+  config?: Record<string, unknown>
 }
 
 export interface Group {

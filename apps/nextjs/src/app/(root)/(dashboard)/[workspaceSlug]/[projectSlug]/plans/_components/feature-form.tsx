@@ -145,8 +145,6 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
         title: "Feature Saved",
         description: `Feature ${data?.title} saved successfully.`,
       })
-
-      form.reset(defaultValues)
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {
@@ -266,7 +264,10 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
                       What&apos;s included in each plan?
                     </Link>
                   </div>
-                  <Select onValueChange={field.onChange}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={feature?.type ?? ""}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a plan" />

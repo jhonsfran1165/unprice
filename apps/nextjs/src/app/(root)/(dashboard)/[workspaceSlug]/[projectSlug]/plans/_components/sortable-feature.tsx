@@ -2,19 +2,18 @@ import type { UniqueIdentifier } from "@dnd-kit/core"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
-import type { Feature } from "@builderai/db/schema/price"
 import { cn } from "@builderai/ui/utils"
 
 import { FeatureCard } from "./feature"
-import type { FeatureType } from "./types"
+import type { FeaturePlan, FeatureType } from "./types"
 
 export interface DragData {
   type: FeatureType
-  feature: Feature
+  feature: FeaturePlan
 }
 
 export function SortableFeature(props: {
-  feature: Feature
+  feature: FeaturePlan
   deleteFeature?: (id: UniqueIdentifier) => void
   className?: string
   isFeature?: boolean
@@ -44,6 +43,8 @@ export function SortableFeature(props: {
     transform: CSS.Translate.toString(transform),
   }
 
+  // TODO: support different variants of the feature card
+
   return (
     <FeatureCard
       projectSlug={props.projectSlug}
@@ -54,6 +55,8 @@ export function SortableFeature(props: {
       className={cn(props.className, {
         "cursor-move": !props.isFeature,
         "cursor-grab": props.isFeature,
+        "border-dashed border-destructive":
+          !props.feature.config && !props.isFeature,
         "border-dashed opacity-80": isDragging && !props.isFeature,
       })}
       deleteFeature={props.deleteFeature}

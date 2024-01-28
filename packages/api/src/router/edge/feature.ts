@@ -75,6 +75,7 @@ export const featureRouter = createTRPCRouter({
           title,
           description,
           type,
+          updatedAt: new Date().toISOString(),
         })
         .where(and(eq(feature.id, id), eq(feature.projectId, project.id)))
         .returning()
@@ -179,6 +180,10 @@ export const featureRouter = createTRPCRouter({
               eq(feature.projectId, project.id),
               or(ilike(feature.slug, filter), ilike(feature.title, filter))
             ),
+          orderBy: (feature, { desc }) => [
+            desc(feature.updatedAt),
+            desc(feature.title),
+          ],
         })
       )
 

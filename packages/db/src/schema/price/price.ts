@@ -66,9 +66,6 @@ export const updateFeatureSchema = featureBase
   .partial({
     description: true,
   })
-  .extend({
-    projectSlug: z.string(),
-  })
 
 export const createFeatureSchema = featureBase
   .pick({

@@ -89,7 +89,8 @@ const FeatureCard = forwardRef<
         {!isFeature && (
           <>
             <div className="line-clamp-2 text-xs text-muted-foreground">
-              {feature.description?.substring(0, 50) + "..."}
+              {feature.description &&
+                feature.description?.substring(0, 50) + "..."}
             </div>
             <div className={cn("ml-auto flex items-center text-xs")}>
               1000 calls per $5 USD

@@ -1,9 +1,9 @@
 import { relations } from "drizzle-orm"
 import {
   index,
-  integer,
   json,
   pgTable,
+  serial,
   text,
   uniqueIndex,
   varchar,
@@ -48,7 +48,7 @@ export const plan = pgTable(
 )
 
 export const version = pgTable(
-  "version",
+  "plan_version",
   {
     ...projectID,
     ...tenantID,
@@ -56,14 +56,16 @@ export const version = pgTable(
     planId: text("plan_id")
       .notNull()
       .references(() => plan.id),
-    slug: text("slug").notNull().unique(),
-    version: integer("version").notNull().unique().default(1),
-    features: json("features"), // array of config features
-    addons: json("features"), // array of config features
+    version: serial("version").notNull(),
+    featuresPlan: json("features_plan"), // config features of the plan
+    addonsPlan: json("addons_plan"), // config addons of the plan
   },
   (table) => ({
     versionProjectInx: index("version_project_id_idx").on(table.projectId),
-    versionInx: uniqueIndex("version_key_slug").on(table.slug),
+    versionInx: uniqueIndex("version_unique_plan").on(
+      table.planId,
+      table.version
+    ),
     versionTenantIdInx: index("version_tenant_uidx").on(table.tenantId),
   })
 )
