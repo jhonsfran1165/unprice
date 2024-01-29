@@ -1,10 +1,10 @@
 import { useState } from "react"
-import type { UniqueIdentifier } from "@dnd-kit/core"
 import type { AnimateLayoutChanges } from "@dnd-kit/sortable"
 import { defaultAnimateLayoutChanges, useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { GripVertical } from "lucide-react"
 
+import type { Group, GroupType } from "@builderai/db/schema/price"
 import {
   AccordionContent,
   AccordionItem,
@@ -14,8 +14,6 @@ import { Button } from "@builderai/ui/button"
 import { Trash2 } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { cn } from "@builderai/ui/utils"
-
-import type { Group, GroupType } from "./types"
 
 export interface GroupDragData {
   type: GroupType
@@ -29,8 +27,8 @@ interface FeatureGroupProps {
   children: React.ReactNode
   group: Group
   disabled?: boolean
-  deleteGroup: (id: UniqueIdentifier) => void
-  updateGroup: (id: UniqueIdentifier, title: string) => void
+  deleteGroup: (id: string) => void
+  updateGroup: (id: string, title: string) => void
 }
 
 export function FeatureGroup({

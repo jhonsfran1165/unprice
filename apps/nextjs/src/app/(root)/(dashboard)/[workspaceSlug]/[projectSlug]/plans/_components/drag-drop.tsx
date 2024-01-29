@@ -6,7 +6,6 @@ import type {
   DragOverEvent,
   DragStartEvent,
   DropAnimation,
-  UniqueIdentifier,
 } from "@dnd-kit/core"
 import {
   defaultDropAnimationSideEffects,
@@ -26,6 +25,12 @@ import {
 } from "@dnd-kit/sortable"
 import { createPortal } from "react-dom"
 
+import type {
+  FeaturePlan,
+  FeatureType,
+  Group,
+  GroupType,
+} from "@builderai/db/schema/price"
 import { Accordion } from "@builderai/ui/accordion"
 import { Button } from "@builderai/ui/button"
 import { Add } from "@builderai/ui/icons"
@@ -42,21 +47,18 @@ import { FeatureGroup } from "./feature-group"
 import { FeatureGroupEmptyPlaceholder } from "./feature-group-placeholder"
 import { Features } from "./features"
 import { SortableFeature } from "./sortable-feature"
-import type { FeaturePlan, FeatureType, Group, GroupType } from "./types"
 
 function generateId() {
   // generate a random id
   return Math.random().toString(36).substr(2, 9)
 }
 
-export const defaultGrops: Group[] = [
+export const defaultGroups: Group[] = [
   {
     id: generateId(),
     title: "Base Features",
   },
 ]
-
-const defaultFeatures: FeaturePlan[] = []
 
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -72,7 +74,7 @@ const dropAnimation: DropAnimation = {
 export default function DragDrop({ projectSlug }: { projectSlug: string }) {
   // each feature has a group id, which represent the plan groupings you implement
   // example of groups: Base Features, Pay as you go, etc
-  const [groups, setGroups] = useState<Group[]>(defaultGrops)
+  const [groups, setGroups] = useState<Group[]>(defaultGroups)
   const groupIds = useMemo(() => groups.map((g) => g.id), [groups])
 
   // when the drag and drop starts we need to handle the state of the plan
@@ -82,7 +84,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
   )
 
   // store all the features in the current plan
-  const [features, setFeatures] = useState<FeaturePlan[]>(defaultFeatures)
+  const [features, setFeatures] = useState<FeaturePlan[]>([])
 
   // store the plan configuration
   // plan_config: { "colum_id": name: "Base Features", features: [Feature1, Feature2] }
@@ -139,9 +141,21 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
     setClonedFeatures(null)
   }
 
-  const deleteFeature = (id: UniqueIdentifier) => {
+  const deleteFeature = (id: string) => {
     const newFeature = features.filter((feature) => feature.id !== id)
     setFeatures(newFeature)
+  }
+
+  const updateFeature = (feature: FeaturePlan) => {
+    console.log("feature", feature)
+
+    setFeatures((features) => {
+      const index = features.findIndex((f) => f.id === feature.id)
+      if (index === -1) return features
+
+      features[index] = feature
+      return [...features]
+    })
   }
 
   const createNewGroup = () => {
@@ -153,7 +167,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
     setGroups([...groups, groupToAdd])
   }
 
-  const deleteGroup = (id: UniqueIdentifier) => {
+  const deleteGroup = (id: string) => {
     const filteredGroups = groups.filter((g) => g.id !== id)
     setGroups(filteredGroups)
 
@@ -161,7 +175,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
     setFeatures(newFeature)
   }
 
-  const updateGroup = (id: UniqueIdentifier, title: string) => {
+  const updateGroup = (id: string, title: string) => {
     const newGroups = groups.map((g) => {
       if (g.id !== id) return g
       return { ...g, title }
@@ -281,7 +295,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
 
         // if the active feature is in the list then we need to move it to the new group
         if (activeFeature) {
-          activeFeature.groupId = overId
+          activeFeature.groupId = overId.toString()
           return arrayMove(features, activeIndex, activeIndex)
         } else {
           // if the active feature is not in the list then we need to add it to the list
@@ -370,8 +384,10 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
                               <SortableFeature
                                 projectSlug={projectSlug}
                                 deleteFeature={deleteFeature}
+                                updateFeature={updateFeature}
                                 key={f.id}
                                 feature={f}
+                                type="Plan"
                               />
                             ))}
                           </div>
@@ -393,6 +409,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
                     isOverlay
                     feature={activeFeature}
                     projectSlug={projectSlug}
+                    type="Feature"
                   />
                 )}
               </DragOverlay>,

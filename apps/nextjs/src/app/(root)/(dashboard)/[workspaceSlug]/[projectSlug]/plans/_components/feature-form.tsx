@@ -5,7 +5,7 @@ import { z } from "zod"
 import { FEATURE_TYPES } from "@builderai/db/schema/enums"
 import type {
   CreateFeature,
-  Feature,
+  FeaturePlan,
   UpdateFeature,
 } from "@builderai/db/schema/price"
 import {
@@ -52,12 +52,12 @@ type FeatureFormProps =
   | {
       projectSlug: string
       mode: "create"
-      feature?: Feature
+      feature?: FeaturePlan
     }
   | {
       projectSlug: string
       mode: "edit"
-      feature: Feature
+      feature: FeaturePlan
     }
 
 export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {

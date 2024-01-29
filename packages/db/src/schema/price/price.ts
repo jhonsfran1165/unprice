@@ -81,6 +81,53 @@ export const createFeatureSchema = featureBase
     projectSlug: z.string(),
   })
 
+export const configFlatFeature = z.object({
+  price: z.coerce.number().min(0),
+  divider: z.coerce
+    .number()
+    .min(0)
+    .describe("Divider for the price. Could be number of days, hours, etc."),
+})
+
+export const configMeteredFeature = z.object({
+  price: z.coerce.number().min(0),
+})
+
+export const configHybridFeature = z.object({
+  price: z.coerce.number().min(0),
+})
+export const featurePlanSchema = featureBase
+  .extend({
+    groupId: z.string(),
+    config: z.union([
+      configFlatFeature,
+      configMeteredFeature,
+      configHybridFeature,
+    ]),
+  })
+  .partial({
+    config: true,
+    groupId: true,
+    description: true,
+  })
+  .superRefine((data, ctx) => {
+    if (data.type === "flat") {
+      configFlatFeature.parse(data.config)
+    } else if (data.type === "metered") {
+      configMeteredFeature.parse(data.config)
+    } else if (data.type === "hybrid") {
+      configHybridFeature.parse(data.config)
+    }
+  })
+
+export type GroupType = "Group"
+export type FeatureType = "Feature" | "Addon" | "Plan"
+export interface Group {
+  id: string
+  title: string
+}
+
+export type FeaturePlan = z.infer<typeof featurePlanSchema>
 export type CreateFeature = z.infer<typeof createFeatureSchema>
 export type UpdateFeature = z.infer<typeof updateFeatureSchema>
 export type Feature = z.infer<typeof featureBase>

@@ -1,8 +1,7 @@
 import type { ComponentPropsWithoutRef, ElementRef } from "react"
 import { forwardRef } from "react"
-import type { UniqueIdentifier } from "@dnd-kit/core"
 
-import type { Feature } from "@builderai/db/schema/price"
+import type { FeaturePlan, FeatureType } from "@builderai/db/schema/price"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import { Trash2 } from "@builderai/ui/icons"
@@ -11,13 +10,29 @@ import { cn } from "@builderai/ui/utils"
 import { FeatureConfigForm } from "./feature-config-form"
 import { FeatureForm } from "./feature-form"
 
-interface FeatureCardProps {
-  feature: Feature
-  isFeature?: boolean
-  isOverlay?: boolean
+interface FeatureCardBase {
+  feature: FeaturePlan
+  type: FeatureType
   projectSlug: string
-  deleteFeature?: (id: UniqueIdentifier) => void
+  isOverlay?: boolean
 }
+
+export type FeatureCardProps =
+  | (FeatureCardBase & {
+      type: "Feature"
+      deleteFeature?: (id: string) => void
+      updateFeature?: (feature: FeaturePlan) => void
+    })
+  | (FeatureCardBase & {
+      type: "Plan"
+      deleteFeature: (id: string) => void
+      updateFeature: (feature: FeaturePlan) => void
+    })
+  | (FeatureCardBase & {
+      type: "Addon"
+      deleteFeature: undefined
+      updateFeature: undefined
+    })
 
 // A common pitfall when using the DragOverlay
 // component is rendering the same component that
@@ -38,9 +53,10 @@ const FeatureCard = forwardRef<
     {
       feature,
       deleteFeature,
-      isFeature,
+      type,
       isOverlay = false,
       projectSlug,
+      updateFeature,
       ...props
     },
     ref
@@ -62,15 +78,25 @@ const FeatureCard = forwardRef<
             <div className={"ml-auto flex items-center"}>
               <Badge className="mr-2">{feature.type}</Badge>
               {!isOverlay &&
-                (isFeature ? (
+                (type === "Feature" ? (
                   <FeatureForm
                     projectSlug={projectSlug}
                     mode="edit"
                     feature={feature}
                   />
-                ) : (
-                  <FeatureConfigForm projectSlug={projectSlug} />
-                ))}
+                ) : type === "Plan" ? (
+                  <FeatureConfigForm
+                    projectSlug={projectSlug}
+                    feature={feature}
+                    onSubmit={updateFeature}
+                  />
+                ) : type === "Addon" ? (
+                  <FeatureForm
+                    projectSlug={projectSlug}
+                    mode="edit"
+                    feature={feature}
+                  />
+                ) : null)}
               {deleteFeature && (
                 <Button
                   onClick={() => deleteFeature(feature.id)}
@@ -86,7 +112,7 @@ const FeatureCard = forwardRef<
           </div>
           <div className="text-xs font-medium">{feature.title}</div>
         </div>
-        {!isFeature && (
+        {type !== "Feature" && (
           <>
             <div className="line-clamp-2 text-xs text-muted-foreground">
               {feature.description &&

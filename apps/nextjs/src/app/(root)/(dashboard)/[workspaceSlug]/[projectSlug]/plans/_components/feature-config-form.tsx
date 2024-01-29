@@ -1,10 +1,12 @@
-import { TRPCClientError } from "@trpc/client"
+import Link from "next/link"
 
-import type { CreateFeature } from "@builderai/db/schema/price"
-import { createFeatureSchema } from "@builderai/db/schema/price"
+import { FEATURE_TYPES } from "@builderai/db/schema/enums"
+import type { FeaturePlan } from "@builderai/db/schema/price"
+import { featurePlanSchema } from "@builderai/db/schema/price"
 import { Button } from "@builderai/ui/button"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -23,51 +25,33 @@ import {
 } from "@builderai/ui/form"
 import { Settings } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
-import { Label } from "@builderai/ui/label"
-import { useToast } from "@builderai/ui/use-toast"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@builderai/ui/select"
+import { Textarea } from "@builderai/ui/text-area"
 
 import { useZodForm } from "~/lib/zod-form"
-import { api } from "~/trpc/client"
 
-export function FeatureConfigForm({ projectSlug }: { projectSlug: string }) {
-  const toaster = useToast()
-  const apiUtils = api.useUtils()
-
+export function FeatureConfigForm({
+  projectSlug,
+  feature,
+  onSubmit,
+}: {
+  projectSlug: string
+  feature: FeaturePlan
+  onSubmit: (feature: FeaturePlan) => void
+}) {
   const form = useZodForm({
-    schema: createFeatureSchema,
-    defaultValues: { projectSlug: projectSlug, title: "New Feature" },
+    schema: featurePlanSchema,
+    defaultValues: { ...feature, config: feature.config ?? {} },
+    mode: "onChange",
   })
 
-  const createFeature = api.feature.create.useMutation({
-    onSettled: async () => {
-      await apiUtils.apikey.listApiKeys.invalidate({
-        projectSlug: projectSlug,
-      })
-    },
-    onSuccess: (feature) => {
-      toaster.toast({
-        title: "API Key Created",
-        description: `ApiKey ${feature?.title} created successfully.`,
-      })
-
-      form.reset()
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
-      } else {
-        toaster.toast({
-          title: "Error creating API Key",
-          variant: "destructive",
-          description:
-            "An issue occurred while creating your key. Please try again.",
-        })
-      }
-    },
-  })
+  console.log("form.erro", form.formState)
 
   return (
     <Dialog>
@@ -87,82 +71,162 @@ export function FeatureConfigForm({ projectSlug }: { projectSlug: string }) {
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(
-              async (data: CreateFeature) =>
-                await createFeature.mutateAsync(data)
-            )}
-            className="space-y-4"
+            id="config-feature"
+            onSubmit={form.handleSubmit((data: FeaturePlan) => {
+              onSubmit(data)
+            })}
+            className="space-y-6"
           >
+            <div className="flex justify-between gap-2">
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Title for your feature"
+                          disabled
+                          readOnly
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Slug</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Slug"
+                          readOnly
+                          disabled
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
             <FormField
               control={form.control}
-              name="title"
+              name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name *</FormLabel>
+                  <div className="flex justify-between">
+                    <FormLabel>Subscription plan *</FormLabel>
+                    <Link
+                      prefetch={false}
+                      href="/pricing"
+                      target="_blank"
+                      className="text-xs text-muted-foreground hover:underline"
+                    >
+                      What&apos;s included in each plan?
+                    </Link>
+                  </div>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={feature?.type ?? ""}
+                    disabled
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a plan" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {FEATURE_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          <span className="font-medium">{type}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex justify-between gap-2">
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="config.price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="number" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="config.divider"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Divider</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="number" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="New Token" />
+                    <Textarea {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormDescription>
-                    Enter a unique name for your token to differentiate it from
-                    other tokens.
+                    Enter a short description of the feature.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="slug"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name *</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="New Token" />
-                  </FormControl>
-                  <FormDescription>
-                    Enter a unique name for your token to differentiate it from
-                    other tokens.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting && (
-                <div className="mr-1" role="status">
-                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-background border-r-transparent" />
-                </div>
-              )}
-              Create Key
-            </Button>
           </form>
         </Form>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              defaultValue="Pedro Duarte"
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              Username
-            </Label>
-            <Input
-              id="username"
-              defaultValue="@peduarte"
-              className="col-span-3"
-            />
-          </div>
-        </div>
         <DialogFooter>
-          <Button type="submit">Save changes</Button>
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button
+            form="config-feature"
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting && (
+              <div className="mr-2" role="status">
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-r-transparent" />
+              </div>
+            )}
+            {"Save"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

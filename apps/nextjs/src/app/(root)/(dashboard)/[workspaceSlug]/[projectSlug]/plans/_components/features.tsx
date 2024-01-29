@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import type { UniqueIdentifier } from "@dnd-kit/core"
 
 import { Search } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
@@ -15,7 +14,7 @@ import { FeatureForm } from "./feature-form"
 import { SortableFeature } from "./sortable-feature"
 
 interface FeaturesProps extends React.HTMLAttributes<HTMLDivElement> {
-  selectedFeaturesIds: UniqueIdentifier[]
+  selectedFeaturesIds: string[]
   projectSlug: string
 }
 
@@ -80,10 +79,10 @@ export function Features({
             ) : (
               searchableFeatures?.map((feature) => (
                 <SortableFeature
-                  isFeature
                   key={feature.id}
                   feature={feature}
                   projectSlug={projectSlug}
+                  type="Feature"
                 />
               ))
             )}
