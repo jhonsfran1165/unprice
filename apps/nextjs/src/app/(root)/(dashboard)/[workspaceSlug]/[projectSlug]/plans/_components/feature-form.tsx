@@ -254,7 +254,7 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex justify-between">
-                    <FormLabel>Subscription plan *</FormLabel>
+                    <FormLabel>Feature Type</FormLabel>
                     <Link
                       prefetch={false}
                       href="/pricing"

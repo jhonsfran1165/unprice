@@ -89,8 +89,21 @@ export const configFlatFeature = z.object({
     .describe("Divider for the price. Could be number of days, hours, etc."),
 })
 
+export const TIER_MODES = ["volume", "tiered"] as const
+
 export const configMeteredFeature = z.object({
-  price: z.coerce.number().min(0),
+  mode: z.enum(TIER_MODES),
+  divider: z.coerce
+    .number()
+    .min(0)
+    .describe("Divider for the price. Could be number of days, hours, etc."),
+  tiers: z.array(
+    z.object({
+      price: z.coerce.number().min(0).describe("Price per unit"),
+      up: z.coerce.number().min(0),
+      flat: z.coerce.number().min(0),
+    })
+  ),
 })
 
 export const configHybridFeature = z.object({
@@ -109,6 +122,7 @@ export const featurePlanSchema = featureBase
     config: true,
     groupId: true,
     description: true,
+    projectSlug: z.string(),
   })
   .superRefine((data, ctx) => {
     if (data.type === "flat") {

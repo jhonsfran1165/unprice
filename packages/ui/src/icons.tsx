@@ -53,6 +53,7 @@ export {
   User,
   User2,
   Users,
+  XCircle,
 } from "lucide-react"
 
 export type { LucideIcon } from "lucide-react"
