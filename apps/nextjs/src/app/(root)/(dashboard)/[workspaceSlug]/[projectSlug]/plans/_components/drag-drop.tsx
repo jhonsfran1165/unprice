@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type {
   DragEndEvent,
   DragOverEvent,
@@ -42,6 +42,8 @@ import {
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 
+import { useDebounce } from "~/lib/use-debounce"
+import useLocalStorage from "~/lib/use-local-storage"
 import { FeatureCard } from "./feature"
 import { FeatureGroup } from "./feature-group"
 import { FeatureGroupEmptyPlaceholder } from "./feature-group-placeholder"
@@ -70,12 +72,15 @@ const dropAnimation: DropAnimation = {
   }),
 }
 
+type PlanConfig = Record<string, { name: string; features: FeaturePlan[] }>
+
 // TODO: do not pass projectSlug to different components - props hell!!
 export default function DragDrop({ projectSlug }: { projectSlug: string }) {
   // each feature has a group id, which represent the plan groupings you implement
   // example of groups: Base Features, Pay as you go, etc
-  const [groups, setGroups] = useState<Group[]>(defaultGroups)
+  const [groups, setGroups] = useState<Group[]>([]) // TODO: design empty state for groups
   const groupIds = useMemo(() => groups.map((g) => g.id), [groups])
+  const wasRebuilt = useRef(false)
 
   // when the drag and drop starts we need to handle the state of the plan
   const [activeFeature, setActiveFeature] = useState<FeaturePlan | null>(null)
@@ -86,30 +91,89 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
   // store all the features in the current plan
   const [features, setFeatures] = useState<FeaturePlan[]>([])
 
-  // store the plan configuration
-  // plan_config: { "colum_id": name: "Base Features", features: [Feature1, Feature2] }
-  const planConfig = useMemo(() => {
-    return features.reduce(
-      (acc, feature) => {
-        if (!feature.groupId) return acc
-        const group = acc[feature.groupId]
-        if (group) {
-          group.features.push(feature)
-        } else {
-          acc[feature.groupId] = {
-            name: groups.find((g) => g.id === feature.groupId)?.title ?? "",
-            features: [feature],
-          }
-        }
-        return acc
-      },
-      {} as Record<string, { name: string; features: FeaturePlan[] }>
-    )
-  }, [features, groups])
-
   const featuresIds = useMemo(() => {
     return features.map((feature) => feature.id)
   }, [features])
+
+  // keep track of the changes in locastorage
+  // TODO: add key: projectSlug, planSlug and version
+  const [config, setConfig] = useLocalStorage("planConfig", "{}")
+
+  const reBuildDragAndDrop = useCallback(
+    (localConfig: PlanConfig) => {
+      try {
+        const groups = Object.keys(localConfig).map((key) => {
+          return { id: key, title: localConfig[key]?.name ?? "" } as Group
+        })
+
+        setGroups(groups)
+
+        const features = Object.values(localConfig).reduce((acc, group) => {
+          return [...acc, ...group.features]
+        }, [] as FeaturePlan[])
+
+        setFeatures(features)
+
+        wasRebuilt.current = true
+        return localConfig
+      } catch (error) {
+        console.error("error", error)
+        setConfig(JSON.stringify({}))
+        return {} as PlanConfig
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
+
+  // store the plan configuration
+  // plan_config: { "colum_id": name: "Base Features", features: [Feature1, Feature2] }
+  const planConfig = useMemo(() => {
+    const plan = features.reduce((acc, feature) => {
+      if (!feature.groupId) return acc
+      const group = acc[feature.groupId]
+      if (group) {
+        group.features.push(feature)
+      } else {
+        acc[feature.groupId] = {
+          name: groups.find((g) => g.id === feature.groupId)?.title ?? "",
+          features: [feature],
+        }
+      }
+      return acc
+    }, {} as PlanConfig)
+
+    const localConfig = JSON.parse(config) as PlanConfig
+
+    // only runs once if there is no plan and there is a local config in the local storage
+    if (
+      Object.keys(plan).length === 0 &&
+      Object.keys(localConfig).length > 0 &&
+      !wasRebuilt.current
+    ) {
+      return reBuildDragAndDrop(localConfig)
+    }
+
+    console.log("plan", plan)
+    if (Object.keys(plan).length > 0 || wasRebuilt.current) {
+      setConfig(JSON.stringify(plan))
+    }
+
+    return plan
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [features, groups, config])
+
+  const debouncedConfig = useDebounce(config, 10000)
+
+  useEffect(() => {
+    const debouncedPlanConfig = JSON.parse(debouncedConfig) as PlanConfig
+    if (Object.keys(debouncedPlanConfig).length > 0 || wasRebuilt.current) {
+      // save to db
+      console.log("saving to the db...")
+    }
+  }, [debouncedConfig])
+
+  // TODO: deboubce the update of the planConfig and save it to db
 
   // sensor are the way we can control how the drag and drop works
   // we have some components inside the feature that are interactive like buttons
@@ -310,8 +374,6 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
       })
     }
   }
-
-  console.log("planConfig", planConfig)
 
   return (
     <DndContext

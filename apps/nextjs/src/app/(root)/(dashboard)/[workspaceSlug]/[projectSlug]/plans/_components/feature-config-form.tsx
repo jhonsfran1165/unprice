@@ -25,7 +25,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
-import { Plus, Settings, XCircle } from "@builderai/ui/icons"
+import {
+  DollarSignIcon,
+  HelpCircle,
+  Plus,
+  Settings,
+  XCircle,
+} from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import {
@@ -37,6 +43,12 @@ import {
 } from "@builderai/ui/select"
 import { Separator } from "@builderai/ui/separator"
 import { Textarea } from "@builderai/ui/text-area"
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipTrigger,
+} from "@builderai/ui/tooltip"
 import { cn } from "@builderai/ui/utils"
 
 import { useZodForm } from "~/lib/zod-form"
@@ -96,7 +108,7 @@ export function FeatureConfigForm({
           <span className="sr-only">configure</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-[700px]">
         <DialogHeader>
           <DialogTitle>Edit profile</DialogTitle>
           <DialogDescription>
@@ -105,14 +117,7 @@ export function FeatureConfigForm({
         </DialogHeader>
 
         <Form {...form}>
-          <form
-            id="config-feature"
-            onSubmit={form.handleSubmit((data: FeaturePlan) => {
-              onSubmit(data)
-              setIsOpen(false)
-            })}
-            className="space-y-6"
-          >
+          <form id="feature-config" className="space-y-6">
             <div className="flex justify-between gap-2">
               <div className="w-full">
                 <FormField
@@ -204,9 +209,32 @@ export function FeatureConfigForm({
                     name="config.price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Price</FormLabel>
+                        <FormLabel>
+                          <Tooltip>
+                            <div className="flex items-center gap-2">
+                              Price
+                              <span>
+                                <TooltipTrigger asChild>
+                                  <HelpCircle className="h-4 w-4 font-light" />
+                                </TooltipTrigger>
+                              </span>
+                            </div>
+
+                            <TooltipContent
+                              className="w-32 bg-background-bg text-xs font-normal"
+                              align="center"
+                              side="right"
+                            >
+                              Slug is important to identify your feature.
+                              <TooltipArrow className="fill-background-bg" />
+                            </TooltipContent>
+                          </Tooltip>
+                        </FormLabel>
                         <FormControl>
-                          <Input {...field} type="number" />
+                          <div className="relative">
+                            <DollarSignIcon className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input {...field} className="pl-8" />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -220,7 +248,27 @@ export function FeatureConfigForm({
                     name="config.divider"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Divider</FormLabel>
+                        <FormLabel>
+                          <Tooltip>
+                            <div className="flex items-center gap-2">
+                              Divider
+                              <span>
+                                <TooltipTrigger asChild>
+                                  <HelpCircle className="h-4 w-4 font-light" />
+                                </TooltipTrigger>
+                              </span>
+                            </div>
+
+                            <TooltipContent
+                              className="w-32 bg-background-bg text-xs font-normal"
+                              align="center"
+                              side="right"
+                            >
+                              Slug is important to identify your feature.
+                              <TooltipArrow className="fill-background-bg" />
+                            </TooltipContent>
+                          </Tooltip>
+                        </FormLabel>
                         <FormControl>
                           <Input {...field} type="number" />
                         </FormControl>
@@ -241,7 +289,27 @@ export function FeatureConfigForm({
                       name="config.mode"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Mode</FormLabel>
+                          <FormLabel>
+                            <Tooltip>
+                              <div className="flex items-center gap-2">
+                                Mode
+                                <span>
+                                  <TooltipTrigger asChild>
+                                    <HelpCircle className="h-4 w-4 font-light" />
+                                  </TooltipTrigger>
+                                </span>
+                              </div>
+
+                              <TooltipContent
+                                className="w-32 bg-background-bg text-xs font-normal"
+                                align="center"
+                                side="right"
+                              >
+                                Slug is important to identify your feature.
+                                <TooltipArrow className="fill-background-bg" />
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             value={field.value ?? ""}
@@ -271,7 +339,27 @@ export function FeatureConfigForm({
                       name="config.divider"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Divider</FormLabel>
+                          <FormLabel>
+                            <Tooltip>
+                              <div className="flex items-center gap-2">
+                                Divider
+                                <span>
+                                  <TooltipTrigger asChild>
+                                    <HelpCircle className="h-4 w-4 font-light" />
+                                  </TooltipTrigger>
+                                </span>
+                              </div>
+
+                              <TooltipContent
+                                className="w-32 bg-background-bg text-xs font-normal"
+                                align="center"
+                                side="right"
+                              >
+                                Slug is important to identify your feature.
+                                <TooltipArrow className="fill-background-bg" />
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
                           <FormControl>
                             <Input {...field} type="number" />
                           </FormControl>
@@ -291,12 +379,17 @@ export function FeatureConfigForm({
 
                   {fields.length > 0 ? (
                     <ScrollArea className="h-28">
-                      <div className="px-2">
+                      <div className="px-2 py-2">
                         {fields.map((field, index) => (
                           <div
                             key={index}
-                            className="flex justify-between gap-2"
+                            className="flex items-end justify-between gap-2"
                           >
+                            <div className="flex items-center justify-start">
+                              <span className="h-8 text-sm font-light leading-8">
+                                {index + 1}
+                              </span>
+                            </div>
                             <div className="w-full">
                               <FormField
                                 control={form.control}
@@ -307,7 +400,26 @@ export function FeatureConfigForm({
                                     <FormLabel
                                       className={cn(index !== 0 && "sr-only")}
                                     >
-                                      Up to
+                                      <Tooltip>
+                                        <div className="flex items-center gap-2 text-sm font-normal">
+                                          Up to
+                                          <span>
+                                            <TooltipTrigger asChild>
+                                              <HelpCircle className="h-4 w-4 font-light" />
+                                            </TooltipTrigger>
+                                          </span>
+                                        </div>
+
+                                        <TooltipContent
+                                          className="w-32 bg-background-bg text-xs font-normal"
+                                          align="center"
+                                          side="right"
+                                        >
+                                          Slug is important to identify your
+                                          feature.
+                                          <TooltipArrow className="fill-background-bg" />
+                                        </TooltipContent>
+                                      </Tooltip>
                                     </FormLabel>
                                     <FormControl>
                                       <Input {...field} className="h-8" />
@@ -327,10 +439,35 @@ export function FeatureConfigForm({
                                     <FormLabel
                                       className={cn(index !== 0 && "sr-only")}
                                     >
-                                      Price per unit
+                                      <Tooltip>
+                                        <div className="flex items-center gap-2 text-sm font-normal">
+                                          Price
+                                          <span>
+                                            <TooltipTrigger asChild>
+                                              <HelpCircle className="h-4 w-4 font-light" />
+                                            </TooltipTrigger>
+                                          </span>
+                                        </div>
+
+                                        <TooltipContent
+                                          className="w-32 bg-background-bg text-xs font-normal"
+                                          align="center"
+                                          side="right"
+                                        >
+                                          Slug is important to identify your
+                                          feature.
+                                          <TooltipArrow className="fill-background-bg" />
+                                        </TooltipContent>
+                                      </Tooltip>
                                     </FormLabel>
                                     <FormControl>
-                                      <Input {...field} className="h-8" />
+                                      <div className="relative">
+                                        <DollarSignIcon className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                          {...field}
+                                          className="h-8 pl-8"
+                                        />
+                                      </div>
                                     </FormControl>
                                     <FormMessage className="text-xs font-light" />
                                   </FormItem>
@@ -347,53 +484,69 @@ export function FeatureConfigForm({
                                     <FormLabel
                                       className={cn(index !== 0 && "sr-only")}
                                     >
-                                      Flat Price
+                                      <Tooltip>
+                                        <div className="flex items-center gap-2 text-sm font-normal">
+                                          Flat price
+                                          <span>
+                                            <TooltipTrigger asChild>
+                                              <HelpCircle className="h-4 w-4 font-light" />
+                                            </TooltipTrigger>
+                                          </span>
+                                        </div>
+
+                                        <TooltipContent
+                                          className="w-32 bg-background-bg text-xs font-normal"
+                                          align="center"
+                                          side="right"
+                                        >
+                                          Slug is important to identify your
+                                          feature.
+                                          <TooltipArrow className="fill-background-bg" />
+                                        </TooltipContent>
+                                      </Tooltip>
                                     </FormLabel>
                                     <FormControl>
-                                      <div className="relative">
-                                        <Input
-                                          {...field}
-                                          className="h-8 w-3/4"
-                                        />
-                                        {index !== fields.length - 1 ? (
-                                          <Button
-                                            variant="ghost"
-                                            size={"icon"}
-                                            className="absolute right-0 top-0 h-8 w-8 text-muted-foreground"
-                                            onClick={() => {
-                                              remove(index)
-                                            }}
-                                          >
-                                            <XCircle className="h-4 w-4" />
-                                            <span className="sr-only">
-                                              delete tier
-                                            </span>
-                                          </Button>
-                                        ) : (
-                                          <Button
-                                            variant="ghost"
-                                            size={"icon"}
-                                            className="absolute right-0 top-0 h-8 w-8 text-muted-foreground"
-                                            onClick={() =>
-                                              append({
-                                                up: 0,
-                                                price: 0,
-                                                flat: 0,
-                                              })
-                                            }
-                                          >
-                                            <Plus className="h-4 w-4" />
-                                            <span className="sr-only">
-                                              add tier
-                                            </span>
-                                          </Button>
-                                        )}
-                                      </div>
+                                      <Input {...field} className="h-8" />
                                     </FormControl>
                                     <FormMessage className="text-xs font-light" />
                                   </FormItem>
                                 )}
                               />
+                            </div>
+                            <div>
+                              {index !== fields.length - 1 ? (
+                                <Button
+                                  variant="ghost"
+                                  size={"icon"}
+                                  className="h-8 w-8"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    e.preventDefault()
+                                    remove(index)
+                                  }}
+                                >
+                                  <XCircle className="h-4 w-4" />
+                                  <span className="sr-only">delete tier</span>
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  size={"icon"}
+                                  className="h-8 w-8"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    e.preventDefault()
+                                    append({
+                                      up: 0,
+                                      price: 0,
+                                      flat: 0,
+                                    })
+                                  }}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                  <span className="sr-only">add tier</span>
+                                </Button>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -430,8 +583,15 @@ export function FeatureConfigForm({
           </DialogClose>
           <Button
             form="config-feature"
-            type="submit"
             disabled={form.formState.isSubmitting}
+            onClick={async (e) => {
+              e.preventDefault()
+
+              await form.handleSubmit((data: FeaturePlan) => {
+                onSubmit(data)
+                setIsOpen(false)
+              })()
+            }}
           >
             {form.formState.isSubmitting && (
               <div className="mr-2" role="status">
