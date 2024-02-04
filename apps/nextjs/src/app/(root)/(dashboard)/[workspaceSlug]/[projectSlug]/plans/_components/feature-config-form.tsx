@@ -51,6 +51,7 @@ import {
 } from "@builderai/ui/tooltip"
 import { cn } from "@builderai/ui/utils"
 
+import { Ping } from "~/components/ping"
 import { useZodForm } from "~/lib/zod-form"
 
 export function FeatureConfigForm({
@@ -100,10 +101,17 @@ export function FeatureConfigForm({
     name: "config.tiers",
   })
 
+  const hasConfig = Object.keys(feature?.config ?? {}).length > 0
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size={"icon"} className="h-8 w-8">
+        <Button variant="ghost" size={"icon"} className="relative h-8 w-8">
+          {!hasConfig && (
+            <div className="absolute right-0 top-0">
+              <Ping variant={"destructive"} />
+            </div>
+          )}
           <Settings className="h-4 w-4" />
           <span className="sr-only">configure</span>
         </Button>
@@ -554,10 +562,10 @@ export function FeatureConfigForm({
                     </ScrollArea>
                   ) : null}
                 </div>
+
+                <Separator />
               </>
             )}
-
-            <Separator />
 
             <FormField
               control={form.control}

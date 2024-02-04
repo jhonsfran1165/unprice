@@ -3,15 +3,16 @@ import Link from "next/link"
 
 import type { SubTabsRoutes } from "@builderai/config/types"
 import { Badge } from "@builderai/ui/badge"
-import { Button } from "@builderai/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@builderai/ui/card"
-import { Add, ChevronLeft } from "@builderai/ui/icons"
+import { ChevronLeft } from "@builderai/ui/icons"
 
 import { DashboardShell } from "~/components/layout2/dashboard-shell"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
 import MenuSubTabs from "~/components/menu-subtabs"
 import { api } from "~/trpc/server-http"
-import { Versions, versions } from "../../_components/versions"
+import CreateNewVersion from "../../_components/create-new-version"
+import { VersionActions } from "../../_components/version-actions"
+import { Versions } from "../../_components/versions"
 
 const subtabs = {
   overview: {
@@ -47,8 +48,8 @@ export default async function PriceLayout(props: {
       <DashboardShell
         tabs={
           <Versions
-            versions={versions}
-            selectedVersion={planVersion}
+            versions={plan?.versions}
+            selectedVersion={Number(planVersion)}
             basePath={`/${workspaceSlug}/${projectSlug}/plans/${planId}`}
           />
         }
@@ -65,10 +66,14 @@ export default async function PriceLayout(props: {
                   back
                 </Badge>
               </Link>
-              <Button>
-                <Add className="mr-2 h-4 w-4" />
-                Create a new version
-              </Button>
+              <div className="flex items-center justify-end space-x-2">
+                <CreateNewVersion planId={planId} projectSlug={projectSlug} />
+                <VersionActions
+                  planId={planId}
+                  projectSlug={projectSlug}
+                  versionId={Number(planVersion)}
+                />
+              </div>
             </div>
 
             <Card className="mb-10">

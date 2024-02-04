@@ -9,7 +9,11 @@ import {
   varchar,
 } from "drizzle-orm/pg-core"
 
-import { currencyEnum, typeFeatureEnum } from "../../utils/enums"
+import {
+  currencyEnum,
+  statusPlanEnum,
+  typeFeatureEnum,
+} from "../../utils/enums"
 import { projectID, tenantID, timestamps } from "../../utils/sql"
 import { project } from "../project"
 
@@ -47,6 +51,7 @@ export const plan = pgTable(
   })
 )
 
+// TODO: add schema to the versions features
 export const version = pgTable(
   "plan_version",
   {
@@ -59,6 +64,7 @@ export const version = pgTable(
     version: serial("version").notNull(),
     featuresPlan: json("features_plan"), // config features of the plan
     addonsPlan: json("addons_plan"), // config addons of the plan
+    status: statusPlanEnum("status").default("draft"),
   },
   (table) => ({
     versionProjectInx: index("version_project_id_idx").on(table.projectId),
@@ -88,11 +94,12 @@ export const feature = pgTable(
   })
 )
 
-export const planRelations = relations(plan, ({ one }) => ({
+export const planRelations = relations(plan, ({ one, many }) => ({
   project: one(project, {
     fields: [plan.projectId],
     references: [project.id],
   }),
+  versions: many(version),
 }))
 
 export const featureRelations = relations(feature, ({ one }) => ({
@@ -106,5 +113,9 @@ export const versionRelations = relations(version, ({ one }) => ({
   project: one(project, {
     fields: [version.projectId],
     references: [project.id],
+  }),
+  plan: one(plan, {
+    fields: [version.planId],
+    references: [plan.id],
   }),
 }))

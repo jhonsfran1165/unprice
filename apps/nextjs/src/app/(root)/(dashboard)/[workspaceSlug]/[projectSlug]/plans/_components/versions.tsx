@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import type { PlanVersionList } from "@builderai/db/schema/price"
 import { buttonVariants } from "@builderai/ui/button"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 import {
@@ -10,13 +11,9 @@ import {
 } from "@builderai/ui/tooltip"
 import { cn } from "@builderai/ui/utils"
 
-export type Versions = (typeof versions)[number]
-
-export const versions = ["v0", "v10"]
-
 interface VersionProps extends React.HTMLAttributes<HTMLDivElement> {
-  versions: Versions[]
-  selectedVersion?: string
+  versions?: PlanVersionList[]
+  selectedVersion: number
   basePath: string
 }
 
@@ -26,6 +23,11 @@ export function Versions({
   selectedVersion,
   basePath,
 }: VersionProps) {
+  // TODO: create a new version button
+  if (!versions || versions.length === 0) {
+    return null
+  }
+
   return (
     <div
       className={cn(
@@ -37,13 +39,13 @@ export function Versions({
         <ScrollArea className="flex">
           <div className="flex flex-col items-center gap-2 pt-4">
             {versions?.map((version, i) => {
-              const active = selectedVersion === version
+              const active = selectedVersion === version.version
               return (
-                <Tooltip key={version}>
+                <Tooltip key={version.id}>
                   <TooltipTrigger>
                     <Link
                       scroll={false}
-                      href={`${basePath}/${version}/overview`}
+                      href={`${basePath}/${version.version}/overview`}
                       prefetch={false}
                       className={cn(
                         buttonVariants({
@@ -53,7 +55,7 @@ export function Versions({
                         "h-8 w-8 text-xs"
                       )}
                     >
-                      {version}
+                      {`v${version.version}`}
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent
@@ -62,7 +64,7 @@ export function Versions({
                     align="center"
                     side="right"
                   >
-                    Version: {version}
+                    Version: {version.version} - {version.status}
                     <TooltipArrow className="fill-background-bg" />
                   </TooltipContent>
                 </Tooltip>

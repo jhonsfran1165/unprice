@@ -4,6 +4,7 @@ import { z } from "zod"
 import { and, eq } from "@builderai/db"
 import {
   createFeatureSchema,
+  deleteFeatureSchema,
   feature,
   featureBase,
   updateFeatureSchema,
@@ -38,6 +39,23 @@ export const featureRouter = createTRPCRouter({
         .returning()
 
       return featureBase.parse(featureDate[0])
+    }),
+
+  delete: protectedOrgProcedure
+    .input(deleteFeatureSchema)
+    .mutation(async (opts) => {
+      const { projectSlug, id } = opts.input
+
+      const { project: projectData } = await hasAccessToProject({
+        projectSlug,
+        ctx: opts.ctx,
+      })
+
+      await opts.ctx.txRLS(({ txRLS }) => {
+        return txRLS
+          .delete(feature)
+          .where(and(eq(feature.projectId, projectData.id), eq(feature.id, id)))
+      })
     }),
   update: protectedOrgProcedure
     .input(updateFeatureSchema)

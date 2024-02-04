@@ -23,6 +23,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
+import { TRPCClientError } from "@trpc/client"
 import { createPortal } from "react-dom"
 
 import type {
@@ -30,7 +31,10 @@ import type {
   FeatureType,
   Group,
   GroupType,
+  PlanConfig,
+  PlanVersion,
 } from "@builderai/db/schema/price"
+import { planConfigSchema } from "@builderai/db/schema/price"
 import { Accordion } from "@builderai/ui/accordion"
 import { Button } from "@builderai/ui/button"
 import { Add } from "@builderai/ui/icons"
@@ -41,9 +45,11 @@ import {
 } from "@builderai/ui/resizable"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
+import { useToast } from "@builderai/ui/use-toast"
 
 import { useDebounce } from "~/lib/use-debounce"
 import useLocalStorage from "~/lib/use-local-storage"
+import { api } from "~/trpc/client"
 import { FeatureCard } from "./feature"
 import { FeatureGroup } from "./feature-group"
 import { FeatureGroupEmptyPlaceholder } from "./feature-group-placeholder"
@@ -72,22 +78,32 @@ const dropAnimation: DropAnimation = {
   }),
 }
 
-type PlanConfig = Record<string, { name: string; features: FeaturePlan[] }>
-
 // TODO: do not pass projectSlug to different components - props hell!!
-export default function DragDrop({ projectSlug }: { projectSlug: string }) {
+export default function DragDrop({
+  projectSlug,
+  version,
+}: {
+  projectSlug: string
+  version: PlanVersion
+}) {
+  const toaster = useToast()
+  const wasBuilt = useRef(false)
+  const disabled = version.status === "published"
+
+  // keep track of the changes in localStorage
+  const [config, setConfig] = useLocalStorage(
+    `config-plan-${projectSlug}`,
+    {} as PlanConfig
+  )
+
   // each feature has a group id, which represent the plan groupings you implement
   // example of groups: Base Features, Pay as you go, etc
   const [groups, setGroups] = useState<Group[]>([]) // TODO: design empty state for groups
-  const groupIds = useMemo(() => groups.map((g) => g.id), [groups])
-  const wasRebuilt = useRef(false)
-
   // when the drag and drop starts we need to handle the state of the plan
   const [activeFeature, setActiveFeature] = useState<FeaturePlan | null>(null)
   const [clonedFeatures, setClonedFeatures] = useState<FeaturePlan[] | null>(
     null
   )
-
   // store all the features in the current plan
   const [features, setFeatures] = useState<FeaturePlan[]>([])
 
@@ -95,30 +111,27 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
     return features.map((feature) => feature.id)
   }, [features])
 
-  // keep track of the changes in locastorage
-  // TODO: add key: projectSlug, planSlug and version
-  const [config, setConfig] = useLocalStorage("planConfig", "{}")
+  const groupIds = useMemo(() => groups.map((g) => g.id), [groups])
 
   const reBuildDragAndDrop = useCallback(
-    (localConfig: PlanConfig) => {
+    (config: PlanConfig) => {
       try {
-        const groups = Object.keys(localConfig).map((key) => {
-          return { id: key, title: localConfig[key]?.name ?? "" } as Group
+        const groups = Object.keys(config).map((key) => {
+          return { id: key, title: config[key]?.name ?? "" } as Group
         })
 
         setGroups(groups)
 
-        const features = Object.values(localConfig).reduce((acc, group) => {
+        const features = Object.values(config).reduce((acc, group) => {
           return [...acc, ...group.features]
         }, [] as FeaturePlan[])
 
         setFeatures(features)
 
-        wasRebuilt.current = true
-        return localConfig
+        return config
       } catch (error) {
         console.error("error", error)
-        setConfig(JSON.stringify({}))
+        setConfig({})
         return {} as PlanConfig
       }
     },
@@ -143,37 +156,83 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
       return acc
     }, {} as PlanConfig)
 
-    const localConfig = JSON.parse(config) as PlanConfig
-
-    // only runs once if there is no plan and there is a local config in the local storage
-    if (
-      Object.keys(plan).length === 0 &&
-      Object.keys(localConfig).length > 0 &&
-      !wasRebuilt.current
-    ) {
-      return reBuildDragAndDrop(localConfig)
-    }
-
-    console.log("plan", plan)
-    if (Object.keys(plan).length > 0 || wasRebuilt.current) {
-      setConfig(JSON.stringify(plan))
-    }
-
     return plan
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [features, groups, config])
+  }, [features, groups])
 
-  const debouncedConfig = useDebounce(config, 10000)
+  const debouncedPlanConfig = useDebounce(planConfig, 600)
+
+  // parse the debouncedConfig to know if it's valid, if so then save it to the db
+  const isValidConfig = (plan: PlanConfig) => {
+    try {
+      if (Object.keys(plan).length === 0) return false
+      planConfigSchema.parse(plan)
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  const updatePlanVersion = api.plan.updateVersion.useMutation({
+    onSuccess: () => {
+      setConfig({}) // clear the local storage
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        toaster.toast({
+          title: err.message,
+          variant: "destructive",
+        })
+      } else {
+        toaster.toast({
+          title: "Error updating plan",
+          variant: "destructive",
+          description:
+            "An issue occurred while updating the plan. Please try again.",
+        })
+      }
+    },
+  })
 
   useEffect(() => {
-    const debouncedPlanConfig = JSON.parse(debouncedConfig) as PlanConfig
-    if (Object.keys(debouncedPlanConfig).length > 0 || wasRebuilt.current) {
-      // save to db
-      console.log("saving to the db...")
+    if (!wasBuilt.current) {
+      wasBuilt.current = true
+      return
     }
-  }, [debouncedConfig])
 
-  // TODO: deboubce the update of the planConfig and save it to db
+    if (Object.keys(config).length !== 0) {
+      const mergedConfig = {
+        ...version.featuresPlan,
+        ...config,
+      }
+
+      reBuildDragAndDrop(mergedConfig)
+    } else {
+      reBuildDragAndDrop(version.featuresPlan ?? {})
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (disabled) return
+    if (!wasBuilt.current) return
+
+    const savedData = async () => {
+      await updatePlanVersion.mutateAsync({
+        projectSlug,
+        versionId: version.version,
+        planId: version.planId,
+        featuresPlan: debouncedPlanConfig,
+      })
+    }
+
+    const isValid = isValidConfig(debouncedPlanConfig)
+
+    if (!isValid) setConfig(debouncedPlanConfig)
+    if (isValid) void savedData()
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedPlanConfig])
 
   // sensor are the way we can control how the drag and drop works
   // we have some components inside the feature that are interactive like buttons
@@ -211,8 +270,6 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
   }
 
   const updateFeature = (feature: FeaturePlan) => {
-    console.log("feature", feature)
-
     setFeatures((features) => {
       const index = features.findIndex((f) => f.id === feature.id)
       if (index === -1) return features
@@ -421,6 +478,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
             <Accordion type="multiple" className="space-y-2">
               <SortableContext
                 items={groupIds}
+                disabled={version.status === "published"}
                 strategy={verticalListSortingStrategy}
               >
                 {groups.map((g) => (
@@ -437,6 +495,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
                     ) : (
                       <ScrollArea className="h-full px-3">
                         <SortableContext
+                          disabled={version.status === "published"}
                           items={
                             planConfig[g.id]?.features.map((f) => f.id) ?? []
                           }
@@ -444,6 +503,7 @@ export default function DragDrop({ projectSlug }: { projectSlug: string }) {
                           <div className="space-y-2">
                             {planConfig[g.id]?.features.map((f) => (
                               <SortableFeature
+                                disabled={version.status === "published"}
                                 projectSlug={projectSlug}
                                 deleteFeature={deleteFeature}
                                 updateFeature={updateFeature}

@@ -163,6 +163,34 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
     },
   })
 
+  const deleteFeature = api.feature.delete.useMutation({
+    onSettled: async () => {
+      await apiUtils.feature.searchBy.invalidate({
+        projectSlug: projectSlug,
+      })
+    },
+    onSuccess: (data) => {
+      toaster.toast({
+        title: "Feature Saved",
+        description: `Feature deleted successfully.`,
+      })
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        toaster.toast({
+          title: err.message,
+          variant: "destructive",
+        })
+      } else {
+        toaster.toast({
+          title: "Error deleted Feature",
+          variant: "destructive",
+          description:
+            "An issue occurred while deleted your Feature. Please try again.",
+        })
+      }
+    },
+  })
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -304,7 +332,28 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
             />
           </form>
         </Form>
-        <SheetFooter>
+        <SheetFooter className="mt-10">
+          {mode === "edit" && (
+            <Button
+              variant="destructive"
+              onClick={async (e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                await deleteFeature.mutateAsync({
+                  id: feature.id,
+                  projectSlug: projectSlug,
+                })
+              }}
+            >
+              {form.formState.isSubmitting && (
+                <div className="mr-2" role="status">
+                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-destructive border-r-transparent" />
+                </div>
+              )}
+
+              {"Delete Feature"}
+            </Button>
+          )}
           <Button
             form="add-feature"
             type="submit"

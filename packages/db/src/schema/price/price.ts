@@ -1,7 +1,7 @@
 import { createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { feature, plan } from "./price.sql"
+import { feature, plan, version } from "./price.sql"
 
 export const planBase = createSelectSchema(plan, {
   id: (schema) => schema.id.cuid2(),
@@ -23,8 +23,6 @@ export const createPlanSchema = planBase
     projectSlug: z.string(),
   })
 
-export type CreatePlan = z.infer<typeof createPlanSchema>
-
 export const updatePlanSchema = planBase
   .pick({
     slug: true,
@@ -39,10 +37,9 @@ export const updatePlanSchema = planBase
     projectSlug: true,
   })
 
-export type UpdatePlan = z.infer<typeof updatePlanSchema>
-
 export const featureBase = createSelectSchema(feature, {
   title: (schema) => schema.title.min(3),
+  description: (schema) => schema.description.optional(),
   slug: (schema) =>
     schema.slug
       .trim()
@@ -56,15 +53,19 @@ export const featureBase = createSelectSchema(feature, {
   projectId: true,
 })
 
-export const updateFeatureSchema = featureBase
+export const updateFeatureSchema = featureBase.pick({
+  id: true,
+  title: true,
+  type: true,
+  description: true,
+})
+
+export const deleteFeatureSchema = featureBase
   .pick({
     id: true,
-    title: true,
-    type: true,
-    description: true,
   })
-  .partial({
-    description: true,
+  .extend({
+    projectSlug: z.string(),
   })
 
 export const createFeatureSchema = featureBase
@@ -73,9 +74,6 @@ export const createFeatureSchema = featureBase
     title: true,
     description: true,
     type: true,
-  })
-  .partial({
-    description: true,
   })
   .extend({
     projectSlug: z.string(),
@@ -109,6 +107,7 @@ export const configMeteredFeature = z.object({
 export const configHybridFeature = z.object({
   price: z.coerce.number().min(0),
 })
+
 export const featurePlanSchema = featureBase
   .extend({
     groupId: z.string(),
@@ -134,6 +133,53 @@ export const featurePlanSchema = featureBase
     }
   })
 
+export const planConfigSchema = z.record(
+  z.object({
+    name: z.string(),
+    features: z.array(featurePlanSchema),
+  })
+)
+
+export const versionBase = createSelectSchema(version).extend({
+  featuresPlan: planConfigSchema.optional(),
+  addonsPlan: planConfigSchema.optional(),
+})
+
+export const versionListBase = versionBase.pick({
+  id: true,
+  status: true,
+  version: true,
+})
+
+export const planList = planBase.extend({
+  versions: z.array(versionListBase),
+})
+
+export const createNewVersionPlan = versionBase
+  .pick({
+    planId: true,
+  })
+  .extend({
+    projectSlug: z.string(),
+  })
+
+export const updateVersionPlan = versionBase
+  .pick({
+    planId: true,
+    featuresPlan: true,
+    addonsPlan: true,
+    status: true,
+  })
+  .partial({
+    status: true,
+    featuresPlan: true,
+    addonsPlan: true,
+  })
+  .extend({
+    versionId: z.coerce.number().min(0),
+    projectSlug: z.string(),
+  })
+
 export type GroupType = "Group"
 export type FeatureType = "Feature" | "Addon" | "Plan"
 export interface Group {
@@ -141,6 +187,14 @@ export interface Group {
   title: string
 }
 
+export type PlanList = z.infer<typeof planList>
+export type CreatePlan = z.infer<typeof createPlanSchema>
+export type UpdatePlan = z.infer<typeof updatePlanSchema>
+export type UpdateVersion = z.infer<typeof updateVersionPlan>
+export type PlanVersion = z.infer<typeof versionBase>
+export type PlanVersionList = z.infer<typeof versionListBase>
+export type CreatePlanVersion = z.infer<typeof createNewVersionPlan>
+export type PlanConfig = z.infer<typeof planConfigSchema>
 export type FeaturePlan = z.infer<typeof featurePlanSchema>
 export type CreateFeature = z.infer<typeof createFeatureSchema>
 export type UpdateFeature = z.infer<typeof updateFeatureSchema>
