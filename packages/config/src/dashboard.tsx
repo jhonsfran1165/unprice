@@ -67,6 +67,7 @@ const submodulesProject = [
   "apikeys",
   "settings",
   "usage",
+  "users",
 ] as const
 
 const ProjectRoutes: Record<
@@ -129,6 +130,18 @@ const ProjectRoutes: Record<
         title: "Danger",
         href: "/settings/danger",
         icon: "Warning",
+      },
+    },
+  },
+  users: {
+    titleTab: "Users",
+    href: "/users/overview",
+    icon: "User2",
+    sidebarMenu: {
+      overview: {
+        title: "Users",
+        href: "/users/overview",
+        icon: "User2",
       },
     },
   },

@@ -31,6 +31,7 @@ export default async function PlansPage(props: {
   const { plans } = await api.plan.listByProject.query({
     projectSlug: projectSlug,
   })
+
   return (
     <DashboardShell
       header={
@@ -60,6 +61,7 @@ export default async function PlansPage(props: {
         </TableHeader>
         <TableBody>
           {plans.map((plan) => {
+            const latestVersion = plan.versions?.[0]?.version ?? 1
             return (
               <TableRow key={plan.id}>
                 <TableCell>{plan.id}</TableCell>
@@ -69,7 +71,7 @@ export default async function PlansPage(props: {
                 <TableCell>
                   <Link
                     prefetch={false}
-                    href={`/${workspaceSlug}/${projectSlug}/plans/${plan.id}/latest/overview`}
+                    href={`/${workspaceSlug}/${projectSlug}/plans/${plan.id}/${latestVersion}/overview`}
                   >
                     <Button className="min-w-max">
                       <Eye className="h-5 w-5" />

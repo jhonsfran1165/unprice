@@ -7,6 +7,7 @@ import { organizationsRouter } from "./router/edge/organization"
 import { pageRouter } from "./router/edge/page"
 import { planRouter } from "./router/edge/plan"
 import { projectRouter } from "./router/edge/project"
+import { subscriptionRouter } from "./router/edge/subscription"
 import { createTRPCRouter } from "./trpc"
 
 // Deployed to /trpc/edge/**
@@ -18,6 +19,8 @@ export const edgeRouter = createTRPCRouter({
   plan: planRouter,
   auth: authRouter,
   apikey: apiKeyRouter,
+  // TODO: put this inside plan
   feature: featureRouter,
+  subscription: subscriptionRouter,
   domain: domainRouter,
 })

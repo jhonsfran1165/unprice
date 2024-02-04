@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.1.2",
+    "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.3",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.4",
@@ -75,6 +76,7 @@
     "./loading-animation": "./src/loading-animation.tsx",
     "./utils": "./src/utils/index.ts",
     "./skeleton": "./src/skeleton.tsx",
+    "./alert-dialog": "./src/alert-dialog.tsx",
     "./resizable": "./src/resizable.tsx",
     "./drawer": "./src/drawer.tsx",
     "./accordion": "./src/accordion.tsx",

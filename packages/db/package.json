@@ -11,6 +11,7 @@
     "./schema/page": "./src/schema/page.ts",
     "./schema/canva": "./src/schema/canva.ts",
     "./schema/price": "./src/schema/price/index.ts",
+    "./schema/subscription": "./src/schema/subscription/index.ts",
     "./schema/workspace": "./src/schema/workspace.ts",
     "./utils": "./src/utils/index.ts"
   },

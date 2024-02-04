@@ -263,6 +263,7 @@ export const planRouter = createTRPCRouter({
               columns: {
                 version: true,
                 status: true,
+                id: true,
               },
             },
           },

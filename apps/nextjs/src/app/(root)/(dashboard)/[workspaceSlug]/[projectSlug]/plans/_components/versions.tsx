@@ -49,7 +49,11 @@ export function Versions({
                       prefetch={false}
                       className={cn(
                         buttonVariants({
-                          variant: active ? "secondary" : "ghost",
+                          variant: active
+                            ? "secondary"
+                            : version.status === "published"
+                            ? "outline"
+                            : "ghost",
                           size: "icon",
                         }),
                         "h-8 w-8 text-xs"
