@@ -1,19 +1,26 @@
 import { createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { user } from "./subscription.sql"
+import { subscription, user } from "./subscription.sql"
 
 export const userBase = createSelectSchema(user)
+export const subscriptionBase = createSelectSchema(subscription)
 
-export const userSubscriptionSchema = userBase
+export const createSubscriptionSchema = subscriptionBase
   .pick({
-    email: true,
-    name: true,
-    id: true,
+    planVersion: true,
+    userId: true,
+    planId: true,
   })
-  .partial({
-    id: true,
+  .extend({
+    projectSlug: z.string(),
   })
+
+export const userSubscriptionSchema = userBase.pick({
+  email: true,
+  name: true,
+  id: true,
+})
 
 export const createUserSchema = userBase
   .extend({
@@ -36,11 +43,15 @@ export const updateUserSchema = userBase
   .pick({
     email: true,
     name: true,
+    id: true,
   })
   .extend({
     projectSlug: z.string(),
   })
 
+export type User = z.infer<typeof userBase>
+export type Subscription = z.infer<typeof subscriptionBase>
+export type CreateSubscription = z.infer<typeof createSubscriptionSchema>
 export type UserSubscription = z.infer<typeof userSubscriptionSchema>
 export type CreateUserSubscription = z.infer<typeof createUserSchema>
 export type UpdateUserSubscription = z.infer<typeof updateUserSchema>

@@ -1,10 +1,11 @@
 import { relations } from "drizzle-orm"
-import { index, pgTable, text } from "drizzle-orm/pg-core"
+import { index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core"
 
 import { subscriptionStatus } from "../../utils/enums"
 import { cuid, projectID, tenantID, timestamps } from "../../utils/sql"
 import { version } from "../price"
 import { project } from "../project"
+import { plan } from "./../price/price.sql"
 
 export const user = pgTable(
   "user",
@@ -28,6 +29,7 @@ export const subscription = pgTable(
     ...tenantID,
     ...timestamps,
     planVersion: cuid("plan_version").notNull(),
+    planId: text("plan_id").notNull(),
     userId: cuid("user_id").notNull(),
     status: subscriptionStatus("active").default("active"),
     // TODO: add fields for handling the subscription like date of start and end, stripe info
@@ -35,6 +37,13 @@ export const subscription = pgTable(
   (table) => ({
     subscriptionProjectInx: index("subscription_project_id_idx").on(
       table.projectId
+    ),
+    subscriptionUniqueInx: uniqueIndex("subscription_unique_uidx").on(
+      table.planId,
+      table.planVersion,
+      table.userId,
+      table.projectId,
+      table.tenantId
     ),
     subscriptionTenantIdInx: index("subscription_tenant_uidx").on(
       table.tenantId
@@ -58,8 +67,12 @@ export const subscriptionRelations = relations(subscription, ({ one }) => ({
     fields: [subscription.userId],
     references: [user.id],
   }),
-  planVersion: one(version, {
+  version: one(version, {
     fields: [subscription.planVersion],
     references: [version.id],
+  }),
+  plan: one(plan, {
+    fields: [subscription.planId],
+    references: [plan.id],
   }),
 }))

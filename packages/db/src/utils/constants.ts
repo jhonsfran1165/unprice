@@ -10,6 +10,7 @@ export const dbNameSpaces = {
   apikey_key: "builderai_live",
   page: "page",
   customer: "customer",
+  subscription: "sub",
   plan_version: "pv",
 } as const
 

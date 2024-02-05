@@ -1,12 +1,95 @@
+import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { createUserSchema, user } from "@builderai/db/schema/subscription"
+import {
+  createSubscriptionSchema,
+  createUserSchema,
+  subscription,
+  user,
+} from "@builderai/db/schema/subscription"
 import { newIdEdge } from "@builderai/db/utils"
 
 import { createTRPCRouter, protectedOrgProcedure } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
 
 export const subscriptionRouter = createTRPCRouter({
+  create: protectedOrgProcedure
+    .input(createSubscriptionSchema)
+    .mutation(async (opts) => {
+      const { planVersion, userId, projectSlug, planId } = opts.input
+
+      const { project } = await hasAccessToProject({
+        projectSlug,
+        ctx: opts.ctx,
+      })
+
+      const userHasActiveSubscription =
+        await opts.ctx.db.query.subscription.findFirst({
+          columns: {
+            id: true,
+          },
+          with: {
+            plan: {
+              columns: {
+                slug: true,
+              },
+            },
+            version: {
+              columns: {
+                version: true,
+              },
+            },
+          },
+          where(fields, operators) {
+            return operators.and(
+              operators.eq(fields.userId, userId),
+              operators.eq(fields.projectId, project.id),
+              operators.eq(fields.status, "active")
+            )
+          },
+        })
+
+      if (userHasActiveSubscription) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: `User already subscribed to plan: ${userHasActiveSubscription.plan.slug} version: ${userHasActiveSubscription.version.version}`,
+        })
+      }
+
+      const versionData = await opts.ctx.db.query.version.findFirst({
+        where(fields, operators) {
+          return operators.and(
+            operators.eq(fields.id, planVersion),
+            operators.eq(fields.planId, planId),
+            operators.eq(fields.projectId, project.id)
+          )
+        },
+      })
+
+      if (!versionData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Version not found",
+        })
+      }
+
+      const subscriptionId = newIdEdge("subscription")
+
+      const subscriptionData = await opts.ctx.db
+        .insert(subscription)
+        .values({
+          id: subscriptionId,
+          projectId: project.id,
+          tenantId: opts.ctx.tenantId,
+          planVersion: versionData.id,
+          planId: versionData.planId,
+          userId,
+          status: "active",
+        })
+        .returning()
+
+      return subscriptionData[0]
+    }),
   createUser: protectedOrgProcedure
     .input(createUserSchema)
     .mutation(async (opts) => {

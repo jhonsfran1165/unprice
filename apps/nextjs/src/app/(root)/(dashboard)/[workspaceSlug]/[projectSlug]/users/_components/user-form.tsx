@@ -96,8 +96,6 @@ export function UserForm({ projectSlug, user, mode }: UserFormProps) {
     defaultValues,
   })
 
-  console.log(form.formState)
-
   const createUser = api.subscription.createUser.useMutation({
     onSettled: async () => {
       router.refresh()

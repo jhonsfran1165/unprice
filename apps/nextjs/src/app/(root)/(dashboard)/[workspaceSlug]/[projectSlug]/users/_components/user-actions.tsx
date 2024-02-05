@@ -1,6 +1,8 @@
 "use client"
 
 import React from "react"
+import { useRouter } from "next/navigation"
+import { TRPCClientError } from "@trpc/client"
 
 import type { PlanList } from "@builderai/db/schema/price"
 import type { UserSubscription } from "@builderai/db/schema/subscription"
@@ -40,6 +42,8 @@ import {
 } from "@builderai/ui/select"
 import { useToast } from "@builderai/ui/use-toast"
 
+import { api } from "~/trpc/client"
+
 export function UserActions({
   projectSlug,
   user,
@@ -50,10 +54,37 @@ export function UserActions({
   plans: PlanList[]
 }) {
   const toaster = useToast()
+  const router = useRouter()
   const [open, setIsOpen] = React.useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
+  const [selectedPlan, setSelectedPlan] = React.useState<string | null>(null)
 
-  console.log(plans)
+  const createPlanVersion = api.subscription.create.useMutation({
+    onSettled: () => {
+      router.refresh()
+    },
+    onSuccess: () => {
+      toaster.toast({
+        title: "User Subscription created",
+        description: `The user has been subscribed to the plan successfully.`,
+      })
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        toaster.toast({
+          title: err.message,
+          variant: "destructive",
+        })
+      } else {
+        toaster.toast({
+          title: "Error creating subscription",
+          variant: "destructive",
+          description:
+            "An issue occurred while creating your subscription. Please try again.",
+        })
+      }
+    },
+  })
 
   return (
     <>
@@ -73,9 +104,8 @@ export function UserActions({
             Add plan to the user
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={async () => {
-              console.log("edit")
-              setShowDeleteDialog(true)
+            onClick={() => {
+              console.log("Edit user")
             }}
             className="text-destructive"
           >
@@ -94,8 +124,8 @@ export function UserActions({
             </DialogDescription>
           </DialogHeader>
           <Select
-            onValueChange={() => {
-              console.log("changed")
+            onValueChange={(data) => {
+              setSelectedPlan(data)
             }}
           >
             <SelectTrigger>
@@ -109,9 +139,13 @@ export function UserActions({
                     {plan.versions
                       .filter((version) => version.status === "published")
                       .map((version) => {
+                        const planAndVersionValue = `${plan.id}*${version.id}`
                         return (
-                          <SelectItem key={version.id} value={version.id}>
-                            v{version.version} - {plan.slug}
+                          <SelectItem
+                            key={version.id}
+                            value={planAndVersionValue}
+                          >
+                            {plan.slug} - v{version.version}
                           </SelectItem>
                         )
                       })}
@@ -121,8 +155,37 @@ export function UserActions({
             </SelectContent>
           </Select>
           <DialogFooter>
-            <Button variant="secondary" onClick={() => setIsOpen(false)}>
+            <Button
+              variant="ghost"
+              onClick={async () => {
+                setIsOpen(false)
+              }}
+            >
               Close
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!selectedPlan) {
+                  toaster.toast({
+                    variant: "destructive",
+                    description: "Please select a plan to subscribe the user.",
+                  })
+                  return
+                }
+
+                const [planId, planVersionId] = selectedPlan.split("*")
+
+                await createPlanVersion.mutateAsync({
+                  planId: planId ?? "",
+                  userId: user.id,
+                  planVersion: planVersionId ?? "",
+                  projectSlug,
+                })
+
+                setIsOpen(false)
+              }}
+            >
+              Save
             </Button>
           </DialogFooter>
         </DialogContent>
