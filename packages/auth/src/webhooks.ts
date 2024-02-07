@@ -1,7 +1,6 @@
-import type { WebhookEvent } from "@builderai/auth/server"
-import { db, eq } from "@builderai/db"
-import { workspace } from "@builderai/db/schema/workspace"
-import { generateSlug, workspaceIdFromTenantId } from "@builderai/db/utils"
+import { db, eq, schema, utils } from "@builderai/db"
+
+import type { WebhookEvent } from "./server"
 
 export async function handleEvent(event: WebhookEvent) {
   switch (event.type) {
@@ -10,12 +9,12 @@ export async function handleEvent(event: WebhookEvent) {
       const { id, first_name, username } = event.data
 
       // use the same id for this workspace so it's easy to identify the tenant inside the app
-      const workspaceId = workspaceIdFromTenantId(id)
+      const workspaceId = utils.workspaceIdFromTenantId(id)
 
-      const orgSlug = username ?? generateSlug(2)
+      const orgSlug = username ?? utils.generateSlug(2)
 
       await db
-        .insert(workspace)
+        .insert(schema.workspace)
         .values({
           id: workspaceId,
           tenantId: id,
@@ -24,14 +23,14 @@ export async function handleEvent(event: WebhookEvent) {
           isPersonal: true,
         })
         .onConflictDoUpdate({
-          target: workspace.id,
+          target: schema.workspace.id,
           set: {
             tenantId: id,
             slug: orgSlug,
             name: first_name ?? orgSlug,
             isPersonal: true,
           },
-          where: eq(workspace.id, workspaceId),
+          where: eq(schema.workspace.id, workspaceId),
         })
 
       break
@@ -45,7 +44,7 @@ export async function handleEvent(event: WebhookEvent) {
         throw new Error("Id not provided when trying to delete user")
       }
 
-      await db.delete(workspace).where(eq(workspace.tenantId, id))
+      await db.delete(schema.workspace).where(eq(schema.workspace.tenantId, id))
 
       break
     }
@@ -66,8 +65,8 @@ export async function handleEvent(event: WebhookEvent) {
     case "organization.updated": {
       const { slug, name, id } = event.data
 
-      const orgSlug = slug ? slug : generateSlug(2)
-      const workspaceId = workspaceIdFromTenantId(id)
+      const orgSlug = slug ? slug : utils.generateSlug(2)
+      const workspaceId = utils.workspaceIdFromTenantId(id)
 
       const workspaceData = await db.query.workspace.findFirst({
         columns: {
@@ -78,16 +77,16 @@ export async function handleEvent(event: WebhookEvent) {
 
       if (workspaceData) {
         await db
-          .update(workspace)
+          .update(schema.workspace)
           .set({
             name: name ?? orgSlug,
             slug: orgSlug,
             tenantId: id,
             isPersonal: false,
           })
-          .where(eq(workspace.id, workspaceData.id))
+          .where(eq(schema.workspace.id, workspaceData.id))
       } else {
-        await db.insert(workspace).values({
+        await db.insert(schema.workspace).values({
           id: workspaceId,
           tenantId: id,
           slug: orgSlug,

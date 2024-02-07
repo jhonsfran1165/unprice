@@ -1,18 +1,9 @@
-import Link from "next/link"
 import { TRPCClientError } from "@trpc/client"
+import Link from "next/link"
 import { z } from "zod"
 
-import { FEATURE_TYPES } from "@builderai/db/schema/enums"
-import type {
-  CreateFeature,
-  FeaturePlan,
-  UpdateFeature,
-} from "@builderai/db/schema/price"
-import {
-  createFeatureSchema,
-  updateFeatureSchema,
-} from "@builderai/db/schema/price"
-import { createSlug } from "@builderai/db/utils"
+import { FEATURE_TYPES } from "@builderai/config"
+import { utils } from "@builderai/db"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -44,6 +35,15 @@ import {
 } from "@builderai/ui/sheet"
 import { Textarea } from "@builderai/ui/text-area"
 import { useToast } from "@builderai/ui/use-toast"
+import type {
+  CreateFeature,
+  FeaturePlan,
+  UpdateFeature,
+} from "@builderai/validators/price"
+import {
+  createFeatureSchema,
+  updateFeatureSchema,
+} from "@builderai/validators/price"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -242,7 +242,7 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
                           onChange={(e) => {
                             form.setValue("title", e.target.value)
                             if (mode === "create") {
-                              const slug = createSlug(e.target.value)
+                              const slug = utils.createSlug(e.target.value)
                               form.setValue("slug", slug)
                             }
                           }}

@@ -8,7 +8,7 @@ import {
 } from "@builderai/ui/table"
 
 import { userCanAccessProject } from "~/lib/project-guard"
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 import { UserActions } from "../_components/user-actions"
 import { UserForm } from "../_components/user-form"
 
@@ -21,11 +21,11 @@ export default async function ProjectUsersPage(props: {
     projectSlug: props.params.projectSlug,
   })
 
-  const { users } = await api.subscription.listUsersByProject.query({
+  const { users } = await api.subscription.listUsersByProject({
     projectSlug: props.params.projectSlug,
   })
 
-  const { plans } = await api.plan.listByProject.query({
+  const { plans } = await api.plan.listByProject({
     projectSlug: props.params.projectSlug,
   })
 

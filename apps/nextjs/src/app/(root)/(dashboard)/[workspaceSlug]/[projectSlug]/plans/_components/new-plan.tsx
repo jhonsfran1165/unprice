@@ -4,8 +4,7 @@ import { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
-import type { CreatePlan } from "@builderai/db/schema/price"
-import { createPlanSchema, currencyEnum } from "@builderai/db/schema/price"
+import { CURRENCIES } from "@builderai/config"
 import { Button } from "@builderai/ui/button"
 import {
   Dialog,
@@ -33,6 +32,8 @@ import {
   SelectValue,
 } from "@builderai/ui/select"
 import { useToast } from "@builderai/ui/use-toast"
+import type { CreatePlan } from "@builderai/validators/price"
+import { createPlanSchema } from "@builderai/validators/price"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -135,7 +136,7 @@ export function NewPlanDialog() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {currencyEnum.enumValues.map((currency, index) => (
+                      {CURRENCIES.map((currency, index) => (
                         <SelectItem key={index} value={currency}>
                           {currency}
                         </SelectItem>

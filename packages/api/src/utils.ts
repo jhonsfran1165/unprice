@@ -1,9 +1,8 @@
 import { TRPCError } from "@trpc/server"
 
-import { and, eq } from "@builderai/db"
-import type { SelectProject } from "@builderai/db/schema/project"
-import { project } from "@builderai/db/schema/project"
-import type { SelectWorkspace } from "@builderai/db/schema/workspace"
+import { and, eq, schema } from "@builderai/db"
+import type { SelectProject } from "@builderai/validators/project"
+import type { SelectWorkspace } from "@builderai/validators/workspace"
 
 import type { Context } from "./trpc"
 
@@ -27,8 +26,8 @@ export const hasAccessToProject = async ({
   await ctx.deactivateRLS()
 
   const condition =
-    (projectId && eq(project.id, projectId)) ??
-    (projectSlug && eq(project.slug, projectSlug))
+    (projectId && eq(schema.project.id, projectId)) ??
+    (projectSlug && eq(schema.project.slug, projectSlug))
 
   if (!condition) {
     throw new TRPCError({
@@ -39,7 +38,7 @@ export const hasAccessToProject = async ({
 
   const currentProject = await ctx.db.query.project.findFirst({
     with: { workspace: true },
-    where: and(condition, eq(project.tenantId, tenant)),
+    where: and(condition, eq(schema.project.tenantId, tenant)),
   })
 
   // the tenantId doesn't have access to this workspace

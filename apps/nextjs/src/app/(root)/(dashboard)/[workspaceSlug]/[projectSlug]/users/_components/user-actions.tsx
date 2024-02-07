@@ -1,46 +1,46 @@
 "use client"
 
-import React from "react"
-import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
+import { useRouter } from "next/navigation"
+import React from "react"
 
-import type { PlanList } from "@builderai/db/schema/price"
-import type { UserSubscription } from "@builderai/db/schema/subscription"
 import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from "@builderai/ui/alert-dialog"
 import { Button } from "@builderai/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@builderai/ui/dialog"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
 import { Ellipsis } from "@builderai/ui/icons"
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
 } from "@builderai/ui/select"
 import { useToast } from "@builderai/ui/use-toast"
+import type { PlanList } from "@builderai/validators/price"
+import type { UserSubscription } from "@builderai/validators/subscription"
 
 import { api } from "~/trpc/client"
 

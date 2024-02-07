@@ -8,6 +8,6 @@ export const getBaseUrl = () => {
 }
 
 // lambdas keys must match the first part of the path
-export const lambdas = ["stripe", "ingestion"]
+export const lambdas = ["ingestion"]
 
 export { type RouterInputs, type RouterOutputs } from "@builderai/api"

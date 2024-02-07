@@ -4,8 +4,6 @@ import { useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
-import type { CreateProject } from "@builderai/db/schema/project"
-import { createProjectSchema } from "@builderai/db/schema/project"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -18,6 +16,8 @@ import {
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
+import type { CreateProject } from "@builderai/validators/project"
+import { createProjectSchema } from "@builderai/validators/project"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"

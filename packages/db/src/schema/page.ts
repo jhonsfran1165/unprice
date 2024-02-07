@@ -1,5 +1,4 @@
 import { integer, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core"
-import { z } from "zod"
 
 import { projectID, tenantID, timestamps } from "../utils/sql"
 
@@ -19,18 +18,3 @@ export const page = pgTable(
     }
   }
 )
-
-export const createPageSchema = z.object({
-  id: z.string().optional(),
-  projectSlug: z.string(),
-  html: z.string(),
-  version: z.number().default(0),
-})
-
-export const updatePageSchema = z.object({
-  id: z.string(),
-  projectSlug: z.string(),
-  html: z.string(),
-  version: z.number().default(0),
-})
-export type CreatePage = z.infer<typeof createPageSchema>

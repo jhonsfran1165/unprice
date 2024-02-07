@@ -15,7 +15,7 @@ import HeaderTab from "~/components/header-tab"
 import { DashboardShell } from "~/components/layout2/dashboard-shell"
 import TabsNav from "~/components/layout2/tabs-nav"
 import { userCanAccessProject } from "~/lib/project-guard"
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 import { NewPlanDialog } from "./_components/new-plan"
 
 export default async function PlansPage(props: {
@@ -28,7 +28,7 @@ export default async function PlansPage(props: {
     needsToBeInTier: ["PRO", "STANDARD", "FREE"],
   })
 
-  const { plans } = await api.plan.listByProject.query({
+  const { plans } = await api.plan.listByProject({
     projectSlug: projectSlug,
   })
 

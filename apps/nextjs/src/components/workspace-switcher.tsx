@@ -1,24 +1,24 @@
 "use client"
 
-import { Suspense, useState } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
+import { Suspense, useState } from "react"
 
 import { useOrganization, useOrganizationList, useUser } from "@builderai/auth"
+import { cn } from "@builderai/ui"
 import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
 import { Button } from "@builderai/ui/button"
 import {
-  Command,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
+    Command,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
 } from "@builderai/ui/command"
 import { Dialog, DialogTrigger } from "@builderai/ui/dialog"
 import { Check, ChevronsUpDown, PlusCircle } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
-import { cn } from "@builderai/ui/utils"
 
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 
@@ -44,7 +44,12 @@ export function WorkspaceSwitcher() {
 
   const activeOrg = org.organization ?? user
 
-  if (!orgs.isLoaded || !org.isLoaded || !activeOrg) {
+  if (
+    !orgs.isLoaded ||
+    !org.isLoaded ||
+    !activeOrg ||
+    orgs.userMemberships.isLoading
+  ) {
     // Skeleton loader
     return <WorkspaceSwitcherSkeleton />
   }

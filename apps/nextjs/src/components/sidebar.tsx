@@ -1,13 +1,13 @@
 "use client"
 
-import { cache } from "react"
 import Link from "next/link"
+import { cache } from "react"
 
 import type { ModuleApp, SubModuleApp } from "@builderai/config"
 import { getModulesApp } from "@builderai/config"
 // TODO: this is adding too much bundle size
+import { cn } from "@builderai/ui"
 import * as Icons from "@builderai/ui/icons"
-import { cn } from "@builderai/ui/utils"
 
 import { useGetPaths } from "~/lib/use-get-path"
 

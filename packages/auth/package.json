@@ -2,6 +2,7 @@
   "name": "@builderai/auth",
   "private": true,
   "version": "0.1.0",
+  "type": "module",
   "exports": {
     ".": "./src/index.ts",
     "./server": "./src/server.ts",
@@ -25,18 +26,20 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@builderai/db": "^0.1.0",
-    "@clerk/nextjs": "^4.26.2",
+    "@builderai/db": "0.1.0",
+    "@clerk/nextjs": "^4.29.6",
+    "@t3-oss/env-nextjs": "^0.7.3",
     "encoding": "^0.1.13",
-    "svix": "^1.11.0"
+    "svix": "^1.11.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@builderai/eslint-config": "0.2.0",
-    "@builderai/prettier-config": "^0.1.0",
-    "@builderai/tsconfig": "^0.1.0",
-    "eslint": "^8.47.0",
-    "prettier": "^3.0.2",
-    "typescript": "^5.1.6"
+    "@builderai/prettier-config": "0.1.0",
+    "@builderai/tsconfig": "0.1.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
   },
   "eslintConfig": {
     "extends": [

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 
 import type { ProjectTier } from "@builderai/config"
 
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 
 export async function userCanAccessProject({
   projectSlug,
@@ -15,7 +15,7 @@ export async function userCanAccessProject({
     notFound()
   }
 
-  const { haveAccess, isInTier } = await api.project.canAccessProject.query({
+  const { haveAccess, isInTier } = await api.project.canAccessProject({
     slug: projectSlug,
     needsToBeInTier,
   })

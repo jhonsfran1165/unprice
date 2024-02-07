@@ -1,41 +1,41 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { z } from "zod"
 
-import type {
-  CreateUserSubscription,
-  UserSubscription,
-} from "@builderai/db/schema/subscription"
-import {
-  createUserSchema,
-  updateUserSchema,
-} from "@builderai/db/schema/subscription"
 import { Button } from "@builderai/ui/button"
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "@builderai/ui/dialog"
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from "@builderai/ui/form"
 import { Pencil, Plus } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Separator } from "@builderai/ui/separator"
 import { useToast } from "@builderai/ui/use-toast"
+import type {
+    CreateUserSubscription,
+    UserSubscription,
+} from "@builderai/validators/subscription"
+import {
+    createUserSchema,
+    updateUserSchema,
+} from "@builderai/validators/subscription"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"

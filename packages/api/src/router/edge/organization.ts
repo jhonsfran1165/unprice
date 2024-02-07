@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
 import { clerkClient } from "@builderai/auth"
-import { inviteOrgMemberSchema } from "@builderai/db/schema/workspace"
+import { inviteOrgMemberSchema } from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,
@@ -40,6 +40,7 @@ export const organizationsRouter = createTRPCRouter({
   }),
 
   deleteMember: protectedOrgAdminProcedure
+    .meta({ openapi: { method: "GET", path: "/find" } })
     .input(z.object({ userId: z.string() }))
     .mutation(async (opts) => {
       const { orgId } = opts.ctx.auth

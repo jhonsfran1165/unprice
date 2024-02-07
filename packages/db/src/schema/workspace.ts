@@ -5,13 +5,11 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core"
-import { createSelectSchema } from "drizzle-zod"
-import { z } from "zod"
 
-import { MEMBERSHIP, PLANS } from "@builderai/config"
+import { PLANS } from "@builderai/config"
 
-import { plans } from "../utils/enums"
 import { id, tenantID, timestamps } from "../utils/sql"
+import { plans } from "./enums"
 
 export const workspace = pgTable(
   "workspace",
@@ -36,7 +34,7 @@ export const workspace = pgTable(
     billingPeriodStart: timestamp("billing_period_start", { mode: "date" }),
     // if null, you should fall back to end of month
     billingPeriodEnd: timestamp("billing_period_end", { mode: "date" }),
-    plans: plans("plans").default(PLANS.FREE.key),
+    plan: plans("plan").default(PLANS.FREE.key),
   },
   (table) => {
     return {
@@ -53,25 +51,3 @@ export const workspace = pgTable(
     }
   }
 )
-
-export const inviteOrgMemberSchema = z.object({
-  email: z.string().email(),
-  role: z.nativeEnum(MEMBERSHIP),
-})
-
-export const purchaseWorkspaceSchema = z.object({
-  orgName: z.string().min(5, "Name must be at least 5 characters"),
-  planId: z.string().refine(
-    (str) =>
-      Object.values(PLANS)
-        .map((p) => p.priceId ?? "")
-        .includes(str),
-    "Invalid planId"
-  ),
-})
-
-export const selectWorkspaceSchema = createSelectSchema(workspace)
-
-export type PurchaseOrg = z.infer<typeof purchaseWorkspaceSchema>
-export type SelectWorkspace = z.infer<typeof selectWorkspaceSchema>
-export type InviteOrgMember = z.infer<typeof inviteOrgMemberSchema>

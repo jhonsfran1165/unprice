@@ -1,9 +1,8 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { eq, sql } from "@builderai/db"
-import { apikey, createApiKeySchema } from "@builderai/db/schema/apikey"
-import { newIdEdge } from "@builderai/db/utils"
+import { eq, schema, sql, utils } from "@builderai/db"
+import { createApiKeySchema } from "@builderai/validators/apikey"
 
 import {
   createTRPCRouter,
@@ -62,13 +61,13 @@ export const apiKeyRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const apiKeyId = newIdEdge("apikey")
+      const apiKeyId = utils.newIdEdge("apikey")
 
       // Generate the key
-      const apiKey = newIdEdge("apikey_key")
+      const apiKey = utils.newIdEdge("apikey_key")
 
       return await opts.ctx.db
-        .insert(apikey)
+        .insert(schema.apikey)
         .values({
           id: apiKeyId,
           name: opts.input.name,
@@ -87,10 +86,10 @@ export const apiKeyRouter = createTRPCRouter({
 
       const result = await opts.ctx.txRLS(({ txRLS }) => {
         return txRLS
-          .update(apikey)
+          .update(schema.apikey)
           .set({ revokedAt: new Date() })
           .where(
-            sql`${apikey.id} in ${ids} AND ${apikey.projectId} = ${projectId} AND ${apikey.revokedAt} is NULL`
+            sql`${schema.apikey.id} in ${ids} AND ${schema.apikey.projectId} = ${projectId} AND ${schema.apikey.revokedAt} is NULL`
           )
           .returning()
       })
@@ -122,13 +121,13 @@ export const apiKeyRouter = createTRPCRouter({
       }
 
       // Generate the key
-      const newKey = newIdEdge("apikey_key")
+      const newKey = utils.newIdEdge("apikey_key")
 
       await opts.ctx.txRLS(({ txRLS }) => {
         return txRLS
-          .update(apikey)
+          .update(schema.apikey)
           .set({ key: newKey })
-          .where(eq(apikey.id, opts.input.id))
+          .where(eq(schema.apikey.id, opts.input.id))
           .returning()
       })
 

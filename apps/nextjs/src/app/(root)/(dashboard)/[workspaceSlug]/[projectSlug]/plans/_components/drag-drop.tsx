@@ -1,51 +1,51 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type {
-  DragEndEvent,
-  DragOverEvent,
-  DragStartEvent,
-  DropAnimation,
+    DragEndEvent,
+    DragOverEvent,
+    DragStartEvent,
+    DropAnimation,
 } from "@dnd-kit/core"
 import {
-  defaultDropAnimationSideEffects,
-  DndContext,
-  DragOverlay,
-  MeasuringStrategy,
-  MouseSensor,
-  pointerWithin,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    DndContext,
+    DragOverlay,
+    MeasuringStrategy,
+    MouseSensor,
+    TouchSensor,
+    defaultDropAnimationSideEffects,
+    pointerWithin,
+    useSensor,
+    useSensors,
 } from "@dnd-kit/core"
 import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy,
+    SortableContext,
+    arrayMove,
+    verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { TRPCClientError } from "@trpc/client"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
-import type {
-  FeaturePlan,
-  FeatureType,
-  Group,
-  GroupType,
-  PlanConfig,
-  PlanVersion,
-} from "@builderai/db/schema/price"
-import { planConfigSchema } from "@builderai/db/schema/price"
 import { Accordion } from "@builderai/ui/accordion"
 import { Button } from "@builderai/ui/button"
 import { Add } from "@builderai/ui/icons"
 import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
+    ResizableHandle,
+    ResizablePanel,
+    ResizablePanelGroup,
 } from "@builderai/ui/resizable"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 import { useToast } from "@builderai/ui/use-toast"
+import type {
+    FeaturePlan,
+    FeatureType,
+    Group,
+    GroupType,
+    PlanConfig,
+    PlanVersion,
+} from "@builderai/validators/price"
+import { planConfigSchema } from "@builderai/validators/price"
 
 import { useDebounce } from "~/lib/use-debounce"
 import useLocalStorage from "~/lib/use-local-storage"

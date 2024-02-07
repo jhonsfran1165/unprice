@@ -1,16 +1,14 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq } from "@builderai/db"
+import { and, eq, schema, utils } from "@builderai/db"
 import {
   createNewVersionPlan,
   createPlanSchema,
-  plan,
   updatePlanSchema,
   updateVersionPlan,
   versionBase,
-} from "@builderai/db/schema/price"
-import { newIdEdge } from "@builderai/db/utils"
+} from "@builderai/validators/price"
 
 import {
   createTRPCRouter,
@@ -18,7 +16,6 @@ import {
   publicProcedure,
 } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
-import { version } from "./../../../../db/src/schema/price/price.sql"
 
 export const planRouter = createTRPCRouter({
   create: protectedOrgProcedure
@@ -31,10 +28,10 @@ export const planRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const planId = newIdEdge("plan")
+      const planId = utils.newIdEdge("plan")
 
       const planData = await opts.ctx.db
-        .insert(plan)
+        .insert(schema.plan)
         .values({
           id: planId,
           slug,
@@ -57,12 +54,14 @@ export const planRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const planVersionId = newIdEdge("plan_version")
+      const planVersionId = utils.newIdEdge("plan_version")
 
       const planData = await opts.ctx.db
         .select()
-        .from(plan)
-        .where(and(eq(plan.id, planId), eq(plan.projectId, project.id)))
+        .from(schema.plan)
+        .where(
+          and(eq(schema.plan.id, planId), eq(schema.plan.projectId, project.id))
+        )
 
       if (!planData) {
         throw new TRPCError({
@@ -73,7 +72,7 @@ export const planRouter = createTRPCRouter({
 
       // version is a incrementing number calculated on save time by the database
       const planVersionData = await opts.ctx.db
-        .insert(version)
+        .insert(schema.version)
         .values({
           id: planVersionId,
           planId,
@@ -118,11 +117,13 @@ export const planRouter = createTRPCRouter({
       })
 
       return await opts.ctx.db
-        .update(plan)
+        .update(schema.plan)
         .set({
           title,
         })
-        .where(and(eq(plan.id, id), eq(plan.projectId, project.id)))
+        .where(
+          and(eq(schema.plan.id, id), eq(schema.plan.projectId, project.id))
+        )
         .returning()
     }),
 
@@ -169,13 +170,13 @@ export const planRouter = createTRPCRouter({
       }
 
       const versionUpdated = await opts.ctx.db
-        .update(version)
+        .update(schema.version)
         .set({
           featuresPlan,
           addonsPlan,
           status,
         })
-        .where(and(eq(version.id, planVersionData.id)))
+        .where(and(eq(schema.version.id, planVersionData.id)))
         .returning()
 
       return versionBase.parse(versionUpdated[0])

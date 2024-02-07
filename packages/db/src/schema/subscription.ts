@@ -1,11 +1,10 @@
 import { relations } from "drizzle-orm"
 import { index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core"
 
-import { subscriptionStatus } from "../../utils/enums"
-import { cuid, projectID, tenantID, timestamps } from "../../utils/sql"
-import { version } from "../price"
-import { project } from "../project"
-import { plan } from "./../price/price.sql"
+import { cuid, projectID, tenantID, timestamps } from "../utils/sql"
+import { subscriptionStatus } from "./enums"
+import { plan, version } from "./price"
+import { project } from "./project"
 
 export const user = pgTable(
   "user",

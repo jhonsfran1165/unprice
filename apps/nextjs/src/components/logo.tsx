@@ -1,5 +1,5 @@
+import { cn } from "@builderai/ui"
 import { Logo as LogoIcon } from "@builderai/ui/icons"
-import { cn } from "@builderai/ui/utils"
 
 export function Logo({ className = "" }) {
   return (

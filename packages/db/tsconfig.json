@@ -3,6 +3,6 @@
   "compilerOptions": {
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
-  "include": ["*.ts", "drizzle", "src"],
+  "include": ["src", "neon.config.ts", "custom.config.ts"],
   "exclude": ["node_modules"]
 }

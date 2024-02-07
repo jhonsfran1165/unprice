@@ -2,10 +2,13 @@
 import { neonConfig, Pool } from "@neondatabase/serverless"
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
 
-import * as schema from "./schema"
+import * as rls from "./rls"
+import * as dbSchemas from "./schema"
+import * as utils from "./utils"
 
 export * from "drizzle-orm"
-export * from "./rls"
+export { rls, utils }
+export const schema = { ...dbSchemas }
 
 // activate connection caching
 neonConfig.fetchConnectionCache = true
@@ -17,6 +20,6 @@ const pool = new Pool({
 })
 
 export const db = drizzleNeon(pool, {
-  schema,
+  schema: dbSchemas,
   logger: process.env.DRIZZLE_LOG === "true",
 })

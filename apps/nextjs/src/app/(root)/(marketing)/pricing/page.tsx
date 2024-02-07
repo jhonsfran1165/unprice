@@ -12,14 +12,14 @@ import {
 import { CheckCircle2 } from "@builderai/ui/icons"
 
 import { currencySymbol } from "~/lib/currency"
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 import { SubscribeNow } from "./subscribe-now"
 
 export const dynamic = "force-dynamic"
 export const runtime = "edge"
 
 export default async function PricingPage() {
-  const plans = await api.stripe.plans.query()
+  const plans = await api.stripe.plans()
 
   return (
     <main className="flex w-full flex-col items-center justify-center pt-16">

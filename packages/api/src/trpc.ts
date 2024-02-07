@@ -7,39 +7,20 @@
  * The pieces you will need to use are documented accordingly near the end
  */
 import type { NextRequest } from "next/server"
-import type { inferAsyncReturnType } from "@trpc/server"
 import { initTRPC, TRPCError } from "@trpc/server"
+import type { OpenApiMeta } from "trpc-openapi"
 import { ZodError } from "zod"
 
+import { auth } from "@builderai/auth"
 import type {
-  AuthObject,
   SignedInAuthObject,
   SignedOutAuthObject,
 } from "@builderai/auth/server"
-import { getAuth } from "@builderai/auth/server"
-import { activateRLS, authTxn, db, deactivateRLS, eq } from "@builderai/db"
-import { apikey } from "@builderai/db/schema/apikey"
+import { db, eq, rls, schema } from "@builderai/db"
 
 import { transformer } from "./transformer"
 
-// TODO: delete when clerk is updated
-type AuthObjectWithDeprecatedResources<T extends AuthObject> = Omit<
-  T,
-  "user" | "organization" | "session"
-> & {
-  /**
-   * @deprecated This will be removed in the next major version
-   */
-  user: T["user"]
-  /**
-   * @deprecated This will be removed in the next major version
-   */
-  organization: T["organization"]
-  /**
-   * @deprecated This will be removed in the next major version
-   */
-  session: T["session"]
-}
+type AuthContext = SignedInAuthObject | SignedOutAuthObject
 
 /**
  * 1. CONTEXT
@@ -51,9 +32,8 @@ type AuthObjectWithDeprecatedResources<T extends AuthObject> = Omit<
  *
  */
 interface CreateContextOptions {
-  auth: AuthObjectWithDeprecatedResources<
-    SignedInAuthObject | SignedOutAuthObject
-  >
+  headers: Headers
+  auth: AuthContext
   apiKey?: string | null
   req?: NextRequest
   tenantId: string // clerk tenant id asociated to the workspace
@@ -71,12 +51,12 @@ interface CreateContextOptions {
 export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     ...opts,
-    db,
+    db: db,
     // db helpers for emulating RLS
-    txRLS: authTxn(db, opts.tenantId),
+    txRLS: rls.authTxn(db, opts.tenantId),
     // these two increase the number of times you call your db
-    activateRLS: activateRLS(db, opts.tenantId),
-    deactivateRLS: deactivateRLS(db),
+    activateRLS: rls.activateRLS(db, opts.tenantId),
+    deactivateRLS: rls.deactivateRLS(db),
   }
 }
 
@@ -85,22 +65,26 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
  * process every request that goes through your tRPC endpoint
  * @link https://trpc.io/docs/context
  */
-export const createTRPCContext = (opts: { req: NextRequest }) => {
-  const auth = getAuth(opts.req)
-
-  const { userId, orgId } = auth
+export const createTRPCContext = async (opts: {
+  headers: Headers
+  auth: AuthContext
+  req?: NextRequest
+  // eslint-disable-next-line @typescript-eslint/require-await
+}) => {
+  const { userId, orgId } = opts.auth ?? auth()
   const tenantId = orgId ?? userId ?? ""
 
-  const apiKey = opts.req.headers.get("x-builderai-api-key")
-  const source = opts.req?.headers.get("x-trpc-source") ?? "unknown"
+  const apiKey = opts.headers.get("x-builderai-api-key")
+  const source = opts.headers.get("x-trpc-source") ?? "unknown"
   const pathname = opts.req?.nextUrl.pathname ?? "unknown"
   console.log(">>> tRPC Request from", source, "by", userId, "to", pathname)
 
   return createInnerTRPCContext({
-    auth,
+    auth: opts.auth,
     tenantId,
     apiKey,
     req: opts.req,
+    headers: opts.headers,
   })
 }
 
@@ -110,19 +94,29 @@ export const createTRPCContext = (opts: { req: NextRequest }) => {
  * This is where the trpc api is initialized, connecting the context and
  * transformer
  */
-export const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer,
-  errorFormatter({ shape, error }) {
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
-    }
-  },
-})
+
+export const t = initTRPC
+  .meta<OpenApiMeta>()
+  .context<typeof createTRPCContext>()
+  .create({
+    transformer,
+    errorFormatter({ shape, error }) {
+      return {
+        ...shape,
+        data: {
+          ...shape.data,
+          zodError:
+            error.cause instanceof ZodError ? error.cause.flatten() : null,
+        },
+      }
+    },
+  })
+
+/**
+ * Create a server-side caller
+ * @see https://trpc.io/docs/server/server-side-calls
+ */
+export const createCallerFactory = t.createCallerFactory
 
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
@@ -148,10 +142,10 @@ export const mergeRouters = t.mergeRouters
 export const publicProcedure = t.procedure
 
 /**
- * Reusable middleware that enforces users are logged in before running the
+ * Reusable procedure that enforces users are logged in before running the
  * procedure
  */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.auth?.userId) {
     throw new TRPCError({ code: "UNAUTHORIZED" })
   }
@@ -166,7 +160,7 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   })
 })
 
-const enforceOrg = enforceUserIsAuthed.unstable_pipe(async ({ ctx, next }) => {
+export const protectedOrgProcedure = protectedProcedure.use(({ ctx, next }) => {
   // You need to create a custom claim inside the session from Clerk
   const orgs = ctx.auth.sessionClaims?.activeOrgs as Record<string, string>
 
@@ -189,32 +183,34 @@ const enforceOrg = enforceUserIsAuthed.unstable_pipe(async ({ ctx, next }) => {
   })
 })
 
-const enforceOrgAdmin = enforceOrg.unstable_pipe(async ({ ctx, next }) => {
-  // You need to create a custom claim inside the session from Clerk
-  const orgs = ctx.auth.sessionClaims?.activeOrgs as Record<string, string>
+export const protectedOrgAdminProcedure = protectedOrgProcedure.use(
+  ({ ctx, next }) => {
+    // You need to create a custom claim inside the session from Clerk
+    const orgs = ctx.auth.sessionClaims?.activeOrgs as Record<string, string>
 
-  if (ctx.auth.orgId && orgs[ctx.auth.orgId] !== "admin") {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message:
-        "You must be an admin of this organization to perform this action",
+    if (ctx.auth.orgId && orgs[ctx.auth.orgId] !== "admin") {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message:
+          "You must be an admin of this organization to perform this action",
+      })
+    }
+
+    return next({
+      ctx: {
+        auth: {
+          ...ctx.auth,
+          orgRole: ctx.auth.orgRole,
+        },
+      },
     })
   }
-
-  return next({
-    ctx: {
-      auth: {
-        ...ctx.auth,
-        orgRole: ctx.auth.orgRole,
-      },
-    },
-  })
-})
+)
 
 /**
- * Middleware to authenticate API requests with an API key
+ * Procedure to authenticate API requests with an API key
  */
-const enforceApiKey = t.middleware(async ({ ctx, next }) => {
+export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (!ctx.apiKey) {
     throw new TRPCError({ code: "UNAUTHORIZED" })
   }
@@ -236,11 +232,11 @@ const enforceApiKey = t.middleware(async ({ ctx, next }) => {
 
   // TODO: I don't know rick - improve this
   void ctx.db
-    .update(apikey)
+    .update(schema.apikey)
     .set({
       lastUsed: new Date(),
     })
-    .where(eq(apikey.id, apiKey.id))
+    .where(eq(schema.apikey.id, apiKey.id))
 
   return next({
     ctx: {
@@ -250,16 +246,18 @@ const enforceApiKey = t.middleware(async ({ ctx, next }) => {
 })
 
 /**
- * Middleware to parse form data and put it in the rawInput
+ * Procedure to parse form data and put it in the rawInput and authenticate requests with an API key
  */
-export const formdataMiddleware = t.middleware(async (opts) => {
-  const formData = await opts.ctx.req?.formData?.()
-  if (!formData) throw new TRPCError({ code: "BAD_REQUEST" })
+export const protectedApiFormDataProcedure = protectedApiProcedure.use(
+  async function formData(opts) {
+    const formData = await opts.ctx.req?.formData?.()
+    if (!formData) throw new TRPCError({ code: "BAD_REQUEST" })
 
-  return opts.next({
-    input: formData,
-  })
-})
+    return opts.next({
+      input: formData,
+    })
+  }
+)
 /**
  * Protected (authed) procedure
  *
@@ -269,13 +267,5 @@ export const formdataMiddleware = t.middleware(async (opts) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed)
-export const protectedOrgProcedure = t.procedure.use(enforceOrg)
-export const protectedOrgAdminProcedure = t.procedure.use(enforceOrgAdmin)
 
-export const protectedApiProcedure = t.procedure.use(enforceApiKey)
-export const protectedApiFormDataProcedure = t.procedure
-  .use(formdataMiddleware)
-  .use(enforceApiKey)
-
-export type Context = inferAsyncReturnType<typeof createTRPCContext>
+export type Context = Awaited<ReturnType<typeof createTRPCContext>>

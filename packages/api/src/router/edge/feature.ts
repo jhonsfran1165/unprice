@@ -1,15 +1,13 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq } from "@builderai/db"
+import { and, eq, schema, utils } from "@builderai/db"
 import {
   createFeatureSchema,
   deleteFeatureSchema,
-  feature,
   featureBase,
   updateFeatureSchema,
-} from "@builderai/db/schema/price"
-import { newIdEdge } from "@builderai/db/utils"
+} from "@builderai/validators/price"
 
 import { createTRPCRouter, protectedOrgProcedure } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
@@ -25,10 +23,10 @@ export const featureRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const featureId = newIdEdge("feature")
+      const featureId = utils.newIdEdge("feature")
 
       const featureDate = await opts.ctx.db
-        .insert(feature)
+        .insert(schema.feature)
         .values({
           id: featureId,
           slug,
@@ -53,8 +51,13 @@ export const featureRouter = createTRPCRouter({
 
       await opts.ctx.txRLS(({ txRLS }) => {
         return txRLS
-          .delete(feature)
-          .where(and(eq(feature.projectId, projectData.id), eq(feature.id, id)))
+          .delete(schema.feature)
+          .where(
+            and(
+              eq(schema.feature.projectId, projectData.id),
+              eq(schema.feature.id, id)
+            )
+          )
       })
     }),
   update: protectedOrgProcedure
@@ -88,14 +91,19 @@ export const featureRouter = createTRPCRouter({
       })
 
       const data = await opts.ctx.db
-        .update(feature)
+        .update(schema.feature)
         .set({
           title,
           description,
           type,
           updatedAt: new Date().toISOString(),
         })
-        .where(and(eq(feature.id, id), eq(feature.projectId, project.id)))
+        .where(
+          and(
+            eq(schema.feature.id, id),
+            eq(schema.feature.projectId, project.id)
+          )
+        )
         .returning()
 
       return featureBase.parse(data[0])

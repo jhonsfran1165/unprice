@@ -21,11 +21,11 @@ const config = {
   images: {
     domains: ["images.unsplash.com"],
   },
+  // swcMinify: true,
   experimental: {
     mdxRs: true,
     optimizePackageImports: ["@builderai/ui"],
   },
-  swcMinify: true,
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },

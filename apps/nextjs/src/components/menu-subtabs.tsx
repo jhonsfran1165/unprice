@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation"
 
 import type { SubTabsRoutes } from "@builderai/config/types"
 import { createIcon } from "@builderai/config/types"
+import { cn } from "@builderai/ui"
 import { buttonVariants } from "@builderai/ui/button"
-import { cn } from "@builderai/ui/utils"
 
 export default function MenuSubTabs({
   basePath,

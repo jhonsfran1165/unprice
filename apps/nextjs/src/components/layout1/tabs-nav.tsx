@@ -1,6 +1,6 @@
 import type { DashboardRoute } from "@builderai/config/types"
+import { cn } from "@builderai/ui"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
-import { cn } from "@builderai/ui/utils"
 
 import Tab from "./tab"
 

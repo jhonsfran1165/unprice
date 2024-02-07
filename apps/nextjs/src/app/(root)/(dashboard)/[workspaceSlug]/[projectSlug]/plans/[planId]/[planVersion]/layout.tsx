@@ -9,7 +9,7 @@ import { ChevronLeft } from "@builderai/ui/icons"
 import { DashboardShell } from "~/components/layout2/dashboard-shell"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
 import MenuSubTabs from "~/components/menu-subtabs"
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 import CreateNewVersion from "../../_components/create-new-version"
 import { VersionActions } from "../../_components/version-actions"
 import { Versions } from "../../_components/versions"
@@ -39,7 +39,7 @@ export default async function PriceLayout(props: {
   }
 }) {
   const { projectSlug, workspaceSlug, planId, planVersion } = props.params
-  const plan = await api.plan.getById.query({
+  const plan = await api.plan.getById({
     id: planId,
   })
 

@@ -2,8 +2,8 @@ import { cache, Suspense } from "react"
 
 import type { ModuleApp, SubModuleApp } from "@builderai/config"
 import { getModulesApp } from "@builderai/config"
+import { cn } from "@builderai/ui"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
-import { cn } from "@builderai/ui/utils"
 
 import UserNav from "../user-nav"
 import UserNavSkeleton from "../user-nav-skeleton"

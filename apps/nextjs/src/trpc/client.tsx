@@ -4,16 +4,12 @@ import { useState } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental"
-import type {
-  HTTPBatchStreamLinkOptions,
-  HTTPHeaders,
-  TRPCLink,
-} from "@trpc/react-query"
-import {
-  createTRPCReact,
-  loggerLink,
-  unstable_httpBatchStreamLink,
-} from "@trpc/react-query"
+import type { TRPCLink } from "@trpc/client"
+import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client"
+import type { HTTPBatchStreamLinkOptions, HTTPHeaders } from "@trpc/react-query"
+import { createTRPCReact } from "@trpc/react-query"
+import type { AnyRootTypes } from "@trpc/server/unstable-core-do-not-import"
+import SuperJSON from "superjson"
 
 import type { AppRouter } from "@builderai/api"
 
@@ -25,17 +21,19 @@ export const endingLinkClient = (opts?: {
   headers?: HTTPHeaders | (() => HTTPHeaders)
 }) =>
   ((runtime) => {
-    const sharedOpts = {
+    const sharedOpts: Partial<HTTPBatchStreamLinkOptions<AnyRootTypes>> = {
       headers: opts?.headers,
-    } satisfies Partial<HTTPBatchStreamLinkOptions>
+    }
 
     const edgeLink = unstable_httpBatchStreamLink({
       ...sharedOpts,
+      transformer: SuperJSON,
       url: `${getBaseUrl()}/api/trpc/edge`,
     })(runtime)
 
     const lambdaLink = unstable_httpBatchStreamLink({
       ...sharedOpts,
+      transformer: SuperJSON,
       url: `${getBaseUrl()}/api/trpc/lambda`,
     })(runtime)
 
@@ -51,10 +49,7 @@ export const endingLinkClient = (opts?: {
     }
   }) satisfies TRPCLink<AppRouter>
 
-export function TRPCReactProvider(props: {
-  children: React.ReactNode
-  headers?: Headers
-}) {
+export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -68,7 +63,6 @@ export function TRPCReactProvider(props: {
 
   const [trpcClient] = useState(() =>
     api.createClient({
-      transformer,
       links: [
         loggerLink({
           enabled: (opts) =>
@@ -77,9 +71,9 @@ export function TRPCReactProvider(props: {
         }),
         endingLinkClient({
           headers: () => {
-            const headers = new Map(props.headers)
+            const headers = new Headers()
             headers.set("x-trpc-source", "nextjs-react")
-            return Object.fromEntries(headers)
+            return headers
           },
         }),
       ],

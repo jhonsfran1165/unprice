@@ -1,13 +1,13 @@
 import type { Editor } from "@tldraw/tldraw"
 import { createShapeId, getSvgAsImage } from "@tldraw/tldraw"
 
-import { newIdEdge } from "@builderai/db/utils"
+import { utils } from "@builderai/db"
 
 import { getHtmlFromOpenAI } from "./getHtmlFromOpenAI"
 import type { PreviewShape } from "./preview-page-shape"
 
 export async function makeReal(editor: Editor, apiKey: string) {
-  const pageId = newIdEdge("page")
+  const pageId = utils.newIdEdge("page")
   const newShapeId = createShapeId(pageId)
   const selectedShapes = editor.getSelectedShapes()
 

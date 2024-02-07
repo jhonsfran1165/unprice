@@ -1,13 +1,11 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
+import { schema, utils } from "@builderai/db"
 import {
   createSubscriptionSchema,
   createUserSchema,
-  subscription,
-  user,
-} from "@builderai/db/schema/subscription"
-import { newIdEdge } from "@builderai/db/utils"
+} from "@builderai/validators/subscription"
 
 import { createTRPCRouter, protectedOrgProcedure } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
@@ -73,10 +71,10 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      const subscriptionId = newIdEdge("subscription")
+      const subscriptionId = utils.newIdEdge("subscription")
 
       const subscriptionData = await opts.ctx.db
-        .insert(subscription)
+        .insert(schema.subscription)
         .values({
           id: subscriptionId,
           projectId: project.id,
@@ -100,10 +98,10 @@ export const subscriptionRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const userId = newIdEdge("user")
+      const userId = utils.newIdEdge("user")
 
       const userData = await opts.ctx.db
-        .insert(user)
+        .insert(schema.user)
         .values({
           id: userId,
           projectId: project.id,

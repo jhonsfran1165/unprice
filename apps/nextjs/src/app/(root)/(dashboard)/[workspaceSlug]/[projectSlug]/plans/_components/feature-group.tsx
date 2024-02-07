@@ -1,19 +1,19 @@
-import { useState } from "react"
 import type { AnimateLayoutChanges } from "@dnd-kit/sortable"
 import { defaultAnimateLayoutChanges, useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { GripVertical } from "lucide-react"
+import { useState } from "react"
 
-import type { Group, GroupType } from "@builderai/db/schema/price"
+import { cn } from "@builderai/ui"
 import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
 } from "@builderai/ui/accordion"
 import { Button } from "@builderai/ui/button"
 import { Trash2 } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
-import { cn } from "@builderai/ui/utils"
+import type { Group, GroupType } from "@builderai/validators/price"
 
 export interface GroupDragData {
   type: GroupType

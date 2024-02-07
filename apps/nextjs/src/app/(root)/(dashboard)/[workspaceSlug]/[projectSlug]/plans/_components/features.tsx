@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 
+import { cn } from "@builderai/ui"
 import { Search } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
-import { cn } from "@builderai/ui/utils"
 
 import { useDebounce } from "~/lib/use-debounce"
 import { api } from "~/trpc/client"

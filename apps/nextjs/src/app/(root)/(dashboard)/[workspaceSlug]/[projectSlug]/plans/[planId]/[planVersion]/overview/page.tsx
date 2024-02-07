@@ -1,5 +1,5 @@
 import { userCanAccessProject } from "~/lib/project-guard"
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 import DragDrop from "../../../_components/drag-drop"
 
 export const runtime = "edge"
@@ -20,7 +20,7 @@ export default async function DashboardPage(props: {
     needsToBeInTier: ["PRO", "STANDARD", "FREE"],
   })
 
-  const versionData = await api.plan.getVersionById.query({
+  const versionData = await api.plan.getVersionById({
     planId: planId,
     versionId: planVersion,
     projectSlug: projectSlug,

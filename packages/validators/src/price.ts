@@ -1,9 +1,9 @@
 import { createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { feature, plan, version } from "./price.sql"
+import { schema } from "@builderai/db"
 
-export const planBase = createSelectSchema(plan, {
+export const planBase = createSelectSchema(schema.plan, {
   id: (schema) => schema.id.cuid2(),
   slug: (schema) =>
     schema.slug
@@ -37,7 +37,7 @@ export const updatePlanSchema = planBase
     projectSlug: true,
   })
 
-export const featureBase = createSelectSchema(feature, {
+export const featureBase = createSelectSchema(schema.feature, {
   title: (schema) => schema.title.min(3),
   description: (schema) => schema.description.optional(),
   slug: (schema) =>
@@ -140,7 +140,7 @@ export const planConfigSchema = z.record(
   })
 )
 
-export const versionBase = createSelectSchema(version).extend({
+export const versionBase = createSelectSchema(schema.version).extend({
   featuresPlan: planConfigSchema.optional(),
   addonsPlan: planConfigSchema.optional(),
 })

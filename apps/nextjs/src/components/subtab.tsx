@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-import { cn } from "@builderai/ui/utils"
+import { cn } from "@builderai/ui"
 
 export default function SubTab({
   href,

@@ -3,6 +3,7 @@ import Link from "next/link"
 import { formatRelative } from "date-fns"
 
 import type { RouterOutputs } from "@builderai/api"
+import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Card,
@@ -19,10 +20,9 @@ import {
   DollarSign,
   Users,
 } from "@builderai/ui/icons"
-import { cn } from "@builderai/ui/utils"
 
 import { userCanAccessProject } from "~/lib/project-guard"
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
 
 export const runtime = "edge"
@@ -172,7 +172,7 @@ async function RecentIngestions(props: {
   projectSlug: string
   workspaceSlug: string
 }) {
-  const ingestions = await api.ingestion.list.query({
+  const ingestions = await api.ingestion.list({
     projectSlug: props.projectSlug,
     limit: 5,
   })

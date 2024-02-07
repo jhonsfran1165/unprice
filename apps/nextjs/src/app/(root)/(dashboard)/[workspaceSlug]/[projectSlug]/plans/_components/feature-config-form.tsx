@@ -2,9 +2,8 @@ import { useState } from "react"
 import Link from "next/link"
 import { useFieldArray } from "react-hook-form"
 
-import { FEATURE_TYPES } from "@builderai/db/schema/enums"
-import type { FeaturePlan } from "@builderai/db/schema/price"
-import { featurePlanSchema, TIER_MODES } from "@builderai/db/schema/price"
+import { FEATURE_TYPES } from "@builderai/config"
+import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Dialog,
@@ -49,7 +48,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@builderai/ui/tooltip"
-import { cn } from "@builderai/ui/utils"
+import type { FeaturePlan } from "@builderai/validators/price"
+import { featurePlanSchema, TIER_MODES } from "@builderai/validators/price"
 
 import { Ping } from "~/components/ping"
 import { useZodForm } from "~/lib/zod-form"
@@ -72,15 +72,15 @@ export function FeatureConfigForm({
           divider: 0,
         }
       : feature.type === "metered"
-      ? {
-          mode: "tiered",
-          divider: 0,
-          tiers: [{ up: 0, price: 0, flat: 0 }],
-        }
-      : {
-          price: 0,
-          divider: 0,
-        }
+        ? {
+            mode: "tiered",
+            divider: 0,
+            tiers: [{ up: 0, price: 0, flat: 0 }],
+          }
+        : {
+            price: 0,
+            divider: 0,
+          }
 
   const defaultValues = {
     projectSlug: projectSlug,

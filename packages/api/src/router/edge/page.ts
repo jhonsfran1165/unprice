@@ -1,12 +1,7 @@
 import { z } from "zod"
 
-import { and, eq } from "@builderai/db"
-import {
-  createPageSchema,
-  page,
-  updatePageSchema,
-} from "@builderai/db/schema/page"
-import { generateSlug, newIdEdge } from "@builderai/db/utils"
+import { and, eq, schema, utils } from "@builderai/db"
+import { createPageSchema, updatePageSchema } from "@builderai/validators/page"
 
 import {
   createTRPCRouter,
@@ -26,11 +21,11 @@ export const pageRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const pageId = id?.replace(/^shape:/, "") ?? newIdEdge("page")
-      const pageSlug = generateSlug(2)
+      const pageId = id?.replace(/^shape:/, "") ?? utils.newIdEdge("page")
+      const pageSlug = utils.generateSlug(2)
 
       return await opts.ctx.db
-        .insert(page)
+        .insert(schema.page)
         .values({
           id: pageId,
           slug: pageSlug,
@@ -52,12 +47,14 @@ export const pageRouter = createTRPCRouter({
       })
 
       return await opts.ctx.db
-        .update(page)
+        .update(schema.page)
         .set({
           html,
           version,
         })
-        .where(and(eq(page.id, id), eq(page.projectId, project.id)))
+        .where(
+          and(eq(schema.page.id, id), eq(schema.page.projectId, project.id))
+        )
         .returning()
     }),
 

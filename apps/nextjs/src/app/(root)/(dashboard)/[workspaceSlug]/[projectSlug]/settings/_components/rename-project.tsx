@@ -2,19 +2,19 @@
 
 import { TRPCClientError } from "@trpc/client"
 
-import type { RenameProject } from "@builderai/db/schema/project"
-import { renameProjectSchema } from "@builderai/db/schema/project"
 import { Button } from "@builderai/ui/button"
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
+import type { RenameProject } from "@builderai/validators/project"
+import { renameProjectSchema } from "@builderai/validators/project"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"

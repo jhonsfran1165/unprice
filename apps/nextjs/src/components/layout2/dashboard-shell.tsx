@@ -1,6 +1,6 @@
 import React from "react"
 
-import { cn } from "@builderai/ui/utils"
+import { cn } from "@builderai/ui"
 
 import MaxWidthWrapper from "~/components/max-width-wrapper"
 

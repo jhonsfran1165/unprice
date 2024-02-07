@@ -1,13 +1,11 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq } from "@builderai/db"
+import { and, eq, schema, utils } from "@builderai/db"
 import {
-  canva,
   createCanvaSchema,
   updateCanvaSchema,
-} from "@builderai/db/schema/canva"
-import { newIdEdge } from "@builderai/db/utils"
+} from "@builderai/validators/canva"
 
 import {
   createTRPCRouter,
@@ -27,10 +25,10 @@ export const canvaRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const canvaId = newIdEdge("canva")
+      const canvaId = utils.newIdEdge("canva")
 
       const canvaData = await opts.ctx.db
-        .insert(canva)
+        .insert(schema.canva)
         .values({
           id: canvaId,
           slug,
@@ -73,11 +71,13 @@ export const canvaRouter = createTRPCRouter({
       })
 
       return await opts.ctx.db
-        .update(canva)
+        .update(schema.canva)
         .set({
           content,
         })
-        .where(and(eq(canva.id, id), eq(canva.projectId, project.id)))
+        .where(
+          and(eq(schema.canva.id, id), eq(schema.canva.projectId, project.id))
+        )
         .returning()
     }),
 

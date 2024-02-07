@@ -1,10 +1,8 @@
 import { TRPCError } from "@trpc/server"
-import { File } from "undici"
 import { z } from "zod"
 import { zfd } from "zod-form-data"
 
-import { ingestion } from "@builderai/db/schema/ingestion"
-import { newIdEdge } from "@builderai/db/utils"
+import { schema, utils } from "@builderai/db"
 
 import {
   createTRPCRouter,
@@ -12,10 +10,6 @@ import {
   protectedOrgProcedure,
 } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
-
-// TODO: try to use another library that supports edge
-// @ts-expect-error - zfd needs a File on the global scope
-globalThis.File = File
 
 const myFileValidator = z.preprocess(
   // @ts-expect-error - this is a hack. not sure why it's needed since it should already be a File
@@ -92,9 +86,9 @@ export const ingestionRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const fileContent = await opts.input.schema.text()
 
-      const id = newIdEdge("ingestion")
+      const id = utils.newId("ingestion")
 
-      await opts.ctx.db.insert(ingestion).values({
+      await opts.ctx.db.insert(schema.ingestion).values({
         id,
         projectId: opts.ctx.apiKey.projectId,
         hash: opts.input.hash,

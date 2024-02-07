@@ -2,16 +2,14 @@ import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
 import { clerkClient } from "@builderai/auth"
-import { eq, sql } from "@builderai/db"
+import { eq, schema, sql, utils } from "@builderai/db"
 import {
   createProjectSchema,
   deleteProjectSchema,
-  project,
   renameProjectSchema,
   transferToPersonalProjectSchema,
   transferToWorkspaceSchema,
-} from "@builderai/db/schema/project"
-import { generateSlug, newIdEdge } from "@builderai/db/utils"
+} from "@builderai/validators/project"
 
 import {
   createTRPCRouter,
@@ -39,7 +37,9 @@ export const projectRouter = createTRPCRouter({
       await opts.ctx.activateRLS()
 
       const projects = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.select({ count: sql<number>`count(*)` }).from(project)
+        return txRLS
+          .select({ count: sql<number>`count(*)` })
+          .from(schema.project)
       })
 
       // TODO: Don't hardcode the limit to PRO
@@ -62,10 +62,10 @@ export const projectRouter = createTRPCRouter({
         })
       }
 
-      const projectId = newIdEdge("project")
-      const projectSlug = generateSlug(2)
+      const projectId = utils.newIdEdge("project")
+      const projectSlug = utils.generateSlug(2)
 
-      await opts.ctx.db.insert(project).values({
+      await opts.ctx.db.insert(schema.project).values({
         id: projectId,
         name,
         slug: projectSlug,
@@ -93,11 +93,11 @@ export const projectRouter = createTRPCRouter({
 
       const projectRenamed = await opts.ctx.txRLS(({ txRLS }) => {
         return txRLS
-          .update(project)
+          .update(schema.project)
           .set({
             name,
           })
-          .where(eq(project.id, projectData.id))
+          .where(eq(schema.project.id, projectData.id))
           .returning()
       })
 
@@ -115,7 +115,9 @@ export const projectRouter = createTRPCRouter({
       })
 
       await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.delete(project).where(eq(project.id, projectData.id))
+        return txRLS
+          .delete(schema.project)
+          .where(eq(schema.project.id, projectData.id))
       })
     }),
 
@@ -184,8 +186,8 @@ export const projectRouter = createTRPCRouter({
       // TODO: do not hard code the limit - is it possible to reduce the queries?
       const projects = await opts.ctx.db
         .select({ count: sql<number>`count(*)` })
-        .from(project)
-        .where(eq(project.workspaceId, personalTargetWorkspace.id))
+        .from(schema.project)
+        .where(eq(schema.project.workspaceId, personalTargetWorkspace.id))
 
       // TODO: Don't hardcode the limit to PRO - the user is paying, should it be possible to transfer projects?
       if (projects[0] && projects[0].count >= PROJECT_LIMITS.PRO) {
@@ -200,12 +202,12 @@ export const projectRouter = createTRPCRouter({
         try {
           // change the workspace for the project to personalTargetWorkspace
           await tx
-            .update(project)
+            .update(schema.project)
             .set({
               tenantId: userId,
               workspaceId: personalTargetWorkspace.id,
             })
-            .where(eq(project.id, projectData.id))
+            .where(eq(schema.project.id, projectData.id))
 
           // execute procedure to update tenant id on all tables of this project
           await tx.execute(
@@ -280,12 +282,12 @@ export const projectRouter = createTRPCRouter({
         try {
           // change the workspace for the project to personalTargetWorkspace
           await tx
-            .update(project)
+            .update(schema.project)
             .set({
               tenantId: targetTenantId,
               workspaceId: targetWorkspace.id,
             })
-            .where(eq(project.id, projectData.id))
+            .where(eq(schema.project.id, projectData.id))
 
           // execute function to update tenant id on all tables of this project
           await tx.execute(
@@ -301,38 +303,41 @@ export const projectRouter = createTRPCRouter({
       })
     }),
 
-  listByActiveWorkspace: protectedOrgProcedure.query(async (opts) => {
-    const projects = await opts.ctx.txRLS(({ txRLS }) =>
-      txRLS.query.project.findMany({
-        columns: {
-          name: true,
-          id: true,
-          url: true,
-          tier: true,
-          slug: true,
-        },
-        with: {
-          workspace: {
-            columns: {
-              slug: true,
+  listByActiveWorkspace: protectedOrgProcedure
+    .meta({ openapi: { method: "GET", path: "/find" } })
+    .query(async (opts) => {
+      const projects = await opts.ctx.txRLS(({ txRLS }) =>
+        txRLS.query.project.findMany({
+          columns: {
+            name: true,
+            id: true,
+            url: true,
+            tier: true,
+            slug: true,
+          },
+          with: {
+            workspace: {
+              columns: {
+                slug: true,
+              },
             },
           },
-        },
-      })
-    )
+        })
+      )
 
-    // FIXME: Don't hardcode the limit to PRO
-    return {
-      projects: projects.map((project) => ({
-        ...project,
-        styles: getRandomPatternStyle(project.id),
-      })),
-      limit: PROJECT_LIMITS.PRO,
-      limitReached: projects.length >= PROJECT_LIMITS.PRO,
-    }
-  }),
+      // FIXME: Don't hardcode the limit to PRO
+      return {
+        projects: projects.map((project) => ({
+          ...project,
+          styles: getRandomPatternStyle(project.id),
+        })),
+        limit: PROJECT_LIMITS.PRO,
+        limitReached: projects.length >= PROJECT_LIMITS.PRO,
+      }
+    }),
   bySlug: protectedOrgProcedure
     .input(z.object({ slug: z.string() }))
+    // .output(project)  // TODO: add output types to all procedures
     .query(async (opts) => {
       const { slug: projectSlug } = opts.input
 

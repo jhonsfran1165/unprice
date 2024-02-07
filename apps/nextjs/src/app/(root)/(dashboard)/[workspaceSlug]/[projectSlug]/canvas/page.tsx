@@ -12,7 +12,7 @@ import {
 } from "@builderai/ui/table"
 
 import { userCanAccessProject } from "~/lib/project-guard"
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 
 export const runtime = "edge"
 export const preferredRegion = ["fra1"]
@@ -27,9 +27,7 @@ export default async function DashboardPage(props: {
     needsToBeInTier: ["PRO", "STANDARD"],
   })
 
-  const { canvas } = await api.canva.listByProject.query({
-    projectSlug: projectSlug,
-  })
+  const { canvas } = await api.canva.listByProject({ projectSlug })
 
   return (
     <Table className="rounded-md border bg-background-base">

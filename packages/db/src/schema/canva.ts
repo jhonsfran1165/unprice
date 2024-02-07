@@ -1,6 +1,5 @@
 import { relations } from "drizzle-orm"
 import { index, json, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core"
-import { z } from "zod"
 
 import { projectID, tenantID, timestamps } from "../utils/sql"
 import { project } from "./project"
@@ -34,18 +33,3 @@ export const canvasRelations = relations(canva, ({ one }) => ({
     references: [project.id],
   }),
 }))
-
-export const createCanvaSchema = z.object({
-  id: z.string().optional(),
-  projectSlug: z.string(),
-  slug: z.string(),
-  content: z.object({}),
-})
-
-export const updateCanvaSchema = z.object({
-  id: z.string(),
-  projectSlug: z.string().optional(),
-  slug: z.string().optional(),
-  content: z.string(),
-})
-export type CreateCanva = z.infer<typeof createCanvaSchema>

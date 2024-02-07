@@ -1,15 +1,14 @@
 import "react-image-crop/dist/ReactCrop.css"
 import "~/styles/globals.css"
 
-import { headers } from "next/headers"
 
 // import { Analytics } from "@vercel/analytics/react"
 
 import { ClerkProvider } from "@builderai/auth"
 import { siteConfig } from "@builderai/config"
+import { cn } from "@builderai/ui"
 import { Toaster } from "@builderai/ui/toaster"
 import { TooltipProvider } from "@builderai/ui/tooltip"
-import { cn } from "@builderai/ui/utils"
 
 import { TailwindIndicator } from "~/components/tailwind-indicator"
 import { ThemeProvider } from "~/components/theme-provider"
@@ -57,7 +56,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             )}
           >
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              <TRPCReactProvider headers={headers()}>
+              <TRPCReactProvider>
                 <TooltipProvider delayDuration={300}>
                   {props.children}
                 </TooltipProvider>

@@ -3,13 +3,13 @@ import Link from "next/link"
 import type { RouterOutputs } from "@builderai/api"
 import type { ProjectTier } from "@builderai/config"
 import { PROJECT_TIER } from "@builderai/config"
+import { cn } from "@builderai/ui"
 import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@builderai/ui/card"
-import { cn } from "@builderai/ui/utils"
 
 function ProjectTierIndicator(props: { tier: ProjectTier }) {
   return (

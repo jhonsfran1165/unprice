@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@builderai/ui/table"
 
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 
 export const runtime = "edge"
 export const preferredRegion = ["fra1"]
@@ -17,7 +17,7 @@ export const preferredRegion = ["fra1"]
 export default async function IngestionPage(props: {
   params: { workspaceSlug: string; projectSlug: string; ingestionId: string }
 }) {
-  const ingestion = await api.ingestion.byId.query({
+  const ingestion = await api.ingestion.byId({
     id: props.params.ingestionId,
   })
 

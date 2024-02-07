@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 
 export const dynamic = "force-dynamic"
 
@@ -26,7 +26,7 @@ export default async function LinkPage({
   const isPreview = !!searchParams.preview
   const version = parseInt(searchParams.version)
 
-  const result = await api.page.getById.query({
+  const result = await api.page.getById({
     id: linkId,
     version,
   })

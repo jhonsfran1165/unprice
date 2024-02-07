@@ -2,14 +2,15 @@
   "name": "builderai",
   "private": true,
   "engines": {
-    "node": ">=v20.0.0"
+    "node": ">=v20.11.0"
   },
+  "engineStrict": true,
   "packageManager": "pnpm@8.6.12",
   "scripts": {
     "build": "turbo build",
     "clean": "git clean -xdf node_modules dist .next",
     "clean:workspaces": "turbo clean",
-    "dev": "FORCE_COLOR=1 turbo dev --parallel",
+    "dev": "cross-env FORCE_COLOR=1 turbo dev --parallel",
     "dev:web": "turbo dev --parallel --filter !@builderai/expo --filter !@builderai/db",
     "format": "turbo format --continue -- --cache --cache-location='node_modules/.cache/.prettiercache' --ignore-path='../../.gitignore'",
     "format:fix": "turbo format --continue -- --write --cache --cache-location='node_modules/.cache/.prettiercache' --ignore-path='../../.gitignore'",
@@ -19,12 +20,13 @@
     "wh": "pnpm dlx webhookthing@latest"
   },
   "dependencies": {
-    "@builderai/prettier-config": "^0.1.0",
-    "@manypkg/cli": "^0.21.0",
-    "@turbo/gen": "^1.10.16",
-    "prettier": "^3.0.3",
-    "turbo": "^1.10.16",
-    "typescript": "^5.2.2"
+    "@builderai/prettier-config": "0.1.0",
+    "@manypkg/cli": "^0.21.1",
+    "@turbo/gen": "^1.11.3",
+    "cross-env": "^7.0.3",
+    "prettier": "^3.1.1",
+    "turbo": "^1.11.3",
+    "typescript": "^5.3.3"
   },
   "prettier": "@builderai/prettier-config"
 }

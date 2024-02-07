@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 
 import { useOrganization } from "@builderai/auth"
+import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Command,
@@ -15,14 +16,15 @@ import {
 } from "@builderai/ui/command"
 import { Check, ChevronsUpDown, LayoutGrid } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
-import { cn } from "@builderai/ui/utils"
 
 import { api } from "~/trpc/client"
 import { ProjectSwitcherSkeleton } from "./project-switcher-skeleton"
 
 export function ProjectSwitcher() {
   const router = useRouter()
-  const [data] = api.project.listByActiveWorkspace.useSuspenseQuery()
+
+  const { data, isLoading } = api.project.listByActiveWorkspace.useQuery()
+
   const { organization } = useOrganization()
 
   const [switcherOpen, setSwitcherOpen] = useState(false)
@@ -31,11 +33,11 @@ export function ProjectSwitcher() {
 
   const projectSlug = params.projectSlug as string
 
-  const activeProject = data.projects.find((p) => p.slug === projectSlug)
+  const activeProject = data?.projects.find((p) => p.slug === projectSlug)
 
   if (!projectSlug) return null
 
-  if (!activeProject) {
+  if (!activeProject || isLoading) {
     return <ProjectSwitcherSkeleton />
   }
 
@@ -65,7 +67,7 @@ export function ProjectSwitcher() {
             <CommandList>
               <CommandInput placeholder="Search project..." />
               <CommandGroup heading="All projects">
-                {data.projects.map((project) => (
+                {data?.projects.map((project) => (
                   <CommandItem
                     key={project.id}
                     onSelect={() => {

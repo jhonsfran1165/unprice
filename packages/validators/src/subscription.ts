@@ -1,10 +1,10 @@
 import { createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { subscription, user } from "./subscription.sql"
+import { schema } from "@builderai/db"
 
-export const userBase = createSelectSchema(user)
-export const subscriptionBase = createSelectSchema(subscription)
+export const userBase = createSelectSchema(schema.user)
+export const subscriptionBase = createSelectSchema(schema.subscription)
 
 export const createSubscriptionSchema = subscriptionBase
   .pick({

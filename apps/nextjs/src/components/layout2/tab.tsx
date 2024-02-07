@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation"
 
 import type { DashboardRoute } from "@builderai/config/types"
 import { createIcon } from "@builderai/config/types"
+import { cn } from "@builderai/ui"
 import {
-  Tooltip,
-  TooltipArrow,
-  TooltipContent,
-  TooltipTrigger,
+    Tooltip,
+    TooltipArrow,
+    TooltipContent,
+    TooltipTrigger,
 } from "@builderai/ui/tooltip"
-import { cn } from "@builderai/ui/utils"
 
 import { Ping } from "~/components/ping"
 

@@ -4,7 +4,7 @@ import { Balancer } from "react-wrap-balancer"
 import { Button } from "@builderai/ui/button"
 import { Add, Warning } from "@builderai/ui/icons"
 
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
 
 export const preferredRegion = ["fra1"]
@@ -13,8 +13,7 @@ export const runtime = "edge"
 export default async function WorkspaceOverviewPage(props: {
   params: { workspaceSlug: string }
 }) {
-  const { projects, limitReached } =
-    await api.project.listByActiveWorkspace.query()
+  const { projects, limitReached } = await api.project.listByActiveWorkspace()
 
   return (
     <>

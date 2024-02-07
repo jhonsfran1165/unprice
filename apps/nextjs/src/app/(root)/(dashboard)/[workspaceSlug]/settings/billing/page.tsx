@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 
-import { api } from "~/trpc/server-http"
+import { api } from "~/trpc/server"
 import { SubscriptionForm } from "./subscription-form"
 
 export const preferredRegion = ["fra1"]

@@ -1,15 +1,15 @@
 import Link from "next/link"
 
-import type { PlanVersionList } from "@builderai/db/schema/price"
+import { cn } from "@builderai/ui"
 import { buttonVariants } from "@builderai/ui/button"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 import {
-  Tooltip,
-  TooltipArrow,
-  TooltipContent,
-  TooltipTrigger,
+    Tooltip,
+    TooltipArrow,
+    TooltipContent,
+    TooltipTrigger,
 } from "@builderai/ui/tooltip"
-import { cn } from "@builderai/ui/utils"
+import type { PlanVersionList } from "@builderai/validators/price"
 
 interface VersionProps extends React.HTMLAttributes<HTMLDivElement> {
   versions?: PlanVersionList[]

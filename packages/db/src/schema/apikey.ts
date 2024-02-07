@@ -6,7 +6,6 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core"
-import { z } from "zod"
 
 import { projectID, tenantID, timestamps } from "../utils/sql"
 import { project } from "./project"
@@ -43,11 +42,3 @@ export const apiKeysRelations = relations(apikey, ({ one }) => ({
     references: [project.id],
   }),
 }))
-
-export const createApiKeySchema = z.object({
-  projectSlug: z.string(),
-  name: z.string(),
-  expiresAt: z.date().optional(),
-  tenantId: z.string().optional(),
-})
-export type CreateApiKey = z.infer<typeof createApiKeySchema>

@@ -5,8 +5,8 @@ import { z } from "zod"
 
 import { currentUser } from "@builderai/auth"
 import { PLANS } from "@builderai/config"
-import { purchaseWorkspaceSchema } from "@builderai/db/schema/workspace"
 import { stripe } from "@builderai/stripe"
+import { purchaseWorkspaceSchema } from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,

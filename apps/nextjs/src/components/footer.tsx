@@ -2,28 +2,28 @@ import dynamic from "next/dynamic"
 import Link from "next/link"
 
 import { siteConfig } from "@builderai/config"
+import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
+    CommandShortcut,
 } from "@builderai/ui/command"
 import {
-  Calculator,
-  Calendar,
-  CreditCard,
-  Github,
-  Settings,
-  Smile,
-  Twitter,
-  User,
+    Calculator,
+    Calendar,
+    CreditCard,
+    Github,
+    Settings,
+    Smile,
+    Twitter,
+    User,
 } from "@builderai/ui/icons"
 import { Skeleton } from "@builderai/ui/skeleton"
-import { cn } from "@builderai/ui/utils"
 
 import { Logo } from "~/components/logo"
 import { Search } from "./search"

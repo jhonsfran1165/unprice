@@ -1,12 +1,12 @@
 "use client"
 
-import dynamic from "next/dynamic"
 import { AnimatePresence, domAnimation, LazyMotion, m } from "framer-motion"
+import dynamic from "next/dynamic"
 
 import type { DashboardRoute } from "@builderai/config/types"
+import { cn } from "@builderai/ui"
 import { Logo } from "@builderai/ui/icons"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
-import { cn } from "@builderai/ui/utils"
 
 import { useGetPaths } from "~/lib/use-get-path"
 import useScroll from "~/lib/use-scroll"

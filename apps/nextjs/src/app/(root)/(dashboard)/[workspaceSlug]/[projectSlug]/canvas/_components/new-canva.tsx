@@ -1,11 +1,9 @@
 "use client"
 
-import { useState } from "react"
-import { useParams, useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
+import { useParams, useRouter } from "next/navigation"
+import { useState } from "react"
 
-import type { CreateCanva } from "@builderai/db/schema/canva"
-import { createCanvaSchema } from "@builderai/db/schema/canva"
 import { Button } from "@builderai/ui/button"
 import {
   Dialog,
@@ -26,6 +24,8 @@ import {
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
+import type { CreateCanva } from "@builderai/validators/canva"
+import { createCanvaSchema } from "@builderai/validators/canva"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"

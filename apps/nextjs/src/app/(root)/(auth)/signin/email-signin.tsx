@@ -93,8 +93,9 @@ export function EmailSignIn() {
       magicFlow.cancelEmailLinkFlow()
 
       if (response?.status === "complete") {
-        await setActive({ session: response.createdSessionId })
-        router.push(`/`)
+        await setActive({ session: response.createdSessionId }).then(() =>
+          router.push(`/`)
+        )
       }
     } else {
       if (!signUpLoaded) return null
@@ -124,8 +125,9 @@ export function EmailSignIn() {
       })
 
       if (response?.status === "complete") {
-        await setActive({ session: response.createdSessionId })
-        router.push(`/`)
+        await setActive({ session: response.createdSessionId }).then(() =>
+          router.push(`/dashboard`)
+        )
         return
       }
     }

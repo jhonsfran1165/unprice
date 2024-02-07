@@ -22,7 +22,7 @@ export function SyncActiveOrgFromUrl() {
   })
 
   useEffect(() => {
-    if (!isLoaded) return
+    if (!isLoaded || userMemberships.isLoading) return
 
     const org = userMemberships.data?.find(
       ({ organization }) => organization.slug === workspaceSlug

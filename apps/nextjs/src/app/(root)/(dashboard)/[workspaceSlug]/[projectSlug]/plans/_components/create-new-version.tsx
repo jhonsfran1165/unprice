@@ -1,13 +1,13 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
+import { useParams, useRouter } from "next/navigation"
 
-import type { CreatePlanVersion } from "@builderai/db/schema/price"
-import { createNewVersionPlan } from "@builderai/db/schema/price"
 import { Button } from "@builderai/ui/button"
 import { Add } from "@builderai/ui/icons"
 import { useToast } from "@builderai/ui/use-toast"
+import type { CreatePlanVersion } from "@builderai/validators/price"
+import { createNewVersionPlan } from "@builderai/validators/price"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"

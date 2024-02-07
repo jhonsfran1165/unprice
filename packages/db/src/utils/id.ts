@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto"
 import baseX from "base-x"
 
 import { customAlphabet, dbNameSpaces } from "./constants"
@@ -28,7 +27,7 @@ class IdGenerator<TPrefixes extends string> {
   public id = (prefix: TPrefixes): string => {
     return [
       this.prefixes[prefix],
-      encodeBase58(Buffer.from(randomUUID().replace(/-/g, ""), "hex")),
+      encodeBase58(Buffer.from(crypto.randomUUID().replace(/-/g, ""), "hex")),
     ].join("_")
   }
 }

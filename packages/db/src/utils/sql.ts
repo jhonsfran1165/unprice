@@ -1,8 +1,6 @@
 import { sql } from "drizzle-orm"
 import { text, timestamp } from "drizzle-orm/pg-core"
 
-// TODO: verify if using uuid is a good idea
-// export const cuid = (id: string) => uuid(id)
 export const cuid = (d: string) => text(d)
 
 // for workspace

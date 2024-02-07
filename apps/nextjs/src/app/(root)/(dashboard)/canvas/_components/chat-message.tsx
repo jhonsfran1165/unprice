@@ -5,8 +5,8 @@ import type { Message } from "ai"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
 
+import { cn } from "@builderai/ui"
 import { Dashboard, User } from "@builderai/ui/icons"
-import { cn } from "@builderai/ui/utils"
 
 import { CodeBlock } from "~/components/codeblock"
 import { MemoizedReactMarkdown } from "~/components/markdown"

@@ -3,27 +3,27 @@
 import { TRPCClientError } from "@trpc/client"
 
 import { MEMBERSHIP } from "@builderai/config"
-import type { InviteOrgMember } from "@builderai/db/schema/workspace"
-import { inviteOrgMemberSchema } from "@builderai/db/schema/workspace"
 import { Button } from "@builderai/ui/button"
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@builderai/ui/select"
 import { useToast } from "@builderai/ui/use-toast"
+import type { InviteOrgMember } from "@builderai/validators/workspace"
+import { inviteOrgMemberSchema } from "@builderai/validators/workspace"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"

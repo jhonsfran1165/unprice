@@ -9,13 +9,9 @@ import {
   varchar,
 } from "drizzle-orm/pg-core"
 
-import {
-  currencyEnum,
-  statusPlanEnum,
-  typeFeatureEnum,
-} from "../../utils/enums"
-import { projectID, tenantID, timestamps } from "../../utils/sql"
-import { project } from "../project"
+import { projectID, tenantID, timestamps } from "../utils/sql"
+import { currencyEnum, statusPlanEnum, typeFeatureEnum } from "./enums"
+import { project } from "./project"
 
 // export const stripe = pgTable(
 //   "stripe",
