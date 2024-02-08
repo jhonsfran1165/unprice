@@ -40,8 +40,15 @@ export const organizationsRouter = createTRPCRouter({
   }),
 
   deleteMember: protectedOrgAdminProcedure
-    .meta({ openapi: { method: "GET", path: "/find" } })
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/edge/organization.deleteMember",
+        protect: true,
+      },
+    })
     .input(z.object({ userId: z.string() }))
+    .output(z.object({ memberName: z.string().optional().nullable() }))
     .mutation(async (opts) => {
       const { orgId } = opts.ctx.auth
 
@@ -61,7 +68,7 @@ export const organizationsRouter = createTRPCRouter({
 
         return { memberName: member.publicUserData?.firstName }
       } catch (e) {
-        console.log("Error deleting member", e)
+        console.error("Error deleting member", e)
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "User not found",

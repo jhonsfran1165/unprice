@@ -4,12 +4,12 @@ import { TRPCClientError } from "@trpc/client"
 
 import { Button } from "@builderai/ui/button"
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
@@ -28,7 +28,7 @@ export function RenameProjectForm(props: { projectSlug: string }) {
 
   const renameProject = api.project.rename.useMutation({
     onSettled: async () => {
-      await apiUtils.project.listByActiveWorkspace.invalidate(undefined)
+      await apiUtils.project.listByActiveWorkspace.invalidate()
       await apiUtils.project.bySlug.invalidate({ slug: props.projectSlug })
     },
     onSuccess: () => {

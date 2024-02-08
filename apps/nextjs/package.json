@@ -17,6 +17,7 @@
   "dependencies": {
     "@builderai/api": "^0.1.0",
     "@builderai/auth": "^0.1.0",
+    "@builderai/client": "^0.1.0",
     "@builderai/config": "^0.1.0",
     "@builderai/db": "^0.1.0",
     "@builderai/stripe": "^0.1.0",
@@ -29,6 +30,7 @@
     "@legendapp/state": "2.0.0-beta.3",
     "@monaco-editor/react": "^4.6.0",
     "@next/mdx": "14.1.0",
+    "@potatohd/trpc-openapi": "^1.2.3",
     "@t3-oss/env-nextjs": "^0.7.3",
     "@tanstack/eslint-plugin-query": "^5.6.0",
     "@tanstack/react-query": "5.18.1",
@@ -64,7 +66,6 @@
     "remark-math": "^6.0.0",
     "superjson": "2.2.1",
     "tailwindcss-animate": "^1.0.7",
-    "trpc-openapi": "^1.2.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

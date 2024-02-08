@@ -304,7 +304,40 @@ export const projectRouter = createTRPCRouter({
     }),
 
   listByActiveWorkspace: protectedOrgProcedure
-    .meta({ openapi: { method: "GET", path: "/find" } })
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/edge/project.listByActiveWorkspace",
+        protect: true,
+      },
+    })
+    // input is null
+    .input(
+      z.object({
+        workspaceSlug: z.string().optional().nullable(),
+      })
+    )
+    .output(
+      z.object({
+        projects: z.array(
+          z.object({
+            name: z.string(),
+            id: z.string(),
+            url: z.string(),
+            tier: z.string(),
+            slug: z.string(),
+            styles: z.object({
+              backgroundImage: z.string(),
+            }),
+            workspace: z.object({
+              slug: z.string(),
+            }),
+          })
+        ),
+        limit: z.number(),
+        limitReached: z.boolean(),
+      })
+    )
     .query(async (opts) => {
       const projects = await opts.ctx.txRLS(({ txRLS }) =>
         txRLS.query.project.findMany({

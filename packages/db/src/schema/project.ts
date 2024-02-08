@@ -12,9 +12,9 @@ export const project = pgTable(
     ...tenantID,
     ...timestamps,
     slug: text("slug").notNull().unique(), // we love random words
-    name: text("name"),
-    tier: projectTier("tier").default("FREE"),
-    url: text("url"),
+    name: text("name").notNull(),
+    tier: projectTier("tier").default("FREE").notNull(),
+    url: text("url").default("").notNull(),
     // domain: text("url"),
     // subdomain: text("url"),
   },

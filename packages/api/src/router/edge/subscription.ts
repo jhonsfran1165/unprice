@@ -2,12 +2,18 @@ import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
 import { schema, utils } from "@builderai/db"
+import { selectApiKeyHeaderSchema } from "@builderai/validators/apikey"
+import type { PlanConfig } from "@builderai/validators/price"
 import {
   createSubscriptionSchema,
   createUserSchema,
 } from "@builderai/validators/subscription"
 
-import { createTRPCRouter, protectedOrgProcedure } from "../../trpc"
+import {
+  createTRPCRouter,
+  protectedApiProcedure,
+  protectedOrgProcedure,
+} from "../../trpc"
 import { hasAccessToProject } from "../../utils"
 
 export const subscriptionRouter = createTRPCRouter({
@@ -132,6 +138,88 @@ export const subscriptionRouter = createTRPCRouter({
 
       return {
         users: users,
+      }
+    }),
+
+  can: protectedApiProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/edge/subscription.can",
+        protect: true,
+      },
+    })
+    .input(
+      z.object({
+        userId: z.string(),
+        featureSlug: z.string(),
+      })
+    )
+    .output(
+      z.object({
+        apiKey: selectApiKeyHeaderSchema,
+        userHasFeature: z.boolean(),
+      })
+    )
+    .query(async (opts) => {
+      const { userId, featureSlug } = opts.input
+      const apiKey = opts.ctx.apiKey
+
+      const user = await opts.ctx.db.query.user.findFirst({
+        where: (user, { eq }) => eq(user.id, userId),
+      })
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        })
+      }
+
+      const feature = await opts.ctx.db.query.feature.findFirst({
+        where: (feature, { eq }) => eq(feature.slug, featureSlug),
+      })
+
+      if (!feature) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Feature not found",
+        })
+      }
+
+      const subscription = await opts.ctx.db.query.subscription.findFirst({
+        where: (subscription, { eq }) =>
+          eq(subscription.userId, userId) &&
+          eq(subscription.projectId, feature.projectId) &&
+          eq(subscription.status, "active"),
+      })
+
+      if (!subscription) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User does not have an active subscription",
+        })
+      }
+
+      const versionPlan = await opts.ctx.db.query.version.findFirst({
+        where: (version, { eq }) =>
+          eq(version.id, subscription.planVersion) &&
+          eq(version.planId, subscription.planId),
+      })
+
+      const featuresPlan = versionPlan?.featuresPlan as PlanConfig
+      const allFeaturesPlan = Object.keys(featuresPlan)
+        .map((group) => featuresPlan[group]?.features)
+        .flat()
+      const userHasFeature = allFeaturesPlan.some(
+        (f) => f?.slug === featureSlug
+      )
+
+      console.log("apiKey", apiKey)
+
+      return {
+        apiKey,
+        userHasFeature,
       }
     }),
 })

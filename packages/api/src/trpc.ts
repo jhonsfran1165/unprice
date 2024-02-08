@@ -7,8 +7,8 @@
  * The pieces you will need to use are documented accordingly near the end
  */
 import type { NextRequest } from "next/server"
+import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import { initTRPC, TRPCError } from "@trpc/server"
-import type { OpenApiMeta } from "trpc-openapi"
 import { ZodError } from "zod"
 
 import { auth } from "@builderai/auth"
@@ -94,10 +94,10 @@ export const createTRPCContext = async (opts: {
  * This is where the trpc api is initialized, connecting the context and
  * transformer
  */
-
+// TODO: support Authorization header https://www.npmjs.com/package/@potatohd/trpc-openapi#authorization
 export const t = initTRPC
-  .meta<OpenApiMeta>()
   .context<typeof createTRPCContext>()
+  .meta<OpenApiMeta>()
   .create({
     transformer,
     errorFormatter({ shape, error }) {
