@@ -145,6 +145,11 @@ export const versionBase = createSelectSchema(schema.version).extend({
   addonsPlan: planConfigSchema.optional(),
 })
 
+export const selectVersionBase = createSelectSchema(schema.version).extend({
+  featuresPlan: planConfigSchema.optional(),
+  addonsPlan: planConfigSchema.optional(),
+})
+
 export const versionListBase = versionBase.pick({
   id: true,
   status: true,
@@ -199,3 +204,4 @@ export type FeaturePlan = z.infer<typeof featurePlanSchema>
 export type CreateFeature = z.infer<typeof createFeatureSchema>
 export type UpdateFeature = z.infer<typeof updateFeatureSchema>
 export type Feature = z.infer<typeof featureBase>
+export type SelectVersion = z.infer<typeof selectVersionBase>

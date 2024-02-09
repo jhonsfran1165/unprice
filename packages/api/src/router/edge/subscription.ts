@@ -2,11 +2,14 @@ import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
 import { schema, utils } from "@builderai/db"
-import { selectApiKeyHeaderSchema } from "@builderai/validators/apikey"
-import type { PlanConfig } from "@builderai/validators/price"
+import { publishEvents } from "@builderai/tinybird"
+import type { PlanConfig, SelectVersion } from "@builderai/validators/price"
+import { planConfigSchema, versionBase } from "@builderai/validators/price"
+import type { Subscription } from "@builderai/validators/subscription"
 import {
   createSubscriptionSchema,
   createUserSchema,
+  subscriptionBase,
 } from "@builderai/validators/subscription"
 
 import {
@@ -14,7 +17,7 @@ import {
   protectedApiProcedure,
   protectedOrgProcedure,
 } from "../../trpc"
-import { hasAccessToProject } from "../../utils"
+import { hasAccessToProject, redis } from "../../utils"
 
 export const subscriptionRouter = createTRPCRouter({
   create: protectedOrgProcedure
@@ -151,22 +154,89 @@ export const subscriptionRouter = createTRPCRouter({
     })
     .input(
       z.object({
-        userId: z.string(),
+        userId: z.string().optional(),
         featureSlug: z.string(),
       })
     )
     .output(
       z.object({
-        apiKey: selectApiKeyHeaderSchema,
+        subscriptionData: subscriptionBase
+          .extend({
+            version: versionBase
+              .omit({
+                featuresPlan: true,
+                addonsPlan: true,
+              })
+              .extend({
+                featuresPlan: planConfigSchema,
+                addonsPlan: planConfigSchema,
+              }),
+          })
+          .optional(),
         userHasFeature: z.boolean(),
       })
     )
     .query(async (opts) => {
       const { userId, featureSlug } = opts.input
       const apiKey = opts.ctx.apiKey
+      const projectId = apiKey.projectId
+
+      // find if there is a plan already saved in redis
+      const id = `app:${projectId}:user:${userId}`
+
+      const payload = (await redis.hgetall(id)) as Subscription & {
+        version: SelectVersion
+      }
+
+      if (payload) {
+        console.log("payload", payload)
+        const featuresPlan = payload.version.featuresPlan!
+        const allFeaturesPlan = Object.keys(featuresPlan)
+          .map((group) => featuresPlan[group]?.features)
+          .flat()
+
+        const userHasFeature = allFeaturesPlan.some(
+          (f) => f?.slug === featureSlug
+        )
+
+        // save report usage to analytics
+        await publishEvents({
+          event_name: "feature_access",
+          session_id: userId ?? "unknown",
+          id: userId ?? "unknown",
+          domain: "subscription",
+          subdomain: "can",
+          time: Date.now(),
+          timestamp: new Date().toISOString(),
+          payload: {
+            featureSlug,
+            userHasFeature,
+            subscriptionData: payload,
+          },
+        })
+
+        return {
+          userHasFeature,
+          subscriptionData: payload,
+        }
+      }
+
+      // if userId is not provided, use the authenticated user
+      const usrId = userId ?? opts.ctx.auth?.userId
+
+      if (!usrId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "UserId not provided or you are not authenticated",
+        })
+      }
 
       const user = await opts.ctx.db.query.user.findFirst({
-        where: (user, { eq }) => eq(user.id, userId),
+        columns: {
+          id: true,
+        },
+        where: (user, { eq, and }) =>
+          and(eq(user.id, usrId), eq(user.projectId, projectId)),
       })
 
       if (!user) {
@@ -177,7 +247,11 @@ export const subscriptionRouter = createTRPCRouter({
       }
 
       const feature = await opts.ctx.db.query.feature.findFirst({
-        where: (feature, { eq }) => eq(feature.slug, featureSlug),
+        columns: {
+          slug: true,
+        },
+        where: (feature, { eq, and }) =>
+          and(eq(feature.slug, featureSlug), eq(feature.projectId, projectId)),
       })
 
       if (!feature) {
@@ -187,39 +261,64 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      const subscription = await opts.ctx.db.query.subscription.findFirst({
-        where: (subscription, { eq }) =>
-          eq(subscription.userId, userId) &&
-          eq(subscription.projectId, feature.projectId) &&
-          eq(subscription.status, "active"),
+      const subscription = await opts.ctx.db.query.subscription.findMany({
+        with: {
+          version: true,
+        },
+        where: (subscription, { eq, and }) =>
+          and(
+            eq(subscription.userId, user.id),
+            eq(subscription.status, "active"),
+            eq(subscription.projectId, projectId)
+          ),
       })
 
-      if (!subscription) {
+      if (!subscription || subscription.length === 0) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "User does not have an active subscription",
         })
       }
 
-      const versionPlan = await opts.ctx.db.query.version.findFirst({
-        where: (version, { eq }) =>
-          eq(version.id, subscription.planVersion) &&
-          eq(version.planId, subscription.planId),
-      })
+      if (subscription.length > 1) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User has more than one active subscription",
+        })
+      }
 
-      const featuresPlan = versionPlan?.featuresPlan as PlanConfig
+      const subscriptionData = subscription[0]
+      const versionPlan = subscriptionData?.version
+
+      if (!versionPlan) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Version not found in subscription",
+        })
+      }
+
+      const featuresPlan = versionPlan.featuresPlan as PlanConfig
       const allFeaturesPlan = Object.keys(featuresPlan)
         .map((group) => featuresPlan[group]?.features)
         .flat()
+
       const userHasFeature = allFeaturesPlan.some(
         (f) => f?.slug === featureSlug
       )
 
-      console.log("apiKey", apiKey)
+      // TODO: report usage to analytics
+      // TODO: cache this result to avoid querying the database every time
+
+      if (!payload) {
+        // if not, save the plan in redis
+        await redis.hset(id, subscriptionData)
+      }
+
+      // TODO: before returning the result, check if the user has access to the feature in the current plan
 
       return {
-        apiKey,
         userHasFeature,
+        subscriptionData,
       }
     }),
 })

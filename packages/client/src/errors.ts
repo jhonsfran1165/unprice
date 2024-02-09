@@ -1,7 +1,164 @@
-import type { components } from "./openapi"
+export interface components {
+  schemas: {
+    ErrBadRequest: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example BAD_REQUEST
+         * @enum {string}
+         */
+        code: "BAD_REQUEST"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://unkey.dev/docs/api-reference/errors/code/BAD_REQUEST
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrUnauthorized: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example UNAUTHORIZED
+         * @enum {string}
+         */
+        code: "UNAUTHORIZED"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://unkey.dev/docs/api-reference/errors/code/UNAUTHORIZED
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrForbidden: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example FORBIDDEN
+         * @enum {string}
+         */
+        code: "FORBIDDEN"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://unkey.dev/docs/api-reference/errors/code/FORBIDDEN
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrNotFound: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example NOT_FOUND
+         * @enum {string}
+         */
+        code: "NOT_FOUND"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://unkey.dev/docs/api-reference/errors/code/NOT_FOUND
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrConflict: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example CONFLICT
+         * @enum {string}
+         */
+        code: "CONFLICT"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://unkey.dev/docs/api-reference/errors/code/CONFLICT
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrTooManyRequests: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example TOO_MANY_REQUESTS
+         * @enum {string}
+         */
+        code: "TOO_MANY_REQUESTS"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://unkey.dev/docs/api-reference/errors/code/TOO_MANY_REQUESTS
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+    ErrInternalServerError: {
+      error: {
+        /**
+         * @description A machine readable error code.
+         * @example INTERNAL_SERVER_ERROR
+         * @enum {string}
+         */
+        code: "INTERNAL_SERVER_ERROR"
+        /**
+         * @description A link to our documentation with more details about this error code
+         * @example https://unkey.dev/docs/api-reference/errors/code/INTERNAL_SERVER_ERROR
+         */
+        docs: string
+        /** @description A human readable explanation of what went wrong */
+        message: string
+        /**
+         * @description Please always include the requestId in your error report
+         * @example req_1234
+         */
+        requestId: string
+      }
+    }
+  }
+}
 
 interface paths {
-  "/v1/liveness": {
+  "/test": {
     get: {
       responses: {
         /** @description The configured services and their status */
@@ -77,6 +234,6 @@ interface paths {
     }
   }
 }
+
 // this is what a json body response looks like
-export type ErrorResponse =
-  paths["/v1/liveness"]["get"]["responses"]["500"]["content"]["application/json"]
+export type ErrorResponse = components["schemas"]["ErrInternalServerError"]

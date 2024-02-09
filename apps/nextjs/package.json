@@ -2,6 +2,10 @@
   "name": "@builderai/nextjs",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=v20.11.0"
+  },
+  "engineStrict": true,
   "scripts": {
     "build": "pnpm with-env next build",
     "analyze": "ANALYZE=true pnpm --filter nextjs run build",

@@ -1,3 +1,6 @@
+import type { SuperJSONResult } from "superjson"
+import superjson from "superjson"
+
 import type { ErrorResponse } from "./errors"
 import type { paths } from "./openapi"
 import type { Telemetry } from "./telemetry"
@@ -136,38 +139,44 @@ export class Builderai {
     let err: Error | null = null
     for (let i = 0; i <= this.retry.attempts; i++) {
       const url = new URL(`${this.baseUrl}/${req.path.join("/")}`)
-      if (req.query) {
-        const queryParams = {
-          batch: "1",
-          input: JSON.stringify({
-            "0": {
-              json: {
-                userId: "user_D9JFW3i3rz4a48XQMYCG8T",
-                featureSlug: "login",
-              },
-            },
-          }),
-        }
 
-        const encodedParams = `batch=${encodeURIComponent(
-          queryParams.batch
-        )}&input=${encodeURIComponent(queryParams.input)}`
-
-        url.search = encodedParams
-      }
-      res = await fetch(url, {
+      const optionsRequest = {
         method: req.method,
         headers: this.getHeaders(),
         cache: this.cache,
-        body: JSON.stringify(req.body),
-      }).catch((e: Error) => {
+        body: undefined as string | undefined,
+      }
+
+      if (req.query) {
+        // expected input for trpc
+        // TODO: use transformer from the API
+        const inputString = superjson.stringify(req.query)
+        const encodedParams = `input=${encodeURIComponent(inputString)}`
+        url.search = encodedParams
+      }
+
+      if (req.body) {
+        optionsRequest.body = superjson.stringify(req.body)
+      }
+
+      res = await fetch(url, optionsRequest).catch((e: Error) => {
         err = e
         return null // set `res` to `null`
       })
+
       if (res?.ok) {
-        return { result: (await res.json()) as TResult }
+        const response = (await res.json()) as Result<{
+          data: SuperJSONResult
+        }>
+
+        const data = response?.result?.data
+        const result = data ? superjson.deserialize(data) : {}
+
+        return { result: result as TResult }
       }
+
       const backoff = this.retry.backoff(i)
+
       console.debug(
         "attempt %d of %d to reach %s failed, retrying in %d ms: %s",
         i + 1,
@@ -177,6 +186,7 @@ export class Builderai {
         // @ts-expect-error I don't understand why `err` is `never`
         err?.message
       )
+
       await new Promise((r) => setTimeout(r, backoff))
     }
 
@@ -185,12 +195,10 @@ export class Builderai {
     }
 
     return {
-      // @ts-expect-error solve this
       error: {
-        code: "FETCH_ERROR",
+        code: "INTERNAL_SERVER_ERROR",
         // @ts-expect-error I don't understand why `err` is `never`
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        message: err?.message ?? "No response",
+        message: JSON.stringify(err?.message) ?? "No response",
         docs: "https://developer.mozilla.org/en-US/docs/Web/API/fetch",
         requestId: "N/A",
       },

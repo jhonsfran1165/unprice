@@ -34,5 +34,8 @@
       "@builderai/eslint-config/base"
     ]
   },
-  "prettier": "@builderai/prettier-config"
+  "prettier": "@builderai/prettier-config",
+  "dependencies": {
+    "superjson": "2.2.1"
+  }
 }

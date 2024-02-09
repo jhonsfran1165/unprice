@@ -312,11 +312,7 @@ export const projectRouter = createTRPCRouter({
       },
     })
     // input is null
-    .input(
-      z.object({
-        workspaceSlug: z.string().optional().nullable(),
-      })
-    )
+    .input(z.void())
     .output(
       z.object({
         projects: z.array(

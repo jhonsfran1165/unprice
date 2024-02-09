@@ -255,6 +255,9 @@ importers:
       '@builderai/stripe':
         specifier: ^0.1.0
         version: link:../stripe
+      '@builderai/tinybird':
+        specifier: workspace:^
+        version: link:../tinybird
       '@builderai/validators':
         specifier: ^0.1.0
         version: link:../validators
@@ -276,6 +279,9 @@ importers:
       '@trpc/server':
         specifier: 11.0.0-next-beta.264
         version: 11.0.0-next-beta.264
+      '@upstash/redis':
+        specifier: ^1.25.1
+        version: 1.25.1
       dinero.js:
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
@@ -349,6 +355,10 @@ importers:
         version: 5.3.3
 
   packages/client:
+    dependencies:
+      superjson:
+        specifier: 2.2.1
+        version: 2.2.1
     devDependencies:
       '@builderai/eslint-config':
         specifier: ^0.2.0
@@ -496,6 +506,37 @@ importers:
         version: link:../../tooling/prettier
       '@builderai/tsconfig':
         specifier: 0.1.0
+        version: link:../../tooling/typescript
+      eslint:
+        specifier: ^8.56.0
+        version: 8.56.0
+      prettier:
+        specifier: ^3.1.1
+        version: 3.1.1
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+
+  packages/tinybird:
+    dependencies:
+      '@chronark/zod-bird':
+        specifier: ^0.3.3
+        version: 0.3.3
+      '@t3-oss/env-nextjs':
+        specifier: ^0.7.3
+        version: 0.7.3(typescript@5.3.3)(zod@3.22.4)
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      '@builderai/eslint-config':
+        specifier: ^0.2.0
+        version: link:../../tooling/eslint
+      '@builderai/prettier-config':
+        specifier: ^0.1.0
+        version: link:../../tooling/prettier
+      '@builderai/tsconfig':
+        specifier: ^0.1.0
         version: link:../../tooling/typescript
       eslint:
         specifier: ^8.56.0
@@ -988,6 +1029,12 @@ packages:
       '@babel/helper-string-parser': 7.23.4
       '@babel/helper-validator-identifier': 7.22.20
       to-fast-properties: 2.0.0
+    dev: false
+
+  /@chronark/zod-bird@0.3.3:
+    resolution: {integrity: sha512-vCpB73FC0QlAvmaP8IHH+M5oRwTgcczEArsVvH9tmuJ/DgM4F7F4+Q6M/5zFmEhl6MW6EHXp2PaYZ9ZP3Off9Q==}
+    dependencies:
+      zod: 3.22.4
     dev: false
 
   /@clerk/backend@0.38.0(react@18.2.0):
