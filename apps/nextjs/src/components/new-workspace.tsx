@@ -66,7 +66,7 @@ export default function NewOrganizationDialog(props: {
         toast({
           title: "Error",
           description:
-            "There was an error setting up your organization. Please try again.",
+            "There was an error setting up your workspace. Please try again.",
           variant: "destructive",
         })
       }

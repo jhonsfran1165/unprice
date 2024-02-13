@@ -7,27 +7,25 @@ export async function handleEvent(event: WebhookEvent) {
     case "user.created":
     case "user.updated": {
       const { id, first_name, username } = event.data
-
       // use the same id for this workspace so it's easy to identify the tenant inside the app
       const workspaceId = utils.workspaceIdFromTenantId(id)
-
-      const orgSlug = username ?? utils.generateSlug(2)
+      const slug = username ?? utils.generateSlug(2)
 
       await db
         .insert(schema.workspace)
         .values({
           id: workspaceId,
           tenantId: id,
-          slug: orgSlug,
-          name: first_name ?? orgSlug,
+          slug: slug,
+          name: first_name ?? slug,
           isPersonal: true,
         })
         .onConflictDoUpdate({
           target: schema.workspace.id,
           set: {
             tenantId: id,
-            slug: orgSlug,
-            name: first_name ?? orgSlug,
+            slug: slug,
+            name: first_name ?? slug,
             isPersonal: true,
           },
           where: eq(schema.workspace.id, workspaceId),
@@ -75,7 +73,7 @@ export async function handleEvent(event: WebhookEvent) {
         where: (workspace, { eq, and }) => and(eq(workspace.id, workspaceId)),
       })
 
-      if (workspaceData) {
+      if (workspaceData?.id) {
         await db
           .update(schema.workspace)
           .set({

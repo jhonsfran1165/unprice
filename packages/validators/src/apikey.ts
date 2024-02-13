@@ -1,16 +1,19 @@
-import { createSelectSchema } from "drizzle-zod"
+import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import { schema } from "@builderai/db"
 
-export const createApiKeySchema = z.object({
-  projectSlug: z.string(),
-  name: z.string(),
-  expiresAt: z.date().optional(),
-  tenantId: z.string().optional(),
-})
+export const insertApiKeySchema = createInsertSchema(schema.apikeys)
+export const selectApiKeySchema = createSelectSchema(schema.apikeys)
 
-export const selectApiKeySchema = createSelectSchema(schema.apikey)
+export const createApiKeySchema = insertApiKeySchema
+  .pick({
+    name: true,
+  })
+  .extend({
+    projectSlug: z.string(),
+    expiresAt: z.date().optional(),
+  })
 
 export const selectApiKeyHeaderSchema = selectApiKeySchema.pick({
   id: true,

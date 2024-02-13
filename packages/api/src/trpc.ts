@@ -16,7 +16,8 @@ import type {
   SignedInAuthObject,
   SignedOutAuthObject,
 } from "@builderai/auth/server"
-import { db, eq, rls, schema } from "@builderai/db"
+import { db, eq, schema } from "@builderai/db"
+import { workspaceIdFromTenantId } from "@builderai/db/src/utils"
 
 import { transformer } from "./transformer"
 
@@ -37,6 +38,7 @@ interface CreateContextOptions {
   apiKey?: string | null
   req?: NextRequest
   tenantId: string // clerk tenant id asociated to the workspace
+  workspaceId: string // workspace id
 }
 
 /**
@@ -52,11 +54,8 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     ...opts,
     db: db,
-    // db helpers for emulating RLS
-    txRLS: rls.authTxn(db, opts.tenantId),
-    // these two increase the number of times you call your db
-    activateRLS: rls.activateRLS(db, opts.tenantId),
-    deactivateRLS: rls.deactivateRLS(db),
+    // INFO: better wait for native support for RLS in Drizzle
+    // txRLS: rls.authTxn(db, opts.tenantId),
   }
 }
 
@@ -73,6 +72,7 @@ export const createTRPCContext = async (opts: {
 }) => {
   const { userId, orgId } = opts.auth ?? auth()
   const tenantId = orgId ?? userId ?? ""
+  const workspaceId = workspaceIdFromTenantId(tenantId)
 
   const apiKey = opts.headers.get("x-builderai-api-key")
   const source = opts.headers.get("x-trpc-source") ?? "unknown"
@@ -82,6 +82,7 @@ export const createTRPCContext = async (opts: {
   return createInnerTRPCContext({
     auth: opts.auth,
     tenantId,
+    workspaceId,
     apiKey,
     req: opts.req,
     headers: opts.headers,
@@ -216,7 +217,7 @@ export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
   }
 
   // Check db for API key
-  const apiKey = await ctx.db.query.apikey.findFirst({
+  const apiKey = await ctx.db.query.apikeys.findFirst({
     columns: {
       id: true,
       projectId: true,
@@ -226,17 +227,16 @@ export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
       sql`${apikey.key} = ${ctx.apiKey} AND ${apikey.revokedAt} is NULL`,
   })
 
-  if (!apiKey) {
+  if (!apiKey?.id) {
     throw new TRPCError({ code: "UNAUTHORIZED" })
   }
 
-  // TODO: I don't know rick - improve this
   void ctx.db
-    .update(schema.apikey)
+    .update(schema.apikeys)
     .set({
       lastUsed: new Date(),
     })
-    .where(eq(schema.apikey.id, apiKey.id))
+    .where(eq(schema.apikeys.id, apiKey.id))
 
   return next({
     ctx: {

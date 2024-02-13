@@ -1,5 +1,10 @@
 import { tb } from "./client"
-import { ClickHitsSchema, eventSchema, pageSchema } from "./validators"
+import {
+  ClickHitsSchema,
+  eventSchema,
+  pageSchema,
+  usageSchema,
+} from "./validators"
 
 export const publishClickHits = tb.buildIngestEndpoint({
   datasource: "click_hits__v1",
@@ -14,4 +19,9 @@ export const publishPageViews = tb.buildIngestEndpoint({
 export const publishEvents = tb.buildIngestEndpoint({
   datasource: "events__v1",
   event: eventSchema,
+})
+
+export const reportUsage = tb.buildIngestEndpoint({
+  datasource: "usage__v1",
+  event: usageSchema,
 })

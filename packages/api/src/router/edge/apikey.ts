@@ -2,30 +2,28 @@ import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
 import { eq, schema, sql, utils } from "@builderai/db"
-import { createApiKeySchema } from "@builderai/validators/apikey"
+import {
+  createApiKeySchema,
+  selectApiKeySchema,
+} from "@builderai/validators/apikey"
 
 import {
   createTRPCRouter,
-  protectedApiProcedure,
   protectedOrgAdminProcedure,
   protectedOrgProcedure,
 } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
 
 export const apiKeyRouter = createTRPCRouter({
-  testing: protectedApiProcedure.query(async (opts) => {
-    const data = opts.ctx.apiKey
-
-    const project = await opts.ctx.db.query.project.findMany({
-      where: (project, { eq }) => eq(project.id, data.projectId),
-    })
-
-    return project
-  }),
   listApiKeys: protectedOrgAdminProcedure
     .input(
       z.object({
         projectSlug: z.string(),
+      })
+    )
+    .output(
+      z.object({
+        apikeys: z.array(selectApiKeySchema),
       })
     )
     .query(async (opts) => {
@@ -36,25 +34,28 @@ export const apiKeyRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const apiKeys = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.apikey.findMany({
-          where: (apikey, { eq }) => eq(apikey.projectId, project.id),
-          orderBy: (apikey, { desc }) => [
-            desc(apikey.revokedAt),
-            desc(apikey.lastUsed),
-            desc(apikey.expiresAt),
-            desc(apikey.createdAt),
-          ],
-        })
+      const apikeys = await opts.ctx.db.query.apikeys.findMany({
+        where: (apikey, { eq }) => eq(apikey.projectId, project.id),
+        orderBy: (apikey, { desc }) => [
+          desc(apikey.revokedAt),
+          desc(apikey.lastUsed),
+          desc(apikey.expiresAt),
+          desc(apikey.createdAt),
+        ],
       })
 
-      return apiKeys
+      return { apikeys }
     }),
 
   createApiKey: protectedOrgProcedure
     .input(createApiKeySchema)
+    .output(
+      z.object({
+        apikey: selectApiKeySchema.optional(),
+      })
+    )
     .mutation(async (opts) => {
-      const projectSlug = opts.input.projectSlug
+      const { projectSlug, name, expiresAt } = opts.input
 
       const { project } = await hasAccessToProject({
         projectSlug,
@@ -66,33 +67,38 @@ export const apiKeyRouter = createTRPCRouter({
       // Generate the key
       const apiKey = utils.newIdEdge("apikey_key")
 
-      return await opts.ctx.db
-        .insert(schema.apikey)
+      const newApiKey = await opts.ctx.db
+        .insert(schema.apikeys)
         .values({
           id: apiKeyId,
-          name: opts.input.name,
+          name: name,
           key: apiKey,
-          expiresAt: opts.input.expiresAt,
+          expiresAt: expiresAt,
           projectId: project.id,
-          tenantId: opts.ctx.tenantId,
         })
         .returning()
+
+      return { apikey: newApiKey?.[0] }
     }),
 
   revokeApiKeys: protectedOrgAdminProcedure
     .input(z.object({ ids: z.string().array(), projectId: z.string() }))
+    .output(z.object({ success: z.boolean(), numRevoked: z.number() }))
     .mutation(async (opts) => {
       const { ids, projectId } = opts.input
 
-      const result = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS
-          .update(schema.apikey)
-          .set({ revokedAt: new Date() })
-          .where(
-            sql`${schema.apikey.id} in ${ids} AND ${schema.apikey.projectId} = ${projectId} AND ${schema.apikey.revokedAt} is NULL`
-          )
-          .returning()
+      const { project } = await hasAccessToProject({
+        projectId,
+        ctx: opts.ctx,
       })
+
+      const result = await opts.ctx.db
+        .update(schema.apikeys)
+        .set({ revokedAt: new Date(), updatedAt: new Date() })
+        .where(
+          sql`${schema.apikeys.id} in ${ids} AND ${schema.apikeys.projectId} = ${project.id} AND ${schema.apikeys.revokedAt} is NULL`
+        )
+        .returning()
 
       if (result.length === 0) {
         throw new TRPCError({
@@ -105,12 +111,23 @@ export const apiKeyRouter = createTRPCRouter({
     }),
 
   rollApiKey: protectedOrgAdminProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), projectSlug: z.string() }))
+    .output(
+      z.object({
+        apikey: selectApiKeySchema.optional(),
+      })
+    )
     .mutation(async (opts) => {
-      const apiKey = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.apikey.findFirst({
-          where: (apikey, { eq }) => eq(apikey.id, opts.input.id),
-        })
+      const { id, projectSlug } = opts.input
+
+      const { project } = await hasAccessToProject({
+        projectSlug,
+        ctx: opts.ctx,
+      })
+
+      const apiKey = await opts.ctx.db.query.apikeys.findFirst({
+        where: (apikey, { eq, and }) =>
+          and(eq(apikey.id, id), eq(apikey.projectId, project.id)),
       })
 
       if (!apiKey) {
@@ -123,14 +140,12 @@ export const apiKeyRouter = createTRPCRouter({
       // Generate the key
       const newKey = utils.newIdEdge("apikey_key")
 
-      await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS
-          .update(schema.apikey)
-          .set({ key: newKey })
-          .where(eq(schema.apikey.id, opts.input.id))
-          .returning()
-      })
+      const newApiKey = await opts.ctx.db
+        .update(schema.apikeys)
+        .set({ key: newKey })
+        .where(eq(schema.apikeys.id, opts.input.id))
+        .returning()
 
-      return newKey
+      return { apikey: newApiKey?.[0] }
     }),
 })

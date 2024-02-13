@@ -18,3 +18,12 @@ export const dbNameSpaces = {
 // Will not collide for a long long time: https://zelark.github.io/nano-id-cc/
 export const customAlphabet =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz" as const
+
+export const FEATURE_TYPES = ["flat", "metered", "hybrid"] as const
+export const CURRENCIES = ["USD", "EUR", "GBP"] as const
+export const STAGES = ["prod", "test", "dev"] as const
+export const STATUS_PLAN = ["draft", "published", "archived"] as const
+export const STATUS_SUBSCRIPTION = ["active", "inactive"] as const
+export const PLANS_APP = ["free", "pro", "enterprise"] as const
+export const PROJECT_TIERS_APP = ["free", "pro", "enterprise"] as const
+export const TIER_MODES = ["volume", "tiered"] as const

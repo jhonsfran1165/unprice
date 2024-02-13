@@ -5,9 +5,10 @@ import { and, eq, schema, utils } from "@builderai/db"
 import {
   createNewVersionPlan,
   createPlanSchema,
+  planSelectBaseSchema,
   updatePlanSchema,
   updateVersionPlan,
-  versionBase,
+  versionSelectBaseSchema,
 } from "@builderai/validators/price"
 
 import {
@@ -20,6 +21,11 @@ import { hasAccessToProject } from "../../utils"
 export const planRouter = createTRPCRouter({
   create: protectedOrgProcedure
     .input(createPlanSchema)
+    .output(
+      z.object({
+        plan: planSelectBaseSchema.optional(),
+      })
+    )
     .mutation(async (opts) => {
       const { projectSlug, slug, title, currency } = opts.input
 
@@ -31,21 +37,27 @@ export const planRouter = createTRPCRouter({
       const planId = utils.newIdEdge("plan")
 
       const planData = await opts.ctx.db
-        .insert(schema.plan)
+        .insert(schema.plans)
         .values({
           id: planId,
           slug,
           title,
           currency,
           projectId: project.id,
-          tenantId: opts.ctx.tenantId,
         })
         .returning()
 
-      return planData[0]
+      return {
+        plan: planData[0],
+      }
     }),
   createNewVersion: protectedOrgProcedure
     .input(createNewVersionPlan)
+    .output(
+      z.object({
+        planVersion: versionSelectBaseSchema.optional(),
+      })
+    )
     .mutation(async (opts) => {
       const { projectSlug, planId } = opts.input
 
@@ -56,14 +68,12 @@ export const planRouter = createTRPCRouter({
 
       const planVersionId = utils.newIdEdge("plan_version")
 
-      const planData = await opts.ctx.db
-        .select()
-        .from(schema.plan)
-        .where(
-          and(eq(schema.plan.id, planId), eq(schema.plan.projectId, project.id))
-        )
+      const planData = await opts.ctx.db.query.plans.findFirst({
+        where: (plan, { eq, and }) =>
+          and(eq(plan.id, planId), eq(plan.projectId, project.id)),
+      })
 
-      if (!planData) {
+      if (!planData?.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "plan not found",
@@ -72,70 +82,83 @@ export const planRouter = createTRPCRouter({
 
       // version is a incrementing number calculated on save time by the database
       const planVersionData = await opts.ctx.db
-        .insert(schema.version)
+        .insert(schema.versions)
         .values({
           id: planVersionId,
           planId,
           projectId: project.id,
-          tenantId: opts.ctx.tenantId,
-          addonsPlan: {},
-          featuresPlan: {},
           status: "draft",
         })
         .returning()
 
-      return planVersionData[0]
+      return {
+        planVersion: planVersionData[0],
+      }
     }),
   update: protectedOrgProcedure
     .input(updatePlanSchema)
+    .output(
+      z.object({
+        plan: planSelectBaseSchema.optional(),
+      })
+    )
     .mutation(async (opts) => {
-      const { title, id } = opts.input
+      const { title, id, projectSlug } = opts.input
 
-      const planData = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.plan.findFirst({
-          with: {
-            project: {
-              columns: {
-                slug: true,
-              },
-            },
-          },
-          where: (plan, { eq }) => eq(plan.id, id),
-        })
+      const { project } = await hasAccessToProject({
+        projectId: projectSlug,
+        ctx: opts.ctx,
       })
 
-      if (!planData) {
+      const planData = await opts.ctx.db.query.plans.findFirst({
+        with: {
+          project: {
+            columns: {
+              slug: true,
+            },
+          },
+        },
+        where: (plan, { eq, and }) =>
+          and(eq(plan.id, id), eq(plan.projectId, project.id)),
+      })
+
+      if (!planData?.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "plan not found",
         })
       }
 
-      const { project } = await hasAccessToProject({
-        projectId: planData.projectId,
-        ctx: opts.ctx,
-      })
-
-      return await opts.ctx.db
-        .update(schema.plan)
+      const updatedPlan = await opts.ctx.db
+        .update(schema.plans)
         .set({
           title,
+          updatedAt: new Date(),
         })
         .where(
-          and(eq(schema.plan.id, id), eq(schema.plan.projectId, project.id))
+          and(eq(schema.plans.id, id), eq(schema.plans.projectId, project.id))
         )
         .returning()
+
+      return {
+        plan: updatedPlan[0],
+      }
     }),
 
   updateVersion: publicProcedure
     .input(updateVersionPlan)
+    .output(
+      z.object({
+        planVersion: versionSelectBaseSchema.optional(),
+      })
+    )
     .mutation(async (opts) => {
       const {
         planId,
         projectSlug,
         versionId,
-        featuresPlan,
-        addonsPlan,
+        featuresConfig,
+        addonsConfig,
         status,
       } = opts.input
 
@@ -144,25 +167,23 @@ export const planRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const planVersionData = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.version.findFirst({
-          with: {
-            plan: {
-              columns: {
-                slug: true,
-              },
+      const planVersionData = await opts.ctx.db.query.versions.findFirst({
+        with: {
+          plan: {
+            columns: {
+              slug: true,
             },
           },
-          where: (version, { and, eq }) =>
-            and(
-              eq(version.version, versionId),
-              eq(version.planId, planId),
-              eq(version.projectId, project.id)
-            ),
-        })
+        },
+        where: (version, { and, eq }) =>
+          and(
+            eq(version.version, versionId),
+            eq(version.planId, planId),
+            eq(version.projectId, project.id)
+          ),
       })
 
-      if (!planVersionData) {
+      if (!planVersionData?.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "version not found",
@@ -170,16 +191,19 @@ export const planRouter = createTRPCRouter({
       }
 
       const versionUpdated = await opts.ctx.db
-        .update(schema.version)
+        .update(schema.versions)
         .set({
-          featuresPlan,
-          addonsPlan,
+          featuresConfig,
+          addonsConfig,
           status,
+          updatedAt: new Date(),
         })
-        .where(and(eq(schema.version.id, planVersionData.id)))
+        .where(and(eq(schema.versions.id, planVersionData.id)))
         .returning()
 
-      return versionBase.parse(versionUpdated[0])
+      return {
+        planVersion: versionUpdated[0],
+      }
     }),
 
   getVersionById: publicProcedure
@@ -190,6 +214,11 @@ export const planRouter = createTRPCRouter({
         projectSlug: z.string(),
       })
     )
+    .output(
+      z.object({
+        planVersion: versionSelectBaseSchema.optional(),
+      })
+    )
     .query(async (opts) => {
       const { planId, projectSlug, versionId } = opts.input
 
@@ -198,56 +227,99 @@ export const planRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const planVersionData = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.version.findFirst({
-          with: {
-            plan: {
-              columns: {
-                slug: true,
-              },
+      const planVersionData = await opts.ctx.db.query.versions.findFirst({
+        with: {
+          plan: {
+            columns: {
+              slug: true,
             },
           },
-          where: (version, { and, eq }) =>
-            and(
-              eq(version.version, versionId),
-              eq(version.planId, planId),
-              eq(version.projectId, project.id)
-            ),
-        })
+        },
+        where: (version, { and, eq }) =>
+          and(
+            eq(version.version, versionId),
+            eq(version.planId, planId),
+            eq(version.projectId, project.id)
+          ),
       })
 
-      return versionBase.parse(planVersionData)
+      return {
+        planVersion: planVersionData,
+      }
     }),
 
   getById: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async (opts) => {
-      const { id } = opts.input
-
-      return await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.plan.findFirst({
-          with: {
-            versions: {
-              orderBy: (version, { desc }) => [desc(version.createdAt)],
-              columns: {
-                version: true,
-                status: true,
+    .input(z.object({ id: z.string(), projectSlug: z.string() }))
+    .output(
+      z.object({
+        plan: planSelectBaseSchema
+          .extend({
+            versions: z.array(
+              versionSelectBaseSchema.pick({
                 id: true,
-              },
-            },
-            project: {
-              columns: {
-                slug: true,
-              },
+                status: true,
+                version: true,
+              })
+            ),
+            project: z.object({
+              slug: z.string(),
+            }),
+          })
+          .optional(),
+      })
+    )
+    .query(async (opts) => {
+      const { id, projectSlug } = opts.input
+
+      const { project } = await hasAccessToProject({
+        projectSlug,
+        ctx: opts.ctx,
+      })
+
+      const plan = await opts.ctx.db.query.plans.findFirst({
+        with: {
+          versions: {
+            orderBy: (version, { desc }) => [desc(version.createdAt)],
+            columns: {
+              version: true,
+              status: true,
+              id: true,
             },
           },
-          where: (plan, { eq }) => eq(plan.id, id),
-        })
+          project: {
+            columns: {
+              slug: true,
+            },
+          },
+        },
+        where: (plan, { eq, and }) =>
+          and(eq(plan.id, id), eq(plan.projectId, project.id)),
       })
+
+      return {
+        plan,
+      }
     }),
 
   listByProject: protectedOrgProcedure
     .input(z.object({ projectSlug: z.string() }))
+    .output(
+      z.object({
+        plans: z.array(
+          planSelectBaseSchema.extend({
+            versions: z.array(
+              versionSelectBaseSchema.pick({
+                id: true,
+                status: true,
+                version: true,
+              })
+            ),
+          })
+        ),
+        limit: z.number(),
+        limitReached: z.boolean(),
+      })
+    )
     .query(async (opts) => {
       const { projectSlug } = opts.input
 
@@ -256,21 +328,19 @@ export const planRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const plans = await opts.ctx.txRLS(({ txRLS }) =>
-        txRLS.query.plan.findMany({
-          with: {
-            versions: {
-              orderBy: (version, { desc }) => [desc(version.createdAt)],
-              columns: {
-                version: true,
-                status: true,
-                id: true,
-              },
+      const plans = await opts.ctx.db.query.plans.findMany({
+        with: {
+          versions: {
+            orderBy: (version, { desc }) => [desc(version.createdAt)],
+            columns: {
+              version: true,
+              status: true,
+              id: true,
             },
           },
-          where: (plan, { eq }) => eq(plan.projectId, project.id),
-        })
-      )
+        },
+        where: (plan, { eq }) => eq(plan.projectId, project.id),
+      })
 
       // FIXME: Don't hardcode the limit to PRO
       return {

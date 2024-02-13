@@ -7,9 +7,11 @@ import {
   createProjectSchema,
   deleteProjectSchema,
   renameProjectSchema,
+  selectProjectSchema,
   transferToPersonalProjectSchema,
   transferToWorkspaceSchema,
 } from "@builderai/validators/project"
+import { selectWorkspaceSchema } from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,
@@ -29,25 +31,28 @@ const PROJECT_LIMITS = {
 export const projectRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createProjectSchema)
+    .output(
+      createProjectSchema.pick({
+        id: true,
+        slug: true,
+        name: true,
+        url: true,
+      })
+    )
     .mutation(async (opts) => {
       const tenantId = opts.ctx.tenantId
       const { name, url } = opts.input
 
-      // activate RLS
-      await opts.ctx.activateRLS()
-
-      const projects = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS
-          .select({ count: sql<number>`count(*)` })
-          .from(schema.project)
-      })
+      const projects = await opts.ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(schema.projects)
 
       // TODO: Don't hardcode the limit to PRO
       if (projects[0] && projects[0].count >= PROJECT_LIMITS.PRO) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "Limit reached" })
       }
 
-      const workspace = await opts.ctx.db.query.workspace.findFirst({
+      const workspace = await opts.ctx.db.query.workspaces.findFirst({
         columns: {
           id: true,
           plan: true,
@@ -55,7 +60,7 @@ export const projectRouter = createTRPCRouter({
         where: (workspace, { eq }) => eq(workspace.tenantId, tenantId),
       })
 
-      if (!workspace) {
+      if (!workspace?.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Workspace don't exist",
@@ -65,24 +70,25 @@ export const projectRouter = createTRPCRouter({
       const projectId = utils.newIdEdge("project")
       const projectSlug = utils.generateSlug(2)
 
-      await opts.ctx.db.insert(schema.project).values({
+      await opts.ctx.db.insert(schema.projects).values({
         id: projectId,
+        workspaceId: workspace.id,
         name,
         slug: projectSlug,
         url,
-        workspaceId: workspace.id,
-        tenantId: opts.ctx.tenantId,
-        tier: workspace.plan,
+        tier: workspace.plan === "free" ? "free" : "pro",
       })
-
-      // deactivate RLS
-      await opts.ctx.deactivateRLS()
 
       return { projectId, projectSlug, name, url }
     }),
 
   rename: protectedOrgAdminProcedure
     .input(renameProjectSchema)
+    .output(
+      z.object({
+        project: selectProjectSchema.optional(),
+      })
+    )
     .mutation(async (opts) => {
       const { projectSlug, name } = opts.input
 
@@ -91,21 +97,26 @@ export const projectRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const projectRenamed = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS
-          .update(schema.project)
-          .set({
-            name,
-          })
-          .where(eq(schema.project.id, projectData.id))
-          .returning()
-      })
+      const projectRenamed = await opts.ctx.db
+        .update(schema.projects)
+        .set({
+          name,
+        })
+        .where(eq(schema.projects.id, projectData.id))
+        .returning()
 
-      return projectRenamed[0]
+      return {
+        project: projectRenamed?.[0],
+      }
     }),
 
   delete: protectedOrgAdminProcedure
     .input(deleteProjectSchema)
+    .output(
+      z.object({
+        project: selectProjectSchema.optional(),
+      })
+    )
     .mutation(async (opts) => {
       const { slug: projectSlug } = opts.input
 
@@ -114,15 +125,20 @@ export const projectRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS
-          .delete(schema.project)
-          .where(eq(schema.project.id, projectData.id))
-      })
+      const deletedProject = await opts.ctx.db
+        .delete(schema.projects)
+        .where(eq(schema.projects.id, projectData.id))
+        .returning()
+
+      return {
+        project: deletedProject?.[0],
+      }
     }),
 
+  // TODO: improve this
   canAccessProject: protectedOrgAdminProcedure
     .input(z.object({ slug: z.string(), needsToBeInTier: z.array(z.string()) }))
+    .output(z.object({ haveAccess: z.boolean(), isInTier: z.boolean() }))
     .query(async (opts) => {
       const { slug: projectSlug, needsToBeInTier: tier } = opts.input
 
@@ -150,6 +166,11 @@ export const projectRouter = createTRPCRouter({
 
   transferToPersonal: protectedOrgAdminProcedure
     .input(transferToPersonalProjectSchema)
+    .output(
+      z.object({
+        project: selectProjectSchema.optional(),
+      })
+    )
     .mutation(async (opts) => {
       const { slug: projectSlug } = opts.input
       const { userId } = opts.ctx.auth
@@ -159,16 +180,15 @@ export const projectRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      if (projectData.workspace.isPersonal ?? projectData.tenantId === userId) {
+      if (projectData.workspace.isPersonal) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Project is already personal",
         })
       }
 
-      // get info of the target workspace - bypass RLS to get the workspace from another tenantId
       const personalTargetWorkspace =
-        await opts.ctx.db.query.workspace.findFirst({
+        await opts.ctx.db.query.workspaces.findFirst({
           columns: {
             id: true,
             tenantId: true,
@@ -176,7 +196,7 @@ export const projectRouter = createTRPCRouter({
           where: (workspace, { eq }) => eq(workspace.tenantId, userId),
         })
 
-      if (!personalTargetWorkspace) {
+      if (!personalTargetWorkspace?.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "The target workspace doesn't exist",
@@ -186,8 +206,8 @@ export const projectRouter = createTRPCRouter({
       // TODO: do not hard code the limit - is it possible to reduce the queries?
       const projects = await opts.ctx.db
         .select({ count: sql<number>`count(*)` })
-        .from(schema.project)
-        .where(eq(schema.project.workspaceId, personalTargetWorkspace.id))
+        .from(schema.projects)
+        .where(eq(schema.projects.workspaceId, personalTargetWorkspace.id))
 
       // TODO: Don't hardcode the limit to PRO - the user is paying, should it be possible to transfer projects?
       if (projects[0] && projects[0].count >= PROJECT_LIMITS.PRO) {
@@ -197,39 +217,26 @@ export const projectRouter = createTRPCRouter({
         })
       }
 
-      // execute on a transaction for updating the owner of the project
-      await opts.ctx.db.transaction(async (tx) => {
-        try {
-          // change the workspace for the project to personalTargetWorkspace
-          await tx
-            .update(schema.project)
-            .set({
-              tenantId: userId,
-              workspaceId: personalTargetWorkspace.id,
-            })
-            .where(eq(schema.project.id, projectData.id))
+      // change the workspace for the project to personalTargetWorkspace
+      const updatedProject = await opts.ctx.db
+        .update(schema.projects)
+        .set({
+          workspaceId: personalTargetWorkspace.id,
+        })
+        .where(eq(schema.projects.id, projectData.id))
+        .returning()
 
-          // execute procedure to update tenant id on all tables of this project
-          await tx.execute(
-            sql.raw(
-              `SELECT update_tenant('${projectData.workspace.tenantId}', '${personalTargetWorkspace.tenantId}', '${projectData.id}')`
-            )
-          )
-
-          // TODO: handle rollback if something goes wrong
-          // if (data.rows) {
-          //   await tx.rollback()
-          //   return
-          // }
-        } catch (error) {
-          console.error(error)
-          tx.rollback()
-          return
-        }
-      })
+      return {
+        project: updatedProject?.[0],
+      }
     }),
   transferToWorkspace: protectedOrgAdminProcedure
     .input(transferToWorkspaceSchema)
+    .output(
+      z.object({
+        project: selectProjectSchema.optional(),
+      })
+    )
     .mutation(async (opts) => {
       const { userId } = opts.ctx.auth
       const { tenantId: targetTenantId, projectSlug } = opts.input
@@ -242,7 +249,7 @@ export const projectRouter = createTRPCRouter({
         (org) => org.organization.id === targetTenantId
       )
 
-      if (!targetOrg) {
+      if (!targetOrg?.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You're not a member of the target organization",
@@ -261,8 +268,7 @@ export const projectRouter = createTRPCRouter({
         })
       }
 
-      // get info of the target workspace - bypass RLS to get from another tenantId
-      const targetWorkspace = await opts.ctx.db.query.workspace.findFirst({
+      const targetWorkspace = await opts.ctx.db.query.workspaces.findFirst({
         columns: {
           id: true,
           tenantId: true,
@@ -270,91 +276,71 @@ export const projectRouter = createTRPCRouter({
         where: (workspace, { eq }) => eq(workspace.tenantId, targetTenantId),
       })
 
-      if (!targetWorkspace) {
+      if (!targetWorkspace?.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "target workspace not found",
         })
       }
 
-      // execute on a transaction for updating the owner of the project
-      await opts.ctx.db.transaction(async (tx) => {
-        try {
-          // change the workspace for the project to personalTargetWorkspace
-          await tx
-            .update(schema.project)
-            .set({
-              tenantId: targetTenantId,
-              workspaceId: targetWorkspace.id,
-            })
-            .where(eq(schema.project.id, projectData.id))
+      const updatedProject = await opts.ctx.db
+        .update(schema.projects)
+        .set({
+          workspaceId: targetWorkspace.id,
+        })
+        .where(eq(schema.projects.id, projectData.id))
+        .returning()
 
-          // execute function to update tenant id on all tables of this project
-          await tx.execute(
-            sql.raw(
-              `SELECT update_tenant('${projectData.workspace.tenantId}', '${targetWorkspace.tenantId}', '${projectData.id}')`
-            )
-          )
-        } catch (error) {
-          console.error(error)
-          tx.rollback()
-          return
-        }
-      })
+      return {
+        project: updatedProject?.[0],
+      }
     }),
 
   listByActiveWorkspace: protectedOrgProcedure
-    .meta({
-      openapi: {
-        method: "GET",
-        path: "/edge/project.listByActiveWorkspace",
-        protect: true,
-      },
-    })
-    // input is null
     .input(z.void())
     .output(
       z.object({
         projects: z.array(
-          z.object({
-            name: z.string(),
-            id: z.string(),
-            url: z.string(),
-            tier: z.string(),
-            slug: z.string(),
-            styles: z.object({
-              backgroundImage: z.string(),
-            }),
-            workspace: z.object({
-              slug: z.string(),
-            }),
-          })
+          selectProjectSchema
+            .pick({
+              id: true,
+              name: true,
+              url: true,
+              tier: true,
+              slug: true,
+            })
+            .extend({
+              styles: z.object({
+                backgroundImage: z.string(),
+              }),
+              workspace: selectWorkspaceSchema.pick({
+                slug: true,
+              }),
+            })
         ),
         limit: z.number(),
         limitReached: z.boolean(),
       })
     )
     .query(async (opts) => {
-      const projects = await opts.ctx.txRLS(({ txRLS }) =>
-        txRLS.query.project.findMany({
-          columns: {
-            name: true,
-            id: true,
-            url: true,
-            tier: true,
-            slug: true,
-          },
-          with: {
-            workspace: {
-              columns: {
-                slug: true,
-              },
+      const projects = await opts.ctx.db.query.projects.findMany({
+        columns: {
+          name: true,
+          id: true,
+          url: true,
+          tier: true,
+          slug: true,
+        },
+        with: {
+          workspace: {
+            columns: {
+              slug: true,
             },
           },
-        })
-      )
+        },
+      })
 
-      // FIXME: Don't hardcode the limit to PRO
+      // TODO: Don't hardcode the limit to PRO
       return {
         projects: projects.map((project) => ({
           ...project,
@@ -366,7 +352,13 @@ export const projectRouter = createTRPCRouter({
     }),
   bySlug: protectedOrgProcedure
     .input(z.object({ slug: z.string() }))
-    // .output(project)  // TODO: add output types to all procedures
+    .output(
+      z.object({
+        project: selectProjectSchema.extend({
+          workspace: selectWorkspaceSchema,
+        }),
+      })
+    )
     .query(async (opts) => {
       const { slug: projectSlug } = opts.input
 
@@ -375,10 +367,19 @@ export const projectRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      return projectData
+      return {
+        project: projectData,
+      }
     }),
   byId: protectedOrgProcedure
     .input(z.object({ id: z.string() }))
+    .output(
+      z.object({
+        project: selectProjectSchema.extend({
+          workspace: selectWorkspaceSchema,
+        }),
+      })
+    )
     .query(async (opts) => {
       const { id: projectId } = opts.input
 
@@ -387,6 +388,8 @@ export const projectRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      return projectData
+      return {
+        project: projectData,
+      }
     }),
 })

@@ -2,7 +2,10 @@ import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
 import { clerkClient } from "@builderai/auth"
-import { inviteOrgMemberSchema } from "@builderai/validators/workspace"
+import {
+  inviteOrgMemberSchema,
+  selectWorkspaceSchema,
+} from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,
@@ -10,14 +13,52 @@ import {
   protectedOrgProcedure,
 } from "../../trpc"
 
-export const organizationsRouter = createTRPCRouter({
+// this router controls organizations from Clerk.
+// Workspaces are similar to organizations in Clerk
+// We sync the two to keep the data consistent (see @builderai/auth webhooks)
+export const workspaceRouter = createTRPCRouter({
+  listWorkspaces: protectedOrgProcedure
+    .input(z.void())
+    .output(
+      z.array(
+        selectWorkspaceSchema.pick({
+          id: true,
+          name: true,
+          createdAt: true,
+        })
+      )
+    )
+    .query(async (opts) => {
+      const { userId, orgId } = opts.ctx.auth
+
+      if (!userId && !orgId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "userId/orgId not provided, logout and login again",
+        })
+      }
+
+      const tenantId = orgId ?? userId
+
+      const workspaces = await opts.ctx.db.query.workspaces.findMany({
+        where(workspace, { eq, or }) {
+          return or(eq(workspace.tenantId, tenantId))
+        },
+      })
+
+      return workspaces.map((wk) => ({
+        id: wk.id,
+        name: wk.name,
+        createdAt: wk.createdAt,
+      }))
+    }),
   listMembers: protectedOrgProcedure.query(async (opts) => {
     const { orgId } = opts.ctx.auth
 
     if (!orgId) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "orgId not provided",
+        message: "orgId not provided, logout and login again",
       })
     }
 
@@ -40,13 +81,6 @@ export const organizationsRouter = createTRPCRouter({
   }),
 
   deleteMember: protectedOrgAdminProcedure
-    .meta({
-      openapi: {
-        method: "GET",
-        path: "/edge/organization.deleteMember",
-        protect: true,
-      },
-    })
     .input(z.object({ userId: z.string() }))
     .output(z.object({ memberName: z.string().optional().nullable() }))
     .mutation(async (opts) => {
@@ -55,7 +89,7 @@ export const organizationsRouter = createTRPCRouter({
       if (!orgId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "orgId not provided",
+          message: "orgId not provided, logout and login again",
         })
       }
 

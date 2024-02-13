@@ -5,21 +5,21 @@ import { TRPCClientError } from "@trpc/client"
 import { MEMBERSHIP } from "@builderai/config"
 import { Button } from "@builderai/ui/button"
 import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@builderai/ui/select"
 import { useToast } from "@builderai/ui/use-toast"
 import type { InviteOrgMember } from "@builderai/validators/workspace"
@@ -35,7 +35,7 @@ export const InviteMemberForm = () => {
     schema: inviteOrgMemberSchema,
   })
 
-  const inviteMember = api.organization.inviteMember.useMutation({
+  const inviteMember = api.workspace.inviteMember.useMutation({
     onSuccess: (data) => {
       toaster.toast({
         title: "Member invited",

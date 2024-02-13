@@ -96,6 +96,16 @@ export const eventSchema = z.object({
   timestamp: z.string().datetime(),
 })
 
-// Infer type for typescript
+export const usageSchema = z.object({
+  id: z.string(),
+  feature: z.string(),
+  metric: z.string(),
+  value: z.number(),
+  time: z.number().int(),
+  timestamp: z.string().datetime(),
+  workspaceId: z.string(),
+  projectId: z.string(),
+})
+
 export type PayloadPageType = z.infer<typeof payloadPageSchema>
 export type PayloadEventType = z.infer<typeof payloadEventSchema>

@@ -90,7 +90,7 @@ async function OrganizationSettingsPage() {
     // <TabsContent value="members" className="flex flex-col space-y-4">
     //   <Suspense fallback={<LoadingCard title="Members" description="" />}>
     //     <OrganizationMembers
-    //       membersPromise={api.organization.listMembers.query()}
+    //       membersPromise={api.workspace.listMembers.query()}
     //     />
     //   </TabsContent>
     // </Tabs>

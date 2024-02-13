@@ -5,7 +5,7 @@ import { and, eq, schema, utils } from "@builderai/db"
 import {
   createFeatureSchema,
   deleteFeatureSchema,
-  featureBase,
+  featureSelectBaseSchema,
   updateFeatureSchema,
 } from "@builderai/validators/price"
 
@@ -15,6 +15,7 @@ import { hasAccessToProject } from "../../utils"
 export const featureRouter = createTRPCRouter({
   create: protectedOrgProcedure
     .input(createFeatureSchema)
+    .output(z.object({ feature: featureSelectBaseSchema.optional() }))
     .mutation(async (opts) => {
       const { projectSlug, slug, title } = opts.input
 
@@ -26,21 +27,23 @@ export const featureRouter = createTRPCRouter({
       const featureId = utils.newIdEdge("feature")
 
       const featureDate = await opts.ctx.db
-        .insert(schema.feature)
+        .insert(schema.features)
         .values({
           id: featureId,
           slug,
           title,
           projectId: project.id,
-          tenantId: opts.ctx.tenantId,
         })
         .returning()
 
-      return featureBase.parse(featureDate[0])
+      return {
+        feature: featureDate?.[0],
+      }
     }),
 
   delete: protectedOrgProcedure
     .input(deleteFeatureSchema)
+    .output(z.object({ feature: featureSelectBaseSchema.optional() }))
     .mutation(async (opts) => {
       const { projectSlug, id } = opts.input
 
@@ -49,67 +52,73 @@ export const featureRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS
-          .delete(schema.feature)
-          .where(
-            and(
-              eq(schema.feature.projectId, projectData.id),
-              eq(schema.feature.id, id)
-            )
+      const deletedFeature = await opts.ctx.db
+        .delete(schema.features)
+        .where(
+          and(
+            eq(schema.features.projectId, projectData.id),
+            eq(schema.features.id, id)
           )
-      })
+        )
+        .returning()
+
+      return {
+        feature: deletedFeature?.[0],
+      }
     }),
   update: protectedOrgProcedure
-    .input(updateFeatureSchema)
+    .input(updateFeatureSchema.extend({ projectSlug: z.string() }))
+    .output(z.object({ feature: featureSelectBaseSchema.optional() }))
     .mutation(async (opts) => {
-      const { title, id, description, type } = opts.input
+      const { title, id, description, type, projectSlug } = opts.input
 
-      const featureData = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.feature.findFirst({
-          with: {
-            project: {
-              columns: {
-                slug: true,
-              },
-            },
-          },
-          where: (feature, { eq }) => eq(feature.id, id),
-        })
+      const { project: projectData } = await hasAccessToProject({
+        projectSlug,
+        ctx: opts.ctx,
       })
 
-      if (!featureData) {
+      const featureData = await opts.ctx.db.query.features.findFirst({
+        with: {
+          project: {
+            columns: {
+              slug: true,
+            },
+          },
+        },
+        where: (feature, { eq, and }) =>
+          and(eq(feature.id, id), eq(feature.projectId, projectData.id)),
+      })
+
+      if (!featureData?.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Feature not found",
         })
       }
 
-      const { project } = await hasAccessToProject({
-        projectSlug: featureData.project.slug,
-        ctx: opts.ctx,
-      })
-
       const data = await opts.ctx.db
-        .update(schema.feature)
+        .update(schema.features)
         .set({
           title,
           description,
           type,
-          updatedAt: new Date().toISOString(),
+          updatedAt: new Date(),
         })
         .where(
           and(
-            eq(schema.feature.id, id),
-            eq(schema.feature.projectId, project.id)
+            eq(schema.features.id, id),
+            eq(schema.features.projectId, projectData.id)
           )
         )
         .returning()
 
-      return featureBase.parse(data[0])
+      return {
+        feature: data?.[0],
+      }
     }),
   featureExist: protectedOrgProcedure
     .input(z.object({ slug: z.string(), projectSlug: z.string() }))
+    .output(z.object({ exist: z.boolean() }))
     .mutation(async (opts) => {
       const { slug, projectSlug } = opts.input
 
@@ -118,26 +127,21 @@ export const featureRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const feature = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.feature.findFirst({
-          with: {
-            project: {
-              columns: {
-                slug: true,
-              },
-            },
-          },
-          where: (feature, { eq, and }) =>
-            and(eq(feature.projectId, project.id), eq(feature.slug, slug)),
-        })
+      const feature = await opts.ctx.db.query.features.findFirst({
+        columns: {
+          id: true,
+        },
+        where: (feature, { eq, and }) =>
+          and(eq(feature.projectId, project.id), eq(feature.slug, slug)),
       })
 
       return {
-        feature,
+        exist: !!feature,
       }
     }),
   getBySlug: protectedOrgProcedure
     .input(z.object({ slug: z.string(), projectSlug: z.string() }))
+    .output(z.object({ feature: featureSelectBaseSchema.optional() }))
     .query(async (opts) => {
       const { slug, projectSlug } = opts.input
 
@@ -146,41 +150,48 @@ export const featureRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const feature = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.feature.findFirst({
-          with: {
-            project: {
-              columns: {
-                slug: true,
-              },
+      const feature = await opts.ctx.db.query.features.findFirst({
+        with: {
+          project: {
+            columns: {
+              slug: true,
             },
           },
-          where: (feature, { eq, and }) =>
-            and(eq(feature.projectId, project.id), eq(feature.slug, slug)),
-        })
+        },
+        where: (feature, { eq, and }) =>
+          and(eq(feature.projectId, project.id), eq(feature.slug, slug)),
       })
 
       return {
-        feature: featureBase.parse(feature),
+        feature: feature,
       }
     }),
   getById: protectedOrgProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), projectSlug: z.string() }))
+    .output(z.object({ feature: featureSelectBaseSchema.optional() }))
     .query(async (opts) => {
-      const { id } = opts.input
+      const { id, projectSlug } = opts.input
 
-      return await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.feature.findFirst({
-          with: {
-            project: {
-              columns: {
-                slug: true,
-              },
+      const { project } = await hasAccessToProject({
+        projectSlug,
+        ctx: opts.ctx,
+      })
+
+      const feature = await opts.ctx.db.query.features.findFirst({
+        with: {
+          project: {
+            columns: {
+              slug: true,
             },
           },
-          where: (feature, { eq }) => eq(feature.id, id),
-        })
+        },
+        where: (feature, { eq, and }) =>
+          and(eq(feature.projectId, project.id), eq(feature.id, id)),
       })
+
+      return {
+        feature: feature,
+      }
     }),
 
   searchBy: protectedOrgProcedure
@@ -190,6 +201,7 @@ export const featureRouter = createTRPCRouter({
         search: z.string().optional(),
       })
     )
+    .output(z.object({ features: z.array(featureSelectBaseSchema) }))
     .query(async (opts) => {
       const { projectSlug, search } = opts.input
       const filter = `%${search}%`
@@ -199,28 +211,26 @@ export const featureRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const features = await opts.ctx.txRLS(({ txRLS }) =>
-        txRLS.query.feature.findMany({
-          where: (feature, { eq, and, or, ilike }) =>
-            and(
-              eq(feature.projectId, project.id),
-              or(ilike(feature.slug, filter), ilike(feature.title, filter))
-            ),
-          orderBy: (feature, { desc }) => [
-            desc(feature.updatedAt),
-            desc(feature.title),
-          ],
-        })
-      )
+      const features = await opts.ctx.db.query.features.findMany({
+        where: (feature, { eq, and, or, ilike }) =>
+          and(
+            eq(feature.projectId, project.id),
+            or(ilike(feature.slug, filter), ilike(feature.title, filter))
+          ),
+        orderBy: (feature, { desc }) => [
+          desc(feature.updatedAt),
+          desc(feature.title),
+        ],
+      })
 
-      // TODO: avoid selecting all columns
       return {
-        feature: features.map((feature) => featureBase.parse(feature)),
+        features: features,
       }
     }),
 
   listByProject: protectedOrgProcedure
     .input(z.object({ projectSlug: z.string() }))
+    .output(z.object({ features: z.array(featureSelectBaseSchema) }))
     .query(async (opts) => {
       const { projectSlug } = opts.input
 
@@ -229,14 +239,12 @@ export const featureRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const features = await opts.ctx.txRLS(({ txRLS }) =>
-        txRLS.query.feature.findMany({
-          where: (feature, { eq }) => eq(feature.projectId, project.id),
-        })
-      )
+      const features = await opts.ctx.db.query.features.findMany({
+        where: (feature, { eq }) => eq(feature.projectId, project.id),
+      })
 
       return {
-        feature: features.map((feature) => featureBase.parse(feature)),
+        features: features,
       }
     }),
 })

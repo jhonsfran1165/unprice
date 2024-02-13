@@ -20,16 +20,13 @@ export const stripeRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { userId } = opts.ctx.auth
 
-      const workspace = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.workspace.findFirst({
-          columns: {
-            id: true,
-            plan: true,
-            stripeId: true,
-          },
-          where: (workspace, { eq }) =>
-            eq(workspace.tenantId, opts.ctx.tenantId),
-        })
+      const workspace = await opts.ctx.db.query.workspaces.findFirst({
+        columns: {
+          id: true,
+          plan: true,
+          stripeId: true,
+        },
+        where: (workspace, { eq }) => eq(workspace.tenantId, opts.ctx.tenantId),
       })
 
       if (!workspace) {
@@ -41,7 +38,7 @@ export const stripeRouter = createTRPCRouter({
 
       const returnUrl = process.env.NEXTJS_URL + "/"
 
-      if (workspace && workspace.plan !== "FREE" && workspace.stripeId) {
+      if (workspace && workspace.plan !== "free" && workspace.stripeId) {
         /**
          * User is subscribed, create a billing portal session
          */

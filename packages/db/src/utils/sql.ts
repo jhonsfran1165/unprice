@@ -1,4 +1,3 @@
-import { sql } from "drizzle-orm"
 import { text, timestamp } from "drizzle-orm/pg-core"
 
 export const cuid = (d: string) => text(d)
@@ -11,7 +10,7 @@ export const id = {
 // for projects
 export const workspaceID = {
   get id() {
-    return cuid("id").primaryKey().notNull()
+    return cuid("id").notNull()
   },
   get workspaceId() {
     return cuid("workspace_id").notNull()
@@ -21,10 +20,10 @@ export const workspaceID = {
 // for rest of tables
 export const projectID = {
   get id() {
-    return cuid("id").primaryKey().notNull()
+    return cuid("id").notNull()
   },
   get projectId() {
-    return cuid("project_id").notNull().notNull()
+    return cuid("project_id").notNull()
   },
 }
 
@@ -34,16 +33,18 @@ export const tenantID = {
   tenantId: cuid("tenant_id").notNull(),
 }
 
+// INFO: if you want update time on update, you can use this
+// https://aviyadav231.medium.com/automatically-updating-a-timestamp-column-in-postgresql-using-triggers-98766e3b47a0
 // common timestamps for all tables
 export const timestamps = {
   createdAt: timestamp("created_at", {
-    mode: "string",
+    mode: "date",
   })
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
+    .defaultNow(),
   updatedAt: timestamp("updated_at", {
-    mode: "string",
+    mode: "date",
   })
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
+    .defaultNow(),
 }

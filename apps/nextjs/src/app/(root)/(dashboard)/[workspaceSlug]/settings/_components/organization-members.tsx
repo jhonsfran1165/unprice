@@ -37,19 +37,19 @@ function formatMemberRole(role: string) {
 }
 
 export function OrganizationMembers() {
-  const [members] = api.organization.listMembers.useSuspenseQuery()
+  const [members] = api.workspace.listMembers.useSuspenseQuery()
   const apiUtils = api.useUtils()
   const toaster = useToast()
   const router = useRouter()
   const { orgRole } = useAuth()
 
-  const deleteMember = api.organization.deleteMember.useMutation({
+  const deleteMember = api.workspace.deleteMember.useMutation({
     onSettled: async () => {
-      await apiUtils.organization.listMembers.invalidate()
+      await apiUtils.workspace.listMembers.invalidate()
     },
     onSuccess: (data) => {
       toaster.toast({
-        title: `Deleted ${data.memberName} from the organization`,
+        title: `Deleted ${data.memberName} from the workspace`,
       })
     },
     onError: (err) => {

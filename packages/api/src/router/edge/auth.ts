@@ -4,15 +4,13 @@ import { createTRPCRouter, protectedProcedure } from "../../trpc"
 
 export const authRouter = createTRPCRouter({
   mySubscription: protectedProcedure.query(async (opts) => {
-    const workspace = await opts.ctx.txRLS(({ txRLS }) => {
-      return txRLS.query.workspace.findFirst({
-        columns: {
-          plan: true,
-          billingPeriodStart: true,
-          billingPeriodEnd: true,
-        },
-        where: (workspace, { eq }) => eq(workspace.tenantId, opts.ctx.tenantId),
-      })
+    const workspace = await opts.ctx.db.query.workspaces.findFirst({
+      columns: {
+        plan: true,
+        billingPeriodStart: true,
+        billingPeriodEnd: true,
+      },
+      where: (workspace, { eq }) => eq(workspace.tenantId, opts.ctx.tenantId),
     })
 
     return {

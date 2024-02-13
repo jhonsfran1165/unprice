@@ -3,14 +3,15 @@ import { z } from "zod"
 
 import { schema } from "@builderai/db"
 
-export const createProjectSchema = createInsertSchema(schema.project).extend({
+export const createProjectSchema = createInsertSchema(schema.projects, {
   id: z.string().optional(),
   slug: z.string().optional(),
   workspaceId: z.string().optional(),
-  tenantId: z.string().optional(),
   name: z.string(),
   url: z.string().url(),
 })
+
+export const selectProjectSchema = createSelectSchema(schema.projects)
 
 export const renameProjectSchema = z.object({
   projectSlug: z.string(),
@@ -29,7 +30,6 @@ export const transferToWorkspaceSchema = z.object({
   projectSlug: z.string(),
   tenantId: z.string(),
 })
-export const selectProjectSchema = createSelectSchema(schema.project)
 
 export type CreateProject = z.infer<typeof createProjectSchema>
 export type SelectProject = z.infer<typeof selectProjectSchema>

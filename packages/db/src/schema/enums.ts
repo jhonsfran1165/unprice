@@ -8,15 +8,16 @@ import {
   STAGES,
   STATUS_PLAN,
   STATUS_SUBSCRIPTION,
-} from "@builderai/config"
+} from "../utils"
 
-export const plans = pgEnum("plan", PLANS_APP)
-export const subscriptionStatus = pgEnum(
+// TODO: replace when we have our price engine
+export const plansEnum = pgEnum("legacy_plans", PLANS_APP)
+export const subscriptionStatusEnum = pgEnum(
   "subscription_status",
   STATUS_SUBSCRIPTION
 )
-export const projectTier = pgEnum("project_tier", PROJECT_TIERS_APP)
-export const statusPlanEnum = pgEnum("status", STATUS_PLAN)
-export const typeFeatureEnum = pgEnum("type", FEATURE_TYPES)
+export const projectTierEnum = pgEnum("project_tier", PROJECT_TIERS_APP)
+export const statusPlanEnum = pgEnum("plan_version_status", STATUS_PLAN)
+export const typeFeatureEnum = pgEnum("feature_types", FEATURE_TYPES)
 export const currencyEnum = pgEnum("currency", CURRENCIES)
-export const stageEnum = pgEnum("stage", STAGES)
+export const stageEnum = pgEnum("app_stages", STAGES)

@@ -3,6 +3,7 @@ import { z } from "zod"
 import { zfd } from "zod-form-data"
 
 import { schema, utils } from "@builderai/db"
+import { ingestionSelectSchema } from "@builderai/validators/ingestion"
 
 import {
   createTRPCRouter,
@@ -27,12 +28,22 @@ const myFileValidator = z.preprocess(
 
 export const ingestionRouter = createTRPCRouter({
   byId: protectedOrgProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), projectSlug: z.string() }))
+    .output(ingestionSelectSchema)
     .query(async (opts) => {
-      const ingestion = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.ingestion.findFirst({
-          where: (ingestion, { eq }) => eq(ingestion.id, opts.input.id),
-        })
+      const projectSlug = opts.input.projectSlug
+
+      const { project } = await hasAccessToProject({
+        projectSlug,
+        ctx: opts.ctx,
+      })
+
+      const ingestion = await opts.ctx.db.query.ingestions.findFirst({
+        where: (ingestion, { eq, and }) =>
+          and(
+            eq(ingestion.id, opts.input.id),
+            eq(ingestion.projectId, project.id)
+          ),
       })
 
       if (!ingestion) {
@@ -52,6 +63,11 @@ export const ingestionRouter = createTRPCRouter({
         limit: z.number().optional(),
       })
     )
+    .output(
+      z.array(
+        ingestionSelectSchema.extend({ adds: z.number(), subs: z.number() })
+      )
+    )
     .query(async (opts) => {
       const projectSlug = opts.input.projectSlug
 
@@ -60,12 +76,10 @@ export const ingestionRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const ingestions = await opts.ctx.txRLS(({ txRLS }) => {
-        return txRLS.query.ingestion.findMany({
-          where: (ingestion, { eq }) => eq(ingestion.projectId, project.id),
-          limit: opts.input.limit,
-          orderBy: (ingestion, { desc }) => [desc(ingestion.createdAt)],
-        })
+      const ingestions = await opts.ctx.db.query.ingestions.findMany({
+        where: (ingestion, { eq }) => eq(ingestion.projectId, project.id),
+        limit: opts.input.limit,
+        orderBy: (ingestion, { desc }) => [desc(ingestion.createdAt)],
       })
 
       return ingestions.map((ingestion) => ({
@@ -83,20 +97,21 @@ export const ingestionRouter = createTRPCRouter({
         schema: myFileValidator,
       })
     )
+    .output(z.object({ status: z.literal("ok") }))
     .mutation(async (opts) => {
-      const fileContent = await opts.input.schema.text()
+      const { schema: fileSchema, origin, hash, parent } = opts.input
+      const fileContent = await fileSchema.text()
+      const apiKey = opts.ctx.apiKey
 
       const id = utils.newId("ingestion")
-
-      await opts.ctx.db.insert(schema.ingestion).values({
+      await opts.ctx.db.insert(schema.ingestions).values({
         id,
-        projectId: opts.ctx.apiKey.projectId,
-        hash: opts.input.hash,
-        parent: opts.input.parent,
-        origin: opts.input.origin,
+        projectId: apiKey.projectId,
+        hash: hash,
+        parent: parent,
+        origin: origin,
         schema: fileContent,
-        apikeyId: opts.ctx.apiKey.id,
-        tenantId: opts.ctx.tenantId,
+        apiKeyId: apiKey.id,
       })
 
       return { status: "ok" }

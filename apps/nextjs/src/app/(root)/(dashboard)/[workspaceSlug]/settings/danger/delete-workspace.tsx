@@ -36,7 +36,7 @@ export function DeleteWorkspace() {
   const title = "Delete workspace"
   const description = "This will delete the workspace and all of its data."
 
-  const deleteOrganization = api.organization.deleteOrganization.useMutation({
+  const deleteOrganization = api.workspace.deleteOrganization.useMutation({
     onSettled: async () => {
       await apiUtils.project.listByActiveWorkspace.invalidate()
       router.refresh()
