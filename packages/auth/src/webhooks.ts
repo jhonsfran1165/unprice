@@ -12,7 +12,7 @@ export async function handleEvent(event: WebhookEvent) {
       const slug = username ?? utils.generateSlug(2)
 
       await db
-        .insert(schema.workspace)
+        .insert(schema.workspaces)
         .values({
           id: workspaceId,
           tenantId: id,
@@ -21,14 +21,14 @@ export async function handleEvent(event: WebhookEvent) {
           isPersonal: true,
         })
         .onConflictDoUpdate({
-          target: schema.workspace.id,
+          target: schema.workspaces.id,
           set: {
             tenantId: id,
             slug: slug,
             name: first_name ?? slug,
             isPersonal: true,
           },
-          where: eq(schema.workspace.id, workspaceId),
+          where: eq(schema.workspaces.id, workspaceId),
         })
 
       break
@@ -42,7 +42,9 @@ export async function handleEvent(event: WebhookEvent) {
         throw new Error("Id not provided when trying to delete user")
       }
 
-      await db.delete(schema.workspace).where(eq(schema.workspace.tenantId, id))
+      await db
+        .delete(schema.workspaces)
+        .where(eq(schema.workspaces.tenantId, id))
 
       break
     }
@@ -66,7 +68,7 @@ export async function handleEvent(event: WebhookEvent) {
       const orgSlug = slug ? slug : utils.generateSlug(2)
       const workspaceId = utils.workspaceIdFromTenantId(id)
 
-      const workspaceData = await db.query.workspace.findFirst({
+      const workspaceData = await db.query.workspaces.findFirst({
         columns: {
           id: true,
         },
@@ -75,16 +77,16 @@ export async function handleEvent(event: WebhookEvent) {
 
       if (workspaceData?.id) {
         await db
-          .update(schema.workspace)
+          .update(schema.workspaces)
           .set({
             name: name ?? orgSlug,
             slug: orgSlug,
             tenantId: id,
             isPersonal: false,
           })
-          .where(eq(schema.workspace.id, workspaceData.id))
+          .where(eq(schema.workspaces.id, workspaceData.id))
       } else {
-        await db.insert(schema.workspace).values({
+        await db.insert(schema.workspaces).values({
           id: workspaceId,
           tenantId: id,
           slug: orgSlug,

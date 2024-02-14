@@ -16,8 +16,7 @@ import type {
   SignedInAuthObject,
   SignedOutAuthObject,
 } from "@builderai/auth/server"
-import { db, eq, schema } from "@builderai/db"
-import { workspaceIdFromTenantId } from "@builderai/db/src/utils"
+import { db, eq, schema, utils } from "@builderai/db"
 
 import { transformer } from "./transformer"
 
@@ -72,7 +71,7 @@ export const createTRPCContext = async (opts: {
 }) => {
   const { userId, orgId } = opts.auth ?? auth()
   const tenantId = orgId ?? userId ?? ""
-  const workspaceId = workspaceIdFromTenantId(tenantId)
+  const workspaceId = utils.workspaceIdFromTenantId(tenantId)
 
   const apiKey = opts.headers.get("x-builderai-api-key")
   const source = opts.headers.get("x-trpc-source") ?? "unknown"

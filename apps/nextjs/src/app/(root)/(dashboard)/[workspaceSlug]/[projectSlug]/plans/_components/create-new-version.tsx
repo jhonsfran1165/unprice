@@ -1,8 +1,9 @@
 "use client"
 
-import { TRPCClientError } from "@trpc/client"
 import { useParams, useRouter } from "next/navigation"
+import { TRPCClientError } from "@trpc/client"
 
+import type { RouterOutputs } from "@builderai/api"
 import { Button } from "@builderai/ui/button"
 import { Add } from "@builderai/ui/icons"
 import { useToast } from "@builderai/ui/use-toast"
@@ -13,7 +14,10 @@ import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
 // TODO: we can do the same without zod-form
-const CreateNewVersion = (props: { projectSlug: string; planId: string }) => {
+const CreateNewVersion = (props: {
+  projectSlug: string
+  plan: RouterOutputs["plans"]["getBySlug"]["plan"]
+}) => {
   const params = useParams()
   const router = useRouter()
 
@@ -23,23 +27,24 @@ const CreateNewVersion = (props: { projectSlug: string; planId: string }) => {
 
   const form = useZodForm({
     schema: createNewVersionPlan,
-    defaultValues: { planId: props.planId, projectSlug: props.projectSlug },
+    defaultValues: { planId: props.plan.id, projectSlug: props.projectSlug },
   })
 
-  const createPlanVersion = api.plan.createNewVersion.useMutation({
+  const createPlanVersion = api.plans.createNewVersion.useMutation({
     onSettled: async () => {
-      await apiUtils.plan.listByProject.invalidate({
+      await apiUtils.plans.listByProject.invalidate({
         projectSlug: props.projectSlug,
       })
     },
     onSuccess: (data) => {
+      const { planVersion } = data
       toaster.toast({
         title: "Project created",
-        description: `Version ${data?.version} created successfully.`,
+        description: `Version ${planVersion?.version} created successfully.`,
       })
 
       router.push(
-        `/${workspaceSlug}/${props.projectSlug}/plans/${props.planId}/${data?.version}/overview`
+        `/${workspaceSlug}/${props.projectSlug}/plans/${props.plan.slug}/${planVersion?.version}/overview`
       )
     },
     onError: (err) => {

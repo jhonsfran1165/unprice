@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 
 import { and, eq, schema } from "@builderai/db"
-import type { SelectProject } from "@builderai/validators/project"
+import type { Project } from "@builderai/validators/project"
 import type { SelectWorkspace } from "@builderai/validators/workspace"
 
 import type { Context } from "../trpc"
@@ -15,7 +15,7 @@ export const hasAccessToProject = async ({
   projectSlug?: string
   ctx: Context
 }): Promise<{
-  project: SelectProject & { workspace: SelectWorkspace }
+  project: Project & { workspace: SelectWorkspace }
 }> => {
   const workspaceId = ctx.workspaceId
 

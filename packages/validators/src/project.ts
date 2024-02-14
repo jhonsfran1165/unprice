@@ -31,7 +31,9 @@ export const transferToWorkspaceSchema = z.object({
   tenantId: z.string(),
 })
 
-export type CreateProject = z.infer<typeof createProjectSchema>
-export type SelectProject = z.infer<typeof selectProjectSchema>
+export type ProjectInsert = z.infer<typeof createProjectSchema>
+export type Project = z.infer<typeof selectProjectSchema>
 export type RenameProject = z.infer<typeof renameProjectSchema>
-export type TransferToWorkspace = z.infer<typeof transferToWorkspaceSchema>
+export type ProjectTransferToWorkspace = z.infer<
+  typeof transferToWorkspaceSchema
+>

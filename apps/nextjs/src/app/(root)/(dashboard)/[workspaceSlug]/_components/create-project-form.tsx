@@ -16,7 +16,7 @@ import {
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import { useToast } from "@builderai/ui/use-toast"
-import type { CreateProject } from "@builderai/validators/project"
+import type { Project, ProjectInsert } from "@builderai/validators/project"
 import { createProjectSchema } from "@builderai/validators/project"
 
 import { useZodForm } from "~/lib/zod-form"
@@ -25,7 +25,7 @@ import { api } from "~/trpc/client"
 const CreateProjectForm = (props: {
   workspaceSlug: string
   // defaults to redirecting to the project page
-  onSuccess?: (project: CreateProject & { slug: string }) => void
+  onSuccess?: (project: Project) => void
 }) => {
   const router = useRouter()
   const toaster = useToast()
@@ -36,23 +36,21 @@ const CreateProjectForm = (props: {
     schema: createProjectSchema,
   })
 
-  const createProject = api.project.create.useMutation({
+  const createProject = api.projects.create.useMutation({
     onSettled: async () => {
-      await apiUtils.project.listByActiveWorkspace.invalidate()
+      await apiUtils.projects.listByWorkspace.invalidate()
     },
     onSuccess: (data) => {
+      const { project: newProject } = data
       if (props.onSuccess) {
-        props.onSuccess({
-          ...data,
-          slug: data.projectSlug,
-        })
+        props.onSuccess(newProject)
       } else {
-        router.push(`/${props.workspaceSlug}/${data.projectSlug}/overview`)
+        router.push(`/${props.workspaceSlug}/${newProject?.slug}/overview`)
       }
 
       toaster.toast({
         title: "Project created",
-        description: `Project ${data.name} created successfully.`,
+        description: `Project ${newProject.name} created successfully.`,
       })
     },
     onError: (err) => {
@@ -72,7 +70,7 @@ const CreateProjectForm = (props: {
     },
   })
 
-  const onSubmit = (data: CreateProject) => {
+  const onSubmit = (data: ProjectInsert) => {
     startTransition(async () => {
       createProject.mutate(data)
     })

@@ -15,7 +15,7 @@ export async function userCanAccessProject({
     notFound()
   }
 
-  const { haveAccess, isInTier } = await api.project.canAccessProject({
+  const { haveAccess, isInTier } = await api.projects.canAccessProject({
     slug: projectSlug,
     needsToBeInTier,
   })

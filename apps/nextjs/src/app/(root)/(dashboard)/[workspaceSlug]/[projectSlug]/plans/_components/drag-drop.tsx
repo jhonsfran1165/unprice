@@ -1,49 +1,49 @@
 "use client"
 
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type {
-    DragEndEvent,
-    DragOverEvent,
-    DragStartEvent,
-    DropAnimation,
+  DragEndEvent,
+  DragOverEvent,
+  DragStartEvent,
+  DropAnimation,
 } from "@dnd-kit/core"
 import {
-    DndContext,
-    DragOverlay,
-    MeasuringStrategy,
-    MouseSensor,
-    TouchSensor,
-    defaultDropAnimationSideEffects,
-    pointerWithin,
-    useSensor,
-    useSensors,
+  defaultDropAnimationSideEffects,
+  DndContext,
+  DragOverlay,
+  MeasuringStrategy,
+  MouseSensor,
+  pointerWithin,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core"
 import {
-    SortableContext,
-    arrayMove,
-    verticalListSortingStrategy,
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { TRPCClientError } from "@trpc/client"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
+import type { RouterOutputs } from "@builderai/api"
+import type { PlanConfig } from "@builderai/db/src/schema/prices"
 import { Accordion } from "@builderai/ui/accordion"
 import { Button } from "@builderai/ui/button"
 import { Add } from "@builderai/ui/icons"
 import {
-    ResizableHandle,
-    ResizablePanel,
-    ResizablePanelGroup,
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
 } from "@builderai/ui/resizable"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 import { useToast } from "@builderai/ui/use-toast"
 import type {
-    FeaturePlan,
-    FeatureType,
-    Group,
-    GroupType,
-    PlanConfig,
-    PlanVersion,
+  FeaturePlan,
+  FeatureType,
+  Group,
+  GroupType,
 } from "@builderai/validators/price"
 import { planConfigSchema } from "@builderai/validators/price"
 
@@ -84,11 +84,11 @@ export default function DragDrop({
   version,
 }: {
   projectSlug: string
-  version: PlanVersion
+  version: RouterOutputs["plans"]["getVersionById"]["planVersion"]
 }) {
   const toaster = useToast()
   const wasBuilt = useRef(false)
-  const disabled = version.status === "published"
+  const disabled = version?.status === "published"
 
   // keep track of the changes in localStorage
   const [config, setConfig] = useLocalStorage(
@@ -172,7 +172,7 @@ export default function DragDrop({
     }
   }
 
-  const updatePlanVersion = api.plan.updateVersion.useMutation({
+  const updatePlanVersion = api.plans.updateVersion.useMutation({
     onSuccess: () => {
       setConfig({}) // clear the local storage
     },
@@ -201,13 +201,13 @@ export default function DragDrop({
 
     if (Object.keys(config).length !== 0) {
       const mergedConfig = {
-        ...version.featuresPlan,
+        ...version?.featuresConfig,
         ...config,
       }
 
       reBuildDragAndDrop(mergedConfig)
     } else {
-      reBuildDragAndDrop(version.featuresPlan ?? {})
+      reBuildDragAndDrop(version?.featuresConfig ?? {})
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -220,9 +220,9 @@ export default function DragDrop({
     const savedData = async () => {
       await updatePlanVersion.mutateAsync({
         projectSlug,
-        versionId: version.version,
-        planId: version.planId,
-        featuresPlan: debouncedPlanConfig,
+        versionId: version?.version ?? 0,
+        planId: version?.plan.id ?? "",
+        featuresConfig: debouncedPlanConfig,
       })
     }
 
@@ -478,7 +478,7 @@ export default function DragDrop({
             <Accordion type="multiple" className="space-y-2">
               <SortableContext
                 items={groupIds}
-                disabled={version.status === "published"}
+                disabled={version?.status === "published"}
                 strategy={verticalListSortingStrategy}
               >
                 {groups.map((g) => (
@@ -495,7 +495,7 @@ export default function DragDrop({
                     ) : (
                       <ScrollArea className="h-full px-3">
                         <SortableContext
-                          disabled={version.status === "published"}
+                          disabled={version?.status === "published"}
                           items={
                             planConfig[g.id]?.features.map((f) => f.id) ?? []
                           }
@@ -503,7 +503,7 @@ export default function DragDrop({
                           <div className="space-y-2">
                             {planConfig[g.id]?.features.map((f) => (
                               <SortableFeature
-                                disabled={version.status === "published"}
+                                disabled={version?.status === "published"}
                                 projectSlug={projectSlug}
                                 deleteFeature={deleteFeature}
                                 updateFeature={updateFeature}

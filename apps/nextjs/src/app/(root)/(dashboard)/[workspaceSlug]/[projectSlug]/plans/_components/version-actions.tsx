@@ -26,7 +26,7 @@ export function VersionActions({
 }) {
   const toaster = useToast()
 
-  const updatePlanVersion = api.plan.updateVersion.useMutation({
+  const updatePlanVersion = api.plans.updateVersion.useMutation({
     onSuccess: () => {
       toaster.toast({
         title: "Version published",
@@ -69,7 +69,6 @@ export function VersionActions({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={async () => {
-            console.log("clicked")
             await updatePlanVersion.mutateAsync({
               planId,
               versionId,

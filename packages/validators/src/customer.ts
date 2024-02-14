@@ -24,7 +24,7 @@ export const customerInsertSchema = customerInsertBaseSchema
     projectSlug: z.string(),
   })
 
-export const updateUserSchema = customerSelectSchema
+export const updateCustomerSchema = customerSelectSchema
   .extend({
     email: z.string().email(),
     name: z.string().min(3),
@@ -38,7 +38,7 @@ export const updateUserSchema = customerSelectSchema
     projectSlug: z.string(),
   })
 
-export type User = z.infer<typeof customerSelectSchema>
+export type Customer = z.infer<typeof customerSelectSchema>
 export type UserSubscription = z.infer<typeof customerSubscriptionSchema>
-export type CreateUserSubscription = z.infer<typeof customerInsertSchema>
-export type UpdateUserSubscription = z.infer<typeof updateUserSchema>
+export type CreateCustomer = z.infer<typeof customerInsertSchema>
+export type UpdateCustomer = z.infer<typeof updateCustomerSchema>

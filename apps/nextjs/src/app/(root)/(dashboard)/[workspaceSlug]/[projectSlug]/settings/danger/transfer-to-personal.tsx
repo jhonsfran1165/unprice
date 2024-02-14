@@ -35,28 +35,30 @@ export function TransferProjectToPersonal() {
   const apiUtils = api.useUtils()
   const router = useRouter()
 
-  const transferProjectToPersonal = api.project.transferToPersonal.useMutation({
-    onSettled: async () => {
-      await apiUtils.project.bySlug.invalidate({ slug: projectSlug })
-      router.push(`/${workspaceSlug}/overview`)
-    },
-    onSuccess: () => {
-      toaster.toast({ title: "Project transferred" })
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
-      } else {
-        toaster.toast({
-          title: "Project could not be transferred",
-          variant: "destructive",
-        })
-      }
-    },
-  })
+  const transferProjectToPersonal = api.projects.transferToPersonal.useMutation(
+    {
+      onSettled: async () => {
+        await apiUtils.projects.bySlug.invalidate({ slug: projectSlug })
+        router.push(`/${workspaceSlug}/overview`)
+      },
+      onSuccess: () => {
+        toaster.toast({ title: "Project transferred" })
+      },
+      onError: (err) => {
+        if (err instanceof TRPCClientError) {
+          toaster.toast({
+            title: err.message,
+            variant: "destructive",
+          })
+        } else {
+          toaster.toast({
+            title: "Project could not be transferred",
+            variant: "destructive",
+          })
+        }
+      },
+    }
+  )
 
   const title = "Transfer to Personal"
   const description = "Transfer this project to your personal workspace"

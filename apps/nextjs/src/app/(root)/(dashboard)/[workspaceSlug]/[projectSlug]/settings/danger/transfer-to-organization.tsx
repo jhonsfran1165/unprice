@@ -1,43 +1,43 @@
 "use client"
 
-import { TRPCClientError } from "@trpc/client"
 import { useParams, useRouter } from "next/navigation"
+import { TRPCClientError } from "@trpc/client"
 
 import { Button } from "@builderai/ui/button"
 import {
-    Card,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@builderai/ui/card"
 import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@builderai/ui/dialog"
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@builderai/ui/form"
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@builderai/ui/select"
 import { useToast } from "@builderai/ui/use-toast"
-import type { TransferToWorkspace } from "@builderai/validators/project"
+import type { ProjectTransferToWorkspace } from "@builderai/validators/project"
 import { transferToWorkspaceSchema } from "@builderai/validators/project"
 
 import { useZodForm } from "~/lib/zod-form"
@@ -61,9 +61,9 @@ export function TransferProjectToOrganization() {
     },
   })
 
-  const transferToWorkspace = api.project.transferToWorkspace.useMutation({
+  const transferToWorkspace = api.projects.transferToWorkspace.useMutation({
     onSettled: async () => {
-      await apiUtils.project.listByActiveWorkspace.refetch()
+      await apiUtils.projects.listByWorkspace.refetch()
       router.push(`/${workspaceSlug}`)
     },
     onSuccess: () => {
@@ -86,7 +86,7 @@ export function TransferProjectToOrganization() {
     },
   })
 
-  async function onSubmit(data: TransferToWorkspace) {
+  async function onSubmit(data: ProjectTransferToWorkspace) {
     if (!projectSlug) throw new Error("No project ID provided")
     transferToWorkspace.mutate(data)
   }

@@ -123,7 +123,7 @@ export default async function DashboardPage(props: {
 function IngestionCard(props: {
   projectSlug: string
   workspaceSlug: string
-  ingestion: RouterOutputs["ingestion"]["list"][number]
+  ingestion: RouterOutputs["ingestions"]["list"][number]
 }) {
   const { ingestion } = props
   const { adds, subs } = ingestion
@@ -172,7 +172,7 @@ async function RecentIngestions(props: {
   projectSlug: string
   workspaceSlug: string
 }) {
-  const ingestions = await api.ingestion.list({
+  const ingestions = await api.ingestions.list({
     projectSlug: props.projectSlug,
     limit: 5,
   })

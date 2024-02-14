@@ -1,5 +1,5 @@
-import { TRPCClientError } from "@trpc/client"
 import Link from "next/link"
+import { TRPCClientError } from "@trpc/client"
 import { z } from "zod"
 
 import { FEATURE_TYPES } from "@builderai/config"
@@ -74,7 +74,7 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
           description: "",
         }
 
-  const featureExist = api.feature.featureExist.useMutation()
+  const featureExist = api.features.featureExist.useMutation()
 
   // async validation only when creating a new feature
   const forSchema =
@@ -85,16 +85,12 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
             .string()
             .min(3)
             .refine(async (slug) => {
-              const data = await featureExist.mutateAsync({
+              const { exist } = await featureExist.mutateAsync({
                 projectSlug: projectSlug,
                 slug: slug,
               })
 
-              if (data.feature?.id) {
-                return false
-              }
-
-              return true
+              return !exist
             }, "Slug already exists. Change the title of your feature."),
         })
 
@@ -103,16 +99,17 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
     defaultValues,
   })
 
-  const createFeature = api.feature.create.useMutation({
+  const createFeature = api.features.create.useMutation({
     onSettled: async () => {
-      await apiUtils.feature.searchBy.invalidate({
+      await apiUtils.features.searchBy.invalidate({
         projectSlug: projectSlug,
       })
     },
     onSuccess: (data) => {
+      const { feature } = data
       toaster.toast({
         title: "Feature Saved",
-        description: `Feature ${data?.title} saved successfully.`,
+        description: `Feature ${feature.title} saved successfully.`,
       })
 
       form.reset(defaultValues)
@@ -134,16 +131,17 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
     },
   })
 
-  const updateFeature = api.feature.update.useMutation({
+  const updateFeature = api.features.update.useMutation({
     onSettled: async () => {
-      await apiUtils.feature.searchBy.invalidate({
+      await apiUtils.features.searchBy.invalidate({
         projectSlug: projectSlug,
       })
     },
     onSuccess: (data) => {
+      const { feature } = data
       toaster.toast({
         title: "Feature Saved",
-        description: `Feature ${data?.title} saved successfully.`,
+        description: `Feature ${feature.title} saved successfully.`,
       })
     },
     onError: (err) => {
@@ -163,16 +161,17 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
     },
   })
 
-  const deleteFeature = api.feature.delete.useMutation({
+  const deleteFeature = api.features.delete.useMutation({
     onSettled: async () => {
-      await apiUtils.feature.searchBy.invalidate({
+      await apiUtils.features.searchBy.invalidate({
         projectSlug: projectSlug,
       })
     },
     onSuccess: (data) => {
+      const { feature } = data
       toaster.toast({
         title: "Feature Saved",
-        description: `Feature deleted successfully.`,
+        description: `Feature ${feature.slug} deleted successfully.`,
       })
     },
     onError: (err) => {
@@ -217,6 +216,7 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
                   await updateFeature.mutateAsync({
                     ...(data as UpdateFeature),
                     id: feature.id,
+                    projectSlug: projectSlug,
                   })
                   return
                 } else if (mode === "create") {

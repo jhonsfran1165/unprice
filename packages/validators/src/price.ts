@@ -2,15 +2,13 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import { schema } from "@builderai/db"
-import type { featureSchema } from "@builderai/db/src/schema/prices"
-import { versionPlanConfig } from "@builderai/db/src/schema/prices"
 
 export const planSelectBaseSchema = createSelectSchema(schema.plans)
 export const planInsertBaseSchema = createInsertSchema(schema.plans)
 
 export const versionSelectBaseSchema = createSelectSchema(schema.versions, {
-  featuresConfig: versionPlanConfig,
-  addonsConfig: versionPlanConfig,
+  featuresConfig: schema.versionPlanConfig,
+  addonsConfig: schema.versionPlanConfig,
 })
 
 export const createPlanSchema = planSelectBaseSchema
@@ -124,8 +122,8 @@ export type UpdateVersion = z.infer<typeof updateVersionPlan>
 export type PlanVersion = z.infer<typeof versionSelectBaseSchema>
 export type PlanVersionList = z.infer<typeof versionListBase>
 export type CreatePlanVersion = z.infer<typeof createNewVersionPlan>
-export type FeatureConfig = z.infer<typeof versionPlanConfig>
-export type FeaturePlan = z.infer<typeof featureSchema>
+export type FeatureConfig = z.infer<typeof schema.versionPlanConfig>
+export type FeaturePlan = z.infer<typeof schema.featureSchema>
 export type CreateFeature = z.infer<typeof createFeatureSchema>
 export type UpdateFeature = z.infer<typeof updateFeatureSchema>
 export type Feature = z.infer<typeof featureSelectBaseSchema>

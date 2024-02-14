@@ -17,8 +17,9 @@ export const preferredRegion = ["fra1"]
 export default async function IngestionPage(props: {
   params: { workspaceSlug: string; projectSlug: string; ingestionId: string }
 }) {
-  const ingestion = await api.ingestion.byId({
+  const ingestion = await api.ingestions.byId({
     id: props.params.ingestionId,
+    projectSlug: props.params.projectSlug,
   })
 
   return (

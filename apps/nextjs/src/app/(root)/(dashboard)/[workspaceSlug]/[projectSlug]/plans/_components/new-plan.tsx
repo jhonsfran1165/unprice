@@ -55,8 +55,8 @@ export function NewPlanDialog() {
     },
   })
 
-  const createPlan = api.plan.create.useMutation({
-    onSettled: (data) => {
+  const createPlan = api.plans.create.useMutation({
+    onSettled: (_data) => {
       router.refresh()
     },
     onError: (err) => {

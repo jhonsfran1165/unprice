@@ -35,7 +35,7 @@ export const InviteMemberForm = () => {
     schema: inviteOrgMemberSchema,
   })
 
-  const inviteMember = api.workspace.inviteMember.useMutation({
+  const inviteMember = api.workspaces.inviteMember.useMutation({
     onSuccess: (data) => {
       toaster.toast({
         title: "Member invited",

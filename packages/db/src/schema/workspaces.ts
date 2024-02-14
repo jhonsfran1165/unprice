@@ -23,11 +23,11 @@ export const workspaces = pgTableProject(
     stripeId: text("stripe_id").unique(),
     subscriptionId: text("subscription_id").unique(),
     // null means there was no trial
-    trialEnds: timestamp("trial_ends", { mode: "string" }),
+    trialEnds: timestamp("trial_ends", { mode: "date" }),
     // if null, you should fall back to start of month
-    billingPeriodStart: timestamp("billing_period_start", { mode: "string" }),
+    billingPeriodStart: timestamp("billing_period_start", { mode: "date" }),
     // if null, you should fall back to end of month
-    billingPeriodEnd: timestamp("billing_period_end", { mode: "string" }),
+    billingPeriodEnd: timestamp("billing_period_end", { mode: "date" }),
     plan: plansEnum("legacy_plans").default("free").notNull(),
   },
   (table) => ({

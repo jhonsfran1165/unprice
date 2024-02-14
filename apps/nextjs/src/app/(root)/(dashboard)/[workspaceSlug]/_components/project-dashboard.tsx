@@ -1,21 +1,25 @@
-"use client"
-
 import Link from "next/link"
 import Balancer from "react-wrap-balancer"
 
 import { Button } from "@builderai/ui/button"
 import { Add, Warning } from "@builderai/ui/icons"
 
-import { api } from "~/trpc/client"
+import { api } from "~/trpc/server"
 import { ProjectCard, ProjectCardSkeleton } from "./project-card"
 
-export const Projects = ({ workspaceSlug }: { workspaceSlug: string }) => {
-  const [data] = api.project.listByActiveWorkspace.useSuspenseQuery()
+export const Projects = async ({
+  workspaceSlug,
+}: {
+  workspaceSlug: string
+}) => {
+  const { limit, projects, limitReached } = await api.projects.listByWorkspace({
+    workspaceSlug,
+  })
 
   return (
     <>
       <div className="flex w-full justify-end">
-        {data.limitReached ? (
+        {limitReached ? (
           <Button className="min-w-max" variant="ghost">
             <Warning className="h-5 w-5" />
             <span className="pl-2">Project limit reached</span>
@@ -31,14 +35,14 @@ export const Projects = ({ workspaceSlug }: { workspaceSlug: string }) => {
       </div>
 
       <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {data.projects.map((project) => (
+        {projects.map((project) => (
           <li key={project.id}>
             <ProjectCard project={project} workspaceSlug={workspaceSlug} />
           </li>
         ))}
       </ul>
 
-      {data.projects.length === 0 && (
+      {projects.length === 0 && (
         <div className="relative">
           <ul className="grid select-none grid-cols-1 gap-4 opacity-40 lg:grid-cols-3">
             <ProjectCardSkeleton pulse={false} />

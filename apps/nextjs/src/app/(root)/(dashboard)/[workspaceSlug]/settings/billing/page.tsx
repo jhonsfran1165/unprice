@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 
+import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import { SubscriptionForm } from "./subscription-form"
 
@@ -22,7 +23,7 @@ export default function BillingPage() {
 }
 
 async function SubscriptionCard() {
-  const subscription = await api.auth.mySubscription.query()
+  const subscription = await api.auth.mySubscription()
 
   return (
     <Card>
@@ -36,7 +37,7 @@ async function SubscriptionCard() {
             {subscription.billingPeriodEnd && (
               <strong>
                 Your subscription will renew on{" "}
-                {new Date(subscription.billingPeriodEnd).toDateString()}
+                {formatDate(subscription.billingPeriodEnd)}.{" "}
               </strong>
             )}
           </p>

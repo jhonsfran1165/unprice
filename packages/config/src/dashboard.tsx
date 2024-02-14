@@ -62,12 +62,11 @@ const WorkspaceRoutes: Record<
 
 const submodulesProject = [
   "overview",
-  "canvas",
   "plans",
   "apikeys",
   "settings",
   "usage",
-  "users",
+  "customers",
 ] as const
 
 const ProjectRoutes: Record<
@@ -78,13 +77,6 @@ const ProjectRoutes: Record<
     titleTab: "Dashboard",
     icon: "Dashboard",
     href: "/overview",
-  },
-  canvas: {
-    titleTab: "Canvas",
-    icon: "Receipt",
-    href: "/canvas",
-    disabled: false,
-    isNew: true,
   },
   plans: {
     titleTab: "Plans",
@@ -133,14 +125,14 @@ const ProjectRoutes: Record<
       },
     },
   },
-  users: {
-    titleTab: "Users",
-    href: "/users/overview",
+  customers: {
+    titleTab: "Customers",
+    href: "/customers/overview",
     icon: "User2",
     sidebarMenu: {
       overview: {
-        title: "Users",
-        href: "/users/overview",
+        title: "Customers",
+        href: "/customers/overview",
         icon: "User2",
       },
     },

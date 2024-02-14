@@ -34,9 +34,9 @@ export function DeleteProject() {
   const toaster = useToast()
   const router = useRouter()
 
-  const deleteProject = api.project.delete.useMutation({
+  const deleteProject = api.projects.delete.useMutation({
     onSettled: async () => {
-      await apiUtils.project.bySlug.invalidate({ slug: projectSlug })
+      await apiUtils.projects.bySlug.invalidate({ slug: projectSlug })
       router.push(`/${workspaceSlug}/overview`)
     },
     onSuccess: () => {

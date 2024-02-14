@@ -5,10 +5,10 @@ import type { ProjectTier } from "@builderai/config"
 import { PROJECT_TIER } from "@builderai/config"
 import { cn } from "@builderai/ui"
 import {
-    Card,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@builderai/ui/card"
 
 function ProjectTierIndicator(props: { tier: ProjectTier }) {
@@ -28,7 +28,7 @@ function ProjectTierIndicator(props: { tier: ProjectTier }) {
 
 export function ProjectCard(props: {
   workspaceSlug: string
-  project: RouterOutputs["project"]["listByActiveWorkspace"]["projects"][number]
+  project: RouterOutputs["projects"]["listByWorkspace"]["projects"][number]
 }) {
   const { project } = props
   const projectTier = (project.tier as ProjectTier) ?? ("FREE" as ProjectTier)

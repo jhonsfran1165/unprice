@@ -27,12 +27,12 @@ export function Features({
 
   const debouncedSearch = useDebounce(search, 500)
 
-  const { data, isLoading } = api.feature.searchBy.useQuery({
+  const { data, isLoading } = api.features.searchBy.useQuery({
     projectSlug: projectSlug,
     search: debouncedSearch,
   })
 
-  const dbFeatures = data?.feature ?? []
+  const dbFeatures = data?.features ?? []
 
   const searchableFeatures = dbFeatures.filter((feature) => {
     return !selectedFeaturesIds.includes(feature.id)

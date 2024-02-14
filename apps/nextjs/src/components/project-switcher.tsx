@@ -22,16 +22,18 @@ import { ProjectSwitcherSkeleton } from "./project-switcher-skeleton"
 
 export function ProjectSwitcher() {
   const router = useRouter()
+  const params = useParams()
 
-  const { data, isLoading } = api.project.listByActiveWorkspace.useQuery()
+  const projectSlug = params.projectSlug as string
+  const workspaceSlug = params.workspaceSlug as string
+
+  const { data, isLoading } = api.projects.listByWorkspace.useQuery({
+    workspaceSlug: workspaceSlug ?? "",
+  })
 
   const { organization } = useOrganization()
 
   const [switcherOpen, setSwitcherOpen] = useState(false)
-
-  const params = useParams()
-
-  const projectSlug = params.projectSlug as string
 
   const activeProject = data?.projects.find((p) => p.slug === projectSlug)
 

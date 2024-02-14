@@ -29,7 +29,7 @@ export async function handleEvent(event: Stripe.Event) {
       }
 
       // stripeId is unique so we can rely on that to filter the right workspace and user
-      const workspaceData = await db.query.workspace.findFirst({
+      const workspaceData = await db.query.workspaces.findFirst({
         columns: {
           id: true,
         },
@@ -46,13 +46,13 @@ export async function handleEvent(event: Stripe.Event) {
        */
       if (workspaceData) {
         return await db
-          .update(schema.workspace)
+          .update(schema.workspaces)
           .set({
             subscriptionId: subscription.id,
             billingPeriodEnd: new Date(subscription.current_period_end * 1000),
             plan: subscriptionPlan?.key,
           })
-          .where(eq(schema.workspace.id, workspaceData.id))
+          .where(eq(schema.workspaces.id, workspaceData.id))
       }
 
       /**
@@ -67,7 +67,7 @@ export async function handleEvent(event: Stripe.Event) {
 
       const workspaceId = utils.workspaceIdFromTenantId(organization.id)
 
-      await db.insert(schema.workspace).values({
+      await db.insert(schema.workspaces).values({
         id: workspaceId,
         stripeId,
         subscriptionId: subscription.id,
@@ -98,12 +98,12 @@ export async function handleEvent(event: Stripe.Event) {
       )
 
       await db
-        .update(schema.workspace)
+        .update(schema.workspaces)
         .set({
           billingPeriodEnd: new Date(subscription.current_period_end * 1000),
           plan: subscriptionPlan?.key,
         })
-        .where(eq(schema.workspace.subscriptionId, subscription.id))
+        .where(eq(schema.workspaces.subscriptionId, subscription.id))
 
       break
     }

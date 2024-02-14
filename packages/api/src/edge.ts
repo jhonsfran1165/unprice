@@ -1,24 +1,24 @@
-import { apiKeyRouter } from "./router/edge/apikey"
+import { apiKeyRouter } from "./router/edge/apikeys"
 import { authRouter } from "./router/edge/auth"
-import { domainRouter } from "./router/edge/domain"
-import { featureRouter } from "./router/edge/feature"
-import { planRouter } from "./router/edge/plan"
-import { projectRouter } from "./router/edge/project"
+import { domainRouter } from "./router/edge/domains"
+import { featureRouter } from "./router/edge/features"
+import { planRouter } from "./router/edge/plans"
+import { projectRouter } from "./router/edge/projects"
 import { stripeRouter } from "./router/edge/stripe"
-import { subscriptionRouter } from "./router/edge/subscription"
-import { workspaceRouter } from "./router/edge/workspace"
+import { subscriptionRouter } from "./router/edge/subscriptions"
+import { workspaceRouter } from "./router/edge/workspaces"
 import { createTRPCRouter } from "./trpc"
 
 // Deployed to /trpc/edge/**
 export const edgeRouter = createTRPCRouter({
-  workspace: workspaceRouter,
-  project: projectRouter,
-  plan: planRouter,
+  workspaces: workspaceRouter,
+  projects: projectRouter,
+  plans: planRouter,
   auth: authRouter,
-  apikey: apiKeyRouter,
+  apikeys: apiKeyRouter,
   // TODO: put this inside plan
-  feature: featureRouter,
-  subscription: subscriptionRouter,
-  domain: domainRouter,
+  features: featureRouter,
+  subscriptions: subscriptionRouter,
+  domains: domainRouter,
   stripe: stripeRouter,
 })

@@ -1,9 +1,11 @@
 import { headers } from "next/headers"
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
+// TODO: delete this
+import { Webhook } from "svix"
 
 import type { WebhookEvent } from "@builderai/auth/server"
-import { handleEvent, Webhook } from "@builderai/auth/webhooks"
+import { handleEvent } from "@builderai/auth/webhooks"
 
 import { env } from "~/env.mjs"
 

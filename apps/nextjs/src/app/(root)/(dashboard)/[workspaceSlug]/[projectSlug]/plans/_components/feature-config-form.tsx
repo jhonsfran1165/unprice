@@ -3,6 +3,7 @@ import Link from "next/link"
 import { useFieldArray } from "react-hook-form"
 
 import { FEATURE_TYPES } from "@builderai/config"
+import { schema, utils } from "@builderai/db"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
@@ -49,7 +50,6 @@ import {
   TooltipTrigger,
 } from "@builderai/ui/tooltip"
 import type { FeaturePlan } from "@builderai/validators/price"
-import { featurePlanSchema, TIER_MODES } from "@builderai/validators/price"
 
 import { Ping } from "~/components/ping"
 import { useZodForm } from "~/lib/zod-form"
@@ -88,7 +88,7 @@ export function FeatureConfigForm({
   }
 
   const form = useZodForm({
-    schema: featurePlanSchema,
+    schema: schema.featureSchema,
     defaultValues: {
       ...feature,
       ...defaultValues,
@@ -328,7 +328,7 @@ export function FeatureConfigForm({
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {TIER_MODES.map((mode) => (
+                              {utils.TIER_MODES.map((mode) => (
                                 <SelectItem key={mode} value={mode}>
                                   <span className="font-medium">{mode}</span>
                                 </SelectItem>

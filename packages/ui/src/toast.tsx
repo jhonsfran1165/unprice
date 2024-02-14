@@ -1,7 +1,7 @@
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
-import { cva } from "class-variance-authority"
 import type { VariantProps } from "class-variance-authority"
+import { cva } from "class-variance-authority"
 import { X } from "lucide-react"
 
 import { cn } from "./utils/cn"
@@ -29,6 +29,8 @@ const toastVariants = cva(
     variants: {
       variant: {
         default: "bg-background border",
+        warning:
+          "group warning border-warning bg-warning text-warning-foreground",
         destructive:
           "group destructive border-destructive bg-destructive text-destructive-foreground",
       },
@@ -116,13 +118,13 @@ type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
 type ToastActionElement = React.ReactElement<typeof ToastAction>
 
 export {
-  type ToastProps,
-  type ToastActionElement,
-  ToastProvider,
-  ToastViewport,
   Toast,
-  ToastTitle,
-  ToastDescription,
-  ToastClose,
   ToastAction,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+  type ToastActionElement,
+  type ToastProps,
 }

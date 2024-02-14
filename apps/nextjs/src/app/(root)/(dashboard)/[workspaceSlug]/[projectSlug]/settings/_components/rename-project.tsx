@@ -22,14 +22,14 @@ import { api } from "~/trpc/client"
 export function RenameProjectForm(props: { projectSlug: string }) {
   const { toast } = useToast()
   const apiUtils = api.useUtils()
-  const [data] = api.project.bySlug.useSuspenseQuery({
+  const [data] = api.projects.bySlug.useSuspenseQuery({
     slug: props.projectSlug,
   })
 
-  const renameProject = api.project.rename.useMutation({
+  const renameProject = api.projects.rename.useMutation({
     onSettled: async () => {
-      await apiUtils.project.listByActiveWorkspace.invalidate()
-      await apiUtils.project.bySlug.invalidate({ slug: props.projectSlug })
+      await apiUtils.projects.listByWorkspace.invalidate()
+      await apiUtils.projects.bySlug.invalidate({ slug: props.projectSlug })
     },
     onSuccess: () => {
       toast({
@@ -54,8 +54,8 @@ export function RenameProjectForm(props: { projectSlug: string }) {
   const form = useZodForm({
     schema: renameProjectSchema,
     defaultValues: {
-      projectSlug: data?.slug,
-      name: data?.name ?? "",
+      projectSlug: data.project?.slug,
+      name: data.project?.name ?? "",
     },
   })
 

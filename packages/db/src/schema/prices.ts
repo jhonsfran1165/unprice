@@ -44,6 +44,7 @@ export const configHybridFeature = z.object({
 
 export const featureSchema = z
   .object({
+    id: z.string(),
     slug: z.string(),
     title: z.string(),
     description: z.string().optional(),
@@ -73,23 +74,6 @@ export const versionPlanConfig = z.record(
 )
 
 export type PlanConfig = z.infer<typeof versionPlanConfig>
-
-// export const stripe = pgTableProject(
-//   "stripe",
-//   {
-//     ...projectID,
-//     ...tenantID,
-//     ...timestamps,
-//     slug: text("slug").notNull().unique(),
-//     token: text("token").notNull().unique(),
-//     stage: stageEnum("stage").default("dev"),
-//   },
-//   (table) => ({
-//     planProjectInx: index("plan_project_id_idx").on(table.projectId),
-//     planInx: uniqueIndex("plan_key_slug").on(table.slug),
-//     planTenantIdInx: index("plan_tenant_uidx").on(table.tenantId),
-//   })
-// )
 
 export const plans = pgTableProject(
   "plans",
@@ -126,6 +110,8 @@ export const versions = pgTableProject(
   })
 )
 
+// TODO: this table could have id as incremental so we can have a better performance
+// also we can use binmanry to store the data in a more efficient way in redis
 export const features = pgTableProject(
   "features",
   {

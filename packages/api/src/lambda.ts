@@ -1,7 +1,7 @@
-import { ingestionRouter } from "./router/lambda/ingestion"
+import { ingestionRouter } from "./router/lambda/ingestions"
 import { createTRPCRouter } from "./trpc"
 
 // Deployed to /trpc/lambda/**
 export const lambdaRouter = createTRPCRouter({
-  ingestion: ingestionRouter,
+  ingestions: ingestionRouter,
 })

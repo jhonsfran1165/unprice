@@ -3,8 +3,8 @@ import { z } from "zod"
 
 import { schema } from "@builderai/db"
 
-export const subscriptionSelectSchema = createSelectSchema(schema.subscription)
-export const subscriptionInsertSchema = createInsertSchema(schema.subscription)
+export const subscriptionSelectSchema = createSelectSchema(schema.subscriptions)
+export const subscriptionInsertSchema = createInsertSchema(schema.subscriptions)
 
 export const createSubscriptionSchema = subscriptionSelectSchema
   .pick({
