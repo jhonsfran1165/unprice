@@ -1,5 +1,5 @@
-import { relations } from "drizzle-orm"
-import { primaryKey, text } from "drizzle-orm/pg-core"
+import { eq, relations } from "drizzle-orm"
+import { foreignKey, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
@@ -21,13 +21,23 @@ export const subscriptions = pgTableProject(
   },
   (table) => ({
     primary: primaryKey({
-      columns: [
-        table.planId,
-        table.planVersionId,
-        table.customerId,
-        table.projectId,
-      ],
+      columns: [table.id, table.projectId],
     }),
+    customerfk: foreignKey({
+      columns: [table.customerId, table.projectId],
+      foreignColumns: [customers.id, customers.projectId],
+    }),
+    versionfk: foreignKey({
+      columns: [table.planVersionId, table.projectId],
+      foreignColumns: [versions.id, versions.projectId],
+    }),
+    planfk: foreignKey({
+      columns: [table.planId, table.projectId],
+      foreignColumns: [plans.id, plans.projectId],
+    }),
+    unique: uniqueIndex("unique_active_subscription")
+      .on(table.customerId)
+      .where(eq(table.status, "active")),
   })
 )
 

@@ -1,9 +1,14 @@
-export const runtime = "edge"
+import { Client } from "./_components/client"
 
-export default function Page(props: { params: { siteId: string } }) {
+export default async function Page() {
   return (
-    <h1 className="font-satoshi mt-5 text-5xl font-extrabold leading-[1.15] text-black sm:text-6xl sm:leading-[1.15]">
-      This is the Site <span className="italic">{props.params.siteId}</span>
-    </h1>
+    <>
+      <h1 className="font-satoshi mt-5 text-5xl font-extrabold leading-[1.15] sm:text-6xl sm:leading-[1.15]">
+        This is s Page from client
+      </h1>
+      <div className="italic">Papi voy solo</div>
+
+      <Client />
+    </>
   )
 }

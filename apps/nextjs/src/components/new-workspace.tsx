@@ -36,19 +36,18 @@ import { currencySymbol } from "~/lib/currency"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export default function NewOrganizationDialog(props: {
-  closeDialog: () => void
-}) {
+export default function NewTeamDialog(props: { closeDialog: () => void }) {
   const { toast } = useToast()
   const plans = api.stripe.plans.useQuery(undefined, {
     refetchOnWindowFocus: false,
   })
 
+  // TODO: plans should be fetch from the plan versions endpoint
   const form = useZodForm({
     schema: purchaseWorkspaceSchema,
     defaultValues: {
       planId: plans?.data?.[0]?.priceId,
-      orgName: "",
+      name: "",
     },
   })
 
@@ -83,18 +82,18 @@ export default function NewOrganizationDialog(props: {
           className="space-y-4"
         >
           <DialogHeader>
-            <DialogTitle>Create organization</DialogTitle>
+            <DialogTitle>Create new team</DialogTitle>
             <DialogDescription>
-              Add a new organization to manage products and customers.
+              Add a new workspace to invite other people to collaborate.
             </DialogDescription>
           </DialogHeader>
 
           <FormField
             control={form.control}
-            name="orgName"
+            name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Organization name *</FormLabel>
+                <FormLabel>Workspace name *</FormLabel>
                 <FormControl>
                   <Input {...field} placeholder="Acme Inc." />
                 </FormControl>

@@ -1,8 +1,10 @@
 import { cache } from "react"
-import { headers } from "next/headers"
+import { cookies, headers } from "next/headers"
 
 import { createCaller, createTRPCContext } from "@builderai/api"
-import { auth } from "@builderai/auth"
+import { auth } from "@builderai/auth/server"
+
+import { COOKIE_NAME_WORKSPACE } from "~/constants"
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
@@ -10,10 +12,13 @@ import { auth } from "@builderai/auth"
  */
 const createContext = cache(async () => {
   const heads = new Headers(headers())
+  const activeWorkspaceSlug = cookies().get(COOKIE_NAME_WORKSPACE)?.value ?? ""
+
   heads.set("x-trpc-source", "rsc")
+  heads.set(COOKIE_NAME_WORKSPACE, activeWorkspaceSlug)
 
   return createTRPCContext({
-    auth: auth(),
+    session: await auth(),
     headers: heads,
   })
 })

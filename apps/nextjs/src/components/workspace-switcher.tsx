@@ -1,68 +1,58 @@
 "use client"
 
+import { Suspense, use, useState } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { Suspense, useState } from "react"
 
-import { useOrganization, useOrganizationList, useUser } from "@builderai/auth"
+import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
 import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
 import { Button } from "@builderai/ui/button"
 import {
-    Command,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-    CommandSeparator,
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
 } from "@builderai/ui/command"
 import { Dialog, DialogTrigger } from "@builderai/ui/dialog"
 import { Check, ChevronsUpDown, PlusCircle } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 
+import { useUser } from "~/lib/use-user"
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 
-const NewOrganizationDialog = dynamic(() => import("./new-workspace"), {
+const NewTeamDialog = dynamic(() => import("./new-workspace"), {
   ssr: false,
 })
 
-export function WorkspaceSwitcher() {
+export function WorkspaceSwitcher({
+  workspacesPromise,
+  workspaceSlug,
+}: {
+  workspaceSlug: string
+  workspacesPromise: Promise<RouterOutputs["workspaces"]["listWorkspaces"]>
+}) {
   const router = useRouter()
-
   const [switcherOpen, setSwitcherOpen] = useState(false)
   const [newOrgDialogOpen, setNewOrgDialogOpen] = useState(false)
 
-  const { user, isSignedIn, isLoaded } = useUser()
-  const org = useOrganization()
-  const orgs = useOrganizationList({
-    userMemberships: {
-      infinite: true,
-    },
-  })
+  const { workspaces } = use(workspacesPromise)
 
-  if (isLoaded && !isSignedIn) throw new Error("How did you get here???")
+  const { user, status: statusSession } = useUser()
 
-  const activeOrg = org.organization ?? user
+  if (!user) throw new Error("User not found, how did you get here?")
 
-  if (
-    !orgs.isLoaded ||
-    !org.isLoaded ||
-    !activeOrg ||
-    orgs.userMemberships.isLoading
-  ) {
-    // Skeleton loader
+  const activeWorkspace = workspaces.find(
+    (workspace) => workspace.slug === workspaceSlug
+  )
+
+  const personalWorkspace = workspaces.find((wk) => wk.isPersonal)
+  const teams = workspaces.filter((wk) => !wk.isPersonal)
+
+  if (statusSession === "loading" || !activeWorkspace) {
     return <WorkspaceSwitcherSkeleton />
-  }
-
-  const normalizedObject = {
-    id: activeOrg.id,
-    name:
-      "name" in activeOrg
-        ? activeOrg.name
-        : "username" in activeOrg
-        ? activeOrg.username
-        : "",
-    image: activeOrg.imageUrl,
   }
 
   return (
@@ -78,12 +68,19 @@ export function WorkspaceSwitcher() {
             className="w-40 justify-between md:w-44"
           >
             <Avatar className="mr-2 h-5 w-5">
-              <AvatarImage src={normalizedObject?.image ?? ""} />
+              <AvatarImage
+                src={
+                  activeWorkspace?.imageUrl ??
+                  `https://avatar.vercel.sh/${activeWorkspace.name}`
+                }
+              />
               <AvatarFallback>
-                {normalizedObject.name?.substring(0, 2)}
+                {activeWorkspace.slug?.substring(0, 2)}
               </AvatarFallback>
             </Avatar>
-            <span className="z-10 font-semibold">{normalizedObject.name}</span>
+            <span className="z-10 truncate font-semibold">
+              {activeWorkspace.name}
+            </span>
             <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -91,79 +88,92 @@ export function WorkspaceSwitcher() {
           <Command>
             <CommandList>
               <CommandInput placeholder="Search workspace..." />
-              <CommandGroup heading="Personal account">
-                <CommandItem
-                  onSelect={async () => {
-                    if (!user?.id) return
-                    normalizedObject.id = user.id ?? ""
-
-                    await orgs.setActive?.({ organization: null })
-                    setSwitcherOpen(false)
-                    router.push(`/${user.username}/overview`)
-                  }}
-                  className={cn(
-                    "cursor-pointer text-sm font-semibold",
-                    org.organization === null
-                      ? "bg-background-bgActive"
-                      : "bg-transparent"
-                  )}
-                >
-                  <Avatar className="mr-2 h-5 w-5">
-                    <AvatarImage
-                      src={user?.imageUrl}
-                      alt={user?.fullName ?? ""}
-                    />
-                    <AvatarFallback>
-                      {`${user?.firstName?.[0]}${user?.lastName?.[0]}` ?? "JD"}
-                    </AvatarFallback>
-                  </Avatar>
-                  {user?.username}
-                  <Check
-                    className={cn(
-                      "ml-auto h-4 w-4",
-                      org.organization === null ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              </CommandGroup>
-
-              <CommandGroup heading="Organizations">
-                {orgs.userMemberships.data?.map(({ organization: org }) => (
+              {personalWorkspace && (
+                <CommandGroup heading="Personal workspace">
                   <CommandItem
-                    key={org.name}
-                    onSelect={async () => {
-                      await orgs.setActive({ organization: org })
+                    onSelect={() => {
                       setSwitcherOpen(false)
-                      router.push(`/${org.slug}/overview`)
+                      router.push(`/${personalWorkspace.slug}/overview`)
                     }}
                     className={cn(
                       "cursor-pointer text-sm font-semibold",
-                      normalizedObject?.id === org.id
+                      activeWorkspace.id === personalWorkspace.id
                         ? "bg-background-bgActive"
                         : "bg-transparent"
                     )}
                   >
                     <Avatar className="mr-2 h-5 w-5">
                       <AvatarImage
-                        src={org.imageUrl ?? "/images/placeholder.png"}
-                        alt={org.name}
+                        src={
+                          personalWorkspace?.imageUrl ??
+                          `https://avatar.vercel.sh/${personalWorkspace.name}`
+                        }
+                        alt={`user-${personalWorkspace.name}`}
                       />
                       <AvatarFallback>
-                        {org.name.substring(0, 2)}
+                        {activeWorkspace.slug?.substring(0, 2)}
                       </AvatarFallback>
                     </Avatar>
-                    {org.name}
+                    <span className="z-10 truncate font-semibold">
+                      {personalWorkspace.name}
+                    </span>
                     <Check
                       className={cn(
                         "ml-auto h-4 w-4",
-                        normalizedObject?.id === org.id
+                        activeWorkspace.id === personalWorkspace.id
                           ? "opacity-100"
                           : "opacity-0"
                       )}
                     />
                   </CommandItem>
-                ))}
-              </CommandGroup>
+                </CommandGroup>
+              )}
+
+              {teams.length !== 0 && (
+                <CommandGroup heading="Teams">
+                  {teams?.map((workspace) => (
+                    <CommandItem
+                      key={workspace.name}
+                      onSelect={() => {
+                        // TODO: set active workspace here
+                        // await orgs.setActive({ organization: org })
+                        setSwitcherOpen(false)
+                        router.push(`/${workspace.slug}/overview`)
+                      }}
+                      className={cn(
+                        "cursor-pointer text-sm font-semibold",
+                        activeWorkspace?.id === workspace.id
+                          ? "bg-background-bgActive"
+                          : "bg-transparent"
+                      )}
+                    >
+                      <Avatar className="mr-2 h-5 w-5">
+                        <AvatarImage
+                          src={
+                            workspace.imageUrl ??
+                            `https://avatar.vercel.sh/${workspace.id}`
+                          }
+                          alt={`user-${workspace.name}`}
+                        />
+                        <AvatarFallback>
+                          {workspace.name.substring(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="z-10 truncate font-semibold">
+                        {workspace.name}
+                      </span>
+                      <Check
+                        className={cn(
+                          "ml-auto h-4 w-4",
+                          activeWorkspace?.id === workspace.id
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
             </CommandList>
             <CommandSeparator />
             <CommandList>
@@ -177,7 +187,7 @@ export function WorkspaceSwitcher() {
                     className="cursor-pointer"
                   >
                     <PlusCircle className="mr-2 h-5 w-5" />
-                    Create Organization
+                    Create Team
                   </CommandItem>
                 </DialogTrigger>
               </CommandGroup>
@@ -187,7 +197,7 @@ export function WorkspaceSwitcher() {
       </Popover>
 
       <Suspense>
-        <NewOrganizationDialog closeDialog={() => setNewOrgDialogOpen(false)} />
+        <NewTeamDialog closeDialog={() => setNewOrgDialogOpen(false)} />
       </Suspense>
     </Dialog>
   )

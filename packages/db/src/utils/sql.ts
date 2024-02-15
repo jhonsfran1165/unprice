@@ -1,5 +1,8 @@
 import { text, timestamp } from "drizzle-orm/pg-core"
 
+import { projects, workspaces } from "../schema"
+
+// easier to migrate to another db
 export const cuid = (d: string) => text(d)
 
 // for workspace
@@ -9,12 +12,9 @@ export const id = {
 
 // for projects
 export const workspaceID = {
-  get id() {
-    return cuid("id").notNull()
-  },
-  get workspaceId() {
-    return cuid("workspace_id").notNull()
-  },
+  workspaceId: cuid("workspace_id")
+    .notNull()
+    .references(() => workspaces.id, { onDelete: "cascade" }),
 }
 
 // for rest of tables
@@ -23,7 +23,9 @@ export const projectID = {
     return cuid("id").notNull()
   },
   get projectId() {
-    return cuid("project_id").notNull()
+    return cuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" })
   },
 }
 

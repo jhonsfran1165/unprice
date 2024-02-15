@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { createTRPCRouter, protectedOrgAdminProcedure } from "../../trpc"
+import { createTRPCRouter, protectedWorkspaceAdminProcedure } from "../../trpc"
 
 export const domainConfigResponseSchema = z.object({
   configuredBy: z
@@ -50,7 +50,7 @@ export type DomainVerificationStatusProps =
   | "Unknown Error"
 
 export const domainRouter = createTRPCRouter({
-  addDomainToVercel: protectedOrgAdminProcedure
+  addDomainToVercel: protectedWorkspaceAdminProcedure
     .input(z.object({ domain: z.string() }))
     .mutation(async (opts) => {
       const data = await fetch(
@@ -68,7 +68,7 @@ export const domainRouter = createTRPCRouter({
       const json = await data.json()
       return domainResponseSchema.parse(json)
     }),
-  removeDomainFromVercelProject: protectedOrgAdminProcedure
+  removeDomainFromVercelProject: protectedWorkspaceAdminProcedure
     .input(z.object({ domain: z.string() }))
     .mutation(async (opts) => {
       const data = await fetch(
@@ -84,7 +84,7 @@ export const domainRouter = createTRPCRouter({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return await data.json()
     }),
-  // removeDomainFromVercelTeam: protectedOrgAdminProcedure
+  // removeDomainFromVercelTeam: protectedWorkspaceAdminProcedure
   //   .input(z.object({ domain: z.string() }))
   //   .mutation(async (opts) => {
   //     const data = await fetch(
@@ -98,7 +98,7 @@ export const domainRouter = createTRPCRouter({
   //     );
   //     return await data.json();
   //   }),
-  getDomains: protectedOrgAdminProcedure.query(async (opts) => {
+  getDomains: protectedWorkspaceAdminProcedure.query(async (opts) => {
     const data = await fetch(
       `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains?teamId=${process.env.TEAM_ID_VERCEL}`,
       {
@@ -126,7 +126,7 @@ export const domainRouter = createTRPCRouter({
       .parse(json?.domains ?? [])
     return result
   }),
-  getDomainResponse: protectedOrgAdminProcedure
+  getDomainResponse: protectedWorkspaceAdminProcedure
     .input(z.object({ domain: z.string() }))
     .query(async (opts) => {
       const data = await fetch(
@@ -155,7 +155,7 @@ export const domainRouter = createTRPCRouter({
         .parse(json)
       return result
     }),
-  getConfigResponse: protectedOrgAdminProcedure
+  getConfigResponse: protectedWorkspaceAdminProcedure
     .input(z.object({ domain: z.string() }))
     .query(async (opts) => {
       const data = await fetch(
@@ -173,7 +173,7 @@ export const domainRouter = createTRPCRouter({
       const result = domainConfigResponseSchema.parse(json)
       return result
     }),
-  verifyDomain: protectedOrgAdminProcedure
+  verifyDomain: protectedWorkspaceAdminProcedure
     .input(z.object({ domain: z.string() }))
     .query(async (opts) => {
       const data = await fetch(

@@ -1,26 +1,25 @@
 import { relations } from "drizzle-orm"
-import { index, primaryKey, text } from "drizzle-orm/pg-core"
+import { index, text, uniqueIndex } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { timestamps, workspaceID } from "../utils/sql"
+import { id, timestamps, workspaceID } from "../utils/sql"
 import { projectTierEnum } from "./enums"
 import { workspaces } from "./workspaces"
 
 export const projects = pgTableProject(
   "projects",
   {
+    ...id,
     ...workspaceID,
     ...timestamps,
-    slug: text("slug").notNull().unique(),
+    slug: text("slug").notNull(),
     name: text("name").notNull(),
     tier: projectTierEnum("tier").default("free").notNull(),
     url: text("url").default("").notNull(),
   },
   (table) => ({
-    slug: index("slug").on(table.slug),
-    primary: primaryKey({
-      columns: [table.workspaceId, table.id],
-    }),
+    slug: index("slug_index").on(table.slug),
+    unique: uniqueIndex("unique_slug").on(table.slug),
   })
 )
 

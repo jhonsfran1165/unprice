@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server"
 
-import { and, eq, schema } from "@builderai/db"
+import { eq, prepared, schema } from "@builderai/db"
 import type { Project } from "@builderai/validators/project"
 import type { SelectWorkspace } from "@builderai/validators/workspace"
 
@@ -17,12 +17,12 @@ export const hasAccessToProject = async ({
 }): Promise<{
   project: Project & { workspace: SelectWorkspace }
 }> => {
-  const workspaceId = ctx.workspaceId
+  const activeWorkspaceSlug = ctx.activeWorkspaceSlug
 
-  if (workspaceId === "") {
+  if (activeWorkspaceSlug === "" || !activeWorkspaceSlug) {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: "Provide tenantId and workspaceId",
+      message: "No active workspace in the session",
     })
   }
 
@@ -37,13 +37,19 @@ export const hasAccessToProject = async ({
     })
   }
 
-  const currentProject = await ctx.db.query.projects.findFirst({
-    with: { workspace: true },
-    where: and(condition, eq(schema.projects.workspaceId, workspaceId)),
-  })
+  // we execute this in a prepared statement to improve performance
+  // INFO: keep in mind that this executes outside of the context of trpc
+  const projectsWithWorkspace =
+    await prepared.projectsWithWorkspacesPrepared.execute({
+      id: projectId,
+      slug: projectSlug,
+    })
 
-  // the tenantId doesn't have access to this workspace
-  if (!currentProject?.id) {
+  const projectBelonsToWorkspace =
+    projectsWithWorkspace?.workspace.slug === activeWorkspaceSlug
+
+  // the user doesn't have access to this workspace
+  if (!projectBelonsToWorkspace) {
     throw new TRPCError({
       code: "NOT_FOUND",
       message: "Project not found or you don't have access to this project",
@@ -51,6 +57,6 @@ export const hasAccessToProject = async ({
   }
 
   return {
-    project: currentProject,
+    project: projectsWithWorkspace,
   }
 }

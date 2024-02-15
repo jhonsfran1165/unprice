@@ -1,3 +1,4 @@
+export * from "./_table"
 export * from "./constants"
 export * from "./id"
 export * from "./id-edge"

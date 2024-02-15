@@ -9,7 +9,7 @@ export default function SitesMiddleware(req: NextRequest) {
   const res = NextResponse.next()
   const url = req.nextUrl
 
-  console.log("sites middleware", domain, path, suddomain)
+  // console.log("sites middleware", domain, path, suddomain)
 
   if (!domain) {
     return NextResponse.next()
@@ -23,7 +23,7 @@ export default function SitesMiddleware(req: NextRequest) {
 
   rewrittenUrl.pathname = `/sites${path === "/" ? "" : path}`
 
-  console.log(`rewriting ${url} to ${rewrittenUrl}`)
+  // console.log(`rewriting ${url} to ${rewrittenUrl}`)
 
   return NextResponse.rewrite(rewrittenUrl)
 }

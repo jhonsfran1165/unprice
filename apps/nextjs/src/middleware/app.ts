@@ -1,80 +1,110 @@
-import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
-import { clerkClient } from "@builderai/auth"
-import type { AuthObject } from "@builderai/auth/server"
+import type { NextAuthRequest } from "@builderai/auth/server"
 
-const skipRoutes = ["onboarding", "canvas", "sites"]
+import {
+  API_AUTH_ROUTE_PREFIX,
+  APP_AUTH_ROUTES,
+  APP_NON_WORKSPACE_ROUTES,
+  AUTH_ROUTES,
+  COOKIE_NAME_WORKSPACE,
+} from "~/constants"
+import { getWorkspacesUser } from "~/lib/session"
+import { parse } from "~/middleware/utils"
 
-export default async function AppMiddleware(
-  req: NextRequest,
-  auth: AuthObject
-) {
+export default function AppMiddleware(req: NextAuthRequest) {
   const url = new URL(req.nextUrl.origin)
-  const parts = req.nextUrl.pathname.split("/").filter(Boolean)
+  const { path, key: currentWorkspace, fullPath } = parse(req)
+  const isLoggedIn = !!req.auth?.user
+  const { user, userBelongsToWorkspace } = getWorkspacesUser(req.auth)
+  const isAppAuthRoute = APP_AUTH_ROUTES.has(path)
+  const isApiAuthRoute = path.startsWith(API_AUTH_ROUTE_PREFIX)
+  const isNonWorkspaceRoute = APP_NON_WORKSPACE_ROUTES.has(path)
+
+  // API routes we don't need to check if the user is logged in
+  if (isApiAuthRoute || path.startsWith("/api/trpc")) {
+    return NextResponse.next()
+  }
+
+  // AUTH routes we check is the user is logged in
+  if (isAppAuthRoute) {
+    return NextResponse.next()
+  }
+
+  if (!isLoggedIn || !user) {
+    // User is not signed in redirect to signin
+    return NextResponse.redirect(
+      new URL(
+        `${AUTH_ROUTES.SIGNIN}${
+          fullPath === "/" ? "" : `?next=${encodeURIComponent(fullPath)}`
+        }`,
+        req.url
+      )
+    )
+  }
+
+  // if the route is not a workspace specific route
+  if (isNonWorkspaceRoute) {
+    return NextResponse.rewrite(
+      new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url)
+    )
+  }
 
   // TODO: recording page hits
+  // if the user is trying to access a workspace specific route check if they have access
+  // by checking if the workspace is in their list of workspaces from the jwt
+  if (!currentWorkspace) {
+    // if the user has no active workspace validate that the workspace exists in the jwt
+    // and set the cookie to the first workspace, if no workspace exists redirect to signup
+    const activeWorkspace = req.cookies.get(COOKIE_NAME_WORKSPACE)?.value
 
-  if (!auth.userId) {
-    // User is not signed in
-    url.pathname = "/signin"
-    return NextResponse.redirect(url)
-  }
+    if (activeWorkspace) {
+      const userBelongsToWorkspace = (user.workspaces.some(
+        (workspace) => workspace.slug === activeWorkspace
+      ) ?? false) as boolean
 
-  // get tenant id from clerk data
-  const tenantSlug = auth.orgSlug
-    ? auth.orgSlug
-    : (auth.sessionClaims.username as string)
-
-  if (req.nextUrl.pathname === "/" || req.nextUrl.pathname === "") {
-    // / should redirect to the user's dashboard
-    // use their current workspace, i.e. /:orgSlug or /:userSlug
-    url.pathname = `/${tenantSlug}/overview`
-
-    return NextResponse.redirect(url)
-  } else {
-    // if the url has a workspace defined lets validate it
-    const workspaceSlug = parts[0] ?? ""
-
-    // user trying to access to its personal workspace or its organization
-    // let them pass
-    if (
-      auth.sessionClaims.username === workspaceSlug ||
-      tenantSlug === workspaceSlug
-    ) {
-      return NextResponse.next()
-    }
-
-    // do not validate this URLS
-    if (skipRoutes.includes(workspaceSlug)) return NextResponse.next()
-
-    // User is accessing an org that's not their active one
-    // Check if they have access to it
-    if (auth.orgSlug && tenantSlug !== workspaceSlug) {
-      const orgs = await clerkClient.users.getOrganizationMembershipList({
-        userId: auth.userId ?? "",
-      })
-
-      const hasAccess = orgs.some(
-        (org) => org.organization.slug === workspaceSlug
-      )
-
-      if (!hasAccess) {
-        url.pathname = `/`
-        return NextResponse.redirect(url)
+      if (!userBelongsToWorkspace) {
+        // User is accessing a user that's not them
+        return NextResponse.redirect(new URL("/error", req.url))
       }
 
-      // User has access to the org, let them pass.
-      // TODO: Set the active org to the one they're accessing
-      // so that we don't need to do this client-side.
-      // This is currently not possible with Clerk but will be.
-      return NextResponse.next()
-    }
-
-    // User is accessing a user that's not them
-    if (tenantSlug !== workspaceSlug) {
-      url.pathname = `/`
+      url.pathname = `/${activeWorkspace}/overview`
       return NextResponse.redirect(url)
+    } else {
+      const firstWorkspace = user.workspaces[0]?.slug
+
+      if (!firstWorkspace) {
+        // this should never happen because every user should have at least one workspace which is their personal workspace by default
+        // if the user has no active workspace redirect to onboarding
+        // if this happens it's a bug when the user is created and the workspace is not set or the workspace is not created
+
+        return NextResponse.redirect(new URL("/error", req.url))
+      }
+
+      url.pathname = `/${firstWorkspace}/overview`
+      // To change a cookie, first create a response
+      const response = NextResponse.redirect(url)
+
+      // Setting a cookie with additional options
+      response.cookies.set({
+        name: COOKIE_NAME_WORKSPACE,
+        value: firstWorkspace,
+        httpOnly: true,
+      })
+
+      return response
     }
   }
+
+  const isUserMemberWorkspace = userBelongsToWorkspace(currentWorkspace)
+
+  if (!isUserMemberWorkspace) {
+    // User is accessing a workspace that's not part of their workspaces
+    return NextResponse.redirect(new URL("/error", req.url))
+  }
+
+  // otherwise, rewrite the path to /app
+  return NextResponse.rewrite(
+    new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url)
+  )
 }

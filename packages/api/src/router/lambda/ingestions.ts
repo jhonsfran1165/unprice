@@ -8,7 +8,7 @@ import { ingestionSelectSchema } from "@builderai/validators/ingestion"
 import {
   createTRPCRouter,
   protectedApiFormDataProcedure,
-  protectedOrgProcedure,
+  protectedWorkspaceProcedure,
 } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
 
@@ -27,7 +27,7 @@ const myFileValidator = z.preprocess(
  */
 
 export const ingestionRouter = createTRPCRouter({
-  byId: protectedOrgProcedure
+  byId: protectedWorkspaceProcedure
     .input(z.object({ id: z.string(), projectSlug: z.string() }))
     .output(ingestionSelectSchema)
     .query(async (opts) => {
@@ -56,7 +56,7 @@ export const ingestionRouter = createTRPCRouter({
       return ingestion
     }),
 
-  list: protectedOrgProcedure
+  list: protectedWorkspaceProcedure
     .input(
       z.object({
         projectSlug: z.string(),

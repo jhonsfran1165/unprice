@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { index, primaryKey, text, unique } from "drizzle-orm/pg-core"
+import { index, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { projectID, timestamps } from "../utils/sql"
@@ -15,9 +15,12 @@ export const customers = pgTableProject(
   },
   (table) => ({
     email: index("email").on(table.email),
-    unique: unique("unique_email_project").on(table.email, table.projectId),
+    unique: uniqueIndex("unique_email_project").on(
+      table.email,
+      table.projectId
+    ),
     primary: primaryKey({
-      columns: [table.projectId, table.id],
+      columns: [table.id, table.projectId],
     }),
   })
 )

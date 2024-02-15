@@ -1,10 +1,11 @@
 import { relations } from "drizzle-orm"
 import {
-  index,
+  foreignKey,
   json,
   primaryKey,
   serial,
   text,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core"
 import * as z from "zod"
@@ -80,17 +81,19 @@ export const plans = pgTableProject(
   {
     ...projectID,
     ...timestamps,
-    slug: text("slug").notNull().unique(),
+    slug: text("slug").notNull(),
     title: varchar("title", { length: 50 }).notNull(),
     currency: currencyEnum("currency").default("EUR"),
   },
   (table) => ({
     primary: primaryKey({
-      columns: [table.projectId, table.id],
+      columns: [table.id, table.projectId],
     }),
-    slug: index("slug").on(table.slug),
+    slug: uniqueIndex("slug_plan").on(table.slug, table.projectId),
   })
 )
+
+// TODO: intitlements should be a separate table
 
 export const versions = pgTableProject(
   "plan_versions",
@@ -104,9 +107,14 @@ export const versions = pgTableProject(
     status: statusPlanEnum("plan_version_status").default("draft"),
   },
   (table) => ({
-    primary: primaryKey({
-      columns: [table.projectId, table.id, table.planId, table.version],
+    planfk: foreignKey({
+      columns: [table.planId, table.projectId],
+      foreignColumns: [plans.id, plans.projectId],
     }),
+    primary: primaryKey({
+      columns: [table.id, table.projectId],
+    }),
+    unique: uniqueIndex("unique_version").on(table.planId, table.version),
   })
 )
 
@@ -117,7 +125,7 @@ export const features = pgTableProject(
   {
     ...projectID,
     ...timestamps,
-    slug: text("slug").notNull().unique(),
+    slug: text("slug").notNull(),
     title: varchar("title", { length: 50 }).notNull(),
     description: text("description"),
     type: typeFeatureEnum("type").default("flat"),
@@ -126,7 +134,7 @@ export const features = pgTableProject(
     primary: primaryKey({
       columns: [table.projectId, table.id],
     }),
-    slug: index("slug").on(table.slug),
+    slug: uniqueIndex("slug_feature").on(table.slug, table.projectId),
   })
 )
 

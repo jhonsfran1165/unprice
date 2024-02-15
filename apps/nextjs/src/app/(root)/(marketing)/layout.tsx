@@ -1,8 +1,9 @@
 import type { ReactNode } from "react"
 import { Suspense } from "react"
+import { cookies } from "next/headers"
 import Link from "next/link"
 
-import { auth } from "@builderai/auth"
+import { auth, signIn, signOut } from "@builderai/auth/server"
 import { navItems, siteConfig } from "@builderai/config"
 import { Button, buttonVariants } from "@builderai/ui/button"
 import { ChevronRight, Logo } from "@builderai/ui/icons"
@@ -12,6 +13,7 @@ import Footer from "~/components/footer"
 import { MainNav } from "~/components/main-nav"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
 import { MobileDropdown } from "~/components/mobile-nav"
+import { AUTH_ROUTES } from "~/constants"
 
 export default function MarketingLayout(props: { children: ReactNode }) {
   return (
@@ -69,19 +71,42 @@ export default function MarketingLayout(props: { children: ReactNode }) {
   )
 }
 
-function DashboardLink() {
-  const { orgSlug, sessionClaims } = auth()
-  const workspaceSlug = orgSlug ? orgSlug : (sessionClaims?.username as string)
+async function DashboardLink() {
+  const session = await auth()
+  const workspaceSlug = cookies().get("workspaceSlug")?.value
 
   if (!workspaceSlug) {
     return (
-      <Link
-        href={`${process.env.NEXTJS_URL}/signin`}
-        className={buttonVariants({ variant: "outline" })}
-      >
-        Sign In
-        <ChevronRight className="ml-1 h-4 w-4" />
-      </Link>
+      <>
+        <Link
+          href={`${process.env.NEXTJS_URL}/${AUTH_ROUTES.SIGNIN}`}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          Sign In
+          <ChevronRight className="ml-1 h-4 w-4" />
+        </Link>
+
+        <form>
+          <Button
+            className="min-w-max"
+            formAction={async () => {
+              "use server"
+              await signIn("github")
+            }}
+          >
+            <span className="pl-2">Login</span>
+          </Button>
+          <Button
+            className="min-w-max"
+            formAction={async () => {
+              "use server"
+              await signOut()
+            }}
+          >
+            <span className="pl-2">Logout</span>
+          </Button>
+        </form>
+      </>
     )
   }
 

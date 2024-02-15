@@ -1,5 +1,11 @@
 import { relations } from "drizzle-orm"
-import { index, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
+import {
+  index,
+  primaryKey,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { projectID, timestamps } from "../utils/sql"
@@ -14,14 +20,14 @@ export const apikeys = pgTableProject(
     lastUsed: timestamp("last_used", { mode: "date" }),
     revokedAt: timestamp("revoked_at", { mode: "date" }),
     name: text("name").notNull(),
-    key: text("key").unique().notNull(),
+    key: text("key").notNull(),
   },
   (table) => ({
     primary: primaryKey({
-      columns: [table.projectId, table.id],
+      columns: [table.id, table.projectId],
     }),
     key: index("key").on(table.key),
-    project: index("project").on(table.projectId),
+    slug: uniqueIndex("slug").on(table.name),
   })
 )
 

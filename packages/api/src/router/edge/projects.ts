@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { clerkClient } from "@builderai/auth"
 import { eq, getTableColumns, schema, sql, utils } from "@builderai/db"
 import {
   createProjectSchema,
@@ -15,9 +14,8 @@ import { selectWorkspaceSchema } from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,
-  protectedOrgAdminProcedure,
-  protectedOrgProcedure,
-  protectedProcedure,
+  protectedWorkspaceAdminProcedure,
+  protectedWorkspaceProcedure,
 } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
 import { getRandomPatternStyle } from "../../utils/generate-pattern"
@@ -29,7 +27,7 @@ const PROJECT_LIMITS = {
 } as const
 
 export const projectRouter = createTRPCRouter({
-  create: protectedProcedure
+  create: protectedWorkspaceProcedure
     .input(createProjectSchema)
     .output(
       z.object({
@@ -37,7 +35,7 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const tenantId = opts.ctx.tenantId
+      const activeWorkspaceSlug = opts.ctx.activeWorkspaceSlug
       const { name, url } = opts.input
 
       const projects = await opts.ctx.db
@@ -54,7 +52,7 @@ export const projectRouter = createTRPCRouter({
           id: true,
           plan: true,
         },
-        where: (workspace, { eq }) => eq(workspace.tenantId, tenantId),
+        where: (workspace, { eq }) => eq(workspace.slug, activeWorkspaceSlug),
       })
 
       if (!workspace?.id) {
@@ -91,7 +89,7 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 
-  rename: protectedOrgAdminProcedure
+  rename: protectedWorkspaceAdminProcedure
     .input(renameProjectSchema)
     .output(
       z.object({
@@ -119,7 +117,7 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 
-  delete: protectedOrgAdminProcedure
+  delete: protectedWorkspaceAdminProcedure
     .input(deleteProjectSchema)
     .output(
       z.object({
@@ -145,7 +143,7 @@ export const projectRouter = createTRPCRouter({
     }),
 
   // TODO: improve this
-  canAccessProject: protectedOrgAdminProcedure
+  canAccessProject: protectedWorkspaceAdminProcedure
     .input(z.object({ slug: z.string(), needsToBeInTier: z.array(z.string()) }))
     .output(z.object({ haveAccess: z.boolean(), isInTier: z.boolean() }))
     .query(async (opts) => {
@@ -173,7 +171,7 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 
-  transferToPersonal: protectedOrgAdminProcedure
+  transferToPersonal: protectedWorkspaceAdminProcedure
     .input(transferToPersonalProjectSchema)
     .output(
       z.object({
@@ -182,7 +180,7 @@ export const projectRouter = createTRPCRouter({
     )
     .mutation(async (opts) => {
       const { slug: projectSlug } = opts.input
-      const { userId } = opts.ctx.auth
+      const { userId } = opts.ctx.session
 
       const { project: projectData } = await hasAccessToProject({
         projectSlug,
@@ -239,7 +237,9 @@ export const projectRouter = createTRPCRouter({
         project: updatedProject?.[0],
       }
     }),
-  transferToWorkspace: protectedOrgAdminProcedure
+
+  // TODO: all this again
+  transferToWorkspace: protectedWorkspaceAdminProcedure
     .input(transferToWorkspaceSchema)
     .output(
       z.object({
@@ -247,23 +247,8 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { userId } = opts.ctx.auth
+      const { userId } = opts.ctx.session
       const { tenantId: targetTenantId, projectSlug } = opts.input
-
-      const orgs = await clerkClient.users.getOrganizationMembershipList({
-        userId: userId,
-      })
-
-      const targetOrg = orgs.find(
-        (org) => org.organization.id === targetTenantId
-      )
-
-      if (!targetOrg?.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You're not a member of the target organization",
-        })
-      }
 
       const { project: projectData } = await hasAccessToProject({
         projectSlug,
@@ -274,6 +259,24 @@ export const projectRouter = createTRPCRouter({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Project is already in the target organization",
+        })
+      }
+
+      const workspaces = await opts.ctx.db.query.members.findMany({
+        columns: {
+          workspaceId: true,
+        },
+        where: (member, { eq }) => eq(member.userId, userId),
+      })
+
+      const targetOrg = workspaces.find(
+        (wk) => wk.workspaceId === targetTenantId
+      )
+
+      if (!targetOrg?.workspaceId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You're not a member of the target organization",
         })
       }
 
@@ -305,7 +308,56 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 
-  listByWorkspace: protectedOrgProcedure
+  listByActiveWorkspace: protectedWorkspaceProcedure
+    .input(z.void())
+    .output(
+      z.object({
+        projects: z.array(
+          selectProjectSchema.extend({
+            styles: z.object({
+              backgroundImage: z.string(),
+            }),
+            workspace: selectWorkspaceSchema.pick({
+              slug: true,
+            }),
+          })
+        ),
+        limit: z.number(),
+        limitReached: z.boolean(),
+      })
+    )
+    .query(async (opts) => {
+      const activeWorkspaceSlug = opts.ctx.activeWorkspaceSlug
+
+      const { ...rest } = getTableColumns(schema.projects)
+      const workspaceProjects = await opts.ctx.db
+        .select({
+          project: {
+            ...rest,
+          },
+          workspace: {
+            slug: schema.workspaces.slug,
+          },
+        })
+        .from(schema.projects)
+        .innerJoin(
+          schema.workspaces,
+          eq(schema.projects.workspaceId, schema.workspaces.id)
+        )
+        .where(eq(schema.workspaces.slug, activeWorkspaceSlug))
+
+      // TODO: Don't hardcode the limit to PRO
+      return {
+        projects: workspaceProjects.map((project) => ({
+          ...project.project,
+          workspace: project.workspace,
+          styles: getRandomPatternStyle(project.project.id),
+        })),
+        limit: PROJECT_LIMITS.PRO,
+        limitReached: workspaceProjects.length >= PROJECT_LIMITS.PRO,
+      }
+    }),
+  listByWorkspace: protectedWorkspaceProcedure
     .input(z.object({ workspaceSlug: z.string() }))
     .output(
       z.object({
@@ -324,6 +376,8 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
+      const { workspaceSlug } = opts.input
+
       const { ...rest } = getTableColumns(schema.projects)
       const workspaceProjects = await opts.ctx.db
         .select({
@@ -339,7 +393,7 @@ export const projectRouter = createTRPCRouter({
           schema.workspaces,
           eq(schema.projects.workspaceId, schema.workspaces.id)
         )
-        .where(eq(schema.workspaces.slug, opts.input.workspaceSlug))
+        .where(eq(schema.workspaces.slug, workspaceSlug))
 
       // TODO: Don't hardcode the limit to PRO
       return {
@@ -352,7 +406,7 @@ export const projectRouter = createTRPCRouter({
         limitReached: workspaceProjects.length >= PROJECT_LIMITS.PRO,
       }
     }),
-  bySlug: protectedOrgProcedure
+  bySlug: protectedWorkspaceProcedure
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
@@ -373,7 +427,7 @@ export const projectRouter = createTRPCRouter({
         project: projectData,
       }
     }),
-  byId: protectedOrgProcedure
+  byId: protectedWorkspaceProcedure
     .input(z.object({ id: z.string() }))
     .output(
       z.object({

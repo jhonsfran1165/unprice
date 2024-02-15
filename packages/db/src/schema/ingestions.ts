@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { index, primaryKey, text } from "drizzle-orm/pg-core"
+import { foreignKey, primaryKey, text } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
@@ -15,14 +15,17 @@ export const ingestions = pgTableProject(
     hash: text("hash").notNull(),
     parent: text("parent"),
     origin: text("origin").notNull(),
-    apiKeyId: cuid("apikey_id").notNull(),
+    apikeyId: cuid("apikey_id").notNull(),
   },
   (table) => {
     return {
+      planfk: foreignKey({
+        columns: [table.apikeyId, table.projectId],
+        foreignColumns: [apikeys.id, apikeys.projectId],
+      }),
       primary: primaryKey({
         columns: [table.projectId, table.id],
       }),
-      project: index("project").on(table.projectId),
     }
   }
 )
@@ -33,7 +36,7 @@ export const ingestionsRelations = relations(ingestions, ({ one }) => ({
     references: [projects.id],
   }),
   apikey: one(apikeys, {
-    fields: [ingestions.apiKeyId],
+    fields: [ingestions.apikeyId],
     references: [apikeys.id],
   }),
 }))

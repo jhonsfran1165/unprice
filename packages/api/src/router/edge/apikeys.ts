@@ -9,13 +9,13 @@ import {
 
 import {
   createTRPCRouter,
-  protectedOrgAdminProcedure,
-  protectedOrgProcedure,
+  protectedWorkspaceAdminProcedure,
+  protectedWorkspaceProcedure,
 } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
 
 export const apiKeyRouter = createTRPCRouter({
-  listApiKeys: protectedOrgAdminProcedure
+  listApiKeys: protectedWorkspaceAdminProcedure
     .input(
       z.object({
         projectSlug: z.string(),
@@ -57,7 +57,7 @@ export const apiKeyRouter = createTRPCRouter({
       return { apikeys }
     }),
 
-  createApiKey: protectedOrgProcedure
+  createApiKey: protectedWorkspaceProcedure
     .input(createApiKeySchema)
     .output(
       z.object({
@@ -77,6 +77,7 @@ export const apiKeyRouter = createTRPCRouter({
       // Generate the key
       const apiKey = utils.newIdEdge("apikey_key")
 
+      // TODO: change returning for .then((res) => res[0])
       const newApiKey = await opts.ctx.db
         .insert(schema.apikeys)
         .values({
@@ -87,11 +88,12 @@ export const apiKeyRouter = createTRPCRouter({
           projectId: project.id,
         })
         .returning()
+        .then((res) => res[0])
 
-      return { apikey: newApiKey?.[0] }
+      return { apikey: newApiKey }
     }),
 
-  revokeApiKeys: protectedOrgAdminProcedure
+  revokeApiKeys: protectedWorkspaceAdminProcedure
     .input(z.object({ ids: z.string().array(), projectSlug: z.string() }))
     .output(z.object({ success: z.boolean(), numRevoked: z.number() }))
     .mutation(async (opts) => {
@@ -120,7 +122,7 @@ export const apiKeyRouter = createTRPCRouter({
       return { success: true, numRevoked: result.length }
     }),
 
-  rollApiKey: protectedOrgAdminProcedure
+  rollApiKey: protectedWorkspaceAdminProcedure
     .input(z.object({ id: z.string(), projectSlug: z.string() }))
     .output(
       z.object({

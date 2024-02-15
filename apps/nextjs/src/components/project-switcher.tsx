@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { use, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 
-import { useOrganization } from "@builderai/auth"
+import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
@@ -17,31 +17,23 @@ import {
 import { Check, ChevronsUpDown, LayoutGrid } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 
-import { api } from "~/trpc/client"
-import { ProjectSwitcherSkeleton } from "./project-switcher-skeleton"
-
-export function ProjectSwitcher() {
+export function ProjectSwitcher({
+  projectPromise,
+}: {
+  projectPromise: Promise<RouterOutputs["projects"]["listByActiveWorkspace"]>
+}) {
   const router = useRouter()
   const params = useParams()
 
   const projectSlug = params.projectSlug as string
   const workspaceSlug = params.workspaceSlug as string
 
-  const { data, isLoading } = api.projects.listByWorkspace.useQuery({
-    workspaceSlug: workspaceSlug ?? "",
-  })
-
-  const { organization } = useOrganization()
-
+  const { projects } = use(projectPromise)
   const [switcherOpen, setSwitcherOpen] = useState(false)
 
-  const activeProject = data?.projects.find((p) => p.slug === projectSlug)
+  const activeProject = projects.find((p) => p.slug === projectSlug)
 
-  if (!projectSlug) return null
-
-  if (!activeProject || isLoading) {
-    return <ProjectSwitcherSkeleton />
-  }
+  if (!projectSlug || !activeProject) return null
 
   return (
     <>
@@ -60,7 +52,9 @@ export function ProjectSwitcher() {
             className="relative w-32 justify-between md:w-44"
           >
             <div className="absolute inset-1 opacity-25" />
-            <span className="z-10 font-semibold">{activeProject?.name}</span>
+            <span className="z-10 truncate font-semibold">
+              {activeProject?.name}
+            </span>
             <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -69,7 +63,7 @@ export function ProjectSwitcher() {
             <CommandList>
               <CommandInput placeholder="Search project..." />
               <CommandGroup heading="All projects">
-                {data?.projects.map((project) => (
+                {projects.map((project) => (
                   <CommandItem
                     key={project.id}
                     onSelect={() => {
@@ -85,7 +79,7 @@ export function ProjectSwitcher() {
                         : "bg-transparent"
                     )}
                   >
-                    <div className="absolute inset-1 opacity-25" />
+                    <div className="absolute inset-1 truncate opacity-25" />
                     {project.name}
                     <Check
                       className={cn(
@@ -104,7 +98,7 @@ export function ProjectSwitcher() {
               <CommandGroup>
                 <CommandItem
                   onSelect={() => {
-                    router.push(`/${organization?.slug}/overview`)
+                    router.push(`/${workspaceSlug}/overview`)
                     setSwitcherOpen(false)
                   }}
                   className="cursor-pointer"

@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
-import { useSession } from "@builderai/auth"
+import { useSession } from "@builderai/auth/react"
 import { Button } from "@builderai/ui/button"
 import { useToast } from "@builderai/ui/use-toast"
 
+import { AUTH_ROUTES } from "~/constants"
 import { api } from "~/trpc/client"
 
 export function SubscribeNow(props: { planId: string }) {
@@ -38,7 +39,8 @@ export function SubscribeNow(props: { planId: string }) {
   return (
     <Button
       onClick={async () => {
-        if (!session.isSignedIn) router.push("/signin")
+        if (session.status === "unauthenticated")
+          router.push(AUTH_ROUTES.SIGNIN)
 
         createSession.mutate({
           planId: props.planId,

@@ -1,67 +1,42 @@
-import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
-import { authMiddleware } from "@builderai/auth"
+import { auth } from "@builderai/auth/server"
 
-import AppMiddleware from "~/middleware/app"
+import SitesMiddleware from "~/middleware/sites"
 import { parse } from "~/middleware/utils"
-import SitesMiddleware from "./middleware/sites"
+import {
+  API_HOSTNAMES,
+  APP_HOSTNAMES,
+  APP_PUBLIC_ROUTES,
+  SITES_HOSTNAMES,
+} from "./constants"
+import ApiMiddleware from "./middleware/api"
+import AppMiddleware from "./middleware/app"
 
-const before = (req: NextRequest) => {
-  const url = req.nextUrl.clone()
+export default auth((req) => {
   const { domain, path, suddomain } = parse(req)
 
-  if (url.pathname.includes("api/trpc")) {
-    return NextResponse.next()
+  const isPublicRoute = APP_PUBLIC_ROUTES.has(path)
+
+  // 1. we validate api routes
+  if (API_HOSTNAMES.has(domain)) {
+    return ApiMiddleware(req)
   }
 
-  if (suddomain === "sites" || domain === "sites.localhost:3000") {
+  // 2. we validate app routes inside the dashboard
+  if (APP_HOSTNAMES.has(domain)) {
+    return AppMiddleware(req)
+  }
+
+  // 3. validate site routes
+  if (SITES_HOSTNAMES.has(domain)) {
     return SitesMiddleware(req)
   }
 
-  // TODO: add middleware to check the subdomain
-
-  return NextResponse.next()
-}
-
-export default authMiddleware({
-  signInUrl: "/signin",
-  publicRoutes: [
-    // "/",
-    "/signout",
-    "/opengraph-image.png",
-    "/signin(.*)",
-    "/sso-callback(.*)",
-    "/terms(.*)",
-    "/pricing(.*)",
-    "/privacy(.*)",
-    "/api(.*)",
-    "/p(.*)",
-  ],
-  beforeAuth: before,
-  debug: false,
-  async afterAuth(auth, req) {
-    const { domain, suddomain } = parse(req)
-
-    if (
-      auth.isPublicRoute ||
-      domain === "builderai.io" ||
-      domain === "builderai.vercel.app"
-    ) {
-      // Don't do anything for public routes and landing page
-      return NextResponse.next()
-    }
-
-    if (
-      suddomain === "app" ||
-      domain === "app.localhost:3000" ||
-      domain?.endsWith("jhonsfran.vercel.app")
-    ) {
-      return AppMiddleware(req, auth)
-    }
-
+  // 0. public routes
+  if (isPublicRoute) {
     return NextResponse.next()
-  },
+  }
 })
 
 export const config = {

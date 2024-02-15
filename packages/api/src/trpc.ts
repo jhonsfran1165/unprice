@@ -11,16 +11,11 @@ import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import { initTRPC, TRPCError } from "@trpc/server"
 import { ZodError } from "zod"
 
-import { auth } from "@builderai/auth"
-import type {
-  SignedInAuthObject,
-  SignedOutAuthObject,
-} from "@builderai/auth/server"
-import { db, eq, schema, utils } from "@builderai/db"
+import type { Session } from "@builderai/auth/server"
+import { auth } from "@builderai/auth/server"
+import { db, eq, schema } from "@builderai/db"
 
 import { transformer } from "./transformer"
-
-type AuthContext = SignedInAuthObject | SignedOutAuthObject
 
 /**
  * 1. CONTEXT
@@ -33,11 +28,10 @@ type AuthContext = SignedInAuthObject | SignedOutAuthObject
  */
 interface CreateContextOptions {
   headers: Headers
-  auth: AuthContext
+  session: Session | null
   apiKey?: string | null
   req?: NextRequest
-  tenantId: string // clerk tenant id asociated to the workspace
-  workspaceId: string // workspace id
+  activeWorkspaceSlug?: string
 }
 
 /**
@@ -54,7 +48,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
     ...opts,
     db: db,
     // INFO: better wait for native support for RLS in Drizzle
-    // txRLS: rls.authTxn(db, opts.tenantId),
+    // txRLS: rls.authTxn(db, opts.session?.user.id),
   }
 }
 
@@ -65,26 +59,23 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
  */
 export const createTRPCContext = async (opts: {
   headers: Headers
-  auth: AuthContext
+  session: Session | null
   req?: NextRequest
-  // eslint-disable-next-line @typescript-eslint/require-await
 }) => {
-  const { userId, orgId } = opts.auth ?? auth()
-  const tenantId = orgId ?? userId ?? ""
-  const workspaceId = utils.workspaceIdFromTenantId(tenantId)
-
+  const session = opts.session ?? (await auth())
+  const userId = session?.user?.id ?? "unknown"
   const apiKey = opts.headers.get("x-builderai-api-key")
   const source = opts.headers.get("x-trpc-source") ?? "unknown"
-  const pathname = opts.req?.nextUrl.pathname ?? "unknown"
-  console.log(">>> tRPC Request from", source, "by", userId, "to", pathname)
+  const activeWorkspaceSlug = opts.headers.get("workspace-slug") ?? ""
+
+  console.log(">>> tRPC Request from", source, "by", userId)
 
   return createInnerTRPCContext({
-    auth: opts.auth,
-    tenantId,
-    workspaceId,
+    session,
     apiKey,
-    req: opts.req,
     headers: opts.headers,
+    req: opts.req,
+    activeWorkspaceSlug,
   })
 }
 
@@ -146,67 +137,111 @@ export const publicProcedure = t.procedure
  * procedure
  */
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (!ctx.auth?.userId) {
+  if (!ctx.session?.user?.id) {
     throw new TRPCError({ code: "UNAUTHORIZED" })
   }
 
   return next({
     ctx: {
-      auth: {
-        ...ctx.auth,
-        userId: ctx.auth.userId,
+      session: {
+        ...ctx.session,
+        userId: ctx.session?.user.id,
       },
     },
   })
 })
 
-export const protectedOrgProcedure = protectedProcedure.use(({ ctx, next }) => {
-  // You need to create a custom claim inside the session from Clerk
-  const orgs = ctx.auth.sessionClaims?.activeOrgs as Record<string, string>
-
-  // if there is no orgId then is a personal user account
-  // so no need to raise and error
-  if (ctx.auth.orgId && !orgs[ctx.auth.orgId]) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "You must be in the organization to perform this action",
-    })
-  }
-
-  return next({
-    ctx: {
-      auth: {
-        ...ctx.auth,
-        orgId: ctx.auth.orgId,
-      },
-    },
-  })
-})
-
-export const protectedOrgAdminProcedure = protectedOrgProcedure.use(
+export const protectedWorkspaceProcedure = protectedProcedure.use(
   ({ ctx, next }) => {
-    // You need to create a custom claim inside the session from Clerk
-    const orgs = ctx.auth.sessionClaims?.activeOrgs as Record<string, string>
+    // TODO: use utils here
+    const activeWorkspaceSlug = ctx.activeWorkspaceSlug
+    const workspaces = ctx.session?.user?.workspaces
+    const activeWorkspaceBelongsToUser = workspaces?.some(
+      (workspace) => workspace.slug === activeWorkspaceSlug
+    )
 
-    if (ctx.auth.orgId && orgs[ctx.auth.orgId] !== "admin") {
+    if (!activeWorkspaceSlug) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message:
-          "You must be an admin of this organization to perform this action",
+          "Invalid active workspace. You must have an active workspace to perform this action",
+      })
+    }
+
+    if (!activeWorkspaceBelongsToUser) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message:
+          "You must be a member of this organization to perform this action",
       })
     }
 
     return next({
       ctx: {
-        auth: {
-          ...ctx.auth,
-          orgRole: ctx.auth.orgRole,
+        activeWorkspaceSlug: activeWorkspaceSlug,
+        session: {
+          ...ctx.session,
         },
       },
     })
   }
 )
 
+export const protectedWorkspaceAdminProcedure = protectedWorkspaceProcedure.use(
+  ({ ctx, next }) => {
+    const activeWorkspaceSlug = ctx.activeWorkspaceSlug
+    const workspaces = ctx.session?.user?.workspaces
+
+    const orgRole = workspaces.find(
+      (workspace) => workspace.slug === activeWorkspaceSlug
+    )?.role
+
+    if (!["OWNER", "ADMIN"].includes(orgRole ?? "")) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message:
+          "You must be an admin or owner of this organization to perform this action",
+      })
+    }
+
+    return next({
+      ctx: {
+        session: {
+          ...ctx.session,
+          orgRole,
+        },
+      },
+    })
+  }
+)
+
+export const protectedWorkspaceOwnerProcedure = protectedWorkspaceProcedure.use(
+  ({ ctx, next }) => {
+    const activeWorkspaceSlug = ctx.activeWorkspaceSlug
+    const workspaces = ctx.session?.user?.workspaces
+
+    const orgRole = workspaces.find(
+      (workspace) => workspace.slug === activeWorkspaceSlug
+    )?.role
+
+    if (!["OWNER"].includes(orgRole ?? "")) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message:
+          "You must be an owner of this organization to perform this action",
+      })
+    }
+
+    return next({
+      ctx: {
+        session: {
+          ...ctx.session,
+          orgRole,
+        },
+      },
+    })
+  }
+)
 /**
  * Procedure to authenticate API requests with an API key
  */
@@ -216,6 +251,7 @@ export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
   }
 
   // Check db for API key
+  // TODO: prepare a statement for this
   const apiKey = await ctx.db.query.apikeys.findFirst({
     columns: {
       id: true,

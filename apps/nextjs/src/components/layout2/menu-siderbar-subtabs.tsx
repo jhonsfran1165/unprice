@@ -42,8 +42,6 @@ export default function SidebarMenuSubTabsv<T extends ModuleApp>(props: {
 
   if (activeSidebarTab.length === 0) return null
 
-  console.log({ activeTab })
-
   return (
     <div className="flex flex-col">
       <div className="mb-8 inline-flex h-10 items-center rounded-md bg-background-bg p-1 text-muted-foreground">

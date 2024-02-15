@@ -18,12 +18,12 @@ import {
 import {
   createTRPCRouter,
   protectedApiProcedure,
-  protectedOrgProcedure,
+  protectedWorkspaceProcedure,
 } from "../../trpc"
 import { hasAccessToProject, redis } from "../../utils"
 
 export const subscriptionRouter = createTRPCRouter({
-  create: protectedOrgProcedure
+  create: protectedWorkspaceProcedure
     .input(createSubscriptionSchema)
     .output(subscriptionSelectSchema.optional())
     .mutation(async (opts) => {
@@ -101,7 +101,7 @@ export const subscriptionRouter = createTRPCRouter({
 
       return subscriptionData?.[0]
     }),
-  createCustomer: protectedOrgProcedure
+  createCustomer: protectedWorkspaceProcedure
     .input(customerInsertSchema)
     .output(
       z.object({
@@ -155,7 +155,7 @@ export const subscriptionRouter = createTRPCRouter({
       }
     }),
 
-  deleteCustomer: protectedOrgProcedure
+  deleteCustomer: protectedWorkspaceProcedure
     .input(
       customerSelectSchema
         .pick({ id: true })
@@ -188,7 +188,7 @@ export const subscriptionRouter = createTRPCRouter({
       if (!deletedCustomer?.[0]) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Error creating customer",
+          message: "Error deleting customer",
         })
       }
 
@@ -197,7 +197,7 @@ export const subscriptionRouter = createTRPCRouter({
       }
     }),
   // TODO: add pagination and filtering - abstract to a common function input schema
-  listCustomersByProject: protectedOrgProcedure
+  listCustomersByProject: protectedWorkspaceProcedure
     .input(
       z.object({
         projectSlug: z.string(),
@@ -297,7 +297,6 @@ export const subscriptionRouter = createTRPCRouter({
       >(id))!
 
       if (payload) {
-        console.log("payload", payload)
         const featuresPlan = payload.version.featuresConfig || {}
         const allFeaturesPlan = Object.keys(featuresPlan)
           .map((group) => featuresPlan[group]?.features)

@@ -13,13 +13,13 @@ import {
 
 import {
   createTRPCRouter,
-  protectedOrgProcedure,
+  protectedWorkspaceProcedure,
   publicProcedure,
 } from "../../trpc"
 import { hasAccessToProject } from "../../utils"
 
 export const planRouter = createTRPCRouter({
-  create: protectedOrgProcedure
+  create: protectedWorkspaceProcedure
     .input(createPlanSchema)
     .output(
       z.object({
@@ -51,7 +51,7 @@ export const planRouter = createTRPCRouter({
         plan: planData[0],
       }
     }),
-  createNewVersion: protectedOrgProcedure
+  createNewVersion: protectedWorkspaceProcedure
     .input(createNewVersionPlan)
     .output(
       z.object({
@@ -102,7 +102,7 @@ export const planRouter = createTRPCRouter({
         planVersion: planVersionData[0],
       }
     }),
-  update: protectedOrgProcedure
+  update: protectedWorkspaceProcedure
     .input(updatePlanSchema)
     .output(
       z.object({
@@ -381,7 +381,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
 
-  listByProject: protectedOrgProcedure
+  listByProject: protectedWorkspaceProcedure
     .input(
       z.object({
         projectSlug: z.string(),
