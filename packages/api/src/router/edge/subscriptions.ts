@@ -214,7 +214,32 @@ export const subscriptionRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
+      // TODO: pass subscription data so I can validate if the user is subscribed to a plan
+      // const columns = getTableColumns(schema.customers)
+      // // need customer with subscription
+      // const customersSubscriptions = await opts.ctx.db.select({
+      //   ...columns,
+      //   subscriptions: {
+      //     id: schema.subscriptions.id,
+      //   },
+      // }).from(schema.customers).innerJoin(schema.subscriptions, eq(schema.customers.id, schema.subscriptions.customerId)).
+      // where(
+      //   and(
+      //     eq(schema.customers.projectId, project.id),
+      //     fromDate && toDate
+      //       ? between(
+      //           schema.customers.createdAt,
+      //           new Date(fromDate),
+      //           new Date(toDate)
+      //         )
+      //       : undefined,
+      //     fromDate ? gte(schema.customers.createdAt, new Date(fromDate)) : undefined,
+      //     toDate ? lte(schema.customers.createdAt, new Date(toDate)) : undefined
+      //   )
+      // )
+
       const customers = await opts.ctx.db.query.customers.findMany({
+        with: {},
         where: (customer, { eq, and, between, gte, lte }) =>
           and(
             eq(customer.projectId, project.id),
