@@ -20,6 +20,7 @@ const handler = auth(async (req) => {
       createTRPCContext({
         headers: req.headers,
         session: req.auth,
+        req,
       }),
     onError: ({ error, path }) => {
       console.log("❌ Error in tRPC handler (edge) on path", path)

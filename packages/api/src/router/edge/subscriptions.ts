@@ -20,7 +20,7 @@ import {
   protectedApiProcedure,
   protectedWorkspaceProcedure,
 } from "../../trpc"
-import { hasAccessToProject, redis } from "../../utils"
+import { projectGuard, redis } from "../../utils"
 
 export const subscriptionRouter = createTRPCRouter({
   create: protectedWorkspaceProcedure
@@ -29,7 +29,7 @@ export const subscriptionRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { planVersionId, customerId, projectSlug, planId } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -111,7 +111,7 @@ export const subscriptionRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { projectSlug, email, name } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -170,7 +170,7 @@ export const subscriptionRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { projectSlug, id } = opts.input
 
-      const { project: projectData } = await hasAccessToProject({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -209,7 +209,7 @@ export const subscriptionRouter = createTRPCRouter({
     .query(async (opts) => {
       const { projectSlug, fromDate, toDate } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })

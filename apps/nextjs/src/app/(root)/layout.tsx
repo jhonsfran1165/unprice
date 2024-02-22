@@ -40,8 +40,6 @@ export const metadata = {
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const session = await auth()
 
-  console.log("session", session)
-
   // TODO: migrate this to authenticated routes
   return (
     <html lang="en" suppressHydrationWarning>

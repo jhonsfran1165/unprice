@@ -10,7 +10,7 @@ import {
 } from "@builderai/validators/price"
 
 import { createTRPCRouter, protectedWorkspaceProcedure } from "../../trpc"
-import { hasAccessToProject } from "../../utils"
+import { projectGuard } from "../../utils"
 
 export const featureRouter = createTRPCRouter({
   create: protectedWorkspaceProcedure
@@ -19,7 +19,7 @@ export const featureRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { projectSlug, slug, title } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -54,7 +54,7 @@ export const featureRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { projectSlug, id } = opts.input
 
-      const { project: projectData } = await hasAccessToProject({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -86,7 +86,7 @@ export const featureRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { title, id, description, type, projectSlug } = opts.input
 
-      const { project: projectData } = await hasAccessToProject({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -143,7 +143,7 @@ export const featureRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { slug, projectSlug } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -166,7 +166,7 @@ export const featureRouter = createTRPCRouter({
     .query(async (opts) => {
       const { slug, projectSlug } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -193,7 +193,7 @@ export const featureRouter = createTRPCRouter({
     .query(async (opts) => {
       const { id, projectSlug } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -227,7 +227,7 @@ export const featureRouter = createTRPCRouter({
       const { projectSlug, search } = opts.input
       const filter = `%${search}%`
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -255,7 +255,7 @@ export const featureRouter = createTRPCRouter({
     .query(async (opts) => {
       const { projectSlug } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })

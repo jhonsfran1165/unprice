@@ -27,7 +27,6 @@ export default function DashboardLayout(props: {
 }) {
   return (
     <div className="relative flex min-h-screen flex-col">
-      {/* <WorkspaceClientCookie workspaceSlug={props.params.workspaceSlug} /> */}
       <Header>
         <div className="flex h-14 items-center space-x-2 sm:justify-between sm:space-x-0">
           <div className="flex items-center justify-start">

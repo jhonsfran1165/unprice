@@ -8,7 +8,7 @@ import { Button } from "@builderai/ui/button"
 
 import { useDebounce } from "~/lib/use-debounce"
 
-export default function Intro() {
+export default function Intro({ workspaceSlug }: { workspaceSlug: string }) {
   const router = useRouter()
 
   const showText = useDebounce(true, 800)
@@ -72,7 +72,11 @@ export default function Intro() {
             >
               <Button
                 size="lg"
-                onClick={() => router.push("/onboarding?step=create-project")}
+                onClick={() =>
+                  router.push(`
+                  /${workspaceSlug}/onboarding?step=create-project
+                `)
+                }
               >
                 Get Started
               </Button>

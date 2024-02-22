@@ -1,12 +1,20 @@
 import { TRPCError } from "@trpc/server"
 
-import { eq, prepared, schema } from "@builderai/db"
+import { prepared } from "@builderai/db"
+import type { User } from "@builderai/validators/auth"
 import type { Project } from "@builderai/validators/project"
-import type { SelectWorkspace } from "@builderai/validators/workspace"
+import type { Workspace, WorkspaceRole } from "@builderai/validators/workspace"
 
 import type { Context } from "../trpc"
 
-export const hasAccessToProject = async ({
+interface ProjectGuardType {
+  project: Project
+  workspace: Workspace
+  member: User & { role: WorkspaceRole }
+  verifyRole: (roles: WorkspaceRole[]) => void
+}
+
+export const projectGuard = async ({
   projectSlug,
   projectId,
   ctx,
@@ -14,23 +22,29 @@ export const hasAccessToProject = async ({
   projectId?: string
   projectSlug?: string
   ctx: Context
-}): Promise<{
-  project: Project & { workspace: SelectWorkspace }
-}> => {
+}): Promise<ProjectGuardType> => {
   const activeWorkspaceSlug = ctx.activeWorkspaceSlug
+  const userId = ctx.session?.user.id
+  const workspaces = ctx.session?.user?.workspaces
+  const activeWorkspace = workspaces?.find(
+    (workspace) => workspace.slug === activeWorkspaceSlug
+  )
 
-  if (activeWorkspaceSlug === "" || !activeWorkspaceSlug) {
+  if (!activeWorkspace?.id) {
     throw new TRPCError({
       code: "BAD_REQUEST",
       message: "No active workspace in the session",
     })
   }
 
-  const condition =
-    (projectId && eq(schema.projects.id, projectId)) ??
-    (projectSlug && eq(schema.projects.slug, projectSlug))
+  if (!userId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "No userId active in the session",
+    })
+  }
 
-  if (!condition) {
+  if (!projectId && !projectSlug) {
     throw new TRPCError({
       code: "BAD_REQUEST",
       message: "Has to provide project id or project slug",
@@ -39,24 +53,42 @@ export const hasAccessToProject = async ({
 
   // we execute this in a prepared statement to improve performance
   // INFO: keep in mind that this executes outside of the context of trpc
-  const projectsWithWorkspace =
-    await prepared.projectsWithWorkspacesPrepared.execute({
-      id: projectId,
-      slug: projectSlug,
+  // apart from checking the project is part of the workspace, we also check if the user has access to the workspace
+  const data = await prepared.projectGuardPrepared
+    .execute({
+      projectId: projectId,
+      projectSlug: projectSlug,
+      workspaceId: activeWorkspace.id,
+      userId,
     })
+    .then((response) => response[0] ?? null)
 
-  const projectBelonsToWorkspace =
-    projectsWithWorkspace?.workspace.slug === activeWorkspaceSlug
+  const project = data?.project
+  const workspace = data?.workspace
+  const member = data?.member as User & { role: WorkspaceRole }
 
-  // the user doesn't have access to this workspace
-  if (!projectBelonsToWorkspace) {
+  if (!member || !project || !workspace) {
     throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Project not found or you don't have access to this project",
+      code: "UNAUTHORIZED",
+      message: "Project not found or you don't have access to the project",
     })
   }
 
+  const verifyRole = (roles: WorkspaceRole[]) => {
+    if (roles && !roles.includes(member.role)) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You must be a member with roles (${roles.join(
+          "/"
+        )}) of this workspace to perform this action`,
+      })
+    }
+  }
+
   return {
-    project: projectsWithWorkspace,
+    project: project,
+    workspace: workspace,
+    member: member,
+    verifyRole,
   }
 }

@@ -53,6 +53,7 @@ export const APP_AUTH_ROUTES = new Set(Object.values(AUTH_ROUTES))
  * @type {string}
  */
 export const API_AUTH_ROUTE_PREFIX = "/api/auth"
+export const API_TRPC_ROUTE_PREFIX = "/api/trpc"
 
 /**
  * The default redirect path after logging in
@@ -63,3 +64,4 @@ export const DEFAULT_LOGIN_REDIRECT = "/"
 export const APP_NON_WORKSPACE_ROUTES = new Set(["/error"])
 
 export const COOKIE_NAME_WORKSPACE = "workspace-slug"
+export const COOKIE_NAME_PROJECT = "project-slug"

@@ -16,6 +16,8 @@ import { auth } from "@builderai/auth/server"
 import { db, eq, schema } from "@builderai/db"
 
 import { transformer } from "./transformer"
+import { projectGuard } from "./utils"
+import { workspaceGuard } from "./utils/workspace-guard"
 
 /**
  * 1. CONTEXT
@@ -31,7 +33,8 @@ interface CreateContextOptions {
   session: Session | null
   apiKey?: string | null
   req?: NextRequest
-  activeWorkspaceSlug?: string
+  activeWorkspaceSlug: string
+  activeProjectSlug: string
 }
 
 /**
@@ -66,9 +69,32 @@ export const createTRPCContext = async (opts: {
   const userId = session?.user?.id ?? "unknown"
   const apiKey = opts.headers.get("x-builderai-api-key")
   const source = opts.headers.get("x-trpc-source") ?? "unknown"
-  const activeWorkspaceSlug = opts.headers.get("workspace-slug") ?? ""
 
-  console.log(">>> tRPC Request from", source, "by", userId)
+  // for client side we set a httpOnly cookie from middleware
+  // for server side we set a header from trpc invoker
+  const activeWorkspaceSlug =
+    opts.req?.cookies.get("workspace-slug")?.value ??
+    opts.headers.get("workspace-slug") ??
+    ""
+
+  // for client side we set a httpOnly cookie from middleware
+  // for server side we set a header from trpc invoker
+  // TODO: use utils here
+  const activeProjectSlug =
+    opts.req?.cookies.get("project-slug")?.value ??
+    opts.headers.get("project-slug") ??
+    ""
+
+  console.log(
+    ">>> tRPC Request from",
+    source,
+    "by",
+    userId,
+    "workspace",
+    activeWorkspaceSlug,
+    "project",
+    activeProjectSlug
+  )
 
   return createInnerTRPCContext({
     session,
@@ -76,6 +102,7 @@ export const createTRPCContext = async (opts: {
     headers: opts.headers,
     req: opts.req,
     activeWorkspaceSlug,
+    activeProjectSlug,
   })
 }
 
@@ -152,33 +179,38 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 })
 
 export const protectedWorkspaceProcedure = protectedProcedure.use(
-  ({ ctx, next }) => {
+  async ({ ctx, next }) => {
     // TODO: use utils here
     const activeWorkspaceSlug = ctx.activeWorkspaceSlug
-    const workspaces = ctx.session?.user?.workspaces
-    const activeWorkspaceBelongsToUser = workspaces?.some(
-      (workspace) => workspace.slug === activeWorkspaceSlug
-    )
 
     if (!activeWorkspaceSlug) {
       throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message:
-          "Invalid active workspace. You must have an active workspace to perform this action",
+        code: "BAD_REQUEST",
+        message: "No active workspace in the session",
       })
     }
 
-    if (!activeWorkspaceBelongsToUser) {
+    const workspaces = ctx.session?.user?.workspaces
+    const activeWorkspace = workspaces?.find(
+      (workspace) => workspace.slug === activeWorkspaceSlug
+    )
+
+    if (!activeWorkspace) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message:
-          "You must be a member of this organization to perform this action",
+          "Workspace not found or you don't have access to the workspace",
       })
     }
 
+    const data = await workspaceGuard({
+      workspaceId: activeWorkspace?.id,
+      ctx,
+    })
+
     return next({
       ctx: {
-        activeWorkspaceSlug: activeWorkspaceSlug,
+        ...data,
         session: {
           ...ctx.session,
         },
@@ -189,59 +221,54 @@ export const protectedWorkspaceProcedure = protectedProcedure.use(
 
 export const protectedWorkspaceAdminProcedure = protectedWorkspaceProcedure.use(
   ({ ctx, next }) => {
-    const activeWorkspaceSlug = ctx.activeWorkspaceSlug
-    const workspaces = ctx.session?.user?.workspaces
-
-    const orgRole = workspaces.find(
-      (workspace) => workspace.slug === activeWorkspaceSlug
-    )?.role
-
-    if (!["OWNER", "ADMIN"].includes(orgRole ?? "")) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message:
-          "You must be an admin or owner of this organization to perform this action",
-      })
-    }
+    ctx.verifyRole(["OWNER", "ADMIN"])
 
     return next({
-      ctx: {
-        session: {
-          ...ctx.session,
-          orgRole,
-        },
-      },
+      ctx,
     })
   }
 )
 
 export const protectedWorkspaceOwnerProcedure = protectedWorkspaceProcedure.use(
   ({ ctx, next }) => {
-    const activeWorkspaceSlug = ctx.activeWorkspaceSlug
-    const workspaces = ctx.session?.user?.workspaces
+    ctx.verifyRole(["OWNER"])
 
-    const orgRole = workspaces.find(
-      (workspace) => workspace.slug === activeWorkspaceSlug
-    )?.role
+    return next({
+      ctx,
+    })
+  }
+)
 
-    if (!["OWNER"].includes(orgRole ?? "")) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message:
-          "You must be an owner of this organization to perform this action",
-      })
-    }
+export const protectedProjectProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    const activeProjectSlug = ctx.activeProjectSlug
+
+    const data = await projectGuard({
+      projectSlug: activeProjectSlug,
+      ctx,
+    })
 
     return next({
       ctx: {
+        ...data,
         session: {
           ...ctx.session,
-          orgRole,
         },
       },
     })
   }
 )
+
+export const protectedProjectAdminProcedure = protectedProjectProcedure.use(
+  ({ ctx, next }) => {
+    ctx.verifyRole(["OWNER", "ADMIN"])
+
+    return next({
+      ctx,
+    })
+  }
+)
+
 /**
  * Procedure to authenticate API requests with an API key
  */

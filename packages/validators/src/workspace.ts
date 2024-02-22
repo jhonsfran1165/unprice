@@ -45,6 +45,8 @@ export const workspacesJWTPayload = selectWorkspaceSchema
 
 export type WorkspacesJWTPayload = z.infer<typeof workspacesJWTPayload>
 export type WorkspaceRole = z.infer<typeof membersSelectBase.shape.role>
+export type WorkspacePlan = z.infer<typeof selectWorkspaceSchema.shape.plan>
 export type PurchaseOrg = z.infer<typeof purchaseWorkspaceSchema>
-export type SelectWorkspace = z.infer<typeof selectWorkspaceSchema>
+export type Workspace = z.infer<typeof selectWorkspaceSchema>
+export type Member = z.infer<typeof membersSelectBase>
 export type InviteOrgMember = z.infer<typeof inviteOrgMemberSchema>

@@ -12,7 +12,7 @@ import {
   protectedWorkspaceAdminProcedure,
   protectedWorkspaceProcedure,
 } from "../../trpc"
-import { hasAccessToProject } from "../../utils"
+import { projectGuard } from "../../utils"
 
 export const apiKeyRouter = createTRPCRouter({
   listApiKeys: protectedWorkspaceAdminProcedure
@@ -31,7 +31,7 @@ export const apiKeyRouter = createTRPCRouter({
     .query(async (opts) => {
       const { projectSlug, fromDate, toDate } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -67,7 +67,7 @@ export const apiKeyRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { projectSlug, name, expiresAt } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -99,7 +99,7 @@ export const apiKeyRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { ids, projectSlug } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -132,7 +132,7 @@ export const apiKeyRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { id, projectSlug } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })

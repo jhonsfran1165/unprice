@@ -137,21 +137,21 @@ export const authConfig = {
 
       if (!userId) return token
 
-      // console.log(">>> JWT for user", userId)
+      // we get the workspaces for the user and add it to the token so it can be used in the session
+      // this is used to avoid fetching the workspaces for the user in every request
+      // we use prepared statements to improve performance
       const userWithWorkspaces =
         await prepared.workspacesByUserPrepared.execute({
           userId,
         })
 
-      const workspaces = userWithWorkspaces?.usersToWorkspaces.map(
-        (member) => ({
-          id: member.workspace.id,
-          slug: member.workspace.slug,
-          role: member.role,
-          isPersonal: member.workspace.isPersonal,
-          plan: member.workspace.plan,
-        })
-      )
+      const workspaces = userWithWorkspaces?.members.map((member) => ({
+        id: member.workspace.id,
+        slug: member.workspace.slug,
+        role: member.role,
+        isPersonal: member.workspace.isPersonal,
+        plan: member.workspace.plan,
+      }))
 
       token.id = userId
       token.workspaces = workspaces ? workspaces : []

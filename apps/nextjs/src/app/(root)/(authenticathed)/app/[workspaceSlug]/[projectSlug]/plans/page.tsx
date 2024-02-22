@@ -22,7 +22,7 @@ export default async function PlansPage(props: {
 
   await userCanAccessProject({
     projectSlug,
-    needsToBeInTier: ["PRO", "STANDARD", "FREE"],
+    needsToBeInTier: ["free"],
   })
 
   const parsed = searchParamsSchema.safeParse(props.searchParams)

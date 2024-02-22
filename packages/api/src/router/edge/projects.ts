@@ -14,10 +14,11 @@ import { selectWorkspaceSchema } from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,
+  protectedProcedure,
   protectedWorkspaceAdminProcedure,
   protectedWorkspaceProcedure,
 } from "../../trpc"
-import { hasAccessToProject } from "../../utils"
+import { projectGuard } from "../../utils"
 import { getRandomPatternStyle } from "../../utils/generate-pattern"
 
 // TODO: Don't hardcode the limit to PRO
@@ -35,8 +36,8 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const activeWorkspaceSlug = opts.ctx.activeWorkspaceSlug
       const { name, url } = opts.input
+      const workspace = opts.ctx.workspace
 
       const projects = await opts.ctx.db
         .select({ count: sql<number>`count(*)` })
@@ -45,21 +46,6 @@ export const projectRouter = createTRPCRouter({
       // TODO: Don't hardcode the limit to PRO
       if (projects[0] && projects[0].count >= PROJECT_LIMITS.PRO) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "Limit reached" })
-      }
-
-      const workspace = await opts.ctx.db.query.workspaces.findFirst({
-        columns: {
-          id: true,
-          plan: true,
-        },
-        where: (workspace, { eq }) => eq(workspace.slug, activeWorkspaceSlug),
-      })
-
-      if (!workspace?.id) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Workspace don't exist",
-        })
       }
 
       const projectId = utils.newIdEdge("project")
@@ -76,8 +62,9 @@ export const projectRouter = createTRPCRouter({
           tier: workspace.plan === "free" ? "free" : "pro",
         })
         .returning()
+        .then((res) => res[0] ?? null)
 
-      if (!newProject?.[0]) {
+      if (!newProject?.id) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Error creating project",
@@ -85,7 +72,7 @@ export const projectRouter = createTRPCRouter({
       }
 
       return {
-        project: newProject?.[0],
+        project: newProject,
       }
     }),
 
@@ -99,7 +86,7 @@ export const projectRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { projectSlug, name } = opts.input
 
-      const { project: projectData } = await hasAccessToProject({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -127,7 +114,7 @@ export const projectRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { slug: projectSlug } = opts.input
 
-      const { project: projectData } = await hasAccessToProject({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -143,19 +130,19 @@ export const projectRouter = createTRPCRouter({
     }),
 
   // TODO: improve this
-  canAccessProject: protectedWorkspaceAdminProcedure
+  canAccessProject: protectedProcedure
     .input(z.object({ slug: z.string(), needsToBeInTier: z.array(z.string()) }))
     .output(z.object({ haveAccess: z.boolean(), isInTier: z.boolean() }))
     .query(async (opts) => {
       const { slug: projectSlug, needsToBeInTier: tier } = opts.input
 
       try {
-        const { project: projectData } = await hasAccessToProject({
+        const { project: projectData, workspace } = await projectGuard({
           projectSlug,
           ctx: opts.ctx,
         })
 
-        if (tier.includes("FREE")) {
+        if (tier.includes(workspace.plan)) {
           return {
             haveAccess: true,
             isInTier: true,
@@ -164,7 +151,7 @@ export const projectRouter = createTRPCRouter({
 
         return {
           haveAccess: projectData.slug === projectSlug,
-          isInTier: tier.includes(projectData.tier ?? "FREE"),
+          isInTier: tier.includes(workspace.plan),
         }
       } catch (error) {
         return { haveAccess: false, isInTier: false }
@@ -182,12 +169,12 @@ export const projectRouter = createTRPCRouter({
       const { slug: projectSlug } = opts.input
       const { userId } = opts.ctx.session
 
-      const { project: projectData } = await hasAccessToProject({
+      const { project: projectData, workspace } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
 
-      if (projectData.workspace.isPersonal) {
+      if (workspace.isPersonal) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Project is already personal",
@@ -250,7 +237,7 @@ export const projectRouter = createTRPCRouter({
       const { userId } = opts.ctx.session
       const { tenantId: targetTenantId, projectSlug } = opts.input
 
-      const { project: projectData } = await hasAccessToProject({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -327,34 +314,36 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const activeWorkspaceSlug = opts.ctx.activeWorkspaceSlug
+      const activeWorkspaceId = opts.ctx.workspace.id
 
-      const { ...rest } = getTableColumns(schema.projects)
-      const workspaceProjects = await opts.ctx.db
-        .select({
-          project: {
-            ...rest,
+      const workspaceProjects = await opts.ctx.db.query.workspaces.findFirst({
+        with: {
+          projects: {
+            orderBy: (project, { desc }) => [desc(project.createdAt)],
           },
-          workspace: {
-            slug: schema.workspaces.slug,
-          },
-        })
-        .from(schema.projects)
-        .innerJoin(
-          schema.workspaces,
-          eq(schema.projects.workspaceId, schema.workspaces.id)
-        )
-        .where(eq(schema.workspaces.slug, activeWorkspaceSlug))
+        },
+        where: (workspace, { eq }) => eq(workspace.id, activeWorkspaceId),
+      })
+
+      if (!workspaceProjects) {
+        return {
+          projects: [],
+          limit: PROJECT_LIMITS.PRO,
+          limitReached: false,
+        }
+      }
+
+      const { projects, ...rest } = workspaceProjects
 
       // TODO: Don't hardcode the limit to PRO
       return {
-        projects: workspaceProjects.map((project) => ({
-          ...project.project,
-          workspace: project.workspace,
-          styles: getRandomPatternStyle(project.project.id),
+        projects: projects.map((project) => ({
+          ...project,
+          workspace: rest,
+          styles: getRandomPatternStyle(project.id),
         })),
         limit: PROJECT_LIMITS.PRO,
-        limitReached: workspaceProjects.length >= PROJECT_LIMITS.PRO,
+        limitReached: projects.length >= PROJECT_LIMITS.PRO,
       }
     }),
   listByWorkspace: protectedWorkspaceProcedure
@@ -418,7 +407,7 @@ export const projectRouter = createTRPCRouter({
     .query(async (opts) => {
       const { slug: projectSlug } = opts.input
 
-      const { project: projectData } = await hasAccessToProject({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -439,7 +428,7 @@ export const projectRouter = createTRPCRouter({
     .query(async (opts) => {
       const { id: projectId } = opts.input
 
-      const { project: projectData } = await hasAccessToProject({
+      const { project: projectData } = await projectGuard({
         projectId,
         ctx: opts.ctx,
       })

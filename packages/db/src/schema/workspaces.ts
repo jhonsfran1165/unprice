@@ -68,7 +68,7 @@ export const members = pgTableProject(
 )
 
 export const workspacesRelations = relations(workspaces, ({ many }) => ({
-  usersToWorkspaces: many(members),
+  members: many(members),
   projects: many(projects),
 }))
 

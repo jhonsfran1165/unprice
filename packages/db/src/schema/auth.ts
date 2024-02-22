@@ -60,7 +60,7 @@ export const verificationTokens = pgTableProject(
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
-  usersToWorkspaces: many(members),
+  members: many(members),
 }))
 
 export const accountsRelations = relations(accounts, ({ one }) => ({

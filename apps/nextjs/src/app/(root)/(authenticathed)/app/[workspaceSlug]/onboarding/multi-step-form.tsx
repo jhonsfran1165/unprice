@@ -24,7 +24,7 @@ export function Onboarding(props: { workspaceSlug: string }) {
   return (
     <div className="mx-auto flex h-[calc(100vh-14rem)] w-full max-w-screen-sm flex-col items-center">
       <AnimatePresence mode="wait">
-        {!step && <Intro key="intro" />}
+        {!step && <Intro workspaceSlug={props.workspaceSlug} key="intro" />}
         {step === "create-project" && (
           <CreateProject workspaceSlug={props.workspaceSlug} />
         )}

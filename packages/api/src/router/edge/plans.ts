@@ -13,13 +13,15 @@ import {
 
 import {
   createTRPCRouter,
+  protectedProjectAdminProcedure,
+  protectedProjectProcedure,
   protectedWorkspaceProcedure,
   publicProcedure,
 } from "../../trpc"
-import { hasAccessToProject } from "../../utils"
+import { projectGuard } from "../../utils"
 
 export const planRouter = createTRPCRouter({
-  create: protectedWorkspaceProcedure
+  create: protectedProjectAdminProcedure
     .input(createPlanSchema)
     .output(
       z.object({
@@ -27,12 +29,8 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { projectSlug, slug, title, currency } = opts.input
-
-      const { project } = await hasAccessToProject({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      const { slug, title, currency } = opts.input
+      const project = opts.ctx.project
 
       const planId = utils.newIdEdge("plan")
 
@@ -46,9 +44,12 @@ export const planRouter = createTRPCRouter({
           projectId: project.id,
         })
         .returning()
+        .then((planData) => {
+          return planData[0]
+        })
 
       return {
-        plan: planData[0],
+        plan: planData,
       }
     }),
   createNewVersion: protectedWorkspaceProcedure
@@ -61,7 +62,7 @@ export const planRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { projectSlug, planId } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -112,7 +113,7 @@ export const planRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { title, id, projectSlug } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectId: projectSlug,
         ctx: opts.ctx,
       })
@@ -169,7 +170,7 @@ export const planRouter = createTRPCRouter({
         status,
       } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -236,7 +237,7 @@ export const planRouter = createTRPCRouter({
     .query(async (opts) => {
       const { planSlug, projectSlug, versionId } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -286,7 +287,7 @@ export const planRouter = createTRPCRouter({
     .query(async (opts) => {
       const { slug, projectSlug } = opts.input
 
-      const { project } = await hasAccessToProject({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -323,31 +324,29 @@ export const planRouter = createTRPCRouter({
       }
     }),
 
-  getById: publicProcedure
+  getById: protectedProjectProcedure
     .input(z.object({ id: z.string(), projectSlug: z.string() }))
     .output(
       z.object({
-        plan: planSelectBaseSchema.extend({
-          versions: z.array(
-            versionSelectBaseSchema.pick({
-              id: true,
-              status: true,
-              version: true,
-            })
-          ),
-          project: z.object({
-            slug: z.string(),
-          }),
-        }),
+        plan: planSelectBaseSchema
+          .extend({
+            versions: z.array(
+              versionSelectBaseSchema.pick({
+                id: true,
+                status: true,
+                version: true,
+              })
+            ),
+            project: z.object({
+              slug: z.string(),
+            }),
+          })
+          .optional(),
       })
     )
     .query(async (opts) => {
-      const { id, projectSlug } = opts.input
-
-      const { project } = await hasAccessToProject({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      const { id } = opts.input
+      const project = opts.ctx.project
 
       const plan = await opts.ctx.db.query.plans.findFirst({
         with: {
@@ -369,22 +368,14 @@ export const planRouter = createTRPCRouter({
           and(eq(plan.id, id), eq(plan.projectId, project.id)),
       })
 
-      if (!plan?.id) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "plan not found",
-        })
-      }
-
       return {
-        plan,
+        plan: plan,
       }
     }),
 
-  listByProject: protectedWorkspaceProcedure
+  listByProject: protectedProjectProcedure
     .input(
       z.object({
-        projectSlug: z.string(),
         fromDate: z.number().optional(),
         toDate: z.number().optional(),
       })
@@ -405,12 +396,8 @@ export const planRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const { projectSlug, fromDate, toDate } = opts.input
-
-      const { project } = await hasAccessToProject({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      const { fromDate, toDate } = opts.input
+      const project = opts.ctx.project
 
       const plans = await opts.ctx.db.query.plans.findMany({
         with: {

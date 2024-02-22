@@ -1,15 +1,15 @@
 import { notFound } from "next/navigation"
 
-import type { ProjectTier } from "@builderai/config"
+import type { WorkspacePlan } from "@builderai/validators/workspace"
 
 import { api } from "~/trpc/server"
 
 export async function userCanAccessProject({
   projectSlug,
-  needsToBeInTier = ["FREE"],
+  needsToBeInTier = ["free"],
 }: {
   projectSlug: string
-  needsToBeInTier?: ProjectTier[]
+  needsToBeInTier?: WorkspacePlan[]
 }) {
   if (!projectSlug) {
     notFound()
