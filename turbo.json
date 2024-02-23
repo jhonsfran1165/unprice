@@ -39,10 +39,7 @@
     }
   },
   "globalEnv": [
-    "CLERK_SECRET_KEY",
-    "CLERK_WEBHOOK_SECRET",
     "DATABASE_URL",
-    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
     "NEXTJS_URL",
     "SKIP_ENV_VALIDATION",
     "STRIPE_API_KEY",

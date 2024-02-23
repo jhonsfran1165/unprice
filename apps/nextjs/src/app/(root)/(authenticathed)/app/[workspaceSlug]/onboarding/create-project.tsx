@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { domAnimation, LazyMotion, m } from "framer-motion"
 import { Balancer } from "react-wrap-balancer"
 
@@ -12,8 +12,9 @@ const CreateProjectForm = dynamic(
   }
 )
 
-export default function CreateProject(props: { workspaceSlug: string }) {
+export default function CreateProject() {
   const router = useRouter()
+  const workspaceSlug = useParams().workspaceSlug as string
 
   return (
     <LazyMotion features={domAnimation}>
@@ -60,12 +61,14 @@ export default function CreateProject(props: { workspaceSlug: string }) {
             }}
           >
             <CreateProjectForm
-              workspaceSlug={props.workspaceSlug}
+              workspaceSlug={workspaceSlug}
               onSuccess={({ slug }) => {
                 const searchParams = new URLSearchParams(window.location.search)
                 searchParams.set("step", "create-api-key")
                 searchParams.set("projectSlug", slug)
-                router.push(`/onboarding?${searchParams.toString()}`)
+                router.push(
+                  `/${workspaceSlug}/onboarding?${searchParams.toString()}`
+                )
               }}
             />
           </m.div>

@@ -64,4 +64,6 @@ export const DEFAULT_LOGIN_REDIRECT = "/"
 export const APP_NON_WORKSPACE_ROUTES = new Set(["/error"])
 
 export const COOKIE_NAME_WORKSPACE = "workspace-slug"
+export const COOKIE_NAME_CURRENT_WORKSPACE = "workspace-slug-current"
 export const COOKIE_NAME_PROJECT = "project-slug"
+export const COOKIE_NAME_STATE_APP = "app-status"

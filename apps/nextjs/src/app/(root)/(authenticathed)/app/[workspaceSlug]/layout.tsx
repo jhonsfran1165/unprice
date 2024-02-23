@@ -9,6 +9,7 @@ import { Logo } from "~/components/logo"
 import { MainNav } from "~/components/main-nav"
 import { ProjectSwitcher } from "~/components/project-switcher"
 import { ProjectSwitcherSkeleton } from "~/components/project-switcher-skeleton"
+import { UpdateClientCookie } from "~/components/update-client-cookie"
 import { WorkspaceSwitcher } from "~/components/workspace-switcher"
 import { WorkspaceSwitcherSkeleton } from "~/components/workspace-switcher-skeleton"
 import { api } from "~/trpc/server"
@@ -21,12 +22,16 @@ const ThemeToggle = dynamic(() => import("~/components/theme-toggle"), {
     </Button>
   ),
 })
+
+export const runtime = "edge"
+
 export default function DashboardLayout(props: {
   children: React.ReactNode
   params: { workspaceSlug: string; projectSlug: string }
 }) {
   return (
     <div className="relative flex min-h-screen flex-col">
+      <UpdateClientCookie />
       <Header>
         <div className="flex h-14 items-center space-x-2 sm:justify-between sm:space-x-0">
           <div className="flex items-center justify-start">

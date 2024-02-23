@@ -11,7 +11,7 @@ export default async function DashboardPage(props: {
 
   await userCanAccessProject({
     projectSlug,
-    needsToBeInTier: ["PRO", "STANDARD", "FREE"],
+    needsToBeInTier: ["PRO", "FREE"],
   })
 
   return (

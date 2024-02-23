@@ -1,6 +1,5 @@
 import type Stripe from "stripe"
 
-import { clerkClient } from "@builderai/auth"
 import { stripePriceToSubscriptionPlan } from "@builderai/config"
 import { db, eq, schema, utils } from "@builderai/db"
 
@@ -22,7 +21,7 @@ export async function handleEvent(event: Stripe.Event) {
         typeof subscription.customer === "string"
           ? subscription.customer
           : subscription.customer.id
-      const { userId, organizationName } = subscription.metadata
+      const { userId, workspaceName } = subscription.metadata
 
       if (!userId) {
         throw new Error("Missing user id")
@@ -41,6 +40,7 @@ export async function handleEvent(event: Stripe.Event) {
         subscription.items.data[0]?.price.id
       )
 
+      // TODO: this will change when we have a proper plan system in place
       /**
        * User is already subscribed, update their info
        */
@@ -50,38 +50,40 @@ export async function handleEvent(event: Stripe.Event) {
           .set({
             subscriptionId: subscription.id,
             billingPeriodEnd: new Date(subscription.current_period_end * 1000),
-            plan: subscriptionPlan?.key,
+            plan: "PRO", // TODO: fix this
           })
           .where(eq(schema.workspaces.id, workspaceData.id))
       }
 
       /**
-       * User is not subscribed, create a new customer and org
+       * User is not subscribed, create a new customer and workspace
        */
-      const orgSlug = utils.generateSlug(2)
-      const organization = await clerkClient.organizations.createOrganization({
-        createdBy: userId,
-        name: organizationName ?? orgSlug,
-        slug: orgSlug,
-      })
-
-      const workspaceId = utils.workspaceIdFromTenantId(organization.id)
+      const workspaceSlug = utils.generateSlug(2)
+      const workspaceId = utils.newIdEdge("workspace")
 
       await db.insert(schema.workspaces).values({
         id: workspaceId,
+        slug: workspaceSlug,
+        name: workspaceName ?? workspaceSlug,
+        isPersonal: false,
         stripeId,
         subscriptionId: subscription.id,
         // plan: subscriptionPlan?.key,
-        tenantId: organization.id,
         billingPeriodStart: new Date(subscription.current_period_start * 1000),
         billingPeriodEnd: new Date(subscription.current_period_end * 1000),
         trialEnds:
           subscription.status === "trialing" && subscription.trial_end
             ? new Date(subscription.trial_end * 1000)
             : null,
-        slug: organization.slug ?? orgSlug,
-        name: organization.name,
       })
+
+      // create membership
+      await db.insert(schema.members).values({
+        userId,
+        workspaceId,
+        role: "OWNER",
+      })
+
       break
     }
     case "invoice.payment_succeeded": {
@@ -101,7 +103,7 @@ export async function handleEvent(event: Stripe.Event) {
         .update(schema.workspaces)
         .set({
           billingPeriodEnd: new Date(subscription.current_period_end * 1000),
-          plan: subscriptionPlan?.key,
+          plan: "PRO", // TODO: fix this
         })
         .where(eq(schema.workspaces.subscriptionId, subscription.id))
 
@@ -119,13 +121,14 @@ export async function handleEvent(event: Stripe.Event) {
           : subscription.customer.id
 
       await db
-        .update(schema.workspace)
+        .update(schema.workspaces)
         .set({
           subscriptionId: null,
           plan: "FREE",
+          isPersonal: true,
           billingPeriodEnd: null,
         })
-        .where(eq(schema.workspace.stripeId, stripeId))
+        .where(eq(schema.workspaces.stripeId, stripeId))
 
       break
     }
@@ -141,12 +144,12 @@ export async function handleEvent(event: Stripe.Event) {
       )
 
       await db
-        .update(schema.workspace)
+        .update(schema.workspaces)
         .set({
-          plan: subscriptionPlan?.key,
+          plan: "PRO", // TODO: fix this
           billingPeriodEnd: new Date(subscription.current_period_end * 1000),
         })
-        .where(eq(schema.workspace.stripeId, stripeId))
+        .where(eq(schema.workspaces.stripeId, stripeId))
 
       break
     }

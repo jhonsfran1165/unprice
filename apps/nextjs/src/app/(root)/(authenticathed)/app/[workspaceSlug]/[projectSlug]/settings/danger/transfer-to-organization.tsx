@@ -120,7 +120,7 @@ export function TransferProjectToOrganization() {
 
                 <FormField
                   control={form.control}
-                  name="tenantId"
+                  name="workspaceId"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Organization</FormLabel>

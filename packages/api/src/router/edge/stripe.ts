@@ -3,42 +3,33 @@ import { TRPCError } from "@trpc/server"
 import { dinero } from "dinero.js"
 import { z } from "zod"
 
-import { currentUser } from "@builderai/auth"
 import { PLANS } from "@builderai/config"
 import { stripe } from "@builderai/stripe"
 import { purchaseWorkspaceSchema } from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,
-  protectedProcedure,
+  protectedWorkspaceProcedure,
   publicProcedure,
 } from "../../trpc"
 
 export const stripeRouter = createTRPCRouter({
-  createSession: protectedProcedure
+  createSession: protectedWorkspaceProcedure
     .input(z.object({ planId: z.string() }))
+    .output(z.object({ success: z.boolean(), url: z.string().optional() }))
     .mutation(async (opts) => {
-      const { userId } = opts.ctx.auth
+      const workspace = opts.ctx.workspace
+      const user = opts.ctx.session.user
+      const returnUrl = process.env.NEXTJS_URL + "/"
 
-      const workspace = await opts.ctx.db.query.workspaces.findFirst({
-        columns: {
-          id: true,
-          plan: true,
-          stripeId: true,
-        },
-        where: (workspace, { eq }) => eq(workspace.tenantId, opts.ctx.tenantId),
-      })
-
-      if (!workspace) {
+      if (!user?.email) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Workspace not found or you don't have access",
+          code: "BAD_REQUEST",
+          message: "User email is not defined",
         })
       }
 
-      const returnUrl = process.env.NEXTJS_URL + "/"
-
-      if (workspace && workspace.plan !== "free" && workspace.stripeId) {
+      if (workspace && workspace.plan !== "FREE" && workspace.stripeId) {
         /**
          * User is subscribed, create a billing portal session
          */
@@ -49,23 +40,13 @@ export const stripeRouter = createTRPCRouter({
         return { success: true as const, url: session.url }
       }
 
-      /**
-       * User is not subscribed, create a checkout session
-       * Use existing email address if available
-       */
-
-      const user = await currentUser()
-      const email = user?.emailAddresses.find(
-        (addr) => addr.id === user?.primaryEmailAddressId
-      )?.emailAddress
-
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
         payment_method_types: ["card"],
-        customer_email: email,
-        client_reference_id: userId,
+        customer_email: user.email,
+        client_reference_id: user.id,
         subscription_data: {
-          metadata: { tenantId: opts.ctx.tenantId, userId },
+          metadata: { userId: user.id },
         },
         cancel_url: returnUrl,
         success_url: returnUrl,
@@ -76,7 +57,8 @@ export const stripeRouter = createTRPCRouter({
       return { success: true as const, url: session.url }
     }),
 
-  plans: publicProcedure.query(async () => {
+  // TODO: add output
+  plans: publicProcedure.input(z.void()).query(async () => {
     // TODO: fix priceId
     const proPrice = await stripe.prices.retrieve(PLANS.PRO?.priceId ?? "")
     const stdPrice = await stripe.prices.retrieve(PLANS.STANDARD?.priceId ?? "")
@@ -103,11 +85,12 @@ export const stripeRouter = createTRPCRouter({
     ]
   }),
 
-  purchaseOrg: protectedProcedure
+  purchaseOrg: protectedWorkspaceProcedure
     .input(purchaseWorkspaceSchema)
+    .output(z.object({ success: z.boolean(), url: z.string().optional() }))
     .mutation(async (opts) => {
-      const { userId } = opts.ctx.auth
-      const { orgName, planId } = opts.input
+      const { name: workspaceName, planId } = opts.input
+      const user = opts.ctx.session.user
 
       const returnUrl = process.env.NEXTJS_URL + "/"
 
@@ -118,21 +101,22 @@ export const stripeRouter = createTRPCRouter({
         })
       }
 
-      const user = await currentUser()
-      const email = user?.emailAddresses.find(
-        (addr) => addr.id === user?.primaryEmailAddressId
-      )?.emailAddress
+      if (!user?.email) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User email is not defined",
+        })
+      }
 
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
-        customer_email: email,
+        customer_email: user?.email,
         payment_method_types: ["card"],
-        client_reference_id: userId,
+        client_reference_id: user?.id,
         subscription_data: {
           metadata: {
-            userId,
-            organizationName: orgName,
-            tenantId: opts.ctx.tenantId,
+            userId: user?.id,
+            workspaceName: workspaceName,
           },
         },
         success_url: returnUrl,

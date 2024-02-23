@@ -26,7 +26,6 @@ export const updatePlanSchema = planSelectBaseSchema
     slug: true,
     id: true,
     content: true,
-    tenantId: true,
     projectId: true,
     title: true,
   })

@@ -10,8 +10,10 @@
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
+    "generate:local": "pnpm with-env drizzle-kit generate:pg --custom --config=local.config.ts",
     "generate:neon": "pnpm with-env drizzle-kit generate:pg --custom --config=neon.config.ts",
     "generate:custom": "pnpm with-env drizzle-kit generate:pg --custom --config=custom.config.ts",
+    "push:local": "pnpm with-env drizzle-kit push:pg --config=local.config.ts",
     "push:neon": "pnpm with-env drizzle-kit push:pg --config=neon.config.ts",
     "push:all": "pnpm push && pnpm migrate:custom",
     "migrate:custom": "pnpm with-env ts-node --esm src/migrate.mts",
@@ -20,6 +22,7 @@
     "up": "pnpm with-env drizzle-kit up:pg",
     "up:custom": "pnpm with-env drizzle-kit up:pg --config=custom.config.ts",
     "studio:neon": "pnpm with-env drizzle-kit studio --config=neon.config.ts --verbose",
+    "studio:local": "pnpm with-env drizzle-kit studio --config=local.config.ts --verbose",
     "format": "prettier --check \"**/*.{mjs,ts,json}\"",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

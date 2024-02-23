@@ -18,7 +18,6 @@ export const featureBase = createSelectSchema(schema.feature, {
 }).omit({
   createdAt: true,
   updatedAt: true,
-  tenantId: true,
   projectId: true,
 })
 

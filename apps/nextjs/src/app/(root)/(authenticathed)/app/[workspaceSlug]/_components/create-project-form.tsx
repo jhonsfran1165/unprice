@@ -126,6 +126,7 @@ const CreateProjectForm = (props: {
             title="Submit"
             type="submit"
             className="w-full sm:w-auto"
+            disabled={isPending}
           >
             {/* // TODO: improve this adding a loading animation */}
             {/* {!isPending ? "Confirm" : <LoadingAnimation />} */}

@@ -2,7 +2,7 @@ import GitHub from "@auth/core/providers/github"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import type { NextAuthConfig } from "next-auth"
 
-import { db, eq, prepared, schema, tableCreator, utils } from "@builderai/db"
+import { db, prepared, schema, tableCreator, utils } from "@builderai/db"
 import type { WorkspacesJWTPayload } from "@builderai/validators/workspace"
 
 const useSecureCookies = process.env.VERCEL_ENV === "production"
@@ -24,72 +24,9 @@ export const authConfig = {
     newUser: "/auth/new-user",
   },
   events: {
-    createUser: async ({ user }) => {
-      const { id, name, image } = user
-
-      if (!id) throw "Id not provided when trying to create user"
-
-      const userData = await db.query.users.findFirst({
-        columns: {
-          id: true,
-        },
-        where: (user, { eq }) => eq(user.id, id),
-      })
-
-      if (!userData?.id) {
-        throw "User not found"
-      }
-
-      const slug = utils.generateSlug(2)
-      const workspaceId = utils.newIdEdge("workspace")
-
-      // TODO: support invitation
-
-      // create the workspace for the workspace and then add it as a member
-      await db.transaction(async (db) => {
-        const workspace = await db
-          .insert(schema.workspaces)
-          .values({
-            id: workspaceId,
-            tenantId: id,
-            slug: slug,
-            name: name ?? slug,
-            imageUrl: image,
-            isPersonal: true,
-          })
-          .onConflictDoUpdate({
-            target: schema.workspaces.id,
-            set: {
-              tenantId: id,
-              isPersonal: true,
-            },
-            where: eq(schema.workspaces.id, workspaceId),
-          })
-          .returning()
-          .then((workspace) => workspace[0] ?? null)
-
-        if (!workspace?.id) {
-          db.rollback()
-          throw "Error creating workspace"
-        }
-
-        const memberShip = await db
-          .insert(schema.members)
-          .values({
-            userId: id,
-            workspaceId: workspaceId,
-            role: "OWNER",
-          })
-          .onConflictDoNothing()
-          .returning()
-          .then((members) => members[0] ?? null)
-
-        if (!memberShip?.userId) {
-          db.rollback()
-          throw "Error creating member"
-        }
-      })
-    },
+    // createUser: async ({ user }) => {
+    //   // send email to user
+    // },
   },
   debug: false,
   // debug: process.env.NODE_ENV === "development",
@@ -106,6 +43,47 @@ export const authConfig = {
       if (!user) {
         throw "Error creating user"
       }
+      // TODO: support invitation
+
+      // create the workspace for the user and then add it as a member
+      await db.transaction(async (db) => {
+        const slug = utils.generateSlug(2)
+        const workspaceId = utils.newIdEdge("workspace")
+
+        const workspace = await db
+          .insert(schema.workspaces)
+          .values({
+            id: workspaceId,
+            slug: slug,
+            name: user.name ?? slug,
+            imageUrl: user.image,
+            isPersonal: true,
+          })
+          .onConflictDoNothing()
+          .returning()
+          .then((workspace) => workspace[0] ?? null)
+
+        if (!workspace?.id) {
+          db.rollback()
+          throw "Error creating workspace"
+        }
+
+        const memberShip = await db
+          .insert(schema.members)
+          .values({
+            userId: user.id,
+            workspaceId: workspaceId,
+            role: "OWNER",
+          })
+          .onConflictDoNothing()
+          .returning()
+          .then((members) => members[0] ?? null)
+
+        if (!memberShip?.userId) {
+          db.rollback()
+          throw "Error creating member"
+        }
+      })
 
       return user
     },

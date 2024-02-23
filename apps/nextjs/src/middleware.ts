@@ -46,10 +46,8 @@ export const config = {
      * - _vercel (Vercel internals)
      * - _next (next internals)
      * - some-file.extension (static files)
-     * - ignore pages starting with /p/ (next.js dynamic pages)
+     * - api (api routes)
      */
-    "/((?!.+\\.[\\w]+$|_next).*)",
-    "/",
-    "/(api|trpc|p)(.*)",
+    "/((?!.+\\.[\\w]+$|_next|api).*)",
   ],
 }

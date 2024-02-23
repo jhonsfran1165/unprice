@@ -6,7 +6,8 @@ import { auth } from "@builderai/auth/server"
 
 import { SignInGithub } from "./github-signin"
 
-export const runtime = "edge"
+// TODO: use edge when next auth supports it
+// export const runtime = "edge"
 
 export default async function AuthenticationPage() {
   const session = await auth()

@@ -6,7 +6,7 @@ import { api } from "~/trpc/server"
 
 export async function userCanAccessProject({
   projectSlug,
-  needsToBeInTier = ["free"],
+  needsToBeInTier = ["FREE", "PRO"],
 }: {
   projectSlug: string
   needsToBeInTier?: WorkspacePlan[]

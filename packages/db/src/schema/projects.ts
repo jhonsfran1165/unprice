@@ -14,7 +14,7 @@ export const projects = pgTableProject(
     ...timestamps,
     slug: text("slug").notNull(),
     name: text("name").notNull(),
-    tier: projectTierEnum("tier").default("free").notNull(),
+    tier: projectTierEnum("tier").default("FREE").notNull(),
     url: text("url").default("").notNull(),
   },
   (table) => ({

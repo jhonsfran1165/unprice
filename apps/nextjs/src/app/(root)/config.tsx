@@ -1,10 +1,10 @@
 import {
-  ClerkWide,
   Component,
   CreditCard,
   Drizzle,
   Globe,
   Mdx,
+  NextAuth,
   Nextjs,
   React,
   TRPC,
@@ -31,18 +31,18 @@ export const marketingFeatures = [
     ),
   },
   {
-    icon: <ClerkWide className="h-10" />,
+    icon: <NextAuth className="h-10" />,
     title: "Authentication",
     body: (
       <>
         Protect pages and API routes throughout your entire app using{" "}
         <a
-          href="https://clerk.com"
+          href="https://authjs.dev/"
           target="_blank"
           rel="noreferrer"
           className="font-medium underline underline-offset-4"
         >
-          Clerk
+          Next Auth
         </a>
         .
       </>
@@ -65,10 +65,10 @@ export const marketingFeatures = [
         <React className="h-10 w-10" />
       </div>
     ),
-    title: "Next.js 13 & React 18",
+    title: "Next.js 14 & React 18",
     body: (
       <>
-        Latest features from Next 13 using the brand new App Router with full
+        Latest features from Next 14 using the brand new App Router with full
         React 18 support including streaming.
       </>
     ),
@@ -94,16 +94,7 @@ export const marketingFeatures = [
         >
           tRPC
         </a>
-        . Typesafe database querying using{" "}
-        <a
-          href="https://kysely.dev"
-          target="_blank"
-          rel="noreferrer"
-          className="font-medium underline underline-offset-4"
-        >
-          Kysely
-        </a>{" "}
-        and{" "}
+        . Typesafe database querying using and{" "}
         <a
           href="https://drizzle.io"
           target="_blank"

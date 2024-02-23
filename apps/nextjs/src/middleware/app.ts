@@ -13,6 +13,7 @@ import {
   APP_AUTH_ROUTES,
   APP_NON_WORKSPACE_ROUTES,
   AUTH_ROUTES,
+  COOKIE_NAME_CURRENT_WORKSPACE,
   COOKIE_NAME_PROJECT,
   COOKIE_NAME_WORKSPACE,
 } from "~/constants"
@@ -93,12 +94,14 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
   // if the user has no active workspace validate that the workspace exists in the jwt
   // and set the cookie to the first workspace, if no workspace exists redirect to signup
-  const cookieWorkspace = req.cookies.get(COOKIE_NAME_WORKSPACE)?.value
+  const cookieWorkspace = req.cookies.get(COOKIE_NAME_CURRENT_WORKSPACE)?.value
+  const isUserMemberWorkspace = userBelongsToWorkspace(currentWorkspaceSlug)
 
   // TODO: recording page hits
+
   // if the user is trying to access a workspace specific route check if they have access
   // by checking if the workspace is in their list of workspaces from the jwt
-  if (!currentWorkspaceSlug) {
+  if (!currentWorkspaceSlug || !isUserMemberWorkspace) {
     if (cookieWorkspace) {
       const isUserMemberWorkspace = userBelongsToWorkspace(cookieWorkspace)
 
@@ -109,6 +112,8 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
         // remove the workspace cookie
         response.cookies.delete(COOKIE_NAME_WORKSPACE)
+        // Apply those cookies to the request
+        applySetCookie(req, response)
         return response
       }
 
@@ -130,13 +135,6 @@ export default function AppMiddleware(req: NextAuthRequest) {
     }
   }
 
-  const isUserMemberWorkspace = userBelongsToWorkspace(currentWorkspaceSlug)
-
-  if (!isUserMemberWorkspace) {
-    url.pathname = `/`
-    return NextResponse.redirect(url)
-  }
-
   const response = NextResponse.rewrite(
     new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url)
   )
@@ -147,39 +145,39 @@ export default function AppMiddleware(req: NextAuthRequest) {
     cookieWorkspace !== currentWorkspaceSlug &&
     isSlug(currentWorkspaceSlug)
   ) {
+    // cookie for calling the api
     response.cookies.set(COOKIE_NAME_WORKSPACE, currentWorkspaceSlug, {
       httpOnly: true,
-      maxAge: 60 * 60 * 24 * 30, // 30 days
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
+      path: `/${currentWorkspaceSlug}/`,
     })
 
-    // Apply those cookies to the request
-    applySetCookie(req, response)
+    // cookie for redirection
+    response.cookies.set(COOKIE_NAME_CURRENT_WORKSPACE, currentWorkspaceSlug, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: `/`,
+    })
   }
 
   const currentProjectSlug = path.split("/")[2] ?? ""
   // check if the current project slug is a valid slug, slug can only contain lowercase letters, numbers and hyphens and no spaces, and at least 2 words
   const cookieProject = req.cookies.get(COOKIE_NAME_PROJECT)?.value
 
-  console.log(
-    "currentProjectSlug",
-    currentProjectSlug,
-    "cookieProject",
-    cookieProject
-  )
-
   if (currentProjectSlug !== cookieProject && isSlug(currentProjectSlug)) {
+    // cookie for calling the api
     response.cookies.set(COOKIE_NAME_PROJECT, currentProjectSlug, {
       httpOnly: true,
-      maxAge: 60 * 60 * 24 * 30, // 30 days
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
+      path: `/${currentWorkspaceSlug}/${currentProjectSlug}/`,
     })
-
-    // Apply those cookies to the request
-    applySetCookie(req, response)
   }
+
+  // Apply those cookies to the request
+  applySetCookie(req, response)
 
   // otherwise, rewrite the path to /app
   return response

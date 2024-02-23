@@ -1,24 +1,41 @@
 // TODO: export like this https://github.com/drizzle-team/drizzle-orm/issues/468
-import { neonConfig, Pool } from "@neondatabase/serverless"
+import { neon, neonConfig, Pool } from "@neondatabase/serverless"
 import { and, eq, getTableColumns, or, sql } from "drizzle-orm"
+import { drizzle } from "drizzle-orm/neon-http"
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
 
 import * as dbSchemas from "./schema"
 import * as utils from "./utils"
 
-// activate connection caching
-neonConfig.fetchConnectionCache = true
+// if we're running locally
+if (process.env.NODE_ENV !== "production") {
+  // Set the WebSocket proxy to work with the local instance
+  neonConfig.wsProxy = (host) => `${host}:5433/v1`
+  // Disable all authentication and encryption
+  neonConfig.useSecureWebSocket = false
+  neonConfig.pipelineTLS = false
+  neonConfig.pipelineConnect = false
+} else {
+  // activate connection caching
+  neonConfig.fetchConnectionCache = true
+}
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL!,
-  // idleTimeoutMillis: 0,
-  // connectionTimeoutMillis: 0,
-})
-
-export const db = drizzleNeon(pool, {
-  schema: dbSchemas,
-  logger: process.env.DRIZZLE_LOG === "true",
-})
+// support local development and neon serverless
+export const db =
+  process.env.NODE_ENV !== "production"
+    ? drizzleNeon(
+        new Pool({
+          connectionString: process.env.DATABASE_URL,
+        }),
+        {
+          schema: dbSchemas,
+          logger: process.env.DRIZZLE_LOG === "true",
+        }
+      )
+    : drizzle(neon(process.env.DRIZZLE_DATABASE_URL!), {
+        schema: dbSchemas,
+        logger: process.env.DRIZZLE_LOG === "true",
+      })
 
 export const projectGuardPrepared = db
   .select({

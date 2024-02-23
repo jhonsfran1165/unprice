@@ -29,12 +29,6 @@ export const projectID = {
   },
 }
 
-// override tenant ID here because in workspace tenantId has to be unique
-// so we have a 1:1 relationship with clerk data
-export const tenantID = {
-  tenantId: cuid("tenant_id").notNull(),
-}
-
 // INFO: if you want update time on update, you can use this
 // https://aviyadav231.medium.com/automatically-updating-a-timestamp-column-in-postgresql-using-triggers-98766e3b47a0
 // common timestamps for all tables

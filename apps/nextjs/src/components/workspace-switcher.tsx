@@ -71,7 +71,7 @@ export function WorkspaceSwitcher({
               <AvatarImage
                 src={
                   activeWorkspace?.imageUrl ??
-                  `https://avatar.vercel.sh/${activeWorkspace.name}`
+                  `https://avatar.vercel.sh/${activeWorkspace.id}`
                 }
               />
               <AvatarFallback>
@@ -106,7 +106,7 @@ export function WorkspaceSwitcher({
                       <AvatarImage
                         src={
                           personalWorkspace?.imageUrl ??
-                          `https://avatar.vercel.sh/${personalWorkspace.name}`
+                          `https://avatar.vercel.sh/${personalWorkspace.id}`
                         }
                         alt={`user-${personalWorkspace.name}`}
                       />

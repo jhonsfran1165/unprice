@@ -39,12 +39,14 @@ export const projectRouter = createTRPCRouter({
       const { name, url } = opts.input
       const workspace = opts.ctx.workspace
 
-      const projects = await opts.ctx.db
+      const countProjectsWorkspace = await opts.ctx.db
         .select({ count: sql<number>`count(*)` })
         .from(schema.projects)
+        .where(eq(schema.projects.workspaceId, workspace.id))
+        .then((res) => res[0]?.count ?? 0)
 
       // TODO: Don't hardcode the limit to PRO
-      if (projects[0] && projects[0].count >= PROJECT_LIMITS.PRO) {
+      if (countProjectsWorkspace >= PROJECT_LIMITS.PRO) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "Limit reached" })
       }
 
@@ -59,7 +61,7 @@ export const projectRouter = createTRPCRouter({
           name,
           slug: projectSlug,
           url,
-          tier: workspace.plan === "free" ? "free" : "pro",
+          tier: workspace.plan === "FREE" ? "FREE" : "PRO",
         })
         .returning()
         .then((res) => res[0] ?? null)
@@ -185,7 +187,6 @@ export const projectRouter = createTRPCRouter({
         await opts.ctx.db.query.workspaces.findFirst({
           columns: {
             id: true,
-            tenantId: true,
           },
           where: (workspace, { eq }) => eq(workspace.tenantId, userId),
         })
@@ -270,7 +271,6 @@ export const projectRouter = createTRPCRouter({
       const targetWorkspace = await opts.ctx.db.query.workspaces.findFirst({
         columns: {
           id: true,
-          tenantId: true,
         },
         where: (workspace, { eq }) => eq(workspace.tenantId, targetTenantId),
       })

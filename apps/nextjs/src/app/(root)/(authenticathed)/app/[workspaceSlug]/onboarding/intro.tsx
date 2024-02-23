@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { domAnimation, LazyMotion, m } from "framer-motion"
 import { Balancer } from "react-wrap-balancer"
 
@@ -8,8 +8,9 @@ import { Button } from "@builderai/ui/button"
 
 import { useDebounce } from "~/lib/use-debounce"
 
-export default function Intro({ workspaceSlug }: { workspaceSlug: string }) {
+export default function Intro() {
   const router = useRouter()
+  const workspaceSlug = useParams().workspaceSlug as string
 
   const showText = useDebounce(true, 800)
 

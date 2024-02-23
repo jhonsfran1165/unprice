@@ -70,14 +70,14 @@ export const createTRPCContext = async (opts: {
   const apiKey = opts.headers.get("x-builderai-api-key")
   const source = opts.headers.get("x-trpc-source") ?? "unknown"
 
-  // for client side we set a httpOnly cookie from middleware
+  // for client side we set the cookie on focus tab event
   // for server side we set a header from trpc invoker
   const activeWorkspaceSlug =
     opts.req?.cookies.get("workspace-slug")?.value ??
     opts.headers.get("workspace-slug") ??
     ""
 
-  // for client side we set a httpOnly cookie from middleware
+  // for client side we set the cookie on fo
   // for server side we set a header from trpc invoker
   // TODO: use utils here
   const activeProjectSlug =
@@ -85,16 +85,7 @@ export const createTRPCContext = async (opts: {
     opts.headers.get("project-slug") ??
     ""
 
-  console.log(
-    ">>> tRPC Request from",
-    source,
-    "by",
-    userId,
-    "workspace",
-    activeWorkspaceSlug,
-    "project",
-    activeProjectSlug
-  )
+  console.log(">>> tRPC Request from", source, "by", userId)
 
   return createInnerTRPCContext({
     session,
@@ -170,9 +161,9 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 
   return next({
     ctx: {
+      userId: ctx.session?.user.id,
       session: {
         ...ctx.session,
-        userId: ctx.session?.user.id,
       },
     },
   })

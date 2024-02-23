@@ -28,7 +28,6 @@ export const transferToPersonalProjectSchema = z.object({
 
 export const transferToWorkspaceSchema = z.object({
   projectSlug: z.string(),
-  tenantId: z.string(),
 })
 
 export type ProjectInsert = z.infer<typeof createProjectSchema>
