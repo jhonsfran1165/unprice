@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
 import { Button } from "@builderai/ui/button"
@@ -22,39 +22,36 @@ import {
   DialogTrigger,
 } from "@builderai/ui/dialog"
 import { Warning } from "@builderai/ui/icons"
-import { useToast } from "@builderai/ui/use-toast"
+import { LoadingAnimation } from "@builderai/ui/loading-animation"
 
+import { useToastAction } from "~/lib/use-toast-action"
 import { api } from "~/trpc/client"
 
-export function DeleteProject() {
-  const params = useParams()
+export function DeleteProject({
+  workspaceSlug,
+  projectSlug,
+}: {
+  workspaceSlug: string
+  projectSlug: string
+}) {
   const apiUtils = api.useUtils()
-  const workspaceSlug = params.workspaceSlug as string
-  const projectSlug = params.projectSlug as string
-  const toaster = useToast()
+  const { toast } = useToastAction()
   const router = useRouter()
 
   const deleteProject = api.projects.delete.useMutation({
     onSettled: async () => {
-      await apiUtils.projects.bySlug.invalidate({ slug: projectSlug })
-      router.push(`/${workspaceSlug}/overview`)
+      await apiUtils.projects.getBySlug.invalidate({ slug: projectSlug })
+      router.refresh()
     },
     onSuccess: () => {
-      toaster.toast({
-        title: "Project deleted",
-      })
+      toast("success")
+      router.push(`/${workspaceSlug}/overview`)
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
+        toast("error", err.message)
       } else {
-        toaster.toast({
-          title: "Project could not be deleted",
-          variant: "destructive",
-        })
+        toast("error")
       }
     },
   })
@@ -92,14 +89,16 @@ export function DeleteProject() {
                 className="button-danger"
                 variant="destructive"
                 onClick={() => {
-                  if (!projectSlug) throw new Error("No project Slug provided")
-
                   deleteProject.mutate({
                     slug: projectSlug,
                   })
                 }}
               >
                 {`I'm sure. Delete this project`}
+
+                {deleteProject.isPending && (
+                  <LoadingAnimation variant={"destructive"} className="ml-2" />
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

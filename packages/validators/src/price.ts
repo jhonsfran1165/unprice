@@ -11,15 +11,11 @@ export const versionSelectBaseSchema = createSelectSchema(schema.versions, {
   addonsConfig: schema.versionPlanConfig,
 })
 
-export const createPlanSchema = planSelectBaseSchema
-  .pick({
-    slug: true,
-    title: true,
-    currency: true,
-  })
-  .extend({
-    projectSlug: z.string(),
-  })
+export const createPlanSchema = planSelectBaseSchema.pick({
+  slug: true,
+  title: true,
+  currency: true,
+})
 
 export const updatePlanSchema = planSelectBaseSchema
   .pick({
@@ -31,9 +27,6 @@ export const updatePlanSchema = planSelectBaseSchema
   })
   .partial({
     slug: true,
-  })
-  .extend({
-    projectSlug: z.string(),
   })
 
 export const featureSelectBaseSchema = createSelectSchema(schema.features)
@@ -74,13 +67,9 @@ export const planList = planSelectBaseSchema.extend({
   versions: z.array(versionListBase),
 })
 
-export const createNewVersionPlan = versionSelectBaseSchema
-  .pick({
-    planId: true,
-  })
-  .extend({
-    projectSlug: z.string(),
-  })
+export const createNewVersionPlan = versionSelectBaseSchema.pick({
+  planId: true,
+})
 
 export const planConfigSchema = z.record(
   z.object({
@@ -103,7 +92,6 @@ export const updateVersionPlan = versionSelectBaseSchema
   })
   .extend({
     versionId: z.coerce.number().min(0),
-    projectSlug: z.string(),
   })
 
 export type GroupType = "Group"

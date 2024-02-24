@@ -58,6 +58,7 @@ export const authConfig = {
             name: user.name ?? slug,
             imageUrl: user.image,
             isPersonal: true,
+            createdBy: user.id,
           })
           .onConflictDoNothing()
           .returning()

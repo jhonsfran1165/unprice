@@ -15,25 +15,29 @@ import {
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import { useToast } from "@builderai/ui/use-toast"
+import { LoadingAnimation } from "@builderai/ui/loading-animation"
 import type { Project, ProjectInsert } from "@builderai/validators/project"
 import { createProjectSchema } from "@builderai/validators/project"
 
+import { useToastAction } from "~/lib/use-toast-action"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
 const CreateProjectForm = (props: {
   workspaceSlug: string
-  // defaults to redirecting to the project page
   onSuccess?: (project: Project) => void
 }) => {
   const router = useRouter()
-  const toaster = useToast()
+  const { toast } = useToastAction()
   const apiUtils = api.useUtils()
   const [isPending, startTransition] = useTransition()
 
   const form = useZodForm({
     schema: createProjectSchema,
+    defaultValues: {
+      name: "",
+      url: "",
+    },
   })
 
   const createProject = api.projects.create.useMutation({
@@ -48,24 +52,13 @@ const CreateProjectForm = (props: {
         router.push(`/${props.workspaceSlug}/${newProject?.slug}/overview`)
       }
 
-      toaster.toast({
-        title: "Project created",
-        description: `Project ${newProject.name} created successfully.`,
-      })
+      toast("success")
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
+        toast("error", err.message)
       } else {
-        toaster.toast({
-          title: "Error creating project",
-          variant: "destructive",
-          description:
-            "An issue occurred while creating your project. Please try again.",
-        })
+        toast("error")
       }
     },
   })
@@ -118,19 +111,19 @@ const CreateProjectForm = (props: {
           )}
         />
 
-        {/* <Button type="submit">Create Project</Button> */}
-
         <div className="sm:col-span-full">
           <Button
             form="add-org-form"
             title="Submit"
             type="submit"
             className="w-full sm:w-auto"
-            disabled={isPending}
+            disabled={form.formState.isSubmitting || isPending}
           >
-            {/* // TODO: improve this adding a loading animation */}
-            {/* {!isPending ? "Confirm" : <LoadingAnimation />} */}
-            {!isPending ? "Create Project" : "Loading..."}
+            {`Create Project`}
+            {form.formState.isSubmitting ||
+              (isPending && (
+                <LoadingAnimation variant={"destructive"} className="ml-2" />
+              ))}
           </Button>
         </div>
       </form>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
 import { Button } from "@builderai/ui/button"
@@ -21,40 +21,36 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@builderai/ui/dialog"
-import { useToast } from "@builderai/ui/use-toast"
+import { LoadingAnimation } from "@builderai/ui/loading-animation"
 
+import { useToastAction } from "~/lib/use-toast-action"
 import { api } from "~/trpc/client"
 
-export function TransferProjectToPersonal() {
-  const params = useParams()
-
-  const workspaceSlug = params.workspaceSlug as string
-  const projectSlug = params.projectSlug as string
-
-  const toaster = useToast()
+// TODO: could use server actions
+export function TransferProjectToPersonal({
+  projectSlug,
+}: {
+  projectSlug: string
+}) {
+  const { toast } = useToastAction()
   const apiUtils = api.useUtils()
   const router = useRouter()
 
   const transferProjectToPersonal = api.projects.transferToPersonal.useMutation(
     {
       onSettled: async () => {
-        await apiUtils.projects.bySlug.invalidate({ slug: projectSlug })
-        router.push(`/${workspaceSlug}/overview`)
+        await apiUtils.projects.getBySlug.invalidate({ slug: projectSlug })
+        router.refresh()
       },
-      onSuccess: () => {
-        toaster.toast({ title: "Project transferred" })
+      onSuccess: (data) => {
+        toast("success")
+        router.push(`/${data?.workspaceSlug}/overview`)
       },
       onError: (err) => {
         if (err instanceof TRPCClientError) {
-          toaster.toast({
-            title: err.message,
-            variant: "destructive",
-          })
+          toast("error", err.message)
         } else {
-          toaster.toast({
-            title: "Project could not be transferred",
-            variant: "destructive",
-          })
+          toast("error")
         }
       },
     }
@@ -88,15 +84,17 @@ export function TransferProjectToPersonal() {
               </DialogClose>
               <Button
                 variant="destructive"
-                onClick={async () => {
-                  if (!projectSlug) throw new Error("No project Slug provided")
-
+                disabled={transferProjectToPersonal.isPending}
+                onClick={() => {
                   transferProjectToPersonal.mutate({
                     slug: projectSlug,
                   })
                 }}
               >
                 {`I'm sure. Transfer this project`}
+                {transferProjectToPersonal.isPending && (
+                  <LoadingAnimation variant={"destructive"} className="ml-2" />
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

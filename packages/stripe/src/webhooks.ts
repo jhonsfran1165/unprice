@@ -65,6 +65,7 @@ export async function handleEvent(event: Stripe.Event) {
         id: workspaceId,
         slug: workspaceSlug,
         name: workspaceName ?? workspaceSlug,
+        createdBy: userId,
         isPersonal: false,
         stripeId,
         subscriptionId: subscription.id,

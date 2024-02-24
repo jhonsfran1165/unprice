@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { eq, getTableColumns, schema, sql, utils } from "@builderai/db"
+import { eq, schema, sql, utils } from "@builderai/db"
 import {
   createProjectSchema,
   deleteProjectSchema,
@@ -20,6 +20,7 @@ import {
 } from "../../trpc"
 import { projectGuard } from "../../utils"
 import { getRandomPatternStyle } from "../../utils/generate-pattern"
+import { workspaceGuard } from "../../utils/workspace-guard"
 
 // TODO: Don't hardcode the limit to PRO
 const PROJECT_LIMITS = {
@@ -61,7 +62,7 @@ export const projectRouter = createTRPCRouter({
           name,
           slug: projectSlug,
           url,
-          tier: workspace.plan === "FREE" ? "FREE" : "PRO",
+          tier: workspace.plan === "FREE" ? "FREE" : "PRO", // TODO: change this only apply when the user buy and addon for the project
         })
         .returning()
         .then((res) => res[0] ?? null)
@@ -86,10 +87,10 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { projectSlug, name } = opts.input
+      const { name, slug } = opts.input
 
-      const { project: projectData } = await projectGuard({
-        projectSlug,
+      const { project } = await projectGuard({
+        projectSlug: slug,
         ctx: opts.ctx,
       })
 
@@ -98,11 +99,12 @@ export const projectRouter = createTRPCRouter({
         .set({
           name,
         })
-        .where(eq(schema.projects.id, projectData.id))
+        .where(eq(schema.projects.id, project.id))
         .returning()
+        .then((res) => res[0] ?? undefined)
 
       return {
-        project: projectRenamed?.[0],
+        project: projectRenamed,
       }
     }),
 
@@ -116,18 +118,19 @@ export const projectRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { slug: projectSlug } = opts.input
 
-      const { project: projectData } = await projectGuard({
+      const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
 
       const deletedProject = await opts.ctx.db
         .delete(schema.projects)
-        .where(eq(schema.projects.id, projectData.id))
+        .where(eq(schema.projects.id, project.id))
         .returning()
+        .then((res) => res[0] ?? undefined)
 
       return {
-        project: deletedProject?.[0],
+        project: deletedProject,
       }
     }),
 
@@ -165,11 +168,12 @@ export const projectRouter = createTRPCRouter({
     .output(
       z.object({
         project: selectProjectSchema.optional(),
+        workspaceSlug: z.string().optional(),
       })
     )
     .mutation(async (opts) => {
       const { slug: projectSlug } = opts.input
-      const { userId } = opts.ctx.session
+      const userId = opts.ctx.userId
 
       const { project: projectData, workspace } = await projectGuard({
         projectSlug,
@@ -179,7 +183,7 @@ export const projectRouter = createTRPCRouter({
       if (workspace.isPersonal) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Project is already personal",
+          message: "Project is already in the personal workspace",
         })
       }
 
@@ -187,25 +191,31 @@ export const projectRouter = createTRPCRouter({
         await opts.ctx.db.query.workspaces.findFirst({
           columns: {
             id: true,
+            slug: true,
           },
-          where: (workspace, { eq }) => eq(workspace.tenantId, userId),
+          where: (workspace, { eq, and }) =>
+            and(
+              eq(workspace.createdBy, userId),
+              eq(workspace.isPersonal, true)
+            ),
         })
 
       if (!personalTargetWorkspace?.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "The target workspace doesn't exist",
+          message: "There is no personal workspace for the user",
         })
       }
 
       // TODO: do not hard code the limit - is it possible to reduce the queries?
-      const projects = await opts.ctx.db
+      const projectsCount = await opts.ctx.db
         .select({ count: sql<number>`count(*)` })
         .from(schema.projects)
         .where(eq(schema.projects.workspaceId, personalTargetWorkspace.id))
+        .then((res) => res[0]?.count ?? 0)
 
       // TODO: Don't hardcode the limit to PRO - the user is paying, should it be possible to transfer projects?
-      if (projects[0] && projects[0].count >= PROJECT_LIMITS.PRO) {
+      if (projectsCount >= PROJECT_LIMITS.PRO) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "The target workspace reached its limit of projects",
@@ -220,9 +230,11 @@ export const projectRouter = createTRPCRouter({
         })
         .where(eq(schema.projects.id, projectData.id))
         .returning()
+        .then((res) => res[0] ?? undefined)
 
       return {
-        project: updatedProject?.[0],
+        project: updatedProject,
+        workspaceSlug: personalTargetWorkspace.slug,
       }
     }),
 
@@ -232,53 +244,47 @@ export const projectRouter = createTRPCRouter({
     .output(
       z.object({
         project: selectProjectSchema.optional(),
+        workspaceSlug: z.string().optional(),
       })
     )
     .mutation(async (opts) => {
-      const { userId } = opts.ctx.session
-      const { tenantId: targetTenantId, projectSlug } = opts.input
+      const { targetWorkspaceId, projectSlug } = opts.input
 
-      const { project: projectData } = await projectGuard({
+      const { project: projectData, workspace } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
 
-      if (projectData.workspace.tenantId === targetTenantId) {
+      if (workspace.id === targetWorkspaceId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Project is already in the target organization",
-        })
-      }
-
-      const workspaces = await opts.ctx.db.query.members.findMany({
-        columns: {
-          workspaceId: true,
-        },
-        where: (member, { eq }) => eq(member.userId, userId),
-      })
-
-      const targetOrg = workspaces.find(
-        (wk) => wk.workspaceId === targetTenantId
-      )
-
-      if (!targetOrg?.workspaceId) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You're not a member of the target organization",
+          message: "Project is already in the target workspace",
         })
       }
 
       const targetWorkspace = await opts.ctx.db.query.workspaces.findFirst({
         columns: {
           id: true,
+          slug: true,
         },
-        where: (workspace, { eq }) => eq(workspace.tenantId, targetTenantId),
+        with: {
+          projects: true,
+        },
+        where: (workspace, { eq }) => eq(workspace.id, targetWorkspaceId),
       })
 
       if (!targetWorkspace?.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "target workspace not found",
+        })
+      }
+
+      // TODO: Don't hardcode the limit to PRO - the user is paying, should it be possible to transfer projects?
+      if (targetWorkspace.projects.length >= PROJECT_LIMITS.PRO) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The target workspace reached its limit of projects",
         })
       }
 
@@ -289,9 +295,11 @@ export const projectRouter = createTRPCRouter({
         })
         .where(eq(schema.projects.id, projectData.id))
         .returning()
+        .then((res) => res[0] ?? undefined)
 
       return {
-        project: updatedProject?.[0],
+        project: updatedProject,
+        workspaceSlug: targetWorkspace.slug,
       }
     }),
 
@@ -346,7 +354,7 @@ export const projectRouter = createTRPCRouter({
         limitReached: projects.length >= PROJECT_LIMITS.PRO,
       }
     }),
-  listByWorkspace: protectedWorkspaceProcedure
+  listByWorkspace: protectedProcedure
     .input(z.object({ workspaceSlug: z.string() }))
     .output(
       z.object({
@@ -367,35 +375,42 @@ export const projectRouter = createTRPCRouter({
     .query(async (opts) => {
       const { workspaceSlug } = opts.input
 
-      const { ...rest } = getTableColumns(schema.projects)
-      const workspaceProjects = await opts.ctx.db
-        .select({
-          project: {
-            ...rest,
+      const { workspace: workspaceData } = await workspaceGuard({
+        workspaceSlug: workspaceSlug,
+        ctx: opts.ctx,
+      })
+
+      const workspaceProjects = await opts.ctx.db.query.workspaces.findFirst({
+        with: {
+          projects: {
+            orderBy: (project, { desc }) => [desc(project.createdAt)],
           },
-          workspace: {
-            slug: schema.workspaces.slug,
-          },
-        })
-        .from(schema.projects)
-        .innerJoin(
-          schema.workspaces,
-          eq(schema.projects.workspaceId, schema.workspaces.id)
-        )
-        .where(eq(schema.workspaces.slug, workspaceSlug))
+        },
+        where: (workspace, { eq }) => eq(workspace.id, workspaceData.id),
+      })
+
+      if (!workspaceProjects) {
+        return {
+          projects: [],
+          limit: PROJECT_LIMITS.PRO,
+          limitReached: false,
+        }
+      }
+
+      const { projects, ...rest } = workspaceProjects
 
       // TODO: Don't hardcode the limit to PRO
       return {
-        projects: workspaceProjects.map((project) => ({
-          ...project.project,
-          workspace: project.workspace,
-          styles: getRandomPatternStyle(project.project.id),
+        projects: projects.map((project) => ({
+          ...project,
+          workspace: rest,
+          styles: getRandomPatternStyle(project.id),
         })),
         limit: PROJECT_LIMITS.PRO,
-        limitReached: workspaceProjects.length >= PROJECT_LIMITS.PRO,
+        limitReached: projects.length >= PROJECT_LIMITS.PRO,
       }
     }),
-  bySlug: protectedWorkspaceProcedure
+  getBySlug: protectedWorkspaceProcedure
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
@@ -407,16 +422,19 @@ export const projectRouter = createTRPCRouter({
     .query(async (opts) => {
       const { slug: projectSlug } = opts.input
 
-      const { project: projectData } = await projectGuard({
+      const { project: projectData, workspace } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
 
       return {
-        project: projectData,
+        project: {
+          ...projectData,
+          workspace: workspace,
+        },
       }
     }),
-  byId: protectedWorkspaceProcedure
+  getById: protectedWorkspaceProcedure
     .input(z.object({ id: z.string() }))
     .output(
       z.object({
@@ -428,13 +446,16 @@ export const projectRouter = createTRPCRouter({
     .query(async (opts) => {
       const { id: projectId } = opts.input
 
-      const { project: projectData } = await projectGuard({
+      const { project: projectData, workspace } = await projectGuard({
         projectId,
         ctx: opts.ctx,
       })
 
       return {
-        project: projectData,
+        project: {
+          ...projectData,
+          workspace: workspace,
+        },
       }
     }),
 })

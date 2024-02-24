@@ -15,13 +15,10 @@ import {
   createTRPCRouter,
   protectedProjectAdminProcedure,
   protectedProjectProcedure,
-  protectedWorkspaceProcedure,
-  publicProcedure,
 } from "../../trpc"
-import { projectGuard } from "../../utils"
 
 export const planRouter = createTRPCRouter({
-  create: protectedProjectAdminProcedure
+  create: protectedProjectProcedure
     .input(createPlanSchema)
     .output(
       z.object({
@@ -52,7 +49,7 @@ export const planRouter = createTRPCRouter({
         plan: planData,
       }
     }),
-  createNewVersion: protectedWorkspaceProcedure
+  createNewVersion: protectedProjectAdminProcedure
     .input(createNewVersionPlan)
     .output(
       z.object({
@@ -60,13 +57,8 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { projectSlug, planId } = opts.input
-
-      const { project } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
-      })
-
+      const { planId } = opts.input
+      const project = opts.ctx.project
       const planVersionId = utils.newIdEdge("plan_version")
 
       const planData = await opts.ctx.db.query.plans.findFirst({
@@ -91,8 +83,9 @@ export const planRouter = createTRPCRouter({
           status: "draft",
         })
         .returning()
+        .then((re) => re[0] ?? undefined)
 
-      if (!planVersionData[0]?.id) {
+      if (!planVersionData?.id) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "error creating version",
@@ -100,10 +93,10 @@ export const planRouter = createTRPCRouter({
       }
 
       return {
-        planVersion: planVersionData[0],
+        planVersion: planVersionData,
       }
     }),
-  update: protectedWorkspaceProcedure
+  update: protectedProjectAdminProcedure
     .input(updatePlanSchema)
     .output(
       z.object({
@@ -111,12 +104,8 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { title, id, projectSlug } = opts.input
-
-      const { project } = await projectGuard({
-        projectId: projectSlug,
-        ctx: opts.ctx,
-      })
+      const { title, id } = opts.input
+      const project = opts.ctx.project
 
       const planData = await opts.ctx.db.query.plans.findFirst({
         with: {
@@ -147,13 +136,14 @@ export const planRouter = createTRPCRouter({
           and(eq(schema.plans.id, id), eq(schema.plans.projectId, project.id))
         )
         .returning()
+        .then((re) => re[0] ?? undefined)
 
       return {
-        plan: updatedPlan[0],
+        plan: updatedPlan,
       }
     }),
 
-  updateVersion: publicProcedure
+  updateVersion: protectedProjectAdminProcedure
     .input(updateVersionPlan)
     .output(
       z.object({
@@ -161,20 +151,10 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const {
-        planId,
-        projectSlug,
-        versionId,
-        featuresConfig,
-        addonsConfig,
-        status,
-      } = opts.input
+      const { planId, versionId, featuresConfig, addonsConfig, status } =
+        opts.input
 
-      const { project } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
-      })
-
+      const project = opts.ctx.project
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
         with: {
           plan: {
@@ -208,18 +188,18 @@ export const planRouter = createTRPCRouter({
         })
         .where(and(eq(schema.versions.id, planVersionData.id)))
         .returning()
+        .then((re) => re[0] ?? undefined)
 
       return {
-        planVersion: versionUpdated[0],
+        planVersion: versionUpdated,
       }
     }),
 
-  getVersionById: publicProcedure
+  getVersionById: protectedProjectProcedure
     .input(
       z.object({
         planSlug: z.string(),
         versionId: z.coerce.number().min(0),
-        projectSlug: z.string(),
       })
     )
     .output(
@@ -235,15 +215,12 @@ export const planRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const { planSlug, projectSlug, versionId } = opts.input
-
-      const { project } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      const { planSlug, versionId } = opts.input
+      const project = opts.ctx.project
 
       const { ...rest } = getTableColumns(schema.versions)
 
+      // TODO: improve this query
       const planVersionData = await opts.ctx.db
         .select({
           ...rest,
@@ -253,6 +230,7 @@ export const planRouter = createTRPCRouter({
           },
         })
         .from(schema.versions)
+        .limit(1)
         .innerJoin(schema.plans, eq(schema.versions.planId, schema.plans.id))
         .where(
           and(
@@ -261,36 +239,35 @@ export const planRouter = createTRPCRouter({
             eq(schema.versions.projectId, project.id)
           )
         )
+        .then((re) => re[0] ?? undefined)
 
       return {
-        planVersion: planVersionData?.[0],
+        planVersion: planVersionData,
       }
     }),
-  getBySlug: publicProcedure
-    .input(z.object({ slug: z.string(), projectSlug: z.string() }))
+  getBySlug: protectedProjectProcedure
+    .input(z.object({ slug: z.string() }))
     .output(
       z.object({
-        plan: planSelectBaseSchema.extend({
-          versions: z.array(
-            versionSelectBaseSchema.pick({
-              id: true,
-              status: true,
-              version: true,
-            })
-          ),
-          project: z.object({
-            slug: z.string(),
-          }),
-        }),
+        plan: planSelectBaseSchema
+          .extend({
+            versions: z.array(
+              versionSelectBaseSchema.pick({
+                id: true,
+                status: true,
+                version: true,
+              })
+            ),
+            project: z.object({
+              slug: z.string(),
+            }),
+          })
+          .optional(),
       })
     )
     .query(async (opts) => {
-      const { slug, projectSlug } = opts.input
-
-      const { project } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      const { slug } = opts.input
+      const project = opts.ctx.project
 
       const plan = await opts.ctx.db.query.plans.findFirst({
         with: {
@@ -312,20 +289,13 @@ export const planRouter = createTRPCRouter({
           and(eq(plan.slug, slug), eq(plan.projectId, project.id)),
       })
 
-      if (!plan?.id) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "plan not found",
-        })
-      }
-
       return {
-        plan,
+        plan: plan,
       }
     }),
 
   getById: protectedProjectProcedure
-    .input(z.object({ id: z.string(), projectSlug: z.string() }))
+    .input(z.object({ id: z.string() }))
     .output(
       z.object({
         plan: planSelectBaseSchema
@@ -421,7 +391,6 @@ export const planRouter = createTRPCRouter({
           ),
       })
 
-      // FIXME: Don't hardcode the limit to PRO
       return {
         plans,
       }

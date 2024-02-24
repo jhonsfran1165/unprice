@@ -11,11 +11,13 @@ export const createProjectSchema = createInsertSchema(schema.projects, {
   url: z.string().url(),
 })
 
-export const selectProjectSchema = createSelectSchema(schema.projects)
-
-export const renameProjectSchema = z.object({
-  projectSlug: z.string(),
+export const selectProjectSchema = createSelectSchema(schema.projects, {
   name: z.string().min(4, "Name must be at least 5 characters"),
+})
+
+export const renameProjectSchema = selectProjectSchema.pick({
+  slug: true,
+  name: true,
 })
 
 export const deleteProjectSchema = z.object({
@@ -28,6 +30,7 @@ export const transferToPersonalProjectSchema = z.object({
 
 export const transferToWorkspaceSchema = z.object({
   projectSlug: z.string(),
+  targetWorkspaceId: z.string(),
 })
 
 export type ProjectInsert = z.infer<typeof createProjectSchema>
@@ -35,4 +38,7 @@ export type Project = z.infer<typeof selectProjectSchema>
 export type RenameProject = z.infer<typeof renameProjectSchema>
 export type ProjectTransferToWorkspace = z.infer<
   typeof transferToWorkspaceSchema
+>
+export type ProjectTransferToPersonal = z.infer<
+  typeof transferToPersonalProjectSchema
 >

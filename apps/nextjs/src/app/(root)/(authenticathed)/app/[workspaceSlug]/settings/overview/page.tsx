@@ -1,9 +1,9 @@
 import { Suspense } from "react"
-import { notFound } from "next/navigation"
 
-import { auth } from "@builderai/auth/server"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
 import { api } from "~/trpc/server"
+import { OrganizationMembers } from "../_components/organization-members"
 import { LoadingCard } from "../../[projectSlug]/_components/loading-card"
 
 export const preferredRegion = ["fra1"]
@@ -43,51 +43,17 @@ export default function WorkspaceSettingsPage({
   // return <UserSettingsPage />
 }
 
-async function WorkspaceSettingsForm({
-  workspaceSlug,
-}: {
-  workspaceSlug: string
-}) {
-  const session = await auth()
-
-  // find if there is a workspace with the given slug that is not personal
-  const workspace = session?.user.workspaces.find(
-    (wk) => wk.slug === workspaceSlug
-  )
-
-  if (!workspace?.id) notFound()
-
-  const workspaceData = await api.workspaces.getBySlug({
-    workspaceSlug,
-  })
-
+function WorkspaceSettingsForm({ workspaceSlug }: { workspaceSlug: string }) {
   return (
-    // <DashboardShell
-    //   title="Organization"
-    //   description="Manage your organization"
-    //   module="workspace"
-    //   submodule="settings"
-    //   routeSlug="settings"
-    //   action={
-    //     <Dialog>
-    //       <DialogTrigger asChild>
-    //         <Button className="self-end">Invite member</Button>
-    //       </DialogTrigger>
-    //       <DialogContent>
-    //         <InviteMemberForm />
-    //       </DialogContent>
-    //     </Dialog>
-    //   }
-    // >
-    // <Tabs defaultValue="general">
-    //   <TabsList className="mb-2 w-full justify-start">
-    //     <TabsTrigger value="general">General</TabsTrigger>
-    //     <TabsTrigger value="members">Members</TabsTrigger>
-    //   </TabsList>
-    //   <TabsContent value="general" className="space-y-4">
-    <Suspense fallback={<LoadingCard title="Members" description="" />}>
+    <Tabs defaultValue="general">
+      <TabsList className="mb-2 w-full justify-start">
+        <TabsTrigger value="general">General</TabsTrigger>
+        <TabsTrigger value="members">Members</TabsTrigger>
+      </TabsList>
+      <TabsContent value="general" className="space-y-4">
+        {/* <Suspense fallback={<LoadingCard title="Members" description="" />}>
       // TODO: build this by my own or personalize
-      {/* <OrganizationName
+      <OrganizationName
         orgSlug={workspaceData.slug}
         name={workspaceData.name}
       />
@@ -95,47 +61,50 @@ async function WorkspaceSettingsForm({
         orgSlug={workspaceData.slug}
         name={workspaceData.name}
         image={workspaceData.imageUrl}
-      /> */}
-    </Suspense>
-
-    // </TabsContent>
-    // <TabsContent value="members" className="flex flex-col space-y-4">
-    //   <Suspense fallback={<LoadingCard title="Members" description="" />}>
-    //     <OrganizationMembers
-    //       membersPromise={api.workspace.listMembers.query()}
-    //     />
-    //   </TabsContent>
-    // </Tabs>
-    // </DashboardShell>
+      />
+    </Suspense> */}
+      </TabsContent>
+      <TabsContent value="members" className="flex flex-col space-y-4">
+        <Suspense fallback={<LoadingCard title="Members" description="" />}>
+          <OrganizationMembers
+            listMembersPromise={api.workspaces.listMembers({
+              workspaceSlug,
+            })}
+          />
+        </Suspense>
+      </TabsContent>
+    </Tabs>
   )
 }
 
-// TODO: build this by my own or personalize
+{
+  /* // TODO: build this by my own or personalize
 function UserSettingsPage() {
   return "dasdasd"
-  // <DashboardShell
-  //   title="Account"
-  //   description="Manage your account details"
-  //   module="workspace"
-  //   submodule="settings"
-  //   routeSlug="settings"
-  // >
-  // <UserProfile
-  //   appearance={{
-  //     variables: {
-  //       borderRadius: "var(--radius)",
-  //       colorPrimary: "#ffc53d",
-  //       colorText: "#fdfdfc",
-  //     },
-  //     elements: {
-  //       // Main card element
-  //       card: "shadow-none bg-background-bg text-background-text",
-  //       navbar: "hidden",
-  //       navbarMobileMenuButton: "hidden",
-  //       headerTitle: "hidden",
-  //       headerSubtitle: "hidden",
-  //     },
-  //   }}
-  // />
-  // </DashboardShell>
+ <DashboardShell
+   title="Account"
+   description="Manage your account details"
+   module="workspace"
+   submodule="settings"
+   routeSlug="settings"
+ >
+ <UserProfile
+   appearance={{
+     variables: {
+       borderRadius: "var(--radius)",
+       colorPrimary: "#ffc53d",
+       colorText: "#fdfdfc",
+     },
+     elements: {
+      Main card element
+       card: "shadow-none bg-background-bg text-background-text",
+       navbar: "hidden",
+       navbarMobileMenuButton: "hidden",
+       headerTitle: "hidden",
+       headerSubtitle: "hidden",
+     },
+   }}
+ />
+ </DashboardShell>
+} */
 }

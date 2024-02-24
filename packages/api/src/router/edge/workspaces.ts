@@ -1,19 +1,129 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { eq, schema } from "@builderai/db"
-import { selectWorkspaceSchema } from "@builderai/validators/workspace"
+import { and, eq, schema } from "@builderai/db"
+import { userSelectBase } from "@builderai/validators/auth"
+import {
+  membersSelectBase,
+  selectWorkspaceSchema,
+  workspaceSelectBase,
+} from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,
+  protectedProcedure,
   protectedWorkspaceOwnerProcedure,
   protectedWorkspaceProcedure,
 } from "../../trpc"
+import { workspaceGuard } from "../../utils/workspace-guard"
 
 // this router controls organizations from Clerk.
 // Workspaces are similar to organizations in Clerk
 // We sync the two to keep the data consistent (see @builderai/auth webhooks)
 export const workspaceRouter = createTRPCRouter({
+  deleteMember: protectedWorkspaceOwnerProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        workspaceId: z.string(),
+      })
+    )
+    .output(
+      z.object({
+        member: membersSelectBase.optional(),
+      })
+    )
+    .mutation(async (opts) => {
+      const { userId, workspaceId } = opts.input
+      const { workspace } = await workspaceGuard({
+        ctx: opts.ctx,
+        workspaceId,
+      })
+
+      // if the user only has one workspace, they cannot delete themselves
+      if (workspace.isPersonal) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot delete yourself from personal workspace",
+        })
+      }
+
+      const user = await opts.ctx.db.query.users.findFirst({
+        where: eq(schema.users.id, userId),
+      })
+
+      if (!user?.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        })
+      }
+
+      // if the user is the only owner, they cannot delete themselves
+      const ownerCount = await opts.ctx.db.query.workspaces.findFirst({
+        with: {
+          members: true,
+        },
+        where: (workspace, operators) =>
+          operators.and(operators.eq(workspace.id, workspaceId)),
+      })
+
+      if (ownerCount && ownerCount.members.length <= 1) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot delete the only owner of the workspace",
+        })
+      }
+
+      const deletedMember = await opts.ctx.db
+        .delete(schema.members)
+        .where(
+          and(
+            eq(schema.members.workspaceId, workspace.id),
+            eq(schema.members.userId, user.id)
+          )
+        )
+        .returning()
+        .then((members) => members[0] ?? undefined)
+
+      return {
+        member: deletedMember,
+      }
+    }),
+  listMembers: protectedProcedure
+    .input(z.object({ workspaceSlug: z.string() }))
+    .output(
+      z.object({
+        members: z.array(
+          membersSelectBase.extend({
+            workspace: workspaceSelectBase,
+            user: userSelectBase,
+          })
+        ),
+      })
+    )
+    .query(async (opts) => {
+      const workspaceSlug = opts.input.workspaceSlug
+
+      const { workspace } = await workspaceGuard({
+        ctx: opts.ctx,
+        workspaceSlug,
+      })
+
+      const members = await opts.ctx.db.query.members.findMany({
+        with: {
+          user: true,
+          workspace: true,
+        },
+        where: (member, operators) =>
+          operators.and(operators.eq(member.workspaceId, workspace.id)),
+        orderBy: (members) => members.createdAt,
+      })
+
+      return {
+        members: members,
+      }
+    }),
   getBySlug: protectedWorkspaceProcedure
     .input(z.object({ workspaceSlug: z.string() }))
     .output(selectWorkspaceSchema)

@@ -11,9 +11,10 @@ import {
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
 
 import { userCanAccessProject } from "~/lib/project-guard"
+import { api } from "~/trpc/server"
 import { DeleteProject } from "./delete-project"
-import { TransferProjectToOrganization } from "./transfer-to-organization"
 import { TransferProjectToPersonal } from "./transfer-to-personal"
+import { TransferProjectToTeam } from "./transfer-to-team"
 
 export default async function DangerZonePage(props: {
   params: { workspaceSlug: string; projectSlug: string }
@@ -24,16 +25,16 @@ export default async function DangerZonePage(props: {
 
   return (
     <>
-      <TransferProjectToPersonal />
+      <TransferProjectToPersonal projectSlug={props.params.projectSlug} />
       <DeleteProject />
 
       <Suspense
         fallback={
           <Card>
             <CardHeader>
-              <CardTitle>Transfer to Organization</CardTitle>
+              <CardTitle>Transfer to Team</CardTitle>
               <CardDescription className="flex items-center">
-                Transfer this project to an organization
+                Transfer this project to team
               </CardDescription>
             </CardHeader>
             <CardFooter className="flex justify-between">
@@ -48,7 +49,11 @@ export default async function DangerZonePage(props: {
           </Card>
         }
       >
-        <TransferProjectToOrganization />
+        <TransferProjectToTeam
+          workspacesPromise={api.workspaces.listWorkspaces()}
+          workspaceSlug={props.params.workspaceSlug}
+          projectSlug={props.params.projectSlug}
+        />
       </Suspense>
     </>
   )

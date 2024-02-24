@@ -1,7 +1,10 @@
 "use client"
 
+import { use } from "react"
+import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
+import type { RouterOutputs } from "@builderai/api"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -12,41 +15,36 @@ import {
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import { useToast } from "@builderai/ui/use-toast"
+import { LoadingAnimation } from "@builderai/ui/loading-animation"
 import type { RenameProject } from "@builderai/validators/project"
 import { renameProjectSchema } from "@builderai/validators/project"
 
+import { useToastAction } from "~/lib/use-toast-action"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export function RenameProjectForm(props: { projectSlug: string }) {
-  const { toast } = useToast()
+export function RenameProjectForm(props: {
+  projectPromise: Promise<RouterOutputs["projects"]["getBySlug"]>
+}) {
+  const { project } = use(props.projectPromise)
   const apiUtils = api.useUtils()
-  const [data] = api.projects.bySlug.useSuspenseQuery({
-    slug: props.projectSlug,
-  })
+  const { toast } = useToastAction()
+  const router = useRouter()
 
   const renameProject = api.projects.rename.useMutation({
     onSettled: async () => {
       await apiUtils.projects.listByWorkspace.invalidate()
-      await apiUtils.projects.bySlug.invalidate({ slug: props.projectSlug })
+      await apiUtils.projects.getBySlug.invalidate({ slug: project.slug })
+      router.refresh()
     },
     onSuccess: () => {
-      toast({
-        title: "Project name updated",
-      })
+      toast("success")
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {
-        toast({
-          title: err.message,
-          variant: "destructive",
-        })
+        toast("error", err.message)
       } else {
-        toast({
-          title: "Project could not be deleted",
-          variant: "destructive",
-        })
+        toast("error")
       }
     },
   })
@@ -54,8 +52,8 @@ export function RenameProjectForm(props: { projectSlug: string }) {
   const form = useZodForm({
     schema: renameProjectSchema,
     defaultValues: {
-      projectSlug: data.project?.slug,
-      name: data.project?.name ?? "",
+      slug: project.slug,
+      name: project.name,
     },
   })
 
@@ -83,6 +81,9 @@ export function RenameProjectForm(props: { projectSlug: string }) {
         <div className="flex pt-4">
           <Button type="submit" className="ml-auto">
             Save
+            {form.formState.isSubmitting && (
+              <LoadingAnimation variant={"destructive"} className="ml-2" />
+            )}
           </Button>
         </div>
       </form>

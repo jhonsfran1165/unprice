@@ -17,6 +17,9 @@ export const workspaces = pgTableProject(
 
     // wether or not is a personal workspace - meaning asociated to a user or a team
     isPersonal: boolean("is_personal").default(false),
+    createdBy: cuid("created_by")
+      .notNull()
+      .references(() => users.id),
     imageUrl: text("image_url"),
     // stripe stuff
     stripeId: text("stripe_id").unique(),
@@ -54,7 +57,11 @@ export const members = pgTableProject(
   })
 )
 
-export const workspacesRelations = relations(workspaces, ({ many }) => ({
+export const workspacesRelations = relations(workspaces, ({ many, one }) => ({
+  createdBy: one(users, {
+    fields: [workspaces.createdBy],
+    references: [users.id],
+  }),
   members: many(members),
   projects: many(projects),
 }))

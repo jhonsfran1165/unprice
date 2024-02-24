@@ -1,10 +1,10 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { use } from "react"
 import { TRPCClientError } from "@trpc/client"
 import { formatRelative } from "date-fns"
 
-import { useAuth } from "@builderai/auth"
+import type { RouterOutputs } from "@builderai/api"
 import { MEMBERSHIP } from "@builderai/config"
 import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
 import { Button } from "@builderai/ui/button"
@@ -23,8 +23,8 @@ import {
   TableHeader,
   TableRow,
 } from "@builderai/ui/table"
-import { useToast } from "@builderai/ui/use-toast"
 
+import { useToastAction } from "~/lib/use-toast-action"
 import { api } from "~/trpc/client"
 
 function formatMemberRole(role: string) {
@@ -36,33 +36,27 @@ function formatMemberRole(role: string) {
   return role
 }
 
-export function OrganizationMembers() {
-  const [members] = api.workspaces.listMembers.useSuspenseQuery()
+export function OrganizationMembers({
+  listMembersPromise,
+}: {
+  listMembersPromise: Promise<RouterOutputs["workspaces"]["listMembers"]>
+}) {
+  const { members } = use(listMembersPromise)
   const apiUtils = api.useUtils()
-  const toaster = useToast()
-  const router = useRouter()
-  const { orgRole } = useAuth()
+  const { toast } = useToastAction()
 
   const deleteMember = api.workspaces.deleteMember.useMutation({
     onSettled: async () => {
       await apiUtils.workspaces.listMembers.invalidate()
     },
-    onSuccess: (data) => {
-      toaster.toast({
-        title: `Deleted ${data.memberName} from the workspace`,
-      })
+    onSuccess: () => {
+      toast("deleted")
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
+        toast("error", err.message)
       } else {
-        toaster.toast({
-          title: "Failed to delete member",
-          variant: "destructive",
-        })
+        toast("error")
       }
     },
   })
@@ -81,21 +75,26 @@ export function OrganizationMembers() {
         </TableHeader>
         <TableBody className="bg-background-base">
           {members.map((member) => (
-            <TableRow key={member.id}>
+            <TableRow key={member.userId}>
               <TableCell className="flex items-center gap-2">
                 <Avatar>
-                  <AvatarImage src={member.avatarUrl} alt={member.name} />
-                  <AvatarFallback>{member.name[0]}</AvatarFallback>
+                  <AvatarImage
+                    src={member.user.image ?? ""}
+                    alt={member.user.name ?? ""}
+                  />
+                  <AvatarFallback>
+                    {member.user.name?.substring(3)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <span>{member.name}</span>
+                  <span>{member.user.name}</span>
                   <span className="text-sm text-muted-foreground">
-                    {member.email}
+                    {member.user.email}
                   </span>
                 </div>
               </TableCell>
               <TableCell>
-                {formatRelative(member.joinedAt, new Date())}
+                {formatRelative(member.createdAt, new Date())}
               </TableCell>
               <TableCell>{formatMemberRole(member.role)}</TableCell>
               <TableCell>
@@ -108,15 +107,16 @@ export function OrganizationMembers() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                      disabled={orgRole !== "admin"}
+                      disabled={!["OWNER", "ADMIN"].includes(member.role)}
                       onClick={() => {
                         deleteMember.mutate({
-                          userId: member.id,
+                          userId: member.userId,
+                          workspaceId: member.workspaceId,
                         })
                       }}
                       className="text-destructive"
                     >
-                      Delete member
+                      Delete member from workspace
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

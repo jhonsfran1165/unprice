@@ -18,10 +18,10 @@ import {
 import { Calendar as CalendarIcon } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
-import { useToast } from "@builderai/ui/use-toast"
 import type { CreateApiKey } from "@builderai/validators/apikey"
 import { createApiKeySchema } from "@builderai/validators/apikey"
 
+import { useToastAction } from "~/lib/use-toast-action"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -29,13 +29,13 @@ export default function CreateApiKeyForm(props: {
   projectSlug: string
   onSuccess?: (key: string) => void
 }) {
-  const toaster = useToast()
+  const { toast } = useToastAction()
   const apiUtils = api.useUtils()
   const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   const form = useZodForm({
     schema: createApiKeySchema,
-    defaultValues: { projectSlug: props.projectSlug, name: "New Token" },
+    defaultValues: { projectSlug: props.projectSlug, name: "" },
   })
 
   const createApkiKey = api.apikeys.createApiKey.useMutation({
@@ -44,29 +44,16 @@ export default function CreateApiKeyForm(props: {
         projectSlug: props.projectSlug,
       })
     },
-    onSuccess: (data) => {
-      const { apikey } = data
-      toaster.toast({
-        title: "API Key Created",
-        description: `ApiKey ${apikey?.name} created successfully.`,
-      })
-
+    onSuccess: () => {
+      toast("success")
       form.reset()
       props.onSuccess?.("")
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
+        toast("error", err.message)
       } else {
-        toaster.toast({
-          title: "Error creating API Key",
-          variant: "destructive",
-          description:
-            "An issue occurred while creating your key. Please try again.",
-        })
+        toast("error")
       }
     },
   })
@@ -86,7 +73,7 @@ export default function CreateApiKeyForm(props: {
             <FormItem>
               <FormLabel>Name *</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="New Token" />
+                <Input {...field} placeholder="api-key-prod" />
               </FormControl>
               <FormDescription>
                 Enter a unique name for your token to differentiate it from

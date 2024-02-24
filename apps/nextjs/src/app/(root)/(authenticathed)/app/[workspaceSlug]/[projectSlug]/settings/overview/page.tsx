@@ -11,6 +11,7 @@ import { Label } from "@builderai/ui/label"
 import { Skeleton } from "@builderai/ui/skeleton"
 
 import { userCanAccessProject } from "~/lib/project-guard"
+import { api } from "~/trpc/server"
 import { RenameProjectForm } from "../_components/rename-project"
 
 export default async function ProjectSettingsPage(props: {
@@ -40,7 +41,11 @@ export default async function ProjectSettingsPage(props: {
             </div>
           }
         >
-          <RenameProjectForm projectSlug={props.params.projectSlug} />
+          <RenameProjectForm
+            projectPromise={api.projects.getBySlug({
+              slug: props.params.projectSlug,
+            })}
+          />
         </Suspense>
       </CardContent>
     </Card>
