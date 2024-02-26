@@ -27,3 +27,4 @@ export const STATUS_SUBSCRIPTION = ["active", "inactive"] as const
 export const PLANS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
 export const PROJECT_TIERS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
 export const TIER_MODES = ["volume", "tiered"] as const
+export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const

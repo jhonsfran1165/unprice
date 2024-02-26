@@ -169,7 +169,11 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   })
 })
 
-export const protectedWorkspaceProcedure = protectedProcedure.use(
+// this is a procedure that requires a user to be logged in and have an active workspace
+// it also sets the active workspace in the context
+// the active workspace is passed in the headers or cookies of the request
+// this way we can have a single endpoint for all requests and not have to pass the workspace slug in the body of the request every time
+export const protectedActiveWorkspaceProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
     // TODO: use utils here
     const activeWorkspaceSlug = ctx.activeWorkspaceSlug
@@ -210,27 +214,25 @@ export const protectedWorkspaceProcedure = protectedProcedure.use(
   }
 )
 
-export const protectedWorkspaceAdminProcedure = protectedWorkspaceProcedure.use(
-  ({ ctx, next }) => {
+export const protectedActiveWorkspaceAdminProcedure =
+  protectedActiveWorkspaceProcedure.use(({ ctx, next }) => {
     ctx.verifyRole(["OWNER", "ADMIN"])
 
     return next({
       ctx,
     })
-  }
-)
+  })
 
-export const protectedWorkspaceOwnerProcedure = protectedWorkspaceProcedure.use(
-  ({ ctx, next }) => {
+export const protectedActiveWorkspaceOwnerProcedure =
+  protectedActiveWorkspaceProcedure.use(({ ctx, next }) => {
     ctx.verifyRole(["OWNER"])
 
     return next({
       ctx,
     })
-  }
-)
+  })
 
-export const protectedProjectProcedure = protectedProcedure.use(
+export const protectedActiveProjectProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
     const activeProjectSlug = ctx.activeProjectSlug
 
@@ -250,15 +252,14 @@ export const protectedProjectProcedure = protectedProcedure.use(
   }
 )
 
-export const protectedProjectAdminProcedure = protectedProjectProcedure.use(
-  ({ ctx, next }) => {
+export const protectedActiveProjectAdminProcedure =
+  protectedActiveProjectProcedure.use(({ ctx, next }) => {
     ctx.verifyRole(["OWNER", "ADMIN"])
 
     return next({
       ctx,
     })
-  }
-)
+  })
 
 /**
  * Procedure to authenticate API requests with an API key

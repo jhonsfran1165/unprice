@@ -1,120 +1,42 @@
-import { Suspense } from "react"
+import { searchDataParamsSchema } from "@builderai/validators/utils"
 
-import { OrganizationMembers } from "../../_components/organization-members"
-// 483.1 kB - 128.1 kB (gzip)
+import { DataTable } from "~/components/data-table/data-table"
+import { api } from "~/trpc/server"
+import { columns } from "../../_components/table/columns"
 
-import { LoadingCard } from "../../../[projectSlug]/_components/loading-card"
-
+export const preferredRegion = ["fra1"]
 export const runtime = "edge"
 
-export default function WorkspaceSettingsPage() {
-  const isOrg = false
-  if (isOrg)
-    return (
-      // <Suspense
-      //   fallback={
-      //     <DashboardShell
-      //       title="Organization"
-      //       description="Manage your organization"
-      //       module="workspace"
-      //       submodule="settings"
-      //       routeSlug="settings"
-      //     >
-      //       <Tabs defaultValue="general">
-      //         <TabsList className="mb-2 w-full justify-start">
-      //           <TabsTrigger value="general">General</TabsTrigger>
-      //           <TabsTrigger value="members">Members</TabsTrigger>
-      //         </TabsList>
-      //         <TabsContent value="general" className="space-y-4">
-      //           <OrganizationName orgSlug="org_123" name="" />
-      //           <OrganizationImage orgSlug="org_123" name="" image="" />
-      //         </TabsContent>
-      //       </Tabs>
-      //     </DashboardShell>
-      //   }
-      // >
-      <OrganizationSettingsPage />
-      // </Suspense>
-    )
+export default async function WorkspaceMembersPage(props: {
+  params: { workspaceSlug: string }
+  searchParams: Record<string, string | string[] | undefined>
+}) {
+  const parsed = searchDataParamsSchema.safeParse(props.searchParams)
 
-  return <UserSettingsPage />
-}
+  const filter = {
+    workspaceSlug: props.params.workspaceSlug,
+    fromDate: undefined as number | undefined,
+    toDate: undefined as number | undefined,
+  }
 
-async function OrganizationSettingsPage() {
-  // const { orgId } = auth()
-  // if (!orgId) notFound()
+  if (parsed?.success) {
+    filter.fromDate = parsed.data.fromDate
+    filter.toDate = parsed.data.toDate
+  }
 
-  // const org = await clerkClient.organizations.getOrganization({
-  //   organizationId: orgId,
-  // })
+  const { members } = await api.workspaces.listMembers(filter)
 
   return (
-    // <DashboardShell
-    //   title="Organization"
-    //   description="Manage your organization"
-    //   module="workspace"
-    //   submodule="settings"
-    //   routeSlug="settings"
-    //   action={
-    //     <Dialog>
-    //       <DialogTrigger asChild>
-    //         <Button className="self-end">Invite member</Button>
-    //       </DialogTrigger>
-    //       <DialogContent>
-    //         <InviteMemberForm />
-    //       </DialogContent>
-    //     </Dialog>
-    //   }
-    // >
-    // <Tabs defaultValue="general">
-    //   <TabsList className="mb-2 w-full justify-start">
-    //     <TabsTrigger value="general">General</TabsTrigger>
-    //     <TabsTrigger value="members">Members</TabsTrigger>
-    //   </TabsList>
-    //   <TabsContent value="general" className="space-y-4">
-    //     <OrganizationName orgSlug={org.slug ?? org.name} name={org.name} />
-    //     <OrganizationImage
-    //       orgSlug={org.slug ?? org.name}
-    //       name={org.name}
-    //       image={org.imageUrl}
-    //     />
-    //   </TabsContent>
-    //   <TabsContent value="members" className="flex flex-col space-y-4">
-    <Suspense fallback={<LoadingCard title="Members" description="" />}>
-      <OrganizationMembers />
-    </Suspense>
-    //   </TabsContent>
-    // </Tabs>
-    // </DashboardShell>
+    <div className="flex flex-col">
+      <DataTable
+        columns={columns}
+        data={members}
+        filterOptions={{
+          filterBy: "name",
+          filterColumns: true,
+          filterDateRange: true,
+        }}
+      />
+    </div>
   )
-}
-
-// TODO: build this by my own or personalize
-function UserSettingsPage() {
-  return "dasd"
-  // <DashboardShell
-  //   title="Account"
-  //   description="Manage your account details"
-  //   module="workspace"
-  //   submodule="settings"
-  //   routeSlug="settings"
-  // >
-  // <UserProfile
-  //   appearance={{
-  //     variables: {
-  //       borderRadius: "var(--radius)",
-  //       colorPrimary: "#ffc53d",
-  //       colorText: "#fdfdfc",
-  //     },
-  //     elements: {
-  //       // Main card element
-  //       card: "shadow-none bg-background-bg text-background-text",
-  //       navbar: "hidden",
-  //       navbarMobileMenuButton: "hidden",
-  //       headerTitle: "hidden",
-  //       headerSubtitle: "hidden",
-  //     },
-  //   }}
-  // />
-  // </DashboardShell>
 }

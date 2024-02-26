@@ -9,12 +9,12 @@ import { purchaseWorkspaceSchema } from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,
-  protectedWorkspaceProcedure,
+  protectedActiveWorkspaceProcedure,
   publicProcedure,
 } from "../../trpc"
 
 export const stripeRouter = createTRPCRouter({
-  createSession: protectedWorkspaceProcedure
+  createSession: protectedActiveWorkspaceProcedure
     .input(z.object({ planId: z.string() }))
     .output(z.object({ success: z.boolean(), url: z.string().optional() }))
     .mutation(async (opts) => {
@@ -85,7 +85,7 @@ export const stripeRouter = createTRPCRouter({
     ]
   }),
 
-  purchaseOrg: protectedWorkspaceProcedure
+  purchaseOrg: protectedActiveWorkspaceProcedure
     .input(purchaseWorkspaceSchema)
     .output(z.object({ success: z.boolean(), url: z.string().optional() }))
     .mutation(async (opts) => {

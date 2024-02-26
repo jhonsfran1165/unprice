@@ -5,13 +5,13 @@ import { selectWorkspaceSchema } from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,
+  protectedActiveWorkspaceOwnerProcedure,
   protectedProcedure,
-  protectedWorkspaceOwnerProcedure,
 } from "../../trpc"
 
 export const authRouter = createTRPCRouter({
   // TODO: this should query the user's active subscriptions
-  mySubscription: protectedWorkspaceOwnerProcedure
+  mySubscription: protectedActiveWorkspaceOwnerProcedure
     .input(z.void())
     .output(
       z.object({

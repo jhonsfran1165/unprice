@@ -2,18 +2,20 @@ import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
 import { and, eq, schema } from "@builderai/db"
-import { userSelectBase } from "@builderai/validators/auth"
+import { searchDataParamsSchema } from "@builderai/validators/utils"
 import {
+  changeRoleMemberSchema,
+  deleteWorkspaceSchema,
+  listMembersSchema,
   membersSelectBase,
+  renameWorkspaceSchema,
   selectWorkspaceSchema,
-  workspaceSelectBase,
 } from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,
+  protectedActiveWorkspaceOwnerProcedure,
   protectedProcedure,
-  protectedWorkspaceOwnerProcedure,
-  protectedWorkspaceProcedure,
 } from "../../trpc"
 import { workspaceGuard } from "../../utils/workspace-guard"
 
@@ -21,7 +23,7 @@ import { workspaceGuard } from "../../utils/workspace-guard"
 // Workspaces are similar to organizations in Clerk
 // We sync the two to keep the data consistent (see @builderai/auth webhooks)
 export const workspaceRouter = createTRPCRouter({
-  deleteMember: protectedWorkspaceOwnerProcedure
+  deleteMember: protectedActiveWorkspaceOwnerProcedure
     .input(
       z.object({
         userId: z.string(),
@@ -90,20 +92,20 @@ export const workspaceRouter = createTRPCRouter({
         member: deletedMember,
       }
     }),
+  // TODO: add pagination
   listMembers: protectedProcedure
-    .input(z.object({ workspaceSlug: z.string() }))
+    .input(
+      searchDataParamsSchema.extend({
+        workspaceSlug: selectWorkspaceSchema.shape.slug,
+      })
+    )
     .output(
       z.object({
-        members: z.array(
-          membersSelectBase.extend({
-            workspace: workspaceSelectBase,
-            user: userSelectBase,
-          })
-        ),
+        members: z.array(listMembersSchema),
       })
     )
     .query(async (opts) => {
-      const workspaceSlug = opts.input.workspaceSlug
+      const { workspaceSlug, fromDate, toDate } = opts.input
 
       const { workspace } = await workspaceGuard({
         ctx: opts.ctx,
@@ -115,8 +117,15 @@ export const workspaceRouter = createTRPCRouter({
           user: true,
           workspace: true,
         },
-        where: (member, operators) =>
-          operators.and(operators.eq(member.workspaceId, workspace.id)),
+        where: (member, { eq, and, between, gte, lte }) =>
+          and(
+            eq(member.workspaceId, workspace.id),
+            fromDate && toDate
+              ? between(member.createdAt, new Date(fromDate), new Date(toDate))
+              : undefined,
+            fromDate ? gte(member.createdAt, new Date(fromDate)) : undefined,
+            toDate ? lte(member.createdAt, new Date(toDate)) : undefined
+          ),
         orderBy: (members) => members.createdAt,
       })
 
@@ -124,52 +133,36 @@ export const workspaceRouter = createTRPCRouter({
         members: members,
       }
     }),
-  getBySlug: protectedWorkspaceProcedure
-    .input(z.object({ workspaceSlug: z.string() }))
-    .output(selectWorkspaceSchema)
+  getBySlug: protectedProcedure
+    .input(selectWorkspaceSchema.pick({ slug: true }))
+    .output(
+      z.object({
+        workspace: selectWorkspaceSchema.optional(),
+      })
+    )
     .query(async (opts) => {
-      const { workspaceSlug } = opts.input
+      const { slug: workspaceSlug } = opts.input
 
-      const workspace = await opts.ctx.db.query.workspaces.findFirst({
-        where: (workspace, operators) =>
-          operators.eq(workspace.slug, workspaceSlug),
+      const { workspace } = await workspaceGuard({
+        ctx: opts.ctx,
+        workspaceSlug,
       })
 
-      if (!workspace) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Workspace not found",
-        })
+      return {
+        workspace: workspace,
       }
-
-      return workspace
     }),
 
-  delete: protectedWorkspaceOwnerProcedure
-    .input(z.object({ workspaceSlug: z.string() }))
+  delete: protectedProcedure
+    .input(deleteWorkspaceSchema)
     .output(z.object({ workspace: selectWorkspaceSchema.optional() }))
     .mutation(async (opts) => {
-      const { workspaceSlug } = opts.input
-      const userId = opts.ctx.session?.user?.id
+      const { slug: workspaceSlug } = opts.input
 
-      if (!userId) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "userId not provided, logout and login again",
-        })
-      }
-
-      const workspace = await opts.ctx.db.query.workspaces.findFirst({
-        where: (workspace, operators) =>
-          operators.eq(workspace.slug, workspaceSlug),
+      const { workspace, verifyRole } = await workspaceGuard({
+        ctx: opts.ctx,
+        workspaceSlug,
       })
-
-      if (!workspace) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Workspace not found",
-        })
-      }
 
       if (workspace?.isPersonal) {
         throw new TRPCError({
@@ -179,12 +172,15 @@ export const workspaceRouter = createTRPCRouter({
         })
       }
 
+      verifyRole(["OWNER"])
+
       const deletedWorkspace = await opts.ctx.db
         .delete(schema.workspaces)
         .where(eq(schema.workspaces.id, workspace.id))
         .returning()
+        .then((wk) => wk[0] ?? undefined)
 
-      if (!deletedWorkspace?.[0]) {
+      if (!deletedWorkspace) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Error deleting workspace",
@@ -192,10 +188,10 @@ export const workspaceRouter = createTRPCRouter({
       }
 
       return {
-        workspace: deletedWorkspace[0],
+        workspace: deletedWorkspace,
       }
     }),
-  listWorkspaces: protectedWorkspaceProcedure
+  listWorkspaces: protectedProcedure
     .input(z.void())
     .output(
       z.object({
@@ -251,117 +247,70 @@ export const workspaceRouter = createTRPCRouter({
         workspaces: workspaces,
       }
     }),
-  // listMembers: protectedWorkspaceProcedure.query(async (opts) => {
-  //   const { orgId } = opts.ctx.auth
+  renameWorkspace: protectedProcedure
+    .input(renameWorkspaceSchema)
+    .output(selectWorkspaceSchema)
+    .mutation(async (opts) => {
+      const { slug: workspaceSlug, name } = opts.input
 
-  //   if (!orgId) {
-  //     throw new TRPCError({
-  //       code: "BAD_REQUEST",
-  //       message: "orgId not provided, logout and login again",
-  //     })
-  //   }
+      const { workspace, verifyRole } = await workspaceGuard({
+        ctx: opts.ctx,
+        workspaceSlug,
+      })
 
-  //   const members =
-  //     await clerkClient.organizations.getOrganizationMembershipList({
-  //       organizationId: orgId,
-  //     })
+      verifyRole(["OWNER", "ADMIN"])
 
-  //   return members.map((member) => ({
-  //     id: member.id,
-  //     email: member.publicUserData?.identifier ?? "",
-  //     role: member.role,
-  //     joinedAt: member.createdAt,
-  //     avatarUrl: member.publicUserData?.imageUrl,
-  //     name: [
-  //       member.publicUserData?.firstName,
-  //       member.publicUserData?.lastName,
-  //     ].join(" "),
-  //   }))
-  // }),
+      const workspaceRenamed = await opts.ctx.db
+        .update(schema.workspaces)
+        .set({ name })
+        .where(eq(schema.workspaces.id, workspace.id))
+        .returning()
+        .then((wk) => wk[0] ?? undefined)
 
-  // deleteMember: protectedWorkspaceAdminProcedure
-  //   .input(z.object({ userId: z.string() }))
-  //   .output(z.object({ memberName: z.string().optional().nullable() }))
-  //   .mutation(async (opts) => {
-  //     const { orgId } = opts.ctx.auth
+      if (!workspaceRenamed) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error updating workspace",
+        })
+      }
 
-  //     if (!orgId) {
-  //       throw new TRPCError({
-  //         code: "BAD_REQUEST",
-  //         message: "orgId not provided, logout and login again",
-  //       })
-  //     }
+      return workspaceRenamed
+    }),
 
-  //     try {
-  //       const member =
-  //         await clerkClient.organizations.deleteOrganizationMembership({
-  //           organizationId: orgId,
-  //           userId: opts.input.userId,
-  //         })
+  changeRoleMember: protectedProcedure
+    .input(changeRoleMemberSchema)
+    .output(z.object({ member: membersSelectBase.optional() }))
+    .mutation(async (opts) => {
+      const { workspaceId, userId, role } = opts.input
 
-  //       return { memberName: member.publicUserData?.firstName }
-  //     } catch (e) {
-  //       console.error("Error deleting member", e)
-  //       throw new TRPCError({
-  //         code: "NOT_FOUND",
-  //         message: "User not found",
-  //       })
-  //     }
-  //   }),
+      const { workspace, verifyRole } = await workspaceGuard({
+        ctx: opts.ctx,
+        workspaceId,
+      })
 
-  // inviteMember: protectedWorkspaceAdminProcedure
-  //   .input(inviteOrgMemberSchema)
-  //   .mutation(async (opts) => {
-  //     const { orgId } = opts.ctx.auth
+      verifyRole(["OWNER", "ADMIN"])
 
-  //     const { email } = opts.input
-  //     const users = await clerkClient.users.getUserList({
-  //       emailAddress: [email],
-  //     })
-  //     const user = users[0]
+      const member = await opts.ctx.db
+        .update(schema.members)
+        .set({ role })
+        .where(
+          and(
+            eq(schema.members.workspaceId, workspace.id),
+            eq(schema.members.userId, userId)
+          )
+        )
+        .returning()
+        .then((wk) => wk[0] ?? undefined)
 
-  //     if (users.length === 0 || !user) {
-  //       throw new TRPCError({
-  //         code: "NOT_FOUND",
-  //         message: "User not found",
-  //       })
-  //     }
+      if (!member) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error updating workspace",
+        })
+      }
 
-  //     if (users.length > 1) {
-  //       throw new TRPCError({
-  //         code: "BAD_REQUEST",
-  //         message: "Multiple users found with that email address",
-  //       })
-  //     }
-
-  //     if (!orgId) {
-  //       throw new TRPCError({
-  //         code: "BAD_REQUEST",
-  //         message: "orgId not provided",
-  //       })
-  //     }
-
-  //     const member =
-  //       await clerkClient.organizations.createOrganizationMembership({
-  //         organizationId: orgId,
-  //         userId: user.id,
-  //         role: opts.input.role,
-  //       })
-
-  //     const { firstName, lastName } = member.publicUserData ?? {}
-  //     return { name: [firstName, lastName].join(" ") }
-  //   }),
-
-  // deleteOrganization: protectedWorkspaceAdminProcedure.mutation(async (opts) => {
-  //   const { orgId } = opts.ctx.auth
-
-  //   if (!orgId) {
-  //     throw new TRPCError({
-  //       code: "BAD_REQUEST",
-  //       message: "orgId not provided",
-  //     })
-  //   }
-
-  //   await clerkClient.organizations.deleteOrganization(orgId)
-  // }),
+      return {
+        member: member,
+      }
+    }),
 })

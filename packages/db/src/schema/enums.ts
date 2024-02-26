@@ -5,6 +5,7 @@ import {
   FEATURE_TYPES,
   PLANS_APP,
   PROJECT_TIERS_APP,
+  ROLES_APP,
   STAGES,
   STATUS_PLAN,
   STATUS_SUBSCRIPTION,
@@ -21,4 +22,4 @@ export const statusPlanEnum = pgEnum("plan_version_status", STATUS_PLAN)
 export const typeFeatureEnum = pgEnum("feature_types", FEATURE_TYPES)
 export const currencyEnum = pgEnum("currency", CURRENCIES)
 export const stageEnum = pgEnum("app_stages", STAGES)
-export const teamRolesEnum = pgEnum("team_roles", ["OWNER", "ADMIN", "MEMBER"])
+export const teamRolesEnum = pgEnum("team_roles", ROLES_APP)

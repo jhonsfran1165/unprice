@@ -9,13 +9,13 @@ import {
 
 import {
   createTRPCRouter,
-  protectedWorkspaceAdminProcedure,
-  protectedWorkspaceProcedure,
+  protectedActiveWorkspaceAdminProcedure,
+  protectedActiveWorkspaceProcedure,
 } from "../../trpc"
 import { projectGuard } from "../../utils"
 
 export const apiKeyRouter = createTRPCRouter({
-  listApiKeys: protectedWorkspaceAdminProcedure
+  listApiKeys: protectedActiveWorkspaceAdminProcedure
     .input(
       z.object({
         projectSlug: z.string(),
@@ -57,7 +57,7 @@ export const apiKeyRouter = createTRPCRouter({
       return { apikeys }
     }),
 
-  createApiKey: protectedWorkspaceProcedure
+  createApiKey: protectedActiveWorkspaceProcedure
     .input(createApiKeySchema)
     .output(
       z.object({
@@ -93,7 +93,7 @@ export const apiKeyRouter = createTRPCRouter({
       return { apikey: newApiKey }
     }),
 
-  revokeApiKeys: protectedWorkspaceAdminProcedure
+  revokeApiKeys: protectedActiveWorkspaceAdminProcedure
     .input(z.object({ ids: z.string().array(), projectSlug: z.string() }))
     .output(z.object({ success: z.boolean(), numRevoked: z.number() }))
     .mutation(async (opts) => {
@@ -122,7 +122,7 @@ export const apiKeyRouter = createTRPCRouter({
       return { success: true, numRevoked: result.length }
     }),
 
-  rollApiKey: protectedWorkspaceAdminProcedure
+  rollApiKey: protectedActiveWorkspaceAdminProcedure
     .input(z.object({ id: z.string(), projectSlug: z.string() }))
     .output(
       z.object({

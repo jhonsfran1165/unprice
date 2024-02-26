@@ -4,7 +4,6 @@ import { startTransition } from "react"
 import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
-import { useSession } from "@builderai/auth/react"
 import { Button } from "@builderai/ui/button"
 import {
   Card,
@@ -25,17 +24,17 @@ import {
 } from "@builderai/ui/dialog"
 import { Warning } from "@builderai/ui/icons"
 
+import { SubmitButton } from "~/components/submit-button"
 import { useToastAction } from "~/lib/use-toast-action"
+import { useUser } from "~/lib/use-user"
 import { api } from "~/trpc/client"
 
 export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
   const { toast } = useToastAction()
   const router = useRouter()
-  // TODO: custom hook for this
-  const { data: session } = useSession()
-  const isPersonal = session?.user?.workspaces.find(
-    (wk) => wk.slug === workspaceSlug
-  )?.isPersonal
+  const { user } = useUser()
+  const isPersonal = user?.workspaces.find((wk) => wk.slug === workspaceSlug)
+    ?.isPersonal
 
   const apiUtils = api.useUtils()
 
@@ -49,7 +48,7 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
     },
     onSuccess: () => {
       toast("deleted")
-      const nextWorkspace = session?.user?.workspaces.find(
+      const nextWorkspace = user?.workspaces.find(
         (wk) => wk.slug !== workspaceSlug
       )
 
@@ -67,7 +66,7 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
   function handleDelete() {
     startTransition(() => {
       deleteWorkspace.mutate({
-        workspaceSlug,
+        slug: workspaceSlug,
       })
     })
   }
@@ -82,8 +81,10 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
       </CardHeader>
       <CardFooter className="flex justify-between">
         <Dialog>
-          <DialogTrigger asChild disabled={!!isPersonal}>
-            <Button variant="destructive">{title}</Button>
+          <DialogTrigger asChild>
+            <Button variant="destructive" disabled={!!isPersonal}>
+              {title}
+            </Button>
           </DialogTrigger>
           {!!isPersonal && (
             <span className="mr-auto px-2 text-sm text-muted-foreground">
@@ -104,15 +105,18 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
               <DialogClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
-              <Button
+
+              <SubmitButton
+                component="spinner"
                 variant="destructive"
+                isDisabled={deleteWorkspace.isPending}
+                isSubmitting={deleteWorkspace.isPending}
+                label="I'm sure. Delete this workspace"
                 onClick={(e) => {
                   e.preventDefault()
                   handleDelete()
                 }}
-              >
-                {`I'm sure. Delete this workspace`}
-              </Button>
+              />
             </DialogFooter>
           </DialogContent>
         </Dialog>

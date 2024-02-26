@@ -14,16 +14,17 @@ import {
   createSubscriptionSchema,
   subscriptionSelectSchema,
 } from "@builderai/validators/subscription"
+import { searchDataParamsSchema } from "@builderai/validators/utils"
 
 import {
   createTRPCRouter,
+  protectedActiveWorkspaceProcedure,
   protectedApiProcedure,
-  protectedWorkspaceProcedure,
 } from "../../trpc"
 import { projectGuard, redis } from "../../utils"
 
 export const subscriptionRouter = createTRPCRouter({
-  create: protectedWorkspaceProcedure
+  create: protectedActiveWorkspaceProcedure
     .input(createSubscriptionSchema)
     .output(subscriptionSelectSchema.optional())
     .mutation(async (opts) => {
@@ -101,7 +102,7 @@ export const subscriptionRouter = createTRPCRouter({
 
       return subscriptionData?.[0]
     }),
-  createCustomer: protectedWorkspaceProcedure
+  createCustomer: protectedActiveWorkspaceProcedure
     .input(customerInsertSchema)
     .output(
       z.object({
@@ -155,7 +156,7 @@ export const subscriptionRouter = createTRPCRouter({
       }
     }),
 
-  deleteCustomer: protectedWorkspaceProcedure
+  deleteCustomer: protectedActiveWorkspaceProcedure
     .input(
       customerSelectSchema
         .pick({ id: true })
@@ -197,12 +198,10 @@ export const subscriptionRouter = createTRPCRouter({
       }
     }),
   // TODO: add pagination and filtering - abstract to a common function input schema
-  listCustomersByProject: protectedWorkspaceProcedure
+  listCustomersByProject: protectedActiveWorkspaceProcedure
     .input(
-      z.object({
+      searchDataParamsSchema.extend({
         projectSlug: z.string(),
-        fromDate: z.number().optional(),
-        toDate: z.number().optional(),
       })
     )
     .output(z.object({ customers: z.array(customerSelectSchema) }))

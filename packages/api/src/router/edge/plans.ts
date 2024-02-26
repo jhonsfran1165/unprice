@@ -13,12 +13,12 @@ import {
 
 import {
   createTRPCRouter,
-  protectedProjectAdminProcedure,
-  protectedProjectProcedure,
+  protectedActiveProjectAdminProcedure,
+  protectedActiveProjectProcedure,
 } from "../../trpc"
 
 export const planRouter = createTRPCRouter({
-  create: protectedProjectProcedure
+  create: protectedActiveProjectProcedure
     .input(createPlanSchema)
     .output(
       z.object({
@@ -49,7 +49,7 @@ export const planRouter = createTRPCRouter({
         plan: planData,
       }
     }),
-  createNewVersion: protectedProjectAdminProcedure
+  createNewVersion: protectedActiveProjectAdminProcedure
     .input(createNewVersionPlan)
     .output(
       z.object({
@@ -96,7 +96,7 @@ export const planRouter = createTRPCRouter({
         planVersion: planVersionData,
       }
     }),
-  update: protectedProjectAdminProcedure
+  update: protectedActiveProjectAdminProcedure
     .input(updatePlanSchema)
     .output(
       z.object({
@@ -143,7 +143,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
 
-  updateVersion: protectedProjectAdminProcedure
+  updateVersion: protectedActiveProjectAdminProcedure
     .input(updateVersionPlan)
     .output(
       z.object({
@@ -195,7 +195,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
 
-  getVersionById: protectedProjectProcedure
+  getVersionById: protectedActiveProjectProcedure
     .input(
       z.object({
         planSlug: z.string(),
@@ -245,7 +245,7 @@ export const planRouter = createTRPCRouter({
         planVersion: planVersionData,
       }
     }),
-  getBySlug: protectedProjectProcedure
+  getBySlug: protectedActiveProjectProcedure
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
@@ -294,7 +294,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
 
-  getById: protectedProjectProcedure
+  getById: protectedActiveProjectProcedure
     .input(z.object({ id: z.string() }))
     .output(
       z.object({
@@ -343,7 +343,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
 
-  listByProject: protectedProjectProcedure
+  listByProject: protectedActiveProjectProcedure
     .input(
       z.object({
         fromDate: z.number().optional(),

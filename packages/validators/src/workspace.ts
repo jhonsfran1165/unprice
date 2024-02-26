@@ -4,10 +4,32 @@ import { z } from "zod"
 import { MEMBERSHIP, PLANS } from "@builderai/config"
 import { schema } from "@builderai/db"
 
+import { userSelectBase } from "./auth"
+
 export const membersSelectBase = createSelectSchema(schema.members)
 export const workspaceSelectBase = createSelectSchema(schema.workspaces)
 export const workspaceInsertBase = createInsertSchema(schema.workspaces, {
   name: z.string().min(3, "Name must be at least 3 characters"),
+})
+
+export const listMembersSchema = membersSelectBase.extend({
+  workspace: workspaceSelectBase,
+  user: userSelectBase,
+})
+
+export const renameWorkspaceSchema = workspaceInsertBase.pick({
+  name: true,
+  slug: true,
+})
+
+export const changeRoleMemberSchema = membersSelectBase.pick({
+  workspaceId: true,
+  userId: true,
+  role: true,
+})
+
+export const deleteWorkspaceSchema = workspaceInsertBase.pick({
+  slug: true,
 })
 
 // TODO: fix this enum - put all in db constants
@@ -50,3 +72,4 @@ export type PurchaseOrg = z.infer<typeof purchaseWorkspaceSchema>
 export type Workspace = z.infer<typeof selectWorkspaceSchema>
 export type Member = z.infer<typeof membersSelectBase>
 export type InviteOrgMember = z.infer<typeof inviteOrgMemberSchema>
+export type RenameWorkspace = z.infer<typeof renameWorkspaceSchema>

@@ -14,9 +14,9 @@ import { selectWorkspaceSchema } from "@builderai/validators/workspace"
 
 import {
   createTRPCRouter,
+  protectedActiveWorkspaceAdminProcedure,
+  protectedActiveWorkspaceProcedure,
   protectedProcedure,
-  protectedWorkspaceAdminProcedure,
-  protectedWorkspaceProcedure,
 } from "../../trpc"
 import { projectGuard } from "../../utils"
 import { getRandomPatternStyle } from "../../utils/generate-pattern"
@@ -29,7 +29,7 @@ const PROJECT_LIMITS = {
 } as const
 
 export const projectRouter = createTRPCRouter({
-  create: protectedWorkspaceProcedure
+  create: protectedActiveWorkspaceProcedure
     .input(createProjectSchema)
     .output(
       z.object({
@@ -79,7 +79,7 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 
-  rename: protectedWorkspaceAdminProcedure
+  rename: protectedActiveWorkspaceAdminProcedure
     .input(renameProjectSchema)
     .output(
       z.object({
@@ -108,7 +108,7 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 
-  delete: protectedWorkspaceAdminProcedure
+  delete: protectedActiveWorkspaceAdminProcedure
     .input(deleteProjectSchema)
     .output(
       z.object({
@@ -163,7 +163,7 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 
-  transferToPersonal: protectedWorkspaceAdminProcedure
+  transferToPersonal: protectedActiveWorkspaceAdminProcedure
     .input(transferToPersonalProjectSchema)
     .output(
       z.object({
@@ -239,7 +239,7 @@ export const projectRouter = createTRPCRouter({
     }),
 
   // TODO: all this again
-  transferToWorkspace: protectedWorkspaceAdminProcedure
+  transferToWorkspace: protectedActiveWorkspaceAdminProcedure
     .input(transferToWorkspaceSchema)
     .output(
       z.object({
@@ -303,7 +303,7 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 
-  listByActiveWorkspace: protectedWorkspaceProcedure
+  listByActiveWorkspace: protectedActiveWorkspaceProcedure
     .input(z.void())
     .output(
       z.object({
@@ -410,7 +410,7 @@ export const projectRouter = createTRPCRouter({
         limitReached: projects.length >= PROJECT_LIMITS.PRO,
       }
     }),
-  getBySlug: protectedWorkspaceProcedure
+  getBySlug: protectedActiveWorkspaceProcedure
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
@@ -434,7 +434,7 @@ export const projectRouter = createTRPCRouter({
         },
       }
     }),
-  getById: protectedWorkspaceProcedure
+  getById: protectedActiveWorkspaceProcedure
     .input(z.object({ id: z.string() }))
     .output(
       z.object({
