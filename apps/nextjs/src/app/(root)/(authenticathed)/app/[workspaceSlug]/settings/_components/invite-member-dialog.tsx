@@ -1,9 +1,9 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
-import { MEMBERSHIP } from "@builderai/config"
-import { Button } from "@builderai/ui/button"
+import { utils } from "@builderai/db"
 import {
   Form,
   FormControl,
@@ -21,51 +21,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@builderai/ui/select"
-import { useToast } from "@builderai/ui/use-toast"
-import type { InviteOrgMember } from "@builderai/validators/workspace"
-import { inviteOrgMemberSchema } from "@builderai/validators/workspace"
+import type { InviteMember } from "@builderai/validators/workspace"
+import { inviteMembersSchema } from "@builderai/validators/workspace"
 
+import { SubmitButton } from "~/components/submit-button"
+import { useToastAction } from "~/lib/use-toast-action"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export const InviteMemberForm = () => {
-  const toaster = useToast()
+export const InviteMemberForm = ({
+  workspaceSlug,
+}: {
+  workspaceSlug: string
+}) => {
+  const { toast } = useToastAction()
+  const router = useRouter()
 
   const form = useZodForm({
-    schema: inviteOrgMemberSchema,
+    schema: inviteMembersSchema,
+    defaultValues: {
+      email: "",
+      workspaceSlug,
+      role: utils.ROLES_APP[0],
+    },
   })
 
   const inviteMember = api.workspaces.inviteMember.useMutation({
-    onSuccess: (data) => {
-      toaster.toast({
-        title: "Member invited",
-        description: `An invitation to ${data.name} has been sent.`,
-      })
+    onSettled: () => {
+      router.refresh()
+    },
+    onSuccess: () => {
+      toast("success")
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
+        toast("error", err.message)
       } else {
-        toaster.toast({
-          title: "Invitation failed",
-          variant: "destructive",
-          description: `An issue occurred while inviting the member. Make sure they have an account, and try again.`,
-        })
+        toast("error")
       }
     },
   })
 
+  async function onSubmit(data: InviteMember) {
+    await inviteMember.mutateAsync(data)
+  }
+
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data: InviteOrgMember) =>
-          inviteMember.mutate(data)
-        )}
-        className="space-y-4"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="email"
@@ -90,23 +93,16 @@ export const InviteMemberForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Role *</FormLabel>
-              <Select
-                onValueChange={(val) =>
-                  field.onChange(
-                    val as (typeof MEMBERSHIP)[keyof typeof MEMBERSHIP]
-                  )
-                }
-                defaultValue={field.value}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a plan" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {Object.entries(MEMBERSHIP).map(([key, value]) => (
-                    <SelectItem key={value} value={value}>
-                      {key}
+                  {utils.ROLES_APP.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {role}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -115,8 +111,11 @@ export const InviteMemberForm = () => {
             </FormItem>
           )}
         />
-
-        <Button type="submit">Create Project</Button>
+        <SubmitButton
+          isDisabled={form.formState.isSubmitting}
+          isSubmitting={form.formState.isSubmitting}
+          label="Invite"
+        />
       </form>
     </Form>
   )

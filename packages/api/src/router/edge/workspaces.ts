@@ -2,10 +2,13 @@ import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
 import { and, eq, schema } from "@builderai/db"
+import { sendEmail, WelcomeEmail } from "@builderai/email"
 import { searchDataParamsSchema } from "@builderai/validators/utils"
 import {
   changeRoleMemberSchema,
   deleteWorkspaceSchema,
+  inviteMembersSchema,
+  invitesSelectBase,
   listMembersSchema,
   membersSelectBase,
   renameWorkspaceSchema,
@@ -311,6 +314,71 @@ export const workspaceRouter = createTRPCRouter({
 
       return {
         member: member,
+      }
+    }),
+  inviteMember: protectedProcedure
+    .input(inviteMembersSchema)
+    .output(
+      z.object({
+        invite: invitesSelectBase.optional(),
+      })
+    )
+    .mutation(async (opts) => {
+      const { email, workspaceSlug, role } = opts.input
+
+      const { workspace } = await workspaceGuard({
+        ctx: opts.ctx,
+        workspaceSlug,
+      })
+
+      // check if the user is already a member
+      const userByEmail = await opts.ctx.db.query.users.findFirst({
+        where: eq(schema.users.email, email),
+      })
+
+      console.log("userByEmail", userByEmail)
+
+      if (userByEmail) {
+        const member = await opts.ctx.db.query.members.findFirst({
+          where: and(
+            eq(schema.members.userId, userByEmail.id),
+            eq(schema.members.workspaceId, workspace.id)
+          ),
+        })
+
+        if (member) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "User is already a member of the workspace",
+          })
+        }
+      }
+
+      const memberInvited = await opts.ctx.db
+        .insert(schema.invites)
+        .values({
+          email: email,
+          workspaceId: workspace.id,
+          role: role,
+        })
+        .returning()
+        .then((res) => {
+          return res[0]
+        })
+
+      // send the invite email
+      await sendEmail({
+        from:
+          process.env.NODE_ENV === "development"
+            ? "delivered@resend.dev"
+            : "Sebastian Franco <sebastian@builderai.com>",
+        subject: "Welcome to Builderai 👋",
+        to: [email],
+        react: WelcomeEmail(),
+      })
+
+      return {
+        invite: memberInvited,
       }
     }),
 })

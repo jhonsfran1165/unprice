@@ -27,7 +27,7 @@ export default function WorkspaceLayout(props: {
                 <Button className="self-end">Invite member</Button>
               </DialogTrigger>
               <DialogContent>
-                <InviteMemberForm />
+                <InviteMemberForm workspaceSlug={workspaceSlug} />
               </DialogContent>
             </Dialog>
           }

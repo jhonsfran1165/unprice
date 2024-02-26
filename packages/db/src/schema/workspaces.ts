@@ -52,7 +52,22 @@ export const members = pgTableProject(
   },
   (table) => ({
     compoundKey: primaryKey({
-      columns: [table.userId, table.workspaceId, table.role],
+      columns: [table.userId, table.workspaceId],
+    }),
+  })
+)
+
+export const invites = pgTableProject(
+  "invites",
+  {
+    ...timestamps,
+    ...workspaceID,
+    email: text("email").notNull(),
+    role: teamRolesEnum("role").default("MEMBER").notNull(),
+  },
+  (table) => ({
+    compoundKey: primaryKey({
+      columns: [table.email, table.workspaceId],
     }),
   })
 )

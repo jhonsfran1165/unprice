@@ -6,6 +6,7 @@ import { schema } from "@builderai/db"
 
 import { userSelectBase } from "./auth"
 
+export const invitesSelectBase = createSelectSchema(schema.invites)
 export const membersSelectBase = createSelectSchema(schema.members)
 export const workspaceSelectBase = createSelectSchema(schema.workspaces)
 export const workspaceInsertBase = createInsertSchema(schema.workspaces, {
@@ -16,6 +17,15 @@ export const listMembersSchema = membersSelectBase.extend({
   workspace: workspaceSelectBase,
   user: userSelectBase,
 })
+
+export const inviteMembersSchema = invitesSelectBase
+  .pick({
+    email: true,
+    role: true,
+  })
+  .extend({
+    workspaceSlug: z.string(),
+  })
 
 export const renameWorkspaceSchema = workspaceInsertBase.pick({
   name: true,
@@ -73,3 +83,4 @@ export type Workspace = z.infer<typeof selectWorkspaceSchema>
 export type Member = z.infer<typeof membersSelectBase>
 export type InviteOrgMember = z.infer<typeof inviteOrgMemberSchema>
 export type RenameWorkspace = z.infer<typeof renameWorkspaceSchema>
+export type InviteMember = z.infer<typeof inviteMembersSchema>
