@@ -4,15 +4,15 @@ const WaitingList = () => {
   return (
     <Html>
       <Head>
-        <title>Thanks for joining OpenStatus waiting list</title>
-        <Preview>Thanks for joining OpenStatus waiting list</Preview>
+        <title>Thanks for joining builderai waiting list</title>
+        <Preview>Thanks for joining builderai waiting list</Preview>
         <Body>
           Hello,
           <br />
           <br />
-          We're working hard to get you access to OpenStatus. You can track our
+          We're working hard to get you access to builderai. You can track our
           progress on our{" "}
-          <Link href="https://github.com/openstatushq/openstatus">
+          <Link href="https://github.com/builderaihq/builderai">
             Github repository
           </Link>
           .
@@ -23,7 +23,7 @@ const WaitingList = () => {
           <br />
           Thank you,
           <br />
-          Thibault Le Ouay Ducasse
+          Sebastian
         </Body>
       </Head>
     </Html>

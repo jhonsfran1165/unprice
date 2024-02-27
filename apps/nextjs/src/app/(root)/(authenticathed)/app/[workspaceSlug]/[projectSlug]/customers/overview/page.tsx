@@ -1,15 +1,10 @@
-import { z } from "zod"
+import { searchDataParamsSchema } from "@builderai/validators/utils"
 
 import { columns } from "~/app/(root)/(authenticathed)/app/[workspaceSlug]/[projectSlug]/customers/_components/table/columns"
 import { DataTable } from "~/components/data-table/data-table"
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 import { UserForm } from "../_components/user-form"
-
-const searchParamsSchema = z.object({
-  fromDate: z.coerce.number().optional(),
-  toDate: z.coerce.number().optional(),
-})
 
 export default async function ProjectUsersPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
@@ -21,7 +16,7 @@ export default async function ProjectUsersPage(props: {
     projectSlug: props.params.projectSlug,
   })
 
-  const parsed = searchParamsSchema.safeParse(props.searchParams)
+  const parsed = searchDataParamsSchema.safeParse(props.searchParams)
 
   const filter = {
     projectSlug: props.params.projectSlug,

@@ -5,4 +5,4 @@ import WelcomeEmail from "./emails/welcome"
 
 export { Alert, EmailDataSchema, SubscribeEmail, WaitingList, WelcomeEmail }
 
-export { sendEmail, sendEmailHtml } from "./emails/send"
+export { sendEmail, sendEmailHtml } from "./send"

@@ -1,41 +1,28 @@
 "use client"
 
 import Link from "next/link"
-import { cache } from "react"
+import { useSelectedLayoutSegments } from "next/navigation"
 
-import type { ModuleApp, SubModuleApp } from "@builderai/config"
-import { getModulesApp } from "@builderai/config"
-// TODO: this is adding too much bundle size
 import { cn } from "@builderai/ui"
 import * as Icons from "@builderai/ui/icons"
 
-import { useGetPaths } from "~/lib/use-get-path"
+import type { DashboardRoute } from "~/types"
 
-const cachedGetModulesApp = cache(getModulesApp)
-
-export default function SidebarNav<T extends ModuleApp>(props: {
+export default function SidebarNav(props: {
   className?: string
-  submodule: SubModuleApp<T>
-  module: T
   basePath: string
+  activeTab: DashboardRoute
 }) {
-  const modules = cachedGetModulesApp({
-    module: props.module,
-    submodule: props.submodule,
-  })
-
-  const { activeTab } = modules
-  const { pathname } = useGetPaths() // get href prefix of the dynamic slugs
-  const activeSideBarRoutes = Object.values(activeTab?.sidebarMenu ?? {})
+  const segments = useSelectedLayoutSegments()
+  const activeSideBarRoutes = Object.values(props.activeTab?.sidebar ?? {})
 
   if (activeSideBarRoutes.length === 0) return null
 
-  // TODO: support mobile version
   return (
     <nav className="sticky top-20 flex flex-col gap-2 rounded-md px-2 md:min-h-[500px]">
       {activeSideBarRoutes.map((item, index) => {
         const fullPath = props.basePath + item.href
-        const active = pathname === fullPath
+        const active = item.href.includes(`/${segments[0]}`)
         const Icon = Icons[item.icon] as React.ElementType
 
         return (

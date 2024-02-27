@@ -1,11 +1,8 @@
-import { Button } from "@builderai/ui/button"
-import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
-
-import HeaderTab from "~/components/header-tab"
-import { DashboardShell } from "~/components/layout2/dashboard-shell"
-import SidebarMenuSubTabs from "~/components/layout2/menu-siderbar-subtabs"
-import TabsNav from "~/components/layout2/tabs-nav"
-import SidebarNav from "~/components/sidebar"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
+import SidebarNav from "~/components/layout/sidebar"
+import TabsNav from "~/components/layout/tabs-nav"
+import { WORKSPACE_TABS_CONFIG } from "~/constants/workspaces"
 import { InviteMemberForm } from "./_components/invite-member-dialog"
 
 // TODO: find a way to add invite member button without adding too much bundle to the layout
@@ -14,6 +11,7 @@ export default function WorkspaceLayout(props: {
   params: { workspaceSlug: string }
 }) {
   const { workspaceSlug } = props.params
+  const tabs = Object.values(WORKSPACE_TABS_CONFIG)
 
   return (
     <DashboardShell
@@ -21,36 +19,19 @@ export default function WorkspaceLayout(props: {
         <HeaderTab
           title="General Settings"
           description="Manage your workspace settings"
-          action={
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="self-end">Invite member</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <InviteMemberForm workspaceSlug={workspaceSlug} />
-              </DialogContent>
-            </Dialog>
-          }
+          action={<InviteMemberForm workspaceSlug={workspaceSlug} />}
         />
       }
       tabs={
         <TabsNav
-          module="workspace"
-          submodule="settings"
+          tabs={tabs}
+          activeTab={WORKSPACE_TABS_CONFIG.settings}
           basePath={`/${workspaceSlug}`}
         />
       }
       sidebar={
         <SidebarNav
-          module="workspace"
-          submodule="settings"
-          basePath={`/${workspaceSlug}`}
-        />
-      }
-      sidebartabs={
-        <SidebarMenuSubTabs
-          module="workspace"
-          submodule="settings"
+          activeTab={WORKSPACE_TABS_CONFIG.settings}
           basePath={`/${workspaceSlug}`}
         />
       }

@@ -1,15 +1,15 @@
-import HeaderTab from "~/components/header-tab"
-import { DashboardShell } from "~/components/layout2/dashboard-shell"
-import SidebarMenuSubTabs from "~/components/layout2/menu-siderbar-subtabs"
-import TabsNav from "~/components/layout2/tabs-nav"
-import SidebarNav from "~/components/sidebar"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
+import SidebarNav from "~/components/layout/sidebar"
+import TabsNav from "~/components/layout/tabs-nav"
+import { PROJECT_TABS_CONFIG } from "~/constants/projects"
 
-// TODO: find a way to add invite member button without adding too much bundle to the layout
 export default function ProjectSettingsLayout(props: {
   children: React.ReactNode
   params: { workspaceSlug: string; projectSlug: string }
 }) {
   const { workspaceSlug, projectSlug } = props.params
+  const tabs = Object.values(PROJECT_TABS_CONFIG)
 
   return (
     <DashboardShell
@@ -21,22 +21,14 @@ export default function ProjectSettingsLayout(props: {
       }
       tabs={
         <TabsNav
-          module="project"
-          submodule="settings"
+          tabs={tabs}
+          activeTab={PROJECT_TABS_CONFIG.customers}
           basePath={`/${workspaceSlug}/${projectSlug}`}
         />
       }
       sidebar={
         <SidebarNav
-          module="project"
-          submodule="settings"
-          basePath={`/${workspaceSlug}/${projectSlug}`}
-        />
-      }
-      sidebartabs={
-        <SidebarMenuSubTabs
-          module="project"
-          submodule="settings"
+          activeTab={PROJECT_TABS_CONFIG.customers}
           basePath={`/${workspaceSlug}/${projectSlug}`}
         />
       }

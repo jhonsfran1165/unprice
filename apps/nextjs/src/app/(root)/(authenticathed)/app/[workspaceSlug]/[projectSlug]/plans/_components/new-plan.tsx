@@ -23,6 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
+import { Add } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import {
   Select,
@@ -43,7 +44,6 @@ export function NewPlanDialog() {
   const params = useParams()
   const router = useRouter()
 
-  const projectSlug = params.projectSlug as string
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const form = useZodForm({
@@ -51,7 +51,6 @@ export function NewPlanDialog() {
     defaultValues: {
       title: "",
       slug: "",
-      projectSlug,
     },
   })
 
@@ -72,7 +71,9 @@ export function NewPlanDialog() {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button className="button-primary">Create Plan</Button>
+        <Button className="h-8 w-8" size={"icon"}>
+          <Add className="h-4 w-4" />
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <Form {...form}>

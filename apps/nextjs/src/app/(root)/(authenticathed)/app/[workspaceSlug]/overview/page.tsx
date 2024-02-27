@@ -19,7 +19,7 @@ export default async function WorkspaceOverviewPage(props: {
 
   return (
     <>
-      <div className="flex w-full justify-end">
+      <div className="mb-4 flex w-full justify-end">
         {limitReached ? (
           <Button className="min-w-max" variant="ghost">
             <Warning className="h-5 w-5" />
@@ -27,9 +27,8 @@ export default async function WorkspaceOverviewPage(props: {
           </Button>
         ) : (
           <Link href={`/${props.params.workspaceSlug}/onboarding`}>
-            <Button className="min-w-max">
-              <Add className="h-5 w-5" />
-              <span className="pl-2">Create a new project</span>
+            <Button className="h-8 w-8" size={"icon"}>
+              <Add className="h-4 w-4" />
             </Button>
           </Link>
         )}

@@ -4,16 +4,16 @@ import { cookies } from "next/headers"
 import Link from "next/link"
 
 import { auth, signIn, signOut } from "@builderai/auth/server"
-import { navItems, siteConfig } from "@builderai/config"
 import { Button, buttonVariants } from "@builderai/ui/button"
 import { ChevronRight, Logo } from "@builderai/ui/icons"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 
-import Footer from "~/components/footer"
-import { MainNav } from "~/components/main-nav"
-import MaxWidthWrapper from "~/components/max-width-wrapper"
-import { MobileDropdown } from "~/components/mobile-nav"
+import Footer from "~/components/layout/footer"
+import { MainNav } from "~/components/layout/main-nav"
+import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
+import { MobileDropdown } from "~/components/layout/mobile-nav"
 import { AUTH_ROUTES } from "~/constants"
+import { navItems, siteConfig } from "~/constants/layout"
 
 export default function MarketingLayout(props: { children: ReactNode }) {
   return (

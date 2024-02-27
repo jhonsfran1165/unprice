@@ -1,18 +1,14 @@
-import { z } from "zod"
+import { searchDataParamsSchema } from "@builderai/validators/utils"
 
 import { DataTable } from "~/components/data-table/data-table"
-import HeaderTab from "~/components/header-tab"
-import { DashboardShell } from "~/components/layout2/dashboard-shell"
-import TabsNav from "~/components/layout2/tabs-nav"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
+import TabsNav from "~/components/layout/tabs-nav"
+import { PROJECT_TABS_CONFIG } from "~/constants/projects"
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 import { NewPlanDialog } from "./_components/new-plan"
 import { columns } from "./_components/table/columns"
-
-const searchParamsSchema = z.object({
-  fromDate: z.coerce.number().optional(),
-  toDate: z.coerce.number().optional(),
-})
 
 export default async function PlansPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
@@ -25,7 +21,7 @@ export default async function PlansPage(props: {
     needsToBeInTier: ["FREE", "PRO"],
   })
 
-  const parsed = searchParamsSchema.safeParse(props.searchParams)
+  const parsed = searchDataParamsSchema.safeParse(props.searchParams)
 
   const filter = {
     projectSlug: props.params.projectSlug,
@@ -39,6 +35,7 @@ export default async function PlansPage(props: {
   }
 
   const { plans } = await api.plans.listByProject(filter)
+  const tabs = Object.values(PROJECT_TABS_CONFIG)
 
   return (
     <DashboardShell
@@ -51,8 +48,8 @@ export default async function PlansPage(props: {
       }
       tabs={
         <TabsNav
-          module="project"
-          submodule="plans"
+          tabs={tabs}
+          activeTab={PROJECT_TABS_CONFIG.plans}
           basePath={`/${workspaceSlug}/${projectSlug}`}
         />
       }

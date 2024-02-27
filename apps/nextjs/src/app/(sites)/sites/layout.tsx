@@ -1,4 +1,4 @@
-import { siteConfig } from "@builderai/config"
+import { siteConfig } from "~/constants/layout"
 
 export const metadata = {
   title: {

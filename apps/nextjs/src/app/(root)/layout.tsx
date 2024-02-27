@@ -1,19 +1,16 @@
 import "react-image-crop/dist/ReactCrop.css"
 import "~/styles/globals.css"
 
-import { SessionProvider } from "@builderai/auth/react"
-import { auth } from "@builderai/auth/server"
+import type { Metadata } from "next"
+
+// TODO: analytics
 // import { Analytics } from "@vercel/analytics/react"
 
-import { siteConfig } from "@builderai/config"
 import { cn } from "@builderai/ui"
-import { Toaster } from "@builderai/ui/toaster"
-import { TooltipProvider } from "@builderai/ui/tooltip"
 
-import { TailwindIndicator } from "~/components/tailwind-indicator"
-import { ThemeProvider } from "~/components/theme-provider"
+import { ThemeProvider } from "~/components/layout/theme-provider"
+import { siteConfig } from "~/constants/layout"
 import { fontMapper } from "~/styles/fonts"
-import { TRPCReactProvider } from "~/trpc/client"
 
 export const metadata = {
   title: {
@@ -32,15 +29,12 @@ export const metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     images: [{ url: "https://acme-corp-lib.vercel.app/opengraph-image.png" }],
-    creator: "@jullerino",
+    creator: "@jhonsfran",
   },
-  metadataBase: new URL("https://acme-corp.jumr.dev"),
-}
+  metadataBase: new URL("https://builderai.dev"),
+} satisfies Metadata
 
-export default async function RootLayout(props: { children: React.ReactNode }) {
-  const session = await auth()
-
-  // TODO: migrate this to authenticated routes
+export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -57,17 +51,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SessionProvider session={session}>
-            <TRPCReactProvider>
-              <TooltipProvider delayDuration={300}>
-                {props.children}
-              </TooltipProvider>
-            </TRPCReactProvider>
-            <TailwindIndicator />
-          </SessionProvider>
+          {props.children}
         </ThemeProvider>
         {/* <Analytics /> */}
-        <Toaster />
       </body>
     </html>
   )

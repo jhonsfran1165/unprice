@@ -87,7 +87,7 @@ export const stripeRouter = createTRPCRouter({
 
   purchaseOrg: protectedActiveWorkspaceProcedure
     .input(purchaseWorkspaceSchema)
-    .output(z.object({ success: z.boolean(), url: z.string().optional() }))
+    .output(z.object({ success: z.boolean(), url: z.string() }))
     .mutation(async (opts) => {
       const { name: workspaceName, planId } = opts.input
       const user = opts.ctx.session.user
@@ -124,7 +124,7 @@ export const stripeRouter = createTRPCRouter({
         line_items: [{ price: planId, quantity: 1 }],
       })
 
-      if (!session.url) return { success: false as const }
+      if (!session.url) return { success: false as const, url: "" }
       return { success: true as const, url: session.url }
     }),
 })

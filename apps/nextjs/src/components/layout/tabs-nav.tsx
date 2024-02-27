@@ -1,29 +1,19 @@
-import { cache, Suspense } from "react"
+import { Suspense } from "react"
 
-import type { ModuleApp, SubModuleApp } from "@builderai/config"
-import { getModulesApp } from "@builderai/config"
 import { cn } from "@builderai/ui"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 
-import UserNav from "../user-nav"
-import UserNavSkeleton from "../user-nav-skeleton"
+import type { DashboardRoute } from "~/types"
 import Tab from "./tab"
+import UserNav from "./user-nav"
+import UserNavSkeleton from "./user-nav-skeleton"
 
-const cachedGetModulesApp = cache(getModulesApp)
-
-export default function TabsNav<T extends ModuleApp>(props: {
+export default function TabsNav(props: {
   className?: string
-  submodule: SubModuleApp<T>
-  module: T
   basePath: string
+  tabs: DashboardRoute[]
+  activeTab: DashboardRoute
 }) {
-  const modules = cachedGetModulesApp({
-    module: props.module,
-    submodule: props.submodule,
-  })
-
-  const { moduleTabs } = modules
-
   return (
     <div
       className={cn(
@@ -34,11 +24,12 @@ export default function TabsNav<T extends ModuleApp>(props: {
       <div className="flex h-full flex-col items-center justify-between">
         <ScrollArea className="flex">
           <div className="flex flex-col items-center gap-2 border-t-2 border-primary-solid pt-4">
-            {moduleTabs.map((route, index) => (
+            {props.tabs.map((route, index) => (
               <Tab
                 key={route.href + index}
                 href={props.basePath + route.href}
                 route={route}
+                active={route.href === props.activeTab.href}
               />
             ))}
           </div>

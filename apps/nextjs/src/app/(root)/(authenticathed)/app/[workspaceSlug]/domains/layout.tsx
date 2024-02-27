@@ -1,12 +1,13 @@
-import HeaderTab from "~/components/header-tab"
-import { DashboardShell } from "~/components/layout2/dashboard-shell"
-import TabsNav from "~/components/layout2/tabs-nav"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
+import TabsNav from "~/components/layout/tabs-nav"
+import { WORKSPACE_TABS_CONFIG } from "~/constants/workspaces"
 
 export default function DomainsLayout(props: {
   children: React.ReactNode
   params: { workspaceSlug: string }
 }) {
-  const { workspaceSlug } = props.params
+  const tabs = Object.values(WORKSPACE_TABS_CONFIG)
   return (
     <DashboardShell
       header={
@@ -14,9 +15,9 @@ export default function DomainsLayout(props: {
       }
       tabs={
         <TabsNav
-          module="workspace"
-          submodule="domains"
-          basePath={`/${workspaceSlug}`}
+          tabs={tabs}
+          activeTab={WORKSPACE_TABS_CONFIG.domains}
+          basePath={`/${props.params.workspaceSlug}`}
         />
       }
     >

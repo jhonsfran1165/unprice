@@ -2,17 +2,14 @@ import React from "react"
 
 import { cn } from "@builderai/ui"
 
-import MaxWidthWrapper from "~/components/max-width-wrapper"
+import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
 
-// TODO: add dashboard skeleton
 export function DashboardShell(props: {
   children: React.ReactNode
   className?: string
   header?: React.ReactNode
   tabs?: React.ReactNode
   sidebar?: React.ReactNode
-  sidebartabs?: React.ReactNode
-  subtabs?: React.ReactNode
 }) {
   return (
     <div
@@ -23,10 +20,10 @@ export function DashboardShell(props: {
     >
       {props.tabs && props.tabs}
 
-      <main className="flex flex-1 flex-col overflow-y-auto border py-4">
+      <main className="flex flex-1 flex-col space-y-4 overflow-y-auto border py-4">
         {props.header && props.header}
 
-        <MaxWidthWrapper className="flex max-w-screen-2xl flex-1 flex-col">
+        <MaxWidthWrapper className="flex max-w-screen-2xl flex-1 flex-col space-y-4">
           {/* sidebar menu config */}
           {props.sidebar && (
             <div className="flex flex-col gap-2 sm:flex-1 sm:flex-row">
@@ -34,7 +31,6 @@ export function DashboardShell(props: {
                 {props.sidebar}
               </aside>
               <div className="flex flex-1 flex-col sm:w-3/4">
-                {props.sidebartabs && props.sidebartabs}
                 <div className={cn("space-y-6", props.className)}>
                   {props.children}
                 </div>
@@ -45,12 +41,7 @@ export function DashboardShell(props: {
           {/* without sidebar menu config */}
 
           {!props.sidebar && (
-            <div className="flex flex-1 flex-col">
-              {props.subtabs && props.subtabs}
-              {/* <div className={cn("grow", props.className)}> */}
-              {props?.children}
-              {/* </div> */}
-            </div>
+            <div className="flex flex-1 flex-col">{props?.children}</div>
           )}
         </MaxWidthWrapper>
       </main>

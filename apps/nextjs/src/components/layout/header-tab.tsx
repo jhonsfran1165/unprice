@@ -1,4 +1,4 @@
-import MaxWidthWrapper from "~/components/max-width-wrapper"
+import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
 
 export default function HeaderTab({
   title,
@@ -11,8 +11,8 @@ export default function HeaderTab({
 }) {
   return (
     <section>
-      <MaxWidthWrapper className="max-w-screen-2xl py-4">
-        <div className="flex h-36 items-center rounded-md border px-10 backdrop-blur-sm">
+      <MaxWidthWrapper className="max-w-screen-2xl">
+        <div className="flex h-36 items-center rounded-md border px-4 backdrop-blur-sm md:px-10">
           <div className="flex w-full items-center justify-between">
             <div className="space-y-2">
               <h1 className="text-4xl font-normal text-background-textContrast">

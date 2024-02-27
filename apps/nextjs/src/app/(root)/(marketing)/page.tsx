@@ -1,18 +1,18 @@
 import { Balancer } from "react-wrap-balancer"
 
-import { siteConfig } from "@builderai/config"
 import { cn } from "@builderai/ui"
 import { buttonVariants } from "@builderai/ui/button"
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@builderai/ui/card"
 import { GitHub } from "@builderai/ui/icons"
 
 import { marketingFeatures } from "~/app/(root)/config"
+import { siteConfig } from "~/constants/layout"
 
 export const runtime = "edge"
 

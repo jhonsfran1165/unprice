@@ -1,29 +1,26 @@
-"use client"
-
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 
-import type { DashboardRoute } from "@builderai/config/types"
-import { createIcon } from "@builderai/config/types"
 import { cn } from "@builderai/ui"
 import {
-    Tooltip,
-    TooltipArrow,
-    TooltipContent,
-    TooltipTrigger,
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipTrigger,
 } from "@builderai/ui/tooltip"
 
 import { Ping } from "~/components/ping"
+import type { DashboardRoute } from "~/types"
+import { createIcon } from "~/types"
 
 export const Tab = ({
   route,
   href,
+  active,
 }: {
   route: DashboardRoute
   href: string
+  active: boolean
 }) => {
-  const pathname = usePathname()
-  const active = pathname === href
   const Icon = route.icon && createIcon(route?.icon)
 
   return (

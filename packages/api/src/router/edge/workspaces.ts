@@ -336,8 +336,6 @@ export const workspaceRouter = createTRPCRouter({
         where: eq(schema.users.email, email),
       })
 
-      console.log("userByEmail", userByEmail)
-
       if (userByEmail) {
         const member = await opts.ctx.db.query.members.findFirst({
           where: and(

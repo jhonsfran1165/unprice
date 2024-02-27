@@ -1,9 +1,9 @@
 import Link from "next/link"
 
-import { siteConfig } from "@builderai/config"
 import { Logo } from "@builderai/ui/icons"
 
-import Footer from "~/components/footer"
+import Footer from "~/components/layout/footer"
+import { siteConfig } from "~/constants/layout"
 
 export default function AuthLayout(props: { children: React.ReactNode }) {
   return (

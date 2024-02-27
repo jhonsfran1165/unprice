@@ -4,13 +4,13 @@ const WelcomeEmail = () => {
   return (
     <Html>
       <Head>
-        <title>Welcome to OpenStatus.dev 👋</title>
-        <Preview>Welcome to OpenStatus.dev 👋</Preview>
+        <title>Welcome to Builderai 👋</title>
+        <Preview>Welcome to Builderai 👋</Preview>
         <Body>
           Hey!
           <br />
           <br />
-          Welcome to OpenStatus.dev! We're excited to have you on board.
+          Welcome to Builderai! We're excited to have you on board.
           <br /> I hope you will enjoy using our product as much as we enjoyed
           building it.
           <br />
@@ -23,13 +23,15 @@ const WelcomeEmail = () => {
           Thank you,
           <br />
           <br />
-          Thibault Le Ouay Ducasse
+          Sebastian,
           <br />
           <br />⭐ Star us on{" "}
-          <Link href="https://github.com/openstatushq/openstatus">GitHub</Link>
+          <Link href="https://github.com/jhonsfran1165/builderai">GitHub</Link>
           <br />
           🚀 Visit our website{" "}
-          <Link href="https://www.openstatus.dev">OpenStatus.dev</Link>
+          <Link href="https://github.com/jhonsfran1165/builderai">
+            builderai
+          </Link>
         </Body>
       </Head>
     </Html>

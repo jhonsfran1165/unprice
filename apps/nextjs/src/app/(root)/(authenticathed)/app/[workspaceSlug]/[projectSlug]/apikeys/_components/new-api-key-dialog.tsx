@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@builderai/ui/dialog"
-import { Spinner } from "@builderai/ui/icons"
+import { Add, Spinner } from "@builderai/ui/icons"
 
 import { api } from "~/trpc/client"
 
@@ -32,7 +32,9 @@ export default function NewApiKeyDialog(props: { projectSlug: string }) {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button size={"sm"}>Create API Key</Button>
+        <Button size={"icon"} className="h-8 w-8">
+          <Add className="h-4 w-4" />
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

@@ -6,7 +6,7 @@ import { EmptyPlaceholder } from "~/components/empty-placeholder"
 
 export default function NotFound() {
   return (
-    <EmptyPlaceholder className="my-4 ">
+    <EmptyPlaceholder className="mx-4 my-4">
       <EmptyPlaceholder.Title>404 Not Found</EmptyPlaceholder.Title>
       <EmptyPlaceholder.Description>
         We couldn't find the page that you're looking for!

@@ -15,10 +15,11 @@ if (process.env.NODE_ENV !== "production") {
   neonConfig.useSecureWebSocket = false
   neonConfig.pipelineTLS = false
   neonConfig.pipelineConnect = false
+  neonConfig.fetchConnectionCache = false
+} else {
+  // activate connection caching
+  neonConfig.fetchConnectionCache = true
 }
-
-// activate connection caching
-neonConfig.fetchConnectionCache = true
 
 // support local development and neon serverless
 export const db =

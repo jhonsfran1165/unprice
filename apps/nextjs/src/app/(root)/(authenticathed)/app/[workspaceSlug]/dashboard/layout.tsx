@@ -3,7 +3,7 @@ import HeaderTab from "~/components/layout/header-tab"
 import TabsNav from "~/components/layout/tabs-nav"
 import { WORKSPACE_TABS_CONFIG } from "~/constants/workspaces"
 
-export default function WorkspaceOverviewLayout(props: {
+export default function WorkspaceDashboardLayout(props: {
   children: React.ReactNode
   params: { workspaceSlug: string }
 }) {
@@ -11,11 +11,16 @@ export default function WorkspaceOverviewLayout(props: {
 
   return (
     <DashboardShell
-      header={<HeaderTab title="Apps" description="All your Apps" />}
+      header={
+        <HeaderTab
+          title="Dashboard"
+          description="Dashboard for the workspace"
+        />
+      }
       tabs={
         <TabsNav
           tabs={tabs}
-          activeTab={WORKSPACE_TABS_CONFIG.overview}
+          activeTab={WORKSPACE_TABS_CONFIG.dashboard}
           basePath={`/${props.params.workspaceSlug}`}
         />
       }

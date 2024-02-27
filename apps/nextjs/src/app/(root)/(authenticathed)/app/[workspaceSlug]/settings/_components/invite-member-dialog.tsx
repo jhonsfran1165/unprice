@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
 
 import { utils } from "@builderai/db"
+import { Button } from "@builderai/ui/button"
+import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
 import {
   Form,
   FormControl,
@@ -67,56 +69,69 @@ export const InviteMemberForm = ({
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email *</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="john@doe.com" />
-              </FormControl>
-              <FormDescription>
-                The email address of the person you want to invite. They must
-                have an account on this app.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="self-end">Invite member</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <InviteMemberForm workspaceSlug={workspaceSlug} />
+      </DialogContent>
+      <DialogContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email *</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="john@doe.com" />
+                  </FormControl>
+                  <FormDescription>
+                    The email address of the person you want to invite. They
+                    must have an account on this app.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="role"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Role *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a plan" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {utils.ROLES_APP.map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {role}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <SubmitButton
-          isDisabled={form.formState.isSubmitting}
-          isSubmitting={form.formState.isSubmitting}
-          label="Invite"
-        />
-      </form>
-    </Form>
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role *</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a plan" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {utils.ROLES_APP.map((role) => (
+                        <SelectItem key={role} value={role}>
+                          {role}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <SubmitButton
+              isDisabled={form.formState.isSubmitting}
+              isSubmitting={form.formState.isSubmitting}
+              label="Invite"
+            />
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   )
 }

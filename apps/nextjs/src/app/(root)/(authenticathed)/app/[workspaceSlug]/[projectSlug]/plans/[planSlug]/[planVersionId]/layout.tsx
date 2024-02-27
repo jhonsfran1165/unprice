@@ -6,7 +6,7 @@ import { Badge } from "@builderai/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@builderai/ui/card"
 import { ChevronLeft } from "@builderai/ui/icons"
 
-import { DashboardShell } from "~/components/layout2/dashboard-shell"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
 import MaxWidthWrapper from "~/components/max-width-wrapper"
 import MenuSubTabs from "~/components/menu-subtabs"
 import { api } from "~/trpc/server"

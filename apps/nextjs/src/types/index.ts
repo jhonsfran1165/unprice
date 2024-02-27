@@ -28,11 +28,11 @@ export type SidebarRoutes = Record<string, SidebarRoute>
 
 type ConditionalProps =
   | {
-      sidebarMenu?: SidebarRoutes
+      sidebar?: SidebarRoutes
       subTabs?: never
     }
   | {
-      sidebarMenu?: never
+      sidebar?: never
       subTabs?: SubTabsRoutes
     }
 

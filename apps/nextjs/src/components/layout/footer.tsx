@@ -1,7 +1,6 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 
-import { siteConfig } from "@builderai/config"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
@@ -25,10 +24,11 @@ import {
 } from "@builderai/ui/icons"
 import { Skeleton } from "@builderai/ui/skeleton"
 
-import { Logo } from "~/components/logo"
+import { Logo } from "~/components/layout/logo"
+import { siteConfig } from "~/constants/layout"
 import { Search } from "./search"
 
-const ThemeToggle = dynamic(() => import("~/components/theme-toggle"), {
+const ThemeToggle = dynamic(() => import("~/components/layout/theme-toggle"), {
   ssr: false,
   loading: () => (
     <Button variant="ghost" size="sm" className="button-ghost">

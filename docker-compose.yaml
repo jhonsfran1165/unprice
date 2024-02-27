@@ -4,6 +4,7 @@ services:
   db:
     image: postgres:15.6
     restart: always
+    command: -c 'max_connections=500'
     environment:
       POSTGRES_PASSWORD: postgres
     volumes:

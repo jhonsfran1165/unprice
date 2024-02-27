@@ -53,7 +53,7 @@ export default function NewTeamDialog(props: { closeDialog: () => void }) {
 
   const stripePurchase = api.stripe.purchaseOrg.useMutation({
     onSettled: (data) => {
-      if (data?.success) window.location.href = data.url
+      if (window && data?.success) window.location.href = data.url
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {

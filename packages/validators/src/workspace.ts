@@ -6,7 +6,9 @@ import { schema } from "@builderai/db"
 
 import { userSelectBase } from "./auth"
 
-export const invitesSelectBase = createSelectSchema(schema.invites)
+export const invitesSelectBase = createSelectSchema(schema.invites, {
+  email: z.string().min(3, "Email must be at least 3 characters").email(),
+})
 export const membersSelectBase = createSelectSchema(schema.members)
 export const workspaceSelectBase = createSelectSchema(schema.workspaces)
 export const workspaceInsertBase = createInsertSchema(schema.workspaces, {
