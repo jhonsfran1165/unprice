@@ -18,7 +18,7 @@ export function DotPattern({
   height = 16,
   x = 0,
   y = 0,
-  cx = 1,
+  // cx = 1,
   cy = 1,
   cr = 1,
   className,

@@ -1,20 +1,19 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq, schema, utils } from "@builderai/db"
-import { publishEvents } from "@builderai/tinybird"
-import {
-  customerInsertSchema,
-  customerSelectSchema,
-} from "@builderai/validators/customer"
-import type { PlanVersion } from "@builderai/validators/price"
-import { versionSelectBaseSchema } from "@builderai/validators/price"
-import type { Subscription } from "@builderai/validators/subscription"
+import { and, eq } from "@builderai/db"
+import * as schema from "@builderai/db/schema"
+import * as utils from "@builderai/db/utils"
+import type { PlanVersion, Subscription } from "@builderai/db/validators"
 import {
   createSubscriptionSchema,
+  customerInsertSchema,
+  customerSelectSchema,
+  searchDataParamsSchema,
   subscriptionSelectSchema,
-} from "@builderai/validators/subscription"
-import { searchDataParamsSchema } from "@builderai/validators/utils"
+  versionSelectBaseSchema,
+} from "@builderai/db/validators"
+import { publishEvents } from "@builderai/tinybird"
 
 import {
   createTRPCRouter,
@@ -296,7 +295,7 @@ export const subscriptionRouter = createTRPCRouter({
       >(id))!
 
       if (payload) {
-        const featuresPlan = payload.version.featuresConfig || {}
+        const featuresPlan = payload.version.featuresConfig ?? {}
         const allFeaturesPlan = Object.keys(featuresPlan)
           .map((group) => featuresPlan[group]?.features)
           .flat()
@@ -308,8 +307,8 @@ export const subscriptionRouter = createTRPCRouter({
         // TODO: save report usage to analytics - use tinybird from analitycs package
         await publishEvents({
           event_name: "feature_access",
-          session_id: customerId ?? "unknown",
-          id: customerId ?? "unknown",
+          session_id: customerId,
+          id: customerId,
           domain: "subscription",
           subdomain: "can",
           time: Date.now(),
@@ -410,8 +409,8 @@ export const subscriptionRouter = createTRPCRouter({
       // TODO: save report usage to analytics - use tinybird from analitycs package
       await publishEvents({
         event_name: "feature_access",
-        session_id: customerId ?? "unknown",
-        id: customerId ?? "unknown",
+        session_id: customerId,
+        id: customerId,
         domain: "subscription",
         subdomain: "can",
         time: Date.now(),

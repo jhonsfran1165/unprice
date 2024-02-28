@@ -2,8 +2,8 @@
 
 import React from "react"
 import { useRouter } from "next/navigation"
-import { TRPCClientError } from "@trpc/client"
 
+import type { Customer, PlanList } from "@builderai/db/validators"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -38,10 +38,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@builderai/ui/select"
-import { useToast } from "@builderai/ui/use-toast"
-import type { Customer } from "@builderai/validators/customer"
-import type { PlanList } from "@builderai/validators/price"
 
+import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
 export function UserActions({
@@ -53,7 +51,6 @@ export function UserActions({
   customer: Customer
   plans: PlanList[]
 }) {
-  const toaster = useToast()
   const router = useRouter()
   const [open, setIsOpen] = React.useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
@@ -64,25 +61,7 @@ export function UserActions({
       router.refresh()
     },
     onSuccess: () => {
-      toaster.toast({
-        title: "User Subscription created",
-        description: `The user has been subscribed to the plan successfully.`,
-      })
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
-      } else {
-        toaster.toast({
-          title: "Error creating subscription",
-          variant: "destructive",
-          description:
-            "An issue occurred while creating your subscription. Please try again.",
-        })
-      }
+      toastAction("success")
     },
   })
 
@@ -97,7 +76,7 @@ export function UserActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" side="right">
           <DropdownMenuItem
-            onClick={async () => {
+            onClick={() => {
               setIsOpen(true)
             }}
           >
@@ -157,7 +136,7 @@ export function UserActions({
           <DialogFooter>
             <Button
               variant="ghost"
-              onClick={async () => {
+              onClick={() => {
                 setIsOpen(false)
               }}
             >
@@ -166,10 +145,7 @@ export function UserActions({
             <Button
               onClick={async () => {
                 if (!selectedPlan) {
-                  toaster.toast({
-                    variant: "destructive",
-                    description: "Please select a plan to subscribe the user.",
-                  })
+                  toastAction("error", "Please select a plan")
                   return
                 }
 
@@ -205,10 +181,7 @@ export function UserActions({
               variant="destructive"
               onClick={() => {
                 setShowDeleteDialog(false)
-
-                toaster.toast({
-                  description: "This user has been deleted.",
-                })
+                toastAction("deleted")
               }}
             >
               Delete

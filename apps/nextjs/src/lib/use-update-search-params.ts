@@ -1,8 +1,8 @@
-import * as React from "react";
-import { useSearchParams } from "next/navigation";
+import * as React from "react"
+import { useSearchParams } from "next/navigation"
 
 export default function useUpdateSearchParams() {
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams()
 
   /**
    * Get a new searchParams string by merging the current searchParams with a provided key/value pair.
@@ -10,20 +10,20 @@ export default function useUpdateSearchParams() {
    */
   const update = React.useCallback(
     (params: Record<string, boolean | string | number | null>) => {
-      const newSearchParams = new URLSearchParams(searchParams?.toString());
+      const newSearchParams = new URLSearchParams(searchParams?.toString())
 
       for (const [key, value] of Object.entries(params)) {
         if (value === null) {
-          newSearchParams.delete(key);
+          newSearchParams.delete(key)
         } else {
-          newSearchParams.set(key, String(value));
+          newSearchParams.set(key, String(value))
         }
       }
 
-      return newSearchParams.toString();
+      return newSearchParams.toString()
     },
-    [searchParams],
-  );
+    [searchParams]
+  )
 
-  return update;
+  return update
 }

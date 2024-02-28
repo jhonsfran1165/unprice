@@ -1,7 +1,7 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { schema } from "@builderai/db"
+import * as schema from "../schema"
 
 export const subscriptionSelectSchema = createSelectSchema(schema.subscriptions)
 export const subscriptionInsertSchema = createInsertSchema(schema.subscriptions)

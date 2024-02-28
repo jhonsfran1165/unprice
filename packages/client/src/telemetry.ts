@@ -35,7 +35,7 @@ export function getTelemetry(opts: BuilderaiOptions): Telemetry | null {
           ? "aws"
           : undefined
 
-      // @ts-ignore
+      // @ts-expect-error - this is a runtime check
       if (typeof EdgeRuntime !== "undefined") {
         runtime = "edge-light"
       } else {
@@ -46,7 +46,9 @@ export function getTelemetry(opts: BuilderaiOptions): Telemetry | null {
     if (opts.wrapperSdkVersion) {
       sdkVersions.push(opts.wrapperSdkVersion)
     }
-  } catch (_error) {}
+  } catch (_error) {
+    return null
+  }
 
   return { platform, runtime, sdkVersions }
 }

@@ -38,7 +38,7 @@ export function SubscribeNow(props: { planId: string }) {
 
   return (
     <Button
-      onClick={async () => {
+      onClick={() => {
         if (session.status === "unauthenticated")
           router.push(AUTH_ROUTES.SIGNIN)
 

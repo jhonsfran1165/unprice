@@ -1,4 +1,4 @@
-import { searchDataParamsSchema } from "@builderai/validators/utils"
+import { searchDataParamsSchema } from "@builderai/db/validators"
 
 import { DataTable } from "~/components/data-table/data-table"
 import { api } from "~/trpc/server"

@@ -2,8 +2,10 @@ import GitHub from "@auth/core/providers/github"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import type { NextAuthConfig } from "next-auth"
 
-import { db, prepared, schema, tableCreator, utils } from "@builderai/db"
-import type { WorkspacesJWTPayload } from "@builderai/validators/workspace"
+import { and, db, eq, prepared, tableCreator } from "@builderai/db"
+import * as schema from "@builderai/db/schema"
+import * as utils from "@builderai/db/utils"
+import type { WorkspacesJWTPayload } from "@builderai/db/validators"
 
 const useSecureCookies = process.env.VERCEL_ENV === "production"
 
@@ -43,7 +45,33 @@ export const authConfig = {
       if (!user) {
         throw "Error creating user"
       }
+
       // TODO: support invitation
+      const inviteUser = await db.query.invites.findFirst({
+        where: (invite, { eq }) => eq(invite.email, user.email),
+      })
+
+      if (inviteUser) {
+        // add the user as a member of the workspace
+        await db
+          .insert(schema.members)
+          .values({
+            userId: user.id,
+            workspaceId: inviteUser.workspaceId,
+            role: inviteUser.role,
+          })
+          .onConflictDoNothing()
+
+        // delete the invite
+        await db
+          .delete(schema.invites)
+          .where(
+            and(
+              eq(schema.invites.email, inviteUser.email),
+              eq(schema.invites.workspaceId, inviteUser.workspaceId)
+            )
+          )
+      }
 
       // create the workspace for the user and then add it as a member
       await db.transaction(async (db) => {

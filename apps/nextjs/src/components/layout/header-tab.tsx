@@ -20,8 +20,7 @@ export default function HeaderTab({
               </h1>
               <h4 className="text-base text-muted-foreground">{description}</h4>
             </div>
-
-            {action}
+            <div>{action}</div>
           </div>
         </div>
       </MaxWidthWrapper>

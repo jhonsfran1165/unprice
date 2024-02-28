@@ -61,7 +61,9 @@ export const columns: ColumnDef<ApiKey>[] = [
       <DataTableColumnHeader column={column} title="Key" />
     ),
     cell: ({ row }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const [show, setShow] = useState(false)
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const [copied, setCopied] = useState(false)
 
       const key = row.original.key

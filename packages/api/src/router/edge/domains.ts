@@ -101,7 +101,7 @@ export const domainRouter = createTRPCRouter({
   //     );
   //     return await data.json();
   //   }),
-  getDomains: protectedActiveWorkspaceAdminProcedure.query(async (opts) => {
+  getDomains: protectedActiveWorkspaceAdminProcedure.query(async (_opts) => {
     const data = await fetch(
       `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains?teamId=${process.env.TEAM_ID_VERCEL}`,
       {
@@ -126,6 +126,7 @@ export const domainRouter = createTRPCRouter({
           .optional(),
       })
       .array()
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       .parse(json?.domains ?? [])
     return result
   }),

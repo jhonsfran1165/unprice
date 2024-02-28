@@ -1,4 +1,4 @@
-import { searchDataParamsSchema } from "@builderai/validators/utils"
+import { searchDataParamsSchema } from "@builderai/db/validators"
 
 import { columns } from "~/app/(root)/(authenticathed)/app/[workspaceSlug]/[projectSlug]/customers/_components/table/columns"
 import { DataTable } from "~/components/data-table/data-table"

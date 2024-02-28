@@ -1,11 +1,11 @@
 import type { ComponentPropsWithoutRef, ElementRef } from "react"
 import { forwardRef } from "react"
 
+import type { FeaturePlan, FeatureType } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import { Trash2 } from "@builderai/ui/icons"
-import type { FeaturePlan, FeatureType } from "@builderai/validators/price"
 
 import { FeatureConfigForm } from "./feature-config-form"
 import { FeatureForm } from "./feature-form"

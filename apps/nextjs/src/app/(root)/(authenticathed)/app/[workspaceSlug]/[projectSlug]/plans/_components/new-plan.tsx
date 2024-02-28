@@ -1,10 +1,11 @@
 "use client"
 
-import { startTransition, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { TRPCClientError } from "@trpc/client"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 import { CURRENCIES } from "@builderai/config"
+import type { CreatePlan } from "@builderai/db/validators"
+import { createPlanSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Dialog,
@@ -32,16 +33,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@builderai/ui/select"
-import type { CreatePlan } from "@builderai/validators/price"
-import { createPlanSchema } from "@builderai/validators/price"
 
-import { useToastAction } from "~/lib/use-toast-action"
+import { SubmitButton } from "~/components/submit-button"
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
 export function NewPlanDialog() {
-  const { toast } = useToastAction()
-  const params = useParams()
   const router = useRouter()
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -56,17 +54,16 @@ export function NewPlanDialog() {
 
   const createPlan = api.plans.create.useMutation({
     onSuccess: (_data) => {
-      toast("saved")
+      form.reset()
+      toastAction("saved")
       router.refresh()
     },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
-    },
   })
+
+  const onCreatePlan = async (values: CreatePlan) => {
+    await createPlan.mutateAsync(values)
+    setDialogOpen(false)
+  }
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -78,12 +75,7 @@ export function NewPlanDialog() {
       <DialogContent>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit((data: CreatePlan) => {
-              startTransition(() => {
-                setDialogOpen(false)
-                void createPlan.mutateAsync(data)
-              })
-            })}
+            onSubmit={form.handleSubmit(onCreatePlan)}
             className="space-y-4"
           >
             <DialogHeader>
@@ -150,7 +142,11 @@ export function NewPlanDialog() {
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>{" "}
-              <Button type="submit">Create plan</Button>
+              <SubmitButton
+                isSubmitting={form.formState.isSubmitting}
+                isDisabled={form.formState.isSubmitting}
+                label="Create Plan"
+              />
             </DialogFooter>
           </form>
         </Form>

@@ -2,7 +2,7 @@ import type { DefaultSession } from "next-auth"
 import type { SessionContextValue } from "next-auth/react"
 import { useSession as useAuthSession } from "next-auth/react"
 
-import type { WorkspacesJWTPayload } from "@builderai/validators/workspace"
+import type { WorkspacesJWTPayload } from "@builderai/db/validators"
 
 export { SessionProvider, signIn, signOut } from "next-auth/react"
 

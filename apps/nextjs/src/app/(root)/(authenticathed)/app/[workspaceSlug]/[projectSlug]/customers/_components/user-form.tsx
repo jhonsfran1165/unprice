@@ -2,9 +2,13 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { TRPCClientError } from "@trpc/client"
 import { z } from "zod"
 
+import type { CreateCustomer, Customer } from "@builderai/db/validators"
+import {
+  customerInsertSchema,
+  updateCustomerSchema,
+} from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Dialog,
@@ -27,13 +31,8 @@ import {
 import { Pencil, Plus } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Separator } from "@builderai/ui/separator"
-import { useToast } from "@builderai/ui/use-toast"
-import type { CreateCustomer, Customer } from "@builderai/validators/customer"
-import {
-  customerInsertSchema,
-  updateCustomerSchema,
-} from "@builderai/validators/customer"
 
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -50,7 +49,6 @@ type UserFormProps =
     }
 
 export function UserForm({ projectSlug, user, mode }: UserFormProps) {
-  const toaster = useToast()
   const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
 
@@ -72,7 +70,7 @@ export function UserForm({ projectSlug, user, mode }: UserFormProps) {
             .string()
             .email()
             .min(3)
-            .refine(async (slug) => {
+            .refine((_slug) => {
               // const data = await featureExist.mutateAsync({
               //   projectSlug: projectSlug,
               //   slug: slug,
@@ -94,34 +92,13 @@ export function UserForm({ projectSlug, user, mode }: UserFormProps) {
   })
 
   const createUser = api.subscriptions.createCustomer.useMutation({
-    onSettled: async () => {
+    onSettled: () => {
       router.refresh()
     },
-    onSuccess: (data) => {
-      const { customer } = data
-      toaster.toast({
-        title: "User Saved",
-        description: `User ${customer.name} saved successfully.`,
-      })
-
-      form.reset(defaultValues)
-
+    onSuccess: () => {
+      toastAction("success")
+      form.reset()
       setIsOpen(false)
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
-      } else {
-        toaster.toast({
-          title: "Error saving User",
-          variant: "destructive",
-          description:
-            "An issue occurred while saving your User. Please try again.",
-        })
-      }
     },
   })
 
@@ -138,7 +115,7 @@ export function UserForm({ projectSlug, user, mode }: UserFormProps) {
         <DialogHeader>
           <DialogTitle>Edit/Create User</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when you're done.
+            Make changes to your profile here. Click save when you are done.
           </DialogDescription>
         </DialogHeader>
 

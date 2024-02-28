@@ -156,8 +156,7 @@ export interface components {
     }
   }
 }
-
-interface paths {
+export interface paths {
   "/test": {
     get: {
       responses: {

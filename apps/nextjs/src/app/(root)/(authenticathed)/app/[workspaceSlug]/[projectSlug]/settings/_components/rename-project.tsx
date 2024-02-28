@@ -2,9 +2,10 @@
 
 import { use } from "react"
 import { useRouter } from "next/navigation"
-import { TRPCClientError } from "@trpc/client"
 
 import type { RouterOutputs } from "@builderai/api"
+import type { RenameProject } from "@builderai/db/validators"
+import { renameProjectSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -16,10 +17,8 @@ import {
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
-import type { RenameProject } from "@builderai/validators/project"
-import { renameProjectSchema } from "@builderai/validators/project"
 
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -28,7 +27,6 @@ export function RenameProjectForm(props: {
 }) {
   const { project } = use(props.projectPromise)
   const apiUtils = api.useUtils()
-  const { toast } = useToastAction()
   const router = useRouter()
 
   const renameProject = api.projects.rename.useMutation({
@@ -38,14 +36,7 @@ export function RenameProjectForm(props: {
       router.refresh()
     },
     onSuccess: () => {
-      toast("success")
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
+      toastAction("success")
     },
   })
 

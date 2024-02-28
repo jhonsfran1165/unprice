@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { TRPCClientError } from "@trpc/client"
 import { add, format } from "date-fns"
 
+import type { CreateApiKey } from "@builderai/db/validators"
+import { createApiKeySchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import { Calendar } from "@builderai/ui/calendar"
 import {
@@ -18,10 +19,8 @@ import {
 import { Calendar as CalendarIcon } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
-import type { CreateApiKey } from "@builderai/validators/apikey"
-import { createApiKeySchema } from "@builderai/validators/apikey"
 
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -29,13 +28,12 @@ export default function CreateApiKeyForm(props: {
   projectSlug: string
   onSuccess?: (key: string) => void
 }) {
-  const { toast } = useToastAction()
   const apiUtils = api.useUtils()
   const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   const form = useZodForm({
     schema: createApiKeySchema,
-    defaultValues: { projectSlug: props.projectSlug, name: "" },
+    defaultValues: { projectSlug: props.projectSlug },
   })
 
   const createApkiKey = api.apikeys.createApiKey.useMutation({
@@ -45,16 +43,9 @@ export default function CreateApiKeyForm(props: {
       })
     },
     onSuccess: () => {
-      toast("success")
+      toastAction("success")
       form.reset()
       props.onSuccess?.("")
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
     },
   })
 

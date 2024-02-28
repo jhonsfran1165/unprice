@@ -4,11 +4,11 @@ import { and, eq, getTableColumns, or, sql } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/neon-http"
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
 
-import * as dbSchemas from "./schema"
-import * as utils from "./utils"
+import { env } from "../env.mjs"
+import * as schema from "./schema"
 
 // if we're running locally
-if (process.env.NODE_ENV !== "production") {
+if (env.NODE_ENV !== "production") {
   // Set the WebSocket proxy to work with the local instance
   neonConfig.wsProxy = (host) => `${host}:5433/v1`
   // Disable all authentication and encryption
@@ -23,77 +23,77 @@ if (process.env.NODE_ENV !== "production") {
 
 // support local development and neon serverless
 export const db =
-  process.env.NODE_ENV !== "production"
+  env.NODE_ENV !== "production"
     ? drizzleNeon(
         new Pool({
-          connectionString: process.env.DATABASE_URL,
+          connectionString: env.DATABASE_URL,
         }),
         {
-          schema: dbSchemas,
-          logger: process.env.DRIZZLE_LOG === "true",
+          schema: schema,
+          logger: env.DRIZZLE_LOG === "true",
         }
       )
-    : drizzle(neon(process.env.DRIZZLE_DATABASE_URL!), {
-        schema: dbSchemas,
-        logger: process.env.DRIZZLE_LOG === "true",
+    : drizzle(neon(env.DATABASE_URL), {
+        schema: schema,
+        logger: env.DRIZZLE_LOG === "true",
       })
 
 export const projectGuardPrepared = db
   .select({
-    project: getTableColumns(dbSchemas.projects),
+    project: getTableColumns(schema.projects),
     member: {
-      ...getTableColumns(dbSchemas.users),
-      role: dbSchemas.members.role,
+      ...getTableColumns(schema.users),
+      role: schema.members.role,
     },
-    workspace: getTableColumns(dbSchemas.workspaces),
+    workspace: getTableColumns(schema.workspaces),
   })
-  .from(dbSchemas.projects)
+  .from(schema.projects)
   .limit(1)
   .where(
     and(
-      eq(dbSchemas.projects.workspaceId, sql.placeholder("workspaceId")),
-      eq(dbSchemas.users.id, sql.placeholder("userId")),
+      eq(schema.projects.workspaceId, sql.placeholder("workspaceId")),
+      eq(schema.users.id, sql.placeholder("userId")),
       or(
-        eq(dbSchemas.projects.id, sql.placeholder("projectId")),
-        eq(dbSchemas.projects.slug, sql.placeholder("projectSlug"))
+        eq(schema.projects.id, sql.placeholder("projectId")),
+        eq(schema.projects.slug, sql.placeholder("projectSlug"))
       )
     )
   )
   .innerJoin(
-    dbSchemas.workspaces,
-    eq(dbSchemas.projects.workspaceId, dbSchemas.workspaces.id)
+    schema.workspaces,
+    eq(schema.projects.workspaceId, schema.workspaces.id)
   )
   .innerJoin(
-    dbSchemas.members,
-    eq(dbSchemas.members.workspaceId, dbSchemas.workspaces.id)
+    schema.members,
+    eq(schema.members.workspaceId, schema.workspaces.id)
   )
-  .innerJoin(dbSchemas.users, eq(dbSchemas.members.userId, dbSchemas.users.id))
+  .innerJoin(schema.users, eq(schema.members.userId, schema.users.id))
   .prepare("project_guard")
 
 export const workspaceGuardPrepared = db
   .select({
     member: {
-      ...getTableColumns(dbSchemas.users),
-      role: dbSchemas.members.role,
+      ...getTableColumns(schema.users),
+      role: schema.members.role,
     },
-    workspace: getTableColumns(dbSchemas.workspaces),
+    workspace: getTableColumns(schema.workspaces),
   })
-  .from(dbSchemas.workspaces)
+  .from(schema.workspaces)
   .limit(1)
   .where(
     and(
       or(
-        eq(dbSchemas.workspaces.id, sql.placeholder("workspaceId")),
-        eq(dbSchemas.workspaces.slug, sql.placeholder("workspaceSlug"))
+        eq(schema.workspaces.id, sql.placeholder("workspaceId")),
+        eq(schema.workspaces.slug, sql.placeholder("workspaceSlug"))
       ),
-      eq(dbSchemas.users.id, sql.placeholder("userId"))
+      eq(schema.users.id, sql.placeholder("userId"))
     )
   )
   .innerJoin(
-    dbSchemas.members,
-    eq(dbSchemas.members.workspaceId, dbSchemas.workspaces.id)
+    schema.members,
+    eq(schema.members.workspaceId, schema.workspaces.id)
   )
-  .innerJoin(dbSchemas.users, eq(dbSchemas.members.userId, dbSchemas.users.id))
+  .innerJoin(schema.users, eq(schema.members.userId, schema.users.id))
   .prepare("workspace_guard")
 
 export const workspacesByUserPrepared = db.query.users
@@ -122,11 +122,10 @@ export const workspacesByUserPrepared = db.query.users
   .prepare("workspaces_by_user")
 
 export * from "drizzle-orm"
-export { utils }
+export { pgTableProject as tableCreator } from "./utils"
+
 export const prepared = {
   workspacesByUserPrepared,
   projectGuardPrepared,
   workspaceGuardPrepared,
 }
-export const schema = { ...dbSchemas }
-export { pgTableProject as tableCreator } from "./utils"

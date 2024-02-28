@@ -2,9 +2,10 @@
 
 import { use } from "react"
 import { useRouter } from "next/navigation"
-import { TRPCClientError } from "@trpc/client"
 
 import type { RouterOutputs } from "@builderai/api"
+import type { ProjectTransferToWorkspace } from "@builderai/db/validators"
+import { transferToWorkspaceSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Card,
@@ -39,10 +40,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@builderai/ui/select"
-import type { ProjectTransferToWorkspace } from "@builderai/validators/project"
-import { transferToWorkspaceSchema } from "@builderai/validators/project"
 
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -58,7 +57,6 @@ export function TransferProjectToTeam({
   const { workspaces } = use(workspacesPromise)
   const router = useRouter()
   const apiUtils = api.useUtils()
-  const { toast } = useToastAction()
 
   const form = useZodForm({
     schema: transferToWorkspaceSchema,
@@ -73,16 +71,9 @@ export function TransferProjectToTeam({
       router.refresh()
     },
     onSuccess: (data) => {
-      toast("success")
+      toastAction("success")
       // redirect to the new workspace
       router.push(`/${data?.workspaceSlug}/overview`)
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
     },
   })
 

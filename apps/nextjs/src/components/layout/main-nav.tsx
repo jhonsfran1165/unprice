@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import { navItems } from "@builderai/config"
+import { navItems } from "~/constants/layout"
 
 export function MainNav({ ...props }: React.HTMLAttributes<HTMLElement>) {
   return (

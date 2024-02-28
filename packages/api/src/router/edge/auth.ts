@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { selectWorkspaceSchema } from "@builderai/validators/workspace"
+import { selectWorkspaceSchema } from "@builderai/db/validators"
 
 import {
   createTRPCRouter,
@@ -52,7 +52,7 @@ export const authRouter = createTRPCRouter({
       }
     }),
   listOrganizations: protectedProcedure.query(async (opts) => {
-    const userId = opts.ctx.session.userId
+    const userId = opts.ctx.userId
 
     const memberships = await opts.ctx.db.query.members.findMany({
       with: {

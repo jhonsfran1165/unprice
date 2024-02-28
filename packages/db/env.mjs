@@ -1,5 +1,5 @@
 import { createEnv } from "@t3-oss/env-nextjs"
-import { z } from "zod"
+import * as z from "zod"
 
 export const env = createEnv({
   shared: {
@@ -7,6 +7,7 @@ export const env = createEnv({
       .enum(["development", "production", "test"])
       .default("development"),
     VERCEL_ENV: z.enum(["development", "preview", "production"]).optional(),
+    DRIZZLE_LOG: z.string().default("false"),
   },
   server: {
     NEXTJS_URL: z.preprocess(
@@ -14,11 +15,8 @@ export const env = createEnv({
         process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str,
       process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
     ),
-    DATABASE_URL: z.string().url(),
-    STRIPE_WEBHOOK_SECRET: z.string(),
-    PROJECT_ID_VERCEL: z.string(),
-    TEAM_ID_VERCEL: z.string(),
-    VERCEL_AUTH_BEARER_TOKEN: z.string(),
+    DATABASE_URL: z.string().min(1).url(),
+    DATABASE_URL_MIGRATOR: z.string().min(1).url(),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis
@@ -26,9 +24,9 @@ export const env = createEnv({
   experimental__runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     VERCEL_ENV: process.env.VERCEL_ENV,
+    DRIZZLE_LOG: process.env.DRIZZLE_LOG,
   },
   skipValidation:
-    !!process.env.CI ||
     !!process.env.SKIP_ENV_VALIDATION ||
     process.env.npm_lifecycle_event === "lint",
 })

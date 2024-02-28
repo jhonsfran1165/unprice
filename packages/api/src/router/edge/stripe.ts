@@ -4,9 +4,10 @@ import { dinero } from "dinero.js"
 import { z } from "zod"
 
 import { PLANS } from "@builderai/config"
+import { purchaseWorkspaceSchema } from "@builderai/db/validators"
 import { stripe } from "@builderai/stripe"
-import { purchaseWorkspaceSchema } from "@builderai/validators/workspace"
 
+import { env } from "../../env.mjs"
 import {
   createTRPCRouter,
   protectedActiveWorkspaceProcedure,
@@ -16,11 +17,11 @@ import {
 export const stripeRouter = createTRPCRouter({
   createSession: protectedActiveWorkspaceProcedure
     .input(z.object({ planId: z.string() }))
-    .output(z.object({ success: z.boolean(), url: z.string().optional() }))
+    .output(z.object({ success: z.boolean(), url: z.string() }))
     .mutation(async (opts) => {
       const workspace = opts.ctx.workspace
       const user = opts.ctx.session.user
-      const returnUrl = process.env.NEXTJS_URL + "/"
+      const returnUrl = env.NEXTJS_URL + "/"
 
       if (!user?.email) {
         throw new TRPCError({
@@ -53,7 +54,7 @@ export const stripeRouter = createTRPCRouter({
         line_items: [{ price: PLANS.PRO?.priceId, quantity: 1 }],
       })
 
-      if (!session.url) return { success: false as const }
+      if (!session.url) return { success: false as const, url: "" }
       return { success: true as const, url: session.url }
     }),
 

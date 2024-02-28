@@ -1,9 +1,12 @@
 import { TRPCError } from "@trpc/server"
 
 import { prepared } from "@builderai/db"
-import type { User } from "@builderai/validators/auth"
-import type { Project } from "@builderai/validators/project"
-import type { Workspace, WorkspaceRole } from "@builderai/validators/workspace"
+import type {
+  Project,
+  User,
+  Workspace,
+  WorkspaceRole,
+} from "@builderai/db/validators"
 
 import type { Context } from "../trpc"
 

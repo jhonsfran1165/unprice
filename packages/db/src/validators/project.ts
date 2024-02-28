@@ -1,13 +1,11 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { schema } from "@builderai/db"
+import * as schema from "../schema"
 
 export const createProjectSchema = createInsertSchema(schema.projects, {
-  id: z.string().optional(),
-  slug: z.string().optional(),
-  workspaceId: z.string().optional(),
-  name: z.string(),
+  slug: z.string().min(1),
+  name: z.string().min(1),
   url: z.string().url(),
 })
 

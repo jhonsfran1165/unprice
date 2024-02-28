@@ -32,7 +32,9 @@
     "clsx": "^2.1.0",
     "cmdk": "^0.2.0",
     "lucide-react": "0.307.0",
+    "next-themes": "^0.2.1",
     "react-resizable-panels": "^1.0.5",
+    "sonner": "^1.4.2",
     "tailwind-merge": "^2.2.0",
     "vaul": "^0.8.0",
     "zod": "^3.22.4"
@@ -77,6 +79,7 @@
     ".": "./src/index.ts",
     "./loading-animation": "./src/loading-animation.tsx",
     "./skeleton": "./src/skeleton.tsx",
+    "./sonner": "./src/sonner.tsx",
     "./alert-dialog": "./src/alert-dialog.tsx",
     "./resizable": "./src/resizable.tsx",
     "./drawer": "./src/drawer.tsx",

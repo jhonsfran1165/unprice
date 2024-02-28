@@ -1,7 +1,7 @@
 import { createSelectSchema } from "drizzle-zod"
 import type { z } from "zod"
 
-import { schema } from "@builderai/db"
+import * as schema from "../schema"
 
 export const userSelectBase = createSelectSchema(schema.users)
 

@@ -32,7 +32,7 @@ async function SubscriptionCard() {
       </CardHeader>
       <CardContent>
         {subscription ? (
-          <p>
+          <div>
             You are currently on the <strong>{subscription.plan}</strong> plan.
             {subscription.billingPeriodEnd && (
               <strong>
@@ -40,9 +40,9 @@ async function SubscriptionCard() {
                 {formatDate(subscription.billingPeriodEnd)}.{" "}
               </strong>
             )}
-          </p>
+          </div>
         ) : (
-          <p>You are not subscribed to any plan.</p>
+          <div>You are not subscribed to any plan.</div>
         )}
       </CardContent>
       <CardFooter>

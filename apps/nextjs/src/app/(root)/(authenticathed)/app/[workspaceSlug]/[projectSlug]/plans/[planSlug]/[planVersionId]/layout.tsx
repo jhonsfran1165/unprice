@@ -1,33 +1,17 @@
 import React from "react"
 import Link from "next/link"
+import { notFound } from "next/navigation"
 
-import type { SubTabsRoutes } from "@builderai/config/types"
 import { Badge } from "@builderai/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@builderai/ui/card"
 import { ChevronLeft } from "@builderai/ui/icons"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
-import MaxWidthWrapper from "~/components/max-width-wrapper"
-import MenuSubTabs from "~/components/menu-subtabs"
+import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
 import { api } from "~/trpc/server"
 import CreateNewVersion from "../../_components/create-new-version"
 import { VersionActions } from "../../_components/version-actions"
 import { Versions } from "../../_components/versions"
-
-const subtabs = {
-  overview: {
-    title: "Overview",
-    icon: "Dashboard",
-  },
-  addons: {
-    title: "Addons",
-    icon: "Dashboard",
-  },
-  settings: {
-    title: "Settings",
-    icon: "Dashboard",
-  },
-} as SubTabsRoutes
 
 export default async function PriceLayout(props: {
   children: React.ReactNode
@@ -41,8 +25,11 @@ export default async function PriceLayout(props: {
   const { projectSlug, workspaceSlug, planSlug, planVersionId } = props.params
   const { plan } = await api.plans.getBySlug({
     slug: planSlug,
-    projectSlug,
   })
+
+  if (!plan) {
+    notFound()
+  }
 
   return (
     <>
@@ -97,12 +84,6 @@ export default async function PriceLayout(props: {
               </CardContent>
             </Card>
           </MaxWidthWrapper>
-        }
-        subtabs={
-          <MenuSubTabs
-            basePath={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${planVersionId}`}
-            activeSubTabs={subtabs}
-          />
         }
       >
         {props.children}

@@ -22,7 +22,7 @@ export function manipulateDate(
     : null
 
   return {
-    fromDate: date?.from?.getTime() || null,
-    toDate: isToDateMidnight ? addOneDayToDate : date?.to?.getTime() || null,
+    fromDate: date?.from?.getTime() ?? null,
+    toDate: isToDateMidnight ? addOneDayToDate : date?.to?.getTime() ?? null,
   }
 }

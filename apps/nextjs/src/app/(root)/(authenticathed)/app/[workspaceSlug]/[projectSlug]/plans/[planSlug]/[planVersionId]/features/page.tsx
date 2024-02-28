@@ -1,4 +1,4 @@
-import MaxWidthWrapper from "~/components/max-width-wrapper"
+import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
 import { userCanAccessProject } from "~/lib/project-guard"
 
 export const runtime = "edge"
@@ -7,7 +7,7 @@ export const preferredRegion = ["fra1"]
 export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string; planId: string }
 }) {
-  const { projectSlug, workspaceSlug, planId } = props.params
+  const { projectSlug } = props.params
 
   await userCanAccessProject({
     projectSlug,

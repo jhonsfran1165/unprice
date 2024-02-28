@@ -2,7 +2,6 @@
 
 import { startTransition } from "react"
 import { useRouter } from "next/navigation"
-import { TRPCClientError } from "@trpc/client"
 
 import { Button } from "@builderai/ui/button"
 import {
@@ -25,12 +24,11 @@ import {
 import { Warning } from "@builderai/ui/icons"
 
 import { SubmitButton } from "~/components/submit-button"
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { useUser } from "~/lib/use-user"
 import { api } from "~/trpc/client"
 
 export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
-  const { toast } = useToastAction()
   const router = useRouter()
   const { user } = useUser()
   const isPersonal = user?.workspaces.find((wk) => wk.slug === workspaceSlug)
@@ -47,19 +45,12 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
       router.refresh()
     },
     onSuccess: () => {
-      toast("deleted")
+      toastAction("deleted")
       const nextWorkspace = user?.workspaces.find(
         (wk) => wk.slug !== workspaceSlug
       )
 
       router.push(`/${nextWorkspace?.slug}/overview`)
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
     },
   })
 
@@ -87,7 +78,7 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
             </Button>
           </DialogTrigger>
           {!!isPersonal && (
-            <span className="mr-auto px-2 text-sm text-muted-foreground">
+            <span className="mr-auto px-2 text-xs text-muted-foreground">
               You can not delete your personal workspace. Contact support if you
               want to delete your account.
             </span>

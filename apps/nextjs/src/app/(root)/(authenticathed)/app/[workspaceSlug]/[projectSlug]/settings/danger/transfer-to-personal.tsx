@@ -23,7 +23,7 @@ import {
 } from "@builderai/ui/dialog"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
 
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
 // TODO: could use server actions
@@ -32,7 +32,6 @@ export function TransferProjectToPersonal({
 }: {
   projectSlug: string
 }) {
-  const { toast } = useToastAction()
   const apiUtils = api.useUtils()
   const router = useRouter()
 
@@ -43,14 +42,14 @@ export function TransferProjectToPersonal({
         router.refresh()
       },
       onSuccess: (data) => {
-        toast("success")
+        toastAction("success")
         router.push(`/${data?.workspaceSlug}/overview`)
       },
       onError: (err) => {
         if (err instanceof TRPCClientError) {
-          toast("error", err.message)
+          toastAction("error", err.message)
         } else {
-          toast("error")
+          toastAction("error")
         }
       },
     }

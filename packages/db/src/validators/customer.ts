@@ -1,11 +1,11 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { schema } from "@builderai/db"
+import * as schema from "../schema"
 
 export const customerSelectSchema = createSelectSchema(schema.customers)
 export const customerInsertBaseSchema = createInsertSchema(schema.customers, {
-  email: z.string().email(),
+  email: z.string().min(3).email(),
   name: z.string().min(3),
 })
 

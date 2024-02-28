@@ -2,8 +2,9 @@
 
 import { useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { TRPCClientError } from "@trpc/client"
 
+import type { Project, ProjectInsert } from "@builderai/db/validators"
+import { createProjectSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -16,10 +17,8 @@ import {
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
-import type { Project, ProjectInsert } from "@builderai/validators/project"
-import { createProjectSchema } from "@builderai/validators/project"
 
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -28,7 +27,7 @@ const CreateProjectForm = (props: {
   onSuccess?: (project: Project) => void
 }) => {
   const router = useRouter()
-  const { toast } = useToastAction()
+
   const apiUtils = api.useUtils()
   const [isPending, startTransition] = useTransition()
 
@@ -52,19 +51,12 @@ const CreateProjectForm = (props: {
         router.push(`/${props.workspaceSlug}/${newProject?.slug}/overview`)
       }
 
-      toast("success")
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
+      toastAction("success")
     },
   })
 
   const onSubmit = (data: ProjectInsert) => {
-    startTransition(async () => {
+    startTransition(() => {
       createProject.mutate(data)
     })
   }

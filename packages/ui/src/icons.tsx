@@ -116,7 +116,7 @@ export const Mdx: Icon = (props) => (
   </svg>
 )
 
-export const NextAuth: Icon = (props) => (
+export const NextAuth: Icon = (_props) => (
   <svg
     width="198"
     height="40"

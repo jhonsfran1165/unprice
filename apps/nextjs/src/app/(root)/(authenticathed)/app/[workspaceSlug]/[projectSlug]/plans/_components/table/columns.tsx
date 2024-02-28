@@ -9,7 +9,8 @@ import { DataTableColumnHeader } from "~/components/data-table/data-table-column
 import { formatDate } from "~/lib/dates"
 import { DataTableRowActions } from "./data-table-row-actions"
 
-export type Plans = RouterOutputs["plans"]["listByProject"]["plans"][number]
+export type Plans =
+  RouterOutputs["plans"]["listByActiveProject"]["plans"][number]
 
 export const columns: ColumnDef<Plans>[] = [
   {

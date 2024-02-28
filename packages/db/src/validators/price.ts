@@ -1,12 +1,19 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { schema } from "@builderai/db"
+import * as schema from "../schema"
 
 export const planSelectBaseSchema = createSelectSchema(schema.plans)
-export const planInsertBaseSchema = createInsertSchema(schema.plans)
+export const planInsertBaseSchema = createInsertSchema(schema.plans, {
+  title: z.string().min(1),
+  slug: z.string().min(1),
+})
 
 export const versionSelectBaseSchema = createSelectSchema(schema.versions, {
+  featuresConfig: schema.versionPlanConfig,
+  addonsConfig: schema.versionPlanConfig,
+})
+export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
   featuresConfig: schema.versionPlanConfig,
   addonsConfig: schema.versionPlanConfig,
 })
@@ -30,6 +37,11 @@ export const updatePlanSchema = planSelectBaseSchema
   })
 
 export const featureSelectBaseSchema = createSelectSchema(schema.features)
+export const featureInserBaseSchema = createInsertSchema(schema.features, {
+  title: z.string().min(1).max(50),
+  slug: z.string().min(1),
+  type: z.string().min(1),
+})
 
 export const updateFeatureSchema = featureSelectBaseSchema.pick({
   id: true,
@@ -38,7 +50,7 @@ export const updateFeatureSchema = featureSelectBaseSchema.pick({
   description: true,
 })
 
-export const deleteFeatureSchema = featureSelectBaseSchema
+export const deleteFeatureSchema = featureInserBaseSchema
   .pick({
     id: true,
   })
@@ -46,7 +58,7 @@ export const deleteFeatureSchema = featureSelectBaseSchema
     projectSlug: z.string(),
   })
 
-export const createFeatureSchema = featureSelectBaseSchema
+export const createFeatureSchema = featureInserBaseSchema
   .pick({
     slug: true,
     title: true,
@@ -67,7 +79,7 @@ export const planList = planSelectBaseSchema.extend({
   versions: z.array(versionListBase),
 })
 
-export const createNewVersionPlan = versionSelectBaseSchema.pick({
+export const createNewVersionPlan = versionInsertBaseSchema.pick({
   planId: true,
 })
 

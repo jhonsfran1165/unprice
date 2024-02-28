@@ -4,6 +4,8 @@ import Link from "next/link"
 import { TRPCClientError } from "@trpc/client"
 import { toDecimal } from "dinero.js"
 
+import type { PurchaseOrg } from "@builderai/db/validators"
+import { purchaseWorkspaceSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   DialogContent,
@@ -29,8 +31,6 @@ import {
   SelectValue,
 } from "@builderai/ui/select"
 import { useToast } from "@builderai/ui/use-toast"
-import type { PurchaseOrg } from "@builderai/validators/workspace"
-import { purchaseWorkspaceSchema } from "@builderai/validators/workspace"
 
 import { currencySymbol } from "~/lib/currency"
 import { useZodForm } from "~/lib/zod-form"

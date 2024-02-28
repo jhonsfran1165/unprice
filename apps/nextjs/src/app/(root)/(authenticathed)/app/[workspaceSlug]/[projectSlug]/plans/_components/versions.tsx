@@ -1,15 +1,15 @@
 import Link from "next/link"
 
+import type { PlanVersionList } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { buttonVariants } from "@builderai/ui/button"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 import {
-    Tooltip,
-    TooltipArrow,
-    TooltipContent,
-    TooltipTrigger,
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipTrigger,
 } from "@builderai/ui/tooltip"
-import type { PlanVersionList } from "@builderai/validators/price"
 
 interface VersionProps extends React.HTMLAttributes<HTMLDivElement> {
   versions?: PlanVersionList[]
@@ -38,7 +38,7 @@ export function Versions({
       <div className="flex h-full flex-col items-center justify-center">
         <ScrollArea className="flex">
           <div className="flex flex-col items-center gap-2 pt-4">
-            {versions?.map((version, i) => {
+            {versions?.map((version) => {
               const active = selectedVersion === version.version
               return (
                 <Tooltip key={version.id}>
@@ -52,8 +52,8 @@ export function Versions({
                           variant: active
                             ? "secondary"
                             : version.status === "published"
-                            ? "outline"
-                            : "ghost",
+                              ? "outline"
+                              : "ghost",
                           size: "icon",
                         }),
                         "h-8 w-8 text-xs"

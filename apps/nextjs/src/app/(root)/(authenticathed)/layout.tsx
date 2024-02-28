@@ -1,11 +1,8 @@
-import "react-image-crop/dist/ReactCrop.css"
-import "~/styles/globals.css"
-
 import { SessionProvider } from "@builderai/auth/react"
 import { auth } from "@builderai/auth/server"
 // import { Analytics } from "@vercel/analytics/react"
 
-import { Toaster } from "@builderai/ui/toaster"
+import { Toaster } from "@builderai/ui/sonner"
 import { TooltipProvider } from "@builderai/ui/tooltip"
 
 import { TailwindIndicator } from "~/components/layout/tailwind-indicator"
@@ -27,7 +24,7 @@ export default async function AuthenticatedLayout(props: {
         <TailwindIndicator />
       </SessionProvider>
       {/* <Analytics /> */}
-      <Toaster />
+      <Toaster richColors />
     </>
   )
 }

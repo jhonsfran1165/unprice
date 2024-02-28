@@ -1,8 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
+import type { FeaturePlan, FeatureType } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
-import type { FeaturePlan, FeatureType } from "@builderai/validators/price"
 
 import type { FeatureCardProps } from "./feature"
 import { FeatureCard } from "./feature"

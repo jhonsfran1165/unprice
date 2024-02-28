@@ -3,10 +3,11 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import type { Row } from "@tanstack/react-table"
-import { TRPCClientError } from "@trpc/client"
 import { MoreHorizontal } from "lucide-react"
 
-import { utils } from "@builderai/db"
+import * as utils from "@builderai/db/utils"
+import type { WorkspaceRole } from "@builderai/db/validators"
+import { listMembersSchema } from "@builderai/db/validators"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,10 +42,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@builderai/ui/select"
-import type { WorkspaceRole } from "@builderai/validators/workspace"
-import { listMembersSchema } from "@builderai/validators/workspace"
 
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
 interface DataTableRowActionsProps<TData> {
@@ -63,7 +62,6 @@ export function DataTableRowActions<TData>({
   const [isPending, startTransition] = React.useTransition()
 
   const apiUtils = api.useUtils()
-  const { toast } = useToastAction()
   const router = useRouter()
 
   const deleteMember = api.workspaces.deleteMember.useMutation({
@@ -72,14 +70,7 @@ export function DataTableRowActions<TData>({
       router.refresh()
     },
     onSuccess: () => {
-      toast("deleted")
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
+      toastAction("deleted")
     },
   })
 
@@ -89,14 +80,7 @@ export function DataTableRowActions<TData>({
       router.refresh()
     },
     onSuccess: () => {
-      toast("success")
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
+      toastAction("success")
     },
   })
 

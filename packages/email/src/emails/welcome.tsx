@@ -28,8 +28,8 @@ const WelcomeEmail = () => {
           <br />⭐ Star us on{" "}
           <Link href="https://github.com/jhonsfran1165/builderai">GitHub</Link>
           <br />
-          🚀 Visit our website{" "}
-          <Link href="https://github.com/jhonsfran1165/builderai">
+          🚀 Login here{" "}
+          <Link href="https://builderai-git-main-jhonsfran.vercel.app/">
             builderai
           </Link>
         </Body>

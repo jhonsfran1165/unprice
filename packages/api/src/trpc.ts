@@ -13,7 +13,8 @@ import { ZodError } from "zod"
 
 import type { Session } from "@builderai/auth/server"
 import { auth } from "@builderai/auth/server"
-import { db, eq, schema } from "@builderai/db"
+import { db, eq } from "@builderai/db"
+import * as schema from "@builderai/db/schema"
 
 import { transformer } from "./transformer"
 import { projectGuard } from "./utils"

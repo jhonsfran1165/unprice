@@ -1,6 +1,6 @@
 /**
  * Every original color has its corresponding saturated gray scale,
- * which can create a more colorful and harmonius vibe,
+ * which can create a more colorful and harmonious vibe,
  * if used on the text against the original color background.
  *
  * @see https://www.radix-ui.com/docs/colors/palette-composition/composing-a-palette

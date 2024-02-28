@@ -18,10 +18,8 @@ export default function WorkSpaceSettingsDangerLoading() {
           <CardTitle>Subscription</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>
-            You are currently on the{" "}
-            {<Skeleton className="inline h-[15px] w-[30px]"></Skeleton>} plan.
-          </p>
+          You are currently on the{" "}
+          {<Skeleton className="inline h-[15px] w-[30px]"></Skeleton>} plan.
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button className="text-transparent">Manage Subscription</Button>

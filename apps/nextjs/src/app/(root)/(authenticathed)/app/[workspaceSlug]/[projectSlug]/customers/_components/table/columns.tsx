@@ -2,8 +2,8 @@
 
 import type { ColumnDef } from "@tanstack/react-table"
 
+import type { Customer } from "@builderai/db/validators"
 import { Checkbox } from "@builderai/ui/checkbox"
-import type { Customer } from "@builderai/validators/customer"
 
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { formatDate } from "~/lib/dates"

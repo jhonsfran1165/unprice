@@ -3,8 +3,8 @@
 import { startTransition } from "react"
 import { useParams, useRouter } from "next/navigation"
 import type { Row } from "@tanstack/react-table"
-import { TRPCClientError } from "@trpc/client"
 
+import { planSelectBaseSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   DropdownMenu,
@@ -13,9 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
 import { Ellipsis } from "@builderai/ui/icons"
-import { planSelectBaseSchema } from "@builderai/validators/price"
 
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
 interface DataTableRowActionsProps<TData> {
@@ -29,33 +28,18 @@ export function DataTableRowActions<TData>({
   const router = useRouter()
   const projectSlug = useParams().projectSlug as string
   const workspaceSlug = useParams().projectSlug as string
-  const { toast } = useToastAction()
 
   const revokeApiKeys = api.apikeys.revokeApiKeys.useMutation({
     onSuccess: () => {
-      toast("success")
+      toastAction("success")
       router.refresh()
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
     },
   })
 
   const rollApiKey = api.apikeys.rollApiKey.useMutation({
     onSuccess: () => {
-      toast("success")
+      toastAction("success")
       router.refresh()
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
     },
   })
 

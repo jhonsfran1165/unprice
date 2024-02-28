@@ -3,7 +3,9 @@ import Link from "next/link"
 import { useFieldArray } from "react-hook-form"
 
 import { FEATURE_TYPES } from "@builderai/config"
-import { schema, utils } from "@builderai/db"
+import * as schema from "@builderai/db/schema"
+import * as utils from "@builderai/db/utils"
+import type { FeaturePlan } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
@@ -49,7 +51,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@builderai/ui/tooltip"
-import type { FeaturePlan } from "@builderai/validators/price"
 
 import { Ping } from "~/components/ping"
 import { useZodForm } from "~/lib/zod-form"
@@ -120,7 +121,7 @@ export function FeatureConfigForm({
         <DialogHeader>
           <DialogTitle>Edit profile</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when you're done.
+            Make changes to your profile here. Click save when you are done.
           </DialogDescription>
         </DialogHeader>
 

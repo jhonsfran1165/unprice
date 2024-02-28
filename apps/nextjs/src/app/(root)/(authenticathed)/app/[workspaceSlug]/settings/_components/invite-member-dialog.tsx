@@ -1,9 +1,10 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { TRPCClientError } from "@trpc/client"
 
-import { utils } from "@builderai/db"
+import * as utils from "@builderai/db/utils"
+import type { InviteMember } from "@builderai/db/validators"
+import { inviteMembersSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
 import {
@@ -23,11 +24,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@builderai/ui/select"
-import type { InviteMember } from "@builderai/validators/workspace"
-import { inviteMembersSchema } from "@builderai/validators/workspace"
 
 import { SubmitButton } from "~/components/submit-button"
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -36,7 +35,6 @@ export const InviteMemberForm = ({
 }: {
   workspaceSlug: string
 }) => {
-  const { toast } = useToastAction()
   const router = useRouter()
 
   const form = useZodForm({
@@ -53,14 +51,7 @@ export const InviteMemberForm = ({
       router.refresh()
     },
     onSuccess: () => {
-      toast("success")
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
+      toastAction("success")
     },
   })
 

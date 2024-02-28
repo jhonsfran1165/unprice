@@ -27,7 +27,14 @@ import { TRPCClientError } from "@trpc/client"
 import { createPortal } from "react-dom"
 
 import type { RouterOutputs } from "@builderai/api"
-import type { PlanConfig } from "@builderai/db/src/schema/prices"
+import type { PlanConfig } from "@builderai/db/schema"
+import type {
+  FeaturePlan,
+  FeatureType,
+  Group,
+  GroupType,
+} from "@builderai/db/validators"
+import { planConfigSchema } from "@builderai/db/validators"
 import { Accordion } from "@builderai/ui/accordion"
 import { Button } from "@builderai/ui/button"
 import { Add } from "@builderai/ui/icons"
@@ -39,13 +46,6 @@ import {
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 import { useToast } from "@builderai/ui/use-toast"
-import type {
-  FeaturePlan,
-  FeatureType,
-  Group,
-  GroupType,
-} from "@builderai/validators/price"
-import { planConfigSchema } from "@builderai/validators/price"
 
 import { useDebounce } from "~/lib/use-debounce"
 import useLocalStorage from "~/lib/use-local-storage"
@@ -219,7 +219,6 @@ export default function DragDrop({
 
     const savedData = async () => {
       await updatePlanVersion.mutateAsync({
-        projectSlug,
         versionId: version?.version ?? 0,
         planId: version?.plan.id ?? "",
         featuresConfig: debouncedPlanConfig,

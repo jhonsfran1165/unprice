@@ -4,173 +4,165 @@
  */
 
 export interface paths {
-    "/edge/organization.deleteMember": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["organization-deleteMember"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/project.listByActiveWorkspace": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["project-listByActiveWorkspace"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/subscription.can": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["subscription-can"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
+  "/edge/organization.deleteMember": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations["organization-deleteMember"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/edge/project.listByActiveWorkspace": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations["project-listByActiveWorkspace"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/edge/subscription.can": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations["subscription-can"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
-export type webhooks = Record<string, never>;
+export type webhooks = Record<string, never>
 export interface components {
-    schemas: never;
-    responses: {
-        /** @description Error response */
-        error: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": {
-                    message: string;
-                    code: string;
-                    issues?: {
-                        message: string;
-                    }[];
-                };
-            };
-        };
-    };
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+  schemas: never
+  responses: {
+    /** @description Error response */
+    error: {
+      headers: Record<string, unknown>
+      content: {
+        "application/json": {
+          message: string
+          code: string
+          issues?: {
+            message: string
+          }[]
+        }
+      }
+    }
+  }
+  parameters: never
+  requestBodies: never
+  headers: never
+  pathItems: never
 }
-export type $defs = Record<string, never>;
+export type $defs = Record<string, never>
 export interface operations {
-    "organization-deleteMember": {
-        parameters: {
-            query: {
-                userId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        memberName?: string | null;
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "project-listByActiveWorkspace": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        projects: {
-                            name: string;
-                            id: string;
-                            url: string;
-                            tier: string;
-                            slug: string;
-                            styles: {
-                                backgroundImage: string;
-                            };
-                            workspace: {
-                                slug: string;
-                            };
-                        }[];
-                        limit: number;
-                        limitReached: boolean;
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "subscription-can": {
-        parameters: {
-            query: {
-                userId: string;
-                featureSlug: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        apiKey: {
-                            id: string;
-                            projectId: string;
-                            key: string;
-                        };
-                        userHasFeature: boolean;
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
+  "organization-deleteMember": {
+    parameters: {
+      query: {
+        userId: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: Record<string, unknown>
+        content: {
+          "application/json": {
+            memberName?: string | null
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "project-listByActiveWorkspace": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: Record<string, unknown>
+        content: {
+          "application/json": {
+            projects: {
+              name: string
+              id: string
+              url: string
+              tier: string
+              slug: string
+              styles: {
+                backgroundImage: string
+              }
+              workspace: {
+                slug: string
+              }
+            }[]
+            limit: number
+            limitReached: boolean
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "subscription-can": {
+    parameters: {
+      query: {
+        userId: string
+        featureSlug: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: Record<string, unknown>
+        content: {
+          "application/json": {
+            apiKey: {
+              id: string
+              projectId: string
+              key: string
+            }
+            userHasFeature: boolean
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
 }

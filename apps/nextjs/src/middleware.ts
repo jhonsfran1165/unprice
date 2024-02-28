@@ -14,7 +14,7 @@ import ApiMiddleware from "./middleware/api"
 import AppMiddleware from "./middleware/app"
 
 export default auth((req) => {
-  const { domain, path, suddomain } = parse(req)
+  const { domain, path } = parse(req)
 
   const isPublicRoute = APP_PUBLIC_ROUTES.has(path)
 

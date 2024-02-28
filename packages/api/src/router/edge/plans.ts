@@ -1,7 +1,9 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq, getTableColumns, schema, utils } from "@builderai/db"
+import { and, eq, getTableColumns } from "@builderai/db"
+import * as schema from "@builderai/db/schema"
+import * as utils from "@builderai/db/utils"
 import {
   createNewVersionPlan,
   createPlanSchema,
@@ -9,7 +11,7 @@ import {
   updatePlanSchema,
   updateVersionPlan,
   versionSelectBaseSchema,
-} from "@builderai/validators/price"
+} from "@builderai/db/validators"
 
 import {
   createTRPCRouter,
@@ -343,7 +345,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
 
-  listByProject: protectedActiveProjectProcedure
+  listByActiveProject: protectedActiveProjectProcedure
     .input(
       z.object({
         fromDate: z.number().optional(),

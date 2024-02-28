@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import type { Row } from "@tanstack/react-table"
 import { MoreHorizontal } from "lucide-react"
 
+import { customerSelectSchema } from "@builderai/db/validators"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,9 +42,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@builderai/ui/select"
-import { customerSelectSchema } from "@builderai/validators/customer"
 
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
 interface DataTableRowActionsProps<TData> {
@@ -56,18 +56,13 @@ export function DataTableRowActions<TData>({
   const customer = customerSelectSchema.parse(row.original)
   const router = useRouter()
   const projectSlug = useParams().projectSlug as string
-  const { toast } = useToastAction()
+
   const [open, setIsOpen] = React.useState(false)
   const [selectedPlan, setSelectedPlan] = React.useState<string | null>(null)
   const [alertOpen, setAlertOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
 
-  const { data } = api.plans.listByProject.useQuery(
-    { projectSlug },
-    {
-      enabled: projectSlug !== undefined && projectSlug !== "" && open === true,
-    }
-  )
+  const { data } = api.plans.listByActiveProject.useQuery()
   const deleteUser = api.subscriptions.deleteCustomer.useMutation()
   const createPlanVersion = api.subscriptions.create.useMutation()
 
@@ -76,12 +71,12 @@ export function DataTableRowActions<TData>({
       try {
         if (!customer.id) return
         await deleteUser.mutateAsync({ id: customer.id, projectSlug })
-        toast("deleted")
+        toastAction("deleted")
         router.refresh()
         setAlertOpen(false)
       } catch (error) {
         console.error(error)
-        toast("error")
+        toastAction("error")
       }
     })
   }
@@ -90,7 +85,7 @@ export function DataTableRowActions<TData>({
     startTransition(async () => {
       try {
         if (!selectedPlan) {
-          toast("error")
+          toastAction("error")
           return
         }
 
@@ -103,12 +98,12 @@ export function DataTableRowActions<TData>({
           projectSlug,
         })
 
-        toast("success")
+        toastAction("success")
         router.refresh()
         setIsOpen(false)
       } catch (error) {
         console.error(error)
-        toast("error")
+        toastAction("error")
       }
     })
   }

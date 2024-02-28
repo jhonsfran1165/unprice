@@ -2,10 +2,19 @@
   "name": "@builderai/db",
   "private": true,
   "version": "0.1.0",
-  "main": "./src/index.ts",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./validators": "./src/validators.ts",
+    "./schema": "./src/schema.ts",
+    "./utils": "./src/utils.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "src/*"
+      ]
+    }
   },
   "license": "MIT",
   "scripts": {

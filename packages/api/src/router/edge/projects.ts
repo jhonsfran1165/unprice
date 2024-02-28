@@ -1,16 +1,18 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { eq, schema, sql, utils } from "@builderai/db"
+import { eq, sql } from "@builderai/db"
+import * as schema from "@builderai/db/schema"
+import * as utils from "@builderai/db/utils"
 import {
   createProjectSchema,
   deleteProjectSchema,
   renameProjectSchema,
   selectProjectSchema,
+  selectWorkspaceSchema,
   transferToPersonalProjectSchema,
   transferToWorkspaceSchema,
-} from "@builderai/validators/project"
-import { selectWorkspaceSchema } from "@builderai/validators/workspace"
+} from "@builderai/db/validators"
 
 import {
   createTRPCRouter,

@@ -1,4 +1,4 @@
-# Acme Corp
+# BuilderAI
 
 > **Warning**
 > This is a work-in-progress and not the finished product.
@@ -7,83 +7,30 @@
 
 ## About
 
-This project features the next-generation stack for building fullstack application. It's structured as a monorepo with a shared API using tRPC. Built on the new app router in Next.js 13 with React Server Components.
+This project features the next-generation stack for building fullstack ai saas application. It's structured as a monorepo with a shared API using tRPC. Built on the new app router in Next.js 14 with React Server Components.
+
+## Tech Stack
+
+- Nextjs14
+- Nextauth v5
+- Drizzle ORM
+- Fully Edge support
+- TRPC
+- ShadcnUI
+- Postgresql
+- Multitenant support with multi projects
+- Monorepo
+- React query
+- Stripe (optional)
+- Resend (optional)
+- Tynibird (optional)
+
+## Why this exists?
+
+I started looking for some good templates with good DX for building my saas product. None of the OSS out there seems to have what I wanted, so I merged a bunch of opensources and create the template you see here, hopefully this also helps other people.
+
+My main focus is build something that allows you to create great saas products with focus on AI and developer experience. Also a product that is API first and that you can iterate very quickly.
+
+There are some points that you might wonder why? for example postgres. I think postgres is amazing, it's all you need for a saas. If you want to use some external vector db like pinecone you can easily add it to the template. I also avoid the use of server actions in the repo, simply because I believe nextjs is pushing to hard for it but the DX is not great yet. Although you can use it, and you will see some server actions where it makes sense in this repo, I use react-query for most of the data state management.
 
 ## Installation
-
-There are two ways of initializing an app using the `acme-corp` starter. You can either use this repository as a template:
-
-![use-as-template](https://github.com/t3-oss/create-t3-turbo/assets/51714798/bb6c2e5d-d8b6-416e-aeb3-b3e50e2ca994)
-
-or use Turbo's CLI to init your project:
-
-```bash
-npx create-turbo@latest -e https://github.com/juliusmarminge/acme-corp
-```
-
-## Quick Start
-
-To get it running, follow the steps below:
-
-### 1. Setup dependencies
-
-```bash
-# Install dependencies
-pnpm i
-
-# Configure environment variables
-# There is an `.env.example` in the root directory you can use for reference
-cp .env.example .env.local
-
-# Push the Drizzle schema to the database
-pnpm db:push
-```
-
-### 2. Configure Expo `dev`-script
-
-> **Warning**
-> The Expo app is still stock from `create-t3-turbo` and haven't yet gotten any attention.
->
-> We will get their in due time!
-
-#### Use iOS Simulator
-
-1. Make sure you have XCode and XCommand Line Tools installed [as shown on expo docs](https://docs.expo.dev/workflow/ios-simulator).
-
-   > **NOTE:** If you just installed XCode, or if you have updated it, you need to open the simulator manually once. Run `npx expo start` in the root dir, and then enter `I` to launch Expo Go. After the manual launch, you can run `pnpm dev` in the root directory.
-
-   ```diff
-   +  "dev": "expo start --ios",
-   ```
-
-2. Run `pnpm dev` at the project root folder.
-
-#### Use Android Emulator
-
-1. Install Android Studio tools [as shown on expo docs](https://docs.expo.dev/workflow/android-studio-emulator).
-
-2. Change the `dev` script at `apps/expo/package.json` to open the Android emulator.
-
-   ```diff
-   +  "dev": "expo start --android",
-   ```
-
-3. Run `pnpm dev` at the project root folder.
-
-> **TIP:** It might be easier to run each app in separate terminal windows so you get the logs from each app separately. This is also required if you want your terminals to be interactive, e.g. to access the Expo QR code. You can run `pnpm --filter expo dev` and `pnpm --filter nextjs dev` to run each app in a separate terminal window.
-
-### 3. When it's time to add a new package
-
-To add a new package, simply run `pnpm turbo gen init` in the monorepo root. This will prompt you for a package name as well as if you want to install any dependencies to the new package (of course you can also do this yourself later).
-
-The generator sets up the `package.json`, `tsconfig.json` and a `index.ts`, as well as configures all the necessary configurations for tooling around your package such as formatting, linting and typechecking. When the package is created, you're ready to go build out the package.
-
-## References
-
-The stack originates from [create-t3-app](https://github.com/t3-oss/create-t3-app).
-
-A [blog post](https://jumr.dev/blog/t3-turbo) where I wrote how to migrate a T3 app into this.
-
-## Questions?
-
-<a href="https://cal.com/julius/quick-chat?utm_source=banner&utm_campaign=oss"><img alt="Book us with Cal.com" src="https://cal.com/book-with-cal-dark.svg" /></a>

@@ -1,14 +1,13 @@
 "use client"
 
 import { useParams, useRouter } from "next/navigation"
-import { TRPCClientError } from "@trpc/client"
 
 import type { RouterOutputs } from "@builderai/api"
+import type { CreatePlanVersion } from "@builderai/db/validators"
+import { createNewVersionPlan } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import { Add } from "@builderai/ui/icons"
 import { useToast } from "@builderai/ui/use-toast"
-import type { CreatePlanVersion } from "@builderai/validators/price"
-import { createNewVersionPlan } from "@builderai/validators/price"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -27,14 +26,12 @@ const CreateNewVersion = (props: {
 
   const form = useZodForm({
     schema: createNewVersionPlan,
-    defaultValues: { planId: props.plan.id, projectSlug: props.projectSlug },
+    defaultValues: { planId: props.plan?.id ?? "" },
   })
 
   const createPlanVersion = api.plans.createNewVersion.useMutation({
     onSettled: async () => {
-      await apiUtils.plans.listByProject.invalidate({
-        projectSlug: props.projectSlug,
-      })
+      await apiUtils.plans.listByActiveProject.invalidate()
     },
     onSuccess: (data) => {
       const { planVersion } = data
@@ -44,23 +41,8 @@ const CreateNewVersion = (props: {
       })
 
       router.push(
-        `/${workspaceSlug}/${props.projectSlug}/plans/${props.plan.slug}/${planVersion?.version}/overview`
+        `/${workspaceSlug}/${props.projectSlug}/plans/${props.plan?.slug}/${planVersion?.version}/overview`
       )
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
-      } else {
-        toaster.toast({
-          title: "Error creating project",
-          variant: "destructive",
-          description:
-            "An issue occurred while creating your project. Please try again.",
-        })
-      }
     },
   })
 

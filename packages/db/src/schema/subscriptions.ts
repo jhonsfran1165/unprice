@@ -1,5 +1,5 @@
 import { eq, relations } from "drizzle-orm"
-import { foreignKey, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
+import { foreignKey, primaryKey, uniqueIndex } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
@@ -14,7 +14,7 @@ export const subscriptions = pgTableProject(
     ...projectID,
     ...timestamps,
     planVersionId: cuid("plan_version_id").notNull(),
-    planId: text("plan_id").notNull(),
+    planId: cuid("plan_id").notNull(),
     customerId: cuid("customers_id").notNull(),
     status: subscriptionStatusEnum("subscription_status").default("active"),
     // TODO: add fields for handling the subscription like date of start and end, stripe info

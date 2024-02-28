@@ -1,9 +1,17 @@
 import Link from "next/link"
-import { TRPCClientError } from "@trpc/client"
 import { z } from "zod"
 
 import { FEATURE_TYPES } from "@builderai/config"
-import { utils } from "@builderai/db"
+import * as utils from "@builderai/db/utils"
+import type {
+  CreateFeature,
+  FeaturePlan,
+  UpdateFeature,
+} from "@builderai/db/validators"
+import {
+  createFeatureSchema,
+  updateFeatureSchema,
+} from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -35,15 +43,6 @@ import {
 } from "@builderai/ui/sheet"
 import { Textarea } from "@builderai/ui/text-area"
 import { useToast } from "@builderai/ui/use-toast"
-import type {
-  CreateFeature,
-  FeaturePlan,
-  UpdateFeature,
-} from "@builderai/validators/price"
-import {
-  createFeatureSchema,
-  updateFeatureSchema,
-} from "@builderai/validators/price"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -114,21 +113,6 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
 
       form.reset(defaultValues)
     },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
-      } else {
-        toaster.toast({
-          title: "Error saving Feature",
-          variant: "destructive",
-          description:
-            "An issue occurred while saving your Feature. Please try again.",
-        })
-      }
-    },
   })
 
   const updateFeature = api.features.update.useMutation({
@@ -143,21 +127,6 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
         title: "Feature Saved",
         description: `Feature ${feature.title} saved successfully.`,
       })
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
-      } else {
-        toaster.toast({
-          title: "Error saving Feature",
-          variant: "destructive",
-          description:
-            "An issue occurred while saving your Feature. Please try again.",
-        })
-      }
     },
   })
 
@@ -174,22 +143,8 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
         description: `Feature ${feature.slug} deleted successfully.`,
       })
     },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
-      } else {
-        toaster.toast({
-          title: "Error deleted Feature",
-          variant: "destructive",
-          description:
-            "An issue occurred while deleted your Feature. Please try again.",
-        })
-      }
-    },
   })
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -203,7 +158,7 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
         <SheetHeader>
           <SheetTitle>Edit Feature</SheetTitle>
           <SheetDescription>
-            Make changes to your profile here. Click save when you're done.
+            Make changes to your profile here. Click save when you are done.
           </SheetDescription>
         </SheetHeader>
         <Separator className="my-4" />
@@ -242,7 +197,7 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
                           onChange={(e) => {
                             form.setValue("title", e.target.value)
                             if (mode === "create") {
-                              const slug = utils.createSlug(e.target.value)
+                              const slug = utils.slugify(e.target.value)
                               form.setValue("slug", slug)
                             }
                           }}

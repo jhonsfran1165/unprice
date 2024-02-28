@@ -1,7 +1,6 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { TRPCClientError } from "@trpc/client"
 
 import { Button } from "@builderai/ui/button"
 import {
@@ -24,7 +23,7 @@ import {
 import { Warning } from "@builderai/ui/icons"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
 
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
 export function DeleteProject({
@@ -35,7 +34,6 @@ export function DeleteProject({
   projectSlug: string
 }) {
   const apiUtils = api.useUtils()
-  const { toast } = useToastAction()
   const router = useRouter()
 
   const deleteProject = api.projects.delete.useMutation({
@@ -44,15 +42,8 @@ export function DeleteProject({
       router.refresh()
     },
     onSuccess: () => {
-      toast("success")
+      toastAction("success")
       router.push(`/${workspaceSlug}/overview`)
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
     },
   })
 

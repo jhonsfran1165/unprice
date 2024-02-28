@@ -1,4 +1,4 @@
-import { searchDataParamsSchema } from "@builderai/validators/utils"
+import { searchDataParamsSchema } from "@builderai/db/validators"
 
 import { DataTable } from "~/components/data-table/data-table"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -34,7 +34,7 @@ export default async function PlansPage(props: {
       (filter.toDate = parsed.data.toDate)
   }
 
-  const { plans } = await api.plans.listByProject(filter)
+  const { plans } = await api.plans.listByActiveProject(filter)
   const tabs = Object.values(PROJECT_TABS_CONFIG)
 
   return (

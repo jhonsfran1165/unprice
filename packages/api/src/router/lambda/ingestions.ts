@@ -2,8 +2,9 @@ import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 import { zfd } from "zod-form-data"
 
-import { schema, utils } from "@builderai/db"
-import { ingestionSelectSchema } from "@builderai/validators/ingestion"
+import * as schema from "@builderai/db/schema"
+import * as utils from "@builderai/db/utils"
+import { ingestionSelectSchema } from "@builderai/db/validators"
 
 import {
   createTRPCRouter,
@@ -107,11 +108,11 @@ export const ingestionRouter = createTRPCRouter({
       await opts.ctx.db.insert(schema.ingestions).values({
         id,
         projectId: apiKey.projectId,
-        hash: hash,
-        parent: parent,
-        origin: origin,
+        apikeyId: apiKey.id,
         schema: fileContent,
-        apiKeyId: apiKey.id,
+        origin,
+        hash,
+        parent,
       })
 
       return { status: "ok" }

@@ -2,17 +2,20 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import { MEMBERSHIP, PLANS } from "@builderai/config"
-import { schema } from "@builderai/db"
 
+import * as schema from "../schema"
 import { userSelectBase } from "./auth"
 
-export const invitesSelectBase = createSelectSchema(schema.invites, {
+export const inviteInsertBase = createInsertSchema(schema.invites, {
   email: z.string().min(3, "Email must be at least 3 characters").email(),
 })
+
+export const invitesSelectBase = createSelectSchema(schema.invites)
 export const membersSelectBase = createSelectSchema(schema.members)
 export const workspaceSelectBase = createSelectSchema(schema.workspaces)
 export const workspaceInsertBase = createInsertSchema(schema.workspaces, {
   name: z.string().min(3, "Name must be at least 3 characters"),
+  slug: z.string().min(3, "Slug must be at least 3 characters"),
 })
 
 export const listMembersSchema = membersSelectBase.extend({
@@ -20,7 +23,7 @@ export const listMembersSchema = membersSelectBase.extend({
   user: userSelectBase,
 })
 
-export const inviteMembersSchema = invitesSelectBase
+export const inviteMembersSchema = inviteInsertBase
   .pick({
     email: true,
     role: true,

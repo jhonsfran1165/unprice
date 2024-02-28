@@ -26,7 +26,6 @@
   "dependencies": {
     "@auth/drizzle-adapter": "0.7.0",
     "@builderai/db": "^0.1.0",
-    "@builderai/validators": "^0.1.0",
     "@t3-oss/env-nextjs": "^0.7.3",
     "encoding": "^0.1.13",
     "next-auth": "5.0.0-beta.13",

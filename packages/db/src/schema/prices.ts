@@ -57,7 +57,7 @@ export const featureSchema = z
       configHybridFeature,
     ]),
   })
-  .superRefine((data, ctx) => {
+  .superRefine((data, _ctx) => {
     if (data.type === "flat") {
       configFlatFeature.parse(data.config)
     } else if (data.type === "metered") {

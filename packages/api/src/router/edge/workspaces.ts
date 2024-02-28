@@ -1,9 +1,8 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq, schema } from "@builderai/db"
-import { sendEmail, WelcomeEmail } from "@builderai/email"
-import { searchDataParamsSchema } from "@builderai/validators/utils"
+import { and, eq } from "@builderai/db"
+import * as schema from "@builderai/db/schema"
 import {
   changeRoleMemberSchema,
   deleteWorkspaceSchema,
@@ -12,8 +11,10 @@ import {
   listMembersSchema,
   membersSelectBase,
   renameWorkspaceSchema,
+  searchDataParamsSchema,
   selectWorkspaceSchema,
-} from "@builderai/validators/workspace"
+} from "@builderai/db/validators"
+import { sendEmail, WelcomeEmail } from "@builderai/email"
 
 import {
   createTRPCRouter,
@@ -22,9 +23,6 @@ import {
 } from "../../trpc"
 import { workspaceGuard } from "../../utils/workspace-guard"
 
-// this router controls organizations from Clerk.
-// Workspaces are similar to organizations in Clerk
-// We sync the two to keep the data consistent (see @builderai/auth webhooks)
 export const workspaceRouter = createTRPCRouter({
   deleteMember: protectedActiveWorkspaceOwnerProcedure
     .input(
@@ -331,12 +329,13 @@ export const workspaceRouter = createTRPCRouter({
         workspaceSlug,
       })
 
-      // check if the user is already a member
+      // check if the user has an account
       const userByEmail = await opts.ctx.db.query.users.findFirst({
         where: eq(schema.users.email, email),
       })
 
       if (userByEmail) {
+        // check if the user is already a member of the workspace
         const member = await opts.ctx.db.query.members.findFirst({
           where: and(
             eq(schema.members.userId, userByEmail.id),
@@ -349,6 +348,18 @@ export const workspaceRouter = createTRPCRouter({
             code: "BAD_REQUEST",
             message: "User is already a member of the workspace",
           })
+        } else {
+          // add the user as a member of the workspace
+          await opts.ctx.db.insert(schema.members).values({
+            userId: userByEmail.id,
+            workspaceId: workspace.id,
+            role: role,
+          })
+
+          // no need to send an invite email
+          return {
+            invite: undefined,
+          }
         }
       }
 

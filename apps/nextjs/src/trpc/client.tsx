@@ -5,7 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental"
 import type { TRPCLink } from "@trpc/client"
-import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client"
+import {
+  loggerLink,
+  TRPCClientError,
+  unstable_httpBatchStreamLink,
+} from "@trpc/client"
 import type { HTTPBatchStreamLinkOptions, HTTPHeaders } from "@trpc/react-query"
 import { createTRPCReact } from "@trpc/react-query"
 import type { AnyRootTypes } from "@trpc/server/unstable-core-do-not-import"
@@ -13,6 +17,7 @@ import SuperJSON from "superjson"
 
 import type { AppRouter } from "@builderai/api"
 
+import { toastAction } from "~/lib/toast"
 import { getBaseUrl, lambdas, transformer } from "./shared"
 
 export const api = createTRPCReact<AppRouter>()
@@ -56,6 +61,15 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
         defaultOptions: {
           queries: {
             staleTime: 5 * 1000,
+          },
+          mutations: {
+            onError: (err) => {
+              if (err instanceof TRPCClientError) {
+                toastAction("error", err.message)
+              } else {
+                toastAction("error-contact")
+              }
+            },
           },
         },
       })

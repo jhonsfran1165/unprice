@@ -1,7 +1,5 @@
 import { notFound } from "next/navigation"
 
-import { api } from "~/trpc/server"
-
 export const dynamic = "force-dynamic"
 
 const SCRIPT_TO_INJECT_FOR_PREVIEW = `
@@ -14,22 +12,18 @@ const SCRIPT_TO_INJECT_FOR_PREVIEW = `
 
 export const runtime = "edge"
 
-export default async function LinkPage({
-  params,
+export default function LinkPage({
   searchParams,
 }: {
   params: { linkId: string }
   searchParams: { preview?: string; version: string }
 }) {
-  const { linkId } = params
-
   const isPreview = !!searchParams.preview
-  const version = parseInt(searchParams.version)
 
-  const result = await api.page.getById({
-    id: linkId,
-    version,
-  })
+  const result = {
+    slug: "test",
+    html: "<h1>Test</h1>",
+  }
 
   if (!result) return notFound()
 

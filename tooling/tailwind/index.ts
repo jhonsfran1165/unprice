@@ -6,7 +6,7 @@ import { generateTheme } from "./generate-theme"
 export default {
   darkMode: ["class"],
   content: ["src/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
-  // disble hover on mobiles
+  // disable hover on mobiles
   future: {
     hoverOnlyWhenSupported: true,
   },

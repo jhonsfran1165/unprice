@@ -2,9 +2,10 @@
 
 import { use } from "react"
 import { useRouter } from "next/navigation"
-import { TRPCClientError } from "@trpc/client"
 
 import type { RouterOutputs } from "@builderai/api"
+import type { RenameWorkspace } from "@builderai/db/validators"
+import { renameWorkspaceSchema } from "@builderai/db/validators"
 import {
   Card,
   CardContent,
@@ -22,11 +23,9 @@ import {
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import type { RenameWorkspace } from "@builderai/validators/workspace"
-import { renameWorkspaceSchema } from "@builderai/validators/workspace"
 
 import { SubmitButton } from "~/components/submit-button"
-import { useToastAction } from "~/lib/use-toast-action"
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -36,7 +35,6 @@ export function WorkspaceName(props: {
 }) {
   const router = useRouter()
   const apiUtils = api.useUtils()
-  const { toast } = useToastAction()
   const { workspace } = use(props.workspacePromise)
 
   const form = useZodForm({
@@ -53,14 +51,7 @@ export function WorkspaceName(props: {
       router.refresh()
     },
     onSuccess: () => {
-      toast("success")
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast("error", err.message)
-      } else {
-        toast("error")
-      }
+      toastAction("success")
     },
   })
 

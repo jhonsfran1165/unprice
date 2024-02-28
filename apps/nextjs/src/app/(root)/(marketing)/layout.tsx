@@ -3,7 +3,6 @@ import { Suspense } from "react"
 import { cookies } from "next/headers"
 import Link from "next/link"
 
-import { auth, signIn, signOut } from "@builderai/auth/server"
 import { Button, buttonVariants } from "@builderai/ui/button"
 import { ChevronRight, Logo } from "@builderai/ui/icons"
 import { ScrollArea } from "@builderai/ui/scroll-area"
@@ -14,6 +13,7 @@ import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
 import { MobileDropdown } from "~/components/layout/mobile-nav"
 import { AUTH_ROUTES } from "~/constants"
 import { navItems, siteConfig } from "~/constants/layout"
+import { env } from "~/env.mjs"
 
 export default function MarketingLayout(props: { children: ReactNode }) {
   return (
@@ -71,48 +71,26 @@ export default function MarketingLayout(props: { children: ReactNode }) {
   )
 }
 
-async function DashboardLink() {
-  const session = await auth()
+function DashboardLink() {
   const workspaceSlug = cookies().get("workspaceSlug")?.value
 
   if (!workspaceSlug) {
     return (
       <>
         <Link
-          href={`${process.env.NEXTJS_URL}/${AUTH_ROUTES.SIGNIN}`}
+          href={`${env.NEXTJS_URL}/${AUTH_ROUTES.SIGNIN}`}
           className={buttonVariants({ variant: "outline" })}
         >
           Sign In
           <ChevronRight className="ml-1 h-4 w-4" />
         </Link>
-
-        <form>
-          <Button
-            className="min-w-max"
-            formAction={async () => {
-              "use server"
-              await signIn("github")
-            }}
-          >
-            <span className="pl-2">Login</span>
-          </Button>
-          <Button
-            className="min-w-max"
-            formAction={async () => {
-              "use server"
-              await signOut()
-            }}
-          >
-            <span className="pl-2">Logout</span>
-          </Button>
-        </form>
       </>
     )
   }
 
   return (
     <Link
-      href={`${process.env.NEXTJS_URL}/${workspaceSlug}`}
+      href={`${env.NEXTJS_URL}/${workspaceSlug}`}
       className={buttonVariants({ variant: "outline" })}
     >
       Dashboard

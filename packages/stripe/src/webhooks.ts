@@ -1,7 +1,8 @@
 import type Stripe from "stripe"
 
-import { stripePriceToSubscriptionPlan } from "@builderai/config"
-import { db, eq, schema, utils } from "@builderai/db"
+import { db, eq } from "@builderai/db"
+import * as schema from "@builderai/db/schema"
+import * as utils from "@builderai/db/utils"
 
 import { stripe } from "."
 
@@ -36,9 +37,9 @@ export async function handleEvent(event: Stripe.Event) {
           and(eq(workspace.stripeId, stripeId)),
       })
 
-      const subscriptionPlan = stripePriceToSubscriptionPlan(
-        subscription.items.data[0]?.price.id
-      )
+      // const subscriptionPlan = stripePriceToSubscriptionPlan(
+      //   subscription.items.data[0]?.price.id
+      // )
 
       // TODO: this will change when we have a proper plan system in place
       /**
@@ -96,9 +97,9 @@ export async function handleEvent(event: Stripe.Event) {
         invoice.subscription
       )
 
-      const subscriptionPlan = stripePriceToSubscriptionPlan(
-        subscription.items.data[0]?.price.id
-      )
+      // const subscriptionPlan = stripePriceToSubscriptionPlan(
+      //   subscription.items.data[0]?.price.id
+      // )
 
       await db
         .update(schema.workspaces)
@@ -140,9 +141,9 @@ export async function handleEvent(event: Stripe.Event) {
           ? subscription.customer
           : subscription.customer.id
 
-      const subscriptionPlan = stripePriceToSubscriptionPlan(
-        subscription.items.data[0]?.price.id
-      )
+      // const subscriptionPlan = stripePriceToSubscriptionPlan(
+      //   subscription.items.data[0]?.price.id
+      // )
 
       await db
         .update(schema.workspaces)
