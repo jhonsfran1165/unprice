@@ -10,15 +10,14 @@ import type { WorkspacesJWTPayload } from "@builderai/db/validators"
 const useSecureCookies = process.env.VERCEL_ENV === "production"
 
 export const authConfig = {
-  trustHost: true,
+  trustHost:
+    Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
   session: {
     strategy: "jwt",
     updateAge: 24 * 60 * 60, // 24 hours for update session
     maxAge: 2592000, // 30 days for expiration
   },
   useSecureCookies,
-  // TODO: support redirect proxy
-  // redirectProxyUrl: process.env.NEXTAUTH_REDIRECT_PROXY_URL,
   pages: {
     signIn: "/auth/signin",
     signOut: "/auth/signout",
@@ -31,8 +30,7 @@ export const authConfig = {
     //   // send email to user
     // },
   },
-  debug: false,
-  // debug: process.env.NODE_ENV === "development",
+  debug: process.env.NODE_ENV === "development",
   adapter: {
     ...DrizzleAdapter(db, tableCreator),
     // override the default create user

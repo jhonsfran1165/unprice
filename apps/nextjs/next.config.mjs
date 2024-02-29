@@ -1,4 +1,5 @@
 import "@builderai/api/env"
+import "@builderai/auth/env"
 import "@builderai/stripe/env"
 import "./src/env.mjs"
 

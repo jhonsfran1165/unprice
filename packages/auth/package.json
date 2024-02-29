@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./server": "./src/server.ts",
     "./config": "./src/config.ts",
-    "./react": "./src/react.ts"
+    "./react": "./src/react.ts",
+    "./env": "./env.mjs"
   },
   "typesVersions": {
     "*": {
