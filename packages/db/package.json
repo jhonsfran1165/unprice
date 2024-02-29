@@ -42,7 +42,7 @@
     "@neondatabase/serverless": "^0.6.0",
     "@t3-oss/env-nextjs": "^0.7.3",
     "base-x": "^4.0.0",
-    "drizzle-orm": "^0.29.3",
+    "drizzle-orm": "^0.29.4",
     "drizzle-zod": "^0.5.1",
     "net": "^1.0.2",
     "postgres": "^3.3.5",
