@@ -72,7 +72,6 @@ export function VersionActions({
             await updatePlanVersion.mutateAsync({
               planId,
               versionId,
-              projectSlug,
               status: "published",
             })
           }}

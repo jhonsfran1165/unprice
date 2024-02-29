@@ -23,7 +23,6 @@ export default async function DashboardPage(props: {
   const { planVersion } = await api.plans.getVersionById({
     planSlug: planSlug,
     versionId: planVersionId,
-    projectSlug: projectSlug,
   })
 
   return (

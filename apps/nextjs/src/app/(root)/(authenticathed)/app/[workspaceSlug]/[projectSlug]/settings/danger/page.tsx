@@ -26,7 +26,10 @@ export default async function DangerZonePage(props: {
   return (
     <>
       <TransferProjectToPersonal projectSlug={props.params.projectSlug} />
-      <DeleteProject />
+      <DeleteProject
+        projectSlug={props.params.projectSlug}
+        workspaceSlug={props.params.workspaceSlug}
+      />
 
       <Suspense
         fallback={

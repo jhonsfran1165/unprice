@@ -62,7 +62,7 @@ export function DataTableRowActions<TData>({
   const [alertOpen, setAlertOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
 
-  const { data } = api.plans.listByActiveProject.useQuery()
+  const { data } = api.plans.listByActiveProject.useQuery({})
   const deleteUser = api.subscriptions.deleteCustomer.useMutation()
   const createPlanVersion = api.subscriptions.create.useMutation()
 

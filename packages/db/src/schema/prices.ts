@@ -48,14 +48,14 @@ export const featureSchema = z
     id: z.string(),
     slug: z.string(),
     title: z.string(),
-    description: z.string().optional(),
+    description: z.string().nullable(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
     type: z.enum(FEATURE_TYPES),
-    groupId: z.string(),
-    config: z.union([
-      configFlatFeature,
-      configMeteredFeature,
-      configHybridFeature,
-    ]),
+    groupId: z.string().optional(),
+    config: z
+      .union([configFlatFeature, configMeteredFeature, configHybridFeature])
+      .optional(),
   })
   .superRefine((data, _ctx) => {
     if (data.type === "flat") {
@@ -131,7 +131,7 @@ export const features = pgTableProject(
     slug: text("slug").notNull(),
     title: varchar("title", { length: 50 }).notNull(),
     description: text("description"),
-    type: typeFeatureEnum("type").default("flat"),
+    type: typeFeatureEnum("type").default("flat").notNull(),
   },
   (table) => ({
     primary: primaryKey({
