@@ -10,8 +10,6 @@ export const env = createEnv({
     ),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
     UPSTASH_REDIS_REST_URL: z.string().url(),
-    RATELIMIT_UPSTASH_REDIS_REST_URL: z.string().url(),
-    RATELIMIT_UPSTASH_REDIS_REST_TOKEN: z.string(),
   },
   experimental__runtimeEnv: {},
   skipValidation:

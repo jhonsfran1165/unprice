@@ -21,11 +21,11 @@ export const ratelimit = (
 ) => {
   return new Ratelimit({
     redis: new Redis({
-      url: env.RATELIMIT_UPSTASH_REDIS_REST_URL,
-      token: env.RATELIMIT_UPSTASH_REDIS_REST_TOKEN,
+      url: env.UPSTASH_REDIS_REST_URL,
+      token: env.UPSTASH_REDIS_REST_TOKEN,
     }),
     limiter: Ratelimit.slidingWindow(requests, seconds),
     analytics: true,
-    prefix: "dub",
+    prefix: "builderai",
   })
 }
