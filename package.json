@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@builderai/prettier-config": "0.1.0",
-    "@manypkg/cli": "^0.21.1",
+    "@manypkg/cli": "^0.21.2",
     "@turbo/gen": "^1.11.3",
     "cross-env": "^7.0.3",
     "prettier": "^3.1.1",
