@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server"
 
-export const parse = (req: NextRequest) => {
+import type { NextAuthRequest } from "@builderai/auth/server"
+
+export const parse = (req: NextAuthRequest) => {
   const domain = req.headers.get("host") ?? "localhost"
   const suddomain = domain.split(".")[0]
   const ip = req.ip ?? "127.0.0.1"

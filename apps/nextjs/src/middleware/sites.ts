@@ -1,9 +1,10 @@
-import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
+
+import type { NextAuthRequest } from "@builderai/auth/server"
 
 import { parse } from "./utils"
 
-export default function SitesMiddleware(req: NextRequest) {
+export default function SitesMiddleware(req: NextAuthRequest) {
   const { domain, path } = parse(req)
   // retrieve the current response
   const url = req.nextUrl

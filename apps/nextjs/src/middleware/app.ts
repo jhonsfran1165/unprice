@@ -2,7 +2,6 @@ import {
   RequestCookies,
   ResponseCookies,
 } from "next/dist/compiled/@edge-runtime/cookies"
-import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
 import type { NextAuthRequest } from "@builderai/auth/server"
@@ -28,7 +27,7 @@ function isSlug(str: string) {
  * Copy cookies from the Set-Cookie header of the response to the Cookie header of the request,
  * so that it will appear to SSR/RSC as if the user already has the new cookies.
  */
-function applySetCookie(req: NextRequest, res: NextResponse) {
+function applySetCookie(req: NextAuthRequest, res: NextResponse) {
   // 1. Parse Set-Cookie header from the response
   const setCookies = new ResponseCookies(res.headers)
 
