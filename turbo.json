@@ -1,6 +1,6 @@
 {
   "$schema": "https://turborepo.org/schema.json",
-  "globalDependencies": ["**/.env"],
+  "globalDependencies": ["**/.env.*local"],
   "pipeline": {
     "topo": {
       "dependsOn": ["^topo"]
