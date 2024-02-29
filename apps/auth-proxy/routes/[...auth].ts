@@ -1,11 +1,12 @@
-import { Auth } from '@auth/core';
-import Github from '@auth/core/providers/github';
-import { eventHandler, toWebRequest } from 'h3';
+import { Auth } from "@auth/core"
+import Github from "@auth/core/providers/github"
+import { eventHandler, toWebRequest } from "h3"
 
 export default eventHandler((event) =>
   Auth(toWebRequest(event), {
     secret: process.env.AUTH_SECRET,
-    trustHost: Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
+    trustHost:
+      Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
     redirectProxyUrl: process.env.AUTH_REDIRECT_PROXY_URL,
     basePath: "/auth",
     providers: [
@@ -20,5 +21,5 @@ export default eventHandler((event) =>
         }),
       }),
     ],
-  }),
-);
+  })
+)
