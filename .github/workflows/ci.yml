@@ -11,7 +11,7 @@ on:
 # @link https://turborepo.org/docs/core-concepts/remote-caching#remote-caching-on-vercel-builds
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}\
 
 jobs:
   build-lint:
@@ -23,8 +23,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
+      - name: Set up pnpm
         uses: pnpm/action-setup@v3
+        with:
+          version: 8
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
