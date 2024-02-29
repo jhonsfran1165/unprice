@@ -6,8 +6,7 @@ import { auth } from "@builderai/auth/server"
 
 import { SignInGithub } from "./github-signin"
 
-// TODO: use edge when next auth supports it
-// export const runtime = "edge"
+export const runtime = "edge"
 
 export default async function AuthenticationPage() {
   const session = await auth()
@@ -15,6 +14,7 @@ export default async function AuthenticationPage() {
   if (session?.user?.id) {
     redirect("/")
   }
+
   return (
     <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
       <div className="flex flex-col space-y-2 text-center">
