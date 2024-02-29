@@ -6,12 +6,11 @@
  * tl;dr - this is where all the tRPC server stuff is created and plugged in.
  * The pieces you will need to use are documented accordingly near the end
  */
-import type { NextRequest } from "next/server"
 import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import { initTRPC, TRPCError } from "@trpc/server"
 import { ZodError } from "zod"
 
-import type { Session } from "@builderai/auth/server"
+import type { NextAuthRequest, Session } from "@builderai/auth/server"
 import { auth } from "@builderai/auth/server"
 import { db, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
@@ -33,7 +32,7 @@ interface CreateContextOptions {
   headers: Headers
   session: Session | null
   apiKey?: string | null
-  req?: NextRequest
+  req?: NextAuthRequest
   activeWorkspaceSlug: string
   activeProjectSlug: string
 }
@@ -64,7 +63,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
 export const createTRPCContext = async (opts: {
   headers: Headers
   session: Session | null
-  req?: NextRequest
+  req?: NextAuthRequest
 }) => {
   const session = opts.session ?? (await auth())
   const userId = session?.user?.id ?? "unknown"

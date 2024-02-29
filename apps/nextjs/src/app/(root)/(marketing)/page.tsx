@@ -14,8 +14,6 @@ import { GitHub } from "@builderai/ui/icons"
 import { marketingFeatures } from "~/app/(root)/config"
 import { siteConfig } from "~/constants/layout"
 
-export const runtime = "edge"
-
 export default function Home() {
   return (
     <main className="flex min-h-screen w-full flex-col items-center justify-center pt-48">
