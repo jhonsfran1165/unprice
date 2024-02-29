@@ -53,7 +53,7 @@
     "@builderai/eslint-config": "^0.2.0",
     "@builderai/prettier-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
-    "dotenv-cli": "^7.2.1",
+    "dotenv-cli": "^7.3.0",
     "drizzle-kit": "^0.20.14",
     "eslint": "^8.56.0",
     "pg": "^8.11.3",
