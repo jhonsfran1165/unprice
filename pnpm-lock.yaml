@@ -128,10 +128,10 @@ importers:
         version: 11.0.0-next-beta.264(@trpc/server@11.0.0-next-beta.264)
       '@trpc/next':
         specifier: 11.0.0-next-beta.264
-        version: 11.0.0-next-beta.264(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/react-query@11.0.0-next-beta.274)(@trpc/server@11.0.0-next-beta.264)(next@14.1.1-canary.81)(react-dom@18.2.0)(react@18.2.0)
+        version: 11.0.0-next-beta.264(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/react-query@11.0.0-next-beta.300)(@trpc/server@11.0.0-next-beta.264)(next@14.1.1-canary.81)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/react-query':
         specifier: next
-        version: 11.0.0-next-beta.274(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0)
+        version: 11.0.0-next-beta.300(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server':
         specifier: 11.0.0-next-beta.264
         version: 11.0.0-next-beta.264
@@ -560,8 +560,8 @@ importers:
         specifier: ^0.7.3
         version: 0.7.3(typescript@5.3.3)(zod@3.22.4)
       stripe:
-        specifier: ^14.15.0
-        version: 14.15.0
+        specifier: ^14.19.0
+        version: 14.19.0
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -2617,6 +2617,7 @@ packages:
     dependencies:
       is-glob: 4.0.3
       micromatch: 4.0.5
+      napi-wasm: 1.1.0
     dev: true
     bundledDependencies:
       - napi-wasm
@@ -4894,7 +4895,7 @@ packages:
       '@trpc/server': 11.0.0-next-beta.264
     dev: false
 
-  /@trpc/next@11.0.0-next-beta.264(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/react-query@11.0.0-next-beta.274)(@trpc/server@11.0.0-next-beta.264)(next@14.1.1-canary.81)(react-dom@18.2.0)(react@18.2.0):
+  /@trpc/next@11.0.0-next-beta.264(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/react-query@11.0.0-next-beta.300)(@trpc/server@11.0.0-next-beta.264)(next@14.1.1-canary.81)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-z/t+TweTk5nMBtp8Ug8FxnKkN6a9YBEZ+WGCPj5JmCjewDuslEutcML4PX4zcYBTNNz4PQYmu7vZf65xe2dnWw==}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
@@ -4912,7 +4913,7 @@ packages:
     dependencies:
       '@tanstack/react-query': 5.18.1(react@18.2.0)
       '@trpc/client': 11.0.0-next-beta.264(@trpc/server@11.0.0-next-beta.264)
-      '@trpc/react-query': 11.0.0-next-beta.274(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0)
+      '@trpc/react-query': 11.0.0-next-beta.300(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server': 11.0.0-next-beta.264
       next: 14.1.1-canary.81(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
@@ -4942,12 +4943,12 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@trpc/react-query@11.0.0-next-beta.274(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-QldZ4KeKbKHpUroIwL21W8WScMawRiq6dSevH8B+bCEzwgTOwYm6qL6RgDMtQayr/A1xnDvOrsh/4gr+wKXCbA==}
+  /@trpc/react-query@11.0.0-next-beta.300(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-ZEsQyhm1WosvYi94q6ilMSswGdGFQzMeZu4NUJPBMtKt8/LBsG6HK7n7zwnY9XZb1THyujebeOxwJYbmCOWabw==}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
-      '@trpc/client': 11.0.0-next-beta.274+bc5196e28
-      '@trpc/server': 11.0.0-next-beta.274+bc5196e28
+      '@trpc/client': 11.0.0-next-beta.300+2486831f7
+      '@trpc/server': 11.0.0-next-beta.300+2486831f7
       react: '>=18.2.0'
       react-dom: '>=18.2.0'
     dependencies:
@@ -10337,6 +10338,10 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  /napi-wasm@1.1.0:
+    resolution: {integrity: sha512-lHwIAJbmLSjF9VDRm9GoVOy9AGp3aIvkjv+Kvz9h16QR3uSVYH78PNQUnT2U4X53mhlnV2M7wrhibQ3GHicDmg==}
+    dev: true
+
   /natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
@@ -12683,8 +12688,8 @@ packages:
       acorn: 8.11.3
     dev: true
 
-  /stripe@14.15.0:
-    resolution: {integrity: sha512-KPxNcf0iFWA38pkzeJyJklK9qQJo/6FEBDcLsZxDCVHfn8yT+uP9p1JSYiOhIxCyh+6BD5XEVOMnnBJnVeEnfA==}
+  /stripe@14.19.0:
+    resolution: {integrity: sha512-Je2USTpUib3hApIgoHXViLoYkDLp+AXdUJvJ6aMQ/AcvZK1PcC7N8nTceh+0gpdotX8izlWN4QyVdMcptubHBQ==}
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 20.8.0
