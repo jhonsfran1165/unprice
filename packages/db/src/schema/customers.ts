@@ -21,6 +21,7 @@ export const customers = pgTableProject(
     ),
     primary: primaryKey({
       columns: [table.id, table.projectId],
+      name: "pk_customer",
     }),
   })
 )

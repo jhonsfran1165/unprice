@@ -23,9 +23,11 @@ export const ingestions = pgTableProject(
       fk: foreignKey({
         columns: [table.apikeyId, table.projectId],
         foreignColumns: [apikeys.id, apikeys.projectId],
+        name: "ingestions_apikey_id_fkey",
       }),
       primary: primaryKey({
         columns: [table.projectId, table.id],
+        name: "ingestions_pkey",
       }),
     }
   }

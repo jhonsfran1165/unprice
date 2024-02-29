@@ -53,6 +53,7 @@ export const members = pgTableProject(
   (table) => ({
     compoundKey: primaryKey({
       columns: [table.userId, table.workspaceId],
+      name: "members_pkey",
     }),
   })
 )
@@ -68,6 +69,7 @@ export const invites = pgTableProject(
   (table) => ({
     compoundKey: primaryKey({
       columns: [table.email, table.workspaceId],
+      name: "invites_pkey",
     }),
   })
 )

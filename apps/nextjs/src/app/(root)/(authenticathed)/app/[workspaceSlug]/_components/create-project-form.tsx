@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 
 import type { Project, ProjectInsert } from "@builderai/db/validators"
 import { createProjectSchema } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
 import {
   Form,
   FormControl,
@@ -16,8 +15,8 @@ import {
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import { LoadingAnimation } from "@builderai/ui/loading-animation"
 
+import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -29,13 +28,12 @@ const CreateProjectForm = (props: {
   const router = useRouter()
 
   const apiUtils = api.useUtils()
-  const [isPending, startTransition] = useTransition()
+  const [_isPending, startTransition] = useTransition()
 
   const form = useZodForm({
     schema: createProjectSchema,
     defaultValues: {
       name: "",
-      url: "",
     },
   })
 
@@ -66,7 +64,6 @@ const CreateProjectForm = (props: {
       <form
         id="add-org-form"
         onSubmit={async (e) => {
-          e.preventDefault()
           await form.handleSubmit(onSubmit)(e)
         }}
         className="space-y-4"
@@ -104,19 +101,11 @@ const CreateProjectForm = (props: {
         />
 
         <div className="sm:col-span-full">
-          <Button
-            form="add-org-form"
-            title="Submit"
-            type="submit"
-            className="w-full sm:w-auto"
-            disabled={form.formState.isSubmitting || isPending}
-          >
-            {`Create Project`}
-            {form.formState.isSubmitting ||
-              (isPending && (
-                <LoadingAnimation variant={"destructive"} className="ml-2" />
-              ))}
-          </Button>
+          <SubmitButton
+            isDisabled={form.formState.isSubmitting}
+            isSubmitting={form.formState.isSubmitting}
+            label="Create Project"
+          />
         </div>
       </form>
     </Form>

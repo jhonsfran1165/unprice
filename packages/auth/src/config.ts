@@ -10,6 +10,7 @@ import type { WorkspacesJWTPayload } from "@builderai/db/validators"
 const useSecureCookies = process.env.VERCEL_ENV === "production"
 
 export const authConfig = {
+  trustHost: true,
   session: {
     strategy: "jwt",
     updateAge: 24 * 60 * 60, // 24 hours for update session
@@ -147,21 +148,25 @@ export const authConfig = {
       // we get the workspaces for the user and add it to the token so it can be used in the session
       // this is used to avoid fetching the workspaces for the user in every request
       // we use prepared statements to improve performance
-      const userWithWorkspaces =
-        await prepared.workspacesByUserPrepared.execute({
-          userId,
-        })
+      try {
+        const userWithWorkspaces =
+          await prepared.workspacesByUserPrepared.execute({
+            userId,
+          })
 
-      const workspaces = userWithWorkspaces?.members.map((member) => ({
-        id: member.workspace.id,
-        slug: member.workspace.slug,
-        role: member.role,
-        isPersonal: member.workspace.isPersonal,
-        plan: member.workspace.plan,
-      }))
+        const workspaces = userWithWorkspaces?.members.map((member) => ({
+          id: member.workspace.id,
+          slug: member.workspace.slug,
+          role: member.role,
+          isPersonal: member.workspace.isPersonal,
+          plan: member.workspace.plan,
+        }))
 
-      token.id = userId
-      token.workspaces = workspaces ? workspaces : []
+        token.id = userId
+        token.workspaces = workspaces ? workspaces : []
+      } catch (error) {
+        throw "Error getting workspaces for user"
+      }
 
       return token
     },

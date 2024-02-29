@@ -88,6 +88,7 @@ export const plans = pgTableProject(
   (table) => ({
     primary: primaryKey({
       columns: [table.id, table.projectId],
+      name: "plans_pkey",
     }),
     slug: uniqueIndex("slug_plan").on(table.slug, table.projectId),
   })
@@ -110,9 +111,11 @@ export const versions = pgTableProject(
     planfk: foreignKey({
       columns: [table.planId, table.projectId],
       foreignColumns: [plans.id, plans.projectId],
+      name: "plan_versions_plan_id_fkey",
     }),
     primary: primaryKey({
       columns: [table.id, table.projectId],
+      name: "plan_versions_pkey",
     }),
     unique: uniqueIndex("unique_version").on(table.planId, table.version),
   })
@@ -133,6 +136,7 @@ export const features = pgTableProject(
   (table) => ({
     primary: primaryKey({
       columns: [table.projectId, table.id],
+      name: "features_pkey",
     }),
     slug: uniqueIndex("slug_feature").on(table.slug, table.projectId),
   })

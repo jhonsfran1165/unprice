@@ -22,18 +22,22 @@ export const subscriptions = pgTableProject(
   (table) => ({
     primary: primaryKey({
       columns: [table.id, table.projectId],
+      name: "subscriptions_pkey",
     }),
     customerfk: foreignKey({
       columns: [table.customerId, table.projectId],
       foreignColumns: [customers.id, customers.projectId],
+      name: "subscriptions_customer_id_fkey",
     }),
     versionfk: foreignKey({
       columns: [table.planVersionId, table.projectId],
       foreignColumns: [versions.id, versions.projectId],
+      name: "subscriptions_plan_version_id_fkey",
     }),
     planfk: foreignKey({
       columns: [table.planId, table.projectId],
       foreignColumns: [plans.id, plans.projectId],
+      name: "subscriptions_plan_id_fkey",
     }),
     unique: uniqueIndex("unique_active_subscription")
       .on(table.customerId)

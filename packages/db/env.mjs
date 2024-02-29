@@ -16,7 +16,9 @@ export const env = createEnv({
       process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
     ),
     DATABASE_URL: z.string().min(1).url(),
-    DATABASE_URL_MIGRATOR: z.string().min(1).url(),
+    DATABASE_URL_MIGRATOR: z.string().url().optional(),
+    DATABASE_URL_LOCAL: z.string().url().optional(),
+    DATABASE_URL_MIGRATOR_LOCAL: z.string().url().optional(),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis

@@ -25,6 +25,7 @@ export const apikeys = pgTableProject(
   (table) => ({
     primary: primaryKey({
       columns: [table.id, table.projectId],
+      name: "pk_apikeys",
     }),
     key: index("key").on(table.key),
     slug: uniqueIndex("slug").on(table.name),

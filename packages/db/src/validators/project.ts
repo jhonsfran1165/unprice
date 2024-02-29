@@ -3,10 +3,15 @@ import { z } from "zod"
 
 import * as schema from "../schema"
 
-export const createProjectSchema = createInsertSchema(schema.projects, {
+export const insertProjectBaseSchema = createInsertSchema(schema.projects, {
   slug: z.string().min(1),
   name: z.string().min(1),
-  url: z.string().url(),
+  url: z.string().url().optional(),
+})
+
+export const createProjectSchema = insertProjectBaseSchema.pick({
+  name: true,
+  url: true,
 })
 
 export const selectProjectSchema = createSelectSchema(schema.projects, {
