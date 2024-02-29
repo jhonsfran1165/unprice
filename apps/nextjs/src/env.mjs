@@ -28,7 +28,6 @@ export const env = createEnv({
     VERCEL_ENV: process.env.VERCEL_ENV,
   },
   skipValidation:
-    !!process.env.CI ||
     !!process.env.SKIP_ENV_VALIDATION ||
     process.env.npm_lifecycle_event === "lint",
 })

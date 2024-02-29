@@ -91,19 +91,20 @@ export const planConfigSchema = z.record(
 )
 
 export const updateVersionPlan = versionSelectBaseSchema
+  .extend({
+    versionId: z.coerce.number().min(0),
+  })
   .pick({
     planId: true,
     featuresConfig: true,
     addonsConfig: true,
     status: true,
+    versionId: true,
   })
   .partial({
     status: true,
     featuresConfig: true,
     addonsConfig: true,
-  })
-  .extend({
-    versionId: z.coerce.number().min(0),
   })
 
 export type GroupType = "Group"

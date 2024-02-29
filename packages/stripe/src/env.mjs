@@ -10,7 +10,7 @@ export const env = createEnv({
       process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
     ),
 
-    STRIPE_API_KEY: z.string(),
+    STRIPE_API_KEY: z.string().min(1),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis

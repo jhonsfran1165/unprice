@@ -58,7 +58,6 @@ export default async function PriceLayout(props: {
                 <CreateNewVersion plan={plan} projectSlug={projectSlug} />
                 <VersionActions
                   planId={plan.id}
-                  projectSlug={projectSlug}
                   versionId={Number(planVersionId)}
                 />
               </div>

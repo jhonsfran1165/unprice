@@ -18,11 +18,9 @@ import { api } from "~/trpc/client"
 export function VersionActions({
   planId,
   versionId,
-  projectSlug,
 }: {
   planId: string
   versionId: number
-  projectSlug: string
 }) {
   const toaster = useToast()
 
