@@ -1,0 +1,41 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1708774055433,
+      "tag": "0000_absent_steel_serpent",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1708985442020,
+      "tag": "0001_glamorous_fabian_cortez",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1709210343314,
+      "tag": "0002_nice_scarlet_spider",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1709210950261,
+      "tag": "0003_known_odin",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1709213165847,
+      "tag": "0004_yielding_morlocks",
+      "breakpoints": true
+    }
+  ]
+}

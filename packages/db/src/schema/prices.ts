@@ -1,0 +1,169 @@
+import { relations } from "drizzle-orm"
+import {
+  foreignKey,
+  json,
+  primaryKey,
+  serial,
+  text,
+  uniqueIndex,
+  varchar,
+} from "drizzle-orm/pg-core"
+import * as z from "zod"
+
+import { FEATURE_TYPES, TIER_MODES } from "../utils"
+import { pgTableProject } from "../utils/_table"
+import { cuid, projectID, timestamps } from "../utils/sql"
+import { currencyEnum, statusPlanEnum, typeFeatureEnum } from "./enums"
+import { projects } from "./projects"
+
+export const configFlatFeature = z.object({
+  price: z.coerce.number().min(0),
+  divider: z.coerce
+    .number()
+    .min(0)
+    .describe("Divider for the price. Could be number of days, hours, etc."),
+})
+
+export const configMeteredFeature = z.object({
+  mode: z.enum(TIER_MODES),
+  divider: z.coerce
+    .number()
+    .min(0)
+    .describe("Divider for the price. Could be number of days, hours, etc."),
+  tiers: z.array(
+    z.object({
+      price: z.coerce.number().min(0).describe("Price per unit"),
+      up: z.coerce.number().min(0),
+      flat: z.coerce.number().min(0),
+    })
+  ),
+})
+
+export const configHybridFeature = z.object({
+  price: z.coerce.number().min(0),
+})
+
+export const featureSchema = z
+  .object({
+    id: z.string(),
+    slug: z.string(),
+    title: z.string(),
+    description: z.string().optional(),
+    type: z.enum(FEATURE_TYPES),
+    groupId: z.string(),
+    config: z.union([
+      configFlatFeature,
+      configMeteredFeature,
+      configHybridFeature,
+    ]),
+  })
+  .superRefine((data, _ctx) => {
+    if (data.type === "flat") {
+      configFlatFeature.parse(data.config)
+    } else if (data.type === "metered") {
+      configMeteredFeature.parse(data.config)
+    } else if (data.type === "hybrid") {
+      configHybridFeature.parse(data.config)
+    }
+  })
+
+export const versionPlanConfig = z.record(
+  z.object({
+    name: z.string(),
+    features: z.array(featureSchema),
+  })
+)
+
+export type PlanConfig = z.infer<typeof versionPlanConfig>
+
+export const plans = pgTableProject(
+  "plans",
+  {
+    ...projectID,
+    ...timestamps,
+    slug: text("slug").notNull(),
+    title: varchar("title", { length: 50 }).notNull(),
+    currency: currencyEnum("currency").default("EUR"),
+  },
+  (table) => ({
+    primary: primaryKey({
+      columns: [table.id, table.projectId],
+      name: "plans_pkey",
+    }),
+    slug: uniqueIndex("slug_plan").on(table.slug, table.projectId),
+  })
+)
+
+// TODO: intitlements should be a separate table
+
+export const versions = pgTableProject(
+  "plan_versions",
+  {
+    ...projectID,
+    ...timestamps,
+    planId: cuid("plan_id").notNull(),
+    version: serial("version").notNull(),
+    featuresConfig: json("features_config").default({}).$type<PlanConfig>(), // config features of the plan
+    addonsConfig: json("addons_config").default({}).$type<PlanConfig>(), // config addons of the plan
+    status: statusPlanEnum("plan_version_status").default("draft"),
+  },
+  (table) => ({
+    planfk: foreignKey({
+      columns: [table.planId, table.projectId],
+      foreignColumns: [plans.id, plans.projectId],
+      name: "plan_versions_plan_id_fkey",
+    }),
+    primary: primaryKey({
+      columns: [table.id, table.projectId],
+      name: "plan_versions_pkey",
+    }),
+    unique: uniqueIndex("unique_version").on(table.planId, table.version),
+  })
+)
+
+// TODO: this table could have id as incremental so we can have a better performance
+// also we can use binmanry to store the data in a more efficient way in redis
+export const features = pgTableProject(
+  "features",
+  {
+    ...projectID,
+    ...timestamps,
+    slug: text("slug").notNull(),
+    title: varchar("title", { length: 50 }).notNull(),
+    description: text("description"),
+    type: typeFeatureEnum("type").default("flat"),
+  },
+  (table) => ({
+    primary: primaryKey({
+      columns: [table.projectId, table.id],
+      name: "features_pkey",
+    }),
+    slug: uniqueIndex("slug_feature").on(table.slug, table.projectId),
+  })
+)
+
+export const planRelations = relations(plans, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [plans.projectId],
+    references: [projects.id],
+  }),
+  versions: many(versions),
+}))
+
+export const featureRelations = relations(features, ({ one }) => ({
+  project: one(projects, {
+    fields: [features.projectId],
+    references: [projects.id],
+  }),
+}))
+
+export const versionRelations = relations(versions, ({ one }) => ({
+  project: one(projects, {
+    fields: [versions.projectId],
+    references: [projects.id],
+  }),
+  plan: one(plans, {
+    fields: [versions.planId],
+    references: [plans.id],
+  }),
+}))

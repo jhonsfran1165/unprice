@@ -1,0 +1,141 @@
+@import "@radix-ui/colors/gray.css";
+@import "@radix-ui/colors/blue.css";
+@import "@radix-ui/colors/green.css";
+@import "@radix-ui/colors/sand.css";
+@import "@radix-ui/colors/crimson.css";
+@import "@radix-ui/colors/yellow.css";
+@import "@radix-ui/colors/red.css";
+@import "@radix-ui/colors/amber.css";
+@import "@radix-ui/colors/amber-dark.css";
+@import "@radix-ui/colors/sand-dark.css";
+@import "@radix-ui/colors/yellow-dark.css";
+@import "@radix-ui/colors/crimson-dark.css";
+@import "@radix-ui/colors/gray-dark.css";
+@import "@radix-ui/colors/blue-dark.css";
+@import "@radix-ui/colors/green-dark.css";
+@import "@radix-ui/colors/red-dark.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --ring: 215deg 20.2% 65.1%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --ring: 216 34% 17%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  /* default styles */
+  h1 {
+    @apply font-primary text-4xl font-extrabold leading-[1.15] text-background-textContrast sm:leading-[1.15] md:text-6xl;
+  }
+
+  h2 {
+    @apply font-primary text-2xl font-bold text-background-textContrast md:text-3xl;
+  }
+
+  h3 {
+    @apply font-primary text-xl font-semibold text-background-textContrast md:text-2xl;
+  }
+
+  p {
+    @apply font-secondary text-base font-semibold text-background-text md:text-xs;
+  }
+
+  body {
+    @apply bg-background-base font-secondary text-background-text;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+  }
+
+  .container {
+    @apply max-sm:px-4;
+  }
+}
+
+/* alias classes to override shadcn ui */
+@layer utilities {
+  .primary {
+    @apply border border-primary-border bg-primary-bg text-primary-text;
+  }
+
+  .secondary {
+    @apply border border-secondary-border bg-secondary-bg text-secondary-text;
+  }
+
+  .warning {
+    @apply border border-warning-border bg-warning-bg text-warning-text;
+  }
+
+  .default {
+    @apply border border-background-border bg-background-base text-background-text;
+  }
+
+  .danger {
+    @apply border border-danger-border bg-danger-bg text-danger-text;
+  }
+
+  .info {
+    @apply border border-info-border bg-info-bg text-info-text;
+  }
+
+  .button-ghost {
+    @apply bg-transparent text-background-text hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
+  }
+
+  .button-default {
+    @apply default hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
+  }
+
+  .button-danger {
+    @apply danger hover:border-danger-borderHover hover:bg-danger-solid hover:text-danger-foreground active:bg-danger-bgActive;
+  }
+
+  .button-primary {
+    @apply primary hover:border-primary-borderHover hover:bg-primary-solid hover:text-primary-foreground active:bg-primary-bgActive;
+  }
+
+  .button-warning {
+    @apply warning hover:border-warning-borderHover hover:bg-warning-solid hover:text-warning-foreground active:bg-warning-bgActive;
+  }
+
+  .button-secondary {
+    @apply secondary hover:border-secondary-borderHover hover:bg-secondary-solid hover:text-secondary-foreground active:bg-secondary-bgActive;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+}
+
+/** Prevent scrolling on body when modal is open */
+body[style*="pointer-events: none"] .overflow-auto,
+body[style*="pointer-events: none"] .overflow-y-auto,
+body[style*="pointer-events: none"] .overflow-x-auto {
+  overflow: hidden !important;
+}
+
+@media (max-width: 640px) {
+  .container {
+    @apply px-4;
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "globalDependencies": ["**/.env"],
+  "pipeline": {
+    "topo": {
+      "dependsOn": ["^topo"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "next-env.d.ts",
+        ".expo/**",
+        ".output/**"
+      ]
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "format": {
+      "outputs": ["node_modules/.cache/.prettiercache"],
+      "outputMode": "new-only"
+    },
+    "lint": {
+      "dependsOn": ["^topo"],
+      "outputs": ["node_modules/.cache/.eslintcache"]
+    },
+    "typecheck": {
+      "dependsOn": ["^topo"],
+      "outputs": ["node_modules/.cache/tsbuildinfo.json"]
+    },
+    "clean": {
+      "cache": false
+    },
+    "//#clean": {
+      "cache": false
+    }
+  },
+  "globalEnv": [
+    "DATABASE_URL",
+    "NEXTJS_URL",
+    "SKIP_ENV_VALIDATION",
+    "STRIPE_API_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "NEXT_PUBLIC_STRIPE_STD_PRODUCT_ID",
+    "NEXT_PUBLIC_STRIPE_STD_MONTHLY_PRICE_ID",
+    "NEXT_PUBLIC_STRIPE_PRO_PRODUCT_ID",
+    "NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID",
+    "PROJECT_ID_VERCEL",
+    "TEAM_ID_VERCEL",
+    "VERCEL_AUTH_BEARER_TOKEN",
+    "AUTH_SECRET",
+    "TINYBIRD_TOKEN",
+    "TINYBIRD_URL",
+    "AUTH_GITHUB_CLIENT_ID",
+    "AUTH_GITHUB_CLIENT_SECRET",
+    "RESEND_API_KEY"
+  ]
+}

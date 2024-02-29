@@ -1,0 +1,153 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "tRPC OpenAPI",
+    "description": "API for Builderai",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "http://app.localhost:3000/api/trpc" }],
+  "paths": {
+    "/edge/organization.deleteMember": {
+      "get": {
+        "operationId": "organization-deleteMember",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "memberName": { "type": "string", "nullable": true }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/project.listByActiveWorkspace": {
+      "get": {
+        "operationId": "project-listByActiveWorkspace",
+        "security": [{ "Authorization": [] }],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "projects": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "id": { "type": "string" },
+                          "url": { "type": "string" },
+                          "tier": { "type": "string" },
+                          "slug": { "type": "string" },
+                          "styles": {
+                            "type": "object",
+                            "properties": {
+                              "backgroundImage": { "type": "string" }
+                            },
+                            "required": ["backgroundImage"],
+                            "additionalProperties": false
+                          },
+                          "workspace": {
+                            "type": "object",
+                            "properties": { "slug": { "type": "string" } },
+                            "required": ["slug"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "id",
+                          "url",
+                          "tier",
+                          "slug",
+                          "styles",
+                          "workspace"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "limit": { "type": "number" },
+                    "limitReached": { "type": "boolean" }
+                  },
+                  "required": ["projects", "limit", "limitReached"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Authorization": { "type": "http", "scheme": "bearer" }
+    },
+    "responses": {
+      "error": {
+        "description": "Error response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "code": { "type": "string" },
+                "issues": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": { "message": { "type": "string" } },
+                    "required": ["message"],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": ["message", "code"],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "schemas": {}
+  },
+  "tags": [
+    { "name": "builderai", "description": "Operations related to builderai" }
+  ],
+  "externalDocs": { "url": "http://example.com/docs" },
+  "x-speakeasy-retries": {
+    "strategy": "backoff",
+    "backoff": {
+      "initialInterval": 500,
+      "maxInterval": 60000,
+      "maxElapsedTime": 3600000,
+      "exponent": 1.5
+    },
+    "statusCodes": ["5XX"],
+    "retryConnectionErrors": true
+  }
+}
