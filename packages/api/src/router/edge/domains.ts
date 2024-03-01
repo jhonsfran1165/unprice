@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { env } from "../../env.mjs"
 import {
   createTRPCRouter,
   protectedActiveWorkspaceAdminProcedure,
@@ -30,6 +31,7 @@ export const domainResponseSchema = z.object({
   updatedAt: z.number().optional(),
   createdAt: z.number().optional(),
   verified: z.boolean().optional(),
+  configVerifiedAt: z.number().optional().nullable(),
   verification: z
     .array(
       z.object({
@@ -57,34 +59,32 @@ export const domainRouter = createTRPCRouter({
     .input(z.object({ domain: z.string() }))
     .mutation(async (opts) => {
       const data = await fetch(
-        `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains?teamId=${process.env.TEAM_ID_VERCEL}`,
+        `https://api.vercel.com/v9/projects/${env.PROJECT_ID_VERCEL}/domains?teamId=${env.TEAM_ID_VERCEL}`,
         {
           body: `{\n  "name": "${opts.input.domain}"\n}`,
           headers: {
-            Authorization: `Bearer ${process.env.VERCEL_AUTH_BEARER_TOKEN}`,
+            Authorization: `Bearer ${env.VERCEL_AUTH_BEARER_TOKEN}`,
             "Content-Type": "application/json",
           },
           method: "POST",
         }
       )
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const json = await data.json()
+      console.log({ json })
       return domainResponseSchema.parse(json)
     }),
   removeDomainFromVercelProject: protectedActiveWorkspaceAdminProcedure
     .input(z.object({ domain: z.string() }))
     .mutation(async (opts) => {
       const data = await fetch(
-        `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains/${opts.input.domain}?teamId=${process.env.TEAM_ID_VERCEL}`,
+        `https://api.vercel.com/v9/projects/${env.PROJECT_ID_VERCEL}/domains/${opts.input.domain}?teamId=${env.TEAM_ID_VERCEL}`,
         {
           headers: {
-            Authorization: `Bearer ${process.env.VERCEL_AUTH_BEARER_TOKEN}`,
+            Authorization: `Bearer ${env.VERCEL_AUTH_BEARER_TOKEN}`,
           },
           method: "DELETE",
         }
       )
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return await data.json()
     }),
   // removeDomainFromVercelTeam: protectedActiveWorkspaceAdminProcedure
@@ -101,44 +101,65 @@ export const domainRouter = createTRPCRouter({
   //     );
   //     return await data.json();
   //   }),
-  getDomains: protectedActiveWorkspaceAdminProcedure.query(async (_opts) => {
-    const data = await fetch(
-      `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains?teamId=${process.env.TEAM_ID_VERCEL}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${process.env.VERCEL_AUTH_BEARER_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      }
-    )
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const json = await data.json()
-
-    const result = domainResponseSchema
-      .extend({
-        error: z
-          .object({
-            code: z.string(),
-            message: z.string(),
-          })
-          .optional(),
-      })
-      .array()
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      .parse(json?.domains ?? [])
-    return result
-  }),
   getDomainResponse: protectedActiveWorkspaceAdminProcedure
     .input(z.object({ domain: z.string() }))
     .query(async (opts) => {
       const data = await fetch(
-        `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains/${opts.input.domain}?teamId=${process.env.TEAM_ID_VERCEL}`,
+        `https://api.vercel.com/v9/projects/${env.PROJECT_ID_VERCEL}/domains/${opts.input.domain}?teamId=${env.TEAM_ID_VERCEL}`,
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${process.env.VERCEL_AUTH_BEARER_TOKEN}`,
+            Authorization: `Bearer ${env.VERCEL_AUTH_BEARER_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      const json = await data.json()
+      const result = domainResponseSchema
+        .extend({
+          error: z
+            .object({
+              code: z.string(),
+              message: z.string(),
+            })
+            .optional(),
+        })
+        .parse(json)
+      return result
+    }),
+  getConfigResponse: protectedActiveWorkspaceAdminProcedure
+    .input(z.object({ domain: z.string() }))
+    .query(async (opts) => {
+      const data = await fetch(
+        `https://api.vercel.com/v6/domains/${opts.input.domain}/config?teamId=${env.TEAM_ID_VERCEL}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${env.VERCEL_AUTH_BEARER_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      const json = await data.json()
+      const result = domainConfigResponseSchema.parse(json)
+      return result
+    }),
+  getDomains: protectedActiveWorkspaceAdminProcedure
+    .input(z.void())
+    .output(
+      z.array(
+        domainResponseSchema.extend({
+          verificationStatus: z.string().optional(),
+        })
+      )
+    )
+    .query(async (_opts) => {
+      const data = await fetch(
+        `https://api.vercel.com/v5/domains?limit=20&teamId=${env.TEAM_ID_VERCEL}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${env.VERCEL_AUTH_BEARER_TOKEN}`,
             "Content-Type": "application/json",
           },
         }
@@ -156,41 +177,24 @@ export const domainRouter = createTRPCRouter({
             })
             .optional(),
         })
-        .parse(json)
-      return result
-    }),
-  getConfigResponse: protectedActiveWorkspaceAdminProcedure
-    .input(z.object({ domain: z.string() }))
-    .query(async (opts) => {
-      const data = await fetch(
-        `https://api.vercel.com/v6/domains/${opts.input.domain}/config?teamId=${process.env.TEAM_ID_VERCEL}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${process.env.VERCEL_AUTH_BEARER_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const json = await data.json()
-      const result = domainConfigResponseSchema.parse(json)
+        .array()
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .parse(json?.domains ?? [])
       return result
     }),
   verifyDomain: protectedActiveWorkspaceAdminProcedure
     .input(z.object({ domain: z.string() }))
     .query(async (opts) => {
       const data = await fetch(
-        `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains/${opts.input.domain}/verify?teamId=${process.env.TEAM_ID_VERCEL}`,
+        `https://api.vercel.com/v9/projects/${env.PROJECT_ID_VERCEL}/domains/${opts.input.domain}/verify?teamId=${env.TEAM_ID_VERCEL}`,
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${process.env.VERCEL_AUTH_BEARER_TOKEN}`,
+            Authorization: `Bearer ${env.VERCEL_AUTH_BEARER_TOKEN}`,
             "Content-Type": "application/json",
           },
         }
       )
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const json = await data.json()
       const result = domainResponseSchema.parse(json)
       return result

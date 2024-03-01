@@ -142,11 +142,24 @@ export const authConfig = {
       const userId = token.sub
 
       if (!userId) return token
+      token.id = userId
+
+      // set a parameter that allows to refresh workspace data every hour
+      // this is used to avoid fetching the workspaces for the user in every request
+      // we use prepared statements to improve performance
+      // TODO: fix this
+      if (!token.workspaces) {
+        token.refreshWorkspaces = true
+      }
 
       // we get the workspaces for the user and add it to the token so it can be used in the session
       // this is used to avoid fetching the workspaces for the user in every request
       // we use prepared statements to improve performance
       try {
+        if (!token.refreshWorkspaces) {
+          return token
+        }
+
         const userWithWorkspaces =
           await prepared.workspacesByUserPrepared.execute({
             userId,
@@ -160,9 +173,10 @@ export const authConfig = {
           plan: member.workspace.plan,
         }))
 
-        token.id = userId
         token.workspaces = workspaces ? workspaces : []
+        token.refreshWorkspaces = false
       } catch (error) {
+        console.error(error)
         throw "Error getting workspaces for user"
       }
 
