@@ -16,7 +16,7 @@ importers:
         version: 0.21.1
       '@turbo/gen':
         specifier: ^1.11.3
-        version: 1.11.3(@types/node@20.8.0)(typescript@5.3.3)
+        version: 1.11.3(@types/node@20.11.24)(typescript@5.3.3)
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -49,8 +49,8 @@ importers:
         specifier: ^0.1.0
         version: link:../../tooling/typescript
       '@types/node':
-        specifier: 20.8.0
-        version: 20.8.0
+        specifier: 20.11.24
+        version: 20.11.24
       eslint:
         specifier: ^8.56.0
         version: 8.57.0
@@ -128,10 +128,10 @@ importers:
         version: 11.0.0-next-beta.264(@trpc/server@11.0.0-next-beta.264)
       '@trpc/next':
         specifier: 11.0.0-next-beta.264
-        version: 11.0.0-next-beta.264(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/react-query@11.0.0-next-beta.274)(@trpc/server@11.0.0-next-beta.264)(next@14.1.1-canary.81)(react-dom@18.2.0)(react@18.2.0)
+        version: 11.0.0-next-beta.264(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/react-query@11.0.0-next-beta.300)(@trpc/server@11.0.0-next-beta.264)(next@14.1.1-canary.81)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/react-query':
         specifier: next
-        version: 11.0.0-next-beta.274(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0)
+        version: 11.0.0-next-beta.300(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server':
         specifier: 11.0.0-next-beta.264
         version: 11.0.0-next-beta.264
@@ -221,8 +221,8 @@ importers:
         specifier: ^2.0.6
         version: 2.0.6
       '@types/node':
-        specifier: 20.8.0
-        version: 20.8.0
+        specifier: 20.11.24
+        version: 20.11.24
       '@types/react':
         specifier: ^18.2.47
         version: 18.2.47
@@ -527,8 +527,8 @@ importers:
         specifier: ^0.1.0
         version: link:../../tooling/typescript
       '@types/node':
-        specifier: 20.8.0
-        version: 20.8.0
+        specifier: 20.11.24
+        version: 20.11.24
       '@types/react':
         specifier: ^18.2.47
         version: 18.2.47
@@ -2617,6 +2617,7 @@ packages:
     dependencies:
       is-glob: 4.0.3
       micromatch: 4.0.5
+      napi-wasm: 1.1.0
     dev: true
     bundledDependencies:
       - napi-wasm
@@ -4894,7 +4895,7 @@ packages:
       '@trpc/server': 11.0.0-next-beta.264
     dev: false
 
-  /@trpc/next@11.0.0-next-beta.264(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/react-query@11.0.0-next-beta.274)(@trpc/server@11.0.0-next-beta.264)(next@14.1.1-canary.81)(react-dom@18.2.0)(react@18.2.0):
+  /@trpc/next@11.0.0-next-beta.264(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/react-query@11.0.0-next-beta.300)(@trpc/server@11.0.0-next-beta.264)(next@14.1.1-canary.81)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-z/t+TweTk5nMBtp8Ug8FxnKkN6a9YBEZ+WGCPj5JmCjewDuslEutcML4PX4zcYBTNNz4PQYmu7vZf65xe2dnWw==}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
@@ -4912,7 +4913,7 @@ packages:
     dependencies:
       '@tanstack/react-query': 5.18.1(react@18.2.0)
       '@trpc/client': 11.0.0-next-beta.264(@trpc/server@11.0.0-next-beta.264)
-      '@trpc/react-query': 11.0.0-next-beta.274(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0)
+      '@trpc/react-query': 11.0.0-next-beta.300(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server': 11.0.0-next-beta.264
       next: 14.1.1-canary.81(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
@@ -4942,12 +4943,12 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@trpc/react-query@11.0.0-next-beta.274(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-QldZ4KeKbKHpUroIwL21W8WScMawRiq6dSevH8B+bCEzwgTOwYm6qL6RgDMtQayr/A1xnDvOrsh/4gr+wKXCbA==}
+  /@trpc/react-query@11.0.0-next-beta.300(@tanstack/react-query@5.18.1)(@trpc/client@11.0.0-next-beta.264)(@trpc/server@11.0.0-next-beta.264)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-ZEsQyhm1WosvYi94q6ilMSswGdGFQzMeZu4NUJPBMtKt8/LBsG6HK7n7zwnY9XZb1THyujebeOxwJYbmCOWabw==}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
-      '@trpc/client': 11.0.0-next-beta.274+bc5196e28
-      '@trpc/server': 11.0.0-next-beta.274+bc5196e28
+      '@trpc/client': 11.0.0-next-beta.300+2486831f7
+      '@trpc/server': 11.0.0-next-beta.300+2486831f7
       react: '>=18.2.0'
       react-dom: '>=18.2.0'
     dependencies:
@@ -4978,7 +4979,7 @@ packages:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
     dev: false
 
-  /@turbo/gen@1.11.3(@types/node@20.8.0)(typescript@5.3.3):
+  /@turbo/gen@1.11.3(@types/node@20.11.24)(typescript@5.3.3):
     resolution: {integrity: sha512-cHGRj7Jn7Hw1cA7NuwWYfYdhEliQX4LuSfEB9L1m8ifGkHalU3bbYXcehzLThmckpGpUQGnXYx0UtVudbQ42HA==}
     hasBin: true
     dependencies:
@@ -4990,7 +4991,7 @@ packages:
       minimatch: 9.0.3
       node-plop: 0.26.3
       proxy-agent: 6.3.1
-      ts-node: 10.9.2(@types/node@20.8.0)(typescript@5.3.3)
+      ts-node: 10.9.2(@types/node@20.11.24)(typescript@5.3.3)
       update-check: 1.5.4
       validate-npm-package-name: 5.0.0
     transitivePeerDependencies:
@@ -5023,13 +5024,13 @@ packages:
     resolution: {integrity: sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==}
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
     dev: false
 
   /@types/connect@3.4.38:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
     dependencies:
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
     dev: false
 
   /@types/cookie@0.4.1:
@@ -5043,7 +5044,7 @@ packages:
   /@types/cors@2.8.17:
     resolution: {integrity: sha512-8CGDvrBj1zgo2qE+oS3pOCyYNqCPryMWY2bGfwA0dcfopWGgxs+78df0Rs3rc9THP4JkOhLsAa+15VdpAqkcUA==}
     dependencies:
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
     dev: false
 
   /@types/debug@4.1.12:
@@ -5078,7 +5079,7 @@ packages:
   /@types/express-serve-static-core@4.17.43:
     resolution: {integrity: sha512-oaYtiBirUOPQGSWNGPWnzyAFJ0BP3cwvN4oWZQY+zUBwpVIGsKUkpBpSztp74drYcjavs7SKFZ4DX1V2QeN8rg==}
     dependencies:
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
       '@types/qs': 6.9.11
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -5097,7 +5098,7 @@ packages:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
     dev: false
 
   /@types/hast@3.0.4:
@@ -5117,7 +5118,7 @@ packages:
   /@types/http-proxy@1.17.14:
     resolution: {integrity: sha512-SSrD0c1OQzlFX7pGu1eXxSEjemej64aaNPRhhVYUGqXh0BtldAAx37MG8btcumvpgKyZp1F5Gn3JkktdxiFv6w==}
     dependencies:
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
     dev: true
 
   /@types/inquirer@6.5.0:
@@ -5169,14 +5170,10 @@ packages:
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
     dev: false
 
-  /@types/node@20.11.16:
-    resolution: {integrity: sha512-gKb0enTmRCzXSSUJDq6/sPcqrfCv2mkkG6Jt/clpn5eiCbKTY+SgZUxo+p8ZKMof5dCp9vHQUAB7wOUTod22wQ==}
+  /@types/node@20.11.24:
+    resolution: {integrity: sha512-Kza43ewS3xoLgCEpQrsT+xRo/EJej1y0kVYGiLFE1NEODXGzTfwiC6tXTLMQskn1X4/Rjlh0MQUvx9W+L9long==}
     dependencies:
       undici-types: 5.26.5
-    dev: false
-
-  /@types/node@20.8.0:
-    resolution: {integrity: sha512-LzcWltT83s1bthcvjBmiBvGJiiUe84NWRHkw+ZV6Fr41z2FbIzvc815dk2nQ3RAKMuN2fkenM/z3Xv2QzEpYxQ==}
 
   /@types/normalize-package-data@2.4.4:
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -5185,7 +5182,7 @@ packages:
   /@types/pg@8.6.6:
     resolution: {integrity: sha512-O2xNmXebtwVekJDD+02udOncjVcMZQuTEQEMpKJ0ZRf5E7/9JJX3izhKUcUifBkyKpljyUM6BTgy2trmviKlpw==}
     dependencies:
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
       pg-protocol: 1.6.0
       pg-types: 2.2.0
     dev: false
@@ -5236,7 +5233,7 @@ packages:
     resolution: {integrity: sha512-x2EM6TJOybec7c52BX0ZspPodMsQUd5L6PRwOunVyVUhXiBSKf3AezDL8Dgvgt5o0UfKNfuA0eMLr2wLT4AiBA==}
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
     dev: false
 
   /@types/serve-static@1.15.5:
@@ -5244,13 +5241,13 @@ packages:
     dependencies:
       '@types/http-errors': 2.0.4
       '@types/mime': 3.0.4
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
     dev: false
 
   /@types/through@0.0.33:
     resolution: {integrity: sha512-HsJ+z3QuETzP3cswwtzt2vEIiHBk/dCcHGhbmG5X3ecnwFD/lPrMpliGXxSCg03L9AhrdwA4Oz/qfspkDW+xGQ==}
     dependencies:
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
     dev: false
 
   /@types/tinycolor2@1.4.6:
@@ -5268,7 +5265,7 @@ packages:
   /@types/webpack@5.28.5(@swc/core@1.3.101)(esbuild@0.19.11):
     resolution: {integrity: sha512-wR87cgvxj3p6D0Crt1r5avwqffqPXUkNlnQ1mjU93G7gCuFjufZR4I6j8cz5g1F1tTYpfOOFvly+cmIQwL9wvw==}
     dependencies:
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
       tapable: 2.2.1
       webpack: 5.90.3(@swc/core@1.3.101)(esbuild@0.19.11)
     transitivePeerDependencies:
@@ -7248,7 +7245,7 @@ packages:
     dependencies:
       '@types/cookie': 0.4.1
       '@types/cors': 2.8.17
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
       accepts: 1.3.8
       base64id: 2.0.0
       cookie: 0.4.2
@@ -9220,7 +9217,7 @@ packages:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: false
@@ -10337,6 +10334,10 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  /napi-wasm@1.1.0:
+    resolution: {integrity: sha512-lHwIAJbmLSjF9VDRm9GoVOy9AGp3aIvkjv+Kvz9h16QR3uSVYH78PNQUnT2U4X53mhlnV2M7wrhibQ3GHicDmg==}
+    dev: true
+
   /natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
@@ -10623,7 +10624,7 @@ packages:
     engines: {node: '>=14'}
     dependencies:
       '@types/express': 4.17.21
-      '@types/node': 20.11.16
+      '@types/node': 20.11.24
       accepts: 1.3.8
       content-disposition: 0.5.4
       depd: 1.1.2
@@ -12687,7 +12688,7 @@ packages:
     resolution: {integrity: sha512-KPxNcf0iFWA38pkzeJyJklK9qQJo/6FEBDcLsZxDCVHfn8yT+uP9p1JSYiOhIxCyh+6BD5XEVOMnnBJnVeEnfA==}
     engines: {node: '>=12.*'}
     dependencies:
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
       qs: 6.11.2
     dev: false
 
@@ -13037,7 +13038,7 @@ packages:
   /ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
 
-  /ts-node@10.9.2(@types/node@20.8.0)(typescript@5.3.3):
+  /ts-node@10.9.2(@types/node@20.11.24)(typescript@5.3.3):
     resolution: {integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==}
     hasBin: true
     peerDependencies:
@@ -13056,7 +13057,7 @@ packages:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 20.8.0
+      '@types/node': 20.11.24
       acorn: 8.11.3
       acorn-walk: 8.3.2
       arg: 4.1.3
@@ -13333,7 +13334,6 @@ packages:
 
   /undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
-    dev: false
 
   /undici@5.28.3:
     resolution: {integrity: sha512-3ItfzbrhDlINjaP0duwnNsKpDQk3acHI3gVJ1z4fmwMK31k5G9OVIAMLSIaP6w4FaGkaAkN6zaQO9LUvZ1t7VA==}
