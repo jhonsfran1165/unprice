@@ -1,23 +1,24 @@
-export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? "Builderai"
+import { env } from "../env.mjs"
 
-export const SHORT_DOMAIN = process.env.NEXT_PUBLIC_APP_SHORT_DOMAIN ?? "dub.sh"
+export const APP_NAME = "builderai"
+
+export const APP_BASE_DOMAIN = `app.${env.NEXT_PUBLIC_APP_DOMAIN}`
 
 export const APP_HOSTNAMES = new Set([
-  `app.${process.env.NEXT_PUBLIC_APP_DOMAIN}`,
-  `preview.${process.env.NEXT_PUBLIC_APP_DOMAIN}`,
+  `app.${env.NEXT_PUBLIC_APP_DOMAIN}`,
   "app.localhost:3000",
   "localhost",
 ])
 
+export const APP_DOMAIN = `https://app.${env.NEXT_PUBLIC_APP_DOMAIN}`
+
 export const API_HOSTNAMES = new Set([
-  `api.${process.env.NEXT_PUBLIC_APP_DOMAIN}`,
-  `api.${SHORT_DOMAIN}`,
+  `api.${env.NEXT_PUBLIC_APP_DOMAIN}`,
   "api.localhost:3000",
 ])
 
 export const SITES_HOSTNAMES = new Set([
-  `sites.${process.env.NEXT_PUBLIC_APP_DOMAIN}`,
-  `sites.${SHORT_DOMAIN}`,
+  `sites.${env.NEXT_PUBLIC_APP_DOMAIN}`,
   "sites.localhost:3000",
 ])
 
