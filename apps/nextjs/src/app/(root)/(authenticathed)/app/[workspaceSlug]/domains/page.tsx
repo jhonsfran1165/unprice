@@ -85,7 +85,7 @@ const DomainCard = ({
         </div>
         <CardDescription className="mb-2 text-sm">
           Please set the following TXT record on {/* // TODO: add link */}
-          <a className="text-blue-600" href="#">
+          <a className="text-blue-600" href={domain.name}>
             builderai.saas
           </a>{" "}
           to prove ownership of builderai.saas:

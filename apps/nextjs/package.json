@@ -21,7 +21,6 @@
   "dependencies": {
     "@builderai/api": "^0.1.0",
     "@builderai/auth": "^0.1.0",
-    "@builderai/client": "^0.1.0",
     "@builderai/config": "^0.1.0",
     "@builderai/db": "^0.1.0",
     "@builderai/stripe": "^0.1.0",

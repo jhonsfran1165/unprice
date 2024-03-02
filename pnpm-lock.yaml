@@ -75,9 +75,6 @@ importers:
       '@builderai/auth':
         specifier: ^0.1.0
         version: link:../../packages/auth
-      '@builderai/client':
-        specifier: ^0.1.0
-        version: link:../../packages/client
       '@builderai/config':
         specifier: ^0.1.0
         version: link:../../packages/config

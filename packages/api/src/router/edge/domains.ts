@@ -69,9 +69,7 @@ export const domainRouter = createTRPCRouter({
           method: "POST",
         }
       )
-      const json = await data.json()
-      console.log({ json })
-      return domainResponseSchema.parse(json)
+      return domainResponseSchema.parse(await data.json())
     }),
   removeDomainFromVercelProject: protectedActiveWorkspaceAdminProcedure
     .input(z.object({ domain: z.string() }))
@@ -85,6 +83,7 @@ export const domainRouter = createTRPCRouter({
           method: "DELETE",
         }
       )
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return await data.json()
     }),
   // removeDomainFromVercelTeam: protectedActiveWorkspaceAdminProcedure
@@ -114,7 +113,6 @@ export const domainRouter = createTRPCRouter({
           },
         }
       )
-      const json = await data.json()
       const result = domainResponseSchema
         .extend({
           error: z
@@ -124,7 +122,7 @@ export const domainRouter = createTRPCRouter({
             })
             .optional(),
         })
-        .parse(json)
+        .parse(data.json())
       return result
     }),
   getConfigResponse: protectedActiveWorkspaceAdminProcedure
@@ -140,8 +138,7 @@ export const domainRouter = createTRPCRouter({
           },
         }
       )
-      const json = await data.json()
-      const result = domainConfigResponseSchema.parse(json)
+      const result = domainConfigResponseSchema.parse(await data.json())
       return result
     }),
   getDomains: protectedActiveWorkspaceAdminProcedure
@@ -195,8 +192,8 @@ export const domainRouter = createTRPCRouter({
           },
         }
       )
-      const json = await data.json()
-      const result = domainResponseSchema.parse(json)
+
+      const result = domainResponseSchema.parse(data.json())
       return result
     }),
 })
