@@ -1,6 +1,7 @@
 export * from "./validators/apikey"
 export * from "./validators/auth"
 export * from "./validators/customer"
+export * from "./validators/domains"
 export * from "./validators/ingestion"
 export * from "./validators/price"
 export * from "./validators/project"

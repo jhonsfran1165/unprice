@@ -2,6 +2,7 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import TabsNav from "~/components/layout/tabs-nav"
 import { WORKSPACE_TABS_CONFIG } from "~/constants/workspaces"
+import { DomainDialog } from "./_components/domain-dialog"
 
 export default function DomainsLayout(props: {
   children: React.ReactNode
@@ -11,7 +12,11 @@ export default function DomainsLayout(props: {
   return (
     <DashboardShell
       header={
-        <HeaderTab title="Domains" description="Domains for this workspace" />
+        <HeaderTab
+          title="Domains"
+          description="Domains for this workspace"
+          action={<DomainDialog />}
+        />
       }
       tabs={
         <TabsNav

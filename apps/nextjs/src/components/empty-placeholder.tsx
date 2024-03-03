@@ -10,7 +10,7 @@ export function EmptyPlaceholder({
   return (
     <div
       className={cn(
-        "relative flex min-h-[400px] flex-col items-center justify-center rounded-md border border-dashed p-8 text-center animate-in fade-in-50",
+        "relative flex h-full min-h-[400px] w-full items-center justify-center rounded-md border border-dashed",
         className
       )}
       {...props}
@@ -28,7 +28,7 @@ EmptyPlaceholder.Icon = function EmptyPlaceHolderIcon({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-background-subtle flex h-20 w-20 items-center justify-center rounded-full">
+    <div className="flex items-center justify-center rounded-full">
       {children}
     </div>
   )
@@ -41,9 +41,20 @@ EmptyPlaceholder.Title = function EmptyPlaceholderTitle({
   ...props
 }: EmptyPlaceholderTitleProps) {
   return (
-    <h2 className={cn("mt-6 text-xl font-semibold", className)} {...props}>
-      Title
-    </h2>
+    // eslint-disable-next-line jsx-a11y/heading-has-content
+    <h2 className={cn("mt-4 text-lg font-semibold", className)} {...props} />
+  )
+}
+
+EmptyPlaceholder.Action = function EmptyPlaceHolderAction({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex items-center justify-center rounded-full">
+      {children}
+    </div>
   )
 }
 
@@ -56,10 +67,7 @@ EmptyPlaceholder.Description = function EmptyPlaceholderDescription({
 }: EmptyPlaceholderDescriptionProps) {
   return (
     <p
-      className={cn(
-        "text-content-subtle mb-8 mt-2 text-center text-sm font-normal leading-6",
-        className
-      )}
+      className={cn("mb-4 mt-2 text-sm text-muted-foreground", className)}
       {...props}
     />
   )

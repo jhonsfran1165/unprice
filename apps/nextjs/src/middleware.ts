@@ -17,9 +17,6 @@ export default auth((req) => {
   const { domain, path } = parse(req)
   const isPublicRoute = APP_PUBLIC_ROUTES.has(path)
 
-  console.log("domain", domain)
-  console.log("isPublicRoute", isPublicRoute)
-
   // 0. public routes
   if (isPublicRoute) {
     return NextResponse.next()
