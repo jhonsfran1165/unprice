@@ -10,7 +10,7 @@ export function EmptyPlaceholder({
   return (
     <div
       className={cn(
-        "relative flex h-full min-h-[400px] w-full items-center justify-center rounded-md border border-dashed",
+        "relative flex h-full min-h-[500px] w-full items-center justify-center rounded-md border border-dashed",
         className
       )}
       {...props}

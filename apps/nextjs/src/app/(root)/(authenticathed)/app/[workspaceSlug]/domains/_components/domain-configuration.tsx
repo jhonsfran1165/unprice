@@ -1,10 +1,11 @@
-"use client"
+import { use } from "react"
 
+import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
+import { Skeleton } from "@builderai/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
 import { getSubdomain } from "~/lib/domains"
-import { api } from "~/trpc/client"
 import DomainStatusIcon from "./domain-status-icon"
 
 export const InlineSnippet = ({
@@ -25,16 +26,15 @@ export const InlineSnippet = ({
     </span>
   )
 }
-export default function DomainConfiguration({ domain }: { domain: string }) {
-  console.log(domain)
-  const { data: domainStatus } = api.domains.verify.useQuery({
-    domain,
-  })
 
-  console.log(domainStatus)
-  const { status, domainJson } = domainStatus ?? {}
+export default function DomainConfiguration({
+  domainPromise,
+}: {
+  domainPromise: Promise<RouterOutputs["domains"]["verify"]>
+}) {
+  const { status, domainJson } = use(domainPromise)
 
-  if (!status || status === "Valid Configuration" || !domainJson) return null
+  if (!status || !domainJson) return null
 
   const subdomain =
     domainJson?.name && domainJson?.apexName
@@ -43,6 +43,7 @@ export default function DomainConfiguration({ domain }: { domain: string }) {
 
   const txtVerification =
     (status === "Pending Verification" &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       domainJson?.verification?.find((x: any) => x.type === "TXT")) ??
     null
 
@@ -82,10 +83,11 @@ export default function DomainConfiguration({ domain }: { domain: string }) {
               </p>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Warning: if you are using this domain for another site, setting this
-            TXT record will transfer domain ownership away from that site and
-            break it. Please exercise caution when setting this record.
+          <p className="text-sm font-normal text-muted-foreground">
+            <b>Warning:</b> if you are using this domain for another site,
+            setting this TXT record will transfer domain ownership away from
+            that site and break it. Please exercise caution when setting this
+            record.
           </p>
         </>
       ) : status === "Unknown Error" ? (
@@ -128,9 +130,15 @@ export default function DomainConfiguration({ domain }: { domain: string }) {
                   </div>
                 </div>
               </div>
-              <div>
-                <p className="text-sm font-bold">Value</p>
-                <p className="mt-2 font-mono text-sm">cname.vercel-dns.com</p>
+            </TabsContent>
+            <TabsContent value="CNAME">
+              <div className="my-3 text-left">
+                <p className="my-5 text-sm">
+                  To configure your subdomain (
+                  <InlineSnippet>{domainJson.name}</InlineSnippet>
+                  ), set the following A record on your DNS provider to
+                  continue:
+                </p>
                 <div className="flex items-center justify-start space-x-10 rounded-md bg-muted p-2">
                   <div>
                     <p className="text-sm font-bold">Type</p>
@@ -166,3 +174,21 @@ export default function DomainConfiguration({ domain }: { domain: string }) {
     </div>
   )
 }
+
+const DomainConfigSkeleton = () => (
+  <div>
+    <div className="mb-4 flex items-center space-x-2">
+      <Skeleton className="h-6 w-[200px]" />
+    </div>
+    <div className="my-3 flex flex-col space-y-4 text-left ">
+      <Skeleton className="h-6 w-[250px]" />
+      <div className="my-5 text-sm">
+        <Skeleton className="h-4 w-full" />
+      </div>
+      <Skeleton className="h-[48px] w-full space-x-10 rounded-md  bg-muted p-2" />
+      <Skeleton className="h-4 w-full" />
+    </div>
+  </div>
+)
+
+DomainConfiguration.Skeleton = DomainConfigSkeleton

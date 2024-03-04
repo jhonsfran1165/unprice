@@ -1,14 +1,15 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { eq } from "@builderai/db"
+import { and, eq } from "@builderai/db"
 import { domains } from "@builderai/db/schema"
 import { newIdEdge } from "@builderai/db/utils"
 import type { DomainVerificationStatusProps } from "@builderai/db/validators"
 import {
-  domainAddSchema,
+  domainCreateBaseSchema,
   domainResponseSchema,
   domainSelectBaseSchema,
+  domainUpdateBaseSchema,
   domainVerificationStatusSchema,
 } from "@builderai/db/validators"
 
@@ -25,10 +26,11 @@ import {
 } from "../../utils/vercel-api"
 
 export const domainRouter = createTRPCRouter({
+  // INFO: defined as a mutation so we can call it asynchronously
   exists: protectedActiveWorkspaceAdminProcedure
     .input(z.object({ domain: z.string() }))
     .output(z.object({ exist: z.boolean() }))
-    .query(async (opts) => {
+    .mutation(async (opts) => {
       const domain = await opts.ctx.db.query.domains.findFirst({
         where: (d, { eq }) => eq(d.name, opts.input.domain),
       })
@@ -38,7 +40,7 @@ export const domainRouter = createTRPCRouter({
       }
     }),
   create: protectedActiveWorkspaceAdminProcedure
-    .input(domainAddSchema)
+    .input(domainCreateBaseSchema.pick({ name: true }))
     .output(z.object({ domain: domainSelectBaseSchema }))
     .mutation(async (opts) => {
       // validate the domain
@@ -98,7 +100,8 @@ export const domainRouter = createTRPCRouter({
 
       return { domain: domainData }
     }),
-  removeDomain: protectedActiveWorkspaceAdminProcedure
+
+  remove: protectedActiveWorkspaceAdminProcedure
     .input(z.object({ id: z.string() }))
     .output(
       z.object({
@@ -138,8 +141,80 @@ export const domainRouter = createTRPCRouter({
         domain: deletedDomain,
       }
     }),
+  update: protectedActiveWorkspaceAdminProcedure
+    .input(domainUpdateBaseSchema)
+    .output(z.object({ domain: domainSelectBaseSchema }))
+    .mutation(async (opts) => {
+      const workspace = opts.ctx.workspace
+      const { id, name: domain } = opts.input
 
-  getDomains: protectedActiveWorkspaceAdminProcedure
+      const oldDomain = await opts.ctx.db.query.domains.findFirst({
+        where: (d, { eq, and }) =>
+          and(eq(d.id, id), eq(d.workspaceId, workspace.id)),
+      })
+
+      if (!oldDomain) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Domain not found",
+        })
+      }
+
+      if (oldDomain.name === domain) {
+        return { domain: oldDomain }
+      }
+
+      // verify if the new domain is already added in our system
+      const newDomainExist = await opts.ctx.db.query.domains.findFirst({
+        where: (d, { eq }) => eq(d.name, domain),
+      })
+
+      if (newDomainExist) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "New Domain already register in the system",
+        })
+      }
+
+      // remove the old domain from vercel
+      const removeData = await removeDomainFromVercelProject(oldDomain.name)
+
+      if (removeData?.error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: removeData.error.message,
+        })
+      }
+
+      // add the new domain to vercel
+      const addData = await addDomainToVercel(domain)
+
+      if (addData.error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: addData.error.message,
+        })
+      }
+
+      const updateDomain = await opts.ctx.db
+        .update(domains)
+        .set({
+          name: domain,
+        })
+        .where(and(eq(domains.id, id), eq(domains.workspaceId, workspace.id)))
+        .returning()
+        .then((res) => res[0])
+
+      if (!updateDomain) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error updating domain",
+        })
+      }
+
+      return { domain: updateDomain }
+    }),
+  getAllByActiveWorkspace: protectedActiveWorkspaceAdminProcedure
     .input(z.void())
     .output(z.array(domainSelectBaseSchema))
     .query(async (opts) => {
@@ -175,6 +250,7 @@ export const domainRouter = createTRPCRouter({
         status = "Unknown Error"
       } else if (!domainJson.verified) {
         status = "Pending Verification"
+
         const verificationJson = await verifyDomainVercel(opts.input.domain)
 
         if (verificationJson.verified) {
@@ -183,6 +259,19 @@ export const domainRouter = createTRPCRouter({
       } else if (configJson.misconfigured) {
         status = "Invalid Configuration"
       }
+
+      // update the domain status
+      await opts.ctx.db
+        .update(domains)
+        .set({
+          verified: status === "Valid Configuration",
+        })
+        .where(
+          and(
+            eq(domains.name, opts.input.domain),
+            eq(domains.workspaceId, opts.ctx.workspace.id)
+          )
+        )
 
       return {
         status,

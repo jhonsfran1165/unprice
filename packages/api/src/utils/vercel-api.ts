@@ -19,16 +19,7 @@ export const addDomainToVercel = async (domain: string) => {
       method: "POST",
     }
   )
-  return domainResponseSchema
-    .extend({
-      error: z
-        .object({
-          code: z.string(),
-          message: z.string(),
-        })
-        .optional(),
-    })
-    .parse(await data.json())
+  return domainResponseSchema.parse(await data.json())
 }
 
 export const removeDomainFromVercelProject = async (domain: string) => {
@@ -70,16 +61,7 @@ export const verifyDomainVercel = async (domain: string) => {
     }
   )
 
-  const result = domainResponseSchema
-    .extend({
-      error: z
-        .object({
-          code: z.string(),
-          message: z.string(),
-        })
-        .optional(),
-    })
-    .parse(await data.json())
+  const result = domainResponseSchema.parse(await data.json())
   return result
 }
 
@@ -95,16 +77,8 @@ export const getDomainResponseVercel = async (domain: string) => {
     }
   )
 
-  const result = domainResponseSchema
-    .extend({
-      error: z
-        .object({
-          code: z.string(),
-          message: z.string(),
-        })
-        .optional(),
-    })
-    .parse(await data.json())
+  const result = domainResponseSchema.parse(await data.json())
+
   return result
 }
 
@@ -119,15 +93,7 @@ export const getConfigResponseVercel = async (domain: string) => {
       },
     }
   )
-  const result = domainConfigResponseSchema
-    .extend({
-      error: z
-        .object({
-          code: z.string(),
-          message: z.string(),
-        })
-        .optional(),
-    })
-    .parse(await data.json())
+  const result = domainConfigResponseSchema.parse(await data.json())
+
   return result
 }

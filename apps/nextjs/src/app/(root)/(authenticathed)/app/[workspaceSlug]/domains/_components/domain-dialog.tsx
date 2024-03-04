@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 
+import type { CreateDomain } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Dialog,
@@ -13,7 +14,13 @@ import {
 
 import { DomainForm } from "./domain-form"
 
-export function DomainDialog({ label }: { label?: string }) {
+export function DomainDialog({
+  label,
+  defaultValues,
+}: {
+  label?: string
+  defaultValues?: CreateDomain
+}) {
   const [dialogOpen, setDialogOpen] = useState(false)
 
   return (
@@ -23,10 +30,11 @@ export function DomainDialog({ label }: { label?: string }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{label ?? "Create Domain"}</DialogTitle>
+          <DialogTitle>{"Domain for this workspace"}</DialogTitle>
         </DialogHeader>
 
         <DomainForm
+          defaultValues={defaultValues ?? { name: "" }}
           onSubmit={() => {
             setDialogOpen(false)
           }}

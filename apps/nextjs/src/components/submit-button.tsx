@@ -16,6 +16,7 @@ export const SubmitButton = ({
   isDisabled,
   label,
   onClick,
+  ...props
 }: SubmitButtonProps) => {
   return (
     <Button
@@ -23,6 +24,7 @@ export const SubmitButton = ({
       type="submit"
       disabled={isDisabled}
       onClick={onClick}
+      {...props}
     >
       {label}
       {isSubmitting && (

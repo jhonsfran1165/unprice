@@ -14,9 +14,16 @@ export const domainCreateBaseSchema = createInsertSchema(domains, {
     .string()
     .min(3)
     .regex(/^[a-z0-9-]+(\.[a-z0-9-]+)+$/, "Invalid domain name"),
+}).partial({
+  id: true,
+  workspaceId: true,
+  createdAt: true,
+  updatedAt: true,
+  apexName: true,
 })
 
-export const domainAddSchema = domainCreateBaseSchema.pick({
+export const domainUpdateBaseSchema = domainCreateBaseSchema.required({
+  id: true,
   name: true,
 })
 
@@ -90,5 +97,5 @@ export type DomainResponse = z.infer<typeof domainResponseSchema>
 export type DomainVerificationStatusProps = z.infer<
   typeof domainVerificationStatusSchema
 >
-export type CreateDomain = z.infer<typeof domainAddSchema>
 export type Domain = z.infer<typeof domainSelectBaseSchema>
+export type CreateDomain = z.infer<typeof domainCreateBaseSchema>

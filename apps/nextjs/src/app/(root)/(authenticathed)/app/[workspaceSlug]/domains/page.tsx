@@ -1,8 +1,8 @@
+import { Suspense } from "react"
 import { ExternalLink, Globe } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { Badge } from "@builderai/ui/badge"
-import { Button } from "@builderai/ui/button"
 import {
   Card,
   CardContent,
@@ -11,15 +11,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
-import { Table, TableBody, TableCell, TableRow } from "@builderai/ui/table"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { api } from "~/trpc/server"
 import DomainConfiguration from "./_components/domain-configuration"
 import { DomainDialog } from "./_components/domain-dialog"
+import { VerifyDomainButton } from "./_components/domain-verify-button"
 
 export default async function PageDomains() {
-  const domains = await api.domains.getDomains()
+  const domains = await api.domains.getAllByActiveWorkspace()
 
   return (
     <>
@@ -77,7 +77,7 @@ export function DomainCardSkeleton() {
 const DomainCard = ({
   domain,
 }: {
-  domain: RouterOutputs["domains"]["getDomains"][number]
+  domain: RouterOutputs["domains"]["getAllByActiveWorkspace"][number]
 }) => {
   const domainVerified = !!domain.verified
 
@@ -101,52 +101,20 @@ const DomainCard = ({
             </Badge>
           </div>
 
-          {/* // TODO: add link */}
           <div className="flex flex-row items-center justify-between space-x-2">
-            {!domainVerified && <Button variant="ghost">Refresh</Button>}
-            <Button>Edit</Button>
+            <VerifyDomainButton domain={domain.name} />
+            <DomainDialog defaultValues={domain} label="Edit" />
           </div>
         </div>
-        {!domainVerified && (
-          <CardDescription className="my-6 text-sm">
-            Please set the following TXT record on {/* // TODO: add link */}
-            <a className="text-blue-600" href={domain.name}>
-              builderai.saas
-            </a>{" "}
-            to prove ownership of builderai.saas:
-          </CardDescription>
-        )}
       </CardHeader>
 
-      {!domainVerified && (
-        <CardContent className="border-t py-4">
-          <DomainConfiguration domain={domain.name} />
-          <Table className="my-4 rounded bg-background-bg">
-            <TableBody>
-              <TableRow>
-                <TableCell>Type</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Value</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">TXT</TableCell>
-                <TableCell className="font-medium">_vercel</TableCell>
-                <TableCell className="font-medium">
-                  vc-domain-verify=builderai.saas,abb86abd11c3eefdb09
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <p className="mt-4 text-sm font-normal">
-            Warning: if you are using this domain for another site, setting this
-            TXT record will transfer domain ownership away from that site and
-            break it. Please exercise caution when setting this record; make
-            sure that the domain that is shown in the TXT verification value is
-            actually the <strong>domain you want to use on Dub.co</strong> – not
-            your production site.
-          </p>
-        </CardContent>
-      )}
+      <CardContent className="border-t py-4">
+        <Suspense fallback={<DomainConfiguration.Skeleton />}>
+          <DomainConfiguration
+            domainPromise={api.domains.verify({ domain: domain.name })}
+          />
+        </Suspense>
+      </CardContent>
     </Card>
   )
 }
