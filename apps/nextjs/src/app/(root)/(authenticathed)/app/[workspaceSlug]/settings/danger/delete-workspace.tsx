@@ -31,8 +31,9 @@ import { api } from "~/trpc/client"
 export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
   const router = useRouter()
   const { user } = useUser()
-  const isPersonal = user?.workspaces.find((wk) => wk.slug === workspaceSlug)
-    ?.isPersonal
+  const isPersonal = user?.workspaces.find(
+    (wk) => wk.slug === workspaceSlug
+  )?.isPersonal
 
   const apiUtils = api.useUtils()
 
