@@ -8,7 +8,7 @@
     "./server": "./src/server.ts",
     "./config": "./src/config.ts",
     "./react": "./src/react.ts",
-    "./env": "./env.mjs"
+    "./env": "./src/env.mjs"
   },
   "typesVersions": {
     "*": {
@@ -25,19 +25,19 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@auth/drizzle-adapter": "0.7.0",
+    "@auth/drizzle-adapter": "0.8.0",
     "@builderai/db": "^0.1.0",
-    "@t3-oss/env-nextjs": "^0.7.3",
+    "@t3-oss/env-nextjs": "0.9.1",
     "encoding": "^0.1.13",
-    "next-auth": "5.0.0-beta.13",
+    "next-auth": "5.0.0-beta.15",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@builderai/eslint-config": "^0.2.0",
     "@builderai/prettier-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
-    "eslint": "^8.56.0",
-    "prettier": "^3.1.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
   },
   "eslintConfig": {

@@ -2,8 +2,8 @@ import type { DefaultSession, User } from "next-auth"
 
 import type { WorkspacesJWTPayload } from "@builderai/db/validators"
 
+import NextAuth from "."
 import { authConfig } from "./config"
-import NextAuth from "./next-auth"
 
 export type { DefaultSession as DefaultAuthSession, Session } from "next-auth"
 

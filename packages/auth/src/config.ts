@@ -144,12 +144,13 @@ export const authConfig = {
       if (!userId) return token
       token.id = userId
 
+      console.log("token", token)
+
       // set a parameter that allows to refresh workspace data every hour
       // this is used to avoid fetching the workspaces for the user in every request
       // we use prepared statements to improve performance
       if (!token.refreshWorkspacesAt) {
-        // if we want to invalidate the token we can set the refreshWorkspacesAt to 0 from the server
-        token.refreshWorkspacesAt = Date.now() + 3600000 // 1 hour but you can set it to any value
+        token.refreshWorkspacesAt = 0
       }
 
       // we get the workspaces for the user and add it to the token so it can be used in the session
@@ -177,7 +178,9 @@ export const authConfig = {
         }))
 
         token.workspaces = workspaces ? workspaces : []
-        token.refreshWorkspacesAt = Date.now() + 3600000
+
+        // if we want to invalidate the token we can set the refreshWorkspacesAt to 0 from the server
+        token.refreshWorkspacesAt = Date.now() + 3600000 // 1 hour
       } catch (error) {
         console.error(error)
         throw "Error getting workspaces for user"
