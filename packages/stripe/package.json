@@ -27,7 +27,7 @@
     "@builderai/auth": "^0.1.0",
     "@builderai/config": "^0.1.0",
     "@builderai/db": "^0.1.0",
-    "@t3-oss/env-nextjs": "^0.9.2",
+    "@t3-oss/env-nextjs": "0.9.1",
     "stripe": "^14.19.0",
     "zod": "^3.22.4"
   },

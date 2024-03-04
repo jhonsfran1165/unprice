@@ -33,7 +33,7 @@
     "@builderai/tinybird": "^0.1.0",
     "@dinero.js/currencies": "2.0.0-alpha.14",
     "@potatohd/trpc-openapi": "^1.2.3",
-    "@t3-oss/env-nextjs": "^0.9.2",
+    "@t3-oss/env-nextjs": "0.9.1",
     "@trpc/client": "11.0.0-next-beta.308",
     "@trpc/next": "11.0.0-next-beta.308",
     "@trpc/server": "11.0.0-next-beta.308",

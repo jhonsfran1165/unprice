@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@builderai/prettier-config':
-        specifier: 0.1.0
+        specifier: ^0.1.0
         version: link:tooling/prettier
       '@manypkg/cli':
         specifier: ^0.21.2
@@ -106,8 +106,8 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3(@trpc/server@11.0.0-next-beta.308)(zod@3.22.4)
       '@t3-oss/env-nextjs':
-        specifier: ^0.9.2
-        version: 0.9.2(typescript@5.3.3)(zod@3.22.4)
+        specifier: 0.9.1
+        version: 0.9.1(typescript@5.3.3)(zod@3.22.4)
       '@tanstack/eslint-plugin-query':
         specifier: ^5.20.1
         version: 5.20.1(eslint@8.57.0)(typescript@5.3.3)
@@ -171,9 +171,6 @@ importers:
       react-markdown:
         specifier: ^9.0.1
         version: 9.0.1(@types/react@18.2.62)(react@18.2.0)
-      react-query@next:
-        specifier: link:@@trpc/react-query@next
-        version: link:@@trpc/react-query@next
       react-wrap-balancer:
         specifier: ^1.1.0
         version: 1.1.0(react@18.2.0)
@@ -275,8 +272,8 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3(@trpc/server@11.0.0-next-beta.308)(zod@3.22.4)
       '@t3-oss/env-nextjs':
-        specifier: ^0.9.2
-        version: 0.9.2(typescript@5.3.3)(zod@3.22.4)
+        specifier: 0.9.1
+        version: 0.9.1(typescript@5.3.3)(zod@3.22.4)
       '@trpc/client':
         specifier: 11.0.0-next-beta.308
         version: 11.0.0-next-beta.308(@trpc/server@11.0.0-next-beta.308)
@@ -333,14 +330,17 @@ importers:
         specifier: ^0.1.0
         version: link:../db
       '@t3-oss/env-nextjs':
-        specifier: ^0.9.2
-        version: 0.9.2(typescript@5.3.3)(zod@3.22.4)
+        specifier: 0.9.1
+        version: 0.9.1(typescript@5.3.3)(zod@3.22.4)
       encoding:
         specifier: ^0.1.13
         version: 0.1.13
+      next:
+        specifier: 14.1.0
+        version: 14.1.0(react-dom@18.2.0)(react@18.2.0)
       next-auth:
         specifier: 5.0.0-beta.15
-        version: 5.0.0-beta.15(next@14.1.1)(react@18.2.0)
+        version: 5.0.0-beta.15(next@14.1.0)(react@18.2.0)
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -401,8 +401,8 @@ importers:
         specifier: 0.1.0
         version: link:../ui
       '@t3-oss/env-nextjs':
-        specifier: ^0.9.2
-        version: 0.9.2(typescript@5.3.3)(zod@3.22.4)
+        specifier: 0.9.1
+        version: 0.9.1(typescript@5.3.3)(zod@3.22.4)
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -435,8 +435,8 @@ importers:
         specifier: ^0.9.0
         version: 0.9.0
       '@t3-oss/env-nextjs':
-        specifier: ^0.9.2
-        version: 0.9.2(typescript@5.3.3)(zod@3.22.4)
+        specifier: 0.9.1
+        version: 0.9.1(typescript@5.3.3)(zod@3.22.4)
       base-x:
         specifier: ^4.0.0
         version: 4.0.0
@@ -505,8 +505,8 @@ importers:
         specifier: ^0.0.14
         version: 0.0.14(react@18.2.0)
       '@t3-oss/env-nextjs':
-        specifier: ^0.9.2
-        version: 0.9.2(typescript@5.3.3)(zod@3.22.4)
+        specifier: 0.9.1
+        version: 0.9.1(typescript@5.3.3)(zod@3.22.4)
       react-email:
         specifier: ^2.1.0
         version: 2.1.0(eslint@8.57.0)
@@ -557,8 +557,8 @@ importers:
         specifier: ^0.1.0
         version: link:../db
       '@t3-oss/env-nextjs':
-        specifier: ^0.9.2
-        version: 0.9.2(typescript@5.3.3)(zod@3.22.4)
+        specifier: 0.9.1
+        version: 0.9.1(typescript@5.3.3)(zod@3.22.4)
       stripe:
         specifier: ^14.19.0
         version: 14.19.0
@@ -591,8 +591,8 @@ importers:
         specifier: ^0.3.3
         version: 0.3.3
       '@t3-oss/env-nextjs':
-        specifier: ^0.9.2
-        version: 0.9.2(typescript@5.3.3)(zod@3.22.4)
+        specifier: 0.9.1
+        version: 0.9.1(typescript@5.3.3)(zod@3.22.4)
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -663,9 +663,6 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.0.7
         version: 1.0.7(@types/react-dom@18.2.19)(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
-      '@t3-oss/env-nextjs':
-        specifier: ^0.9.2
-        version: 0.9.2(typescript@5.3.3)(zod@3.22.4)
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
@@ -4662,8 +4659,8 @@ packages:
       defer-to-connect: 2.0.1
     dev: false
 
-  /@t3-oss/env-core@0.9.2(typescript@5.3.3)(zod@3.22.4):
-    resolution: {integrity: sha512-KgWXljUTHgO3o7GMZQPAD5+P+HqpauMNNHowlm7V2b9IeMitSUpNKwG6xQrup/xARWHTdxRVIl0mSI4wCevQhQ==}
+  /@t3-oss/env-core@0.9.1(typescript@5.3.3)(zod@3.22.4):
+    resolution: {integrity: sha512-QgR4jV2BmRMdq+in5DbI9Ox/mgpNM/b1H1wB6a0Zf015RsuLk12mIC9FKzDtLITgSSSI/Gt8ZbarqugAUtRslw==}
     peerDependencies:
       typescript: '>=5.0.0'
       zod: ^3.0.0
@@ -4675,8 +4672,8 @@ packages:
       zod: 3.22.4
     dev: false
 
-  /@t3-oss/env-nextjs@0.9.2(typescript@5.3.3)(zod@3.22.4):
-    resolution: {integrity: sha512-dklHrgKLESStNVB67Jdbu6osxDYA+xNKaPBRerlnkEvzbCccSKMvZENx6EZebJuR4snqB3/yRykNMn/bdIAyiQ==}
+  /@t3-oss/env-nextjs@0.9.1(typescript@5.3.3)(zod@3.22.4):
+    resolution: {integrity: sha512-c5JbI8ADarxhItsimm0fnbrr6YLFC+8l509IFlc6v0Y6aEaAidhJkRj+SwyKtKzz/6gJ4c98vxd5kOLb3FoGWQ==}
     peerDependencies:
       typescript: '>=5.0.0'
       zod: ^3.0.0
@@ -4684,7 +4681,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@t3-oss/env-core': 0.9.2(typescript@5.3.3)(zod@3.22.4)
+      '@t3-oss/env-core': 0.9.1(typescript@5.3.3)(zod@3.22.4)
       typescript: 5.3.3
       zod: 3.22.4
     dev: false
@@ -10247,7 +10244,7 @@ packages:
     engines: {node: '>= 0.4.0'}
     dev: false
 
-  /next-auth@5.0.0-beta.15(next@14.1.1)(react@18.2.0):
+  /next-auth@5.0.0-beta.15(next@14.1.0)(react@18.2.0):
     resolution: {integrity: sha512-UQggNq8CDu3/w8CYkihKLLnRPNXel98K0j7mtjj9a6XTNYo4Hni8xg/2h1YhElW6vXE8mgtvmH11rU8NKw86jQ==}
     peerDependencies:
       '@simplewebauthn/browser': ^9.0.1
@@ -10264,7 +10261,7 @@ packages:
         optional: true
     dependencies:
       '@auth/core': 0.28.0
-      next: 14.1.1(react-dom@18.2.0)(react@18.2.0)
+      next: 14.1.0(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
     dev: false
 
