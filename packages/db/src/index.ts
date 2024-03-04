@@ -14,10 +14,6 @@ if (env.NODE_ENV === "development") {
   neonConfig.useSecureWebSocket = false
   neonConfig.pipelineTLS = false
   neonConfig.pipelineConnect = false
-  neonConfig.fetchConnectionCache = false
-} else {
-  // activate connection caching
-  neonConfig.fetchConnectionCache = true
 }
 
 // support local development and neon serverless
