@@ -18,10 +18,19 @@ export const env = createEnv({
     TEAM_ID_VERCEL: z.string(),
     VERCEL_AUTH_BEARER_TOKEN: z.string(),
   },
-  client: {},
+  client: {
+    NEXT_PUBLIC_APP_DOMAIN: z.preprocess(
+      (str) =>
+        process.env.NEXT_PUBLIC_VERCEL_URL
+          ? process.env.NEXT_PUBLIC_VERCEL_URL
+          : str,
+      z.string().min(1)
+    ),
+  },
   // Client side variables gets destructured here due to Next.js static analysis
   // Shared ones are also included here for good measure since the behavior has been inconsistent
   experimental__runtimeEnv: {
+    NEXT_PUBLIC_APP_DOMAIN: process.env.NEXT_PUBLIC_APP_DOMAIN,
     NODE_ENV: process.env.NODE_ENV,
     VERCEL_ENV: process.env.VERCEL_ENV,
   },

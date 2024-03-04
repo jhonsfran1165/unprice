@@ -21,7 +21,6 @@
   "dependencies": {
     "@builderai/api": "^0.1.0",
     "@builderai/auth": "^0.1.0",
-    "@builderai/client": "^0.1.0",
     "@builderai/config": "^0.1.0",
     "@builderai/db": "^0.1.0",
     "@builderai/stripe": "^0.1.0",
@@ -45,6 +44,7 @@
     "date-fns": "^3.3.1",
     "dinero.js": "2.0.0-alpha.14",
     "framer-motion": "^10.18.0",
+    "lucide-react": "0.307.0",
     "next": "14.1.1-canary.81",
     "next-themes": "^0.2.1",
     "react": "18.2.0",

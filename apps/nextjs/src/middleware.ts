@@ -15,8 +15,12 @@ import AppMiddleware from "./middleware/app"
 
 export default auth((req) => {
   const { domain, path } = parse(req)
-
   const isPublicRoute = APP_PUBLIC_ROUTES.has(path)
+
+  // 0. public routes
+  if (isPublicRoute) {
+    return NextResponse.next()
+  }
 
   // 1. we validate api routes
   if (API_HOSTNAMES.has(domain)) {
@@ -33,10 +37,7 @@ export default auth((req) => {
     return SitesMiddleware(req)
   }
 
-  // 0. public routes
-  if (isPublicRoute) {
-    return NextResponse.next()
-  }
+  return NextResponse.next()
 })
 
 export const config = {

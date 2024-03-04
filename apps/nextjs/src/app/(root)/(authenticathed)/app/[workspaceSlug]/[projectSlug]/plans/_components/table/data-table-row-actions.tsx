@@ -27,7 +27,7 @@ export function DataTableRowActions<TData>({
   const plan = planSelectBaseSchema.parse(row.original)
   const router = useRouter()
   const projectSlug = useParams().projectSlug as string
-  const workspaceSlug = useParams().projectSlug as string
+  const workspaceSlug = useParams().workspaceSlug as string
 
   const revokeApiKeys = api.apikeys.revokeApiKeys.useMutation({
     onSuccess: () => {
@@ -74,7 +74,7 @@ export function DataTableRowActions<TData>({
           onClick={(e) => {
             e.preventDefault()
             router.push(
-              `/${workspaceSlug}/${projectSlug}/plans/${plan.slug}/latest/overview`
+              `/${workspaceSlug}/${projectSlug}/plans/${plan.slug}/0/overview`
             )
           }}
         >

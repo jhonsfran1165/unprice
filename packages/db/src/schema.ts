@@ -1,6 +1,7 @@
 export * from "./schema/apikeys"
 export * from "./schema/auth"
 export * from "./schema/customers"
+export * from "./schema/domains"
 export * from "./schema/enums"
 export * from "./schema/ingestions"
 export * from "./schema/prices"

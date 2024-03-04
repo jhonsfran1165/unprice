@@ -21,7 +21,8 @@ export const stripeRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const workspace = opts.ctx.workspace
       const user = opts.ctx.session.user
-      const returnUrl = env.NEXTJS_URL + "/"
+      // TODO: fix returnUrl
+      const returnUrl = `app.${env.NEXTJS_URL}` + "/"
 
       if (!user?.email) {
         throw new TRPCError({
@@ -93,7 +94,8 @@ export const stripeRouter = createTRPCRouter({
       const { name: workspaceName, planId } = opts.input
       const user = opts.ctx.session.user
 
-      const returnUrl = process.env.NEXTJS_URL + "/"
+      // TODO: fix returnUrl
+      const returnUrl = `app.${env.NEXTJS_URL}` + "/"
 
       if (!returnUrl) {
         throw new TRPCError({

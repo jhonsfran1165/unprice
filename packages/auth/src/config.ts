@@ -142,11 +142,27 @@ export const authConfig = {
       const userId = token.sub
 
       if (!userId) return token
+      token.id = userId
+
+      // set a parameter that allows to refresh workspace data every hour
+      // this is used to avoid fetching the workspaces for the user in every request
+      // we use prepared statements to improve performance
+      if (!token.refreshWorkspacesAt) {
+        // if we want to invalidate the token we can set the refreshWorkspacesAt to 0 from the server
+        token.refreshWorkspacesAt = Date.now() + 3600000 // 1 hour but you can set it to any value
+      }
 
       // we get the workspaces for the user and add it to the token so it can be used in the session
       // this is used to avoid fetching the workspaces for the user in every request
       // we use prepared statements to improve performance
       try {
+        const tokenDate = new Date(token.refreshWorkspacesAt as number)
+
+        // refresh the workspaces if the time is greater than the refreshWorkspacesAt
+        if (tokenDate > new Date()) {
+          return token
+        }
+
         const userWithWorkspaces =
           await prepared.workspacesByUserPrepared.execute({
             userId,
@@ -160,9 +176,10 @@ export const authConfig = {
           plan: member.workspace.plan,
         }))
 
-        token.id = userId
         token.workspaces = workspaces ? workspaces : []
+        token.refreshWorkspacesAt = Date.now() + 3600000
       } catch (error) {
+        console.error(error)
         throw "Error getting workspaces for user"
       }
 

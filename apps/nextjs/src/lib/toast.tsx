@@ -33,6 +33,7 @@ const config = {
   deleted: { type: "success", title: "Deleted successfully" },
   removed: { type: "success", title: "Removed successfully" },
   saved: { type: "success", title: "Saved successfully" },
+  updated: { type: "success", title: "Updated successfully" },
   "test-error": {
     type: "error",
     title: "Connection Failed",

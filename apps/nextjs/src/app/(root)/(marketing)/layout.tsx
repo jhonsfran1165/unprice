@@ -11,9 +11,8 @@ import Footer from "~/components/layout/footer"
 import { MainNav } from "~/components/layout/main-nav"
 import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
 import { MobileDropdown } from "~/components/layout/mobile-nav"
-import { AUTH_ROUTES } from "~/constants"
+import { APP_DOMAIN, AUTH_ROUTES } from "~/constants"
 import { navItems, siteConfig } from "~/constants/layout"
-import { env } from "~/env.mjs"
 
 export default function MarketingLayout(props: { children: ReactNode }) {
   return (
@@ -78,7 +77,7 @@ function DashboardLink() {
     return (
       <>
         <Link
-          href={`${env.NEXTJS_URL}/${AUTH_ROUTES.SIGNIN}`}
+          href={`${APP_DOMAIN}/${AUTH_ROUTES.SIGNIN}`}
           className={buttonVariants({ variant: "outline" })}
         >
           Sign In
@@ -90,7 +89,7 @@ function DashboardLink() {
 
   return (
     <Link
-      href={`${env.NEXTJS_URL}/${workspaceSlug}`}
+      href={`${APP_DOMAIN}/${workspaceSlug}`}
       className={buttonVariants({ variant: "outline" })}
     >
       Dashboard

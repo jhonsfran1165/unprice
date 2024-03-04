@@ -2,8 +2,17 @@ import type { NextRequest } from "next/server"
 
 import type { NextAuthRequest } from "@builderai/auth/server"
 
+import { APP_BASE_DOMAIN } from "~/constants"
+
 export const parse = (req: NextAuthRequest) => {
-  const domain = req.headers.get("host") ?? "localhost"
+  let domain = req.headers.get("host")!
+  domain = domain.replace("www.", "") // remove www. from domain
+
+  if (domain === "app.localhost:3000" || domain.endsWith(".vercel.app")) {
+    // for local development and preview URLs
+    domain = APP_BASE_DOMAIN
+  }
+
   const suddomain = domain.split(".")[0]
   const ip = req.ip ?? "127.0.0.1"
   const path = req.nextUrl.pathname

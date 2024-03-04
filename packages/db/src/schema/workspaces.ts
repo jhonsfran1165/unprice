@@ -1,5 +1,11 @@
 import { relations } from "drizzle-orm"
-import { boolean, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
+import {
+  boolean,
+  foreignKey,
+  primaryKey,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, id, timestamps, workspaceID } from "../utils/sql"
@@ -45,12 +51,15 @@ export const members = pgTableProject(
   {
     ...timestamps,
     ...workspaceID,
-    userId: cuid("userId")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    userId: cuid("user_id").notNull(),
     role: teamRolesEnum("role").default("MEMBER").notNull(),
   },
   (table) => ({
+    fk: foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "members_user_id_fkey",
+    }),
     compoundKey: primaryKey({
       columns: [table.userId, table.workspaceId],
       name: "members_pkey",

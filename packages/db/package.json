@@ -32,7 +32,7 @@
     "up:custom": "pnpm with-env drizzle-kit up:pg --config=custom.config.ts",
     "studio:neon": "pnpm with-env drizzle-kit studio --config=neon.config.ts --verbose",
     "studio:local": "pnpm with-env drizzle-kit studio --config=local.config.ts --verbose",
-    "format": "prettier --check \"**/*.{mjs,ts,json}\"",
+    "format": "prettier --check \"**/*.{mjs,ts}\"",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env.local --"
