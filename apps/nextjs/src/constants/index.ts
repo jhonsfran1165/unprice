@@ -1,27 +1,31 @@
 import { env } from "../env.mjs"
 
 export const APP_NAME = "builderai"
+export const APP_DOMAIN_NAME = "app.builderai.sh"
 
 export const APP_BASE_DOMAIN = `app.${env.NEXT_PUBLIC_APP_DOMAIN}`
 
 export const APP_HOSTNAMES = new Set([
+  "app.builderai.sh",
   `app.${env.NEXT_PUBLIC_APP_DOMAIN}`,
   "app.localhost:3000",
 ])
 
 export const APP_DOMAIN =
   env.VERCEL_ENV === "production"
-    ? `https://app.${env.NEXT_PUBLIC_APP_DOMAIN}`
+    ? "app.builderai.sh"
     : env.VERCEL_ENV === "preview"
       ? `https://${env.NEXT_PUBLIC_APP_DOMAIN}`
       : `http://app.localhost:3000`
 
 export const API_HOSTNAMES = new Set([
+  "api.builderai.sh",
   `api.${env.NEXT_PUBLIC_APP_DOMAIN}`,
   "api.localhost:3000",
 ])
 
 export const SITES_HOSTNAMES = new Set([
+  "sites.builderai.sh",
   `sites.${env.NEXT_PUBLIC_APP_DOMAIN}`,
   "sites.localhost:3000",
 ])
