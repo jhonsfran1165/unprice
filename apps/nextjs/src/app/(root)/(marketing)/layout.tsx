@@ -77,7 +77,7 @@ function DashboardLink() {
     return (
       <>
         <Link
-          href={`${APP_DOMAIN}/${AUTH_ROUTES.SIGNIN}`}
+          href={`${APP_DOMAIN}${AUTH_ROUTES.SIGNIN}`}
           className={buttonVariants({ variant: "outline" })}
         >
           Sign In
@@ -89,7 +89,7 @@ function DashboardLink() {
 
   return (
     <Link
-      href={`${APP_DOMAIN}/${workspaceSlug}`}
+      href={`${APP_DOMAIN}${workspaceSlug}`}
       className={buttonVariants({ variant: "outline" })}
     >
       Dashboard

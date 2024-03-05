@@ -57,6 +57,27 @@
       "when": 1709475377978,
       "tag": "0007_reflective_starhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1709639120866,
+      "tag": "0008_icy_scarecrow",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1709642453936,
+      "tag": "0009_brave_mystique",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1709649167824,
+      "tag": "0010_premium_deathstrike",
+      "breakpoints": true
     }
   ]
 }

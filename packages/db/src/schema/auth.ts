@@ -12,6 +12,8 @@ export const users = pgTableProject("user", {
   email: text("email").notNull(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
+  theme: text("theme").default("dark").notNull(),
+  defaultWorkspaceSlug: text("default_wk_slug"),
 })
 
 export const accounts = pgTableProject(

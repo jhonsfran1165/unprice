@@ -234,8 +234,8 @@ export const workspaceRouter = createTRPCRouter({
             },
           },
         },
-        where: (members, operators) => operators.eq(members.userId, userId),
-        orderBy: (members) => members.createdAt,
+        where: (member, operators) => operators.eq(member.userId, userId),
+        orderBy: (member) => member.createdAt,
       })
 
       const workspaces = memberships.map((member) => ({

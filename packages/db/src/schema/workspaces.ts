@@ -45,7 +45,6 @@ export const workspaces = pgTableProject(
   (_table) => ({})
 )
 
-// TODO: members_workspaces
 export const members = pgTableProject(
   "members",
   {
@@ -55,7 +54,7 @@ export const members = pgTableProject(
     role: teamRolesEnum("role").default("MEMBER").notNull(),
   },
   (table) => ({
-    fk: foreignKey({
+    userFk: foreignKey({
       columns: [table.userId],
       foreignColumns: [users.id],
       name: "members_user_id_fkey",
@@ -74,6 +73,7 @@ export const invites = pgTableProject(
     ...workspaceID,
     email: text("email").notNull(),
     role: teamRolesEnum("role").default("MEMBER").notNull(),
+    acceptedAt: timestamp("accepted_at", { mode: "date" }),
   },
   (table) => ({
     compoundKey: primaryKey({

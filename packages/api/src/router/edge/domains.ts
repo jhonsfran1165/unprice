@@ -122,6 +122,9 @@ export const domainRouter = createTRPCRouter({
         })
       }
 
+      // TODO: I also need to remove the domain from the vercel account
+      // not that easy as delete it and we are done, but maybe that domain is used for another account
+      // maybe with a cron job that verify if the domain is used by another account and then remove it from our account
       const data = await removeDomainFromVercelProject(domain.name)
 
       if (data?.error) {

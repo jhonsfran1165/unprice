@@ -2,7 +2,7 @@ import GitHub from "@auth/core/providers/github"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import type { NextAuthConfig } from "next-auth"
 
-import { and, db, eq, prepared, tableCreator } from "@builderai/db"
+import { and, db, eq, prepared, sql, tableCreator } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import type { WorkspacesJWTPayload } from "@builderai/db/validators"
@@ -33,6 +33,7 @@ export const authConfig = {
   debug: process.env.NODE_ENV === "development",
   adapter: {
     ...DrizzleAdapter(db, tableCreator),
+
     // override the default create user
     async createUser(data) {
       const user = await db
@@ -45,9 +46,9 @@ export const authConfig = {
         throw "Error creating user"
       }
 
-      // TODO: support invitation
       const inviteUser = await db.query.invites.findFirst({
-        where: (invite, { eq }) => eq(invite.email, user.email),
+        where: (invite, { eq, and }) =>
+          and(eq(invite.email, user.email), eq(invite.acceptedAt, sql`NULL`)),
       })
 
       if (inviteUser) {
@@ -61,9 +62,12 @@ export const authConfig = {
           })
           .onConflictDoNothing()
 
-        // delete the invite
+        // update the invite as accepted
         await db
-          .delete(schema.invites)
+          .update(schema.invites)
+          .set({
+            acceptedAt: new Date(),
+          })
           .where(
             and(
               eq(schema.invites.email, inviteUser.email),
@@ -181,6 +185,8 @@ export const authConfig = {
         token.refreshWorkspacesAt = Date.now() + 3600000 // 1 hour
       } catch (error) {
         console.error(error)
+        token.refreshWorkspacesAt = 0 // invalidate the token if there is an error
+        token.workspaces = [] // invalidate the token if there is an error
         throw "Error getting workspaces for user"
       }
 

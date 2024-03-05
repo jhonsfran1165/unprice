@@ -7,10 +7,14 @@ export const APP_BASE_DOMAIN = `app.${env.NEXT_PUBLIC_APP_DOMAIN}`
 export const APP_HOSTNAMES = new Set([
   `app.${env.NEXT_PUBLIC_APP_DOMAIN}`,
   "app.localhost:3000",
-  "localhost",
 ])
 
-export const APP_DOMAIN = `https://app.${env.NEXT_PUBLIC_APP_DOMAIN}`
+export const APP_DOMAIN =
+  env.VERCEL_ENV === "production"
+    ? `https://app.${env.NEXT_PUBLIC_APP_DOMAIN}`
+    : env.VERCEL_ENV === "preview"
+      ? `https://${env.NEXT_PUBLIC_APP_DOMAIN}`
+      : `http://app.localhost:3000`
 
 export const API_HOSTNAMES = new Set([
   `api.${env.NEXT_PUBLIC_APP_DOMAIN}`,
