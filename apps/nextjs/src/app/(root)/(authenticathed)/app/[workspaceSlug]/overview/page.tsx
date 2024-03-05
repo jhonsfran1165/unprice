@@ -1,39 +1,21 @@
-import Link from "next/link"
 import { Balancer } from "react-wrap-balancer"
-
-import { Button } from "@builderai/ui/button"
-import { Add, Warning } from "@builderai/ui/icons"
 
 import { api } from "~/trpc/server"
 import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
 
+// TODO: add preferred region for edge where we call the db
 export const preferredRegion = ["fra1"]
 export const runtime = "edge"
 
 export default async function WorkspaceOverviewPage(props: {
   params: { workspaceSlug: string }
 }) {
-  const { projects, limitReached } = await api.projects.listByWorkspace({
+  const { projects } = await api.projects.listByWorkspace({
     workspaceSlug: props.params.workspaceSlug,
   })
 
   return (
     <>
-      <div className="mb-4 flex w-full justify-end">
-        {limitReached ? (
-          <Button className="min-w-max" variant="ghost">
-            <Warning className="h-5 w-5" />
-            <span className="pl-2">Project limit reached</span>
-          </Button>
-        ) : (
-          <Link href={`/${props.params.workspaceSlug}/onboarding`}>
-            <Button className="h-8 w-8" size={"icon"}>
-              <Add className="h-4 w-4" />
-            </Button>
-          </Link>
-        )}
-      </div>
-
       <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {projects.map((project) => (
           <li key={project.id}>

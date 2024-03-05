@@ -4,6 +4,8 @@ import TabsNav from "~/components/layout/tabs-nav"
 import { WORKSPACE_TABS_CONFIG } from "~/constants/workspaces"
 import { DomainDialog } from "./_components/domain-dialog"
 
+export const runtime = "edge"
+
 export default function DomainsLayout(props: {
   children: React.ReactNode
   params: { workspaceSlug: string }

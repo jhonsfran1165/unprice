@@ -13,7 +13,6 @@ export interface SidebarRoute {
   tier?: string
   icon: keyof typeof Icons
   href: string
-  subTabs?: SubTabsRoutes
 }
 
 export interface SubTabRoute {
@@ -26,25 +25,16 @@ export interface SubTabRoute {
 export type SubTabsRoutes = Record<string, SubTabRoute>
 export type SidebarRoutes = Record<string, SidebarRoute>
 
-type ConditionalProps =
-  | {
-      sidebar?: SidebarRoutes
-      subTabs?: never
-    }
-  | {
-      sidebar?: never
-      subTabs?: SubTabsRoutes
-    }
-
-export type DashboardRoute = {
+export interface DashboardRoute {
   titleTab: string
   isNew?: boolean
   href: string
   disabled?: boolean
   icon: keyof typeof Icons
+  sidebar?: SidebarRoutes
   // we can use this for further customization from here
   // testing?: JSX.Element
-} & ConditionalProps
+}
 
 export interface Route {
   title: string

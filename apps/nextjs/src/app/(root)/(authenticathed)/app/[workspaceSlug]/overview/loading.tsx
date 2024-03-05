@@ -5,6 +5,8 @@ import { Add } from "@builderai/ui/icons"
 
 import { ProjectCardSkeleton } from "../_components/project-card"
 
+export const runtime = "edge"
+
 export default function Loading() {
   return (
     <>

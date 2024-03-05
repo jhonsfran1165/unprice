@@ -1,12 +1,8 @@
 import type { DashboardRoute } from "~/types"
 
-const submodulesWorkspace = [
-  "overview",
-  "settings",
-  "domains",
-  "dashboard",
-] as const
+const submodulesWorkspace = ["overview", "settings", "domains"] as const
 
+// TODO: improve icons
 export const WORKSPACE_TABS_CONFIG: Record<
   (typeof submodulesWorkspace)[number],
   DashboardRoute
@@ -15,11 +11,6 @@ export const WORKSPACE_TABS_CONFIG: Record<
     icon: "AppWindow",
     titleTab: "Projects",
     href: "/overview",
-  },
-  dashboard: {
-    icon: "Dashboard",
-    titleTab: "Dashboard",
-    href: "/dashboard",
   },
   domains: {
     icon: "Globe",
@@ -36,18 +27,12 @@ export const WORKSPACE_TABS_CONFIG: Record<
         title: "General",
         href: "/settings/overview",
         icon: "Settings",
-        subTabs: {
-          overview: {
-            title: "Organization",
-            icon: "AppWindow",
-            description: "Cabeza de AppWindow",
-          },
-          members: {
-            title: "Members",
-            icon: "User2",
-            description: "Cabeza de AppWindow",
-          },
-        },
+      },
+      members: {
+        title: "Members",
+        href: "/settings/members",
+        icon: "User2",
+        description: "Cabeza de AppWindow",
       },
       billing: {
         title: "Billing",
