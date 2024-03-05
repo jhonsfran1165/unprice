@@ -3,20 +3,15 @@ import { ExternalLink, Globe } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { Badge } from "@builderai/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@builderai/ui/card"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { api } from "~/trpc/server"
 import DomainConfiguration from "./_components/domain-configuration"
 import { DomainDialog } from "./_components/domain-dialog"
 import { VerifyDomainButton } from "./_components/domain-verify-button"
+
+export const runtime = "edge"
 
 export default async function PageDomains() {
   const domains = await api.domains.getAllByActiveWorkspace()
@@ -50,27 +45,6 @@ export default async function PageDomains() {
         </ul>
       )}
     </>
-  )
-}
-
-// TODO: fix this
-export function DomainCardSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center space-x-4">
-          <ExternalLink className="h-6 w-6" />
-          <div className="space-y-1.5">
-            <CardTitle>shadcn.com</CardTitle>
-            <CardDescription>shadcn.com</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="bg-background-bg p-4"></div>
-      </CardContent>
-      <CardFooter>dasdasdsad</CardFooter>
-    </Card>
   )
 }
 

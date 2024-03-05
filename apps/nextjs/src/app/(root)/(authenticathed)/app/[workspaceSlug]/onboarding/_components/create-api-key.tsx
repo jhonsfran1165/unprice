@@ -1,25 +1,30 @@
-"use client"
-
+import { useEffect } from "react"
 import dynamic from "next/dynamic"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { domAnimation, LazyMotion, m } from "framer-motion"
 import { Balancer } from "react-wrap-balancer"
 
-const CreateProjectForm = dynamic(
-  () => import("../_components/create-project-form"),
+const CreateApiKeyForm = dynamic(
+  () => import("../../[projectSlug]/apikeys/_components/create-api-key-form"),
   {
     ssr: false,
   }
 )
 
-export default function CreateProject() {
+export default function CreateApiKey() {
   const router = useRouter()
-  const workspaceSlug = useParams().workspaceSlug as string
+  const projectSlug = useSearchParams().get("projectSlug")
+
+  useEffect(() => {
+    if (!projectSlug) {
+      router.push(`/onboarding`)
+    }
+  }, [projectSlug, router])
 
   return (
     <LazyMotion features={domAnimation}>
       <m.div
-        className="my-auto flex h-full w-full flex-col items-center justify-center"
+        className="flex h-full w-full flex-col items-center justify-center"
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.3, type: "spring" }}
       >
@@ -47,7 +52,7 @@ export default function CreateProject() {
             }}
           >
             <Balancer>
-              {`Let's start off by creating your first project`}
+              {`Next, let's create an API key for your project`}
             </Balancer>
           </m.h1>
           <m.div
@@ -60,15 +65,13 @@ export default function CreateProject() {
               },
             }}
           >
-            <CreateProjectForm
-              workspaceSlug={workspaceSlug}
-              onSuccess={({ slug }) => {
+            <CreateApiKeyForm
+              projectSlug={projectSlug!}
+              onSuccess={(key: string) => {
                 const searchParams = new URLSearchParams(window.location.search)
-                searchParams.set("step", "create-api-key")
-                searchParams.set("projectSlug", slug)
-                router.push(
-                  `/${workspaceSlug}/onboarding?${searchParams.toString()}`
-                )
+                searchParams.set("step", "done")
+                searchParams.set("apiKey", key)
+                router.push(`/onboarding?${searchParams.toString()}`)
               }}
             />
           </m.div>

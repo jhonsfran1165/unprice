@@ -2,7 +2,6 @@ export * from "./utils/_table"
 export * from "./utils/constants"
 export * from "./utils/id"
 export * from "./utils/id-edge"
-export * from "./utils/sql"
 
 export { generateSlug } from "random-word-slugs"
 

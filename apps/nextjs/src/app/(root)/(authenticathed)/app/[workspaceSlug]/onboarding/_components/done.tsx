@@ -1,3 +1,5 @@
+"use client"
+
 import { useEffect, useTransition } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -25,7 +27,7 @@ export default function Done(props: { workspaceSlug: string }) {
   return (
     <LazyMotion features={domAnimation}>
       <m.div
-        className="shadox-xl flex h-full w-full flex-col items-center justify-center bg-opacity-60 p-8"
+        className="flex h-full w-full flex-col items-center justify-center bg-opacity-60 p-8 shadow-xl"
         exit={{ opacity: 0, scale: 0.95 }}
         initial={{ background: "transparent" }}
         animate={{ background: "var(--background)" }}

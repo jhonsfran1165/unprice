@@ -314,6 +314,71 @@ export const workspaceRouter = createTRPCRouter({
         member: member,
       }
     }),
+  listInvites: protectedProcedure
+    .input(
+      z.object({
+        workspaceSlug: z.string(),
+      })
+    )
+    .output(
+      z.object({
+        invites: z.array(invitesSelectBase),
+      })
+    )
+    .query(async (opts) => {
+      const { workspaceSlug } = opts.input
+
+      const { workspace } = await workspaceGuard({
+        ctx: opts.ctx,
+        workspaceSlug,
+      })
+
+      const invites = await opts.ctx.db.query.invites.findMany({
+        where: eq(schema.invites.workspaceId, workspace.id),
+      })
+
+      return {
+        invites: invites,
+      }
+    }),
+  deleteInvite: protectedProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+        workspaceId: z.string(),
+      })
+    )
+    .output(
+      z.object({
+        invite: invitesSelectBase.optional(),
+      })
+    )
+    .mutation(async (opts) => {
+      const { email, workspaceId } = opts.input
+
+      const { workspace, verifyRole } = await workspaceGuard({
+        ctx: opts.ctx,
+        workspaceId,
+      })
+
+      // only owners and admins can delete invites
+      verifyRole(["OWNER", "ADMIN"])
+
+      const deletedInvite = await opts.ctx.db
+        .delete(schema.invites)
+        .where(
+          and(
+            eq(schema.invites.email, email),
+            eq(schema.invites.workspaceId, workspace.id)
+          )
+        )
+        .returning()
+        .then((inv) => inv[0] ?? undefined)
+
+      return {
+        invite: deletedInvite,
+      }
+    }),
   inviteMember: protectedProcedure
     .input(inviteMembersSchema)
     .output(

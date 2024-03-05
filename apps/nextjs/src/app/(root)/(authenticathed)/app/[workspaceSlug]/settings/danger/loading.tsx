@@ -7,20 +7,18 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 
-export const runtime = "edge"
-
 export default function WorkSpaceSettingsDangerLoading() {
   return (
     <Card className="animate-pulse bg-muted">
       <CardHeader>
-        <CardTitle>Delete workspace</CardTitle>
+        <CardTitle>Delete</CardTitle>
         <CardDescription>
           This will delete the workspace and all of its data.
         </CardDescription>
       </CardHeader>
       <CardFooter className="flex justify-between">
         <Button variant="destructive" className="text-transparent">
-          Delete workspace
+          Delete
         </Button>
       </CardFooter>
     </Card>

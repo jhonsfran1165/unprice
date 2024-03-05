@@ -18,6 +18,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 
+import { cn } from "@builderai/ui"
 import {
   Table,
   TableBody,
@@ -40,12 +41,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   filterOptions?: FilterOptionDataTable
+  className?: string
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   filterOptions,
+  className,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -78,7 +81,7 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <div className="space-y-4">
+    <div className={cn("space-y-4", className)}>
       <DataTableToolbar table={table} filterOptions={filterOptions} />
       <div className="rounded-md border">
         <Table>

@@ -1,4 +1,4 @@
-import { Onboarding } from "./multi-step-form"
+import { Onboarding } from "./_components/multi-step-form"
 
 export const runtime = "edge"
 

@@ -2,8 +2,8 @@ import type { AdapterAccount } from "@auth/core/adapters"
 import { relations } from "drizzle-orm"
 import { integer, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
 
-import { cuid } from "../utils"
 import { pgTableProject } from "../utils/_table"
+import { cuid } from "../utils/sql"
 import { members } from "./workspaces"
 
 export const users = pgTableProject("user", {

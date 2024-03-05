@@ -86,7 +86,7 @@ export function WorkspaceName(props: {
               )}
             />
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex justify-end">
             <SubmitButton
               isDisabled={form.formState.isSubmitting}
               isSubmitting={form.formState.isSubmitting}

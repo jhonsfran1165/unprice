@@ -37,7 +37,7 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
 
   const apiUtils = api.useUtils()
 
-  const title = "Delete workspace"
+  const title = "Delete"
   const description = "This will delete the workspace and all of its data."
 
   const deleteWorkspace = api.workspaces.delete.useMutation({

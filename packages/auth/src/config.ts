@@ -144,8 +144,6 @@ export const authConfig = {
       if (!userId) return token
       token.id = userId
 
-      console.log("token", token)
-
       // set a parameter that allows to refresh workspace data every hour
       // this is used to avoid fetching the workspaces for the user in every request
       // we use prepared statements to improve performance
@@ -160,7 +158,7 @@ export const authConfig = {
         const tokenDate = new Date(token.refreshWorkspacesAt as number)
 
         // refresh the workspaces if the time is greater than the refreshWorkspacesAt
-        if (tokenDate > new Date()) {
+        if (token.workspaces && tokenDate > new Date()) {
           return token
         }
 
