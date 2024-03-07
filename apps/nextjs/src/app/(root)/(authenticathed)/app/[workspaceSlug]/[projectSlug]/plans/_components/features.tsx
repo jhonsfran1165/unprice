@@ -45,7 +45,7 @@ export function Features({
         <h1 className="text-xl font-bold">Features</h1>
       </div>
       <Separator />
-      <div className="flex flex-row items-center space-x-1 p-4 backdrop-blur">
+      <div className="flex flex-row items-center space-x-1 p-2 backdrop-blur">
         <form className="w-full">
           <div className="relative">
             <Search className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
@@ -65,7 +65,7 @@ export function Features({
         <FeatureForm projectSlug={projectSlug} mode={"create"} />
       </div>
       <ScrollArea className="max-h-[750px] flex-1 overflow-y-auto">
-        <div className="px-4 py-2">
+        <div className="px-2 py-2">
           <div className="space-y-2">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center space-y-2">

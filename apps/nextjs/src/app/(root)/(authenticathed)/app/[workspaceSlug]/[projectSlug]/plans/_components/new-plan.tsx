@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { CURRENCIES } from "@builderai/config"
+import { slugify } from "@builderai/db/utils"
 import type { CreatePlan } from "@builderai/db/validators"
 import { createPlanSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
@@ -19,12 +20,12 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
-import { Add } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import {
   Select,
@@ -33,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@builderai/ui/select"
+import { Textarea } from "@builderai/ui/text-area"
 
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -68,75 +70,108 @@ export function NewPlanDialog() {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button className="h-8 w-8" size={"icon"}>
-          <Add className="h-4 w-4" />
-        </Button>
+        <Button>Create Plan</Button>
       </DialogTrigger>
       <DialogContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onCreatePlan)}
-            className="space-y-4"
-          >
+          <form onSubmit={form.handleSubmit(onCreatePlan)}>
             <DialogHeader>
               <DialogTitle>Create Plan</DialogTitle>
               <DialogDescription>Add a new Plan</DialogDescription>
             </DialogHeader>
 
-            <FormField
-              control={form.control}
-              name="slug"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Plan Slug</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Acme Inc." />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="my-4 space-y-4">
+              <div className="flex w-full flex-row justify-between space-x-2">
+                <div className="w-full">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Plan Title</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="FREE"
+                            onChange={(e) => {
+                              form.setValue("title", e.target.value)
+                              const slug = slugify(e.target.value)
+                              form.setValue("slug", slug)
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Plan Title</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Acme Inc." />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <div className="w-full">
+                  <FormField
+                    control={form.control}
+                    name="slug"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Plan Slug</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            readOnly
+                            disabled
+                            placeholder="free"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
 
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex justify-between">
-                    <FormLabel>Subscription plan *</FormLabel>
-                  </div>
-                  <Select onValueChange={field.onChange}>
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between">
+                      <FormLabel>Currency of the plan</FormLabel>
+                    </div>
+                    <Select onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a plan" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CURRENCIES.map((currency, index) => (
+                          <SelectItem key={index} value={currency}>
+                            {currency}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a plan" />
-                      </SelectTrigger>
+                      <Textarea {...field} value={field.value ?? ""} />
                     </FormControl>
-                    <SelectContent>
-                      {CURRENCIES.map((currency, index) => (
-                        <SelectItem key={index} value={currency}>
-                          {currency}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormDescription>
+                      Enter a short description of the feature.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>

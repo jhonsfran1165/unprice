@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
-import type { FeaturePlan, FeatureType } from "@builderai/db/validators"
+import type { FeatureType, PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 
 import type { FeatureCardProps } from "./feature"
@@ -9,7 +9,7 @@ import { FeatureCard } from "./feature"
 
 export interface DragData {
   type: FeatureType
-  feature: FeaturePlan
+  feature: PlanVersionFeature
 }
 
 export function SortableFeature(

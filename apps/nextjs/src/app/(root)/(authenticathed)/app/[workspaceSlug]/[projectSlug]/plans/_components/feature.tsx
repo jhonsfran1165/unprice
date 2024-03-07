@@ -1,9 +1,9 @@
 import type { ComponentPropsWithoutRef, ElementRef } from "react"
 import { forwardRef } from "react"
+import { GripVertical } from "lucide-react"
 
-import type { FeaturePlan, FeatureType } from "@builderai/db/validators"
+import type { FeatureType, PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
-import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import { Trash2 } from "@builderai/ui/icons"
 
@@ -11,7 +11,7 @@ import { FeatureConfigForm } from "./feature-config-form"
 import { FeatureForm } from "./feature-form"
 
 interface FeatureCardBase {
-  feature: FeaturePlan
+  feature: PlanVersionFeature
   type: FeatureType
   projectSlug: string
   isOverlay?: boolean
@@ -21,12 +21,12 @@ export type FeatureCardProps =
   | (FeatureCardBase & {
       type: "Feature"
       deleteFeature?: (id: string) => void
-      updateFeature?: (feature: FeaturePlan) => void
+      updateFeature?: (feature: PlanVersionFeature) => void
     })
   | (FeatureCardBase & {
       type: "Plan"
       deleteFeature: (id: string) => void
-      updateFeature: (feature: FeaturePlan) => void
+      updateFeature: (feature: PlanVersionFeature) => void
     })
   | (FeatureCardBase & {
       type: "Addon"
@@ -66,17 +66,21 @@ const FeatureCard = forwardRef<
         ref={ref}
         {...props}
         className={cn(
-          "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent",
-          props.className
+          "flex flex-col items-start gap-2 rounded-lg border bg-background-bgSubtle px-3 py-1 text-left text-sm transition-all",
+          props.className,
+          {
+            "h-16 bg-background-base": isOverlay,
+          }
         )}
       >
         <div className="flex w-full flex-col gap-1">
           <div className="flex items-center">
             <div className="flex items-center gap-2">
-              <div className="font-semibold">{feature.title}</div>
+              <GripVertical className="h-4 w-4" />
+              <div className="truncate font-semibold">{feature.slug}</div>
             </div>
             <div className={"ml-auto flex items-center"}>
-              <Badge className="mr-2">{feature.type}</Badge>
+              {/* <Badge className="mr-2">{feature.type}</Badge> */}
               {!isOverlay &&
                 (type === "Feature" ? (
                   <FeatureForm
@@ -110,13 +114,11 @@ const FeatureCard = forwardRef<
               )}
             </div>
           </div>
-          <div className="text-xs font-medium">{feature.title}</div>
         </div>
         {type !== "Feature" && (
           <>
-            <div className="line-clamp-2 text-xs text-muted-foreground">
-              {feature.description &&
-                feature.description?.substring(0, 50) + "..."}
+            <div className="ml-6 line-clamp-2 w-72 truncate text-xs text-muted-foreground">
+              {feature.description}
             </div>
             <div className={cn("ml-auto flex items-center text-xs")}>
               1000 calls per $5 USD

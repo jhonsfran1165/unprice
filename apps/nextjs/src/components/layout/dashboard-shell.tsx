@@ -23,7 +23,7 @@ export function DashboardShell(props: {
       <main className="flex flex-1 flex-col overflow-y-auto border py-4">
         {props.header && props.header}
 
-        <MaxWidthWrapper className="my-10 flex max-w-screen-2xl flex-1 flex-col space-y-4">
+        <MaxWidthWrapper className="mt-10 flex max-w-screen-2xl flex-1 flex-col space-y-4">
           {/* sidebar menu config */}
           {props.sidebar && (
             <div className="flex flex-col gap-2 sm:flex-1 sm:flex-row">

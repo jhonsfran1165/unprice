@@ -1,11 +1,9 @@
-import Link from "next/link"
 import { z } from "zod"
 
-import { FEATURE_TYPES } from "@builderai/config"
 import * as utils from "@builderai/db/utils"
 import type {
   CreateFeature,
-  FeaturePlan,
+  PlanVersionFeature,
   UpdateFeature,
 } from "@builderai/db/validators"
 import {
@@ -24,13 +22,6 @@ import {
 } from "@builderai/ui/form"
 import { Pencil, Plus } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@builderai/ui/select"
 import { Separator } from "@builderai/ui/separator"
 import {
   Sheet,
@@ -51,12 +42,12 @@ type FeatureFormProps =
   | {
       projectSlug: string
       mode: "create"
-      feature?: FeaturePlan
+      feature?: PlanVersionFeature
     }
   | {
       projectSlug: string
       mode: "edit"
-      feature: FeaturePlan
+      feature: PlanVersionFeature
     }
 
 export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
@@ -148,13 +139,12 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size={"icon"} className="h-8 w-8">
+        <Button variant="link" size={"icon"}>
           {mode === "edit" && <Pencil className="h-4 w-4" />}
           {mode === "create" && <Plus className="h-4 w-4" />}
-          <span className="sr-only">configure</span>
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="">
         <SheetHeader>
           <SheetTitle>Edit Feature</SheetTitle>
           <SheetDescription>
@@ -231,7 +221,7 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
               </div>
             </div>
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="type"
               render={({ field }) => (
@@ -267,7 +257,7 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             <FormField
               control={form.control}

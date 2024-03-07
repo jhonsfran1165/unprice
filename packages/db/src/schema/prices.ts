@@ -13,7 +13,7 @@ import * as z from "zod"
 import { FEATURE_TYPES, TIER_MODES } from "../utils"
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
-import { currencyEnum, statusPlanEnum, typeFeatureEnum } from "./enums"
+import { currencyEnum, statusPlanEnum } from "./enums"
 import { projects } from "./projects"
 
 export const configFlatFeature = z.object({
@@ -43,7 +43,7 @@ export const configHybridFeature = z.object({
   price: z.coerce.number().min(0),
 })
 
-export const featureSchema = z
+export const planVersionFeatureSchema = z
   .object({
     id: z.string(),
     slug: z.string(),
@@ -51,7 +51,7 @@ export const featureSchema = z
     description: z.string().nullable(),
     createdAt: z.date(),
     updatedAt: z.date(),
-    type: z.enum(FEATURE_TYPES),
+    type: z.enum(FEATURE_TYPES).optional(),
     groupId: z.string().optional(),
     config: z
       .union([configFlatFeature, configMeteredFeature, configHybridFeature])
@@ -67,15 +67,6 @@ export const featureSchema = z
     }
   })
 
-export const versionPlanConfig = z.record(
-  z.object({
-    name: z.string(),
-    features: z.array(featureSchema),
-  })
-)
-
-export type PlanConfig = z.infer<typeof versionPlanConfig>
-
 export const plans = pgTableProject(
   "plans",
   {
@@ -84,6 +75,7 @@ export const plans = pgTableProject(
     slug: text("slug").notNull(),
     title: varchar("title", { length: 50 }).notNull(),
     currency: currencyEnum("currency").default("EUR"),
+    description: text("description"),
   },
   (table) => ({
     primary: primaryKey({
@@ -103,8 +95,12 @@ export const versions = pgTableProject(
     ...timestamps,
     planId: cuid("plan_id").notNull(),
     version: serial("version").notNull(),
-    featuresConfig: json("features_config").default({}).$type<PlanConfig>(), // config features of the plan
-    addonsConfig: json("addons_config").default({}).$type<PlanConfig>(), // config addons of the plan
+    featuresConfig:
+      json("features_config").$type<
+        z.infer<typeof planVersionFeatureSchema>[]
+      >(), // config features of the plan
+    addonsConfig:
+      json("addons_config").$type<z.infer<typeof planVersionFeatureSchema>[]>(), // config addons of the plan
     status: statusPlanEnum("plan_version_status").default("draft"),
   },
   (table) => ({
@@ -131,7 +127,7 @@ export const features = pgTableProject(
     slug: text("slug").notNull(),
     title: varchar("title", { length: 50 }).notNull(),
     description: text("description"),
-    type: typeFeatureEnum("type").default("flat").notNull(),
+    // type: typeFeatureEnum("type").default("flat").notNull(),
   },
   (table) => ({
     primary: primaryKey({

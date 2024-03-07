@@ -5,7 +5,7 @@ import { useFieldArray } from "react-hook-form"
 import { FEATURE_TYPES } from "@builderai/config"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
-import type { FeaturePlan } from "@builderai/db/validators"
+import type { PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
@@ -61,8 +61,8 @@ export function FeatureConfigForm({
   onSubmit,
 }: {
   projectSlug: string
-  feature: FeaturePlan
-  onSubmit: (feature: FeaturePlan) => void
+  feature: PlanVersionFeature
+  onSubmit: (feature: PlanVersionFeature) => void
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -89,7 +89,7 @@ export function FeatureConfigForm({
   }
 
   const form = useZodForm({
-    schema: schema.featureSchema,
+    schema: schema.planVersionFeatureSchema,
     defaultValues: {
       ...feature,
       ...defaultValues,
@@ -596,7 +596,7 @@ export function FeatureConfigForm({
             onClick={async (e) => {
               e.preventDefault()
 
-              await form.handleSubmit((data: FeaturePlan) => {
+              await form.handleSubmit((data: PlanVersionFeature) => {
                 onSubmit(data)
                 setIsOpen(false)
               })()

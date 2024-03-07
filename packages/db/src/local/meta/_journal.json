@@ -78,6 +78,13 @@
       "when": 1709649167824,
       "tag": "0010_premium_deathstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1709653968351,
+      "tag": "0011_tan_beast",
+      "breakpoints": true
     }
   ]
 }

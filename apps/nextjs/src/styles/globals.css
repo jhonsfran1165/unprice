@@ -82,7 +82,7 @@
   }
 
   .default {
-    @apply border border-background-border bg-background-base text-background-text;
+    @apply bg-transparent text-background-text;
   }
 
   .danger {
@@ -99,6 +99,14 @@
 
   .button-default {
     @apply default hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
+  }
+
+  .link {
+    @apply bg-background-bgSubtle text-background-text;
+  }
+
+  .button-link {
+    @apply default hover:text-background-textContrast active:text-background-bgActive;
   }
 
   .button-danger {
