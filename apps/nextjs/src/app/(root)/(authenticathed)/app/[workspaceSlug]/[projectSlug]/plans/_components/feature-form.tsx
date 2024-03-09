@@ -1,3 +1,4 @@
+import { Settings } from "lucide-react"
 import { z } from "zod"
 
 import * as utils from "@builderai/db/utils"
@@ -20,7 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
-import { Pencil, Plus } from "@builderai/ui/icons"
+import { Plus } from "@builderai/ui/icons"
 import { Input } from "@builderai/ui/input"
 import { Separator } from "@builderai/ui/separator"
 import {
@@ -140,7 +141,7 @@ export function FeatureForm({ projectSlug, feature, mode }: FeatureFormProps) {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="link" size={"icon"}>
-          {mode === "edit" && <Pencil className="h-4 w-4" />}
+          {mode === "edit" && <Settings className="h-4 w-4" />}
           {mode === "create" && <Plus className="h-4 w-4" />}
         </Button>
       </SheetTrigger>

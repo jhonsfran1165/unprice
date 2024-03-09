@@ -35,7 +35,6 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@builderai/ui/resizable"
-import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 import { useToast } from "@builderai/ui/use-toast"
 
@@ -145,7 +144,6 @@ export default function DragDrop({
   const onDragCancel = () => {
     if (clonedFeatures) {
       // Reset items to their original state in case items have been
-      // Dragged across containers
       setClonedFeatures(features)
     }
 
@@ -171,8 +169,6 @@ export default function DragDrop({
     // just copy the features in case the user cancels the drag
     setClonedFeatures(features)
 
-    console.log("event", event)
-
     if (event.active.data.current?.type === "Feature") {
       setActiveFeature(event.active.data.current.feature as PlanVersionFeature)
       return
@@ -196,9 +192,6 @@ export default function DragDrop({
   const onDragOver = (event: DragOverEvent) => {
     const { active, over } = event
 
-    console.log("active", active)
-    console.log("active", over)
-
     // only process if there is an over item
     if (!over) return
 
@@ -218,56 +211,34 @@ export default function DragDrop({
     // only process features
     if (!isActiveFeature) return
 
-    // I'm dropping a Feature over another Feature
-    // the over feature can be inside a group or not
-    if (isActiveFeature && isOverAFeature) {
-      // if the over feature has a group id then we need to move the active feature to the same group
-      setFeatures((features) => {
-        const activeIndex = features.findIndex((t) => t.id === activeId)
+    // look for the index of the active feature
+    const activeIndex = features.findIndex((t) => t.id === activeId)
+    const activeFeature = features[activeIndex]
+
+    setFeatures((features) => {
+      // I'm dropping a Feature over another Feature
+      if (isOverAFeature) {
         const overIndex = features.findIndex((t) => t.id === overId)
-        const activeFeature = features[activeIndex]
-        const overFeature = features[overIndex]
-
-        // if the active feature is in the list
-        // and the over feature is in the list
-        // and the active feature is not in the same group as the over feature
-        // then we need to move the active feature to the same group as the over feature
-        if (activeFeature && overFeature) {
-          return arrayMove(features, activeIndex, overIndex - 1)
-        } else if (!activeFeature && overFeature) {
-          // if the active feature is not in the list then we need to add it to the list
-          return arrayMove(
-            [...features, activeData.feature],
-            activeIndex,
-            overIndex
-          ) as PlanVersionFeature[]
-        } else {
-          // otherwise we only re-order the list
-          return arrayMove(features, activeIndex, overIndex)
-        }
-      })
-    }
-
-    // I'm dropping a Feature over a group
-    if (isActiveFeature && !isOverAFeature) {
-      setFeatures((features) => {
-        const activeIndex = features.findIndex((t) => t.id === activeId)
-        const activeFeature = features[activeIndex]
-
-        // if the active feature is in the list then we need to move it to the new group
-        if (activeFeature) {
-          return arrayMove(features, activeIndex, activeIndex)
-        } else {
-          // if the active feature is not in the list then we need to add it to the list
-          return [...features, activeData.feature] as PlanVersionFeature[]
-        }
-      })
-    }
+        // if the active feature is not in the list we add it
+        return activeFeature
+          ? arrayMove(features, activeIndex, overIndex)
+          : arrayMove(
+              [...features, activeData.feature] as PlanVersionFeature[],
+              activeIndex,
+              overIndex
+            )
+      } else {
+        // I'm dropping a Feature over the drop area
+        return activeFeature
+          ? arrayMove(features, activeIndex, activeIndex)
+          : ([...features, activeData.feature] as PlanVersionFeature[])
+      }
+    })
   }
 
   return (
     <DndContext
-      id={"plan-features"}
+      id={"plan-version-features"}
       sensors={sensors}
       measuring={{
         droppable: {
@@ -307,46 +278,44 @@ export default function DragDrop({
             </div>
           </div>
           <Separator />
-          <div className="flex flex-col py-4">
+          <div className="flex h-full flex-col px-4 py-4">
             <DroppableContainer id="1">
-              <ScrollArea className="h-full px-4">
-                <SortableContext
-                  items={features}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {features.length === 0 ? (
-                    <EmptyPlaceholder>
-                      <EmptyPlaceholder.Icon>
-                        <FileStack className="h-8 w-8" />
-                      </EmptyPlaceholder.Icon>
-                      <EmptyPlaceholder.Title>
-                        No features added yet
-                      </EmptyPlaceholder.Title>
-                      <EmptyPlaceholder.Description>
-                        Create your first feature and drag it here
-                      </EmptyPlaceholder.Description>
-                      <EmptyPlaceholder.Action>
-                        <Button size="sm" className="relative">
-                          Add Feature
-                        </Button>
-                      </EmptyPlaceholder.Action>
-                    </EmptyPlaceholder>
-                  ) : (
-                    <div className="space-y-2">
-                      {features.map((f) => (
-                        <SortableFeature
-                          projectSlug={projectSlug}
-                          deleteFeature={deleteFeature}
-                          updateFeature={updateFeature}
-                          key={f.id}
-                          feature={f}
-                          type="Plan"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </SortableContext>
-              </ScrollArea>
+              <SortableContext
+                items={features}
+                strategy={verticalListSortingStrategy}
+              >
+                {features.length === 0 ? (
+                  <EmptyPlaceholder>
+                    <EmptyPlaceholder.Icon>
+                      <FileStack className="h-8 w-8" />
+                    </EmptyPlaceholder.Icon>
+                    <EmptyPlaceholder.Title>
+                      No features added yet
+                    </EmptyPlaceholder.Title>
+                    <EmptyPlaceholder.Description>
+                      Create your first feature and drag it here
+                    </EmptyPlaceholder.Description>
+                    <EmptyPlaceholder.Action>
+                      <Button size="sm" className="relative">
+                        Add Feature
+                      </Button>
+                    </EmptyPlaceholder.Action>
+                  </EmptyPlaceholder>
+                ) : (
+                  <div className="space-y-2">
+                    {features.map((f) => (
+                      <SortableFeature
+                        projectSlug={projectSlug}
+                        deleteFeature={deleteFeature}
+                        updateFeature={updateFeature}
+                        key={f.id}
+                        feature={f}
+                        type="Plan"
+                      />
+                    ))}
+                  </div>
+                )}
+              </SortableContext>
             </DroppableContainer>
           </div>
 
