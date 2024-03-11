@@ -1,3 +1,5 @@
+"use client"
+
 import type { ComponentProps, ElementRef } from "react"
 import { forwardRef } from "react"
 import type { VariantProps } from "class-variance-authority"
@@ -7,8 +9,10 @@ import { ChevronRight } from "lucide-react"
 import type { PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
+import { Button } from "@builderai/ui/button"
 
 import { FeatureForm } from "../../../_components/feature-form"
+import { useActiveFeature, useSelectedFeatures } from "../use-mail"
 
 const featureVariants = cva(
   "flex gap-2 rounded-lg border text-left text-sm transition-all",
@@ -31,7 +35,6 @@ export interface FeaturePlanProps
   feature: PlanVersionFeature
   mode: "Feature" | "FeaturePlan"
   isOverlay?: boolean
-  setActiveFeature?: (id: string) => void
 }
 
 // A common pitfall when using the DragOverlay
@@ -47,23 +50,18 @@ export interface FeaturePlanProps
 // and calls useSortable
 const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
   (props, ref) => {
-    const {
-      isOverlay,
-      mode,
-      setActiveFeature,
-      variant,
-      className,
-      feature,
-      ...rest
-    } = props
+    const { isOverlay, mode, variant, className, feature, ...rest } = props
+
+    const [active, setActiveFeature] = useActiveFeature()
+    const [_, setSelectedFeatures] = useSelectedFeatures()
 
     const handleClick = (_event: React.MouseEvent<HTMLDivElement>) => {
-      setActiveFeature?.(feature.id)
+      setActiveFeature?.(feature)
     }
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Enter" || event.key === " ") {
-        setActiveFeature?.(feature.id)
+        setActiveFeature?.(feature)
       }
     }
 
@@ -71,7 +69,10 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
       <div
         ref={ref}
         {...rest}
-        className={cn(featureVariants({ variant, className }))}
+        className={cn(featureVariants({ variant, className }), {
+          "bg-background-bgHover":
+            mode === "FeaturePlan" && active?.id === feature.id,
+        })}
         onClick={handleClick}
         onKeyDown={handleKeyDown} // Add onKeyDown event listener
         role="button" // Add the role attribute to indicate interactive nature
@@ -89,7 +90,16 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
               {feature.title}
             </span>
             <span className={cn("ml-auto")}>
-              <ChevronRight className="mr-2 h-4 w-4" />
+              <Button
+                variant="link"
+                size={"icon"}
+                onClick={() => {
+                  console.log("add feature")
+                  setSelectedFeatures?.((prev) => [...prev, feature])
+                }}
+              >
+                <ChevronRight className="mr-2 h-4 w-4" />
+              </Button>
             </span>
           </>
         ) : mode === "FeaturePlan" ? (

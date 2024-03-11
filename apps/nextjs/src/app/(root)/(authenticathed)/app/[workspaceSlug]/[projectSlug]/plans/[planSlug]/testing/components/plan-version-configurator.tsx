@@ -13,9 +13,10 @@ import {
 import { Separator } from "@builderai/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
-import { useMail, useSelectedFeatures } from "../use-mail"
+import { FeatureForm } from "../../../_components/feature-form"
+import { useActiveFeature, useMail, useSelectedFeatures } from "../use-mail"
+import { FeatureConfig } from "./feature-config"
 import { FeatureList } from "./feature-list"
-import { MailDisplay } from "./mail-display"
 import { PlanFeatureList } from "./plan-feature-list"
 
 interface PlanVersionConfiguratorProps {
@@ -28,7 +29,10 @@ export function PlanVersionConfigurator({
   features,
 }: PlanVersionConfiguratorProps) {
   const [mail] = useMail()
+  const [activeFeature] = useActiveFeature()
   const [planFeatures] = useSelectedFeatures()
+
+  console.log("activeFeature", activeFeature)
 
   return (
     <ResizablePanelGroup
@@ -52,8 +56,9 @@ export function PlanVersionConfigurator({
         //   )}`
         // }}
       >
-        <div className={cn("flex h-[52px] items-center px-4")}>
+        <div className={cn("flex h-[52px] items-center justify-between px-4")}>
           <h1 className="truncate text-xl font-bold">All features</h1>
+          <FeatureForm projectSlug={"projectSlug"} mode="create" />
         </div>
 
         <Separator />
@@ -111,9 +116,7 @@ export function PlanVersionConfigurator({
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={defaultLayout[2]}>
-        <MailDisplay
-          mail={planFeatures.find((item) => item.id === mail.selected) ?? null}
-        />
+        <FeatureConfig feature={activeFeature ?? null} />
       </ResizablePanel>
     </ResizablePanelGroup>
   )

@@ -11,7 +11,6 @@ import {
 } from "lucide-react"
 
 import type { PlanVersionFeature } from "@builderai/db/validators"
-import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
 import { Button } from "@builderai/ui/button"
 import { Calendar } from "@builderai/ui/calendar"
 import {
@@ -27,11 +26,13 @@ import { Switch } from "@builderai/ui/switch"
 import { Textarea } from "@builderai/ui/text-area"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
-interface MailDisplayProps {
-  mail: PlanVersionFeature | null
+import { FeatureConfigForm } from "./feature-config-form"
+
+interface FeatureConfigProps {
+  feature: PlanVersionFeature | null
 }
 
-export function MailDisplay({ mail }: MailDisplayProps) {
+export function FeatureConfig({ feature }: FeatureConfigProps) {
   const today = new Date()
 
   return (
@@ -40,7 +41,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
         <div className="flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button variant="ghost" size="icon" disabled={!feature}>
                 <Archive className="h-4 w-4" />
                 <span className="sr-only">Archive</span>
               </Button>
@@ -49,7 +50,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button variant="ghost" size="icon" disabled={!feature}>
                 <ArchiveX className="h-4 w-4" />
                 <span className="sr-only">Move to junk</span>
               </Button>
@@ -58,7 +59,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button variant="ghost" size="icon" disabled={!feature}>
                 <Trash2 className="h-4 w-4" />
                 <span className="sr-only">Move to trash</span>
               </Button>
@@ -70,7 +71,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
             <Popover>
               <PopoverTrigger asChild>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" disabled={!mail}>
+                  <Button variant="ghost" size="icon" disabled={!feature}>
                     <Clock className="h-4 w-4" />
                     <span className="sr-only">Snooze</span>
                   </Button>
@@ -129,7 +130,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
         <div className="ml-auto flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button variant="ghost" size="icon" disabled={!feature}>
                 <Reply className="h-4 w-4" />
                 <span className="sr-only">Reply</span>
               </Button>
@@ -138,7 +139,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button variant="ghost" size="icon" disabled={!feature}>
                 <ReplyAll className="h-4 w-4" />
                 <span className="sr-only">Reply all</span>
               </Button>
@@ -147,7 +148,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button variant="ghost" size="icon" disabled={!feature}>
                 <Forward className="h-4 w-4" />
                 <span className="sr-only">Forward</span>
               </Button>
@@ -158,7 +159,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
         <Separator orientation="vertical" className="mx-2 h-6" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" disabled={!mail}>
+            <Button variant="ghost" size="icon" disabled={!feature}>
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">More</span>
             </Button>
@@ -172,36 +173,35 @@ export function MailDisplay({ mail }: MailDisplayProps) {
         </DropdownMenu>
       </div>
       <Separator />
-      {mail ? (
+      {feature ? (
         <div className="flex flex-1 flex-col">
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm">
-              <Avatar>
-                <AvatarImage alt={mail.title} />
-                <AvatarFallback>
-                  {mail.title
-                    .split(" ")
-                    .map((chunk) => chunk[0])
-                    .join("")}
-                </AvatarFallback>
-              </Avatar>
               <div className="grid gap-1">
-                <div className="font-semibold">{mail.title}</div>
-                <div className="line-clamp-1 text-xs">{mail.description}</div>
+                <div className="font-semibold">
+                  {feature.title.length > 30
+                    ? feature.title.substring(0, 30) + "..."
+                    : feature.title}
+                </div>
+                <div className="line-clamp-1 text-xs">{feature.slug}</div>
                 <div className="line-clamp-1 text-xs">
-                  <span className="font-medium">Reply-To:</span> {mail.title}
+                  {feature.description}
                 </div>
               </div>
             </div>
-            {mail.createdAt && (
+            {feature.createdAt && (
               <div className="ml-auto text-xs text-muted-foreground">
-                {format(new Date(mail.createdAt), "PPpp")}
+                {format(new Date(feature.createdAt), "PPpp")}
               </div>
             )}
           </div>
           <Separator />
           <div className="flex-1 whitespace-pre-wrap p-4 text-sm">
-            {mail.description}
+            <FeatureConfigForm
+              feature={feature}
+              projectSlug="projectSlug"
+              onSubmit={(data) => console.log(data)}
+            />
           </div>
           <Separator className="mt-auto" />
           <div className="p-4">
@@ -209,7 +209,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
               <div className="grid gap-4">
                 <Textarea
                   className="p-4"
-                  placeholder={`Reply ${mail.title}...`}
+                  placeholder={`Reply ${feature.title}...`}
                 />
                 <div className="flex items-center">
                   <Label

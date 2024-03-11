@@ -29,7 +29,7 @@ export function SortableFeature(props: DragData) {
       feature: props.feature,
     } satisfies DragData,
     attributes: {
-      roleDescription: "Feature",
+      roleDescription: props.mode,
     },
   })
 
