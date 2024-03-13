@@ -9,7 +9,7 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
 import { api } from "~/trpc/server"
-import { ExamplesNav } from "./example-nav"
+import { NavVersionPlan } from "./_components/plan-version-nav"
 
 export default async function PriceLayout(props: {
   children: React.ReactNode
@@ -55,7 +55,7 @@ export default async function PriceLayout(props: {
     >
       <div className="relative">
         <section>
-          <ExamplesNav />
+          <NavVersionPlan />
           <div className="overflow-hidden rounded-[0.5rem] border bg-background shadow-md md:shadow-xl">
             {props.children}
           </div>

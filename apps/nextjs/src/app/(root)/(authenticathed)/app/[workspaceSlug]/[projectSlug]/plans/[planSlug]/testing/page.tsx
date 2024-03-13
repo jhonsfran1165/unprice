@@ -1,134 +1,32 @@
 import { cookies } from "next/headers"
 
-import DragDrop from "./components/drag-drop"
-import { PlanVersionConfigurator } from "./components/plan-version-configurator"
+import { api } from "~/trpc/server"
+import DragDrop from "./_components/drag-drop"
+import { PlanVersionConfigurator } from "./_components/plan-version-configurator"
 
-const defaultFeatures = [
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title: "asdasdasd",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-]
-
-export default function MailPage() {
+export default async function NewVersionPage({
+  params,
+}: {
+  params: {
+    workspaceSlug: string
+    projectSlug: string
+    planSlug: string
+  }
+}) {
   const layout = cookies().get("react-resizable-panels:layout")
-  const collapsed = cookies().get("react-resizable-panels:collapsed")
 
   // TODO: fix this
-  // const defaultLayout = layout ? JSON.parse(layout.value ?? 0) : undefined
-  // const defaultCollapsed = collapsed
-  //   ? JSON.parse(collapsed.value ?? 0)
-  //   : undefined
+  const defaultLayout = layout ? JSON.parse(layout.value ?? 0) : undefined
+
+  const { features } = await api.features.listByActiveProject()
 
   return (
     <>
       <div className="flex flex-col">
         <DragDrop projectSlug="projectSlug">
           <PlanVersionConfigurator
-            // features={accounts} // initial features
-            // planVersionFeatures={mails}
-            features={defaultFeatures}
-            defaultLayout={undefined}
+            features={features}
+            defaultLayout={defaultLayout}
           />
         </DragDrop>
       </div>

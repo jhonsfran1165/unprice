@@ -77,7 +77,7 @@ export function DomainForm({
 
   const createDomain = api.domains.create.useMutation({
     onSuccess: ({ domain }) => {
-      form.reset()
+      form.reset(defaultValues)
       toastAction("saved")
       router.refresh()
       onSubmit?.(domain)

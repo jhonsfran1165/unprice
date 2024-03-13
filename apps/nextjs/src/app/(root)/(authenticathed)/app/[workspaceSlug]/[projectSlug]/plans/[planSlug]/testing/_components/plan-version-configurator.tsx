@@ -1,9 +1,10 @@
 "use client"
 
-import { Search } from "lucide-react"
+import { PlusIcon, Search } from "lucide-react"
 
 import type { PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
+import { Button } from "@builderai/ui/button"
 import { Input } from "@builderai/ui/input"
 import {
   ResizableHandle,
@@ -13,9 +14,9 @@ import {
 import { Separator } from "@builderai/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
-import { FeatureForm } from "../../../_components/feature-form"
-import { useActiveFeature, useMail, useSelectedFeatures } from "../use-mail"
+import { useActiveFeature, useSelectedFeatures } from "../use-mail"
 import { FeatureConfig } from "./feature-config"
+import { DomainDialog } from "./feature-dialog"
 import { FeatureList } from "./feature-list"
 import { PlanFeatureList } from "./plan-feature-list"
 
@@ -28,11 +29,8 @@ export function PlanVersionConfigurator({
   defaultLayout = [265, 440, 655],
   features,
 }: PlanVersionConfiguratorProps) {
-  const [mail] = useMail()
   const [activeFeature] = useActiveFeature()
   const [planFeatures] = useSelectedFeatures()
-
-  console.log("activeFeature", activeFeature)
 
   return (
     <ResizablePanelGroup
@@ -47,18 +45,16 @@ export function PlanVersionConfigurator({
       <ResizablePanel
         defaultSize={defaultLayout[0]}
         collapsible={false}
-        minSize={15}
+        minSize={10}
         maxSize={20}
-        // onCollapse={(collapsed) => {
-        //   setIsCollapsed(collapsed)
-        //   document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
-        //     collapsed
-        //   )}`
-        // }}
       >
         <div className={cn("flex h-[52px] items-center justify-between px-4")}>
           <h1 className="truncate text-xl font-bold">All features</h1>
-          <FeatureForm projectSlug={"projectSlug"} mode="create" />
+          <DomainDialog>
+            <Button variant="ghost" size="icon">
+              <PlusIcon className="h-4 w-4" />
+            </Button>
+          </DomainDialog>
         </div>
 
         <Separator />
@@ -73,7 +69,7 @@ export function PlanVersionConfigurator({
         <FeatureList features={features} />
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
+      <ResizablePanel defaultSize={defaultLayout[1]} minSize={25}>
         <Tabs defaultValue="all">
           <div className="flex items-center px-4 py-2">
             <h1 className="truncate text-xl font-bold">
@@ -107,15 +103,12 @@ export function PlanVersionConfigurator({
             <PlanFeatureList features={planFeatures} id={"plan-features"} />
           </TabsContent>
           <TabsContent value="unread" className="m-0">
-            <PlanFeatureList
-              features={planFeatures.filter((item) => !item.read)}
-              id={"plan-addons"}
-            />
+            <PlanFeatureList features={[]} id={"plan-addons"} />
           </TabsContent>
         </Tabs>
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={defaultLayout[2]}>
+      <ResizablePanel defaultSize={defaultLayout[2]} minSize={25}>
         <FeatureConfig feature={activeFeature ?? null} />
       </ResizablePanel>
     </ResizablePanelGroup>

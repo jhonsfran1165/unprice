@@ -38,32 +38,31 @@ export const updatePlanSchema = planSelectBaseSchema
   })
 
 export const featureSelectBaseSchema = createSelectSchema(schema.features)
-export const featureInserBaseSchema = createInsertSchema(schema.features, {
+
+export const featureInsertBaseSchema = createInsertSchema(schema.features, {
   title: z.string().min(1).max(50),
-  slug: z.string().min(1),
+  slug: z
+    .string()
+    .min(1)
+    .refine((slug) => /^[a-z0-9-]+$/.test(slug), {
+      message: "Slug must be a valid slug",
+    }),
+}).partial({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  projectId: true,
 })
 
 export const updateFeatureSchema = featureSelectBaseSchema.pick({
   id: true,
   title: true,
   type: true,
-  description: true,
 })
 
-export const deleteFeatureSchema = featureInserBaseSchema
+export const deleteFeatureSchema = featureInsertBaseSchema
   .pick({
     id: true,
-  })
-  .extend({
-    projectSlug: z.string(),
-  })
-
-export const createFeatureSchema = featureInserBaseSchema
-  .pick({
-    slug: true,
-    title: true,
-    description: true,
-    type: true,
   })
   .extend({
     projectSlug: z.string(),
@@ -123,7 +122,7 @@ export type PlanVersion = z.infer<typeof versionSelectBaseSchema>
 export type PlanVersionList = z.infer<typeof versionListBase>
 export type CreatePlanVersion = z.infer<typeof createNewVersionPlan>
 export type PlanVersionFeature = z.infer<typeof schema.planVersionFeatureSchema>
-export type CreateFeature = z.infer<typeof createFeatureSchema>
+export type InsertFeature = z.infer<typeof featureInsertBaseSchema>
 export type UpdateFeature = z.infer<typeof updateFeatureSchema>
 export type Feature = z.infer<typeof featureSelectBaseSchema>
 export type SelectVersion = z.infer<typeof versionSelectBaseSchema>

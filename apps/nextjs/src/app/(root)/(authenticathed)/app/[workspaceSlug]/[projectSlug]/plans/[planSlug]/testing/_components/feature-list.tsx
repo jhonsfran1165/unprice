@@ -1,6 +1,7 @@
 import type { PlanVersionFeature } from "@builderai/db/validators"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 
+import { useSelectedFeatures } from "../use-mail"
 import { SortableFeature } from "./sortable-feature"
 
 interface FeatureListProps {
@@ -8,10 +9,18 @@ interface FeatureListProps {
 }
 
 export function FeatureList({ features }: FeatureListProps) {
+  const [planFeatures] = useSelectedFeatures()
+
+  const planFeatureIds = planFeatures.map((feature) => feature.id)
+
+  const searchableFeatures = features.filter(
+    (feature) => !planFeatureIds.includes(feature.id)
+  )
+
   return (
-    <ScrollArea className="h-[750px]">
-      <div className="flex flex-col gap-2 px-4 pb-4 pt-0">
-        {features.map((feature, index) => (
+    <ScrollArea className="h-[750px] pb-4">
+      <div className="flex flex-col gap-2 px-4 pt-0">
+        {searchableFeatures.map((feature, index) => (
           <SortableFeature
             key={index}
             mode={"Feature"}

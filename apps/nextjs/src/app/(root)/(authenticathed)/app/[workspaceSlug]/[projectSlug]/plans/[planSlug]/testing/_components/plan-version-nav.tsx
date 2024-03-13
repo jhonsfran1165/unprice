@@ -2,14 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ArrowRight } from "lucide-react"
 
 import { cn } from "@builderai/ui"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 
 const examples = [
   {
-    name: "Mail",
+    name: "Overview",
     href: "/examples/mail",
     code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/mail",
   },
@@ -19,40 +18,20 @@ const examples = [
     code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/dashboard",
   },
   {
-    name: "Cards",
+    name: "Customers",
     href: "/examples/cards",
     code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/cards",
   },
   {
-    name: "Tasks",
+    name: "Preview Page",
     href: "/examples/tasks",
     code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/tasks",
   },
-  {
-    name: "Playground",
-    href: "/examples/playground",
-    code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/playground",
-  },
-  {
-    name: "Forms",
-    href: "/examples/forms",
-    code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/forms",
-  },
-  {
-    name: "Music",
-    href: "/examples/music",
-    code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/music",
-  },
-  {
-    name: "Authentication",
-    href: "/examples/authentication",
-    code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/authentication",
-  },
 ]
 
-type ExamplesNavProps = React.HTMLAttributes<HTMLDivElement>
+type NavVersionPlanProps = React.HTMLAttributes<HTMLDivElement>
 
-export function ExamplesNav({ className, ...props }: ExamplesNavProps) {
+export function NavVersionPlan({ className, ...props }: NavVersionPlanProps) {
   const pathname = usePathname()
 
   return (
@@ -78,29 +57,5 @@ export function ExamplesNav({ className, ...props }: ExamplesNavProps) {
         <ScrollBar orientation="horizontal" className="invisible" />
       </ScrollArea>
     </div>
-  )
-}
-
-interface ExampleCodeLinkProps {
-  pathname: string | null
-}
-
-export function ExampleCodeLink({ pathname }: ExampleCodeLinkProps) {
-  const example = examples.find((example) => pathname?.startsWith(example.href))
-
-  if (!example?.code) {
-    return null
-  }
-
-  return (
-    <Link
-      href={example?.code}
-      target="_blank"
-      rel="nofollow"
-      className="absolute right-0 top-0 hidden items-center rounded-[0.5rem] text-sm font-medium md:flex"
-    >
-      View code
-      <ArrowRight className="ml-1 h-4 w-4" />
-    </Link>
   )
 }

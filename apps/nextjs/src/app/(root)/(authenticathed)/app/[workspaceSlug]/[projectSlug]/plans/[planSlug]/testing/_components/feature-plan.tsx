@@ -20,7 +20,7 @@ const featureVariants = cva(
     variants: {
       variant: {
         feature:
-          "h-10 px-2 items-center bg-background-bg  hover:bg-background-bgHover disabled:opacity-50",
+          "h-10 px-2 items-center bg-background hover:bg-background-bgHover disabled:opacity-50",
         default: "flex-col items-start p-3 hover:bg-accent",
       },
     },
@@ -86,29 +86,27 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
               feature={feature}
             />
 
-            <span className={cn("truncate text-sm font-medium")}>
+            <span className={cn("w-full truncate text-sm font-medium")}>
               {feature.title}
             </span>
-            <span className={cn("ml-auto")}>
-              <Button
-                variant="link"
-                size={"icon"}
-                onClick={() => {
-                  console.log("add feature")
-                  setSelectedFeatures?.((prev) => [...prev, feature])
-                }}
-              >
-                <ChevronRight className="mr-2 h-4 w-4" />
-              </Button>
-            </span>
+            <Button
+              variant="link"
+              size={"icon"}
+              onClick={() => {
+                console.log("add feature")
+                setSelectedFeatures?.((prev) => [...prev, feature])
+              }}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </>
         ) : mode === "FeaturePlan" ? (
           <>
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center">
                 <div className="flex items-center gap-2">
-                  <div className="font-semibold">
-                    {feature.title.substring(0, 30) + "..."}
+                  <div className="line-clamp-1 font-semibold">
+                    {feature.title}
                   </div>
 
                   {!feature?.config && (
@@ -117,10 +115,12 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                 </div>
                 <div className={cn("ml-auto text-xs")}>{"$5"}</div>
               </div>
-              <div className="text-xs font-medium">{feature.slug}</div>
+              <div className="line-clamp-1 text-xs font-medium">
+                {feature.slug}
+              </div>
             </div>
             <div className="line-clamp-2 text-xs text-muted-foreground">
-              {feature?.description?.substring(0, 300) + "..."}
+              {feature?.description}
             </div>
 
             {feature.type && (

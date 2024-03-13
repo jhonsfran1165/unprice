@@ -24,24 +24,107 @@ export const configFlatFeature = z.object({
     .describe("Divider for the price. Could be number of days, hours, etc."),
 })
 
-export const configMeteredFeature = z.object({
-  mode: z.enum(TIER_MODES),
-  divider: z.coerce
-    .number()
-    .min(0)
-    .describe("Divider for the price. Could be number of days, hours, etc."),
-  tiers: z.array(
-    z.object({
-      price: z.coerce.number().min(0).describe("Price per unit"),
-      up: z.coerce.number().min(0),
-      flat: z.coerce.number().min(0),
-    })
-  ),
-})
+export const configTieredFeature = z
+  .object({
+    mode: z.enum(TIER_MODES),
+    divider: z.coerce
+      .number()
+      .min(0)
+      .describe("Divider for the price. Could be number of days, hours, etc."),
+    tiers: z.array(
+      z.object({
+        price: z.coerce.number().min(0).describe("flat price for the tier"),
+        first: z.coerce.number().min(0).describe("First unit for the tier"),
+        last: z.coerce.number().min(0).describe("Last unit for the tier"),
+      })
+    ),
+  })
+  .refine(
+    (data) => {
+      // validate that the first and last are in order
+      const tiers = data.tiers
+      let tierId = 0
 
-export const configHybridFeature = z.object({
-  price: z.coerce.number().min(0),
-})
+      for (let i = 0; i < tiers.length; i++) {
+        const tier = tiers[i]
+
+        if (!tier) {
+          continue
+        }
+
+        if (i === 0) {
+          continue
+        }
+
+        const prevTier = tiers[i - 1]
+
+        if (!prevTier) {
+          continue
+        }
+
+        if (tier.first <= prevTier.last) {
+          tierId = i
+          return false
+        }
+      }
+
+      return true
+    },
+    {
+      message: "Tiers must be in order",
+      path: [`config.tiers.0.first`],
+    }
+  )
+
+export const configVolumeFeature = z
+  .object({
+    mode: z.enum(TIER_MODES),
+    divider: z.coerce
+      .number()
+      .min(0)
+      .describe("Divider for the price. Could be number of days, hours, etc."),
+    tiers: z.array(
+      z.object({
+        price: z.coerce.number().min(0).describe("Price per unit"),
+        first: z.coerce.number().min(0).describe("First unit for the volume"),
+        last: z.coerce.number().min(0).describe("Last unit for the volume"),
+      })
+    ),
+  })
+  .refine(
+    (data) => {
+      // validate that the first and last are in order
+      const tiers = data.tiers
+
+      for (let i = 0; i < tiers.length; i++) {
+        const tier = tiers[i]
+
+        if (!tier) {
+          continue
+        }
+
+        if (i === 0) {
+          continue
+        }
+
+        const prevTier = tiers[i - 1]
+
+        if (!prevTier) {
+          continue
+        }
+
+        if (tier.first <= prevTier.last) {
+          return false
+        }
+      }
+
+      return true
+    },
+    {
+      message: "Tiers must be in order",
+      path: ["config.tiers.0.first"],
+    }
+  )
 
 export const planVersionFeatureSchema = z
   .object({
@@ -49,21 +132,18 @@ export const planVersionFeatureSchema = z
     slug: z.string(),
     title: z.string(),
     description: z.string().nullable(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
     type: z.enum(FEATURE_TYPES).optional(),
-    groupId: z.string().optional(),
     config: z
-      .union([configFlatFeature, configMeteredFeature, configHybridFeature])
+      .union([configFlatFeature, configTieredFeature, configVolumeFeature])
       .optional(),
   })
   .superRefine((data, _ctx) => {
     if (data.type === "flat") {
       configFlatFeature.parse(data.config)
-    } else if (data.type === "metered") {
-      configMeteredFeature.parse(data.config)
-    } else if (data.type === "hybrid") {
-      configHybridFeature.parse(data.config)
+    } else if (data.type === "tiered") {
+      configTieredFeature.parse(data.config)
+    } else if (data.type === "volume") {
+      configVolumeFeature.parse(data.config)
     }
   })
 

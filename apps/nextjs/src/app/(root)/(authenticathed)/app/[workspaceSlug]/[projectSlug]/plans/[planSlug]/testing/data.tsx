@@ -171,18 +171,6 @@ export const mails = [
   },
 ]
 
-export const features = [
-  {
-    id: Math.random().toString(),
-    slug: "slug",
-    title:
-      "asdasdadasdasdasdadasdasdasdsasd fsdfsd fsd fsd fsd fsd fsdfsd fsdfsdfsdf",
-    description: "description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-]
-
 export type Mail = (typeof mails)[number]
 
 export const accounts = [

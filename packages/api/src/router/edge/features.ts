@@ -5,17 +5,15 @@ import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
-  createFeatureSchema,
-  deleteFeatureSchema,
+  featureInsertBaseSchema,
   featureSelectBaseSchema,
-  updateFeatureSchema,
 } from "@builderai/db/validators"
 
 import { createTRPCRouter, protectedActiveProjectProcedure } from "../../trpc"
 
 export const featureRouter = createTRPCRouter({
   create: protectedActiveProjectProcedure
-    .input(createFeatureSchema)
+    .input(featureInsertBaseSchema)
     .output(z.object({ feature: featureSelectBaseSchema }))
     .mutation(async (opts) => {
       const { description, slug, title } = opts.input
@@ -47,11 +45,11 @@ export const featureRouter = createTRPCRouter({
       }
     }),
 
-  delete: protectedActiveProjectProcedure
-    .input(deleteFeatureSchema)
+  remove: protectedActiveProjectProcedure
+    .input(featureSelectBaseSchema.pick({ id: true }))
     .output(z.object({ feature: featureSelectBaseSchema }))
     .mutation(async (opts) => {
-      const { projectSlug, id } = opts.input
+      const { id } = opts.input
       const project = opts.ctx.project
 
       const deletedFeature = await opts.ctx.db
@@ -76,10 +74,16 @@ export const featureRouter = createTRPCRouter({
       }
     }),
   update: protectedActiveProjectProcedure
-    .input(updateFeatureSchema.extend({ projectSlug: z.string() }))
+    .input(
+      featureSelectBaseSchema
+        .pick({ id: true, title: true, description: true })
+        .partial({
+          description: true,
+        })
+    )
     .output(z.object({ feature: featureSelectBaseSchema }))
     .mutation(async (opts) => {
-      const { title, id, description, projectSlug } = opts.input
+      const { title, id, description } = opts.input
       const project = opts.ctx.project
 
       const featureData = await opts.ctx.db.query.features.findFirst({
@@ -105,7 +109,7 @@ export const featureRouter = createTRPCRouter({
         .update(schema.features)
         .set({
           title,
-          description,
+          description: description ?? "",
           updatedAt: new Date(),
         })
         .where(
@@ -128,11 +132,11 @@ export const featureRouter = createTRPCRouter({
         feature: data,
       }
     }),
-  featureExist: protectedActiveProjectProcedure
-    .input(z.object({ slug: z.string(), projectSlug: z.string() }))
+  exist: protectedActiveProjectProcedure
+    .input(z.object({ slug: z.string() }))
     .output(z.object({ exist: z.boolean() }))
     .mutation(async (opts) => {
-      const { slug, projectSlug } = opts.input
+      const { slug } = opts.input
       const project = opts.ctx.project
 
       const feature = await opts.ctx.db.query.features.findFirst({
@@ -225,11 +229,10 @@ export const featureRouter = createTRPCRouter({
       }
     }),
 
-  listByProject: protectedActiveProjectProcedure
-    .input(z.object({ projectSlug: z.string() }))
+  listByActiveProject: protectedActiveProjectProcedure
+    .input(z.void())
     .output(z.object({ features: z.array(featureSelectBaseSchema) }))
     .query(async (opts) => {
-      const { projectSlug } = opts.input
       const project = opts.ctx.project
 
       const features = await opts.ctx.db.query.features.findMany({
