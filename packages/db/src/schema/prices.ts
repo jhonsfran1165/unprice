@@ -20,7 +20,8 @@ export const configFlatFeature = z.object({
   price: z.coerce.number().min(0),
   divider: z.coerce
     .number()
-    .min(0)
+    .nonnegative()
+    .min(1)
     .describe("Divider for the price. Could be number of days, hours, etc."),
 })
 
@@ -29,7 +30,8 @@ export const configTieredFeature = z
     mode: z.enum(TIER_MODES),
     divider: z.coerce
       .number()
-      .min(0)
+      .nonnegative()
+      .min(1)
       .describe("Divider for the price. Could be number of days, hours, etc."),
     tiers: z.array(
       z.object({
@@ -39,49 +41,43 @@ export const configTieredFeature = z
       })
     ),
   })
-  .refine(
-    (data) => {
-      // validate that the first and last are in order
-      const tiers = data.tiers
-      let tierId = 0
+  .superRefine((data, ctx) => {
+    data.tiers.forEach((tier, i) => {
+      if (tier.first >= tier.last) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Tiers need to have a valid range",
+          path: ["tiers", i, "last"],
+          fatal: true,
+        })
 
-      for (let i = 0; i < tiers.length; i++) {
-        const tier = tiers[i]
+        return false
+      }
 
-        if (!tier) {
-          continue
-        }
+      const prevTier = i > 0 && data.tiers[i - 1]
 
-        if (i === 0) {
-          continue
-        }
+      if (prevTier && tier.first <= prevTier.last) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Tiers cannot overlap",
+          path: ["tiers", i, "first"],
+          fatal: true,
+        })
 
-        const prevTier = tiers[i - 1]
-
-        if (!prevTier) {
-          continue
-        }
-
-        if (tier.first <= prevTier.last) {
-          tierId = i
-          return false
-        }
+        return false
       }
 
       return true
-    },
-    {
-      message: "Tiers must be in order",
-      path: [`config.tiers.0.first`],
-    }
-  )
+    })
+  })
 
 export const configVolumeFeature = z
   .object({
     mode: z.enum(TIER_MODES),
     divider: z.coerce
       .number()
-      .min(0)
+      .nonnegative()
+      .min(1)
       .describe("Divider for the price. Could be number of days, hours, etc."),
     tiers: z.array(
       z.object({
@@ -91,40 +87,37 @@ export const configVolumeFeature = z
       })
     ),
   })
-  .refine(
-    (data) => {
-      // validate that the first and last are in order
-      const tiers = data.tiers
+  .superRefine((data, ctx) => {
+    // validate that the first and last are in order
 
-      for (let i = 0; i < tiers.length; i++) {
-        const tier = tiers[i]
+    data.tiers.forEach((tier, i) => {
+      if (tier.first >= tier.last) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Tiers need to have a valid range",
+          path: ["tiers", i, "last"],
+          fatal: true,
+        })
 
-        if (!tier) {
-          continue
-        }
+        return false
+      }
 
-        if (i === 0) {
-          continue
-        }
+      const prevTier = i > 0 && data.tiers[i - 1]
 
-        const prevTier = tiers[i - 1]
+      if (prevTier && tier.first <= prevTier.last) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Tiers cannot overlap",
+          path: ["tiers", i, "first"],
+          fatal: true,
+        })
 
-        if (!prevTier) {
-          continue
-        }
-
-        if (tier.first <= prevTier.last) {
-          return false
-        }
+        return false
       }
 
       return true
-    },
-    {
-      message: "Tiers must be in order",
-      path: ["config.tiers.0.first"],
-    }
-  )
+    })
+  })
 
 export const planVersionFeatureSchema = z
   .object({

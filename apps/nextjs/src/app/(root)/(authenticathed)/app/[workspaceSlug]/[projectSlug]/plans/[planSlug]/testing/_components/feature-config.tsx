@@ -426,7 +426,7 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                           {fields.map((field, index) => (
                             <div
                               key={index}
-                              className="flex items-end justify-between gap-2"
+                              className="flex items-end justify-between gap-2 space-y-2"
                             >
                               <div className="flex items-center justify-start">
                                 <span className="h-8 text-sm font-light leading-8">
@@ -464,10 +464,11 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                                           </TooltipContent>
                                         </Tooltip>
                                       </FormLabel>
+
+                                      <FormMessage className="text-xs font-light" />
                                       <FormControl>
                                         <Input {...field} className="h-8" />
                                       </FormControl>
-                                      <FormMessage className="text-xs font-light" />
                                     </FormItem>
                                   )}
                                 />
@@ -505,10 +506,12 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                                           </TooltipContent>
                                         </Tooltip>
                                       </FormLabel>
+
+                                      <FormMessage className="text-xs font-light" />
+
                                       <FormControl>
                                         <Input {...field} className="h-8" />
                                       </FormControl>
-                                      <FormMessage className="text-xs font-light" />
                                     </FormItem>
                                   )}
                                 />
@@ -543,6 +546,9 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                                           </TooltipContent>
                                         </Tooltip>
                                       </FormLabel>
+
+                                      <FormMessage className="text-xs font-light" />
+
                                       <FormControl>
                                         <div className="relative">
                                           <DollarSignIcon className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
@@ -552,7 +558,6 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                                           />
                                         </div>
                                       </FormControl>
-                                      <FormMessage className="text-xs font-light" />
                                     </FormItem>
                                   )}
                                 />
