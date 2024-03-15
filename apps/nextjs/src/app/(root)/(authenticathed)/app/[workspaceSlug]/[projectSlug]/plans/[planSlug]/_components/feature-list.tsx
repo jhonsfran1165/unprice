@@ -1,8 +1,8 @@
 import type { PlanVersionFeature } from "@builderai/db/validators"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 
-import { useSelectedFeatures } from "../use-mail"
 import { SortableFeature } from "./sortable-feature"
+import { useSelectedFeatures } from "./use-features"
 
 interface FeatureListProps {
   features: PlanVersionFeature[]

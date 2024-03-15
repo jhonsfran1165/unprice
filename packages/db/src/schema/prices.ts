@@ -16,128 +16,214 @@ import { cuid, projectID, timestamps } from "../utils/sql"
 import { currencyEnum, statusPlanEnum } from "./enums"
 import { projects } from "./projects"
 
+const typeFeatureSchema = z.enum(FEATURE_TYPES)
+
+export type FeatureType = z.infer<typeof typeFeatureSchema>
+
 export const configFlatFeature = z.object({
-  price: z.coerce.number().min(0),
-  divider: z.coerce
-    .number()
-    .nonnegative()
-    .min(1)
-    .describe("Divider for the price. Could be number of days, hours, etc."),
+  type: z.literal(typeFeatureSchema.enum.flat, {
+    errorMap: () => ({ message: "Invalid configuration for the feature 1" }),
+  }),
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  config: z
+    .object({
+      price: z.coerce
+        .number()
+        .nonnegative()
+        .min(0)
+        .describe("Flat price of the feature"),
+      divider: z.coerce
+        .number()
+        .nonnegative()
+        .min(0)
+        .describe(
+          "Divider for the price. Could be number of days, hours, etc."
+        ),
+    })
+    .optional(),
 })
 
-export const configTieredFeature = z
-  .object({
-    mode: z.enum(TIER_MODES),
-    divider: z.coerce
-      .number()
-      .nonnegative()
-      .min(1)
-      .describe("Divider for the price. Could be number of days, hours, etc."),
-    tiers: z.array(
-      z.object({
-        price: z.coerce.number().min(0).describe("flat price for the tier"),
-        first: z.coerce.number().min(0).describe("First unit for the tier"),
-        last: z.coerce.number().min(0).describe("Last unit for the tier"),
-      })
-    ),
-  })
-  .superRefine((data, ctx) => {
-    data.tiers.forEach((tier, i) => {
-      if (tier.first >= tier.last) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Tiers need to have a valid range",
-          path: ["tiers", i, "last"],
-          fatal: true,
+export const configTieredFeature = z.object({
+  type: z.literal(typeFeatureSchema.enum.tiered, {
+    errorMap: () => ({ message: "Invalid configuration for the feature 2" }),
+  }),
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  config: z
+    .object({
+      mode: z.enum(TIER_MODES),
+      divider: z.coerce
+        .number()
+        .nonnegative()
+        .min(1)
+        .describe(
+          "Divider for the price. Could be number of days, hours, etc."
+        ),
+      tiers: z.array(
+        z.object({
+          price: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("Price per unit"),
+          first: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("First unit for the volume"),
+          last: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("Last unit for the volume"),
         })
-
-        return false
-      }
-
-      const prevTier = i > 0 && data.tiers[i - 1]
-
-      if (prevTier && tier.first <= prevTier.last) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Tiers cannot overlap",
-          path: ["tiers", i, "first"],
-          fatal: true,
-        })
-
-        return false
-      }
-
-      return true
+      ),
     })
-  })
+    .optional()
+    .superRefine((data, ctx) => {
+      // validate that the first and last are in order
 
-export const configVolumeFeature = z
-  .object({
-    mode: z.enum(TIER_MODES),
-    divider: z.coerce
-      .number()
-      .nonnegative()
-      .min(1)
-      .describe("Divider for the price. Could be number of days, hours, etc."),
-    tiers: z.array(
-      z.object({
-        price: z.coerce.number().min(0).describe("Price per unit"),
-        first: z.coerce.number().min(0).describe("First unit for the volume"),
-        last: z.coerce.number().min(0).describe("Last unit for the volume"),
-      })
-    ),
-  })
-  .superRefine((data, ctx) => {
-    // validate that the first and last are in order
+      data &&
+        data.tiers.forEach((tier, i) => {
+          if (tier.first >= tier.last) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers need to have a valid range",
+              path: ["tiers", i, "last"],
+              fatal: true,
+            })
 
-    data.tiers.forEach((tier, i) => {
-      if (tier.first >= tier.last) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Tiers need to have a valid range",
-          path: ["tiers", i, "last"],
-          fatal: true,
+            return false
+          }
+
+          const prevTier = i > 0 && data.tiers[i - 1]
+
+          if (prevTier && tier.first <= prevTier.last) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers cannot overlap",
+              path: ["tiers", i, "first"],
+              fatal: true,
+            })
+
+            return false
+          } else if (prevTier && prevTier.last + 1 !== tier.first) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers need to be consecutive",
+              path: ["tiers", i, "first"],
+              fatal: true,
+            })
+
+            return false
+          }
+
+          return true
         })
+    }),
+})
 
-        return false
-      }
-
-      const prevTier = i > 0 && data.tiers[i - 1]
-
-      if (prevTier && tier.first <= prevTier.last) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Tiers cannot overlap",
-          path: ["tiers", i, "first"],
-          fatal: true,
+export const configVolumeFeature = z.object({
+  type: z.literal(typeFeatureSchema.enum.volume, {
+    errorMap: () => ({ message: "Invalid configuration for the feature 3" }),
+  }),
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  config: z
+    .object({
+      mode: z.enum(TIER_MODES),
+      divider: z.coerce
+        .number()
+        .nonnegative()
+        .min(1)
+        .describe(
+          "Divider for the price. Could be number of days, hours, etc."
+        ),
+      tiers: z.array(
+        z.object({
+          price: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("Price per unit"),
+          first: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("First unit for the volume"),
+          last: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("Last unit for the volume"),
         })
-
-        return false
-      }
-
-      return true
+      ),
     })
-  })
+    .optional()
+    .superRefine((data, ctx) => {
+      // validate that the first and last are in order
+
+      data &&
+        data.tiers.forEach((tier, i) => {
+          if (tier.first >= tier.last) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers need to have a valid range",
+              path: ["tiers", i, "last"],
+              fatal: true,
+            })
+
+            return false
+          }
+
+          const prevTier = i > 0 && data.tiers[i - 1]
+
+          if (prevTier && tier.first <= prevTier.last) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers cannot overlap",
+              path: ["tiers", i, "first"],
+              fatal: true,
+            })
+
+            return false
+          }
+
+          return true
+        })
+    }),
+})
 
 export const planVersionFeatureSchema = z
-  .object({
-    id: z.string(),
-    slug: z.string(),
-    title: z.string(),
-    description: z.string().nullable(),
-    type: z.enum(FEATURE_TYPES).optional(),
-    config: z
-      .union([configFlatFeature, configTieredFeature, configVolumeFeature])
-      .optional(),
-  })
-  .superRefine((data, _ctx) => {
-    if (data.type === "flat") {
-      configFlatFeature.parse(data.config)
-    } else if (data.type === "tiered") {
-      configTieredFeature.parse(data.config)
-    } else if (data.type === "volume") {
-      configVolumeFeature.parse(data.config)
+  .discriminatedUnion("type", [
+    configFlatFeature,
+    configTieredFeature,
+    configVolumeFeature,
+  ])
+  .superRefine((data, ctx) => {
+    if (!data) {
+      return
     }
+
+    if (!data.type) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid configuration for the feature",
+        path: ["type"],
+        fatal: true,
+      })
+
+      return false
+    }
+
+    return true
   })
 
 export const plans = pgTableProject(
@@ -159,7 +245,7 @@ export const plans = pgTableProject(
   })
 )
 
-// TODO: intitlements should be a separate table
+// TODO: entitlements should be a separate table
 
 export const versions = pgTableProject(
   "plan_versions",

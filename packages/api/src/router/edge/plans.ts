@@ -5,11 +5,11 @@ import { and, eq, getTableColumns } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
-  createNewVersionPlan,
   createPlanSchema,
   planSelectBaseSchema,
   updatePlanSchema,
   updateVersionPlan,
+  versionInsertBaseSchema,
   versionSelectBaseSchema,
 } from "@builderai/db/validators"
 
@@ -52,7 +52,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
   createNewVersion: protectedActiveProjectAdminProcedure
-    .input(createNewVersionPlan)
+    .input(versionInsertBaseSchema.pick({ planId: true }))
     .output(
       z.object({
         planVersion: versionSelectBaseSchema,

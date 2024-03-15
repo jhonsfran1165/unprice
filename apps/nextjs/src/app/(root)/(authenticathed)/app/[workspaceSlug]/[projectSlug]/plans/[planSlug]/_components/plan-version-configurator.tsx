@@ -14,11 +14,11 @@ import {
 import { Separator } from "@builderai/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
-import { useActiveFeature, useSelectedFeatures } from "../use-mail"
 import { FeatureConfig } from "./feature-config"
-import { DomainDialog } from "./feature-dialog"
+import { FeatureDialog } from "./feature-dialog"
 import { FeatureList } from "./feature-list"
 import { PlanFeatureList } from "./plan-feature-list"
+import { useActiveFeature, useSelectedFeatures } from "./use-features"
 
 interface PlanVersionConfiguratorProps {
   defaultLayout: number[] | undefined
@@ -50,11 +50,11 @@ export function PlanVersionConfigurator({
       >
         <div className={cn("flex h-[52px] items-center justify-between px-4")}>
           <h1 className="truncate text-xl font-bold">All features</h1>
-          <DomainDialog>
+          <FeatureDialog>
             <Button variant="ghost" size="icon">
               <PlusIcon className="h-4 w-4" />
             </Button>
-          </DomainDialog>
+          </FeatureDialog>
         </div>
 
         <Separator />

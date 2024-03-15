@@ -43,6 +43,16 @@ export function DataTableRowActions<TData>({
     },
   })
 
+  const createNewVersion = api.plans.createNewVersion.useMutation({
+    onSuccess: (data) => {
+      const { planVersion } = data
+      toastAction("success")
+      router.push(
+        `/${workspaceSlug}/${projectSlug}/plans/${plan?.slug}/${planVersion?.version}/overview`
+      )
+    },
+  })
+
   function onRevokeKey() {
     startTransition(() => {
       void revokeApiKeys.mutateAsync({
@@ -61,6 +71,14 @@ export function DataTableRowActions<TData>({
     })
   }
 
+  function onCreateVersion() {
+    startTransition(() => {
+      void createNewVersion.mutateAsync({
+        planId: plan.id,
+      })
+    })
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -73,9 +91,7 @@ export function DataTableRowActions<TData>({
         <DropdownMenuItem
           onClick={(e) => {
             e.preventDefault()
-            router.push(
-              `/${workspaceSlug}/${projectSlug}/plans/${plan.slug}/0/overview`
-            )
+            onCreateVersion()
           }}
         >
           Create a version

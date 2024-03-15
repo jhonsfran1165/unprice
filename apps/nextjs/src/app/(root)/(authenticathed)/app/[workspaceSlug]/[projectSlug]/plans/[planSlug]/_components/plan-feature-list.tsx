@@ -9,7 +9,7 @@ import { ScrollArea } from "@builderai/ui/scroll-area"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DroppableContainer } from "./droppable"
-import { DomainDialog } from "./feature-dialog"
+import { FeatureDialog } from "./feature-dialog"
 import { SortableFeature } from "./sortable-feature"
 
 interface PlanFeatureListProps {
@@ -38,9 +38,9 @@ export function PlanFeatureList({ features, id }: PlanFeatureListProps) {
                   Create your first feature and drag it here
                 </EmptyPlaceholder.Description>
                 <EmptyPlaceholder.Action>
-                  <DomainDialog>
+                  <FeatureDialog>
                     <Button>Create feature</Button>
-                  </DomainDialog>
+                  </FeatureDialog>
                 </EmptyPlaceholder.Action>
               </EmptyPlaceholder>
             ) : (

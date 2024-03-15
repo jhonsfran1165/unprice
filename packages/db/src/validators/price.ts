@@ -9,10 +9,7 @@ export const planInsertBaseSchema = createInsertSchema(schema.plans, {
   slug: z.string().min(1),
 })
 
-export const versionSelectBaseSchema = createSelectSchema(schema.versions, {
-  featuresConfig: schema.planVersionFeatureSchema,
-  addonsConfig: schema.planVersionFeatureSchema,
-})
+export const versionSelectBaseSchema = createSelectSchema(schema.versions)
 export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
   featuresConfig: schema.planVersionFeatureSchema,
   addonsConfig: schema.planVersionFeatureSchema,
@@ -78,10 +75,6 @@ export const planList = planSelectBaseSchema.extend({
   versions: z.array(versionListBase),
 })
 
-export const createNewVersionPlan = versionInsertBaseSchema.pick({
-  planId: true,
-})
-
 export const planConfigSchema = z.record(
   z.object({
     name: z.string(),
@@ -107,7 +100,6 @@ export const updateVersionPlan = versionSelectBaseSchema
   })
 
 export type GroupType = "Group"
-export type FeatureType = "Feature" | "Addon" | "Plan"
 
 export interface Group {
   id: string
@@ -120,7 +112,6 @@ export type UpdatePlan = z.infer<typeof updatePlanSchema>
 export type UpdateVersion = z.infer<typeof updateVersionPlan>
 export type PlanVersion = z.infer<typeof versionSelectBaseSchema>
 export type PlanVersionList = z.infer<typeof versionListBase>
-export type CreatePlanVersion = z.infer<typeof createNewVersionPlan>
 export type PlanVersionFeature = z.infer<typeof schema.planVersionFeatureSchema>
 export type InsertFeature = z.infer<typeof featureInsertBaseSchema>
 export type UpdateFeature = z.infer<typeof updateFeatureSchema>

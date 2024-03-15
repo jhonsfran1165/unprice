@@ -1,11 +1,12 @@
-import { userCanAccessProject } from "~/lib/project-guard"
+import { cookies } from "next/headers"
+
 import { api } from "~/trpc/server"
-import DragDrop from "../../../_components/drag-drop"
+import DragDrop from "../../_components/drag-drop"
+import { PlanVersionConfigurator } from "../../_components/plan-version-configurator"
 
-export const runtime = "edge"
-export const preferredRegion = ["fra1"]
-
-export default async function DashboardPage(props: {
+export default async function NewVersionPage({
+  params,
+}: {
   params: {
     workspaceSlug: string
     projectSlug: string
@@ -13,21 +14,32 @@ export default async function DashboardPage(props: {
     planVersionId: number
   }
 }) {
-  const { projectSlug, planSlug, planVersionId } = props.params
+  const { projectSlug, planSlug, planVersionId } = params
 
-  await userCanAccessProject({
-    projectSlug,
-    needsToBeInTier: ["PRO", "FREE"],
-  })
+  const layout = cookies().get("react-resizable-panels:layout")
+
+  // TODO: fix this
+  const defaultLayout = layout ? JSON.parse(layout.value ?? 0) : undefined
 
   const { planVersion } = await api.plans.getVersionById({
     planSlug: planSlug,
     versionId: planVersionId,
   })
 
+  console.log(planVersion)
+
+  const { features } = await api.features.listByActiveProject()
+
   return (
-    <div className="flex flex-1 flex-col overflow-hidden rounded-lg border bg-background">
-      <DragDrop projectSlug={projectSlug} version={planVersion} />
-    </div>
+    <>
+      <div className="flex flex-col">
+        <DragDrop projectSlug="projectSlug">
+          <PlanVersionConfigurator
+            features={features}
+            defaultLayout={defaultLayout}
+          />
+        </DragDrop>
+      </div>
+    </>
   )
 }

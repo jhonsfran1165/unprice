@@ -4,15 +4,16 @@ import type { ComponentProps, ElementRef } from "react"
 import { forwardRef } from "react"
 import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Settings2 } from "lucide-react"
 
+import type { FeatureType } from "@builderai/db/schema"
 import type { PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 
-import { FeatureForm } from "../../../_components/feature-form"
-import { useActiveFeature, useSelectedFeatures } from "../use-mail"
+import { FeatureDialog } from "./feature-dialog"
+import { useActiveFeature, useSelectedFeatures } from "./use-features"
 
 const featureVariants = cva(
   "flex gap-2 rounded-lg border text-left text-sm transition-all",
@@ -37,17 +38,6 @@ export interface FeaturePlanProps
   isOverlay?: boolean
 }
 
-// A common pitfall when using the DragOverlay
-// component is rendering the same component that
-// calls useSortable inside the DragOverlay.
-// This will lead to unexpected results,
-// since there will be an id collision between the
-// two components both calling useDraggable with the same id,
-// since useSortable is an abstraction on top of useDraggable.
-// To avoid this, make sure that the component that calls useSortable
-// is not rendered inside the DragOverlay so basically this component renders the DragOverlay
-// and for the sortable feature we have a separate component that wraps the feature card
-// and calls useSortable
 const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
   (props, ref) => {
     const { isOverlay, mode, variant, className, feature, ...rest } = props
@@ -56,12 +46,12 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
     const [_, setSelectedFeatures] = useSelectedFeatures()
 
     const handleClick = (_event: React.MouseEvent<HTMLDivElement>) => {
-      setActiveFeature?.(feature)
+      setActiveFeature(feature)
     }
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Enter" || event.key === " ") {
-        setActiveFeature?.(feature)
+        setActiveFeature(feature)
       }
     }
 
@@ -80,11 +70,11 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
       >
         {mode === "Feature" ? (
           <>
-            <FeatureForm
-              projectSlug={"projectSlug"}
-              mode="edit"
-              feature={feature}
-            />
+            <FeatureDialog defaultValues={feature}>
+              <Button variant="link" size={"icon"}>
+                <Settings2 className="h-4 w-4" />
+              </Button>
+            </FeatureDialog>
 
             <span className={cn("w-full truncate text-sm font-medium")}>
               {feature.title}
@@ -113,7 +103,19 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                     <span className="flex h-2 w-2 rounded-full bg-info-solid" />
                   )}
                 </div>
-                <div className={cn("ml-auto text-xs")}>{"$5"}</div>
+                {feature.type === "flat" && (
+                  <div className="ml-auto text-xs">
+                    {feature?.config?.price === 0
+                      ? "Free"
+                      : `$${feature?.config?.price}`}
+                  </div>
+                )}
+
+                {feature.type !== "flat" && (
+                  <div className="ml-auto text-xs">
+                    {feature?.config?.tiers.length} tiers
+                  </div>
+                )}
               </div>
               <div className="line-clamp-1 text-xs font-medium">
                 {feature.slug}
@@ -138,17 +140,17 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
 )
 
 function getBadgeVariantFromType(
-  type: string
+  type: FeatureType
 ): ComponentProps<typeof Badge>["variant"] {
-  if (["flat"].includes(type.toLowerCase())) {
+  if (["tiered"].includes(type.toLowerCase())) {
     return "default"
   }
 
-  if (["metered"].includes(type.toLowerCase())) {
-    return "outline"
+  if (["volume"].includes(type.toLowerCase())) {
+    return "secondary"
   }
 
-  return "secondary"
+  return "outline"
 }
 
 FeaturePlan.displayName = "FeatureCard"

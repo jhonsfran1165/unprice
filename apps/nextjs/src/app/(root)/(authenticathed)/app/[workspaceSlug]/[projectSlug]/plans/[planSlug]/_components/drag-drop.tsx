@@ -26,8 +26,8 @@ import type { PlanVersionFeature } from "@builderai/db/validators"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { api } from "~/trpc/client"
-import { useSelectedFeatures } from "../use-mail"
 import { FeaturePlan } from "./feature-plan"
+import { useSelectedFeatures } from "./use-features"
 
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({

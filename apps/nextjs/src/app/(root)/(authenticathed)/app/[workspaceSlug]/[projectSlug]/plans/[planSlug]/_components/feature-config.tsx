@@ -1,9 +1,8 @@
+"use client"
+
 import { useEffect } from "react"
-import { addDays, addHours, format, nextSaturday } from "date-fns"
 import {
-  Clock,
   DollarSignIcon,
-  Forward,
   HelpCircle,
   MoreVertical,
   Plus,
@@ -17,7 +16,6 @@ import { TIER_MODES, TIER_MODES_MAP } from "@builderai/db/utils"
 import type { PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
-import { Calendar } from "@builderai/ui/calendar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,7 +33,6 @@ import {
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import { Label } from "@builderai/ui/label"
-import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 import { RadioGroup, RadioGroupItem } from "@builderai/ui/radio-group"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import {
@@ -55,41 +52,39 @@ import {
 } from "@builderai/ui/tooltip"
 
 import { useZodForm } from "~/lib/zod-form"
+import { useActiveFeature, useSelectedFeatures } from "./use-features"
 
 interface FeatureConfigProps {
   feature: PlanVersionFeature | null
 }
 
 export function FeatureConfig({ feature }: FeatureConfigProps) {
-  const today = new Date()
+  // define default values config for the form using the feature prop
+  const defaultConfigValues = {
+    mode: "sum",
+    price: 0,
+    tiers: [{ first: 0, last: 0, price: 0 }],
+    divider: 1,
+  }
 
-  const defaultValues =
-    feature?.type === "flat"
-      ? {
-          price: 0,
-          divider: 0,
-        }
-      : feature?.type === "tiered"
-        ? {
-            mode: "sum",
-            divider: 0,
-            tiers: [{ first: 0, price: 0, last: 0 }],
-          }
-        : {
-            module: "sum",
-            divider: 0,
-            tiers: [{ first: 0, price: 0, last: 0 }],
-          }
+  const defaultValues = feature?.config
+    ? feature
+    : ({
+        ...feature,
+        config: defaultConfigValues,
+        type: "flat",
+      } as PlanVersionFeature)
 
   const form = useZodForm({
     schema: planVersionFeatureSchema,
+    defaultValues: defaultValues,
   })
 
+  const [active, setActiveFeature] = useActiveFeature()
+  const [_, setSelectedFeatures] = useSelectedFeatures()
+
   useEffect(() => {
-    form.reset({
-      config: feature?.config ?? defaultValues,
-      ...feature,
-    })
+    form.reset(defaultValues)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feature?.id])
 
@@ -100,14 +95,22 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
 
   const onSubmitForm = async (feature: PlanVersionFeature) => {
     console.log("feature", feature)
-  }
+    setActiveFeature(feature)
+    setSelectedFeatures((features) => {
+      const index = features.findIndex((f) => f.id === feature.id)
 
-  console.log("formStatus", form.formState)
+      features[index] = feature
+      return features
+    })
+  }
 
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center p-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center px-2">
+          <h1 className="truncate text-xl font-bold">Feature configuration</h1>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" disabled={!feature}>
@@ -116,77 +119,6 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
               </Button>
             </TooltipTrigger>
             <TooltipContent>Delete from plan</TooltipContent>
-          </Tooltip>
-          <Separator orientation="vertical" className="mx-1 h-6" />
-          <Tooltip>
-            <Popover>
-              <PopoverTrigger asChild>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" disabled={!feature}>
-                    <Clock className="h-4 w-4" />
-                    <span className="sr-only">Snooze</span>
-                  </Button>
-                </TooltipTrigger>
-              </PopoverTrigger>
-              <PopoverContent className="flex w-[535px] p-0">
-                <div className="flex flex-col gap-2 border-r px-2 py-4">
-                  <div className="px-4 text-sm font-medium">Snooze until</div>
-                  <div className="grid min-w-[250px] gap-1">
-                    <Button
-                      variant="ghost"
-                      className="justify-start font-normal"
-                    >
-                      Later today{" "}
-                      <span className="ml-auto text-muted-foreground">
-                        {format(addHours(today, 4), "E, h:m b")}
-                      </span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="justify-start font-normal"
-                    >
-                      Tomorrow
-                      <span className="ml-auto text-muted-foreground">
-                        {format(addDays(today, 1), "E, h:m b")}
-                      </span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="justify-start font-normal"
-                    >
-                      This weekend
-                      <span className="ml-auto text-muted-foreground">
-                        {format(nextSaturday(today), "E, h:m b")}
-                      </span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="justify-start font-normal"
-                    >
-                      Next week
-                      <span className="ml-auto text-muted-foreground">
-                        {format(addDays(today, 7), "E, h:m b")}
-                      </span>
-                    </Button>
-                  </div>
-                </div>
-                <div className="p-2">
-                  <Calendar />
-                </div>
-              </PopoverContent>
-            </Popover>
-            <TooltipContent>Snooze</TooltipContent>
-          </Tooltip>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!feature}>
-                <Forward className="h-4 w-4" />
-                <span className="sr-only">Forward</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Forward</TooltipContent>
           </Tooltip>
         </div>
         <Separator orientation="vertical" className="mx-2 h-6" />
@@ -207,6 +139,7 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
       </div>
 
       <Separator />
+
       {feature ? (
         <div className="flex flex-1 flex-col">
           <div className="flex items-start p-4">
@@ -249,7 +182,7 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                         <FormMessage />
                         <RadioGroup
                           onValueChange={field.onChange}
-                          defaultValue={field.value ?? "flat"}
+                          defaultValue={field.value}
                           className="grid grid-cols-3 gap-2 pt-2"
                         >
                           <FormItem>
@@ -343,7 +276,8 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                                 </FormDescription>
                                 <div className="text-xs font-normal leading-snug">
                                   This is the flat price of the feature over the
-                                  period of the plan. eg 100 usd per month
+                                  period of the plan. eg 100 usd per month.
+                                  Price of 0 means the feature is free.
                                 </div>
                               </div>
 
@@ -417,8 +351,16 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
 
                   {["tiered", "volume"].includes(form.watch("type") ?? "") && (
                     <div>
-                      <div className="mb-4 flex justify-between">
-                        <h4 className="my-auto block">Tiers</h4>
+                      <div className="mb-4 flex flex-col">
+                        <h4 className="my-auto block font-semibold">
+                          {form.watch("type") === "volume"
+                            ? "Volume tiers"
+                            : "Flat tiers"}
+                        </h4>
+                        <div className="text-xs font-normal leading-snug">
+                          Configure the tiers for the feature, the price is
+                          based on the mode usage you selected above.
+                        </div>
                       </div>
 
                       {fields.length > 0 ? (
@@ -458,8 +400,8 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                                             align="center"
                                             side="right"
                                           >
-                                            Slug is important to identify your
-                                            feature.
+                                            First unit for the tier range. For
+                                            the first tier, this should be 0.
                                             <TooltipArrow className="fill-background-bg" />
                                           </TooltipContent>
                                         </Tooltip>
@@ -495,13 +437,14 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                                           </div>
 
                                           <TooltipContent
-                                            className="w-32 bg-background-bg text-xs font-normal"
+                                            className="w-48 bg-background-bg text-xs font-normal"
                                             align="center"
                                             side="right"
                                           >
                                             If the usage is less than the tier
                                             up to value, then the flat price is
-                                            charged.
+                                            charged. For infinite usage, use
+                                            9999999.
                                             <TooltipArrow className="fill-background-bg" />
                                           </TooltipContent>
                                         </Tooltip>
@@ -528,7 +471,9 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                                       >
                                         <Tooltip>
                                           <div className="flex items-center gap-2 text-sm font-normal">
-                                            Flat price tier
+                                            {form.watch("type") === "volume"
+                                              ? "Price per unit"
+                                              : "Flat price tier"}
                                             <span>
                                               <TooltipTrigger asChild>
                                                 <HelpCircle className="h-4 w-4 font-light" />
@@ -563,39 +508,47 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                                 />
                               </div>
                               <div>
-                                {index !== fields.length - 1 ? (
+                                <div className="flex flex-row space-x-1">
                                   <Button
-                                    variant="ghost"
+                                    variant="outline"
                                     size={"icon"}
                                     className="h-8 w-8"
                                     onClick={(e) => {
                                       e.stopPropagation()
                                       e.preventDefault()
-                                      remove(index)
-                                    }}
-                                  >
-                                    <XCircle className="h-4 w-4" />
-                                    <span className="sr-only">delete tier</span>
-                                  </Button>
-                                ) : (
-                                  <Button
-                                    variant="ghost"
-                                    size={"icon"}
-                                    className="h-8 w-8"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      e.preventDefault()
+
+                                      const firstTierValue =
+                                        Number(
+                                          form.getValues(
+                                            `config.tiers.${index}.last`
+                                          )
+                                        ) + 1 || 0
+
                                       append({
-                                        first: 0,
+                                        first: firstTierValue,
                                         price: 0,
-                                        last: 0,
+                                        last: firstTierValue + 1,
                                       })
                                     }}
                                   >
                                     <Plus className="h-4 w-4" />
                                     <span className="sr-only">add tier</span>
                                   </Button>
-                                )}
+                                  <Button
+                                    variant="link"
+                                    size={"icon"}
+                                    className="h-8 w-8 rounded-full"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      e.preventDefault()
+                                      if (fields.length === 1) return
+                                      remove(index)
+                                    }}
+                                  >
+                                    <XCircle className="h-5 w-5" />
+                                    <span className="sr-only">delete tier</span>
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           ))}

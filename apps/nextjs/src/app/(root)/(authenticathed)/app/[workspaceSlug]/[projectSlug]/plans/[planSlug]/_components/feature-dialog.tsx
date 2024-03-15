@@ -13,7 +13,7 @@ import {
 
 import { FeatureForm } from "./feature-form"
 
-export function DomainDialog({
+export function FeatureDialog({
   defaultValues,
   children,
 }: {
@@ -28,7 +28,7 @@ export function DomainDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Feature configuration"}</DialogTitle>
+          <DialogTitle>{"Feature Data"}</DialogTitle>
         </DialogHeader>
 
         <FeatureForm
