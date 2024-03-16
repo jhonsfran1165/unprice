@@ -1,9 +1,8 @@
-import { searchDataParamsSchema } from "@builderai/db/validators"
+import Balancer from "react-wrap-balancer"
 
-import { DataTable } from "~/components/data-table/data-table"
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
-import { columns } from "../_components/table/columns"
+import { PlanCard, PlanCardSkeleton } from "./_components/plan-card"
 
 export default async function PlansPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
@@ -16,30 +15,41 @@ export default async function PlansPage(props: {
     needsToBeInTier: ["FREE", "PRO"],
   })
 
-  const parsed = searchDataParamsSchema.safeParse(props.searchParams)
-
-  const filter = {
-    projectSlug: props.params.projectSlug,
-    fromDate: undefined as number | undefined,
-    toDate: undefined as number | undefined,
-  }
-
-  if (parsed?.success) {
-    ;(filter.fromDate = parsed.data.fromDate),
-      (filter.toDate = parsed.data.toDate)
-  }
-
-  const { plans } = await api.plans.listByActiveProject(filter)
+  const { plans } = await api.plans.listByActiveProject({})
 
   return (
-    <DataTable
-      columns={columns}
-      data={plans}
-      filterOptions={{
-        filterBy: "slug",
-        filterColumns: true,
-        filterDateRange: true,
-      }}
-    />
+    <>
+      <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {plans.map((plan) => (
+          <li key={plan.id}>
+            <PlanCard
+              plan={plan}
+              workspaceSlug={workspaceSlug}
+              projectSlug={projectSlug}
+            />
+          </li>
+        ))}
+      </ul>
+
+      {plans.length === 0 && (
+        <div className="relative">
+          <ul className="grid select-none grid-cols-1 gap-4 opacity-40 lg:grid-cols-3">
+            <PlanCardSkeleton pulse={false} />
+            <PlanCardSkeleton pulse={false} />
+            <PlanCardSkeleton pulse={false} />
+          </ul>
+          <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center">
+            <Balancer>
+              <h2 className="text-2xl font-bold">
+                This workspace has no projects yet
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Create your first project to get started
+              </p>
+            </Balancer>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

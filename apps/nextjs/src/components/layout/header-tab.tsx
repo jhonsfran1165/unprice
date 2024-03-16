@@ -4,11 +4,25 @@ export default function HeaderTab({
   title,
   description,
   action,
+  children,
 }: {
-  title: string
+  title?: string
   description?: string
   action?: React.ReactNode
+  children?: React.ReactNode
 }) {
+  if (children) {
+    return (
+      <section>
+        <MaxWidthWrapper className="max-w-screen-2xl">
+          <div className="flex h-36 items-center rounded-md border px-4 backdrop-blur-sm md:px-10">
+            {children}
+          </div>
+        </MaxWidthWrapper>
+      </section>
+    )
+  }
+
   return (
     <section>
       <MaxWidthWrapper className="max-w-screen-2xl">

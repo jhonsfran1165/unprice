@@ -18,7 +18,9 @@ const buttonVariants = cva(
         secondary:
           "button-secondary bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "button-ghost bg-transparent",
-        link: "button-link text-primary hover:underline focus-visible:ring-none focus-visible:ring-ring focus-visible:ring-offset-none",
+        link: "button-link text-primary hover:underline-none focus-visible:ring-none focus-visible:ring-ring focus-visible:ring-offset-none",
+        custom:
+          "hover:underline-none focus-visible:ring-offset-none focus-visible:ring-none focus-visible:ring-offset-0 focus-visible:ring-0",
       },
       size: {
         default: "h-9 rounded-md px-3",

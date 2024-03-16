@@ -143,14 +143,14 @@ function getBadgeVariantFromType(
   type: FeatureType
 ): ComponentProps<typeof Badge>["variant"] {
   if (["tiered"].includes(type.toLowerCase())) {
-    return "default"
+    return "info"
   }
 
   if (["volume"].includes(type.toLowerCase())) {
     return "secondary"
   }
 
-  return "outline"
+  return "default"
 }
 
 FeaturePlan.displayName = "FeatureCard"

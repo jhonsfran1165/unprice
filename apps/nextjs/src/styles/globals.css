@@ -93,6 +93,10 @@
     @apply border border-info-border bg-info-bg text-info-text;
   }
 
+  .success {
+    @apply border border-success-border bg-success-bg text-success-text;
+  }
+
   .button-ghost {
     @apply bg-transparent text-background-text hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
   }
