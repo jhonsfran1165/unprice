@@ -25,7 +25,7 @@ export function ConfirmAction({
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription className="font-light">
             This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            data.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

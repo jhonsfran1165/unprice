@@ -1,17 +1,26 @@
 import React from "react"
 import Link from "next/link"
-import { notFound } from "next/navigation"
-import { DollarSign, RefreshCcw } from "lucide-react"
-
-import { Badge } from "@builderai/ui/badge"
-import { ChevronLeft } from "@builderai/ui/icons"
+import { notFound, redirect } from "next/navigation"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@builderai/ui/select"
+  Check,
+  ChevronDown,
+  DollarSign,
+  GalleryHorizontalEnd,
+  RefreshCcw,
+} from "lucide-react"
+
+import { cn } from "@builderai/ui"
+import { Badge } from "@builderai/ui/badge"
+import { Button } from "@builderai/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@builderai/ui/dropdown-menu"
+import { ChevronLeft } from "@builderai/ui/icons"
 import { Separator } from "@builderai/ui/separator"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -20,6 +29,8 @@ import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
 import { api } from "~/trpc/server"
 import CreateNewVersion from "../../_components/create-new-version"
 import { VersionActions } from "../../_components/version-actions"
+
+export const runtime = "edge"
 
 export default async function PriceLayout(props: {
   children: React.ReactNode
@@ -36,6 +47,28 @@ export default async function PriceLayout(props: {
   })
 
   if (!plan) {
+    notFound()
+  }
+
+  if (planVersionId !== "latest" && isNaN(parseInt(planVersionId))) {
+    notFound()
+  }
+
+  if (planVersionId === "latest") {
+    const latestVersion = plan.versions.find(
+      (version) => version.latest === true
+    )
+    // redirect to the latest version
+    redirect(
+      `/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${latestVersion?.version}`
+    )
+  }
+
+  const activeVersion = plan.versions.find(
+    (version) => version.version === Number(planVersionId)
+  )
+
+  if (!activeVersion) {
     notFound()
   }
 
@@ -84,18 +117,50 @@ export default async function PriceLayout(props: {
               <div>
                 <div className="flex items-center justify-end space-x-6">
                   <div className="flex">
-                    <Select defaultValue="billing">
-                      <SelectTrigger id="versions" className="w-32">
-                        <SelectValue placeholder="Select a version" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="team">free - v1</SelectItem>
-                        <SelectItem value="billing">free - v2</SelectItem>
-                        <SelectItem value="account">free - v3</SelectItem>
-                        <SelectItem value="deployments">free - v4</SelectItem>
-                        <SelectItem value="support">free - v5</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {plan.versions.length > 0 ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button className="w-[200px]" variant="ghost">
+                            <GalleryHorizontalEnd className="mr-2 h-4 w-4" />
+                            {`Version V${activeVersion.version}`}
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-[200px]">
+                          <DropdownMenuLabel>All versions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {plan.versions.map((version) => {
+                            return (
+                              <DropdownMenuItem key={version.id}>
+                                <Link
+                                  prefetch={false}
+                                  href={`/${workspaceSlug}/${projectSlug}/plans/${plan.slug}/${version.version}`}
+                                  className="relative line-clamp-1 flex w-full items-center justify-between"
+                                >
+                                  <span className="text-xs">
+                                    {`${plan.title} - V${version.version}`}
+                                    {version.latest ? " (latest)" : ""}
+                                  </span>
+
+                                  <Check
+                                    className={cn(
+                                      "absolute right-0 h-4 w-4",
+                                      version.version === activeVersion.version
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                </Link>
+                              </DropdownMenuItem>
+                            )
+                          })}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <div className="flex items-center font-semibold">
+                        No versions yet
+                      </div>
+                    )}
                   </div>
                   <Separator orientation="vertical" className="h-12" />
                   <div className="flex space-x-2">

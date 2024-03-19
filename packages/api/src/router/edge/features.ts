@@ -152,10 +152,10 @@ export const featureRouter = createTRPCRouter({
       }
     }),
   getBySlug: protectedActiveProjectProcedure
-    .input(z.object({ slug: z.string(), projectSlug: z.string() }))
+    .input(z.object({ slug: z.string() }))
     .output(z.object({ feature: featureSelectBaseSchema.optional() }))
     .query(async (opts) => {
-      const { slug, projectSlug } = opts.input
+      const { slug } = opts.input
       const project = opts.ctx.project
 
       const feature = await opts.ctx.db.query.features.findFirst({

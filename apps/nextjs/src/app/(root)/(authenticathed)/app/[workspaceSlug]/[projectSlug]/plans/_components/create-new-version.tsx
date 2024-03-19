@@ -20,12 +20,12 @@ const CreateNewVersion = ({
 }) => {
   const router = useRouter()
 
-  const createNewVersion = api.plans.createNewVersion.useMutation({
+  const createVersion = api.plans.createVersion.useMutation({
     onSuccess: (data) => {
       const { planVersion } = data
       toastAction("success")
       router.push(
-        `/${workspaceSlug}/${projectSlug}/plans/${plan?.slug}/${planVersion?.version}/overview`
+        `/${workspaceSlug}/${projectSlug}/plans/${plan?.slug}/${planVersion?.version}`
       )
     },
   })
@@ -37,7 +37,7 @@ const CreateNewVersion = ({
         return
       }
 
-      void createNewVersion.mutateAsync({
+      void createVersion.mutateAsync({
         planId: plan.id,
       })
     })
@@ -46,9 +46,9 @@ const CreateNewVersion = ({
   return (
     <div className="sm:col-span-full">
       <SubmitButton
-        isSubmitting={createNewVersion.isPending}
-        isDisabled={createNewVersion.isPending}
-        label={"Create new version"}
+        isSubmitting={createVersion.isPending}
+        isDisabled={createVersion.isPending}
+        label={"Save version"}
         onClick={onCreateVersion}
       />
     </div>

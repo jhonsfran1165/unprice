@@ -42,7 +42,8 @@ export const STATUS_PLAN = ["draft", "published", "archived"] as const
 export const STATUS_SUBSCRIPTION = ["active", "inactive"] as const
 export const PLANS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
 export const PROJECT_TIERS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
-
+export const PLAN_TYPES = ["recurring", "once"] as const
+export const PLAN_BILLING_PERIODS = ["monthly", "yearly"] as const
 export const TIER_MODES = Object.keys(TIER_MODES_MAP) as unknown as readonly [
   string,
   ...string[],

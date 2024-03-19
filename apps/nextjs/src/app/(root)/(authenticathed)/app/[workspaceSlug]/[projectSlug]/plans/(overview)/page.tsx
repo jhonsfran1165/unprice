@@ -41,10 +41,10 @@ export default async function PlansPage(props: {
           <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center">
             <Balancer>
               <h2 className="text-2xl font-bold">
-                This workspace has no projects yet
+                This project has no plans yet
               </h2>
               <p className="text-lg text-muted-foreground">
-                Create your first project to get started
+                Create your first plan to get started
               </p>
             </Balancer>
           </div>

@@ -15,11 +15,11 @@ export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
   addonsConfig: schema.planVersionFeatureSchema,
 })
 
-export const createPlanSchema = planSelectBaseSchema.pick({
-  slug: true,
-  title: true,
-  currency: true,
-  description: true,
+export const insertPlanSchema = planSelectBaseSchema.partial({
+  id: true,
+  projectId: true,
+  createdAt: true,
+  updatedAt: true,
 })
 
 export const updatePlanSchema = planSelectBaseSchema
@@ -107,7 +107,7 @@ export interface Group {
 }
 
 export type PlanList = z.infer<typeof planList>
-export type CreatePlan = z.infer<typeof createPlanSchema>
+export type InsertPlan = z.infer<typeof insertPlanSchema>
 export type UpdatePlan = z.infer<typeof updatePlanSchema>
 export type UpdateVersion = z.infer<typeof updateVersionPlan>
 export type PlanVersion = z.infer<typeof versionSelectBaseSchema>

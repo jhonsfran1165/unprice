@@ -63,7 +63,7 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
   const defaultConfigValues = {
     mode: "sum",
     price: 0,
-    tiers: [{ first: 0, last: 0, price: 0 }],
+    tiers: [{ first: 0, last: 1, price: 0 }],
     divider: 1,
   }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useTransition } from "react"
+import { startTransition } from "react"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 
@@ -35,22 +35,25 @@ export function FeatureForm({
 }) {
   const router = useRouter()
 
-  const [_isPending, startTransition] = useTransition()
   const featureExist = api.features.exist.useMutation()
 
-  // async validation only when creating a new feature
-  const forSchema = featureInsertBaseSchema.extend({
-    slug: z
-      .string()
-      .min(3)
-      .refine(async (slug) => {
-        const { exist } = await featureExist.mutateAsync({
-          slug: slug,
-        })
+  const editMode = defaultValues.id ? true : false
 
-        return !exist
-      }, "Feature slug already exists in this app. Change the title of your feature."),
-  })
+  // async validation only when creating a new feature
+  const forSchema = editMode
+    ? featureInsertBaseSchema
+    : featureInsertBaseSchema.extend({
+        slug: z
+          .string()
+          .min(3)
+          .refine(async (slug) => {
+            const { exist } = await featureExist.mutateAsync({
+              slug: slug,
+            })
+
+            return !exist
+          }, "Feature slug already exists in this app. Change the title of your feature."),
+      })
 
   const form = useZodForm({
     schema: forSchema,
@@ -58,8 +61,8 @@ export function FeatureForm({
   })
 
   const createFeature = api.features.create.useMutation({
-    onSuccess: () => {
-      form.reset(defaultValues)
+    onSuccess: ({ feature }) => {
+      form.reset(feature)
       toastAction("saved")
       router.refresh()
       setDialogOpen?.(false)
@@ -67,25 +70,29 @@ export function FeatureForm({
   })
 
   const updateFeature = api.features.update.useMutation({
-    onSuccess: () => {
-      form.reset(defaultValues)
+    onSuccess: ({ feature }) => {
+      form.reset(feature)
       toastAction("updated")
       router.refresh()
       setDialogOpen?.(false)
     },
   })
 
-  const deleteFeature = api.features.remove.useMutation()
+  const deleteFeature = api.features.remove.useMutation({
+    onSuccess: () => {
+      toastAction("deleted")
+      form.reset()
+      router.refresh()
+    },
+  })
 
   function onDelete() {
-    startTransition(async () => {
+    startTransition(() => {
       if (!defaultValues.id) return
-      await deleteFeature.mutateAsync({ id: defaultValues.id })
-      form.reset()
-      toastAction("deleted")
-      router.refresh()
+      void deleteFeature.mutateAsync({ id: defaultValues.id })
     })
   }
+
   const onSubmitForm = async (data: InsertFeature) => {
     if (!defaultValues.id) {
       await createFeature.mutateAsync(data)
@@ -96,15 +103,9 @@ export function FeatureForm({
     }
   }
 
-  const editMode = defaultValues.id ? true : false
-
   return (
     <Form {...form}>
-      <form
-        id="add-feature"
-        onSubmit={form.handleSubmit(onSubmitForm)}
-        className="space-y-6"
-      >
+      <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6">
         <div className="flex justify-between gap-2">
           <div className="w-full">
             <FormField
@@ -118,7 +119,7 @@ export function FeatureForm({
                       {...field}
                       placeholder="Custom Domains"
                       onChange={(e) => {
-                        form.setValue("title", e.target.value)
+                        field.onChange(e)
                         if (!editMode) {
                           const slug = slugify(e.target.value)
                           form.setValue("slug", slug)

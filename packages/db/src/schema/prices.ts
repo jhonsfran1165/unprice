@@ -1,11 +1,13 @@
 import { relations } from "drizzle-orm"
 import {
+  boolean,
   foreignKey,
+  integer,
   json,
   primaryKey,
   serial,
   text,
-  uniqueIndex,
+  unique,
   varchar,
 } from "drizzle-orm/pg-core"
 import * as z from "zod"
@@ -13,7 +15,12 @@ import * as z from "zod"
 import { FEATURE_TYPES, TIER_MODES } from "../utils"
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
-import { currencyEnum, statusPlanEnum } from "./enums"
+import {
+  currencyEnum,
+  planBillingPeriodEnum,
+  planTypeEnum,
+  statusPlanEnum,
+} from "./enums"
 import { projects } from "./projects"
 
 const typeFeatureSchema = z.enum(FEATURE_TYPES)
@@ -234,6 +241,12 @@ export const plans = pgTableProject(
     slug: text("slug").notNull(),
     title: varchar("title", { length: 50 }).notNull(),
     currency: currencyEnum("currency").default("EUR"),
+    type: planTypeEnum("plan_type").default("recurring"),
+    billingPeriod: planBillingPeriodEnum("billing_period").default("monthly"),
+    startCycle: text("start_cycle").$type<
+      z.ZodNumber | z.ZodLiteral<"last_day"> | z.ZodNull
+    >(),
+    gracePeriod: integer("grace_period").default(0),
     description: text("description"),
   },
   (table) => ({
@@ -241,7 +254,7 @@ export const plans = pgTableProject(
       columns: [table.id, table.projectId],
       name: "plans_pkey",
     }),
-    slug: uniqueIndex("slug_plan").on(table.slug, table.projectId),
+    slug: unique("slug_plan").on(table.slug, table.projectId),
   })
 )
 
@@ -254,6 +267,7 @@ export const versions = pgTableProject(
     ...timestamps,
     planId: cuid("plan_id").notNull(),
     version: serial("version").notNull(),
+    latest: boolean("latest").default(false),
     featuresConfig:
       json("features_config").$type<
         z.infer<typeof planVersionFeatureSchema>[]
@@ -272,7 +286,7 @@ export const versions = pgTableProject(
       columns: [table.id, table.projectId],
       name: "plan_versions_pkey",
     }),
-    unique: uniqueIndex("unique_version").on(table.planId, table.version),
+    unique: unique("unique_version").on(table.planId, table.version),
   })
 )
 
@@ -293,7 +307,7 @@ export const features = pgTableProject(
       columns: [table.projectId, table.id],
       name: "features_pkey",
     }),
-    slug: uniqueIndex("slug_feature").on(table.slug, table.projectId),
+    slug: unique("slug_feature").on(table.slug, table.projectId),
   })
 )
 

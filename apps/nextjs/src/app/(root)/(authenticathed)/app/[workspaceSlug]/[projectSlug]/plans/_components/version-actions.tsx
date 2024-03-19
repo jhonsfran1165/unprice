@@ -1,6 +1,7 @@
 "use client"
 
 import { TRPCClientError } from "@trpc/client"
+import { MoreVertical } from "lucide-react"
 
 import { Button } from "@builderai/ui/button"
 import {
@@ -10,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
-import { MoreHorizontal } from "@builderai/ui/icons"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { api } from "~/trpc/client"
@@ -53,7 +53,7 @@ export function VersionActions({
       <DropdownMenuTrigger asChild>
         <Button variant="outline">
           <span className="sr-only">Actions</span>
-          <MoreHorizontal className="h-4 w-4" />
+          <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

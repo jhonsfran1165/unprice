@@ -43,7 +43,7 @@ export function DataTableRowActions<TData>({
     },
   })
 
-  const createNewVersion = api.plans.createNewVersion.useMutation({
+  const createVersion = api.plans.createVersion.useMutation({
     onSuccess: (data) => {
       const { planVersion } = data
       toastAction("success")
@@ -73,7 +73,7 @@ export function DataTableRowActions<TData>({
 
   function onCreateVersion() {
     startTransition(() => {
-      void createNewVersion.mutateAsync({
+      void createVersion.mutateAsync({
         planId: plan.id,
       })
     })

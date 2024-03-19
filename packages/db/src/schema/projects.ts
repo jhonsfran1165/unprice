@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { index, text, uniqueIndex } from "drizzle-orm/pg-core"
+import { index, text, unique } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { id, timestamps, workspaceID } from "../utils/sql"
@@ -19,7 +19,7 @@ export const projects = pgTableProject(
   },
   (table) => ({
     slug: index("slug_index").on(table.slug),
-    unique: uniqueIndex("unique_slug").on(table.slug),
+    unique: unique("unique_slug").on(table.slug),
   })
 )
 

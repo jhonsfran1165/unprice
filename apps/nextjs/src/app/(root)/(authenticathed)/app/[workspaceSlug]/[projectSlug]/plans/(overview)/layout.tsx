@@ -1,8 +1,12 @@
+import { Plus } from "lucide-react"
+
+import { Button } from "@builderai/ui/button"
+
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import TabsNav from "~/components/layout/tabs-nav"
 import { PROJECT_TABS_CONFIG } from "~/constants/projects"
-import { NewPlanDialog } from "../_components/new-plan"
+import { PlanDialog } from "../_components/dialog-plan"
 
 export default function ProjectSettingsLayout(props: {
   children: React.ReactNode
@@ -17,7 +21,14 @@ export default function ProjectSettingsLayout(props: {
         <HeaderTab
           title="Plans"
           description="Create and manage your plans"
-          action={<NewPlanDialog />}
+          action={
+            <PlanDialog>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Plan
+              </Button>
+            </PlanDialog>
+          }
         />
       }
       tabs={
