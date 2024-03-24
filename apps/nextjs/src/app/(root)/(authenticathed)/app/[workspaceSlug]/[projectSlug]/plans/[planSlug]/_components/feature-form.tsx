@@ -34,7 +34,7 @@ export function FeatureForm({
   defaultValues: InsertFeature
 }) {
   const router = useRouter()
-
+  const apiUtils = api.useUtils()
   const featureExist = api.features.exist.useMutation()
 
   const editMode = defaultValues.id ? true : false
@@ -61,8 +61,9 @@ export function FeatureForm({
   })
 
   const createFeature = api.features.create.useMutation({
-    onSuccess: ({ feature }) => {
+    onSuccess: async ({ feature }) => {
       form.reset(feature)
+      await apiUtils.features.searchBy.invalidate()
       toastAction("saved")
       router.refresh()
       setDialogOpen?.(false)
@@ -70,8 +71,9 @@ export function FeatureForm({
   })
 
   const updateFeature = api.features.update.useMutation({
-    onSuccess: ({ feature }) => {
+    onSuccess: async ({ feature }) => {
       form.reset(feature)
+      await apiUtils.features.searchBy.invalidate()
       toastAction("updated")
       router.refresh()
       setDialogOpen?.(false)
@@ -79,7 +81,8 @@ export function FeatureForm({
   })
 
   const deleteFeature = api.features.remove.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
+      await apiUtils.features.searchBy.invalidate()
       toastAction("deleted")
       form.reset()
       router.refresh()

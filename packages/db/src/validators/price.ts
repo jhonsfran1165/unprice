@@ -2,17 +2,24 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import * as schema from "../schema"
+import { startCycleSchema } from "../schema"
 
-export const planSelectBaseSchema = createSelectSchema(schema.plans)
+export const planSelectBaseSchema = createSelectSchema(schema.plans, {
+  startCycle: startCycleSchema,
+})
 export const planInsertBaseSchema = createInsertSchema(schema.plans, {
   title: z.string().min(1),
   slug: z.string().min(1),
 })
 
-export const versionSelectBaseSchema = createSelectSchema(schema.versions)
+export const versionSelectBaseSchema = createSelectSchema(schema.versions, {
+  featuresConfig: z.array(schema.planVersionFeatureSchema),
+  addonsConfig: z.array(schema.planVersionFeatureSchema),
+})
+
 export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
-  featuresConfig: schema.planVersionFeatureSchema,
-  addonsConfig: schema.planVersionFeatureSchema,
+  featuresConfig: z.array(schema.planVersionFeatureSchema),
+  addonsConfig: z.array(schema.planVersionFeatureSchema),
 })
 
 export const insertPlanSchema = planSelectBaseSchema.partial({
@@ -20,6 +27,9 @@ export const insertPlanSchema = planSelectBaseSchema.partial({
   projectId: true,
   createdAt: true,
   updatedAt: true,
+  startCycle: true,
+  gracePeriod: true,
+  active: true,
 })
 
 export const updatePlanSchema = planSelectBaseSchema

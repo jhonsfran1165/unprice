@@ -8,8 +8,33 @@ export function useActiveFeature() {
   return useAtom(configActiveFeatureAtom)
 }
 
-const configSelectedFeedAtom = atom<PlanVersionFeature[]>([])
+export interface PlanFeaturesList {
+  planFeatures: PlanVersionFeature[]
+  planAddons: PlanVersionFeature[]
+  validConfig: boolean
+}
 
-export function useSelectedFeatures() {
-  return useAtom(configSelectedFeedAtom)
+export const configPlanFeaturesListAtom = atom<PlanFeaturesList>({
+  planFeatures: [],
+  planAddons: [],
+  validConfig: false,
+})
+
+const configPlanActiveTabAtom = atom<"planFeatures" | "planAddons">(
+  "planFeatures"
+)
+
+export function usePlanActiveTab() {
+  return useAtom(configPlanActiveTabAtom)
+}
+
+export function usePlanFeaturesList() {
+  return useAtom(configPlanFeaturesListAtom)
+}
+
+export function usePlanFeaturesListActive() {
+  const [featuresList] = usePlanFeaturesList()
+  const [planActiveTab] = usePlanActiveTab()
+
+  return featuresList[planActiveTab] || []
 }

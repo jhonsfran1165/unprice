@@ -52,13 +52,18 @@ import {
 } from "@builderai/ui/tooltip"
 
 import { useZodForm } from "~/lib/zod-form"
-import { useActiveFeature, useSelectedFeatures } from "./use-features"
+import {
+  useActiveFeature,
+  usePlanActiveTab,
+  usePlanFeaturesList,
+} from "./use-features"
 
 interface FeatureConfigProps {
   feature: PlanVersionFeature | null
 }
 
 export function FeatureConfig({ feature }: FeatureConfigProps) {
+  const [activeFeature] = useActiveFeature()
   // define default values config for the form using the feature prop
   const defaultConfigValues = {
     mode: "sum",
@@ -67,10 +72,10 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
     divider: 1,
   }
 
-  const defaultValues = feature?.config
-    ? feature
+  const defaultValues = activeFeature?.config
+    ? activeFeature
     : ({
-        ...feature,
+        ...activeFeature,
         config: defaultConfigValues,
         type: "flat",
       } as PlanVersionFeature)
@@ -80,13 +85,15 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
     defaultValues: defaultValues,
   })
 
+  const [planActiveTab] = usePlanActiveTab()
+  const [_planFeatures, setPlanFeatures] = usePlanFeaturesList()
+
   const [active, setActiveFeature] = useActiveFeature()
-  const [_, setSelectedFeatures] = useSelectedFeatures()
 
   useEffect(() => {
     form.reset(defaultValues)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [feature?.id])
+  }, [activeFeature?.id])
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -96,13 +103,19 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
   const onSubmitForm = async (feature: PlanVersionFeature) => {
     console.log("feature", feature)
     setActiveFeature(feature)
-    setSelectedFeatures((features) => {
-      const index = features.findIndex((f) => f.id === feature.id)
+    setPlanFeatures((features) => {
+      const activeFeatures = features[planActiveTab]
+      const index = activeFeatures.findIndex((f) => f.id === feature.id)
 
-      features[index] = feature
-      return features
+      activeFeatures[index] = feature
+      return {
+        ...features,
+        [planActiveTab]: activeFeatures,
+      }
     })
   }
+
+  console.log(defaultValues)
 
   return (
     <div className="flex h-full flex-col">
@@ -140,19 +153,19 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
 
       <Separator />
 
-      {feature ? (
+      {activeFeature ? (
         <div className="flex flex-1 flex-col">
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm">
               <div className="grid gap-1">
                 <div className="line-clamp-1 text-lg font-semibold">
-                  {feature.title}
+                  {activeFeature.title}
                 </div>
                 <div className="line-clamp-1 text-xs">
-                  slug: <b>{feature.slug}</b>
+                  slug: <b>{activeFeature.slug}</b>
                 </div>
                 <div className="line-clamp-1 text-xs">
-                  {feature.description}
+                  {activeFeature.description}
                 </div>
               </div>
             </div>
@@ -183,6 +196,7 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                         <RadioGroup
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          value={field.value}
                           className="grid grid-cols-3 gap-2 pt-2"
                         >
                           <FormItem>

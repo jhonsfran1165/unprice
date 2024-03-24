@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq, getTableColumns, ne } from "@builderai/db"
+import { and, eq, getTableColumns } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
@@ -55,7 +55,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
   createVersion: protectedActiveProjectAdminProcedure
-    .input(versionInsertBaseSchema.pick({ planId: true }))
+    .input(versionInsertBaseSchema.partial({ id: true, version: true }))
     .output(
       z.object({
         planVersion: versionSelectBaseSchema,
@@ -64,7 +64,6 @@ export const planRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { planId } = opts.input
       const project = opts.ctx.project
-      const planVersionId = utils.newIdEdge("plan_version")
 
       const planData = await opts.ctx.db.query.plans.findFirst({
         where: (plan, { eq, and }) =>
@@ -78,17 +77,36 @@ export const planRouter = createTRPCRouter({
         })
       }
 
+      const planVersionId = utils.newIdEdge("plan_version")
+
       // this should happen in a transaction
       const planVersionData = await opts.ctx.db.transaction(async (tx) => {
         try {
+          // change status of previous latest version.
+          const latestVersion = await tx
+            .update(schema.versions)
+            .set({
+              latest: false,
+            })
+            .where(
+              and(
+                eq(schema.versions.projectId, project.id),
+                eq(schema.versions.latest, true)
+              )
+            )
+            .returning()
+            .then((re) => re[0])
+
           // version is a incrementing number calculated on save time by the database
-          const planVersionData = await opts.ctx.db
+          const planVersionData = await tx
             .insert(schema.versions)
             .values({
               id: planVersionId,
               planId,
               projectId: project.id,
               status: "draft",
+              latest: true,
+              version: latestVersion?.version ? latestVersion?.version + 1 : 1,
             })
             .returning()
             .then((re) => re[0])
@@ -99,20 +117,6 @@ export const planRouter = createTRPCRouter({
               message: "error creating version",
             })
           }
-
-          // change status of previous latest version.
-          await opts.ctx.db
-            .update(schema.versions)
-            .set({
-              latest: false,
-            })
-            .where(
-              and(
-                eq(schema.versions.projectId, project.id),
-                ne(schema.versions.id, planVersionData.id),
-                eq(schema.versions.latest, true)
-              )
-            )
 
           return planVersionData
         } catch (error) {
@@ -224,7 +228,7 @@ export const planRouter = createTRPCRouter({
           and(eq(schema.plans.id, id), eq(schema.plans.projectId, project.id))
         )
         .returning()
-        .then((re) => re[0] ?? undefined)
+        .then((re) => re[0])
 
       return {
         plan: updatedPlan,
@@ -276,7 +280,7 @@ export const planRouter = createTRPCRouter({
         })
         .where(and(eq(schema.versions.id, planVersionData.id)))
         .returning()
-        .then((re) => re[0] ?? undefined)
+        .then((re) => re[0])
 
       return {
         planVersion: versionUpdated,

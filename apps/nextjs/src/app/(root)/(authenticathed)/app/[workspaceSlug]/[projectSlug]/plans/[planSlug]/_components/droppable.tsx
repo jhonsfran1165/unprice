@@ -1,3 +1,5 @@
+"use client"
+
 import { useDroppable } from "@dnd-kit/core"
 import type { AnimateLayoutChanges } from "@dnd-kit/sortable"
 import { defaultAnimateLayoutChanges } from "@dnd-kit/sortable"

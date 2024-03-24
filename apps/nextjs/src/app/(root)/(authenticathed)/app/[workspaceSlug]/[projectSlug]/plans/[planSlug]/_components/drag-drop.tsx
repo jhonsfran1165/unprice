@@ -27,7 +27,7 @@ import { useToast } from "@builderai/ui/use-toast"
 
 import { api } from "~/trpc/client"
 import { FeaturePlan } from "./feature-plan"
-import { useSelectedFeatures } from "./use-features"
+import { usePlanActiveTab, usePlanFeaturesList } from "./use-features"
 
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -40,16 +40,13 @@ const dropAnimation: DropAnimation = {
 }
 
 // TODO: do not pass projectSlug to different components - props hell!!
-export default function DragDrop({
-  projectSlug,
-  children,
-}: {
-  projectSlug: string
-  children: React.ReactNode
-}) {
+export default function DragDrop({ children }: { children: React.ReactNode }) {
   const toaster = useToast()
+  const [planActiveTab] = usePlanActiveTab()
 
-  const [features, setFeatures] = useSelectedFeatures()
+  const [featuresList, setFeatures] = usePlanFeaturesList()
+
+  const features = featuresList[planActiveTab]
 
   const [activeFeature, setActiveFeature] = useState<PlanVersionFeature | null>(
     null
@@ -164,23 +161,34 @@ export default function DragDrop({
     const activeIndex = features.findIndex((t) => t.id === activeId)
     const activeFeature = features[activeIndex]
 
-    setFeatures((features) => {
+    setFeatures((featureList) => {
+      const features = featureList[planActiveTab]
       // I'm dropping a Feature over another Feature
       if (isOverAFeature) {
         const overIndex = features.findIndex((t) => t.id === overId)
         // if the active feature is not in the list we add it
-        return activeFeature
+        const result = activeFeature
           ? arrayMove(features, activeIndex, overIndex)
           : arrayMove(
               [...features, activeData.feature] as PlanVersionFeature[],
               activeIndex,
               overIndex
             )
+
+        return {
+          ...featureList,
+          [planActiveTab]: result,
+        }
       } else {
         // I'm dropping a Feature over the drop area
-        return activeFeature
+        const result = activeFeature
           ? arrayMove(features, activeIndex, activeIndex)
           : ([...features, activeData.feature] as PlanVersionFeature[])
+
+        return {
+          ...featureList,
+          [planActiveTab]: result,
+        }
       }
     })
   }

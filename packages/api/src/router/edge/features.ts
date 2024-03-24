@@ -201,13 +201,12 @@ export const featureRouter = createTRPCRouter({
   searchBy: protectedActiveProjectProcedure
     .input(
       z.object({
-        projectSlug: z.string(),
         search: z.string().optional(),
       })
     )
     .output(z.object({ features: z.array(featureSelectBaseSchema) }))
     .query(async (opts) => {
-      const { projectSlug, search } = opts.input
+      const { search } = opts.input
       const project = opts.ctx.project
 
       const filter = `%${search}%`

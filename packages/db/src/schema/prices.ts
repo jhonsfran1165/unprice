@@ -5,7 +5,6 @@ import {
   integer,
   json,
   primaryKey,
-  serial,
   text,
   unique,
   varchar,
@@ -233,19 +232,26 @@ export const planVersionFeatureSchema = z
     return true
   })
 
+export const startCycleSchema = z.union([
+  z.number().nonnegative(),
+  z.literal("last_day"),
+  z.null(),
+])
+
+type StartCycleType = z.infer<typeof startCycleSchema>
+
 export const plans = pgTableProject(
   "plans",
   {
     ...projectID,
     ...timestamps,
     slug: text("slug").notNull(),
+    active: boolean("active").default(true),
     title: varchar("title", { length: 50 }).notNull(),
     currency: currencyEnum("currency").default("EUR"),
     type: planTypeEnum("plan_type").default("recurring"),
     billingPeriod: planBillingPeriodEnum("billing_period").default("monthly"),
-    startCycle: text("start_cycle").$type<
-      z.ZodNumber | z.ZodLiteral<"last_day"> | z.ZodNull
-    >(),
+    startCycle: text("start_cycle").$type<StartCycleType>().default(null),
     gracePeriod: integer("grace_period").default(0),
     description: text("description"),
   },
@@ -266,7 +272,7 @@ export const versions = pgTableProject(
     ...projectID,
     ...timestamps,
     planId: cuid("plan_id").notNull(),
-    version: serial("version").notNull(),
+    version: integer("version").notNull(),
     latest: boolean("latest").default(false),
     featuresConfig:
       json("features_config").$type<

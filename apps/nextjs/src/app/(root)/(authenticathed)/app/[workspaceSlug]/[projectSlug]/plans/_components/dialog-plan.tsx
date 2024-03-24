@@ -39,9 +39,10 @@ export function PlanDialog({
               description: "",
               type: "recurring",
               billingPeriod: "monthly",
-              startCycle: "1",
+              startCycle: 1,
               currency: "USD",
               gracePeriod: 0,
+              active: true,
             }
           }
           setDialogOpen={setDialogOpen}

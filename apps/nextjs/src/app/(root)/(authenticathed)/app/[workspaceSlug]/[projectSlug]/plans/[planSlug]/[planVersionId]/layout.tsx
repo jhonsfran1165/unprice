@@ -1,6 +1,7 @@
 import React from "react"
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
+import { Provider } from "jotai"
 import {
   Check,
   ChevronDown,
@@ -73,121 +74,136 @@ export default async function PriceLayout(props: {
   }
 
   return (
-    <DashboardShell
-      header={
-        <>
-          <MaxWidthWrapper className="max-w-screen-2xl">
-            <div className="mb-6 flex justify-between align-middle">
-              <Link
-                className="flex items-center justify-start align-middle text-sm"
-                prefetch={false}
-                href={`/${workspaceSlug}/${projectSlug}/plans`}
-              >
-                <Badge variant={"outline"} className="py-1">
-                  <ChevronLeft className="h-4 w-4" />
-                  back
-                </Badge>
-              </Link>
-            </div>
-          </MaxWidthWrapper>
-          <HeaderTab>
-            <div className="flex w-full items-center justify-between">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-normal text-background-textContrast">
-                  {`${plan.title}: ${planVersionId === "version 0" ? "" : `version ${planVersionId}`}`}
-                </h1>
-                <h4 className="text-base text-muted-foreground">
-                  {plan.description}
-                </h4>
-                <div className="flex space-x-2">
-                  <Badge className="success">
-                    <span className="flex h-2 w-2 rounded-full bg-success-solid" />
-                    <span className="ml-1">Active</span>
+    <Provider>
+      <DashboardShell
+        header={
+          <>
+            <MaxWidthWrapper className="max-w-screen-2xl">
+              <div className="mb-6 flex justify-between align-middle">
+                <Link
+                  className="flex items-center justify-start align-middle text-sm"
+                  prefetch={false}
+                  href={`/${workspaceSlug}/${projectSlug}/plans`}
+                >
+                  <Badge variant={"outline"} className="py-1">
+                    <ChevronLeft className="h-4 w-4" />
+                    back
                   </Badge>
-                  <Badge className="info">
-                    <DollarSign className="h-3 w-3" />
-                    <span className="ml-1">{plan.currency}</span>
-                  </Badge>
-                  <Badge className="warning">
-                    <RefreshCcw className="h-3 w-3" />
-                    <span className="ml-1">{"monthly"}</span>
-                  </Badge>
-                </div>
+                </Link>
               </div>
-              <div>
-                <div className="flex items-center justify-end space-x-6">
-                  <div className="flex">
-                    {plan.versions.length > 0 ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button className="w-[200px]" variant="ghost">
-                            <GalleryHorizontalEnd className="mr-2 h-4 w-4" />
-                            {`Version V${activeVersion.version}`}
-                            <ChevronDown className="ml-2 h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[200px]">
-                          <DropdownMenuLabel>All versions</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {plan.versions.map((version) => {
-                            return (
-                              <DropdownMenuItem key={version.id}>
-                                <Link
-                                  prefetch={false}
-                                  href={`/${workspaceSlug}/${projectSlug}/plans/${plan.slug}/${version.version}`}
-                                  className="relative line-clamp-1 flex w-full items-center justify-between"
-                                >
-                                  <span className="text-xs">
-                                    {`${plan.title} - V${version.version}`}
-                                    {version.latest ? " (latest)" : ""}
-                                  </span>
-
-                                  <Check
-                                    className={cn(
-                                      "absolute right-0 h-4 w-4",
-                                      version.version === activeVersion.version
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                </Link>
-                              </DropdownMenuItem>
-                            )
-                          })}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : (
-                      <div className="flex items-center font-semibold">
-                        No versions yet
-                      </div>
-                    )}
-                  </div>
-                  <Separator orientation="vertical" className="h-12" />
+            </MaxWidthWrapper>
+            <HeaderTab>
+              <div className="flex w-full items-center justify-between">
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-normal text-background-textContrast">
+                    {`${plan.title}: ${planVersionId === "version 0" ? "" : `version ${planVersionId}`}`}
+                  </h1>
+                  <h4 className="text-base text-muted-foreground">
+                    {plan.description}
+                  </h4>
                   <div className="flex space-x-2">
-                    <CreateNewVersion
-                      plan={plan}
-                      projectSlug={projectSlug}
-                      workspaceSlug={workspaceSlug}
-                    />
-                    <VersionActions
-                      planId={plan.id}
-                      versionId={Number(planVersionId)}
-                    />
+                    <Badge className="success">
+                      <span className="flex h-2 w-2 rounded-full bg-success-solid" />
+                      <span className="ml-1">Active</span>
+                    </Badge>
+                    <Badge className="info">
+                      <DollarSign className="h-3 w-3" />
+                      <span className="ml-1">{plan.currency}</span>
+                    </Badge>
+                    <Badge className="warning">
+                      <RefreshCcw className="h-3 w-3" />
+                      <span className="ml-1">{"monthly"}</span>
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-end space-x-6">
+                    <div className="flex">
+                      {plan.versions.length > 0 ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button className="w-[200px]" variant="ghost">
+                              <GalleryHorizontalEnd className="mr-2 h-4 w-4" />
+                              {`Version V${activeVersion.version}`}
+                              <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-[200px]"
+                          >
+                            <DropdownMenuLabel>All versions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            {plan.versions.map((version) => {
+                              return (
+                                <DropdownMenuItem key={version.id}>
+                                  <Link
+                                    prefetch={false}
+                                    href={`/${workspaceSlug}/${projectSlug}/plans/${plan.slug}/${version.version}`}
+                                    className="relative line-clamp-1 flex w-full items-center justify-between"
+                                  >
+                                    <span className="text-xs">
+                                      {`${plan.title} - V${version.version}`}
+                                      {version.latest ? " (latest)" : ""}
+                                    </span>
+
+                                    <Check
+                                      className={cn(
+                                        "absolute right-0 h-4 w-4",
+                                        version.version ===
+                                          activeVersion.version
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                  </Link>
+                                </DropdownMenuItem>
+                              )
+                            })}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
+                        <div className="flex items-center font-semibold">
+                          No versions yet
+                        </div>
+                      )}
+                    </div>
+                    <Separator orientation="vertical" className="h-12" />
+                    <div className="flex items-center justify-end space-x-6">
+                      <div className="button-primary flex items-center space-x-1 rounded-md ">
+                        <CreateNewVersion
+                          plan={plan}
+                          projectSlug={projectSlug}
+                          workspaceSlug={workspaceSlug}
+                          planVersionId={Number(planVersionId)}
+                        />
+
+                        <Separator
+                          orientation="vertical"
+                          className="h-[20px] p-0"
+                        />
+
+                        <VersionActions
+                          planId={plan.id}
+                          versionId={Number(planVersionId)}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+            </HeaderTab>
+          </>
+        }
+      >
+        <div className="relative">
+          <section>
+            <div className="overflow-hidden rounded-[0.5rem] border bg-background shadow-md md:shadow-xl">
+              {props.children}
             </div>
-          </HeaderTab>
-        </>
-      }
-    >
-      <div className="relative">
-        <section>
-          <div className="overflow-hidden rounded-[0.5rem] border bg-background shadow-md md:shadow-xl">
-            {props.children}
-          </div>
-        </section>
-      </div>
-    </DashboardShell>
+          </section>
+        </div>
+      </DashboardShell>
+    </Provider>
   )
 }

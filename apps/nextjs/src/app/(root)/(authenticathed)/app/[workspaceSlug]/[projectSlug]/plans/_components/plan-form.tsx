@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { z } from "zod"
 
 import { CURRENCIES } from "@builderai/config"
-import { PLAN_TYPES, slugify } from "@builderai/db/utils"
+import { PLAN_BILLING_PERIODS, PLAN_TYPES, slugify } from "@builderai/db/utils"
 import type { InsertPlan } from "@builderai/db/validators"
 import { insertPlanSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
@@ -192,32 +192,65 @@ export function PlanForm({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex justify-between">
-                  <FormLabel>Type of the plan</FormLabel>
-                </div>
-                <Select onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a plan" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {PLAN_TYPES.map((type, index) => (
-                      <SelectItem key={index} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex w-full flex-row justify-between space-x-2">
+            <div className="w-full">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between">
+                      <FormLabel>Type of the plan</FormLabel>
+                    </div>
+                    <Select onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a plan" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {PLAN_TYPES.map((type, index) => (
+                          <SelectItem key={index} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="w-full">
+              <FormField
+                control={form.control}
+                name="billingPeriod"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between">
+                      <FormLabel>Billing Cycle</FormLabel>
+                    </div>
+                    <Select onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a cycle" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {PLAN_BILLING_PERIODS.map((type, index) => (
+                          <SelectItem key={index} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
 
           <FormField
             control={form.control}

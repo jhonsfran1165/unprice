@@ -1,62 +1,87 @@
 "use client"
 
+import { useState } from "react"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { FileStack } from "lucide-react"
+import { FileStack, Search } from "lucide-react"
 
-import type { PlanVersionFeature } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
+import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DroppableContainer } from "./droppable"
 import { FeatureDialog } from "./feature-dialog"
 import { SortableFeature } from "./sortable-feature"
+import { usePlanFeaturesListActive } from "./use-features"
 
 interface PlanFeatureListProps {
-  features: PlanVersionFeature[]
-  id: string
+  id: "planAddons" | "planFeatures"
 }
 
-export function PlanFeatureList({ features, id }: PlanFeatureListProps) {
+export function PlanFeatureList({ id }: PlanFeatureListProps) {
+  const [filter, setFilter] = useState("")
+
+  const features = usePlanFeaturesListActive()
+
+  const filteredFeatures = features.filter((feature) =>
+    feature.title.toLowerCase().includes(filter.toLowerCase())
+  )
+
   return (
-    <ScrollArea className="h-[750px] pb-4">
-      <div className="flex flex-col gap-2 p-4 pt-0">
-        <DroppableContainer id={id}>
-          <SortableContext
-            items={features.map((feature) => feature.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            {features.length === 0 ? (
-              <EmptyPlaceholder>
-                <EmptyPlaceholder.Icon>
-                  <FileStack className="h-8 w-8" />
-                </EmptyPlaceholder.Icon>
-                <EmptyPlaceholder.Title>
-                  No features added yet
-                </EmptyPlaceholder.Title>
-                <EmptyPlaceholder.Description>
-                  Create your first feature and drag it here
-                </EmptyPlaceholder.Description>
-                <EmptyPlaceholder.Action>
-                  <FeatureDialog>
-                    <Button>Create feature</Button>
-                  </FeatureDialog>
-                </EmptyPlaceholder.Action>
-              </EmptyPlaceholder>
-            ) : (
-              <div className="space-y-2">
-                {features.map((feature, i) => (
-                  <SortableFeature
-                    key={i}
-                    mode="FeaturePlan"
-                    feature={feature}
-                  />
-                ))}
-              </div>
-            )}
-          </SortableContext>
-        </DroppableContainer>
+    <>
+      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">
+        <div className="relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search feature in plan"
+            className="pl-8"
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </div>
       </div>
-    </ScrollArea>
+      <ScrollArea className="h-[750px] pb-4">
+        <div className="flex flex-col gap-2 p-4 pt-0">
+          <DroppableContainer id={id}>
+            <SortableContext
+              items={features.map((feature) => feature.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {filteredFeatures.length === 0 ? (
+                <EmptyPlaceholder>
+                  <EmptyPlaceholder.Icon>
+                    <FileStack className="h-8 w-8" />
+                  </EmptyPlaceholder.Icon>
+                  <EmptyPlaceholder.Title>No features</EmptyPlaceholder.Title>
+                  <EmptyPlaceholder.Description>
+                    Create feature and drag it here
+                  </EmptyPlaceholder.Description>
+                  <EmptyPlaceholder.Action>
+                    <FeatureDialog
+                      defaultValues={{
+                        title: filter,
+                        slug: filter,
+                        description: "",
+                      }}
+                    >
+                      <Button>Create feature</Button>
+                    </FeatureDialog>
+                  </EmptyPlaceholder.Action>
+                </EmptyPlaceholder>
+              ) : (
+                <div className="space-y-2">
+                  {filteredFeatures.map((feature, i) => (
+                    <SortableFeature
+                      key={i}
+                      mode="FeaturePlan"
+                      feature={feature}
+                    />
+                  ))}
+                </div>
+              )}
+            </SortableContext>
+          </DroppableContainer>
+        </div>
+      </ScrollArea>
+    </>
   )
 }

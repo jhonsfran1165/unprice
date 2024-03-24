@@ -1,7 +1,7 @@
 "use client"
 
 import { TRPCClientError } from "@trpc/client"
-import { MoreVertical } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 
 import { Button } from "@builderai/ui/button"
 import {
@@ -51,9 +51,9 @@ export function VersionActions({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
+        <Button variant={"custom"}>
           <span className="sr-only">Actions</span>
-          <MoreVertical className="h-4 w-4" />
+          <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

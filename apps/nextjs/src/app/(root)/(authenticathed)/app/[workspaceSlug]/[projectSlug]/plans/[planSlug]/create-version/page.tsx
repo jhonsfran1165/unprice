@@ -1,7 +1,7 @@
-import DragDrop from "../../_components/drag-drop"
-import { PlanVersionConfigurator } from "../../_components/plan-version-configurator"
+import DragDrop from "../_components/drag-drop"
+import { PlanVersionConfigurator } from "../_components/plan-version-configurator"
 
-export default function OverviewVersionPage({
+export default function NewVersionPage({
   params,
 }: {
   params: {
@@ -16,8 +16,8 @@ export default function OverviewVersionPage({
   return (
     <div className="flex flex-col">
       <DragDrop>
-        {/* // INFO: if we use jotai in other parts of the app probably this is better placed as a top level provider */}
         <PlanVersionConfigurator
+          isCreatingNewVersion
           planSlug={planSlug}
           planVersionId={planVersionId}
         />

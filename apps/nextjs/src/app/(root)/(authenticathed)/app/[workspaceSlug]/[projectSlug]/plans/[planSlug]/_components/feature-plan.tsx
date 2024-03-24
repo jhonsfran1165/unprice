@@ -13,7 +13,11 @@ import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 
 import { FeatureDialog } from "./feature-dialog"
-import { useActiveFeature, useSelectedFeatures } from "./use-features"
+import {
+  useActiveFeature,
+  usePlanActiveTab,
+  usePlanFeaturesList,
+} from "./use-features"
 
 const featureVariants = cva(
   "flex gap-2 rounded-lg border text-left text-sm transition-all",
@@ -43,7 +47,8 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
     const { isOverlay, mode, variant, className, feature, ...rest } = props
 
     const [active, setActiveFeature] = useActiveFeature()
-    const [_, setSelectedFeatures] = useSelectedFeatures()
+    const [planActiveTab] = usePlanActiveTab()
+    const [_planFeatures, setPlanFeatures] = usePlanFeaturesList()
 
     const handleClick = (_event: React.MouseEvent<HTMLDivElement>) => {
       setActiveFeature(feature)
@@ -83,8 +88,14 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
               variant="link"
               size={"icon"}
               onClick={() => {
-                console.log("add feature")
-                setSelectedFeatures?.((prev) => [...prev, feature])
+                setPlanFeatures((prev) => {
+                  return {
+                    ...prev,
+                    [planActiveTab]: [...prev[planActiveTab], feature],
+                  }
+                })
+
+                setActiveFeature(feature)
               }}
             >
               <ChevronRight className="h-4 w-4" />
