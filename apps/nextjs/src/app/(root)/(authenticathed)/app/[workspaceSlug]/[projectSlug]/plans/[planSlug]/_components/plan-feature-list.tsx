@@ -9,10 +9,10 @@ import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import { DroppableContainer } from "./droppable"
-import { FeatureDialog } from "./feature-dialog"
-import { SortableFeature } from "./sortable-feature"
-import { usePlanFeaturesListActive } from "./use-features"
+import { DroppableContainer } from "../../_components/droppable"
+import { FeatureDialog } from "../../_components/feature-dialog"
+import { SortableFeature } from "../../_components/sortable-feature"
+import { usePlanFeaturesListActive } from "../../_components/use-features"
 
 interface PlanFeatureListProps {
   id: "planAddons" | "planFeatures"

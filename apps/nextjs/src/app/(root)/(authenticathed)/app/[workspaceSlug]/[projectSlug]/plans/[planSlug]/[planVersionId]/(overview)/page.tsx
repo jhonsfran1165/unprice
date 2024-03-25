@@ -1,5 +1,5 @@
-import DragDrop from "../../_components/drag-drop"
 import { PlanVersionConfigurator } from "../../_components/plan-version-configurator"
+import DragDrop from "../../../_components/drag-drop"
 
 export default function OverviewVersionPage({
   params,

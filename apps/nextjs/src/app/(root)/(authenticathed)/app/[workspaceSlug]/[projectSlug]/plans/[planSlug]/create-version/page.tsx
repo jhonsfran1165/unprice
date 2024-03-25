@@ -1,5 +1,5 @@
-import DragDrop from "../_components/drag-drop"
 import { PlanVersionConfigurator } from "../_components/plan-version-configurator"
+import DragDrop from "../../_components/drag-drop"
 
 export default function NewVersionPage({
   params,
@@ -14,14 +14,12 @@ export default function NewVersionPage({
   const { planSlug, planVersionId } = params
 
   return (
-    <div className="flex flex-col">
-      <DragDrop>
-        <PlanVersionConfigurator
-          isCreatingNewVersion
-          planSlug={planSlug}
-          planVersionId={planVersionId}
-        />
-      </DragDrop>
-    </div>
+    <DragDrop>
+      <PlanVersionConfigurator
+        isCreatingNewVersion
+        planSlug={planSlug}
+        planVersionId={planVersionId}
+      />
+    </DragDrop>
   )
 }

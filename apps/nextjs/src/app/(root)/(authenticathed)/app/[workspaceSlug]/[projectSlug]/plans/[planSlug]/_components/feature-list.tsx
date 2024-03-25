@@ -12,9 +12,9 @@ import { ScrollArea } from "@builderai/ui/scroll-area"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useDebounce } from "~/lib/use-debounce"
 import { api } from "~/trpc/client"
-import { FeatureDialog } from "./feature-dialog"
-import { SortableFeature } from "./sortable-feature"
-import { usePlanFeaturesList } from "./use-features"
+import { FeatureDialog } from "../../_components/feature-dialog"
+import { SortableFeature } from "../../_components/sortable-feature"
+import { usePlanFeaturesList } from "../../_components/use-features"
 
 interface FeatureListProps {
   featuresPromise: Promise<RouterOutputs["features"]["searchBy"]>

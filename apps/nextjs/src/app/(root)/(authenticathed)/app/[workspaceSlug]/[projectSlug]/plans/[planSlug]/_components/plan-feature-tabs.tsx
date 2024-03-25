@@ -5,13 +5,13 @@ import { useHydrateAtoms } from "jotai/utils"
 import { Separator } from "@builderai/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
-import { PlanFeatureList } from "./plan-feature-list"
-import type { PlanFeaturesList } from "./use-features"
+import type { PlanFeaturesList } from "../../_components/use-features"
 import {
   configPlanFeaturesListAtom,
   useActiveFeature,
   usePlanActiveTab,
-} from "./use-features"
+} from "../../_components/use-features"
+import { PlanFeatureList } from "./plan-feature-list"
 
 interface PlanFeatureTabsProps {
   initialFeatures: PlanFeaturesList

@@ -10,7 +10,7 @@ import { Separator } from "@builderai/ui/separator"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
-import { usePlanFeaturesList } from "../[planSlug]/_components/use-features"
+import { usePlanFeaturesList } from "./use-features"
 import { VersionActions } from "./version-actions"
 
 const CreateNewVersion = ({

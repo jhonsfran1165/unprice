@@ -6,9 +6,9 @@ import { Separator } from "@builderai/ui/separator"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { api } from "~/trpc/server"
-import PlanHeader from "../_components/plan-header"
-import PlanVersionList from "../_components/plan-versions-list"
 import CreateNewVersion from "../../_components/create-new-version"
+import PlanHeader from "../../_components/plan-header"
+import PlanVersionList from "../../_components/plan-versions-list"
 
 export const runtime = "edge"
 

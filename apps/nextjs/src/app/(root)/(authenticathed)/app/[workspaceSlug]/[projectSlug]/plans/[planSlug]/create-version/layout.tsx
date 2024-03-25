@@ -4,8 +4,8 @@ import { Provider } from "jotai"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { api } from "~/trpc/server"
-import PlanHeader from "../_components/plan-header"
 import CreateNewVersion from "../../_components/create-new-version"
+import PlanHeader from "../../_components/plan-header"
 
 export const runtime = "edge"
 

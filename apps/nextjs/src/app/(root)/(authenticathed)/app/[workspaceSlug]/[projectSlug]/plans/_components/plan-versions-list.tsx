@@ -56,7 +56,8 @@ export default function PlanVersionList(props: {
                   >
                     <span className="text-xs">
                       {`${plan.title} - V${version.version}`}
-                      {version.latest ? " (latest)" : ""}
+                      {version.latest ? " (latest) " : " "}
+                      {version.status}
                     </span>
 
                     <Check

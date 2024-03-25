@@ -56,7 +56,7 @@ import {
   useActiveFeature,
   usePlanActiveTab,
   usePlanFeaturesList,
-} from "./use-features"
+} from "../../_components/use-features"
 
 export function FeatureConfig() {
   const [activeFeature] = useActiveFeature()

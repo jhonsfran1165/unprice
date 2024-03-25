@@ -62,7 +62,7 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { planId } = opts.input
+      const { planId, featuresConfig, addonsConfig } = opts.input
       const project = opts.ctx.project
 
       const planData = await opts.ctx.db.query.plans.findFirst({
@@ -107,6 +107,8 @@ export const planRouter = createTRPCRouter({
               status: "draft",
               latest: true,
               version: latestVersion?.version ? latestVersion?.version + 1 : 1,
+              featuresConfig,
+              addonsConfig,
             })
             .returning()
             .then((re) => re[0])
