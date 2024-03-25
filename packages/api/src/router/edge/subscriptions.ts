@@ -295,11 +295,7 @@ export const subscriptionRouter = createTRPCRouter({
       >(id))!
 
       if (payload) {
-        const featuresPlan = payload.version.featuresConfig ?? {}
-        const allFeaturesPlan = Object.keys(featuresPlan)
-          .map((group) => featuresPlan[group]?.features)
-          .flat()
-
+        const allFeaturesPlan = payload.version.featuresConfig ?? []
         const userHasFeature = allFeaturesPlan.some(
           (f) => f?.slug === featureSlug
         )
@@ -392,11 +388,7 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      const featuresPlan = versionPlan.addonsConfig
-      const allFeaturesPlan = Object.keys(featuresPlan)
-        .map((group) => featuresPlan[group]?.features)
-        .flat()
-
+      const allFeaturesPlan = versionPlan.featuresConfig ?? []
       const userHasFeature = allFeaturesPlan.some(
         (f) => f?.slug === featureSlug
       )

@@ -84,7 +84,7 @@ export function FeatureConfig() {
   const [planActiveTab] = usePlanActiveTab()
   const [_planFeatures, setPlanFeatures] = usePlanFeaturesList()
 
-  const [active, setActiveFeature] = useActiveFeature()
+  const [_active, setActiveFeature] = useActiveFeature()
 
   useEffect(() => {
     form.reset(defaultValues)
@@ -96,8 +96,7 @@ export function FeatureConfig() {
     name: "config.tiers",
   })
 
-  const onSubmitForm = async (feature: PlanVersionFeature) => {
-    console.log("feature", feature)
+  const onSubmitForm = (feature: PlanVersionFeature) => {
     setActiveFeature(feature)
     setPlanFeatures((features) => {
       const activeFeatures = features[planActiveTab]

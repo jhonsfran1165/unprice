@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import type {
   DragEndEvent,
   DragOverEvent,
@@ -19,13 +19,10 @@ import {
   useSensors,
 } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
-import { TRPCClientError } from "@trpc/client"
 import { createPortal } from "react-dom"
 
 import type { PlanVersionFeature } from "@builderai/db/validators"
-import { useToast } from "@builderai/ui/use-toast"
 
-import { api } from "~/trpc/client"
 import { FeaturePlan } from "./feature-plan"
 import { usePlanActiveTab, usePlanFeaturesList } from "./use-features"
 
@@ -39,9 +36,7 @@ const dropAnimation: DropAnimation = {
   }),
 }
 
-// TODO: do not pass projectSlug to different components - props hell!!
 export default function DragDrop({ children }: { children: React.ReactNode }) {
-  const toaster = useToast()
   const [planActiveTab] = usePlanActiveTab()
 
   const [featuresList, setFeatures] = usePlanFeaturesList()
@@ -54,31 +49,6 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
   const [clonedFeatures, setClonedFeatures] = useState<
     PlanVersionFeature[] | null
   >(null)
-
-  const featuresIds = useMemo(() => {
-    return features.map((feature) => feature.id)
-  }, [features])
-
-  const updatePlanVersion = api.plans.updateVersion.useMutation({
-    onSuccess: () => {
-      // setConfig([]) // clear the local storage
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
-      } else {
-        toaster.toast({
-          title: "Error updating plan",
-          variant: "destructive",
-          description:
-            "An issue occurred while updating the plan. Please try again.",
-        })
-      }
-    },
-  })
 
   // sensor are the way we can control how the drag and drop works
   // we have some components inside the feature that are interactive like buttons

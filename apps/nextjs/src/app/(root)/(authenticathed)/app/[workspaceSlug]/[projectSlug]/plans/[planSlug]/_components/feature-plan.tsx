@@ -45,7 +45,7 @@ export interface FeaturePlanProps
 
 const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
   (props, ref) => {
-    const { isOverlay, mode, variant, className, feature, ...rest } = props
+    const { mode, variant, className, feature, ...rest } = props
 
     const [active, setActiveFeature] = useActiveFeature()
     const [planActiveTab] = usePlanActiveTab()
