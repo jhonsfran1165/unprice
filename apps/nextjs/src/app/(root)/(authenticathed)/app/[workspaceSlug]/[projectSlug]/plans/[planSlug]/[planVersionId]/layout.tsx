@@ -29,7 +29,6 @@ import HeaderTab from "~/components/layout/header-tab"
 import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
 import { api } from "~/trpc/server"
 import CreateNewVersion from "../../_components/create-new-version"
-import { VersionActions } from "../../_components/version-actions"
 
 export const runtime = "edge"
 
@@ -53,12 +52,20 @@ export default async function PriceLayout(props: {
 
   if (planVersionId !== "latest" && isNaN(parseInt(planVersionId))) {
     notFound()
+    // redirect
   }
 
   if (planVersionId === "latest") {
     const latestVersion = plan.versions.find(
       (version) => version.latest === true
     )
+
+    if (!latestVersion) {
+      redirect(
+        `/${workspaceSlug}/${projectSlug}/plans/${planSlug}/create-version`
+      )
+    }
+
     // redirect to the latest version
     redirect(
       `/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${latestVersion?.version}`
@@ -70,7 +77,9 @@ export default async function PriceLayout(props: {
   )
 
   if (!activeVersion) {
-    notFound()
+    redirect(
+      `/${workspaceSlug}/${projectSlug}/plans/${planSlug}/create-version`
+    )
   }
 
   return (
@@ -102,9 +111,16 @@ export default async function PriceLayout(props: {
                     {plan.description}
                   </h4>
                   <div className="flex space-x-2">
-                    <Badge className="success">
+                    <Badge
+                      className={cn({
+                        success: plan.active,
+                        danger: !plan.active,
+                      })}
+                    >
                       <span className="flex h-2 w-2 rounded-full bg-success-solid" />
-                      <span className="ml-1">Active</span>
+                      <span className="ml-1">
+                        {plan.active ? "active" : "inactive"}
+                      </span>
                     </Badge>
                     <Badge className="info">
                       <DollarSign className="h-3 w-3" />
@@ -124,7 +140,7 @@ export default async function PriceLayout(props: {
                           <DropdownMenuTrigger asChild>
                             <Button className="w-[200px]" variant="ghost">
                               <GalleryHorizontalEnd className="mr-2 h-4 w-4" />
-                              {`Version V${activeVersion.version}`}
+                              {`Version V${activeVersion.version} ${activeVersion.latest ? "(latest)" : ""}`}
                               <ChevronDown className="ml-2 h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -170,24 +186,12 @@ export default async function PriceLayout(props: {
                     </div>
                     <Separator orientation="vertical" className="h-12" />
                     <div className="flex items-center justify-end space-x-6">
-                      <div className="button-primary flex items-center space-x-1 rounded-md ">
-                        <CreateNewVersion
-                          plan={plan}
-                          projectSlug={projectSlug}
-                          workspaceSlug={workspaceSlug}
-                          planVersionId={Number(planVersionId)}
-                        />
-
-                        <Separator
-                          orientation="vertical"
-                          className="h-[20px] p-0"
-                        />
-
-                        <VersionActions
-                          planId={plan.id}
-                          versionId={Number(planVersionId)}
-                        />
-                      </div>
+                      <CreateNewVersion
+                        plan={plan}
+                        projectSlug={projectSlug}
+                        workspaceSlug={workspaceSlug}
+                        planVersionId={Number(planVersionId)}
+                      />
                     </div>
                   </div>
                 </div>

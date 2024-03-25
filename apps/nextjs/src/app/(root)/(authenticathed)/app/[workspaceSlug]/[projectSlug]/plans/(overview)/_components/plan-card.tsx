@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
 
+import { PropagationStopper } from "~/components/prevent-propagation"
 import type { RouterOutputs } from "~/trpc/shared"
 import { PlanForm } from "../../_components/plan-form"
 
@@ -36,9 +37,11 @@ export function PlanCard(props: {
   plan: RouterOutputs["plans"]["listByActiveProject"]["plans"][number]
 }) {
   const { plan } = props
+  const { versions, ...rest } = plan
 
   return (
     <Link
+      prefetch={false}
       href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}/latest`}
     >
       <Card className="overflow-hidden hover:border-background-borderHover">
@@ -50,82 +53,70 @@ export function PlanCard(props: {
             </CardDescription>
           </div>
           <div className="flex items-center space-x-1 ">
-            <Dialog>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant={"ghost"}>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="w-[200px]"
-                  forceMount
-                >
-                  <DropdownMenuLabel>Plan Actions</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Link
-                      href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}/create-version`}
-                      className="flex items-center"
-                    >
-                      <PlusIcon className="mr-2 h-4 w-4" />
-                      create version
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link
-                      href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}
-                      className="flex items-center"
-                    >
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link
-                      href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}
-                      className="flex items-center"
-                    >
-                      <User2 className="mr-2 h-4 w-4" />
-                      Customer
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DialogTrigger asChild>
+            <PropagationStopper>
+              <Dialog>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant={"ghost"}>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[200px]"
+                    forceMount
+                  >
+                    <DropdownMenuLabel>Plan Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
+                      <Link
+                        href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}/create-version`}
+                        className="flex items-center"
+                      >
+                        <PlusIcon className="mr-2 h-4 w-4" />
+                        Create version
+                      </Link>
                     </DropdownMenuItem>
-                  </DialogTrigger>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuItem>
+                      <Link
+                        href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}
+                        className="flex items-center"
+                      >
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link
+                        href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}
+                        className="flex items-center"
+                      >
+                        <User2 className="mr-2 h-4 w-4" />
+                        Customer
+                      </Link>
+                    </DropdownMenuItem>
 
-              <DialogContent>
-                <PlanForm
-                  defaultValues={
-                    plan ?? {
-                      title: "",
-                      slug: "",
-                      description: "",
-                      type: "recurring",
-                      billingPeriod: "monthly",
-                      startCycle: "1",
-                      currency: "USD",
-                      gracePeriod: 0,
-                    }
-                  }
-                />
-              </DialogContent>
-            </Dialog>
+                    <DialogTrigger asChild>
+                      <DropdownMenuItem>
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                      </DropdownMenuItem>
+                    </DialogTrigger>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DialogContent>
+                  <PlanForm defaultValues={rest} />
+                </DialogContent>
+              </Dialog>
+            </PropagationStopper>
           </div>
         </CardHeader>
         <CardContent>
           <div className="flex justify-between space-x-4 text-sm text-muted-foreground">
             <div className="flex items-center">
               <GalleryHorizontalEnd className="mr-1 h-3 w-3" />
-              {plan.versions.length === 0 ? "No" : plan.versions.length}{" "}
-              Versions
+              {versions.length === 0 ? "No" : versions.length} Versions
             </div>
 
             <div>Updated April 2023</div>

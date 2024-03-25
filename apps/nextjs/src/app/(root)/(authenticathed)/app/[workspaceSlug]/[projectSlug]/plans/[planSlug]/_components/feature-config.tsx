@@ -58,11 +58,7 @@ import {
   usePlanFeaturesList,
 } from "./use-features"
 
-interface FeatureConfigProps {
-  feature: PlanVersionFeature | null
-}
-
-export function FeatureConfig({ feature }: FeatureConfigProps) {
+export function FeatureConfig() {
   const [activeFeature] = useActiveFeature()
   // define default values config for the form using the feature prop
   const defaultConfigValues = {
@@ -115,18 +111,34 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
     })
   }
 
-  console.log(defaultValues)
-
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center p-2">
-        <div className="flex items-center px-2">
-          <h1 className="truncate text-xl font-bold">Feature configuration</h1>
-        </div>
+      <div className="flex items-center px-4 py-2">
+        <h1 className="truncate text-xl font-bold">Feature configuration</h1>
         <div className="ml-auto flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!feature}>
+              <Button
+                variant="ghost"
+                size="icon"
+                disabled={!activeFeature}
+                onClick={() => {
+                  // delete feature
+                  setActiveFeature(null)
+                  setPlanFeatures((features) => {
+                    const activeFeatures = features[planActiveTab]
+                    const index = activeFeatures.findIndex(
+                      (f) => f.id === activeFeature?.id
+                    )
+
+                    activeFeatures.splice(index, 1)
+                    return {
+                      ...features,
+                      [planActiveTab]: activeFeatures,
+                    }
+                  })
+                }}
+              >
                 <Trash2 className="h-4 w-4" />
                 <span className="sr-only">Delete from plan</span>
               </Button>
@@ -137,7 +149,7 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
         <Separator orientation="vertical" className="mx-2 h-6" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" disabled={!feature}>
+            <Button variant="ghost" size="icon" disabled={!activeFeature}>
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">More</span>
             </Button>
@@ -581,7 +593,7 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
               <div className="flex items-center">
                 <Label
                   htmlFor="mute"
-                  className="flex items-center gap-2 text-xs font-normal"
+                  className="flex items-center gap-2 truncate text-xs font-normal"
                 >
                   <Switch id="mute" aria-label="Don't show" /> Hide this from
                   preview page
@@ -590,7 +602,7 @@ export function FeatureConfig({ feature }: FeatureConfigProps) {
                   type="submit"
                   form="feature-config-form"
                   size="sm"
-                  className="ml-auto"
+                  className="ml-auto truncate"
                 >
                   Save configuration
                 </Button>

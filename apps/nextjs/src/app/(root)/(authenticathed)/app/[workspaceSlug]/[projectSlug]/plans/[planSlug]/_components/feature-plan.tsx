@@ -12,6 +12,7 @@ import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 
+import { Ping } from "~/components/ping"
 import { FeatureDialog } from "./feature-dialog"
 import {
   useActiveFeature,
@@ -104,29 +105,31 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
         ) : mode === "FeaturePlan" ? (
           <>
             <div className="flex w-full flex-col gap-1">
-              <div className="flex items-center">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="line-clamp-1 font-semibold">
                     {feature.title}
                   </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  {feature.type === "flat"
+                    ? `${
+                        feature?.config?.price === 0
+                          ? "Free"
+                          : `$${feature?.config?.price}`
+                      }`
+                    : ["volume", "tiered"].includes(feature.type)
+                      ? `${feature?.config?.tiers.length ?? 0} tiers`
+                      : null}
 
                   {!feature?.config && (
-                    <span className="flex h-2 w-2 rounded-full bg-info-solid" />
+                    <div className="relative ">
+                      <div className="absolute -top-1 right-0">
+                        <Ping variant={"destructive"} />
+                      </div>
+                    </div>
                   )}
                 </div>
-                {feature.type === "flat" && (
-                  <div className="ml-auto text-xs">
-                    {feature?.config?.price === 0
-                      ? "Free"
-                      : `$${feature?.config?.price}`}
-                  </div>
-                )}
-
-                {feature.type !== "flat" && (
-                  <div className="ml-auto text-xs">
-                    {feature?.config?.tiers.length} tiers
-                  </div>
-                )}
               </div>
               <div className="line-clamp-1 text-xs font-medium">
                 {feature.slug}

@@ -25,7 +25,7 @@ export function PlanFeatureTabs({ initialFeatures }: PlanFeatureTabsProps) {
 
   return (
     <Tabs value={planActiveTab}>
-      <div className="flex items-center px-4 py-2">
+      <div className="flex items-center justify-between space-x-1 px-4 py-2">
         <h1 className="truncate text-xl font-bold">Features on this plan</h1>
         <TabsList className="ml-auto">
           <TabsTrigger

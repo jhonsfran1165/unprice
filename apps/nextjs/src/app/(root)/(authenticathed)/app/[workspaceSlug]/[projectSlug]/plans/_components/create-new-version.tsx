@@ -4,11 +4,14 @@ import { startTransition } from "react"
 import { useRouter } from "next/navigation"
 
 import type { RouterOutputs } from "@builderai/api"
+import type { PlanVersionFeature } from "@builderai/db/validators"
+import { Separator } from "@builderai/ui/separator"
 
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 import { usePlanFeaturesList } from "../[planSlug]/_components/use-features"
+import { VersionActions } from "./version-actions"
 
 const CreateNewVersion = ({
   projectSlug,
@@ -23,6 +26,15 @@ const CreateNewVersion = ({
 }) => {
   const router = useRouter()
   const [planFeatures] = usePlanFeaturesList()
+
+  // is valid when all features have config
+  const isValidConfig = Object.values(planFeatures).every(
+    (features: PlanVersionFeature[]) => {
+      return features.every((feature) => {
+        return feature.config !== undefined
+      })
+    }
+  )
 
   const createVersion = api.plans.createVersion.useMutation({
     onSuccess: (data) => {
@@ -43,6 +55,14 @@ const CreateNewVersion = ({
 
   function onUpdateVersion() {
     startTransition(() => {
+      if (!isValidConfig) {
+        toastAction(
+          "error",
+          "Please save configuration for each feature before saving"
+        )
+        return
+      }
+
       if (plan?.id === undefined) {
         toastAction("error", "Plan id is undefined")
         return
@@ -64,6 +84,14 @@ const CreateNewVersion = ({
 
   function onCreateVersion() {
     startTransition(() => {
+      if (!isValidConfig) {
+        toastAction(
+          "error",
+          "Please save configuration for each feature before saving"
+        )
+        return
+      }
+
       if (plan?.id === undefined) {
         toastAction("error", "Plan id is undefined")
         return
@@ -79,14 +107,24 @@ const CreateNewVersion = ({
   }
 
   return (
-    <div className="sm:col-span-full">
-      <SubmitButton
-        variant={"custom"}
-        isSubmitting={createVersion.isPending}
-        isDisabled={createVersion.isPending}
-        label={"Save version"}
-        onClick={planVersionId ? onUpdateVersion : onCreateVersion}
-      />
+    <div className="button-primary flex items-center space-x-1 rounded-md ">
+      <div className="sm:col-span-full">
+        <SubmitButton
+          variant={"custom"}
+          isSubmitting={
+            planVersionId ? updateVersion.isPending : createVersion.isPending
+          }
+          isDisabled={
+            planVersionId ? updateVersion.isPending : createVersion.isPending
+          }
+          label={planVersionId ? "Update version" : "Save version"}
+          onClick={planVersionId ? onUpdateVersion : onCreateVersion}
+        />
+      </div>
+
+      <Separator orientation="vertical" className="h-[20px] p-0" />
+
+      <VersionActions planId={plan.id} versionId={Number(planVersionId)} />
     </div>
   )
 }

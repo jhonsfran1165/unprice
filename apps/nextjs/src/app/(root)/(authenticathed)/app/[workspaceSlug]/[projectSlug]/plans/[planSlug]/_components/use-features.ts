@@ -11,13 +11,11 @@ export function useActiveFeature() {
 export interface PlanFeaturesList {
   planFeatures: PlanVersionFeature[]
   planAddons: PlanVersionFeature[]
-  validConfig: boolean
 }
 
 export const configPlanFeaturesListAtom = atom<PlanFeaturesList>({
   planFeatures: [],
   planAddons: [],
-  validConfig: false,
 })
 
 const configPlanActiveTabAtom = atom<"planFeatures" | "planAddons">(

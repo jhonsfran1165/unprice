@@ -21,7 +21,7 @@ export const SubmitButton = ({
   return (
     <Button
       variant={variant}
-      type="submit"
+      type={onClick ? "button" : "submit"}
       disabled={isDisabled}
       onClick={onClick}
       {...props}

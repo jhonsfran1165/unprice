@@ -29,7 +29,6 @@ export async function PlanVersionConfigurator({
   // TODOS:
   // - activeFeature
   // - planFeatures
-  // - config layout resizable
   const layout = cookies().get("react-resizable-panels:layout")
 
   let initialFeatures = {} as PlanFeaturesList
@@ -47,20 +46,17 @@ export async function PlanVersionConfigurator({
     initialFeatures = {
       planFeatures: planVersion.featuresConfig ?? [],
       planAddons: planVersion.addonsConfig ?? [],
-      validConfig: true,
     }
   } else {
     initialFeatures = {
       planFeatures: [],
       planAddons: [],
-      validConfig: false,
     }
   }
 
-  console.log("initialFeatures", initialFeatures)
-
-  // TODO: fix this
-  const defaultLayout = layout ? JSON.parse(layout.value ?? 0) : [265, 440, 655]
+  const defaultLayout = layout?.value
+    ? (JSON.parse(layout.value) as [number, number, number])
+    : [20, 25, 55]
 
   return (
     <ResizablePanelConfig
@@ -68,7 +64,9 @@ export async function PlanVersionConfigurator({
       featureList={
         <>
           <div
-            className={cn("flex h-[52px] items-center justify-between px-4")}
+            className={cn(
+              "flex h-[52px] items-center justify-between space-x-1 px-4"
+            )}
           >
             <h1 className="truncate text-xl font-bold">All features</h1>
             <FeatureDialog>
@@ -86,7 +84,7 @@ export async function PlanVersionConfigurator({
         </>
       }
       planFeatureList={<PlanFeatureTabs initialFeatures={initialFeatures} />}
-      featureConfig={<FeatureConfig feature={null} />}
+      featureConfig={<FeatureConfig />}
     />
   )
 }

@@ -6,14 +6,12 @@ import { DollarSign, RefreshCcw } from "lucide-react"
 
 import { Badge } from "@builderai/ui/badge"
 import { ChevronLeft } from "@builderai/ui/icons"
-import { Separator } from "@builderai/ui/separator"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
 import { api } from "~/trpc/server"
 import CreateNewVersion from "../../_components/create-new-version"
-import { VersionActions } from "../../_components/version-actions"
 
 export const runtime = "edge"
 
@@ -33,9 +31,6 @@ export default async function PriceLayout(props: {
 
   if (!plan) {
     notFound()
-  }
-  {
-    /* // INFO: if we use jotai in other parts of the app probably this is better placed as a top level provider */
   }
 
   return (
@@ -84,23 +79,11 @@ export default async function PriceLayout(props: {
                   </div>
                 </div>
                 <div className="flex items-center justify-end space-x-6">
-                  <div className="button-primary flex items-center space-x-1 rounded-md ">
-                    <CreateNewVersion
-                      plan={plan}
-                      projectSlug={projectSlug}
-                      workspaceSlug={workspaceSlug}
-                    />
-
-                    <Separator
-                      orientation="vertical"
-                      className="h-[20px] p-0"
-                    />
-
-                    <VersionActions
-                      planId={plan.id}
-                      versionId={Number(planVersionId)}
-                    />
-                  </div>
+                  <CreateNewVersion
+                    plan={plan}
+                    projectSlug={projectSlug}
+                    workspaceSlug={workspaceSlug}
+                  />
                 </div>
               </div>
             </HeaderTab>

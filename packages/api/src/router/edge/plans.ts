@@ -364,21 +364,19 @@ export const planRouter = createTRPCRouter({
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
-        plan: planSelectBaseSchema
-          .extend({
-            versions: z.array(
-              versionSelectBaseSchema.pick({
-                id: true,
-                status: true,
-                version: true,
-                latest: true,
-              })
-            ),
-            project: z.object({
-              slug: z.string(),
-            }),
-          })
-          .optional(),
+        plan: planSelectBaseSchema.extend({
+          versions: z.array(
+            versionSelectBaseSchema.pick({
+              id: true,
+              status: true,
+              version: true,
+              latest: true,
+            })
+          ),
+          project: z.object({
+            slug: z.string(),
+          }),
+        }),
       })
     )
     .query(async (opts) => {
@@ -405,6 +403,14 @@ export const planRouter = createTRPCRouter({
         where: (plan, { eq, and }) =>
           and(eq(plan.slug, slug), eq(plan.projectId, project.id)),
       })
+
+      // TODO: return 403 on all queries that return null
+      if (!plan) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan not found",
+        })
+      }
 
       return {
         plan: plan,

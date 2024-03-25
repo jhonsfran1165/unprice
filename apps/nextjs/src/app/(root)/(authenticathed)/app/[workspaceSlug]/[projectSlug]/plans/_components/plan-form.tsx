@@ -118,7 +118,7 @@ export function PlanForm({
 
   return (
     <Form {...form}>
-      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmitForm)}>
+      <form className="space-y-6">
         <div className="my-4 space-y-4">
           <div className="flex w-full flex-row justify-between space-x-2">
             <div className="w-full">
@@ -173,10 +173,14 @@ export function PlanForm({
                 <div className="flex justify-between">
                   <FormLabel>Currency of the plan</FormLabel>
                 </div>
-                <Select onValueChange={field.onChange}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                  disabled={editMode}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a plan" />
+                      <SelectValue placeholder="Select a currency" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -202,10 +206,14 @@ export function PlanForm({
                     <div className="flex justify-between">
                       <FormLabel>Type of the plan</FormLabel>
                     </div>
-                    <Select onValueChange={field.onChange}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value ?? ""}
+                      disabled={editMode}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a plan" />
+                          <SelectValue placeholder="Select a plan type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -231,7 +239,11 @@ export function PlanForm({
                     <div className="flex justify-between">
                       <FormLabel>Billing Cycle</FormLabel>
                     </div>
-                    <Select onValueChange={field.onChange}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value ?? ""}
+                      disabled={editMode}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a cycle" />
@@ -278,10 +290,16 @@ export function PlanForm({
                 onDelete()
               }}
             >
-              <Button variant={"destructive"}>Delete</Button>
+              <Button
+                variant={"destructive"}
+                disabled={deleteFeature.isPending}
+              >
+                Delete
+              </Button>
             </ConfirmAction>
           )}
           <SubmitButton
+            onClick={() => form.handleSubmit(onSubmitForm)()}
             isSubmitting={form.formState.isSubmitting}
             isDisabled={form.formState.isSubmitting}
             label={editMode ? "Update" : "Create"}
