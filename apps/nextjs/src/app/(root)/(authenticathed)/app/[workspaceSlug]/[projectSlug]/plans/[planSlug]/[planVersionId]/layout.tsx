@@ -52,7 +52,6 @@ export default async function PriceLayout(props: {
 
   if (planVersionId !== "latest" && isNaN(parseInt(planVersionId))) {
     notFound()
-    // redirect
   }
 
   if (planVersionId === "latest") {
