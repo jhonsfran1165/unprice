@@ -17,6 +17,7 @@ const config = {
     "@builderai/ui",
     "@builderai/auth",
     "@builderai/config",
+    "@builderai/tailwind-config",
   ],
   pageExtensions: ["ts", "tsx", "mdx"],
   images: {

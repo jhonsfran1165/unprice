@@ -59,7 +59,7 @@ const DomainCard = ({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div className="flex flex-row items-center ">
+          <div className="flex flex-row items-center">
             <CardTitle className="text-2xl font-semibold">
               {domain.name}
             </CardTitle>

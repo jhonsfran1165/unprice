@@ -15,7 +15,7 @@ export default function DashboardLayout(props: {
   params: { workspaceSlug: string; projectSlug: string }
 }) {
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col overflow-hidden">
       <UpdateClientCookie />
       <Header>
         <>
@@ -35,7 +35,7 @@ export default function DashboardLayout(props: {
           </Suspense>
         </>
       </Header>
-      <div className="flex flex-1 overflow-hidden">{props.children}</div>
+      <div className="flex flex-1">{props.children}</div>
     </div>
   )
 }

@@ -1,11 +1,12 @@
 import { relations } from "drizzle-orm"
 import {
+  boolean,
   foreignKey,
+  integer,
   json,
   primaryKey,
-  serial,
   text,
-  uniqueIndex,
+  unique,
   varchar,
 } from "drizzle-orm/pg-core"
 import * as z from "zod"
@@ -13,68 +14,231 @@ import * as z from "zod"
 import { FEATURE_TYPES, TIER_MODES } from "../utils"
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
-import { currencyEnum, statusPlanEnum, typeFeatureEnum } from "./enums"
+import {
+  currencyEnum,
+  planBillingPeriodEnum,
+  planTypeEnum,
+  statusPlanEnum,
+} from "./enums"
 import { projects } from "./projects"
 
+const typeFeatureSchema = z.enum(FEATURE_TYPES)
+
+export type FeatureType = z.infer<typeof typeFeatureSchema>
+
 export const configFlatFeature = z.object({
-  price: z.coerce.number().min(0),
-  divider: z.coerce
-    .number()
-    .min(0)
-    .describe("Divider for the price. Could be number of days, hours, etc."),
-})
-
-export const configMeteredFeature = z.object({
-  mode: z.enum(TIER_MODES),
-  divider: z.coerce
-    .number()
-    .min(0)
-    .describe("Divider for the price. Could be number of days, hours, etc."),
-  tiers: z.array(
-    z.object({
-      price: z.coerce.number().min(0).describe("Price per unit"),
-      up: z.coerce.number().min(0),
-      flat: z.coerce.number().min(0),
+  type: z.literal(typeFeatureSchema.enum.flat, {
+    errorMap: () => ({ message: "Invalid configuration for the feature 1" }),
+  }),
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  config: z
+    .object({
+      price: z.coerce
+        .number()
+        .nonnegative()
+        .min(0)
+        .describe("Flat price of the feature"),
+      divider: z.coerce
+        .number()
+        .nonnegative()
+        .min(0)
+        .describe(
+          "Divider for the price. Could be number of days, hours, etc."
+        ),
     })
-  ),
+    .optional(),
 })
 
-export const configHybridFeature = z.object({
-  price: z.coerce.number().min(0),
+export const configTieredFeature = z.object({
+  type: z.literal(typeFeatureSchema.enum.tiered, {
+    errorMap: () => ({ message: "Invalid configuration for the feature 2" }),
+  }),
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  config: z
+    .object({
+      mode: z.enum(TIER_MODES),
+      divider: z.coerce
+        .number()
+        .nonnegative()
+        .min(1)
+        .describe(
+          "Divider for the price. Could be number of days, hours, etc."
+        ),
+      tiers: z.array(
+        z.object({
+          price: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("Price per unit"),
+          first: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("First unit for the volume"),
+          last: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("Last unit for the volume"),
+        })
+      ),
+    })
+    .optional()
+    .superRefine((data, ctx) => {
+      // validate that the first and last are in order
+
+      data &&
+        data.tiers.forEach((tier, i) => {
+          if (tier.first >= tier.last) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers need to have a valid range",
+              path: ["tiers", i, "last"],
+              fatal: true,
+            })
+
+            return false
+          }
+
+          const prevTier = i > 0 && data.tiers[i - 1]
+
+          if (prevTier && tier.first <= prevTier.last) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers cannot overlap",
+              path: ["tiers", i, "first"],
+              fatal: true,
+            })
+
+            return false
+          } else if (prevTier && prevTier.last + 1 !== tier.first) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers need to be consecutive",
+              path: ["tiers", i, "first"],
+              fatal: true,
+            })
+
+            return false
+          }
+
+          return true
+        })
+    }),
 })
 
-export const featureSchema = z
-  .object({
-    id: z.string(),
-    slug: z.string(),
-    title: z.string(),
-    description: z.string().nullable(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-    type: z.enum(FEATURE_TYPES),
-    groupId: z.string().optional(),
-    config: z
-      .union([configFlatFeature, configMeteredFeature, configHybridFeature])
-      .optional(),
-  })
-  .superRefine((data, _ctx) => {
-    if (data.type === "flat") {
-      configFlatFeature.parse(data.config)
-    } else if (data.type === "metered") {
-      configMeteredFeature.parse(data.config)
-    } else if (data.type === "hybrid") {
-      configHybridFeature.parse(data.config)
+export const configVolumeFeature = z.object({
+  type: z.literal(typeFeatureSchema.enum.volume, {
+    errorMap: () => ({ message: "Invalid configuration for the feature 3" }),
+  }),
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  config: z
+    .object({
+      mode: z.enum(TIER_MODES),
+      divider: z.coerce
+        .number()
+        .nonnegative()
+        .min(1)
+        .describe(
+          "Divider for the price. Could be number of days, hours, etc."
+        ),
+      tiers: z.array(
+        z.object({
+          price: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("Price per unit"),
+          first: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("First unit for the volume"),
+          last: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .describe("Last unit for the volume"),
+        })
+      ),
+    })
+    .optional()
+    .superRefine((data, ctx) => {
+      // validate that the first and last are in order
+
+      data &&
+        data.tiers.forEach((tier, i) => {
+          if (tier.first >= tier.last) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers need to have a valid range",
+              path: ["tiers", i, "last"],
+              fatal: true,
+            })
+
+            return false
+          }
+
+          const prevTier = i > 0 && data.tiers[i - 1]
+
+          if (prevTier && tier.first <= prevTier.last) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers cannot overlap",
+              path: ["tiers", i, "first"],
+              fatal: true,
+            })
+
+            return false
+          }
+
+          return true
+        })
+    }),
+})
+
+export const planVersionFeatureSchema = z
+  .discriminatedUnion("type", [
+    configFlatFeature,
+    configTieredFeature,
+    configVolumeFeature,
+  ])
+  .superRefine((data, ctx) => {
+    if (!data) {
+      return
     }
+
+    if (!data.type) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid configuration for the feature",
+        path: ["type"],
+        fatal: true,
+      })
+
+      return false
+    }
+
+    return true
   })
 
-export const versionPlanConfig = z.record(
-  z.object({
-    name: z.string(),
-    features: z.array(featureSchema),
-  })
-)
+export const startCycleSchema = z.union([
+  z.number().nonnegative(),
+  z.literal("last_day"),
+  z.null(),
+])
 
-export type PlanConfig = z.infer<typeof versionPlanConfig>
+type StartCycleType = z.infer<typeof startCycleSchema>
 
 export const plans = pgTableProject(
   "plans",
@@ -82,19 +246,25 @@ export const plans = pgTableProject(
     ...projectID,
     ...timestamps,
     slug: text("slug").notNull(),
+    active: boolean("active").default(true),
     title: varchar("title", { length: 50 }).notNull(),
     currency: currencyEnum("currency").default("EUR"),
+    type: planTypeEnum("plan_type").default("recurring"),
+    billingPeriod: planBillingPeriodEnum("billing_period").default("monthly"),
+    startCycle: text("start_cycle").$type<StartCycleType>().default(null),
+    gracePeriod: integer("grace_period").default(0),
+    description: text("description"),
   },
   (table) => ({
     primary: primaryKey({
       columns: [table.id, table.projectId],
       name: "plans_pkey",
     }),
-    slug: uniqueIndex("slug_plan").on(table.slug, table.projectId),
+    slug: unique("slug_plan").on(table.slug, table.projectId),
   })
 )
 
-// TODO: intitlements should be a separate table
+// TODO: entitlements should be a separate table
 
 export const versions = pgTableProject(
   "plan_versions",
@@ -102,9 +272,14 @@ export const versions = pgTableProject(
     ...projectID,
     ...timestamps,
     planId: cuid("plan_id").notNull(),
-    version: serial("version").notNull(),
-    featuresConfig: json("features_config").default({}).$type<PlanConfig>(), // config features of the plan
-    addonsConfig: json("addons_config").default({}).$type<PlanConfig>(), // config addons of the plan
+    version: integer("version").notNull(),
+    latest: boolean("latest").default(false),
+    featuresConfig:
+      json("features_config").$type<
+        z.infer<typeof planVersionFeatureSchema>[]
+      >(), // config features of the plan
+    addonsConfig:
+      json("addons_config").$type<z.infer<typeof planVersionFeatureSchema>[]>(), // config addons of the plan
     status: statusPlanEnum("plan_version_status").default("draft"),
   },
   (table) => ({
@@ -117,7 +292,7 @@ export const versions = pgTableProject(
       columns: [table.id, table.projectId],
       name: "plan_versions_pkey",
     }),
-    unique: uniqueIndex("unique_version").on(table.planId, table.version),
+    unique: unique("unique_version").on(table.planId, table.version),
   })
 )
 
@@ -131,14 +306,14 @@ export const features = pgTableProject(
     slug: text("slug").notNull(),
     title: varchar("title", { length: 50 }).notNull(),
     description: text("description"),
-    type: typeFeatureEnum("type").default("flat").notNull(),
+    // type: typeFeatureEnum("type").default("flat").notNull(),
   },
   (table) => ({
     primary: primaryKey({
       columns: [table.projectId, table.id],
       name: "features_pkey",
     }),
-    slug: uniqueIndex("slug_feature").on(table.slug, table.projectId),
+    slug: unique("slug_feature").on(table.slug, table.projectId),
   })
 )
 

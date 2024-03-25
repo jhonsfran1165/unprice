@@ -1,23 +1,22 @@
+"use client"
+
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
-import type { FeaturePlan, FeatureType } from "@builderai/db/validators"
+import type { PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 
-import type { FeatureCardProps } from "./feature"
-import { FeatureCard } from "./feature"
+import type { FeaturePlanProps } from "./feature-plan"
+import { FeaturePlan } from "./feature-plan"
 
-export interface DragData {
-  type: FeatureType
-  feature: FeaturePlan
+export interface DragData extends FeaturePlanProps {
+  mode: "Feature" | "FeaturePlan"
+  feature: PlanVersionFeature
+  className?: string
+  disabled?: boolean
 }
 
-export function SortableFeature(
-  props: FeatureCardProps & {
-    className?: string
-    disabled?: boolean
-  }
-) {
+export function SortableFeature(props: DragData) {
   const {
     setNodeRef,
     listeners,
@@ -28,11 +27,11 @@ export function SortableFeature(
   } = useSortable({
     id: props.feature.id,
     data: {
-      type: "Feature",
+      mode: props.mode,
       feature: props.feature,
     } satisfies DragData,
     attributes: {
-      roleDescription: "Feature",
+      roleDescription: props.mode,
     },
   })
 
@@ -41,18 +40,19 @@ export function SortableFeature(
     transform: CSS.Translate.toString(transform),
   }
 
-  const isFeature = props.type === "Feature"
+  const isFeature = props.mode === "Feature"
 
   return (
-    <FeatureCard
+    <FeaturePlan
       ref={props.disabled ? undefined : setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
       className={cn(props.className, {
-        "cursor-move": !isFeature,
+        "cursor-pointer": !isFeature,
         "cursor-grab": isFeature,
-        "border-dashed opacity-80": isDragging && !isFeature,
+        "cursor-pointer border-dashed border-primary-solid opacity-80 ":
+          isDragging && !isFeature,
       })}
       {...props}
     />

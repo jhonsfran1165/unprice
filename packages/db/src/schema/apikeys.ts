@@ -1,11 +1,5 @@
 import { relations } from "drizzle-orm"
-import {
-  index,
-  primaryKey,
-  text,
-  timestamp,
-  uniqueIndex,
-} from "drizzle-orm/pg-core"
+import { index, primaryKey, text, timestamp, unique } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { projectID, timestamps } from "../utils/sql"
@@ -28,7 +22,7 @@ export const apikeys = pgTableProject(
       name: "pk_apikeys",
     }),
     key: index("key").on(table.key),
-    slug: uniqueIndex("slug").on(table.name),
+    slug: unique("slug").on(table.name),
   })
 )
 

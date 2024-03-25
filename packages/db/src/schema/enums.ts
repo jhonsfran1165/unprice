@@ -3,6 +3,8 @@ import { pgEnum } from "drizzle-orm/pg-core"
 import {
   CURRENCIES,
   FEATURE_TYPES,
+  PLAN_BILLING_PERIODS,
+  PLAN_TYPES,
   PLANS_APP,
   PROJECT_TIERS_APP,
   ROLES_APP,
@@ -23,3 +25,8 @@ export const typeFeatureEnum = pgEnum("feature_types", FEATURE_TYPES)
 export const currencyEnum = pgEnum("currency", CURRENCIES)
 export const stageEnum = pgEnum("app_stages", STAGES)
 export const teamRolesEnum = pgEnum("team_roles", ROLES_APP)
+export const planBillingPeriodEnum = pgEnum(
+  "billing_period",
+  PLAN_BILLING_PERIODS
+)
+export const planTypeEnum = pgEnum("plan_type", PLAN_TYPES)

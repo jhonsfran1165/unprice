@@ -17,6 +17,7 @@ const loadingVariants = cva(
         secondary: "bg-secondary",
         ghost: "bg-transparent",
         link: "bg-transparent",
+        custom: "bg-foreground",
       },
       size: {
         default: "h-1 w-1",

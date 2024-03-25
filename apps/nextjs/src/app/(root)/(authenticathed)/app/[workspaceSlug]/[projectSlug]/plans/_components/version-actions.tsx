@@ -1,6 +1,6 @@
 "use client"
 
-import { TRPCClientError } from "@trpc/client"
+import { ChevronDown } from "lucide-react"
 
 import { Button } from "@builderai/ui/button"
 import {
@@ -10,9 +10,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
-import { MoreHorizontal } from "@builderai/ui/icons"
-import { useToast } from "@builderai/ui/use-toast"
 
+import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
 export function VersionActions({
@@ -22,38 +21,18 @@ export function VersionActions({
   planId: string
   versionId: number
 }) {
-  const toaster = useToast()
-
   const updatePlanVersion = api.plans.updateVersion.useMutation({
     onSuccess: () => {
-      toaster.toast({
-        title: "Version published",
-        description: `Version published successfully.`,
-      })
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toaster.toast({
-          title: err.message,
-          variant: "destructive",
-        })
-      } else {
-        toaster.toast({
-          title: "Error updating plan",
-          variant: "destructive",
-          description:
-            "An issue occurred while updating the plan. Please try again.",
-        })
-      }
+      toastAction("success", "Version published")
     },
   })
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
+        <Button variant={"custom"}>
           <span className="sr-only">Actions</span>
-          <MoreHorizontal className="h-4 w-4" />
+          <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -62,7 +41,7 @@ export function VersionActions({
             console.log("clicked")
           }}
         >
-          Content filter preferences
+          Delete this version
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -75,7 +54,7 @@ export function VersionActions({
           }}
           className="text-red-600"
         >
-          Publish
+          Publish this version
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

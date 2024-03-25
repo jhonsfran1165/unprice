@@ -45,6 +45,7 @@ export function DomainForm({
   const debouncedDomain = useDebounce(watchDomain, 1000)
   const domainExist = api.domains.exists.useMutation()
 
+  // TODO: compare with the validation on feature-form.tsx
   useEffect(() => {
     if (debouncedDomain) {
       void domainExist
@@ -76,7 +77,7 @@ export function DomainForm({
 
   const createDomain = api.domains.create.useMutation({
     onSuccess: ({ domain }) => {
-      form.reset()
+      form.reset(defaultValues)
       toastAction("saved")
       router.refresh()
       onSubmit?.(domain)
