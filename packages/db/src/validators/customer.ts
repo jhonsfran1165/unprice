@@ -15,14 +15,10 @@ export const customerSubscriptionSchema = customerSelectSchema.pick({
   id: true,
 })
 
-export const customerInsertSchema = customerInsertBaseSchema
-  .pick({
-    email: true,
-    name: true,
-  })
-  .extend({
-    projectSlug: z.string(),
-  })
+export const customerInsertSchema = customerInsertBaseSchema.partial({
+  id: true,
+  projectId: true,
+})
 
 export const updateCustomerSchema = customerSelectSchema
   .extend({
@@ -40,5 +36,5 @@ export const updateCustomerSchema = customerSelectSchema
 
 export type Customer = z.infer<typeof customerSelectSchema>
 export type UserSubscription = z.infer<typeof customerSubscriptionSchema>
-export type CreateCustomer = z.infer<typeof customerInsertSchema>
+export type InsertCustomer = z.infer<typeof customerInsertSchema>
 export type UpdateCustomer = z.infer<typeof updateCustomerSchema>

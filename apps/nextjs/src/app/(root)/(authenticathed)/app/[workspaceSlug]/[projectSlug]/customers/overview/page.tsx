@@ -4,7 +4,6 @@ import { columns } from "~/app/(root)/(authenticathed)/app/[workspaceSlug]/[proj
 import { DataTable } from "~/components/data-table/data-table"
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
-import { UserForm } from "../_components/user-form"
 
 export default async function ProjectUsersPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
@@ -33,9 +32,6 @@ export default async function ProjectUsersPage(props: {
 
   return (
     <div className="flex flex-col">
-      <div className="mb-6 flex items-center justify-end">
-        <UserForm projectSlug={projectSlug} mode="create" />
-      </div>
       <DataTable
         columns={columns}
         data={customers}

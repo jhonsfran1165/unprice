@@ -46,7 +46,7 @@ export function PlanForm({
   const planExist = api.plans.exist.useMutation()
 
   // async validation only when creating a new plan
-  const forSchema = editMode
+  const formSchema = editMode
     ? insertPlanSchema
     : insertPlanSchema.extend({
         slug: z
@@ -62,7 +62,7 @@ export function PlanForm({
       })
 
   const form = useZodForm({
-    schema: forSchema,
+    schema: formSchema,
     defaultValues: defaultValues,
   })
 

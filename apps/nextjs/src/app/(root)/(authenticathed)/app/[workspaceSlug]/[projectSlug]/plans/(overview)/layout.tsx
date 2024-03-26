@@ -6,7 +6,7 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import TabsNav from "~/components/layout/tabs-nav"
 import { PROJECT_TABS_CONFIG } from "~/constants/projects"
-import { PlanDialog } from "../_components/dialog-plan"
+import { PlanDialog } from "../_components/plan-dialog"
 
 export default function ProjectSettingsLayout(props: {
   children: React.ReactNode

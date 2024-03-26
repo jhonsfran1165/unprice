@@ -17,6 +17,7 @@ import { publishEvents } from "@builderai/tinybird"
 
 import {
   createTRPCRouter,
+  protectedActiveProjectAdminProcedure,
   protectedActiveWorkspaceProcedure,
   protectedApiProcedure,
 } from "../../trpc"
@@ -101,7 +102,7 @@ export const subscriptionRouter = createTRPCRouter({
 
       return subscriptionData?.[0]
     }),
-  createCustomer: protectedActiveWorkspaceProcedure
+  createCustomer: protectedActiveProjectAdminProcedure
     .input(customerInsertSchema)
     .output(
       z.object({
@@ -109,12 +110,8 @@ export const subscriptionRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { projectSlug, email, name } = opts.input
-
-      const { project } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      const { email, name } = opts.input
+      const project = opts.ctx.project
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         where: (customer, operators) =>
@@ -155,12 +152,8 @@ export const subscriptionRouter = createTRPCRouter({
       }
     }),
 
-  deleteCustomer: protectedActiveWorkspaceProcedure
-    .input(
-      customerSelectSchema
-        .pick({ id: true })
-        .extend({ projectSlug: z.string() })
-    )
+  deleteCustomer: protectedActiveProjectAdminProcedure
+    .input(customerSelectSchema.pick({ id: true }))
 
     .output(
       z.object({
@@ -168,18 +161,14 @@ export const subscriptionRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { projectSlug, id } = opts.input
-
-      const { project: projectData } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      const { id } = opts.input
+      const project = opts.ctx.project
 
       const deletedCustomer = await opts.ctx.db
         .delete(schema.customers)
         .where(
           and(
-            eq(schema.customers.projectId, projectData.id),
+            eq(schema.customers.projectId, project.id),
             eq(schema.customers.id, id)
           )
         )

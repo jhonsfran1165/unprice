@@ -4,10 +4,9 @@ const submodulesProject = [
   "overview",
   "plans",
   "apikeys",
-  "settings",
   "usage",
   "customers",
-  "ingestions",
+  "settings",
 ] as const
 
 export const PROJECT_TABS_CONFIG: Record<
@@ -49,10 +48,17 @@ export const PROJECT_TABS_CONFIG: Record<
     href: "/apikeys",
     icon: "Key",
   },
-  ingestions: {
-    titleTab: "Ingestions",
-    href: "/ingestions",
-    icon: "Key",
+  customers: {
+    titleTab: "Customers",
+    href: "/customers/overview",
+    icon: "User2",
+    sidebar: {
+      overview: {
+        title: "Customers",
+        href: "/customers/overview",
+        icon: "User2",
+      },
+    },
   },
   settings: {
     titleTab: "Settings",
@@ -68,18 +74,6 @@ export const PROJECT_TABS_CONFIG: Record<
         title: "Danger",
         href: "/settings/danger",
         icon: "Warning",
-      },
-    },
-  },
-  customers: {
-    titleTab: "Customers",
-    href: "/customers/overview",
-    icon: "User2",
-    sidebar: {
-      overview: {
-        title: "Customers",
-        href: "/customers/overview",
-        icon: "User2",
       },
     },
   },
