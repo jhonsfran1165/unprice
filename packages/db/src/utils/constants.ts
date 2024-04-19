@@ -5,20 +5,14 @@ export const dbNameSpaces = {
   user: "user",
   feature: "feat",
   plan: "plan",
-  canva: "canva",
   apikey: "api",
   apikey_key: "builderai_live",
   page: "page",
-  customer: "customer",
+  customer: "cus",
   subscription: "sub",
   domain: "domain",
   plan_version: "pv",
 } as const
-
-// Use custom alphabet without special chars for less chaotic, copy-able URLs
-// Will not collide for a long long time: https://zelark.github.io/nano-id-cc/
-export const customAlphabet =
-  "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz" as const
 
 export const TIER_MODES_MAP = {
   sum: {
@@ -43,7 +37,7 @@ export const STATUS_SUBSCRIPTION = ["active", "inactive"] as const
 export const PLANS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
 export const PROJECT_TIERS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
 export const PLAN_TYPES = ["recurring", "once"] as const
-export const PLAN_BILLING_PERIODS = ["monthly", "yearly"] as const
+export const PLAN_BILLING_PERIODS = ["month", "year"] as const
 export const TIER_MODES = Object.keys(TIER_MODES_MAP) as unknown as readonly [
   string,
   ...string[],

@@ -134,6 +134,13 @@
       "when": 1709649550415,
       "tag": "0018_nosy_dexter_bennett",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1711411733526,
+      "tag": "0019_slim_blindfold",
+      "breakpoints": true
     }
   ]
 }

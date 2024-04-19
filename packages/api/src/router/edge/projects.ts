@@ -53,7 +53,7 @@ export const projectRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST", message: "Limit reached" })
       }
 
-      const projectId = utils.newIdEdge("project")
+      const projectId = utils.newId("project")
       const projectSlug = utils.generateSlug(2)
 
       const newProject = await opts.ctx.db

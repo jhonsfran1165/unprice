@@ -11,6 +11,7 @@ import {
   customerSelectSchema,
   searchDataParamsSchema,
   subscriptionSelectSchema,
+  subscriptionWithCustomerSchema,
   versionSelectBaseSchema,
 } from "@builderai/db/validators"
 import { publishEvents } from "@builderai/tinybird"
@@ -18,6 +19,7 @@ import { publishEvents } from "@builderai/tinybird"
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
+  protectedActiveProjectProcedure,
   protectedActiveWorkspaceProcedure,
   protectedApiProcedure,
 } from "../../trpc"
@@ -86,7 +88,7 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      const subscriptionId = utils.newIdEdge("subscription")
+      const subscriptionId = utils.newId("subscription")
 
       const subscriptionData = await opts.ctx.db
         .insert(schema.subscriptions)
@@ -128,7 +130,7 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      const customerId = utils.newIdEdge("customer")
+      const customerId = utils.newId("customer")
 
       const newCustomerData = await opts.ctx.db
         .insert(schema.customers)
@@ -226,7 +228,6 @@ export const subscriptionRouter = createTRPCRouter({
       // )
 
       const customers = await opts.ctx.db.query.customers.findMany({
-        with: {},
         where: (customer, { eq, and, between, gte, lte }) =>
           and(
             eq(customer.projectId, project.id),
@@ -244,6 +245,55 @@ export const subscriptionRouter = createTRPCRouter({
 
       return {
         customers: customers,
+      }
+    }),
+
+  listByPlan: protectedActiveProjectProcedure
+    .input(
+      z.object({
+        planSlug: z.string(),
+        planVersionId: z.number(),
+      })
+    )
+    .output(
+      z.object({
+        subscriptions: z.array(subscriptionWithCustomerSchema),
+      })
+    )
+    .query(async (opts) => {
+      const { planVersionId, planSlug } = opts.input
+      const project = opts.ctx.project
+
+      const plan = await opts.ctx.db.query.plans.findFirst({
+        where: (plan, { eq, and }) =>
+          and(eq(plan.projectId, project.id), eq(plan.slug, planSlug)),
+      })
+
+      if (!plan?.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan not found, please check the planSlug",
+        })
+      }
+
+      const planVersion = await opts.ctx.db.query.versions.findFirst({
+        with: {
+          subscriptions: {
+            with: {
+              customer: true,
+            },
+          },
+        },
+        where: (version, { eq, and }) =>
+          and(
+            eq(version.projectId, project.id),
+            eq(version.planId, plan.id),
+            eq(version.version, planVersionId)
+          ),
+      })
+
+      return {
+        subscriptions: planVersion?.subscriptions ?? [],
       }
     }),
 

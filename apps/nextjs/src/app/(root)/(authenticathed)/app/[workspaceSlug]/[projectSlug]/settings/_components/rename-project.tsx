@@ -73,7 +73,7 @@ export function RenameProjectForm(props: {
           <Button type="submit" className="ml-auto">
             Save
             {form.formState.isSubmitting && (
-              <LoadingAnimation variant={"destructive"} className="ml-2" />
+              <LoadingAnimation className="ml-2" />
             )}
           </Button>
         </div>

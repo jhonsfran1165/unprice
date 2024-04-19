@@ -8,6 +8,7 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { api } from "~/trpc/server"
 import CreateNewVersion from "../../_components/create-new-version"
 import PlanHeader from "../../_components/plan-header"
+import { NavVersionPlan } from "../../_components/plan-version-nav"
 import PlanVersionList from "../../_components/plan-versions-list"
 
 export const runtime = "edge"
@@ -91,12 +92,11 @@ export default async function PriceLayout(props: {
           </PlanHeader>
         }
       >
+        <NavVersionPlan
+          baseUrl={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${planVersionId}`}
+        />
         <div className="relative">
-          <section>
-            <div className="overflow-hidden rounded-[0.5rem] border bg-background shadow-md md:shadow-xl">
-              {props.children}
-            </div>
-          </section>
+          <section>{props.children}</section>
         </div>
       </DashboardShell>
     </Provider>

@@ -148,9 +148,7 @@ export function TransferProjectToTeam({
                     disabled={form.formState.isSubmitting}
                   >
                     {`I'm sure. Transfer this project`}
-                    {form.formState.isSubmitting && (
-                      <LoadingAnimation variant={"destructive"} />
-                    )}
+                    {form.formState.isSubmitting && <LoadingAnimation />}
                   </Button>
                 </DialogFooter>
               </form>

@@ -88,7 +88,7 @@ export function DeleteProject({
                 {`I'm sure. Delete this project`}
 
                 {deleteProject.isPending && (
-                  <LoadingAnimation variant={"destructive"} className="ml-2" />
+                  <LoadingAnimation className="ml-2" />
                 )}
               </Button>
             </DialogFooter>

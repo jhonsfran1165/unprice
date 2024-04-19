@@ -19,7 +19,7 @@ export const featureRouter = createTRPCRouter({
       const { description, slug, title } = opts.input
       const project = opts.ctx.project
 
-      const featureId = utils.newIdEdge("feature")
+      const featureId = utils.newId("feature")
 
       const featureData = await opts.ctx.db
         .insert(schema.features)

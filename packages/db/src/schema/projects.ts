@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { index, text, unique } from "drizzle-orm/pg-core"
+import { boolean, index, text, unique } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { id, timestamps, workspaceID } from "../utils/sql"
@@ -16,6 +16,8 @@ export const projects = pgTableProject(
     name: text("name").notNull(),
     tier: projectTierEnum("tier").default("FREE").notNull(),
     url: text("url").default("").notNull(),
+    stripeAccountId: text("stripe_account_id").default(""),
+    stripeAccountVerified: boolean("stripe_account_verified").default(false),
   },
   (table) => ({
     slug: index("slug_index").on(table.slug),

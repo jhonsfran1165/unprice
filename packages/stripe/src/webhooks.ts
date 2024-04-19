@@ -60,7 +60,7 @@ export async function handleEvent(event: Stripe.Event) {
        * User is not subscribed, create a new customer and workspace
        */
       const workspaceSlug = utils.generateSlug(2)
-      const workspaceId = utils.newIdEdge("workspace")
+      const workspaceId = utils.newId("workspace")
 
       await db.insert(schema.workspaces).values({
         id: workspaceId,

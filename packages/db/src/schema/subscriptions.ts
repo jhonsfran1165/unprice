@@ -18,6 +18,18 @@ export const subscriptions = pgTableProject(
     customerId: cuid("customers_id").notNull(),
     status: subscriptionStatusEnum("subscription_status").default("active"),
     // TODO: add fields for handling the subscription like date of start and end, stripe info
+    // trialsEnd
+    // startDate
+    // endDate
+    // autoRenew
+    // billing: charge_automatically - send_invoice
+    // isNew
+    // quantity
+    // metadata
+    // planChanged -> whether this plan needs to be change
+    // status
+    // TODO: how to handle payments? as a separated table?
+    // we somehow should support addons here as well?
   },
   (table) => ({
     primary: primaryKey({
@@ -51,15 +63,15 @@ export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
     references: [projects.id],
   }),
   customer: one(customers, {
-    fields: [subscriptions.customerId],
-    references: [customers.id],
+    fields: [subscriptions.customerId, subscriptions.projectId],
+    references: [customers.id, customers.projectId],
   }),
   version: one(versions, {
-    fields: [subscriptions.planVersionId],
-    references: [versions.id],
+    fields: [subscriptions.planVersionId, subscriptions.projectId],
+    references: [versions.id, versions.projectId],
   }),
   plan: one(plans, {
-    fields: [subscriptions.planId],
-    references: [plans.id],
+    fields: [subscriptions.planId, subscriptions.projectId],
+    references: [plans.id, plans.projectId],
   }),
 }))

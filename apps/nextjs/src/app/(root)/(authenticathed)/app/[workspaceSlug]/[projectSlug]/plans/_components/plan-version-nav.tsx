@@ -6,47 +6,52 @@ import { usePathname } from "next/navigation"
 import { cn } from "@builderai/ui"
 import { ScrollArea, ScrollBar } from "@builderai/ui/scroll-area"
 
-const examples = [
+const routes = [
   {
     name: "Overview",
-    href: "/examples/mail",
-    code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/mail",
+    href: "/",
   },
   {
     name: "Dashboard",
-    href: "/examples/dashboard",
-    code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/dashboard",
+    href: "/dashboard",
   },
   {
-    name: "Customers",
-    href: "/examples/cards",
-    code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/cards",
+    name: "Subscriptions",
+    href: "/subscriptions",
   },
   {
     name: "Preview Page",
-    href: "/examples/tasks",
-    code: "https://github.com/shadcn/ui/tree/main/apps/www/app/examples/tasks",
+    href: "/preview",
   },
 ]
 
-type NavVersionPlanProps = React.HTMLAttributes<HTMLDivElement>
+type NavVersionPlanProps = {
+  baseUrl: string
+} & React.HTMLAttributes<HTMLDivElement>
 
-export function NavVersionPlan({ className, ...props }: NavVersionPlanProps) {
+export function NavVersionPlan({
+  className,
+  baseUrl,
+  ...props
+}: NavVersionPlanProps) {
   const pathname = usePathname()
 
   return (
     <div className="relative">
       <ScrollArea className="max-w-[600px] lg:max-w-none">
-        <div className={cn("mb-4 flex items-center", className)} {...props}>
-          {examples.map((example, index) => (
+        <div
+          className={cn("mb-4 flex items-center space-x-1", className)}
+          {...props}
+        >
+          {routes.map((example, index) => (
             <Link
-              href={example.href}
-              key={example.href}
+              href={`${baseUrl}${example.href}`}
+              key={`${baseUrl}${example.href}`}
               className={cn(
-                "flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors hover:text-primary",
-                pathname?.startsWith(example.href) ||
-                  (index === 0 && pathname === "/")
-                  ? "bg-muted font-medium text-primary"
+                "flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors hover:text-background-textContrast",
+                pathname === `${baseUrl}${example.href}` ||
+                  (index === 0 && pathname === baseUrl)
+                  ? "bg-muted font-medium text-background-textContrast"
                   : "text-muted-foreground"
               )}
             >

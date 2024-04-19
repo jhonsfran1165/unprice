@@ -21,6 +21,7 @@ import {
   statusPlanEnum,
 } from "./enums"
 import { projects } from "./projects"
+import { subscriptions } from "./subscriptions"
 
 const typeFeatureSchema = z.enum(FEATURE_TYPES)
 
@@ -36,6 +37,8 @@ export const configFlatFeature = z.object({
   description: z.string().nullable(),
   config: z
     .object({
+      // TODO: add priceId from stripe
+      // paymentProviderPriceId -> external price ID
       price: z.coerce
         .number()
         .nonnegative()
@@ -250,7 +253,10 @@ export const plans = pgTableProject(
     title: varchar("title", { length: 50 }).notNull(),
     currency: currencyEnum("currency").default("EUR"),
     type: planTypeEnum("plan_type").default("recurring"),
-    billingPeriod: planBillingPeriodEnum("billing_period").default("monthly"),
+    // pay_in_advance
+    // pay_in_arrear
+    // payment provider configuration
+    billingPeriod: planBillingPeriodEnum("billing_period").default("month"),
     startCycle: text("start_cycle").$type<StartCycleType>().default(null),
     gracePeriod: integer("grace_period").default(0),
     description: text("description"),
@@ -274,6 +280,10 @@ export const versions = pgTableProject(
     planId: cuid("plan_id").notNull(),
     version: integer("version").notNull(),
     latest: boolean("latest").default(false),
+    // name for multi language
+
+    // TODO: versions should be allow multiple currencies
+    // currency: currencyEnum("currency").default("EUR"),
     featuresConfig:
       json("features_config").$type<
         z.infer<typeof planVersionFeatureSchema>[]
@@ -332,7 +342,7 @@ export const featureRelations = relations(features, ({ one }) => ({
   }),
 }))
 
-export const versionRelations = relations(versions, ({ one }) => ({
+export const versionRelations = relations(versions, ({ one, many }) => ({
   project: one(projects, {
     fields: [versions.projectId],
     references: [projects.id],
@@ -341,4 +351,5 @@ export const versionRelations = relations(versions, ({ one }) => ({
     fields: [versions.planId],
     references: [plans.id],
   }),
+  subscriptions: many(subscriptions),
 }))

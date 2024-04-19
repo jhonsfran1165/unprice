@@ -74,10 +74,10 @@ export const apiKeyRouter = createTRPCRouter({
         ctx: opts.ctx,
       })
 
-      const apiKeyId = utils.newIdEdge("apikey")
+      const apiKeyId = utils.newId("apikey")
 
       // Generate the key
-      const apiKey = utils.newIdEdge("apikey_key")
+      const apiKey = utils.newId("apikey_key")
 
       // TODO: change returning for .then((res) => res[0])
       const newApiKey = await opts.ctx.db
@@ -152,7 +152,7 @@ export const apiKeyRouter = createTRPCRouter({
       }
 
       // Generate the key
-      const newKey = utils.newIdEdge("apikey_key")
+      const newKey = utils.newId("apikey_key")
 
       const newApiKey = await opts.ctx.db
         .update(schema.apikeys)

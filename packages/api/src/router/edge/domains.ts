@@ -3,7 +3,7 @@ import { z } from "zod"
 
 import { and, eq } from "@builderai/db"
 import { domains } from "@builderai/db/schema"
-import { newIdEdge } from "@builderai/db/utils"
+import { newId } from "@builderai/db/utils"
 import type { DomainVerificationStatusProps } from "@builderai/db/validators"
 import {
   domainCreateBaseSchema,
@@ -78,7 +78,7 @@ export const domainRouter = createTRPCRouter({
         })
       }
 
-      const domainId = newIdEdge("domain")
+      const domainId = newId("domain")
 
       const domainData = await opts.ctx.db
         .insert(domains)

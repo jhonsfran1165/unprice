@@ -12,6 +12,14 @@ export const customers = pgTableProject(
     ...timestamps,
     email: text("email").notNull(),
     name: text("name").notNull(),
+    // payment info
+    // {
+    // stripeCustomerId
+    // }
+    // beta features
+    // payment config - stripe integration
+    // metadata
+    // external id - external aliases
   },
   (table) => ({
     email: index("email").on(table.email),
@@ -23,7 +31,7 @@ export const customers = pgTableProject(
   })
 )
 
-export const customersRelations = relations(customers, ({ one }) => ({
+export const customersRelations = relations(customers, ({ one, many }) => ({
   project: one(projects, {
     fields: [customers.projectId],
     references: [projects.id],

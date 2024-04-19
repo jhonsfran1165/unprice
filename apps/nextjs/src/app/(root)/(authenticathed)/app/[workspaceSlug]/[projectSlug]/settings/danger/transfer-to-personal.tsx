@@ -92,7 +92,7 @@ export function TransferProjectToPersonal({
               >
                 {`I'm sure. Transfer this project`}
                 {transferProjectToPersonal.isPending && (
-                  <LoadingAnimation variant={"destructive"} className="ml-2" />
+                  <LoadingAnimation className="ml-2" />
                 )}
               </Button>
             </DialogFooter>

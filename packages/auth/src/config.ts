@@ -79,7 +79,7 @@ export const authConfig = {
       // create the workspace for the user and then add it as a member
       await db.transaction(async (db) => {
         const slug = utils.generateSlug(2)
-        const workspaceId = utils.newIdEdge("workspace")
+        const workspaceId = utils.newId("workspace")
 
         const workspace = await db
           .insert(schema.workspaces)

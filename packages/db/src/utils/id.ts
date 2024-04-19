@@ -1,35 +1,13 @@
-import baseX from "base-x"
+// INFO: https://unkey.dev/blog/uuid-ux
 
-import { customAlphabet, dbNameSpaces } from "./constants"
+import { customAlphabet } from "nanoid"
 
-function encodeBase58(buf: Buffer): string {
-  return baseX(customAlphabet).encode(buf)
+import { dbNameSpaces } from "./constants"
+
+export const nanoid = customAlphabet(
+  "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+)
+
+export function newId(prefix: keyof typeof dbNameSpaces): string {
+  return [dbNameSpaces[prefix], nanoid(16)].join("_")
 }
-/**
- * Generate ids similar to stripe
- */
-class IdGenerator<TPrefixes extends string> {
-  private prefixes: Record<TPrefixes, string>
-
-  /**
-   * Create a new id generator with fully typed prefixes
-   * @param prefixes - Relevant prefixes for your domain
-   */
-  constructor(prefixes: Record<TPrefixes, string>) {
-    this.prefixes = prefixes
-  }
-
-  /**
-   * Generate a new unique base58 encoded uuid with a defined prefix
-   *
-   * @returns xxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-   */
-  public id = (prefix: TPrefixes): string => {
-    return [
-      this.prefixes[prefix],
-      encodeBase58(Buffer.from(crypto.randomUUID().replace(/-/g, ""), "hex")),
-    ].join("_")
-  }
-}
-
-export const newId = new IdGenerator(dbNameSpaces).id

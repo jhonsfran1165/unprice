@@ -40,6 +40,8 @@ const CreateNewVersion = ({
     onSuccess: (data) => {
       const { planVersion } = data
       toastAction("success")
+
+      router.refresh()
       router.push(
         `/${workspaceSlug}/${projectSlug}/plans/${plan?.slug}/${planVersion?.version}`
       )

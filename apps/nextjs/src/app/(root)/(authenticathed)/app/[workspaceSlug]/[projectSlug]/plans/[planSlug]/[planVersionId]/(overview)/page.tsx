@@ -12,11 +12,13 @@ export default function OverviewVersionPage({
   const { planSlug, planVersionId } = params
 
   return (
-    <DragDrop>
-      <PlanVersionConfigurator
-        planSlug={planSlug}
-        planVersionId={planVersionId}
-      />
-    </DragDrop>
+    <div className="overflow-hidden rounded-[0.5rem] border bg-background shadow-md md:shadow-xl">
+      <DragDrop>
+        <PlanVersionConfigurator
+          planSlug={planSlug}
+          planVersionId={planVersionId}
+        />
+      </DragDrop>
+    </div>
   )
 }

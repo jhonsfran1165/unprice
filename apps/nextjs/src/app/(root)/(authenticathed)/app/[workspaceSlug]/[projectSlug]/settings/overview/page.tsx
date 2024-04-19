@@ -12,6 +12,7 @@ import { Skeleton } from "@builderai/ui/skeleton"
 
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
+import { RegisterAccountForm } from "../_components/register-account-form"
 import { RenameProjectForm } from "../_components/rename-project"
 
 export default async function ProjectSettingsPage(props: {
@@ -46,6 +47,8 @@ export default async function ProjectSettingsPage(props: {
               slug: props.params.projectSlug,
             })}
           />
+
+          <RegisterAccountForm />
         </Suspense>
       </CardContent>
     </Card>

@@ -46,7 +46,7 @@ export default async function DangerZonePage(props: {
                 className="animate-pulse text-transparent"
                 disabled={true}
               >
-                <LoadingAnimation variant={"destructive"} />
+                <LoadingAnimation />
               </Button>
             </CardFooter>
           </Card>

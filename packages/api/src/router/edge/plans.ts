@@ -4,6 +4,7 @@ import { z } from "zod"
 import { and, eq, getTableColumns } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
+import type { PlanVersionFeature } from "@builderai/db/validators"
 import {
   insertPlanSchema,
   planSelectBaseSchema,
@@ -11,6 +12,7 @@ import {
   versionInsertBaseSchema,
   versionSelectBaseSchema,
 } from "@builderai/db/validators"
+import { stripe } from "@builderai/stripe"
 
 import {
   createTRPCRouter,
@@ -31,7 +33,7 @@ export const planRouter = createTRPCRouter({
         opts.input
       const project = opts.ctx.project
 
-      const planId = utils.newIdEdge("plan")
+      const planId = utils.newId("plan")
 
       const planData = await opts.ctx.db
         .insert(schema.plans)
@@ -77,7 +79,7 @@ export const planRouter = createTRPCRouter({
         })
       }
 
-      const planVersionId = utils.newIdEdge("plan_version")
+      const planVersionId = utils.newId("plan_version")
 
       // this should happen in a transaction
       const planVersionData = await opts.ctx.db.transaction(async (tx) => {
@@ -269,6 +271,13 @@ export const planRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "version not found",
+        })
+      }
+
+      if (planVersionData.status === "published") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot update a published version",
         })
       }
 
@@ -518,6 +527,116 @@ export const planRouter = createTRPCRouter({
 
       return {
         plans,
+      }
+    }),
+  syncWithStripe: protectedActiveProjectProcedure
+    .input(
+      z.object({
+        planId: z.string(),
+        planVersionId: z.number(),
+      })
+    )
+    .output(z.object({ success: z.boolean() }))
+    .mutation(async (opts) => {
+      const project = opts.ctx.project
+
+      const planVersion = await opts.ctx.db.query.versions.findFirst({
+        with: {
+          plan: true,
+        },
+        where: (version, { and, eq }) =>
+          and(
+            eq(version.projectId, project.id),
+            eq(version.status, "published"),
+            eq(version.version, opts.input.planVersionId)
+          ),
+      })
+
+      if (!planVersion?.featuresConfig) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan version has no features to sync",
+        })
+      }
+
+      // add custom id of the product
+      // search for prices of the product to check if they need to be updated
+      // or created
+
+      // limits of products is important here
+
+      // group all features by type
+      const features = planVersion.featuresConfig.reduce(
+        (acc, feature) => {
+          if (!acc[feature.type]) {
+            acc[feature.type] = []
+          }
+
+          acc[feature.type]?.push(feature)
+
+          return acc
+        },
+        {} as Record<schema.FeatureType, PlanVersionFeature[]>
+      )
+
+      console.log("features", features)
+
+      // calculate the price of flat features and that would be the base price of the plan
+      const basePricePlan = features.flat.reduce((acc, feature) => {
+        return acc + feature.config?.price
+      }, 0)
+
+      console.log("basePricePlan", basePricePlan)
+
+      // create a product for the plan
+      // limit 15 flat features
+      const flatProductStripe = await stripe.products.create(
+        {
+          name: `${planVersion.plan.slug} - flat`,
+          type: "service",
+          description: planVersion.plan.description ?? "dasdasd",
+          features: features.flat.map((feature) => ({
+            name: feature.title,
+          })),
+          metadata: {
+            planId: planVersion.plan.id,
+            planVersionId: planVersion.id,
+          },
+        },
+        {
+          stripeAccount: project.stripeAccountId ?? "",
+        }
+      )
+
+      // TODO
+      // get the product and price id
+      // save the prices ids in the plan version
+
+      // create a price for the product
+      const flatPriceStripe = await stripe.prices.create(
+        {
+          currency: planVersion.plan.currency ?? "usd",
+          product: flatProductStripe.id,
+          unit_amount: basePricePlan * 100,
+          recurring: {
+            interval: planVersion.plan.billingPeriod ?? "month",
+          },
+          metadata: {
+            planId: planVersion.plan.id,
+            planVersionId: planVersion.id,
+          },
+          lookup_key: `${planVersion.plan.slug}-flat`,
+        },
+        {
+          stripeAccount: project.stripeAccountId ?? "",
+        }
+      )
+
+      // update the plan with the price id
+      console.log("flatPriceStripe", flatPriceStripe)
+
+      return {
+        success: true,
       }
     }),
 })

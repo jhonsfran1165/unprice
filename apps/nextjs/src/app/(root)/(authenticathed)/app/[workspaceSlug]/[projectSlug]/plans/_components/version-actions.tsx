@@ -27,6 +27,12 @@ export function VersionActions({
     },
   })
 
+  const syncPlanVersion = api.plans.syncWithStripe.useMutation({
+    onSuccess: () => {
+      toastAction("success", "Version synced")
+    },
+  })
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -55,6 +61,16 @@ export function VersionActions({
           className="text-red-600"
         >
           Publish this version
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={async () => {
+            await syncPlanVersion.mutateAsync({
+              planId,
+              planVersionId: versionId,
+            })
+          }}
+        >
+          Sync with stripe
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
