@@ -1,50 +1,40 @@
-import React from "react"
-import Link from "next/link"
-import { DollarSign, RefreshCcw } from "lucide-react"
+import { RefreshCcw } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
-import { ChevronLeft } from "@builderai/ui/icons"
+import { Button } from "@builderai/ui/button"
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@builderai/ui/card"
 
-import HeaderTab from "~/components/layout/header-tab"
-import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
+import { PlanVersionDialog } from "../[planSlug]/_components/plan-version-dialog"
 
 export const runtime = "edge"
 
 export default function PlanHeader(props: {
-  children: React.ReactNode
   workspaceSlug: string
   projectSlug: string
   planVersionId: string
   plan: RouterOutputs["plans"]["getBySlug"]["plan"]
+  className?: string
 }) {
-  const { workspaceSlug, projectSlug, planVersionId, plan } = props
+  const { plan } = props
   return (
-    <div className="flex flex-col">
-      <MaxWidthWrapper className="max-w-screen-2xl">
-        <div className="mb-6 flex justify-between align-middle">
-          <Link
-            className="flex items-center justify-start align-middle text-sm"
-            prefetch={false}
-            href={`/${workspaceSlug}/${projectSlug}/plans`}
-          >
-            <Badge variant={"outline"} className="py-1">
-              <ChevronLeft className="h-4 w-4" />
-              back
-            </Badge>
-          </Link>
-        </div>
-      </MaxWidthWrapper>
-      <HeaderTab>
-        <div className="flex w-full items-center justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-normal text-background-textContrast">
-              {`${plan.title}: ${planVersionId === undefined ? "new version" : `version ${planVersionId}`}`}
-            </h1>
-            <h4 className="text-base text-muted-foreground">
+    <Card>
+      <div className="flex flex-row justify-between">
+        <div className="flex flex-col">
+          <CardHeader className="pb-3">
+            <CardTitle>{plan.slug.toUpperCase()}</CardTitle>
+            <CardDescription className="max-w-lg text-balance leading-relaxed">
               {plan.description}
-            </h4>
+            </CardDescription>
+          </CardHeader>
+          <CardFooter>
             <div className="flex space-x-1">
               <Badge
                 className={cn({
@@ -57,19 +47,27 @@ export default function PlanHeader(props: {
                   {plan.active ? "active" : "inactive"}
                 </span>
               </Badge>
-              <Badge className="info">
-                <DollarSign className="h-3 w-3" />
-                <span className="ml-1">{plan.currency}</span>
-              </Badge>
-              <Badge className="warning">
+              <Badge>
                 <RefreshCcw className="h-3 w-3" />
-                <span className="ml-1">{plan.billingPeriod}</span>
+                <span className="ml-1">{plan.type}</span>
               </Badge>
             </div>
-          </div>
-          <div>{props.children}</div>
+          </CardFooter>
         </div>
-      </HeaderTab>
-    </div>
+
+        <div className="flex items-center px-6">
+          <PlanVersionDialog
+            defaultValues={{
+              planId: plan.id,
+              description: plan.description,
+              title: plan.slug,
+              projectId: plan.projectId,
+            }}
+          >
+            <Button>Create New Version</Button>
+          </PlanVersionDialog>
+        </div>
+      </div>
+    </Card>
   )
 }

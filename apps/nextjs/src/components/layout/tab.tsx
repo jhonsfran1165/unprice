@@ -64,7 +64,7 @@ export const Tab = ({
         </Link>
       </TooltipTrigger>
       <TooltipContent
-        className="bg-background-bg"
+        className="bg-background-bgSubtle"
         sideOffset={10}
         align="center"
         side="right"

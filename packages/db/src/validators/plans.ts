@@ -1,26 +1,58 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
-import { z } from "zod"
+import * as z from "zod"
 
 import * as schema from "../schema"
-import { startCycleSchema } from "../schema"
+import {
+  configFlatFeature,
+  configTieredFeature,
+  configVolumeFeature,
+} from "./features"
 
-export const planSelectBaseSchema = createSelectSchema(schema.plans, {
-  startCycle: startCycleSchema,
-})
+export const planVersionFeatureSchema = z
+  .discriminatedUnion("type", [
+    configFlatFeature,
+    configTieredFeature,
+    configVolumeFeature,
+  ])
+  .superRefine((data, ctx) => {
+    if (!data) {
+      return
+    }
+
+    if (!data.type) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid configuration for the feature",
+        path: ["type"],
+        fatal: true,
+      })
+
+      return false
+    }
+
+    return true
+  })
+
+export const startCycleSchema = z.union([
+  z.number().nonnegative(),
+  z.literal("last_day"),
+  z.null(),
+])
+
+export const planSelectBaseSchema = createSelectSchema(schema.plans)
 export const planInsertBaseSchema = createInsertSchema(schema.plans, {
-  title: z.string().min(1),
   slug: z.string().min(1),
 })
 
 export const versionSelectBaseSchema = createSelectSchema(schema.versions, {
-  featuresConfig: z.array(schema.planVersionFeatureSchema),
-  addonsConfig: z.array(schema.planVersionFeatureSchema),
+  featuresConfig: z.array(planVersionFeatureSchema),
 })
 
 export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
-  featuresConfig: z.array(schema.planVersionFeatureSchema),
-  addonsConfig: z.array(schema.planVersionFeatureSchema),
+  featuresConfig: z.array(planVersionFeatureSchema),
 })
+
+export type StartCycleType = z.infer<typeof startCycleSchema>
 
 export const insertPlanSchema = planSelectBaseSchema.partial({
   id: true,
@@ -44,36 +76,15 @@ export const updatePlanSchema = planSelectBaseSchema
     slug: true,
   })
 
-export const featureSelectBaseSchema = createSelectSchema(schema.features)
-
-export const featureInsertBaseSchema = createInsertSchema(schema.features, {
-  title: z.string().min(1).max(50),
-  slug: z
-    .string()
-    .min(1)
-    .refine((slug) => /^[a-z0-9-]+$/.test(slug), {
-      message: "Slug must be a valid slug",
-    }),
-}).partial({
+export const insertPlanVersionSchema = versionInsertBaseSchema.partial({
   id: true,
+  version: true,
   createdAt: true,
   updatedAt: true,
-  projectId: true,
+  startCycle: true,
+  gracePeriod: true,
+  active: true,
 })
-
-export const updateFeatureSchema = featureSelectBaseSchema.pick({
-  id: true,
-  title: true,
-  type: true,
-})
-
-export const deleteFeatureSchema = featureInsertBaseSchema
-  .pick({
-    id: true,
-  })
-  .extend({
-    projectSlug: z.string(),
-  })
 
 export const versionListBase = versionSelectBaseSchema.pick({
   id: true,
@@ -99,14 +110,12 @@ export const updateVersionPlan = versionSelectBaseSchema
   .pick({
     planId: true,
     featuresConfig: true,
-    addonsConfig: true,
     status: true,
     versionId: true,
   })
   .partial({
     status: true,
     featuresConfig: true,
-    addonsConfig: true,
   })
 
 export type GroupType = "Group"
@@ -119,11 +128,9 @@ export interface Group {
 export type PlanList = z.infer<typeof planList>
 export type InsertPlan = z.infer<typeof insertPlanSchema>
 export type UpdatePlan = z.infer<typeof updatePlanSchema>
+export type InsertPlanVersion = z.infer<typeof insertPlanVersionSchema>
 export type UpdateVersion = z.infer<typeof updateVersionPlan>
 export type PlanVersion = z.infer<typeof versionSelectBaseSchema>
 export type PlanVersionList = z.infer<typeof versionListBase>
-export type PlanVersionFeature = z.infer<typeof schema.planVersionFeatureSchema>
-export type InsertFeature = z.infer<typeof featureInsertBaseSchema>
-export type UpdateFeature = z.infer<typeof updateFeatureSchema>
-export type Feature = z.infer<typeof featureSelectBaseSchema>
+export type PlanVersionFeature = z.infer<typeof planVersionFeatureSchema>
 export type SelectVersion = z.infer<typeof versionSelectBaseSchema>

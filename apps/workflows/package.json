@@ -11,7 +11,8 @@
     "format": "prettier --check \"**/*.{js,cjs,mjs,ts,tsx,md,json}\"",
     "start": "pnpm with-env next start",
     "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env.local --"
+    "with-env": "dotenv -e ../../.env.local --",
+    "triggers": "pnpm dlx @trigger.dev/cli@latest dev --port 3200"
   },
   "dependencies": {
     "react": "^18",

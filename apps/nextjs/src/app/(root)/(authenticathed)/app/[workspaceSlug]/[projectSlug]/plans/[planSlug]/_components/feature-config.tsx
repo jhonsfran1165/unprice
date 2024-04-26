@@ -11,9 +11,9 @@ import {
 } from "lucide-react"
 import { useFieldArray } from "react-hook-form"
 
-import { planVersionFeatureSchema } from "@builderai/db/schema"
 import { TIER_MODES, TIER_MODES_MAP } from "@builderai/db/utils"
 import type { PlanVersionFeature } from "@builderai/db/validators"
+import { planVersionFeatureSchema } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {

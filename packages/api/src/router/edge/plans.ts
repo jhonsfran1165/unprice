@@ -64,7 +64,7 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { planId, featuresConfig, addonsConfig } = opts.input
+      const { planId, featuresConfig } = opts.input
       const project = opts.ctx.project
 
       const planData = await opts.ctx.db.query.plans.findFirst({
@@ -110,7 +110,8 @@ export const planRouter = createTRPCRouter({
               latest: true,
               version: latestVersion?.version ? latestVersion?.version + 1 : 1,
               featuresConfig,
-              addonsConfig,
+              // TODO: fix this
+              title: "draft version",
             })
             .returning()
             .then((re) => re[0])
@@ -247,8 +248,7 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { planId, versionId, featuresConfig, addonsConfig, status } =
-        opts.input
+      const { planId, versionId, featuresConfig, status } = opts.input
 
       const project = opts.ctx.project
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
@@ -285,7 +285,6 @@ export const planRouter = createTRPCRouter({
         .update(schema.versions)
         .set({
           featuresConfig,
-          addonsConfig,
           status,
           updatedAt: new Date(),
         })
@@ -307,14 +306,12 @@ export const planRouter = createTRPCRouter({
     )
     .output(
       z.object({
-        planVersion: versionSelectBaseSchema
-          .extend({
-            plan: planSelectBaseSchema.pick({
-              slug: true,
-              id: true,
-            }),
-          })
-          .optional(),
+        planVersion: versionSelectBaseSchema.extend({
+          plan: planSelectBaseSchema.pick({
+            slug: true,
+            id: true,
+          }),
+        }),
       })
     )
     .query(async (opts) => {
@@ -382,6 +379,11 @@ export const planRouter = createTRPCRouter({
               status: true,
               version: true,
               latest: true,
+              title: true,
+              tags: true,
+              description: true,
+              currency: true,
+              createdAt: true,
             })
           ),
           project: z.object({
@@ -399,10 +401,15 @@ export const planRouter = createTRPCRouter({
           versions: {
             orderBy: (version, { desc }) => [desc(version.createdAt)],
             columns: {
-              version: true,
-              status: true,
               id: true,
+              status: true,
+              version: true,
               latest: true,
+              title: true,
+              tags: true,
+              description: true,
+              currency: true,
+              createdAt: true,
             },
           },
           project: {

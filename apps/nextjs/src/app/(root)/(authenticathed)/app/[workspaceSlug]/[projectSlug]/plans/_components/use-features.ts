@@ -10,17 +10,13 @@ export function useActiveFeature() {
 
 export interface PlanFeaturesList {
   planFeatures: PlanVersionFeature[]
-  planAddons: PlanVersionFeature[]
 }
 
 export const configPlanFeaturesListAtom = atom<PlanFeaturesList>({
   planFeatures: [],
-  planAddons: [],
 })
 
-const configPlanActiveTabAtom = atom<"planFeatures" | "planAddons">(
-  "planFeatures"
-)
+const configPlanActiveTabAtom = atom<"planFeatures">("planFeatures")
 
 export function usePlanActiveTab() {
   return useAtom(configPlanActiveTabAtom)

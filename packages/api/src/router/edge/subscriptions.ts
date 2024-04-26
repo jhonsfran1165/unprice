@@ -420,7 +420,7 @@ export const subscriptionRouter = createTRPCRouter({
       const subscriptionData = subscription[0]
       const versionPlan = subscriptionData?.version
 
-      if (!versionPlan?.addonsConfig) {
+      if (!versionPlan?.featuresConfig) {
         throw new TRPCError({
           code: "CONFLICT",
           message: "Version not found in subscription or it has no features",

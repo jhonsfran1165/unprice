@@ -10,45 +10,32 @@ import { Separator } from "@builderai/ui/separator"
 import { api } from "~/trpc/server"
 import { FeatureDialog } from "../../_components/feature-dialog"
 import { ResizablePanelConfig } from "../../_components/resizable"
-import type { PlanFeaturesList } from "../../_components/use-features"
 import { FeatureConfig } from "./feature-config"
 import { FeatureList } from "./feature-list"
-import { PlanFeatureTabs } from "./plan-feature-tabs"
+import { PlanFeatureList } from "./plan-feature-list"
 
 interface PlanVersionConfiguratorProps {
-  isCreatingNewVersion?: boolean
   planSlug: string
   planVersionId: string
 }
 
 export async function PlanVersionConfigurator({
-  isCreatingNewVersion,
   planSlug,
   planVersionId,
 }: PlanVersionConfiguratorProps) {
   const layout = cookies().get("react-resizable-panels:layout")
 
-  let initialFeatures = {} as PlanFeaturesList
+  const { planVersion } = await api.plans.getVersionById({
+    versionId: Number(planVersionId),
+    planSlug,
+  })
 
-  if (!isCreatingNewVersion) {
-    const { planVersion } = await api.plans.getVersionById({
-      versionId: Number(planVersionId),
-      planSlug,
-    })
+  if (!planVersion) {
+    notFound()
+  }
 
-    if (!planVersion) {
-      notFound()
-    }
-
-    initialFeatures = {
-      planFeatures: planVersion.featuresConfig ?? [],
-      planAddons: planVersion.addonsConfig ?? [],
-    }
-  } else {
-    initialFeatures = {
-      planFeatures: [],
-      planAddons: [],
-    }
+  const initialFeatures = {
+    planFeatures: planVersion.featuresConfig ?? [],
   }
 
   const defaultLayout = layout?.value
@@ -80,7 +67,7 @@ export async function PlanVersionConfigurator({
           </Suspense>
         </>
       }
-      planFeatureList={<PlanFeatureTabs initialFeatures={initialFeatures} />}
+      planFeatureList={<PlanFeatureList initialFeatures={initialFeatures} />}
       featureConfig={<FeatureConfig />}
     />
   )

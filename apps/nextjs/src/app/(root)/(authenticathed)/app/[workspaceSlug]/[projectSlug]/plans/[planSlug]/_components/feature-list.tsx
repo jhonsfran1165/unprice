@@ -27,10 +27,7 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
 
   const [planFeatures] = usePlanFeaturesList()
 
-  const activeFeatures = [
-    ...planFeatures.planFeatures,
-    ...planFeatures.planAddons,
-  ]
+  const activeFeatures = [...planFeatures.planFeatures]
 
   const { data } = api.features.searchBy.useQuery(
     {

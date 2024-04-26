@@ -78,7 +78,6 @@ const CreateNewVersion = ({
       void updateVersion.mutateAsync({
         planId: plan.id,
         featuresConfig: planFeatures.planFeatures,
-        addonsConfig: planFeatures.planAddons,
         versionId: planVersionId,
       })
     })
@@ -102,7 +101,6 @@ const CreateNewVersion = ({
       void createVersion.mutateAsync({
         planId: plan.id,
         featuresConfig: planFeatures.planFeatures,
-        addonsConfig: planFeatures.planAddons,
         projectId: plan.projectId,
       })
     })

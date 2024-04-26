@@ -1,12 +1,11 @@
 "use client"
 
-import type { ComponentProps, ElementRef } from "react"
+import type { ElementRef } from "react"
 import { forwardRef } from "react"
 import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
 import { ChevronRight, Settings2 } from "lucide-react"
 
-import type { FeatureType } from "@builderai/db/schema"
 import type { PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
@@ -21,13 +20,12 @@ import {
 } from "./use-features"
 
 const featureVariants = cva(
-  "flex gap-2 rounded-lg border text-left text-sm transition-all",
+  "flex gap-2 rounded-lg border text-left text-sm transition-all bg-background-bgSubtle hover:bg-background-bgHover",
   {
     variants: {
       variant: {
-        feature:
-          "h-10 px-2 items-center bg-background hover:bg-background-bgHover disabled:opacity-50",
-        default: "flex-col items-start p-3 hover:bg-accent",
+        feature: "h-10 px-2 items-center  disabled:opacity-50",
+        default: "flex-col items-start p-3",
       },
     },
     defaultVariants: {
@@ -141,9 +139,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
 
             {feature.type && (
               <div className="flex items-center gap-2">
-                <Badge variant={getBadgeVariantFromType(feature.type)}>
-                  {feature.type}
-                </Badge>
+                <Badge>{feature.type}</Badge>
               </div>
             )}
           </>
@@ -152,20 +148,6 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
     )
   }
 )
-
-function getBadgeVariantFromType(
-  type: FeatureType
-): ComponentProps<typeof Badge>["variant"] {
-  if (["tiered"].includes(type.toLowerCase())) {
-    return "info"
-  }
-
-  if (["volume"].includes(type.toLowerCase())) {
-    return "secondary"
-  }
-
-  return "default"
-}
 
 FeaturePlan.displayName = "FeatureCard"
 

@@ -20,7 +20,7 @@ export function DataTableSkeleton({ rows = 3 }: DataTableSkeletonProps) {
   return (
     <div className="rounded-md border">
       <Table>
-        <TableHeader className="bg-muted/50">
+        <TableHeader className="bg-muted">
           <TableRow className="hover:bg-transparent">
             <TableHead>
               <Skeleton className="my-1.5 h-4 w-24" />

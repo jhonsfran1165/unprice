@@ -1,27 +1,8 @@
-import { relations } from "drizzle-orm"
-import {
-  boolean,
-  foreignKey,
-  integer,
-  json,
-  primaryKey,
-  text,
-  unique,
-  varchar,
-} from "drizzle-orm/pg-core"
+import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 
+import * as schema from "../schema"
 import { FEATURE_TYPES, TIER_MODES } from "../utils"
-import { pgTableProject } from "../utils/_table"
-import { cuid, projectID, timestamps } from "../utils/sql"
-import {
-  currencyEnum,
-  planBillingPeriodEnum,
-  planTypeEnum,
-  statusPlanEnum,
-} from "./enums"
-import { projects } from "./projects"
-import { subscriptions } from "./subscriptions"
 
 const typeFeatureSchema = z.enum(FEATURE_TYPES)
 
@@ -210,146 +191,37 @@ export const configVolumeFeature = z.object({
     }),
 })
 
-export const planVersionFeatureSchema = z
-  .discriminatedUnion("type", [
-    configFlatFeature,
-    configTieredFeature,
-    configVolumeFeature,
-  ])
-  .superRefine((data, ctx) => {
-    if (!data) {
-      return
-    }
+export const featureSelectBaseSchema = createSelectSchema(schema.features)
 
-    if (!data.type) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Invalid configuration for the feature",
-        path: ["type"],
-        fatal: true,
-      })
+export const featureInsertBaseSchema = createInsertSchema(schema.features, {
+  title: z.string().min(1).max(50),
+  slug: z
+    .string()
+    .min(1)
+    .refine((slug) => /^[a-z0-9-]+$/.test(slug), {
+      message: "Slug must be a valid slug",
+    }),
+}).partial({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  projectId: true,
+})
 
-      return false
-    }
+export const updateFeatureSchema = featureSelectBaseSchema.pick({
+  id: true,
+  title: true,
+  type: true,
+})
 
-    return true
+export const deleteFeatureSchema = featureInsertBaseSchema
+  .pick({
+    id: true,
+  })
+  .extend({
+    projectSlug: z.string(),
   })
 
-export const startCycleSchema = z.union([
-  z.number().nonnegative(),
-  z.literal("last_day"),
-  z.null(),
-])
-
-type StartCycleType = z.infer<typeof startCycleSchema>
-
-export const plans = pgTableProject(
-  "plans",
-  {
-    ...projectID,
-    ...timestamps,
-    slug: text("slug").notNull(),
-    active: boolean("active").default(true),
-    title: varchar("title", { length: 50 }).notNull(),
-    currency: currencyEnum("currency").default("EUR"),
-    type: planTypeEnum("plan_type").default("recurring"),
-    // pay_in_advance
-    // pay_in_arrear
-    // payment provider configuration
-    billingPeriod: planBillingPeriodEnum("billing_period").default("month"),
-    startCycle: text("start_cycle").$type<StartCycleType>().default(null),
-    gracePeriod: integer("grace_period").default(0),
-    description: text("description"),
-  },
-  (table) => ({
-    primary: primaryKey({
-      columns: [table.id, table.projectId],
-      name: "plans_pkey",
-    }),
-    slug: unique("slug_plan").on(table.slug, table.projectId),
-  })
-)
-
-// TODO: entitlements should be a separate table
-
-export const versions = pgTableProject(
-  "plan_versions",
-  {
-    ...projectID,
-    ...timestamps,
-    planId: cuid("plan_id").notNull(),
-    version: integer("version").notNull(),
-    latest: boolean("latest").default(false),
-    // name for multi language
-
-    // TODO: versions should be allow multiple currencies
-    // currency: currencyEnum("currency").default("EUR"),
-    featuresConfig:
-      json("features_config").$type<
-        z.infer<typeof planVersionFeatureSchema>[]
-      >(), // config features of the plan
-    addonsConfig:
-      json("addons_config").$type<z.infer<typeof planVersionFeatureSchema>[]>(), // config addons of the plan
-    status: statusPlanEnum("plan_version_status").default("draft"),
-  },
-  (table) => ({
-    planfk: foreignKey({
-      columns: [table.planId, table.projectId],
-      foreignColumns: [plans.id, plans.projectId],
-      name: "plan_versions_plan_id_fkey",
-    }),
-    primary: primaryKey({
-      columns: [table.id, table.projectId],
-      name: "plan_versions_pkey",
-    }),
-    unique: unique("unique_version").on(table.planId, table.version),
-  })
-)
-
-// TODO: this table could have id as incremental so we can have a better performance
-// also we can use binmanry to store the data in a more efficient way in redis
-export const features = pgTableProject(
-  "features",
-  {
-    ...projectID,
-    ...timestamps,
-    slug: text("slug").notNull(),
-    title: varchar("title", { length: 50 }).notNull(),
-    description: text("description"),
-    // type: typeFeatureEnum("type").default("flat").notNull(),
-  },
-  (table) => ({
-    primary: primaryKey({
-      columns: [table.projectId, table.id],
-      name: "features_pkey",
-    }),
-    slug: unique("slug_feature").on(table.slug, table.projectId),
-  })
-)
-
-export const planRelations = relations(plans, ({ one, many }) => ({
-  project: one(projects, {
-    fields: [plans.projectId],
-    references: [projects.id],
-  }),
-  versions: many(versions),
-}))
-
-export const featureRelations = relations(features, ({ one }) => ({
-  project: one(projects, {
-    fields: [features.projectId],
-    references: [projects.id],
-  }),
-}))
-
-export const versionRelations = relations(versions, ({ one, many }) => ({
-  project: one(projects, {
-    fields: [versions.projectId],
-    references: [projects.id],
-  }),
-  plan: one(plans, {
-    fields: [versions.planId],
-    references: [plans.id],
-  }),
-  subscriptions: many(subscriptions),
-}))
+export type InsertFeature = z.infer<typeof featureInsertBaseSchema>
+export type UpdateFeature = z.infer<typeof updateFeatureSchema>
+export type Feature = z.infer<typeof featureSelectBaseSchema>

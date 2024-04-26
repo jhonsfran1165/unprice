@@ -53,7 +53,7 @@ const themeNames = {
     warning: "yellow",
     info: "blue",
     primary: "amber",
-    secondary: "crimson",
+    secondary: "bronze",
   },
   slate: {
     success: "teal",
@@ -114,7 +114,7 @@ export const generateTheme = (
     },
     primary: generateVariantRadixColors(theme.primary),
     secondary: generateVariantRadixColors(theme.secondary),
-    border: `var(--${grayscale}-5)`,
+    border: `var(--${grayscale}-6)`,
     input: `var(--${grayscale}-6)`,
     ring: `var(--${grayscale}-8)`,
     foreground: `var(--${grayscale}-11)`,
@@ -123,7 +123,7 @@ export const generateTheme = (
       foreground: `var(--${theme.destructive}-3)`,
     },
     muted: {
-      DEFAULT: `var(--${grayscale}-3)`,
+      DEFAULT: `var(--${grayscale}-4)`,
       foreground: `var(--${grayscale}-11)`,
     },
     accent: {
@@ -131,7 +131,7 @@ export const generateTheme = (
       foreground: `var(--${grayscale}-12)`,
     },
     popover: {
-      DEFAULT: `var(--${grayscale}-3)`,
+      DEFAULT: `var(--${grayscale}-2)`,
       foreground: `var(--${grayscale}-11)`,
     },
     card: {

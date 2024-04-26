@@ -20,10 +20,12 @@ export function DashboardShell(props: {
     >
       {props.tabs && props.tabs}
 
-      <main className="flex flex-1 flex-col overflow-y-auto border py-4">
-        {props.header && props.header}
+      <main className="flex flex-1 flex-col space-y-8 overflow-y-auto">
+        <MaxWidthWrapper className="max-w-screen-2xl">
+          {props.header && props.header}
+        </MaxWidthWrapper>
 
-        <MaxWidthWrapper className="mt-10 flex max-w-screen-2xl flex-1 flex-col space-y-4">
+        <MaxWidthWrapper className="flex max-w-screen-2xl flex-1 flex-col">
           {/* sidebar menu config */}
           {props.sidebar && (
             <div className="flex flex-col gap-2 sm:flex-1 sm:flex-row">

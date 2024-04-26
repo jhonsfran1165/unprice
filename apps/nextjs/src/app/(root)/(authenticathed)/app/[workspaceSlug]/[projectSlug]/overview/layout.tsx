@@ -1,5 +1,4 @@
 import { DashboardShell } from "~/components/layout/dashboard-shell"
-import HeaderTab from "~/components/layout/header-tab"
 import TabsNav from "~/components/layout/tabs-nav"
 import { PROJECT_TABS_CONFIG } from "~/constants/projects"
 
@@ -11,7 +10,6 @@ export default function ProjectOverviewLayout(props: {
   const tabs = Object.values(PROJECT_TABS_CONFIG)
   return (
     <DashboardShell
-      header={<HeaderTab title="Dashboard" />}
       tabs={
         <TabsNav
           tabs={tabs}

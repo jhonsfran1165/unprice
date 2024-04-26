@@ -17,7 +17,7 @@ export default function TabsNav(props: {
   return (
     <div
       className={cn(
-        "-py-2 sticky inset-x-0 left-0 top-0 z-30 block w-12 items-center justify-start bg-background-bg px-2 transition-all",
+        "-py-2 sticky inset-x-0 left-0 top-0 z-30 block w-12 items-center justify-start bg-background-bgSubtle px-2 transition-all",
         props.className
       )}
     >
