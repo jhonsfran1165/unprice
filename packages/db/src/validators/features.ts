@@ -2,192 +2,245 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 
 import * as schema from "../schema"
-import { FEATURE_TYPES, TIER_MODES } from "../utils"
+import {
+  FEATURE_TYPES,
+  PAYMENT_PROVIDERS,
+  TIER_MODES,
+  USAGE_METERED,
+  USAGE_MODES,
+} from "../utils"
 
 const typeFeatureSchema = z.enum(FEATURE_TYPES)
-
+const paymentProviderSchema = z.enum(PAYMENT_PROVIDERS)
+const usageModeSchema = z.enum(USAGE_MODES)
+const tierModeSchema = z.enum(TIER_MODES)
 export type FeatureType = z.infer<typeof typeFeatureSchema>
 
+export type PaymentProvider = z.infer<typeof paymentProviderSchema>
+
+export const paymentInfoSchema = z.record(
+  paymentProviderSchema,
+  z.object({ priceId: z.string() })
+)
+
 export const configFlatFeature = z.object({
-  type: z.literal(typeFeatureSchema.enum.flat, {
-    errorMap: () => ({ message: "Invalid configuration for the feature 1" }),
-  }),
+  type: z.literal(typeFeatureSchema.enum.flat),
+  tierMode: z.void(),
+  usageMode: z.void(),
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  description: z.string().nullable(),
-  config: z
-    .object({
-      // TODO: add priceId from stripe
-      // paymentProviderPriceId -> external price ID
-      price: z.coerce
-        .number()
-        .nonnegative()
-        .min(0)
-        .describe("Flat price of the feature"),
-      divider: z.coerce
-        .number()
-        .nonnegative()
-        .min(0)
-        .describe(
-          "Divider for the price. Could be number of days, hours, etc."
-        ),
-    })
-    .optional(),
+  description: z.string().optional(),
+  config: z.object({
+    price: z.coerce
+      .number()
+      .nonnegative()
+      .min(0)
+      .describe("Flat price of the feature"),
+    paymentInfo: paymentInfoSchema.optional(),
+  }),
 })
 
-export const configTieredFeature = z.object({
-  type: z.literal(typeFeatureSchema.enum.tiered, {
-    errorMap: () => ({ message: "Invalid configuration for the feature 2" }),
-  }),
+export const configTierFeature = z.object({
+  type: z.literal(typeFeatureSchema.enum.tier),
+  tierMode: tierModeSchema,
+  aggregationMethod: z.enum(USAGE_METERED),
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  description: z.string().nullable(),
+  description: z.string().optional(),
   config: z
     .object({
-      mode: z.enum(TIER_MODES),
-      divider: z.coerce
-        .number()
-        .nonnegative()
-        .min(1)
-        .describe(
-          "Divider for the price. Could be number of days, hours, etc."
-        ),
       tiers: z.array(
         z.object({
-          price: z.coerce
+          unitPrice: z.coerce
             .number()
             .nonnegative()
             .min(0)
-            .describe("Price per unit"),
-          first: z.coerce
+            .describe("Price per Unit"),
+          flatPrice: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .optional()
+            .describe("Flat price for the tier"),
+          firstUnit: z.coerce
             .number()
             .nonnegative()
             .min(0)
             .describe("First unit for the volume"),
-          last: z.coerce
-            .number()
-            .nonnegative()
-            .min(0)
-            .describe("Last unit for the volume"),
+          lastUnit: z.union([
+            z.coerce
+              .number()
+              .nonnegative()
+              .min(0)
+              .describe("Last unit for the volume"),
+            z.literal("Infinity"),
+          ]),
         })
       ),
+      paymentInfo: paymentInfoSchema.optional(),
     })
-    .optional()
     .superRefine((data, ctx) => {
-      // validate that the first and last are in order
+      const tiers = data.tiers
 
-      data &&
-        data.tiers.forEach((tier, i) => {
-          if (tier.first >= tier.last) {
+      for (let i = 0; i < tiers.length; i++) {
+        if (i > 0) {
+          const currentFirstUnit = tiers[i]?.firstUnit
+          const previousLastUnit = tiers[i - 1]?.lastUnit
+
+          if (previousLastUnit === "Infinity") {
+            return true
+          }
+
+          if (!currentFirstUnit) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              message: "Tiers need to have a valid range",
-              path: ["tiers", i, "last"],
+              message: "firstUnit needs to be defined",
+              path: ["tiers", i, "firstUnit"],
               fatal: true,
             })
 
             return false
           }
 
-          const prevTier = i > 0 && data.tiers[i - 1]
-
-          if (prevTier && tier.first <= prevTier.last) {
+          if (!previousLastUnit) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              message: "Tiers cannot overlap",
-              path: ["tiers", i, "first"],
+              message: "lastUnit needs to be defined",
+              path: ["tiers", i, "lastUnit"],
               fatal: true,
             })
 
             return false
-          } else if (prevTier && prevTier.last + 1 !== tier.first) {
+          }
+
+          if (currentFirstUnit > previousLastUnit + 1) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: "Tiers need to be consecutive",
-              path: ["tiers", i, "first"],
+              path: ["tiers", i, "firstUnit"],
               fatal: true,
             })
 
             return false
           }
+          if (currentFirstUnit < previousLastUnit + 1) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers cannot overlap",
+              path: ["tiers", i, "firstUnit"],
+              fatal: true,
+            })
 
-          return true
-        })
+            return false
+          }
+        }
+      }
+
+      return true
     }),
 })
 
-export const configVolumeFeature = z.object({
-  type: z.literal(typeFeatureSchema.enum.volume, {
-    errorMap: () => ({ message: "Invalid configuration for the feature 3" }),
-  }),
+export const configUsageFeature = z.object({
+  type: z.literal(typeFeatureSchema.enum.usage),
+  tierMode: tierModeSchema.optional(),
+  usageMode: usageModeSchema,
+  aggregationMethod: z.enum(USAGE_METERED),
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  description: z.string().nullable(),
+  description: z.string().optional(),
   config: z
     .object({
-      mode: z.enum(TIER_MODES),
-      divider: z.coerce
-        .number()
-        .nonnegative()
-        .min(1)
-        .describe(
-          "Divider for the price. Could be number of days, hours, etc."
-        ),
       tiers: z.array(
         z.object({
-          price: z.coerce
+          unitPrice: z.coerce
             .number()
             .nonnegative()
             .min(0)
-            .describe("Price per unit"),
-          first: z.coerce
+            .describe("Price per Unit"),
+          flatPrice: z.coerce
+            .number()
+            .nonnegative()
+            .min(0)
+            .optional()
+            .describe("Flat price for the tier"),
+          firstUnit: z.coerce
             .number()
             .nonnegative()
             .min(0)
             .describe("First unit for the volume"),
-          last: z.coerce
-            .number()
-            .nonnegative()
-            .min(0)
-            .describe("Last unit for the volume"),
+          lastUnit: z.union([
+            z.coerce
+              .number()
+              .nonnegative()
+              .min(0)
+              .describe("Last unit for the volume"),
+            z.literal("Infinity"),
+          ]),
         })
       ),
+      paymentInfo: paymentInfoSchema.optional(),
     })
-    .optional()
     .superRefine((data, ctx) => {
-      // validate that the first and last are in order
+      const tiers = data.tiers
 
-      data &&
-        data.tiers.forEach((tier, i) => {
-          if (tier.first >= tier.last) {
+      for (let i = 0; i < tiers.length; i++) {
+        if (i > 0) {
+          const currentFirstUnit = tiers[i]?.firstUnit
+          const previousLastUnit = tiers[i - 1]?.lastUnit
+
+          if (previousLastUnit === "Infinity") {
+            return true
+          }
+
+          if (!currentFirstUnit) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              message: "Tiers need to have a valid range",
-              path: ["tiers", i, "last"],
+              message: "firstUnit needs to be defined",
+              path: ["tiers", i, "firstUnit"],
               fatal: true,
             })
 
             return false
           }
 
-          const prevTier = i > 0 && data.tiers[i - 1]
+          if (!previousLastUnit) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "lastUnit needs to be defined",
+              path: ["tiers", i, "lastUnit"],
+              fatal: true,
+            })
 
-          if (prevTier && tier.first <= prevTier.last) {
+            return false
+          }
+
+          if (currentFirstUnit > previousLastUnit + 1) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers need to be consecutive",
+              path: ["tiers", i, "firstUnit"],
+              fatal: true,
+            })
+
+            return false
+          }
+          if (currentFirstUnit < previousLastUnit + 1) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: "Tiers cannot overlap",
-              path: ["tiers", i, "first"],
+              path: ["tiers", i, "firstUnit"],
               fatal: true,
             })
 
             return false
           }
+        }
+      }
 
-          return true
-        })
+      return true
     }),
 })
 

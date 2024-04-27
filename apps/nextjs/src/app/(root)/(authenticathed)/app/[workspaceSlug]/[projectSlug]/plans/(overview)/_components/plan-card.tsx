@@ -4,16 +4,18 @@ import {
   LayoutDashboard,
   MoreHorizontal,
   PlusIcon,
+  RefreshCcw,
   Settings,
   User2,
 } from "lucide-react"
 
 import { cn } from "@builderai/ui"
+import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import {
   Card,
-  CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
@@ -42,12 +44,12 @@ export function PlanCard(props: {
   return (
     <Link
       prefetch={false}
-      href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}/latest`}
+      href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}
     >
       <Card className="overflow-hidden hover:border-background-borderHover">
         <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
           <div className="space-y-2">
-            <CardTitle className={"line-clamp-1"}>{plan.title}</CardTitle>
+            <CardTitle className={"line-clamp-1"}>{plan.slug}</CardTitle>
             <CardDescription className="line-clamp-4 h-20">
               {plan.description}
             </CardDescription>
@@ -112,16 +114,18 @@ export function PlanCard(props: {
             </PropagationStopper>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex justify-between space-x-4 text-sm text-muted-foreground">
-            <div className="flex items-center">
-              <GalleryHorizontalEnd className="mr-1 h-3 w-3" />
-              {versions.length === 0 ? "No" : versions.length} Versions
-            </div>
-
-            <div>Updated April 2023</div>
+        <CardFooter className="flex flex-row justify-between space-x-4 text-sm text-muted-foreground">
+          <div>
+            <Badge>
+              <RefreshCcw className="h-3 w-3" />
+              <span className="ml-1">recurring</span>
+            </Badge>
           </div>
-        </CardContent>
+          <div className="flex items-center text-xs text-muted-foreground">
+            <GalleryHorizontalEnd className="mr-1 h-3 w-3" />
+            {versions.length === 0 ? "No" : versions.length} Versions
+          </div>
+        </CardFooter>
       </Card>
     </Link>
   )

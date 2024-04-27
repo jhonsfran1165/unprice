@@ -4,8 +4,12 @@ import { startTransition } from "react"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 
-import { CURRENCIES } from "@builderai/config"
-import { PLAN_BILLING_PERIODS, PLAN_TYPES, slugify } from "@builderai/db/utils"
+import {
+  PAYMENT_PROVIDERS,
+  PLAN_BILLING_PERIODS,
+  PLAN_TYPES,
+  slugify,
+} from "@builderai/db/utils"
 import type { InsertPlan } from "@builderai/db/validators"
 import { insertPlanSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
@@ -167,11 +171,11 @@ export function PlanForm({
 
           <FormField
             control={form.control}
-            name="currency"
+            name="paymentProvider"
             render={({ field }) => (
               <FormItem>
                 <div className="flex justify-between">
-                  <FormLabel>Currency of the plan</FormLabel>
+                  <FormLabel>Payment provider</FormLabel>
                 </div>
                 <Select
                   onValueChange={field.onChange}
@@ -180,13 +184,13 @@ export function PlanForm({
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a currency" />
+                      <SelectValue placeholder="Select a provider" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {CURRENCIES.map((currency, index) => (
-                      <SelectItem key={index} value={currency}>
-                        {currency}
+                    {PAYMENT_PROVIDERS.map((provider, index) => (
+                      <SelectItem key={index} value={provider}>
+                        {provider}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -4,15 +4,18 @@ import * as z from "zod"
 import * as schema from "../schema"
 import {
   configFlatFeature,
-  configTieredFeature,
-  configVolumeFeature,
+  configTierFeature,
+  configUsageFeature,
 } from "./features"
 
+// contains the configuration for the features for the specific plan version
+// the reason why we save the configuration as json inside the featuresConfig is because
+// it suppose to be append only, so we can keep track of the changes
 export const planVersionFeatureSchema = z
   .discriminatedUnion("type", [
     configFlatFeature,
-    configTieredFeature,
-    configVolumeFeature,
+    configTierFeature,
+    configUsageFeature,
   ])
   .superRefine((data, ctx) => {
     if (!data) {
@@ -23,7 +26,29 @@ export const planVersionFeatureSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Invalid configuration for the feature",
-        path: ["type"],
+        path: ["pricingModel.type"],
+        fatal: true,
+      })
+
+      return false
+    }
+
+    if (data.type === "tier" && !data.tierMode) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid configuration for the tier feature",
+        path: ["pricingModel.tierMode"],
+        fatal: true,
+      })
+
+      return false
+    }
+
+    if (data.type === "usage" && !data.usageMode) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid configuration for the usage feature",
+        path: ["pricingModel.usageMode"],
         fatal: true,
       })
 
@@ -34,15 +59,13 @@ export const planVersionFeatureSchema = z
   })
 
 export const startCycleSchema = z.union([
-  z.number().nonnegative(),
-  z.literal("last_day"),
-  z.null(),
+  z.number().nonnegative(), // number of day from the start of the cycle
+  z.literal("last_day"), // last day of the month
+  z.null(), // null means the first day of the month
 ])
 
 export const planSelectBaseSchema = createSelectSchema(schema.plans)
-export const planInsertBaseSchema = createInsertSchema(schema.plans, {
-  slug: z.string().min(1),
-})
+export const planInsertBaseSchema = createInsertSchema(schema.plans)
 
 export const versionSelectBaseSchema = createSelectSchema(schema.versions, {
   featuresConfig: z.array(planVersionFeatureSchema),

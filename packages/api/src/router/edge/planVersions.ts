@@ -189,11 +189,19 @@ export const planRouter = createTRPCRouter({
     )
     .output(
       z.object({
-        plan: planSelectBaseSchema,
+        plan: planSelectBaseSchema.optional(),
       })
     )
     .mutation(async (opts) => {
-      const { id, paymentProvider, description, active, type } = opts.input
+      const {
+        id,
+        title,
+        currency,
+        billingPeriod,
+        startCycle,
+        description,
+        type,
+      } = opts.input
       const project = opts.ctx.project
 
       const planData = await opts.ctx.db.query.plans.findFirst({
@@ -218,9 +226,11 @@ export const planRouter = createTRPCRouter({
       const updatedPlan = await opts.ctx.db
         .update(schema.plans)
         .set({
+          title,
+          currency,
+          billingPeriod,
+          startCycle: startCycle ?? null,
           description,
-          paymentProvider,
-          active,
           type,
           updatedAt: new Date(),
         })
@@ -229,13 +239,6 @@ export const planRouter = createTRPCRouter({
         )
         .returning()
         .then((re) => re[0])
-
-      if (!updatedPlan) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error updating plan",
-        })
-      }
 
       return {
         plan: updatedPlan,

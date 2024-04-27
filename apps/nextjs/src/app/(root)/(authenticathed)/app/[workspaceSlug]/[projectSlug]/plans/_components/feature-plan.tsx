@@ -50,11 +50,14 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
     const [_planFeatures, setPlanFeatures] = usePlanFeaturesList()
 
     const handleClick = (_event: React.MouseEvent<HTMLDivElement>) => {
+      if (mode !== "FeaturePlan") return
       setActiveFeature(feature)
     }
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Enter" || event.key === " ") {
+        if (mode !== "FeaturePlan") return
+
         setActiveFeature(feature)
       }
     }
@@ -64,7 +67,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
         ref={ref}
         {...rest}
         className={cn(featureVariants({ variant, className }), {
-          "bg-background-bgHover":
+          "border-background-borderHover":
             mode === "FeaturePlan" && active?.id === feature.id,
         })}
         onClick={handleClick}

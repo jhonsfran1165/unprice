@@ -11,7 +11,16 @@ import {
 } from "lucide-react"
 import { useFieldArray } from "react-hook-form"
 
-import { TIER_MODES, TIER_MODES_MAP } from "@builderai/db/utils"
+import {
+  FEATURE_TYPES,
+  FEATURE_TYPES_MAPS,
+  TIER_MODES,
+  TIER_MODES_MAP,
+  USAGE_METERED,
+  USAGE_METERED_MAP,
+  USAGE_MODES,
+  USAGE_MODES_MAP,
+} from "@builderai/db/utils"
 import type { PlanVersionFeature } from "@builderai/db/validators"
 import { planVersionFeatureSchema } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
@@ -33,7 +42,6 @@ import {
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import { Label } from "@builderai/ui/label"
-import { RadioGroup, RadioGroupItem } from "@builderai/ui/radio-group"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import {
   Select,
@@ -62,19 +70,18 @@ export function FeatureConfig() {
   const [activeFeature] = useActiveFeature()
   // define default values config for the form using the feature prop
   const defaultConfigValues = {
-    mode: "sum",
+    aggregationMethod: "sum",
     price: 0,
-    tiers: [{ first: 0, last: 1, price: 0 }],
-    divider: 1,
+    tiers: [{ firstUnit: 0, lastUnit: "Infinity" }],
   }
 
   const defaultValues = activeFeature?.config
     ? activeFeature
-    : ({
+    : {
         ...activeFeature,
         config: defaultConfigValues,
         type: "flat",
-      } as PlanVersionFeature)
+      }
 
   const form = useZodForm({
     schema: planVersionFeatureSchema,
@@ -109,6 +116,8 @@ export function FeatureConfig() {
       }
     })
   }
+
+  console.log(form.formState.errors)
 
   return (
     <div className="flex h-full flex-col">
@@ -176,7 +185,7 @@ export function FeatureConfig() {
                   slug: <b>{activeFeature.slug}</b>
                 </div>
                 <div className="line-clamp-1 text-xs">
-                  {activeFeature.description}
+                  {activeFeature?.description}
                 </div>
               </div>
             </div>
@@ -194,94 +203,170 @@ export function FeatureConfig() {
                   className="space-y-6"
                   onSubmit={form.handleSubmit(onSubmitForm)}
                 >
-                  <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel>Type</FormLabel>
-                        <FormDescription>
-                          Select the type of feature you want
-                        </FormDescription>
-                        <FormMessage />
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          value={field.value}
-                          className="grid grid-cols-3 gap-2 pt-2"
-                        >
-                          <FormItem>
-                            <FormLabel className="[&:has([data-state=checked])>div]:border-background-border">
-                              <FormControl>
-                                <RadioGroupItem
-                                  value="flat"
-                                  className="sr-only"
-                                />
-                              </FormControl>
-                              <div className="h-[115px] items-center rounded-md border-2 border-muted p-1 hover:border-accent">
-                                <div className="space-y-2 rounded-sm p-2">
-                                  <div className="rounded-md bg-background-bg p-2 text-center font-semibold shadow-sm">
-                                    Flat
-                                  </div>
-                                  <div className="line-clamp-3 break-all px-1 text-justify text-xs font-normal leading-snug text-muted-foreground">
-                                    Flat features are charged at a fixed price
-                                  </div>
-                                </div>
-                              </div>
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem>
-                            <FormLabel className="[&:has([data-state=checked])>div]:border-background-border">
-                              <FormControl>
-                                <RadioGroupItem
-                                  value="tiered"
-                                  className="sr-only"
-                                />
-                              </FormControl>
+                  <div className="flex flex-col gap-2">
+                    <div className="border-1 items-center rounded-md">
+                      <div className="space-y-2 rounded-sm border p-2">
+                        <div className="rounded-md bg-background-bg p-2 text-center font-semibold shadow-sm">
+                          Pricing Model
+                        </div>
+                        <div className="line-clamp-3 space-y-2 break-all px-2 text-justify text-xs font-normal leading-snug text-muted-foreground">
+                          All units price based on final tier reached. Needs a
+                          record for Stripe to track customer service usage.
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <FormField
+                            control={form.control}
+                            name="type"
+                            render={({ field }) => (
+                              <FormItem className="space-y-1">
+                                <FormMessage className="self-start px-2" />
+                                <Select
+                                  onValueChange={(value) => {
+                                    field.onChange(value)
+                                    form.setValue("usageMode", "")
+                                    form.setValue("tierMode", "")
+                                  }}
+                                  value={field.value ?? ""}
+                                >
+                                  <FormControl className="truncate">
+                                    <SelectTrigger className="items-start [&_[data-description]]:hidden">
+                                      <SelectValue placeholder="Select type" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {FEATURE_TYPES.map((type, index) => (
+                                      <SelectItem value={type} key={index}>
+                                        <div className="flex items-start gap-3 text-muted-foreground">
+                                          <div className="grid gap-0.5">
+                                            <p>
+                                              {
+                                                FEATURE_TYPES_MAPS[
+                                                  type as keyof typeof FEATURE_TYPES_MAPS
+                                                ].label
+                                              }
+                                            </p>
+                                            <p
+                                              className="text-xs"
+                                              data-description
+                                            >
+                                              {
+                                                FEATURE_TYPES_MAPS[
+                                                  type as keyof typeof FEATURE_TYPES_MAPS
+                                                ].description
+                                              }
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormItem>
+                            )}
+                          />
 
-                              <div className="h-[115px] items-center rounded-md border-2 border-muted p-1 hover:border-accent">
-                                <div className="space-y-2 rounded-sm p-2">
-                                  <div className="rounded-md bg-background-bg p-2 text-center font-semibold shadow-sm">
-                                    Tier
-                                  </div>
-                                  <div className="line-clamp-3 break-all px-1 text-justify text-xs font-normal leading-snug text-muted-foreground">
-                                    The amount to charge varies incrementally as
-                                    usage increases, different units may be at
-                                    different prices depending on the tier they
-                                    fall into. We also support defining distinct
-                                    pricing types for each slab.
-                                  </div>
-                                </div>
-                              </div>
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem>
-                            <FormLabel className="[&:has([data-state=checked])>div]:border-background-border">
-                              <FormControl>
-                                <RadioGroupItem
-                                  value="volume"
-                                  className="sr-only"
-                                />
-                              </FormControl>
-                              <div className="h-[115px] items-center rounded-md border-2 border-muted p-1 hover:border-accent">
-                                <div className="space-y-2 rounded-sm p-2">
-                                  <div className="rounded-md bg-background-bg p-2 text-center font-semibold shadow-sm">
-                                    Volume
-                                  </div>
-                                  <div className="line-clamp-3 break-all px-1 text-justify text-xs font-normal leading-snug text-muted-foreground">
-                                    Similar to the tiered pricing model, except
-                                    that only one slab is applied at the end of
-                                    the billing period based on the total usage
-                                    units.
-                                  </div>
-                                </div>
-                              </div>
-                            </FormLabel>
-                          </FormItem>
-                        </RadioGroup>
-                      </FormItem>
-                    )}
-                  />
+                          {form.watch("type") === "usage" && (
+                            <FormField
+                              control={form.control}
+                              name="usageMode"
+                              render={({ field }) => (
+                                <FormItem className="space-y-1">
+                                  <FormMessage className="self-start px-2" />
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value ?? ""}
+                                  >
+                                    <FormControl className="truncate">
+                                      <SelectTrigger className="items-start [&_[data-description]]:hidden">
+                                        <SelectValue placeholder="Select type" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {USAGE_MODES.map((mode, index) => (
+                                        <SelectItem value={mode} key={index}>
+                                          <div className="flex items-start gap-3 text-muted-foreground">
+                                            <div className="grid gap-0.5">
+                                              <p>
+                                                {
+                                                  USAGE_MODES_MAP[
+                                                    mode as keyof typeof USAGE_MODES_MAP
+                                                  ].label
+                                                }
+                                              </p>
+                                              <p
+                                                className="text-xs"
+                                                data-description
+                                              >
+                                                {
+                                                  USAGE_MODES_MAP[
+                                                    mode as keyof typeof USAGE_MODES_MAP
+                                                  ].description
+                                                }
+                                              </p>
+                                            </div>
+                                          </div>
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormItem>
+                              )}
+                            />
+                          )}
+
+                          {(form.watch("type") === "tier" ||
+                            form.watch("usageMode") === "tier") && (
+                            <FormField
+                              control={form.control}
+                              name="tierMode"
+                              render={({ field }) => (
+                                <FormItem className="space-y-1">
+                                  <FormMessage className="self-start px-2" />
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value ?? ""}
+                                  >
+                                    <FormControl className="truncate">
+                                      <SelectTrigger className="items-start [&_[data-description]]:hidden">
+                                        <SelectValue placeholder="Select type" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {TIER_MODES.map((mode, index) => (
+                                        <SelectItem value={mode} key={index}>
+                                          <div className="flex items-start gap-3 text-muted-foreground">
+                                            <div className="grid gap-0.5">
+                                              <p>
+                                                {
+                                                  TIER_MODES_MAP[
+                                                    mode as keyof typeof TIER_MODES_MAP
+                                                  ].label
+                                                }
+                                              </p>
+                                              <p
+                                                className="text-xs"
+                                                data-description
+                                              >
+                                                {
+                                                  TIER_MODES_MAP[
+                                                    mode as keyof typeof TIER_MODES_MAP
+                                                  ].description
+                                                }
+                                              </p>
+                                            </div>
+                                          </div>
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
                   <Separator />
 
@@ -292,7 +377,7 @@ export function FeatureConfig() {
                           control={form.control}
                           name="config.price"
                           render={({ field }) => (
-                            <FormItem className="flex flex-row space-x-4">
+                            <FormItem className="">
                               <div className="w-2/3">
                                 <FormLabel>Price</FormLabel>
                                 <FormDescription>
@@ -323,16 +408,16 @@ export function FeatureConfig() {
                     </div>
                   )}
 
-                  {["volume", "tiered"].includes(form.watch("type") ?? "") && (
+                  {["tier"].includes(form.watch("type") ?? "") && (
                     <div className="flex justify-between">
                       <div className="w-full">
                         <FormField
                           control={form.control}
-                          name="config.mode"
+                          name="aggregationMethod"
                           render={({ field }) => (
-                            <FormItem className="flex flex-row space-x-4">
-                              <div className="w-2/3">
-                                <FormLabel>Mode</FormLabel>
+                            <FormItem className="flex flex-col">
+                              <div className="">
+                                <FormLabel>Aggreation Method</FormLabel>
                                 <FormDescription>
                                   Charge for metered usage by
                                 </FormDescription>
@@ -340,31 +425,44 @@ export function FeatureConfig() {
                                   Different modes of charging for metered usage
                                 </div>
                               </div>
-                              <div className="flex w-1/3 flex-col items-center space-y-1">
-                                <Select
-                                  onValueChange={field.onChange}
-                                  value={field.value ?? ""}
-                                >
-                                  <FormControl className="truncate">
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select mode" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {TIER_MODES.map((mode) => (
-                                      <SelectItem key={mode} value={mode}>
-                                        {
-                                          TIER_MODES_MAP?.[
-                                            mode as keyof typeof TIER_MODES_MAP
-                                          ].label
-                                        }
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
 
-                                <FormMessage className="self-start px-2" />
-                              </div>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value ?? ""}
+                              >
+                                <FormControl className="truncate">
+                                  <SelectTrigger className="items-start [&_[data-description]]:hidden">
+                                    <SelectValue placeholder="Select type" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {USAGE_METERED.map((mode, index) => (
+                                    <SelectItem value={mode} key={index}>
+                                      <div className="flex items-start gap-3 text-muted-foreground">
+                                        <div className="grid gap-0.5">
+                                          <p>
+                                            {
+                                              USAGE_METERED_MAP[
+                                                mode as keyof typeof USAGE_METERED_MAP
+                                              ].label
+                                            }
+                                          </p>
+                                          <p
+                                            className="text-xs"
+                                            data-description
+                                          >
+                                            {
+                                              USAGE_METERED_MAP[
+                                                mode as keyof typeof USAGE_METERED_MAP
+                                              ].description
+                                            }
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </FormItem>
                           )}
                         />
@@ -374,7 +472,7 @@ export function FeatureConfig() {
 
                   <Separator />
 
-                  {["tiered", "volume"].includes(form.watch("type") ?? "") && (
+                  {["tier"].includes(form.watch("type") ?? "") && (
                     <div>
                       <div className="mb-4 flex flex-col">
                         <h4 className="my-auto block font-semibold">
@@ -404,14 +502,14 @@ export function FeatureConfig() {
                                 <FormField
                                   control={form.control}
                                   key={field.id}
-                                  name={`config.tiers.${index}.first`}
+                                  name={`config.tiers.${index}.firstUnit`}
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel
                                         className={cn(index !== 0 && "sr-only")}
                                       >
                                         <Tooltip>
-                                          <div className="flex items-center gap-2 text-sm font-normal">
+                                          <div className="flex items-center gap-2 text-xs font-normal">
                                             First Unit
                                             <span>
                                               <TooltipTrigger asChild>
@@ -434,7 +532,11 @@ export function FeatureConfig() {
 
                                       <FormMessage className="text-xs font-light" />
                                       <FormControl>
-                                        <Input {...field} className="h-8" />
+                                        <Input
+                                          {...field}
+                                          className="h-8"
+                                          disabled={index === 0}
+                                        />
                                       </FormControl>
                                     </FormItem>
                                   )}
@@ -445,14 +547,14 @@ export function FeatureConfig() {
                                 <FormField
                                   control={form.control}
                                   key={field.id}
-                                  name={`config.tiers.${index}.last`}
+                                  name={`config.tiers.${index}.lastUnit`}
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel
                                         className={cn(index !== 0 && "sr-only")}
                                       >
                                         <Tooltip>
-                                          <div className="flex items-center gap-2 text-sm font-normal">
+                                          <div className="flex items-center gap-2 text-xs font-normal">
                                             Last Unit
                                             <span>
                                               <TooltipTrigger asChild>
@@ -478,7 +580,20 @@ export function FeatureConfig() {
                                       <FormMessage className="text-xs font-light" />
 
                                       <FormControl>
-                                        <Input {...field} className="h-8" />
+                                        <Input
+                                          {...field}
+                                          className="h-8"
+                                          value={
+                                            field.value === "Infinity"
+                                              ? "∞"
+                                              : field.value
+                                          }
+                                          disabled={
+                                            (index !== 0 &&
+                                              index === fields.length - 1) ||
+                                            fields.length === 1
+                                          }
+                                        />
                                       </FormControl>
                                     </FormItem>
                                   )}
@@ -488,17 +603,15 @@ export function FeatureConfig() {
                                 <FormField
                                   control={form.control}
                                   key={field.id}
-                                  name={`config.tiers.${index}.price`}
+                                  name={`config.tiers.${index}.flatPrice`}
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel
                                         className={cn(index !== 0 && "sr-only")}
                                       >
                                         <Tooltip>
-                                          <div className="flex items-center gap-2 text-sm font-normal">
-                                            {form.watch("type") === "volume"
-                                              ? "Price per unit"
-                                              : "Flat price tier"}
+                                          <div className="flex items-center gap-2 text-xs font-normal">
+                                            Flat price tier
                                             <span>
                                               <TooltipTrigger asChild>
                                                 <HelpCircle className="h-4 w-4 font-light" />
@@ -511,7 +624,53 @@ export function FeatureConfig() {
                                             align="center"
                                             side="right"
                                           >
-                                            Price per unit for this tier.
+                                            Flat price for this tier.
+                                            <TooltipArrow className="fill-background-bg" />
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </FormLabel>
+
+                                      <FormMessage className="text-xs font-light" />
+
+                                      <FormControl>
+                                        <div className="relative">
+                                          <DollarSignIcon className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
+                                          <Input
+                                            {...field}
+                                            className="h-8 pl-8"
+                                          />
+                                        </div>
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                              <div className="w-full">
+                                <FormField
+                                  control={form.control}
+                                  key={field.id}
+                                  name={`config.tiers.${index}.unitPrice`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel
+                                        className={cn(index !== 0 && "sr-only")}
+                                      >
+                                        <Tooltip>
+                                          <div className="flex items-center gap-2 text-xs font-normal">
+                                            Unit price
+                                            <span>
+                                              <TooltipTrigger asChild>
+                                                <HelpCircle className="h-4 w-4 font-light" />
+                                              </TooltipTrigger>
+                                            </span>
+                                          </div>
+
+                                          <TooltipContent
+                                            className="w-32 bg-background-bg text-xs font-normal"
+                                            align="center"
+                                            side="right"
+                                          >
+                                            Price per unit
                                             <TooltipArrow className="fill-background-bg" />
                                           </TooltipContent>
                                         </Tooltip>
@@ -533,50 +692,65 @@ export function FeatureConfig() {
                                 />
                               </div>
                               <div>
-                                <div className="flex flex-row space-x-1">
-                                  <Button
-                                    variant="outline"
-                                    size={"icon"}
-                                    className="h-8 w-8"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      e.preventDefault()
-
-                                      const firstTierValue =
-                                        Number(
-                                          form.getValues(
-                                            `config.tiers.${index}.last`
-                                          )
-                                        ) + 1 || 0
-
-                                      append({
-                                        first: firstTierValue,
-                                        price: 0,
-                                        last: firstTierValue + 1,
-                                      })
-                                    }}
-                                  >
-                                    <Plus className="h-4 w-4" />
-                                    <span className="sr-only">add tier</span>
-                                  </Button>
-                                  <Button
-                                    variant="link"
-                                    size={"icon"}
-                                    className="h-8 w-8 rounded-full"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      e.preventDefault()
-                                      if (fields.length === 1) return
-                                      remove(index)
-                                    }}
-                                  >
-                                    <XCircle className="h-5 w-5" />
-                                    <span className="sr-only">delete tier</span>
-                                  </Button>
-                                </div>
+                                <Button
+                                  variant="link"
+                                  size={"icon"}
+                                  className="h-8 w-8 rounded-full"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    e.preventDefault()
+                                    if (fields.length === 1) return
+                                    remove(index)
+                                  }}
+                                >
+                                  <XCircle className="h-5 w-5" />
+                                  <span className="sr-only">delete tier</span>
+                                </Button>
                               </div>
                             </div>
                           ))}
+                          <div className="w-full px-2 py-4">
+                            <div className="flex justify-end">
+                              <Button
+                                variant="default"
+                                size={"sm"}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  e.preventDefault()
+
+                                  const firstUnitValue = Number(
+                                    form.getValues(
+                                      `config.tiers.${fields.length - 1}.firstUnit`
+                                    )
+                                  )
+
+                                  const lastUnitValue = form.getValues(
+                                    `config.tiers.${fields.length - 1}.lastUnit`
+                                  )
+
+                                  form.setValue(
+                                    `config.tiers.${fields.length - 1}.lastUnit`,
+                                    lastUnitValue === "Infinity"
+                                      ? firstUnitValue + 1
+                                      : lastUnitValue
+                                  )
+
+                                  append({
+                                    firstUnit:
+                                      lastUnitValue === "Infinity"
+                                        ? firstUnitValue + 2
+                                        : lastUnitValue + 1,
+                                    flatPrice: 0,
+                                    lastUnit: "Infinity",
+                                    unitPrice: 0,
+                                  })
+                                }}
+                              >
+                                <Plus className="h-3 w-3" />
+                                <span className="ml-2">add tier</span>
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       ) : null}
                     </div>

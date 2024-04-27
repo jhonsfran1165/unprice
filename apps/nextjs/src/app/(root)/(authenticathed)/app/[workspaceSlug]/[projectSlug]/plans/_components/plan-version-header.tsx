@@ -81,6 +81,14 @@ export default function PlanVersionHeader(props: {
                   <RefreshCcw className="h-3 w-3" />
                   <span className="ml-1">{planVersion.currency}</span>
                 </Badge>
+                <Badge variant={"secondary"}>
+                  <RefreshCcw className="h-3 w-3" />
+                  <span className="ml-1">montly</span>
+                </Badge>
+                <Badge variant={"secondary"}>
+                  <RefreshCcw className="h-3 w-3" />
+                  <span className="ml-1">montly</span>
+                </Badge>
               </div>
             </CardFooter>
           </div>

@@ -19,9 +19,11 @@ import type {
 } from "../validators/plans"
 import {
   currencyEnum,
+  paymentProviderEnum,
   planBillingPeriodEnum,
   planTypeEnum,
   statusPlanEnum,
+  whenToBillEnum,
 } from "./enums"
 import { projects } from "./projects"
 import { subscriptions } from "./subscriptions"
@@ -35,13 +37,14 @@ export const plans = pgTableProject(
     ...timestamps,
     slug: text("slug").notNull(),
     // whether the plan is active or not, if not active, it won't be available for purchase
-    // this is useful for plans that are not available anymore
+    // this is useful for plans that are not available anymore so the api won't list them
     active: boolean("active").default(true),
     // payment provider for the plan - stripe, paypal, lemonsquezee etc.
-    // TODO: this should be a list of providers that the project has configured
-    paymentProvider: text("payment_provider").default("stripe"),
+    paymentProvider: paymentProviderEnum("payment_providers"),
+    // description of the plan
     description: text("description"),
     // type of the plan - recurring, one-time, etc.
+    // TODO: add more types for now only support recurring
     type: planTypeEnum("plan_type").default("recurring"),
   },
   (table) => ({
@@ -56,17 +59,22 @@ export const plans = pgTableProject(
 // plan_versions are the different versions of the plan
 // each version can have different features and configurations
 // this allows to handle different currencies, billing periods, etc.
+// the idea with versions is the user can create a new version of the plan and publish it,
+// this way the customers can subscribe to the new version of the plan
+// versions are immutable, once created they can't be changed, also a version is a way to iterate on the plan
+// and add new features, configurations, etc. without affecting the existing customers
+// this allows pricing experiments, etc.
 export const versions = pgTableProject(
   "plan_versions",
   {
     ...projectID,
     ...timestamps,
     planId: cuid("plan_id").notNull(),
-    // description
-    description: text("description"),
+    // description of the plan version
+    description: text("description").$type<string | undefined>(),
     // version number of the plan, is a sequential number
     version: integer("version").notNull(),
-    // whether this is the latest version of the plan for the currency
+    // whether this is the latest version of the plan for the given currency
     latest: boolean("latest").default(false),
     // title of the version, this is useful for multiple languages. eg. "Basic Plan", "Plan Basico"
     title: varchar("title", { length: 50 }).notNull(),
@@ -74,13 +82,14 @@ export const versions = pgTableProject(
     tags: json("tags").$type<string[]>(),
     // currency of the plan
     currency: currencyEnum("currency").default("EUR"),
-    // payOption: pay_in_advance - pay_in_arrear
-    // billingPeriod: billing_period - billing_cycle, only used for recurring plans
+    // whenToBill: pay_in_advance - pay_in_arrear
+    whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance"),
+    // billingPeriod: billing_period - billing_cycle, only used for recurring plans, only used for recurring plans
     billingPeriod: planBillingPeriodEnum("billing_period"),
     // when to start each cycle for this subscription - not used for now, only used for recurring plans
-    startCycle: text("start_cycle").$type<StartCycleType>().default(1), // 1 - first day of the month
+    startCycle: text("start_cycle").$type<StartCycleType>().default(null), // null means the first day of the month
     // used for generating invoices - not used for now, only used for recurring plans
-    gracePeriod: integer("grace_period").default(0),
+    gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
     // status of the plan version - draft, active, inactive, published
     status: statusPlanEnum("plan_version_status").default("draft"),
     // features of the plan, each feature can have different configurations
@@ -96,7 +105,7 @@ export const versions = pgTableProject(
       foreignColumns: [plans.id, plans.projectId],
       name: "plan_versions_plan_id_fkey",
     }),
-    primary: primaryKey({
+    pk: primaryKey({
       columns: [table.id, table.projectId],
       name: "plan_versions_pkey",
     }),

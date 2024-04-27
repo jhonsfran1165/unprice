@@ -15,32 +15,103 @@ export const dbNameSpaces = {
 } as const
 
 export const TIER_MODES_MAP = {
-  sum: {
-    label: "Sum of usage during the period",
+  volume: {
+    label: "Volume",
     description: "Volume based pricing",
   },
-  most_recent: {
-    label: "Most recent usage during the period",
+  graduated: {
+    label: "Graduated",
+    description: "Graduated pricing",
+  },
+} as const
+
+export const USAGE_MODES_MAP = {
+  tier: {
+    label: "Tier",
     description: "Volume based pricing",
   },
-  max: {
-    label: "Maximum usage during the period",
+  package: {
+    label: "Package",
+    description: "Volume based pricing",
+  },
+  unit: {
+    label: "Unit",
     description: "Volume based pricing",
   },
 } as const
 
-export const FEATURE_TYPES = ["flat", "tiered", "volume"] as const
+// TODO: change the description
+export const USAGE_METERED_MAP = {
+  sum: {
+    label: "Sum",
+    description: "Volume based pricing",
+  },
+  most_recent: {
+    label: "Most recent",
+    description: "Most recent usage",
+  },
+  max: {
+    label: "Maximum",
+    description: "Volume based pricing",
+  },
+  min: {
+    label: "Minimum",
+    description: "Volume based pricing",
+  },
+  count: {
+    label: "Count",
+    description: "Volume based pricing",
+  },
+} as const
+
+export const PAYMENT_PROVIDERS = ["STRIPE", "LEMONSQUEEZY"] as const
 export const CURRENCIES = ["USD", "EUR", "GBP"] as const
 export const STAGES = ["prod", "test", "dev"] as const
 export const STATUS_PLAN = ["draft", "published", "archived"] as const
 export const STATUS_SUBSCRIPTION = ["active", "inactive"] as const
 export const PLANS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
 export const PROJECT_TIERS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
-export const PLAN_TYPES = ["recurring", "once"] as const
+export const PLAN_TYPES = ["recurring"] as const
 export const PLAN_BILLING_PERIODS = ["month", "year"] as const
 export const TIER_MODES = Object.keys(TIER_MODES_MAP) as unknown as readonly [
   string,
   ...string[],
 ]
+export const USAGE_MODES = Object.keys(USAGE_MODES_MAP) as unknown as readonly [
+  string,
+  ...string[],
+]
+
+export const USAGE_METERED = Object.keys(
+  USAGE_METERED_MAP
+) as unknown as readonly [string, ...string[]]
 
 export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
+export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
+
+export const FEATURE_TYPES_MAPS = {
+  flat: {
+    code: "flat",
+    label: "Flat",
+    description: "Single price for the feature",
+  },
+  tier: {
+    code: "tier",
+    label: "Tier",
+    description: "Price per tier",
+  },
+  package: {
+    code: "package",
+    label: "Package",
+    description: "Price per package of units",
+  },
+  usage: {
+    code: "usage",
+    label: "Usage",
+    description: "Price per usage",
+  },
+} as const
+
+export const FEATURE_TYPES = Object.keys(
+  FEATURE_TYPES_MAPS
+) as unknown as readonly [string, ...string[]]

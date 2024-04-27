@@ -162,6 +162,20 @@
       "when": 1714146823455,
       "tag": "0022_smooth_rocket_racer",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1714160849628,
+      "tag": "0023_cloudy_wong",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1714161085056,
+      "tag": "0024_secret_angel",
+      "breakpoints": true
     }
   ]
 }
