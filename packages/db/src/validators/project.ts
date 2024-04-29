@@ -3,22 +3,22 @@ import { z } from "zod"
 
 import * as schema from "../schema"
 
-export const insertProjectBaseSchema = createInsertSchema(schema.projects, {
+export const projectInserBaseSchema = createInsertSchema(schema.projects, {
   slug: z.string().min(1),
   name: z.string().min(1),
   url: z.string().url().optional(),
 })
 
-export const createProjectSchema = insertProjectBaseSchema.pick({
+export const createProjectSchema = projectInserBaseSchema.pick({
   name: true,
   url: true,
 })
 
-export const selectProjectSchema = createSelectSchema(schema.projects, {
+export const projectSelectBaseSchema = createSelectSchema(schema.projects, {
   name: z.string().min(4, "Name must be at least 5 characters"),
 })
 
-export const renameProjectSchema = selectProjectSchema.pick({
+export const renameProjectSchema = projectSelectBaseSchema.pick({
   slug: true,
   name: true,
 })
@@ -37,7 +37,7 @@ export const transferToWorkspaceSchema = z.object({
 })
 
 export type ProjectInsert = z.infer<typeof createProjectSchema>
-export type Project = z.infer<typeof selectProjectSchema>
+export type Project = z.infer<typeof projectSelectBaseSchema>
 export type RenameProject = z.infer<typeof renameProjectSchema>
 export type ProjectTransferToWorkspace = z.infer<
   typeof transferToWorkspaceSchema

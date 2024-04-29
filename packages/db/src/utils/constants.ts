@@ -112,6 +112,7 @@ export const FEATURE_TYPES_MAPS = {
   },
 } as const
 
+// TODO: should I delete this
 export const FEATURE_TYPES = Object.keys(
   FEATURE_TYPES_MAPS
 ) as unknown as readonly [string, ...string[]]

@@ -4,6 +4,7 @@ import * as z from "zod"
 import * as schema from "../schema"
 import {
   FEATURE_TYPES,
+  FEATURE_TYPES_MAPS,
   PAYMENT_PROVIDERS,
   TIER_MODES,
   USAGE_METERED,
@@ -24,7 +25,7 @@ export const paymentInfoSchema = z.record(
 )
 
 export const configFlatFeature = z.object({
-  type: z.literal(typeFeatureSchema.enum.flat),
+  type: z.literal(FEATURE_TYPES_MAPS.flat.code),
   tierMode: z.void(),
   usageMode: z.void(),
   id: z.string(),
@@ -42,7 +43,7 @@ export const configFlatFeature = z.object({
 })
 
 export const configTierFeature = z.object({
-  type: z.literal(typeFeatureSchema.enum.tier),
+  type: z.literal(FEATURE_TYPES_MAPS.tier.code),
   tierMode: tierModeSchema,
   aggregationMethod: z.enum(USAGE_METERED),
   id: z.string(),
@@ -143,7 +144,7 @@ export const configTierFeature = z.object({
 })
 
 export const configUsageFeature = z.object({
-  type: z.literal(typeFeatureSchema.enum.usage),
+  type: z.literal(FEATURE_TYPES_MAPS.usage.code),
   tierMode: tierModeSchema.optional(),
   usageMode: usageModeSchema,
   aggregationMethod: z.enum(USAGE_METERED),

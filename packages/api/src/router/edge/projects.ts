@@ -7,8 +7,8 @@ import * as utils from "@builderai/db/utils"
 import {
   createProjectSchema,
   deleteProjectSchema,
+  projectSelectBaseSchema,
   renameProjectSchema,
-  selectProjectSchema,
   selectWorkspaceSchema,
   transferToPersonalProjectSchema,
   transferToWorkspaceSchema,
@@ -35,7 +35,7 @@ export const projectRouter = createTRPCRouter({
     .input(createProjectSchema)
     .output(
       z.object({
-        project: selectProjectSchema,
+        project: projectSelectBaseSchema,
       })
     )
     .mutation(async (opts) => {
@@ -85,7 +85,7 @@ export const projectRouter = createTRPCRouter({
     .input(renameProjectSchema)
     .output(
       z.object({
-        project: selectProjectSchema.optional(),
+        project: projectSelectBaseSchema.optional(),
       })
     )
     .mutation(async (opts) => {
@@ -114,7 +114,7 @@ export const projectRouter = createTRPCRouter({
     .input(deleteProjectSchema)
     .output(
       z.object({
-        project: selectProjectSchema.optional(),
+        project: projectSelectBaseSchema.optional(),
       })
     )
     .mutation(async (opts) => {
@@ -169,7 +169,7 @@ export const projectRouter = createTRPCRouter({
     .input(transferToPersonalProjectSchema)
     .output(
       z.object({
-        project: selectProjectSchema.optional(),
+        project: projectSelectBaseSchema.optional(),
         workspaceSlug: z.string().optional(),
       })
     )
@@ -245,7 +245,7 @@ export const projectRouter = createTRPCRouter({
     .input(transferToWorkspaceSchema)
     .output(
       z.object({
-        project: selectProjectSchema.optional(),
+        project: projectSelectBaseSchema.optional(),
         workspaceSlug: z.string().optional(),
       })
     )
@@ -310,7 +310,7 @@ export const projectRouter = createTRPCRouter({
     .output(
       z.object({
         projects: z.array(
-          selectProjectSchema.extend({
+          projectSelectBaseSchema.extend({
             styles: z.object({
               backgroundImage: z.string(),
             }),
@@ -361,7 +361,7 @@ export const projectRouter = createTRPCRouter({
     .output(
       z.object({
         projects: z.array(
-          selectProjectSchema.extend({
+          projectSelectBaseSchema.extend({
             styles: z.object({
               backgroundImage: z.string(),
             }),
@@ -416,7 +416,7 @@ export const projectRouter = createTRPCRouter({
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
-        project: selectProjectSchema.extend({
+        project: projectSelectBaseSchema.extend({
           workspace: selectWorkspaceSchema,
         }),
       })
@@ -440,7 +440,7 @@ export const projectRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .output(
       z.object({
-        project: selectProjectSchema.extend({
+        project: projectSelectBaseSchema.extend({
           workspace: selectWorkspaceSchema,
         }),
       })
