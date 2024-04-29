@@ -18,8 +18,8 @@ export default async function PriceLayout(props: {
   }
 }) {
   const { projectSlug, workspaceSlug, planSlug, planVersionId } = props.params
-  const { planVersion } = await api.plans.getVersionById({
-    versionId: Number(planVersionId),
+  const { planVersion } = await api.planVersions.getByVersion({
+    version: Number(planVersionId),
     planSlug,
   })
 

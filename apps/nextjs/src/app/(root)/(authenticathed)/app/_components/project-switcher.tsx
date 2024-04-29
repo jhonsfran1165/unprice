@@ -45,7 +45,6 @@ export function ProjectSwitcher({
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            size="sm"
             role="combobox"
             aria-expanded={switcherOpen}
             aria-label="Select a project"

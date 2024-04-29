@@ -28,20 +28,16 @@ export function PlanDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Feature Data"}</DialogTitle>
+          <DialogTitle>{"Plan Form"}</DialogTitle>
         </DialogHeader>
 
         <PlanForm
           defaultValues={
             defaultValues ?? {
-              title: "",
+              paymentProvider: "stripe",
               slug: "",
               description: "",
               type: "recurring",
-              billingPeriod: "monthly",
-              startCycle: 1,
-              currency: "USD",
-              gracePeriod: 0,
               active: true,
             }
           }

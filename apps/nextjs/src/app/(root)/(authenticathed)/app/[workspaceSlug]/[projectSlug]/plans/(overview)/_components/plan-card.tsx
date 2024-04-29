@@ -7,6 +7,7 @@ import {
   RefreshCcw,
   Settings,
   User2,
+  Wallet,
 } from "lucide-react"
 
 import { cn } from "@builderai/ui"
@@ -50,7 +51,7 @@ export function PlanCard(props: {
         <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
           <div className="space-y-2">
             <CardTitle className={"line-clamp-1"}>{plan.slug}</CardTitle>
-            <CardDescription className="line-clamp-4 h-20">
+            <CardDescription className="line-clamp-2 h-10">
               {plan.description}
             </CardDescription>
           </div>
@@ -115,15 +116,19 @@ export function PlanCard(props: {
           </div>
         </CardHeader>
         <CardFooter className="flex flex-row justify-between space-x-4 text-sm text-muted-foreground">
-          <div>
+          <div className="space-x-2">
             <Badge>
               <RefreshCcw className="h-3 w-3" />
-              <span className="ml-1">recurring</span>
+              <span className="ml-1">{plan.type}</span>
+            </Badge>
+            <Badge>
+              <Wallet className="h-3 w-3" />
+              <span className="ml-1">{plan.paymentProvider}</span>
             </Badge>
           </div>
           <div className="flex items-center text-xs text-muted-foreground">
-            <GalleryHorizontalEnd className="mr-1 h-3 w-3" />
-            {versions.length === 0 ? "No" : versions.length} Versions
+            <GalleryHorizontalEnd className="mr-2 h-3 w-3" />
+            {versions.length === 0 ? "no" : versions.length} versions
           </div>
         </CardFooter>
       </Card>
@@ -135,7 +140,7 @@ export function PlanCardSkeleton(props: { pulse?: boolean }) {
   const { pulse = true } = props
   return (
     <Card>
-      <div className={cn("h-32 bg-muted", pulse && "animate-pulse")} />
+      <div className={cn("h-20 bg-muted", pulse && "animate-pulse")} />
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span className={cn("flex-1 bg-muted", pulse && "animate-pulse")}>

@@ -2,6 +2,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 
 import * as schema from "../schema"
+import { CURRENCIES } from "../utils"
 import {
   configFlatFeature,
   configTierFeature,
@@ -68,25 +69,26 @@ export const versionSelectBaseSchema = createSelectSchema(schema.versions, {
   featuresConfig: z.array(planVersionFeatureSchema),
   startCycle: startCycleSchema,
   tags: z.array(z.string()),
+  currency: z.enum(CURRENCIES),
 })
 
 export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
   featuresConfig: z.array(planVersionFeatureSchema),
   startCycle: startCycleSchema,
   tags: z.array(z.string()),
+  currency: z.enum(CURRENCIES),
 })
+  .partial({
+    projectId: true,
+    id: true,
+    version: true,
+  })
+  .required({
+    planId: true,
+    currency: true,
+  })
 
 export type StartCycleType = z.infer<typeof startCycleSchema>
-
-export const insertPlanVersionSchema = versionInsertBaseSchema.partial({
-  id: true,
-  version: true,
-  createdAt: true,
-  updatedAt: true,
-  startCycle: true,
-  gracePeriod: true,
-  active: true,
-})
 
 export const versionListBase = versionSelectBaseSchema.pick({
   id: true,
@@ -123,7 +125,7 @@ export interface Group {
   title: string
 }
 
-export type InsertPlanVersion = z.infer<typeof insertPlanVersionSchema>
+export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>
 export type UpdateVersion = z.infer<typeof updateVersionPlan>
 export type PlanVersion = z.infer<typeof versionSelectBaseSchema>
 export type PlanVersionList = z.infer<typeof versionListBase>

@@ -1,17 +1,16 @@
 "use client"
 
 import { startTransition } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 
-import {
-  PAYMENT_PROVIDERS,
-  PLAN_BILLING_PERIODS,
-  PLAN_TYPES,
-  slugify,
-} from "@builderai/db/utils"
+import { PAYMENT_PROVIDERS, PLAN_TYPES } from "@builderai/db/utils"
 import type { InsertPlan } from "@builderai/db/validators"
-import { insertPlanSchema } from "@builderai/db/validators"
+import {
+  planInsertBaseSchema,
+  planSelectBaseSchema,
+} from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -49,10 +48,9 @@ export function PlanForm({
   const editMode = defaultValues.id ? true : false
   const planExist = api.plans.exist.useMutation()
 
-  // async validation only when creating a new plan
   const formSchema = editMode
-    ? insertPlanSchema
-    : insertPlanSchema.extend({
+    ? planSelectBaseSchema
+    : planInsertBaseSchema.extend({
         slug: z
           .string()
           .min(3)
@@ -62,7 +60,7 @@ export function PlanForm({
             })
 
             return !exist
-          }, "Plan slug already exists in this app. Change the title of your plan."),
+          }, "Plan slug already exists in this app."),
       })
 
   const form = useZodForm({
@@ -123,51 +121,24 @@ export function PlanForm({
   return (
     <Form {...form}>
       <form className="space-y-6">
-        <div className="my-4 space-y-4">
-          <div className="flex w-full flex-row justify-between space-x-2">
-            <div className="w-full">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Plan Title</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="FREE"
-                        onChange={(e) => {
-                          field.onChange(e)
-
-                          if (!editMode) {
-                            const slug = slugify(e.target.value)
-                            form.setValue("slug", slug)
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="w-full">
-              <FormField
-                control={form.control}
-                name="slug"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Plan Slug</FormLabel>
-                    <FormControl>
-                      <Input {...field} readOnly disabled placeholder="free" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+        <div className="space-y-8">
+          <FormField
+            control={form.control}
+            name="slug"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Plan Slug</FormLabel>
+                <FormDescription>
+                  The slug is a unique identifier for the plan and will be used
+                  for api calls.
+                </FormDescription>
+                <FormControl>
+                  <Input {...field} placeholder="free" disabled={editMode} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -176,11 +147,22 @@ export function PlanForm({
               <FormItem>
                 <div className="flex justify-between">
                   <FormLabel>Payment provider</FormLabel>
+                  {/* // TODO: add link to payment provider configuration */}
+                  <Link
+                    href="#"
+                    className="ml-auto inline-block text-xs text-info underline opacity-70"
+                  >
+                    Configure payment provider
+                  </Link>
                 </div>
+
+                <FormDescription>
+                  In oder to use a payment provider, you need to configure it
+                  first for your organization.
+                </FormDescription>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value ?? ""}
-                  disabled={editMode}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -200,73 +182,37 @@ export function PlanForm({
             )}
           />
 
-          <div className="flex w-full flex-row justify-between space-x-2">
-            <div className="w-full">
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex justify-between">
-                      <FormLabel>Type of the plan</FormLabel>
-                    </div>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value ?? ""}
-                      disabled={editMode}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a plan type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {PLAN_TYPES.map((type, index) => (
-                          <SelectItem key={index} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Type of the plan</FormLabel>
+                <FormDescription>
+                  Only recurring plans are supported at the moment.
+                </FormDescription>
 
-            <div className="w-full">
-              <FormField
-                control={form.control}
-                name="billingPeriod"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex justify-between">
-                      <FormLabel>Billing Cycle</FormLabel>
-                    </div>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value ?? ""}
-                      disabled={editMode}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a cycle" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {PLAN_BILLING_PERIODS.map((type, index) => (
-                          <SelectItem key={index} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a plan type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {PLAN_TYPES.map((type, index) => (
+                      <SelectItem key={index} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -286,7 +232,7 @@ export function PlanForm({
           />
         </div>
 
-        <div className="mt-8 flex justify-end space-x-2">
+        <div className="mt-8 flex justify-end space-x-4">
           {editMode && (
             <ConfirmAction
               confirmAction={() => {
@@ -294,10 +240,7 @@ export function PlanForm({
                 onDelete()
               }}
             >
-              <Button
-                variant={"destructive"}
-                disabled={deleteFeature.isPending}
-              >
+              <Button variant={"link"} disabled={deleteFeature.isPending}>
                 Delete
               </Button>
             </ConfirmAction>

@@ -11,7 +11,7 @@ interface SubmitButtonProps extends ButtonProps {
 }
 
 export const SubmitButton = ({
-  variant = "default",
+  variant = "primary",
   isSubmitting,
   isDisabled,
   label,

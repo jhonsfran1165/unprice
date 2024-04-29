@@ -2,6 +2,7 @@
 
 import { ChevronDown } from "lucide-react"
 
+import type { RouterOutputs } from "@builderai/api"
 import { Button } from "@builderai/ui/button"
 import {
   DropdownMenu,
@@ -15,19 +16,17 @@ import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
 export function VersionActions({
-  planId,
-  versionId,
+  planVersion,
 }: {
-  planId: string
-  versionId: number
+  planVersion: RouterOutputs["planVersions"]["getByVersion"]["planVersion"]
 }) {
-  const updatePlanVersion = api.plans.updateVersion.useMutation({
+  const updatePlanVersion = api.planVersions.update.useMutation({
     onSuccess: () => {
       toastAction("success", "Version published")
     },
   })
 
-  const syncPlanVersion = api.plans.syncWithStripe.useMutation({
+  const syncPlanVersion = api.planVersions.syncWithStripe.useMutation({
     onSuccess: () => {
       toastAction("success", "Version synced")
     },
@@ -53,9 +52,12 @@ export function VersionActions({
         <DropdownMenuItem
           onSelect={async () => {
             await updatePlanVersion.mutateAsync({
-              planId,
-              versionId,
               status: "published",
+              currency: planVersion.currency,
+              planId: planVersion.planId,
+              id: planVersion.id,
+              projectId: planVersion.projectId,
+              version: planVersion.version,
             })
           }}
           className="text-red-600"
@@ -65,8 +67,8 @@ export function VersionActions({
         <DropdownMenuItem
           onSelect={async () => {
             await syncPlanVersion.mutateAsync({
-              planId,
-              planVersionId: versionId,
+              planId: planVersion.planId,
+              planVersionId: planVersion.version,
             })
           }}
         >

@@ -17,14 +17,9 @@ import {
   protectedActiveProjectProcedure,
 } from "../../trpc"
 
-export const planRouter = createTRPCRouter({
+export const planVersionRouter = createTRPCRouter({
   create: protectedActiveProjectAdminProcedure
-    .input(
-      versionInsertBaseSchema.partial({ id: true, version: true }).required({
-        planId: true,
-        currency: true,
-      })
-    )
+    .input(versionInsertBaseSchema)
     .output(
       z.object({
         planVersion: versionSelectBaseSchema,
@@ -124,8 +119,70 @@ export const planRouter = createTRPCRouter({
       }
     }),
 
+  remove: protectedActiveProjectAdminProcedure
+    .input(
+      versionInsertBaseSchema
+        .pick({
+          id: true,
+        })
+        .required({ id: true })
+    )
+    .output(z.object({ plan: versionSelectBaseSchema }))
+    .mutation(async (opts) => {
+      const { id } = opts.input
+      const project = opts.ctx.project
+
+      const planVersionData = await opts.ctx.db.query.versions.findFirst({
+        where: (version, { and, eq }) =>
+          and(eq(version.id, id), eq(version.projectId, project.id)),
+      })
+
+      if (!planVersionData?.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "version not found",
+        })
+      }
+
+      // TODO: should we allow to delete a published version when there is no subscription?
+      if (planVersionData?.status === "published") {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Cannot delete a published version, deactivate it instead",
+        })
+      }
+
+      const deletedPlanVersion = await opts.ctx.db
+        .delete(schema.versions)
+        .where(
+          and(
+            eq(schema.versions.projectId, project.id),
+            eq(schema.versions.id, planVersionData.id)
+          )
+        )
+        .returning()
+        .then((data) => data[0])
+
+      if (!deletedPlanVersion?.id) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error deleting feature",
+        })
+      }
+
+      return {
+        plan: deletedPlanVersion,
+      }
+    }),
   update: protectedActiveProjectAdminProcedure
-    .input(versionSelectBaseSchema)
+    .input(
+      versionInsertBaseSchema
+        .partial({
+          projectId: true,
+          title: true,
+        })
+        .required({ id: true })
+    )
     .output(
       z.object({
         planVersion: versionSelectBaseSchema,

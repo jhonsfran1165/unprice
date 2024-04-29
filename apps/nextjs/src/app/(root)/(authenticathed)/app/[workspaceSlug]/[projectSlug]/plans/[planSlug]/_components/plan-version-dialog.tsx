@@ -28,16 +28,16 @@ export function PlanVersionDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Feature Data"}</DialogTitle>
+          <DialogTitle>Plan version form</DialogTitle>
         </DialogHeader>
 
         <PlanVersionForm
           defaultValues={
             defaultValues ?? {
               title: "",
-              description: "",
               planId: "",
               projectId: "",
+              currency: "USD",
             }
           }
           setDialogOpen={setDialogOpen}

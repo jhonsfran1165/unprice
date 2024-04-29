@@ -19,12 +19,14 @@ export const plans = pgTableProject(
     // this is useful for plans that are not available anymore so the api won't list them
     active: boolean("active").default(true),
     // payment provider for the plan - stripe, paypal, lemonsquezee etc.
-    paymentProvider: paymentProviderEnum("payment_providers"),
+    paymentProvider: paymentProviderEnum("payment_providers")
+      .default("stripe")
+      .notNull(),
     // description of the plan
     description: text("description"),
     // type of the plan - recurring, one-time, etc.
     // TODO: add more types for now only support recurring
-    type: planTypeEnum("plan_type").default("recurring"),
+    type: planTypeEnum("plan_type").default("recurring").notNull(),
   },
   (table) => ({
     primary: primaryKey({

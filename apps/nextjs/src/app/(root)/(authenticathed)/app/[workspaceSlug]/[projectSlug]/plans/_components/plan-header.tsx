@@ -1,4 +1,4 @@
-import { RefreshCcw } from "lucide-react"
+import { RefreshCcw, Wallet } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
@@ -11,8 +11,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
+import { Separator } from "@builderai/ui/separator"
 
 import { PlanVersionDialog } from "../[planSlug]/_components/plan-version-dialog"
+import { PlanActions } from "./plan-actions"
 
 export const runtime = "edge"
 
@@ -30,12 +32,12 @@ export default function PlanHeader(props: {
         <div className="flex flex-col">
           <CardHeader className="pb-3">
             <CardTitle>{plan.slug.toUpperCase()}</CardTitle>
-            <CardDescription className="max-w-lg text-balance leading-relaxed">
+            <CardDescription className="line-clamp-2 h-12 max-w-lg text-balance leading-relaxed">
               {plan.description}
             </CardDescription>
           </CardHeader>
           <CardFooter>
-            <div className="flex space-x-1">
+            <div className="flex space-x-2">
               <Badge
                 className={cn({
                   success: plan.active,
@@ -51,21 +53,35 @@ export default function PlanHeader(props: {
                 <RefreshCcw className="h-3 w-3" />
                 <span className="ml-1">{plan.type}</span>
               </Badge>
+              <Badge>
+                <Wallet className="h-3 w-3" />
+                <span className="ml-1">{plan.paymentProvider}</span>
+              </Badge>
             </div>
           </CardFooter>
         </div>
 
         <div className="flex items-center px-6">
-          <PlanVersionDialog
-            defaultValues={{
-              planId: plan.id,
-              description: plan.description,
-              title: plan.slug,
-              projectId: plan.projectId,
-            }}
-          >
-            <Button>Create New Version</Button>
-          </PlanVersionDialog>
+          <div className="button-primary flex items-center space-x-1 rounded-md ">
+            <div className="sm:col-span-full">
+              <PlanVersionDialog
+                defaultValues={{
+                  planId: plan.id,
+                  description: plan.description,
+                  title: plan.slug,
+                  projectId: plan.projectId,
+                  // TODO: use default currency from org settings
+                  currency: "USD",
+                }}
+              >
+                <Button variant={"custom"}>Add Version</Button>
+              </PlanVersionDialog>
+            </div>
+
+            <Separator orientation="vertical" className="h-[20px] p-0" />
+
+            <PlanActions plan={plan} />
+          </div>
         </div>
       </div>
     </Card>

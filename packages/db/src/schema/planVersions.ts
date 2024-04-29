@@ -49,6 +49,8 @@ export const versions = pgTableProject(
     latest: boolean("latest").default(false),
     // title of the version, this is useful for multiple languages. eg. "Basic Plan", "Plan Basico"
     title: varchar("title", { length: 50 }).notNull(),
+    // active: whether the plan version is active or not, if not active, it won't be available for purchase
+    active: boolean("active").default(true),
     // tags for the plan, this could be used for filtering
     tags: json("tags").$type<string[]>(),
     // currency of the plan

@@ -13,16 +13,15 @@ import { api } from "~/trpc/client"
 import { usePlanFeaturesList } from "./use-features"
 import { VersionActions } from "./version-actions"
 
+// TODO: fix thi, should handle planversion form and update action
 const CreateNewVersion = ({
   projectSlug,
   workspaceSlug,
-  plan,
-  planVersionId,
+  planVersion,
 }: {
   projectSlug: string
   workspaceSlug: string
-  plan: RouterOutputs["plans"]["getBySlug"]["plan"]
-  planVersionId?: number
+  planVersion?: RouterOutputs["planVersions"]["getByVersion"]["planVersion"]
 }) => {
   const router = useRouter()
   const [planFeatures] = usePlanFeaturesList()
@@ -36,19 +35,19 @@ const CreateNewVersion = ({
     }
   )
 
-  const createVersion = api.plans.createVersion.useMutation({
+  const createVersion = api.planVersions.create.useMutation({
     onSuccess: (data) => {
-      const { planVersion } = data
+      const { planVersion: version } = data
       toastAction("success")
 
       router.refresh()
       router.push(
-        `/${workspaceSlug}/${projectSlug}/plans/${plan?.slug}/${planVersion?.version}`
+        `/${workspaceSlug}/${projectSlug}/plans/${planVersion?.plan.slug}/${version.version}`
       )
     },
   })
 
-  const updateVersion = api.plans.updateVersion.useMutation({
+  const updateVersion = api.planVersions.update.useMutation({
     onSuccess: () => {
       toastAction("updated")
       router.refresh()
@@ -65,20 +64,18 @@ const CreateNewVersion = ({
         return
       }
 
-      if (plan?.id === undefined) {
-        toastAction("error", "Plan id is undefined")
-        return
-      }
-
-      if (planVersionId === undefined) {
-        toastAction("error", "Plan version id is undefined")
+      if (!planVersion) {
         return
       }
 
       void updateVersion.mutateAsync({
-        planId: plan.id,
-        featuresConfig: planFeatures.planFeatures,
-        versionId: planVersionId,
+        ...planVersion,
+        // TODO: pass version id - pass planversion object
+        id: "planVersionId",
+        projectId: planVersion?.projectId,
+        title: "Version 1",
+        description: "Version 1",
+        billingPeriod: "month",
       })
     })
   }
@@ -93,15 +90,18 @@ const CreateNewVersion = ({
         return
       }
 
-      if (plan?.id === undefined) {
-        toastAction("error", "Plan id is undefined")
+      if (!planVersion) {
         return
       }
 
       void createVersion.mutateAsync({
-        planId: plan.id,
+        planId: planVersion.plan.id,
         featuresConfig: planFeatures.planFeatures,
-        projectId: plan.projectId,
+        projectId: planVersion.projectId,
+        currency: "EUR",
+        title: "Version 1",
+        description: "Version 1",
+        billingPeriod: "month",
       })
     })
   }
@@ -112,19 +112,29 @@ const CreateNewVersion = ({
         <SubmitButton
           variant={"custom"}
           isSubmitting={
-            planVersionId ? updateVersion.isPending : createVersion.isPending
+            planVersion?.id ? updateVersion.isPending : createVersion.isPending
           }
           isDisabled={
-            planVersionId ? updateVersion.isPending : createVersion.isPending
+            planVersion?.id ? updateVersion.isPending : createVersion.isPending
           }
-          label={planVersionId ? "Update version" : "Save version"}
-          onClick={planVersionId ? onUpdateVersion : onCreateVersion}
+          label={planVersion?.version ? "Update version" : "Save version"}
+          onClick={planVersion?.version ? onUpdateVersion : onCreateVersion}
         />
       </div>
 
       <Separator orientation="vertical" className="h-[20px] p-0" />
 
-      <VersionActions planId={plan.id} versionId={Number(planVersionId)} />
+      <VersionActions
+        planVersion={
+          planVersion ?? {
+            id: "planVersionId",
+            planId: "planId",
+            projectId: "projectId",
+            version: "version",
+            currency: "USD",
+          }
+        }
+      />
     </div>
   )
 }

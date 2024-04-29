@@ -25,8 +25,8 @@ export async function PlanVersionConfigurator({
 }: PlanVersionConfiguratorProps) {
   const layout = cookies().get("react-resizable-panels:layout")
 
-  const { planVersion } = await api.plans.getVersionById({
-    versionId: Number(planVersionId),
+  const { planVersion } = await api.planVersions.getByVersion({
+    version: Number(planVersionId),
     planSlug,
   })
 

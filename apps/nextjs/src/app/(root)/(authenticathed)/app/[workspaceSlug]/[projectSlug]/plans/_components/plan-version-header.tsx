@@ -21,9 +21,9 @@ export default function PlanVersionHeader(props: {
   workspaceSlug: string
   projectSlug: string
   planVersionId: string
-  planVersion: RouterOutputs["plans"]["getVersionById"]["planVersion"]
+  planVersion: RouterOutputs["planVersions"]["getByVersion"]["planVersion"]
 }) {
-  const { workspaceSlug, projectSlug, planVersionId, planVersion } = props
+  const { workspaceSlug, projectSlug, planVersion } = props
   return (
     <div className="flex flex-col">
       <div className="my-4 flex justify-between align-middle">
@@ -95,10 +95,9 @@ export default function PlanVersionHeader(props: {
 
           <div className="flex items-center px-6">
             <CreateNewVersion
-              plan={planVersion.plan}
+              planVersion={planVersion}
               projectSlug={projectSlug}
               workspaceSlug={workspaceSlug}
-              planVersionId={Number(planVersionId)}
             />
           </div>
         </div>

@@ -3,6 +3,7 @@ import { authRouter } from "./router/edge/auth"
 import { domainRouter } from "./router/edge/domains"
 import { featureRouter } from "./router/edge/features"
 import { planRouter } from "./router/edge/plans"
+import { planVersionRouter } from "./router/edge/planVersions"
 import { projectRouter } from "./router/edge/projects"
 import { stripeRouter } from "./router/edge/stripe"
 import { subscriptionRouter } from "./router/edge/subscriptions"
@@ -14,9 +15,9 @@ export const edgeRouter = createTRPCRouter({
   workspaces: workspaceRouter,
   projects: projectRouter,
   plans: planRouter,
+  planVersions: planVersionRouter,
   auth: authRouter,
   apikeys: apiKeyRouter,
-  // TODO: put this inside plan
   features: featureRouter,
   subscriptions: subscriptionRouter,
   domains: domainRouter,

@@ -64,7 +64,7 @@ export const USAGE_METERED_MAP = {
   },
 } as const
 
-export const PAYMENT_PROVIDERS = ["STRIPE", "LEMONSQUEEZY"] as const
+export const PAYMENT_PROVIDERS = ["stripe", "lemonsqueezy"] as const
 export const CURRENCIES = ["USD", "EUR", "GBP"] as const
 export const STAGES = ["prod", "test", "dev"] as const
 export const STATUS_PLAN = ["draft", "published", "archived"] as const

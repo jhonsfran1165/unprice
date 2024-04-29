@@ -5,7 +5,7 @@ import { and, eq, sql } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
-  insertPlanSchema,
+  planInsertBaseSchema,
   planSelectBaseSchema,
   projectSelectBaseSchema,
   versionSelectBaseSchema,
@@ -19,7 +19,7 @@ import {
 
 export const planRouter = createTRPCRouter({
   create: protectedActiveProjectProcedure
-    .input(insertPlanSchema)
+    .input(planInsertBaseSchema)
     .output(
       z.object({
         plan: planSelectBaseSchema,
@@ -105,11 +105,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
   update: protectedActiveProjectAdminProcedure
-    .input(
-      insertPlanSchema.required({
-        id: true,
-      })
-    )
+    .input(planInsertBaseSchema.required({ id: true }))
     .output(
       z.object({
         plan: planSelectBaseSchema,
@@ -137,6 +133,11 @@ export const planRouter = createTRPCRouter({
           message: "plan not found",
         })
       }
+
+      // TODO: is it a good idea to let the user update the plan?
+      // maybe we should think what happen if the user update the plan and there are versions
+      // that are not compatible with the new plan. This is also a good reason to have a version as a snapshot
+      // in the subscription so the customer can keep using the old version no matter what happens with the plan
 
       const updatedPlan = await opts.ctx.db
         .update(schema.plans)

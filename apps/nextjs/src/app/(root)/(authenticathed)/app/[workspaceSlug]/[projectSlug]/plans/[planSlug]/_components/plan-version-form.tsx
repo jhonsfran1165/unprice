@@ -4,8 +4,9 @@ import { startTransition } from "react"
 import { useRouter } from "next/navigation"
 
 import { CURRENCIES } from "@builderai/config"
+import { PLAN_BILLING_PERIODS } from "@builderai/db/utils"
 import type { InsertPlanVersion } from "@builderai/db/validators"
-import { insertPlanVersionSchema } from "@builderai/db/validators"
+import { versionInsertBaseSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -43,29 +44,29 @@ export function PlanVersionForm({
   const editMode = defaultValues.id ? true : false
 
   const form = useZodForm({
-    schema: insertPlanVersionSchema,
+    schema: versionInsertBaseSchema,
     defaultValues: defaultValues,
   })
 
-  const createVersionPlan = api.plans.createVersion.useMutation({
-    onSuccess: ({ plan }) => {
-      form.reset(plan)
+  const createPlanVersion = api.planVersions.create.useMutation({
+    onSuccess: ({ planVersion }) => {
+      form.reset(planVersion)
       toastAction("saved")
       setDialogOpen?.(false)
       router.refresh()
     },
   })
 
-  const updatePlan = api.plans.update.useMutation({
-    onSuccess: ({ plan }) => {
-      form.reset(plan)
+  const updatePlanVersion = api.planVersions.update.useMutation({
+    onSuccess: ({ planVersion }) => {
+      form.reset(planVersion)
       toastAction("updated")
       setDialogOpen?.(false)
       router.refresh()
     },
   })
 
-  const deleteFeature = api.plans.remove.useMutation({
+  const deletePlanVersion = api.planVersions.remove.useMutation({
     onSuccess: () => {
       toastAction("deleted")
       form.reset()
@@ -75,7 +76,14 @@ export function PlanVersionForm({
 
   const onSubmitForm = async (data: InsertPlanVersion) => {
     if (!defaultValues.id) {
-      await createVersionPlan.mutateAsync(data)
+      await createPlanVersion.mutateAsync(data)
+    }
+
+    if (defaultValues.id && defaultValues.projectId) {
+      await updatePlanVersion.mutateAsync({
+        ...data,
+        id: defaultValues.id,
+      })
     }
   }
 
@@ -86,20 +94,24 @@ export function PlanVersionForm({
         return
       }
 
-      void deleteFeature.mutateAsync({ id: defaultValues.id })
+      void deletePlanVersion.mutateAsync({ id: defaultValues.id })
     })
   }
 
   return (
     <Form {...form}>
       <form className="space-y-6">
-        <div className="my-4 space-y-4">
+        <div className="space-y-8">
           <FormField
             control={form.control}
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Plan Title</FormLabel>
+                <FormLabel>Plan version Title</FormLabel>
+                <FormDescription>
+                  This title will be displayed to your customers. You can use it
+                  for handling multiple languages.
+                </FormDescription>
                 <FormControl>
                   <Input
                     {...field}
@@ -118,7 +130,7 @@ export function PlanVersionForm({
             render={({ field }) => (
               <FormItem>
                 <div className="flex justify-between">
-                  <FormLabel>Currency of the plan</FormLabel>
+                  <FormLabel>Currency of this version</FormLabel>
                 </div>
                 <Select
                   onValueChange={field.onChange}
@@ -145,6 +157,37 @@ export function PlanVersionForm({
 
           <FormField
             control={form.control}
+            name="billingPeriod"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex justify-between">
+                  <FormLabel>Billing period</FormLabel>
+                </div>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                  disabled={editMode}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a billing period" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {PLAN_BILLING_PERIODS.map((period, index) => (
+                      <SelectItem key={index} value={period}>
+                        {period}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem>
@@ -153,7 +196,7 @@ export function PlanVersionForm({
                   <Textarea {...field} value={field.value ?? ""} />
                 </FormControl>
                 <FormDescription>
-                  Enter a short description of the feature.
+                  Enter a short description of the versions.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -161,7 +204,7 @@ export function PlanVersionForm({
           />
         </div>
 
-        <div className="mt-8 flex justify-end space-x-2">
+        <div className="mt-8 flex justify-end space-x-4">
           {editMode && (
             <ConfirmAction
               confirmAction={() => {
@@ -169,10 +212,7 @@ export function PlanVersionForm({
                 onDelete()
               }}
             >
-              <Button
-                variant={"destructive"}
-                disabled={deleteFeature.isPending}
-              >
+              <Button variant={"link"} disabled={deletePlanVersion.isPending}>
                 Delete
               </Button>
             </ConfirmAction>

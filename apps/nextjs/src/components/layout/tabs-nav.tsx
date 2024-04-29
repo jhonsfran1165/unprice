@@ -17,13 +17,13 @@ export default function TabsNav(props: {
   return (
     <div
       className={cn(
-        "-py-2 sticky inset-x-0 left-0 top-0 z-30 block w-12 items-center justify-start bg-background-bgSubtle px-2 transition-all",
+        "border-t-1 sticky inset-x-0 left-0 top-0 z-30 block w-12 items-center justify-start border-r border-t-primary-solid bg-background-bgSubtle px-2 transition-all",
         props.className
       )}
     >
       <div className="flex h-full flex-col items-center justify-between">
         <ScrollArea className="flex">
-          <div className="flex flex-col items-center gap-2 border-t-2 border-primary-solid pt-4">
+          <div className="flex flex-col items-center gap-4 pt-4">
             {props.tabs.map((route, index) => (
               <Tab
                 key={route.href + index}
@@ -33,6 +33,7 @@ export default function TabsNav(props: {
               />
             ))}
           </div>
+
           <ScrollBar orientation="vertical" className="invisible" />
         </ScrollArea>
         <div className="mb-4 flex">
