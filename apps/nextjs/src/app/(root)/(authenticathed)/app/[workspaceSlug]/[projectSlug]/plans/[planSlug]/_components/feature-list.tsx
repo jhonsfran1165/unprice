@@ -79,7 +79,7 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
                     description: "",
                   }}
                 >
-                  <Button>Create feature</Button>
+                  <Button size={"sm"}>Create feature</Button>
                 </FeatureDialog>
               </EmptyPlaceholder.Action>
             </EmptyPlaceholder>

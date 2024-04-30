@@ -82,6 +82,16 @@ export function PlanForm({
       form.reset(plan)
       toastAction("updated")
       setDialogOpen?.(false)
+
+      // Only needed when the form is inside a uncontrolled dialog - normally updates
+      // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+      if (!setDialogOpen) {
+        const escKeyEvent = new KeyboardEvent("keydown", {
+          key: "Escape",
+        })
+        document.dispatchEvent(escKeyEvent)
+      }
+
       router.refresh()
     },
   })

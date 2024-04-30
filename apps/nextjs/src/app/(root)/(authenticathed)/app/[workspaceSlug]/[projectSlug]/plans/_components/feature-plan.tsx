@@ -67,7 +67,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
         ref={ref}
         {...rest}
         className={cn(featureVariants({ variant, className }), {
-          "border-background-borderHover":
+          "border-background-borderHover shadow-lg":
             mode === "FeaturePlan" && active?.id === feature.id,
         })}
         onClick={handleClick}
@@ -119,7 +119,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                           ? "Free"
                           : `$${feature?.config?.price}`
                       }`
-                    : ["volume", "tiered"].includes(feature.type)
+                    : ["usage", "tier"].includes(feature.type)
                       ? `${feature?.config?.tiers.length ?? 0} tiers`
                       : null}
 

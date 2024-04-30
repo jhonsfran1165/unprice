@@ -13,9 +13,11 @@ import {
 export function ConfirmAction({
   confirmAction,
   children,
+  message,
 }: {
   confirmAction: () => void
   children: React.ReactNode
+  message?: string
 }) {
   return (
     <AlertDialog>
@@ -24,8 +26,9 @@ export function ConfirmAction({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription className="font-light">
-            This action cannot be undone. This will permanently delete your
-            data.
+            {message
+              ? message
+              : "This action cannot be undone. This will permanently delete your data."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

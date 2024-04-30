@@ -8,6 +8,7 @@ import {
   Wallet,
 } from "lucide-react"
 
+import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import {
@@ -136,7 +137,13 @@ export default async function PlanPage({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {/* // TODO: create empty state */}
+                    {plan.versions.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center">
+                          No versions found
+                        </TableCell>
+                      </TableRow>
+                    )}
                     {plan.versions.map((version) => (
                       <TableRow key={version.id}>
                         <TableCell className="table-cell text-left">
@@ -159,7 +166,13 @@ export default async function PlanPage({
                           </Badge>
                         </TableCell>
                         <TableCell className="table-cell text-center">
-                          <Badge className="text-xs">{version.status}</Badge>
+                          <Badge
+                            className={cn({
+                              success: version.status === "published",
+                            })}
+                          >
+                            {version.status}
+                          </Badge>
                         </TableCell>
                         <TableCell className="hidden text-left md:table-cell">
                           {formatDate(version.createdAt)}
@@ -195,7 +208,7 @@ export default async function PlanPage({
                                   <DropdownMenuSeparator />
                                   <DialogTrigger asChild>
                                     <DropdownMenuItem>
-                                      Edit plan
+                                      Edit version
                                     </DropdownMenuItem>
                                   </DialogTrigger>
                                   <DropdownMenuItem>
@@ -206,7 +219,6 @@ export default async function PlanPage({
                                       Configure features
                                     </Link>
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>Delete</DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
 

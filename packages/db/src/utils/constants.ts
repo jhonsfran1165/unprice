@@ -1,6 +1,6 @@
 export const dbNameSpaces = {
   workspace: "ws",
-  ingestion: "ingest",
+  ingestion: "ing",
   project: "proj",
   user: "user",
   feature: "feat",
@@ -10,7 +10,7 @@ export const dbNameSpaces = {
   page: "page",
   customer: "cus",
   subscription: "sub",
-  domain: "domain",
+  domain: "dom",
   plan_version: "pv",
 } as const
 
@@ -30,14 +30,14 @@ export const USAGE_MODES_MAP = {
     label: "Tier",
     description: "Volume based pricing",
   },
-  package: {
-    label: "Package",
-    description: "Volume based pricing",
-  },
-  unit: {
-    label: "Unit",
-    description: "Volume based pricing",
-  },
+  // package: {
+  //   label: "Package",
+  //   description: "Volume based pricing",
+  // },
+  // unit: {
+  //   label: "Unit",
+  //   description: "Volume based pricing",
+  // },
 } as const
 
 // TODO: change the description
@@ -65,10 +65,11 @@ export const USAGE_METERED_MAP = {
 } as const
 
 export const PAYMENT_PROVIDERS = ["stripe", "lemonsqueezy"] as const
-export const CURRENCIES = ["USD", "EUR", "GBP"] as const
+export const CURRENCIES = ["USD", "EUR"] as const
 export const STAGES = ["prod", "test", "dev"] as const
 export const STATUS_PLAN = ["draft", "published", "archived"] as const
 export const STATUS_SUBSCRIPTION = ["active", "inactive"] as const
+// TODO: delete this
 export const PLANS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
 export const PROJECT_TIERS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
 export const PLAN_TYPES = ["recurring"] as const
@@ -100,11 +101,16 @@ export const FEATURE_TYPES_MAPS = {
     label: "Tier",
     description: "Price per tier",
   },
-  package: {
-    code: "package",
-    label: "Package",
-    description: "Price per package of units",
-  },
+  // package: {
+  //   code: "package",
+  //   label: "Package",
+  //   description: "Price per package of units",
+  // },
+  // unit: {
+  //   code: "package",
+  //   label: "Package",
+  //   description: "Price per package of units",
+  // },
   usage: {
     code: "usage",
     label: "Usage",

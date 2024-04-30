@@ -35,15 +35,18 @@ export default function SidebarNav(props: {
             >
               <span
                 className={cn(
-                  "group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-background-bg hover:text-background-textContrast active:bg-background-bgActive",
+                  "group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 hover:text-background-textContrast",
                   {
                     transparent: !active,
-                    "bg-background-bgSubtle": active,
                     "cursor-not-allowed opacity-80": item.disabled,
                   }
                 )}
               >
-                <Icon className="mr-2 h-4 w-4" />
+                <Icon
+                  className={cn("mr-2 h-4 w-4", {
+                    "text-background-textContrast": active,
+                  })}
+                />
                 <span
                   className={cn({
                     "text-background-textContrast": active,

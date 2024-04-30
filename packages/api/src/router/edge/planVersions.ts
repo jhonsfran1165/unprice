@@ -60,8 +60,8 @@ export const planVersionRouter = createTRPCRouter({
         try {
           // change status of previous latest version.
 
-          // get the latest version of the plan for the specific currency
-          const latestVersion = await tx
+          // set the latest version to false if there is a latest version
+          await tx
             .update(schema.versions)
             .set({
               latest: false,
@@ -86,7 +86,6 @@ export const planVersionRouter = createTRPCRouter({
               projectId: project.id,
               status: status ?? "draft",
               latest: true,
-              version: latestVersion?.version ? latestVersion?.version + 1 : 1,
               featuresConfig: featuresConfig ?? [],
               title: title ?? planData.slug,
               description,
@@ -98,6 +97,11 @@ export const planVersionRouter = createTRPCRouter({
               tags: tags ?? [],
             })
             .returning()
+            .catch((err) => {
+              console.error(err)
+              tx.rollback()
+              throw err
+            })
             .then((re) => re[0])
 
           if (!planVersionData?.id) {
@@ -109,8 +113,17 @@ export const planVersionRouter = createTRPCRouter({
 
           return planVersionData
         } catch (error) {
-          tx.rollback()
-          throw error
+          if (error instanceof Error) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: error.message,
+            })
+          } else {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "error creating version",
+            })
+          }
         }
       })
 
@@ -180,6 +193,8 @@ export const planVersionRouter = createTRPCRouter({
         .partial({
           projectId: true,
           title: true,
+          currency: true,
+          planId: true,
         })
         .required({ id: true })
     )
@@ -214,11 +229,7 @@ export const planVersionRouter = createTRPCRouter({
           },
         },
         where: (version, { and, eq }) =>
-          and(
-            eq(version.id, id),
-            eq(version.planId, planId),
-            eq(version.projectId, project.id)
-          ),
+          and(eq(version.id, id), eq(version.projectId, project.id)),
       })
 
       if (!planVersionData?.id) {

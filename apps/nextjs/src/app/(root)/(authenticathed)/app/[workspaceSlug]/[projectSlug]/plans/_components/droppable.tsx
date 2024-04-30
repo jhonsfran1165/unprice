@@ -36,7 +36,7 @@ export function DroppableContainer({
     <div
       ref={disabled ? undefined : setNodeRef}
       className={cn(
-        "flex h-[730px] w-full flex-shrink-0 snap-center flex-col space-y-2"
+        "flex h-[700px] w-full flex-shrink-0 snap-center flex-col space-y-2"
       )}
     >
       {children}

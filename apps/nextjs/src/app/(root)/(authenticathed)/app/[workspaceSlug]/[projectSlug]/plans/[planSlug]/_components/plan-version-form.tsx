@@ -1,6 +1,7 @@
 "use client"
 
 import { startTransition } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { CURRENCIES } from "@builderai/config"
@@ -62,6 +63,16 @@ export function PlanVersionForm({
       form.reset(planVersion)
       toastAction("updated")
       setDialogOpen?.(false)
+
+      // Only needed when the form is inside a uncontrolled dialog - normally updates
+      // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+      if (!setDialogOpen) {
+        const escKeyEvent = new KeyboardEvent("keydown", {
+          key: "Escape",
+        })
+        document.dispatchEvent(escKeyEvent)
+      }
+
       router.refresh()
     },
   })
@@ -69,6 +80,7 @@ export function PlanVersionForm({
   const deletePlanVersion = api.planVersions.remove.useMutation({
     onSuccess: () => {
       toastAction("deleted")
+      setDialogOpen?.(false)
       form.reset()
       router.refresh()
     },
@@ -131,7 +143,18 @@ export function PlanVersionForm({
               <FormItem>
                 <div className="flex justify-between">
                   <FormLabel>Currency of this version</FormLabel>
+                  <Link
+                    href="#"
+                    className="ml-auto inline-block text-xs text-info underline opacity-70"
+                  >
+                    Set default currency for this organization
+                  </Link>
                 </div>
+
+                <FormDescription>
+                  You can set a different currency for each version of your
+                  plan.
+                </FormDescription>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value ?? ""}
@@ -209,6 +232,16 @@ export function PlanVersionForm({
             <ConfirmAction
               confirmAction={() => {
                 setDialogOpen?.(false)
+
+                // Only needed when the form is inside a uncontrolled dialog - normally updates
+                // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+                if (!setDialogOpen) {
+                  const escKeyEvent = new KeyboardEvent("keydown", {
+                    key: "Escape",
+                  })
+                  document.dispatchEvent(escKeyEvent)
+                }
+
                 onDelete()
               }}
             >
@@ -217,6 +250,7 @@ export function PlanVersionForm({
               </Button>
             </ConfirmAction>
           )}
+
           <SubmitButton
             onClick={() => form.handleSubmit(onSubmitForm)()}
             isSubmitting={form.formState.isSubmitting}

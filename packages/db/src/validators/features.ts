@@ -26,8 +26,6 @@ export const paymentInfoSchema = z.record(
 
 export const configFlatFeature = z.object({
   type: z.literal(FEATURE_TYPES_MAPS.flat.code),
-  tierMode: z.void(),
-  usageMode: z.void(),
   id: z.string(),
   slug: z.string(),
   title: z.string(),

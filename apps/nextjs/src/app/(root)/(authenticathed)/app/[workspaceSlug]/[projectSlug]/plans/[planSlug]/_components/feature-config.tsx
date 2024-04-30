@@ -1,14 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import {
-  DollarSignIcon,
-  HelpCircle,
-  MoreVertical,
-  Plus,
-  Trash2,
-  XCircle,
-} from "lucide-react"
+import { DollarSignIcon, HelpCircle, Plus, Trash2, XCircle } from "lucide-react"
 import { useFieldArray } from "react-hook-form"
 
 import {
@@ -26,12 +19,6 @@ import { planVersionFeatureSchema } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
-import {
   Form,
   FormControl,
   FormDescription,
@@ -41,7 +28,6 @@ import {
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import { Label } from "@builderai/ui/label"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import {
   Select,
@@ -51,7 +37,6 @@ import {
   SelectValue,
 } from "@builderai/ui/select"
 import { Separator } from "@builderai/ui/separator"
-import { Switch } from "@builderai/ui/switch"
 import {
   Tooltip,
   TooltipArrow,
@@ -68,19 +53,21 @@ import {
 
 export function FeatureConfig() {
   const [activeFeature] = useActiveFeature()
-  // define default values config for the form using the feature prop
+
   const defaultConfigValues = {
-    aggregationMethod: "sum",
     price: 0,
-    tiers: [{ firstUnit: 0, lastUnit: "Infinity" }],
+    aggregationMethod: "sum",
+    tierMode: "volume",
+    tiers: [{ firstUnit: 0, lastUnit: "Infinity", unitPrice: 0 }],
   }
 
+  // define default values config for the form using activeFeature
   const defaultValues = activeFeature?.config
     ? activeFeature
     : {
         ...activeFeature,
         config: defaultConfigValues,
-        type: "flat",
+        type: "flat" as const,
       }
 
   const form = useZodForm({
@@ -117,8 +104,6 @@ export function FeatureConfig() {
     })
   }
 
-  console.log(form.formState.errors)
-
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center px-4 py-2">
@@ -145,6 +130,8 @@ export function FeatureConfig() {
                       [planActiveTab]: activeFeatures,
                     }
                   })
+
+                  // TODO: save here
                 }}
               >
                 <Trash2 className="h-4 w-4" />
@@ -154,21 +141,6 @@ export function FeatureConfig() {
             <TooltipContent>Delete from plan</TooltipContent>
           </Tooltip>
         </div>
-        <Separator orientation="vertical" className="mx-2 h-6" />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" disabled={!activeFeature}>
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">More</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>Mark as unread</DropdownMenuItem>
-            <DropdownMenuItem>Star thread</DropdownMenuItem>
-            <DropdownMenuItem>Add label</DropdownMenuItem>
-            <DropdownMenuItem>Mute thread</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       <Separator />
@@ -185,18 +157,20 @@ export function FeatureConfig() {
                   slug: <b>{activeFeature.slug}</b>
                 </div>
                 <div className="line-clamp-1 text-xs">
-                  {activeFeature?.description}
+                  {activeFeature?.description
+                    ? `description: ${activeFeature.description}`
+                    : ""}
                 </div>
               </div>
             </div>
             <div className="ml-auto text-xs text-muted-foreground">
-              recurring monthly
+              {activeFeature.id}
             </div>
           </div>
           <Separator />
 
-          <ScrollArea className="h-[650px] pb-4">
-            <div className="flex-1 space-y-6 whitespace-pre-wrap p-4 text-sm">
+          <ScrollArea className="h-[700px] pb-4">
+            <div className="flex-1 space-y-8 whitespace-pre-wrap p-4 text-sm">
               <Form {...form}>
                 <form
                   id="feature-config-form"
@@ -205,7 +179,7 @@ export function FeatureConfig() {
                 >
                   <div className="flex flex-col gap-2">
                     <div className="border-1 items-center rounded-md">
-                      <div className="space-y-2 rounded-sm border p-2">
+                      <div className="space-y-2">
                         <div className="rounded-md bg-background-bg p-2 text-center font-semibold shadow-sm">
                           Pricing Model
                         </div>
@@ -213,7 +187,7 @@ export function FeatureConfig() {
                           All units price based on final tier reached. Needs a
                           record for Stripe to track customer service usage.
                         </div>
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1  px-2">
                           <FormField
                             control={form.control}
                             name="type"
@@ -372,39 +346,35 @@ export function FeatureConfig() {
 
                   {form.watch("type") === "flat" && (
                     <div className="flex justify-between gap-2">
-                      <div className="w-full">
-                        <FormField
-                          control={form.control}
-                          name="config.price"
-                          render={({ field }) => (
-                            <FormItem className="">
-                              <div className="w-2/3">
-                                <FormLabel>Price</FormLabel>
-                                <FormDescription>
-                                  Price of the feature in the selected currency
-                                  of the plan (USD)
-                                </FormDescription>
-                                <div className="text-xs font-normal leading-snug">
-                                  This is the flat price of the feature over the
-                                  period of the plan. eg 100 usd per month.
-                                  Price of 0 means the feature is free.
+                      <FormField
+                        control={form.control}
+                        name="config.price"
+                        render={({ field }) => (
+                          <FormItem className="">
+                            <FormLabel>Price</FormLabel>
+                            <FormDescription>
+                              Price of the feature in the selected currency of
+                              the plan (USD)
+                            </FormDescription>
+                            <div className="text-xs font-normal leading-snug">
+                              This is the flat price of the feature over the
+                              period of the plan. eg 100 usd per month. Price of
+                              0 means the feature is free.
+                            </div>
+
+                            <div className="flex flex-col items-center space-y-1">
+                              <FormControl className="w-full">
+                                <div className="relative">
+                                  <DollarSignIcon className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                  <Input {...field} className="pl-8" />
                                 </div>
-                              </div>
+                              </FormControl>
 
-                              <div className="flex w-1/3 flex-col items-center space-y-1">
-                                <FormControl className="w-full">
-                                  <div className="relative">
-                                    <DollarSignIcon className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                    <Input {...field} className="pl-8" />
-                                  </div>
-                                </FormControl>
-
-                                <FormMessage className="self-start px-2" />
-                              </div>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                              <FormMessage className="self-start px-2" />
+                            </div>
+                          </FormItem>
+                        )}
+                      />
                     </div>
                   )}
 
@@ -476,9 +446,7 @@ export function FeatureConfig() {
                     <div>
                       <div className="mb-4 flex flex-col">
                         <h4 className="my-auto block font-semibold">
-                          {form.watch("type") === "volume"
-                            ? "Volume tiers"
-                            : "Flat tiers"}
+                          Tier Configuration
                         </h4>
                         <div className="text-xs font-normal leading-snug">
                           Configure the tiers for the feature, the price is
@@ -509,7 +477,7 @@ export function FeatureConfig() {
                                         className={cn(index !== 0 && "sr-only")}
                                       >
                                         <Tooltip>
-                                          <div className="flex items-center gap-2 text-xs font-normal">
+                                          <div className="flex items-center justify-center gap-2 text-xs font-normal">
                                             First Unit
                                             <span>
                                               <TooltipTrigger asChild>
@@ -554,7 +522,7 @@ export function FeatureConfig() {
                                         className={cn(index !== 0 && "sr-only")}
                                       >
                                         <Tooltip>
-                                          <div className="flex items-center gap-2 text-xs font-normal">
+                                          <div className="flex items-center justify-center gap-2 text-xs font-normal">
                                             Last Unit
                                             <span>
                                               <TooltipTrigger asChild>
@@ -610,8 +578,8 @@ export function FeatureConfig() {
                                         className={cn(index !== 0 && "sr-only")}
                                       >
                                         <Tooltip>
-                                          <div className="flex items-center gap-2 text-xs font-normal">
-                                            Flat price tier
+                                          <div className="flex items-center justify-center gap-2 text-xs font-normal">
+                                            Flat price
                                             <span>
                                               <TooltipTrigger asChild>
                                                 <HelpCircle className="h-4 w-4 font-light" />
@@ -624,7 +592,8 @@ export function FeatureConfig() {
                                             align="center"
                                             side="right"
                                           >
-                                            Flat price for this tier.
+                                            Flat price of the tier, it will be
+                                            sum to usage price.
                                             <TooltipArrow className="fill-background-bg" />
                                           </TooltipContent>
                                         </Tooltip>
@@ -656,7 +625,7 @@ export function FeatureConfig() {
                                         className={cn(index !== 0 && "sr-only")}
                                       >
                                         <Tooltip>
-                                          <div className="flex items-center gap-2 text-xs font-normal">
+                                          <div className="flex items-center justify-center gap-2 text-xs font-normal">
                                             Unit price
                                             <span>
                                               <TooltipTrigger asChild>
@@ -740,7 +709,6 @@ export function FeatureConfig() {
                                       lastUnitValue === "Infinity"
                                         ? firstUnitValue + 2
                                         : lastUnitValue + 1,
-                                    flatPrice: 0,
                                     lastUnit: "Infinity",
                                     unitPrice: 0,
                                   })
@@ -761,25 +729,17 @@ export function FeatureConfig() {
           </ScrollArea>
 
           <Separator className="mt-auto" />
+
           <div className="p-4">
-            <div className="grid gap-4">
-              <div className="flex items-center">
-                <Label
-                  htmlFor="mute"
-                  className="flex items-center gap-2 truncate text-xs font-normal"
-                >
-                  <Switch id="mute" aria-label="Don't show" /> Hide this from
-                  preview page
-                </Label>
-                <Button
-                  type="submit"
-                  form="feature-config-form"
-                  size="sm"
-                  className="ml-auto truncate"
-                >
-                  Save configuration
-                </Button>
-              </div>
+            <div className="flex items-center">
+              <Button
+                type="submit"
+                form="feature-config-form"
+                size="sm"
+                className="ml-auto truncate"
+              >
+                Save configuration
+              </Button>
             </div>
           </div>
         </div>

@@ -30,7 +30,6 @@ export default async function PriceLayout(props: {
           <PlanVersionHeader
             workspaceSlug={workspaceSlug}
             projectSlug={projectSlug}
-            planVersionId={planVersionId}
             planVersion={planVersion}
           />
         }

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { RefreshCcw } from "lucide-react"
+import { DollarSign, GalleryHorizontalEnd, RefreshCcw } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
@@ -13,20 +13,19 @@ import {
 } from "@builderai/ui/card"
 import { ChevronLeft } from "@builderai/ui/icons"
 
-import CreateNewVersion from "./create-new-version"
+import PlanVersionActions from "./plan-version-actions"
 
 export const runtime = "edge"
 
 export default function PlanVersionHeader(props: {
   workspaceSlug: string
   projectSlug: string
-  planVersionId: string
   planVersion: RouterOutputs["planVersions"]["getByVersion"]["planVersion"]
 }) {
   const { workspaceSlug, projectSlug, planVersion } = props
   return (
     <div className="flex flex-col">
-      <div className="my-4 flex justify-between align-middle">
+      <div className="mb-4 flex justify-between align-middle">
         <Link
           className="flex items-center justify-start align-middle text-sm"
           prefetch={false}
@@ -34,7 +33,7 @@ export default function PlanVersionHeader(props: {
         >
           <Badge variant={"outline"} className="bg-background-bgSubtle py-1">
             <ChevronLeft className="h-4 w-4" />
-            back to versions
+            back
           </Badge>
         </Link>
       </div>
@@ -42,63 +41,67 @@ export default function PlanVersionHeader(props: {
         <div className="flex flex-row justify-between">
           <div className="flex flex-col">
             <CardHeader className="pb-3">
-              {/* // TODO: add edit button here */}
-              <CardTitle>{planVersion.title}</CardTitle>
-              <CardDescription className="max-w-lg text-balance leading-relaxed">
-                small descriptions
+              <div className="flex items-center space-x-4">
+                <CardTitle>{planVersion.title}</CardTitle>
+
+                <div
+                  className={cn(
+                    "inline-flex items-center text-xs font-semibold",
+                    {
+                      "text-success": planVersion.status === "published",
+                      "text-info": planVersion.status !== "published",
+                    }
+                  )}
+                >
+                  <span
+                    className={cn("flex h-2 w-2 rounded-full", {
+                      "bg-success-solid": planVersion.status === "published",
+                      "bg-info": planVersion.status !== "published",
+                    })}
+                  />
+                  <span className="ml-1">{planVersion.status}</span>
+                </div>
+              </div>
+
+              <CardDescription className="line-clamp-1 h-12 max-w-lg text-balance leading-relaxed">
+                {planVersion.description}
               </CardDescription>
-              <ul className="grid gap-1 p-1">
-                <li className="flex items-center justify-between text-xs ">
-                  <span className="text-xs text-muted-foreground">
-                    plan slug: <span>{planVersion.plan.slug}</span>
-                  </span>
-                </li>
-                <li className="flex items-center justify-between text-xs ">
-                  <span className="text-xs text-muted-foreground">
-                    grace Period: <span>{planVersion.gracePeriod}</span>
-                  </span>
-                </li>
-                <li className="flex items-center justify-between text-xs ">
-                  <span className="text-muted-foreground">
-                    startCycle: <span>{planVersion.startCycle}</span>
-                  </span>
-                </li>
-              </ul>
             </CardHeader>
 
             <CardFooter>
               <div className="flex space-x-1">
-                <Badge
-                  className={cn({
-                    success: planVersion.status === "published",
-                    danger: planVersion.status === "archived",
-                  })}
-                >
-                  <span className="flex h-2 w-2 rounded-full bg-success-solid" />
-                  <span className="ml-1">{planVersion.status}</span>
-                </Badge>
-                <Badge variant={"secondary"}>
-                  <RefreshCcw className="h-3 w-3" />
+                {planVersion.latest && (
+                  <Badge
+                    className={cn({
+                      success: planVersion.latest,
+                    })}
+                  >
+                    <GalleryHorizontalEnd className="h-3 w-3" />
+                    <span className="ml-1">latest</span>
+                  </Badge>
+                )}
+
+                <Badge>
+                  <DollarSign className="h-3 w-3" />
                   <span className="ml-1">{planVersion.currency}</span>
                 </Badge>
-                <Badge variant={"secondary"}>
+
+                <Badge>
                   <RefreshCcw className="h-3 w-3" />
-                  <span className="ml-1">montly</span>
+                  <span className="ml-1">{planVersion.billingPeriod}</span>
                 </Badge>
-                <Badge variant={"secondary"}>
-                  <RefreshCcw className="h-3 w-3" />
-                  <span className="ml-1">montly</span>
-                </Badge>
+
+                {planVersion.tags?.map((tag, i) => (
+                  <Badge key={i}>
+                    <span>{tag}</span>
+                  </Badge>
+                ))}
               </div>
             </CardFooter>
           </div>
 
           <div className="flex items-center px-6">
-            <CreateNewVersion
-              planVersion={planVersion}
-              projectSlug={projectSlug}
-              workspaceSlug={workspaceSlug}
-            />
+            <PlanVersionActions planVersion={planVersion} />
           </div>
         </div>
       </Card>

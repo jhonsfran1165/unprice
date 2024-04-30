@@ -20,14 +20,16 @@ export function DashboardShell(props: {
     >
       {props.tabs && props.tabs}
 
-      <main className="flex flex-1 flex-col space-y-8 overflow-y-auto">
-        <MaxWidthWrapper className="max-w-screen-2xl">
-          {props.header && props.header}
-        </MaxWidthWrapper>
+      <main className="flex flex-1 flex-col space-y-8 overflow-y-auto py-8">
+        {props.header && (
+          <MaxWidthWrapper className="max-w-screen-2xl">
+            {props.header}
+          </MaxWidthWrapper>
+        )}
 
         <MaxWidthWrapper className="flex max-w-screen-2xl flex-1 flex-col">
           {/* sidebar menu config */}
-          {props.sidebar && (
+          {props.sidebar ? (
             <div className="flex flex-col gap-2 sm:flex-1 sm:flex-row">
               <aside className="flex flex-col sm:flex sm:w-1/4">
                 {props.sidebar}
@@ -38,11 +40,7 @@ export function DashboardShell(props: {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* without sidebar menu config */}
-
-          {!props.sidebar && (
+          ) : (
             <div className="flex flex-1 flex-col">{props?.children}</div>
           )}
         </MaxWidthWrapper>

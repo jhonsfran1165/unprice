@@ -75,7 +75,7 @@ export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
                         description: "",
                       }}
                     >
-                      <Button>Create feature</Button>
+                      <Button size={"sm"}>Create feature</Button>
                     </FeatureDialog>
                   </EmptyPlaceholder.Action>
                 </EmptyPlaceholder>

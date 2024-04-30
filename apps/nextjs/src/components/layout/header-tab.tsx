@@ -12,9 +12,7 @@ export default function HeaderTab({
   className?: string
 }) {
   return (
-    <div
-      className={cn("flex w-full items-center justify-between pt-8", className)}
-    >
+    <div className={cn("flex w-full items-center justify-between", className)}>
       <div className="space-y-2 px-2">
         <h1 className="text-lg font-semibold leading-none tracking-tight">
           {title}

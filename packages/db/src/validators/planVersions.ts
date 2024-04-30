@@ -27,29 +27,7 @@ export const planVersionFeatureSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Invalid configuration for the feature",
-        path: ["pricingModel.type"],
-        fatal: true,
-      })
-
-      return false
-    }
-
-    if (data.type === "tier" && !data.tierMode) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Invalid configuration for the tier feature",
-        path: ["pricingModel.tierMode"],
-        fatal: true,
-      })
-
-      return false
-    }
-
-    if (data.type === "usage" && !data.usageMode) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Invalid configuration for the usage feature",
-        path: ["pricingModel.usageMode"],
+        path: ["type"],
         fatal: true,
       })
 
@@ -77,6 +55,7 @@ export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
   startCycle: startCycleSchema,
   tags: z.array(z.string()),
   currency: z.enum(CURRENCIES),
+  title: z.string().min(3).max(50),
 })
   .partial({
     projectId: true,
