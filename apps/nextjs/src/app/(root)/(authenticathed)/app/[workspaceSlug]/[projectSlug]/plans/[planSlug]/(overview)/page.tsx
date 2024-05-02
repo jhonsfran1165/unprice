@@ -1,12 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import {
-  ArrowUp,
-  ListFilter,
-  MoreVertical,
-  Settings,
-  Wallet,
-} from "lucide-react"
+import { ArrowUp, ListFilter, MoreVertical, Wallet } from "lucide-react"
 
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
@@ -113,7 +107,7 @@ export default async function PlanPage({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="table-cell text-left">
+                      <TableHead className="table-cell text-center">
                         Version
                       </TableHead>
                       <TableHead className="table-cell text-left">
@@ -146,7 +140,7 @@ export default async function PlanPage({
                     )}
                     {plan.versions.map((version) => (
                       <TableRow key={version.id}>
-                        <TableCell className="table-cell text-left">
+                        <TableCell className="table-cell text-center">
                           {version.version}
                         </TableCell>
                         <TableCell className="table-cell">
@@ -179,18 +173,6 @@ export default async function PlanPage({
                         </TableCell>
                         <TableCell className="table-cell justify-start">
                           <div className="flex flex-row space-x-1">
-                            <Link
-                              href={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${version.version}`}
-                              prefetch={false}
-                            >
-                              <Button
-                                aria-haspopup="true"
-                                size="icon"
-                                variant="ghost"
-                              >
-                                <Settings className="h-4 w-4" />
-                              </Button>
-                            </Link>
                             <Dialog>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>

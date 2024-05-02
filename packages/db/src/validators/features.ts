@@ -24,6 +24,25 @@ export const paymentInfoSchema = z.record(
   z.object({ priceId: z.string() })
 )
 
+export const tiersSchema = z.object({
+  unitPrice: z.coerce.number().nonnegative().min(0).describe("Price per Unit"),
+  flatPrice: z.coerce
+    .number()
+    .nonnegative()
+    .min(0)
+    .optional()
+    .describe("Flat price for the tier"),
+  firstUnit: z.coerce
+    .number()
+    .nonnegative()
+    .min(0)
+    .describe("First unit for the volume"),
+  lastUnit: z.union([
+    z.coerce.number().nonnegative().min(0).describe("Last unit for the volume"),
+    z.literal("Infinity"),
+  ]),
+})
+
 export const configFlatFeature = z.object({
   type: z.literal(FEATURE_TYPES_MAPS.flat.code),
   id: z.string(),
@@ -31,6 +50,7 @@ export const configFlatFeature = z.object({
   title: z.string(),
   description: z.string().optional(),
   config: z.object({
+    tiers: z.array(tiersSchema).optional(),
     price: z.coerce
       .number()
       .nonnegative()
@@ -50,34 +70,7 @@ export const configTierFeature = z.object({
   description: z.string().optional(),
   config: z
     .object({
-      tiers: z.array(
-        z.object({
-          unitPrice: z.coerce
-            .number()
-            .nonnegative()
-            .min(0)
-            .describe("Price per Unit"),
-          flatPrice: z.coerce
-            .number()
-            .nonnegative()
-            .min(0)
-            .optional()
-            .describe("Flat price for the tier"),
-          firstUnit: z.coerce
-            .number()
-            .nonnegative()
-            .min(0)
-            .describe("First unit for the volume"),
-          lastUnit: z.union([
-            z.coerce
-              .number()
-              .nonnegative()
-              .min(0)
-              .describe("Last unit for the volume"),
-            z.literal("Infinity"),
-          ]),
-        })
-      ),
+      tiers: z.array(tiersSchema),
       paymentInfo: paymentInfoSchema.optional(),
     })
     .superRefine((data, ctx) => {
@@ -152,34 +145,7 @@ export const configUsageFeature = z.object({
   description: z.string().optional(),
   config: z
     .object({
-      tiers: z.array(
-        z.object({
-          unitPrice: z.coerce
-            .number()
-            .nonnegative()
-            .min(0)
-            .describe("Price per Unit"),
-          flatPrice: z.coerce
-            .number()
-            .nonnegative()
-            .min(0)
-            .optional()
-            .describe("Flat price for the tier"),
-          firstUnit: z.coerce
-            .number()
-            .nonnegative()
-            .min(0)
-            .describe("First unit for the volume"),
-          lastUnit: z.union([
-            z.coerce
-              .number()
-              .nonnegative()
-              .min(0)
-              .describe("Last unit for the volume"),
-            z.literal("Infinity"),
-          ]),
-        })
-      ),
+      tiers: z.array(tiersSchema),
       paymentInfo: paymentInfoSchema.optional(),
     })
     .superRefine((data, ctx) => {
@@ -277,3 +243,11 @@ export const deleteFeatureSchema = featureInsertBaseSchema
 export type InsertFeature = z.infer<typeof featureInsertBaseSchema>
 export type UpdateFeature = z.infer<typeof updateFeatureSchema>
 export type Feature = z.infer<typeof featureSelectBaseSchema>
+
+export const featureConfigSchema = z.union([
+  configFlatFeature.shape.config,
+  configTierFeature.shape.config,
+  configUsageFeature.shape.config,
+])
+
+export type PlanFeatureConfig = z.infer<typeof featureConfigSchema>

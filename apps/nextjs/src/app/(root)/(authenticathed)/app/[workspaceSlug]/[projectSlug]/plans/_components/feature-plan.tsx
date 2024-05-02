@@ -4,7 +4,7 @@ import type { ElementRef } from "react"
 import { forwardRef } from "react"
 import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
-import { ChevronRight, Settings2 } from "lucide-react"
+import { ChevronRight, Settings2, Trash2 } from "lucide-react"
 
 import type { PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
@@ -67,7 +67,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
         ref={ref}
         {...rest}
         className={cn(featureVariants({ variant, className }), {
-          "border-background-borderHover shadow-lg":
+          "border-2 border-background-borderHover bg-background-bgHover shadow-lg":
             mode === "FeaturePlan" && active?.id === feature.id,
         })}
         onClick={handleClick}
@@ -109,10 +109,10 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="line-clamp-1 font-semibold">
-                    {feature.title}
+                    {feature.slug}
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
+                <div className="flex items-center gap-1 text-xs">
                   {feature.type === "flat"
                     ? `${
                         feature?.config?.price === 0
@@ -123,6 +123,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                       ? `${feature?.config?.tiers.length ?? 0} tiers`
                       : null}
 
+                  {/* // TODO: change this beside the name and use isValid */}
                   {!feature?.config && (
                     <div className="relative ">
                       <div className="absolute -top-1 right-0">
@@ -130,13 +131,39 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                       </div>
                     </div>
                   )}
+
+                  <div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
+
+                        // delete feature
+                        setPlanFeatures((features) => {
+                          const activeFeatures = features[planActiveTab]
+                          const filteredFeatures = activeFeatures.filter(
+                            (f) => f.id !== feature.id
+                          )
+
+                          return {
+                            ...features,
+                            [planActiveTab]: filteredFeatures,
+                          }
+                        })
+
+                        // TODO: save here
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete from plan</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
-              <div className="line-clamp-1 text-xs font-medium">
-                {feature.slug}
-              </div>
             </div>
-            <div className="line-clamp-2 text-xs text-muted-foreground">
+            <div className="line-clamp-1 h-6 text-xs text-muted-foreground">
               {feature?.description}
             </div>
 

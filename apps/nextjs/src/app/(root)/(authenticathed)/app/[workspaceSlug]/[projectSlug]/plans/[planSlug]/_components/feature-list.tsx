@@ -42,6 +42,9 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
 
   const planFeatureIds = activeFeatures.map((feature) => feature.id)
 
+  console.log(planFeatureIds)
+  console.log(data.features)
+
   const searchableFeatures = data.features.filter(
     (feature) => !planFeatureIds.includes(feature.id)
   )
@@ -88,12 +91,17 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
               <SortableFeature
                 key={index}
                 mode={"Feature"}
+                // TODO: default all features to flat type free?
                 feature={
                   {
                     id: feature.id,
                     title: feature.title,
                     description: feature.description,
                     slug: feature.slug,
+                    type: "flat",
+                    config: {
+                      price: 0,
+                    },
                   } as PlanVersionFeature
                 }
                 variant={"feature"}
