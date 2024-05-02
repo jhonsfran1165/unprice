@@ -107,10 +107,11 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
           <>
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="line-clamp-1 font-semibold">
-                    {feature.slug}
-                  </div>
+                <div className="line-clamp-1 items-center gap-1 text-left font-bold">
+                  {feature.slug}
+                  <p className="line-clamp-1 text-xs font-normal text-muted-foreground">
+                    {feature.description}
+                  </p>
                 </div>
                 <div className="flex items-center gap-1 text-xs">
                   {feature.type === "flat"
@@ -140,6 +141,10 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                         e.stopPropagation()
                         e.preventDefault()
 
+                        if (active?.id === feature.id) {
+                          setActiveFeature(null)
+                        }
+
                         // delete feature
                         setPlanFeatures((features) => {
                           const activeFeatures = features[planActiveTab]
@@ -162,9 +167,6 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="line-clamp-1 h-6 text-xs text-muted-foreground">
-              {feature?.description}
             </div>
 
             {feature.type && (

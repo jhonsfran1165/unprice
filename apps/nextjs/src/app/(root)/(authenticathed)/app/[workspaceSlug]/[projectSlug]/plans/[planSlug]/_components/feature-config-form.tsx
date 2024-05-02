@@ -63,7 +63,7 @@ export function FeatureConfigForm({
         tiers: feature.config?.tiers ?? [
           {
             firstUnit: 0,
-            lastUnit: "Infinity",
+            lastUnit: Infinity,
             unitPrice: 0,
             flatPrice: 0,
           },
@@ -73,21 +73,30 @@ export function FeatureConfigForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feature.id])
 
+  // // set form dirty state so we can show a warning when user tries to leave the page
+  // useEffect(() => {
+  //   if (form.formState.isDirty) {
+  //   }
+  // }, [form.formState.isDirty])
+
   // subscribe to type changes for conditional rendering in the forms
   const type = form.watch("type")
 
-  const onSubmitForm = (feature: PlanVersionFeature) => {
-    setActiveFeature(feature)
+  const onSubmitForm = (data: PlanVersionFeature) => {
+    setActiveFeature(data)
+
     setPlanFeatures((features) => {
       const activeFeatures = features[planActiveTab]
-      const index = activeFeatures.findIndex((f) => f.id === feature.id)
+      const index = activeFeatures.findIndex((f) => f.id === data.id)
 
-      activeFeatures[index] = feature
+      activeFeatures[index] = data
       return {
         ...features,
         [planActiveTab]: activeFeatures,
       }
     })
+
+    // TODO: save here
   }
 
   return (

@@ -16,7 +16,7 @@ interface ResizablePanelConfigProps {
 }
 
 export function ResizablePanelConfig({
-  defaultLayout = [265, 440, 655],
+  defaultLayout = [20, 30, 50],
   featureList,
   planFeatureList,
   featureConfig,
@@ -40,11 +40,11 @@ export function ResizablePanelConfig({
         {featureList}
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={defaultLayout[1]} minSize={25}>
+      <ResizablePanel defaultSize={defaultLayout[1]} minSize={10} maxSize={30}>
         {planFeatureList}
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={defaultLayout[2]} minSize={25}>
+      <ResizablePanel defaultSize={defaultLayout[2]} maxSize={70}>
         {featureConfig}
       </ResizablePanel>
     </ResizablePanelGroup>

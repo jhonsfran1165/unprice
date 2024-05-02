@@ -20,7 +20,7 @@ export function FlatFormFields({
   form: ReturnType<typeof useZodForm>
 }) {
   return (
-    <div className="flex justify-between gap-2">
+    <div className="flex flex-col">
       <FormField
         control={form.control}
         name="config.price"

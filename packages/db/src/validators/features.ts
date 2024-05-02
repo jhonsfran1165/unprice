@@ -43,6 +43,78 @@ export const tiersSchema = z.object({
   ]),
 })
 
+export const configFeatureSchema = z
+  .object({
+    tiers: z.array(tiersSchema),
+    paymentInfo: paymentInfoSchema.optional(),
+  })
+  .superRefine((data, ctx) => {
+    const tiers = data.tiers
+
+    for (let i = 0; i < tiers.length; i++) {
+      if (i > 0) {
+        const currentFirstUnit = tiers[i]?.firstUnit
+        const previousLastUnit = tiers[i - 1]?.lastUnit
+
+        if (!currentFirstUnit) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "firstUnit needs to be defined",
+            path: ["tiers", i, "firstUnit"],
+            fatal: true,
+          })
+
+          return false
+        }
+
+        if (previousLastUnit === Infinity || previousLastUnit === "Infinity") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Only the last unit of the tiers can be Infinity",
+            path: ["tiers", i - 1, "lastUnit"],
+            fatal: true,
+          })
+
+          return false
+        }
+
+        if (!previousLastUnit) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "lastUnit needs to be defined",
+            path: ["tiers", i - 1, "lastUnit"],
+            fatal: true,
+          })
+
+          return false
+        }
+
+        if (currentFirstUnit > previousLastUnit + 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Tiers need to be consecutive",
+            path: ["tiers", i - 1, "lastUnit"],
+            fatal: true,
+          })
+
+          return false
+        }
+        if (currentFirstUnit < previousLastUnit + 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Tiers cannot overlap",
+            path: ["tiers", i, "firstUnit"],
+            fatal: true,
+          })
+
+          return false
+        }
+      }
+    }
+
+    return true
+  })
+
 export const configFlatFeature = z.object({
   type: z.literal(FEATURE_TYPES_MAPS.flat.code),
   id: z.string(),
@@ -68,70 +140,7 @@ export const configTierFeature = z.object({
   slug: z.string(),
   title: z.string(),
   description: z.string().optional(),
-  config: z
-    .object({
-      tiers: z.array(tiersSchema),
-      paymentInfo: paymentInfoSchema.optional(),
-    })
-    .superRefine((data, ctx) => {
-      const tiers = data.tiers
-
-      for (let i = 0; i < tiers.length; i++) {
-        if (i > 0) {
-          const currentFirstUnit = tiers[i]?.firstUnit
-          const previousLastUnit = tiers[i - 1]?.lastUnit
-
-          if (previousLastUnit === "Infinity") {
-            return true
-          }
-
-          if (!currentFirstUnit) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "firstUnit needs to be defined",
-              path: ["tiers", i, "firstUnit"],
-              fatal: true,
-            })
-
-            return false
-          }
-
-          if (!previousLastUnit) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "lastUnit needs to be defined",
-              path: ["tiers", i, "lastUnit"],
-              fatal: true,
-            })
-
-            return false
-          }
-
-          if (currentFirstUnit > previousLastUnit + 1) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Tiers need to be consecutive",
-              path: ["tiers", i, "firstUnit"],
-              fatal: true,
-            })
-
-            return false
-          }
-          if (currentFirstUnit < previousLastUnit + 1) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Tiers cannot overlap",
-              path: ["tiers", i, "firstUnit"],
-              fatal: true,
-            })
-
-            return false
-          }
-        }
-      }
-
-      return true
-    }),
+  config: configFeatureSchema,
 })
 
 export const configUsageFeature = z.object({
@@ -143,70 +152,7 @@ export const configUsageFeature = z.object({
   slug: z.string(),
   title: z.string(),
   description: z.string().optional(),
-  config: z
-    .object({
-      tiers: z.array(tiersSchema),
-      paymentInfo: paymentInfoSchema.optional(),
-    })
-    .superRefine((data, ctx) => {
-      const tiers = data.tiers
-
-      for (let i = 0; i < tiers.length; i++) {
-        if (i > 0) {
-          const currentFirstUnit = tiers[i]?.firstUnit
-          const previousLastUnit = tiers[i - 1]?.lastUnit
-
-          if (previousLastUnit === "Infinity") {
-            return true
-          }
-
-          if (!currentFirstUnit) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "firstUnit needs to be defined",
-              path: ["tiers", i, "firstUnit"],
-              fatal: true,
-            })
-
-            return false
-          }
-
-          if (!previousLastUnit) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "lastUnit needs to be defined",
-              path: ["tiers", i, "lastUnit"],
-              fatal: true,
-            })
-
-            return false
-          }
-
-          if (currentFirstUnit > previousLastUnit + 1) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Tiers need to be consecutive",
-              path: ["tiers", i, "firstUnit"],
-              fatal: true,
-            })
-
-            return false
-          }
-          if (currentFirstUnit < previousLastUnit + 1) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Tiers cannot overlap",
-              path: ["tiers", i, "firstUnit"],
-              fatal: true,
-            })
-
-            return false
-          }
-        }
-      }
-
-      return true
-    }),
+  config: configFeatureSchema,
 })
 
 export const featureSelectBaseSchema = createSelectSchema(schema.features)
@@ -251,3 +197,4 @@ export const featureConfigSchema = z.union([
 ])
 
 export type PlanFeatureConfig = z.infer<typeof featureConfigSchema>
+export type FeatureTier = z.infer<typeof tiersSchema>

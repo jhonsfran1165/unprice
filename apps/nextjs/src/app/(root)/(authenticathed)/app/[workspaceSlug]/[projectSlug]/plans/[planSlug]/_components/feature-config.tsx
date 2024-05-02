@@ -12,8 +12,8 @@ export function FeatureConfig() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className=" flex h-[52px] items-center px-4 py-2">
-        <h1 className="truncate text-xl font-bold">Feature configuration</h1>
+      <div className="flex h-[52px] shrink-0 items-center justify-between space-x-1 px-4 py-2">
+        <h1 className="truncate text-xl font-bold">Features on this plan</h1>
       </div>
 
       <Separator />
@@ -30,9 +30,8 @@ export function FeatureConfig() {
                   slug: <b>{activeFeature.slug}</b>
                 </div>
                 <div className="line-clamp-1 text-xs">
-                  {activeFeature?.description
-                    ? `description: ${activeFeature.description}`
-                    : ""}
+                  description:{" "}
+                  <b>{activeFeature.description ?? "No description"}</b>
                 </div>
               </div>
             </div>
@@ -42,7 +41,7 @@ export function FeatureConfig() {
           </div>
           <Separator />
 
-          <ScrollArea className="h-[700px] pb-4">
+          <ScrollArea className="h-[680px] pb-4">
             <div className="flex-1 space-y-8 p-4 text-sm">
               <FeatureConfigForm
                 formId={"feature-config-form"}
@@ -53,7 +52,7 @@ export function FeatureConfig() {
 
           <Separator className="mt-auto" />
 
-          <div className="p-4">
+          <div className="flex h-[60px] shrink-0 flex-col p-4">
             <div className="flex items-center">
               <Button
                 type="submit"

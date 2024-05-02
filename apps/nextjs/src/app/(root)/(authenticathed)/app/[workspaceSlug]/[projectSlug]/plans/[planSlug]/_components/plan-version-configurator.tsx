@@ -40,7 +40,7 @@ export async function PlanVersionConfigurator({
 
   const defaultLayout = layout?.value
     ? (JSON.parse(layout.value) as [number, number, number])
-    : [20, 25, 55]
+    : [20, 30, 50]
 
   return (
     <ResizablePanelConfig

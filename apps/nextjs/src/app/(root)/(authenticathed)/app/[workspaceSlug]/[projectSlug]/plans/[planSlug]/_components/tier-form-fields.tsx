@@ -204,7 +204,9 @@ export function TierFormFields({
                             {...field}
                             className="h-8"
                             value={
-                              field.value === "Infinity" ? "∞" : field.value
+                              field.value.toString() === "Infinity"
+                                ? "∞"
+                                : field.value
                             }
                             disabled={
                               (index !== 0 && index === fields.length - 1) ||
@@ -308,6 +310,13 @@ export function TierFormFields({
                       e.stopPropagation()
                       e.preventDefault()
                       if (fields.length === 1) return
+
+                      // change last unit of the previous tier to the last unit of the current tier
+                      form.setValue(
+                        `config.tiers.${index - 1}.lastUnit`,
+                        form.getValues(`config.tiers.${index}.lastUnit`)
+                      )
+
                       remove(index)
                     }}
                   >
@@ -338,17 +347,18 @@ export function TierFormFields({
 
                     form.setValue(
                       `config.tiers.${fields.length - 1}.lastUnit`,
-                      lastUnitValue === "Infinity"
+                      lastUnitValue.toString() === "Infinity"
                         ? firstUnitValue + 1
                         : lastUnitValue
                     )
 
                     append({
                       firstUnit:
+                        lastUnitValue === Infinity ||
                         lastUnitValue === "Infinity"
                           ? firstUnitValue + 2
                           : lastUnitValue + 1,
-                      lastUnit: "Infinity",
+                      lastUnit: Infinity,
                       unitPrice: 0,
                     })
                   }}

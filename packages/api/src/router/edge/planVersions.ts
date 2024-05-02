@@ -205,7 +205,6 @@ export const planVersionRouter = createTRPCRouter({
     )
     .mutation(async (opts) => {
       const {
-        planId,
         featuresConfig,
         status,
         id,
@@ -247,10 +246,28 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
+      // replace lastUnit Inifinity with string "Infinity" -> if infinity is passed as a number it will be converted to null
+      const config = featuresConfig?.map((feature) => {
+        const { config } = feature
+        if (config?.tiers) {
+          config.tiers = config.tiers.map((tier) => {
+            if (tier.lastUnit === Infinity) {
+              return {
+                ...tier,
+                lastUnit: "Infinity",
+              }
+            }
+            return tier
+          })
+        }
+        return feature
+      })
+
+      // TODO: change this so we can update only some fields if they are provided
       const versionUpdated = await opts.ctx.db
         .update(schema.versions)
         .set({
-          featuresConfig,
+          featuresConfig: config,
           status,
           updatedAt: new Date(),
           description,

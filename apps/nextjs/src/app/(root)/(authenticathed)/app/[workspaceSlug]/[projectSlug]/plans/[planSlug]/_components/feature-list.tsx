@@ -42,9 +42,6 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
 
   const planFeatureIds = activeFeatures.map((feature) => feature.id)
 
-  console.log(planFeatureIds)
-  console.log(data.features)
-
   const searchableFeatures = data.features.filter(
     (feature) => !planFeatureIds.includes(feature.id)
   )
@@ -64,7 +61,7 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
         </div>
       </div>
       <ScrollArea className="h-[750px] pb-4">
-        <div className="flex flex-col gap-2 px-4 pt-0">
+        <div className="flex h-[730px] flex-col gap-2 px-4 pt-0">
           {searchableFeatures.length === 0 ? (
             <EmptyPlaceholder>
               <EmptyPlaceholder.Icon>
