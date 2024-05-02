@@ -91,8 +91,6 @@ const PlanVersionActions = ({
         return
       }
 
-      console.log("planFeatures.planFeatures", planFeatures.planFeatures)
-
       void updateVersion.mutateAsync({
         id: planVersion.id,
         featuresConfig: planFeatures.planFeatures,
