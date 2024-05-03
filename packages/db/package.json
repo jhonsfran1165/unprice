@@ -55,7 +55,7 @@
     "@builderai/tsconfig": "^0.1.0",
     "dotenv-cli": "^7.3.0",
     "drizzle-kit": "^0.20.14",
-    "eslint": "^8.57.0",
+    "eslint": "^9.2.0",
     "pg": "^8.11.3",
     "prettier": "^3.2.5",
     "typescript": "^5.3.3"
