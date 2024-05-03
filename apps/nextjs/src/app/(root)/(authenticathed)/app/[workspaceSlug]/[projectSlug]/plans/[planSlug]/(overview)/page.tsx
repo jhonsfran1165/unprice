@@ -193,6 +193,10 @@ export default async function PlanPage({
                                       Edit version
                                     </DropdownMenuItem>
                                   </DialogTrigger>
+                                  {/* // TODO: duplicate version */}
+                                  <DropdownMenuItem>
+                                    Duplicate version
+                                  </DropdownMenuItem>
                                   <DropdownMenuItem>
                                     <Link
                                       href={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${version.version}`}

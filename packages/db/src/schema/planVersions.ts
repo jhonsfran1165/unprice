@@ -5,7 +5,6 @@ import {
   integer,
   json,
   primaryKey,
-  serial,
   text,
   unique,
   varchar,
@@ -45,7 +44,7 @@ export const versions = pgTableProject(
     // description of the plan version
     description: text("description"),
     // version number of the plan, is a sequential number
-    version: serial("version").notNull().unique(),
+    version: integer("version").notNull(),
     // whether this is the latest version of the plan for the given currency
     latest: boolean("latest").default(false),
     // title of the version, this is useful for multiple languages. eg. "Basic Plan", "Plan Basico"

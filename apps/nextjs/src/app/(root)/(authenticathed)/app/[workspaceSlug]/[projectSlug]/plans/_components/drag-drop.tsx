@@ -43,6 +43,7 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
 
   const features = featuresList[planActiveTab]
 
+  // TODO: this could be the atom as well
   const [activeFeature, setActiveFeature] = useState<PlanVersionFeature | null>(
     null
   )

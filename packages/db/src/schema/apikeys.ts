@@ -10,6 +10,7 @@ export const apikeys = pgTableProject(
   {
     ...projectID,
     ...timestamps,
+    // TODO: transform to unix timestamp
     expiresAt: timestamp("expires_at", { mode: "date" }),
     lastUsed: timestamp("last_used", { mode: "date" }),
     revokedAt: timestamp("revoked_at", { mode: "date" }),

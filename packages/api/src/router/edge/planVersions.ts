@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq, getTableColumns } from "@builderai/db"
+import { and, eq, getTableColumns, sql } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
@@ -53,12 +53,31 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
+      // if plan is recurring, then billing period is required
+      if (planData.type === "recurring" && !billingPeriod) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "billingPeriod is required for recurring plans",
+        })
+      }
+
       const planVersionId = utils.newId("plan_version")
 
       // this should happen in a transaction because we need to change the status of the previous version
       const planVersionData = await opts.ctx.db.transaction(async (tx) => {
         try {
-          // change status of previous latest version.
+          // count how many versions are there for the plan
+          const countVersionsPlan = await opts.ctx.db
+            .select({ count: sql<number>`count(*)` })
+            .from(schema.versions)
+            .where(
+              and(
+                eq(schema.versions.projectId, project.id),
+                eq(schema.versions.planId, planId),
+                eq(schema.versions.currency, currency)
+              )
+            )
+            .then((res) => res[0]?.count ?? 0)
 
           // set the latest version to false if there is a latest version
           await tx
@@ -85,6 +104,7 @@ export const planVersionRouter = createTRPCRouter({
               planId,
               projectId: project.id,
               status: status ?? "draft",
+              version: countVersionsPlan + 1,
               latest: true,
               featuresConfig: featuresConfig ?? [],
               title: title ?? planData.slug,
@@ -263,21 +283,20 @@ export const planVersionRouter = createTRPCRouter({
         return feature
       })
 
-      // TODO: change this so we can update only some fields if they are provided
       const versionUpdated = await opts.ctx.db
         .update(schema.versions)
         .set({
-          featuresConfig: config,
-          status,
+          ...(description && { description }),
+          ...(currency && { currency }),
+          ...(billingPeriod && { billingPeriod }),
+          ...(startCycle && { startCycle }),
+          ...(gracePeriod && { gracePeriod }),
+          ...(title && { title }),
+          ...(tags && { tags }),
+          ...(whenToBill && { whenToBill }),
+          ...(status && { status }),
+          ...(featuresConfig && { featuresConfig: config }),
           updatedAt: new Date(),
-          description,
-          currency,
-          billingPeriod,
-          startCycle,
-          gracePeriod,
-          title,
-          tags,
-          whenToBill,
         })
         .where(and(eq(schema.versions.id, planVersionData.id)))
         .returning()

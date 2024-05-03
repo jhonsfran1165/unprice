@@ -33,6 +33,10 @@ export const projectID = {
 // https://aviyadav231.medium.com/automatically-updating-a-timestamp-column-in-postgresql-using-triggers-98766e3b47a0
 // common timestamps for all tables
 export const timestamps = {
+  // TODO: is this a good idea?
+  // createdAt: integer("timestamp")
+  //   .notNull()
+  //   .default(sql`extract(epoch from now())`),
   createdAt: timestamp("created_at", {
     mode: "date",
   })

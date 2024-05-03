@@ -35,6 +35,7 @@ export const subscriptions = pgTableProject(
     entitlements: json("entitlements").default([]),
 
     // subscription trial period
+    // TODO: transform to unix timestamp
     trialsEnd: date("trials_end"),
     startDate: date("start_date"),
     endDate: date("end_date"),

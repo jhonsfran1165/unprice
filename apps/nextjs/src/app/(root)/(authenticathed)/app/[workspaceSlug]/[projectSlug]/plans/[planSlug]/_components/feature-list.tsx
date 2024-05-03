@@ -29,7 +29,7 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
 
   const activeFeatures = [...planFeatures.planFeatures]
 
-  const { data } = api.features.searchBy.useQuery(
+  const { data, isFetching } = api.features.searchBy.useQuery(
     {
       search: filterDebounce,
     },
@@ -37,6 +37,7 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
       staleTime: 0,
       initialData: initialFeatures,
       refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }
   )
 
@@ -62,7 +63,12 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
       </div>
       <ScrollArea className="h-[750px] pb-4">
         <div className="flex h-[730px] flex-col gap-2 px-4 pt-0">
-          {searchableFeatures.length === 0 ? (
+          {isFetching && (
+            <div className="flex h-full items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+            </div>
+          )}
+          {!isFetching && searchableFeatures.length === 0 ? (
             <EmptyPlaceholder>
               <EmptyPlaceholder.Icon>
                 <FileStack className="h-8 w-8" />
@@ -84,6 +90,7 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
               </EmptyPlaceholder.Action>
             </EmptyPlaceholder>
           ) : (
+            !isFetching &&
             searchableFeatures.map((feature, index) => (
               <SortableFeature
                 key={index}
