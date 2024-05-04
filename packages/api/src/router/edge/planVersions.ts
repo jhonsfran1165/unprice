@@ -9,7 +9,6 @@ import {
   versionInsertBaseSchema,
   versionSelectBaseSchema,
 } from "@builderai/db/validators"
-import { stripe } from "@builderai/stripe"
 
 import {
   createTRPCRouter,
@@ -28,7 +27,7 @@ export const planVersionRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const {
         planId,
-        featuresConfig,
+        metadata,
         description,
         currency,
         billingPeriod,
@@ -38,6 +37,8 @@ export const planVersionRouter = createTRPCRouter({
         tags,
         whenToBill,
         status,
+        paymentProvider,
+        planType,
       } = opts.input
       const project = opts.ctx.project
 
@@ -53,20 +54,12 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
-      // if plan is recurring, then billing period is required
-      if (planData.type === "recurring" && !billingPeriod) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "billingPeriod is required for recurring plans",
-        })
-      }
-
       const planVersionId = utils.newId("plan_version")
 
       // this should happen in a transaction because we need to change the status of the previous version
       const planVersionData = await opts.ctx.db.transaction(async (tx) => {
         try {
-          // count how many versions are there for the plan
+          // count how many versions there are for the plan
           const countVersionsPlan = await opts.ctx.db
             .select({ count: sql<number>`count(*)` })
             .from(schema.versions)
@@ -89,32 +82,34 @@ export const planVersionRouter = createTRPCRouter({
               and(
                 eq(schema.versions.projectId, project.id),
                 eq(schema.versions.latest, true),
-                eq(schema.versions.planId, planId),
-                eq(schema.versions.currency, currency)
+                eq(schema.versions.planId, planId)
               )
             )
             .returning()
             .then((re) => re[0])
 
-          // version is a incrementing number calculated on save time by the database
           const planVersionData = await tx
             .insert(schema.versions)
             .values({
               id: planVersionId,
               planId,
               projectId: project.id,
+              description,
+              title: title ?? planData.slug,
+              tags: tags ?? [],
+
               status: status ?? "draft",
               version: countVersionsPlan + 1,
+              paymentProvider,
+              planType,
+              // TODO: is latest really necessary?
               latest: true,
-              featuresConfig: featuresConfig ?? [],
-              title: title ?? planData.slug,
-              description,
               currency,
               billingPeriod: billingPeriod ?? "month",
               startCycle: startCycle ?? null,
               gracePeriod: gracePeriod ?? 0,
               whenToBill: whenToBill ?? "pay_in_advance",
-              tags: tags ?? [],
+              metadata,
             })
             .returning()
             .catch((err) => {
@@ -154,7 +149,7 @@ export const planVersionRouter = createTRPCRouter({
 
   remove: protectedActiveProjectAdminProcedure
     .input(
-      versionInsertBaseSchema
+      versionSelectBaseSchema
         .pick({
           id: true,
         })
@@ -208,16 +203,7 @@ export const planVersionRouter = createTRPCRouter({
       }
     }),
   update: protectedActiveProjectAdminProcedure
-    .input(
-      versionInsertBaseSchema
-        .partial({
-          projectId: true,
-          title: true,
-          currency: true,
-          planId: true,
-        })
-        .required({ id: true })
-    )
+    .input(versionSelectBaseSchema.partial().required({ id: true }))
     .output(
       z.object({
         planVersion: versionSelectBaseSchema,
@@ -225,7 +211,6 @@ export const planVersionRouter = createTRPCRouter({
     )
     .mutation(async (opts) => {
       const {
-        featuresConfig,
         status,
         id,
         description,
@@ -267,21 +252,21 @@ export const planVersionRouter = createTRPCRouter({
       }
 
       // replace lastUnit Inifinity with string "Infinity" -> if infinity is passed as a number it will be converted to null
-      const config = featuresConfig?.map((feature) => {
-        const { config } = feature
-        if (config?.tiers) {
-          config.tiers = config.tiers.map((tier) => {
-            if (tier.lastUnit === Infinity) {
-              return {
-                ...tier,
-                lastUnit: "Infinity",
-              }
-            }
-            return tier
-          })
-        }
-        return feature
-      })
+      // const config = featuresConfig?.map((feature) => {
+      //   const { config } = feature
+      //   if (config?.tiers) {
+      //     config.tiers = config.tiers.map((tier) => {
+      //       if (tier.lastUnit === Infinity) {
+      //         return {
+      //           ...tier,
+      //           lastUnit: "Infinity",
+      //         }
+      //       }
+      //       return tier
+      //     })
+      //   }
+      //   return feature
+      // })
 
       const versionUpdated = await opts.ctx.db
         .update(schema.versions)
@@ -295,7 +280,7 @@ export const planVersionRouter = createTRPCRouter({
           ...(tags && { tags }),
           ...(whenToBill && { whenToBill }),
           ...(status && { status }),
-          ...(featuresConfig && { featuresConfig: config }),
+          // ...(featuresConfig && { featuresConfig: config }),
           updatedAt: new Date(),
         })
         .where(and(eq(schema.versions.id, planVersionData.id)))
@@ -318,7 +303,7 @@ export const planVersionRouter = createTRPCRouter({
     .input(
       z.object({
         planSlug: z.string(),
-        version: z.coerce.number().min(0),
+        version: z.coerce.number().min(1),
       })
     )
     .output(
@@ -393,12 +378,12 @@ export const planVersionRouter = createTRPCRouter({
           ),
       })
 
-      if (!planVersion?.featuresConfig) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Plan version has no features to sync",
-        })
-      }
+      // if (!planVersion?.featuresConfig) {
+      //   throw new TRPCError({
+      //     code: "NOT_FOUND",
+      //     message: "Plan version has no features to sync",
+      //   })
+      // }
 
       // add custom id of the product
       // search for prices of the product to check if they need to be updated
@@ -407,66 +392,66 @@ export const planVersionRouter = createTRPCRouter({
       // limits of products is important here
 
       // group all features by type
-      const features = planVersion.featuresConfig
+      // const features = planVersion.featuresConfig
 
-      console.log("features", features)
+      // console.log("features", features)
 
-      // calculate the price of flat features and that would be the base price of the plan
-      const basePricePlan = features.reduce((acc, feature) => {
-        if (feature.type === "flat") {
-          return acc + feature.config.price
-        }
-        return acc
-      }, 0)
+      // // calculate the price of flat features and that would be the base price of the plan
+      // const basePricePlan = features.reduce((acc, feature) => {
+      //   if (feature.type === "flat") {
+      //     return acc + feature.config.price
+      //   }
+      //   return acc
+      // }, 0)
 
-      console.log("basePricePlan", basePricePlan)
+      // console.log("basePricePlan", basePricePlan)
 
       // create a product for the plan
       // limit 15 flat features
-      const flatProductStripe = await stripe.products.create(
-        {
-          name: `${planVersion.plan.slug} - flat`,
-          type: "service",
-          description: planVersion.plan.description ?? "dasdasd",
-          features: features.map((feature) => ({
-            name: feature.title,
-          })),
-          metadata: {
-            planId: planVersion.plan.id,
-            planVersionId: planVersion.id,
-          },
-        },
-        {
-          stripeAccount: project.stripeAccountId ?? "",
-        }
-      )
+      // const flatProductStripe = await stripe.products.create(
+      //   {
+      //     name: `${planVersion.plan.slug} - flat`,
+      //     type: "service",
+      //     description: planVersion.plan.description ?? "dasdasd",
+      //     features: features.map((feature) => ({
+      //       name: feature.title,
+      //     })),
+      //     metadata: {
+      //       planId: planVersion.plan.id,
+      //       planVersionId: planVersion.id,
+      //     },
+      //   },
+      //   {
+      //     stripeAccount: project.stripeAccountId ?? "",
+      //   }
+      // )
 
       // TODO
       // get the product and price id
       // save the prices ids in the plan version
 
       // create a price for the product
-      const flatPriceStripe = await stripe.prices.create(
-        {
-          currency: planVersion.currency ?? "usd",
-          product: flatProductStripe.id,
-          unit_amount: basePricePlan * 100,
-          recurring: {
-            interval: planVersion.billingPeriod ?? "month",
-          },
-          metadata: {
-            planId: planVersion.plan.id,
-            planVersionId: planVersion.id,
-          },
-          lookup_key: `${planVersion.plan.slug}-flat`,
-        },
-        {
-          stripeAccount: project.stripeAccountId ?? "",
-        }
-      )
+      // const flatPriceStripe = await stripe.prices.create(
+      //   {
+      //     currency: planVersion.currency ?? "usd",
+      //     product: flatProductStripe.id,
+      //     unit_amount: basePricePlan * 100,
+      //     recurring: {
+      //       interval: planVersion.billingPeriod ?? "month",
+      //     },
+      //     metadata: {
+      //       planId: planVersion.plan.id,
+      //       planVersionId: planVersion.id,
+      //     },
+      //     lookup_key: `${planVersion.plan.slug}-flat`,
+      //   },
+      //   {
+      //     stripeAccount: project.stripeAccountId ?? "",
+      //   }
+      // )
 
-      // update the plan with the price id
-      console.log("flatPriceStripe", flatPriceStripe)
+      // // update the plan with the price id
+      // console.log("flatPriceStripe", flatPriceStripe)
 
       return {
         success: true,

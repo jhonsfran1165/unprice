@@ -4,14 +4,11 @@ import {
   LayoutDashboard,
   MoreHorizontal,
   PlusIcon,
-  RefreshCcw,
   Settings,
   User2,
-  Wallet,
 } from "lucide-react"
 
 import { cn } from "@builderai/ui"
-import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import {
   Card,
@@ -116,16 +113,6 @@ export function PlanCard(props: {
           </div>
         </CardHeader>
         <CardFooter className="flex flex-row justify-between space-x-4 text-sm text-muted-foreground">
-          <div className="space-x-2">
-            <Badge>
-              <RefreshCcw className="h-3 w-3" />
-              <span className="ml-1">{plan.type}</span>
-            </Badge>
-            <Badge>
-              <Wallet className="h-3 w-3" />
-              <span className="ml-1">{plan.paymentProvider}</span>
-            </Badge>
-          </div>
           <div className="flex items-center text-xs text-muted-foreground">
             <GalleryHorizontalEnd className="mr-2 h-3 w-3" />
             {versions.length === 0 ? "no" : versions.length} versions

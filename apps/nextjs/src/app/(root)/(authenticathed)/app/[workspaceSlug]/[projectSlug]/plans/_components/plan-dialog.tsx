@@ -34,10 +34,8 @@ export function PlanDialog({
         <PlanForm
           defaultValues={
             defaultValues ?? {
-              paymentProvider: "stripe",
               slug: "",
               description: "",
-              type: "recurring",
               active: true,
             }
           }

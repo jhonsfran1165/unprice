@@ -1,9 +1,8 @@
 import { relations } from "drizzle-orm"
-import { boolean, primaryKey, text, unique } from "drizzle-orm/pg-core"
+import { boolean, json, primaryKey, text, unique } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { projectID, timestamps } from "../utils/sql"
-import { paymentProviderEnum, planTypeEnum } from "./enums"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
 
@@ -18,15 +17,12 @@ export const plans = pgTableProject(
     // whether the plan is active or not, if not active, it won't be available for purchase
     // this is useful for plans that are not available anymore so the api won't list them
     active: boolean("active").default(true),
-    // payment provider for the plan - stripe, paypal, lemonsquezee etc.
-    paymentProvider: paymentProviderEnum("payment_providers")
-      .default("stripe")
-      .notNull(),
     // description of the plan
     description: text("description"),
-    // type of the plan - recurring, one-time, etc.
-    // TODO: add more types for now only support recurring
-    type: planTypeEnum("plan_type").default("recurring").notNull(),
+    // metadata probably will be useful to save external data, etc.
+    metadata: json("metadata").$type<{
+      externalId?: string
+    }>(),
   },
   (table) => ({
     primary: primaryKey({

@@ -4,6 +4,7 @@ export const dbNameSpaces = {
   project: "proj",
   user: "user",
   feature: "feat",
+  feature_version: "fv",
   plan: "plan",
   apikey: "api",
   apikey_key: "builderai_live",
@@ -67,7 +68,7 @@ export const USAGE_METERED_MAP = {
 export const PAYMENT_PROVIDERS = ["stripe", "lemonsqueezy"] as const
 export const CURRENCIES = ["USD", "EUR"] as const
 export const STAGES = ["prod", "test", "dev"] as const
-export const STATUS_PLAN = ["draft", "published", "archived"] as const
+export const STATUS_PLAN = ["draft", "published"] as const
 export const STATUS_SUBSCRIPTION = ["active", "inactive"] as const
 // TODO: delete this
 export const PLANS_APP = ["FREE", "PRO", "ENTERPRISE"] as const

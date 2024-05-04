@@ -14,8 +14,6 @@ export const planInsertBaseSchema = createInsertSchema(schema.plans, {
   })
   .required({
     slug: true,
-    paymentProvider: true,
-    type: true,
   })
 
 export type InsertPlan = z.infer<typeof planInsertBaseSchema>

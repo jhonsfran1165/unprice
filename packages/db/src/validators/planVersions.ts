@@ -2,40 +2,12 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 
 import * as schema from "../schema"
-import { CURRENCIES } from "../utils"
-import {
-  configFlatFeature,
-  configTierFeature,
-  configUsageFeature,
-} from "./features"
+import { PLAN_BILLING_PERIODS } from "../utils"
 
-// contains the configuration for the features for the specific plan version
-// the reason why we save the configuration as json inside the featuresConfig is because
-// it suppose to be append only, so we can keep track of the changes
-export const planVersionFeatureSchema = z
-  .discriminatedUnion("type", [
-    configFlatFeature,
-    configTierFeature,
-    configUsageFeature,
-  ])
-  .superRefine((data, ctx) => {
-    if (!data) {
-      return
-    }
-
-    if (!data.type) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Invalid configuration for the feature",
-        path: ["type"],
-        fatal: true,
-      })
-
-      return false
-    }
-
-    return true
-  })
+export const planVersionMetadataSchema = z.object({
+  externalId: z.string().optional(),
+  lastTimeSyncPaymentProvider: z.number().optional(),
+})
 
 export const startCycleSchema = z.union([
   z.number().nonnegative(), // number of day from the start of the cycle
@@ -44,18 +16,19 @@ export const startCycleSchema = z.union([
 ])
 
 export const versionSelectBaseSchema = createSelectSchema(schema.versions, {
-  featuresConfig: z.array(planVersionFeatureSchema),
+  // featuresConfig: z.array(planVersionFeatureSchema),
   startCycle: startCycleSchema,
   tags: z.array(z.string()),
-  currency: z.enum(CURRENCIES),
+  metadata: planVersionMetadataSchema,
 })
 
 export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
-  featuresConfig: z.array(planVersionFeatureSchema),
+  // featuresConfig: z.array(planVersionFeatureSchema),
   startCycle: startCycleSchema,
   tags: z.array(z.string()),
-  currency: z.enum(CURRENCIES),
   title: z.string().min(3).max(50),
+  metadata: planVersionMetadataSchema,
+  billingPeriod: z.enum(PLAN_BILLING_PERIODS),
 })
   .partial({
     projectId: true,
@@ -65,22 +38,29 @@ export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
   .required({
     planId: true,
     currency: true,
+    planType: true,
+    paymentProvider: true,
   })
+  .superRefine((data, ctx) => {
+    if (data.planType === "recurring" && !data.billingPeriod) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Billing period is required for recurring plans",
+        path: ["billingPeriod"],
+        fatal: true,
+      })
 
-export type StartCycleType = z.infer<typeof startCycleSchema>
+      return false
+    }
+
+    return true
+  })
 
 export const versionListBase = versionSelectBaseSchema.pick({
   id: true,
   status: true,
   version: true,
 })
-
-export const planConfigSchema = z.record(
-  z.object({
-    name: z.string(),
-    features: z.array(versionSelectBaseSchema.shape.featuresConfig),
-  })
-)
 
 export const updateVersionPlan = versionSelectBaseSchema
   .extend({
@@ -97,16 +77,10 @@ export const updateVersionPlan = versionSelectBaseSchema
     featuresConfig: true,
   })
 
-export type GroupType = "Group"
-
-export interface Group {
-  id: string
-  title: string
-}
-
+export type StartCycleType = z.infer<typeof startCycleSchema>
+export type PlanVersionMetadata = z.infer<typeof planVersionMetadataSchema>
 export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>
 export type UpdateVersion = z.infer<typeof updateVersionPlan>
 export type PlanVersion = z.infer<typeof versionSelectBaseSchema>
 export type PlanVersionList = z.infer<typeof versionListBase>
-export type PlanVersionFeature = z.infer<typeof planVersionFeatureSchema>
 export type SelectVersion = z.infer<typeof versionSelectBaseSchema>

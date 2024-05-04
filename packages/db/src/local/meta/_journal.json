@@ -176,6 +176,13 @@
       "when": 1714161085056,
       "tag": "0024_secret_angel",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1714820629490,
+      "tag": "0025_flashy_penance",
+      "breakpoints": true
     }
   ]
 }

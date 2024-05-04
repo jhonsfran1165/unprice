@@ -26,7 +26,7 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { slug, paymentProvider, description, type } = opts.input
+      const { slug, description } = opts.input
       const project = opts.ctx.project
 
       const planId = utils.newId("plan")
@@ -36,10 +36,8 @@ export const planRouter = createTRPCRouter({
         .values({
           id: planId,
           slug,
-          paymentProvider,
           projectId: project.id,
           description,
-          type,
           active: true,
         })
         .returning()
@@ -112,7 +110,7 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { id, paymentProvider, description, active, type } = opts.input
+      const { id, description, active } = opts.input
       const project = opts.ctx.project
 
       const planData = await opts.ctx.db.query.plans.findFirst({
@@ -143,9 +141,7 @@ export const planRouter = createTRPCRouter({
         .update(schema.plans)
         .set({
           description,
-          paymentProvider,
           active,
-          type,
           updatedAt: new Date(),
         })
         .where(

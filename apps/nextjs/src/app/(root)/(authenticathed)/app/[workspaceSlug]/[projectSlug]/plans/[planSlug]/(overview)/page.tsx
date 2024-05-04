@@ -117,6 +117,9 @@ export default async function PlanPage({
                         Currency
                       </TableHead>
                       <TableHead className="hidden text-center sm:table-cell">
+                        Provider
+                      </TableHead>
+                      <TableHead className="hidden text-center sm:table-cell">
                         Type
                       </TableHead>
                       <TableHead className="table-cell text-center">
@@ -156,8 +159,11 @@ export default async function PlanPage({
                         </TableCell>
                         <TableCell className="hidden text-center md:table-cell">
                           <Badge className="text-xs">
-                            {version.billingPeriod}
+                            {version.paymentProvider}
                           </Badge>
+                        </TableCell>
+                        <TableCell className="hidden text-center md:table-cell">
+                          <Badge className="text-xs">{version.planType}</Badge>
                         </TableCell>
                         <TableCell className="table-cell text-center">
                           <Badge

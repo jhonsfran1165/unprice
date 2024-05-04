@@ -5,7 +5,11 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { CURRENCIES } from "@builderai/config"
-import { PLAN_BILLING_PERIODS } from "@builderai/db/utils"
+import {
+  PAYMENT_PROVIDERS,
+  PLAN_BILLING_PERIODS,
+  PLAN_TYPES,
+} from "@builderai/db/utils"
 import type { InsertPlanVersion } from "@builderai/db/validators"
 import { versionInsertBaseSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
@@ -46,7 +50,7 @@ export function PlanVersionForm({
 
   const form = useZodForm({
     schema: versionInsertBaseSchema,
-    defaultValues: defaultValues,
+    defaultValues,
   })
 
   const createPlanVersion = api.planVersions.create.useMutation({
@@ -109,6 +113,8 @@ export function PlanVersionForm({
       void deletePlanVersion.mutateAsync({ id: defaultValues.id })
     })
   }
+
+  const planType = form.watch("planType")
 
   return (
     <Form {...form}>
@@ -180,26 +186,38 @@ export function PlanVersionForm({
 
           <FormField
             control={form.control}
-            name="billingPeriod"
+            name="paymentProvider"
             render={({ field }) => (
               <FormItem>
                 <div className="flex justify-between">
-                  <FormLabel>Billing period</FormLabel>
+                  <FormLabel>Payment provider</FormLabel>
+                  {/* // TODO: add link to payment provider configuration */}
+                  <Link
+                    href="#"
+                    className="ml-auto inline-block text-xs text-info underline opacity-70"
+                  >
+                    Configure payment provider
+                  </Link>
                 </div>
+
+                <FormDescription>
+                  In oder to use a payment provider, you need to configure it
+                  first for your organization.
+                </FormDescription>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value ?? ""}
-                  disabled={editMode}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a billing period" />
+                      <SelectValue placeholder="Select a provider" />
                     </SelectTrigger>
                   </FormControl>
+                  {/* // TODO: use the default payment provider from the organization */}
                   <SelectContent>
-                    {PLAN_BILLING_PERIODS.map((period, index) => (
-                      <SelectItem key={index} value={period}>
-                        {period}
+                    {PAYMENT_PROVIDERS.map((provider, index) => (
+                      <SelectItem key={index} value={provider}>
+                        {provider}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -208,6 +226,71 @@ export function PlanVersionForm({
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="planType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Type of the plan</FormLabel>
+                <FormDescription>
+                  Only recurring plans are supported at the moment.
+                </FormDescription>
+
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a plan type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {PLAN_TYPES.map((type, index) => (
+                      <SelectItem key={index} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {planType === "recurring" && (
+            <FormField
+              control={form.control}
+              name="billingPeriod"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex justify-between">
+                    <FormLabel>Billing period</FormLabel>
+                  </div>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? ""}
+                    disabled={editMode}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a billing period" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {PLAN_BILLING_PERIODS.map((period, index) => (
+                        <SelectItem key={index} value={period}>
+                          {period}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}

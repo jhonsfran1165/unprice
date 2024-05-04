@@ -6,24 +6,28 @@ import {
   json,
   primaryKey,
   text,
+  timestamp,
   unique,
   varchar,
 } from "drizzle-orm/pg-core"
-import type * as z from "zod"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
 import type {
-  planVersionFeatureSchema,
+  PlanVersionMetadata,
   StartCycleType,
 } from "../validators/planVersions"
+import { users } from "./auth"
 import {
   currencyEnum,
+  paymentProviderEnum,
   planBillingPeriodEnum,
+  planTypeEnum,
   statusPlanEnum,
   whenToBillEnum,
 } from "./enums"
 import { plans } from "./plans"
+import { planVersionFeatures } from "./planVersionFeatures"
 import { projects } from "./projects"
 import { subscriptions } from "./subscriptions"
 
@@ -40,19 +44,46 @@ export const versions = pgTableProject(
   {
     ...projectID,
     ...timestamps,
+
+    // basic information of the plan version
     planId: cuid("plan_id").notNull(),
     // description of the plan version
     description: text("description"),
-    // version number of the plan, is a sequential number
+    // version number of the plan, this is grouped by plan and project.
     version: integer("version").notNull(),
-    // whether this is the latest version of the plan for the given currency
+    // whether this is the latest version of the plan for the given currency, payment provider, plan type, and plan id
     latest: boolean("latest").default(false),
     // title of the version, this is useful for multiple languages. eg. "Basic Plan", "Plan Basico"
     title: varchar("title", { length: 50 }).notNull(),
+    // tags for the plan, this could be used for filtering - we don't use metadata to save this
+    // because we want to improve the search performance, and searching in metadata is not efficient
+    tags: json("tags").$type<string[]>(),
+
+    // handling status of the plan version
     // active: whether the plan version is active or not, if not active, it won't be available for purchase
     active: boolean("active").default(true),
-    // tags for the plan, this could be used for filtering
-    tags: json("tags").$type<string[]>(),
+    // status of the plan version - draft, published
+    status: statusPlanEnum("plan_version_status").default("draft"),
+    // date when the plan version was published
+    publishedAt: timestamp("published_at", { mode: "date" }),
+    // user that published the plan version
+    publishedBy: cuid("published_by").references(() => users.id),
+    // the customers have been migrated to a new version
+    archived: boolean("archived").default(false),
+    archivedAt: timestamp("archived_at", { mode: "date" }),
+    archivedBy: cuid("archived_by").references(() => users.id),
+
+    // payment provider for the plan - stripe, paypal, lemonsquezee etc.
+    paymentProvider: paymentProviderEnum("payment_providers")
+      .default("stripe")
+      .notNull(),
+    // type of the plan - recurring, one-time, etc.
+    // the idea is to support different types of plans in the future
+    // and compere which one is more useful for the business
+    // TODO: add more types for now only support recurring
+    planType: planTypeEnum("plan_type").default("recurring").notNull(),
+
+    // handle billing data
     // currency of the plan
     currency: currencyEnum("currency").notNull().default("EUR"),
     // whenToBill: pay_in_advance - pay_in_arrear
@@ -63,29 +94,24 @@ export const versions = pgTableProject(
     startCycle: text("start_cycle").$type<StartCycleType>().default(null), // null means the first day of the month
     // used for generating invoices - not used for now, only used for recurring plans
     gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
-    // status of the plan version - draft, active, inactive, published
-    status: statusPlanEnum("plan_version_status").default("draft"),
-    // features of the plan, each feature can have different configurations
-    // a feature is treated as a product that can be sold. This also allows to set the entitlements in the subscription
-    featuresConfig:
-      json("features_config").$type<
-        z.infer<typeof planVersionFeatureSchema>[]
-      >(),
+
+    // metadata probably will be useful to save external data, etc.
+    metadata: json("metadata").$type<PlanVersionMetadata>(),
   },
   (table) => ({
     planfk: foreignKey({
       columns: [table.planId, table.projectId],
       foreignColumns: [plans.id, plans.projectId],
-      name: "plan_versions_plan_id_fkey",
+      name: "plan_versions_plan_id_pkey",
     }),
     pk: primaryKey({
       columns: [table.id, table.projectId],
-      name: "plan_versions_pkey",
+      name: "plan_versions_plan_id_fkey",
     }),
+    // TODO: review this later
     unique: unique("unique_version").on(
       table.planId,
       table.projectId,
-      table.currency,
       table.version
     ),
   })
@@ -100,5 +126,6 @@ export const versionRelations = relations(versions, ({ one, many }) => ({
     fields: [versions.planId],
     references: [plans.id],
   }),
+  features: many(planVersionFeatures),
   subscriptions: many(subscriptions),
 }))
