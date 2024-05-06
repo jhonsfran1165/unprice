@@ -38,11 +38,13 @@ import { FlatFormFields } from "./flat-form-fields"
 import { TierFormFields } from "./tier-form-fields"
 
 export function FeatureConfigForm({
+  setDialogOpen,
   feature,
   formId,
 }: {
   feature: PlanVersionFeature
   formId: string
+  setDialogOpen?: (open: boolean) => void
 }) {
   // TODO: decide if we need to use this!
   const [planActiveTab] = usePlanActiveTab()
@@ -95,6 +97,8 @@ export function FeatureConfigForm({
         [planActiveTab]: activeFeatures,
       }
     })
+
+    setDialogOpen?.(false)
 
     // TODO: save here
   }

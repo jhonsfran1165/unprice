@@ -10,6 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@builderai/ui/alert-dialog"
 
+// TODO: support close first modal when open second modal
 export function ConfirmAction({
   confirmAction,
   children,

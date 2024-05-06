@@ -7,6 +7,7 @@ const submodulesProject = [
   "usage",
   "customers",
   "settings",
+  "planVersion",
 ] as const
 
 export const PROJECT_TABS_CONFIG: Record<
@@ -39,6 +40,29 @@ export const PROJECT_TABS_CONFIG: Record<
       danger: {
         title: "Danger",
         href: "/ingestions/danger",
+        icon: "CreditCard",
+      },
+    },
+  },
+  planVersion: {
+    titleTab: "usage",
+    icon: "BarChartIcon",
+    href: "/ingestions/overview",
+    disabled: true,
+    sidebar: {
+      overview: {
+        title: "Features",
+        href: "/",
+        icon: "Settings",
+      },
+      subscriptions: {
+        title: "subscriptions",
+        href: "/subscriptions",
+        icon: "CreditCard",
+      },
+      preview: {
+        title: "preview",
+        href: "/preview",
         icon: "CreditCard",
       },
     },

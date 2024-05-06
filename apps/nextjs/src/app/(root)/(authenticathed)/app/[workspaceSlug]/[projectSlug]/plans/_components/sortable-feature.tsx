@@ -51,7 +51,7 @@ export function SortableFeature(props: DragData) {
       className={cn(props.className, {
         "cursor-pointer": !isFeature,
         "cursor-grab": isFeature,
-        "cursor-pointer border-dashed border-primary-solid opacity-80 ":
+        "cursor-pointer border-dashed border-primary-solid opacity-80":
           isDragging && !isFeature,
       })}
       {...props}

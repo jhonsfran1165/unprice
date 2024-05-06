@@ -2,9 +2,9 @@ import React from "react"
 import { Provider } from "jotai"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
 import { api } from "~/trpc/server"
-import PlanVersionHeader from "../../_components/plan-version-header"
-import { NavVersionPlan } from "../../_components/plan-version-nav"
+import Stepper from "./(overview)/stepper"
 
 export const runtime = "edge"
 
@@ -26,20 +26,16 @@ export default async function PriceLayout(props: {
   return (
     <Provider>
       <DashboardShell
+        backLink={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}`}
         header={
-          <PlanVersionHeader
-            workspaceSlug={workspaceSlug}
-            projectSlug={projectSlug}
-            planVersion={planVersion}
+          <HeaderTab
+            title="Plan Version Settings"
+            description="Manage different settings for this plan version."
           />
         }
+        sidebar={<Stepper />}
       >
-        <NavVersionPlan
-          baseUrl={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${planVersionId}`}
-        />
-        <div className="relative">
-          <section>{props.children}</section>
-        </div>
+        {props.children}
       </DashboardShell>
     </Provider>
   )

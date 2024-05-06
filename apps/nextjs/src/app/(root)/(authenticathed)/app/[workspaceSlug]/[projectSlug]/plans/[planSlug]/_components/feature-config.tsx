@@ -1,26 +1,25 @@
 "use client"
 
-import { Button } from "@builderai/ui/button"
-import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 
 import { useActiveFeature } from "../../_components/use-features"
 import { FeatureConfigForm } from "./feature-config-form"
 
-export function FeatureConfig() {
+export function FeatureConfig({
+  setDialogOpen,
+  formId,
+}: {
+  setDialogOpen?: (open: boolean) => void
+  formId: string
+}) {
   const [activeFeature] = useActiveFeature()
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex h-[52px] shrink-0 items-center justify-between space-x-1 px-4 py-2">
-        <h1 className="truncate text-xl font-bold">Features on this plan</h1>
-      </div>
-
-      <Separator />
-
+    <div className="my-2 flex flex-1 flex-col">
       {activeFeature ? (
-        <div className="flex flex-1 flex-col">
-          <div className="flex items-start p-4">
+        <div className="flex flex-col">
+          <Separator />
+          <div className="flex items-start py-4">
             <div className="flex items-start gap-4 text-sm">
               <div className="grid gap-1">
                 <div className="line-clamp-1 text-lg font-semibold">
@@ -41,28 +40,12 @@ export function FeatureConfig() {
           </div>
           <Separator />
 
-          <ScrollArea className="h-[680px] pb-4">
-            <div className="flex-1 space-y-8 p-4 text-sm">
-              <FeatureConfigForm
-                formId={"feature-config-form"}
-                feature={activeFeature}
-              />
-            </div>
-          </ScrollArea>
-
-          <Separator className="mt-auto" />
-
-          <div className="flex h-[60px] shrink-0 flex-col p-4">
-            <div className="flex items-center">
-              <Button
-                type="submit"
-                form="feature-config-form"
-                size="sm"
-                className="ml-auto truncate"
-              >
-                Save configuration
-              </Button>
-            </div>
+          <div className="flex-1 space-y-8 p-4 py-10 text-sm">
+            <FeatureConfigForm
+              setDialogOpen={setDialogOpen}
+              formId={formId}
+              feature={activeFeature}
+            />
           </div>
         </div>
       ) : (
