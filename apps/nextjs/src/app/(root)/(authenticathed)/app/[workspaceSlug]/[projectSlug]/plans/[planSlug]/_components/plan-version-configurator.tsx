@@ -3,6 +3,7 @@ import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
 import { PlusIcon } from "lucide-react"
 
+import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Separator } from "@builderai/ui/separator"
@@ -10,32 +11,24 @@ import { Separator } from "@builderai/ui/separator"
 import { api } from "~/trpc/server"
 import { FeatureDialog } from "../../_components/feature-dialog"
 import { ResizablePanelConfig } from "../../_components/resizable"
-import { FeatureConfig } from "./feature-config"
 import { FeatureList } from "./feature-list"
 import { PlanFeatureList } from "./plan-feature-list"
 
 interface PlanVersionConfiguratorProps {
-  planSlug: string
-  planVersionId: string
+  planVersion: RouterOutputs["planVersions"]["getById"]["planVersion"]
 }
 
-export async function PlanVersionConfigurator({
-  planSlug,
-  planVersionId,
+export function PlanVersionConfigurator({
+  planVersion,
 }: PlanVersionConfiguratorProps) {
   const layout = cookies().get("react-resizable-panels:layout")
-
-  const { planVersion } = await api.planVersions.getByVersion({
-    version: Number(planVersionId),
-    planSlug,
-  })
 
   if (!planVersion) {
     notFound()
   }
 
   const initialFeatures = {
-    planFeatures: planVersion.featuresConfig ?? [],
+    planFeatures: planVersion.metadata?.orderFeatures ?? [],
   }
 
   const defaultLayout = layout?.value
@@ -49,13 +42,13 @@ export async function PlanVersionConfigurator({
         <>
           <div
             className={cn(
-              "flex h-[52px] items-center justify-between space-x-1 px-4"
+              "flex h-[70px] items-center justify-between space-x-1 px-4"
             )}
           >
             <h1 className="truncate text-xl font-bold">All features</h1>
             <FeatureDialog>
-              <Button variant="ghost" size="icon">
-                <PlusIcon className="h-4 w-4" />
+              <Button variant="default" size="sm">
+                <PlusIcon className="h-3.5 w-3.5" />
               </Button>
             </FeatureDialog>
           </div>
@@ -68,7 +61,6 @@ export async function PlanVersionConfigurator({
         </>
       }
       planFeatureList={<PlanFeatureList initialFeatures={initialFeatures} />}
-      featureConfig={<FeatureConfig />}
     />
   )
 }

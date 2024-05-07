@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { useHydrateAtoms } from "jotai/utils"
-import { FileStack, Search } from "lucide-react"
+import { ChevronRight, FileStack, Search } from "lucide-react"
 
 import { Button } from "@builderai/ui/button"
 import { Input } from "@builderai/ui/input"
@@ -37,8 +37,12 @@ export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
 
   return (
     <>
-      <div className="flex h-[52px] items-center justify-between space-x-1 px-4 py-2">
-        <h1 className="truncate text-xl font-bold">Features on this plan</h1>
+      <div className="flex h-[70px] items-center justify-between space-x-1 px-4 py-2">
+        <h1 className="truncate text-xl font-bold">Features on this version</h1>
+        <Button size={"sm"}>
+          addons
+          <ChevronRight className="h-3.5 w-3.5" />
+        </Button>
       </div>
       <Separator />
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">

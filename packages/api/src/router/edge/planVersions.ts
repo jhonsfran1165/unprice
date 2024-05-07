@@ -1,11 +1,12 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq, getTableColumns, sql } from "@builderai/db"
+import { and, eq, sql } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
   planSelectBaseSchema,
+  planVersionFeatureSelectBaseSchema,
   versionInsertBaseSchema,
   versionSelectBaseSchema,
 } from "@builderai/db/validators"
@@ -221,6 +222,8 @@ export const planVersionRouter = createTRPCRouter({
         title,
         tags,
         whenToBill,
+        paymentProvider,
+        metadata,
       } = opts.input
 
       const project = opts.ctx.project
@@ -280,6 +283,7 @@ export const planVersionRouter = createTRPCRouter({
           ...(tags && { tags }),
           ...(whenToBill && { whenToBill }),
           ...(status && { status }),
+          ...(metadata && { metadata }),
           // ...(featuresConfig && { featuresConfig: config }),
           updatedAt: new Date(),
         })
@@ -299,11 +303,11 @@ export const planVersionRouter = createTRPCRouter({
       }
     }),
 
-  getByVersion: protectedActiveProjectProcedure
+  getById: protectedActiveProjectProcedure
     .input(
       z.object({
         planSlug: z.string(),
-        version: z.coerce.number().min(1),
+        id: z.string(),
       })
     )
     .output(
@@ -313,35 +317,44 @@ export const planVersionRouter = createTRPCRouter({
             slug: true,
             id: true,
           }),
+          features: z.array(
+            planVersionFeatureSelectBaseSchema.pick({
+              id: true,
+              config: true,
+            })
+          ),
         }),
       })
     )
     .query(async (opts) => {
-      const { planSlug, version } = opts.input
+      const { planSlug, id } = opts.input
       const project = opts.ctx.project
 
-      const { ...rest } = getTableColumns(schema.versions)
+      const planData = await opts.ctx.db.query.plans.findFirst({
+        where: (plan, { and, eq }) =>
+          and(eq(plan.slug, planSlug), eq(plan.projectId, project.id)),
+      })
+
+      if (!planData?.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan not found",
+        })
+      }
 
       // TODO: improve this query
-      const planVersionData = await opts.ctx.db
-        .select({
-          ...rest,
-          plan: {
-            slug: schema.plans.slug,
-            id: schema.plans.id,
-          },
-        })
-        .from(schema.versions)
-        .limit(1)
-        .innerJoin(schema.plans, eq(schema.versions.planId, schema.plans.id))
-        .where(
+      const planVersionData = await opts.ctx.db.query.versions.findFirst({
+        with: {
+          plan: true,
+          features: true,
+        },
+        where: (version, { and, eq }) =>
           and(
-            eq(schema.versions.version, version),
-            eq(schema.plans.slug, planSlug),
-            eq(schema.versions.projectId, project.id)
-          )
-        )
-        .then((re) => re[0])
+            eq(version.projectId, project.id),
+            eq(version.id, id),
+            eq(version.planId, planData.id)
+          ),
+      })
 
       if (!planVersionData) {
         throw new TRPCError({

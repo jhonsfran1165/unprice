@@ -47,6 +47,7 @@ export function PlanVersionForm({
 }) {
   const router = useRouter()
   const editMode = defaultValues.id ? true : false
+  const isPublished = defaultValues.status === "published"
 
   const form = useZodForm({
     schema: versionInsertBaseSchema,
@@ -122,6 +123,7 @@ export function PlanVersionForm({
         <div className="space-y-8">
           <FormField
             control={form.control}
+            disabled={isPublished}
             name="title"
             render={({ field }) => (
               <FormItem>
@@ -144,6 +146,7 @@ export function PlanVersionForm({
 
           <FormField
             control={form.control}
+            disabled={isPublished}
             name="currency"
             render={({ field }) => (
               <FormItem>
@@ -164,7 +167,6 @@ export function PlanVersionForm({
                 <Select
                   onValueChange={field.onChange}
                   value={field.value ?? ""}
-                  disabled={editMode}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -187,6 +189,7 @@ export function PlanVersionForm({
           <FormField
             control={form.control}
             name="paymentProvider"
+            disabled={isPublished}
             render={({ field }) => (
               <FormItem>
                 <div className="flex justify-between">
@@ -230,6 +233,7 @@ export function PlanVersionForm({
           <FormField
             control={form.control}
             name="planType"
+            disabled={isPublished}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Type of the plan</FormLabel>
@@ -263,6 +267,7 @@ export function PlanVersionForm({
             <FormField
               control={form.control}
               name="billingPeriod"
+              disabled={isPublished}
               render={({ field }) => (
                 <FormItem>
                   <div className="flex justify-between">
@@ -271,7 +276,6 @@ export function PlanVersionForm({
                   <Select
                     onValueChange={field.onChange}
                     value={field.value ?? ""}
-                    disabled={editMode}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -294,6 +298,7 @@ export function PlanVersionForm({
 
           <FormField
             control={form.control}
+            disabled={isPublished}
             name="description"
             render={({ field }) => (
               <FormItem>

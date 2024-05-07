@@ -86,8 +86,8 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
               </Button>
             </FeatureDialog>
 
-            <span className={cn("w-full truncate text-sm font-medium")}>
-              {feature.title}
+            <span className={cn("line-clamp-1 w-full text-sm font-medium")}>
+              {feature.title.substring(0, 10) + "..."}
             </span>
           </div>
         ) : mode === "FeaturePlan" ? (

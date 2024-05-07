@@ -7,6 +7,7 @@ import { PLAN_BILLING_PERIODS } from "../utils"
 export const planVersionMetadataSchema = z.object({
   externalId: z.string().optional(),
   lastTimeSyncPaymentProvider: z.number().optional(),
+  orderFeatures: z.array(z.string()).optional(),
 })
 
 export const startCycleSchema = z.union([

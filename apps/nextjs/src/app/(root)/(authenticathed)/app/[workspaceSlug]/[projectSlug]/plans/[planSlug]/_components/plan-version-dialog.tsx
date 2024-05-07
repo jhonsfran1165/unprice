@@ -38,6 +38,8 @@ export function PlanVersionDialog({
               planId: "",
               projectId: "",
               currency: "USD",
+              planType: "recurring",
+              paymentProvider: "stripe",
             }
           }
           setDialogOpen={setDialogOpen}

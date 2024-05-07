@@ -126,6 +126,6 @@ export const versionRelations = relations(versions, ({ one, many }) => ({
     fields: [versions.planId],
     references: [plans.id],
   }),
-  features: many(planVersionFeatures),
+  planFeatures: many(planVersionFeatures),
   subscriptions: many(subscriptions),
 }))

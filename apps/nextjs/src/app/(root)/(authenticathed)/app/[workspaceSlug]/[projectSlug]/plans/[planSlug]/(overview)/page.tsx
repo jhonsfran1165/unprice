@@ -205,7 +205,7 @@ export default async function PlanPage({
                                   </DropdownMenuItem>
                                   <DropdownMenuItem>
                                     <Link
-                                      href={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${version.version}`}
+                                      href={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${version.id}`}
                                       prefetch={false}
                                     >
                                       Configure features
