@@ -6,7 +6,10 @@ import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
 import { Settings, Trash2 } from "lucide-react"
 
-import type { PlanVersionFeature } from "@builderai/db/validators"
+import type {
+  Feature,
+  PlanVersionFeatureDragDrop,
+} from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
@@ -14,18 +17,14 @@ import { Button } from "@builderai/ui/button"
 import { Ping } from "~/components/ping"
 import { PlanVersionFeatureSheet } from "../[planSlug]/_components/plan-version-feature-sheet"
 import { FeatureDialog } from "./feature-dialog"
-import {
-  useActiveFeature,
-  usePlanActiveTab,
-  usePlanFeaturesList,
-} from "./use-features"
+import { useActiveFeature, usePlanFeaturesList } from "./use-features"
 
 const featureVariants = cva(
   "flex gap-2 rounded-lg border text-left text-sm transition-all bg-background-bgSubtle hover:bg-background-bgHover",
   {
     variants: {
       variant: {
-        feature: "h-10 px-2 items-center  disabled:opacity-50",
+        feature: "h-10 px-2 items-center disabled:opacity-50",
         default: "flex-col items-start p-3",
       },
     },
@@ -34,13 +33,24 @@ const featureVariants = cva(
     },
   }
 )
-export interface FeaturePlanProps
-  extends React.ComponentPropsWithoutRef<"div">,
-    VariantProps<typeof featureVariants> {
-  feature: PlanVersionFeature
-  mode: "Feature" | "FeaturePlan"
-  isOverlay?: boolean
-}
+
+export type ConditionalTypeFeature =
+  | {
+      mode: "Feature"
+      feature: Feature
+      className?: string
+      disabled?: boolean
+    }
+  | {
+      mode: "FeaturePlan"
+      feature: PlanVersionFeatureDragDrop
+      className?: string
+      disabled?: boolean
+    }
+
+export type FeaturePlanProps = ConditionalTypeFeature &
+  VariantProps<typeof featureVariants> &
+  React.ComponentPropsWithoutRef<"div">
 
 // TODO: there is a bug with the sheet component that allow to drag the feature card
 const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
@@ -49,7 +59,6 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
 
     const [active, setActiveFeature] = useActiveFeature()
 
-    const [planActiveTab] = usePlanActiveTab()
     const [_planFeatures, setPlanFeatures] = usePlanFeaturesList()
 
     const handleClick = (_event: React.MouseEvent<HTMLDivElement>) => {
@@ -91,23 +100,24 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
             </span>
           </div>
         ) : mode === "FeaturePlan" ? (
-          <PlanVersionFeatureSheet defaultValues={feature}>
+          <PlanVersionFeatureSheet>
             <div className="flex w-full flex-col gap-2">
               <div className="flex w-full flex-col gap-1">
                 <div className="flex items-center justify-between">
-                  <div className="line-clamp-1 items-center gap-1 text-left font-bold">
-                    {feature.slug}
-                  </div>
-                  <div className="flex items-center gap-1 text-xs">
-                    {/* // TODO: change this beside the name and use isValid */}
-                    {!feature?.config && (
-                      <div className="relative ">
-                        <div className="absolute -top-1 right-0">
+                  <div className="flex flex-row gap-2">
+                    <div className="line-clamp-1 items-center gap-1 text-left font-bold">
+                      {feature.feature.slug}
+                    </div>
+                    {/* // If there is no id it means that the feature is not saved */}
+                    {!feature?.id && (
+                      <div className="relative">
+                        <div className="absolute right-0 top-0">
                           <Ping variant={"destructive"} />
                         </div>
                       </div>
                     )}
-
+                  </div>
+                  <div className="flex items-center gap-1 text-xs">
                     <div className="flex- flex-row gap-1">
                       <Button
                         className="px-0"
@@ -123,15 +133,11 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
 
                           // delete feature
                           setPlanFeatures((features) => {
-                            const activeFeatures = features[planActiveTab]
-                            const filteredFeatures = activeFeatures.filter(
+                            const filteredFeatures = features.filter(
                               (f) => f.id !== feature.id
                             )
 
-                            return {
-                              ...features,
-                              [planActiveTab]: filteredFeatures,
-                            }
+                            return filteredFeatures
                           })
 
                           // TODO: save here
@@ -146,22 +152,22 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
               </div>
 
               <div className="line-clamp-1 text-xs font-normal text-muted-foreground">
-                {feature.description}
+                {feature.feature.description ?? "No description"}
               </div>
 
-              {feature.type && (
+              {feature.featureType && (
                 <div className="mt-2 flex w-full flex-row items-center justify-between gap-2">
                   <div>
-                    <Badge>{feature.type}</Badge>
+                    <Badge>{feature.featureType}</Badge>
                   </div>
                   <div className="line-clamp-1 pr-3 text-xs font-normal">
-                    {feature.type === "flat"
+                    {feature?.config && feature.featureType === "flat"
                       ? `${
                           feature?.config?.price === 0
                             ? "Free"
                             : `$${feature?.config?.price}`
                         }`
-                      : ["usage", "tier"].includes(feature.type)
+                      : ["usage", "tier"].includes(feature.featureType)
                         ? `${feature?.config?.tiers.length ?? 0} tiers`
                         : null}
                   </div>

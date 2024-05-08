@@ -4,11 +4,10 @@ import { useDroppable } from "@dnd-kit/core"
 import type { AnimateLayoutChanges } from "@dnd-kit/sortable"
 import { defaultAnimateLayoutChanges } from "@dnd-kit/sortable"
 
-import type { GroupType } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 
 export interface GroupDragData {
-  type: GroupType
+  type: "FeaturesListGroup"
 }
 
 export const animateLayoutChanges: AnimateLayoutChanges = (args) =>
@@ -28,7 +27,7 @@ export function DroppableContainer({
   const { setNodeRef } = useDroppable({
     id: id,
     data: {
-      type: "Group",
+      type: "FeaturesListGroup",
     } satisfies GroupDragData,
   })
 

@@ -10,6 +10,8 @@ import {
   USAGE_METERED,
   USAGE_MODES,
 } from "../utils"
+import { featureSelectBaseSchema } from "./features"
+import { versionSelectBaseSchema } from "./planVersions"
 
 const typeFeatureSchema = z.enum(FEATURE_TYPES)
 const paymentProviderSchema = z.enum(PAYMENT_PROVIDERS)
@@ -222,4 +224,27 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
     paymentProvider: true,
   })
 
-export type PlanVersionFeature = z.infer<typeof planVersionFeatureSchema>
+export type PlanVersionFeature = z.infer<
+  typeof planVersionFeatureSelectBaseSchema
+>
+
+export const planVersionFeatureDragDropSchema =
+  planVersionFeatureSelectBaseSchema
+    .extend({
+      planVersion: versionSelectBaseSchema.pick({
+        id: true,
+      }),
+      feature: featureSelectBaseSchema.pick({
+        slug: true,
+        id: true,
+        title: true,
+        description: true,
+      }),
+    })
+    .partial({
+      id: true,
+    })
+
+export type PlanVersionFeatureDragDrop = z.infer<
+  typeof planVersionFeatureDragDropSchema
+>

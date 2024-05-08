@@ -10,8 +10,8 @@ import {
   USAGE_MODES,
   USAGE_MODES_MAP,
 } from "@builderai/db/utils"
-import type { PlanVersionFeature } from "@builderai/db/validators"
-import { planVersionFeatureSchema } from "@builderai/db/validators"
+import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
+import { planVersionFeatureInsertBaseSchema } from "@builderai/db/validators"
 import {
   Form,
   FormControl,
@@ -31,7 +31,6 @@ import { Separator } from "@builderai/ui/separator"
 import { useZodForm } from "~/lib/zod-form"
 import {
   useActiveFeature,
-  usePlanActiveTab,
   usePlanFeaturesList,
 } from "../../_components/use-features"
 import { FlatFormFields } from "./flat-form-fields"
@@ -42,17 +41,15 @@ export function FeatureConfigForm({
   feature,
   formId,
 }: {
-  feature: PlanVersionFeature
+  feature: PlanVersionFeatureDragDrop
   formId: string
   setDialogOpen?: (open: boolean) => void
 }) {
-  // TODO: decide if we need to use this!
-  const [planActiveTab] = usePlanActiveTab()
-  const [_planFeatures, setPlanFeatures] = usePlanFeaturesList()
+  const [_planFeatures, setPlanFeaturesList] = usePlanFeaturesList()
   const [_, setActiveFeature] = useActiveFeature()
 
   const form = useZodForm({
-    schema: planVersionFeatureSchema,
+    schema: planVersionFeatureInsertBaseSchema,
     defaultValues: feature,
   })
 
@@ -82,20 +79,16 @@ export function FeatureConfigForm({
   // }, [form.formState.isDirty])
 
   // subscribe to type changes for conditional rendering in the forms
-  const type = form.watch("type")
+  const featureType = form.watch("featureType")
 
-  const onSubmitForm = (data: PlanVersionFeature) => {
+  const onSubmitForm = (data: PlanVersionFeatureDragDrop) => {
     setActiveFeature(data)
 
-    setPlanFeatures((features) => {
-      const activeFeatures = features[planActiveTab]
-      const index = activeFeatures.findIndex((f) => f.id === data.id)
+    setPlanFeaturesList((features) => {
+      const index = features.findIndex((f) => f.id === data.id)
 
-      activeFeatures[index] = data
-      return {
-        ...features,
-        [planActiveTab]: activeFeatures,
-      }
+      features[index] = data
+      return features
     })
 
     setDialogOpen?.(false)
@@ -123,7 +116,7 @@ export function FeatureConfigForm({
               <div className="flex flex-col gap-1  px-2">
                 <FormField
                   control={form.control}
-                  name="type"
+                  name="featureType"
                   render={({ field }) => (
                     <FormItem className="space-y-1">
                       <FormMessage className="self-start px-2" />
@@ -169,7 +162,7 @@ export function FeatureConfigForm({
                   )}
                 />
 
-                {form.watch("type") === "usage" && (
+                {featureType === "usage" && (
                   <FormField
                     control={form.control}
                     name="usageMode"
@@ -215,7 +208,7 @@ export function FeatureConfigForm({
                   />
                 )}
 
-                {(form.watch("type") === "tier" ||
+                {(featureType === "tier" ||
                   form.watch("usageMode") === "tier") && (
                   <FormField
                     control={form.control}
@@ -268,9 +261,9 @@ export function FeatureConfigForm({
 
         <Separator />
 
-        {type === "flat" && <FlatFormFields form={form} />}
+        {featureType === "flat" && <FlatFormFields form={form} />}
 
-        {type === "tier" && <TierFormFields form={form} />}
+        {featureType === "tier" && <TierFormFields form={form} />}
       </form>
     </Form>
   )

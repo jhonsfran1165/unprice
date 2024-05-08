@@ -5,6 +5,7 @@ import { and, eq, sql } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
+  featureSelectBaseSchema,
   planSelectBaseSchema,
   planVersionFeatureSelectBaseSchema,
   versionInsertBaseSchema,
@@ -284,7 +285,7 @@ export const planVersionRouter = createTRPCRouter({
           ...(whenToBill && { whenToBill }),
           ...(status && { status }),
           ...(metadata && { metadata }),
-          // ...(featuresConfig && { featuresConfig: config }),
+          ...(paymentProvider && { paymentProvider }),
           updatedAt: new Date(),
         })
         .where(and(eq(schema.versions.id, planVersionData.id)))
@@ -317,10 +318,14 @@ export const planVersionRouter = createTRPCRouter({
             slug: true,
             id: true,
           }),
-          features: z.array(
-            planVersionFeatureSelectBaseSchema.pick({
-              id: true,
-              config: true,
+          planFeatures: z.array(
+            planVersionFeatureSelectBaseSchema.extend({
+              feature: featureSelectBaseSchema.pick({
+                id: true,
+                slug: true,
+                title: true,
+                description: true,
+              }),
             })
           ),
         }),
@@ -345,8 +350,24 @@ export const planVersionRouter = createTRPCRouter({
       // TODO: improve this query
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
         with: {
-          plan: true,
-          features: true,
+          plan: {
+            columns: {
+              id: true,
+              slug: true,
+            },
+          },
+          planFeatures: {
+            with: {
+              feature: {
+                columns: {
+                  id: true,
+                  slug: true,
+                  title: true,
+                  description: true,
+                },
+              },
+            },
+          },
         },
         where: (version, { and, eq }) =>
           and(

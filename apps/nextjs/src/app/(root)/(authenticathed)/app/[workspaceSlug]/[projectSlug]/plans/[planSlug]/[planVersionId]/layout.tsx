@@ -6,7 +6,7 @@ import HeaderTab from "~/components/layout/header-tab"
 
 export const runtime = "edge"
 
-export default async function PriceLayout(props: {
+export default function PriceLayout(props: {
   children: React.ReactNode
   params: {
     workspaceSlug: string
@@ -15,8 +15,6 @@ export default async function PriceLayout(props: {
     planVersionId: string
   }
 }) {
-  const { projectSlug, workspaceSlug, planSlug, planVersionId } = props.params
-
   return (
     <Provider>
       <DashboardShell

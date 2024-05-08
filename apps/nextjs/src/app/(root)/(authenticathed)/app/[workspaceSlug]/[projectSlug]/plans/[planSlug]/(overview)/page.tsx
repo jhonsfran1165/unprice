@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowUp, ListFilter, MoreVertical, Wallet } from "lucide-react"
+import { ArrowUp, ListFilter, MoreVertical } from "lucide-react"
 
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
@@ -34,7 +34,6 @@ import {
 } from "@builderai/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
-import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import { PlanVersionForm } from "../_components/plan-version-form"
 import PlanHeader from "../../_components/plan-header"
@@ -117,16 +116,10 @@ export default async function PlanPage({
                         Currency
                       </TableHead>
                       <TableHead className="hidden text-center sm:table-cell">
-                        Provider
-                      </TableHead>
-                      <TableHead className="hidden text-center sm:table-cell">
                         Type
                       </TableHead>
                       <TableHead className="table-cell text-center">
                         Status
-                      </TableHead>
-                      <TableHead className="hidden text-left md:table-cell">
-                        Date
                       </TableHead>
                       <TableHead className="table-cell text-left">
                         Actions
@@ -158,11 +151,6 @@ export default async function PlanPage({
                           </Badge>
                         </TableCell>
                         <TableCell className="hidden text-center md:table-cell">
-                          <Badge className="text-xs">
-                            {version.paymentProvider}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden text-center md:table-cell">
                           <Badge className="text-xs">{version.planType}</Badge>
                         </TableCell>
                         <TableCell className="table-cell text-center">
@@ -173,9 +161,6 @@ export default async function PlanPage({
                           >
                             {version.status}
                           </Badge>
-                        </TableCell>
-                        <TableCell className="hidden text-left md:table-cell">
-                          {formatDate(version.createdAt)}
                         </TableCell>
                         <TableCell className="table-cell justify-start">
                           <div className="flex flex-row space-x-1">
@@ -286,19 +271,6 @@ export default async function PlanPage({
                 <div className="flex items-center justify-between">
                   <dt className="text-muted-foreground">Worse version</dt>
                   <dd>version 2</dd>
-                </div>
-              </dl>
-            </div>
-            <Separator className="my-4" />
-            <div className="grid gap-3">
-              <div className="font-semibold">Payment Information</div>
-              <dl className="grid gap-3">
-                <div className="flex items-center justify-between">
-                  <dt className="flex items-center gap-1 text-muted-foreground">
-                    <Wallet className="h-4 w-4" />
-                    Provider
-                  </dt>
-                  <dd>stripe</dd>
                 </div>
               </dl>
             </div>

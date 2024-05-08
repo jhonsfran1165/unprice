@@ -23,14 +23,14 @@ export function FeatureConfig({
             <div className="flex items-start gap-4 text-sm">
               <div className="grid gap-1">
                 <div className="line-clamp-1 text-lg font-semibold">
-                  {activeFeature.title}
+                  {activeFeature.feature.title}
                 </div>
                 <div className="line-clamp-1 text-xs">
-                  slug: <b>{activeFeature.slug}</b>
+                  slug: <b>{activeFeature.feature.slug}</b>
                 </div>
                 <div className="line-clamp-1 text-xs">
                   description:{" "}
-                  <b>{activeFeature.description ?? "No description"}</b>
+                  <b>{activeFeature.feature.description ?? "No description"}</b>
                 </div>
               </div>
             </div>

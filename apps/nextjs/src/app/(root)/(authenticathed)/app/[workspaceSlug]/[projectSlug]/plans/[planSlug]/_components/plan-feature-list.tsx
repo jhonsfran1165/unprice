@@ -5,6 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { useHydrateAtoms } from "jotai/utils"
 import { ChevronRight, FileStack, Search } from "lucide-react"
 
+import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
@@ -14,14 +15,13 @@ import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DroppableContainer } from "../../_components/droppable"
 import { FeatureDialog } from "../../_components/feature-dialog"
 import { SortableFeature } from "../../_components/sortable-feature"
-import type { PlanFeaturesList } from "../../_components/use-features"
 import {
   configPlanFeaturesListAtom,
-  usePlanFeaturesListActive,
+  usePlanFeaturesList,
 } from "../../_components/use-features"
 
 interface PlanFeatureListProps {
-  initialFeatures: PlanFeaturesList
+  initialFeatures: PlanVersionFeatureDragDrop[]
 }
 
 export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
@@ -29,11 +29,13 @@ export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
 
   // hydrate atoms with initial data
   useHydrateAtoms([[configPlanFeaturesListAtom, initialFeatures]])
-  const features = usePlanFeaturesListActive()
 
-  const filteredFeatures = features.filter((feature) =>
-    feature.title.toLowerCase().includes(filter.toLowerCase())
-  )
+  const [featuresList] = usePlanFeaturesList()
+
+  const filteredFeatures =
+    featuresList.filter((feature) =>
+      feature.feature.title.toLowerCase().includes(filter.toLowerCase())
+    ) ?? featuresList
 
   return (
     <>
@@ -57,9 +59,9 @@ export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
       </div>
       <ScrollArea className="h-[750px] pb-4">
         <div className="flex flex-col gap-2 p-4 pt-0">
-          <DroppableContainer id={"featuresConfig"}>
+          <DroppableContainer id={"planVersionFeaturesList"}>
             <SortableContext
-              items={features.map((feature) => feature.id)}
+              items={featuresList.map((feature) => feature.feature.slug)}
               strategy={verticalListSortingStrategy}
             >
               {filteredFeatures.length === 0 ? (

@@ -3,20 +3,12 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
-import type { PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 
 import type { FeaturePlanProps } from "./feature-plan"
 import { FeaturePlan } from "./feature-plan"
 
-export interface DragData extends FeaturePlanProps {
-  mode: "Feature" | "FeaturePlan"
-  feature: PlanVersionFeature
-  className?: string
-  disabled?: boolean
-}
-
-export function SortableFeature(props: DragData) {
+export function SortableFeature(props: FeaturePlanProps) {
   const {
     setNodeRef,
     listeners,
@@ -29,7 +21,7 @@ export function SortableFeature(props: DragData) {
     data: {
       mode: props.mode,
       feature: props.feature,
-    } satisfies DragData,
+    },
     attributes: {
       roleDescription: props.mode,
     },

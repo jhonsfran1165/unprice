@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 
-import type { InsertPlanVersion } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Sheet,
@@ -16,14 +15,11 @@ import {
 import { FeatureConfig } from "./feature-config"
 
 export function PlanVersionFeatureSheet({
-  defaultValues,
   children,
 }: {
   label?: string
-  defaultValues?: InsertPlanVersion
   children?: React.ReactNode
 }) {
-  // const [isOpen, setIsOpen] = useIsOpenConfigFeature()
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -35,7 +31,7 @@ export function PlanVersionFeatureSheet({
             Plan version feature form
           </SheetTitle>
           <SheetDescription>
-            Make changes to your profile here. Click save when you're done.
+            Make changes to your profile here. Click save when you are done.
           </SheetDescription>
         </SheetHeader>
 

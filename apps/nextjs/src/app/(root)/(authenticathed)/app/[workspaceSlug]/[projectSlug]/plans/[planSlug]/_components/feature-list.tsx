@@ -4,7 +4,6 @@ import { use, useState } from "react"
 import { FileStack, Search } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
-import type { PlanVersionFeature } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
@@ -25,9 +24,7 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
   const [filter, setFilter] = useState("")
   const filterDebounce = useDebounce(filter, 500)
 
-  const [planFeatures] = usePlanFeaturesList()
-
-  const activeFeatures = [...planFeatures.planFeatures]
+  const [planVersionFeatureList] = usePlanFeaturesList()
 
   const { data, isFetching } = api.features.searchBy.useQuery(
     {
@@ -41,7 +38,9 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
     }
   )
 
-  const planFeatureIds = activeFeatures.map((feature) => feature.id)
+  const planFeatureIds = planVersionFeatureList.map(
+    (feature) => feature.feature.id
+  )
 
   const searchableFeatures = data.features.filter(
     (feature) => !planFeatureIds.includes(feature.id)
@@ -95,19 +94,7 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
               <SortableFeature
                 key={index}
                 mode={"Feature"}
-                // TODO: default all features to flat type free?
-                feature={
-                  {
-                    id: feature.id,
-                    title: feature.title,
-                    description: feature.description,
-                    slug: feature.slug,
-                    type: "flat",
-                    config: {
-                      price: 0,
-                    },
-                  } as PlanVersionFeature
-                }
+                feature={feature}
                 variant={"feature"}
               />
             ))

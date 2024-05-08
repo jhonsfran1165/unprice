@@ -21,10 +21,10 @@ import {
 import { arrayMove } from "@dnd-kit/sortable"
 import { createPortal } from "react-dom"
 
-import type { PlanVersionFeature } from "@builderai/db/validators"
+import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
 
 import { FeaturePlan } from "./feature-plan"
-import { usePlanActiveTab, usePlanFeaturesList } from "./use-features"
+import { useActiveFeature, usePlanFeaturesList } from "./use-features"
 
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -36,19 +36,18 @@ const dropAnimation: DropAnimation = {
   }),
 }
 
-export default function DragDrop({ children }: { children: React.ReactNode }) {
-  const [planActiveTab] = usePlanActiveTab()
+export default function DragDrop({
+  children,
+  planVersionId,
+}: {
+  children: React.ReactNode
+  planVersionId: string
+}) {
+  const [planFeaturesList, setPlanFeaturesList] = usePlanFeaturesList()
+  const [activeFeature, setActiveFeature] = useActiveFeature()
 
-  const [featuresList, setFeatures] = usePlanFeaturesList()
-
-  const features = featuresList[planActiveTab]
-
-  // TODO: this could be the atom as well
-  const [activeFeature, setActiveFeature] = useState<PlanVersionFeature | null>(
-    null
-  )
   const [clonedFeatures, setClonedFeatures] = useState<
-    PlanVersionFeature[] | null
+    PlanVersionFeatureDragDrop[] | null
   >(null)
 
   // sensor are the way we can control how the drag and drop works
@@ -74,7 +73,7 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
   const onDragCancel = () => {
     if (clonedFeatures) {
       // Reset items to their original state in case items have been
-      setClonedFeatures(features)
+      setClonedFeatures(planFeaturesList)
     }
 
     setClonedFeatures(null)
@@ -82,14 +81,35 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
 
   const onDragStart = (event: DragStartEvent) => {
     // just copy the features in case the user cancels the drag
-    setClonedFeatures(features)
+    setClonedFeatures(planFeaturesList)
 
     if (
       ["Feature", "FeaturePlan"].includes(
         event.active.data.current?.mode as string
       )
     ) {
-      setActiveFeature(event.active.data.current?.feature as PlanVersionFeature)
+      const activeData = event.active.data.current
+
+      if (!activeData?.mode) return
+
+      // when the feature is being dragged from the feature list we need to ensure that the feature is a featurePlan
+      const feature =
+        activeData.mode === "Feature"
+          ? (activeData.feature as PlanVersionFeatureDragDrop["feature"])
+          : (activeData.feature as PlanVersionFeatureDragDrop)
+
+      const featurePlan =
+        activeData.mode === "Feature"
+          ? ({
+              planVersionId: planVersionId,
+              featureId: feature.id,
+              featureType: "flat", // default type for featurePlan
+              paymentProvider: "stripe",
+              feature: feature,
+            } as PlanVersionFeatureDragDrop)
+          : (activeData.feature as PlanVersionFeatureDragDrop)
+
+      setActiveFeature(featurePlan)
       return
     }
   }
@@ -118,22 +138,37 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
     // active represents the item that is being dragged
     const activeId = active.id
     const overId = over.id
+    const activeData = active.data.current
 
     if (activeId === overId) return
+    if (!activeData?.mode) return
 
-    const activeData = active.data.current
+    // when the feature is being dragged from the feature list we need to ensure that the feature is a featurePlan
+    const feature =
+      activeData.mode === "Feature"
+        ? (activeData.feature as PlanVersionFeatureDragDrop["feature"])
+        : (activeData.feature as PlanVersionFeatureDragDrop)
+
+    const featurePlan =
+      activeData.mode === "Feature"
+        ? ({
+            planVersionId: planVersionId,
+            featureId: feature.id,
+            featureType: "flat", // default type for featurePlan
+            paymentProvider: "stripe",
+            feature: feature,
+          } as PlanVersionFeatureDragDrop)
+        : (activeData.feature as PlanVersionFeatureDragDrop)
+
     const overData = over.data.current
-
-    if (!activeData) return
 
     const isOverAFeature = overData?.mode === "FeaturePlan"
 
     // look for the index of the active feature
-    const activeIndex = features.findIndex((t) => t.id === activeId)
-    const activeFeature = features[activeIndex]
+    const activeIndex = planFeaturesList.findIndex((t) => t.id === activeId)
+    const activeFeature = planFeaturesList[activeIndex]
 
-    setFeatures((featureList) => {
-      const features = featureList[planActiveTab]
+    setPlanFeaturesList((features) => {
       // I'm dropping a Feature over another Feature
       if (isOverAFeature) {
         const overIndex = features.findIndex((t) => t.id === overId)
@@ -141,25 +176,19 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
         const result = activeFeature
           ? arrayMove(features, activeIndex, overIndex)
           : arrayMove(
-              [...features, activeData.feature] as PlanVersionFeature[],
+              [...features, featurePlan] as PlanVersionFeatureDragDrop[],
               activeIndex,
               overIndex
             )
 
-        return {
-          ...featureList,
-          [planActiveTab]: result,
-        }
+        return result
       } else {
         // I'm dropping a Feature over the drop area
         const result = activeFeature
           ? arrayMove(features, activeIndex, activeIndex)
-          : ([...features, activeData.feature] as PlanVersionFeature[])
+          : ([...features, featurePlan] as PlanVersionFeatureDragDrop[])
 
-        return {
-          ...featureList,
-          [planActiveTab]: result,
-        }
+        return result
       }
     })
   }

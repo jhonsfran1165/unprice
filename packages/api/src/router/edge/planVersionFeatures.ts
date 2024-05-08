@@ -6,6 +6,7 @@ import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
   featureSelectBaseSchema,
+  planVersionFeatureDragDropSchema,
   planVersionFeatureInsertBaseSchema,
   planVersionFeatureSelectBaseSchema,
   versionSelectBaseSchema,
@@ -274,6 +275,62 @@ export const planVersionFeatureRouter = createTRPCRouter({
 
       return {
         planVersionFeature: planVersionFeatureData,
+      }
+    }),
+
+  getByPlanVersionId: protectedActiveProjectProcedure
+    .input(
+      z.object({
+        planVersionId: z.string(),
+      })
+    )
+    .output(
+      z.object({
+        planVersionFeatures: planVersionFeatureDragDropSchema.array(),
+      })
+    )
+    .query(async (opts) => {
+      const { planVersionId } = opts.input
+      const project = opts.ctx.project
+
+      const planVersionData = await opts.ctx.db.query.versions.findFirst({
+        where: (version, { and, eq }) =>
+          and(eq(version.id, planVersionId), eq(version.projectId, project.id)),
+      })
+
+      if (!planVersionData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan version not found",
+        })
+      }
+
+      const planVersionFeatureData =
+        await opts.ctx.db.query.planVersionFeatures.findMany({
+          with: {
+            planVersion: {
+              columns: {
+                id: true,
+              },
+            },
+            feature: {
+              columns: {
+                slug: true,
+                id: true,
+                title: true,
+                description: true,
+              },
+            },
+          },
+          where: (planVersionFeature, { and, eq }) =>
+            and(
+              eq(planVersionFeature.planVersionId, planVersionId),
+              eq(planVersionFeature.projectId, project.id)
+            ),
+        })
+
+      return {
+        planVersionFeatures: planVersionFeatureData,
       }
     }),
 })
