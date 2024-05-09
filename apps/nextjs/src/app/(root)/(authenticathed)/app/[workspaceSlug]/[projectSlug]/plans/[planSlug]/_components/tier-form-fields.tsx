@@ -4,7 +4,10 @@ import { DollarSignIcon, HelpCircle, Plus, XCircle } from "lucide-react"
 import type { UseFormReturn } from "react-hook-form"
 import { useFieldArray } from "react-hook-form"
 
-import { USAGE_METERED, USAGE_METERED_MAP } from "@builderai/db/utils"
+import {
+  AGGREGATION_METHODS,
+  AGGREGATION_METHODS_MAP,
+} from "@builderai/db/utils"
 import type { PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
@@ -42,13 +45,22 @@ export function TierFormFields({
     name: "config.tiers",
   })
 
+  if (fields.length === 0) {
+    append({
+      firstUnit: 0,
+      lastUnit: Infinity,
+      unitPrice: 0,
+      flatPrice: 0,
+    })
+  }
+
   return (
     <div className="flex flex-col space-y-6">
       <div className="flex justify-between">
         <div className="w-full">
           <FormField
             control={form.control}
-            name="aggregationMethod"
+            name="config.aggregationMethod"
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <div className="">
@@ -69,21 +81,21 @@ export function TierFormFields({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {USAGE_METERED.map((mode, index) => (
+                      {AGGREGATION_METHODS.map((mode, index) => (
                         <SelectItem value={mode} key={index}>
                           <div className="flex items-start gap-3 text-muted-foreground">
                             <div className="grid gap-0.5">
                               <p>
                                 {
-                                  USAGE_METERED_MAP[
-                                    mode as keyof typeof USAGE_METERED_MAP
+                                  AGGREGATION_METHODS_MAP[
+                                    mode as keyof typeof AGGREGATION_METHODS_MAP
                                   ].label
                                 }
                               </p>
                               <p className="text-xs" data-description>
                                 {
-                                  USAGE_METERED_MAP[
-                                    mode as keyof typeof USAGE_METERED_MAP
+                                  AGGREGATION_METHODS_MAP[
+                                    mode as keyof typeof AGGREGATION_METHODS_MAP
                                   ].description
                                 }
                               </p>

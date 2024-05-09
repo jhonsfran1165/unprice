@@ -23,7 +23,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
     .input(planVersionFeatureInsertBaseSchema)
     .output(
       z.object({
-        planVersionFeature: planVersionFeatureSelectBaseSchema,
+        planVersionFeature: planVersionFeatureDragDropSchema,
       })
     )
     .mutation(async (opts) => {
@@ -57,7 +57,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
 
       const planVersionFeatureId = utils.newId("feature_version")
 
-      const planVersionFeatureData = await opts.ctx.db
+      const planVersionFeatureCreated = await opts.ctx.db
         .insert(schema.planVersionFeatures)
         .values({
           id: planVersionFeatureId,
@@ -72,10 +72,30 @@ export const planVersionFeatureRouter = createTRPCRouter({
         .returning()
         .then((re) => re[0])
 
-      if (!planVersionFeatureData?.id) {
+      if (!planVersionFeatureCreated?.id) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Error creating feature for this version",
+        })
+      }
+
+      const planVersionFeatureData =
+        await opts.ctx.db.query.planVersionFeatures.findFirst({
+          with: {
+            planVersion: true,
+            feature: true,
+          },
+          where: (planVersionFeature, { and, eq }) =>
+            and(
+              eq(planVersionFeature.id, planVersionFeatureCreated.id),
+              eq(planVersionFeature.projectId, project.id)
+            ),
+        })
+
+      if (!planVersionFeatureData?.id) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error fetching the created feature",
         })
       }
 
@@ -246,7 +266,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
     )
     .output(
       z.object({
-        planVersionFeature: planVersionFeatureInsertBaseSchema.extend({
+        planVersionFeature: planVersionFeatureSelectBaseSchema.extend({
           planVersion: versionSelectBaseSchema,
           feature: featureSelectBaseSchema,
         }),
@@ -313,14 +333,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
                 id: true,
               },
             },
-            feature: {
-              columns: {
-                slug: true,
-                id: true,
-                title: true,
-                description: true,
-              },
-            },
+            feature: true,
           },
           where: (planVersionFeature, { and, eq }) =>
             and(
@@ -328,6 +341,13 @@ export const planVersionFeatureRouter = createTRPCRouter({
               eq(planVersionFeature.projectId, project.id)
             ),
         })
+
+      if (!planVersionFeatureData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan version features not found",
+        })
+      }
 
       return {
         planVersionFeatures: planVersionFeatureData,

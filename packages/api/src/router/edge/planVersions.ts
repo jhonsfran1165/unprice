@@ -204,6 +204,67 @@ export const planVersionRouter = createTRPCRouter({
         plan: deletedPlanVersion,
       }
     }),
+  updateOrderFeatures: protectedActiveProjectAdminProcedure
+    .input(
+      versionSelectBaseSchema.partial().required({ id: true, metadata: true })
+    )
+    .output(
+      z.object({
+        planVersion: versionSelectBaseSchema,
+      })
+    )
+    .mutation(async (opts) => {
+      const { id, metadata } = opts.input
+
+      const project = opts.ctx.project
+      const planVersionData = await opts.ctx.db.query.versions.findFirst({
+        with: {
+          plan: {
+            columns: {
+              slug: true,
+            },
+          },
+        },
+        where: (version, { and, eq }) =>
+          and(eq(version.id, id), eq(version.projectId, project.id)),
+      })
+
+      if (!planVersionData?.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "version not found",
+        })
+      }
+
+      // TODO: actually a user can update some fields of the version
+      if (planVersionData.status === "published") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot update a published version, read only",
+        })
+      }
+
+      const versionUpdated = await opts.ctx.db
+        .update(schema.versions)
+        .set({
+          ...(metadata && { metadata }),
+          updatedAt: new Date(),
+        })
+        .where(and(eq(schema.versions.id, planVersionData.id)))
+        .returning()
+        .then((re) => re[0])
+
+      if (!versionUpdated) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error updating version",
+        })
+      }
+
+      return {
+        planVersion: versionUpdated,
+      }
+    }),
   update: protectedActiveProjectAdminProcedure
     .input(versionSelectBaseSchema.partial().required({ id: true }))
     .output(
@@ -320,12 +381,7 @@ export const planVersionRouter = createTRPCRouter({
           }),
           planFeatures: z.array(
             planVersionFeatureSelectBaseSchema.extend({
-              feature: featureSelectBaseSchema.pick({
-                id: true,
-                slug: true,
-                title: true,
-                description: true,
-              }),
+              feature: featureSelectBaseSchema,
             })
           ),
         }),
@@ -358,14 +414,7 @@ export const planVersionRouter = createTRPCRouter({
           },
           planFeatures: {
             with: {
-              feature: {
-                columns: {
-                  id: true,
-                  slug: true,
-                  title: true,
-                  description: true,
-                },
-              },
+              feature: true,
             },
           },
         },
@@ -384,8 +433,35 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
+      // TODO: improve this
+      const orderPlanVersionFeaturesId =
+        planVersionData.metadata?.orderPlanVersionFeaturesId ?? []
+
+      // given orderPlanVersionFeaturesId, we need to sort the initialFeatures
+      // so that the features are displayed in the correct order
+      const orderedFeatures = []
+
+      // if orderPlanVersionFeaturesId is not empty, we need to sort the features
+      if (orderPlanVersionFeaturesId.length > 0) {
+        orderPlanVersionFeaturesId.forEach((id) => {
+          const feature = planVersionData.planFeatures.find(
+            (obj) => obj.id === id
+          )
+          if (feature) {
+            orderedFeatures.push({
+              ...feature,
+            })
+          }
+        })
+      } else {
+        orderedFeatures.push(...planVersionData.planFeatures)
+      }
+
       return {
-        planVersion: planVersionData,
+        planVersion: {
+          ...planVersionData,
+          planFeatures: orderedFeatures,
+        },
       }
     }),
   // TODO: change this for syncWithPaymentProvider

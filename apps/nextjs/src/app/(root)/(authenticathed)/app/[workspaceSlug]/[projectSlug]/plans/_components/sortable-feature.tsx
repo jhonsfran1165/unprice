@@ -17,10 +17,10 @@ export function SortableFeature(props: FeaturePlanProps) {
     transform,
     transition,
   } = useSortable({
-    id: props.feature.id,
+    id: props.planFeatureVersion.featureId,
     data: {
       mode: props.mode,
-      feature: props.feature,
+      planFeatureVersion: props.planFeatureVersion,
     },
     attributes: {
       roleDescription: props.mode,
@@ -36,7 +36,7 @@ export function SortableFeature(props: FeaturePlanProps) {
 
   return (
     <FeaturePlan
-      ref={props.disabled ? undefined : setNodeRef}
+      ref={props.isDisabled ? undefined : setNodeRef}
       style={style}
       {...attributes}
       {...listeners}

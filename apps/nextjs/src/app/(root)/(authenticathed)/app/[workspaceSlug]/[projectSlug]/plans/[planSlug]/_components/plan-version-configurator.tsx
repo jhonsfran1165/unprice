@@ -4,7 +4,6 @@ import { notFound } from "next/navigation"
 import { PlusIcon } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
-import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Separator } from "@builderai/ui/separator"
@@ -27,27 +26,6 @@ export function PlanVersionConfigurator({
   if (!planVersion) {
     notFound()
   }
-
-  const orderPlanVersionFeaturesId =
-    planVersion.metadata?.orderPlanVersionFeaturesId ?? []
-  const initialFeatures = planVersion.planFeatures ?? []
-
-  // given orderPlanVersionFeaturesId, we need to sort the initialFeatures
-  // so that the features are displayed in the correct order
-  const orderedFeatures: PlanVersionFeatureDragDrop[] = []
-
-  orderPlanVersionFeaturesId.forEach((id) => {
-    const feature = initialFeatures.find((obj) => obj.id === id)
-    if (feature) {
-      orderedFeatures.push({
-        ...feature,
-        feature: feature.feature,
-        planVersion: {
-          id: planVersion.id,
-        },
-      })
-    }
-  })
 
   const defaultLayout = layout?.value
     ? (JSON.parse(layout.value) as [number, number])
@@ -74,13 +52,16 @@ export function PlanVersionConfigurator({
           <Separator />
 
           <Suspense fallback={null}>
-            <FeatureList featuresPromise={api.features.listByActiveProject()} />
+            <FeatureList
+              planVersionId={planVersion.id}
+              featuresPromise={api.features.listByActiveProject()}
+            />
           </Suspense>
         </>
       }
       planFeatureList={
         <Suspense fallback={null}>
-          <PlanFeatureList initialFeatures={orderedFeatures} />
+          <PlanFeatureList initialFeatures={planVersion.planFeatures} />
         </Suspense>
       }
     />

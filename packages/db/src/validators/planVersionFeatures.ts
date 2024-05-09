@@ -1,30 +1,26 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
+import { ZodError } from "zod"
 
 import * as schema from "../schema"
 import {
+  AGGREGATION_METHODS,
   FEATURE_TYPES,
   FEATURE_TYPES_MAPS,
   PAYMENT_PROVIDERS,
   TIER_MODES,
-  USAGE_METERED,
   USAGE_MODES,
 } from "../utils"
 import { featureSelectBaseSchema } from "./features"
-import { versionSelectBaseSchema } from "./planVersions"
 
 const typeFeatureSchema = z.enum(FEATURE_TYPES)
 const paymentProviderSchema = z.enum(PAYMENT_PROVIDERS)
 const usageModeSchema = z.enum(USAGE_MODES)
+const aggregationMethodSchema = z.enum(AGGREGATION_METHODS)
 const tierModeSchema = z.enum(TIER_MODES)
 export type FeatureType = z.infer<typeof typeFeatureSchema>
 
 export type PaymentProvider = z.infer<typeof paymentProviderSchema>
-
-export const paymentInfoSchema = z.record(
-  paymentProviderSchema,
-  z.object({ priceId: z.string() })
-)
 
 export const planVersionFeatureMetadataSchema = z.object({
   externalId: z.string().optional(),
@@ -50,17 +46,12 @@ export const tiersSchema = z.object({
   ]),
 })
 
-export const configFeatureSchema = z
+export const configTierSchema = z
   .object({
+    price: z.coerce.number().nonnegative().min(0).optional(),
+    aggregationMethod: aggregationMethodSchema,
+    tierMode: tierModeSchema,
     tiers: z.array(tiersSchema),
-    paymentInfo: paymentInfoSchema.optional(),
-    // TODO: we have to validate this based on the type of the feature - only required for flat features
-    price: z.coerce
-      .number()
-      .nonnegative()
-      .min(0)
-      .optional()
-      .describe("Price for flat features"),
   })
   .superRefine((data, ctx) => {
     const tiers = data.tiers
@@ -129,73 +120,95 @@ export const configFeatureSchema = z
     return true
   })
 
-export const configFlatFeature = z.object({
-  type: z.literal(FEATURE_TYPES_MAPS.flat.code),
-  id: z.string(),
-  slug: z.string(),
-  title: z.string(),
-  description: z.string().optional(),
-  config: z.object({
-    tiers: z.array(tiersSchema).optional(),
-    price: z.coerce
-      .number()
-      .nonnegative()
-      .min(0)
-      .describe("Flat price of the feature"),
-    paymentInfo: paymentInfoSchema.optional(),
-  }),
-})
-
-export const configTierFeature = z.object({
-  type: z.literal(FEATURE_TYPES_MAPS.tier.code),
-  tierMode: tierModeSchema,
-  aggregationMethod: z.enum(USAGE_METERED),
-  id: z.string(),
-  slug: z.string(),
-  title: z.string(),
-  description: z.string().optional(),
-  config: configFeatureSchema,
-})
-
-export const configUsageFeature = z.object({
-  type: z.literal(FEATURE_TYPES_MAPS.usage.code),
-  tierMode: tierModeSchema.optional(),
-  usageMode: usageModeSchema,
-  aggregationMethod: z.enum(USAGE_METERED),
-  id: z.string(),
-  slug: z.string(),
-  title: z.string(),
-  description: z.string().optional(),
-  config: configFeatureSchema,
-})
-
-// contains the configuration for the features for the specific plan version
-// the reason why we save the configuration as json inside the featuresConfig is because
-// it suppose to be append only, so we can keep track of the changes
-export const planVersionFeatureSchema = z
-  .discriminatedUnion("type", [
-    configFlatFeature,
-    configTierFeature,
-    configUsageFeature,
-  ])
+export const configUsageSchema = z
+  .object({
+    price: z.coerce.number().nonnegative().min(0).optional(),
+    usageMode: usageModeSchema,
+    aggregationMethod: aggregationMethodSchema,
+    tierMode: tierModeSchema,
+    tiers: z.array(tiersSchema),
+  })
   .superRefine((data, ctx) => {
-    if (!data) {
-      return
-    }
+    const tiers = data.tiers
 
-    if (!data.type) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Invalid configuration for the feature",
-        path: ["type"],
-        fatal: true,
-      })
+    for (let i = 0; i < tiers.length; i++) {
+      if (i > 0) {
+        const currentFirstUnit = tiers[i]?.firstUnit
+        const previousLastUnit = tiers[i - 1]?.lastUnit
 
-      return false
+        if (!currentFirstUnit) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "firstUnit needs to be defined",
+            path: ["tiers", i, "firstUnit"],
+            fatal: true,
+          })
+
+          return false
+        }
+
+        if (previousLastUnit === Infinity || previousLastUnit === "Infinity") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Only the last unit of the tiers can be Infinity",
+            path: ["tiers", i - 1, "lastUnit"],
+            fatal: true,
+          })
+
+          return false
+        }
+
+        if (!previousLastUnit) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "lastUnit needs to be defined",
+            path: ["tiers", i - 1, "lastUnit"],
+            fatal: true,
+          })
+
+          return false
+        }
+
+        if (currentFirstUnit > previousLastUnit + 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Tiers need to be consecutive",
+            path: ["tiers", i - 1, "lastUnit"],
+            fatal: true,
+          })
+
+          return false
+        }
+        if (currentFirstUnit < previousLastUnit + 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Tiers cannot overlap",
+            path: ["tiers", i, "firstUnit"],
+            fatal: true,
+          })
+
+          return false
+        }
+      }
     }
 
     return true
   })
+
+export const configFlatSchema = z.object({
+  tiers: z.array(tiersSchema).optional(),
+  price: z.coerce
+    .number()
+    .nonnegative()
+    .min(0)
+    .describe("Flat price of the feature"),
+})
+
+export const configFeatureSchema = z.union([
+  configFlatSchema,
+  configTierSchema,
+  configUsageSchema,
+])
 
 export const planVersionFeatureSelectBaseSchema = createSelectSchema(
   schema.planVersionFeatures,
@@ -208,14 +221,16 @@ export const planVersionFeatureSelectBaseSchema = createSelectSchema(
 export const planVersionFeatureInsertBaseSchema = createInsertSchema(
   schema.planVersionFeatures,
   {
-    config: configFeatureSchema,
-    metadata: planVersionFeatureMetadataSchema,
+    config: configFeatureSchema.optional(),
+    metadata: planVersionFeatureMetadataSchema.optional(),
   }
 )
   .partial({
     projectId: true,
     id: true,
     version: true,
+    config: true,
+    metadata: true,
   })
   .required({
     planId: true,
@@ -223,27 +238,85 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
     planType: true,
     paymentProvider: true,
   })
+  .superRefine((data, ctx) => {
+    if (!data.config) {
+      return true
+    }
+
+    // validate flat feature configuration
+    if (data.featureType === FEATURE_TYPES_MAPS.flat.code) {
+      try {
+        configFlatSchema.parse(data.config)
+      } catch (err) {
+        if (err instanceof ZodError) {
+          // add issues to the context
+          err.errors.forEach((issue) => {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: issue.message,
+              path: [`config.${issue.path.join(".")}`],
+              fatal: true,
+            })
+          })
+        }
+
+        return false
+      }
+    }
+
+    // validate tier feature configuration
+    if (data.featureType === FEATURE_TYPES_MAPS.tier.code) {
+      try {
+        configTierSchema.parse(data.config)
+      } catch (err) {
+        if (err instanceof ZodError) {
+          // add issues to the context
+          err.errors.forEach((issue) => {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: issue.message,
+              path: [`config.${issue.path.join(".")}`],
+              fatal: true,
+            })
+          })
+        }
+
+        return false
+      }
+    }
+
+    // validate flat feature configuration
+    if (data.featureType === FEATURE_TYPES_MAPS.usage.code) {
+      try {
+        configUsageSchema.parse(data.config)
+      } catch (err) {
+        if (err instanceof ZodError) {
+          // add issues to the context
+          err.errors.forEach((issue) => {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: issue.message,
+              path: [`config.${issue.path.join(".")}`],
+              fatal: true,
+            })
+          })
+        }
+
+        return false
+      }
+    }
+
+    return true
+  })
 
 export type PlanVersionFeature = z.infer<
-  typeof planVersionFeatureSelectBaseSchema
+  typeof planVersionFeatureInsertBaseSchema
 >
 
 export const planVersionFeatureDragDropSchema =
-  planVersionFeatureSelectBaseSchema
-    .extend({
-      planVersion: versionSelectBaseSchema.pick({
-        id: true,
-      }),
-      feature: featureSelectBaseSchema.pick({
-        slug: true,
-        id: true,
-        title: true,
-        description: true,
-      }),
-    })
-    .partial({
-      id: true,
-    })
+  planVersionFeatureSelectBaseSchema.extend({
+    feature: featureSelectBaseSchema,
+  })
 
 export type PlanVersionFeatureDragDrop = z.infer<
   typeof planVersionFeatureDragDropSchema

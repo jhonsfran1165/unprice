@@ -4,6 +4,7 @@ import { use, useState } from "react"
 import { FileStack, Search } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
+import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
@@ -17,9 +18,13 @@ import { usePlanFeaturesList } from "../../_components/use-features"
 
 interface FeatureListProps {
   featuresPromise: Promise<RouterOutputs["features"]["searchBy"]>
+  planVersionId: string
 }
 
-export function FeatureList({ featuresPromise }: FeatureListProps) {
+export function FeatureList({
+  featuresPromise,
+  planVersionId,
+}: FeatureListProps) {
   const initialFeatures = use(featuresPromise)
   const [filter, setFilter] = useState("")
   const filterDebounce = useDebounce(filter, 500)
@@ -90,14 +95,26 @@ export function FeatureList({ featuresPromise }: FeatureListProps) {
             </EmptyPlaceholder>
           ) : (
             !isFetching &&
-            searchableFeatures.map((feature, index) => (
-              <SortableFeature
-                key={index}
-                mode={"Feature"}
-                feature={feature}
-                variant={"feature"}
-              />
-            ))
+            searchableFeatures.map((feature, index) => {
+              // define planFeatureVersion defaults
+              // this will be used to create a new featurePlan optimistically from the drag and drop
+              const planFeatureVersion = {
+                planVersionId: planVersionId,
+                featureId: feature.id,
+                featureType: "flat", // default type for featurePlan
+                paymentProvider: "stripe",
+                feature: feature,
+              } as PlanVersionFeatureDragDrop
+
+              return (
+                <SortableFeature
+                  key={index}
+                  mode={"Feature"}
+                  planFeatureVersion={planFeatureVersion}
+                  variant={"feature"}
+                />
+              )
+            })
           )}
         </div>
       </ScrollArea>

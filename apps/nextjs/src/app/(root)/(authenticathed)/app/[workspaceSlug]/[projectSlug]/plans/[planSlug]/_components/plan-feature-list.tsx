@@ -32,6 +32,8 @@ export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
 
   const [featuresList] = usePlanFeaturesList()
 
+  console.log("featuresList", featuresList)
+
   const filteredFeatures =
     featuresList.filter((feature) =>
       feature.feature.title.toLowerCase().includes(filter.toLowerCase())
@@ -91,7 +93,7 @@ export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
                     <SortableFeature
                       key={i}
                       mode="FeaturePlan"
-                      feature={feature}
+                      planFeatureVersion={feature}
                     />
                   ))}
                 </div>

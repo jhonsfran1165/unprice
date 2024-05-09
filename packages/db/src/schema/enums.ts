@@ -1,6 +1,7 @@
 import { pgEnum } from "drizzle-orm/pg-core"
 
 import {
+  AGGREGATION_METHODS,
   CURRENCIES,
   FEATURE_TYPES,
   PAYMENT_PROVIDERS,
@@ -12,6 +13,8 @@ import {
   STAGES,
   STATUS_PLAN,
   STATUS_SUBSCRIPTION,
+  TIER_MODES,
+  USAGE_MODES,
   WHEN_TO_BILLING,
 } from "../utils"
 
@@ -24,6 +27,12 @@ export const subscriptionStatusEnum = pgEnum(
 export const projectTierEnum = pgEnum("project_tier", PROJECT_TIERS_APP)
 export const statusPlanEnum = pgEnum("plan_version_status", STATUS_PLAN)
 export const typeFeatureEnum = pgEnum("feature_types", FEATURE_TYPES)
+export const aggregationMethodEnum = pgEnum(
+  "aggregation_method",
+  AGGREGATION_METHODS
+)
+export const tierModeEnum = pgEnum("tier_mode", TIER_MODES)
+export const usageModeEnum = pgEnum("usage_mode", USAGE_MODES)
 export const paymentProviderEnum = pgEnum(
   "payment_providers",
   PAYMENT_PROVIDERS

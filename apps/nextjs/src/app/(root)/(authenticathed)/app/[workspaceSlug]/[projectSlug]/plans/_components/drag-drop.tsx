@@ -36,13 +36,7 @@ const dropAnimation: DropAnimation = {
   }),
 }
 
-export default function DragDrop({
-  children,
-  planVersionId,
-}: {
-  children: React.ReactNode
-  planVersionId: string
-}) {
+export default function DragDrop({ children }: { children: React.ReactNode }) {
   const [planFeaturesList, setPlanFeaturesList] = usePlanFeaturesList()
   const [activeFeature, setActiveFeature] = useActiveFeature()
 
@@ -73,7 +67,7 @@ export default function DragDrop({
   const onDragCancel = () => {
     if (clonedFeatures) {
       // Reset items to their original state in case items have been
-      setClonedFeatures(planFeaturesList)
+      setPlanFeaturesList(clonedFeatures)
     }
 
     setClonedFeatures(null)
@@ -90,26 +84,20 @@ export default function DragDrop({
     ) {
       const activeData = event.active.data.current
 
+      console.log("activeData", activeData)
+
       if (!activeData?.mode) return
 
-      // when the feature is being dragged from the feature list we need to ensure that the feature is a featurePlan
-      const feature =
-        activeData.mode === "Feature"
-          ? (activeData.feature as PlanVersionFeatureDragDrop["feature"])
-          : (activeData.feature as PlanVersionFeatureDragDrop)
+      const planFeatureVersion =
+        activeData.planFeatureVersion as PlanVersionFeatureDragDrop
 
-      const featurePlan =
-        activeData.mode === "Feature"
-          ? ({
-              planVersionId: planVersionId,
-              featureId: feature.id,
-              featureType: "flat", // default type for featurePlan
-              paymentProvider: "stripe",
-              feature: feature,
-            } as PlanVersionFeatureDragDrop)
-          : (activeData.feature as PlanVersionFeatureDragDrop)
+      setActiveFeature(planFeatureVersion)
 
-      setActiveFeature(featurePlan)
+      // // if the feature is already created we don't need to create it again
+      // if (!planFeatureVersion.id) {
+      //   // optimistic update :)
+      //   onDragFeature(planFeatureVersion)
+      // }
       return
     }
   }
@@ -139,30 +127,16 @@ export default function DragDrop({
     const activeId = active.id
     const overId = over.id
     const activeData = active.data.current
-
-    if (activeId === overId) return
-    if (!activeData?.mode) return
-
-    // when the feature is being dragged from the feature list we need to ensure that the feature is a featurePlan
-    const feature =
-      activeData.mode === "Feature"
-        ? (activeData.feature as PlanVersionFeatureDragDrop["feature"])
-        : (activeData.feature as PlanVersionFeatureDragDrop)
-
-    const featurePlan =
-      activeData.mode === "Feature"
-        ? ({
-            planVersionId: planVersionId,
-            featureId: feature.id,
-            featureType: "flat", // default type for featurePlan
-            paymentProvider: "stripe",
-            feature: feature,
-          } as PlanVersionFeatureDragDrop)
-        : (activeData.feature as PlanVersionFeatureDragDrop)
-
     const overData = over.data.current
 
-    const isOverAFeature = overData?.mode === "FeaturePlan"
+    const isOverAFeature = overData?.mode === "Feature"
+    const isOverFeaturesListGroup = overData?.mode === "FeaturesListGroup"
+
+    // feature over feature is dismissed
+    if (isOverAFeature || activeId === overId || !activeData?.mode) return
+
+    const planFeatureVersion =
+      activeData.planFeatureVersion as PlanVersionFeatureDragDrop
 
     // look for the index of the active feature
     const activeIndex = planFeaturesList.findIndex((t) => t.id === activeId)
@@ -170,23 +144,19 @@ export default function DragDrop({
 
     setPlanFeaturesList((features) => {
       // I'm dropping a Feature over another Feature
-      if (isOverAFeature) {
+      if (!isOverFeaturesListGroup) {
         const overIndex = features.findIndex((t) => t.id === overId)
         // if the active feature is not in the list we add it
         const result = activeFeature
           ? arrayMove(features, activeIndex, overIndex)
-          : arrayMove(
-              [...features, featurePlan] as PlanVersionFeatureDragDrop[],
-              activeIndex,
-              overIndex
-            )
+          : arrayMove([...features, planFeatureVersion], activeIndex, overIndex)
 
         return result
       } else {
         // I'm dropping a Feature over the drop area
         const result = activeFeature
           ? arrayMove(features, activeIndex, activeIndex)
-          : ([...features, featurePlan] as PlanVersionFeatureDragDrop[])
+          : [...features, planFeatureVersion]
 
         return result
       }
@@ -214,7 +184,11 @@ export default function DragDrop({
         createPortal(
           <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
             {activeFeature && (
-              <FeaturePlan mode={"FeaturePlan"} feature={activeFeature} />
+              <FeaturePlan
+                mode={"FeaturePlan"}
+                planFeatureVersion={activeFeature}
+                isOverlay
+              />
             )}
           </DragOverlay>,
           document.body

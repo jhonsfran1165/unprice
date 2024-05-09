@@ -1,15 +1,12 @@
 "use client"
 
 import type { ElementRef } from "react"
-import { forwardRef } from "react"
+import React, { forwardRef } from "react"
 import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
 import { Settings, Trash2 } from "lucide-react"
 
-import type {
-  Feature,
-  PlanVersionFeatureDragDrop,
-} from "@builderai/db/validators"
+import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
@@ -34,43 +31,36 @@ const featureVariants = cva(
   }
 )
 
-export type ConditionalTypeFeature =
-  | {
-      mode: "Feature"
-      feature: Feature
-      className?: string
-      disabled?: boolean
-    }
-  | {
-      mode: "FeaturePlan"
-      feature: PlanVersionFeatureDragDrop
-      className?: string
-      disabled?: boolean
-    }
-
-export type FeaturePlanProps = ConditionalTypeFeature &
-  VariantProps<typeof featureVariants> &
-  React.ComponentPropsWithoutRef<"div">
+export interface FeaturePlanProps
+  extends React.ComponentPropsWithoutRef<"div">,
+    VariantProps<typeof featureVariants> {
+  planFeatureVersion: PlanVersionFeatureDragDrop
+  mode: "Feature" | "FeaturePlan"
+  isOverlay?: boolean
+  isDisabled?: boolean
+}
 
 // TODO: there is a bug with the sheet component that allow to drag the feature card
 const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
   (props, ref) => {
-    const { mode, variant, className, feature, ...rest } = props
+    const { mode, variant, className, planFeatureVersion, ...rest } = props
 
     const [active, setActiveFeature] = useActiveFeature()
 
     const [_planFeatures, setPlanFeatures] = usePlanFeaturesList()
 
+    const feature = planFeatureVersion.feature
+
     const handleClick = (_event: React.MouseEvent<HTMLDivElement>) => {
       if (mode !== "FeaturePlan") return
-      setActiveFeature(feature)
+      setActiveFeature(planFeatureVersion)
     }
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Enter" || event.key === " ") {
         if (mode !== "FeaturePlan") return
 
-        setActiveFeature(feature)
+        setActiveFeature(planFeatureVersion)
       }
     }
 
@@ -80,7 +70,8 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
         {...rest}
         className={cn(featureVariants({ variant, className }), {
           "relative z-0 border-2 border-background-borderHover bg-background-bgHover shadow-lg":
-            mode === "FeaturePlan" && active?.id === feature.id,
+            mode === "FeaturePlan" &&
+            active?.id === planFeatureVersion.featureId,
         })}
         onClick={handleClick}
         onKeyDown={handleKeyDown} // Add onKeyDown event listener
@@ -106,7 +97,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                 <div className="flex items-center justify-between">
                   <div className="flex flex-row gap-2">
                     <div className="line-clamp-1 items-center gap-1 text-left font-bold">
-                      {feature.feature.slug}
+                      {feature.slug}
                     </div>
                     {/* // If there is no id it means that the feature is not saved */}
                     {!feature?.id && (
@@ -152,23 +143,26 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
               </div>
 
               <div className="line-clamp-1 text-xs font-normal text-muted-foreground">
-                {feature.feature.description ?? "No description"}
+                {feature.description ?? "No description"}
               </div>
 
-              {feature.featureType && (
+              {planFeatureVersion.featureType && (
                 <div className="mt-2 flex w-full flex-row items-center justify-between gap-2">
                   <div>
-                    <Badge>{feature.featureType}</Badge>
+                    <Badge>{planFeatureVersion.featureType}</Badge>
                   </div>
                   <div className="line-clamp-1 pr-3 text-xs font-normal">
-                    {feature?.config && feature.featureType === "flat"
+                    {planFeatureVersion?.config &&
+                    planFeatureVersion.featureType === "flat"
                       ? `${
-                          feature?.config?.price === 0
+                          planFeatureVersion?.config?.price === 0
                             ? "Free"
-                            : `$${feature?.config?.price}`
+                            : `$${planFeatureVersion?.config?.price}`
                         }`
-                      : ["usage", "tier"].includes(feature.featureType)
-                        ? `${feature?.config?.tiers.length ?? 0} tiers`
+                      : ["usage", "tier"].includes(
+                            planFeatureVersion.featureType
+                          )
+                        ? `${planFeatureVersion?.config?.tiers?.length ?? 0} tiers`
                         : null}
                   </div>
                 </div>

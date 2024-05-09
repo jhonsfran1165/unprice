@@ -31,18 +31,18 @@ export const USAGE_MODES_MAP = {
     label: "Tier",
     description: "Volume based pricing",
   },
-  // package: {
-  //   label: "Package",
-  //   description: "Volume based pricing",
-  // },
-  // unit: {
-  //   label: "Unit",
-  //   description: "Volume based pricing",
-  // },
+  package: {
+    label: "Package",
+    description: "Volume based pricing",
+  },
+  unit: {
+    label: "Unit",
+    description: "Volume based pricing",
+  },
 } as const
 
 // TODO: change the description
-export const USAGE_METERED_MAP = {
+export const AGGREGATION_METHODS_MAP = {
   sum: {
     label: "Sum",
     description: "Volume based pricing",
@@ -84,8 +84,8 @@ export const USAGE_MODES = Object.keys(USAGE_MODES_MAP) as unknown as readonly [
   ...string[],
 ]
 
-export const USAGE_METERED = Object.keys(
-  USAGE_METERED_MAP
+export const AGGREGATION_METHODS = Object.keys(
+  AGGREGATION_METHODS_MAP
 ) as unknown as readonly [string, ...string[]]
 
 export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
@@ -102,16 +102,16 @@ export const FEATURE_TYPES_MAPS = {
     label: "Tier",
     description: "Price per tier",
   },
-  // package: {
-  //   code: "package",
-  //   label: "Package",
-  //   description: "Price per package of units",
-  // },
-  // unit: {
-  //   code: "package",
-  //   label: "Package",
-  //   description: "Price per package of units",
-  // },
+  package: {
+    code: "package",
+    label: "Package",
+    description: "Price per package of units",
+  },
+  unit: {
+    code: "package",
+    label: "Package",
+    description: "Price per package of units",
+  },
   usage: {
     code: "usage",
     label: "Usage",

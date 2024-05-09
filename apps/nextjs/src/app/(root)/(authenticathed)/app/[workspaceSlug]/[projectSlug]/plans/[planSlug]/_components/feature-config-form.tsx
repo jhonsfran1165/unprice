@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 import {
   FEATURE_TYPES,
@@ -10,7 +11,7 @@ import {
   USAGE_MODES,
   USAGE_MODES_MAP,
 } from "@builderai/db/utils"
-import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
+import type { PlanVersionFeature } from "@builderai/db/validators"
 import { planVersionFeatureInsertBaseSchema } from "@builderai/db/validators"
 import {
   Form,
@@ -28,7 +29,9 @@ import {
 } from "@builderai/ui/select"
 import { Separator } from "@builderai/ui/separator"
 
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
+import { api } from "~/trpc/client"
 import {
   useActiveFeature,
   usePlanFeaturesList,
@@ -41,16 +44,27 @@ export function FeatureConfigForm({
   feature,
   formId,
 }: {
-  feature: PlanVersionFeatureDragDrop
+  feature: PlanVersionFeature
   formId: string
   setDialogOpen?: (open: boolean) => void
 }) {
-  const [_planFeatures, setPlanFeaturesList] = usePlanFeaturesList()
+  const [planFeaturesList, setPlanFeaturesList] = usePlanFeaturesList()
   const [_, setActiveFeature] = useActiveFeature()
+  const router = useRouter()
 
   const form = useZodForm({
     schema: planVersionFeatureInsertBaseSchema,
     defaultValues: feature,
+  })
+
+  const updatePlanVersion = api.planVersions.updateOrderFeatures.useMutation()
+  const createPlanVersionFeatures = api.planVersionFeatures.create.useMutation({
+    onSuccess: ({ planVersionFeature }) => {
+      form.reset(planVersionFeature)
+      toastAction("saved")
+      setDialogOpen?.(false)
+      router.refresh()
+    },
   })
 
   // reset form values when feature changes
@@ -59,14 +73,7 @@ export function FeatureConfigForm({
       ...feature,
       config: {
         ...feature.config,
-        tiers: feature.config?.tiers ?? [
-          {
-            firstUnit: 0,
-            lastUnit: Infinity,
-            unitPrice: 0,
-            flatPrice: 0,
-          },
-        ],
+        tiers: feature.config?.tiers,
       },
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,19 +88,32 @@ export function FeatureConfigForm({
   // subscribe to type changes for conditional rendering in the forms
   const featureType = form.watch("featureType")
 
-  const onSubmitForm = (data: PlanVersionFeatureDragDrop) => {
-    setActiveFeature(data)
+  const onSubmitForm = async (data: PlanVersionFeature) => {
+    // TODO: support edition
+    const { planVersionFeature } =
+      await createPlanVersionFeatures.mutateAsync(data)
 
+    // once the feature is created we update the feature with the new id
     setPlanFeaturesList((features) => {
-      const index = features.findIndex((f) => f.id === data.id)
+      const index = features.findIndex(
+        (feature) => feature.featureId === planVersionFeature.featureId
+      )
 
-      features[index] = data
+      features[index] = planVersionFeature
+
       return features
     })
 
-    setDialogOpen?.(false)
+    const getPlanFeaturesIds = planFeaturesList
+      .filter((id) => id)
+      .map((feature) => feature.id)
 
-    // TODO: save here
+    await updatePlanVersion.mutateAsync({
+      id: planVersionFeature.planVersionId,
+      metadata: {
+        orderPlanVersionFeaturesId: getPlanFeaturesIds,
+      },
+    })
   }
 
   return (
@@ -123,8 +143,8 @@ export function FeatureConfigForm({
                       <Select
                         onValueChange={(value) => {
                           field.onChange(value)
-                          form.setValue("usageMode", "")
-                          form.setValue("tierMode", "")
+                          form.setValue("config.usageMode", "")
+                          form.setValue("config.tierMode", "")
                         }}
                         value={field.value ?? ""}
                       >
@@ -165,7 +185,7 @@ export function FeatureConfigForm({
                 {featureType === "usage" && (
                   <FormField
                     control={form.control}
-                    name="usageMode"
+                    name="config.usageMode"
                     render={({ field }) => (
                       <FormItem className="space-y-1">
                         <FormMessage className="self-start px-2" />
@@ -209,10 +229,10 @@ export function FeatureConfigForm({
                 )}
 
                 {(featureType === "tier" ||
-                  form.watch("usageMode") === "tier") && (
+                  form.watch("config.usageMode") === "tier") && (
                   <FormField
                     control={form.control}
-                    name="tierMode"
+                    name="config.tierMode"
                     render={({ field }) => (
                       <FormItem className="space-y-1">
                         <FormMessage className="self-start px-2" />
