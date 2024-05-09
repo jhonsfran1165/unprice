@@ -34,6 +34,7 @@ export function PlanVersionConfigurator({
   return (
     <ResizablePanelConfig
       defaultLayout={defaultLayout}
+      // TODO: add suspense component
       featureList={
         <>
           <div
@@ -51,7 +52,7 @@ export function PlanVersionConfigurator({
 
           <Separator />
 
-          <Suspense fallback={null}>
+          <Suspense fallback={<div>loading</div>}>
             <FeatureList
               planVersionId={planVersion.id}
               featuresPromise={api.features.listByActiveProject()}
@@ -60,9 +61,7 @@ export function PlanVersionConfigurator({
         </>
       }
       planFeatureList={
-        <Suspense fallback={null}>
-          <PlanFeatureList initialFeatures={planVersion.planFeatures} />
-        </Suspense>
+        <PlanFeatureList initialFeatures={planVersion.planFeatures} />
       }
     />
   )

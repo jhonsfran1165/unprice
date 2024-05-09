@@ -38,6 +38,8 @@ const dropAnimation: DropAnimation = {
 
 export default function DragDrop({ children }: { children: React.ReactNode }) {
   const [planFeaturesList, setPlanFeaturesList] = usePlanFeaturesList()
+  // TODO: use this to get the order of the groups
+  // const groupIds = useMemo(() => groups.map((g) => g.id), [groups])
   const [activeFeature, setActiveFeature] = useActiveFeature()
 
   const [clonedFeatures, setClonedFeatures] = useState<
@@ -67,7 +69,7 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
   const onDragCancel = () => {
     if (clonedFeatures) {
       // Reset items to their original state in case items have been
-      setPlanFeaturesList(clonedFeatures)
+      setClonedFeatures(planFeaturesList)
     }
 
     setClonedFeatures(null)
@@ -82,16 +84,10 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
         event.active.data.current?.mode as string
       )
     ) {
-      const activeData = event.active.data.current
-
-      console.log("activeData", activeData)
-
-      if (!activeData?.mode) return
-
-      const planFeatureVersion =
-        activeData.planFeatureVersion as PlanVersionFeatureDragDrop
-
-      setActiveFeature(planFeatureVersion)
+      setActiveFeature(
+        event.active.data.current
+          ?.planFeatureVersion as PlanVersionFeatureDragDrop
+      )
 
       // // if the feature is already created we don't need to create it again
       // if (!planFeatureVersion.id) {
@@ -108,8 +104,11 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
 
     const { active, over } = event
 
+    // only process if there is an over item
     if (!over) return
 
+    // over represents the item that is being dragged over
+    // active represents the item that is being dragged
     const activeId = active.id
     const overId = over.id
 
@@ -119,6 +118,8 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
   const onDragOver = (event: DragOverEvent) => {
     const { active, over } = event
 
+    console.log("onDragOver", { active }, { over })
+
     // only process if there is an over item
     if (!over) return
 
@@ -126,26 +127,31 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
     // active represents the item that is being dragged
     const activeId = active.id
     const overId = over.id
+
+    if (activeId === overId) return
+
     const activeData = active.data.current
     const overData = over.data.current
 
-    const isOverAFeature = overData?.mode === "Feature"
-    const isOverFeaturesListGroup = overData?.mode === "FeaturesListGroup"
+    if (!activeData) return
 
-    // feature over feature is dismissed
-    if (isOverAFeature || activeId === overId || !activeData?.mode) return
+    const isOverAFeaturePlan = overData?.mode === "FeaturePlan"
+    const isActiveAFeature = activeData?.mode === "Feature"
 
     const planFeatureVersion =
       activeData.planFeatureVersion as PlanVersionFeatureDragDrop
 
     // look for the index of the active feature
-    const activeIndex = planFeaturesList.findIndex((t) => t.id === activeId)
+    const activeIndex = planFeaturesList.findIndex(
+      (t) => t.featureId === activeId
+    )
     const activeFeature = planFeaturesList[activeIndex]
 
-    setPlanFeaturesList((features) => {
+    setPlanFeaturesList((featuresList) => {
+      const features = featuresList
       // I'm dropping a Feature over another Feature
-      if (!isOverFeaturesListGroup) {
-        const overIndex = features.findIndex((t) => t.id === overId)
+      if (isOverAFeaturePlan || isActiveAFeature) {
+        const overIndex = features.findIndex((t) => t.featureId === overId)
         // if the active feature is not in the list we add it
         const result = activeFeature
           ? arrayMove(features, activeIndex, overIndex)
@@ -187,7 +193,6 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
               <FeaturePlan
                 mode={"FeaturePlan"}
                 planFeatureVersion={activeFeature}
-                isOverlay
               />
             )}
           </DragOverlay>,

@@ -43,8 +43,7 @@ export function SortableFeature(props: FeaturePlanProps) {
       className={cn(props.className, {
         "cursor-pointer": !isFeature,
         "cursor-grab": isFeature,
-        "cursor-pointer border-dashed border-primary-solid opacity-80":
-          isDragging && !isFeature,
+        "cursor-pointer border-dashed opacity-80": isDragging && !isFeature,
       })}
       {...props}
     />

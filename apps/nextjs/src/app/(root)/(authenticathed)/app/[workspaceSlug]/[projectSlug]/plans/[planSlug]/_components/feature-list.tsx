@@ -104,6 +104,9 @@ export function FeatureList({
                 featureType: "flat", // default type for featurePlan
                 paymentProvider: "stripe",
                 feature: feature,
+                config: {
+                  price: 0,
+                },
               } as PlanVersionFeatureDragDrop
 
               return (

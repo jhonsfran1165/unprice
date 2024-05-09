@@ -62,7 +62,14 @@ export function FeatureConfigForm({
     onSuccess: ({ planVersionFeature }) => {
       form.reset(planVersionFeature)
       toastAction("saved")
-      setDialogOpen?.(false)
+      router.refresh()
+    },
+  })
+
+  const updatePlanVersionFeatures = api.planVersionFeatures.update.useMutation({
+    onSuccess: ({ planVersionFeature }) => {
+      form.reset(planVersionFeature)
+      toastAction("saved")
       router.refresh()
     },
   })
@@ -78,12 +85,6 @@ export function FeatureConfigForm({
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feature.id])
-
-  // // set form dirty state so we can show a warning when user tries to leave the page
-  // useEffect(() => {
-  //   if (form.formState.isDirty) {
-  //   }
-  // }, [form.formState.isDirty])
 
   // subscribe to type changes for conditional rendering in the forms
   const featureType = form.watch("featureType")
@@ -108,6 +109,7 @@ export function FeatureConfigForm({
       .filter((id) => id)
       .map((feature) => feature.id)
 
+    // TODO: save and update order when the list change only
     await updatePlanVersion.mutateAsync({
       id: planVersionFeature.planVersionId,
       metadata: {

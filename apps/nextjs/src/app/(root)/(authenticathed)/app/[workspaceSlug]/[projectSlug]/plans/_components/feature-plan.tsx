@@ -36,7 +36,6 @@ export interface FeaturePlanProps
     VariantProps<typeof featureVariants> {
   planFeatureVersion: PlanVersionFeatureDragDrop
   mode: "Feature" | "FeaturePlan"
-  isOverlay?: boolean
   isDisabled?: boolean
 }
 
@@ -71,7 +70,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
         className={cn(featureVariants({ variant, className }), {
           "relative z-0 border-2 border-background-borderHover bg-background-bgHover shadow-lg":
             mode === "FeaturePlan" &&
-            active?.id === planFeatureVersion.featureId,
+            active?.featureId === planFeatureVersion.featureId,
         })}
         onClick={handleClick}
         onKeyDown={handleKeyDown} // Add onKeyDown event listener

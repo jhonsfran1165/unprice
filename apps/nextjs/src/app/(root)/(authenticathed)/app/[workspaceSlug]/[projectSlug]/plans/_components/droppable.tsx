@@ -6,10 +6,6 @@ import { defaultAnimateLayoutChanges } from "@dnd-kit/sortable"
 
 import { cn } from "@builderai/ui"
 
-export interface GroupDragData {
-  type: "FeaturesListGroup"
-}
-
 export const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true })
 
@@ -28,7 +24,7 @@ export function DroppableContainer({
     id: id,
     data: {
       type: "FeaturesListGroup",
-    } satisfies GroupDragData,
+    },
   })
 
   return (

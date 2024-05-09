@@ -32,15 +32,13 @@ export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
 
   const [featuresList] = usePlanFeaturesList()
 
-  console.log("featuresList", featuresList)
-
   const filteredFeatures =
     featuresList.filter((feature) =>
       feature.feature.title.toLowerCase().includes(filter.toLowerCase())
     ) ?? featuresList
 
   return (
-    <>
+    <div className="flex flex-col">
       <div className="flex h-[70px] items-center justify-between space-x-1 px-4 py-2">
         <h1 className="truncate text-xl font-bold">Features on this version</h1>
         <Button size={"sm"}>
@@ -102,6 +100,6 @@ export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
           </DroppableContainer>
         </div>
       </ScrollArea>
-    </>
+    </div>
   )
 }
