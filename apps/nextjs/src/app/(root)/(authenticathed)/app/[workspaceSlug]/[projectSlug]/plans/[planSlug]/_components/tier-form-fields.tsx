@@ -385,11 +385,33 @@ export function TierFormFields({
           <div className="flex items-center justify-center p-4">
             <div className="flex flex-col items-center gap-2">
               <div className="flex items-center gap-2">
-                <div className="grid gap-1">
-                  <p className="text-sm font-semibold">No tiers</p>
-                  <p className="text-xs font-normal leading-snug text-muted-foreground">
-                    Something went wrong, please try again.
+                <div className="grid gap-2">
+                  <p
+                    className="
+                   self-center text-sm font-semibold"
+                  >
+                    No tiers
                   </p>
+                  <p className="justify-center  text-xs font-normal leading-snug text-muted-foreground">
+                    Something went wrong, please add the first tier.
+                  </p>
+                  <Button
+                    variant="default"
+                    size={"sm"}
+                    className="py-2"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      e.preventDefault()
+                      append({
+                        firstUnit: 0,
+                        lastUnit: Infinity,
+                        unitPrice: 0,
+                        flatPrice: 0,
+                      })
+                    }}
+                  >
+                    Add first tier
+                  </Button>
                 </div>
               </div>
             </div>

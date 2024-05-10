@@ -34,6 +34,7 @@ import {
 } from "@builderai/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
+import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import { PlanVersionForm } from "../_components/plan-version-form"
 import PlanHeader from "../../_components/plan-header"
@@ -106,9 +107,6 @@ export default async function PlanPage({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="table-cell text-center">
-                        Version
-                      </TableHead>
                       <TableHead className="table-cell text-left">
                         Title
                       </TableHead>
@@ -120,6 +118,9 @@ export default async function PlanPage({
                       </TableHead>
                       <TableHead className="table-cell text-center">
                         Status
+                      </TableHead>
+                      <TableHead className="table-cell text-center">
+                        Date
                       </TableHead>
                       <TableHead className="table-cell text-left">
                         Actions
@@ -136,9 +137,6 @@ export default async function PlanPage({
                     )}
                     {plan.versions.map((version) => (
                       <TableRow key={version.id}>
-                        <TableCell className="table-cell text-center">
-                          {version.version}
-                        </TableCell>
                         <TableCell className="table-cell">
                           <div className="font-bold">{version.title}</div>
                           <div className="hidden text-xs text-muted-foreground md:inline">
@@ -161,6 +159,11 @@ export default async function PlanPage({
                           >
                             {version.status}
                           </Badge>
+                        </TableCell>
+                        <TableCell className="hidden text-center md:table-cell">
+                          <span className="text-xs">
+                            {formatDate(version.updatedAt)}
+                          </span>
                         </TableCell>
                         <TableCell className="table-cell justify-start">
                           <div className="flex flex-row space-x-1">

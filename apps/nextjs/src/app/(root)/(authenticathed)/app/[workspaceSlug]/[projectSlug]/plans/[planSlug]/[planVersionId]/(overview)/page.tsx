@@ -29,11 +29,11 @@ export default async function OverviewVersionPage({
       <div className="flex w-full flex-1 flex-row items-start gap-2 lg:w-3/4">
         {/* // TODO: pass this to a card */}
         <Card className="w-full overflow-hidden">
-          <DragDrop planVersionId={planVersion.id}>
+          <DragDrop>
             <PlanVersionConfigurator planVersion={planVersion} />
           </DragDrop>
         </Card>
-        <Stepper className="flex flex-col px-4" />
+        <Stepper className="flex flex-col px-2 sm:px-4" />
       </div>
     </div>
   )

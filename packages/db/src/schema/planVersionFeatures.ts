@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm"
-import { foreignKey, json, primaryKey, text, unique } from "drizzle-orm/pg-core"
+import {
+  doublePrecision,
+  foreignKey,
+  json,
+  primaryKey,
+  text,
+  unique,
+} from "drizzle-orm/pg-core"
 import type * as z from "zod"
 
 import { pgTableProject } from "../utils/_table"
@@ -40,6 +47,7 @@ export const planVersionFeatures = pgTableProject(
       json("metadata").$type<
         z.infer<typeof planVersionFeatureMetadataSchema>
       >(),
+    order: doublePrecision("order").notNull(),
   },
   (table) => ({
     planversionfk: foreignKey({
@@ -56,12 +64,10 @@ export const planVersionFeatures = pgTableProject(
       columns: [table.id, table.projectId],
       name: "plan_versions_pkey",
     }),
-    // only one feature per plan version
-    unique: unique("unique_version_feature").on(
-      table.planVersionId,
-      table.featureId,
-      table.projectId
-    ),
+    // only one feature per plan version with the same order
+    unique: unique("unique_version_feature")
+      .on(table.planVersionId, table.featureId, table.projectId, table.order)
+      .nullsNotDistinct(),
   })
 )
 

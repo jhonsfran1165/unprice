@@ -49,8 +49,6 @@ export const versions = pgTableProject(
     planId: cuid("plan_id").notNull(),
     // description of the plan version
     description: text("description"),
-    // version number of the plan, this is grouped by plan and project.
-    version: integer("version").notNull(),
     // whether this is the latest version of the plan for the given currency, payment provider, plan type, and plan id
     latest: boolean("latest").default(false),
     // title of the version, this is useful for multiple languages. eg. "Basic Plan", "Plan Basico"
@@ -108,12 +106,7 @@ export const versions = pgTableProject(
       columns: [table.id, table.projectId],
       name: "plan_versions_plan_id_fkey",
     }),
-    // TODO: review this later
-    unique: unique("unique_version").on(
-      table.planId,
-      table.projectId,
-      table.version
-    ),
+    unique: unique("unique_version").on(table.planId, table.projectId),
   })
 )
 

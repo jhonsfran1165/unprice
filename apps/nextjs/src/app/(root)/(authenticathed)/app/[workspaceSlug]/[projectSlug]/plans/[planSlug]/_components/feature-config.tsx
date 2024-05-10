@@ -43,8 +43,7 @@ export function FeatureConfig({
           <div className="flex-1 space-y-8 p-4 py-10 text-sm">
             <FeatureConfigForm
               setDialogOpen={setDialogOpen}
-              formId={formId}
-              feature={activeFeature}
+              defaultValues={activeFeature}
             />
           </div>
         </div>

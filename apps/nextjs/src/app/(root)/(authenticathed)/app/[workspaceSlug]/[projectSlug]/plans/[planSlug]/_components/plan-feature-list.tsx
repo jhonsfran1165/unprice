@@ -61,7 +61,7 @@ export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
         <div className="flex flex-col gap-2 p-4 pt-0">
           <DroppableContainer id={"planVersionFeaturesList"}>
             <SortableContext
-              items={featuresList.map((feature) => feature.feature.slug)}
+              items={featuresList.map((feature) => feature.featureId)}
               strategy={verticalListSortingStrategy}
             >
               {filteredFeatures.length === 0 ? (

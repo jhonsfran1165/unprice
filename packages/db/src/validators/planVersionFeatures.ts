@@ -52,6 +52,7 @@ export const configTierSchema = z
     aggregationMethod: aggregationMethodSchema,
     tierMode: tierModeSchema,
     tiers: z.array(tiersSchema),
+    usageMode: usageModeSchema.optional(),
   })
   .superRefine((data, ctx) => {
     const tiers = data.tiers
@@ -202,6 +203,9 @@ export const configFlatSchema = z.object({
     .nonnegative()
     .min(0)
     .describe("Flat price of the feature"),
+  usageMode: usageModeSchema.optional(),
+  aggregationMethod: aggregationMethodSchema.optional(),
+  tierMode: tierModeSchema.optional(),
 })
 
 export const configFeatureSchema = z.union([
@@ -210,6 +214,7 @@ export const configFeatureSchema = z.union([
   configUsageSchema,
 ])
 
+// TODO: use discriminated union
 export const planVersionFeatureSelectBaseSchema = createSelectSchema(
   schema.planVersionFeatures,
   {
@@ -228,7 +233,6 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
   .partial({
     projectId: true,
     id: true,
-    version: true,
     config: true,
     metadata: true,
   })

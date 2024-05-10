@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq, sql } from "@builderai/db"
+import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
@@ -61,19 +61,6 @@ export const planVersionRouter = createTRPCRouter({
       // this should happen in a transaction because we need to change the status of the previous version
       const planVersionData = await opts.ctx.db.transaction(async (tx) => {
         try {
-          // count how many versions there are for the plan
-          const countVersionsPlan = await opts.ctx.db
-            .select({ count: sql<number>`count(*)` })
-            .from(schema.versions)
-            .where(
-              and(
-                eq(schema.versions.projectId, project.id),
-                eq(schema.versions.planId, planId),
-                eq(schema.versions.currency, currency)
-              )
-            )
-            .then((res) => res[0]?.count ?? 0)
-
           // set the latest version to false if there is a latest version
           await tx
             .update(schema.versions)
@@ -101,7 +88,6 @@ export const planVersionRouter = createTRPCRouter({
               tags: tags ?? [],
 
               status: status ?? "draft",
-              version: countVersionsPlan + 1,
               paymentProvider,
               planType,
               // TODO: is latest really necessary?
@@ -202,67 +188,6 @@ export const planVersionRouter = createTRPCRouter({
 
       return {
         plan: deletedPlanVersion,
-      }
-    }),
-  updateOrderFeatures: protectedActiveProjectAdminProcedure
-    .input(
-      versionSelectBaseSchema.partial().required({ id: true, metadata: true })
-    )
-    .output(
-      z.object({
-        planVersion: versionSelectBaseSchema,
-      })
-    )
-    .mutation(async (opts) => {
-      const { id, metadata } = opts.input
-
-      const project = opts.ctx.project
-      const planVersionData = await opts.ctx.db.query.versions.findFirst({
-        with: {
-          plan: {
-            columns: {
-              slug: true,
-            },
-          },
-        },
-        where: (version, { and, eq }) =>
-          and(eq(version.id, id), eq(version.projectId, project.id)),
-      })
-
-      if (!planVersionData?.id) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "version not found",
-        })
-      }
-
-      // TODO: actually a user can update some fields of the version
-      if (planVersionData.status === "published") {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cannot update a published version, read only",
-        })
-      }
-
-      const versionUpdated = await opts.ctx.db
-        .update(schema.versions)
-        .set({
-          ...(metadata && { metadata }),
-          updatedAt: new Date(),
-        })
-        .where(and(eq(schema.versions.id, planVersionData.id)))
-        .returning()
-        .then((re) => re[0])
-
-      if (!versionUpdated) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error updating version",
-        })
-      }
-
-      return {
-        planVersion: versionUpdated,
       }
     }),
   update: protectedActiveProjectAdminProcedure
@@ -416,6 +341,9 @@ export const planVersionRouter = createTRPCRouter({
             with: {
               feature: true,
             },
+            orderBy(fields, operators) {
+              return operators.asc(fields.order)
+            },
           },
         },
         where: (version, { and, eq }) =>
@@ -433,35 +361,8 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
-      // TODO: improve this
-      const orderPlanVersionFeaturesId =
-        planVersionData.metadata?.orderPlanVersionFeaturesId ?? []
-
-      // given orderPlanVersionFeaturesId, we need to sort the initialFeatures
-      // so that the features are displayed in the correct order
-      const orderedFeatures = []
-
-      // if orderPlanVersionFeaturesId is not empty, we need to sort the features
-      if (orderPlanVersionFeaturesId.length > 0) {
-        orderPlanVersionFeaturesId.forEach((id) => {
-          const feature = planVersionData.planFeatures.find(
-            (obj) => obj.id === id
-          )
-          if (feature) {
-            orderedFeatures.push({
-              ...feature,
-            })
-          }
-        })
-      } else {
-        orderedFeatures.push(...planVersionData.planFeatures)
-      }
-
       return {
-        planVersion: {
-          ...planVersionData,
-          planFeatures: orderedFeatures,
-        },
+        planVersion: planVersionData,
       }
     }),
   // TODO: change this for syncWithPaymentProvider
@@ -469,7 +370,7 @@ export const planVersionRouter = createTRPCRouter({
     .input(
       z.object({
         planId: z.string(),
-        planVersionId: z.number(),
+        id: z.string(),
       })
     )
     .output(z.object({ success: z.boolean() }))
@@ -484,7 +385,7 @@ export const planVersionRouter = createTRPCRouter({
           and(
             eq(version.projectId, project.id),
             eq(version.status, "published"),
-            eq(version.version, opts.input.planVersionId)
+            eq(version.id, opts.input.id)
           ),
       })
 

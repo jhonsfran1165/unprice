@@ -276,7 +276,6 @@ export const planRouter = createTRPCRouter({
               versionSelectBaseSchema.pick({
                 id: true,
                 status: true,
-                version: true,
               })
             ),
           })
@@ -292,7 +291,6 @@ export const planRouter = createTRPCRouter({
           versions: {
             orderBy: (version, { desc }) => [desc(version.createdAt)],
             columns: {
-              version: true,
               status: true,
               id: true,
             },

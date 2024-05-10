@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { startTransition, useState } from "react"
+import { useRouter } from "next/navigation"
 import type {
   DragEndEvent,
   DragOverEvent,
@@ -23,6 +24,7 @@ import { createPortal } from "react-dom"
 
 import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
 
+import { api } from "~/trpc/client"
 import { FeaturePlan } from "./feature-plan"
 import { useActiveFeature, usePlanFeaturesList } from "./use-features"
 
@@ -37,14 +39,90 @@ const dropAnimation: DropAnimation = {
 }
 
 export default function DragDrop({ children }: { children: React.ReactNode }) {
-  const [planFeaturesList, setPlanFeaturesList] = usePlanFeaturesList()
-  // TODO: use this to get the order of the groups
-  // const groupIds = useMemo(() => groups.map((g) => g.id), [groups])
-  const [activeFeature, setActiveFeature] = useActiveFeature()
-
   const [clonedFeatures, setClonedFeatures] = useState<
     PlanVersionFeatureDragDrop[] | null
   >(null)
+  const router = useRouter()
+
+  const [activeFeature, setActiveFeature] = useActiveFeature()
+  const [planFeaturesList, setPlanFeaturesList] = usePlanFeaturesList()
+
+  const updatePlanVersionFeatures = api.planVersionFeatures.update.useMutation({
+    onSuccess: () => {
+      router.refresh()
+    },
+  })
+
+  const createPlanVersionFeatures = api.planVersionFeatures.create.useMutation({
+    onSuccess: ({ planVersionFeature }) => {
+      // once the feature is created we update the feature with the new id
+      setPlanFeaturesList((features) => {
+        const index = features.findIndex(
+          (feature) => feature.featureId === planVersionFeature.featureId
+        )
+
+        features[index] = planVersionFeature
+
+        return features
+      })
+
+      router.refresh()
+    },
+  })
+
+  function onChanges(planFeatureVersion: PlanVersionFeatureDragDrop) {
+    startTransition(() => {
+      // look for the index of the active feature to see if it is already in the list
+      const activeIndex = planFeaturesList.findIndex(
+        (t) => t.featureId === planFeatureVersion.featureId
+      )
+      const previousIndex = planFeaturesList[activeIndex - 1]
+      const nextIndex = planFeaturesList[activeIndex + 1]
+
+      // we are calculating the order of the feature based on the previous and next feature
+      // we average those two numbers to get the order of the feature
+      // we give a default value of 1024 so there is always a space between the features
+      // this approach avoids the need to update all the features when we reorder them
+      if (!previousIndex && nextIndex) {
+        // if the feature is the first one in the list
+        planFeatureVersion.order = nextIndex.order / 2
+      } else if (previousIndex && !nextIndex) {
+        // if the feature is the last one in the list
+        planFeatureVersion.order = previousIndex.order + 1024
+      } else if (previousIndex && nextIndex) {
+        // if the feature is in the middle of the list
+        planFeatureVersion.order = (previousIndex.order + nextIndex.order) / 2
+      } else {
+        // if the feature is the only one in the list
+        planFeatureVersion.order = 1024
+      }
+
+      if (!planFeatureVersion.id) {
+        // create a new plan feature
+        void createPlanVersionFeatures.mutateAsync({ ...planFeatureVersion })
+      } else {
+        const clonedOrderFeatures =
+          clonedFeatures?.filter((f) => f.id).map((t) => t.order) ?? []
+
+        const currentOrderFeatures =
+          planFeaturesList.filter((f) => f.id).map((t) => t.order) ?? []
+
+        // if the order of the features is the same we don't need to update
+        if (
+          clonedOrderFeatures.toString() === currentOrderFeatures.toString()
+        ) {
+          return
+        }
+
+        // update the order of the feature
+        void updatePlanVersionFeatures.mutateAsync({
+          id: planFeatureVersion.id,
+          planVersionId: planFeatureVersion.planVersionId,
+          order: planFeatureVersion.order,
+        })
+      }
+    })
+  }
 
   // sensor are the way we can control how the drag and drop works
   // we have some components inside the feature that are interactive like buttons
@@ -65,6 +143,20 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
       },
     })
   )
+
+  const onDragEnd = (event: DragEndEvent) => {
+    const { active } = event
+    const activeData = active.data.current
+
+    if (!activeData) return
+
+    const planFeatureVersion =
+      activeData.planFeatureVersion as PlanVersionFeatureDragDrop
+
+    onChanges(planFeatureVersion)
+
+    setClonedFeatures(null)
+  }
 
   const onDragCancel = () => {
     if (clonedFeatures) {
@@ -89,36 +181,12 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
           ?.planFeatureVersion as PlanVersionFeatureDragDrop
       )
 
-      // // if the feature is already created we don't need to create it again
-      // if (!planFeatureVersion.id) {
-      //   // optimistic update :)
-      //   onDragFeature(planFeatureVersion)
-      // }
       return
     }
   }
 
-  const onDragEnd = (event: DragEndEvent) => {
-    setActiveFeature(null)
-    setClonedFeatures(null)
-
-    const { active, over } = event
-
-    // only process if there is an over item
-    if (!over) return
-
-    // over represents the item that is being dragged over
-    // active represents the item that is being dragged
-    const activeId = active.id
-    const overId = over.id
-
-    if (activeId === overId) return
-  }
-
   const onDragOver = (event: DragOverEvent) => {
     const { active, over } = event
-
-    console.log("onDragOver", { active }, { over })
 
     // only process if there is an over item
     if (!over) return
@@ -135,32 +203,39 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
 
     if (!activeData) return
 
+    // FeaturePlan represents a feature that is already inside the plan version list
     const isOverAFeaturePlan = overData?.mode === "FeaturePlan"
+    // Feature represents a feature inside the feature list
     const isActiveAFeature = activeData?.mode === "Feature"
 
     const planFeatureVersion =
       activeData.planFeatureVersion as PlanVersionFeatureDragDrop
 
-    // look for the index of the active feature
+    // look for the index of the active feature to see if it is already in the list
     const activeIndex = planFeaturesList.findIndex(
       (t) => t.featureId === activeId
     )
-    const activeFeature = planFeaturesList[activeIndex]
+    const activeFeatureInList = planFeaturesList[activeIndex]
 
+    // set the new list of features given the new order
     setPlanFeaturesList((featuresList) => {
       const features = featuresList
       // I'm dropping a Feature over another Feature
       if (isOverAFeaturePlan || isActiveAFeature) {
+        // check the index of the feature that is being dragged over
         const overIndex = features.findIndex((t) => t.featureId === overId)
         // if the active feature is not in the list we add it
-        const result = activeFeature
+        // otherwise we just reorder the list
+        const result = activeFeatureInList
           ? arrayMove(features, activeIndex, overIndex)
           : arrayMove([...features, planFeatureVersion], activeIndex, overIndex)
 
         return result
       } else {
         // I'm dropping a Feature over the drop area
-        const result = activeFeature
+        // if the active feature is not in the list we add it
+        // otherwise we just reorder the list
+        const result = activeFeatureInList
           ? arrayMove(features, activeIndex, activeIndex)
           : [...features, planFeatureVersion]
 

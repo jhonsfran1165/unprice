@@ -11,14 +11,16 @@ import { PlanVersionDialog } from "../../../_components/plan-version-dialog"
 export default function VersionOverview({
   planVersion,
 }: {
-  planVersion: RouterOutputs["planVersions"]["getByVersion"]["planVersion"]
+  planVersion: RouterOutputs["planVersions"]["getById"]["planVersion"]
 }) {
   return (
     <Card className="overflow-hidden">
       <div className="flex flex-col">
         <div className="flex h-[70px] shrink-0 items-center justify-between space-x-1 px-4 py-2">
           <div className="flex items-center space-x-2">
-            <h3 className="truncate text-xl font-bold">{planVersion.title}</h3>
+            <h3 className="truncate text-xl font-bold">
+              {planVersion.title.toUpperCase()}
+            </h3>
 
             <div
               className={cn("inline-flex items-center text-xs font-semibold", {

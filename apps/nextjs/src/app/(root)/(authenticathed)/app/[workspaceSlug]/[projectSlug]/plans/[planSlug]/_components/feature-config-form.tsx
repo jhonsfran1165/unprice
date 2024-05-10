@@ -13,6 +13,7 @@ import {
 } from "@builderai/db/utils"
 import type { PlanVersionFeature } from "@builderai/db/validators"
 import { planVersionFeatureInsertBaseSchema } from "@builderai/db/validators"
+import { Button } from "@builderai/ui/button"
 import {
   Form,
   FormControl,
@@ -29,99 +30,92 @@ import {
 } from "@builderai/ui/select"
 import { Separator } from "@builderai/ui/separator"
 
+import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
-import {
-  useActiveFeature,
-  usePlanFeaturesList,
-} from "../../_components/use-features"
+import { usePlanFeaturesList } from "../../_components/use-features"
 import { FlatFormFields } from "./flat-form-fields"
 import { TierFormFields } from "./tier-form-fields"
 
 export function FeatureConfigForm({
   setDialogOpen,
-  feature,
-  formId,
+  defaultValues,
 }: {
-  feature: PlanVersionFeature
-  formId: string
+  defaultValues: PlanVersionFeature
   setDialogOpen?: (open: boolean) => void
 }) {
-  const [planFeaturesList, setPlanFeaturesList] = usePlanFeaturesList()
-  const [_, setActiveFeature] = useActiveFeature()
   const router = useRouter()
+  const [_planFeatureList, setPlanFeatureList] = usePlanFeaturesList()
+  const editMode = defaultValues.id ? true : false
+
+  // we set all possible values for the form so react-hook-form don't complain
+  const controlledDefaultValues = {
+    ...defaultValues,
+    config: {
+      ...defaultValues.config,
+      tiers: defaultValues.config?.tiers ?? [
+        {
+          firstUnit: 0,
+          lastUnit: Infinity,
+          unitPrice: 0,
+          flatPrice: 0,
+        },
+      ],
+      usageMode: defaultValues.config?.usageMode ?? "tier",
+      aggregationMethod: defaultValues.config?.aggregationMethod ?? "sum",
+      tierMode: defaultValues.config?.tierMode ?? "volume",
+    },
+  }
 
   const form = useZodForm({
     schema: planVersionFeatureInsertBaseSchema,
-    defaultValues: feature,
-  })
-
-  const updatePlanVersion = api.planVersions.updateOrderFeatures.useMutation()
-  const createPlanVersionFeatures = api.planVersionFeatures.create.useMutation({
-    onSuccess: ({ planVersionFeature }) => {
-      form.reset(planVersionFeature)
-      toastAction("saved")
-      router.refresh()
-    },
+    defaultValues: controlledDefaultValues,
   })
 
   const updatePlanVersionFeatures = api.planVersionFeatures.update.useMutation({
     onSuccess: ({ planVersionFeature }) => {
+      // update the feature list
+      setPlanFeatureList((features) => {
+        const index = features.findIndex(
+          (feature) => feature.featureId === planVersionFeature.featureId
+        )
+
+        features[index] = planVersionFeature
+
+        return features
+      })
+
       form.reset(planVersionFeature)
       toastAction("saved")
+      setDialogOpen?.(false)
       router.refresh()
     },
   })
 
   // reset form values when feature changes
   useEffect(() => {
-    form.reset({
-      ...feature,
-      config: {
-        ...feature.config,
-        tiers: feature.config?.tiers,
-      },
-    })
+    form.reset(controlledDefaultValues)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [feature.id])
+  }, [defaultValues.id])
 
   // subscribe to type changes for conditional rendering in the forms
   const featureType = form.watch("featureType")
+  const usageMode = form.watch("config.usageMode")
 
   const onSubmitForm = async (data: PlanVersionFeature) => {
-    // TODO: support edition
-    const { planVersionFeature } =
-      await createPlanVersionFeatures.mutateAsync(data)
-
-    // once the feature is created we update the feature with the new id
-    setPlanFeaturesList((features) => {
-      const index = features.findIndex(
-        (feature) => feature.featureId === planVersionFeature.featureId
-      )
-
-      features[index] = planVersionFeature
-
-      return features
-    })
-
-    const getPlanFeaturesIds = planFeaturesList
-      .filter((id) => id)
-      .map((feature) => feature.id)
-
-    // TODO: save and update order when the list change only
-    await updatePlanVersion.mutateAsync({
-      id: planVersionFeature.planVersionId,
-      metadata: {
-        orderPlanVersionFeaturesId: getPlanFeaturesIds,
-      },
-    })
+    if (defaultValues.id) {
+      await updatePlanVersionFeatures.mutateAsync({
+        ...data,
+        id: defaultValues.id,
+      })
+    }
   }
 
   return (
     <Form {...form}>
       <form
-        id={formId}
+        id={"feature-config-form"}
         className="space-y-6"
         onSubmit={form.handleSubmit(onSubmitForm)}
       >
@@ -145,8 +139,6 @@ export function FeatureConfigForm({
                       <Select
                         onValueChange={(value) => {
                           field.onChange(value)
-                          form.setValue("config.usageMode", "")
-                          form.setValue("config.tierMode", "")
                         }}
                         value={field.value ?? ""}
                       >
@@ -231,7 +223,7 @@ export function FeatureConfigForm({
                 )}
 
                 {(featureType === "tier" ||
-                  form.watch("config.usageMode") === "tier") && (
+                  (featureType === "usage" && usageMode === "tier")) && (
                   <FormField
                     control={form.control}
                     name="config.tierMode"
@@ -286,6 +278,27 @@ export function FeatureConfigForm({
         {featureType === "flat" && <FlatFormFields form={form} />}
 
         {featureType === "tier" && <TierFormFields form={form} />}
+
+        <div className="mt-8 flex justify-end space-x-4">
+          <div className="flex flex-col p-4">
+            <div className="flex justify-end gap-4">
+              <Button
+                variant={"link"}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setDialogOpen?.(false)
+                }}
+              >
+                Cancel
+              </Button>
+              <SubmitButton
+                isSubmitting={form.formState.isSubmitting}
+                isDisabled={form.formState.isSubmitting}
+                label={editMode ? "Update" : "Create"}
+              />
+            </div>
+          </div>
+        </div>
       </form>
     </Form>
   )

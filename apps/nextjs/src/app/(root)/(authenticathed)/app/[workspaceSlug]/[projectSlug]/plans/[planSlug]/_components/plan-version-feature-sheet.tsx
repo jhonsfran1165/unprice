@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 
-import { Button } from "@builderai/ui/button"
 import {
   Sheet,
   SheetContent,
@@ -31,23 +30,11 @@ export function PlanVersionFeatureSheet({
             Plan version feature form
           </SheetTitle>
           <SheetDescription>
-            Make changes to your profile here. Click save when you are done.
+            Configure the feature for the plan version
           </SheetDescription>
         </SheetHeader>
 
         <FeatureConfig setDialogOpen={setIsOpen} formId="feature-config-form" />
-
-        <div className="flex flex-col p-4">
-          <div className="flex items-center">
-            <Button
-              type="submit"
-              form="feature-config-form"
-              className="ml-auto truncate"
-            >
-              Save configuration
-            </Button>
-          </div>
-        </div>
       </SheetContent>
     </Sheet>
   )

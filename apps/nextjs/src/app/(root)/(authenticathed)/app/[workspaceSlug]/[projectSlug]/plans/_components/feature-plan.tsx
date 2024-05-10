@@ -12,6 +12,7 @@ import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 
 import { Ping } from "~/components/ping"
+import { api } from "~/trpc/client"
 import { PlanVersionFeatureSheet } from "../[planSlug]/_components/plan-version-feature-sheet"
 import { FeatureDialog } from "./feature-dialog"
 import { useActiveFeature, usePlanFeaturesList } from "./use-features"
@@ -47,6 +48,9 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
     const [active, setActiveFeature] = useActiveFeature()
 
     const [_planFeatures, setPlanFeatures] = usePlanFeaturesList()
+
+    const removePlanVersionFeature =
+      api.planVersionFeatures.remove.useMutation()
 
     const feature = planFeatureVersion.feature
 
@@ -99,9 +103,9 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                       {feature.slug}
                     </div>
                     {/* // If there is no id it means that the feature is not saved */}
-                    {!feature?.id && (
+                    {!planFeatureVersion?.id && (
                       <div className="relative">
-                        <div className="absolute right-0 top-0">
+                        <div className="1right-1 absolute top-2">
                           <Ping variant={"destructive"} />
                         </div>
                       </div>
@@ -124,13 +128,15 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                           // delete feature
                           setPlanFeatures((features) => {
                             const filteredFeatures = features.filter(
-                              (f) => f.id !== feature.id
+                              (f) => f.featureId !== feature.id
                             )
 
                             return filteredFeatures
                           })
 
-                          // TODO: save here
+                          void removePlanVersionFeature.mutateAsync({
+                            id: planFeatureVersion.id,
+                          })
                         }}
                       >
                         <Trash2 className="h-4 w-4" />

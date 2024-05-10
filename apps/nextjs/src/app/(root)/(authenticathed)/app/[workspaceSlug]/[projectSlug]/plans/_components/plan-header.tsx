@@ -1,4 +1,4 @@
-import { RefreshCcw, Wallet } from "lucide-react"
+import { BadgeCheck } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
@@ -49,14 +49,13 @@ export default function PlanHeader(props: {
                   {plan.active ? "active" : "inactive"}
                 </span>
               </Badge>
-              <Badge>
-                <RefreshCcw className="h-3 w-3" />
-                <span className="ml-1">{plan.type}</span>
-              </Badge>
-              <Badge>
-                <Wallet className="h-3 w-3" />
-                <span className="ml-1">{plan.paymentProvider}</span>
-              </Badge>
+
+              {plan.defaultPlan && (
+                <Badge>
+                  <BadgeCheck className="h-3 w-3" />
+                  <span className="ml-1">{"default"}</span>
+                </Badge>
+              )}
             </div>
           </CardFooter>
         </div>

@@ -23,7 +23,7 @@ export const apikeys = pgTableProject(
       name: "pk_apikeys",
     }),
     key: index("key").on(table.key),
-    slug: unique("slug").on(table.name),
+    name: unique("name_unique").on(table.name),
   })
 )
 

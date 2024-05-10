@@ -23,6 +23,10 @@ export const plans = pgTableProject(
     metadata: json("metadata").$type<{
       externalId?: string
     }>(),
+    // whether this is the default plan for the project where all the users are subscribed by default
+    // this is useful for the free plan
+    // all users will fall back to this plan if they don't have a subscription or they downgrade their plan
+    defaultPlan: boolean("default_plan").default(false),
   },
   (table) => ({
     primary: primaryKey({
