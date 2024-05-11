@@ -32,8 +32,8 @@ export function UsageFormFields({
 }) {
   return (
     <div className="flex flex-col space-y-6">
-      <div className="flex justify-between">
-        <div className="w-full">
+      {form.getValues("config.usageMode") === "unit" && (
+        <div className="flex w-full justify-between">
           <FormField
             control={form.control}
             name="config.price"
@@ -52,9 +52,18 @@ export function UsageFormFields({
 
                 <div className="flex flex-col items-center space-y-1 px-2">
                   <FormControl className="w-full">
-                    <div className="relative">
-                      <DollarSignIcon className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input {...field} className="pl-8" />
+                    <div className="flex flex-row items-center">
+                      <div className="relative flex-1">
+                        <DollarSignIcon className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input {...field} className="rounded-e-none pl-8" />
+                      </div>
+                      <div
+                        className={
+                          "inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 bg-background-bg px-3 text-sm font-medium"
+                        }
+                      >
+                        {form.formState.defaultValues?.currency}
+                      </div>
                     </div>
                   </FormControl>
 
@@ -64,7 +73,7 @@ export function UsageFormFields({
             )}
           />
         </div>
-      </div>
+      )}
 
       <div className="flex justify-between">
         <div className="w-full">

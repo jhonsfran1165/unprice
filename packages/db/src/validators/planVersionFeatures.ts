@@ -29,7 +29,9 @@ export const planVersionFeatureMetadataSchema = z.object({
   lastTimeSyncPaymentProvider: z.number().optional(),
 })
 
-export const priceSchema = z.string().regex(/^\d{1,15}(\.\d{1,12})?$/)
+export const priceSchema = z
+  .string()
+  .regex(/^\d{1,15}(\.\d{1,12})?$/, "Invalid price")
 
 export const tiersSchema = z.object({
   unitPrice: priceSchema,
@@ -271,6 +273,7 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
     planVersionId: true,
     featureType: true,
     paymentProvider: true,
+    currency: true,
   })
   .transform((data) => {
     if (data.config) {
@@ -282,18 +285,12 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
           delete data.config.tierMode
           delete data.config.usageMode
 
-          return {
-            ...data,
-            config: configFlatSchema.parse(data.config),
-          }
+          return data
         case FEATURE_TYPES_MAPS.tier.code:
           delete data.config.price
           delete data.config.usageMode
 
-          return {
-            ...data,
-            config: configTierSchema.parse(data.config),
-          }
+          return data
 
         case FEATURE_TYPES_MAPS.usage.code:
           if (data.config.usageMode === USAGE_MODES_MAP.unit.code) {

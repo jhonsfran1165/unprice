@@ -157,11 +157,17 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                     <Badge variant={"secondary"}>
                       {planFeatureVersion.featureType}
                     </Badge>
-                    <Badge>
-                      {planFeatureVersion.config?.aggregationMethod}
-                    </Badge>
-                    <Badge>{planFeatureVersion.config?.usageMode}</Badge>
-                    <Badge>{planFeatureVersion.config?.tierMode}</Badge>
+                    {planFeatureVersion.config?.usageMode && (
+                      <Badge>{planFeatureVersion.config.usageMode}</Badge>
+                    )}
+                    {planFeatureVersion.config?.aggregationMethod && (
+                      <Badge>
+                        {planFeatureVersion.config.aggregationMethod}
+                      </Badge>
+                    )}
+                    {planFeatureVersion.config?.tierMode && (
+                      <Badge>{planFeatureVersion.config.tierMode}</Badge>
+                    )}
                   </div>
                   <div className="line-clamp-1 pr-3 text-xs font-normal">
                     {/* // TODO: fix this */}
@@ -171,7 +177,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                             ? "Free"
                             : `$${planFeatureVersion?.config?.price}`
                         }`
-                      : ["tier"].includes(planFeatureVersion.featureType)
+                      : planFeatureVersion.config?.tiers?.length?.toString()
                         ? `${planFeatureVersion?.config?.tiers?.length ?? 0} tiers`
                         : null}
                   </div>

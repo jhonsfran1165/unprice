@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation"
+
 import { Card } from "@builderai/ui/card"
 
 import { api } from "~/trpc/server"
@@ -20,6 +22,10 @@ export default async function OverviewVersionPage({
     id: planVersionId,
     planSlug,
   })
+
+  if (!planVersion) {
+    notFound()
+  }
 
   return (
     <div className="flex flex-col-reverse items-start gap-4 sm:py-0 md:gap-6 lg:flex-row">

@@ -45,15 +45,6 @@ export function TierFormFields({
     name: "config.tiers",
   })
 
-  if (fields.length === 0) {
-    append({
-      firstUnit: 0,
-      lastUnit: null,
-      unitPrice: "0",
-      flatPrice: null,
-    })
-  }
-
   return (
     <div className="flex flex-col space-y-6">
       <div className="flex justify-between">
@@ -379,7 +370,7 @@ export function TierFormFields({
                           ? firstUnitValue + 2
                           : lastUnitValue + 1,
                       lastUnit: null,
-                      unitPrice: "0",
+                      unitPrice: "0.00",
                       flatPrice: null,
                     })
                   }}
@@ -414,7 +405,7 @@ export function TierFormFields({
                       append({
                         firstUnit: 1,
                         lastUnit: null,
-                        unitPrice: "0",
+                        unitPrice: "0.00",
                         flatPrice: null,
                       })
                     }}

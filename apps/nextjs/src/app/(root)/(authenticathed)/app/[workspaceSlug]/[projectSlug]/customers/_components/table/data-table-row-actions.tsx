@@ -173,7 +173,7 @@ export function DataTableRowActions<TData>({
                             key={version.id}
                             value={planAndVersionValue}
                           >
-                            {plan.slug} - v{version.version}
+                            {plan.slug}
                           </SelectItem>
                         )
                       })}

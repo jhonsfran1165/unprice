@@ -15,7 +15,7 @@ import type {
   configFeatureSchema,
   planVersionFeatureMetadataSchema,
 } from "../validators"
-import { paymentProviderEnum, typeFeatureEnum } from "./enums"
+import { currencyEnum, paymentProviderEnum, typeFeatureEnum } from "./enums"
 import { features } from "./features"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
@@ -34,9 +34,9 @@ export const planVersionFeatures = pgTableProject(
     // type of the feature - flat, tier, usage, etc.
     featureType: typeFeatureEnum("feature_type").notNull(),
     // payment provider for the plan - stripe, paypal, lemonsquezee etc.
-    paymentProvider: paymentProviderEnum("payment_providers")
-      .default("stripe")
-      .notNull(),
+    paymentProvider: paymentProviderEnum("payment_providers").notNull(),
+    // currency same as plan version
+    currency: currencyEnum("currency").notNull(),
     // price Id of the payment provider for this feature
     priceId: text("price_id"),
     // configuration of the feature

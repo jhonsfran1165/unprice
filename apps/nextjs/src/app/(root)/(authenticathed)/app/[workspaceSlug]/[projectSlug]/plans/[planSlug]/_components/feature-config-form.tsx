@@ -59,7 +59,7 @@ export function FeatureConfigForm({
         {
           firstUnit: 1,
           lastUnit: null,
-          unitPrice: "0",
+          unitPrice: "0.00",
           flatPrice: null,
         },
       ],

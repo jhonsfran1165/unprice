@@ -27,8 +27,15 @@ export const planVersionFeatureRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { featureId, planVersionId, featureType, config, metadata, order } =
-        opts.input
+      const {
+        featureId,
+        planVersionId,
+        featureType,
+        config,
+        metadata,
+        order,
+        currency,
+      } = opts.input
       const project = opts.ctx.project
 
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
@@ -68,6 +75,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
           featureType,
           config,
           metadata,
+          currency,
           order: order ?? "1024",
         })
         .returning()
@@ -184,11 +192,14 @@ export const planVersionFeatureRouter = createTRPCRouter({
         featureType,
         config,
         metadata,
-        paymentProvider,
         planVersionId,
         priceId,
         order,
       } = opts.input
+
+      // we purposely don't allow to update the currency and the payment provider
+      // those should be update from another method because they are related to the plan version
+      // but we have it inside the feature because that's easier to handle the feature as a product
 
       const project = opts.ctx.project
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
@@ -213,7 +224,6 @@ export const planVersionFeatureRouter = createTRPCRouter({
       const planVersionFeatureUpdated = await opts.ctx.db
         .update(schema.planVersionFeatures)
         .set({
-          ...(paymentProvider && { paymentProvider }),
           ...(planVersionId && { planVersionId }),
           ...(featureId && { featureId }),
           ...(featureType && { featureType }),

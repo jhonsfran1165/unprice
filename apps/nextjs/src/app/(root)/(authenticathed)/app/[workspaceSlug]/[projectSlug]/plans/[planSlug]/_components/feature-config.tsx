@@ -7,10 +7,8 @@ import { FeatureConfigForm } from "./feature-config-form"
 
 export function FeatureConfig({
   setDialogOpen,
-  formId,
 }: {
   setDialogOpen?: (open: boolean) => void
-  formId: string
 }) {
   const [activeFeature] = useActiveFeature()
 

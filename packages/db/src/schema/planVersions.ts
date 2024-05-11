@@ -7,7 +7,6 @@ import {
   primaryKey,
   text,
   timestamp,
-  unique,
   varchar,
 } from "drizzle-orm/pg-core"
 
@@ -72,9 +71,7 @@ export const versions = pgTableProject(
     archivedBy: cuid("archived_by").references(() => users.id),
 
     // payment provider for the plan - stripe, paypal, lemonsquezee etc.
-    paymentProvider: paymentProviderEnum("payment_providers")
-      .default("stripe")
-      .notNull(),
+    paymentProvider: paymentProviderEnum("payment_providers").notNull(),
     // type of the plan - recurring, one-time, etc.
     // the idea is to support different types of plans in the future
     // and compere which one is more useful for the business
@@ -83,7 +80,7 @@ export const versions = pgTableProject(
 
     // handle billing data
     // currency of the plan
-    currency: currencyEnum("currency").notNull().default("EUR"),
+    currency: currencyEnum("currency").notNull(),
     // whenToBill: pay_in_advance - pay_in_arrear
     whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance"),
     // billingPeriod: billing_period - billing_cycle, only used for recurring plans, only used for recurring plans
@@ -106,7 +103,6 @@ export const versions = pgTableProject(
       columns: [table.id, table.projectId],
       name: "plan_versions_plan_id_fkey",
     }),
-    unique: unique("unique_version").on(table.planId, table.projectId),
   })
 )
 

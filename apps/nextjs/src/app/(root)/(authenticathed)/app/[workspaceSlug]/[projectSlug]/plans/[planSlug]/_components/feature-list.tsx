@@ -18,12 +18,12 @@ import { usePlanFeaturesList } from "../../_components/use-features"
 
 interface FeatureListProps {
   featuresPromise: Promise<RouterOutputs["features"]["searchBy"]>
-  planVersionId: string
+  planVersion: RouterOutputs["planVersions"]["getById"]["planVersion"]
 }
 
 export function FeatureList({
   featuresPromise,
-  planVersionId,
+  planVersion,
 }: FeatureListProps) {
   const initialFeatures = use(featuresPromise)
   const [filter, setFilter] = useState("")
@@ -51,6 +51,7 @@ export function FeatureList({
     (feature) => !planFeatureIds.includes(feature.id)
   )
 
+  console.log(planVersion)
   return (
     <>
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">
@@ -99,16 +100,17 @@ export function FeatureList({
               // define planFeatureVersion defaults
               // this will be used to create a new featurePlan optimistically from the drag and drop
               const planFeatureVersion = {
-                planVersionId: planVersionId,
+                planVersionId: planVersion.id,
                 featureId: feature.id,
                 featureType: "flat", // default type for featurePlan
-                paymentProvider: "stripe",
+                paymentProvider: planVersion.paymentProvider,
+                currency: planVersion.currency,
                 feature: feature,
                 // no order
                 order: 0,
                 // default config
                 config: {
-                  price: "0",
+                  price: "0.00",
                 },
               } as PlanVersionFeatureDragDrop
 

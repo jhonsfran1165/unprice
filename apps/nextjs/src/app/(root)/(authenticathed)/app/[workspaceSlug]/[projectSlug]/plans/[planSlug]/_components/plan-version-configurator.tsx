@@ -1,6 +1,5 @@
 import { Suspense } from "react"
 import { cookies } from "next/headers"
-import { notFound } from "next/navigation"
 import { PlusIcon } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
@@ -22,10 +21,6 @@ export function PlanVersionConfigurator({
   planVersion,
 }: PlanVersionConfiguratorProps) {
   const layout = cookies().get("react-resizable-panels:layout")
-
-  if (!planVersion) {
-    notFound()
-  }
 
   const defaultLayout = layout?.value
     ? (JSON.parse(layout.value) as [number, number])
@@ -54,7 +49,7 @@ export function PlanVersionConfigurator({
 
           <Suspense fallback={<div>loading</div>}>
             <FeatureList
-              planVersionId={planVersion.id}
+              planVersion={planVersion}
               featuresPromise={api.features.listByActiveProject()}
             />
           </Suspense>
