@@ -37,6 +37,7 @@ import { api } from "~/trpc/client"
 import { usePlanFeaturesList } from "../../_components/use-features"
 import { FlatFormFields } from "./flat-form-fields"
 import { TierFormFields } from "./tier-form-fields"
+import { UsageFormFields } from "./usage-form-fields"
 
 export function FeatureConfigForm({
   setDialogOpen,
@@ -56,10 +57,10 @@ export function FeatureConfigForm({
       ...defaultValues.config,
       tiers: defaultValues.config?.tiers ?? [
         {
-          firstUnit: 0,
-          lastUnit: Infinity,
-          unitPrice: 0,
-          flatPrice: 0,
+          firstUnit: 1,
+          lastUnit: null,
+          unitPrice: "0",
+          flatPrice: null,
         },
       ],
       usageMode: defaultValues.config?.usageMode ?? "tier",
@@ -111,6 +112,9 @@ export function FeatureConfigForm({
       })
     }
   }
+
+  console.log("error", form.formState.errors)
+  console.log("getValues", form.getValues())
 
   return (
     <Form {...form}>
@@ -276,6 +280,8 @@ export function FeatureConfigForm({
         <Separator />
 
         {featureType === "flat" && <FlatFormFields form={form} />}
+
+        {featureType === "usage" && <UsageFormFields form={form} />}
 
         {featureType === "tier" && <TierFormFields form={form} />}
 

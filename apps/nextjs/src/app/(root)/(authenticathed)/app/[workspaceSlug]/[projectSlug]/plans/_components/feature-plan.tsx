@@ -72,7 +72,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
         ref={ref}
         {...rest}
         className={cn(featureVariants({ variant, className }), {
-          "relative z-0 border-2 border-background-borderHover bg-background-bgHover shadow-lg":
+          "relative z-0 border-2 border-background-borderHover bg-background-bgHover shadow-sm":
             mode === "FeaturePlan" &&
             active?.featureId === planFeatureVersion.featureId,
         })}
@@ -153,20 +153,25 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
 
               {planFeatureVersion.featureType && (
                 <div className="mt-2 flex w-full flex-row items-center justify-between gap-2">
-                  <div>
-                    <Badge>{planFeatureVersion.featureType}</Badge>
+                  <div className="flex flex-row gap-1">
+                    <Badge variant={"secondary"}>
+                      {planFeatureVersion.featureType}
+                    </Badge>
+                    <Badge>
+                      {planFeatureVersion.config?.aggregationMethod}
+                    </Badge>
+                    <Badge>{planFeatureVersion.config?.usageMode}</Badge>
+                    <Badge>{planFeatureVersion.config?.tierMode}</Badge>
                   </div>
                   <div className="line-clamp-1 pr-3 text-xs font-normal">
-                    {planFeatureVersion?.config &&
-                    planFeatureVersion.featureType === "flat"
+                    {/* // TODO: fix this */}
+                    {planFeatureVersion?.config?.price
                       ? `${
-                          planFeatureVersion?.config?.price === 0
+                          parseFloat(planFeatureVersion?.config?.price) === 0
                             ? "Free"
                             : `$${planFeatureVersion?.config?.price}`
                         }`
-                      : ["usage", "tier"].includes(
-                            planFeatureVersion.featureType
-                          )
+                      : ["tier"].includes(planFeatureVersion.featureType)
                         ? `${planFeatureVersion?.config?.tiers?.length ?? 0} tiers`
                         : null}
                   </div>

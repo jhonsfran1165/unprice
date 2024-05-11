@@ -241,23 +241,6 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
-      // replace lastUnit Inifinity with string "Infinity" -> if infinity is passed as a number it will be converted to null
-      // const config = featuresConfig?.map((feature) => {
-      //   const { config } = feature
-      //   if (config?.tiers) {
-      //     config.tiers = config.tiers.map((tier) => {
-      //       if (tier.lastUnit === Infinity) {
-      //         return {
-      //           ...tier,
-      //           lastUnit: "Infinity",
-      //         }
-      //       }
-      //       return tier
-      //     })
-      //   }
-      //   return feature
-      // })
-
       const versionUpdated = await opts.ctx.db
         .update(schema.versions)
         .set({

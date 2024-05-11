@@ -1,7 +1,9 @@
 "use client"
 
 import { DollarSignIcon } from "lucide-react"
+import type { UseFormReturn } from "react-hook-form"
 
+import type { PlanVersionFeature } from "@builderai/db/validators"
 import {
   FormControl,
   FormDescription,
@@ -12,12 +14,10 @@ import {
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 
-import type { useZodForm } from "~/lib/zod-form"
-
 export function FlatFormFields({
   form,
 }: {
-  form: ReturnType<typeof useZodForm>
+  form: UseFormReturn<PlanVersionFeature>
 }) {
   return (
     <div className="flex flex-col">

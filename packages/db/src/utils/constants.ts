@@ -28,14 +28,17 @@ export const TIER_MODES_MAP = {
 
 export const USAGE_MODES_MAP = {
   tier: {
+    code: "tier",
     label: "Tier",
     description: "Volume based pricing",
   },
   package: {
+    code: "package",
     label: "Package",
     description: "Volume based pricing",
   },
   unit: {
+    code: "unit",
     label: "Unit",
     description: "Volume based pricing",
   },
@@ -103,11 +106,6 @@ export const FEATURE_TYPES_MAPS = {
     description: "Price per tier",
   },
   package: {
-    code: "package",
-    label: "Package",
-    description: "Price per package of units",
-  },
-  unit: {
     code: "package",
     label: "Package",
     description: "Price per package of units",

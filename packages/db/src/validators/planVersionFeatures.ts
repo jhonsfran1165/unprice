@@ -10,6 +10,7 @@ import {
   PAYMENT_PROVIDERS,
   TIER_MODES,
   USAGE_MODES,
+  USAGE_MODES_MAP,
 } from "../utils"
 import { featureSelectBaseSchema } from "./features"
 
@@ -18,6 +19,7 @@ const paymentProviderSchema = z.enum(PAYMENT_PROVIDERS)
 const usageModeSchema = z.enum(USAGE_MODES)
 const aggregationMethodSchema = z.enum(AGGREGATION_METHODS)
 const tierModeSchema = z.enum(TIER_MODES)
+
 export type FeatureType = z.infer<typeof typeFeatureSchema>
 
 export type PaymentProvider = z.infer<typeof paymentProviderSchema>
@@ -27,28 +29,18 @@ export const planVersionFeatureMetadataSchema = z.object({
   lastTimeSyncPaymentProvider: z.number().optional(),
 })
 
+export const priceSchema = z.string().regex(/^\d{1,15}(\.\d{1,12})?$/)
+
 export const tiersSchema = z.object({
-  unitPrice: z.coerce.number().nonnegative().min(0).describe("Price per Unit"),
-  flatPrice: z.coerce
-    .number()
-    .nonnegative()
-    .min(0)
-    .optional()
-    .describe("Flat price for the tier"),
-  firstUnit: z.coerce
-    .number()
-    .nonnegative()
-    .min(0)
-    .describe("First unit for the volume"),
-  lastUnit: z.union([
-    z.coerce.number().nonnegative().min(0).describe("Last unit for the volume"),
-    z.literal("Infinity"),
-  ]),
+  unitPrice: priceSchema,
+  flatPrice: priceSchema.nullable(),
+  firstUnit: z.coerce.number().int().min(1),
+  lastUnit: z.coerce.number().int().min(1).nullable(),
 })
 
 export const configTierSchema = z
   .object({
-    price: z.coerce.number().nonnegative().min(0).optional(),
+    price: priceSchema.optional(),
     aggregationMethod: aggregationMethodSchema,
     tierMode: tierModeSchema,
     tiers: z.array(tiersSchema),
@@ -73,10 +65,10 @@ export const configTierSchema = z
           return false
         }
 
-        if (previousLastUnit === Infinity || previousLastUnit === "Infinity") {
+        if (!previousLastUnit) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "Only the last unit of the tiers can be Infinity",
+            message: "Only the last unit of the tiers can be null",
             path: ["tiers", i - 1, "lastUnit"],
             fatal: true,
           })
@@ -123,72 +115,98 @@ export const configTierSchema = z
 
 export const configUsageSchema = z
   .object({
-    price: z.coerce.number().nonnegative().min(0).optional(),
+    price: priceSchema.optional(),
     usageMode: usageModeSchema,
     aggregationMethod: aggregationMethodSchema,
-    tierMode: tierModeSchema,
-    tiers: z.array(tiersSchema),
+    tierMode: tierModeSchema.optional(),
+    tiers: z.array(tiersSchema).optional(),
   })
   .superRefine((data, ctx) => {
-    const tiers = data.tiers
+    if (data.usageMode === USAGE_MODES_MAP.unit.code) {
+      if (!data.price) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Price is required when usage mode is unit",
+          path: ["price"],
+          fatal: true,
+        })
 
-    for (let i = 0; i < tiers.length; i++) {
-      if (i > 0) {
-        const currentFirstUnit = tiers[i]?.firstUnit
-        const previousLastUnit = tiers[i - 1]?.lastUnit
+        return false
+      }
+    }
 
-        if (!currentFirstUnit) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "firstUnit needs to be defined",
-            path: ["tiers", i, "firstUnit"],
-            fatal: true,
-          })
+    if (data.usageMode === USAGE_MODES_MAP.tier.code) {
+      const tiers = data.tiers
 
-          return false
-        }
+      if (!tiers || tiers.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Tiers are required when usage mode is tier",
+          path: ["usageMode"], // TODO: check path
+          fatal: true,
+        })
 
-        if (previousLastUnit === Infinity || previousLastUnit === "Infinity") {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Only the last unit of the tiers can be Infinity",
-            path: ["tiers", i - 1, "lastUnit"],
-            fatal: true,
-          })
+        return false
+      }
 
-          return false
-        }
+      for (let i = 0; i < tiers.length; i++) {
+        if (i > 0) {
+          const currentFirstUnit = tiers[i]?.firstUnit
+          const previousLastUnit = tiers[i - 1]?.lastUnit
 
-        if (!previousLastUnit) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "lastUnit needs to be defined",
-            path: ["tiers", i - 1, "lastUnit"],
-            fatal: true,
-          })
+          if (!currentFirstUnit) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "firstUnit needs to be defined",
+              path: ["tiers", i, "firstUnit"],
+              fatal: true,
+            })
 
-          return false
-        }
+            return false
+          }
 
-        if (currentFirstUnit > previousLastUnit + 1) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Tiers need to be consecutive",
-            path: ["tiers", i - 1, "lastUnit"],
-            fatal: true,
-          })
+          if (!previousLastUnit) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Only the last unit of the tiers can be null",
+              path: ["tiers", i - 1, "lastUnit"],
+              fatal: true,
+            })
 
-          return false
-        }
-        if (currentFirstUnit < previousLastUnit + 1) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Tiers cannot overlap",
-            path: ["tiers", i, "firstUnit"],
-            fatal: true,
-          })
+            return false
+          }
 
-          return false
+          if (!previousLastUnit) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "lastUnit needs to be defined",
+              path: ["tiers", i - 1, "lastUnit"],
+              fatal: true,
+            })
+
+            return false
+          }
+
+          if (currentFirstUnit > previousLastUnit + 1) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers need to be consecutive",
+              path: ["tiers", i - 1, "lastUnit"],
+              fatal: true,
+            })
+
+            return false
+          }
+          if (currentFirstUnit < previousLastUnit + 1) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Tiers cannot overlap",
+              path: ["tiers", i, "firstUnit"],
+              fatal: true,
+            })
+
+            return false
+          }
         }
       }
     }
@@ -198,11 +216,7 @@ export const configUsageSchema = z
 
 export const configFlatSchema = z.object({
   tiers: z.array(tiersSchema).optional(),
-  price: z.coerce
-    .number()
-    .nonnegative()
-    .min(0)
-    .describe("Flat price of the feature"),
+  price: priceSchema,
   usageMode: usageModeSchema.optional(),
   aggregationMethod: aggregationMethodSchema.optional(),
   tierMode: tierModeSchema.optional(),
@@ -223,6 +237,22 @@ export const planVersionFeatureSelectBaseSchema = createSelectSchema(
   }
 )
 
+export const parseFeaturesConfig = (feature: PlanVersionFeature) => {
+  switch (feature.featureType) {
+    case FEATURE_TYPES_MAPS.flat.code:
+      return configFlatSchema.parse(feature.config)
+    case FEATURE_TYPES_MAPS.tier.code:
+      return configTierSchema.parse(feature.config)
+    case FEATURE_TYPES_MAPS.usage.code:
+      return configUsageSchema.parse(feature.config)
+    default:
+      throw new Error("Feature type not supported")
+  }
+}
+
+// We avoid the use of discriminated union because of the complexity of the schema
+// also zod is planning to deprecated it
+// TODO: improve this when switch api is available
 export const planVersionFeatureInsertBaseSchema = createInsertSchema(
   schema.planVersionFeatures,
   {
@@ -237,77 +267,84 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
     metadata: true,
   })
   .required({
-    planId: true,
-    currency: true,
-    planType: true,
+    featureId: true,
+    planVersionId: true,
+    featureType: true,
     paymentProvider: true,
   })
+  .transform((data) => {
+    if (data.config) {
+      // remove unnecessary fields
+      switch (data.featureType) {
+        case FEATURE_TYPES_MAPS.flat.code:
+          delete data.config.tiers
+          delete data.config.aggregationMethod
+          delete data.config.tierMode
+          delete data.config.usageMode
+
+          return {
+            ...data,
+            config: configFlatSchema.parse(data.config),
+          }
+        case FEATURE_TYPES_MAPS.tier.code:
+          delete data.config.price
+          delete data.config.usageMode
+
+          return {
+            ...data,
+            config: configTierSchema.parse(data.config),
+          }
+
+        case FEATURE_TYPES_MAPS.usage.code:
+          if (data.config.usageMode === USAGE_MODES_MAP.unit.code) {
+            delete data.config.tierMode
+            delete data.config.tiers
+          }
+
+          if (data.config.usageMode === USAGE_MODES_MAP.tier.code) {
+            delete data.config.price
+          }
+
+          return data
+        default:
+          throw new Error("Feature type not supported")
+      }
+    }
+
+    return data
+  })
   .superRefine((data, ctx) => {
-    if (!data.config) {
-      return true
-    }
-
-    // validate flat feature configuration
-    if (data.featureType === FEATURE_TYPES_MAPS.flat.code) {
-      try {
-        configFlatSchema.parse(data.config)
-      } catch (err) {
-        if (err instanceof ZodError) {
-          // add issues to the context
-          err.errors.forEach((issue) => {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: issue.message,
-              path: [`config.${issue.path.join(".")}`],
-              fatal: true,
-            })
-          })
+    try {
+      if (data.config) {
+        switch (data.featureType) {
+          case FEATURE_TYPES_MAPS.flat.code:
+            configFlatSchema.parse(data.config)
+            break
+          case FEATURE_TYPES_MAPS.tier.code:
+            configTierSchema.parse(data.config)
+            break
+          case FEATURE_TYPES_MAPS.usage.code:
+            // TODO: when usage mode is unit, price is required
+            configUsageSchema.parse(data.config)
+            break
+          default:
+            throw new Error("Feature type not supported")
         }
-
-        return false
       }
-    }
-
-    // validate tier feature configuration
-    if (data.featureType === FEATURE_TYPES_MAPS.tier.code) {
-      try {
-        configTierSchema.parse(data.config)
-      } catch (err) {
-        if (err instanceof ZodError) {
-          // add issues to the context
-          err.errors.forEach((issue) => {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: issue.message,
-              path: [`config.${issue.path.join(".")}`],
-              fatal: true,
-            })
+    } catch (err) {
+      if (err instanceof ZodError) {
+        // add issues to the context
+        err.errors.forEach((issue) => {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: issue.message,
+            path: [`config.${issue.path.join(".")}`],
+            fatal: true,
           })
-        }
-
-        return false
+        })
       }
-    }
 
-    // validate flat feature configuration
-    if (data.featureType === FEATURE_TYPES_MAPS.usage.code) {
-      try {
-        configUsageSchema.parse(data.config)
-      } catch (err) {
-        if (err instanceof ZodError) {
-          // add issues to the context
-          err.errors.forEach((issue) => {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: issue.message,
-              path: [`config.${issue.path.join(".")}`],
-              fatal: true,
-            })
-          })
-        }
-
-        return false
-      }
+      return false
     }
 
     return true

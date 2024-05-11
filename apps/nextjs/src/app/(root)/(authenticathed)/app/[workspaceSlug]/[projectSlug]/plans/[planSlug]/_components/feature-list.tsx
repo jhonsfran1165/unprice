@@ -108,7 +108,7 @@ export function FeatureList({
                 order: 0,
                 // default config
                 config: {
-                  price: 0,
+                  price: "0",
                 },
               } as PlanVersionFeatureDragDrop
 

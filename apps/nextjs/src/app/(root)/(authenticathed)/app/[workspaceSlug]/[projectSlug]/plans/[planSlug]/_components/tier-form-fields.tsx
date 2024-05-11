@@ -48,9 +48,9 @@ export function TierFormFields({
   if (fields.length === 0) {
     append({
       firstUnit: 0,
-      lastUnit: Infinity,
-      unitPrice: 0,
-      flatPrice: 0,
+      lastUnit: null,
+      unitPrice: "0",
+      flatPrice: null,
     })
   }
 
@@ -215,11 +215,7 @@ export function TierFormFields({
                           <Input
                             {...field}
                             className="h-8"
-                            value={
-                              field.value.toString() === "Infinity"
-                                ? "∞"
-                                : field.value
-                            }
+                            value={field.value ?? "∞"}
                             disabled={
                               (index !== 0 && index === fields.length - 1) ||
                               fields.length === 1
@@ -265,7 +261,22 @@ export function TierFormFields({
                         <FormControl>
                           <div className="relative">
                             <DollarSignIcon className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-                            <Input {...field} className="h-8 pl-8" />
+                            <Input
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                field.onChange(e.target.value)
+
+                                // if the value is empty, set the flatPrice to null
+                                if (e.target.value === "") {
+                                  form.setValue(
+                                    `config.tiers.${index}.flatPrice`,
+                                    null
+                                  )
+                                }
+                              }}
+                              className="h-8 pl-8"
+                            />
                           </div>
                         </FormControl>
                       </FormItem>
@@ -359,19 +370,17 @@ export function TierFormFields({
 
                     form.setValue(
                       `config.tiers.${fields.length - 1}.lastUnit`,
-                      lastUnitValue.toString() === "Infinity"
-                        ? firstUnitValue + 1
-                        : lastUnitValue
+                      lastUnitValue ?? firstUnitValue + 1
                     )
 
                     append({
                       firstUnit:
-                        lastUnitValue === Infinity ||
-                        lastUnitValue === "Infinity"
+                        lastUnitValue === null
                           ? firstUnitValue + 2
                           : lastUnitValue + 1,
-                      lastUnit: Infinity,
-                      unitPrice: 0,
+                      lastUnit: null,
+                      unitPrice: "0",
+                      flatPrice: null,
                     })
                   }}
                 >
@@ -403,10 +412,10 @@ export function TierFormFields({
                       e.stopPropagation()
                       e.preventDefault()
                       append({
-                        firstUnit: 0,
-                        lastUnit: Infinity,
-                        unitPrice: 0,
-                        flatPrice: 0,
+                        firstUnit: 1,
+                        lastUnit: null,
+                        unitPrice: "0",
+                        flatPrice: null,
                       })
                     }}
                   >

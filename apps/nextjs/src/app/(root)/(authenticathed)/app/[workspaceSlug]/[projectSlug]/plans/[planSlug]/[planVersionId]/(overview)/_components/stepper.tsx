@@ -10,9 +10,9 @@ export default function Stepper({ className }: { className?: string }) {
         <div className="space-y-4">
           <Link
             href={"#"}
-            className="flex flex-row items-center gap-2 text-xs text-primary"
+            className="flex flex-row items-center gap-2 text-xs text-primary-text"
           >
-            <Combine className="h-5 w-5 text-primary" />
+            <Combine className="h-5 w-5 text-primary-text" />
             <span className="hidden sm:inline">Features</span>
           </Link>
           <Separator className="mx-2 h-6" orientation="vertical" />
