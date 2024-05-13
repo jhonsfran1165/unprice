@@ -9,7 +9,7 @@ import {
   planVersionFeatureDragDropSchema,
   planVersionFeatureInsertBaseSchema,
   planVersionFeatureSelectBaseSchema,
-  versionSelectBaseSchema,
+  planVersionSelectBaseSchema,
 } from "@builderai/db/validators"
 
 import {
@@ -27,15 +27,8 @@ export const planVersionFeatureRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const {
-        featureId,
-        planVersionId,
-        featureType,
-        config,
-        metadata,
-        order,
-        currency,
-      } = opts.input
+      const { featureId, planVersionId, featureType, config, metadata, order } =
+        opts.input
       const project = opts.ctx.project
 
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
@@ -71,11 +64,9 @@ export const planVersionFeatureRouter = createTRPCRouter({
           featureId: featureData.id,
           projectId: project.id,
           planVersionId: planVersionData.id,
-          paymentProvider: planVersionData.paymentProvider,
           featureType,
           config,
           metadata,
-          currency,
           order: order ?? "1024",
         })
         .returning()
@@ -283,7 +274,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
     .output(
       z.object({
         planVersionFeature: planVersionFeatureSelectBaseSchema.extend({
-          planVersion: versionSelectBaseSchema,
+          planVersion: planVersionSelectBaseSchema,
           feature: featureSelectBaseSchema,
         }),
       })

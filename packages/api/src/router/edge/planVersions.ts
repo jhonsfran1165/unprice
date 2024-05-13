@@ -8,8 +8,8 @@ import {
   featureSelectBaseSchema,
   planSelectBaseSchema,
   planVersionFeatureSelectBaseSchema,
+  planVersionSelectBaseSchema,
   versionInsertBaseSchema,
-  versionSelectBaseSchema,
 } from "@builderai/db/validators"
 
 import {
@@ -17,13 +17,14 @@ import {
   protectedActiveProjectAdminProcedure,
   protectedActiveProjectProcedure,
 } from "../../trpc"
+import { syncPaymentProvider } from "../../utils/sync-payment-provider"
 
 export const planVersionRouter = createTRPCRouter({
   create: protectedActiveProjectAdminProcedure
     .input(versionInsertBaseSchema)
     .output(
       z.object({
-        planVersion: versionSelectBaseSchema,
+        planVersion: planVersionSelectBaseSchema,
       })
     )
     .mutation(async (opts) => {
@@ -137,13 +138,13 @@ export const planVersionRouter = createTRPCRouter({
 
   remove: protectedActiveProjectAdminProcedure
     .input(
-      versionSelectBaseSchema
+      planVersionSelectBaseSchema
         .pick({
           id: true,
         })
         .required({ id: true })
     )
-    .output(z.object({ plan: versionSelectBaseSchema }))
+    .output(z.object({ plan: planVersionSelectBaseSchema }))
     .mutation(async (opts) => {
       const { id } = opts.input
       const project = opts.ctx.project
@@ -191,10 +192,10 @@ export const planVersionRouter = createTRPCRouter({
       }
     }),
   update: protectedActiveProjectAdminProcedure
-    .input(versionSelectBaseSchema.partial().required({ id: true }))
+    .input(planVersionSelectBaseSchema.partial().required({ id: true }))
     .output(
       z.object({
-        planVersion: versionSelectBaseSchema,
+        planVersion: planVersionSelectBaseSchema,
       })
     )
     .mutation(async (opts) => {
@@ -272,7 +273,71 @@ export const planVersionRouter = createTRPCRouter({
         planVersion: versionUpdated,
       }
     }),
+  publish: protectedActiveProjectAdminProcedure
+    .input(planVersionSelectBaseSchema.partial().required({ id: true }))
+    .output(
+      z.object({
+        planVersion: planVersionSelectBaseSchema,
+      })
+    )
+    .mutation(async (opts) => {
+      const { id } = opts.input
 
+      const project = opts.ctx.project
+      const planVersionData = await opts.ctx.db.query.versions.findFirst({
+        with: {
+          plan: {
+            columns: {
+              slug: true,
+            },
+          },
+        },
+        where: (version, { and, eq }) =>
+          and(eq(version.id, id), eq(version.projectId, project.id)),
+      })
+
+      if (!planVersionData?.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "version not found",
+        })
+      }
+
+      // TODO: actually a user can update some fields of the version
+      if (planVersionData.status === "published") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot update a published version, read only",
+        })
+      }
+
+      // TODO: sync with payment provider
+      await syncPaymentProvider({
+        ctx: opts.ctx,
+        planVersion: planVersionData,
+      })
+
+      const versionUpdated = await opts.ctx.db
+        .update(schema.versions)
+        .set({
+          status: "published",
+          updatedAt: new Date(),
+        })
+        .where(and(eq(schema.versions.id, planVersionData.id)))
+        .returning()
+        .then((re) => re[0])
+
+      if (!versionUpdated) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error updating version",
+        })
+      }
+
+      return {
+        planVersion: versionUpdated,
+      }
+    }),
   getById: protectedActiveProjectProcedure
     .input(
       z.object({
@@ -282,11 +347,8 @@ export const planVersionRouter = createTRPCRouter({
     )
     .output(
       z.object({
-        planVersion: versionSelectBaseSchema.extend({
-          plan: planSelectBaseSchema.pick({
-            slug: true,
-            id: true,
-          }),
+        planVersion: planVersionSelectBaseSchema.extend({
+          plan: planSelectBaseSchema,
           planFeatures: z.array(
             planVersionFeatureSelectBaseSchema.extend({
               feature: featureSelectBaseSchema,
@@ -314,12 +376,7 @@ export const planVersionRouter = createTRPCRouter({
       // TODO: improve this query
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
         with: {
-          plan: {
-            columns: {
-              id: true,
-              slug: true,
-            },
-          },
+          plan: true,
           planFeatures: {
             with: {
               feature: true,
@@ -346,109 +403,6 @@ export const planVersionRouter = createTRPCRouter({
 
       return {
         planVersion: planVersionData,
-      }
-    }),
-  // TODO: change this for syncWithPaymentProvider
-  syncWithStripe: protectedActiveProjectProcedure
-    .input(
-      z.object({
-        planId: z.string(),
-        id: z.string(),
-      })
-    )
-    .output(z.object({ success: z.boolean() }))
-    .mutation(async (opts) => {
-      const project = opts.ctx.project
-
-      const planVersion = await opts.ctx.db.query.versions.findFirst({
-        with: {
-          plan: true,
-        },
-        where: (version, { and, eq }) =>
-          and(
-            eq(version.projectId, project.id),
-            eq(version.status, "published"),
-            eq(version.id, opts.input.id)
-          ),
-      })
-
-      // if (!planVersion?.featuresConfig) {
-      //   throw new TRPCError({
-      //     code: "NOT_FOUND",
-      //     message: "Plan version has no features to sync",
-      //   })
-      // }
-
-      // add custom id of the product
-      // search for prices of the product to check if they need to be updated
-      // or created
-
-      // limits of products is important here
-
-      // group all features by type
-      // const features = planVersion.featuresConfig
-
-      // console.log("features", features)
-
-      // // calculate the price of flat features and that would be the base price of the plan
-      // const basePricePlan = features.reduce((acc, feature) => {
-      //   if (feature.type === "flat") {
-      //     return acc + feature.config.price
-      //   }
-      //   return acc
-      // }, 0)
-
-      // console.log("basePricePlan", basePricePlan)
-
-      // create a product for the plan
-      // limit 15 flat features
-      // const flatProductStripe = await stripe.products.create(
-      //   {
-      //     name: `${planVersion.plan.slug} - flat`,
-      //     type: "service",
-      //     description: planVersion.plan.description ?? "dasdasd",
-      //     features: features.map((feature) => ({
-      //       name: feature.title,
-      //     })),
-      //     metadata: {
-      //       planId: planVersion.plan.id,
-      //       planVersionId: planVersion.id,
-      //     },
-      //   },
-      //   {
-      //     stripeAccount: project.stripeAccountId ?? "",
-      //   }
-      // )
-
-      // TODO
-      // get the product and price id
-      // save the prices ids in the plan version
-
-      // create a price for the product
-      // const flatPriceStripe = await stripe.prices.create(
-      //   {
-      //     currency: planVersion.currency ?? "usd",
-      //     product: flatProductStripe.id,
-      //     unit_amount: basePricePlan * 100,
-      //     recurring: {
-      //       interval: planVersion.billingPeriod ?? "month",
-      //     },
-      //     metadata: {
-      //       planId: planVersion.plan.id,
-      //       planVersionId: planVersion.id,
-      //     },
-      //     lookup_key: `${planVersion.plan.slug}-flat`,
-      //   },
-      //   {
-      //     stripeAccount: project.stripeAccountId ?? "",
-      //   }
-      // )
-
-      // // update the plan with the price id
-      // console.log("flatPriceStripe", flatPriceStripe)
-
-      return {
-        success: true,
       }
     }),
 })

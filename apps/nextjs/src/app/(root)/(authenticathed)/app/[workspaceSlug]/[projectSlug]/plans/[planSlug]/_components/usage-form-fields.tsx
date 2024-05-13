@@ -2,26 +2,45 @@
 
 import type { UseFormReturn } from "react-hook-form"
 
-import type { PlanVersionFeature } from "@builderai/db/validators"
+import type { Currency, PlanVersionFeature } from "@builderai/db/validators"
 
-import { AggregationMethodFormField, PriceFormField } from "./fields-form"
+import {
+  AggregationMethodFormField,
+  PriceFormField,
+  TierFormField,
+} from "./fields-form"
+import { PackageFormFields } from "./package-form-fields"
 
 export function UsageFormFields({
   form,
+  currency,
 }: {
   form: UseFormReturn<PlanVersionFeature>
+  currency: Currency
 }) {
   return (
     <div className="flex flex-col space-y-6">
-      {form.getValues("config.usageMode") === "unit" && (
-        <div className="flex w-full justify-between">
-          <PriceFormField form={form} />
-        </div>
-      )}
-
       <div className="flex w-full justify-between">
         <AggregationMethodFormField form={form} />
       </div>
+
+      {form.getValues("config.usageMode") === "unit" && (
+        <div className="flex w-full justify-between">
+          <PriceFormField form={form} currency={currency} />
+        </div>
+      )}
+
+      {form.getValues("config.usageMode") === "tier" && (
+        <div className="flex w-full justify-between">
+          <TierFormField form={form} />
+        </div>
+      )}
+
+      {form.getValues("config.usageMode") === "package" && (
+        <div className="flex w-full justify-between">
+          <PackageFormFields form={form} currency={currency} />
+        </div>
+      )}
     </div>
   )
 }

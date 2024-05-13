@@ -9,10 +9,10 @@ import {
   createSubscriptionSchema,
   customerInsertSchema,
   customerSelectSchema,
+  planVersionSelectBaseSchema,
   searchDataParamsSchema,
   subscriptionSelectSchema,
   subscriptionWithCustomerSchema,
-  versionSelectBaseSchema,
 } from "@builderai/db/validators"
 import { publishEvents } from "@builderai/tinybird"
 
@@ -315,7 +315,7 @@ export const subscriptionRouter = createTRPCRouter({
       z.object({
         subscriptionData: subscriptionSelectSchema
           .extend({
-            version: versionSelectBaseSchema,
+            version: planVersionSelectBaseSchema,
           })
           .optional(),
         userHasFeature: z.boolean(),

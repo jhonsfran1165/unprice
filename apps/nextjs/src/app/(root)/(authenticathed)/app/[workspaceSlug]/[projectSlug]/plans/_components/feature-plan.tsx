@@ -1,10 +1,10 @@
 "use client"
 
 import type { ElementRef } from "react"
-import React, { forwardRef } from "react"
+import React, { forwardRef, useState } from "react"
 import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
-import { Settings, Trash2 } from "lucide-react"
+import { Settings, Trash2, X } from "lucide-react"
 
 import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
@@ -37,13 +37,14 @@ export interface FeaturePlanProps
     VariantProps<typeof featureVariants> {
   planFeatureVersion: PlanVersionFeatureDragDrop
   mode: "Feature" | "FeaturePlan"
-  isDisabled?: boolean
+  disabled?: boolean
 }
 
 // TODO: there is a bug with the sheet component that allow to drag the feature card
 const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
   (props, ref) => {
     const { mode, variant, className, planFeatureVersion, ...rest } = props
+    const [isDelete, setConfirmDelete] = useState<boolean>(false)
 
     const [active, setActiveFeature] = useActiveFeature()
 
@@ -113,35 +114,73 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                   </div>
                   <div className="flex items-center gap-1 text-xs">
                     <div className="flex- flex-row gap-1">
-                      <Button
-                        className="px-0"
-                        variant="link"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          e.preventDefault()
+                      {isDelete && (
+                        <div className="flex flex-row items-center">
+                          <Button
+                            className="px-0 text-xs font-light"
+                            variant="link"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              e.preventDefault()
+                              setConfirmDelete(false)
+                            }}
+                          >
+                            cancel
+                            <span className="sr-only">
+                              cancel delete from plan
+                            </span>
+                          </Button>
+                          <Button
+                            className="px-0"
+                            variant="link"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              e.preventDefault()
 
-                          if (active?.id === feature.id) {
-                            setActiveFeature(null)
-                          }
+                              if (active?.id === feature.id) {
+                                setActiveFeature(null)
+                              }
 
-                          // delete feature
-                          setPlanFeatures((features) => {
-                            const filteredFeatures = features.filter(
-                              (f) => f.featureId !== feature.id
-                            )
+                              // delete feature
+                              setPlanFeatures((features) => {
+                                const filteredFeatures = features.filter(
+                                  (f) => f.featureId !== feature.id
+                                )
 
-                            return filteredFeatures
-                          })
+                                return filteredFeatures
+                              })
 
-                          void removePlanVersionFeature.mutateAsync({
-                            id: planFeatureVersion.id,
-                          })
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete from plan</span>
-                      </Button>
+                              setConfirmDelete(false)
+
+                              void removePlanVersionFeature.mutateAsync({
+                                id: planFeatureVersion.id,
+                              })
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">
+                              Confirm delete from plan
+                            </span>
+                          </Button>
+                        </div>
+                      )}
+                      {!isDelete && (
+                        <Button
+                          className="px-0"
+                          variant="link"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                            setConfirmDelete(true)
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete from plan</span>
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -175,7 +214,9 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                       ? `${
                           parseFloat(planFeatureVersion?.config?.price) === 0
                             ? "Free"
-                            : `$${planFeatureVersion?.config?.price}`
+                            : planFeatureVersion?.config?.units
+                              ? `$${planFeatureVersion?.config?.price} per ${planFeatureVersion?.config?.units} units`
+                              : `$${planFeatureVersion?.config?.price}`
                         }`
                       : planFeatureVersion.config?.tiers?.length?.toString()
                         ? `${planFeatureVersion?.config?.tiers?.length ?? 0} tiers`

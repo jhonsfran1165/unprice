@@ -5,7 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { useHydrateAtoms } from "jotai/utils"
 import { ChevronRight, FileStack, Search } from "lucide-react"
 
-import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
+import type { RouterOutputs } from "@builderai/api"
 import { Button } from "@builderai/ui/button"
 import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
@@ -16,21 +16,31 @@ import { DroppableContainer } from "../../_components/droppable"
 import { FeatureDialog } from "../../_components/feature-dialog"
 import { SortableFeature } from "../../_components/sortable-feature"
 import {
+  configActivePlanAtom,
+  configActivePlanVersionAtom,
   configPlanFeaturesListAtom,
   usePlanFeaturesList,
+  usePlanVersionFeatureOpen,
 } from "../../_components/use-features"
 
 interface PlanFeatureListProps {
-  initialFeatures: PlanVersionFeatureDragDrop[]
+  planVersion: RouterOutputs["planVersions"]["getById"]["planVersion"]
 }
 
-export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
+export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
   const [filter, setFilter] = useState("")
 
+  const { planFeatures, plan, ...activePlanVersion } = planVersion
+
   // hydrate atoms with initial data
-  useHydrateAtoms([[configPlanFeaturesListAtom, initialFeatures]])
+  // TODO: this atoms should be refetch when the planVersion changes
+  useHydrateAtoms([[configPlanFeaturesListAtom, planFeatures]])
+  useHydrateAtoms([[configActivePlanVersionAtom, activePlanVersion]])
+  useHydrateAtoms([[configActivePlanAtom, plan]])
 
   const [featuresList] = usePlanFeaturesList()
+  // this avoid to drag and drop features when the planVersionFeature is open
+  const [planVersionFeatureOpen] = usePlanVersionFeatureOpen()
 
   const filteredFeatures =
     featuresList.filter((feature) =>
@@ -89,6 +99,7 @@ export function PlanFeatureList({ initialFeatures }: PlanFeatureListProps) {
                 <div className="space-y-2">
                   {filteredFeatures.map((feature, i) => (
                     <SortableFeature
+                      disabled={planVersionFeatureOpen}
                       key={i}
                       mode="FeaturePlan"
                       planFeatureVersion={feature}

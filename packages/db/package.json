@@ -20,6 +20,7 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "generate:local": "pnpm with-env drizzle-kit generate:pg --custom --config=local.config.ts",
+    "migrate:local": "pnpm with-env drizzle-kit migrate --custom --config=local.config.ts",
     "generate:neon": "pnpm with-env drizzle-kit generate:pg --custom --config=neon.config.ts",
     "generate:custom": "pnpm with-env drizzle-kit generate:pg --custom --config=custom.config.ts",
     "push:local": "pnpm with-env drizzle-kit push:pg --config=local.config.ts",
@@ -53,7 +54,7 @@
     "@builderai/prettier-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
     "dotenv-cli": "^7.3.0",
-    "drizzle-kit": "^0.20.14",
+    "drizzle-kit": "^0.21.1",
     "eslint": "^8.57.0",
     "pg": "^8.11.3",
     "prettier": "^3.2.5",

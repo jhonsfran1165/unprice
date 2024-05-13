@@ -190,6 +190,13 @@
       "when": 1715452017426,
       "tag": "0026_confused_mordo",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "5",
+      "when": 1715592175602,
+      "tag": "0027_spotty_nightcrawler",
+      "breakpoints": true
     }
   ]
 }

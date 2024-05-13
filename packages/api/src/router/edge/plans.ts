@@ -7,8 +7,8 @@ import * as utils from "@builderai/db/utils"
 import {
   planInsertBaseSchema,
   planSelectBaseSchema,
+  planVersionSelectBaseSchema,
   projectSelectBaseSchema,
-  versionSelectBaseSchema,
 } from "@builderai/db/validators"
 
 import {
@@ -192,7 +192,7 @@ export const planRouter = createTRPCRouter({
     .output(
       z.object({
         plan: planSelectBaseSchema.extend({
-          versions: z.array(versionSelectBaseSchema),
+          versions: z.array(planVersionSelectBaseSchema),
           project: projectSelectBaseSchema,
         }),
       })
@@ -229,7 +229,7 @@ export const planRouter = createTRPCRouter({
     .output(
       z.object({
         plan: planSelectBaseSchema.extend({
-          versions: z.array(versionSelectBaseSchema),
+          versions: z.array(planVersionSelectBaseSchema),
           project: projectSelectBaseSchema,
         }),
       })
@@ -273,7 +273,7 @@ export const planRouter = createTRPCRouter({
         plans: z.array(
           planSelectBaseSchema.extend({
             versions: z.array(
-              versionSelectBaseSchema.pick({
+              planVersionSelectBaseSchema.pick({
                 id: true,
                 status: true,
               })

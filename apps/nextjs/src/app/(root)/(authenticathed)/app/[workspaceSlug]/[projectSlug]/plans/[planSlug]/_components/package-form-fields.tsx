@@ -4,9 +4,9 @@ import type { UseFormReturn } from "react-hook-form"
 
 import type { Currency, PlanVersionFeature } from "@builderai/db/validators"
 
-import { PriceFormField } from "./fields-form"
+import { PriceFormField, UnitsFormField } from "./fields-form"
 
-export function FlatFormFields({
+export function PackageFormFields({
   form,
   currency,
 }: {
@@ -14,8 +14,9 @@ export function FlatFormFields({
   currency: Currency
 }) {
   return (
-    <div className="flex flex-col">
+    <div className="flex w-full flex-col gap-1">
       <PriceFormField form={form} currency={currency} />
+      <UnitsFormField form={form} />
     </div>
   )
 }

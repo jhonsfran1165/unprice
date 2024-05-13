@@ -25,6 +25,7 @@ export function SortableFeature(props: FeaturePlanProps) {
     attributes: {
       roleDescription: props.mode,
     },
+    disabled: props.disabled,
   })
 
   const style = {
@@ -36,7 +37,7 @@ export function SortableFeature(props: FeaturePlanProps) {
 
   return (
     <FeaturePlan
-      ref={props.isDisabled ? undefined : setNodeRef}
+      ref={props.disabled ? undefined : setNodeRef}
       style={style}
       {...attributes}
       {...listeners}

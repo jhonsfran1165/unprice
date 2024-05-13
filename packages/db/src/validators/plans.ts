@@ -17,3 +17,4 @@ export const planInsertBaseSchema = createInsertSchema(schema.plans, {
   })
 
 export type InsertPlan = z.infer<typeof planInsertBaseSchema>
+export type Plan = z.infer<typeof planSelectBaseSchema>

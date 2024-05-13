@@ -13,16 +13,16 @@ import {
   USAGE_MODES_MAP,
 } from "../utils"
 import { featureSelectBaseSchema } from "./features"
+import { planSelectBaseSchema } from "./plans"
+import { planVersionSelectBaseSchema } from "./planVersions"
+import { projectSelectBaseSchema } from "./project"
 
 const typeFeatureSchema = z.enum(FEATURE_TYPES)
 const paymentProviderSchema = z.enum(PAYMENT_PROVIDERS)
 const usageModeSchema = z.enum(USAGE_MODES)
 const aggregationMethodSchema = z.enum(AGGREGATION_METHODS)
 const tierModeSchema = z.enum(TIER_MODES)
-
-export type FeatureType = z.infer<typeof typeFeatureSchema>
-
-export type PaymentProvider = z.infer<typeof paymentProviderSchema>
+const unitSchema = z.coerce.number().int().min(1)
 
 export const planVersionFeatureMetadataSchema = z.object({
   externalId: z.string().optional(),
@@ -47,6 +47,7 @@ export const configTierSchema = z
     tierMode: tierModeSchema,
     tiers: z.array(tiersSchema),
     usageMode: usageModeSchema.optional(),
+    units: unitSchema.optional(),
   })
   .superRefine((data, ctx) => {
     const tiers = data.tiers
@@ -122,6 +123,7 @@ export const configUsageSchema = z
     aggregationMethod: aggregationMethodSchema,
     tierMode: tierModeSchema.optional(),
     tiers: z.array(tiersSchema).optional(),
+    units: unitSchema.optional(),
   })
   .superRefine((data, ctx) => {
     if (data.usageMode === USAGE_MODES_MAP.unit.code) {
@@ -130,6 +132,30 @@ export const configUsageSchema = z
           code: z.ZodIssueCode.custom,
           message: "Price is required when usage mode is unit",
           path: ["price"],
+          fatal: true,
+        })
+
+        return false
+      }
+    }
+
+    if (data.usageMode === USAGE_MODES_MAP.package.code) {
+      if (!data.price) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Price is required when usage mode is unit",
+          path: ["price"],
+          fatal: true,
+        })
+
+        return false
+      }
+
+      if (!data.units) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Units for the package is required",
+          path: ["unit"],
           fatal: true,
         })
 
@@ -222,6 +248,16 @@ export const configFlatSchema = z.object({
   usageMode: usageModeSchema.optional(),
   aggregationMethod: aggregationMethodSchema.optional(),
   tierMode: tierModeSchema.optional(),
+  units: unitSchema.optional(),
+})
+
+export const configPackageSchema = z.object({
+  tiers: z.array(tiersSchema).optional(),
+  price: priceSchema,
+  usageMode: usageModeSchema.optional(),
+  aggregationMethod: aggregationMethodSchema.optional(),
+  tierMode: tierModeSchema.optional(),
+  units: unitSchema,
 })
 
 export const configFeatureSchema = z.union([
@@ -272,8 +308,6 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
     featureId: true,
     planVersionId: true,
     featureType: true,
-    paymentProvider: true,
-    currency: true,
   })
   .transform((data) => {
     if (data.config) {
@@ -284,11 +318,23 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
           delete data.config.aggregationMethod
           delete data.config.tierMode
           delete data.config.usageMode
+          delete data.config.units
 
           return data
+
+        case FEATURE_TYPES_MAPS.package.code:
+          delete data.config.usageMode
+          delete data.config.tiers
+          delete data.config.aggregationMethod
+          delete data.config.tierMode
+          delete data.config.usageMode
+
+          return data
+
         case FEATURE_TYPES_MAPS.tier.code:
           delete data.config.price
           delete data.config.usageMode
+          delete data.config.units
 
           return data
 
@@ -300,6 +346,12 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
 
           if (data.config.usageMode === USAGE_MODES_MAP.tier.code) {
             delete data.config.price
+            delete data.config.units
+          }
+
+          if (data.config.usageMode === USAGE_MODES_MAP.package.code) {
+            delete data.config.tierMode
+            delete data.config.tiers
           }
 
           return data
@@ -319,6 +371,9 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
             break
           case FEATURE_TYPES_MAPS.tier.code:
             configTierSchema.parse(data.config)
+            break
+          case FEATURE_TYPES_MAPS.package.code:
+            configPackageSchema.parse(data.config)
             break
           case FEATURE_TYPES_MAPS.usage.code:
             // TODO: when usage mode is unit, price is required
@@ -347,15 +402,32 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
     return true
   })
 
-export type PlanVersionFeature = z.infer<
-  typeof planVersionFeatureInsertBaseSchema
->
-
 export const planVersionFeatureDragDropSchema =
   planVersionFeatureSelectBaseSchema.extend({
     feature: featureSelectBaseSchema,
   })
 
+export const planVersionFeatureExtendedSchema =
+  planVersionFeatureSelectBaseSchema.extend({
+    feature: featureSelectBaseSchema,
+    planVersion: planVersionSelectBaseSchema.extend({
+      plan: planSelectBaseSchema,
+    }),
+    project: projectSelectBaseSchema,
+  })
+
+export type PlanVersionFeature = z.infer<
+  typeof planVersionFeatureInsertBaseSchema
+>
+
+export type PlanVersionFeatureExtended = z.infer<
+  typeof planVersionFeatureExtendedSchema
+>
+
 export type PlanVersionFeatureDragDrop = z.infer<
   typeof planVersionFeatureDragDropSchema
 >
+
+export type FeatureType = z.infer<typeof typeFeatureSchema>
+
+export type PaymentProvider = z.infer<typeof paymentProviderSchema>

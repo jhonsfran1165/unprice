@@ -34,8 +34,12 @@ import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
-import { usePlanFeaturesList } from "../../_components/use-features"
+import {
+  useActivePlanVersion,
+  usePlanFeaturesList,
+} from "../../_components/use-features"
 import { FlatFormFields } from "./flat-form-fields"
+import { PackageFormFields } from "./package-form-fields"
 import { TierFormFields } from "./tier-form-fields"
 import { UsageFormFields } from "./usage-form-fields"
 
@@ -48,6 +52,9 @@ export function FeatureConfigForm({
 }) {
   const router = useRouter()
   const [_planFeatureList, setPlanFeatureList] = usePlanFeaturesList()
+
+  const [activePlanVersion] = useActivePlanVersion()
+
   const editMode = defaultValues.id ? true : false
 
   // we set all possible values for the form so react-hook-form don't complain
@@ -66,6 +73,7 @@ export function FeatureConfigForm({
       usageMode: defaultValues.config?.usageMode ?? "tier",
       aggregationMethod: defaultValues.config?.aggregationMethod ?? "sum",
       tierMode: defaultValues.config?.tierMode ?? "volume",
+      units: defaultValues.config?.units ?? 1,
     },
   }
 
@@ -113,8 +121,10 @@ export function FeatureConfigForm({
     }
   }
 
-  console.log("error", form.formState.errors)
-  console.log("getValues", form.getValues())
+  // TODO: add error handling here
+  if (!activePlanVersion) {
+    return null
+  }
 
   return (
     <Form {...form}>
@@ -279,9 +289,20 @@ export function FeatureConfigForm({
 
         <Separator />
 
-        {featureType === "flat" && <FlatFormFields form={form} />}
+        {featureType === "flat" && (
+          <FlatFormFields form={form} currency={activePlanVersion.currency} />
+        )}
 
-        {featureType === "usage" && <UsageFormFields form={form} />}
+        {featureType === "package" && (
+          <PackageFormFields
+            form={form}
+            currency={activePlanVersion.currency}
+          />
+        )}
+
+        {featureType === "usage" && (
+          <UsageFormFields form={form} currency={activePlanVersion.currency} />
+        )}
 
         {featureType === "tier" && <TierFormFields form={form} />}
 

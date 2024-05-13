@@ -8,7 +8,7 @@ import {
   AGGREGATION_METHODS,
   AGGREGATION_METHODS_MAP,
 } from "@builderai/db/utils"
-import type { PlanVersionFeature } from "@builderai/db/validators"
+import type { Currency, PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
@@ -36,8 +36,10 @@ import {
 
 export function PriceFormField({
   form,
+  currency,
 }: {
   form: UseFormReturn<PlanVersionFeature>
+  currency: Currency
 }) {
   return (
     <div className="w-full">
@@ -48,11 +50,10 @@ export function PriceFormField({
           <FormItem className="">
             <FormLabel>Price</FormLabel>
             <FormDescription>
-              Price of the feature in the selected currency of the plan (USD)
+              Price of the feature in the selected currency of the plan.
             </FormDescription>
             <div className="text-xs font-normal leading-snug">
-              This is the flat price of the feature over the period of the plan.
-              eg 100 usd per month. Price of 0 means the feature is free.
+              Prices can be set as decimal values. For example, $1.99.
             </div>
 
             <div className="flex flex-col items-center space-y-1 px-2">
@@ -67,7 +68,51 @@ export function PriceFormField({
                       "inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 bg-background-bg px-3 text-sm font-medium"
                     }
                   >
-                    {form.getValues("currency")}
+                    {currency}
+                  </div>
+                </div>
+              </FormControl>
+
+              <FormMessage className="self-start px-2" />
+            </div>
+          </FormItem>
+        )}
+      />
+    </div>
+  )
+}
+
+export function UnitsFormField({
+  form,
+}: {
+  form: UseFormReturn<PlanVersionFeature>
+}) {
+  return (
+    <div className="w-full">
+      <FormField
+        control={form.control}
+        name="config.units"
+        render={({ field }) => (
+          <FormItem className="">
+            <div className="flex flex-col items-center space-y-1 px-2">
+              <FormControl className="w-full">
+                <div className="flex flex-row items-center">
+                  <div
+                    className={
+                      "inline-flex h-9 items-center justify-center rounded-e-none rounded-s-md border border-r-0 bg-background-bg px-3 text-sm font-medium"
+                    }
+                  >
+                    per
+                  </div>
+                  <div className="flex-1">
+                    <Input {...field} className="rounded-none" />
+                  </div>
+                  <div
+                    className={
+                      "inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 bg-background-bg px-3 text-sm font-medium"
+                    }
+                  >
+                    units
                   </div>
                 </div>
               </FormControl>
@@ -94,10 +139,11 @@ export function AggregationMethodFormField({
         render={({ field }) => (
           <FormItem className="flex flex-col">
             <div className="">
-              <FormLabel>Aggreation Method</FormLabel>
+              <FormLabel>Aggregation Method</FormLabel>
               <FormDescription>Charge for metered usage by</FormDescription>
               <div className="text-xs font-normal leading-snug">
-                Different modes of charging for metered usage
+                Usage based features meters usage over a period of time. Select
+                the aggregation method for the feature.
               </div>
             </div>
             <div className="px-2">

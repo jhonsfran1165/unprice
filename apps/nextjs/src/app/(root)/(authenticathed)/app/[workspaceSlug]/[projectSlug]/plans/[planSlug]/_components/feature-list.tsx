@@ -14,7 +14,10 @@ import { useDebounce } from "~/lib/use-debounce"
 import { api } from "~/trpc/client"
 import { FeatureDialog } from "../../_components/feature-dialog"
 import { SortableFeature } from "../../_components/sortable-feature"
-import { usePlanFeaturesList } from "../../_components/use-features"
+import {
+  usePlanFeaturesList,
+  usePlanVersionFeatureOpen,
+} from "../../_components/use-features"
 
 interface FeatureListProps {
   featuresPromise: Promise<RouterOutputs["features"]["searchBy"]>
@@ -30,6 +33,8 @@ export function FeatureList({
   const filterDebounce = useDebounce(filter, 500)
 
   const [planVersionFeatureList] = usePlanFeaturesList()
+  // this avoid to drag and drop features when the planVersionFeature is open
+  const [planVersionFeatureOpen] = usePlanVersionFeatureOpen()
 
   const { data, isFetching } = api.features.searchBy.useQuery(
     {
@@ -51,7 +56,6 @@ export function FeatureList({
     (feature) => !planFeatureIds.includes(feature.id)
   )
 
-  console.log(planVersion)
   return (
     <>
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">
@@ -103,8 +107,6 @@ export function FeatureList({
                 planVersionId: planVersion.id,
                 featureId: feature.id,
                 featureType: "flat", // default type for featurePlan
-                paymentProvider: planVersion.paymentProvider,
-                currency: planVersion.currency,
                 feature: feature,
                 // no order
                 order: 0,
@@ -116,6 +118,7 @@ export function FeatureList({
 
               return (
                 <SortableFeature
+                  disabled={planVersionFeatureOpen}
                   key={index}
                   mode={"Feature"}
                   planFeatureVersion={planFeatureVersion}
