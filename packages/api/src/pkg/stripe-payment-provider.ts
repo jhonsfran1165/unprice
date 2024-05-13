@@ -17,7 +17,7 @@ export class StripePaymentProvider {
 
   public async createProduct(planVersionFeature: PlanVersionFeatureExtended) {
     // TODO: add app name to the product name
-    const productName = `App: ${planVersionFeature.project.name} - feature: ${planVersionFeature.feature.slug} from Builderai`
+    const productName = `${planVersionFeature.project.name} - ${planVersionFeature.feature.slug} from Builderai`
 
     // check if the product already exists
     try {
