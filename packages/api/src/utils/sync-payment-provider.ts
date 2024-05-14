@@ -1,7 +1,5 @@
 import { TRPCError } from "@trpc/server"
 
-import { and, eq } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
 import type { PlanVersion } from "@builderai/db/validators"
 
 import { StripePaymentProvider } from "../pkg/stripe-payment-provider"
@@ -29,11 +27,10 @@ export const syncPaymentProvider = async ({
       feature: true,
       project: true,
     },
-    where: (planVersionFeature, { and, eq, isNull }) =>
+    where: (planVersionFeature, { and, eq }) =>
       and(
         eq(planVersionFeature.planVersionId, planVersion.id),
-        eq(planVersionFeature.projectId, planVersion.projectId),
-        isNull(planVersionFeature.priceId)
+        eq(planVersionFeature.projectId, planVersion.projectId)
       ),
   })
 
@@ -84,23 +81,6 @@ export const syncPaymentProvider = async ({
     // create product and price in the payment provider
     await paymentProviderClient.createProduct(feature)
     const price = await paymentProviderClient.createPrice(feature)
-
-    // update the feature with the price id
-    await ctx.db
-      .update(schema.planVersionFeatures)
-      .set({
-        priceId: price?.id ?? null,
-        metadata: {
-          ...feature.metadata,
-          lastTimeSyncPaymentProvider: Date.now(),
-        },
-      })
-      .where(
-        and(
-          eq(schema.planVersionFeatures.id, feature.id),
-          eq(schema.planVersionFeatures.projectId, feature.projectId)
-        )
-      )
   }
 
   return {

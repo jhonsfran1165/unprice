@@ -3,7 +3,7 @@ import { Provider } from "jotai"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
-import PlanVersionActions from "../../_components/plan-version-actions"
+import { PlanVersionPublish } from "../../_components/plan-version-actions"
 
 export const runtime = "edge"
 
@@ -25,7 +25,7 @@ export default function PriceLayout(props: {
             title="Plan Version Settings"
             description="Manage different settings for this plan version."
             action={
-              <PlanVersionActions planVersionId={props.params.planVersionId} />
+              <PlanVersionPublish planVersionId={props.params.planVersionId} />
             }
           />
         }

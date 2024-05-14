@@ -192,7 +192,6 @@ export const planVersionFeatureRouter = createTRPCRouter({
         config,
         metadata,
         planVersionId,
-        priceId,
         order,
       } = opts.input
 
@@ -228,7 +227,6 @@ export const planVersionFeatureRouter = createTRPCRouter({
           ...(featureType && { featureType }),
           ...(config && { config }),
           ...(metadata && { metadata }),
-          ...(priceId && { priceId }),
           ...(order && { order }),
           updatedAt: new Date(),
         })

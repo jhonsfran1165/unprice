@@ -6,7 +6,6 @@ import { CURRENCIES, PLAN_BILLING_PERIODS } from "../utils"
 
 export const planVersionMetadataSchema = z.object({
   externalId: z.string().optional(),
-  lastTimeSyncPaymentProvider: z.number().optional(),
 })
 
 export const currencySchema = z.enum(CURRENCIES)

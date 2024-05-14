@@ -4,7 +4,6 @@ import {
   foreignKey,
   json,
   primaryKey,
-  text,
   unique,
 } from "drizzle-orm/pg-core"
 import type * as z from "zod"
@@ -21,7 +20,6 @@ import { versions } from "./planVersions"
 import { projects } from "./projects"
 
 // this table can be seen as the products configuration that a plan version has and the user can subscribe to
-// it has a provider and a priceId once the version of the plan is published
 // the payment provider is the same as the one in the plan version
 // we just add paymentProvider here because later on the user can subscribe to a set of features instead of the whole plan
 export const planVersionFeatures = pgTableProject(
@@ -33,8 +31,6 @@ export const planVersionFeatures = pgTableProject(
     featureId: cuid("feature_id").notNull(),
     // type of the feature - flat, tier, usage, etc.
     featureType: typeFeatureEnum("feature_type").notNull(),
-    // price Id of the payment provider for this feature
-    priceId: text("price_id"),
     // configuration of the feature
     config:
       json("features_config").$type<z.infer<typeof configFeatureSchema>>(),

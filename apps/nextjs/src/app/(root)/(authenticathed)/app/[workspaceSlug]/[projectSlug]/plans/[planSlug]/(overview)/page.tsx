@@ -38,6 +38,7 @@ import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import { PlanVersionForm } from "../_components/plan-version-form"
 import PlanHeader from "../../_components/plan-header"
+import { PlanVersionDuplicate } from "../../_components/plan-version-actions"
 
 export default async function PlanPage({
   params,
@@ -187,9 +188,11 @@ export default async function PlanPage({
                                       Edit version
                                     </DropdownMenuItem>
                                   </DialogTrigger>
-                                  {/* // TODO: duplicate version */}
-                                  <DropdownMenuItem>
-                                    Duplicate version
+                                  <DropdownMenuItem asChild>
+                                    <PlanVersionDuplicate
+                                      classNames="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-background-bgHover"
+                                      planVersionId={version.id}
+                                    />
                                   </DropdownMenuItem>
                                   <DropdownMenuItem>
                                     <Link
