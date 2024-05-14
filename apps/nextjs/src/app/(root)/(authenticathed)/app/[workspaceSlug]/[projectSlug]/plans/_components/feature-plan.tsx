@@ -143,7 +143,14 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                                 setActiveFeature(null)
                               }
 
-                              // delete feature
+                              if (planFeatureVersion.id) {
+                                // delete from plan
+                                void removePlanVersionFeature.mutateAsync({
+                                  id: planFeatureVersion.id,
+                                })
+                              }
+
+                              // delete feature from the list in the drag and drop
                               setPlanFeatures((features) => {
                                 const filteredFeatures = features.filter(
                                   (f) => f.featureId !== feature.id
@@ -153,10 +160,6 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                               })
 
                               setConfirmDelete(false)
-
-                              void removePlanVersionFeature.mutateAsync({
-                                id: planFeatureVersion.id,
-                              })
                             }}
                           >
                             <X className="h-4 w-4" />

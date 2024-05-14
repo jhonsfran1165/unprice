@@ -10,6 +10,7 @@ export const planVersionMetadataSchema = z.object({
 })
 
 export const currencySchema = z.enum(CURRENCIES)
+export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
 
 export const startCycleSchema = z.union([
   z.number().nonnegative(), // number of day from the start of the cycle
@@ -28,7 +29,8 @@ export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
   tags: z.array(z.string()),
   title: z.string().min(3).max(50),
   metadata: planVersionMetadataSchema,
-  billingPeriod: z.enum(PLAN_BILLING_PERIODS),
+  billingPeriod: billingPeriodSchema,
+  currency: currencySchema,
 })
   .partial({
     projectId: true,
@@ -60,3 +62,4 @@ export type PlanVersionMetadata = z.infer<typeof planVersionMetadataSchema>
 export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>
 export type PlanVersion = z.infer<typeof planVersionSelectBaseSchema>
 export type Currency = z.infer<typeof currencySchema>
+export type BillingPeriod = z.infer<typeof billingPeriodSchema>

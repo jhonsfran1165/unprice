@@ -51,7 +51,7 @@ const PlanVersionActions = ({ planVersionId }: { planVersionId: string }) => {
       }}
     >
       {/* // TODO: create a confetti animation or something in the first version published? */}
-      <Button variant={"primary"}>
+      <Button variant={"primary"} disabled={publishVersion.isPending}>
         Published
         {publishVersion.isPending && <LoadingAnimation className={"ml-2"} />}
       </Button>

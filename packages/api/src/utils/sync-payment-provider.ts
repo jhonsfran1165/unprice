@@ -79,6 +79,7 @@ export const syncPaymentProvider = async ({
   }
 
   // TODO what happens if something fails here?
+  // TODO: happens if this takes too long?
   for (const feature of planVersionFeatures) {
     // create product and price in the payment provider
     await paymentProviderClient.createProduct(feature)

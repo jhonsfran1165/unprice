@@ -4,8 +4,8 @@ import { startTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-import { CURRENCIES } from "@builderai/config"
 import {
+  CURRENCIES,
   PAYMENT_PROVIDERS,
   PLAN_BILLING_PERIODS,
   PLAN_TYPES,

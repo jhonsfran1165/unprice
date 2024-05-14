@@ -1,5 +1,10 @@
+import { APP_NAME } from "@builderai/config"
 import type { PlanVersionFeatureExtended } from "@builderai/db/validators"
-import { configFeatureSchema } from "@builderai/db/validators"
+import {
+  configFlatSchema,
+  configTierSchema,
+  configUsageSchema,
+} from "@builderai/db/validators"
 import type { Stripe } from "@builderai/stripe"
 import { stripe, StripeClient } from "@builderai/stripe"
 
@@ -15,50 +20,247 @@ export class StripePaymentProvider {
       : stripe
   }
 
+  public getProduct(id: string) {
+    return this.client.products.retrieve(id)
+  }
+
   public async createProduct(planVersionFeature: PlanVersionFeatureExtended) {
-    // TODO: add app name to the product name
-    const productName = `${planVersionFeature.project.name} - ${planVersionFeature.feature.slug} from Builderai`
+    const productName = `${planVersionFeature.project.name} - ${planVersionFeature.feature.slug} from ${APP_NAME}`
 
     // check if the product already exists
     try {
-      await this.client.products.retrieve(planVersionFeature.featureId)
+      await this.getProduct(planVersionFeature.featureId)
     } catch (error) {
       return this.client.products.create({
         id: planVersionFeature.featureId,
         name: productName,
-        type: "service",
-        description: planVersionFeature.feature.description ?? "",
+        type: "service", // TODO: do we need to change this?
+        description: planVersionFeature.feature.description!,
       })
     }
   }
 
-  public createPrice(planVersionFeature: PlanVersionFeatureExtended) {
-    switch (planVersionFeature.featureType) {
-      case "flat":
-        const config = configFeatureSchema.parse(planVersionFeature.config)
+  public getPrice(id: string) {
+    return this.client.prices.retrieve(id)
+  }
 
-        const { planType, billingPeriod } = planVersionFeature.planVersion
+  public listPrices(lookup_keys: string[], limit?: number) {
+    return this.client.prices.list({
+      lookup_keys,
+      limit,
+    })
+  }
+
+  public async createPrice(planVersionFeature: PlanVersionFeatureExtended) {
+    switch (planVersionFeature.featureType) {
+      case "flat": {
+        const {
+          featureId,
+          config,
+          id,
+          feature: { slug },
+          planVersion: { planType, billingPeriod, currency },
+        } = planVersionFeature
+
+        const { price } = configFlatSchema.parse(config)
+
+        // we need to transform price to cents without rounding
+        const priceInCents = Math.floor(parseFloat(price) * 100).toFixed(2)
+
+        try {
+          const priceExist = await this.listPrices([id], 1)
+          if (priceExist.data.length > 0) {
+            return priceExist.data[0]
+          }
+        } catch (error) {
+          // do nothing
+        }
 
         if (billingPeriod && planType === "recurring") {
-          // TODO: fix this price
-          const price = parseInt(config.price ?? "") * 100
-
-          // TODO: how to avoid creating the price multiple times?
           return this.client.prices.create({
-            product: planVersionFeature.featureId,
-            currency: planVersionFeature.planVersion.currency,
-            unit_amount: price,
+            nickname: `Flat price ${slug}`,
+            product: featureId,
+            currency: currency,
+            unit_amount_decimal: priceInCents,
             recurring: {
+              interval_count: 1,
               interval: billingPeriod,
             },
             metadata: {
-              planVersionFeatureId: planVersionFeature.id,
+              planVersionFeatureId: id,
             },
-            lookup_key: planVersionFeature.id,
+            lookup_key: id,
           })
         }
 
-        break
+        throw new Error("Error creating price for flat feature")
+      }
+      case "tier": {
+        const {
+          featureId,
+          config,
+          id,
+          feature: { slug },
+          planVersion: { planType, billingPeriod, currency },
+        } = planVersionFeature
+
+        const { tierMode, tiers } = configTierSchema.parse(config)
+
+        // we need to transform price to cents without rounding for each tier
+        const transformedTiersForStripe = tiers.map((tier) => {
+          return {
+            up_to: tier.lastUnit ?? ("inf" as const),
+            unit_amount_decimal: Math.floor(
+              parseFloat(tier.unitPrice) * 100
+            ).toFixed(2),
+            flat_amount_decimal: tier.flatPrice
+              ? Math.floor(parseFloat(tier.flatPrice) * 100).toFixed(2)
+              : undefined,
+          }
+        })
+
+        try {
+          const priceExist = await this.listPrices([id], 1)
+          if (priceExist.data.length > 0) {
+            return priceExist.data[0]
+          }
+        } catch (error) {
+          // do nothing
+        }
+
+        if (billingPeriod && planType === "recurring") {
+          return this.client.prices.create({
+            nickname: `Tiered price ${slug}`,
+            product: featureId,
+            currency: currency,
+            recurring: {
+              interval_count: 1,
+              interval: billingPeriod,
+              usage_type: "licensed", // automatically set the quantities when creating the subscription,
+            },
+            billing_scheme: "tiered",
+            tiers_mode: tierMode,
+            tiers: transformedTiersForStripe,
+            metadata: {
+              planVersionFeatureId: id,
+            },
+            expand: ["tiers"],
+            lookup_key: id,
+          })
+        }
+
+        throw new Error("Error creating price for flat feature")
+      }
+
+      case "usage": {
+        const {
+          featureId,
+          config,
+          id,
+          feature: { slug },
+          planVersion: { planType, billingPeriod, currency },
+        } = planVersionFeature
+
+        const { tierMode, tiers, usageMode, aggregationMethod, units, price } =
+          configUsageSchema.parse(config)
+
+        try {
+          const priceExist = await this.listPrices([id], 1)
+          if (priceExist.data.length > 0) {
+            return priceExist.data[0]
+          }
+        } catch (error) {
+          // do nothing
+        }
+
+        if (usageMode === "tier" && tiers && tiers.length > 0) {
+          // we need to transform price to cents without rounding for each tier
+          const transformedTiersForStripe = tiers.map((tier) => {
+            return {
+              up_to: tier.lastUnit ?? ("inf" as const),
+              unit_amount_decimal: Math.floor(
+                parseFloat(tier.unitPrice) * 100
+              ).toFixed(2),
+              flat_amount_decimal: tier.flatPrice
+                ? Math.floor(parseFloat(tier.flatPrice) * 100).toFixed(2)
+                : undefined,
+            }
+          })
+
+          if (billingPeriod && planType === "recurring") {
+            return this.client.prices.create({
+              nickname: `Usage tiered price ${slug}`,
+              product: featureId,
+              currency: currency,
+              recurring: {
+                interval: billingPeriod,
+                usage_type: "metered", // quantities are set at the end of the billing period as usage records
+                aggregate_usage: aggregationMethod,
+                interval_count: 1,
+              },
+              billing_scheme: "tiered",
+              tiers_mode: tierMode,
+              tiers: transformedTiersForStripe,
+              metadata: {
+                planVersionFeatureId: id,
+              },
+              expand: ["tiers"],
+              lookup_key: id,
+            })
+          }
+        }
+
+        if (usageMode === "unit" && price) {
+          if (billingPeriod && planType === "recurring") {
+            return this.client.prices.create({
+              nickname: `Usage per unit price ${slug}`,
+              product: featureId,
+              currency: currency,
+              recurring: {
+                interval: billingPeriod,
+                usage_type: "metered", // quantities are set at the end of the billing period as usage records
+                aggregate_usage: aggregationMethod,
+                interval_count: 1,
+              },
+              unit_amount_decimal: Math.floor(parseFloat(price) * 100).toFixed(
+                2
+              ),
+              billing_scheme: "per_unit",
+              metadata: {
+                planVersionFeatureId: id,
+              },
+              lookup_key: id,
+            })
+          }
+        }
+
+        if (usageMode === "package" && units && price) {
+          if (billingPeriod && planType === "recurring") {
+            return this.client.prices.create({
+              nickname: `Usage tiered price ${slug}`,
+              product: featureId,
+              currency: currency,
+              recurring: {
+                interval: billingPeriod,
+                usage_type: "metered", // quantities are set at the end of the billing period as usage records
+                aggregate_usage: aggregationMethod,
+                interval_count: 1,
+              },
+
+              unit_amount_decimal: Math.floor(parseFloat(price) * 100).toFixed(
+                2
+              ),
+              billing_scheme: "per_unit",
+              metadata: {
+                planVersionFeatureId: id,
+              },
+              lookup_key: id,
+            })
+          }
+        }
+
+        throw new Error("Error creating price for flat feature")
+      }
       default:
         throw new Error("Invalid feature type")
     }

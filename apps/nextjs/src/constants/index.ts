@@ -1,7 +1,5 @@
 import { env } from "../env.mjs"
 
-export const APP_NAME = "builderai"
-
 export const APP_BASE_DOMAIN = `app.${env.NEXT_PUBLIC_APP_DOMAIN}`
 
 export const APP_HOSTNAMES = new Set([

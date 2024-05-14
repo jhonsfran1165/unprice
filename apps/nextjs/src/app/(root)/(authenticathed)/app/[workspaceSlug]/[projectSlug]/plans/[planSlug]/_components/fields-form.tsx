@@ -201,8 +201,9 @@ export function TierFormField({
       <div className="mb-4 flex flex-col">
         <h4 className="my-auto block font-semibold">Tier Configuration</h4>
         <div className="text-xs font-normal leading-snug">
-          Configure the tiers for the feature, the price is based on the mode
-          usage you selected above.
+          {form.getValues("featureType") === "usage"
+            ? "Configure the tiers for the feature, the price will be calculated with the reported usage"
+            : "Configure the tiers for the feature, the price will be calculated when the subscription is created."}
         </div>
       </div>
 

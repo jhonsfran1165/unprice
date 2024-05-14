@@ -43,6 +43,14 @@ export const planVersionFeatureRouter = createTRPCRouter({
         })
       }
 
+      // if published we should not allow to add a feature
+      if (planVersionData.status === "published") {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Cannot add a feature to a published version",
+        })
+      }
+
       const featureData = await opts.ctx.db.query.features.findFirst({
         where: (feature, { eq, and }) =>
           and(eq(feature.id, featureId), eq(feature.projectId, project.id)),

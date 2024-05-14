@@ -99,7 +99,10 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
                 <div className="space-y-2">
                   {filteredFeatures.map((feature, i) => (
                     <SortableFeature
-                      disabled={planVersionFeatureOpen}
+                      disabled={
+                        planVersionFeatureOpen ||
+                        activePlanVersion?.status === "published"
+                      }
                       key={i}
                       mode="FeaturePlan"
                       planFeatureVersion={feature}

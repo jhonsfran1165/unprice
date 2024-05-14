@@ -81,6 +81,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./loading-animation": "./src/loading-animation.tsx",
+    "./alert": "./src/alert.tsx",
     "./skeleton": "./src/skeleton.tsx",
     "./switch": "./src/switch.tsx",
     "./sonner": "./src/sonner.tsx",

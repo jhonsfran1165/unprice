@@ -15,6 +15,7 @@ import { api } from "~/trpc/client"
 import { FeatureDialog } from "../../_components/feature-dialog"
 import { SortableFeature } from "../../_components/sortable-feature"
 import {
+  useActivePlanVersion,
   usePlanFeaturesList,
   usePlanVersionFeatureOpen,
 } from "../../_components/use-features"
@@ -35,6 +36,7 @@ export function FeatureList({
   const [planVersionFeatureList] = usePlanFeaturesList()
   // this avoid to drag and drop features when the planVersionFeature is open
   const [planVersionFeatureOpen] = usePlanVersionFeatureOpen()
+  const [activePlanVersion] = useActivePlanVersion()
 
   const { data, isFetching } = api.features.searchBy.useQuery(
     {
@@ -118,7 +120,10 @@ export function FeatureList({
 
               return (
                 <SortableFeature
-                  disabled={planVersionFeatureOpen}
+                  disabled={
+                    planVersionFeatureOpen ||
+                    activePlanVersion?.status === "published"
+                  }
                   key={index}
                   mode={"Feature"}
                   planFeatureVersion={planFeatureVersion}

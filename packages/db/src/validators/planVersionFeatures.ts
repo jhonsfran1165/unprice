@@ -43,7 +43,7 @@ export const tiersSchema = z.object({
 export const configTierSchema = z
   .object({
     price: priceSchema.optional(),
-    aggregationMethod: aggregationMethodSchema,
+    aggregationMethod: aggregationMethodSchema.optional(),
     tierMode: tierModeSchema,
     tiers: z.array(tiersSchema),
     usageMode: usageModeSchema.optional(),
@@ -264,6 +264,7 @@ export const configFeatureSchema = z.union([
   configFlatSchema,
   configTierSchema,
   configUsageSchema,
+  configPackageSchema,
 ])
 
 // TODO: use discriminated union
@@ -335,6 +336,7 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
           delete data.config.price
           delete data.config.usageMode
           delete data.config.units
+          delete data.config.aggregationMethod
 
           return data
 
