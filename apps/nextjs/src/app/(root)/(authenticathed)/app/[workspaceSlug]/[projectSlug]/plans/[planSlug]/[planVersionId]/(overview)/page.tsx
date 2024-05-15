@@ -9,23 +9,25 @@ import { Card } from "@builderai/ui/card"
 import { Separator } from "@builderai/ui/separator"
 
 import { api } from "~/trpc/server"
+import Stepper from "../_components/stepper"
+import VersionOverview from "../_components/version-overview"
 import { FeatureList } from "../../_components/feature-list"
 import { PlanFeatureList } from "../../_components/plan-feature-list"
 import DragDrop from "../../../_components/drag-drop"
 import { FeatureDialog } from "../../../_components/feature-dialog"
 import { ResizablePanelConfig } from "../../../_components/resizable"
-import Stepper from "./_components/stepper"
-import VersionOverview from "./_components/version-overview"
 
 export default async function OverviewVersionPage({
   params,
 }: {
   params: {
+    workspaceSlug: string
+    projectSlug: string
     planSlug: string
     planVersionId: string
   }
 }) {
-  const { planSlug, planVersionId } = params
+  const { planSlug, planVersionId, workspaceSlug, projectSlug } = params
 
   const { planVersion } = await api.planVersions.getById({
     id: planVersionId,
@@ -83,7 +85,11 @@ export default async function OverviewVersionPage({
             />
           </DragDrop>
         </Card>
-        <Stepper className="flex flex-col px-2 sm:px-4" />
+        <Stepper
+          className="flex flex-col px-2 sm:px-4"
+          step="overview"
+          baseUrl={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${planVersion.id}`}
+        />
       </div>
     </div>
   )

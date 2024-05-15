@@ -3,7 +3,7 @@ import { Provider } from "jotai"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
-import { PlanVersionPublish } from "../../_components/plan-version-actions"
+import StepperButton from "./_components/stepper-button"
 
 export const runtime = "edge"
 
@@ -25,7 +25,10 @@ export default function PriceLayout(props: {
             title="Plan Version Settings"
             description="Manage different settings for this plan version."
             action={
-              <PlanVersionPublish planVersionId={props.params.planVersionId} />
+              <StepperButton
+                planVersionId={props.params.planVersionId}
+                baseUrl={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}/${props.params.planVersionId}`}
+              />
             }
           />
         }
