@@ -61,8 +61,9 @@ export const featureRouter = createTRPCRouter({
           )
         )
         .returning()
+        .then((data) => data[0])
 
-      if (!deletedFeature?.[0]) {
+      if (!deletedFeature) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Error deleting feature",
@@ -70,7 +71,7 @@ export const featureRouter = createTRPCRouter({
       }
 
       return {
-        feature: deletedFeature[0],
+        feature: deletedFeature,
       }
     }),
   update: protectedActiveProjectProcedure
@@ -87,13 +88,6 @@ export const featureRouter = createTRPCRouter({
       const project = opts.ctx.project
 
       const featureData = await opts.ctx.db.query.features.findFirst({
-        with: {
-          project: {
-            columns: {
-              slug: true,
-            },
-          },
-        },
         where: (feature, { eq, and }) =>
           and(eq(feature.id, id), eq(feature.projectId, project.id)),
       })

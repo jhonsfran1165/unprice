@@ -46,8 +46,18 @@ export function PlanCard(props: {
     >
       <Card className="overflow-hidden hover:border-background-borderHover">
         <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
-          <div className="space-y-2">
-            <CardTitle className={"line-clamp-1"}>{plan.slug}</CardTitle>
+          <div className="space-y-4">
+            <CardTitle className={"line-clamp-1"}>
+              <div className="flex items-center space-x-3">
+                <span>{plan.slug}</span>
+                {plan.defaultPlan && (
+                  <div className="inline-flex items-center font-secondary text-xs font-semibold text-info">
+                    <span className="flex h-2 w-2 rounded-full bg-info" />
+                    <span className="ml-1">{"default"}</span>
+                  </div>
+                )}
+              </div>
+            </CardTitle>
             <CardDescription className="line-clamp-2 h-10">
               {plan.description}
             </CardDescription>

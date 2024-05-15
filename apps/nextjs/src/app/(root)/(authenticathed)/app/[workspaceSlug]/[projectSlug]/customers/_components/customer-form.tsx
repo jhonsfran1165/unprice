@@ -10,13 +10,14 @@ import { Button } from "@builderai/ui/button"
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import { Separator } from "@builderai/ui/separator"
+import { Textarea } from "@builderai/ui/text-area"
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"
@@ -24,7 +25,7 @@ import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export function UserForm({
+export function CustomerForm({
   setDialogOpen,
   defaultValues,
 }: {
@@ -56,7 +57,7 @@ export function UserForm({
     defaultValues: defaultValues,
   })
 
-  const createCustomer = api.subscriptions.createCustomer.useMutation({
+  const createCustomer = api.customers.create.useMutation({
     onSuccess: ({ customer }) => {
       form.reset(customer)
       toastAction("saved")
@@ -65,17 +66,26 @@ export function UserForm({
     },
   })
 
-  // TODO: add update customer
-  const updateCustomer = api.subscriptions.createCustomer.useMutation({
+  const updateCustomer = api.customers.update.useMutation({
     onSuccess: ({ customer }) => {
       form.reset(customer)
       toastAction("updated")
       setDialogOpen?.(false)
+
+      // Only needed when the form is inside a uncontrolled dialog - normally updates
+      // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+      if (!setDialogOpen) {
+        const escKeyEvent = new KeyboardEvent("keydown", {
+          key: "Escape",
+        })
+        document.dispatchEvent(escKeyEvent)
+      }
+
       router.refresh()
     },
   })
 
-  const deleteCustomer = api.subscriptions.deleteCustomer.useMutation({
+  const deleteCustomer = api.customers.remove.useMutation({
     onSuccess: () => {
       toastAction("deleted")
       form.reset()
@@ -112,43 +122,53 @@ export function UserForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6">
-        <div className="flex justify-between gap-2">
-          <div className="flex-1">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+        <div className="space-y-8">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-          <div className="flex-1">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>email</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="email" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>email</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="email" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea {...field} value={field.value ?? ""} />
+                </FormControl>
+                <FormDescription>
+                  Enter a short description of the feature.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
-        <Separator />
-
-        <div className="mt-8 flex justify-end space-x-2">
+        <div className="mt-8 flex justify-end space-x-4">
           {editMode && (
             <ConfirmAction
               confirmAction={() => {
@@ -156,10 +176,7 @@ export function UserForm({
                 onDelete()
               }}
             >
-              <Button
-                variant={"destructive"}
-                disabled={deleteCustomer.isPending}
-              >
+              <Button variant={"link"} disabled={deleteCustomer.isPending}>
                 Delete
               </Button>
             </ConfirmAction>

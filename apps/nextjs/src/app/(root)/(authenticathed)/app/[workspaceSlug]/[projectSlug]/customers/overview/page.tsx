@@ -9,8 +9,6 @@ export default async function ProjectUsersPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
   searchParams: Record<string, string | string[] | undefined>
 }) {
-  const { projectSlug } = props.params
-
   await userCanAccessProject({
     projectSlug: props.params.projectSlug,
   })
@@ -28,7 +26,7 @@ export default async function ProjectUsersPage(props: {
       (filter.toDate = parsed.data.toDate)
   }
 
-  const { customers } = await api.subscriptions.listCustomersByProject(filter)
+  const { customers } = await api.customers.listByActiveProject(filter)
 
   return (
     <div className="flex flex-col">

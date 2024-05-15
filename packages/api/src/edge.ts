@@ -1,5 +1,6 @@
 import { apiKeyRouter } from "./router/edge/apikeys"
 import { authRouter } from "./router/edge/auth"
+import { customersRouter } from "./router/edge/customers"
 import { domainRouter } from "./router/edge/domains"
 import { featureRouter } from "./router/edge/features"
 import { planRouter } from "./router/edge/plans"
@@ -24,4 +25,5 @@ export const edgeRouter = createTRPCRouter({
   subscriptions: subscriptionRouter,
   domains: domainRouter,
   stripe: stripeRouter,
+  customers: customersRouter,
 })

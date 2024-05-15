@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation"
 import { z } from "zod"
 
 import type { InsertPlan } from "@builderai/db/validators"
-import {
-  planInsertBaseSchema,
-  planSelectBaseSchema,
-} from "@builderai/db/validators"
+import { planInsertBaseSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -20,6 +17,7 @@ import {
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
+import { Switch } from "@builderai/ui/switch"
 import { Textarea } from "@builderai/ui/text-area"
 
 import { ConfirmAction } from "~/components/confirm-action"
@@ -40,7 +38,7 @@ export function PlanForm({
   const planExist = api.plans.exist.useMutation()
 
   const formSchema = editMode
-    ? planSelectBaseSchema
+    ? planInsertBaseSchema
     : planInsertBaseSchema.extend({
         slug: z
           .string()
@@ -151,9 +149,31 @@ export function PlanForm({
                   <Textarea {...field} value={field.value ?? ""} />
                 </FormControl>
                 <FormDescription>
-                  Enter a short description of the feature.
+                  Enter a short description of the plan.
                 </FormDescription>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="defaultPlan"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Default plan</FormLabel>
+                  <FormDescription>
+                    Mark this plan as the default so that new users are
+                    automatically assigned to it. Usually this is the free plan.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value ?? false}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
               </FormItem>
             )}
           />

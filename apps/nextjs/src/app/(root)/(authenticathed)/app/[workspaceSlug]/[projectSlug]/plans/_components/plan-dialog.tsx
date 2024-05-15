@@ -37,6 +37,7 @@ export function PlanDialog({
               slug: "",
               description: "",
               active: true,
+              defaultPlan: false,
             }
           }
           setDialogOpen={setDialogOpen}

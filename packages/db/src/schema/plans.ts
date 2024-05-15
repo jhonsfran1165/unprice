@@ -1,8 +1,10 @@
 import { relations } from "drizzle-orm"
 import { boolean, json, primaryKey, text, unique } from "drizzle-orm/pg-core"
+import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
 import { projectID, timestamps } from "../utils/sql"
+import type { planMetadataSchema } from "../validators"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
 
@@ -20,9 +22,7 @@ export const plans = pgTableProject(
     // description of the plan
     description: text("description"),
     // metadata probably will be useful to save external data, etc.
-    metadata: json("metadata").$type<{
-      externalId?: string
-    }>(),
+    metadata: json("metadata").$type<z.infer<typeof planMetadataSchema>>(),
     // whether this is the default plan for the project where all the users are subscribed by default
     // this is useful for the free plan
     // all users will fall back to this plan if they don't have a subscription or they downgrade their plan

@@ -3,9 +3,16 @@ import { z } from "zod"
 
 import * as schema from "../schema"
 
-export const planSelectBaseSchema = createSelectSchema(schema.plans)
+export const planMetadataSchema = z.object({
+  externalId: z.string().optional(),
+})
+
+export const planSelectBaseSchema = createSelectSchema(schema.plans, {
+  metadata: planMetadataSchema,
+})
 
 export const planInsertBaseSchema = createInsertSchema(schema.plans, {
+  metadata: planMetadataSchema,
   slug: z.string().min(3, "Slug must be at least 3 characters"),
 })
   .partial({

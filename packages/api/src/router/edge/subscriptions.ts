@@ -7,7 +7,7 @@ import * as utils from "@builderai/db/utils"
 import type { PlanVersion, Subscription } from "@builderai/db/validators"
 import {
   createSubscriptionSchema,
-  customerInsertSchema,
+  customerInsertBaseSchema,
   customerSelectSchema,
   planVersionSelectBaseSchema,
   searchDataParamsSchema,
@@ -105,7 +105,7 @@ export const subscriptionRouter = createTRPCRouter({
       return subscriptionData?.[0]
     }),
   createCustomer: protectedActiveProjectAdminProcedure
-    .input(customerInsertSchema)
+    .input(customerInsertBaseSchema)
     .output(
       z.object({
         customer: customerSelectSchema,

@@ -21,6 +21,7 @@
     "clean": "rm -rf .turbo node_modules",
     "generate:local": "pnpm with-env drizzle-kit generate --config=local.config.ts",
     "migrate:local": "pnpm with-env drizzle-kit migrate --config=local.config.ts",
+    "introspect:local": "pnpm with-env drizzle-kit introspect --config=local.config.ts",
     "generate:neon": "pnpm with-env drizzle-kit generate --config=neon.config.ts",
     "generate:custom": "pnpm with-env drizzle-kit generate --config=custom.config.ts",
     "push:local": "pnpm with-env drizzle-kit push --config=local.config.ts",

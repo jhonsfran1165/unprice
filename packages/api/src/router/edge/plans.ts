@@ -26,10 +26,24 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { slug, description } = opts.input
+      const { slug, description, defaultPlan } = opts.input
       const project = opts.ctx.project
 
       const planId = utils.newId("plan")
+
+      if (defaultPlan) {
+        const defaultPlanData = await opts.ctx.db.query.plans.findFirst({
+          where: (plan, { eq, and }) =>
+            and(eq(plan.projectId, project.id), eq(plan.defaultPlan, true)),
+        })
+
+        if (defaultPlanData) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "There is already a default plan for this project",
+          })
+        }
+      }
 
       const planData = await opts.ctx.db
         .insert(schema.plans)
@@ -39,6 +53,7 @@ export const planRouter = createTRPCRouter({
           projectId: project.id,
           description,
           active: true,
+          defaultPlan: defaultPlan ?? false,
         })
         .returning()
         .then((planData) => {
@@ -110,7 +125,7 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { id, description, active } = opts.input
+      const { id, description, active, defaultPlan } = opts.input
       const project = opts.ctx.project
 
       const planData = await opts.ctx.db.query.plans.findFirst({
@@ -132,6 +147,19 @@ export const planRouter = createTRPCRouter({
         })
       }
 
+      if (defaultPlan) {
+        const defaultPlanData = await opts.ctx.db.query.plans.findFirst({
+          where: (plan, { eq, and }) =>
+            and(eq(plan.projectId, project.id), eq(plan.defaultPlan, true)),
+        })
+
+        if (defaultPlanData?.id !== id) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "There is already a default plan for this project",
+          })
+        }
+      }
       // TODO: is it a good idea to let the user update the plan?
       // maybe we should think what happen if the user update the plan and there are versions
       // that are not compatible with the new plan. This is also a good reason to have a version as a snapshot
@@ -142,6 +170,7 @@ export const planRouter = createTRPCRouter({
         .set({
           description,
           active,
+          defaultPlan: defaultPlan ?? false,
           updatedAt: new Date(),
         })
         .where(

@@ -11,9 +11,9 @@ import {
   DialogTrigger,
 } from "@builderai/ui/dialog"
 
-import { UserForm } from "./user-form"
+import { CustomerForm } from "./customer-form"
 
-export function UserDialog({
+export function CustomerDialog({
   defaultValues,
   children,
 }: {
@@ -31,12 +31,12 @@ export function UserDialog({
           <DialogTitle>{"Feature Data"}</DialogTitle>
         </DialogHeader>
 
-        <UserForm
+        <CustomerForm
           defaultValues={
             defaultValues ?? {
               email: "",
               name: "",
-              id: "",
+              description: "",
             }
           }
           setDialogOpen={setDialogOpen}
