@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { z } from "zod"
 
 import type { InsertCustomer } from "@builderai/db/validators"
-import { customerInsertSchema } from "@builderai/db/validators"
+import { customerInsertBaseSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -33,13 +33,12 @@ export function UserForm({
 }) {
   const router = useRouter()
   const editMode = defaultValues.id ? true : false
-  // TODO: change this
   const customerExist = api.plans.exist.useMutation()
 
   // async validation only when creating a new plan
   const formSchema = editMode
-    ? customerInsertSchema
-    : customerInsertSchema.extend({
+    ? customerInsertBaseSchema
+    : customerInsertBaseSchema.extend({
         email: z
           .string()
           .min(3)

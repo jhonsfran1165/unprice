@@ -1,8 +1,10 @@
 import { relations } from "drizzle-orm"
-import { index, primaryKey, text, unique } from "drizzle-orm/pg-core"
+import { index, json, primaryKey, text, unique } from "drizzle-orm/pg-core"
+import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
 import { projectID, timestamps } from "../utils/sql"
+import type { customerMetadataSchema } from "../validators"
 import { projects } from "./projects"
 
 export const customers = pgTableProject(
@@ -12,14 +14,9 @@ export const customers = pgTableProject(
     ...timestamps,
     email: text("email").notNull(),
     name: text("name").notNull(),
-    // payment info
-    // {
-    // stripeCustomerId
-    // }
+    description: text("description"),
+    metadata: json("metadata").$type<z.infer<typeof customerMetadataSchema>>(),
     // beta features
-    // payment config - stripe integration
-    // metadata
-    // external id - external aliases
   },
   (table) => ({
     email: index("email").on(table.email),

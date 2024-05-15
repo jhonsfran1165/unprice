@@ -20,20 +20,5 @@ export const featureInsertBaseSchema = createInsertSchema(schema.features, {
   projectId: true,
 })
 
-export const updateFeatureSchema = featureSelectBaseSchema.pick({
-  id: true,
-  title: true,
-  type: true,
-})
-
-export const deleteFeatureSchema = featureInsertBaseSchema
-  .pick({
-    id: true,
-  })
-  .extend({
-    projectSlug: z.string(),
-  })
-
 export type InsertFeature = z.infer<typeof featureInsertBaseSchema>
-export type UpdateFeature = z.infer<typeof updateFeatureSchema>
 export type Feature = z.infer<typeof featureSelectBaseSchema>

@@ -8,7 +8,11 @@ export default defineConfig({
     url: process.env.DATABASE_URL_MIGRATOR_LOCAL!,
   },
   migrations: {
-    table: "migrations",
+    table: "__drizzle_migrations",
+    schema: "drizzle",
+  },
+  introspect: {
+    casing: "preserve",
   },
   tablesFilter: ["builderai_*"],
   verbose: true,

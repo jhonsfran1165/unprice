@@ -41,6 +41,10 @@ export const workspaces = pgTableProject(
     // if null, you should fall back to end of month
     billingPeriodEnd: timestamp("billing_period_end", { mode: "date" }),
     plan: plansEnum("legacy_plans").default("FREE").notNull(),
+    /**
+     * if the workspace is disabled, all API requests will be rejected
+     */
+    //  enabled: boolean("enabled").notNull().default(true),
   },
   (_table) => ({})
 )
