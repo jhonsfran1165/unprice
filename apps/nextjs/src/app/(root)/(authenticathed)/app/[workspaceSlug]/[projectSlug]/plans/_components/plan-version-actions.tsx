@@ -11,7 +11,9 @@ import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 import { usePlanFeaturesList } from "./use-features"
 
-const PlanVersionPublish = ({ planVersionId }: { planVersionId: string }) => {
+const PlanVersionPublish: React.FC<{ planVersionId: string }> = ({
+  planVersionId,
+}) => {
   const router = useRouter()
   const [planFeatures] = usePlanFeaturesList()
 
@@ -59,13 +61,10 @@ const PlanVersionPublish = ({ planVersionId }: { planVersionId: string }) => {
   )
 }
 
-const PlanVersionDuplicate = ({
-  planVersionId,
-  classNames,
-}: {
+const PlanVersionDuplicate: React.FC<{
   planVersionId: string
   classNames?: string
-}) => {
+}> = ({ planVersionId, classNames }) => {
   const router = useRouter()
 
   const duplicateVersion = api.planVersions.duplicate.useMutation({

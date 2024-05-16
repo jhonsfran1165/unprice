@@ -453,6 +453,8 @@ export const planVersionRouter = createTRPCRouter({
         .set({
           status: "published",
           updatedAt: new Date(),
+          publishedAt: new Date(),
+          publishedBy: opts.ctx.userId,
         })
         .where(and(eq(schema.versions.id, planVersionData.id)))
         .returning()

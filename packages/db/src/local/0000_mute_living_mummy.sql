@@ -267,24 +267,17 @@ CREATE TABLE IF NOT EXISTS "builderai_subscriptions" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"customers_id" text NOT NULL,
-	"entitlements" json DEFAULT '[]'::json,
-	"trials_end" date,
+	"plan_version_id" text NOT NULL,
+	"trial_ends" date,
+	"trial_days" integer DEFAULT 0,
 	"start_date" date,
 	"end_date" date,
 	"auto_renew" boolean DEFAULT true,
-	"billing_period" text NOT NULL,
-	"start_cycle" text NOT NULL,
-	"grace_period" integer DEFAULT 0,
-	"type" text NOT NULL,
-	"currency" text NOT NULL,
-	"payment_provider_id" text NOT NULL,
 	"collection_method" text DEFAULT 'charge_automatically',
 	"is_new" boolean DEFAULT true,
 	"metadata" json DEFAULT '{}'::json,
-	"plan_changed" boolean DEFAULT false,
 	"status" "subscription_status" DEFAULT 'active',
-	"item_type" text NOT NULL,
-	"item_id" text NOT NULL,
+	"items" json,
 	CONSTRAINT "subscriptions_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
@@ -442,6 +435,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "builderai_subscriptions" ADD CONSTRAINT "subscriptions_planversion_id_fkey" FOREIGN KEY ("plan_version_id","project_id") REFERENCES "public"."builderai_plan_versions"("id","project_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "builderai_invites" ADD CONSTRAINT "builderai_invites_workspace_id_builderai_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."builderai_workspaces"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -469,4 +468,3 @@ CREATE INDEX IF NOT EXISTS "key" ON "builderai_apikeys" ("key");--> statement-br
 CREATE INDEX IF NOT EXISTS "email" ON "builderai_customers" ("email");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "name" ON "builderai_domains" ("name");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "slug_index" ON "builderai_projects" ("slug");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "unique_active_subscription" ON "builderai_subscriptions" ("customers_id");

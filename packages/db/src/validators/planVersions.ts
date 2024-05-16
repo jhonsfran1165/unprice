@@ -3,6 +3,8 @@ import * as z from "zod"
 
 import * as schema from "../schema"
 import { CURRENCIES, PLAN_BILLING_PERIODS } from "../utils"
+import { featureSelectBaseSchema } from "./features"
+import { planVersionFeatureSelectBaseSchema } from "./planVersionFeatures"
 
 export const planVersionMetadataSchema = z.object({
   externalId: z.string().optional(),
@@ -56,9 +58,18 @@ export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
     return true
   })
 
+export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
+  planVersionFeatures: z.array(
+    planVersionFeatureSelectBaseSchema.extend({
+      feature: featureSelectBaseSchema,
+    })
+  ),
+})
+
 export type StartCycleType = z.infer<typeof startCycleSchema>
 export type PlanVersionMetadata = z.infer<typeof planVersionMetadataSchema>
 export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>
 export type PlanVersion = z.infer<typeof planVersionSelectBaseSchema>
 export type Currency = z.infer<typeof currencySchema>
 export type BillingPeriod = z.infer<typeof billingPeriodSchema>
+export type PlanVersionExtended = z.infer<typeof planVersionExtendedSchema>

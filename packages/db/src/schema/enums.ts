@@ -46,3 +46,12 @@ export const planBillingPeriodEnum = pgEnum(
 )
 export const planTypeEnum = pgEnum("plan_type", PLAN_TYPES)
 export const whenToBillEnum = pgEnum("when_to_bill", WHEN_TO_BILLING)
+export const collectionMethodEnum = pgEnum("collection_method", [
+  "charge_automatically",
+  "send_invoice",
+])
+
+export const typeSubscriptionEnum = pgEnum("subscription_type", [
+  "plan",
+  "addon",
+])

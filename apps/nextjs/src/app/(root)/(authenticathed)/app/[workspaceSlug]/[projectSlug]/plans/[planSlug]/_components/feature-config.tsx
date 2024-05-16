@@ -24,11 +24,11 @@ export function FeatureConfig({
                   {activeFeature.feature.title}
                 </div>
                 <div className="line-clamp-1 text-xs">
-                  slug: <b>{activeFeature.feature.slug}</b>
+                  <b>slug:</b> {activeFeature.feature.slug}
                 </div>
-                <div className="line-clamp-1 text-xs">
-                  description:{" "}
-                  <b>{activeFeature.feature.description ?? "No description"}</b>
+                <div className="text-xs">
+                  <b>description: </b>
+                  {activeFeature.feature.description ?? "No description"}
                 </div>
               </div>
             </div>
