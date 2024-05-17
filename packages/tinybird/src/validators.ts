@@ -1,5 +1,83 @@
 import * as z from "zod"
 
+export type MaybeArray<T> = T | T[]
+
+/**
+ * `t` has the format `2021-01-01 00:00:00`
+ *
+ * If we transform it as is, we get `1609459200000` which is `2021-01-01 01:00:00` due to fun timezone stuff.
+ * So we split the string at the space and take the date part, and then parse that.
+ */
+export const dateToUnixMilli = z
+  .string()
+  .transform((t) => new Date(t.split(" ").at(0) ?? t).getTime())
+
+export const featureVerificationSchemaV1 = z.object({
+  workspaceId: z.string(),
+  projectId: z.string(),
+  planVersionFeatureId: z.string(),
+  featureId: z.string(),
+  subscriptionId: z.string(),
+  customerId: z.string(),
+  planVersionId: z.string(),
+  deniedReason: z
+    .enum([
+      "SUBSCRIPTION_EXPIRED",
+      "SUBSCRIPTION_NOT_FOUND",
+      "SUBSCRIPTION_NOT_ACTIVE",
+      "RATE_LIMITED",
+      "USAGE_EXCEEDED",
+      "NOT_FOUND",
+      "INTERNAL_SERVER_ERROR",
+    ])
+    .optional(),
+  time: z.number(),
+  ipAddress: z.string().default(""),
+  userAgent: z.string().default(""),
+  latency: z.number().optional(),
+})
+
+export const auditLogSchemaV1 = z.object({
+  /**
+   * The workspace owning this audit log
+   */
+  workspaceId: z.string(),
+
+  /**
+   * Buckets are used as namespaces for different logs belonging to a single workspace
+   */
+  bucket: z.string(),
+  auditLogId: z.string(),
+  event: z.string(),
+  description: z.string().optional(),
+  time: z.number(),
+  meta: z
+    .record(z.union([z.string(), z.number(), z.boolean(), z.null()]))
+    .optional(),
+  actor: z.object({
+    type: z.string(),
+    id: z.string(),
+    name: z.string().optional(),
+    meta: z
+      .record(z.union([z.string(), z.number(), z.boolean(), z.null()]))
+      .optional(),
+  }),
+  resources: z.array(
+    z.object({
+      type: z.string(),
+      id: z.string(),
+      name: z.string().optional(),
+      meta: z
+        .record(z.union([z.string(), z.number(), z.boolean(), z.null()]))
+        .optional(),
+    })
+  ),
+  context: z.object({
+    location: z.string(),
+    userAgent: z.string().optional(),
+  }),
+})
+
 export const analyticApiSchema = z.object({
   action: z.string().min(1, {
     message: "action is required",

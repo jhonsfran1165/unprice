@@ -21,7 +21,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@chronark/zod-bird": "^0.3.3",
     "@t3-oss/env-nextjs": "0.9.1",
     "zod": "^3.23.8"
   },
@@ -29,6 +28,7 @@
     "@builderai/eslint-config": "^0.2.0",
     "@builderai/prettier-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
+    "@chronark/zod-bird": "^0.3.9",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "typescript": "^5.3.3"

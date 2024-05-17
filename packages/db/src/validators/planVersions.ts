@@ -1,10 +1,8 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 
-import * as schema from "../schema"
+import { versions } from "../schema/planVersions"
 import { CURRENCIES, PLAN_BILLING_PERIODS } from "../utils"
-import { featureSelectBaseSchema } from "./features"
-import { planVersionFeatureSelectBaseSchema } from "./planVersionFeatures"
 
 export const planVersionMetadataSchema = z.object({
   externalId: z.string().optional(),
@@ -19,13 +17,13 @@ export const startCycleSchema = z.union([
   z.null(), // null means the first day of the month
 ])
 
-export const planVersionSelectBaseSchema = createSelectSchema(schema.versions, {
+export const planVersionSelectBaseSchema = createSelectSchema(versions, {
   startCycle: startCycleSchema,
   tags: z.array(z.string()),
   metadata: planVersionMetadataSchema,
 })
 
-export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
+export const versionInsertBaseSchema = createInsertSchema(versions, {
   startCycle: startCycleSchema,
   tags: z.array(z.string()),
   title: z.string().min(3).max(50),
@@ -58,18 +56,9 @@ export const versionInsertBaseSchema = createInsertSchema(schema.versions, {
     return true
   })
 
-export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
-  planVersionFeatures: z.array(
-    planVersionFeatureSelectBaseSchema.extend({
-      feature: featureSelectBaseSchema,
-    })
-  ),
-})
-
 export type StartCycleType = z.infer<typeof startCycleSchema>
 export type PlanVersionMetadata = z.infer<typeof planVersionMetadataSchema>
 export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>
 export type PlanVersion = z.infer<typeof planVersionSelectBaseSchema>
 export type Currency = z.infer<typeof currencySchema>
 export type BillingPeriod = z.infer<typeof billingPeriodSchema>
-export type PlanVersionExtended = z.infer<typeof planVersionExtendedSchema>

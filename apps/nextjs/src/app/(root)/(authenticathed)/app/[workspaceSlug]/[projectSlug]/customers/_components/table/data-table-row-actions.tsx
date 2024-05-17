@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import type { Row } from "@tanstack/react-table"
 import { MoreHorizontal } from "lucide-react"
 
@@ -55,56 +55,48 @@ export function DataTableRowActions<TData>({
 }: DataTableRowActionsProps<TData>) {
   const customer = customerSelectSchema.parse(row.original)
   const router = useRouter()
-  const projectSlug = useParams().projectSlug as string
 
   const [open, setIsOpen] = React.useState(false)
-  const [selectedPlan, setSelectedPlan] = React.useState<string | null>(null)
+  const [selectedPlanVersionId, setSelectedPlanPlanVersionId] =
+    React.useState<string>()
   const [alertOpen, setAlertOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
 
-  const { data } = api.plans.listByActiveProject.useQuery({})
-  const deleteUser = api.subscriptions.deleteCustomer.useMutation()
-  const createPlanVersion = api.subscriptions.create.useMutation()
+  const { data, isLoading } = api.plans.listByActiveProject.useQuery({})
+
+  const removeCustomer = api.customers.remove.useMutation({
+    onSuccess: () => {
+      toastAction("deleted")
+      setAlertOpen(false)
+      router.refresh()
+    },
+  })
+
+  const createPlanVersion = api.subscriptions.create.useMutation({
+    onSuccess: () => {
+      toastAction("saved")
+      setAlertOpen(false)
+      router.refresh()
+    },
+  })
 
   function onDelete() {
-    startTransition(async () => {
-      try {
-        if (!customer.id) return
-        await deleteUser.mutateAsync({ id: customer.id, projectSlug })
-        toastAction("deleted")
-        router.refresh()
-        setAlertOpen(false)
-      } catch (error) {
-        console.error(error)
-        toastAction("error")
-      }
+    startTransition(() => {
+      void removeCustomer.mutateAsync({ id: customer.id })
     })
   }
 
   function onChangePlan() {
     startTransition(async () => {
-      try {
-        if (!selectedPlan) {
-          toastAction("error")
-          return
-        }
-
-        const [planId, planVersionId] = selectedPlan.split("*")
-
-        await createPlanVersion.mutateAsync({
-          planId: planId ?? "",
-          customerId: customer.id,
-          planVersionId: planVersionId ?? "",
-          projectSlug,
-        })
-
-        toastAction("success")
-        router.refresh()
-        setIsOpen(false)
-      } catch (error) {
-        console.error(error)
-        toastAction("error")
+      if (!selectedPlanVersionId) {
+        toastAction("error", "Please select a plan")
+        return
       }
+
+      await createPlanVersion.mutateAsync({
+        customerId: customer.id,
+        planVersionId: selectedPlanVersionId ?? "",
+      })
     })
   }
 
@@ -148,35 +140,34 @@ export function DataTableRowActions<TData>({
           </DialogHeader>
           <Select
             onValueChange={(data) => {
-              setSelectedPlan(data)
+              setSelectedPlanPlanVersionId(data)
             }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select a verified email to display" />
             </SelectTrigger>
             <SelectContent>
-              {data?.plans?.length === 0 && (
-                <SelectItem value="0" disabled>
-                  No plans available
-                </SelectItem>
-              )}
+              {data?.plans?.length === 0 ||
+                (isLoading && (
+                  <SelectItem value="0" disabled>
+                    No plans available
+                  </SelectItem>
+                ))}
               {data?.plans?.map((plan) => {
+                if (plan.versions.length === 0) {
+                  return null
+                }
+
                 return (
                   <SelectGroup key={plan.id}>
                     <SelectLabel>{plan.slug}</SelectLabel>
-                    {plan.versions
-                      .filter((version) => version.status === "published")
-                      .map((version) => {
-                        const planAndVersionValue = `${plan.id}*${version.id}`
-                        return (
-                          <SelectItem
-                            key={version.id}
-                            value={planAndVersionValue}
-                          >
-                            {plan.slug}
-                          </SelectItem>
-                        )
-                      })}
+                    {plan.versions.map((version) => {
+                      return (
+                        <SelectItem key={version.id} value={version.id}>
+                          {`${version.title} - ${version.currency}`}
+                        </SelectItem>
+                      )
+                    })}
                   </SelectGroup>
                 )
               })}

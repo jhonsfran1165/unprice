@@ -13,7 +13,7 @@ import { cuid, projectID, timestamps } from "../utils/sql"
 import type {
   configFeatureSchema,
   planVersionFeatureMetadataSchema,
-} from "../validators"
+} from "../validators/planVersionFeatures"
 import { typeFeatureEnum } from "./enums"
 import { features } from "./features"
 import { versions } from "./planVersions"

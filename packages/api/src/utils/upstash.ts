@@ -1,6 +1,8 @@
 import { Ratelimit } from "@upstash/ratelimit"
 import { Redis } from "@upstash/redis"
 
+import type { SubscriptionExtended } from "@builderai/db/validators"
+
 import { env } from "../env.mjs"
 
 // Initiate Redis instance by connecting to REST URL
@@ -28,4 +30,12 @@ export const ratelimit = (
     analytics: true,
     prefix: "builderai",
   })
+}
+
+export const getActiveSubscriptions = async (id: string) => {
+  const cachedData = await redis.hgetall<{
+    activeSubscriptions: SubscriptionExtended[]
+  }>(id)
+
+  return cachedData?.activeSubscriptions ?? []
 }

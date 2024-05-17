@@ -305,6 +305,8 @@ export const planRouter = createTRPCRouter({
               planVersionSelectBaseSchema.pick({
                 id: true,
                 status: true,
+                title: true,
+                currency: true,
               })
             ),
           })
@@ -318,10 +320,13 @@ export const planRouter = createTRPCRouter({
       const plans = await opts.ctx.db.query.plans.findMany({
         with: {
           versions: {
+            where: (version, { eq }) => eq(version.status, "published"),
             orderBy: (version, { desc }) => [desc(version.createdAt)],
             columns: {
               status: true,
               id: true,
+              title: true,
+              currency: true,
             },
           },
         },

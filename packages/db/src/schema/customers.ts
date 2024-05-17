@@ -6,6 +6,7 @@ import { pgTableProject } from "../utils/_table"
 import { projectID, timestamps } from "../utils/sql"
 import type { customerMetadataSchema } from "../validators"
 import { projects } from "./projects"
+import { subscriptions } from "./subscriptions"
 
 export const customers = pgTableProject(
   "customers",
@@ -33,4 +34,5 @@ export const customersRelations = relations(customers, ({ one, many }) => ({
     fields: [customers.projectId],
     references: [projects.id],
   }),
+  subscriptions: many(subscriptions),
 }))

@@ -2,7 +2,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 import { ZodError } from "zod"
 
-import * as schema from "../schema"
+import { planVersionFeatures } from "../schema/planVersionFeatures"
 import {
   AGGREGATION_METHODS,
   FEATURE_TYPES,
@@ -269,7 +269,7 @@ export const configFeatureSchema = z.union([
 
 // TODO: use discriminated union
 export const planVersionFeatureSelectBaseSchema = createSelectSchema(
-  schema.planVersionFeatures,
+  planVersionFeatures,
   {
     config: configFeatureSchema,
     metadata: planVersionFeatureMetadataSchema,
@@ -293,7 +293,7 @@ export const parseFeaturesConfig = (feature: PlanVersionFeature) => {
 // also zod is planning to deprecated it
 // TODO: improve this when switch api is available
 export const planVersionFeatureInsertBaseSchema = createInsertSchema(
-  schema.planVersionFeatures,
+  planVersionFeatures,
   {
     config: configFeatureSchema.optional(),
     metadata: planVersionFeatureMetadataSchema.optional(),
@@ -418,6 +418,25 @@ export const planVersionFeatureExtendedSchema =
     project: projectSelectBaseSchema,
   })
 
+export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
+  planFeatures: z.array(
+    planVersionFeatureSelectBaseSchema
+      .pick({
+        id: true,
+        featureId: true,
+        featureType: true,
+        config: true,
+        metadata: true,
+      })
+      .extend({
+        feature: featureSelectBaseSchema.pick({
+          id: true,
+          slug: true,
+        }),
+      })
+  ),
+})
+
 export type PlanVersionFeature = z.infer<
   typeof planVersionFeatureInsertBaseSchema
 >
@@ -433,3 +452,5 @@ export type PlanVersionFeatureDragDrop = z.infer<
 export type FeatureType = z.infer<typeof typeFeatureSchema>
 
 export type PaymentProvider = z.infer<typeof paymentProviderSchema>
+
+export type PlanVersionExtended = z.infer<typeof planVersionExtendedSchema>

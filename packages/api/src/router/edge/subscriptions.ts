@@ -3,24 +3,18 @@ import { z } from "zod"
 
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
-import type {
-  SubscriptionExtended,
-  SubscriptionItem,
-} from "@builderai/db/validators"
+import type { SubscriptionItem } from "@builderai/db/validators"
 import {
   subscriptionInsertSchema,
   subscriptionItemsSchema,
   subscriptionSelectSchema,
 } from "@builderai/db/validators"
-import { publishEvents } from "@builderai/tinybird"
 
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
   protectedActiveProjectProcedure,
-  protectedApiProcedure,
 } from "../../trpc"
-import { redis } from "../../utils"
 
 export const subscriptionRouter = createTRPCRouter({
   create: protectedActiveProjectAdminProcedure
@@ -31,7 +25,7 @@ export const subscriptionRouter = createTRPCRouter({
     )
     .output(
       z.object({
-        subscription: subscriptionSelectSchema.optional(),
+        subscription: subscriptionSelectSchema,
       })
     )
     .mutation(async (opts) => {
@@ -130,9 +124,12 @@ export const subscriptionRouter = createTRPCRouter({
           ...(configItemsSubscription.length > 0 && {
             items: configItemsSubscription,
           }),
+          metadata: null,
         })
         .returning()
         .then((re) => re[0])
+
+      console.log(subscriptionData)
 
       if (!subscriptionData) {
         throw new TRPCError({
@@ -178,160 +175,6 @@ export const subscriptionRouter = createTRPCRouter({
 
       return {
         subscriptions: subscriptionData,
-      }
-    }),
-
-  can: protectedApiProcedure
-    .meta({
-      openapi: {
-        method: "GET",
-        path: "/edge/subscription.can",
-        protect: true,
-      },
-    })
-    .input(
-      z.object({
-        customerId: z.string(),
-        featureSlug: z.string(),
-      })
-    )
-    .output(
-      z.object({
-        userHasFeature: z.boolean(),
-      })
-    )
-    .query(async (opts) => {
-      const { customerId, featureSlug } = opts.input
-      const apiKey = opts.ctx.apiKey
-      const projectId = apiKey.projectId
-
-      // find if there is a plan already saved in redis
-      const id = `app:${projectId}:user:${customerId}`
-
-      const payload = (await redis.hgetall<{
-        subscriptions: SubscriptionExtended[]
-      }>(id))!
-
-      if (payload) {
-        // check if the user has access to the feature in one of the active subscriptions
-        const userHasFeature = payload.subscriptions.some((sub) => {
-          return sub.planVersion.planVersionFeatures.some(
-            (pv) => pv.feature.slug === featureSlug
-          )
-        })
-
-        // TODO: add wait until here
-
-        // TODO: save report usage to analytics - use tinybird from analitycs package
-        await publishEvents({
-          event_name: "feature_access",
-          session_id: customerId,
-          id: customerId,
-          domain: "subscription",
-          subdomain: "can",
-          time: Date.now(),
-          timestamp: new Date().toISOString(),
-          payload: {
-            featureSlug,
-            userHasFeature,
-            subscriptionData: payload,
-          },
-        })
-
-        return {
-          userHasFeature,
-          subscriptionData: payload,
-        }
-      } else {
-        const customer = await opts.ctx.db.query.customers.findFirst({
-          columns: {
-            id: true,
-          },
-          where: (customer, { eq, and }) =>
-            and(eq(customer.id, customerId), eq(customer.projectId, projectId)),
-        })
-
-        if (!customer?.id) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Customer not found, please check the customerId",
-          })
-        }
-
-        const feature = await opts.ctx.db.query.features.findFirst({
-          columns: {
-            slug: true,
-          },
-          where: (feature, { eq, and }) =>
-            and(
-              eq(feature.slug, featureSlug),
-              eq(feature.projectId, projectId)
-            ),
-        })
-
-        if (!feature?.slug) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Feature not found, please check the featureSlug",
-          })
-        }
-
-        const subscriptionsData =
-          await opts.ctx.db.query.subscriptions.findMany({
-            with: {
-              planVersion: {
-                with: {
-                  planFeatures: {
-                    with: {
-                      feature: true,
-                    },
-                  },
-                },
-              },
-            },
-            where: (subscription, { eq, and }) =>
-              and(
-                eq(subscription.customerId, customer.id),
-                eq(subscription.projectId, projectId),
-                eq(subscription.status, "active")
-              ),
-          })
-
-        if (!subscriptionsData || subscriptionsData.length === 0) {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "User does not have an active subscription",
-          })
-        }
-        // check if the user has access to the feature in one of the active subscriptions
-        const userHasFeature = subscriptionsData.some((sub) => {
-          return sub.planVersion.planFeatures.some(
-            (pv) => pv.feature.slug === featureSlug
-          )
-        })
-
-        // save to redis
-        await redis.hset(id, { subscriptions: subscriptionsData })
-
-        // TODO: save report usage to analytics - use tinybird from analitycs package
-        await publishEvents({
-          event_name: "feature_access",
-          session_id: customerId,
-          id: customerId,
-          domain: "subscription",
-          subdomain: "can",
-          time: Date.now(),
-          timestamp: new Date().toISOString(),
-          payload: {
-            featureSlug,
-            userHasFeature,
-            subscriptionData: payload,
-          },
-        })
-
-        return {
-          userHasFeature,
-        }
       }
     }),
 })

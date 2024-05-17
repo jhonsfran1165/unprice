@@ -14,7 +14,9 @@ import type { NextAuthRequest, Session } from "@builderai/auth/server"
 import { auth } from "@builderai/auth/server"
 import { db, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
+import { Analytics } from "@builderai/tinybird"
 
+import { env } from "./env.mjs"
 import { transformer } from "./transformer"
 import { projectGuard } from "./utils"
 import { workspaceGuard } from "./utils/workspace-guard"
@@ -35,6 +37,7 @@ interface CreateContextOptions {
   req?: NextAuthRequest
   activeWorkspaceSlug: string
   activeProjectSlug: string
+  analytics: Analytics
 }
 
 /**
@@ -85,6 +88,10 @@ export const createTRPCContext = async (opts: {
     opts.headers.get("project-slug") ??
     ""
 
+  const analytics = new Analytics({
+    tinybirdToken: env.TINYBIRD_TOKEN,
+  })
+
   console.log(">>> tRPC Request from", source, "by", userId)
 
   return createInnerTRPCContext({
@@ -94,6 +101,7 @@ export const createTRPCContext = async (opts: {
     req: opts.req,
     activeWorkspaceSlug,
     activeProjectSlug,
+    analytics,
   })
 }
 
@@ -270,7 +278,7 @@ export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
   }
 
   // Check db for API key
-  // TODO: prepare a statement for this
+  // TODO: prepare a statement for this and redis
   const apiKey = await ctx.db.query.apikeys.findFirst({
     columns: {
       id: true,
