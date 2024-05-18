@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import { waitUntil } from "@vercel/functions"
 import { z } from "zod"
 
 import * as schema from "@builderai/db/schema"
@@ -15,6 +16,7 @@ import {
   protectedActiveProjectAdminProcedure,
   protectedActiveProjectProcedure,
 } from "../../trpc"
+import { getCustomerHash, setActiveSubscriptions } from "../../utils"
 
 export const subscriptionRouter = createTRPCRouter({
   create: protectedActiveProjectAdminProcedure
@@ -129,14 +131,45 @@ export const subscriptionRouter = createTRPCRouter({
         .returning()
         .then((re) => re[0])
 
-      console.log(subscriptionData)
-
       if (!subscriptionData) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Error creating subscription",
         })
       }
+
+      const redisId = getCustomerHash(project.id, customerId)
+
+      // every time a subscription is created, we need to update the cache
+      waitUntil(
+        opts.ctx.db.query.customers
+          .findFirst({
+            with: {
+              subscriptions: {
+                where: (sub, { eq }) => eq(sub.status, "active"),
+                with: {
+                  planVersion: {
+                    with: {
+                      planFeatures: {
+                        with: {
+                          feature: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            where: (customer, { eq, and }) =>
+              and(
+                eq(customer.id, customerId),
+                eq(customer.projectId, project.id)
+              ),
+          })
+          .then(async (customer) => {
+            await setActiveSubscriptions(redisId, customer?.subscriptions ?? [])
+          })
+      )
 
       return {
         subscription: subscriptionData,

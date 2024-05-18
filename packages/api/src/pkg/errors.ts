@@ -1,23 +1,25 @@
-import { z } from "zod"
+import type {
+  FeatureDenyReason,
+  FeatureReportUsageError,
+} from "@builderai/db/validators"
 
-export const ErrorCode = z.enum([
-  "SUBSCRIPTION_EXPIRED",
-  "SUBSCRIPTION_NOT_FOUND",
-  "SUBSCRIPTION_NOT_ACTIVE",
-  "RATE_LIMITED",
-  "USAGE_EXCEEDED",
-  "NOT_FOUND",
-  "INTERNAL_SERVER_ERROR",
-])
+export class UnPriceVerificationError extends Error {
+  public readonly code: FeatureDenyReason
 
-export class UnPriceApiError extends Error {
-  public readonly code: z.infer<typeof ErrorCode>
+  constructor({ code, message }: { code: FeatureDenyReason; message: string }) {
+    super(message)
+    this.code = code
+  }
+}
+
+export class UnPriceReportUsageError extends Error {
+  public readonly code: FeatureReportUsageError
 
   constructor({
     code,
     message,
   }: {
-    code: z.infer<typeof ErrorCode>
+    code: FeatureReportUsageError
     message: string
   }) {
     super(message)

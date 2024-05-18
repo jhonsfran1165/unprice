@@ -64,6 +64,8 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
           },
           mutations: {
             onError: (err) => {
+              console.error(err)
+
               if (err instanceof TRPCClientError) {
                 toastAction("error", err.message)
               } else {

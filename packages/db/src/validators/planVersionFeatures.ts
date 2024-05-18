@@ -425,6 +425,7 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
         id: true,
         featureId: true,
         featureType: true,
+        planVersionId: true,
         config: true,
         metadata: true,
       })

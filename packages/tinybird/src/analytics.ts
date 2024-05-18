@@ -1,7 +1,11 @@
 import { NoopTinybird, Tinybird } from "@chronark/zod-bird"
 import { z } from "zod"
 
-import { auditLogSchemaV1, featureVerificationSchemaV1 } from "./validators"
+import {
+  auditLogSchemaV1,
+  featureUsageSchemaV1,
+  featureVerificationSchemaV1,
+} from "./validators"
 
 export class Analytics {
   public readonly readClient: Tinybird | NoopTinybird
@@ -60,6 +64,31 @@ export class Analytics {
     return this.writeClient.buildIngestEndpoint({
       datasource: "features_verifications__v1",
       event: featureVerificationSchemaV1,
+    })
+  }
+
+  public get ingestFeaturesUsage() {
+    return this.writeClient.buildIngestEndpoint({
+      datasource: "features_usage__v1",
+      event: featureUsageSchemaV1,
+      wait: true,
+    })
+  }
+
+  public get getUsageFeature() {
+    return this.readClient.buildPipe({
+      pipe: "get_features_usage__v1",
+      parameters: z.object({
+        workspaceId: z.string(),
+        projectId: z.string(),
+        customerId: z.string(),
+        planVersionFeatureId: z.string(),
+        // start: z.number().optional(),
+        // end: z.number().optional(),
+      }),
+      data: z.object({
+        total_usage: z.number(),
+      }),
     })
   }
 }

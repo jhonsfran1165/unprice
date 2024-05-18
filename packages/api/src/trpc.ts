@@ -280,6 +280,13 @@ export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
   // Check db for API key
   // TODO: prepare a statement for this and redis
   const apiKey = await ctx.db.query.apikeys.findFirst({
+    with: {
+      project: {
+        columns: {
+          workspaceId: true,
+        },
+      },
+    },
     columns: {
       id: true,
       projectId: true,

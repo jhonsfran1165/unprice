@@ -1,26 +1,29 @@
 import { TRPCError } from "@trpc/server"
+import { waitUntil } from "@vercel/functions"
 import { z } from "zod"
 
 import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
-import type {
-  PlanVersionExtended,
-  SubscriptionExtended,
-} from "@builderai/db/validators"
 import {
   customerInsertBaseSchema,
   customerSelectSchema,
+  deniedReasonSchema,
+  reportUsageErrorSchema,
   searchDataParamsSchema,
 } from "@builderai/db/validators"
 
-import { UnPriceApiError } from "../../pkg/errors"
 import {
   createTRPCRouter,
   protectedActiveProjectProcedure,
   protectedApiProcedure,
 } from "../../trpc"
-import { getActiveSubscriptions } from "../../utils"
+import { reportUsageFeature } from "../../utils/report-usage-feature"
+import { verifyFeature } from "../../utils/verify-feature"
+import {
+  UnPriceReportUsageError,
+  UnPriceVerificationError,
+} from "./../../pkg/errors"
 
 export const customersRouter = createTRPCRouter({
   create: protectedActiveProjectProcedure
@@ -264,141 +267,37 @@ export const customersRouter = createTRPCRouter({
     .output(
       z.object({
         userHasFeature: z.boolean(),
-        // TODO: this should be an enum
-        deniedReason: z.string().optional(),
+        deniedReason: deniedReasonSchema.optional(),
       })
     )
     .query(async (opts) => {
       const { customerId, featureSlug } = opts.input
-      const apiKey = opts.ctx.apiKey
+      const { apiKey, ...ctx } = opts.ctx
       const projectId = apiKey.projectId
       const analytics = opts.ctx.analytics
 
-      // basic data from the request
-      const ip = opts.ctx.headers.get("x-real-ip") ?? ""
-      const userAgent = opts.ctx.headers.get("user-agent") ?? ""
+      try {
+        // basic data from the request
+        const ip = opts.ctx.headers.get("x-real-ip") ?? ""
+        const userAgent = opts.ctx.headers.get("user-agent") ?? ""
 
-      // TODO: add metrics so I know how long this takes, for now save it into the analytics
-      const start = performance.now()
+        // TODO: add metrics so I know how long this takes, for now save it into the analytics
+        const start = performance.now()
 
-      // find if there is a plan already saved in redis
-      const redisId = `app:${projectId}:customer:${customerId}`
-
-      const cachedActiveSubs = await getActiveSubscriptions(redisId)
-      let activeSubs = []
-
-      if (cachedActiveSubs.length > 0) {
-        activeSubs = cachedActiveSubs
-      } else {
-        const customer = await opts.ctx.db.query.customers.findFirst({
-          with: {
-            subscriptions: {
-              where: (sub, { eq }) => eq(sub.status, "active"),
-              with: {
-                planVersion: {
-                  with: {
-                    planFeatures: {
-                      with: {
-                        feature: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          where: (customer, { eq, and }) =>
-            and(eq(customer.id, customerId), eq(customer.projectId, projectId)),
+        const { feature, subscription } = await verifyFeature({
+          customerId,
+          featureSlug,
+          projectId: projectId,
+          ctx,
         })
 
-        if (!customer || customer?.subscriptions.length === 0) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Customer have no active subscriptions",
-          })
-        }
-
-        activeSubs = customer.subscriptions
-      }
-
-      // check if the user has access to the feature in one of the active subscriptions
-      // get the subscription and the feature
-      const { subscription, feature } = activeSubs.reduce(
-        (acc, sub) => {
-          const planFeature = sub.planVersion.planFeatures.find(
-            (pf) => pf.feature.slug === featureSlug
-          )
-
-          if (planFeature) {
-            acc.feature = planFeature
-            acc.subscription = sub
-          }
-
-          return acc
-        },
-        {
-          subscription: undefined as SubscriptionExtended | undefined,
-          // disable autoformat for this line
-          // prettier-ignore
-          feature: undefined as Pick<PlanVersionExtended, "planFeatures">["planFeatures"][number] | undefined,
-        }
-      )
-
-      try {
-        // if the subscription is not active here means that after billing the subscription was canceled
-        // TODO: we could check the current status here or somehow keep updated the cache because the billing process happens once per day
-        // TODO: add a different status for canceled subscriptions
-        if (!subscription || subscription.status !== "active") {
-          throw new UnPriceApiError({
-            code: "SUBSCRIPTION_EXPIRED",
-            message: "Subscription not found",
-          })
-        }
-
-        if (!feature) {
-          throw new UnPriceApiError({
-            code: "NOT_FOUND",
-            message: "Feature not found",
-          })
-        }
-
-        // TODO: add wait until here - update nextjs
-
-        // TODO: is it true for the rest of the types?
-        // TODO: support limits for metered features
-        if (feature.featureType === "usage") {
-          // we have to check the usage of the feature from tinybird
-          //TODO: for now lest just call tinybird api directly, but later on we could check the usage from the cache
-          // so that means we check the cache usage and then revalidate the usage from tinybird in background with waitUntil
-        } else {
-          // just return the userHasFeature
-        }
-
-        // TODO: save report usage to analytics - use tinybird from analitycs package
-        // TODO: remember in tynibird you separate mutable data from immutable data
-        // TODO: presign url from tinybird to upload usage data from the client?
-
-        // TODO: get this data https://nextjs.org/docs/app/api-reference/functions/userAgent
-      } catch (error) {
-        let deniedReason = ""
-        if (error instanceof UnPriceApiError) {
-          deniedReason = error.code
-        } else {
-          deniedReason = "INTERNAL_SERVER_ERROR"
-        }
-
-        if (feature && subscription) {
-          // report verification to analytics only if the feature and subscription are found
-          // TODO: report usage to analytics as well
-          await analytics.ingestFeaturesVerification({
+        // report verification to analytics only if the feature and subscription are found
+        waitUntil(
+          analytics.ingestFeaturesVerification({
             featureId: feature.featureId,
             planVersionFeatureId: feature.id,
             workspaceId: projectId,
             planVersionId: subscription.planVersionId,
-            deniedReason:
-              error instanceof UnPriceApiError
-                ? error.code
-                : "INTERNAL_SERVER_ERROR",
             customerId,
             subscriptionId: subscription.id,
             projectId,
@@ -407,11 +306,84 @@ export const customersRouter = createTRPCRouter({
             userAgent: userAgent,
             latency: performance.now() - start,
           })
-        }
+        )
 
         return {
-          userHasFeature: false,
-          deniedReason,
+          userHasFeature: true,
+        }
+      } catch (error) {
+        console.error("Error verifying feature", error)
+
+        if (error instanceof UnPriceVerificationError) {
+          return {
+            userHasFeature: false,
+            deniedReason: error.code,
+          }
+        } else {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error verifying feature",
+          })
+        }
+      }
+    }),
+  // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_6hASRQKH7vsq5WQH", featureSlug: "access", usage: 10}}}))
+  reportUsage: protectedApiProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/edge/subscription.reportUsage",
+        protect: true,
+      },
+    })
+    .input(
+      z.object({
+        customerId: z.string(),
+        featureSlug: z.string(),
+        usage: z.number(),
+      })
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        error: deniedReasonSchema.or(reportUsageErrorSchema).optional(),
+      })
+    )
+    .query(async (opts) => {
+      const { customerId, featureSlug, usage } = opts.input
+      const { apiKey, ...ctx } = opts.ctx
+      const projectId = apiKey.projectId
+      const workspaceId = apiKey.project.workspaceId
+
+      try {
+        const { success } = await reportUsageFeature({
+          customerId,
+          featureSlug,
+          projectId: projectId,
+          workspaceId: workspaceId,
+          usage: usage,
+          ctx,
+        })
+
+        return {
+          success: success,
+        }
+      } catch (error) {
+        if (error instanceof UnPriceVerificationError) {
+          return {
+            success: false,
+            error: error.code,
+          }
+        } else if (error instanceof UnPriceReportUsageError) {
+          return {
+            success: false,
+            error: error.code,
+          }
+        } else {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error reporting usage for feature",
+          })
         }
       }
     }),

@@ -3,6 +3,20 @@ import * as z from "zod"
 
 import * as schema from "../schema"
 
+// enum for all possible reasons a feature verification can be denied
+export const deniedReasonSchema = z.enum([
+  "SUBSCRIPTION_EXPIRED",
+  "SUBSCRIPTION_NOT_ACTIVE",
+  "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+  "CUSTOMER_HAS_NO_SUBSCRIPTION",
+  "CUSTOMER_NOT_FOUND",
+  "RATE_LIMITED",
+  "USAGE_EXCEEDED",
+  "FEATURE_TYPE_NOT_SUPPORTED",
+])
+
+export const reportUsageErrorSchema = z.enum(["FEATURE_IS_NOT_USAGE_TYPE"])
+
 export const featureSelectBaseSchema = createSelectSchema(schema.features)
 
 export const featureInsertBaseSchema = createInsertSchema(schema.features, {
@@ -22,3 +36,5 @@ export const featureInsertBaseSchema = createInsertSchema(schema.features, {
 
 export type InsertFeature = z.infer<typeof featureInsertBaseSchema>
 export type Feature = z.infer<typeof featureSelectBaseSchema>
+export type FeatureDenyReason = z.infer<typeof deniedReasonSchema>
+export type FeatureReportUsageError = z.infer<typeof reportUsageErrorSchema>

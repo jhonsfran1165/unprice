@@ -32,10 +32,30 @@ export const ratelimit = (
   })
 }
 
+export const getCustomerHash = (projectId: string, customerId: string) => {
+  return `app:${projectId}:customer:${customerId}`
+}
+
 export const getActiveSubscriptions = async (id: string) => {
   const cachedData = await redis.hgetall<{
     activeSubscriptions: SubscriptionExtended[]
   }>(id)
 
   return cachedData?.activeSubscriptions ?? []
+}
+
+export const setActiveSubscriptions = async (
+  id: string,
+  activeSubscriptions: SubscriptionExtended[]
+) => {
+  return redis.hset(id, { activeSubscriptions })
+}
+
+export const appendActiveSubscription = async (
+  id: string,
+  activeSubscription: SubscriptionExtended
+) => {
+  const activeSubscriptions = await getActiveSubscriptions(id)
+  activeSubscriptions.push(activeSubscription)
+  return setActiveSubscriptions(id, activeSubscriptions)
 }

@@ -11,7 +11,7 @@ const alertVariants = cva(
       variant: {
         default: "bg-background text-foreground",
         destructive: "button-danger [&>svg]:text-destructive",
-        info: "button-info [&>svg]:text-info",
+        info: "info [&>svg]:text-info",
       },
     },
     defaultVariants: {

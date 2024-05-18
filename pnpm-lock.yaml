@@ -652,6 +652,9 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
+      '@builderai/db':
+        specifier: workspace:^0.1.0
+        version: link:../db
       '@builderai/eslint-config':
         specifier: ^0.2.0
         version: link:../../tooling/eslint

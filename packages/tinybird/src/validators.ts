@@ -1,5 +1,7 @@
 import * as z from "zod"
 
+import { deniedReasonSchema } from "@builderai/db/validators"
+
 export type MaybeArray<T> = T | T[]
 
 /**
@@ -20,17 +22,22 @@ export const featureVerificationSchemaV1 = z.object({
   subscriptionId: z.string(),
   customerId: z.string(),
   planVersionId: z.string(),
-  deniedReason: z
-    .enum([
-      "SUBSCRIPTION_EXPIRED",
-      "SUBSCRIPTION_NOT_FOUND",
-      "SUBSCRIPTION_NOT_ACTIVE",
-      "RATE_LIMITED",
-      "USAGE_EXCEEDED",
-      "NOT_FOUND",
-      "INTERNAL_SERVER_ERROR",
-    ])
-    .optional(),
+  deniedReason: deniedReasonSchema.optional(),
+  time: z.number(),
+  ipAddress: z.string().default(""),
+  userAgent: z.string().default(""),
+  latency: z.number().optional(),
+})
+
+export const featureUsageSchemaV1 = z.object({
+  workspaceId: z.string(),
+  projectId: z.string(),
+  planVersionFeatureId: z.string(),
+  featureId: z.string(),
+  subscriptionId: z.string(),
+  customerId: z.string(),
+  planVersionId: z.string(),
+  usage: z.number(),
   time: z.number(),
   ipAddress: z.string().default(""),
   userAgent: z.string().default(""),

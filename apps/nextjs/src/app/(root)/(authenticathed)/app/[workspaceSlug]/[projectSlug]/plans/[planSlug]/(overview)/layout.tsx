@@ -5,6 +5,8 @@ import { ChevronLeft } from "lucide-react"
 import { Badge } from "@builderai/ui/badge"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
+import TabsNav from "~/components/layout/tabs-nav"
+import { PROJECT_TABS_CONFIG } from "~/constants/projects"
 
 export const runtime = "edge"
 
@@ -17,8 +19,19 @@ export default function PlanLayout(props: {
     planVersionId: string
   }
 }) {
+  const { workspaceSlug, projectSlug } = props.params
+  const tabs = Object.values(PROJECT_TABS_CONFIG)
+
   return (
-    <DashboardShell>
+    <DashboardShell
+      tabs={
+        <TabsNav
+          tabs={tabs}
+          activeTab={PROJECT_TABS_CONFIG.plans}
+          basePath={`/${workspaceSlug}/${projectSlug}`}
+        />
+      }
+    >
       <div className="flex flex-col">
         <div className="mb-4 flex justify-between align-middle">
           <Link
