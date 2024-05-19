@@ -13,7 +13,9 @@ export const env = createEnv({
         process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str,
       process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
     ),
-    DATABASE_URL: z.string().min(1).url(),
+    DATABASE_PRIMARY_URL: z.string().min(1).url(),
+    DATABASE_READ1_URL: z.string().min(1).url(),
+    DATABASE_READ2_URL: z.string().min(1).url(),
     DATABASE_URL_MIGRATOR: z.string().url().optional(),
     DATABASE_URL_LOCAL: z.string().url().optional(),
     DATABASE_URL_MIGRATOR_LOCAL: z.string().url().optional(),

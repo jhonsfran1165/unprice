@@ -39,7 +39,9 @@
     }
   },
   "globalEnv": [
-    "DATABASE_URL",
+    "DATABASE_PRIMARY_URL",
+    "DATABASE_READ1_URL",
+    "DATABASE_READ2_URL",
     "NEXTJS_URL",
     "SKIP_ENV_VALIDATION",
     "STRIPE_API_KEY",

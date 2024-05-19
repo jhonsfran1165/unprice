@@ -6,7 +6,7 @@ import type {
 } from "@builderai/db/validators"
 
 import { getCustomerHash, UnpriceCache } from "../pkg/cache"
-import { UnPriceVerificationError } from "../pkg/errors"
+import { UnPriceApiError } from "../pkg/errors"
 import type { Context } from "../trpc"
 
 type FeatureResponse = Pick<
@@ -66,14 +66,14 @@ export const getCustomerData = async ({
     })
 
     if (!customer) {
-      throw new UnPriceVerificationError({
+      throw new UnPriceApiError({
         code: "CUSTOMER_NOT_FOUND",
         message: "Customer not found",
       })
     }
 
     if (customer.subscriptions.length === 0) {
-      throw new UnPriceVerificationError({
+      throw new UnPriceApiError({
         code: "CUSTOMER_HAS_NO_SUBSCRIPTION",
         message: "Customer has not active subscription",
       })
@@ -100,7 +100,7 @@ export const getCustomerData = async ({
   const feature = allFeatures.get(featureSlug)
 
   if (!feature) {
-    throw new UnPriceVerificationError({
+    throw new UnPriceApiError({
       code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
       message: "Feature not found",
     })
@@ -110,7 +110,7 @@ export const getCustomerData = async ({
   const subscription = allSubscriptions.get(feature?.planVersionId)
 
   if (!subscription) {
-    throw new UnPriceVerificationError({
+    throw new UnPriceApiError({
       code: "CUSTOMER_HAS_NO_SUBSCRIPTION",
       message: "Subscription not found",
     })

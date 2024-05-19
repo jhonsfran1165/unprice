@@ -326,6 +326,9 @@ importers:
       '@builderai/tinybird':
         specifier: ^0.1.0
         version: link:../tinybird
+      '@builderai/unprice':
+        specifier: workspace:^
+        version: link:../unprice
       '@dinero.js/currencies':
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
@@ -815,6 +818,37 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.1)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+
+  packages/unprice:
+    dependencies:
+      superjson:
+        specifier: 2.2.1
+        version: 2.2.1
+    devDependencies:
+      '@builderai/eslint-config':
+        specifier: ^0.2.0
+        version: link:../../tooling/eslint
+      '@builderai/prettier-config':
+        specifier: ^0.1.0
+        version: link:../../tooling/prettier
+      '@builderai/tsconfig':
+        specifier: ^0.1.0
+        version: link:../../tooling/typescript
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.0
+      openapi-typescript:
+        specifier: 7.0.0-next.7
+        version: 7.0.0-next.7(typescript@5.3.3)
+      prettier:
+        specifier: ^3.2.5
+        version: 3.2.5
+      tsup:
+        specifier: ^8.0.2
+        version: 8.0.2(typescript@5.3.3)
       typescript:
         specifier: ^5.3.3
         version: 5.3.3

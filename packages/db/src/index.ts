@@ -2,6 +2,7 @@
 import { neonConfig, Pool } from "@neondatabase/serverless"
 import { and, eq, getTableColumns, or, sql } from "drizzle-orm"
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
+import { withReplicas } from "drizzle-orm/pg-core"
 
 import { env } from "../env.mjs"
 import * as schema from "./schema"
@@ -17,11 +18,11 @@ if (env.NODE_ENV === "development") {
 }
 
 // support local development and neon serverless
-export const db =
+export const primary =
   env.NODE_ENV === "production"
     ? drizzleNeon(
         new Pool({
-          connectionString: env.DATABASE_URL,
+          connectionString: env.DATABASE_PRIMARY_URL,
         }),
         {
           schema: schema,
@@ -37,6 +38,40 @@ export const db =
           logger: env.DRIZZLE_LOG === "true",
         }
       )
+
+export const db =
+  env.NODE_ENV === "production"
+    ? withReplicas(primary, [
+        drizzleNeon(
+          new Pool({
+            connectionString: env.DATABASE_READ1_URL,
+          }),
+          {
+            schema: schema,
+            logger: env.DRIZZLE_LOG === "true",
+          }
+        ),
+        drizzleNeon(
+          new Pool({
+            connectionString: env.DATABASE_READ2_URL,
+          }),
+          {
+            schema: schema,
+            logger: env.DRIZZLE_LOG === "true",
+          }
+        ),
+      ])
+    : withReplicas(primary, [
+        drizzleNeon(
+          new Pool({
+            connectionString: env.DATABASE_URL_LOCAL,
+          }),
+          {
+            schema: schema,
+            logger: env.DRIZZLE_LOG === "true",
+          }
+        ),
+      ])
 
 const projectGuardPrepared = db
   .select({

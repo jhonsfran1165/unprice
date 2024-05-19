@@ -1,7 +1,17 @@
 import type {
+  ApiError,
   FeatureDenyReason,
   FeatureReportUsageError,
 } from "@builderai/db/validators"
+
+export class UnPriceApiError extends Error {
+  public readonly code: ApiError
+
+  constructor({ code, message }: { code: ApiError; message: string }) {
+    super(message)
+    this.code = code
+  }
+}
 
 export class UnPriceVerificationError extends Error {
   public readonly code: FeatureDenyReason

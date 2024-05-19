@@ -31,6 +31,7 @@
     "@builderai/email": "^0.1.0",
     "@builderai/stripe": "^0.1.0",
     "@builderai/tinybird": "^0.1.0",
+    "@builderai/unprice": "workspace:^",
     "@dinero.js/currencies": "2.0.0-alpha.14",
     "@potatohd/trpc-openapi": "^1.2.3",
     "@t3-oss/env-nextjs": "0.9.1",

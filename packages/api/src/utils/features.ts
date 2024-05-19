@@ -38,6 +38,7 @@ export const verifyFeature = async ({
     (item) => item.itemId === feature.id
   )?.limit
 
+  // TODO: add params to usage so we can count or max and get data by date
   const usage = await analytics
     .getUsageFeature({
       planVersionFeatureId: feature.id,

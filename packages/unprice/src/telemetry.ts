@@ -1,5 +1,4 @@
-import { version } from "../package.json"
-import type { BuilderaiOptions } from "./client"
+import type { UnpriceOptions } from "./client"
 
 export interface Telemetry {
   /**
@@ -19,10 +18,11 @@ export interface Telemetry {
   runtime?: string
 }
 
-export function getTelemetry(opts: BuilderaiOptions): Telemetry | null {
+export function getTelemetry(opts: UnpriceOptions): Telemetry | null {
   let platform: string | undefined
   let runtime: string | undefined
-  const sdkVersions = [`@builderai/api@${version}`]
+  // TODO: add version and change this for unprice/api
+  const sdkVersions = [`@builderai/unprice@0.0.1`]
 
   try {
     if (typeof process !== "undefined") {

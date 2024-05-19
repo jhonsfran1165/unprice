@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import { waitUntil } from "@vercel/functions"
 import { z } from "zod"
 
 import { and, eq } from "@builderai/db"
@@ -18,20 +19,44 @@ import {
   protectedApiProcedure,
 } from "../../trpc"
 import { reportUsageFeature, verifyFeature } from "../../utils/features"
+import { unprice } from "../../utils/unprice"
 import {
+  UnPriceApiError,
   UnPriceReportUsageError,
   UnPriceVerificationError,
 } from "./../../pkg/errors"
 
 export const customersRouter = createTRPCRouter({
+  // TODO: create should support apikeys as well
   create: protectedActiveProjectProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/edge/customers.create",
+        protect: true,
+      },
+    })
     .input(customerInsertBaseSchema)
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
       const { description, name, email, metadata } = opts.input
       const project = opts.ctx.project
+      const workspaceId = project.workspaceId
 
       const customerId = utils.newId("customer")
+
+      // TODO: find the best way to use my product to create my own product
+      const data = await unprice.customers.can({
+        customerId: workspaceId,
+        featureSlug: "customers",
+      })
+
+      if (data?.result?.deniedReason) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: data?.result.deniedReason,
+        })
+      }
 
       const customerData = await opts.ctx.db
         .insert(schema.customers)
@@ -52,6 +77,14 @@ export const customersRouter = createTRPCRouter({
           message: "Error creating customer",
         })
       }
+
+      waitUntil(
+        unprice.customers.reportUsage({
+          customerId: workspaceId,
+          featureSlug: "customers",
+          usage: 1,
+        })
+      )
 
       return {
         customer: customerData,
@@ -252,7 +285,7 @@ export const customersRouter = createTRPCRouter({
     .meta({
       openapi: {
         method: "GET",
-        path: "/edge/subscription.can",
+        path: "/edge/customers.can",
         protect: true,
       },
     })
@@ -299,6 +332,11 @@ export const customersRouter = createTRPCRouter({
             currentUsage: error.currentUsage,
             limit: error.limit,
           }
+        } else if (error instanceof UnPriceApiError) {
+          throw new TRPCError({
+            code: "UNPROCESSABLE_CONTENT",
+            message: error.code,
+          })
         } else {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -312,7 +350,7 @@ export const customersRouter = createTRPCRouter({
     .meta({
       openapi: {
         method: "GET",
-        path: "/edge/subscription.reportUsage",
+        path: "/edge/customers.reportUsage",
         protect: true,
       },
     })
@@ -349,16 +387,16 @@ export const customersRouter = createTRPCRouter({
           success: success,
         }
       } catch (error) {
-        if (error instanceof UnPriceVerificationError) {
-          return {
-            success: false,
-            error: error.code,
-          }
+        if (error instanceof UnPriceApiError) {
+          throw new TRPCError({
+            code: "UNPROCESSABLE_CONTENT",
+            message: error.code,
+          })
         } else if (error instanceof UnPriceReportUsageError) {
-          return {
-            success: false,
-            error: error.code,
-          }
+          throw new TRPCError({
+            code: "UNPROCESSABLE_CONTENT",
+            message: error.code,
+          })
         } else {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",

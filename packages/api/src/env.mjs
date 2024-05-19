@@ -10,7 +10,6 @@ export const env = createEnv({
     ),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
-    DATABASE_URL: z.string().url(),
     STRIPE_WEBHOOK_SECRET: z.string(),
     PROJECT_ID_VERCEL: z.string(),
     TEAM_ID_VERCEL: z.string(),

@@ -32,7 +32,7 @@ export const authConfig = {
   },
   debug: process.env.NODE_ENV === "development",
   adapter: {
-    ...DrizzleAdapter(db, tableCreator),
+    ...DrizzleAdapter(db.$primary, tableCreator),
 
     // override the default create user
     async createUser(data) {

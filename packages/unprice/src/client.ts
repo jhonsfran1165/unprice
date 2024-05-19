@@ -6,7 +6,7 @@ import type { paths } from "./openapi"
 import type { Telemetry } from "./telemetry"
 import { getTelemetry } from "./telemetry"
 
-export type BuilderaiOptions = {
+export type UnpriceOptions = {
   token: string
 } & {
   /**
@@ -82,7 +82,7 @@ type Result<R> =
       error: ErrorResponse["error"]
     }
 
-export class Builderai {
+export class Unprice {
   public readonly baseUrl: string
   private readonly token: string
   private readonly cache?: RequestCache
@@ -93,8 +93,8 @@ export class Builderai {
     backoff: (retryCount: number) => number
   }
 
-  constructor(opts: BuilderaiOptions) {
-    this.baseUrl = opts.baseUrl ?? "https://api.builderai.dev"
+  constructor(opts: UnpriceOptions) {
+    this.baseUrl = opts.baseUrl ?? "https://api.unprice.dev"
     this.token = opts.token
     if (!opts.disableTelemetry) {
       this.telemetry = getTelemetry(opts)
@@ -106,12 +106,12 @@ export class Builderai {
      */
     if (!this.token) {
       throw new Error(
-        "builderai root key must be set, maybe you passed in `undefined` or an empty string?"
+        "unprice root key must be set, maybe you passed in `undefined` or an empty string?"
       )
     }
 
     this.retry = {
-      attempts: opts.retry?.attempts ?? 5,
+      attempts: opts.retry?.attempts ?? 2,
       backoff: opts.retry?.backoff ?? ((n) => Math.round(Math.exp(n) * 10)),
     }
   }
@@ -119,8 +119,8 @@ export class Builderai {
   private getHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${this.token}`,
       "x-builderai-api-key": this.token,
+      "x-trpc-source": "sdk", // TODO: add version here
     }
     if (this.telemetry?.sdkVersions) {
       headers["builderai-Telemetry-SDK"] = this.telemetry.sdkVersions.join(",")
@@ -138,7 +138,7 @@ export class Builderai {
     let res: Response | null = null
     let err: Error | null = null
     for (let i = 0; i <= this.retry.attempts; i++) {
-      const url = new URL(`${this.baseUrl}/${req.path.join("/")}`)
+      const url = new URL(`${this.baseUrl}/trpc/${req.path.join("/")}`)
 
       const optionsRequest = {
         method: req.method,
@@ -149,9 +149,11 @@ export class Builderai {
 
       if (req.query) {
         // expected input for trpc
-        // TODO: use transformer from the API
-        const inputString = superjson.stringify(req.query)
-        const encodedParams = `input=${encodeURIComponent(inputString)}`
+        const inputString = superjson.serialize(req.query)
+        const stringifyRequest = JSON.stringify({ 0: inputString })
+
+        const encodedParams = `batch=0&input=${encodeURIComponent(stringifyRequest)}`
+
         url.search = encodedParams
       }
 
@@ -358,35 +360,49 @@ export class Builderai {
   //   }
   // }
 
-  public get projects() {
+  // public get projects() {
+  //   return {
+  //     get: async (
+  //       req: paths["/edge/project.l"]["get"]["parameters"]["query"]
+  //     ): Promise<
+  //       Result<
+  //         paths["/edge/project.listByActiveWorkspace"]["get"]["responses"]["200"]["content"]["application/json"]
+  //       >
+  //     > => {
+  //       return await this.fetch({
+  //         path: ["edge", "project.listByActiveWorkspace"],
+  //         method: "GET",
+  //         query: req,
+  //       })
+  //     },
+  //   }
+  // }
+
+  public get customers() {
     return {
-      get: async (
-        req: paths["/edge/project.listByActiveWorkspace"]["get"]["parameters"]["query"]
+      can: async (
+        req: paths["/edge/customers.can"]["get"]["parameters"]["query"]
       ): Promise<
         Result<
-          paths["/edge/project.listByActiveWorkspace"]["get"]["responses"]["200"]["content"]["application/json"]
+          paths["/edge/customers.can"]["get"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["edge", "project.listByActiveWorkspace"],
+          path: ["edge", "customers.can"],
           method: "GET",
           query: req,
         })
       },
-    }
-  }
 
-  public get subscriptions() {
-    return {
-      can: async (
-        req: paths["/edge/subscription.can"]["get"]["parameters"]["query"]
+      reportUsage: async (
+        req: paths["/edge/customers.reportUsage"]["get"]["parameters"]["query"]
       ): Promise<
         Result<
-          paths["/edge/subscription.can"]["get"]["responses"]["200"]["content"]["application/json"]
+          paths["/edge/customers.reportUsage"]["get"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["edge", "subscription.can"],
+          path: ["edge", "customers.reportUsage"],
           method: "GET",
           query: req,
         })

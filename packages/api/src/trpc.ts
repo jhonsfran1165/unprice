@@ -8,6 +8,7 @@
  */
 import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import { initTRPC, TRPCError } from "@trpc/server"
+import { waitUntil } from "@vercel/functions"
 import { ZodError } from "zod"
 
 import type { NextAuthRequest, Session } from "@builderai/auth/server"
@@ -241,6 +242,7 @@ export const protectedActiveWorkspaceOwnerProcedure =
     })
   })
 
+// TODO: duplicate this to support api keys or active project
 export const protectedActiveProjectProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
     const activeProjectSlug = ctx.activeProjectSlug
@@ -280,6 +282,7 @@ export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
 
   // Check db for API key
   // TODO: prepare a statement for this and redis
+  // TODO: fix revoke at
   const apiKey = await ctx.db.query.apikeys.findFirst({
     with: {
       project: {
@@ -298,15 +301,20 @@ export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
   })
 
   if (!apiKey?.id) {
-    throw new TRPCError({ code: "UNAUTHORIZED" })
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Api key not found" })
   }
 
-  void ctx.db
-    .update(schema.apikeys)
-    .set({
-      lastUsed: new Date(),
-    })
-    .where(eq(schema.apikeys.id, apiKey.id))
+  // update last used
+  waitUntil(
+    ctx.db
+      .update(schema.apikeys)
+      .set({
+        lastUsed: new Date(),
+      })
+      .where(eq(schema.apikeys.id, apiKey.id))
+      .returning()
+      .then((key) => key)
+  )
 
   return next({
     ctx: {

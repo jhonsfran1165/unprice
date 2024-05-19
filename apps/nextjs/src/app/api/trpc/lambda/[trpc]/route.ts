@@ -10,8 +10,15 @@ export const preferredRegion = ["fra1"]
 export const runtime = "nodejs"
 
 const handler = auth(async (req) => {
+  // when we use the middleware to rewrite the request, the path doesn't include the /api prefix
+  // trpc under the hood uses the path to determine the procedure
+  const pathName = req.nextUrl.pathname
+  const endpoint = pathName.startsWith("/api")
+    ? "/api/trpc/lambda"
+    : "/trpc/lambda"
+
   const response = await fetchRequestHandler({
-    endpoint: "/api/trpc/edge",
+    endpoint: endpoint,
     router: lambdaRouter,
     req,
     createContext: () =>

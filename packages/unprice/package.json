@@ -1,16 +1,21 @@
 {
-  "name": "@builderai/client",
+  "name": "@builderai/unprice",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
   "version": "0.1.0",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "./dist/**"
-  ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "src/*"
+      ]
+    }
+  },
   "keywords": [
     "builderai",
     "client",
