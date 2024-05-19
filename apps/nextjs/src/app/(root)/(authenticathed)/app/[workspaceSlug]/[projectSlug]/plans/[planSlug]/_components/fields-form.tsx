@@ -34,6 +34,106 @@ import {
   TooltipTrigger,
 } from "@builderai/ui/tooltip"
 
+export function QuantityFormField({
+  form,
+}: {
+  form: UseFormReturn<PlanVersionFeature>
+}) {
+  return (
+    <div className="w-full">
+      <FormField
+        control={form.control}
+        name="defaultQuantity"
+        render={({ field }) => (
+          <FormItem className="">
+            <FormLabel>Quantity</FormLabel>
+            <FormDescription>
+              Default quantity of the feature when the subscription is created.
+            </FormDescription>
+            <div className="text-xs font-normal leading-snug">
+              If the quantity is not provided, it must be set at the time of the
+              subscription.
+            </div>
+
+            <div className="flex flex-col items-center space-y-1 px-2">
+              <FormControl className="w-full">
+                <div className="flex flex-row items-center">
+                  <div className="relative flex-1">
+                    <Input
+                      {...field}
+                      className="rounded-e-none"
+                      value={field.value ?? ""}
+                    />
+                  </div>
+                  <div
+                    className={
+                      "inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 bg-background-bg px-3 text-sm font-medium"
+                    }
+                  >
+                    units
+                  </div>
+                </div>
+              </FormControl>
+
+              <FormMessage className="self-start px-2" />
+            </div>
+          </FormItem>
+        )}
+      />
+    </div>
+  )
+}
+
+export function LimitFormField({
+  form,
+}: {
+  form: UseFormReturn<PlanVersionFeature>
+}) {
+  return (
+    <div className="w-full">
+      <FormField
+        control={form.control}
+        name="limit"
+        render={({ field }) => (
+          <FormItem className="">
+            <FormLabel>Limit</FormLabel>
+            <FormDescription>
+              Set a limit for the feature when the subscription is created.
+            </FormDescription>
+            <div className="text-xs font-normal leading-snug">
+              If you set a limit, the feature will be disabled when the limit is
+              reached. Otherwise the feature will be unlimited.
+            </div>
+
+            <div className="flex flex-col items-center space-y-1 px-2">
+              <FormControl className="w-full">
+                <div className="flex flex-row items-center">
+                  <div className="relative flex-1">
+                    <Input
+                      {...field}
+                      className="rounded-e-none"
+                      value={field.value ?? ""}
+                    />
+                  </div>
+                  <div
+                    className={
+                      "inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 bg-background-bg px-3 text-sm font-medium"
+                    }
+                  >
+                    units
+                  </div>
+                </div>
+              </FormControl>
+
+              <FormMessage className="self-start px-2" />
+            </div>
+          </FormItem>
+        )}
+      />
+    </div>
+  )
+}
+
 export function PriceFormField({
   form,
   currency,
@@ -104,7 +204,7 @@ export function UnitsFormField({
                   >
                     per
                   </div>
-                  <div className="flex-1">
+                  <div className="relative flex-1">
                     <Input {...field} className="rounded-none" />
                   </div>
                   <div

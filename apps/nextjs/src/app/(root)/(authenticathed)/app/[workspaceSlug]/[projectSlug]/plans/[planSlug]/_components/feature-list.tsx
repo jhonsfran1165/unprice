@@ -58,7 +58,6 @@ export function FeatureList({
     (feature) => !planFeatureIds.includes(feature.id)
   )
 
-  console.log(planVersionFeatureOpen)
   return (
     <>
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">

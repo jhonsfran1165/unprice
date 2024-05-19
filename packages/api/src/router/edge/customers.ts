@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server"
-import { waitUntil } from "@vercel/functions"
 import { z } from "zod"
 
 import { and, eq } from "@builderai/db"
@@ -18,8 +17,7 @@ import {
   protectedActiveProjectProcedure,
   protectedApiProcedure,
 } from "../../trpc"
-import { reportUsageFeature } from "../../utils/report-usage-feature"
-import { verifyFeature } from "../../utils/verify-feature"
+import { reportUsageFeature, verifyFeature } from "../../utils/features"
 import {
   UnPriceReportUsageError,
   UnPriceVerificationError,
@@ -268,48 +266,28 @@ export const customersRouter = createTRPCRouter({
       z.object({
         userHasFeature: z.boolean(),
         deniedReason: deniedReasonSchema.optional(),
+        currentUsage: z.number().optional(),
+        limit: z.number().optional(),
       })
     )
     .query(async (opts) => {
       const { customerId, featureSlug } = opts.input
       const { apiKey, ...ctx } = opts.ctx
       const projectId = apiKey.projectId
-      const analytics = opts.ctx.analytics
 
       try {
-        // basic data from the request
-        const ip = opts.ctx.headers.get("x-real-ip") ?? ""
-        const userAgent = opts.ctx.headers.get("user-agent") ?? ""
-
-        // TODO: add metrics so I know how long this takes, for now save it into the analytics
-        const start = performance.now()
-
-        const { feature, subscription } = await verifyFeature({
+        const { currentUsage, limit } = await verifyFeature({
           customerId,
           featureSlug,
           projectId: projectId,
+          workspaceId: apiKey.project.workspaceId,
           ctx,
         })
 
-        // report verification to analytics only if the feature and subscription are found
-        waitUntil(
-          analytics.ingestFeaturesVerification({
-            featureId: feature.featureId,
-            planVersionFeatureId: feature.id,
-            workspaceId: projectId,
-            planVersionId: subscription.planVersionId,
-            customerId,
-            subscriptionId: subscription.id,
-            projectId,
-            time: Date.now(),
-            ipAddress: ip,
-            userAgent: userAgent,
-            latency: performance.now() - start,
-          })
-        )
-
         return {
           userHasFeature: true,
+          currentUsage: currentUsage,
+          limit: limit,
         }
       } catch (error) {
         console.error("Error verifying feature", error)
@@ -318,6 +296,8 @@ export const customersRouter = createTRPCRouter({
           return {
             userHasFeature: false,
             deniedReason: error.code,
+            currentUsage: error.currentUsage,
+            limit: error.limit,
           }
         } else {
           throw new TRPCError({

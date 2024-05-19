@@ -4,7 +4,7 @@ import type { ElementRef } from "react"
 import React, { forwardRef, useState } from "react"
 import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
-import { Settings, Trash2, X } from "lucide-react"
+import { EyeOff, Settings, Trash2, X } from "lucide-react"
 
 import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
@@ -109,6 +109,11 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                         <div className="1right-1 absolute top-2">
                           <Ping variant={"destructive"} />
                         </div>
+                      </div>
+                    )}
+                    {planFeatureVersion.hidden && (
+                      <div className="flex items-center gap-1">
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
                       </div>
                     )}
                   </div>

@@ -88,6 +88,7 @@ export const createTRPCContext = async (opts: {
     opts.headers.get("project-slug") ??
     ""
 
+  // TODO: is it a good idea to create a new instance for every request?
   const analytics = new Analytics({
     tinybirdToken: env.TINYBIRD_TOKEN,
   })

@@ -11,12 +11,12 @@ import {
   subscriptionSelectSchema,
 } from "@builderai/db/validators"
 
+import { getCustomerHash, UnpriceCache } from "../../pkg/cache"
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
   protectedActiveProjectProcedure,
 } from "../../trpc"
-import { getCustomerHash, setActiveSubscriptions } from "../../utils"
 
 export const subscriptionRouter = createTRPCRouter({
   create: protectedActiveProjectAdminProcedure
@@ -69,6 +69,18 @@ export const subscriptionRouter = createTRPCRouter({
       }
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
+        with: {
+          subscriptions: {
+            with: {
+              planVersion: {
+                with: {
+                  planFeatures: true,
+                },
+              },
+            },
+            where: (sub, { eq }) => eq(sub.status, "active"),
+          },
+        },
         where: (customer, operators) =>
           operators.and(
             operators.eq(customer.id, customerId),
@@ -83,31 +95,55 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      // null means the customer is subscribing to the whole plan
-      let configItemsSubscription: SubscriptionItem[] = []
+      // check the active subscriptions of the customer. The plan version the customer is attempting to subscript can't any feature that the customer already has
+      const activeSubscriptions = customerData.subscriptions
+      const activeFeatures = activeSubscriptions.flatMap((sub) =>
+        sub.planVersion.planFeatures.map((f) => f.id)
+      )
+      const newFeatures = versionData.planFeatures.map((f) => f.id)
+      const commonFeatures = activeFeatures.filter((f) =>
+        newFeatures.includes(f)
+      )
 
-      // if items are passed, check if they are valid an set the right quantities
-      if (items && items.length > 0) {
-        const planFeatures = versionData.planFeatures
-        const planFeaturesMap = new Map(planFeatures.map((i) => [i.id, i]))
+      if (commonFeatures.length > 0) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message:
+            "The customer is trying to subscribe to a feature already active in another subscription",
+        })
+      }
 
-        configItemsSubscription = items.map((item) => {
-          const feature = planFeaturesMap.get(item.itemId)
+      // if no items are passed, configuration is created from the default quantities of the plan features
+      const configItemsSubscription = versionData.planFeatures.map(
+        (feature) => {
+          const quantity =
+            feature.defaultQuantity ??
+            items?.find((i) => i.itemId === feature.id)?.quantity
 
-          if (!feature) {
+          const limit = feature.limit
+
+          if (feature.featureType !== "usage" && quantity === undefined) {
             throw new TRPCError({
               code: "CONFLICT",
-              message: "Feature not found in plan version",
+              message: "Feature quantity not provided",
+            })
+          }
+
+          if (limit && quantity && quantity > limit) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Feature quantity exceeds the limit",
             })
           }
 
           return {
             itemType: "feature",
             itemId: feature.id,
-            quantity: item.quantity,
+            limit: limit ?? quantity, // if not provided means there is no limit
+            quantity: quantity, // if not provided means is a usage based feature
           } as SubscriptionItem
-        })
-      }
+        }
+      )
 
       const subscriptionId = utils.newId("subscription")
 
@@ -123,9 +159,7 @@ export const subscriptionRouter = createTRPCRouter({
           isNew: true,
           collectionMethod: "charge_automatically",
           status: "active",
-          ...(configItemsSubscription.length > 0 && {
-            items: configItemsSubscription,
-          }),
+          items: configItemsSubscription,
           metadata: null,
         })
         .returning()
@@ -139,6 +173,7 @@ export const subscriptionRouter = createTRPCRouter({
       }
 
       const redisId = getCustomerHash(project.id, customerId)
+      const cache = new UnpriceCache()
 
       // every time a subscription is created, we need to update the cache
       waitUntil(
@@ -167,7 +202,10 @@ export const subscriptionRouter = createTRPCRouter({
               ),
           })
           .then(async (customer) => {
-            await setActiveSubscriptions(redisId, customer?.subscriptions ?? [])
+            await cache.setCustomerActiveSubs(
+              redisId,
+              customer?.subscriptions ?? []
+            )
           })
       )
 

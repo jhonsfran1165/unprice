@@ -10,7 +10,8 @@ export const subscriptionMetadataSchema = z.object({
 
 const itemSchema = z.object({
   itemType: z.enum(["feature", "addon"]),
-  quantity: z.coerce.number().min(1),
+  quantity: z.coerce.number().optional(),
+  limit: z.coerce.number().optional(),
   itemId: z.string(),
 })
 

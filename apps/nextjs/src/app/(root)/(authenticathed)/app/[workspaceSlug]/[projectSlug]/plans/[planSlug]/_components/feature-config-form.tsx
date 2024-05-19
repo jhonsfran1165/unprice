@@ -17,8 +17,10 @@ import { Button } from "@builderai/ui/button"
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
 import {
@@ -29,6 +31,7 @@ import {
   SelectValue,
 } from "@builderai/ui/select"
 import { Separator } from "@builderai/ui/separator"
+import { Switch } from "@builderai/ui/switch"
 
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -133,6 +136,34 @@ export function FeatureConfigForm({
         className="space-y-6"
         onSubmit={form.handleSubmit(onSubmitForm)}
       >
+        <div className="flex flex-col gap-1">
+          <FormField
+            control={form.control}
+            name="hidden"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-sm font-semibold">
+                    Hide this feature from UI
+                  </FormLabel>
+                  <FormDescription className="text-sm font-normal">
+                    When enabled, this feature will not be visible in pricing
+                    pages.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value ?? false}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <Separator />
+
         <div className="flex flex-col gap-2">
           <div className="border-1 items-center rounded-md">
             <div className="space-y-2">

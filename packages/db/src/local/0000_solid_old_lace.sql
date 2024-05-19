@@ -5,6 +5,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ CREATE TYPE "public"."collection_method" AS ENUM('charge_automatically', 'send_invoice');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  CREATE TYPE "public"."currency" AS ENUM('USD', 'EUR');
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -72,6 +78,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  CREATE TYPE "public"."feature_types" AS ENUM('flat', 'tier', 'package', 'usage');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."subscription_type" AS ENUM('plan', 'addon');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -201,6 +213,9 @@ CREATE TABLE IF NOT EXISTS "builderai_plan_versions_features" (
 	"features_config" json,
 	"metadata" json,
 	"order" double precision NOT NULL,
+	"default_quantity" integer,
+	"limit" integer,
+	"hidden" boolean DEFAULT false NOT NULL,
 	CONSTRAINT "plan_versions_pkey" PRIMARY KEY("id","project_id"),
 	CONSTRAINT "unique_version_feature" UNIQUE NULLS NOT DISTINCT("plan_version_id","feature_id","project_id","order")
 );
@@ -268,16 +283,16 @@ CREATE TABLE IF NOT EXISTS "builderai_subscriptions" (
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"customers_id" text NOT NULL,
 	"plan_version_id" text NOT NULL,
-	"trial_ends" timestamp,
 	"trial_days" integer DEFAULT 0,
+	"trial_ends" timestamp,
 	"start_date" timestamp DEFAULT now() NOT NULL,
 	"end_date" timestamp,
 	"auto_renew" boolean DEFAULT true,
-	"collection_method" text DEFAULT 'charge_automatically',
+	"collection_method" "collection_method" DEFAULT 'charge_automatically',
 	"is_new" boolean DEFAULT true,
-	"metadata" json DEFAULT '{}'::json,
 	"status" "subscription_status" DEFAULT 'active',
 	"items" json,
+	"metadata" json,
 	CONSTRAINT "subscriptions_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
@@ -468,3 +483,4 @@ CREATE INDEX IF NOT EXISTS "key" ON "builderai_apikeys" ("key");--> statement-br
 CREATE INDEX IF NOT EXISTS "email" ON "builderai_customers" ("email");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "name" ON "builderai_domains" ("name");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "slug_index" ON "builderai_projects" ("slug");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_active_planversion_subscription" ON "builderai_subscriptions" ("customers_id","plan_version_id","project_id");

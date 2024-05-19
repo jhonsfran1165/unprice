@@ -47,6 +47,7 @@
     "Configurator",
     "datasource",
     "dinero",
+    "hget",
     "hgetall",
     "hset",
     "ianvs",
@@ -58,7 +59,9 @@
     "sidemodule",
     "tinybird",
     "typecheck",
-    "uidx"
+    "uidx",
+    "Unprice",
+    "UPSTASH"
   ],
   "search.exclude": {
     "**/.git": true,

@@ -27,8 +27,17 @@ export const planVersionFeatureRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { featureId, planVersionId, featureType, config, metadata, order } =
-        opts.input
+      const {
+        featureId,
+        planVersionId,
+        featureType,
+        config,
+        metadata,
+        order,
+        defaultQuantity,
+        limit,
+        hidden,
+      } = opts.input
       const project = opts.ctx.project
 
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
@@ -76,6 +85,9 @@ export const planVersionFeatureRouter = createTRPCRouter({
           config,
           metadata,
           order: order ?? "1024",
+          defaultQuantity: defaultQuantity === 0 ? null : defaultQuantity,
+          limit: limit === 0 ? null : limit,
+          hidden,
         })
         .returning()
         .then((re) => re[0])
@@ -193,6 +205,9 @@ export const planVersionFeatureRouter = createTRPCRouter({
         metadata,
         planVersionId,
         order,
+        defaultQuantity,
+        limit,
+        hidden,
       } = opts.input
 
       // we purposely don't allow to update the currency and the payment provider
@@ -228,6 +243,11 @@ export const planVersionFeatureRouter = createTRPCRouter({
           ...(config && { config }),
           ...(metadata && { metadata }),
           ...(order && { order }),
+          ...(defaultQuantity !== undefined && {
+            defaultQuantity: defaultQuantity === 0 ? null : defaultQuantity,
+          }),
+          ...(limit !== undefined && { limit: limit === 0 ? null : limit }),
+          ...(hidden !== undefined && { hidden }),
           updatedAt: new Date(),
         })
         .where(

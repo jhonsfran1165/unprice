@@ -66,6 +66,7 @@ export function FeatureForm({
       await apiUtils.features.searchBy.invalidate()
       toastAction("saved")
       setDialogOpen?.(false)
+      router.refresh()
     },
   })
 
@@ -84,6 +85,8 @@ export function FeatureForm({
         })
         document.dispatchEvent(escKeyEvent)
       }
+
+      router.refresh()
     },
   })
 

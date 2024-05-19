@@ -273,6 +273,8 @@ export const planVersionFeatureSelectBaseSchema = createSelectSchema(
   {
     config: configFeatureSchema,
     metadata: planVersionFeatureMetadataSchema,
+    defaultQuantity: z.coerce.number().int().optional(),
+    limit: z.coerce.number().int().optional(),
   }
 )
 
@@ -297,6 +299,8 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
   {
     config: configFeatureSchema.optional(),
     metadata: planVersionFeatureMetadataSchema.optional(),
+    defaultQuantity: z.coerce.number().int().optional(),
+    limit: z.coerce.number().int().optional(),
   }
 )
   .partial({
@@ -428,6 +432,7 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
         planVersionId: true,
         config: true,
         metadata: true,
+        limit: true,
       })
       .extend({
         feature: featureSelectBaseSchema.pick({

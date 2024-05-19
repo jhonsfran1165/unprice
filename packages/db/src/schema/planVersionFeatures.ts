@@ -1,7 +1,9 @@
 import { relations } from "drizzle-orm"
 import {
+  boolean,
   doublePrecision,
   foreignKey,
+  integer,
   json,
   primaryKey,
   unique,
@@ -40,6 +42,13 @@ export const planVersionFeatures = pgTableProject(
         z.infer<typeof planVersionFeatureMetadataSchema>
       >(),
     order: doublePrecision("order").notNull(),
+    // if nulls the feature quantity must be provided at subscription time
+    defaultQuantity: integer("default_quantity"),
+    // the limit of the feature, if nulls there is no limit, normally used for usage features to limit the usage
+    // for the rest of the features types it can be used to limit the quantity of the feature
+    limit: integer("limit"),
+    // wether the feature is hidden or not in the UI
+    hidden: boolean("hidden").notNull().default(false),
   },
   (table) => ({
     planversionfk: foreignKey({

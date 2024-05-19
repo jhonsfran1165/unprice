@@ -77,7 +77,9 @@ export const subscriptions = pgTableProject(
 
     // items information for the subscription - can be features or addons information
     // if null means that the subscription is for the whole plan
-    items: json("items").$type<z.infer<typeof subscriptionItemsSchema>>(),
+    items: json("items")
+      .$type<z.infer<typeof subscriptionItemsSchema>>()
+      .notNull(),
 
     // TODO: create invoice table
 

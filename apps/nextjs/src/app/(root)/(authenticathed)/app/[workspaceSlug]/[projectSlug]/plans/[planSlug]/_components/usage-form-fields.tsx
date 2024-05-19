@@ -3,9 +3,11 @@
 import type { UseFormReturn } from "react-hook-form"
 
 import type { Currency, PlanVersionFeature } from "@builderai/db/validators"
+import { Separator } from "@builderai/ui/separator"
 
 import {
   AggregationMethodFormField,
+  LimitFormField,
   PriceFormField,
   TierFormField,
 } from "./fields-form"
@@ -23,6 +25,14 @@ export function UsageFormFields({
       <div className="flex w-full justify-between">
         <AggregationMethodFormField form={form} />
       </div>
+
+      <Separator />
+
+      <div className="flex w-full justify-between">
+        <LimitFormField form={form} />
+      </div>
+
+      <Separator />
 
       {form.getValues("config.usageMode") === "unit" && (
         <div className="flex w-full justify-between">

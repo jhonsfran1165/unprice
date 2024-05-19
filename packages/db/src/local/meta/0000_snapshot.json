@@ -1,5 +1,5 @@
 {
-  "id": "118dd019-f01f-45b2-b77f-9d6ce28e4e57",
+  "id": "033f4184-f88c-4598-a376-193c265f27e5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -781,6 +781,25 @@
           "type": "double precision",
           "primaryKey": false,
           "notNull": true
+        },
+        "default_quantity": {
+          "name": "default_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "limit": {
+          "name": "limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -1326,28 +1345,35 @@
           "primaryKey": false,
           "notNull": true
         },
-        "entitlements": {
-          "name": "entitlements",
-          "type": "json",
+        "plan_version_id": {
+          "name": "plan_version_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "trial_days": {
+          "name": "trial_days",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "default": "'[]'::json"
+          "default": 0
         },
-        "trials_end": {
-          "name": "trials_end",
-          "type": "date",
+        "trial_ends": {
+          "name": "trial_ends",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
         "start_date": {
           "name": "start_date",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "now()"
         },
         "end_date": {
           "name": "end_date",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
@@ -1358,46 +1384,10 @@
           "notNull": false,
           "default": true
         },
-        "billing_period": {
-          "name": "billing_period",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "start_cycle": {
-          "name": "start_cycle",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "grace_period": {
-          "name": "grace_period",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "currency": {
-          "name": "currency",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "payment_provider_id": {
-          "name": "payment_provider_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "collection_method": {
           "name": "collection_method",
-          "type": "text",
+          "type": "collection_method",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
           "default": "'charge_automatically'"
@@ -1409,20 +1399,6 @@
           "notNull": false,
           "default": true
         },
-        "metadata": {
-          "name": "metadata",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'{}'::json"
-        },
-        "plan_changed": {
-          "name": "plan_changed",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
         "status": {
           "name": "status",
           "type": "subscription_status",
@@ -1431,24 +1407,26 @@
           "notNull": false,
           "default": "'active'"
         },
-        "item_type": {
-          "name": "item_type",
-          "type": "text",
+        "items": {
+          "name": "items",
+          "type": "json",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "item_id": {
-          "name": "item_id",
-          "type": "text",
+        "metadata": {
+          "name": "metadata",
+          "type": "json",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         }
       },
       "indexes": {
-        "unique_active_subscription": {
-          "name": "unique_active_subscription",
+        "unique_active_planversion_subscription": {
+          "name": "unique_active_planversion_subscription",
           "columns": [
-            "customers_id"
+            "customers_id",
+            "plan_version_id",
+            "project_id"
           ],
           "isUnique": true
         }
@@ -1473,6 +1451,21 @@
           "tableTo": "builderai_customers",
           "columnsFrom": [
             "customers_id",
+            "project_id"
+          ],
+          "columnsTo": [
+            "id",
+            "project_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "subscriptions_planversion_id_fkey": {
+          "name": "subscriptions_planversion_id_fkey",
+          "tableFrom": "builderai_subscriptions",
+          "tableTo": "builderai_plan_versions",
+          "columnsFrom": [
+            "plan_version_id",
             "project_id"
           ],
           "columnsTo": [
@@ -1792,6 +1785,14 @@
         "max"
       ]
     },
+    "public.collection_method": {
+      "name": "collection_method",
+      "schema": "public",
+      "values": [
+        "charge_automatically",
+        "send_invoice"
+      ]
+    },
     "public.currency": {
       "name": "currency",
       "schema": "public",
@@ -1891,6 +1892,14 @@
         "tier",
         "package",
         "usage"
+      ]
+    },
+    "public.subscription_type": {
+      "name": "subscription_type",
+      "schema": "public",
+      "values": [
+        "plan",
+        "addon"
       ]
     },
     "public.usage_mode": {
