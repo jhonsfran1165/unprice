@@ -17,7 +17,6 @@ if (env.NODE_ENV === "development") {
   neonConfig.pipelineConnect = false
 }
 
-// support local development and neon serverless
 export const primary =
   env.NODE_ENV === "production"
     ? drizzleNeon(
@@ -39,39 +38,30 @@ export const primary =
         }
       )
 
+export const read1 = drizzleNeon(
+  new Pool({
+    connectionString: env.DATABASE_READ1_URL,
+  }),
+  {
+    schema: schema,
+    logger: env.DRIZZLE_LOG === "true",
+  }
+)
+
+export const read2 = drizzleNeon(
+  new Pool({
+    connectionString: env.DATABASE_READ2_URL,
+  }),
+  {
+    schema: schema,
+    logger: env.DRIZZLE_LOG === "true",
+  }
+)
+
 export const db =
   env.NODE_ENV === "production"
-    ? withReplicas(primary, [
-        drizzleNeon(
-          new Pool({
-            connectionString: env.DATABASE_READ1_URL,
-          }),
-          {
-            schema: schema,
-            logger: env.DRIZZLE_LOG === "true",
-          }
-        ),
-        drizzleNeon(
-          new Pool({
-            connectionString: env.DATABASE_READ2_URL,
-          }),
-          {
-            schema: schema,
-            logger: env.DRIZZLE_LOG === "true",
-          }
-        ),
-      ])
-    : withReplicas(primary, [
-        drizzleNeon(
-          new Pool({
-            connectionString: env.DATABASE_URL_LOCAL,
-          }),
-          {
-            schema: schema,
-            logger: env.DRIZZLE_LOG === "true",
-          }
-        ),
-      ])
+    ? withReplicas(primary, [read1, read2])
+    : withReplicas(primary, [primary])
 
 const projectGuardPrepared = db
   .select({
