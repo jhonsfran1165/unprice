@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/edge/customers.create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["customers-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/edge/customers.can": {
         parameters: {
             query?: never;
@@ -64,6 +80,80 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    "customers-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    id?: string;
+                    projectId?: string;
+                    /** Format: date-time */
+                    createdAt?: string;
+                    /** Format: date-time */
+                    updatedAt?: string;
+                    /** Format: email */
+                    email: string;
+                    name: string;
+                    description?: string | null;
+                    metadata?: {
+                        metadataPaymentProviderSchema: {
+                            stripe: {
+                                customerId?: string;
+                                defaultPaymentMethodId?: string;
+                            };
+                            lemonsqueezy: {
+                                customerId?: string;
+                                defaultPaymentMethodId?: string;
+                            };
+                        };
+                        externalId?: string;
+                    } | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        customer: {
+                            id: string;
+                            projectId: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            /** Format: date-time */
+                            updatedAt: string;
+                            email: string;
+                            name: string;
+                            description: string | null;
+                            metadata: {
+                                metadataPaymentProviderSchema: {
+                                    stripe: {
+                                        customerId?: string;
+                                        defaultPaymentMethodId?: string;
+                                    };
+                                    lemonsqueezy: {
+                                        customerId?: string;
+                                        defaultPaymentMethodId?: string;
+                                    };
+                                };
+                                externalId?: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            default: components["responses"]["error"];
+        };
+    };
     "customers-can": {
         parameters: {
             query: {
@@ -83,9 +173,9 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        userHasFeature: boolean;
+                        access: boolean;
                         /** @enum {string} */
-                        deniedReason?: "SUBSCRIPTION_EXPIRED" | "SUBSCRIPTION_NOT_ACTIVE" | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION" | "CUSTOMER_HAS_NO_SUBSCRIPTION" | "CUSTOMER_NOT_FOUND" | "RATE_LIMITED" | "USAGE_EXCEEDED" | "FEATURE_TYPE_NOT_SUPPORTED";
+                        deniedReason?: "RATE_LIMITED" | "USAGE_EXCEEDED" | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION";
                         currentUsage?: number;
                         limit?: number;
                     };
@@ -115,7 +205,6 @@ export interface operations {
                 content: {
                     "application/json": {
                         success: boolean;
-                        error?: ("SUBSCRIPTION_EXPIRED" | "SUBSCRIPTION_NOT_ACTIVE" | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION" | "CUSTOMER_HAS_NO_SUBSCRIPTION" | "CUSTOMER_NOT_FOUND" | "RATE_LIMITED" | "USAGE_EXCEEDED" | "FEATURE_TYPE_NOT_SUPPORTED") | "FEATURE_IS_NOT_USAGE_TYPE";
                     };
                 };
             };

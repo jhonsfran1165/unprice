@@ -31,8 +31,8 @@
     "lint": "eslint .",
     "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
     "typecheck": "tsc --noEmit",
-    "generate:openapi": "curl http://localhost:3000/api/trpc/openapi > openapi-spec.json",
-    "generate": "openapi-typescript http://localhost:3000/api/trpc/openapi -o ./src/openapi.d.ts",
+    "generate:openapi": "curl http://api.localhost:3000/trpc/openapi > openapi-spec.json",
+    "generate": "openapi-typescript http://api.localhost:3000/trpc/openapi -o ./src/openapi.d.ts",
     "build": "tsup",
     "generate:sdk": "speakeasy generate sdk --schema openapi-spec.json --lang typescript --out ./sdk"
   },

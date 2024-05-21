@@ -5,6 +5,8 @@ import { UnPriceCustomerError } from "../pkg/errors"
 import type { Context } from "../trpc"
 
 // shared logic for some procedures
+// this way I use my product to build my product
+// without setting up unprice sdk
 export const verifyFeature = async ({
   customerId,
   featureSlug,

@@ -19,14 +19,13 @@ import {
   protectedApiProcedure,
 } from "../../trpc"
 import { reportUsageFeature, verifyFeature } from "../../utils/shared"
-import { unprice } from "../../utils/unprice"
 
 export const customersRouter = createTRPCRouter({
   // TODO: create should support apikeys as well
   create: protectedApiOrActiveProjectProcedure
     .meta({
       openapi: {
-        method: "GET",
+        method: "POST",
         path: "/edge/customers.create",
         protect: true,
       },
@@ -37,6 +36,11 @@ export const customersRouter = createTRPCRouter({
       const { description, name, email, metadata } = opts.input
       const { apiKey, project, ...ctx } = opts.ctx
       const workspaceId = project.workspaceId
+
+      // const customer = await unprice.customers.create({
+      //   name: workspaceId,
+      //   email: email,
+      // })
 
       const customerId = utils.newId("customer")
 
@@ -95,9 +99,12 @@ export const customersRouter = createTRPCRouter({
       }
 
       waitUntil(
-        unprice.customers.reportUsage({
+        reportUsageFeature({
           customerId: workspaceId,
           featureSlug: "customers",
+          projectId: project.id,
+          workspaceId: workspaceId,
+          ctx: ctx,
           usage: 1,
         })
       )

@@ -380,6 +380,20 @@ export class Unprice {
 
   public get customers() {
     return {
+      create: async (
+        req: paths["/edge/customers.create"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.create"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.create"],
+          method: "POST",
+          body: req,
+        })
+      },
+
       can: async (
         req: paths["/edge/customers.can"]["get"]["parameters"]["query"]
       ): Promise<
