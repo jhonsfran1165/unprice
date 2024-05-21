@@ -13,11 +13,12 @@ import { ZodError } from "zod"
 
 import type { NextAuthRequest, Session } from "@builderai/auth/server"
 import { auth } from "@builderai/auth/server"
-import { db, eq } from "@builderai/db"
+import { db, eq, prepared } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import { Analytics } from "@builderai/tinybird"
 
 import { env } from "./env.mjs"
+import { UnpriceCache } from "./pkg/cache"
 import { transformer } from "./transformer"
 import { projectGuard } from "./utils"
 import { workspaceGuard } from "./utils/workspace-guard"
@@ -39,6 +40,7 @@ interface CreateContextOptions {
   activeWorkspaceSlug: string
   activeProjectSlug: string
   analytics: Analytics
+  cache: UnpriceCache
 }
 
 /**
@@ -94,6 +96,8 @@ export const createTRPCContext = async (opts: {
     tinybirdToken: env.TINYBIRD_TOKEN,
   })
 
+  const cache = new UnpriceCache()
+
   console.log(">>> tRPC Request from", source, "by", userId)
 
   return createInnerTRPCContext({
@@ -104,6 +108,7 @@ export const createTRPCContext = async (opts: {
     activeWorkspaceSlug,
     activeProjectSlug,
     analytics,
+    cache,
   })
 }
 
@@ -242,7 +247,81 @@ export const protectedActiveWorkspaceOwnerProcedure =
     })
   })
 
-// TODO: duplicate this to support api keys or active project
+// for those endpoint that are used inside the app but they also can be used with an api key
+export const protectedApiOrActiveProjectProcedure = t.procedure.use(
+  async ({ ctx, next }) => {
+    const activeProjectSlug = ctx.activeProjectSlug
+    const apiKey = ctx.apiKey
+
+    // Check db for API key if apiKey is present
+    if (apiKey) {
+      // TODO: does it make sense to cache this in redis
+      const apiKeyData = await prepared.apiKeyPrepared.execute({
+        apiKey,
+      })
+
+      if (!apiKeyData) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Api key not found",
+        })
+      }
+
+      if (apiKeyData.revokedAt !== null) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Api key is revoked",
+        })
+      }
+
+      if (apiKeyData.expiresAt && apiKeyData.expiresAt < new Date()) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Api key is expired",
+        })
+      }
+
+      // update last used in background
+      waitUntil(
+        ctx.db
+          .update(schema.apikeys)
+          .set({
+            lastUsed: new Date(),
+          })
+          .where(eq(schema.apikeys.id, apiKeyData.id))
+          .execute()
+      )
+
+      return next({
+        ctx: {
+          // pass the project data to the context to ensure all changes are applied to the correct project
+          project: apiKeyData.project,
+          apiKey: apiKeyData,
+        },
+      })
+    } else {
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" })
+      }
+
+      const data = await projectGuard({
+        projectSlug: activeProjectSlug,
+        ctx,
+      })
+
+      return next({
+        ctx: {
+          userId: ctx.session?.user.id,
+          ...data,
+          session: {
+            ...ctx.session,
+          },
+        },
+      })
+    }
+  }
+)
+
 export const protectedActiveProjectProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
     const activeProjectSlug = ctx.activeProjectSlug
@@ -276,49 +355,47 @@ export const protectedActiveProjectAdminProcedure =
  * Procedure to authenticate API requests with an API key
  */
 export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
-  if (!ctx.apiKey) {
-    throw new TRPCError({ code: "UNAUTHORIZED" })
+  const apiKey = ctx.apiKey
+
+  if (!apiKey) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Api key not found in headers",
+    })
   }
 
   // Check db for API key
-  // TODO: prepare a statement for this and redis
-  // TODO: fix revoke at
-  const apiKey = await ctx.db.query.apikeys.findFirst({
-    with: {
-      project: {
-        columns: {
-          workspaceId: true,
-        },
-      },
-    },
-    columns: {
-      id: true,
-      projectId: true,
-      key: true,
-    },
-    where: (apikey, { sql }) =>
-      sql`${apikey.key} = ${ctx.apiKey} AND ${apikey.revokedAt} is NULL`,
+  // TODO: does it make sense to cache this in redis
+  const apiKeyData = await prepared.apiKeyPrepared.execute({
+    apiKey,
   })
 
-  if (!apiKey?.id) {
+  if (!apiKeyData) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Api key not found" })
   }
 
-  // update last used
+  if (apiKeyData.revokedAt !== null) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Api key is revoked" })
+  }
+
+  if (apiKeyData.expiresAt && apiKeyData.expiresAt < new Date()) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Api key is expired" })
+  }
+
+  // update last used in background
   waitUntil(
     ctx.db
       .update(schema.apikeys)
       .set({
         lastUsed: new Date(),
       })
-      .where(eq(schema.apikeys.id, apiKey.id))
-      .returning()
-      .then((key) => key)
+      .where(eq(schema.apikeys.id, apiKeyData.id))
+      .execute()
   )
 
   return next({
     ctx: {
-      apiKey,
+      apiKey: apiKeyData,
     },
   })
 })

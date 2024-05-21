@@ -1,7 +1,5 @@
 import * as z from "zod"
 
-import { deniedReasonSchema } from "@builderai/db/validators"
-
 export type MaybeArray<T> = T | T[]
 
 /**
@@ -22,7 +20,7 @@ export const featureVerificationSchemaV1 = z.object({
   subscriptionId: z.string(),
   customerId: z.string(),
   planVersionId: z.string(),
-  deniedReason: deniedReasonSchema.optional(),
+  deniedReason: z.string().optional(),
   time: z.number(),
   ipAddress: z.string().default(""),
   userAgent: z.string().default(""),

@@ -8,27 +8,22 @@ import * as utils from "@builderai/db/utils"
 import {
   customerInsertBaseSchema,
   customerSelectSchema,
-  deniedReasonSchema,
-  reportUsageErrorSchema,
   searchDataParamsSchema,
 } from "@builderai/db/validators"
 
+import { deniedReasonSchema } from "../../pkg/errors"
 import {
   createTRPCRouter,
   protectedActiveProjectProcedure,
+  protectedApiOrActiveProjectProcedure,
   protectedApiProcedure,
 } from "../../trpc"
-import { reportUsageFeature, verifyFeature } from "../../utils/features"
+import { reportUsageFeature, verifyFeature } from "../../utils/shared"
 import { unprice } from "../../utils/unprice"
-import {
-  UnPriceApiError,
-  UnPriceReportUsageError,
-  UnPriceVerificationError,
-} from "./../../pkg/errors"
 
 export const customersRouter = createTRPCRouter({
   // TODO: create should support apikeys as well
-  create: protectedActiveProjectProcedure
+  create: protectedApiOrActiveProjectProcedure
     .meta({
       openapi: {
         method: "GET",
@@ -40,21 +35,42 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
       const { description, name, email, metadata } = opts.input
-      const project = opts.ctx.project
+      const { apiKey, project, ...ctx } = opts.ctx
       const workspaceId = project.workspaceId
 
       const customerId = utils.newId("customer")
 
-      // TODO: find the best way to use my product to create my own product
-      const data = await unprice.customers.can({
-        customerId: workspaceId,
-        featureSlug: "customers",
-      })
+      const { access, deniedReason, currentUsage, limit } = await verifyFeature(
+        {
+          customerId: workspaceId,
+          featureSlug: "customers",
+          projectId: project.id,
+          workspaceId: workspaceId,
+          ctx: ctx,
+        }
+      )
 
-      if (data?.result?.deniedReason) {
+      if (!access) {
+        if (deniedReason === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message:
+              "Your plan does not have access to this feature, please upgrade your plan",
+          })
+        }
+
+        if (limit && currentUsage >= limit) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "You have reached the limit of customers, please upgrade your plan",
+          })
+        }
+
         throw new TRPCError({
-          code: "CONFLICT",
-          message: data?.result.deniedReason,
+          code: "BAD_REQUEST",
+          message:
+            "You don't have access to this feature, please upgrade your plan",
         })
       }
 
@@ -297,7 +313,7 @@ export const customersRouter = createTRPCRouter({
     )
     .output(
       z.object({
-        userHasFeature: z.boolean(),
+        access: z.boolean(),
         deniedReason: deniedReasonSchema.optional(),
         currentUsage: z.number().optional(),
         limit: z.number().optional(),
@@ -308,42 +324,13 @@ export const customersRouter = createTRPCRouter({
       const { apiKey, ...ctx } = opts.ctx
       const projectId = apiKey.projectId
 
-      try {
-        const { currentUsage, limit } = await verifyFeature({
-          customerId,
-          featureSlug,
-          projectId: projectId,
-          workspaceId: apiKey.project.workspaceId,
-          ctx,
-        })
-
-        return {
-          userHasFeature: true,
-          currentUsage: currentUsage,
-          limit: limit,
-        }
-      } catch (error) {
-        console.error("Error verifying feature", error)
-
-        if (error instanceof UnPriceVerificationError) {
-          return {
-            userHasFeature: false,
-            deniedReason: error.code,
-            currentUsage: error.currentUsage,
-            limit: error.limit,
-          }
-        } else if (error instanceof UnPriceApiError) {
-          throw new TRPCError({
-            code: "UNPROCESSABLE_CONTENT",
-            message: error.code,
-          })
-        } else {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error verifying feature",
-          })
-        }
-      }
+      return await verifyFeature({
+        customerId,
+        featureSlug,
+        projectId: projectId,
+        workspaceId: apiKey.project.workspaceId,
+        ctx,
+      })
     }),
   // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_6hASRQKH7vsq5WQH", featureSlug: "access", usage: 10}}}))
   reportUsage: protectedApiProcedure
@@ -364,7 +351,6 @@ export const customersRouter = createTRPCRouter({
     .output(
       z.object({
         success: z.boolean(),
-        error: deniedReasonSchema.or(reportUsageErrorSchema).optional(),
       })
     )
     .query(async (opts) => {
@@ -373,36 +359,13 @@ export const customersRouter = createTRPCRouter({
       const projectId = apiKey.projectId
       const workspaceId = apiKey.project.workspaceId
 
-      try {
-        const { success } = await reportUsageFeature({
-          customerId,
-          featureSlug,
-          projectId: projectId,
-          workspaceId: workspaceId,
-          usage: usage,
-          ctx,
-        })
-
-        return {
-          success: success,
-        }
-      } catch (error) {
-        if (error instanceof UnPriceApiError) {
-          throw new TRPCError({
-            code: "UNPROCESSABLE_CONTENT",
-            message: error.code,
-          })
-        } else if (error instanceof UnPriceReportUsageError) {
-          throw new TRPCError({
-            code: "UNPROCESSABLE_CONTENT",
-            message: error.code,
-          })
-        } else {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error reporting usage for feature",
-          })
-        }
-      }
+      return await reportUsageFeature({
+        customerId,
+        featureSlug,
+        projectId: projectId,
+        workspaceId: workspaceId,
+        usage: usage,
+        ctx,
+      })
     }),
 })

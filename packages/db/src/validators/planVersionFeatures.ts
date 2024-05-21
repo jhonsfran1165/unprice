@@ -422,26 +422,44 @@ export const planVersionFeatureExtendedSchema =
     project: projectSelectBaseSchema,
   })
 
-export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
-  planFeatures: z.array(
-    planVersionFeatureSelectBaseSchema
-      .pick({
-        id: true,
-        featureId: true,
-        featureType: true,
-        planVersionId: true,
-        config: true,
-        metadata: true,
-        limit: true,
-      })
-      .extend({
-        feature: featureSelectBaseSchema.pick({
+export const planVersionExtendedSchema = planVersionSelectBaseSchema
+  .pick({
+    id: true,
+    planId: true,
+    status: true,
+    planType: true,
+    active: true,
+    currency: true,
+    billingPeriod: true,
+    startCycle: true,
+    gracePeriod: true,
+    whenToBill: true,
+    paymentProvider: true,
+    metadata: true,
+  })
+  .extend({
+    plan: planSelectBaseSchema.pick({
+      slug: true,
+    }),
+    planFeatures: z.array(
+      planVersionFeatureSelectBaseSchema
+        .pick({
           id: true,
-          slug: true,
-        }),
-      })
-  ),
-})
+          featureId: true,
+          featureType: true,
+          planVersionId: true,
+          config: true,
+          metadata: true,
+          limit: true,
+        })
+        .extend({
+          feature: featureSelectBaseSchema.pick({
+            id: true,
+            slug: true,
+          }),
+        })
+    ),
+  })
 
 export type PlanVersionFeature = z.infer<
   typeof planVersionFeatureInsertBaseSchema

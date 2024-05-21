@@ -11,7 +11,7 @@ import {
   subscriptionSelectSchema,
 } from "@builderai/db/validators"
 
-import { getCustomerHash, UnpriceCache } from "../../pkg/cache"
+import { UnpriceCache } from "../../pkg/cache"
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
@@ -172,7 +172,6 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      const redisId = getCustomerHash(project.id, customerId)
       const cache = new UnpriceCache()
 
       // every time a subscription is created, we need to update the cache
@@ -181,13 +180,57 @@ export const subscriptionRouter = createTRPCRouter({
           .findFirst({
             with: {
               subscriptions: {
+                columns: {
+                  id: true,
+                  planVersionId: true,
+                  customerId: true,
+                  status: true,
+                  items: true,
+                  metadata: true,
+                },
                 where: (sub, { eq }) => eq(sub.status, "active"),
+                orderBy(fields, operators) {
+                  return [operators.desc(fields.startDate)]
+                },
                 with: {
                   planVersion: {
+                    columns: {
+                      id: true,
+                      planId: true,
+                      status: true,
+                      planType: true,
+                      active: true,
+                      currency: true,
+                      billingPeriod: true,
+                      startCycle: true,
+                      gracePeriod: true,
+                      whenToBill: true,
+                      paymentProvider: true,
+                      metadata: true,
+                    },
                     with: {
+                      plan: {
+                        columns: {
+                          slug: true,
+                        },
+                      },
                       planFeatures: {
+                        columns: {
+                          id: true,
+                          featureId: true,
+                          featureType: true,
+                          planVersionId: true,
+                          config: true,
+                          metadata: true,
+                          limit: true,
+                        },
                         with: {
-                          feature: true,
+                          feature: {
+                            columns: {
+                              slug: true,
+                              id: true,
+                            },
+                          },
                         },
                       },
                     },
@@ -197,13 +240,19 @@ export const subscriptionRouter = createTRPCRouter({
             },
             where: (customer, { eq, and }) =>
               and(
-                eq(customer.id, customerId),
-                eq(customer.projectId, project.id)
+                eq(customer.id, customerData.id),
+                eq(customer.projectId, customerData.projectId)
               ),
           })
           .then(async (customer) => {
+            if (!customer) {
+              // TODO: log error
+              console.error("Customer not found")
+              return
+            }
+
             await cache.setCustomerActiveSubs(
-              redisId,
+              customer.id,
               customer?.subscriptions ?? []
             )
           })

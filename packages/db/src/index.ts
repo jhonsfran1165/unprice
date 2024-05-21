@@ -146,11 +146,35 @@ const workspacesByUserPrepared = db.query.users
   })
   .prepare("workspaces_by_user_prepared")
 
+const apiKeyPrepared = db.query.apikeys
+  .findFirst({
+    with: {
+      project: {
+        columns: {
+          workspaceId: true,
+          id: true,
+        },
+      },
+    },
+    columns: {
+      id: true,
+      projectId: true,
+      key: true,
+      expiresAt: true,
+      revokedAt: true,
+    },
+    where: (apikey, { and, eq }) =>
+      and(eq(apikey.key, sql.placeholder("apiKey"))),
+  })
+  .prepare("apikey_prepared")
+
 export * from "drizzle-orm"
 export { pgTableProject as tableCreator } from "./utils"
+export type Database = typeof db
 
 export const prepared = {
   workspacesByUserPrepared,
   projectGuardPrepared,
   workspaceGuardPrepared,
+  apiKeyPrepared,
 }

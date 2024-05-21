@@ -1,6 +1,8 @@
 import { Redis } from "@upstash/redis"
 
 import type { SubscriptionExtended } from "@builderai/db/validators"
+import type { Result } from "@builderai/error"
+import { Err, FetchError, Ok } from "@builderai/error"
 
 import { env } from "../env.mjs"
 
@@ -16,19 +18,26 @@ const redis =
       })
     : new NoopCache()
 
+// Cache interface so you can swap out the cache implementation
 export interface CacheInterface {
   getCustomerActiveSubs: (
-    customerHash: string
-  ) => Promise<SubscriptionExtended[] | null>
+    customerId: string
+  ) => Promise<Result<SubscriptionExtended[], FetchError>>
 
   setCustomerActiveSubs: (
-    customerHash: string,
+    customerId: string,
     activeSubs: SubscriptionExtended[]
-  ) => Promise<number>
+  ) => Promise<Result<number>>
 }
 
+const namespaces = {
+  customer: "customer",
+  subscription: "subscription",
+} as const
+
 export class UnpriceCache implements CacheInterface {
-  public readonly client: Redis | NoopCache
+  private readonly client: Redis | NoopCache
+  private readonly namespaces = namespaces
 
   constructor(opts?: { token: string; url: string }) {
     if (!opts) {
@@ -41,25 +50,53 @@ export class UnpriceCache implements CacheInterface {
     }
   }
 
-  async getCustomerActiveSubs(customerHash: string) {
-    return this.client.hget<SubscriptionExtended[]>(
-      customerHash,
-      "activeSubscriptions"
-    )
+  private getCustomerHash(key: keyof typeof namespaces, id: string) {
+    return `app:${this.namespaces[key]}:${id}`
   }
 
-  async setCustomerActiveSubs(
-    customerHash: string,
+  public async getCustomerActiveSubs(
+    customerId: string
+  ): Promise<Result<SubscriptionExtended[], FetchError>> {
+    try {
+      const hash = this.getCustomerHash("customer", customerId)
+      const activeSubs = await this.client.hget<SubscriptionExtended[]>(
+        hash,
+        "activeSubscriptions"
+      )
+
+      return Ok(activeSubs ?? [])
+    } catch (error) {
+      const e = error as Error
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: false,
+        })
+      )
+    }
+  }
+
+  public async setCustomerActiveSubs(
+    customerId: string,
     activeSubs: SubscriptionExtended[]
-  ) {
-    return this.client.hset<SubscriptionExtended[]>(customerHash, {
-      activeSubscriptions: activeSubs,
-    })
-  }
-}
+  ): Promise<Result<number, FetchError>> {
+    try {
+      const hash = this.getCustomerHash("customer", customerId)
+      const success = await this.client.hset(hash, {
+        activeSubscriptions: activeSubs,
+      })
 
-export const getCustomerHash = (projectId: string, customerId: string) => {
-  return `app:${projectId}:customer:${customerId}`
+      return Ok(success)
+    } catch (error) {
+      const e = error as Error
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: false,
+        })
+      )
+    }
+  }
 }
 
 // Create a new ratelimiter, that allows 10 requests per 10 seconds by default

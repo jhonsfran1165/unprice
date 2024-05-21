@@ -1,52 +1,44 @@
-import type {
-  ApiError,
-  FeatureDenyReason,
-  FeatureReportUsageError,
-} from "@builderai/db/validators"
+import { z } from "zod"
 
-export class UnPriceApiError extends Error {
-  public readonly code: ApiError
+import { BaseError } from "@builderai/error"
 
-  constructor({ code, message }: { code: ApiError; message: string }) {
-    super(message)
-    this.code = code
-  }
-}
+export const apiCustomerErrorSchema = z.enum([
+  "SUBSCRIPTION_EXPIRED",
+  "SUBSCRIPTION_NOT_ACTIVE",
+  "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+  "CUSTOMER_HAS_NO_SUBSCRIPTIONS",
+  "CUSTOMER_NOT_FOUND",
+  "FEATURE_TYPE_NOT_SUPPORTED",
+  "FEATURE_IS_NOT_USAGE_TYPE",
+])
 
-export class UnPriceVerificationError extends Error {
-  public readonly code: FeatureDenyReason
-  public readonly currentUsage?: number
-  public readonly limit?: number
+export const deniedReasonSchema = z.enum([
+  "RATE_LIMITED",
+  "USAGE_EXCEEDED",
+  "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+])
 
-  constructor({
-    code,
-    message,
-    currentUsage,
-    limit,
-  }: {
-    code: FeatureDenyReason
-    message: string
-    currentUsage?: number
-    limit?: number
-  }) {
-    super(message)
-    this.code = code
-    this.currentUsage = currentUsage
-    this.limit = limit
-  }
-}
+export type ApiCustomerError = z.infer<typeof apiCustomerErrorSchema>
+export type DenyReason = z.infer<typeof deniedReasonSchema>
 
-export class UnPriceReportUsageError extends Error {
-  public readonly code: FeatureReportUsageError
+export class UnPriceCustomerError extends BaseError<{ customerId: string }> {
+  public readonly retry = false
+  public readonly name = UnPriceCustomerError.name
+  public readonly code: ApiCustomerError
 
   constructor({
     code,
-    message,
+    customerId,
   }: {
-    code: FeatureReportUsageError
-    message: string
+    code: ApiCustomerError
+    customerId: string
   }) {
-    super(message)
+    super({
+      message: "Customer API error",
+      context: {
+        customerId,
+      },
+    })
     this.code = code
   }
 }
