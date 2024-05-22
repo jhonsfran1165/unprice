@@ -307,6 +307,7 @@ export const planRouter = createTRPCRouter({
                 status: true,
                 title: true,
                 currency: true,
+                version: true,
               })
             ),
           })
@@ -327,6 +328,7 @@ export const planRouter = createTRPCRouter({
               id: true,
               title: true,
               currency: true,
+              version: true,
             },
           },
         },

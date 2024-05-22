@@ -20,6 +20,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/edge/customers.remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["customers-remove"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/edge/customers.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["customers-update"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/edge/customers.exist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["customers-exist"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/edge/customers.getByEmail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["customers-getByEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/edge/customers.getById": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["customers-getById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/edge/customers.can": {
         parameters: {
             query?: never;
@@ -116,6 +196,255 @@ export interface operations {
                 };
             };
         };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        customer: {
+                            id: string;
+                            projectId: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            /** Format: date-time */
+                            updatedAt: string;
+                            email: string;
+                            name: string;
+                            description: string | null;
+                            metadata: {
+                                metadataPaymentProviderSchema: {
+                                    stripe: {
+                                        customerId?: string;
+                                        defaultPaymentMethodId?: string;
+                                    };
+                                    lemonsqueezy: {
+                                        customerId?: string;
+                                        defaultPaymentMethodId?: string;
+                                    };
+                                };
+                                externalId?: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            default: components["responses"]["error"];
+        };
+    };
+    "customers-remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    id: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        customer: {
+                            id: string;
+                            projectId: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            /** Format: date-time */
+                            updatedAt: string;
+                            email: string;
+                            name: string;
+                            description: string | null;
+                            metadata: {
+                                metadataPaymentProviderSchema: {
+                                    stripe: {
+                                        customerId?: string;
+                                        defaultPaymentMethodId?: string;
+                                    };
+                                    lemonsqueezy: {
+                                        customerId?: string;
+                                        defaultPaymentMethodId?: string;
+                                    };
+                                };
+                                externalId?: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            default: components["responses"]["error"];
+        };
+    };
+    "customers-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    id: string;
+                    name: string;
+                    description?: string | null;
+                    email: string;
+                    metadata?: {
+                        metadataPaymentProviderSchema: {
+                            stripe: {
+                                customerId?: string;
+                                defaultPaymentMethodId?: string;
+                            };
+                            lemonsqueezy: {
+                                customerId?: string;
+                                defaultPaymentMethodId?: string;
+                            };
+                        };
+                        externalId?: string;
+                    } | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        customer: {
+                            id: string;
+                            projectId: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            /** Format: date-time */
+                            updatedAt: string;
+                            email: string;
+                            name: string;
+                            description: string | null;
+                            metadata: {
+                                metadataPaymentProviderSchema: {
+                                    stripe: {
+                                        customerId?: string;
+                                        defaultPaymentMethodId?: string;
+                                    };
+                                    lemonsqueezy: {
+                                        customerId?: string;
+                                        defaultPaymentMethodId?: string;
+                                    };
+                                };
+                                externalId?: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            default: components["responses"]["error"];
+        };
+    };
+    "customers-exist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    email: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        exist: boolean;
+                    };
+                };
+            };
+            default: components["responses"]["error"];
+        };
+    };
+    "customers-getByEmail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    email: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        customer: {
+                            id: string;
+                            projectId: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            /** Format: date-time */
+                            updatedAt: string;
+                            email: string;
+                            name: string;
+                            description: string | null;
+                            metadata: {
+                                metadataPaymentProviderSchema: {
+                                    stripe: {
+                                        customerId?: string;
+                                        defaultPaymentMethodId?: string;
+                                    };
+                                    lemonsqueezy: {
+                                        customerId?: string;
+                                        defaultPaymentMethodId?: string;
+                                    };
+                                };
+                                externalId?: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            default: components["responses"]["error"];
+        };
+    };
+    "customers-getById": {
+        parameters: {
+            query: {
+                id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful response */
             200: {

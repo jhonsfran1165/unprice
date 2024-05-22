@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm"
-import { index, json, primaryKey, text, unique } from "drizzle-orm/pg-core"
+import {
+  boolean,
+  index,
+  json,
+  primaryKey,
+  text,
+  unique,
+} from "drizzle-orm/pg-core"
 import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
@@ -17,6 +24,7 @@ export const customers = pgTableProject(
     name: text("name").notNull(),
     description: text("description"),
     metadata: json("metadata").$type<z.infer<typeof customerMetadataSchema>>(),
+    active: boolean("active").default(true),
     // beta features
   },
   (table) => ({

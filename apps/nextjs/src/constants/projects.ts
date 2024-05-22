@@ -74,15 +74,8 @@ export const PROJECT_TABS_CONFIG: Record<
   },
   customers: {
     titleTab: "Customers",
-    href: "/customers/overview",
-    icon: "User2",
-    sidebar: {
-      overview: {
-        title: "Customers",
-        href: "/customers/overview",
-        icon: "User2",
-      },
-    },
+    href: "/customers",
+    icon: "Users",
   },
   settings: {
     titleTab: "Settings",

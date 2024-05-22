@@ -10,6 +10,7 @@ declare class NoopCache extends Redis {
   constructor()
 }
 
+// TODO: is it a good idea to instance this here? maybe inside the class?
 const redis =
   env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN
     ? new Redis({

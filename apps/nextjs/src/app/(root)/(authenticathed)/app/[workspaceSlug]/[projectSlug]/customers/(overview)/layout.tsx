@@ -6,7 +6,7 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import TabsNav from "~/components/layout/tabs-nav"
 import { PROJECT_TABS_CONFIG } from "~/constants/projects"
-import { CustomerDialog } from "./_components/customer-dialog"
+import { CustomerDialog } from "../_components/customer-dialog"
 
 export default function CustomerLayout(props: {
   children: React.ReactNode
@@ -19,8 +19,8 @@ export default function CustomerLayout(props: {
     <DashboardShell
       header={
         <HeaderTab
-          title="Users & Subscriptions"
-          description="Manage your users and subscriptions."
+          title="All customers from your project"
+          description="Manage your customers, add new customers, update plans and more."
           action={
             <CustomerDialog>
               <Button>

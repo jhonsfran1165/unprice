@@ -59,6 +59,7 @@ export async function handleEvent(event: Stripe.Event) {
       /**
        * User is not subscribed, create a new customer and workspace
        */
+      // TODO: should be able to retry if the slug already exists
       const workspaceSlug = utils.generateSlug(2)
       const workspaceId = utils.newId("workspace")
 

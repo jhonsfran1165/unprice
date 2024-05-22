@@ -53,6 +53,7 @@ export const projectRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST", message: "Limit reached" })
       }
 
+      // TODO: should be able to retry if the slug already exists
       const projectId = utils.newId("project")
       const projectSlug = utils.generateSlug(2)
 
@@ -144,12 +145,12 @@ export const projectRouter = createTRPCRouter({
       const { slug: projectSlug, needsToBeInTier: tier } = opts.input
 
       try {
-        const { project: projectData, workspace } = await projectGuard({
+        const { project: projectData } = await projectGuard({
           projectSlug,
           ctx: opts.ctx,
         })
 
-        if (tier.includes(workspace.plan)) {
+        if (tier.includes(projectData.workspace.plan)) {
           return {
             haveAccess: true,
             isInTier: true,
@@ -158,7 +159,7 @@ export const projectRouter = createTRPCRouter({
 
         return {
           haveAccess: projectData.slug === projectSlug,
-          isInTier: tier.includes(workspace.plan),
+          isInTier: tier.includes(projectData.workspace.plan),
         }
       } catch (error) {
         return { haveAccess: false, isInTier: false }
@@ -177,12 +178,12 @@ export const projectRouter = createTRPCRouter({
       const { slug: projectSlug } = opts.input
       const userId = opts.ctx.userId
 
-      const { project: projectData, workspace } = await projectGuard({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
 
-      if (workspace.isPersonal) {
+      if (projectData.workspace.isPersonal) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Project is already in the personal workspace",
@@ -252,12 +253,12 @@ export const projectRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { targetWorkspaceId, projectSlug } = opts.input
 
-      const { project: projectData, workspace } = await projectGuard({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
 
-      if (workspace.id === targetWorkspaceId) {
+      if (projectData.workspaceId === targetWorkspaceId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Project is already in the target workspace",
@@ -424,7 +425,7 @@ export const projectRouter = createTRPCRouter({
     .query(async (opts) => {
       const { slug: projectSlug } = opts.input
 
-      const { project: projectData, workspace } = await projectGuard({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -432,7 +433,7 @@ export const projectRouter = createTRPCRouter({
       return {
         project: {
           ...projectData,
-          workspace: workspace,
+          workspace: projectData.workspace,
         },
       }
     }),
@@ -448,7 +449,7 @@ export const projectRouter = createTRPCRouter({
     .query(async (opts) => {
       const { id: projectId } = opts.input
 
-      const { project: projectData, workspace } = await projectGuard({
+      const { project: projectData } = await projectGuard({
         projectId,
         ctx: opts.ctx,
       })
@@ -456,7 +457,7 @@ export const projectRouter = createTRPCRouter({
       return {
         project: {
           ...projectData,
-          workspace: workspace,
+          workspace: projectData.workspace,
         },
       }
     }),

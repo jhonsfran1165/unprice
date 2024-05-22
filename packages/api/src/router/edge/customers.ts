@@ -9,6 +9,7 @@ import {
   customerInsertBaseSchema,
   customerSelectSchema,
   searchDataParamsSchema,
+  subscriptionSelectSchema,
 } from "@builderai/db/validators"
 
 import { deniedReasonSchema } from "../../pkg/errors"
@@ -16,8 +17,8 @@ import {
   createTRPCRouter,
   protectedActiveProjectProcedure,
   protectedApiOrActiveProjectProcedure,
-  protectedApiProcedure,
 } from "../../trpc"
+import { featureGuard } from "../../utils/feature-guard"
 import { reportUsageFeature, verifyFeature } from "../../utils/shared"
 
 export const customersRouter = createTRPCRouter({
@@ -35,44 +36,17 @@ export const customersRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { description, name, email, metadata } = opts.input
       const { apiKey, project, ...ctx } = opts.ctx
-      const workspaceId = project.workspaceId
+
       const unpriceCustomerId = project.workspace.unPriceCustomerId
+      const workspaceId = project.workspaceId
+
+      await featureGuard({
+        project,
+        featureSlug: "customers",
+        ctx,
+      })
 
       const customerId = utils.newId("customer")
-
-      const { access, deniedReason, currentUsage, limit } = await verifyFeature(
-        {
-          customerId: unpriceCustomerId,
-          featureSlug: "domains",
-          projectId: project.id,
-          workspaceId: workspaceId,
-          ctx: ctx,
-        }
-      )
-
-      if (!access) {
-        if (deniedReason === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message:
-              "Your plan does not have access to this feature, please upgrade your plan",
-          })
-        }
-
-        if (limit && currentUsage >= limit) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message:
-              "You have reached the limit of customers, please upgrade your plan",
-          })
-        }
-
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message:
-            "You don't have access to this feature, please upgrade your plan",
-        })
-      }
 
       const customerData = await opts.ctx.db
         .insert(schema.customers)
@@ -96,7 +70,7 @@ export const customersRouter = createTRPCRouter({
 
       waitUntil(
         reportUsageFeature({
-          customerId: workspaceId,
+          customerId: unpriceCustomerId,
           featureSlug: "customers",
           projectId: project.id,
           workspaceId: workspaceId,
@@ -110,12 +84,28 @@ export const customersRouter = createTRPCRouter({
       }
     }),
 
-  remove: protectedActiveProjectProcedure
+  remove: protectedApiOrActiveProjectProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/edge/customers.remove",
+        protect: true,
+      },
+    })
     .input(customerSelectSchema.pick({ id: true }))
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
       const { id } = opts.input
-      const project = opts.ctx.project
+      const { apiKey, project, ...ctx } = opts.ctx
+
+      const unpriceCustomerId = project.workspace.unPriceCustomerId
+      const workspaceId = project.workspaceId
+
+      await featureGuard({
+        project,
+        featureSlug: "customers",
+        ctx,
+      })
 
       const deletedCustomer = await opts.ctx.db
         .delete(schema.customers)
@@ -135,11 +125,29 @@ export const customersRouter = createTRPCRouter({
         })
       }
 
+      waitUntil(
+        reportUsageFeature({
+          customerId: unpriceCustomerId,
+          featureSlug: "customers",
+          projectId: project.id,
+          workspaceId: workspaceId,
+          ctx: ctx,
+          usage: -1,
+        })
+      )
+
       return {
         customer: deletedCustomer,
       }
     }),
-  update: protectedActiveProjectProcedure
+  update: protectedApiOrActiveProjectProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/edge/customers.update",
+        protect: true,
+      },
+    })
     .input(
       customerSelectSchema
         .pick({
@@ -157,7 +165,13 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
       const { email, id, description, metadata, name } = opts.input
-      const project = opts.ctx.project
+      const { apiKey, project, ...ctx } = opts.ctx
+
+      await featureGuard({
+        project,
+        featureSlug: "customers",
+        ctx,
+      })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         where: (feature, { eq, and }) =>
@@ -205,7 +219,15 @@ export const customersRouter = createTRPCRouter({
         customer: updatedCustomer,
       }
     }),
-  exist: protectedActiveProjectProcedure
+  // is it a mutation because we need to call it from the client async
+  exist: protectedApiOrActiveProjectProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/edge/customers.exist",
+        protect: true,
+      },
+    })
     .input(customerSelectSchema.pick({ email: true }))
     .output(z.object({ exist: z.boolean() }))
     .mutation(async (opts) => {
@@ -224,7 +246,15 @@ export const customersRouter = createTRPCRouter({
         exist: !!customerData,
       }
     }),
-  getByEmail: protectedActiveProjectProcedure
+  // is it a mutation because we need to call it from the client async
+  getByEmail: protectedApiOrActiveProjectProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/edge/customers.getByEmail",
+        protect: true,
+      },
+    })
     .input(customerSelectSchema.pick({ email: true }))
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
@@ -247,7 +277,14 @@ export const customersRouter = createTRPCRouter({
         customer: customerData,
       }
     }),
-  getById: protectedActiveProjectProcedure
+  getById: protectedApiOrActiveProjectProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/edge/customers.getById",
+        protect: true,
+      },
+    })
     .input(customerSelectSchema.pick({ id: true }))
     .output(z.object({ customer: customerSelectSchema }))
     .query(async (opts) => {
@@ -271,6 +308,45 @@ export const customersRouter = createTRPCRouter({
       }
     }),
 
+  getSubscriptions: protectedApiOrActiveProjectProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/edge/customers.getSubscriptions",
+        protect: true,
+      },
+    })
+    .input(customerSelectSchema.pick({ id: true }))
+    .output(
+      z.object({
+        customer: customerSelectSchema.extend({
+          subscriptions: subscriptionSelectSchema.array(),
+        }),
+      })
+    )
+    .query(async (opts) => {
+      const { id } = opts.input
+      const project = opts.ctx.project
+
+      const customerData = await opts.ctx.db.query.customers.findFirst({
+        with: {
+          subscriptions: true,
+        },
+        where: (customer, { eq, and }) =>
+          and(eq(customer.projectId, project.id), eq(customer.id, id)),
+      })
+
+      if (!customerData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
+        })
+      }
+
+      return {
+        customer: customerData,
+      }
+    }),
   listByActiveProject: protectedActiveProjectProcedure
     .input(searchDataParamsSchema)
     .output(z.object({ customers: z.array(customerSelectSchema) }))
@@ -300,7 +376,7 @@ export const customersRouter = createTRPCRouter({
     }),
 
   // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_6hASRQKH7vsq5WQH", featureSlug: "access" }}}))
-  can: protectedApiProcedure
+  can: protectedApiOrActiveProjectProcedure
     .meta({
       openapi: {
         method: "GET",
@@ -336,7 +412,7 @@ export const customersRouter = createTRPCRouter({
       })
     }),
   // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_6hASRQKH7vsq5WQH", featureSlug: "access", usage: 10}}}))
-  reportUsage: protectedApiProcedure
+  reportUsage: protectedApiOrActiveProjectProcedure
     .meta({
       openapi: {
         method: "GET",

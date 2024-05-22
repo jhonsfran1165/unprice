@@ -394,6 +394,76 @@ export class Unprice {
         })
       },
 
+      update: async (
+        req: paths["/edge/customers.update"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.update"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.update"],
+          method: "POST",
+          body: req,
+        })
+      },
+
+      remove: async (
+        req: paths["/edge/customers.remove"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.remove"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.remove"],
+          method: "POST",
+          body: req,
+        })
+      },
+
+      exist: async (
+        req: paths["/edge/customers.exist"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.exist"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.exist"],
+          method: "POST",
+          body: req,
+        })
+      },
+
+      getByEmail: async (
+        req: paths["/edge/customers.getByEmail"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.getByEmail"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.getByEmail"],
+          method: "POST",
+          body: req,
+        })
+      },
+
+      getById: async (
+        req: paths["/edge/customers.getById"]["get"]["parameters"]["query"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.getById"]["get"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.getById"],
+          method: "GET",
+          query: req,
+        })
+      },
+
       can: async (
         req: paths["/edge/customers.can"]["get"]["parameters"]["query"]
       ): Promise<

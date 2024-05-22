@@ -2,17 +2,15 @@ import { TRPCError } from "@trpc/server"
 
 import { prepared } from "@builderai/db"
 import type {
-  Project,
+  ProjectExtended,
   User,
-  Workspace,
   WorkspaceRole,
 } from "@builderai/db/validators"
 
 import type { Context } from "../trpc"
 
 interface ProjectGuardType {
-  project: Project
-  workspace: Workspace
+  project: ProjectExtended
   member: User & { role: WorkspaceRole }
   verifyRole: (roles: WorkspaceRole[]) => void
 }
@@ -102,9 +100,12 @@ export const projectGuard = async ({
     }
   }
 
+  // TODO: fix the query so we can we ProjectExtended without this
   return {
-    project: project,
-    workspace: workspace,
+    project: {
+      ...project,
+      workspace,
+    } as ProjectExtended,
     member: member,
     verifyRole,
   }

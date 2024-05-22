@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import type { ColumnDef } from "@tanstack/react-table"
 
 import type { Customer } from "@builderai/db/validators"
@@ -39,7 +40,11 @@ export const columns: ColumnDef<Customer>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Name" />
     ),
-    cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+    cell: ({ row }) => (
+      <Link href={`./customers/${row.original.id}`} prefetch={false}>
+        <div className="lowercase">{row.getValue("name")}</div>
+      </Link>
+    ),
   },
   {
     accessorKey: "email",

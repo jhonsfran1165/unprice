@@ -78,6 +78,7 @@ export const authConfig = {
 
       // create the workspace for the user and then add it as a member
       await db.transaction(async (db) => {
+        // TODO: should be able to retry if the slug already exists
         const slug = utils.generateSlug(2)
         const customerId = utils.newId("customer")
         const workspaceId = utils.newId("workspace")

@@ -63,6 +63,7 @@ export const db =
     ? withReplicas(primary, [read1, read2])
     : withReplicas(primary, [primary])
 
+// TODO: do we need all data from the tables?
 const projectGuardPrepared = db
   .select({
     project: getTableColumns(schema.projects),
@@ -156,12 +157,15 @@ const apiKeyPrepared = db.query.apikeys
           workspaceId: true,
           id: true,
           enabled: true,
+          slug: true,
         },
         with: {
           workspace: {
             columns: {
               enabled: true,
               unPriceCustomerId: true,
+              isPersonal: true,
+              plan: true,
             },
           },
         },

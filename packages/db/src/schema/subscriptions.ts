@@ -17,7 +17,11 @@ import type {
   subscriptionMetadataSchema,
 } from "../validators/subscription"
 import { customers } from "./customers"
-import { collectionMethodEnum, subscriptionStatusEnum } from "./enums"
+import {
+  collectionMethodEnum,
+  subscriptionStatusEnum,
+  typeSubscriptionEnum,
+} from "./enums"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
 
@@ -42,6 +46,7 @@ export const subscriptions = pgTableProject(
     planVersionId: cuid("plan_version_id").notNull(),
     // TODO: support addons - every addon should have a subscription
     // addonId: cuid("addon_id"),
+    type: typeSubscriptionEnum("type").default("plan").notNull(),
 
     // subscription trial period
     // TODO: I can configure this from the plan version

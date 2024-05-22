@@ -164,7 +164,7 @@ export function DataTableRowActions<TData>({
                     {plan.versions.map((version) => {
                       return (
                         <SelectItem key={version.id} value={version.id}>
-                          {`${version.title} - ${version.currency}`}
+                          {`${version.title} - ${version.currency} - ${version.version}`}
                         </SelectItem>
                       )
                     })}

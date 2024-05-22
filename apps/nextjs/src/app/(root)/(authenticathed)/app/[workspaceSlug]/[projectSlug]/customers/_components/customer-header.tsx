@@ -1,5 +1,3 @@
-import { BadgeCheck } from "lucide-react"
-
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
@@ -13,49 +11,45 @@ import {
 } from "@builderai/ui/card"
 import { Separator } from "@builderai/ui/separator"
 
-import { PlanVersionDialog } from "../[planSlug]/_components/plan-version-dialog"
-import { PlanActions } from "./plan-actions"
+import { CustomerActions } from "./customer-actions"
+import { CustomerDialog } from "./customer-dialog"
 
 export const runtime = "edge"
 
-export default function PlanHeader(props: {
+export default function CustomerHeader(props: {
   workspaceSlug: string
   projectSlug: string
-  planVersionId: string
-  plan: RouterOutputs["plans"]["getBySlug"]["plan"]
+  customer: RouterOutputs["customers"]["getById"]["customer"]
   className?: string
 }) {
-  const { plan } = props
+  const { customer } = props
   return (
     <Card>
       <div className="flex flex-row justify-between">
         <div className="flex flex-col">
           <CardHeader className="pb-3">
-            <CardTitle>{plan.slug.toUpperCase()}</CardTitle>
-            <CardDescription className="line-clamp-2 h-12 max-w-lg text-balance leading-relaxed">
-              {plan.description}
+            <CardTitle>{customer.name}</CardTitle>
+            <CardDescription className="line-clamp-2 max-w-lg text-balance leading-relaxed">
+              {customer.email}
+            </CardDescription>
+
+            <CardDescription className="text-normal line-clamp-2 max-w-lg text-balance leading-relaxed">
+              {customer.description}
             </CardDescription>
           </CardHeader>
           <CardFooter>
             <div className="flex space-x-2">
               <Badge
                 className={cn({
-                  success: plan.active,
-                  danger: !plan.active,
+                  success: customer.active,
+                  danger: !customer.active,
                 })}
               >
                 <span className="flex h-2 w-2 rounded-full bg-success-solid" />
                 <span className="ml-1">
-                  {plan.active ? "active" : "inactive"}
+                  {customer.active ? "active" : "inactive"}
                 </span>
               </Badge>
-
-              {plan.defaultPlan && (
-                <Badge>
-                  <BadgeCheck className="h-3 w-3" />
-                  <span className="ml-1">{"default"}</span>
-                </Badge>
-              )}
             </div>
           </CardFooter>
         </div>
@@ -63,25 +57,21 @@ export default function PlanHeader(props: {
         <div className="flex items-center px-6">
           <div className="button-primary flex items-center space-x-1 rounded-md ">
             <div className="sm:col-span-full">
-              <PlanVersionDialog
+              {/* // TODO: should be add subscription */}
+              <CustomerDialog
                 defaultValues={{
-                  planId: plan.id,
-                  description: plan.description,
-                  title: plan.slug,
-                  projectId: plan.projectId,
-                  // TODO: use default currency from org settings
-                  currency: "USD",
-                  planType: "recurring",
-                  paymentProvider: "stripe",
+                  name: customer.name,
+                  description: customer.description,
+                  email: customer.email,
                 }}
               >
-                <Button variant={"custom"}>Add Version</Button>
-              </PlanVersionDialog>
+                <Button variant={"custom"}>Add Subscription</Button>
+              </CustomerDialog>
             </div>
 
             <Separator orientation="vertical" className="h-[20px] p-0" />
 
-            <PlanActions plan={plan} />
+            <CustomerActions customer={customer} />
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq } from "@builderai/db"
+import { and, eq, sql } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
@@ -77,6 +77,17 @@ export const planVersionRouter = createTRPCRouter({
             .returning()
             .then((re) => re[0])
 
+          const countVersionsPlan = await opts.ctx.db
+            .select({ count: sql<number>`count(*)` })
+            .from(schema.versions)
+            .where(
+              and(
+                eq(schema.versions.projectId, project.id),
+                eq(schema.versions.planId, planId)
+              )
+            )
+            .then((res) => res[0]?.count ?? 0)
+
           const planVersionData = await tx
             .insert(schema.versions)
             .values({
@@ -86,7 +97,6 @@ export const planVersionRouter = createTRPCRouter({
               description,
               title: title ?? planData.slug,
               tags: tags ?? [],
-
               status: status ?? "draft",
               paymentProvider,
               planType,
@@ -98,6 +108,7 @@ export const planVersionRouter = createTRPCRouter({
               gracePeriod: gracePeriod ?? 0,
               whenToBill: whenToBill ?? "pay_in_advance",
               metadata,
+              version: countVersionsPlan + 1,
             })
             .returning()
             .catch((err) => {

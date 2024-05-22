@@ -2,6 +2,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import * as schema from "../schema"
+import { workspaceSelectBase } from "./workspace"
 
 export const projectInserBaseSchema = createInsertSchema(schema.projects, {
   slug: z.string().min(1),
@@ -22,6 +23,22 @@ export const renameProjectSchema = projectSelectBaseSchema.pick({
   slug: true,
   name: true,
 })
+
+export const projectExtendedSelectSchema = projectSelectBaseSchema
+  .pick({
+    id: true,
+    enabled: true,
+    workspaceId: true,
+    slug: true,
+  })
+  .extend({
+    workspace: workspaceSelectBase.pick({
+      unPriceCustomerId: true,
+      enabled: true,
+      plan: true,
+      isPersonal: true,
+    }),
+  })
 
 export const deleteProjectSchema = z.object({
   slug: z.string(),
@@ -45,3 +62,5 @@ export type ProjectTransferToWorkspace = z.infer<
 export type ProjectTransferToPersonal = z.infer<
   typeof transferToPersonalProjectSchema
 >
+
+export type ProjectExtended = z.infer<typeof projectExtendedSelectSchema>

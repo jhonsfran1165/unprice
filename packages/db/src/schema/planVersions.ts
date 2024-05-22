@@ -91,6 +91,8 @@ export const versions = pgTableProject(
 
     // metadata probably will be useful to save external data, etc.
     metadata: json("metadata").$type<PlanVersionMetadata>(),
+
+    version: integer("version").default(1).notNull(),
   },
   (table) => ({
     planfk: foreignKey({
