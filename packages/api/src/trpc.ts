@@ -8,19 +8,18 @@
  */
 import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import { initTRPC, TRPCError } from "@trpc/server"
-import { waitUntil } from "@vercel/functions"
 import { ZodError } from "zod"
 
 import type { NextAuthRequest, Session } from "@builderai/auth/server"
 import { auth } from "@builderai/auth/server"
-import { db, eq, prepared } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
+import { db } from "@builderai/db"
 import { Analytics } from "@builderai/tinybird"
 
 import { env } from "./env.mjs"
 import { UnpriceCache } from "./pkg/cache"
 import { transformer } from "./transformer"
 import { projectGuard } from "./utils"
+import { apikeyGuard } from "./utils/apaikey-guard"
 import { workspaceGuard } from "./utils/workspace-guard"
 
 /**
@@ -35,7 +34,7 @@ import { workspaceGuard } from "./utils/workspace-guard"
 interface CreateContextOptions {
   headers: Headers
   session: Session | null
-  apiKey?: string | null
+  apikey?: string | null
   req?: NextAuthRequest
   activeWorkspaceSlug: string
   activeProjectSlug: string
@@ -73,7 +72,7 @@ export const createTRPCContext = async (opts: {
 }) => {
   const session = opts.session ?? (await auth())
   const userId = session?.user?.id ?? "unknown"
-  const apiKey = opts.headers.get("x-builderai-api-key")
+  const apikey = opts.headers.get("x-builderai-api-key")
   const source = opts.headers.get("x-trpc-source") ?? "unknown"
 
   // for client side we set the cookie on focus tab event
@@ -102,7 +101,7 @@ export const createTRPCContext = async (opts: {
 
   return createInnerTRPCContext({
     session,
-    apiKey,
+    apikey,
     headers: opts.headers,
     req: opts.req,
     activeWorkspaceSlug,
@@ -190,7 +189,6 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 // this way we can have a single endpoint for all requests and not have to pass the workspace slug in the body of the request every time
 export const protectedActiveWorkspaceProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
-    // TODO: use utils here
     const activeWorkspaceSlug = ctx.activeWorkspaceSlug
 
     if (!activeWorkspaceSlug) {
@@ -251,57 +249,25 @@ export const protectedActiveWorkspaceOwnerProcedure =
 export const protectedApiOrActiveProjectProcedure = t.procedure.use(
   async ({ ctx, next }) => {
     const activeProjectSlug = ctx.activeProjectSlug
-    const apiKey = ctx.apiKey
+    const apikey = ctx.apikey
 
     // Check db for API key if apiKey is present
-    if (apiKey) {
-      // TODO: does it make sense to cache this in redis
-      const apiKeyData = await prepared.apiKeyPrepared.execute({
-        apiKey,
+    if (apikey) {
+      const { apiKey } = await apikeyGuard({
+        apikey,
+        ctx,
       })
-
-      if (!apiKeyData) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Api key not found",
-        })
-      }
-
-      if (apiKeyData.revokedAt !== null) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Api key is revoked",
-        })
-      }
-
-      if (apiKeyData.expiresAt && apiKeyData.expiresAt < new Date()) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Api key is expired",
-        })
-      }
-
-      // update last used in background
-      waitUntil(
-        ctx.db
-          .update(schema.apikeys)
-          .set({
-            lastUsed: new Date(),
-          })
-          .where(eq(schema.apikeys.id, apiKeyData.id))
-          .execute()
-      )
 
       return next({
         ctx: {
           // pass the project data to the context to ensure all changes are applied to the correct project
-          project: apiKeyData.project,
-          apiKey: apiKeyData,
+          project: apiKey.project,
+          apiKey: apiKey,
         },
       })
     } else {
       if (!ctx.session?.user?.id) {
-        throw new TRPCError({ code: "UNAUTHORIZED" })
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "User not found" })
       }
 
       const data = await projectGuard({
@@ -355,47 +321,16 @@ export const protectedActiveProjectAdminProcedure =
  * Procedure to authenticate API requests with an API key
  */
 export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
-  const apiKey = ctx.apiKey
+  const apikey = ctx.apikey
 
-  if (!apiKey) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Api key not found in headers",
-    })
-  }
-
-  // Check db for API key
-  // TODO: does it make sense to cache this in redis
-  const apiKeyData = await prepared.apiKeyPrepared.execute({
-    apiKey,
+  const { apiKey } = await apikeyGuard({
+    apikey,
+    ctx,
   })
-
-  if (!apiKeyData) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Api key not found" })
-  }
-
-  if (apiKeyData.revokedAt !== null) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Api key is revoked" })
-  }
-
-  if (apiKeyData.expiresAt && apiKeyData.expiresAt < new Date()) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Api key is expired" })
-  }
-
-  // update last used in background
-  waitUntil(
-    ctx.db
-      .update(schema.apikeys)
-      .set({
-        lastUsed: new Date(),
-      })
-      .where(eq(schema.apikeys.id, apiKeyData.id))
-      .execute()
-  )
 
   return next({
     ctx: {
-      apiKey: apiKeyData,
+      apiKey: apiKey,
     },
   })
 })

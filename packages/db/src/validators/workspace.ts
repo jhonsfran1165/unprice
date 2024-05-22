@@ -75,6 +75,8 @@ export const workspacesJWTPayload = selectWorkspaceSchema
     slug: true,
     isPersonal: true,
     plan: true,
+    enabled: true,
+    unPriceCustomerId: true,
   })
   .extend({
     role: membersSelectBase.shape.role,

@@ -68,6 +68,23 @@ export const apiKeyRouter = createTRPCRouter({
     )
     .mutation(async (opts) => {
       const { projectSlug, name, expiresAt } = opts.input
+      const { workspaces, email } = opts.ctx.session.user
+
+      const workspaceName = workspaces?.[0]?.slug ?? email
+
+      if (!workspaceName) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Workspace name is required",
+        })
+      }
+
+      if (!email) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "email is required",
+        })
+      }
 
       const { project } = await projectGuard({
         projectSlug,

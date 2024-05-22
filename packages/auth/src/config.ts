@@ -79,7 +79,24 @@ export const authConfig = {
       // create the workspace for the user and then add it as a member
       await db.transaction(async (db) => {
         const slug = utils.generateSlug(2)
+        const customerId = utils.newId("customer")
         const workspaceId = utils.newId("workspace")
+        const workspaceName = user.name ?? slug
+
+        const unpriceCustomer = await db
+          .insert(schema.customers)
+          .values({
+            id: customerId,
+            name: workspaceName,
+            email: user.email,
+            projectId: "proj_KRrmfCoBuoDmq8HZ", // TODO: this should be a env variable for the default unprice project
+          })
+          .execute()
+
+        if (!unpriceCustomer) {
+          db.rollback()
+          throw "Error creating customer"
+        }
 
         const workspace = await db
           .insert(schema.workspaces)
@@ -90,6 +107,8 @@ export const authConfig = {
             imageUrl: user.image,
             isPersonal: true,
             createdBy: user.id,
+            enabled: true,
+            unPriceCustomerId: customerId,
           })
           .onConflictDoNothing()
           .returning()
@@ -177,6 +196,8 @@ export const authConfig = {
           role: member.role,
           isPersonal: member.workspace.isPersonal,
           plan: member.workspace.plan,
+          enabled: member.workspace.enabled,
+          unPriceCustomerId: member.workspace.unPriceCustomerId,
         }))
 
         token.workspaces = workspaces ? workspaces : []

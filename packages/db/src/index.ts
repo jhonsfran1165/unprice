@@ -136,6 +136,8 @@ const workspacesByUserPrepared = db.query.users
               isPersonal: true,
               name: true,
               plan: true,
+              enabled: true,
+              unPriceCustomerId: true,
             },
           },
         },
@@ -153,6 +155,15 @@ const apiKeyPrepared = db.query.apikeys
         columns: {
           workspaceId: true,
           id: true,
+          enabled: true,
+        },
+        with: {
+          workspace: {
+            columns: {
+              enabled: true,
+              unPriceCustomerId: true,
+            },
+          },
         },
       },
     },
@@ -164,7 +175,7 @@ const apiKeyPrepared = db.query.apikeys
       revokedAt: true,
     },
     where: (apikey, { and, eq }) =>
-      and(eq(apikey.key, sql.placeholder("apiKey"))),
+      and(eq(apikey.key, sql.placeholder("apikey"))),
   })
   .prepare("apikey_prepared")
 

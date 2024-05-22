@@ -36,18 +36,14 @@ export const customersRouter = createTRPCRouter({
       const { description, name, email, metadata } = opts.input
       const { apiKey, project, ...ctx } = opts.ctx
       const workspaceId = project.workspaceId
-
-      // const customer = await unprice.customers.create({
-      //   name: workspaceId,
-      //   email: email,
-      // })
+      const unpriceCustomerId = project.workspace.unPriceCustomerId
 
       const customerId = utils.newId("customer")
 
       const { access, deniedReason, currentUsage, limit } = await verifyFeature(
         {
-          customerId: workspaceId,
-          featureSlug: "customers",
+          customerId: unpriceCustomerId,
+          featureSlug: "domains",
           projectId: project.id,
           workspaceId: workspaceId,
           ctx: ctx,
