@@ -2,6 +2,7 @@ import { pgEnum } from "drizzle-orm/pg-core"
 
 import {
   AGGREGATION_METHODS,
+  COLLECTION_METHODS,
   CURRENCIES,
   FEATURE_TYPES,
   PAYMENT_PROVIDERS,
@@ -13,6 +14,7 @@ import {
   STAGES,
   STATUS_PLAN,
   STATUS_SUBSCRIPTION,
+  SUBSCRIPTION_TYPES,
   TIER_MODES,
   USAGE_MODES,
   WHEN_TO_BILLING,
@@ -46,12 +48,11 @@ export const planBillingPeriodEnum = pgEnum(
 )
 export const planTypeEnum = pgEnum("plan_type", PLAN_TYPES)
 export const whenToBillEnum = pgEnum("when_to_bill", WHEN_TO_BILLING)
-export const collectionMethodEnum = pgEnum("collection_method", [
-  "charge_automatically",
-  "send_invoice",
-])
-
-export const typeSubscriptionEnum = pgEnum("subscription_type", [
-  "plan",
-  "addon",
-])
+export const collectionMethodEnum = pgEnum(
+  "collection_method",
+  COLLECTION_METHODS
+)
+export const typeSubscriptionEnum = pgEnum(
+  "subscription_type",
+  SUBSCRIPTION_TYPES
+)

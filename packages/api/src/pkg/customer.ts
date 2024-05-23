@@ -146,6 +146,96 @@ export class UnpriceCustomer {
     return Ok(customer.subscriptions)
   }
 
+  public async getEntitlements(opts: {
+    customerId: string
+    projectId: string
+  }): Promise<
+    Result<{ entitlements: string[] }, UnPriceCustomerError | FetchError>
+  > {
+    const res = await this.cache.getCustomerEntitlements(opts.customerId)
+
+    if (res.err) {
+      // TODO: sent log
+      console.error(`Error getting cache for customer: ${res.err.message}`)
+    }
+
+    if (res.val && res.val.length > 0) {
+      return Ok({ entitlements: res.val })
+    }
+
+    const customer = await this.db.query.customers.findFirst({
+      with: {
+        subscriptions: {
+          columns: {
+            id: true,
+          },
+          where: (sub, { eq }) => eq(sub.status, "active"),
+          orderBy(fields, operators) {
+            return [operators.desc(fields.startDate)]
+          },
+          with: {
+            planVersion: {
+              columns: {
+                id: true,
+              },
+              with: {
+                planFeatures: {
+                  columns: {
+                    id: true,
+                  },
+                  with: {
+                    feature: {
+                      columns: {
+                        slug: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      where: (customer, { eq, and }) =>
+        and(
+          eq(customer.id, opts.customerId),
+          eq(customer.projectId, opts.projectId)
+        ),
+    })
+
+    if (!customer) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "CUSTOMER_NOT_FOUND",
+          customerId: opts.customerId,
+        })
+      )
+    }
+
+    if (!customer.subscriptions || customer.subscriptions.length === 0) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "CUSTOMER_HAS_NO_SUBSCRIPTIONS",
+          customerId: opts.customerId,
+        })
+      )
+    }
+
+    // get entitlements for every subscriptions, entitlements won't be repeated
+    const entitlements = Array.from(
+      new Set(
+        customer.subscriptions.flatMap((sub) =>
+          sub.planVersion.planFeatures.map((pf) => pf.feature.slug)
+        )
+      )
+    )
+
+    // cache the active entitlements
+    waitUntil(this.cache.setCustomerEntitlements(customer.id, entitlements))
+
+    return Ok({ entitlements })
+  }
+
   public async getCustomerActiveSubByFeature(opts: {
     customerId: string
     projectId: string

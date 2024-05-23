@@ -24,7 +24,7 @@ export default async function AuthenticatedLayout(props: {
         <TailwindIndicator />
       </SessionProvider>
       {/* <Analytics /> */}
-      <Toaster richColors closeButton />
+      <Toaster richColors closeButton position="bottom-left" />
     </>
   )
 }

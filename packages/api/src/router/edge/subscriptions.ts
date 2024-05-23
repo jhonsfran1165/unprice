@@ -11,7 +11,6 @@ import {
   subscriptionSelectSchema,
 } from "@builderai/db/validators"
 
-import { UnpriceCache } from "../../pkg/cache"
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
@@ -36,7 +35,11 @@ export const subscriptionRouter = createTRPCRouter({
 
       const versionData = await opts.ctx.db.query.versions.findFirst({
         with: {
-          planFeatures: true,
+          planFeatures: {
+            with: {
+              feature: true,
+            },
+          },
         },
         where(fields, operators) {
           return operators.and(
@@ -57,7 +60,8 @@ export const subscriptionRouter = createTRPCRouter({
       if (versionData.status !== "published") {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Plan version is not published",
+          message:
+            "Plan version is not published, only published versions can be subscribed to",
         })
       }
 
@@ -95,7 +99,8 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      // check the active subscriptions of the customer. The plan version the customer is attempting to subscript can't any feature that the customer already has
+      // check the active subscriptions of the customer.
+      // The plan version the customer is attempting to subscript can't have any feature that the customer already has
       const activeSubscriptions = customerData.subscriptions
       const activeFeatures = activeSubscriptions.flatMap((sub) =>
         sub.planVersion.planFeatures.map((f) => f.id)
@@ -122,17 +127,18 @@ export const subscriptionRouter = createTRPCRouter({
 
           const limit = feature.limit
 
+          // TODO: what if I try to validate all of this from the schema?
           if (feature.featureType !== "usage" && quantity === undefined) {
             throw new TRPCError({
               code: "CONFLICT",
-              message: "Feature quantity not provided",
+              message: `Feature ${feature.feature.slug} is not a usage based feature and requires a quantity`,
             })
           }
 
           if (limit && quantity && quantity > limit) {
             throw new TRPCError({
               code: "CONFLICT",
-              message: "Feature quantity exceeds the limit",
+              message: `Feature ${feature.feature.slug} has a limit of ${limit} and the quantity is ${quantity}`,
             })
           }
 
@@ -171,8 +177,6 @@ export const subscriptionRouter = createTRPCRouter({
           message: "Error creating subscription",
         })
       }
-
-      const cache = new UnpriceCache()
 
       // every time a subscription is created, we need to update the cache
       waitUntil(
@@ -251,7 +255,7 @@ export const subscriptionRouter = createTRPCRouter({
               return
             }
 
-            await cache.setCustomerActiveSubs(
+            await opts.ctx.cache.setCustomerActiveSubs(
               customer.id,
               customer?.subscriptions ?? []
             )

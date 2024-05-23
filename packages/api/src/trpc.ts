@@ -95,7 +95,10 @@ export const createTRPCContext = async (opts: {
     tinybirdToken: env.TINYBIRD_TOKEN,
   })
 
-  const cache = new UnpriceCache()
+  const cache = new UnpriceCache({
+    url: env.UPSTASH_REDIS_REST_URL,
+    token: env.UPSTASH_REDIS_REST_TOKEN,
+  })
 
   console.log(">>> tRPC Request from", source, "by", userId)
 

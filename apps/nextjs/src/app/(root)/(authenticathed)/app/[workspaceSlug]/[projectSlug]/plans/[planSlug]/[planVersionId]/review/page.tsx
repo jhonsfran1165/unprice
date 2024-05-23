@@ -20,7 +20,6 @@ export default async function ReviewPage({
 
   const { planVersion } = await api.planVersions.getById({
     id: planVersionId,
-    planSlug,
   })
 
   if (!planVersion) {

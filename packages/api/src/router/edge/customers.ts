@@ -8,6 +8,8 @@ import * as utils from "@builderai/db/utils"
 import {
   customerInsertBaseSchema,
   customerSelectSchema,
+  planSelectBaseSchema,
+  planVersionSelectBaseSchema,
   searchDataParamsSchema,
   subscriptionSelectSchema,
 } from "@builderai/db/validators"
@@ -15,11 +17,15 @@ import {
 import { deniedReasonSchema } from "../../pkg/errors"
 import {
   createTRPCRouter,
-  protectedActiveProjectProcedure,
   protectedApiOrActiveProjectProcedure,
 } from "../../trpc"
+import { entitlementGuard } from "../../utils/entitlement-guard"
 import { featureGuard } from "../../utils/feature-guard"
-import { reportUsageFeature, verifyFeature } from "../../utils/shared"
+import {
+  getEntitlements,
+  reportUsageFeature,
+  verifyFeature,
+} from "../../utils/shared"
 
 export const customersRouter = createTRPCRouter({
   // TODO: create should support apikeys as well
@@ -101,7 +107,8 @@ export const customersRouter = createTRPCRouter({
       const unpriceCustomerId = project.workspace.unPriceCustomerId
       const workspaceId = project.workspaceId
 
-      await featureGuard({
+      // we just need to validate the entitlements
+      await entitlementGuard({
         project,
         featureSlug: "customers",
         ctx,
@@ -167,7 +174,8 @@ export const customersRouter = createTRPCRouter({
       const { email, id, description, metadata, name } = opts.input
       const { apiKey, project, ...ctx } = opts.ctx
 
-      await featureGuard({
+      // we just need to validate the entitlements
+      await entitlementGuard({
         project,
         featureSlug: "customers",
         ctx,
@@ -232,7 +240,14 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ exist: z.boolean() }))
     .mutation(async (opts) => {
       const { email } = opts.input
-      const project = opts.ctx.project
+      const { apiKey, project, ...ctx } = opts.ctx
+
+      // we just need to validate the entitlements
+      await entitlementGuard({
+        project,
+        featureSlug: "customers",
+        ctx,
+      })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         columns: {
@@ -259,7 +274,14 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
       const { email } = opts.input
-      const project = opts.ctx.project
+      const { apiKey, project, ...ctx } = opts.ctx
+
+      // we just need to validate the entitlements
+      await entitlementGuard({
+        project,
+        featureSlug: "customers",
+        ctx,
+      })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         where: (customer, { eq, and }) =>
@@ -289,7 +311,14 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ customer: customerSelectSchema }))
     .query(async (opts) => {
       const { id } = opts.input
-      const project = opts.ctx.project
+      const { apiKey, project, ...ctx } = opts.ctx
+
+      // we just need to validate the entitlements
+      await entitlementGuard({
+        project,
+        featureSlug: "customers",
+        ctx,
+      })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         where: (customer, { eq, and }) =>
@@ -320,17 +349,38 @@ export const customersRouter = createTRPCRouter({
     .output(
       z.object({
         customer: customerSelectSchema.extend({
-          subscriptions: subscriptionSelectSchema.array(),
+          subscriptions: subscriptionSelectSchema
+            .extend({
+              planVersion: planVersionSelectBaseSchema.extend({
+                plan: planSelectBaseSchema,
+              }),
+            })
+            .array(),
         }),
       })
     )
     .query(async (opts) => {
       const { id } = opts.input
-      const project = opts.ctx.project
+      const { apiKey, project, ...ctx } = opts.ctx
+
+      // we just need to validate the entitlements
+      await entitlementGuard({
+        project,
+        featureSlug: "customers",
+        ctx,
+      })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         with: {
-          subscriptions: true,
+          subscriptions: {
+            with: {
+              planVersion: {
+                with: {
+                  plan: true,
+                },
+              },
+            },
+          },
         },
         where: (customer, { eq, and }) =>
           and(eq(customer.projectId, project.id), eq(customer.id, id)),
@@ -347,12 +397,26 @@ export const customersRouter = createTRPCRouter({
         customer: customerData,
       }
     }),
-  listByActiveProject: protectedActiveProjectProcedure
+  listByActiveProject: protectedApiOrActiveProjectProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/edge/customers.listByActiveProject",
+        protect: true,
+      },
+    })
     .input(searchDataParamsSchema)
     .output(z.object({ customers: z.array(customerSelectSchema) }))
     .query(async (opts) => {
       const { fromDate, toDate } = opts.input
-      const project = opts.ctx.project
+      const { apiKey, project, ...ctx } = opts.ctx
+
+      // we just need to validate the entitlements
+      await entitlementGuard({
+        project,
+        featureSlug: "customers",
+        ctx,
+      })
 
       const customers = await opts.ctx.db.query.customers.findMany({
         where: (customer, { eq, and, between, gte, lte }) =>
@@ -375,6 +439,36 @@ export const customersRouter = createTRPCRouter({
       }
     }),
 
+  // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_6hASRQKH7vsq5WQH", featureSlug: "access" }}}))
+  entitlements: protectedApiOrActiveProjectProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/edge/customers.entitlements",
+        protect: true,
+      },
+    })
+    .input(
+      z.object({
+        customerId: z.string(),
+      })
+    )
+    .output(
+      z.object({
+        entitlements: z.string().array(),
+      })
+    )
+    .query(async (opts) => {
+      const { customerId } = opts.input
+      const { apiKey, ...ctx } = opts.ctx
+      const projectId = apiKey.projectId
+
+      return await getEntitlements({
+        customerId,
+        projectId: projectId,
+        ctx,
+      })
+    }),
   // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_6hASRQKH7vsq5WQH", featureSlug: "access" }}}))
   can: protectedApiOrActiveProjectProcedure
     .meta({

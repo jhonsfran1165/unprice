@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
-import { DialogTrigger } from "@builderai/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -106,7 +105,7 @@ export default async function PlanPage({
                   <TableHeader>
                     <TableRow>
                       <TableHead className="table-cell text-left">
-                        Title
+                        Plan Version
                       </TableHead>
                       <TableHead className="table-cell text-center">
                         Currency
@@ -118,7 +117,10 @@ export default async function PlanPage({
                         Status
                       </TableHead>
                       <TableHead className="table-cell text-center">
-                        Date
+                        Start Date
+                      </TableHead>
+                      <TableHead className="table-cell text-center">
+                        End Date
                       </TableHead>
                       <TableHead className="table-cell text-left">
                         Actions
@@ -129,25 +131,25 @@ export default async function PlanPage({
                     {customer.subscriptions.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center">
-                          No versions found
+                          No subscriptions found
                         </TableCell>
                       </TableRow>
                     )}
                     {customer.subscriptions.map((sub) => (
                       <TableRow key={sub.id}>
                         <TableCell className="table-cell">
-                          <div className="font-bold">{sub.id}</div>
-                          <div className="hidden text-xs text-muted-foreground md:inline">
-                            {sub.id?.slice(0, 20) + "..."}
+                          <div className="font-bold">
+                            {sub.planVersion.plan.slug} - v
+                            {sub.planVersion.version}
                           </div>
                         </TableCell>
                         <TableCell className="table-cell text-center">
                           <Badge className="text-xs" variant="secondary">
-                            {sub.id}
+                            {sub.planVersion.currency}
                           </Badge>
                         </TableCell>
                         <TableCell className="hidden text-center md:table-cell">
-                          <Badge className="text-xs">{sub.id}</Badge>
+                          <Badge className="text-xs">{sub.type}</Badge>
                         </TableCell>
                         <TableCell className="table-cell text-center">
                           <Badge
@@ -160,7 +162,12 @@ export default async function PlanPage({
                         </TableCell>
                         <TableCell className="hidden text-center md:table-cell">
                           <span className="text-xs">
-                            {formatDate(sub.createdAt)}
+                            {formatDate(sub.startDate)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="hidden text-center md:table-cell">
+                          <span className="text-xs">
+                            {sub.endDate && formatDate(sub.endDate)}
                           </span>
                         </TableCell>
                         <TableCell className="table-cell justify-start">
@@ -179,11 +186,9 @@ export default async function PlanPage({
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DialogTrigger asChild>
-                                  <DropdownMenuItem>
-                                    Edit version
-                                  </DropdownMenuItem>
-                                </DialogTrigger>
+                                <DropdownMenuItem>
+                                  Edit version
+                                </DropdownMenuItem>
 
                                 <DropdownMenuItem>
                                   <Link

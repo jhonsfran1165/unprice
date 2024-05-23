@@ -53,6 +53,45 @@ export const verifyFeature = async ({
   return val
 }
 
+export const getEntitlements = async ({
+  customerId,
+  projectId,
+  ctx,
+}: {
+  customerId: string
+  projectId: string
+  ctx: Context
+}) => {
+  const customer = new UnpriceCustomer({
+    cache: ctx.cache,
+    db: ctx.db,
+    analytics: ctx.analytics,
+  })
+
+  const { err, val } = await customer.getEntitlements({
+    customerId,
+    projectId,
+  })
+
+  if (err) {
+    console.error("Error getting entitlements feature", err)
+    switch (true) {
+      case err instanceof UnPriceCustomerError:
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: err.code,
+        })
+      default:
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error verifying entitlements",
+        })
+    }
+  }
+
+  return val
+}
+
 // TODO: handling errors and logging here
 export const reportUsageFeature = async ({
   customerId,

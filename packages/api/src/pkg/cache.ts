@@ -4,23 +4,23 @@ import type { SubscriptionExtended } from "@builderai/db/validators"
 import type { Result } from "@builderai/error"
 import { Err, FetchError, Ok } from "@builderai/error"
 
-import { env } from "../env.mjs"
-
-declare class NoopCache extends Redis {
-  constructor()
+class NoopCache extends Redis {
+  constructor() {
+    super({ token: "", url: "" })
+  }
 }
-
-// TODO: is it a good idea to instance this here? maybe inside the class?
-const redis =
-  env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN
-    ? new Redis({
-        url: env.UPSTASH_REDIS_REST_URL,
-        token: env.UPSTASH_REDIS_REST_TOKEN,
-      })
-    : new NoopCache()
 
 // Cache interface so you can swap out the cache implementation
 export interface CacheInterface {
+  getCustomerEntitlements: (
+    customerId: string
+  ) => Promise<Result<string[], FetchError>>
+
+  setCustomerEntitlements: (
+    customerId: string,
+    activeSubs: string[]
+  ) => Promise<Result<number>>
+
   getCustomerActiveSubs: (
     customerId: string
   ) => Promise<Result<SubscriptionExtended[], FetchError>>
@@ -39,10 +39,17 @@ const namespaces = {
 export class UnpriceCache implements CacheInterface {
   private readonly client: Redis | NoopCache
   private readonly namespaces = namespaces
+  // this is a noop cache that fallback all calls to empty data
+  // when that happens, we call the database directly
+  private readonly noop: boolean = false
+  // TODO: implement cache TTL
+  // private readonly defaultTTL = 60 * 60 * 24 * 7 // 1 week
+  // private readonly defaultTTLKey = "ttl"
 
-  constructor(opts?: { token: string; url: string }) {
-    if (!opts) {
-      this.client = redis
+  constructor(opts?: { token?: string; url?: string }) {
+    if (!opts?.url || !opts?.token) {
+      this.client = new NoopCache()
+      this.noop = true
     } else {
       this.client = new Redis({
         token: opts.token,
@@ -55,11 +62,68 @@ export class UnpriceCache implements CacheInterface {
     return `app:${this.namespaces[key]}:${id}`
   }
 
+  public async getCustomerEntitlements(
+    customerId: string
+  ): Promise<Result<string[], FetchError>> {
+    try {
+      const hash = this.getCustomerHash("customer", customerId)
+
+      if (this.noop) {
+        return Ok([])
+      }
+
+      // TODO: can we use a bitmap for this? we can use the code of the feature
+      const activeSubs = await this.client.hget<string[]>(hash, "entitlements")
+
+      return Ok(activeSubs ?? [])
+    } catch (error) {
+      const e = error as Error
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: false,
+        })
+      )
+    }
+  }
+
+  public async setCustomerEntitlements(
+    customerId: string,
+    entitlements: string[]
+  ): Promise<Result<number, FetchError>> {
+    try {
+      const hash = this.getCustomerHash("customer", customerId)
+
+      if (this.noop) {
+        return Ok(1)
+      }
+
+      const success = await this.client.hset(hash, {
+        entitlements: entitlements,
+      })
+
+      return Ok(success)
+    } catch (error) {
+      const e = error as Error
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: false,
+        })
+      )
+    }
+  }
+
   public async getCustomerActiveSubs(
     customerId: string
   ): Promise<Result<SubscriptionExtended[], FetchError>> {
     try {
       const hash = this.getCustomerHash("customer", customerId)
+
+      if (this.noop) {
+        return Ok([])
+      }
+
       const activeSubs = await this.client.hget<SubscriptionExtended[]>(
         hash,
         "activeSubscriptions"
@@ -83,6 +147,11 @@ export class UnpriceCache implements CacheInterface {
   ): Promise<Result<number, FetchError>> {
     try {
       const hash = this.getCustomerHash("customer", customerId)
+
+      if (this.noop) {
+        return Ok(1)
+      }
+
       const success = await this.client.hset(hash, {
         activeSubscriptions: activeSubs,
       })

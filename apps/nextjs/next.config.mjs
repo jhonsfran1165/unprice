@@ -3,11 +3,10 @@ import "@builderai/auth/env"
 import "@builderai/stripe/env"
 import "./src/env.mjs"
 
-import withBundleAnalyzer from "@next/bundle-analyzer"
 import withMDX from "@next/mdx"
 
-/** @type {import("next").NextConfig} */
-const config = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
   /** Enables hot reloading for local packages without a build step */
   transpilePackages: [
@@ -34,9 +33,8 @@ const config = {
   typescript: { ignoreBuildErrors: true },
 }
 
-export default withBundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-  openAnalyzer: false,
-})(withMDX()(config))
+export default withMDX()(nextConfig)
+// TODO: try to use million
+// export default MillionLint.next({ rsc: true })(withMDX()(nextConfig))
 
 // TODO: https://www.flavienbonvin.com/reduce-next-js-bundle/

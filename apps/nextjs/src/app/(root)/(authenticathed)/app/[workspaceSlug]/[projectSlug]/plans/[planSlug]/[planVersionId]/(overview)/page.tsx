@@ -31,7 +31,6 @@ export default async function OverviewVersionPage({
 
   const { planVersion } = await api.planVersions.getById({
     id: planVersionId,
-    planSlug,
   })
 
   if (!planVersion) {

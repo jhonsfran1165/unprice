@@ -13,6 +13,7 @@ const itemSchema = z.object({
   quantity: z.coerce.number().optional(),
   limit: z.coerce.number().optional(),
   itemId: z.string(),
+  slug: z.string().optional(),
 })
 
 // stripe won't allow more than 250 items in a single invoice

@@ -485,7 +485,6 @@ export const planVersionRouter = createTRPCRouter({
   getById: protectedActiveProjectProcedure
     .input(
       z.object({
-        planSlug: z.string(),
         id: z.string(),
       })
     )
@@ -502,20 +501,8 @@ export const planVersionRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const { planSlug, id } = opts.input
+      const { id } = opts.input
       const project = opts.ctx.project
-
-      const planData = await opts.ctx.db.query.plans.findFirst({
-        where: (plan, { and, eq }) =>
-          and(eq(plan.slug, planSlug), eq(plan.projectId, project.id)),
-      })
-
-      if (!planData?.id) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Plan not found",
-        })
-      }
 
       // TODO: improve this query
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
@@ -531,11 +518,7 @@ export const planVersionRouter = createTRPCRouter({
           },
         },
         where: (version, { and, eq }) =>
-          and(
-            eq(version.projectId, project.id),
-            eq(version.id, id),
-            eq(version.planId, planData.id)
-          ),
+          and(eq(version.projectId, project.id), eq(version.id, id)),
       })
 
       if (!planVersionData) {
@@ -547,6 +530,61 @@ export const planVersionRouter = createTRPCRouter({
 
       return {
         planVersion: planVersionData,
+      }
+    }),
+
+  listByActiveProject: protectedActiveProjectProcedure
+    .input(
+      z.object({
+        published: z.boolean().optional(),
+      })
+    )
+    .output(
+      z.object({
+        planVersions: planVersionSelectBaseSchema
+          .extend({
+            plan: planSelectBaseSchema,
+            planFeatures: z.array(
+              planVersionFeatureSelectBaseSchema.extend({
+                feature: featureSelectBaseSchema,
+              })
+            ),
+          })
+          .array(),
+      })
+    )
+    .query(async (opts) => {
+      const { published } = opts.input
+      const project = opts.ctx.project
+
+      const planVersionData = await opts.ctx.db.query.versions.findMany({
+        with: {
+          plan: true,
+          planFeatures: {
+            with: {
+              feature: true,
+            },
+            orderBy(fields, operators) {
+              return operators.asc(fields.order)
+            },
+          },
+        },
+        where: (version, { and, eq }) =>
+          and(
+            eq(version.projectId, project.id),
+            published ? eq(version.status, "published") : undefined
+          ),
+      })
+
+      if (planVersionData.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan version not found",
+        })
+      }
+
+      return {
+        planVersions: planVersionData,
       }
     }),
 })

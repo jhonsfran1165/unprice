@@ -11,8 +11,8 @@ import {
 } from "@builderai/ui/card"
 import { Separator } from "@builderai/ui/separator"
 
+import { SubscriptionSheet } from "../../subscriptions/_components/subscription-sheet"
 import { CustomerActions } from "./customer-actions"
-import { CustomerDialog } from "./customer-dialog"
 
 export const runtime = "edge"
 
@@ -57,16 +57,19 @@ export default function CustomerHeader(props: {
         <div className="flex items-center px-6">
           <div className="button-primary flex items-center space-x-1 rounded-md ">
             <div className="sm:col-span-full">
-              {/* // TODO: should be add subscription */}
-              <CustomerDialog
+              <SubscriptionSheet
                 defaultValues={{
-                  name: customer.name,
-                  description: customer.description,
-                  email: customer.email,
+                  customerId: customer.id,
+                  projectId: customer.projectId,
+                  planVersionId: "",
+                  type: "plan",
+                  collectionMethod: "charge_automatically",
+                  autoRenew: true,
+                  items: [],
                 }}
               >
                 <Button variant={"custom"}>Add Subscription</Button>
-              </CustomerDialog>
+              </SubscriptionSheet>
             </div>
 
             <Separator orientation="vertical" className="h-[20px] p-0" />
