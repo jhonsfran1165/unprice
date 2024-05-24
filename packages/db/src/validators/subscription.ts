@@ -21,6 +21,7 @@ export const subscriptionItemsSchema = z
   .array(itemSchema)
   .superRefine((items, ctx) => {
     if (items.length > 250) {
+      // TODO: add a better message and map to the correct path
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Total items for the subscription should be less than 250",
@@ -37,7 +38,7 @@ export const subscriptionItemsSchema = z
       if (item?.quantity && item.limit && item.quantity > item.limit) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Quantity is required for feature items",
+          message: "limit met for the item",
           path: [i, "quantity"],
           fatal: true,
         })
@@ -60,6 +61,9 @@ export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   items: subscriptionItemsSchema,
 })
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
+  planVersionId: z.string().min(1, { message: "Plan version is required" }),
+  startDate: z.date({ message: "Start date is required" }),
+  trialDays: z.coerce.number().int().min(0).default(0),
   metadata: subscriptionMetadataSchema,
   items: subscriptionItemsSchema,
 }).partial({

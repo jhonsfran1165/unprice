@@ -48,6 +48,9 @@ export const subscriptions = pgTableProject(
     // addonId: cuid("addon_id"),
     type: typeSubscriptionEnum("type").default("plan").notNull(),
 
+    // prorate the subscription when the subscription is created in the middle of the billing period
+    prorated: boolean("prorated").default(true),
+
     // subscription trial period
     // TODO: I can configure this from the plan version
     // TODO: we could override this when creating the subscription, otherwise use planVersion data
@@ -57,9 +60,7 @@ export const subscriptions = pgTableProject(
     }),
     startDate: timestamp("start_date", {
       mode: "date",
-    })
-      .notNull()
-      .defaultNow(),
+    }).notNull(),
     endDate: timestamp("end_date", {
       mode: "date",
     }),
