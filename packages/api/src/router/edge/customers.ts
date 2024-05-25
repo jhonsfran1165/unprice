@@ -19,7 +19,6 @@ import {
   createTRPCRouter,
   protectedApiOrActiveProjectProcedure,
 } from "../../trpc"
-import { entitlementGuard } from "../../utils/entitlement-guard"
 import { featureGuard } from "../../utils/feature-guard"
 import {
   getEntitlements,
@@ -108,11 +107,11 @@ export const customersRouter = createTRPCRouter({
       const workspaceId = project.workspaceId
 
       // we just need to validate the entitlements
-      await entitlementGuard({
-        project,
-        featureSlug: "customers",
-        ctx,
-      })
+      // await entitlementGuard({
+      //   project,
+      //   featureSlug: "customers",
+      //   ctx,
+      // })
 
       const deletedCustomer = await opts.ctx.db
         .delete(schema.customers)
@@ -175,11 +174,11 @@ export const customersRouter = createTRPCRouter({
       const { apiKey, project, ...ctx } = opts.ctx
 
       // we just need to validate the entitlements
-      await entitlementGuard({
-        project,
-        featureSlug: "customers",
-        ctx,
-      })
+      // await entitlementGuard({
+      //   project,
+      //   featureSlug: "customers",
+      //   ctx,
+      // })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         where: (feature, { eq, and }) =>
@@ -243,11 +242,11 @@ export const customersRouter = createTRPCRouter({
       const { apiKey, project, ...ctx } = opts.ctx
 
       // we just need to validate the entitlements
-      await entitlementGuard({
-        project,
-        featureSlug: "customers",
-        ctx,
-      })
+      // await entitlementGuard({
+      //   project,
+      //   featureSlug: "customers",
+      //   ctx,
+      // })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         columns: {
@@ -277,11 +276,11 @@ export const customersRouter = createTRPCRouter({
       const { apiKey, project, ...ctx } = opts.ctx
 
       // we just need to validate the entitlements
-      await entitlementGuard({
-        project,
-        featureSlug: "customers",
-        ctx,
-      })
+      // await entitlementGuard({
+      //   project,
+      //   featureSlug: "customers",
+      //   ctx,
+      // })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         where: (customer, { eq, and }) =>
@@ -314,11 +313,11 @@ export const customersRouter = createTRPCRouter({
       const { apiKey, project, ...ctx } = opts.ctx
 
       // we just need to validate the entitlements
-      await entitlementGuard({
-        project,
-        featureSlug: "customers",
-        ctx,
-      })
+      // await entitlementGuard({
+      //   project,
+      //   featureSlug: "customers",
+      //   ctx,
+      // })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         where: (customer, { eq, and }) =>
@@ -364,11 +363,11 @@ export const customersRouter = createTRPCRouter({
       const { apiKey, project, ...ctx } = opts.ctx
 
       // we just need to validate the entitlements
-      await entitlementGuard({
-        project,
-        featureSlug: "customers",
-        ctx,
-      })
+      // await entitlementGuard({
+      //   project,
+      //   featureSlug: "customers",
+      //   ctx,
+      // })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         with: {
@@ -412,11 +411,11 @@ export const customersRouter = createTRPCRouter({
       const { apiKey, project, ...ctx } = opts.ctx
 
       // we just need to validate the entitlements
-      await entitlementGuard({
-        project,
-        featureSlug: "customers",
-        ctx,
-      })
+      // await entitlementGuard({
+      //   project,
+      //   featureSlug: "customers",
+      //   ctx,
+      // })
 
       const customers = await opts.ctx.db.query.customers.findMany({
         where: (customer, { eq, and, between, gte, lte }) =>

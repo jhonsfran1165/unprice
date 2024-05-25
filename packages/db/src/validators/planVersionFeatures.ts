@@ -17,7 +17,7 @@ import { planSelectBaseSchema } from "./plans"
 import { planVersionSelectBaseSchema } from "./planVersions"
 import { projectSelectBaseSchema } from "./project"
 
-const typeFeatureSchema = z.enum(FEATURE_TYPES)
+export const typeFeatureSchema = z.enum(FEATURE_TYPES)
 const paymentProviderSchema = z.enum(PAYMENT_PROVIDERS)
 const usageModeSchema = z.enum(USAGE_MODES)
 const aggregationMethodSchema = z.enum(AGGREGATION_METHODS)
@@ -451,6 +451,7 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema
           config: true,
           metadata: true,
           limit: true,
+          defaultQuantity: true,
         })
         .extend({
           feature: featureSelectBaseSchema.pick({

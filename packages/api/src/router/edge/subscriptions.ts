@@ -1,11 +1,12 @@
 import { TRPCError } from "@trpc/server"
 import { waitUntil } from "@vercel/functions"
-import { z } from "zod"
+import { z, ZodError } from "zod"
 
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import type { SubscriptionItem } from "@builderai/db/validators"
 import {
+  createDefaultSubscriptionConfig,
   subscriptionInsertSchema,
   subscriptionItemsSchema,
   subscriptionSelectSchema,
@@ -30,7 +31,16 @@ export const subscriptionRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { planVersionId, customerId, items } = opts.input
+      const {
+        planVersionId,
+        customerId,
+        items,
+        trialDays,
+        startDate,
+        endDate,
+        type,
+        collectionMethod,
+      } = opts.input
       const project = opts.ctx.project
 
       const versionData = await opts.ctx.db.query.versions.findFirst({
@@ -40,6 +50,7 @@ export const subscriptionRouter = createTRPCRouter({
               feature: true,
             },
           },
+          plan: true,
         },
         where(fields, operators) {
           return operators.and(
@@ -118,38 +129,31 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      // if no items are passed, configuration is created from the default quantities of the plan features
-      const configItemsSubscription = versionData.planFeatures.map(
-        (feature) => {
-          const quantity =
-            feature.defaultQuantity ??
-            items?.find((i) => i.itemId === feature.id)?.quantity
+      let configItemsSubscription: SubscriptionItem[] = []
 
-          const limit = feature.limit
+      if (items) {
+        const parseItems = subscriptionItemsSchema.safeParse(items)
 
-          // TODO: what if I try to validate all of this from the schema?
-          if (feature.featureType !== "usage" && quantity === undefined) {
-            throw new TRPCError({
-              code: "CONFLICT",
-              message: `Feature ${feature.feature.slug} is not a usage based feature and requires a quantity`,
-            })
-          }
-
-          if (limit && quantity && quantity > limit) {
-            throw new TRPCError({
-              code: "CONFLICT",
-              message: `Feature ${feature.feature.slug} has a limit of ${limit} and the quantity is ${quantity}`,
-            })
-          }
-
-          return {
-            itemType: "feature",
-            itemId: feature.id,
-            limit: limit ?? quantity, // if not provided means there is no limit
-            quantity: quantity, // if not provided means is a usage based feature
-          } as SubscriptionItem
+        if (!parseItems.success) {
+          throw ZodError.create(parseItems.error.errors)
         }
-      )
+
+        configItemsSubscription = parseItems.data
+      } else {
+        // if no items are passed, configuration is created from the default quantities of the plan features
+        const { err, val } = createDefaultSubscriptionConfig({
+          planVersion: versionData,
+        })
+
+        if (err) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: err.message,
+          })
+        }
+
+        configItemsSubscription = val
+      }
 
       const subscriptionId = utils.newId("subscription")
 
@@ -160,10 +164,13 @@ export const subscriptionRouter = createTRPCRouter({
           projectId: project.id,
           planVersionId: versionData.id,
           customerId: customerData.id,
-          startDate: new Date(),
+          startDate: startDate,
+          endDate: endDate,
           autoRenew: true,
+          trialDays: trialDays,
+          type: type,
           isNew: true,
-          collectionMethod: "charge_automatically",
+          collectionMethod: collectionMethod,
           status: "active",
           items: configItemsSubscription,
           metadata: null,

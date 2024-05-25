@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@builderai/config": "^0.1.0",
+    "@builderai/error": "workspace:^",
     "@neondatabase/serverless": "^0.9.0",
     "@t3-oss/env-nextjs": "0.9.1",
     "drizzle-orm": "^0.29.4",

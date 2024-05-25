@@ -498,6 +498,9 @@ importers:
       '@builderai/config':
         specifier: ^0.1.0
         version: link:../config
+      '@builderai/error':
+        specifier: workspace:^
+        version: link:../error
       '@neondatabase/serverless':
         specifier: ^0.9.0
         version: 0.9.0

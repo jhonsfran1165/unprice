@@ -7,11 +7,11 @@ import { useFieldArray } from "react-hook-form"
 
 import type { RouterOutputs } from "@builderai/api"
 import { COLLECTION_METHODS, SUBSCRIPTION_TYPES } from "@builderai/db/utils"
-import type {
-  InsertSubscription,
-  SubscriptionItem,
+import type { InsertSubscription } from "@builderai/db/validators"
+import {
+  createDefaultSubscriptionConfig,
+  subscriptionInsertSchema,
 } from "@builderai/db/validators"
-import { subscriptionInsertSchema } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
@@ -60,9 +60,6 @@ import ConfigItemsFormField from "./items-fields"
 type PlanVersionResponse =
   RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 
-type PlanVersionFeaturesResponse =
-  RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]["planFeatures"][0]
-
 export function SubscriptionForm({
   setDialogOpen,
   defaultValues,
@@ -77,8 +74,6 @@ export function SubscriptionForm({
     useState<PlanVersionResponse>()
 
   const [switcherPlanOpen, setSwitcherPlanOpen] = useState(false)
-
-  const [date, setDate] = useState<Date>()
 
   const form = useZodForm({
     schema: subscriptionInsertSchema,
@@ -219,19 +214,18 @@ export function SubscriptionForm({
                               onSelect={() => {
                                 field.onChange(version.id)
 
-                                const itemsConfig =
-                                  version.planFeatures.map((feature) => {
-                                    return {
-                                      itemType: "feature",
-                                      quantity: feature.defaultQuantity ?? 0,
-                                      limit: feature.limit,
-                                      itemId: feature.id,
-                                      slug: feature.feature.slug,
-                                    } as SubscriptionItem
-                                  }) ?? []
+                                const { err, val: itemsConfig } =
+                                  createDefaultSubscriptionConfig({
+                                    planVersion: version,
+                                  })
 
                                 setSelectedPlanVersion(version)
                                 setSwitcherPlanOpen(false)
+
+                                if (err) {
+                                  console.error(err)
+                                  return
+                                }
 
                                 items.replace(itemsConfig)
                               }}
