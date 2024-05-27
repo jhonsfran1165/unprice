@@ -1,17 +1,25 @@
 "use client"
 
-import { useState } from "react"
-import { LayoutGrid, Trash2, X } from "lucide-react"
+import { EyeIcon, LayoutGrid } from "lucide-react"
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form"
 
 import type { RouterOutputs } from "@builderai/api"
 import type { InsertSubscription } from "@builderai/db/validators"
 import { calculatePricePerFeature } from "@builderai/db/validators"
+import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@builderai/ui/dialog"
 import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
@@ -25,7 +33,9 @@ import {
 } from "@builderai/ui/table"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
+import { PropagationStopper } from "~/components/prevent-propagation"
 import { toastAction } from "~/lib/toast"
+import { FeatureConfigForm } from "../../plans/[planSlug]/_components/feature-config-form"
 
 type PlanVersionResponse =
   RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
@@ -43,27 +53,31 @@ export default function ConfigItemsFormField({
   items: UseFieldArrayReturn<InsertSubscription, "items", "id">
 }) {
   const versionFeatures = new Map<string, PlanVersionFeaturesResponse>()
-  const { fields, append, remove, replace } = items
-
-  const [isDelete, setConfirmDelete] = useState<Record<number, boolean>>(
-    Object.fromEntries(fields.map((_, i) => [i, false]))
-  )
+  const { fields } = items
 
   selectedPlanVersion?.planFeatures.forEach((feature) => {
     versionFeatures.set(feature.id, feature)
   })
 
-  console.log("form", form.formState.errors)
+  const { errors } = form.formState
 
   return (
     <div className="flex w-full flex-col">
-      <div className="mb-4 flex flex-col">
-        <h4 className="my-auto block font-semibold">Feature configuration</h4>
+      <div className="mb-4 flex flex-col gap-2">
+        <FormLabel
+          className={cn({
+            "text-destructive": errors.items,
+          })}
+        >
+          <h4 className="my-auto block font-semibold">Feature configuration</h4>
+        </FormLabel>
+
         <div className="text-xs font-normal leading-snug">
-          {form.getValues("type") === "addons"
-            ? "Configure the tiers for the feature, the price will be calculated with the reported usage"
-            : "Configure the quantity for each feature, the price will be calculated with the reported usage. You can't change the quantity for flat features. If you want to exclude a feature, just delete it."}
+          {
+            "Configure the quantity for each feature, for usage based feature, the price will be calculated with the reported usage. You can't change the quantity for flat features"
+          }
         </div>
+        {errors.items && <FormMessage>{errors.items.message}</FormMessage>}
       </div>
 
       <div className="flex items-center justify-center px-2 py-4">
@@ -71,11 +85,11 @@ export default function ConfigItemsFormField({
           <Table>
             <TableHeader className="border-b border-t">
               <TableRow className="pointer-events-none">
-                <TableHead className="h-10 px-0">Features</TableHead>
+                <TableHead className="h-10 pl-1">Features</TableHead>
                 <TableHead className="h-10 px-0 text-center">
                   Quantity
                 </TableHead>
-                <TableHead className="h-10 pr-0 text-end">
+                <TableHead className="h-10 pr-1 text-end">
                   Estimated Total
                 </TableHead>
               </TableRow>
@@ -104,69 +118,35 @@ export default function ConfigItemsFormField({
                     key={item.id}
                     className="border-b hover:bg-transparent"
                   >
-                    <TableCell className="px-0">
+                    <TableCell className="pl-1">
                       <div className="flex items-center gap-1">
                         <span className="font-semibold">{item.slug}</span>
-                        <div className="flex- w-20 flex-row gap-1">
-                          {isDelete[index] && (
-                            <div className="flex flex-row items-center">
+                        <PropagationStopper>
+                          <Dialog>
+                            <DialogTrigger asChild>
                               <Button
-                                className="px-0"
+                                className="w-4"
                                 variant="link"
                                 size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  e.preventDefault()
-
-                                  setConfirmDelete((prev) => {
-                                    return { ...prev, [index]: false }
-                                  })
-                                  remove(index)
-                                }}
                               >
-                                <X className="h-3 w-3" />
-                                <span className="sr-only">
-                                  Confirm delete feature
-                                </span>
+                                <EyeIcon className="h-3 w-3" />
+                                <span className="sr-only">View feature</span>
                               </Button>
-                              <Button
-                                className="px-0 text-xs font-light"
-                                variant="link"
-                                size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  e.preventDefault()
-                                  setConfirmDelete((prev) => {
-                                    return { ...prev, [index]: false }
-                                  })
-                                }}
-                              >
-                                cancel
-                                <span className="sr-only">
-                                  cancel delete from plan
-                                </span>
-                              </Button>
-                            </div>
-                          )}
-                          {!isDelete[index] && (
-                            <Button
-                              className="px-0"
-                              variant="link"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                e.preventDefault()
+                            </DialogTrigger>
 
-                                setConfirmDelete((prev) => {
-                                  return { ...prev, [index]: true }
-                                })
-                              }}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                              <span className="sr-only">Delete from plan</span>
-                            </Button>
-                          )}
-                        </div>
+                            <DialogContent className="flex max-h-[800px] w-full flex-col justify-between overflow-y-scroll md:w-1/2 lg:w-[600px]">
+                              <DialogHeader>
+                                <DialogTitle>
+                                  Plan Version Feature Details
+                                </DialogTitle>
+                              </DialogHeader>
+                              <FeatureConfigForm
+                                defaultValues={featureData}
+                                planVersion={selectedPlanVersion}
+                              />
+                            </DialogContent>
+                          </Dialog>
+                        </PropagationStopper>
                       </div>
 
                       <div className="hidden text-xs text-muted-foreground md:block">
@@ -209,7 +189,7 @@ export default function ConfigItemsFormField({
                         />
                       )}
                     </TableCell>
-                    <TableCell className="pr-0 text-end text-xs">
+                    <TableCell className="pr-1 text-end text-xs">
                       {pricePerFeature.totalPriceText}
                     </TableCell>
                   </TableRow>

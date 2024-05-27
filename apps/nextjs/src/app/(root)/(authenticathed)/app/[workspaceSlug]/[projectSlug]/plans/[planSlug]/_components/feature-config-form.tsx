@@ -11,7 +11,7 @@ import {
   USAGE_MODES,
   USAGE_MODES_MAP,
 } from "@builderai/db/utils"
-import type { PlanVersionFeature } from "@builderai/db/validators"
+import type { PlanVersion, PlanVersionFeature } from "@builderai/db/validators"
 import { planVersionFeatureInsertBaseSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
@@ -37,10 +37,8 @@ import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
-import {
-  useActivePlanVersion,
-  usePlanFeaturesList,
-} from "../../_components/use-features"
+import { usePlanFeaturesList } from "../../_components/use-features"
+import { BannerPublishedVersion } from "../[planVersionId]/_components/banner"
 import { FlatFormFields } from "./flat-form-fields"
 import { PackageFormFields } from "./package-form-fields"
 import { TierFormFields } from "./tier-form-fields"
@@ -49,14 +47,14 @@ import { UsageFormFields } from "./usage-form-fields"
 export function FeatureConfigForm({
   setDialogOpen,
   defaultValues,
+  planVersion,
 }: {
   defaultValues: PlanVersionFeature
+  planVersion: PlanVersion | null
   setDialogOpen?: (open: boolean) => void
 }) {
   const router = useRouter()
   const [_planFeatureList, setPlanFeatureList] = usePlanFeaturesList()
-
-  const [activePlanVersion] = useActivePlanVersion()
 
   const editMode = defaultValues.id ? true : false
 
@@ -125,7 +123,7 @@ export function FeatureConfigForm({
   }
 
   // TODO: add error handling here
-  if (!activePlanVersion) {
+  if (!planVersion) {
     return null
   }
 
@@ -136,31 +134,31 @@ export function FeatureConfigForm({
         className="space-y-6"
         onSubmit={form.handleSubmit(onSubmitForm)}
       >
-        <div className="flex flex-col gap-1">
-          <FormField
-            control={form.control}
-            name="hidden"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-sm font-semibold">
-                    Hide this feature from UI
-                  </FormLabel>
-                  <FormDescription className="text-sm font-normal">
-                    When enabled, this feature will not be visible in pricing
-                    pages.
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value ?? false}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
+        {planVersion.status === "published" && <BannerPublishedVersion />}
+
+        <FormField
+          control={form.control}
+          name="hidden"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-sm font-semibold">
+                  Hide this feature from UI
+                </FormLabel>
+                <FormDescription className="text-sm font-normal">
+                  When enabled, this feature will not be visible in pricing
+                  pages.
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value ?? false}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
 
         <Separator />
 
@@ -321,42 +319,41 @@ export function FeatureConfigForm({
         <Separator />
 
         {featureType === "flat" && (
-          <FlatFormFields form={form} currency={activePlanVersion.currency} />
+          <FlatFormFields form={form} currency={planVersion.currency} />
         )}
 
         {featureType === "package" && (
-          <PackageFormFields
-            form={form}
-            currency={activePlanVersion.currency}
-          />
+          <PackageFormFields form={form} currency={planVersion.currency} />
         )}
 
         {featureType === "usage" && (
-          <UsageFormFields form={form} currency={activePlanVersion.currency} />
+          <UsageFormFields form={form} currency={planVersion.currency} />
         )}
 
         {featureType === "tier" && <TierFormFields form={form} />}
 
-        <div className="mt-8 flex justify-end space-x-4">
-          <div className="flex flex-col p-4">
-            <div className="flex justify-end gap-4">
-              <Button
-                variant={"link"}
-                onClick={(e) => {
-                  e.preventDefault()
-                  setDialogOpen?.(false)
-                }}
-              >
-                Cancel
-              </Button>
-              <SubmitButton
-                isSubmitting={form.formState.isSubmitting}
-                isDisabled={form.formState.isSubmitting}
-                label={editMode ? "Update" : "Create"}
-              />
+        {planVersion.status !== "published" && (
+          <div className="mt-8 flex justify-end space-x-4">
+            <div className="flex flex-col p-4">
+              <div className="flex justify-end gap-4">
+                <Button
+                  variant={"link"}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setDialogOpen?.(false)
+                  }}
+                >
+                  Cancel
+                </Button>
+                <SubmitButton
+                  isSubmitting={form.formState.isSubmitting}
+                  isDisabled={form.formState.isSubmitting}
+                  label={editMode ? "Update" : "Create"}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </form>
     </Form>
   )

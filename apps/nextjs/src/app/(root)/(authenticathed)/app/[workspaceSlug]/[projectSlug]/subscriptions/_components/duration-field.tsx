@@ -33,7 +33,7 @@ export default function DurationFormField({
   const { errors } = form.formState
 
   return (
-    <div className="flex w-full flex-col md:w-1/2">
+    <div className="flex w-full flex-col lg:w-1/2">
       <FormLabel
         className={cn({
           "text-destructive": errors.startDate,

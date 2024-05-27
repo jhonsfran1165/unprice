@@ -10,6 +10,7 @@ const metadataPaymentProviderSchema = z.record(
   z.object({
     customerId: z.string().optional(),
     defaultPaymentMethodId: z.string().optional(),
+    stripeSubscriptionId: z.string().optional(),
   })
 )
 

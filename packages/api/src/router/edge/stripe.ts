@@ -3,9 +3,10 @@ import { TRPCError } from "@trpc/server"
 import { dinero } from "dinero.js"
 import { z } from "zod"
 
-import { APP_DOMAIN, PLANS } from "@builderai/config"
+import { API_DOMAIN, APP_DOMAIN, PLANS } from "@builderai/config"
 import { projects } from "@builderai/db/schema"
 import { purchaseWorkspaceSchema } from "@builderai/db/validators"
+import type { Stripe } from "@builderai/stripe"
 import { stripe } from "@builderai/stripe"
 
 import {
@@ -102,6 +103,104 @@ export const stripeRouter = createTRPCRouter({
         cancel_url: returnUrl,
         success_url: returnUrl,
         line_items: [{ price: PLANS.PRO?.priceId, quantity: 1 }],
+      })
+
+      if (!session.url) return { success: false as const, url: "" }
+      return { success: true as const, url: session.url }
+    }),
+  listPaymentMethods: protectedActiveProjectProcedure
+    .input(
+      z.object({
+        customerId: z.string(),
+      })
+    )
+    .output(
+      z.object({
+        paymentMethods: z.custom<Stripe.PaymentMethod>().array(),
+      })
+    )
+    .query(async (opts) => {
+      const { customerId } = opts.input
+
+      const customerData = await opts.ctx.db.query.customers.findFirst({
+        where: (customer, { and, eq }) =>
+          and(
+            eq(customer.id, customerId),
+            eq(customer.projectId, opts.ctx.project.id)
+          ),
+      })
+
+      if (!customerData) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Customer not found",
+        })
+      }
+
+      const stripeCustomerId =
+        customerData.metadata?.metadataPaymentProviderSchema?.stripe?.customerId
+
+      if (!stripeCustomerId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Stripe configuration not found for this customer",
+        })
+      }
+
+      const paymentMethods =
+        await stripe.customers.listPaymentMethods(stripeCustomerId)
+
+      return {
+        paymentMethods: paymentMethods.data,
+      }
+    }),
+
+  createPaymentMethod: protectedActiveProjectProcedure
+    .input(
+      z.object({
+        customerId: z.string(),
+        successUrl: z.string().url(),
+        cancelUrl: z.string().url(),
+      })
+    )
+    .output(z.object({ success: z.boolean(), url: z.string() }))
+    .mutation(async (opts) => {
+      const project = opts.ctx.project
+      const { successUrl, cancelUrl, customerId } = opts.input
+
+      const customerData = await opts.ctx.db.query.customers.findFirst({
+        where: (customer, { and, eq }) =>
+          and(eq(customer.id, customerId), eq(customer.projectId, project.id)),
+      })
+
+      if (!customerData) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Customer not found",
+        })
+      }
+
+      // do not use `new URL(...).searchParams` here, because it will escape the curly braces and stripe will not replace them with the session id
+      const apiCallbackUrl = `${API_DOMAIN}/stripe.callback?session_id={CHECKOUT_SESSION_ID}`
+
+      // TODO: check if customer has a payment method already
+
+      // create a new session for registering a payment method
+      const session = await stripe.checkout.sessions.create({
+        client_reference_id: customerData.id,
+        customer_email: customerData.email,
+        billing_address_collection: "auto",
+        mode: "setup",
+        metadata: {
+          successUrl,
+          cancelUrl,
+          customerId,
+          projectId: project.id,
+        },
+        success_url: apiCallbackUrl,
+        cancel_url: cancelUrl,
+        currency: "USD", // TODO: fix currency with project currency
+        customer_creation: "always",
       })
 
       if (!session.url) return { success: false as const, url: "" }

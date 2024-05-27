@@ -2,7 +2,10 @@
 
 import { Separator } from "@builderai/ui/separator"
 
-import { useActiveFeature } from "../../_components/use-features"
+import {
+  useActiveFeature,
+  useActivePlanVersion,
+} from "../../_components/use-features"
 import { FeatureConfigForm } from "./feature-config-form"
 
 export function FeatureConfig({
@@ -11,6 +14,7 @@ export function FeatureConfig({
   setDialogOpen?: (open: boolean) => void
 }) {
   const [activeFeature] = useActiveFeature()
+  const [activePlanVersion] = useActivePlanVersion()
 
   return (
     <div className="my-2 flex flex-1 flex-col">
@@ -42,6 +46,7 @@ export function FeatureConfig({
             <FeatureConfigForm
               setDialogOpen={setDialogOpen}
               defaultValues={activeFeature}
+              planVersion={activePlanVersion}
             />
           </div>
         </div>

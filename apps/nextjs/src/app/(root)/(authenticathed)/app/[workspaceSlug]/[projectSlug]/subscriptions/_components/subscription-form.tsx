@@ -166,11 +166,10 @@ export function SubscriptionForm({
               <FormItem className="flex flex-col">
                 <FormLabel>Plan Version</FormLabel>
                 <FormDescription>
-                  Set a limit for the feature when the subscription is created.
+                  Select the plan version for the subscription.
                 </FormDescription>
                 <div className="text-xs font-normal leading-snug">
-                  If you set a limit, the feature will be disabled when the
-                  limit is reached. Otherwise the feature will be unlimited.
+                  All the items will be configured based on the plan version
                 </div>
                 <Popover
                   open={switcherPlanOpen}
@@ -251,7 +250,7 @@ export function SubscriptionForm({
             )}
           />
 
-          <div className="flex flex-row items-center justify-between space-x-2 px-2">
+          <div className="flex flex-col items-center justify-between gap-4 px-2 lg:flex-row">
             <FormField
               control={form.control}
               name="type"
@@ -366,7 +365,7 @@ export function SubscriptionForm({
               <FormItem className="space-y-2">
                 <FormLabel>Trial Days</FormLabel>
                 <div className="flex flex-col">
-                  <FormControl className="w-full md:w-1/2">
+                  <FormControl className="w-full lg:w-1/2">
                     <div className="flex flex-row items-center">
                       <div className="relative flex-1">
                         <Input
@@ -390,6 +389,8 @@ export function SubscriptionForm({
               </FormItem>
             )}
           />
+
+          <Separator />
 
           <Separator />
 

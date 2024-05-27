@@ -2,6 +2,8 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowUp, ListFilter, MoreVertical } from "lucide-react"
 
+import { APP_DOMAIN } from "@builderai/config"
+import type { Stripe } from "@builderai/stripe"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
@@ -36,6 +38,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import CustomerHeader from "../_components/customer-header"
+import { UserPaymentMethod } from "../_components/payment-method"
+import { PaymentMethodForm } from "../_components/payment-method-form"
 
 export default async function PlanPage({
   params,
@@ -51,6 +55,16 @@ export default async function PlanPage({
   const { customer } = await api.customers.getSubscriptions({
     id: customerId,
   })
+
+  const { paymentMethods } = await api.stripe.listPaymentMethods({
+    customerId,
+  })
+
+  let paymentMethod: Stripe.PaymentMethod | undefined = undefined
+
+  if (paymentMethods && paymentMethods.length > 0) {
+    paymentMethod = paymentMethods.at(0)
+  }
 
   if (!customer) {
     notFound()
@@ -68,6 +82,7 @@ export default async function PlanPage({
           <div className="flex items-center">
             <TabsList>
               <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+              <TabsTrigger value="paymentMethods">Payment Methods</TabsTrigger>
               <TabsTrigger value="invoices">Invoices</TabsTrigger>
             </TabsList>
             <div className="ml-auto flex items-center gap-2">
@@ -208,6 +223,14 @@ export default async function PlanPage({
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+          <TabsContent value="paymentMethods">
+            <UserPaymentMethod paymentMethod={paymentMethod} />
+            <PaymentMethodForm
+              customerId={customerId}
+              successUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
+              cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
+            />
           </TabsContent>
         </Tabs>
       </div>

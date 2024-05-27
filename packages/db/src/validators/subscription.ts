@@ -25,14 +25,14 @@ export const subscriptionMetadataSchema = z.object({
 
 const itemConfigSubscriptionSchema = z.object({
   itemType: typeFeatureSchema,
-  // usage based doesn't have quantity
+  // usage based doesn't have quantity because varies
   quantity: z.coerce.number().min(0).optional(),
   // min quantity for the item
   min: z.coerce.number().optional(),
   // limit for the item if any
   limit: z.coerce.number().optional(),
   itemId: z.string(),
-  slug: z.string().optional(),
+  slug: z.string(),
   // current usage for the item in the current billing period
   usage: z.coerce.number().optional(),
 })
@@ -41,12 +41,12 @@ const itemConfigSubscriptionSchema = z.object({
 export const subscriptionItemsSchema = z
   .array(itemConfigSubscriptionSchema)
   .superRefine((items, ctx) => {
-    if (items.length > 250) {
+    if (items.length > 50) {
       // TODO: add a better message and map to the correct path
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Total items for the subscription should be less than 250",
-        path: [0, "quantity"],
+        message: "Total items for the subscription should be less than 50",
+        path: ["."],
         fatal: true,
       })
 
@@ -235,7 +235,7 @@ export const calculatePricePerFeature = ({
 
         const unitPriceText = firstTier.flatPrice
           ? `${currency} $${firstTier.flatPrice} +  per unit per $${firstTier.unitPrice}/${period}`
-          : `${currency} $${firstTier.unitPrice}/${period}`
+          : `${currency} $${firstTier.unitPrice} per unit per ${period}`
 
         return Ok({
           totalPriceText: `$${firstTier.unitPrice}/${period}`,
@@ -275,9 +275,7 @@ export const calculatePricePerFeature = ({
 
       const unitPriceText = tier.flatPrice
         ? `${currency} $${tier.flatPrice} +  per unit per $${tier.unitPrice}/${period}`
-        : `${currency} $${tier.unitPrice}/${period}`
-
-      console.log("totalPrice", totalPrice.toFixed(2))
+        : `${currency} $${tier.unitPrice} per unit per ${period}`
 
       return Ok({
         totalPriceText: `$${totalPrice.toFixed(2)}/${billingPeriod}`,
