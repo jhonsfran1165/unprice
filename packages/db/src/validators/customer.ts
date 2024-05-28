@@ -7,6 +7,7 @@ import { paymentProviderSchema } from "./shared"
 export const customerProvidersMetadataSchema = z.object({
   externalId: z.string().optional(),
   stripeSubscriptionId: z.string().optional(),
+  defaultPaymentMethodId: z.string().optional(),
 })
 
 export const customerMetadataSchema = z.object({

@@ -87,9 +87,9 @@ export async function GET(req: NextRequest) {
         projectId: customerData.projectId,
         paymentProvider: "stripe",
         paymentProviderCustomerId: customer.id,
-        defaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
         metadata: {
           stripeSubscriptionId: (session.subscription as string) ?? "",
+          defaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
         },
       })
       .execute()
@@ -97,7 +97,10 @@ export async function GET(req: NextRequest) {
     await db
       .update(schema.customerPaymentProviders)
       .set({
-        defaultPaymentMethodId: paymentMethods.data.at(0)?.id,
+        metadata: {
+          ...paymentProviderData.metadata,
+          defaultPaymentMethodId: paymentMethods.data.at(0)?.id,
+        },
       })
       .where(eq(schema.customerPaymentProviders.id, paymentProviderData.id))
   }

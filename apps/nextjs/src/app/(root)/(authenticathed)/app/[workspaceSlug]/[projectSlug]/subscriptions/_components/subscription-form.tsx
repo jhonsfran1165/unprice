@@ -90,9 +90,10 @@ export function SubscriptionForm({
     published: true,
   })
 
-  const { data: paymentMethods } = api.stripe.listPaymentMethods.useQuery({
-    customerId: defaultValues.customerId,
-  })
+  const { data: paymentProviders } =
+    api.customers.listPaymentProviders.useQuery({
+      customerId: defaultValues.customerId,
+    })
 
   const createSubscription = api.subscriptions.create.useMutation({
     onSuccess: ({ subscription }) => {
@@ -399,7 +400,7 @@ export function SubscriptionForm({
 
           <PaymentMethodsFormField
             form={form}
-            paymentMethods={paymentMethods?.paymentMethods}
+            paymentProviders={paymentProviders?.providers ?? []}
             selectedPlanVersion={selectedPlanVersion}
           />
 

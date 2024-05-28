@@ -27,31 +27,36 @@ import { api } from "~/trpc/client"
 import { UserPaymentMethod } from "./payment-method"
 
 type PaymentMethodProviderData =
-  RouterOutputs["stripe"]["listPaymentMethods"]["paymentMethods"][number]
+  RouterOutputs["customers"]["listPaymentProviders"]["providers"][number]
 
 export function PaymentMethodForm({
   customer,
   successUrl,
   cancelUrl,
-  paymentMethods,
+  paymentProviders,
 }: {
   customer: Customer
   successUrl: string
   cancelUrl: string
-  paymentMethods: PaymentMethodProviderData[]
+  paymentProviders: PaymentMethodProviderData[]
 }) {
   // TODO: set with the default payment provider for the project
   const [provider, setProvider] = useState<PaymentProvider>("stripe")
 
-  const createSession = api.stripe.createPaymentMethod.useMutation({
+  const createSession = api.customers.createPaymentMethod.useMutation({
     onSettled: (data) => {
       if (data?.url) window.location.href = data?.url
     },
   })
 
-  const paymentMethod = paymentMethods.find(
+  const paymentMethod = paymentProviders.find(
     (method) => method.paymentProvider === provider
   )
+
+  const defaultPaymentMethod =
+    paymentMethod?.paymentMethods.find(
+      (p) => p.id === paymentMethod.metadata?.defaultPaymentMethodId
+    ) ?? paymentMethod?.paymentMethods.at(0)
 
   return (
     <Card>
@@ -62,9 +67,7 @@ export function PaymentMethodForm({
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <UserPaymentMethod
-          paymentMethod={paymentMethod?.defaultPaymentMethod}
-        />
+        <UserPaymentMethod paymentMethod={defaultPaymentMethod} />
         <div className="flex flex-col gap-2">
           <Label htmlFor="provider">Payment Provider</Label>
           <Select
@@ -91,6 +94,7 @@ export function PaymentMethodForm({
           variant="default"
           onClick={() => {
             createSession.mutate({
+              paymentProvider: provider,
               customerId: customer.id,
               successUrl,
               cancelUrl,

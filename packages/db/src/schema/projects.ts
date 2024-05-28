@@ -3,7 +3,7 @@ import { boolean, index, text, unique } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { id, timestamps, workspaceID } from "../utils/sql"
-import { projectTierEnum } from "./enums"
+import { currencyEnum, projectTierEnum } from "./enums"
 import { workspaces } from "./workspaces"
 
 export const projects = pgTableProject(
@@ -21,6 +21,7 @@ export const projects = pgTableProject(
     stripeAccountVerified: boolean("stripe_account_verified").default(false),
     // if not enabled, the project will not be accessible and all API requests will be rejected
     enabled: boolean("enabled").default(true).notNull(),
+    defaultCurrency: currencyEnum("default_currency").default("USD"),
   },
   (table) => ({
     slug: index("slug_index").on(table.slug),

@@ -18,19 +18,19 @@ type PlanVersionResponse =
   RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 
 type PaymentMethodProviderData =
-  RouterOutputs["stripe"]["listPaymentMethods"]["paymentMethods"][number]
+  RouterOutputs["customers"]["listPaymentProviders"]["providers"][number]
 
 export default function PaymentMethodsFormField({
   form,
-  paymentMethods,
+  paymentProviders,
   selectedPlanVersion,
 }: {
   form: UseFormReturn<InsertSubscription>
-  paymentMethods?: PaymentMethodProviderData[]
+  paymentProviders: PaymentMethodProviderData[]
   selectedPlanVersion?: PlanVersionResponse
 }) {
-  const validPaymentMethods = paymentMethods?.filter((method) => {
-    return method.paymentProvider === selectedPlanVersion?.paymentProvider
+  const paymentProviderData = paymentProviders.find((p) => {
+    return p.paymentProvider === selectedPlanVersion?.paymentProvider
   })
 
   return (
@@ -51,7 +51,7 @@ export default function PaymentMethodsFormField({
               className="flex flex-col gap-4 pt-2"
             >
               {/* // TODO: add payment method link */}
-              {validPaymentMethods?.map((method) => (
+              {paymentProviderData?.paymentMethods.map((method) => (
                 <FormItem key={method.id}>
                   <FormLabel className="[&:has([data-state=checked])>div]:border-background-borderHover">
                     <FormControl>
@@ -60,21 +60,16 @@ export default function PaymentMethodsFormField({
                     <div className="cursor-pointer items-center rounded-md border-2 border-muted p-6 hover:border-accent">
                       <div className="flex flex-row items-center justify-between">
                         <div className="inline-flex gap-2">
-                          <span>{method?.defaultPaymentMethod?.brand}</span>
-                          <span>
-                            **** **** **** {method?.defaultPaymentMethod?.last4}
-                          </span>
+                          <span>{method?.brand}</span>
+                          <span>**** **** **** {method?.last4}</span>
                         </div>
                         <div className="inline-flex gap-2">
                           <span>Expires</span>
                           <span>
-                            {method?.defaultPaymentMethod?.expMonth?.toLocaleString(
-                              "en-US",
-                              {
-                                minimumIntegerDigits: 2,
-                              }
-                            )}
-                            /{method?.defaultPaymentMethod?.expYear}
+                            {method?.expMonth?.toLocaleString("en-US", {
+                              minimumIntegerDigits: 2,
+                            })}
+                            /{method?.expYear}
                           </span>
                         </div>
                       </div>

@@ -6,7 +6,7 @@ export * from "./webhooks"
 
 export { Stripe as StripeClient } from "stripe"
 
-export type { Stripe }
+export { Stripe }
 
 export const stripe = new Stripe(env.STRIPE_API_KEY, {
   apiVersion: "2023-10-16",

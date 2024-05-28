@@ -17,7 +17,7 @@ import type {
   customerMetadataSchema,
   customerProvidersMetadataSchema,
 } from "../validators"
-import { paymentProviderEnum } from "./enums"
+import { currencyEnum, paymentProviderEnum } from "./enums"
 import { projects } from "./projects"
 import { subscriptions } from "./subscriptions"
 
@@ -31,6 +31,7 @@ export const customers = pgTableProject(
     description: text("description"),
     metadata: json("metadata").$type<z.infer<typeof customerMetadataSchema>>(),
     active: boolean("active").default(true),
+    defaultCurrency: currencyEnum("default_currency").default("USD"),
     // beta features
   },
   (table) => ({
@@ -49,7 +50,6 @@ export const customerPaymentProviders = pgTableProject(
     ...projectID,
     ...timestamps,
     customerId: text("customer_id").notNull(),
-    defaultPaymentMethodId: text("default_payment_method_id").notNull(),
     paymentProvider: paymentProviderEnum("payment_provider").notNull(),
     paymentProviderCustomerId: text("payment_provider_customer_id")
       .notNull()

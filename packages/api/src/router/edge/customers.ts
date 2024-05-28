@@ -7,14 +7,18 @@ import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
   customerInsertBaseSchema,
+  customerPaymentProviderSelectSchema,
   customerSelectSchema,
+  paymentProviderSchema,
   planSelectBaseSchema,
   planVersionSelectBaseSchema,
   searchDataParamsSchema,
   subscriptionSelectSchema,
 } from "@builderai/db/validators"
+import { stripe } from "@builderai/stripe"
 
 import { deniedReasonSchema } from "../../pkg/errors"
+import { StripePaymentProvider } from "../../pkg/payment-provider/stripe"
 import {
   createTRPCRouter,
   protectedApiOrActiveProjectProcedure,
@@ -226,6 +230,160 @@ export const customersRouter = createTRPCRouter({
         customer: updatedCustomer,
       }
     }),
+
+  // TODO: move this and the second procedure to customers
+  listPaymentProviders: protectedApiOrActiveProjectProcedure
+    .input(
+      z.object({
+        customerId: z.string(),
+      })
+    )
+    .output(
+      z.object({
+        providers: customerPaymentProviderSelectSchema
+          .extend({
+            paymentMethods: z
+              .object({
+                id: z.string(),
+                name: z.string().nullable(),
+                last4: z.string().optional(),
+                expMonth: z.number().optional(),
+                expYear: z.number().optional(),
+                brand: z.string().optional(),
+              })
+              .array(),
+          })
+          .array(),
+      })
+    )
+    .query(async (opts) => {
+      const { customerId } = opts.input
+      const project = opts.ctx.project
+
+      const customerData = await opts.ctx.db.query.customers.findFirst({
+        with: {
+          providers: true,
+        },
+        where: (customer, { and, eq }) =>
+          and(eq(customer.id, customerId), eq(customer.projectId, project.id)),
+      })
+
+      if (!customerData) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Customer not found",
+        })
+      }
+
+      const customerPaymentProviders = customerData.providers
+
+      // we have to query the payment provider api to get up-to-date information
+      const allDataProviders = await Promise.all(
+        customerPaymentProviders.map(async (provider) => {
+          switch (provider.paymentProvider) {
+            case "stripe": {
+              const paymentMethods = await stripe.customers.listPaymentMethods(
+                provider.paymentProviderCustomerId,
+                {
+                  limit: 5,
+                }
+              )
+
+              const data = paymentMethods.data.map((paymentMethod) => {
+                return {
+                  id: paymentMethod.id,
+                  name: paymentMethod.billing_details.name,
+                  last4: paymentMethod.card?.last4,
+                  expMonth: paymentMethod.card?.exp_month,
+                  expYear: paymentMethod.card?.exp_year,
+                  brand: paymentMethod.card?.brand,
+                }
+              })
+
+              return {
+                ...provider,
+                paymentMethods: data,
+              }
+            }
+            default:
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Payment provider not supported",
+              })
+          }
+        })
+      )
+
+      return {
+        providers: allDataProviders,
+      }
+    }),
+
+  createPaymentMethod: protectedApiOrActiveProjectProcedure
+    .input(
+      z.object({
+        paymentProvider: paymentProviderSchema,
+        customerId: z.string(),
+        successUrl: z.string().url(),
+        cancelUrl: z.string().url(),
+      })
+    )
+    .output(z.object({ success: z.boolean(), url: z.string() }))
+    .mutation(async (opts) => {
+      const project = opts.ctx.project
+      const { successUrl, cancelUrl, customerId } = opts.input
+
+      const customerData = await opts.ctx.db.query.customers.findFirst({
+        with: {
+          providers: true,
+        },
+        where: (customer, { and, eq }) =>
+          and(eq(customer.id, customerId), eq(customer.projectId, project.id)),
+      })
+
+      if (!customerData) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Customer not found",
+        })
+      }
+
+      switch (opts.input.paymentProvider) {
+        case "stripe": {
+          const stripeCustomerData = customerData.providers.find(
+            (provider) => provider.paymentProvider === "stripe"
+          )
+
+          const stripePaymentProvider = new StripePaymentProvider({
+            paymentCustomerId: stripeCustomerData?.paymentProviderCustomerId,
+            successUrl: successUrl,
+            cancelUrl: cancelUrl,
+          })
+
+          const { err, val } = await stripePaymentProvider.createSession({
+            customerId: customerId,
+            projectId: project.id,
+            email: customerData.email,
+            currency: "USD", // TODO: pass the currency from the project
+          })
+
+          if (err ?? !val) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Error creating session",
+            })
+          }
+
+          return val
+        }
+        default:
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Payment provider not supported yet",
+          })
+      }
+    }),
+
   // is it a mutation because we need to call it from the client async
   exist: protectedApiOrActiveProjectProcedure
     .meta({

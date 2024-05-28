@@ -54,7 +54,7 @@ export default async function PlanPage({
     id: customerId,
   })
 
-  const { paymentMethods } = await api.stripe.listPaymentMethods({
+  const { providers } = await api.customers.listPaymentProviders({
     customerId: customer.id,
   })
 
@@ -174,7 +174,8 @@ export default async function PlanPage({
                         </TableCell>
                         <TableCell className="hidden text-center md:table-cell">
                           <span className="text-xs">
-                            {sub.endDate && formatDate(sub.endDate)}
+                            {(sub.endDate && formatDate(sub.endDate)) ??
+                              "Forever"}
                           </span>
                         </TableCell>
                         <TableCell className="table-cell justify-start">
@@ -221,7 +222,7 @@ export default async function PlanPage({
       </div>
       <div className="flex flex-col gap-4">
         <PaymentMethodForm
-          paymentMethods={paymentMethods}
+          paymentProviders={providers}
           customer={customer}
           successUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
           cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
