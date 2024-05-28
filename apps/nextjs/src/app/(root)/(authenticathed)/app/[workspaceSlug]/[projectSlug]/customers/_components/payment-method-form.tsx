@@ -1,6 +1,10 @@
 "use client"
 
-import { Button } from "@builderai/ui/button"
+import { useState } from "react"
+
+import type { RouterOutputs } from "@builderai/api"
+import { PAYMENT_PROVIDERS } from "@builderai/db/utils"
+import type { Customer, PaymentProvider } from "@builderai/db/validators"
 import {
   Card,
   CardContent,
@@ -9,10 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
-import { StripeLinkLogo } from "@builderai/ui/icons"
-import { Input } from "@builderai/ui/input"
 import { Label } from "@builderai/ui/label"
-import { RadioGroup, RadioGroupItem } from "@builderai/ui/radio-group"
 import {
   Select,
   SelectContent,
@@ -21,144 +22,84 @@ import {
   SelectValue,
 } from "@builderai/ui/select"
 
+import { SubmitButton } from "~/components/submit-button"
 import { api } from "~/trpc/client"
+import { UserPaymentMethod } from "./payment-method"
+
+type PaymentMethodProviderData =
+  RouterOutputs["stripe"]["listPaymentMethods"]["paymentMethods"][number]
 
 export function PaymentMethodForm({
-  customerId,
+  customer,
   successUrl,
   cancelUrl,
+  paymentMethods,
 }: {
-  customerId: string
+  customer: Customer
   successUrl: string
   cancelUrl: string
+  paymentMethods: PaymentMethodProviderData[]
 }) {
+  // TODO: set with the default payment provider for the project
+  const [provider, setProvider] = useState<PaymentProvider>("stripe")
+
   const createSession = api.stripe.createPaymentMethod.useMutation({
     onSettled: (data) => {
       if (data?.url) window.location.href = data?.url
     },
   })
 
+  const paymentMethod = paymentMethods.find(
+    (method) => method.paymentProvider === provider
+  )
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Payment Method</CardTitle>
         <CardDescription>
-          Add a new payment method to your account.
+          Default payment method for this customer
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-6">
-        <RadioGroup defaultValue="card" className="grid grid-cols-3 gap-4">
-          <div>
-            <RadioGroupItem value="card" id="card" className="peer sr-only" />
-            <Label
-              htmlFor="card"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                className="mb-3 h-6 w-6"
-              >
-                <rect width="20" height="14" x="2" y="5" rx="2" />
-                <path d="M2 10h20" />
-              </svg>
-              Card
-            </Label>
-          </div>
-          <div>
-            <RadioGroupItem
-              value="paypal"
-              id="paypal"
-              className="peer sr-only"
-            />
-            <Label
-              htmlFor="paypal"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              <StripeLinkLogo className="mb-3 h-6 w-6" />
-              Paypal
-            </Label>
-          </div>
-          <div>
-            <RadioGroupItem value="apple" id="apple" className="peer sr-only" />
-            <Label
-              htmlFor="apple"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              <StripeLinkLogo className="mb-3 h-6 w-6" />
-              Apple
-            </Label>
-          </div>
-        </RadioGroup>
-        <div className="grid gap-2">
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" placeholder="First Last" />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="number">Card number</Label>
-          <Input id="number" placeholder="" />
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="month">Expires</Label>
-            <Select>
-              <SelectTrigger id="month">
-                <SelectValue placeholder="Month" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">January</SelectItem>
-                <SelectItem value="2">February</SelectItem>
-                <SelectItem value="3">March</SelectItem>
-                <SelectItem value="4">April</SelectItem>
-                <SelectItem value="5">May</SelectItem>
-                <SelectItem value="6">June</SelectItem>
-                <SelectItem value="7">July</SelectItem>
-                <SelectItem value="8">August</SelectItem>
-                <SelectItem value="9">September</SelectItem>
-                <SelectItem value="10">October</SelectItem>
-                <SelectItem value="11">November</SelectItem>
-                <SelectItem value="12">December</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="year">Year</Label>
-            <Select>
-              <SelectTrigger id="year">
-                <SelectValue placeholder="Year" />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 10 }, (_, i) => (
-                  <SelectItem key={i} value={`${new Date().getFullYear() + i}`}>
-                    {new Date().getFullYear() + i}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="cvc">CVC</Label>
-            <Input id="cvc" placeholder="CVC" />
-          </div>
+      <CardContent className="flex flex-col gap-6">
+        <UserPaymentMethod
+          paymentMethod={paymentMethod?.defaultPaymentMethod}
+        />
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="provider">Payment Provider</Label>
+          <Select
+            value={provider}
+            onValueChange={(e) => {
+              setProvider(e as PaymentProvider)
+            }}
+          >
+            <SelectTrigger id={"provider"}>
+              <SelectValue placeholder="Select a provider" />
+            </SelectTrigger>
+            <SelectContent>
+              {PAYMENT_PROVIDERS.map((provider, index) => (
+                <SelectItem key={index} value={provider}>
+                  {provider}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </CardContent>
-      <CardFooter>
-        <Button
+      <CardFooter className="flex flex-col justify-center">
+        <SubmitButton
+          variant="default"
           onClick={() => {
             createSession.mutate({
-              customerId,
+              customerId: customer.id,
               successUrl,
               cancelUrl,
             })
           }}
-        >
-          Add Payment Method
-        </Button>
+          isSubmitting={createSession.isPending}
+          isDisabled={createSession.isPending}
+          label={!paymentMethod ? "Add Payment Method" : "Billing Portal"}
+        />
       </CardFooter>
     </Card>
   )

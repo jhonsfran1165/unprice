@@ -7,7 +7,6 @@ import {
   AGGREGATION_METHODS,
   FEATURE_TYPES,
   FEATURE_TYPES_MAPS,
-  PAYMENT_PROVIDERS,
   TIER_MODES,
   USAGE_MODES,
   USAGE_MODES_MAP,
@@ -18,7 +17,6 @@ import { planVersionSelectBaseSchema } from "./planVersions"
 import { projectSelectBaseSchema } from "./project"
 
 export const typeFeatureSchema = z.enum(FEATURE_TYPES)
-const paymentProviderSchema = z.enum(PAYMENT_PROVIDERS)
 const usageModeSchema = z.enum(USAGE_MODES)
 const aggregationMethodSchema = z.enum(AGGREGATION_METHODS)
 const tierModeSchema = z.enum(TIER_MODES)
@@ -475,7 +473,5 @@ export type PlanVersionFeatureDragDrop = z.infer<
 >
 
 export type FeatureType = z.infer<typeof typeFeatureSchema>
-
-export type PaymentProvider = z.infer<typeof paymentProviderSchema>
 
 export type PlanVersionExtended = z.infer<typeof planVersionExtendedSchema>

@@ -16,7 +16,7 @@ import type {
   subscriptionItemsSchema,
   subscriptionMetadataSchema,
 } from "../validators/subscription"
-import { customers } from "./customers"
+import { customerPaymentProviders, customers } from "./customers"
 import {
   collectionMethodEnum,
   subscriptionStatusEnum,
@@ -38,6 +38,8 @@ export const subscriptions = pgTableProject(
     ...timestamps,
     // customer to get the payment info from that customer
     customerId: cuid("customers_id").notNull(),
+
+    paymentProviderId: cuid("payment_provider_id").notNull(),
 
     // data from plan version when the subscription was created
     // payment provider configured for the plan. This should not changed after the subscription is created
@@ -102,6 +104,14 @@ export const subscriptions = pgTableProject(
       columns: [table.customerId, table.projectId],
       foreignColumns: [customers.id, customers.projectId],
       name: "subscriptions_customer_id_fkey",
+    }),
+    paymentmethodfk: foreignKey({
+      columns: [table.paymentProviderId, table.projectId],
+      foreignColumns: [
+        customerPaymentProviders.id,
+        customerPaymentProviders.projectId,
+      ],
+      name: "subscriptions_payment_method_id_fkey",
     }),
     planversionfk: foreignKey({
       columns: [table.planVersionId, table.projectId],

@@ -1,12 +1,13 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
-import { and, db, eq } from "@builderai/db"
+import { db, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
+import * as utils from "@builderai/db/utils"
 import { stripe } from "@builderai/stripe"
 
-// TODO: report logs
-export default async function StripeMiddleware(req: NextRequest) {
+export async function GET(req: NextRequest) {
+  // TODO: add rate limiting
   const sessionId = req.nextUrl.searchParams.get("session_id")
 
   if (!sessionId) {
@@ -16,6 +17,7 @@ export default async function StripeMiddleware(req: NextRequest) {
     )
   }
 
+  // TODO: add logs and notifications if errors occur
   const session = await stripe.checkout.sessions.retrieve(sessionId)
 
   if (!session) {
@@ -41,7 +43,10 @@ export default async function StripeMiddleware(req: NextRequest) {
     )
   }
 
-  const customer = await stripe.customers.retrieve(session.customer as string)
+  const [customer, paymentMethods] = await Promise.all([
+    stripe.customers.retrieve(session.customer as string),
+    stripe.customers.listPaymentMethods(session.customer as string),
+  ])
 
   if (!customer) {
     return NextResponse.json(
@@ -52,6 +57,11 @@ export default async function StripeMiddleware(req: NextRequest) {
 
   // check if the customer exists in the database
   const customerData = await db.query.customers.findFirst({
+    with: {
+      providers: {
+        where: (provider, { eq }) => eq(provider.paymentProvider, "stripe"),
+      },
+    },
     where: (customer, { and, eq }) =>
       and(eq(customer.id, customerId), eq(customer.projectId, projectId)),
   })
@@ -63,27 +73,34 @@ export default async function StripeMiddleware(req: NextRequest) {
     )
   }
 
-  // if all checks pass, update the customer metadata with the stripe subscription id
-  await db
-    .update(schema.customers)
-    .set({
-      metadata: {
-        ...customerData.metadata,
-        metadataPaymentProviderSchema: {
-          stripe: {
-            customerId: customer.id,
-            stripeSubscriptionId: session.subscription! as string,
-          },
-        },
-      },
-    })
-    .where(
-      and(
-        eq(schema.customers.id, customerData.id),
-        eq(schema.customers.projectId, customerData.projectId)
-      )
-    )
+  const paymentProviderData = customerData.providers.at(0)
 
+  if (!paymentProviderData) {
+    // TODO: it would be a good idea to waitUntil here?
+    const id = utils.newId("customer_provider")
+    // if all checks pass, update the customer metadata with the stripe subscription id
+    await db
+      .insert(schema.customerPaymentProviders)
+      .values({
+        id: id,
+        customerId: customerData.id,
+        projectId: customerData.projectId,
+        paymentProvider: "stripe",
+        paymentProviderCustomerId: customer.id,
+        defaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
+        metadata: {
+          stripeSubscriptionId: (session.subscription as string) ?? "",
+        },
+      })
+      .execute()
+  } else {
+    await db
+      .update(schema.customerPaymentProviders)
+      .set({
+        defaultPaymentMethodId: paymentMethods.data.at(0)?.id,
+      })
+      .where(eq(schema.customerPaymentProviders.id, paymentProviderData.id))
+  }
   // redirect the user to the success URL
   return NextResponse.redirect(successUrl)
 }

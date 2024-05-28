@@ -42,6 +42,7 @@ export function SubscriptionSheet({
               planVersionId: "",
               type: "plan",
               items: [],
+              paymentProviderId: "",
             }
           }
         />

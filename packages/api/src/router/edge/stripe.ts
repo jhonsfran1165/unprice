@@ -5,8 +5,10 @@ import { z } from "zod"
 
 import { API_DOMAIN, APP_DOMAIN, PLANS } from "@builderai/config"
 import { projects } from "@builderai/db/schema"
-import { purchaseWorkspaceSchema } from "@builderai/db/validators"
-import type { Stripe } from "@builderai/stripe"
+import {
+  customerPaymentProviderSelectSchema,
+  purchaseWorkspaceSchema,
+} from "@builderai/db/validators"
 import { stripe } from "@builderai/stripe"
 
 import {
@@ -108,6 +110,7 @@ export const stripeRouter = createTRPCRouter({
       if (!session.url) return { success: false as const, url: "" }
       return { success: true as const, url: session.url }
     }),
+  // TODO: move this and the second procedure to customers
   listPaymentMethods: protectedActiveProjectProcedure
     .input(
       z.object({
@@ -116,18 +119,32 @@ export const stripeRouter = createTRPCRouter({
     )
     .output(
       z.object({
-        paymentMethods: z.custom<Stripe.PaymentMethod>().array(),
+        paymentMethods: customerPaymentProviderSelectSchema
+          .extend({
+            defaultPaymentMethod: z
+              .object({
+                id: z.string(),
+                name: z.string().nullable(),
+                last4: z.string().optional(),
+                expMonth: z.number().optional(),
+                expYear: z.number().optional(),
+                brand: z.string().optional(),
+              })
+              .optional(),
+          })
+          .array(),
       })
     )
     .query(async (opts) => {
       const { customerId } = opts.input
+      const project = opts.ctx.project
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
+        with: {
+          providers: true,
+        },
         where: (customer, { and, eq }) =>
-          and(
-            eq(customer.id, customerId),
-            eq(customer.projectId, opts.ctx.project.id)
-          ),
+          and(eq(customer.id, customerId), eq(customer.projectId, project.id)),
       })
 
       if (!customerData) {
@@ -137,21 +154,42 @@ export const stripeRouter = createTRPCRouter({
         })
       }
 
-      const stripeCustomerId =
-        customerData.metadata?.metadataPaymentProviderSchema?.stripe?.customerId
+      const customerPaymentProviders = customerData.providers
 
-      if (!stripeCustomerId) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Stripe configuration not found for this customer",
+      // we have to query the payment provider api to get up-to-date information
+      const allDataProviders = await Promise.all(
+        customerPaymentProviders.map(async (provider) => {
+          switch (provider.paymentProvider) {
+            case "stripe": {
+              const paymentMethods = await stripe.customers.listPaymentMethods(
+                provider.paymentProviderCustomerId
+              )
+
+              const paymentMethod = paymentMethods.data[0]
+
+              return {
+                ...provider,
+                defaultPaymentMethod: paymentMethod && {
+                  id: paymentMethod.id,
+                  name: paymentMethod.billing_details.name,
+                  last4: paymentMethod.card?.last4,
+                  expMonth: paymentMethod.card?.exp_month,
+                  expYear: paymentMethod.card?.exp_year,
+                  brand: paymentMethod.card?.brand,
+                },
+              }
+            }
+            default:
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Payment provider not supported",
+              })
+          }
         })
-      }
-
-      const paymentMethods =
-        await stripe.customers.listPaymentMethods(stripeCustomerId)
+      )
 
       return {
-        paymentMethods: paymentMethods.data,
+        paymentMethods: allDataProviders,
       }
     }),
 
@@ -169,6 +207,9 @@ export const stripeRouter = createTRPCRouter({
       const { successUrl, cancelUrl, customerId } = opts.input
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
+        with: {
+          providers: true,
+        },
         where: (customer, { and, eq }) =>
           and(eq(customer.id, customerId), eq(customer.projectId, project.id)),
       })
@@ -180,10 +221,25 @@ export const stripeRouter = createTRPCRouter({
         })
       }
 
-      // do not use `new URL(...).searchParams` here, because it will escape the curly braces and stripe will not replace them with the session id
-      const apiCallbackUrl = `${API_DOMAIN}/stripe.callback?session_id={CHECKOUT_SESSION_ID}`
+      const stripeCustomerData = customerData.providers.find(
+        (provider) => provider.paymentProvider === "stripe"
+      )
 
-      // TODO: check if customer has a payment method already
+      // do not use `new URL(...).searchParams` here, because it will escape the curly braces and stripe will not replace them with the session id
+      const apiCallbackUrl = `${API_DOMAIN}/payment/stripe?session_id={CHECKOUT_SESSION_ID}`
+
+      // check if customer has a payment method already
+      if (stripeCustomerData?.customerId) {
+        /**
+         * Customer is already configured, create a billing portal session
+         */
+        const session = await stripe.billingPortal.sessions.create({
+          customer: stripeCustomerData.paymentProviderCustomerId,
+          return_url: cancelUrl,
+        })
+
+        return { success: true as const, url: session.url }
+      }
 
       // create a new session for registering a payment method
       const session = await stripe.checkout.sessions.create({

@@ -56,6 +56,7 @@ import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 import DurationFormField from "./duration-field"
 import ConfigItemsFormField from "./items-fields"
+import PaymentMethodsFormField from "./payment-method-field"
 
 type PlanVersionResponse =
   RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
@@ -87,6 +88,10 @@ export function SubscriptionForm({
 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery({
     published: true,
+  })
+
+  const { data: paymentMethods } = api.stripe.listPaymentMethods.useQuery({
+    customerId: defaultValues.customerId,
   })
 
   const createSubscription = api.subscriptions.create.useMutation({
@@ -391,6 +396,12 @@ export function SubscriptionForm({
           />
 
           <Separator />
+
+          <PaymentMethodsFormField
+            form={form}
+            paymentMethods={paymentMethods?.paymentMethods}
+            selectedPlanVersion={selectedPlanVersion}
+          />
 
           <Separator />
 

@@ -3,7 +3,6 @@ import { notFound } from "next/navigation"
 import { ArrowUp, ListFilter, MoreVertical } from "lucide-react"
 
 import { APP_DOMAIN } from "@builderai/config"
-import type { Stripe } from "@builderai/stripe"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
@@ -38,7 +37,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import CustomerHeader from "../_components/customer-header"
-import { UserPaymentMethod } from "../_components/payment-method"
 import { PaymentMethodForm } from "../_components/payment-method-form"
 
 export default async function PlanPage({
@@ -57,14 +55,8 @@ export default async function PlanPage({
   })
 
   const { paymentMethods } = await api.stripe.listPaymentMethods({
-    customerId,
+    customerId: customer.id,
   })
-
-  let paymentMethod: Stripe.PaymentMethod | undefined = undefined
-
-  if (paymentMethods && paymentMethods.length > 0) {
-    paymentMethod = paymentMethods.at(0)
-  }
 
   if (!customer) {
     notFound()
@@ -224,17 +216,16 @@ export default async function PlanPage({
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="paymentMethods">
-            <UserPaymentMethod paymentMethod={paymentMethod} />
-            <PaymentMethodForm
-              customerId={customerId}
-              successUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
-              cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
-            />
-          </TabsContent>
+          <TabsContent value="paymentMethods"></TabsContent>
         </Tabs>
       </div>
-      <div>
+      <div className="flex flex-col gap-4">
+        <PaymentMethodForm
+          paymentMethods={paymentMethods}
+          customer={customer}
+          successUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
+          cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
+        />
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-start">
             <div className="grid gap-0.5">
