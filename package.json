@@ -14,7 +14,7 @@
   "scripts": {
     "build": "turbo build",
     "clean": "git clean -xdf node_modules dist .next",
-    "clean:workspaces": "turbo clean",
+    "clean:workspaces": "turbo clean --parallel",
     "dev": "cross-env FORCE_COLOR=1 turbo dev --parallel",
     "dev:web": "turbo dev --parallel --filter !@builderai/expo --filter !@builderai/db",
     "format": "turbo format --continue -- --cache --cache-location='node_modules/.cache/.prettiercache' --ignore-path='../../.gitignore'",

@@ -13,12 +13,15 @@ export const featureInsertBaseSchema = createInsertSchema(schema.features, {
     .refine((slug) => /^[a-z0-9-]+$/.test(slug), {
       message: "Slug must be a valid slug",
     }),
-}).partial({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  projectId: true,
 })
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
+  .partial({
+    id: true,
+    projectId: true,
+  })
 
 export type InsertFeature = z.infer<typeof featureInsertBaseSchema>
 export type Feature = z.infer<typeof featureSelectBaseSchema>

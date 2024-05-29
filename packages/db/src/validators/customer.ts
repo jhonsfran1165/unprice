@@ -28,10 +28,15 @@ export const customerPaymentProviderInsertSchema = createInsertSchema(
     metadata: customerProvidersMetadataSchema,
     paymentProvider: paymentProviderSchema,
   }
-).partial({
-  id: true,
-  projectId: true,
-})
+)
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
+  .partial({
+    id: true,
+    projectId: true,
+  })
 
 export const customerSelectSchema = createSelectSchema(schema.customers, {
   metadata: customerMetadataSchema,
@@ -41,10 +46,15 @@ export const customerInsertBaseSchema = createInsertSchema(schema.customers, {
   metadata: customerMetadataSchema,
   email: z.string().min(3).email(),
   name: z.string().min(3),
-}).partial({
-  id: true,
-  projectId: true,
 })
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
+  .partial({
+    id: true,
+    projectId: true,
+  })
 
 export type Customer = z.infer<typeof customerSelectSchema>
 export type InsertCustomer = z.infer<typeof customerInsertBaseSchema>

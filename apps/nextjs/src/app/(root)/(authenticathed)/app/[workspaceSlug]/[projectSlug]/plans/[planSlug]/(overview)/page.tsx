@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { ArrowUp, ListFilter, MoreVertical } from "lucide-react"
+import { ArrowUp, MoreVertical } from "lucide-react"
 
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
@@ -15,7 +15,6 @@ import {
 import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -74,29 +73,6 @@ export default async function PlanPage({
             <TabsList>
               <TabsTrigger value="versions">Versions</TabsTrigger>
             </TabsList>
-            <div className="ml-auto flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 gap-1 text-sm"
-                  >
-                    <ListFilter className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only">Filter</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem checked>
-                    Currency
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem>Status</DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem>Active</DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
           </div>
           <TabsContent value="versions">
             <Card>
@@ -143,10 +119,14 @@ export default async function PlanPage({
                             href={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${version.id}`}
                             prefetch={false}
                           >
-                            <div className="font-bold">{version.title}</div>
-                            <div className="hidden text-xs text-muted-foreground md:inline">
-                              {version.description?.slice(0, 20) + "..."}
+                            <div className="font-bold">
+                              {version.title} - v{version.version}
                             </div>
+                            {version.description && (
+                              <div className="hidden text-xs text-muted-foreground md:inline">
+                                {version.description.slice(0, 20) + "..."}
+                              </div>
+                            )}
                           </SuperLink>
                         </TableCell>
                         <TableCell className="table-cell text-center">
@@ -199,6 +179,7 @@ export default async function PlanPage({
                                       planVersionId={version.id}
                                     />
                                   </DropdownMenuItem>
+
                                   <DropdownMenuItem>
                                     <SuperLink
                                       href={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${version.id}`}

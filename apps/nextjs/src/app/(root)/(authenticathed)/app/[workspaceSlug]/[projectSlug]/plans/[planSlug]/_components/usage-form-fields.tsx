@@ -10,8 +10,8 @@ import {
   LimitFormField,
   PriceFormField,
   TierFormField,
+  UnitsFormField,
 } from "./fields-form"
-import { PackageFormFields } from "./package-form-fields"
 
 export function UsageFormFields({
   form,
@@ -48,7 +48,10 @@ export function UsageFormFields({
 
       {form.getValues("config.usageMode") === "package" && (
         <div className="flex w-full justify-between">
-          <PackageFormFields form={form} currency={currency} />
+          <div className="flex w-full flex-col gap-1">
+            <PriceFormField form={form} currency={currency} />
+            <UnitsFormField form={form} />
+          </div>
         </div>
       )}
     </div>

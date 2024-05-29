@@ -2,7 +2,7 @@
 
 import { startTransition } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 import {
   CURRENCIES,
@@ -45,6 +45,7 @@ export function PlanVersionForm({
   setDialogOpen?: (open: boolean) => void
   defaultValues: InsertPlanVersion
 }) {
+  const pathname = usePathname()
   const router = useRouter()
   const editMode = defaultValues.id ? true : false
   const isPublished = defaultValues.status === "published"
@@ -83,10 +84,15 @@ export function PlanVersionForm({
   })
 
   const deletePlanVersion = api.planVersions.remove.useMutation({
-    onSuccess: () => {
+    onSuccess: ({ planVersion }) => {
       toastAction("deleted")
       setDialogOpen?.(false)
       form.reset()
+
+      if (pathname.includes(planVersion.id)) {
+        router.push(pathname.replace(planVersion.id, ""))
+      }
+
       router.refresh()
     },
   })

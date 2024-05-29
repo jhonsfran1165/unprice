@@ -98,10 +98,15 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   trialDays: z.coerce.number().int().min(0).default(0),
   metadata: subscriptionMetadataSchema,
   items: subscriptionItemsSchema,
-}).partial({
-  id: true,
-  projectId: true,
 })
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
+  .partial({
+    id: true,
+    projectId: true,
+  })
 
 export const subscriptionExtendedSchema = subscriptionSelectSchema
   .pick({

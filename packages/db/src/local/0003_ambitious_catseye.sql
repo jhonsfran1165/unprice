@@ -1,1 +1,0 @@
-ALTER TABLE "builderai_projects" ADD COLUMN "enabled" boolean DEFAULT true NOT NULL;

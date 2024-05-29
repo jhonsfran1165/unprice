@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation"
 
-import { Card } from "@builderai/ui/card"
-
 import { api } from "~/trpc/server"
 import Stepper from "../_components/stepper"
 import VersionOverview from "../_components/version-overview"
+import { PricingCard } from "./_components/pricing-card"
 
 export default async function ReviewPage({
   params,
@@ -32,15 +31,17 @@ export default async function ReviewPage({
         <VersionOverview planVersion={planVersion} />
       </div>
       <div className="flex w-full flex-1 flex-row items-start gap-2 lg:w-3/4">
-        {/* // TODO: pass this to a card */}
-        <Card className="w-full overflow-hidden">{"Review configuration"}</Card>
-      </div>
+        <div className="flex flex-1 justify-center">
+          {/* // TODO: pass this to a card */}
+          <PricingCard planVersion={planVersion} />
+        </div>
 
-      <Stepper
-        className="flex flex-col px-2 sm:px-4"
-        step="review"
-        baseUrl={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${planVersion.id}`}
-      />
+        <Stepper
+          className="flex flex-col px-2 sm:px-4"
+          step="review"
+          baseUrl={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${planVersion.id}`}
+        />
+      </div>
     </div>
   )
 }

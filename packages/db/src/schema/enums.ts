@@ -5,6 +5,7 @@ import {
   COLLECTION_METHODS,
   CURRENCIES,
   FEATURE_TYPES,
+  FEATURE_VERSION_TYPES,
   PAYMENT_PROVIDERS,
   PLAN_BILLING_PERIODS,
   PLAN_TYPES,
@@ -29,6 +30,10 @@ export const subscriptionStatusEnum = pgEnum(
 export const projectTierEnum = pgEnum("project_tier", PROJECT_TIERS_APP)
 export const statusPlanEnum = pgEnum("plan_version_status", STATUS_PLAN)
 export const typeFeatureEnum = pgEnum("feature_types", FEATURE_TYPES)
+export const typeFeatureVersionEnum = pgEnum(
+  "feature_version_types",
+  FEATURE_VERSION_TYPES
+)
 export const aggregationMethodEnum = pgEnum(
   "aggregation_method",
   AGGREGATION_METHODS

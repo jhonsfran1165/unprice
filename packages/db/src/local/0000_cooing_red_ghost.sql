@@ -83,7 +83,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."subscription_type" AS ENUM('plan', 'addon');
+ CREATE TYPE "public"."subscription_type" AS ENUM('plan', 'addons');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -152,6 +152,19 @@ CREATE TABLE IF NOT EXISTS "builderai_verificationToken" (
 	CONSTRAINT "builderai_verificationToken_identifier_token_pk" PRIMARY KEY("identifier","token")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "builderai_customer_payment_providers" (
+	"id" text NOT NULL,
+	"project_id" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"customer_id" text NOT NULL,
+	"payment_provider" "payment_providers" NOT NULL,
+	"payment_provider_customer_id" text NOT NULL,
+	"metadata" json,
+	CONSTRAINT "pk_customer_payment_method" PRIMARY KEY("id","project_id"),
+	CONSTRAINT "builderai_customer_payment_providers_payment_provider_customer_id_unique" UNIQUE("payment_provider_customer_id")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "builderai_customers" (
 	"id" text NOT NULL,
 	"project_id" text NOT NULL,
@@ -161,6 +174,8 @@ CREATE TABLE IF NOT EXISTS "builderai_customers" (
 	"name" text NOT NULL,
 	"description" text,
 	"metadata" json,
+	"active" boolean DEFAULT true,
+	"default_currency" "currency" DEFAULT 'USD',
 	CONSTRAINT "pk_customer" PRIMARY KEY("id","project_id"),
 	CONSTRAINT "unique_email_project" UNIQUE("email","project_id")
 );
@@ -245,6 +260,7 @@ CREATE TABLE IF NOT EXISTS "builderai_plan_versions" (
 	"start_cycle" text DEFAULT null,
 	"grace_period" integer DEFAULT 0,
 	"metadata" json,
+	"version" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "plan_versions_plan_id_fkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
@@ -273,6 +289,8 @@ CREATE TABLE IF NOT EXISTS "builderai_projects" (
 	"url" text DEFAULT '' NOT NULL,
 	"stripe_account_id" text DEFAULT '',
 	"stripe_account_verified" boolean DEFAULT false,
+	"enabled" boolean DEFAULT true NOT NULL,
+	"default_currency" "currency" DEFAULT 'USD' NOT NULL,
 	CONSTRAINT "unique_slug" UNIQUE("slug")
 );
 --> statement-breakpoint
@@ -282,16 +300,19 @@ CREATE TABLE IF NOT EXISTS "builderai_subscriptions" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"customers_id" text NOT NULL,
+	"payment_provider_id" text NOT NULL,
 	"plan_version_id" text NOT NULL,
+	"type" "subscription_type" DEFAULT 'plan' NOT NULL,
+	"prorated" boolean DEFAULT true,
 	"trial_days" integer DEFAULT 0,
 	"trial_ends" timestamp,
-	"start_date" timestamp DEFAULT now() NOT NULL,
+	"start_date" timestamp NOT NULL,
 	"end_date" timestamp,
 	"auto_renew" boolean DEFAULT true,
 	"collection_method" "collection_method" DEFAULT 'charge_automatically',
 	"is_new" boolean DEFAULT true,
 	"status" "subscription_status" DEFAULT 'active',
-	"items" json,
+	"items" json NOT NULL,
 	"metadata" json,
 	CONSTRAINT "subscriptions_pkey" PRIMARY KEY("id","project_id")
 );
@@ -324,15 +345,11 @@ CREATE TABLE IF NOT EXISTS "builderai_workspaces" (
 	"is_personal" boolean DEFAULT false,
 	"created_by" text NOT NULL,
 	"image_url" text,
-	"stripe_id" text,
-	"subscription_id" text,
-	"trial_ends" timestamp,
-	"billing_period_start" timestamp,
-	"billing_period_end" timestamp,
+	"unprice_customer_id" text NOT NULL,
 	"legacy_plans" "legacy_plans" DEFAULT 'FREE' NOT NULL,
+	"enabled" boolean DEFAULT true NOT NULL,
 	CONSTRAINT "builderai_workspaces_slug_unique" UNIQUE("slug"),
-	CONSTRAINT "builderai_workspaces_stripe_id_unique" UNIQUE("stripe_id"),
-	CONSTRAINT "builderai_workspaces_subscription_id_unique" UNIQUE("subscription_id")
+	CONSTRAINT "unprice_customer_id" UNIQUE("unprice_customer_id")
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -349,6 +366,18 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "builderai_session" ADD CONSTRAINT "builderai_session_userId_builderai_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."builderai_user"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "builderai_customer_payment_providers" ADD CONSTRAINT "builderai_customer_payment_providers_project_id_builderai_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."builderai_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "builderai_customer_payment_providers" ADD CONSTRAINT "payment_customer_id_fkey" FOREIGN KEY ("customer_id","project_id") REFERENCES "public"."builderai_customers"("id","project_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -390,13 +419,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_plan_versions_features" ADD CONSTRAINT "plan_versions_id_fkey" FOREIGN KEY ("plan_version_id","project_id") REFERENCES "public"."builderai_plan_versions"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "builderai_plan_versions_features" ADD CONSTRAINT "plan_versions_id_fkey" FOREIGN KEY ("plan_version_id","project_id") REFERENCES "public"."builderai_plan_versions"("id","project_id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_plan_versions_features" ADD CONSTRAINT "features_id_fkey" FOREIGN KEY ("feature_id","project_id") REFERENCES "public"."builderai_features"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "builderai_plan_versions_features" ADD CONSTRAINT "features_id_fkey" FOREIGN KEY ("feature_id","project_id") REFERENCES "public"."builderai_features"("id","project_id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -450,6 +479,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "builderai_subscriptions" ADD CONSTRAINT "subscriptions_payment_method_id_fkey" FOREIGN KEY ("payment_provider_id","project_id") REFERENCES "public"."builderai_customer_payment_providers"("id","project_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "builderai_subscriptions" ADD CONSTRAINT "subscriptions_planversion_id_fkey" FOREIGN KEY ("plan_version_id","project_id") REFERENCES "public"."builderai_plan_versions"("id","project_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -480,6 +515,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "key" ON "builderai_apikeys" ("key");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_payment_provider" ON "builderai_customer_payment_providers" ("customer_id","payment_provider");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "email" ON "builderai_customers" ("email");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "name" ON "builderai_domains" ("name");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "slug_index" ON "builderai_projects" ("slug");--> statement-breakpoint

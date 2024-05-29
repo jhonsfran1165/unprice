@@ -7,6 +7,7 @@ import {
   AGGREGATION_METHODS,
   FEATURE_TYPES,
   FEATURE_TYPES_MAPS,
+  FEATURE_VERSION_TYPES,
   TIER_MODES,
   USAGE_MODES,
   USAGE_MODES_MAP,
@@ -20,6 +21,7 @@ export const typeFeatureSchema = z.enum(FEATURE_TYPES)
 const usageModeSchema = z.enum(USAGE_MODES)
 const aggregationMethodSchema = z.enum(AGGREGATION_METHODS)
 const tierModeSchema = z.enum(TIER_MODES)
+const featureVersionType = z.enum(FEATURE_VERSION_TYPES)
 const unitSchema = z.coerce.number().int().min(1)
 
 export const planVersionFeatureMetadataSchema = z.object({
@@ -270,6 +272,7 @@ export const planVersionFeatureSelectBaseSchema = createSelectSchema(
   planVersionFeatures,
   {
     config: configFeatureSchema,
+    type: featureVersionType,
     metadata: planVersionFeatureMetadataSchema,
     defaultQuantity: z.coerce.number().int().optional(),
     limit: z.coerce.number().int().optional(),
@@ -299,8 +302,13 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
     metadata: planVersionFeatureMetadataSchema.optional(),
     defaultQuantity: z.coerce.number().int().optional(),
     limit: z.coerce.number().int().optional(),
+    type: featureVersionType,
   }
 )
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
   .partial({
     projectId: true,
     id: true,
@@ -311,6 +319,7 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
     featureId: true,
     planVersionId: true,
     featureType: true,
+    type: true,
   })
   .transform((data) => {
     if (data.config) {
@@ -450,6 +459,7 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema
           metadata: true,
           limit: true,
           defaultQuantity: true,
+          type: true,
         })
         .extend({
           feature: featureSelectBaseSchema.pick({
@@ -475,3 +485,4 @@ export type PlanVersionFeatureDragDrop = z.infer<
 export type FeatureType = z.infer<typeof typeFeatureSchema>
 
 export type PlanVersionExtended = z.infer<typeof planVersionExtendedSchema>
+export type FeatureVersionType = z.infer<typeof featureVersionType>

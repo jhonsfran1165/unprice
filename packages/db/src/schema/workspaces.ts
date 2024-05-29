@@ -29,27 +29,12 @@ export const workspaces = pgTableProject(
     imageUrl: text("image_url"),
 
     // unprice id
-    unPriceCustomerId: text("unprice_customer_id")
-      .unique("unprice_customer_id")
-      .notNull(),
-
-    // TODO: delete this, we should handle the subscription with unprice
-    // stripe stuff
     // in Postgres 15.0+ NULLS NOT DISTINCT is available
-    stripeId: text("stripe_id").unique("stripe_id", { nulls: "not distinct" }),
-    // TODO: define the way subscriptions will work
-    // a workspace can have multiple projects and each project can have a different plan
-    // workspaces with subscribed projects will have a plan tag here to differentiate them so we can show the right features in the UI
-    // plan: plansEnum("legacy_plans").default("free").notNull(),
-    subscriptionId: cuid("subscription_id").unique("subscription_id", {
-      nulls: "not distinct",
-    }),
-    // null means there was no trial
-    trialEnds: timestamp("trial_ends", { mode: "date" }),
-    // if null, you should fall back to start of month
-    billingPeriodStart: timestamp("billing_period_start", { mode: "date" }),
-    // if null, you should fall back to end of month
-    billingPeriodEnd: timestamp("billing_period_end", { mode: "date" }),
+    unPriceCustomerId: text("unprice_customer_id").unique(
+      "unprice_customer_id",
+      { nulls: "not distinct" }
+    ),
+
     plan: plansEnum("legacy_plans").default("FREE").notNull(),
 
     /**

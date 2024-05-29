@@ -31,6 +31,10 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
   billingPeriod: billingPeriodSchema,
   currency: currencySchema,
 })
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
   .partial({
     projectId: true,
     id: true,

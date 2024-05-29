@@ -37,6 +37,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
         defaultQuantity,
         limit,
         hidden,
+        type,
       } = opts.input
       const project = opts.ctx.project
 
@@ -88,6 +89,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
           defaultQuantity: defaultQuantity === 0 ? null : defaultQuantity,
           limit: limit === 0 ? null : limit,
           hidden,
+          type,
         })
         .returning()
         .then((re) => re[0])

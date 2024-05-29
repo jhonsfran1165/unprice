@@ -42,7 +42,12 @@ export function PlanVersionFeatureSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <FeatureConfig setDialogOpen={setIsOpen} />
+        <FeatureConfig
+          setDialogOpen={(open) => {
+            setIsOpen(open)
+            setPlanVersionFeatureOpen(open)
+          }}
+        />
       </SheetContent>
     </Sheet>
   )

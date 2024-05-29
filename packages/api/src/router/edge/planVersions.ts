@@ -154,7 +154,7 @@ export const planVersionRouter = createTRPCRouter({
         })
         .required({ id: true })
     )
-    .output(z.object({ plan: planVersionSelectBaseSchema }))
+    .output(z.object({ planVersion: planVersionSelectBaseSchema }))
     .mutation(async (opts) => {
       const { id } = opts.input
       const project = opts.ctx.project
@@ -198,7 +198,7 @@ export const planVersionRouter = createTRPCRouter({
       }
 
       return {
-        plan: deletedPlanVersion,
+        planVersion: deletedPlanVersion,
       }
     }),
   update: protectedActiveProjectAdminProcedure

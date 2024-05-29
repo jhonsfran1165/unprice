@@ -1,1 +1,0 @@
-ALTER TABLE "builderai_plan_versions" ADD COLUMN "version" integer DEFAULT 1 NOT NULL;

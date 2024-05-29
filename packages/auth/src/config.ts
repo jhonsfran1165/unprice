@@ -80,36 +80,19 @@ export const authConfig = {
       await db.transaction(async (db) => {
         // TODO: should be able to retry if the slug already exists
         const slug = utils.generateSlug(2)
-        const customerId = utils.newId("customer")
         const workspaceId = utils.newId("workspace")
         const workspaceName = user.name ?? slug
-
-        const unpriceCustomer = await db
-          .insert(schema.customers)
-          .values({
-            id: customerId,
-            name: workspaceName,
-            email: user.email,
-            projectId: "proj_KRrmfCoBuoDmq8HZ", // TODO: this should be a env variable for the default unprice project
-          })
-          .execute()
-
-        if (!unpriceCustomer) {
-          db.rollback()
-          throw "Error creating customer"
-        }
 
         const workspace = await db
           .insert(schema.workspaces)
           .values({
             id: workspaceId,
             slug: slug,
-            name: user.name ?? slug,
+            name: workspaceName,
             imageUrl: user.image,
             isPersonal: true,
             createdBy: user.id,
             enabled: true,
-            unPriceCustomerId: customerId,
           })
           .onConflictDoNothing()
           .returning()

@@ -10,10 +10,15 @@ export const projectInserBaseSchema = createInsertSchema(schema.projects, {
   url: z.string().url().optional(),
 })
 
-export const createProjectSchema = projectInserBaseSchema.pick({
-  name: true,
-  url: true,
-})
+export const createProjectSchema = projectInserBaseSchema
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
+  .pick({
+    name: true,
+    url: true,
+  })
 
 export const projectSelectBaseSchema = createSelectSchema(schema.projects, {
   name: z.string().min(4, "Name must be at least 5 characters"),

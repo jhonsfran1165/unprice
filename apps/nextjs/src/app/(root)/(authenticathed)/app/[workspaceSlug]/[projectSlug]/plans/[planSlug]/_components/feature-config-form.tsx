@@ -195,19 +195,9 @@ export function FeatureConfigForm({
                             <SelectItem value={type} key={index}>
                               <div className="flex items-start gap-3 text-muted-foreground">
                                 <div className="grid gap-0.5">
-                                  <p>
-                                    {
-                                      FEATURE_TYPES_MAPS[
-                                        type as keyof typeof FEATURE_TYPES_MAPS
-                                      ].label
-                                    }
-                                  </p>
+                                  <p>{FEATURE_TYPES_MAPS[type].label}</p>
                                   <p className="text-xs" data-description>
-                                    {
-                                      FEATURE_TYPES_MAPS[
-                                        type as keyof typeof FEATURE_TYPES_MAPS
-                                      ].description
-                                    }
+                                    {FEATURE_TYPES_MAPS[type].description}
                                   </p>
                                 </div>
                               </div>
@@ -240,19 +230,9 @@ export function FeatureConfigForm({
                               <SelectItem value={mode} key={index}>
                                 <div className="flex items-start gap-3 text-muted-foreground">
                                   <div className="grid gap-0.5">
-                                    <p>
-                                      {
-                                        USAGE_MODES_MAP[
-                                          mode as keyof typeof USAGE_MODES_MAP
-                                        ].label
-                                      }
-                                    </p>
+                                    <p>{USAGE_MODES_MAP[mode].label}</p>
                                     <p className="text-xs" data-description>
-                                      {
-                                        USAGE_MODES_MAP[
-                                          mode as keyof typeof USAGE_MODES_MAP
-                                        ].description
-                                      }
+                                      {USAGE_MODES_MAP[mode].description}
                                     </p>
                                   </div>
                                 </div>
@@ -287,19 +267,9 @@ export function FeatureConfigForm({
                               <SelectItem value={mode} key={index}>
                                 <div className="flex items-start gap-3 text-muted-foreground">
                                   <div className="grid gap-0.5">
-                                    <p>
-                                      {
-                                        TIER_MODES_MAP[
-                                          mode as keyof typeof TIER_MODES_MAP
-                                        ].label
-                                      }
-                                    </p>
+                                    <p>{TIER_MODES_MAP[mode].label}</p>
                                     <p className="text-xs" data-description>
-                                      {
-                                        TIER_MODES_MAP[
-                                          mode as keyof typeof TIER_MODES_MAP
-                                        ].description
-                                      }
+                                      {TIER_MODES_MAP[mode].description}
                                     </p>
                                   </div>
                                 </div>

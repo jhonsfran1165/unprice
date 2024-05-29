@@ -31,7 +31,7 @@ export const FEATURE_TYPES_MAPS = {
   flat: {
     code: "flat",
     label: "Flat",
-    description: "Single price for the feature",
+    description: "Single price per unit",
   },
   tier: {
     code: "tier",
@@ -118,6 +118,7 @@ export const AGGREGATION_METHODS = Object.keys(
 
 export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
 export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
+export const FEATURE_VERSION_TYPES = ["feature", "addon"] as const
 export const SUBSCRIPTION_TYPES = ["plan", "addons"] as const
 export const COLLECTION_METHODS = [
   "charge_automatically",

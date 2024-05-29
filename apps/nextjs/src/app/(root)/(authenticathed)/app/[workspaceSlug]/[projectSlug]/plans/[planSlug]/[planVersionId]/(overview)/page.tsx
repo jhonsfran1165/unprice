@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
+import { Provider } from "jotai"
 import { PlusIcon } from "lucide-react"
 
 import { cn } from "@builderai/ui"
@@ -44,52 +45,58 @@ export default async function OverviewVersionPage({
     : [30, 70]
 
   return (
-    <div className="flex flex-col-reverse items-start gap-4 sm:py-0 md:gap-6 lg:flex-row">
-      <div className="flex w-full flex-col lg:w-1/4">
-        <VersionOverview planVersion={planVersion} />
-      </div>
-      <div className="flex w-full flex-1 flex-row items-start gap-2 lg:w-3/4">
-        {/* // TODO: pass this to a card */}
-        <Card className="w-full overflow-hidden">
-          <DragDrop>
-            <ResizablePanelConfig
-              defaultLayout={defaultLayout}
-              // TODO: add suspense component
-              featureList={
-                <>
-                  <div
-                    className={cn(
-                      "flex h-[70px] items-center justify-between space-x-1 px-4"
-                    )}
-                  >
-                    <h1 className="truncate text-xl font-bold">All features</h1>
-                    <FeatureDialog>
-                      <Button variant="default" size="sm">
-                        <PlusIcon className="h-3.5 w-3.5" />
-                      </Button>
-                    </FeatureDialog>
-                  </div>
+    <Provider>
+      <div className="flex flex-col-reverse items-start gap-4 sm:py-0 md:gap-6 lg:flex-row">
+        <div className="flex w-full flex-col lg:w-1/4">
+          <VersionOverview planVersion={planVersion} />
+        </div>
+        <div className="flex w-full flex-1 flex-row items-start gap-2 lg:w-3/4">
+          <Card className="w-full overflow-hidden">
+            <DragDrop>
+              <ResizablePanelConfig
+                defaultLayout={defaultLayout}
+                // TODO: add suspense component
+                featureList={
+                  <>
+                    <div
+                      className={cn(
+                        "flex h-[70px] items-center justify-between space-x-1 px-4"
+                      )}
+                    >
+                      <h1 className="truncate text-xl font-bold">
+                        All features
+                      </h1>
+                      <FeatureDialog>
+                        <Button variant="default" size="sm">
+                          <PlusIcon className="h-3.5 w-3.5" />
+                        </Button>
+                      </FeatureDialog>
+                    </div>
 
-                  <Separator />
+                    <Separator />
 
-                  <Suspense fallback={<div>loading</div>}>
-                    <FeatureList
-                      planVersion={planVersion}
-                      featuresPromise={api.features.listByActiveProject()}
-                    />
-                  </Suspense>
-                </>
-              }
-              planFeatureList={<PlanFeatureList planVersion={planVersion} />}
-            />
-          </DragDrop>
-        </Card>
-        <Stepper
-          className="flex flex-col px-2 sm:px-4"
-          step="overview"
-          baseUrl={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${planVersion.id}`}
-        />
+                    <Suspense fallback={<div>loading</div>}>
+                      <FeatureList
+                        type="feature"
+                        planVersion={planVersion}
+                        featuresPromise={api.features.listByActiveProject()}
+                      />
+                    </Suspense>
+                  </>
+                }
+                planFeatureList={
+                  <PlanFeatureList type="feature" planVersion={planVersion} />
+                }
+              />
+            </DragDrop>
+          </Card>
+          <Stepper
+            className="flex flex-col px-2 sm:px-4"
+            step="overview"
+            baseUrl={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${planVersion.id}`}
+          />
+        </div>
       </div>
-    </div>
+    </Provider>
   )
 }

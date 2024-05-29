@@ -1,6 +1,7 @@
 "use client"
 
-import { startTransition } from "react"
+import type { ElementRef } from "react"
+import { forwardRef, startTransition } from "react"
 import { useRouter } from "next/navigation"
 
 import { Button } from "@builderai/ui/button"
@@ -61,10 +62,18 @@ const PlanVersionPublish: React.FC<{ planVersionId: string }> = ({
   )
 }
 
-const PlanVersionDuplicate: React.FC<{
+export interface PlanVersionDuplicateProps
+  extends React.ComponentPropsWithoutRef<"button"> {
   planVersionId: string
   classNames?: string
-}> = ({ planVersionId, classNames }) => {
+}
+
+const PlanVersionDuplicate = forwardRef<
+  ElementRef<"button">,
+  PlanVersionDuplicateProps
+>((props, ref) => {
+  const { planVersionId, classNames } = props
+
   const router = useRouter()
 
   const duplicateVersion = api.planVersions.duplicate.useMutation({
@@ -91,6 +100,7 @@ const PlanVersionDuplicate: React.FC<{
     >
       {/* // TODO: create a confetti animation or something in the first version published? */}
       <Button
+        ref={ref}
         className={classNames}
         variant={"custom"}
         disabled={duplicateVersion.isPending}
@@ -100,6 +110,8 @@ const PlanVersionDuplicate: React.FC<{
       </Button>
     </ConfirmAction>
   )
-}
+})
+
+PlanVersionDuplicate.displayName = "PlanVersionDuplicate"
 
 export { PlanVersionDuplicate, PlanVersionPublish }

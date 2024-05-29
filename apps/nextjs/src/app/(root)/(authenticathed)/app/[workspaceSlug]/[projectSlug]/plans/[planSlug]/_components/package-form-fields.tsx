@@ -20,15 +20,15 @@ export function PackageFormFields({
 }) {
   return (
     <div className="flex flex-col space-y-6">
-      <div className="flex w-full flex-col gap-1">
-        <PriceFormField form={form} currency={currency} />
-        <UnitsFormField form={form} />
+      <div className="flex w-full justify-between">
+        <QuantityFormField form={form} />
       </div>
 
       <Separator />
 
-      <div className="flex w-full justify-between">
-        <QuantityFormField form={form} />
+      <div className="flex w-full flex-col gap-1">
+        <PriceFormField form={form} currency={currency} />
+        <UnitsFormField form={form} />
       </div>
     </div>
   )
