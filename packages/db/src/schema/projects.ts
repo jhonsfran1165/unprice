@@ -21,7 +21,7 @@ export const projects = pgTableProject(
     stripeAccountVerified: boolean("stripe_account_verified").default(false),
     // if not enabled, the project will not be accessible and all API requests will be rejected
     enabled: boolean("enabled").default(true).notNull(),
-    defaultCurrency: currencyEnum("default_currency").default("USD"),
+    defaultCurrency: currencyEnum("default_currency").default("USD").notNull(),
   },
   (table) => ({
     slug: index("slug_index").on(table.slug),

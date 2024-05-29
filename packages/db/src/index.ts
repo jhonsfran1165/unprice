@@ -158,6 +158,7 @@ const apiKeyPrepared = db.query.apikeys
           id: true,
           enabled: true,
           slug: true,
+          defaultCurrency: true,
         },
         with: {
           workspace: {

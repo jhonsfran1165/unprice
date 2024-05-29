@@ -12,5 +12,21 @@ export interface PaymentProviderInterface {
     customerId: string
     projectId: string
     email: string
+    successUrl: string
+    cancelUrl: string
   }) => Promise<Result<PaymentProviderCreateSession, FetchError>>
+
+  listPaymentMethods: (opts: { limit?: number }) => Promise<
+    Result<
+      {
+        id: string
+        name: string | null
+        last4?: string
+        expMonth?: number
+        expYear?: number
+        brand?: string
+      }[],
+      FetchError
+    >
+  >
 }

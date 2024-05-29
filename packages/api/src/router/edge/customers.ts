@@ -15,7 +15,6 @@ import {
   searchDataParamsSchema,
   subscriptionSelectSchema,
 } from "@builderai/db/validators"
-import { stripe } from "@builderai/stripe"
 
 import { deniedReasonSchema } from "../../pkg/errors"
 import { StripePaymentProvider } from "../../pkg/payment-provider/stripe"
@@ -282,27 +281,25 @@ export const customersRouter = createTRPCRouter({
         customerPaymentProviders.map(async (provider) => {
           switch (provider.paymentProvider) {
             case "stripe": {
-              const paymentMethods = await stripe.customers.listPaymentMethods(
-                provider.paymentProviderCustomerId,
-                {
-                  limit: 5,
-                }
-              )
-
-              const data = paymentMethods.data.map((paymentMethod) => {
-                return {
-                  id: paymentMethod.id,
-                  name: paymentMethod.billing_details.name,
-                  last4: paymentMethod.card?.last4,
-                  expMonth: paymentMethod.card?.exp_month,
-                  expYear: paymentMethod.card?.exp_year,
-                  brand: paymentMethod.card?.brand,
-                }
+              const stripePaymentProvider = new StripePaymentProvider({
+                paymentCustomerId: provider.paymentProviderCustomerId,
               })
+
+              const { err, val } =
+                await stripePaymentProvider.listPaymentMethods({
+                  limit: 3,
+                })
+
+              if (err ?? !val) {
+                throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+                })
+              }
 
               return {
                 ...provider,
-                paymentMethods: data,
+                paymentMethods: val,
               }
             }
             default:
@@ -356,15 +353,15 @@ export const customersRouter = createTRPCRouter({
 
           const stripePaymentProvider = new StripePaymentProvider({
             paymentCustomerId: stripeCustomerData?.paymentProviderCustomerId,
-            successUrl: successUrl,
-            cancelUrl: cancelUrl,
           })
 
           const { err, val } = await stripePaymentProvider.createSession({
             customerId: customerId,
             projectId: project.id,
             email: customerData.email,
-            currency: "USD", // TODO: pass the currency from the project
+            successUrl: successUrl,
+            cancelUrl: cancelUrl,
+            currency: project.defaultCurrency,
           })
 
           if (err ?? !val) {

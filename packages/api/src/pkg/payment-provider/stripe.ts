@@ -11,18 +11,9 @@ import type {
 export class StripePaymentProvider implements PaymentProviderInterface {
   private readonly client: Stripe
   private readonly paymentCustomerId?: string
-  private readonly successUrl: string
-  private readonly cancelUrl: string
 
-  constructor(opts: {
-    token?: string
-    paymentCustomerId?: string
-    successUrl: string
-    cancelUrl: string
-  }) {
+  constructor(opts: { token?: string; paymentCustomerId?: string }) {
     this.paymentCustomerId = opts.paymentCustomerId
-    this.successUrl = opts.successUrl
-    this.cancelUrl = opts.cancelUrl
 
     if (opts?.token) {
       this.client = new Stripe(opts.token, {
@@ -39,6 +30,8 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     projectId: string
     email: string
     currency: string
+    successUrl: string
+    cancelUrl: string
   }): Promise<Result<PaymentProviderCreateSession, FetchError>> {
     try {
       // check if customer has a payment method already
@@ -48,7 +41,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
          */
         const session = await this.client.billingPortal.sessions.create({
           customer: this.paymentCustomerId,
-          return_url: this.cancelUrl,
+          return_url: opts.cancelUrl,
         })
 
         return Ok({ success: true as const, url: session.url })
@@ -65,13 +58,13 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         billing_address_collection: "auto",
         mode: "setup",
         metadata: {
-          successUrl: this.successUrl,
-          cancelUrl: this.cancelUrl,
+          successUrl: opts.successUrl,
+          cancelUrl: opts.cancelUrl,
           customerId: opts.customerId,
           projectId: opts.projectId,
         },
         success_url: apiCallbackUrl,
-        cancel_url: this.cancelUrl,
+        cancel_url: opts.cancelUrl,
         currency: opts.currency,
         customer_creation: "always",
       })
@@ -79,6 +72,47 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       if (!session.url) return Ok({ success: false as const, url: "" })
 
       return Ok({ success: true as const, url: session.url })
+    } catch (error) {
+      const e = error as Error
+
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: true,
+        })
+      )
+    }
+  }
+
+  public async listPaymentMethods(opts: { limit?: number }): Promise<
+    Result<
+      {
+        id: string
+        name: string | null
+        last4?: string
+        expMonth?: number
+        expYear?: number
+        brand?: string
+      }[],
+      FetchError
+    >
+  > {
+    try {
+      const paymentMethods = await this.client.paymentMethods.list({
+        customer: this.paymentCustomerId,
+        limit: opts.limit,
+      })
+
+      return Ok(
+        paymentMethods.data.map((pm) => ({
+          id: pm.id,
+          name: pm.billing_details.name,
+          last4: pm.card?.last4,
+          expMonth: pm.card?.exp_month,
+          expYear: pm.card?.exp_year,
+          brand: pm.card?.brand,
+        }))
+      )
     } catch (error) {
       const e = error as Error
 

@@ -15,7 +15,11 @@ import { Ping } from "~/components/ping"
 import { api } from "~/trpc/client"
 import { PlanVersionFeatureSheet } from "../[planSlug]/_components/plan-version-feature-sheet"
 import { FeatureDialog } from "./feature-dialog"
-import { useActiveFeature, usePlanFeaturesList } from "./use-features"
+import {
+  useActiveFeature,
+  useActivePlanVersion,
+  usePlanFeaturesList,
+} from "./use-features"
 
 const featureVariants = cva(
   "flex gap-2 rounded-lg border text-left text-sm transition-all bg-background-bgSubtle hover:bg-background-bgHover",
@@ -47,6 +51,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
     const [isDelete, setConfirmDelete] = useState<boolean>(false)
 
     const [active, setActiveFeature] = useActiveFeature()
+    const [activePlanVersion] = useActivePlanVersion()
 
     const [_planFeatures, setPlanFeatures] = usePlanFeaturesList()
 
@@ -67,6 +72,8 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
         setActiveFeature(planFeatureVersion)
       }
     }
+
+    const isPublished = activePlanVersion?.status === "published"
 
     return (
       <div
@@ -119,7 +126,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                   </div>
                   <div className="flex items-center gap-1 text-xs">
                     <div className="flex- flex-row gap-1">
-                      {isDelete && (
+                      {!isPublished && isDelete && (
                         <div className="flex flex-row items-center">
                           <Button
                             className="px-0 text-xs font-light"
@@ -174,7 +181,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                           </Button>
                         </div>
                       )}
-                      {!isDelete && (
+                      {!isPublished && !isDelete && (
                         <Button
                           className="px-0"
                           variant="link"

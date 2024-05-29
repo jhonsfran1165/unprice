@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowUp, ListFilter, MoreVertical } from "lucide-react"
 
@@ -34,6 +33,7 @@ import {
 } from "@builderai/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
+import { SuperLink } from "~/components/super-link"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import { PlanVersionForm } from "../_components/plan-version-form"
@@ -139,10 +139,15 @@ export default async function PlanPage({
                     {plan.versions.map((version) => (
                       <TableRow key={version.id}>
                         <TableCell className="table-cell">
-                          <div className="font-bold">{version.title}</div>
-                          <div className="hidden text-xs text-muted-foreground md:inline">
-                            {version.description?.slice(0, 20) + "..."}
-                          </div>
+                          <SuperLink
+                            href={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${version.id}`}
+                            prefetch={false}
+                          >
+                            <div className="font-bold">{version.title}</div>
+                            <div className="hidden text-xs text-muted-foreground md:inline">
+                              {version.description?.slice(0, 20) + "..."}
+                            </div>
+                          </SuperLink>
                         </TableCell>
                         <TableCell className="table-cell text-center">
                           <Badge className="text-xs" variant="secondary">
@@ -195,12 +200,11 @@ export default async function PlanPage({
                                     />
                                   </DropdownMenuItem>
                                   <DropdownMenuItem>
-                                    <Link
+                                    <SuperLink
                                       href={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${version.id}`}
-                                      prefetch={false}
                                     >
                                       Configure features
-                                    </Link>
+                                    </SuperLink>
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
