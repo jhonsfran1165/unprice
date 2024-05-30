@@ -66,9 +66,8 @@
   "devDependencies": {
     "@builderai/eslint-config": "^0.2.0",
     "@builderai/prettier-config": "^0.1.0",
-    "@builderai/tailwind-config": "^0.1.0",
+    "@builderai/tailwind-config": "workspace:^",
     "@builderai/tsconfig": "^0.1.0",
-    "@radix-ui/colors": "3.0.0",
     "@tanstack/react-query-devtools": "^5.24.8",
     "@types/mdx": "^2.0.11",
     "@types/node": "20.11.24",

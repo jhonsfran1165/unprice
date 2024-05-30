@@ -1,8 +1,15 @@
 import type { Config } from "tailwindcss"
 
-import baseConfig from "@builderai/tailwind-config"
+import { unPriceTailwindPreset } from "@builderai/tailwind-config"
 
-export default {
-  content: [...baseConfig.content, "../../packages/ui/src/**/*.{ts,tsx}"],
-  presets: [baseConfig],
-} satisfies Config
+const config: Config = {
+  content: [
+    "src/**/*.{ts,tsx}",
+    "components/**/*.{ts,tsx}",
+    "../../packages/ui/src/**/*.{ts,tsx}",
+  ],
+  darkMode: "class",
+  presets: [unPriceTailwindPreset],
+}
+
+export default config

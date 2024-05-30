@@ -16,7 +16,6 @@
   "devDependencies": {
     "@builderai/eslint-config": "^0.2.0",
     "@builderai/prettier-config": "^0.1.0",
-    "@builderai/tailwind-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
     "@types/node": "20.11.24",
     "eslint": "^8.57.0",
