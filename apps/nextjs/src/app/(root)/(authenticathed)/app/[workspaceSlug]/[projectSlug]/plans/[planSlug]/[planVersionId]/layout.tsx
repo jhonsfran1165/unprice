@@ -1,5 +1,4 @@
 import React from "react"
-import { Provider } from "jotai"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
@@ -22,31 +21,29 @@ export default function PriceLayout(props: {
   const tabs = Object.values(PROJECT_TABS_CONFIG)
 
   return (
-    <Provider>
-      <DashboardShell
-        backLink={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}`}
-        header={
-          <HeaderTab
-            title="Plan Version Settings"
-            description="Manage different settings for this plan version."
-            action={
-              <StepperButton
-                planVersionId={props.params.planVersionId}
-                baseUrl={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}/${props.params.planVersionId}`}
-              />
-            }
-          />
-        }
-        tabs={
-          <TabsNav
-            tabs={tabs}
-            activeTab={PROJECT_TABS_CONFIG.plans}
-            basePath={`/${workspaceSlug}/${projectSlug}`}
-          />
-        }
-      >
-        {props.children}
-      </DashboardShell>
-    </Provider>
+    <DashboardShell
+      backLink={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}`}
+      header={
+        <HeaderTab
+          title="Plan Version Settings"
+          description="Manage different settings for this plan version."
+          action={
+            <StepperButton
+              planVersionId={props.params.planVersionId}
+              baseUrl={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}/${props.params.planVersionId}`}
+            />
+          }
+        />
+      }
+      tabs={
+        <TabsNav
+          tabs={tabs}
+          activeTab={PROJECT_TABS_CONFIG.plans}
+          basePath={`/${workspaceSlug}/${projectSlug}`}
+        />
+      }
+    >
+      {props.children}
+    </DashboardShell>
   )
 }

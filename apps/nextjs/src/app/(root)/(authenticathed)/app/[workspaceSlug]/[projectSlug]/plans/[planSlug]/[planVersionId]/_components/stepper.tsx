@@ -20,7 +20,6 @@ export default function Stepper({
         <div className="space-y-4">
           <SuperLink
             href={`${baseUrl}`}
-            prefetch={false}
             className={cn("flex flex-row items-center gap-2 text-xs", {
               "text-primary-text": ["overview", "addons", "review"].includes(
                 step
@@ -32,13 +31,12 @@ export default function Stepper({
           </SuperLink>
           <Separator
             className={cn("mx-2 h-6", {
-              "bg-primary": ["addons", "review"].includes(step),
+              "bg-primary-text": ["addons", "review"].includes(step),
             })}
             orientation="vertical"
           />
           <SuperLink
             href={`${baseUrl}/addons`}
-            prefetch={false}
             className={cn("flex flex-row items-center gap-2 text-xs", {
               "text-primary-text": ["addons", "review"].includes(step),
               "hover:text-background-textContrast": step !== "addons",
@@ -49,13 +47,12 @@ export default function Stepper({
           </SuperLink>
           <Separator
             className={cn("mx-2 h-6", {
-              "bg-primary": step === "review",
+              "bg-primary-text": step === "review",
             })}
             orientation="vertical"
           />
           <SuperLink
             href={`${baseUrl}/review`}
-            prefetch={false}
             className={cn("flex flex-row items-center gap-2 text-xs", {
               "text-primary-text": ["review"].includes(step),
               "hover:text-background-textContrast": step !== "review",
