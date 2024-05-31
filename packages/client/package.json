@@ -35,7 +35,7 @@
     "@builderai/eslint-config": "^0.2.0",
     "@builderai/prettier-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
-    "eslint": "^8.57.0",
+    "eslint": "^9.4.0",
     "openapi-typescript": "7.0.0-next.7",
     "prettier": "^3.2.5",
     "tsup": "^8.0.2",
