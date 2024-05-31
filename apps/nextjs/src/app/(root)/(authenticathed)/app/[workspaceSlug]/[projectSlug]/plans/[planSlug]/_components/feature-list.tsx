@@ -55,9 +55,11 @@ export function FeatureList({
     }
   )
 
-  const selectedFeaturesIds = planVersion.planFeatures.map(
-    (feature) => feature.feature.id
-  )
+  const selectedFeaturesIds = planVersion.planFeatures
+    .filter((feature) =>
+      type === "addon" ? feature.type === "feature" : feature.type === "addon"
+    )
+    .map((feature) => feature.feature.id)
 
   const planFeatureIds = planVersionFeatureList.map(
     (feature) => feature.feature.id
@@ -73,7 +75,7 @@ export function FeatureList({
     <>
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">
         <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
           <Input
             type="search"
             placeholder="Search feature"
@@ -88,7 +90,7 @@ export function FeatureList({
         <div className="flex h-[730px] flex-col gap-2 px-4 pt-0">
           {isFetching && (
             <div className="flex h-full items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+              <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2 border-t-2"></div>
             </div>
           )}
           {!isFetching && searchableFeatures.length === 0 ? (
@@ -123,11 +125,21 @@ export function FeatureList({
                 featureType: "flat", // default type for featurePlan
                 feature: feature,
                 type: type,
-                // no order
-                order: 0,
-                // default config
+                order: 1024, // first element
+                // default config price
                 config: {
-                  price: "0.00",
+                  price: {
+                    displayAmount: "0.00",
+                    dinero: {
+                      amount: 0,
+                      currency: {
+                        code: planVersion.currency,
+                        base: 10,
+                        exponent: 2,
+                      },
+                      scale: 2,
+                    },
+                  },
                 },
               } as PlanVersionFeatureDragDrop
 

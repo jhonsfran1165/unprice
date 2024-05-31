@@ -42,7 +42,7 @@ export default function DurationFormField({
         Duration
       </FormLabel>
 
-      <div className="mb-1 mt-3 flex flex-row rounded-md border bg-background-bg">
+      <div className="bg-background-bg mb-1 mt-3 flex flex-row rounded-md border">
         <FormField
           control={form.control}
           name="startDate"
@@ -54,7 +54,7 @@ export default function DurationFormField({
                     <Button
                       variant={"custom"}
                       className={cn(
-                        "h-9 rounded-e-none pl-3 text-left font-normal hover:bg-muted hover:text-background-textContrast",
+                        "hover:bg-muted hover:text-background-textContrast focus-visible:ring-ring h-9 rounded-e-none pl-3 text-left font-normal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-1",
                         !start && "text-muted-foreground"
                       )}
                     >
@@ -150,7 +150,7 @@ export default function DurationFormField({
                     <Button
                       variant={"custom"}
                       className={cn(
-                        "rounded-s-none pl-3 text-left font-normal hover:bg-muted hover:text-background-textContrast",
+                        "hover:bg-muted hover:text-background-textContrast focus-visible:ring-ring rounded-s-none pl-3 text-left font-normal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-1",
                         !end && "text-muted-foreground"
                       )}
                     >

@@ -4,6 +4,7 @@ import type { ElementRef } from "react"
 import React, { forwardRef, useState } from "react"
 import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
+import { dinero, toDecimal } from "dinero.js"
 import { EyeOff, Settings, Trash2, X } from "lucide-react"
 
 import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
@@ -12,6 +13,7 @@ import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 
 import { Ping } from "~/components/ping"
+import { currencySymbol } from "~/lib/currency"
 import { api } from "~/trpc/client"
 import { PlanVersionFeatureSheet } from "../[planSlug]/_components/plan-version-feature-sheet"
 import { FeatureDialog } from "./feature-dialog"
@@ -53,7 +55,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
     const [active, setActiveFeature] = useActiveFeature()
     const [activePlanVersion] = useActivePlanVersion()
 
-    const [_planFeatures, setPlanFeatures] = usePlanFeaturesList()
+    const [_planFeatures, setPlanFeaturesList] = usePlanFeaturesList()
 
     const removePlanVersionFeature =
       api.planVersionFeatures.remove.useMutation()
@@ -80,7 +82,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
         ref={ref}
         {...rest}
         className={cn(featureVariants({ variant, className }), {
-          "relative z-0 border-2 border-background-borderHover bg-background-bgHover shadow-sm":
+          "border-background-borderHover bg-background-bgHover relative z-0 border-2 shadow-sm":
             mode === "FeaturePlan" &&
             active?.featureId === planFeatureVersion.featureId,
         })}
@@ -120,7 +122,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                     )}
                     {planFeatureVersion.hidden && (
                       <div className="flex items-center gap-1">
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        <EyeOff className="text-muted-foreground h-4 w-4" />
                       </div>
                     )}
                   </div>
@@ -163,7 +165,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                               }
 
                               // delete feature from the list in the drag and drop
-                              setPlanFeatures((features) => {
+                              setPlanFeaturesList((features) => {
                                 const filteredFeatures = features.filter(
                                   (f) => f.featureId !== feature.id
                                 )
@@ -201,7 +203,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                 </div>
               </div>
 
-              <div className="line-clamp-1 text-xs font-normal text-muted-foreground">
+              <div className="text-muted-foreground line-clamp-1 text-xs font-normal">
                 {feature.description ?? "No description"}
               </div>
 
@@ -227,11 +229,23 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                     {/* // TODO: fix this */}
                     {planFeatureVersion?.config?.price
                       ? `${
-                          parseFloat(planFeatureVersion?.config?.price) === 0
+                          planFeatureVersion?.config?.price.dinero.amount === 0
                             ? "Free"
                             : planFeatureVersion?.config?.units
-                              ? `$${planFeatureVersion?.config?.price} per ${planFeatureVersion?.config?.units} units`
-                              : `$${planFeatureVersion?.config?.price}`
+                              ? `${toDecimal(
+                                  dinero(
+                                    planFeatureVersion?.config?.price.dinero
+                                  ),
+                                  ({ value, currency }) =>
+                                    `${currencySymbol(currency.code)}${value}`
+                                )} per ${planFeatureVersion?.config?.units} units`
+                              : toDecimal(
+                                  dinero(
+                                    planFeatureVersion?.config?.price.dinero
+                                  ),
+                                  ({ value, currency }) =>
+                                    `${currencySymbol(currency.code)}${value}`
+                                )
                         }`
                       : planFeatureVersion.config?.tiers?.length?.toString()
                         ? `${planFeatureVersion?.config?.tiers?.length ?? 0} tiers`

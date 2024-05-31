@@ -34,6 +34,8 @@ import {
   TooltipTrigger,
 } from "@builderai/ui/tooltip"
 
+import { currencySymbol } from "~/lib/currency"
+
 export function QuantityFormField({
   form,
 }: {
@@ -67,7 +69,7 @@ export function QuantityFormField({
                   </div>
                   <div
                     className={
-                      "inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 bg-background-bg px-3 text-sm font-medium"
+                      "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 px-3 text-sm font-medium"
                     }
                   >
                     units
@@ -117,7 +119,7 @@ export function LimitFormField({
                   </div>
                   <div
                     className={
-                      "inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 bg-background-bg px-3 text-sm font-medium"
+                      "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 px-3 text-sm font-medium"
                     }
                   >
                     units
@@ -145,7 +147,7 @@ export function PriceFormField({
     <div className="w-full">
       <FormField
         control={form.control}
-        name="config.price"
+        name="config.price.displayAmount"
         render={({ field }) => (
           <FormItem className="">
             <FormLabel>Price</FormLabel>
@@ -160,12 +162,18 @@ export function PriceFormField({
               <FormControl className="w-full">
                 <div className="flex flex-row items-center">
                   <div className="relative flex-1">
-                    <DollarSignIcon className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input {...field} className="rounded-e-none pl-8" />
+                    <span className="text-muted-foreground absolute left-2 top-2 h-5 w-5">
+                      {currencySymbol(currency)}
+                    </span>
+                    <Input
+                      {...field}
+                      className="rounded-e-none pl-6"
+                      value={field.value ?? ""}
+                    />
                   </div>
                   <div
                     className={
-                      "inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 bg-background-bg px-3 text-sm font-medium"
+                      "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 px-3 text-sm font-medium"
                     }
                   >
                     {currency}
@@ -199,7 +207,7 @@ export function UnitsFormField({
                 <div className="flex flex-row items-center">
                   <div
                     className={
-                      "inline-flex h-9 items-center justify-center rounded-e-none rounded-s-md border border-r-0 bg-background-bg px-3 text-sm font-medium"
+                      "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-none rounded-s-md border border-r-0 px-3 text-sm font-medium"
                     }
                   >
                     per
@@ -209,7 +217,7 @@ export function UnitsFormField({
                   </div>
                   <div
                     className={
-                      "inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 bg-background-bg px-3 text-sm font-medium"
+                      "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 px-3 text-sm font-medium"
                     }
                   >
                     units
@@ -256,21 +264,11 @@ export function AggregationMethodFormField({
                 <SelectContent>
                   {AGGREGATION_METHODS.map((mode, index) => (
                     <SelectItem value={mode} key={index}>
-                      <div className="flex items-start gap-3 text-muted-foreground">
+                      <div className="text-muted-foreground flex items-start gap-3">
                         <div className="grid gap-0.5">
-                          <p>
-                            {
-                              AGGREGATION_METHODS_MAP[
-                                mode as keyof typeof AGGREGATION_METHODS_MAP
-                              ].label
-                            }
-                          </p>
+                          <p>{AGGREGATION_METHODS_MAP[mode].label}</p>
                           <p className="text-xs" data-description>
-                            {
-                              AGGREGATION_METHODS_MAP[
-                                mode as keyof typeof AGGREGATION_METHODS_MAP
-                              ].description
-                            }
+                            {AGGREGATION_METHODS_MAP[mode].description}
                           </p>
                         </div>
                       </div>
@@ -288,8 +286,10 @@ export function AggregationMethodFormField({
 
 export function TierFormField({
   form,
+  currency,
 }: {
   form: UseFormReturn<PlanVersionFeature>
+  currency: Currency
 }) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -338,7 +338,7 @@ export function TierFormField({
                           </div>
 
                           <TooltipContent
-                            className="w-32 bg-background-bg text-xs font-normal"
+                            className="bg-background-bg w-32 text-xs font-normal"
                             align="center"
                             side="right"
                           >
@@ -381,7 +381,7 @@ export function TierFormField({
                           </div>
 
                           <TooltipContent
-                            className="w-48 bg-background-bg text-xs font-normal"
+                            className="bg-background-bg w-48 text-xs font-normal"
                             align="center"
                             side="right"
                           >
@@ -414,7 +414,7 @@ export function TierFormField({
                 <FormField
                   control={form.control}
                   key={field.id}
-                  name={`config.tiers.${index}.flatPrice`}
+                  name={`config.tiers.${index}.flatPrice.displayAmount`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className={cn(index !== 0 && "sr-only")}>
@@ -429,7 +429,7 @@ export function TierFormField({
                           </div>
 
                           <TooltipContent
-                            className="w-32 bg-background-bg text-xs font-normal"
+                            className="bg-background-bg w-32 text-xs font-normal"
                             align="center"
                             side="right"
                           >
@@ -444,7 +444,7 @@ export function TierFormField({
 
                       <FormControl>
                         <div className="relative">
-                          <DollarSignIcon className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
+                          <DollarSignIcon className="text-muted-foreground absolute left-2 top-2 h-4 w-4" />
                           <Input
                             {...field}
                             value={field.value ?? ""}
@@ -454,8 +454,8 @@ export function TierFormField({
                               // if the value is empty, set the flatPrice to null
                               if (e.target.value === "") {
                                 form.setValue(
-                                  `config.tiers.${index}.flatPrice`,
-                                  null
+                                  `config.tiers.${index}.flatPrice.displayAmount`,
+                                  "0.00"
                                 )
                               }
                             }}
@@ -471,7 +471,7 @@ export function TierFormField({
                 <FormField
                   control={form.control}
                   key={field.id}
-                  name={`config.tiers.${index}.unitPrice`}
+                  name={`config.tiers.${index}.unitPrice.displayAmount`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className={cn(index !== 0 && "sr-only")}>
@@ -486,7 +486,7 @@ export function TierFormField({
                           </div>
 
                           <TooltipContent
-                            className="w-32 bg-background-bg text-xs font-normal"
+                            className="bg-background-bg w-32 text-xs font-normal"
                             align="center"
                             side="right"
                           >
@@ -500,7 +500,7 @@ export function TierFormField({
 
                       <FormControl>
                         <div className="relative">
-                          <DollarSignIcon className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
+                          <DollarSignIcon className="text-muted-foreground absolute left-2 top-2 h-4 w-4" />
                           <Input {...field} className="h-8 pl-8" />
                         </div>
                       </FormControl>
@@ -563,8 +563,30 @@ export function TierFormField({
                         ? firstUnitValue + 2
                         : lastUnitValue + 1,
                     lastUnit: null,
-                    unitPrice: "0.00",
-                    flatPrice: null,
+                    unitPrice: {
+                      displayAmount: "0.00",
+                      dinero: {
+                        amount: 0,
+                        currency: {
+                          code: currency,
+                          base: 10,
+                          exponent: 2,
+                        },
+                        scale: 2,
+                      },
+                    },
+                    flatPrice: {
+                      displayAmount: "0.00",
+                      dinero: {
+                        amount: 0,
+                        currency: {
+                          code: currency,
+                          base: 10,
+                          exponent: 2,
+                        },
+                        scale: 2,
+                      },
+                    },
                   })
                 }}
               >
@@ -585,7 +607,7 @@ export function TierFormField({
                 >
                   No tiers
                 </p>
-                <p className="justify-center  text-xs font-normal leading-snug text-muted-foreground">
+                <p className="text-muted-foreground  justify-center text-xs font-normal leading-snug">
                   Something went wrong, please add the first tier.
                 </p>
                 <Button
@@ -598,8 +620,30 @@ export function TierFormField({
                     append({
                       firstUnit: 1,
                       lastUnit: null,
-                      unitPrice: "0.00",
-                      flatPrice: null,
+                      unitPrice: {
+                        displayAmount: "0.00",
+                        dinero: {
+                          amount: 0,
+                          currency: {
+                            code: currency,
+                            base: 10,
+                            exponent: 2,
+                          },
+                          scale: 2,
+                        },
+                      },
+                      flatPrice: {
+                        displayAmount: "0.00",
+                        dinero: {
+                          amount: 0,
+                          currency: {
+                            code: currency,
+                            base: 10,
+                            exponent: 2,
+                          },
+                          scale: 2,
+                        },
+                      },
                     })
                   }}
                 >

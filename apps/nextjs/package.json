@@ -23,6 +23,7 @@
     "@builderai/auth": "^0.1.0",
     "@builderai/config": "^0.1.0",
     "@builderai/db": "^0.1.0",
+    "@builderai/error": "workspace:^",
     "@builderai/stripe": "^0.1.0",
     "@builderai/ui": "^0.1.0",
     "@dinero.js/currencies": "2.0.0-alpha.14",

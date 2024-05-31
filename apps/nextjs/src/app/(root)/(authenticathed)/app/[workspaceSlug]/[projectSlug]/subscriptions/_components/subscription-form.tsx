@@ -1,6 +1,6 @@
 "use client"
 
-import { startTransition, useState } from "react"
+import { startTransition, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { CheckIcon, ChevronDown, HelpCircle } from "lucide-react"
 import { useFieldArray } from "react-hook-form"
@@ -89,6 +89,26 @@ export function SubscriptionForm({
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery({
     published: true,
   })
+
+  const subscriptionType = form.watch("type")
+  const subscriptionPlanId = form.watch("planVersionId")
+
+  useMemo(() => {
+    if (selectedPlanVersion && subscriptionPlanId) {
+      const { err, val: itemsConfig } = createDefaultSubscriptionConfig({
+        planVersion: selectedPlanVersion,
+        type: subscriptionType === "plan" ? "feature" : "addon",
+      })
+
+      if (err) {
+        console.error(err)
+        return
+      }
+
+      items.replace(itemsConfig)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subscriptionPlanId, subscriptionType])
 
   const { data: paymentProviders } =
     api.customers.listPaymentProviders.useQuery({
@@ -211,28 +231,21 @@ export function SubscriptionForm({
                         {isLoading && (
                           <CommandLoading>Loading...</CommandLoading>
                         )}
-                        <ScrollArea className="h-24">
+                        <ScrollArea
+                          className={cn({
+                            "max-h-24":
+                              data?.planVersions?.length &&
+                              data?.planVersions?.length > 5,
+                          })}
+                        >
                           {data?.planVersions.map((version) => (
                             <CommandItem
                               value={`${version.title} - v${version.version} - ${version.billingPeriod}`}
                               key={version.id}
                               onSelect={() => {
                                 field.onChange(version.id)
-
-                                const { err, val: itemsConfig } =
-                                  createDefaultSubscriptionConfig({
-                                    planVersion: version,
-                                  })
-
                                 setSelectedPlanVersion(version)
                                 setSwitcherPlanOpen(false)
-
-                                if (err) {
-                                  console.error(err)
-                                  return
-                                }
-
-                                items.replace(itemsConfig)
                               }}
                             >
                               <CheckIcon
@@ -275,7 +288,7 @@ export function SubscriptionForm({
                         </div>
 
                         <TooltipContent
-                          className="w-32 bg-background-bg text-xs font-normal"
+                          className="bg-background-bg w-32 text-xs font-normal"
                           align="center"
                           side="right"
                         >
@@ -292,7 +305,7 @@ export function SubscriptionForm({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a currency" />
+                        <SelectValue placeholder="Select a type" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -326,7 +339,7 @@ export function SubscriptionForm({
                         </div>
 
                         <TooltipContent
-                          className="w-32 bg-background-bg text-xs font-normal"
+                          className="bg-background-bg w-32 text-xs font-normal"
                           align="center"
                           side="right"
                         >
@@ -382,7 +395,7 @@ export function SubscriptionForm({
                       </div>
                       <div
                         className={
-                          "inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 bg-background-bg px-3 text-sm font-medium"
+                          "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 px-3 text-sm font-medium"
                         }
                       >
                         days

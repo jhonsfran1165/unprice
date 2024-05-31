@@ -5,6 +5,10 @@ import { and, eq, sql } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
+  configFlatSchema,
+  configPackageSchema,
+  configTierSchema,
+  configUsageSchema,
   featureSelectBaseSchema,
   planSelectBaseSchema,
   planVersionFeatureSelectBaseSchema,
@@ -252,25 +256,211 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
-      const versionUpdated = await opts.ctx.db
-        .update(schema.versions)
-        .set({
-          ...(description && { description }),
-          ...(currency && { currency }),
-          ...(billingPeriod && { billingPeriod }),
-          ...(startCycle && { startCycle }),
-          ...(gracePeriod && { gracePeriod }),
-          ...(title && { title }),
-          ...(tags && { tags }),
-          ...(whenToBill && { whenToBill }),
-          ...(status && { status }),
-          ...(metadata && { metadata }),
-          ...(paymentProvider && { paymentProvider }),
-          updatedAt: new Date(),
-        })
-        .where(and(eq(schema.versions.id, planVersionData.id)))
-        .returning()
-        .then((re) => re[0])
+      // Very costly operation -- this only happens when the currency is updated and the plan is not published
+      // if the user wants to update the currency, we have to go over all the features and update the currency
+      const versionUpdated = await opts.ctx.db.transaction(async (tx) => {
+        if (currency && currency !== planVersionData.currency) {
+          await tx.query.planVersionFeatures
+            .findMany({
+              where: (feature, { and, eq }) =>
+                and(
+                  eq(feature.planVersionId, planVersionData.id),
+                  eq(feature.projectId, project.id)
+                ),
+            })
+            .then(async (features) => {
+              await Promise.all(
+                features.map(async (feature) => {
+                  // here we have to take into account the feature type
+                  switch (feature.featureType) {
+                    case "flat": {
+                      const config = configFlatSchema.parse(feature.config)
+
+                      return await tx
+                        .update(schema.planVersionFeatures)
+                        .set({
+                          config: {
+                            ...config,
+                            price: {
+                              ...config.price,
+                              dinero: {
+                                ...config.price.dinero,
+                                currency: {
+                                  ...config.price.dinero.currency,
+                                  code: currency,
+                                },
+                              },
+                            },
+                          },
+                        })
+                        .where(
+                          and(eq(schema.planVersionFeatures.id, feature.id))
+                        )
+                    }
+
+                    case "tier": {
+                      const config = configTierSchema.parse(feature.config)
+
+                      return await tx
+                        .update(schema.planVersionFeatures)
+                        .set({
+                          config: {
+                            ...config,
+                            tiers: config.tiers.map((tier) => ({
+                              ...tier,
+                              unitPrice: {
+                                ...tier.unitPrice,
+                                dinero: {
+                                  ...tier.unitPrice.dinero,
+                                  currency: {
+                                    ...tier.unitPrice.dinero.currency,
+                                    code: currency,
+                                  },
+                                },
+                              },
+                              flatPrice: {
+                                ...tier.flatPrice,
+                                dinero: {
+                                  ...tier.flatPrice.dinero,
+                                  currency: {
+                                    ...tier.flatPrice.dinero.currency,
+                                    code: currency,
+                                  },
+                                },
+                              },
+                            })),
+                          },
+                        })
+                        .where(
+                          and(eq(schema.planVersionFeatures.id, feature.id))
+                        )
+                    }
+
+                    case "usage": {
+                      const config = configUsageSchema.parse(feature.config)
+
+                      if (config.tiers && config.tiers.length > 0) {
+                        return await tx
+                          .update(schema.planVersionFeatures)
+                          .set({
+                            config: {
+                              ...config,
+                              tiers: config.tiers.map((tier) => ({
+                                ...tier,
+                                unitPrice: {
+                                  ...tier.unitPrice,
+                                  dinero: {
+                                    ...tier.unitPrice.dinero,
+                                    currency: {
+                                      ...tier.unitPrice.dinero.currency,
+                                      code: currency,
+                                    },
+                                  },
+                                },
+                                flatPrice: {
+                                  ...tier.flatPrice,
+                                  dinero: {
+                                    ...tier.flatPrice.dinero,
+                                    currency: {
+                                      ...tier.flatPrice.dinero.currency,
+                                      code: currency,
+                                    },
+                                  },
+                                },
+                              })),
+                            },
+                          })
+                          .where(
+                            and(eq(schema.planVersionFeatures.id, feature.id))
+                          )
+                      }
+
+                      if (config.price) {
+                        return await tx
+                          .update(schema.planVersionFeatures)
+                          .set({
+                            config: {
+                              ...config,
+                              price: {
+                                ...config.price,
+                                dinero: {
+                                  ...config.price.dinero,
+                                  currency: {
+                                    ...config.price.dinero.currency,
+                                    code: currency,
+                                  },
+                                },
+                              },
+                            },
+                          })
+                          .where(
+                            and(eq(schema.planVersionFeatures.id, feature.id))
+                          )
+                      }
+
+                      break
+                    }
+
+                    case "package": {
+                      const config = configPackageSchema.parse(feature.config)
+
+                      return await tx
+                        .update(schema.planVersionFeatures)
+                        .set({
+                          config: {
+                            ...config,
+                            price: {
+                              ...config.price,
+                              dinero: {
+                                ...config.price.dinero,
+                                currency: {
+                                  ...config.price.dinero.currency,
+                                  code: currency,
+                                },
+                              },
+                            },
+                          },
+                        })
+                        .where(
+                          and(eq(schema.planVersionFeatures.id, feature.id))
+                        )
+                    }
+
+                    default:
+                      break
+                  }
+                })
+              )
+            })
+            .catch((err) => {
+              console.error(err)
+              tx.rollback()
+              throw err
+            })
+        }
+
+        const data = await tx
+          .update(schema.versions)
+          .set({
+            ...(description && { description }),
+            ...(currency && { currency }),
+            ...(billingPeriod && { billingPeriod }),
+            ...(startCycle && { startCycle }),
+            ...(gracePeriod && { gracePeriod }),
+            ...(title && { title }),
+            ...(tags && { tags }),
+            ...(whenToBill && { whenToBill }),
+            ...(status && { status }),
+            ...(metadata && { metadata }),
+            ...(paymentProvider && { paymentProvider }),
+            updatedAt: new Date(),
+          })
+          .where(and(eq(schema.versions.id, planVersionData.id)))
+          .returning()
+          .then((re) => re[0])
+
+        return data
+      })
 
       if (!versionUpdated) {
         throw new TRPCError({

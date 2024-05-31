@@ -42,7 +42,7 @@ export function UsageFormFields({
 
       {form.getValues("config.usageMode") === "tier" && (
         <div className="flex w-full justify-between">
-          <TierFormField form={form} />
+          <TierFormField form={form} currency={currency} />
         </div>
       )}
 

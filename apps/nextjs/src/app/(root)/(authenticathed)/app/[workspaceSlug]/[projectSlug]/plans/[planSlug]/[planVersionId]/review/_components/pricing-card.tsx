@@ -12,6 +12,7 @@ import { CheckIcon, HelpCircle } from "@builderai/ui/icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
 import { currencySymbol } from "~/lib/currency"
+import { toastAction } from "~/lib/toast"
 
 export function PricingCard({
   planVersion,
@@ -44,16 +45,17 @@ export function PricingCard({
         <div className="space-y-6">
           <div className="space-y-2">
             <h4 className="text-lg font-semibold">Features Included</h4>
-
+            {/* //TODO: convine addons and features in one component */}
             <ul className="space-y-4 px-2">
               {features.map((feature) => {
                 const { err, val: pricePerFeature } = calculatePricePerFeature({
                   feature: feature,
                   quantity: feature.defaultQuantity ?? 0,
-                  planVersion: planVersion,
                 })
 
                 if (err) {
+                  toastAction("error-contact", err.message)
+                  // TODO: log error
                   return null
                 }
 
@@ -87,7 +89,8 @@ export function PricingCard({
                             </Tooltip>
                           </div>
                           <div className="text-xs">
-                            {pricePerFeature.unitPriceText}
+                            {pricePerFeature.unitPrice.displayAmount}/
+                            {planVersion.billingPeriod}
                           </div>
                         </div>
                       </div>
@@ -106,10 +109,11 @@ export function PricingCard({
                 const { err, val: pricePerFeature } = calculatePricePerFeature({
                   feature: feature,
                   quantity: feature.defaultQuantity ?? 0,
-                  planVersion: planVersion,
                 })
 
                 if (err) {
+                  toastAction("error-contact", err.message)
+                  // TODO: log error
                   return null
                 }
 
@@ -143,7 +147,8 @@ export function PricingCard({
                             </Tooltip>
                           </div>
                           <div className="text-xs">
-                            {pricePerFeature.unitPriceText}
+                            {pricePerFeature.unitPrice.displayAmount}/
+                            {planVersion.billingPeriod}
                           </div>
                         </div>
                       </div>

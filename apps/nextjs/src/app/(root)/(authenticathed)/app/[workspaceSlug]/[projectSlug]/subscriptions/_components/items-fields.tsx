@@ -1,6 +1,7 @@
 "use client"
 
-import { EyeIcon, LayoutGrid } from "lucide-react"
+import { useCallback, useState } from "react"
+import { EyeIcon, EyeOff, LayoutGrid, Trash2, X } from "lucide-react"
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form"
 
 import type { RouterOutputs } from "@builderai/api"
@@ -11,6 +12,7 @@ import { Button } from "@builderai/ui/button"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -31,10 +33,10 @@ import {
   TableHeader,
   TableRow,
 } from "@builderai/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"
-import { toastAction } from "~/lib/toast"
 import { FeatureConfigForm } from "../../plans/[planSlug]/_components/feature-config-form"
 
 type PlanVersionResponse =
@@ -53,10 +55,24 @@ export default function ConfigItemsFormField({
   items: UseFieldArrayReturn<InsertSubscription, "items", "id">
 }) {
   const versionFeatures = new Map<string, PlanVersionFeaturesResponse>()
+  const versionAddons = new Map<string, PlanVersionFeaturesResponse>()
   const { fields } = items
 
+  const [isDelete, setConfirmDelete] = useState<Map<string, boolean>>(
+    new Map<string, boolean>(
+      fields.map((item) => [item.id, false] as [string, boolean])
+    )
+  )
+
+  const isSubscriptionTypeAddons = form.watch("type") === "addons"
+
   selectedPlanVersion?.planFeatures.forEach((feature) => {
-    versionFeatures.set(feature.id, feature)
+    if (feature.type === "feature") {
+      versionFeatures.set(feature.id, feature)
+    }
+    if (feature.type === "addon") {
+      versionAddons.set(feature.id, feature)
+    }
   })
 
   const { errors } = form.formState
@@ -87,31 +103,25 @@ export default function ConfigItemsFormField({
               <TableRow className="pointer-events-none">
                 <TableHead className="h-10 pl-1">Features</TableHead>
                 <TableHead className="h-10 px-0 text-center">
-                  Quantity
+                  Quantity Units
                 </TableHead>
-                <TableHead className="h-10 pr-1 text-end">
+                <TableHead
+                  className={cn("h-10 text-end", {
+                    "pr-1": !isSubscriptionTypeAddons,
+                    "pr-8": isSubscriptionTypeAddons,
+                  })}
+                >
                   Estimated Total
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {fields.map((item, index) => {
-                const featureData = versionFeatures.get(item.itemId)
+                const feature =
+                  versionFeatures.get(item.itemId) ??
+                  versionAddons.get(item.itemId)!
 
-                if (!featureData || !selectedPlanVersion) {
-                  return null
-                }
-
-                const { err, val: pricePerFeature } = calculatePricePerFeature({
-                  feature: featureData,
-                  quantity: form.getValues(`items.${index}.quantity`) ?? 0,
-                  planVersion: selectedPlanVersion,
-                })
-
-                if (err) {
-                  toastAction("error", err.message)
-                  return null
-                }
+                const quantity = form.watch(`items.${index}.quantity`)
 
                 return (
                   <TableRow
@@ -125,11 +135,15 @@ export default function ConfigItemsFormField({
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button
-                                className="w-4"
+                                className="h-4 w-4"
                                 variant="link"
                                 size="icon"
                               >
-                                <EyeIcon className="h-3 w-3" />
+                                {feature.hidden ? (
+                                  <EyeOff className="h-3 w-3" />
+                                ) : (
+                                  <EyeIcon className="h-3 w-3" />
+                                )}
                                 <span className="sr-only">View feature</span>
                               </Button>
                             </DialogTrigger>
@@ -137,32 +151,41 @@ export default function ConfigItemsFormField({
                             <DialogContent className="flex max-h-[800px] w-full flex-col justify-between overflow-y-scroll md:w-1/2 lg:w-[600px]">
                               <DialogHeader>
                                 <DialogTitle>
-                                  Plan Version Feature Details
+                                  Feature: {feature.feature.title}
                                 </DialogTitle>
                               </DialogHeader>
+                              {feature.feature?.description && (
+                                <DialogDescription>
+                                  {feature.feature.description}
+                                </DialogDescription>
+                              )}
                               <FeatureConfigForm
-                                defaultValues={featureData}
-                                planVersion={selectedPlanVersion}
+                                defaultValues={feature}
+                                planVersion={selectedPlanVersion!}
+                                className="my-6"
                               />
                             </DialogContent>
                           </Dialog>
                         </PropagationStopper>
                       </div>
 
-                      <div className="hidden text-xs text-muted-foreground md:block">
-                        {pricePerFeature.usageMode
-                          ? `${featureData.featureType} rate per
-                        ${pricePerFeature.usageMode}`
-                          : `${featureData.featureType} rate`}
+                      <div className="text-muted-foreground hidden text-xs md:block">
+                        {feature.config?.usageMode
+                          ? `${feature.featureType} rate per
+                      ${feature.config.usageMode}`
+                          : `${feature.featureType} rate`}
                       </div>
-                      <div className="hidden text-xs italic text-muted-foreground md:inline">
-                        {pricePerFeature.unitPriceText}
-                      </div>
+                      <ConfigItemPrice
+                        selectedPlanVersion={selectedPlanVersion!}
+                        quantity={quantity}
+                        feature={feature}
+                        type="unit"
+                      />
                     </TableCell>
                     <TableCell className="table-cell">
-                      {featureData.featureType === "usage" ? (
+                      {feature.featureType === "usage" ? (
                         <div className="text-center">Varies</div>
-                      ) : featureData.featureType === "flat" ? (
+                      ) : ["flat", "package"].includes(feature.featureType) ? (
                         <div className="text-center">{item.quantity}</div>
                       ) : (
                         <FormField
@@ -178,9 +201,10 @@ export default function ConfigItemsFormField({
                                     {...field}
                                     className="mx-auto h-8 w-20"
                                     disabled={
-                                      featureData?.featureType === "flat" ||
-                                      featureData?.featureType === "usage"
+                                      feature.featureType === "flat" ||
+                                      feature.featureType === "usage"
                                     }
+                                    value={field.value ?? ""}
                                   />
                                 </div>
                               </FormControl>
@@ -189,8 +213,70 @@ export default function ConfigItemsFormField({
                         />
                       )}
                     </TableCell>
-                    <TableCell className="pr-1 text-end text-xs">
-                      {pricePerFeature.totalPriceText}
+                    <TableCell className="flex h-24 items-center justify-end gap-1 pr-1">
+                      <ConfigItemPrice
+                        selectedPlanVersion={selectedPlanVersion!}
+                        quantity={quantity}
+                        feature={feature}
+                        type="total"
+                      />
+                      {isSubscriptionTypeAddons &&
+                        isDelete.get(item.itemId) && (
+                          <div className="flex flex-row items-center">
+                            <Button
+                              className="px-0"
+                              variant="link"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
+                                items.remove(index)
+
+                                setConfirmDelete(
+                                  (prev) =>
+                                    new Map(prev.set(item.itemId, false))
+                                )
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      {isSubscriptionTypeAddons &&
+                        !isDelete.get(item.itemId) && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                className="px-0"
+                                variant="link"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  e.preventDefault()
+                                  setConfirmDelete(
+                                    (prev) =>
+                                      new Map(prev.set(item.itemId, true))
+                                  )
+
+                                  // set timeout to reset the delete confirmation
+                                  setTimeout(() => {
+                                    setConfirmDelete(
+                                      (prev) =>
+                                        new Map(prev.set(item.itemId, false))
+                                    )
+                                  }, 2000)
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div className="max-w-[200px] text-sm">
+                                remove this addon from the subscription
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
                     </TableCell>
                   </TableRow>
                 )
@@ -211,6 +297,52 @@ export default function ConfigItemsFormField({
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function ConfigItemPrice({
+  selectedPlanVersion,
+  quantity,
+  feature,
+  type,
+}: {
+  selectedPlanVersion: PlanVersionResponse
+  feature: PlanVersionFeaturesResponse
+  quantity?: number
+  type: "total" | "unit"
+}) {
+  // useCallback to prevent re-rendering calculatePricePerFeature
+  const calculatePrice = useCallback(() => {
+    return calculatePricePerFeature({
+      feature: feature,
+      quantity,
+    })
+  }, [feature, quantity])
+
+  const { err, val: pricePerFeature } = calculatePrice()
+
+  if (err) {
+    return (
+      <div className="text-muted-foreground inline text-xs italic">
+        provide quantity
+      </div>
+    )
+  }
+
+  if (type === "total") {
+    return (
+      <div className="inline text-end text-xs">
+        {pricePerFeature?.totalPrice.displayAmount &&
+          `${pricePerFeature.totalPrice.displayAmount}/ ${selectedPlanVersion.billingPeriod}`}
+      </div>
+    )
+  }
+
+  return (
+    <div className="text-muted-foreground inline text-xs italic">
+      {pricePerFeature?.unitPrice.displayAmount &&
+        `${pricePerFeature.unitPrice.displayAmount}/ ${selectedPlanVersion?.billingPeriod}`}
     </div>
   )
 }

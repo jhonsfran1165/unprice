@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server"
-import { waitUntil } from "@vercel/functions"
 import { z } from "zod"
 
 import { and, eq } from "@builderai/db"
@@ -22,7 +21,6 @@ import {
   createTRPCRouter,
   protectedApiOrActiveProjectProcedure,
 } from "../../trpc"
-import { featureGuard } from "../../utils/feature-guard"
 import {
   getEntitlements,
   reportUsageFeature,
@@ -48,12 +46,6 @@ export const customersRouter = createTRPCRouter({
       const unpriceCustomerId = project.workspace.unPriceCustomerId
       const workspaceId = project.workspaceId
 
-      await featureGuard({
-        project,
-        featureSlug: "customers",
-        ctx,
-      })
-
       const customerId = utils.newId("customer")
 
       const customerData = await opts.ctx.db
@@ -76,16 +68,16 @@ export const customersRouter = createTRPCRouter({
         })
       }
 
-      waitUntil(
-        reportUsageFeature({
-          customerId: unpriceCustomerId,
-          featureSlug: "customers",
-          projectId: project.id,
-          workspaceId: workspaceId,
-          ctx: ctx,
-          usage: 1,
-        })
-      )
+      // waitUntil(
+      //   reportUsageFeature({
+      //     customerId: unpriceCustomerId,
+      //     featureSlug: "customers",
+      //     projectId: project.id,
+      //     workspaceId: workspaceId,
+      //     ctx: ctx,
+      //     usage: 1,
+      //   })
+      // )
 
       return {
         customer: customerData,
@@ -134,16 +126,16 @@ export const customersRouter = createTRPCRouter({
         })
       }
 
-      waitUntil(
-        reportUsageFeature({
-          customerId: unpriceCustomerId,
-          featureSlug: "customers",
-          projectId: project.id,
-          workspaceId: workspaceId,
-          ctx: ctx,
-          usage: -1,
-        })
-      )
+      // waitUntil(
+      //   reportUsageFeature({
+      //     customerId: unpriceCustomerId,
+      //     featureSlug: "customers",
+      //     projectId: project.id,
+      //     workspaceId: workspaceId,
+      //     ctx: ctx,
+      //     usage: -1,
+      //   })
+      // )
 
       return {
         customer: deletedCustomer,

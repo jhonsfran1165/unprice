@@ -2,13 +2,13 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 
 import { versions } from "../schema/planVersions"
-import { CURRENCIES, PLAN_BILLING_PERIODS } from "../utils"
+import { PLAN_BILLING_PERIODS } from "../utils"
+import { currencySchema } from "./shared"
 
 export const planVersionMetadataSchema = z.object({
   externalId: z.string().optional(),
 })
 
-export const currencySchema = z.enum(CURRENCIES)
 export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
 
 export const startCycleSchema = z.union([
@@ -64,5 +64,4 @@ export type StartCycleType = z.infer<typeof startCycleSchema>
 export type PlanVersionMetadata = z.infer<typeof planVersionMetadataSchema>
 export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>
 export type PlanVersion = z.infer<typeof planVersionSelectBaseSchema>
-export type Currency = z.infer<typeof currencySchema>
 export type BillingPeriod = z.infer<typeof billingPeriodSchema>

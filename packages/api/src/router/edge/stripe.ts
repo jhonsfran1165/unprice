@@ -1,6 +1,6 @@
 import * as currencies from "@dinero.js/currencies"
 import { TRPCError } from "@trpc/server"
-import { dinero } from "dinero.js"
+import { dinero, multiply, toDecimal, toUnits, transformScale } from "dinero.js"
 import { z } from "zod"
 
 import { APP_DOMAIN, PLANS } from "@builderai/config"
@@ -123,6 +123,50 @@ export const stripeRouter = createTRPCRouter({
             currencies[stdPrice.currency as keyof typeof currencies] ??
             currencies.USD,
         }),
+      },
+      {
+        ...PLANS.PRO,
+        price: dinero({
+          amount: proPrice.unit_amount!,
+          currency:
+            currencies[proPrice.currency as keyof typeof currencies] ??
+            currencies.USD,
+        }),
+      },
+    ]
+  }),
+
+  // TODO: add output
+  dinero: publicProcedure.input(z.void()).query(async () => {
+    // TODO: fix priceId
+    const proPrice = await stripe.prices.retrieve(PLANS.PRO?.priceId ?? "")
+    const stdPrice = await stripe.prices.retrieve(PLANS.STANDARD?.priceId ?? "")
+
+    // TODO: DINERO from string
+    const priceCentsTest = "1000.00"
+
+    const scale = priceCentsTest.includes(".")
+      ? priceCentsTest.split(".")[1]?.length
+      : undefined
+
+    const priceDecimal = dinero({
+      amount: parseInt(priceCentsTest.replace(".", "")),
+      currency:
+        currencies[stdPrice.currency as keyof typeof currencies] ??
+        currencies.USD,
+      scale: scale ? currencies.USD.exponent + scale : currencies.USD.exponent,
+    })
+
+    const usage = multiply(priceDecimal, 10)
+
+    return [
+      {
+        ...PLANS.STANDARD,
+        price: priceDecimal,
+        toDecimal: toDecimal(priceDecimal),
+        usage: toDecimal(usage),
+        units: toUnits(usage),
+        total: toDecimal(transformScale(usage, currencies.USD.exponent)),
       },
       {
         ...PLANS.PRO,

@@ -1,48 +1,96 @@
+import * as currencies from "@dinero.js/currencies"
+import type { DineroSnapshot } from "dinero.js"
+import { dinero } from "dinero.js"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 import { ZodError } from "zod"
 
 import { planVersionFeatures } from "../schema/planVersionFeatures"
-import {
-  AGGREGATION_METHODS,
-  FEATURE_TYPES,
-  FEATURE_TYPES_MAPS,
-  FEATURE_VERSION_TYPES,
-  TIER_MODES,
-  USAGE_MODES,
-  USAGE_MODES_MAP,
-} from "../utils"
+import { FEATURE_TYPES_MAPS, USAGE_MODES_MAP } from "../utils"
 import { featureSelectBaseSchema } from "./features"
 import { planSelectBaseSchema } from "./plans"
 import { planVersionSelectBaseSchema } from "./planVersions"
 import { projectSelectBaseSchema } from "./project"
+import {
+  aggregationMethodSchema,
+  featureVersionType,
+  tierModeSchema,
+  unitSchema,
+  usageModeSchema,
+} from "./shared"
 
-export const typeFeatureSchema = z.enum(FEATURE_TYPES)
-const usageModeSchema = z.enum(USAGE_MODES)
-const aggregationMethodSchema = z.enum(AGGREGATION_METHODS)
-const tierModeSchema = z.enum(TIER_MODES)
-const featureVersionType = z.enum(FEATURE_VERSION_TYPES)
-const unitSchema = z.coerce.number().int().min(1)
+export const priceSchema = z.coerce
+  .string()
+  .regex(/^\d{1,10}(\.\d{1,10})?$/, "Invalid price format")
+
+export const dineroSchema = z
+  .object({
+    dinero: z.custom<DineroSnapshot<number>>(),
+    displayAmount: priceSchema,
+  })
+  .transform((data, ctx) => {
+    if (!data.dinero) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid dinero object",
+        path: ["displayAmount"],
+        fatal: true,
+      })
+
+      return z.NEVER
+    }
+
+    const priceCents = data.displayAmount
+
+    // only rely on the currency code because the scale is not always the same
+    const currencyDinero =
+      currencies[data.dinero.currency.code as keyof typeof currencies]
+
+    // recalculate the scale base on the currency
+    const precision =
+      priceCents.split(".")[1]?.length ?? currencyDinero.exponent
+
+    // convert the price to the smallest unit
+    const amount = Math.round(Number(priceCents) * Math.pow(10, precision))
+
+    const price = dinero({
+      amount: amount,
+      currency: currencyDinero,
+      scale: precision,
+    })
+
+    try {
+      return {
+        dinero: price.toJSON(),
+        displayAmount: priceCents,
+      }
+    } catch {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid dinero object",
+        path: ["displayAmount"],
+        fatal: true,
+      })
+
+      return z.NEVER
+    }
+  })
 
 export const planVersionFeatureMetadataSchema = z.object({
   externalId: z.string().optional(),
   lastTimeSyncPaymentProvider: z.number().optional(),
 })
 
-export const priceSchema = z
-  .string()
-  .regex(/^\d{1,15}(\.\d{1,12})?$/, "Invalid price")
-
 export const tiersSchema = z.object({
-  unitPrice: priceSchema,
-  flatPrice: priceSchema.nullable(),
+  unitPrice: dineroSchema,
+  flatPrice: dineroSchema,
   firstUnit: z.coerce.number().int().min(1),
   lastUnit: z.coerce.number().int().min(1).nullable(),
 })
 
 export const configTierSchema = z
   .object({
-    price: priceSchema.optional(),
+    price: dineroSchema.optional(),
     aggregationMethod: aggregationMethodSchema.optional(),
     tierMode: tierModeSchema,
     tiers: z.array(tiersSchema),
@@ -118,7 +166,7 @@ export const configTierSchema = z
 
 export const configUsageSchema = z
   .object({
-    price: priceSchema.optional(),
+    price: dineroSchema.optional(),
     usageMode: usageModeSchema,
     aggregationMethod: aggregationMethodSchema,
     tierMode: tierModeSchema.optional(),
@@ -244,7 +292,7 @@ export const configUsageSchema = z
 
 export const configFlatSchema = z.object({
   tiers: z.array(tiersSchema).optional(),
-  price: priceSchema,
+  price: dineroSchema,
   usageMode: usageModeSchema.optional(),
   aggregationMethod: aggregationMethodSchema.optional(),
   tierMode: tierModeSchema.optional(),
@@ -253,7 +301,7 @@ export const configFlatSchema = z.object({
 
 export const configPackageSchema = z.object({
   tiers: z.array(tiersSchema).optional(),
-  price: priceSchema,
+  price: dineroSchema,
   usageMode: usageModeSchema.optional(),
   aggregationMethod: aggregationMethodSchema.optional(),
   tierMode: tierModeSchema.optional(),
@@ -482,7 +530,4 @@ export type PlanVersionFeatureDragDrop = z.infer<
   typeof planVersionFeatureDragDropSchema
 >
 
-export type FeatureType = z.infer<typeof typeFeatureSchema>
-
 export type PlanVersionExtended = z.infer<typeof planVersionExtendedSchema>
-export type FeatureVersionType = z.infer<typeof featureVersionType>

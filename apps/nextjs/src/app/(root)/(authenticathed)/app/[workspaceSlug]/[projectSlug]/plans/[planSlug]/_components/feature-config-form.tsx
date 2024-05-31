@@ -13,6 +13,7 @@ import {
 } from "@builderai/db/utils"
 import type { PlanVersion, PlanVersionFeature } from "@builderai/db/validators"
 import { planVersionFeatureInsertBaseSchema } from "@builderai/db/validators"
+import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -48,10 +49,12 @@ export function FeatureConfigForm({
   setDialogOpen,
   defaultValues,
   planVersion,
+  className,
 }: {
   defaultValues: PlanVersionFeature
   planVersion: PlanVersion | null
   setDialogOpen?: (open: boolean) => void
+  className?: string
 }) {
   const router = useRouter()
   const [_planFeatureList, setPlanFeatureList] = usePlanFeaturesList()
@@ -67,8 +70,30 @@ export function FeatureConfigForm({
         {
           firstUnit: 1,
           lastUnit: null,
-          unitPrice: "0.00",
-          flatPrice: null,
+          unitPrice: {
+            displayAmount: "0.00",
+            dinero: {
+              amount: 0,
+              currency: {
+                code: planVersion?.currency ?? "USD",
+                base: 10,
+                exponent: 2,
+              },
+              scale: 2,
+            },
+          },
+          flatPrice: {
+            displayAmount: "0.00",
+            dinero: {
+              amount: 0,
+              currency: {
+                code: planVersion?.currency ?? "USD",
+                base: 10,
+                exponent: 2,
+              },
+              scale: 2,
+            },
+          },
         },
       ],
       usageMode: defaultValues.config?.usageMode ?? "tier",
@@ -131,7 +156,7 @@ export function FeatureConfigForm({
     <Form {...form}>
       <form
         id={"feature-config-form"}
-        className="space-y-6"
+        className={cn("space-y-6", className)}
         onSubmit={form.handleSubmit(onSubmitForm)}
       >
         {planVersion.status === "published" && <BannerPublishedVersion />}
@@ -165,10 +190,10 @@ export function FeatureConfigForm({
         <div className="flex flex-col gap-2">
           <div className="border-1 items-center rounded-md">
             <div className="space-y-2">
-              <div className="rounded-md bg-background-bg p-2 text-center font-semibold shadow-sm">
+              <div className="bg-background-bg rounded-md p-2 text-center font-semibold shadow-sm">
                 Pricing Model
               </div>
-              <div className="line-clamp-3 space-y-2 break-all px-2 text-justify text-xs font-normal leading-snug text-muted-foreground">
+              <div className="text-muted-foreground line-clamp-3 space-y-2 break-all px-2 text-justify text-xs font-normal leading-snug">
                 All units price based on final tier reached. Needs a record for
                 Stripe to track customer service usage.
               </div>
@@ -193,7 +218,7 @@ export function FeatureConfigForm({
                         <SelectContent>
                           {FEATURE_TYPES.map((type, index) => (
                             <SelectItem value={type} key={index}>
-                              <div className="flex items-start gap-3 text-muted-foreground">
+                              <div className="text-muted-foreground flex items-start gap-3">
                                 <div className="grid gap-0.5">
                                   <p>{FEATURE_TYPES_MAPS[type].label}</p>
                                   <p className="text-xs" data-description>
@@ -228,7 +253,7 @@ export function FeatureConfigForm({
                           <SelectContent>
                             {USAGE_MODES.map((mode, index) => (
                               <SelectItem value={mode} key={index}>
-                                <div className="flex items-start gap-3 text-muted-foreground">
+                                <div className="text-muted-foreground flex items-start gap-3">
                                   <div className="grid gap-0.5">
                                     <p>{USAGE_MODES_MAP[mode].label}</p>
                                     <p className="text-xs" data-description>
@@ -265,7 +290,7 @@ export function FeatureConfigForm({
                           <SelectContent>
                             {TIER_MODES.map((mode, index) => (
                               <SelectItem value={mode} key={index}>
-                                <div className="flex items-start gap-3 text-muted-foreground">
+                                <div className="text-muted-foreground flex items-start gap-3">
                                   <div className="grid gap-0.5">
                                     <p>{TIER_MODES_MAP[mode].label}</p>
                                     <p className="text-xs" data-description>
@@ -300,7 +325,9 @@ export function FeatureConfigForm({
           <UsageFormFields form={form} currency={planVersion.currency} />
         )}
 
-        {featureType === "tier" && <TierFormFields form={form} />}
+        {featureType === "tier" && (
+          <TierFormFields form={form} currency={planVersion.currency} />
+        )}
 
         {planVersion.status !== "published" && (
           <div className="mt-8 flex justify-end space-x-4">
