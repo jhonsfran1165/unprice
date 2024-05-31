@@ -15,7 +15,7 @@ export const createApiKeySchema = insertApiKeySchema
   })
   .extend({
     projectSlug: z.string(),
-    expiresAt: z.date().optional(),
+    expiresAt: z.coerce.date().optional(),
   })
 
 export const selectApiKeyHeaderSchema = selectApiKeySchema.pick({

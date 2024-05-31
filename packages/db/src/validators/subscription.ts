@@ -28,6 +28,7 @@ import {
 
 export const subscriptionMetadataSchema = z.object({
   externalId: z.string().optional(),
+  defaultPaymentMethodId: z.string().optional(),
 })
 
 const itemConfigSubscriptionSchema = z.object({
@@ -103,7 +104,7 @@ export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
 
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
-  startDate: z.date({ message: "Start date is required" }),
+  startDate: z.coerce.date({ message: "Start date is required" }),
   trialDays: z.coerce.number().int().min(0).default(0),
   metadata: subscriptionMetadataSchema,
   items: subscriptionItemsSchema,
@@ -116,6 +117,11 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   .partial({
     id: true,
     projectId: true,
+  })
+  .required({
+    customerId: true,
+    planVersionId: true,
+    type: true,
   })
 
 export const subscriptionExtendedSchema = subscriptionSelectSchema

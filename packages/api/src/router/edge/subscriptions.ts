@@ -41,6 +41,7 @@ export const subscriptionRouter = createTRPCRouter({
         type,
         collectionMethod,
         paymentProviderId,
+        metadata,
       } = opts.input
       const project = opts.ctx.project
 
@@ -144,6 +145,7 @@ export const subscriptionRouter = createTRPCRouter({
         // if no items are passed, configuration is created from the default quantities of the plan features
         const { err, val } = createDefaultSubscriptionConfig({
           planVersion: versionData,
+          type: type === "plan" ? "feature" : "addon",
         })
 
         if (err) {
@@ -174,7 +176,7 @@ export const subscriptionRouter = createTRPCRouter({
           collectionMethod: collectionMethod,
           status: "active",
           items: configItemsSubscription,
-          metadata: null,
+          metadata: metadata,
           paymentProviderId: paymentProviderId,
         })
         .returning()

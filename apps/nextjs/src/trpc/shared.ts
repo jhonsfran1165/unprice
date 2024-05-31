@@ -1,5 +1,3 @@
-export { transformer } from "@builderai/api/transformer"
-
 export const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""
   const vc = process.env.VERCEL_URL
@@ -9,5 +7,3 @@ export const getBaseUrl = () => {
 
 // lambdas keys must match the first part of the path
 export const lambdas = ["ingestion"]
-
-export { type RouterInputs, type RouterOutputs } from "@builderai/api"

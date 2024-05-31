@@ -40,7 +40,7 @@
     "@tanstack/react-table": "^8.13.2",
     "@trpc/client": "11.0.0-rc.382",
     "@trpc/next": "11.0.0-rc.382",
-    "@trpc/react-query": "11.0.0-next-beta.274",
+    "@trpc/react-query": "11.0.0-rc.382",
     "@trpc/server": "11.0.0-rc.382",
     "@vercel/analytics": "^1.2.2",
     "date-fns": "^3.3.1",

@@ -13,12 +13,12 @@ import {
 import type { HTTPBatchStreamLinkOptions, HTTPHeaders } from "@trpc/react-query"
 import { createTRPCReact } from "@trpc/react-query"
 import type { AnyRootTypes } from "@trpc/server/unstable-core-do-not-import"
-import SuperJSON from "superjson"
 
 import type { AppRouter } from "@builderai/api"
+import { transformer } from "@builderai/api/transformer"
 
 import { toastAction } from "~/lib/toast"
-import { getBaseUrl, lambdas, transformer } from "./shared"
+import { getBaseUrl, lambdas } from "./shared"
 
 export const api = createTRPCReact<AppRouter>()
 
@@ -32,13 +32,13 @@ export const endingLinkClient = (opts?: {
 
     const edgeLink = unstable_httpBatchStreamLink({
       ...sharedOpts,
-      transformer: SuperJSON,
+      transformer: transformer,
       url: `${getBaseUrl()}/api/trpc/edge`,
     })(runtime)
 
     const lambdaLink = unstable_httpBatchStreamLink({
       ...sharedOpts,
-      transformer: SuperJSON,
+      transformer: transformer,
       url: `${getBaseUrl()}/api/trpc/lambda`,
     })(runtime)
 

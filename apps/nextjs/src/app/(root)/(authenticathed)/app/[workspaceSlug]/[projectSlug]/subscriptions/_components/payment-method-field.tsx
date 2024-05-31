@@ -37,7 +37,7 @@ export default function PaymentMethodsFormField({
     <div className="flex w-full flex-row gap-4">
       <FormField
         control={form.control}
-        name="paymentProviderId"
+        name="metadata.defaultPaymentMethodId"
         render={({ field }) => (
           <FormItem className="w-full space-y-1 ">
             <FormLabel>Payment information</FormLabel>
@@ -46,7 +46,13 @@ export default function PaymentMethodsFormField({
             </FormDescription>
             <FormMessage />
             <RadioGroup
-              onValueChange={field.onChange}
+              onValueChange={(value) => {
+                field.onChange(value)
+                form.setValue(
+                  "paymentProviderId",
+                  paymentProviderData?.id ?? ""
+                )
+              }}
               defaultValue={field.value}
               className="flex flex-col gap-4 pt-2"
             >
@@ -57,7 +63,7 @@ export default function PaymentMethodsFormField({
                     <FormControl>
                       <RadioGroupItem value={method.id} className="sr-only" />
                     </FormControl>
-                    <div className="cursor-pointer items-center rounded-md border-2 border-muted p-6 hover:border-accent">
+                    <div className="border-muted hover:border-accent cursor-pointer items-center rounded-md border-2 p-6">
                       <div className="flex flex-row items-center justify-between">
                         <div className="inline-flex gap-2">
                           <span>{method?.brand}</span>
