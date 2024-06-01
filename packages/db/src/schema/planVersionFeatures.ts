@@ -16,7 +16,7 @@ import type {
   configFeatureSchema,
   planVersionFeatureMetadataSchema,
 } from "../validators/planVersionFeatures"
-import { typeFeatureEnum, typeFeatureVersionEnum } from "./enums"
+import { typeFeatureEnum } from "./enums"
 import { features } from "./features"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
@@ -33,7 +33,6 @@ export const planVersionFeatures = pgTableProject(
     featureId: cuid("feature_id").notNull(),
     // type of the feature - flat, tier, usage, etc.
     featureType: typeFeatureEnum("feature_type").notNull(),
-    type: typeFeatureVersionEnum("type").notNull().default("feature"),
     // configuration of the feature
     config:
       json("features_config").$type<z.infer<typeof configFeatureSchema>>(),

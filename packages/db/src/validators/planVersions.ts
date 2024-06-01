@@ -21,6 +21,8 @@ export const planVersionSelectBaseSchema = createSelectSchema(versions, {
   startCycle: startCycleSchema,
   tags: z.array(z.string()),
   metadata: planVersionMetadataSchema,
+  billingPeriod: billingPeriodSchema,
+  currency: currencySchema,
 })
 
 export const versionInsertBaseSchema = createInsertSchema(versions, {

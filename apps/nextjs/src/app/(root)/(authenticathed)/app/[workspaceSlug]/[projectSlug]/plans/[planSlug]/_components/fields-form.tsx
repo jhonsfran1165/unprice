@@ -34,6 +34,7 @@ import {
   TooltipTrigger,
 } from "@builderai/ui/tooltip"
 
+import { InputWithAddons } from "~/components/test"
 import { currencySymbol } from "~/lib/currency"
 
 export function QuantityFormField({
@@ -59,22 +60,11 @@ export function QuantityFormField({
 
             <div className="flex flex-col items-center space-y-1 px-2">
               <FormControl className="w-full">
-                <div className="flex flex-row items-center">
-                  <div className="relative flex-1">
-                    <Input
-                      {...field}
-                      className="rounded-e-none"
-                      value={field.value ?? ""}
-                    />
-                  </div>
-                  <div
-                    className={
-                      "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 px-3 text-sm font-medium"
-                    }
-                  >
-                    units
-                  </div>
-                </div>
+                <InputWithAddons
+                  {...field}
+                  trailing={"units"}
+                  value={field.value ?? ""}
+                />
               </FormControl>
 
               <FormMessage className="self-start px-2" />
@@ -109,22 +99,11 @@ export function LimitFormField({
 
             <div className="flex flex-col items-center space-y-1 px-2">
               <FormControl className="w-full">
-                <div className="flex flex-row items-center">
-                  <div className="relative flex-1">
-                    <Input
-                      {...field}
-                      className="rounded-e-none"
-                      value={field.value ?? ""}
-                    />
-                  </div>
-                  <div
-                    className={
-                      "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 px-3 text-sm font-medium"
-                    }
-                  >
-                    units
-                  </div>
-                </div>
+                <InputWithAddons
+                  {...field}
+                  trailing={"units"}
+                  value={field.value ?? ""}
+                />
               </FormControl>
 
               <FormMessage className="self-start px-2" />
@@ -160,25 +139,12 @@ export function PriceFormField({
 
             <div className="flex flex-col items-center space-y-1 px-2">
               <FormControl className="w-full">
-                <div className="flex flex-row items-center">
-                  <div className="relative flex-1">
-                    <span className="text-muted-foreground absolute left-2 top-2 h-5 w-5">
-                      {currencySymbol(currency)}
-                    </span>
-                    <Input
-                      {...field}
-                      className="rounded-e-none pl-6"
-                      value={field.value ?? ""}
-                    />
-                  </div>
-                  <div
-                    className={
-                      "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 px-3 text-sm font-medium"
-                    }
-                  >
-                    {currency}
-                  </div>
-                </div>
+                <InputWithAddons
+                  {...field}
+                  leading={currencySymbol(currency)}
+                  trailing={currency}
+                  value={field.value ?? ""}
+                />
               </FormControl>
 
               <FormMessage className="self-start px-2" />
@@ -204,25 +170,12 @@ export function UnitsFormField({
           <FormItem className="">
             <div className="flex flex-col items-center space-y-1 px-2">
               <FormControl className="w-full">
-                <div className="flex flex-row items-center">
-                  <div
-                    className={
-                      "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-none rounded-s-md border border-r-0 px-3 text-sm font-medium"
-                    }
-                  >
-                    per
-                  </div>
-                  <div className="relative flex-1">
-                    <Input {...field} className="rounded-none" />
-                  </div>
-                  <div
-                    className={
-                      "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 px-3 text-sm font-medium"
-                    }
-                  >
-                    units
-                  </div>
-                </div>
+                <InputWithAddons
+                  {...field}
+                  leading={"per"}
+                  trailing={"units"}
+                  value={field.value ?? ""}
+                />
               </FormControl>
 
               <FormMessage className="self-start px-2" />
@@ -601,13 +554,8 @@ export function TierFormField({
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <div className="grid gap-2">
-                <p
-                  className="
-                   self-center text-sm font-semibold"
-                >
-                  No tiers
-                </p>
-                <p className="text-muted-foreground  justify-center text-xs font-normal leading-snug">
+                <p className="self-center text-sm font-semibold">No tiers</p>
+                <p className="text-muted-foreground justify-center text-xs font-normal leading-snug">
                   Something went wrong, please add the first tier.
                 </p>
                 <Button

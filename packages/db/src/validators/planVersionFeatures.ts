@@ -13,7 +13,6 @@ import { planVersionSelectBaseSchema } from "./planVersions"
 import { projectSelectBaseSchema } from "./project"
 import {
   aggregationMethodSchema,
-  featureVersionType,
   tierModeSchema,
   unitSchema,
   usageModeSchema,
@@ -320,7 +319,6 @@ export const planVersionFeatureSelectBaseSchema = createSelectSchema(
   planVersionFeatures,
   {
     config: configFeatureSchema,
-    type: featureVersionType,
     metadata: planVersionFeatureMetadataSchema,
     defaultQuantity: z.coerce.number().int().optional(),
     limit: z.coerce.number().int().optional(),
@@ -350,7 +348,6 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
     metadata: planVersionFeatureMetadataSchema.optional(),
     defaultQuantity: z.coerce.number().int().optional(),
     limit: z.coerce.number().int().optional(),
-    type: featureVersionType,
   }
 )
   .omit({
@@ -367,7 +364,6 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
     featureId: true,
     planVersionId: true,
     featureType: true,
-    type: true,
   })
   .transform((data) => {
     if (data.config) {
@@ -507,7 +503,6 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema
           metadata: true,
           limit: true,
           defaultQuantity: true,
-          type: true,
         })
         .extend({
           feature: featureSelectBaseSchema.pick({

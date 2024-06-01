@@ -225,7 +225,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
                       <Badge>{planFeatureVersion.config.tierMode}</Badge>
                     )}
                   </div>
-                  <div className="line-clamp-1 pr-3 text-xs font-normal">
+                  <div className="line-clamp-1 pr-3 text-xs font-light">
                     {/* // TODO: fix this */}
                     {planFeatureVersion?.config?.price
                       ? `${

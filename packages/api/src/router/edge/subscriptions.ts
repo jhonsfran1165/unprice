@@ -38,7 +38,6 @@ export const subscriptionRouter = createTRPCRouter({
         trialDays,
         startDate,
         endDate,
-        type,
         collectionMethod,
         paymentProviderId,
         metadata,
@@ -145,7 +144,6 @@ export const subscriptionRouter = createTRPCRouter({
         // if no items are passed, configuration is created from the default quantities of the plan features
         const { err, val } = createDefaultSubscriptionConfig({
           planVersion: versionData,
-          type: type === "plan" ? "feature" : "addon",
         })
 
         if (err) {
@@ -171,7 +169,6 @@ export const subscriptionRouter = createTRPCRouter({
           endDate: endDate,
           autoRenew: true,
           trialDays: trialDays,
-          type: type,
           isNew: true,
           collectionMethod: collectionMethod,
           status: "active",

@@ -64,15 +64,12 @@ export default function ConfigItemsFormField({
     )
   )
 
-  const isSubscriptionTypeAddons = form.watch("type") === "addons"
+  // TODO: use later for addons support
+  const isSubscriptionTypeAddons = false
 
   selectedPlanVersion?.planFeatures.forEach((feature) => {
-    if (feature.type === "feature") {
-      versionFeatures.set(feature.id, feature)
-    }
-    if (feature.type === "addon") {
-      versionAddons.set(feature.id, feature)
-    }
+    versionFeatures.set(feature.id, feature)
+    versionAddons.set(feature.id, feature)
   })
 
   const { errors } = form.formState

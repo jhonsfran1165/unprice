@@ -19,7 +19,7 @@ import {
   planVersionFeatureInsertBaseSchema,
   priceSchema,
 } from "./planVersionFeatures"
-import type { Currency, FeatureVersionType } from "./shared"
+import type { Currency } from "./shared"
 import {
   currencySymbol,
   subscriptionTypeSchema,
@@ -105,7 +105,7 @@ export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
   startDate: z.coerce.date({ message: "Start date is required" }),
-  trialDays: z.coerce.number().int().min(0).default(0),
+  trialDays: z.coerce.number().int().min(0).max(30).default(0),
   metadata: subscriptionMetadataSchema,
   items: subscriptionItemsSchema,
   type: subscriptionTypeSchema,
@@ -144,10 +144,8 @@ export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,
-  type,
 }: {
   planVersion: PlanVersionExtended
-  type: FeatureVersionType
 }): Result<SubscriptionItem[], UnPriceCalculationError> => {
   if (!planVersion.planFeatures || planVersion.planFeatures.length === 0) {
     return Err(
@@ -156,61 +154,59 @@ export const createDefaultSubscriptionConfig = ({
       })
     )
   }
-  const itemsConfig = planVersion.planFeatures
-    .filter((f) => f.type === type)
-    .map((planFeature) => {
-      switch (planFeature.featureType) {
-        case "flat":
-          return {
-            itemType: planFeature.featureType,
-            itemId: planFeature.id,
-            slug: planFeature.feature.slug,
-            quantity: 1,
-            limit: 1,
-            min: 1,
-          } as SubscriptionItem
-        case "tier": {
-          return {
-            itemType: planFeature.featureType,
-            itemId: planFeature.id,
-            slug: planFeature.feature.slug,
-            quantity: planFeature.defaultQuantity ?? 1,
-            min: 1,
-            limit: planFeature.limit,
-          } as SubscriptionItem
-        }
-        case "usage":
-          return {
-            itemType: planFeature.featureType,
-            itemId: planFeature.id,
-            slug: planFeature.feature.slug,
-            usage: 0,
-            limit: planFeature.limit,
-          } as SubscriptionItem
-
-        case "package": {
-          const config = configPackageSchema.parse(planFeature.config)
-          return {
-            itemType: planFeature.featureType,
-            itemId: planFeature.id,
-            slug: planFeature.feature.slug,
-            quantity: config.units,
-            limit: config.units,
-            min: config.units,
-          } as SubscriptionItem
-        }
-
-        default:
-          return {
-            itemType: planFeature.featureType,
-            itemId: planFeature.id,
-            slug: planFeature.feature.slug,
-            quantity: planFeature.defaultQuantity,
-            limit: planFeature.defaultQuantity,
-            min: 1,
-          } as SubscriptionItem
+  const itemsConfig = planVersion.planFeatures.map((planFeature) => {
+    switch (planFeature.featureType) {
+      case "flat":
+        return {
+          itemType: planFeature.featureType,
+          itemId: planFeature.id,
+          slug: planFeature.feature.slug,
+          quantity: 1,
+          limit: 1,
+          min: 1,
+        } as SubscriptionItem
+      case "tier": {
+        return {
+          itemType: planFeature.featureType,
+          itemId: planFeature.id,
+          slug: planFeature.feature.slug,
+          quantity: planFeature.defaultQuantity ?? 1,
+          min: 1,
+          limit: planFeature.limit,
+        } as SubscriptionItem
       }
-    })
+      case "usage":
+        return {
+          itemType: planFeature.featureType,
+          itemId: planFeature.id,
+          slug: planFeature.feature.slug,
+          usage: 0,
+          limit: planFeature.limit,
+        } as SubscriptionItem
+
+      case "package": {
+        const config = configPackageSchema.parse(planFeature.config)
+        return {
+          itemType: planFeature.featureType,
+          itemId: planFeature.id,
+          slug: planFeature.feature.slug,
+          quantity: config.units,
+          limit: config.units,
+          min: config.units,
+        } as SubscriptionItem
+      }
+
+      default:
+        return {
+          itemType: planFeature.featureType,
+          itemId: planFeature.id,
+          slug: planFeature.feature.slug,
+          quantity: planFeature.defaultQuantity,
+          limit: planFeature.defaultQuantity,
+          min: 1,
+        } as SubscriptionItem
+    }
+  })
 
   return Ok(itemsConfig)
 }
@@ -230,6 +226,34 @@ const calculatePricePerFeatureSchema = itemConfigSubscriptionSchema
   .extend({
     feature: planVersionFeatureInsertBaseSchema,
   })
+
+export const calculateFlatPricePlan = ({
+  planVersion,
+}: {
+  planVersion: PlanVersionExtended
+}): Result<z.infer<typeof calculatePriceSchema>, UnPriceCalculationError> => {
+  const defaultDineroCurrency = currencies[planVersion.currency]
+  let total = dinero({ amount: 0, currency: defaultDineroCurrency })
+
+  planVersion.planFeatures.forEach((feature) => {
+    // TODO: what happen with tiers and usage?
+    if (["flat", "package"].includes(feature.featureType)) {
+      const { price } = configFlatSchema.parse(feature.config)
+      total = add(total, dinero(price.dinero))
+    }
+  })
+
+  const displayAmount = toDecimal(
+    total,
+    ({ value, currency }) =>
+      `${currencySymbol(currency.code as Currency)}${parseFloat(value)}`
+  )
+
+  return Ok({
+    dinero: total,
+    displayAmount: displayAmount,
+  })
+}
 
 export const calculatePricePerFeature = (
   data: z.infer<typeof calculatePricePerFeatureSchema>
@@ -386,7 +410,7 @@ export const calculatePricePerFeature = (
             displayAmount: toDecimal(
               dineroPrice,
               ({ value, currency }) =>
-                `${currencySymbol(currency.code as Currency)}${value} per unit`
+                `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
             ),
           },
           totalPrice: {
@@ -413,7 +437,7 @@ export const calculatePricePerFeature = (
             displayAmount: toDecimal(
               dineroPrice,
               ({ value, currency }) =>
-                `${currencySymbol(currency.code as Currency)}${value} per ${units} unit`
+                `starts at ${currencySymbol(currency.code as Currency)}${value} per ${units} unit`
             ),
           },
           totalPrice: {

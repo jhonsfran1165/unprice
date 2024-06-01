@@ -4,10 +4,7 @@ import { use, useState } from "react"
 import { FileStack, Search } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
-import type {
-  FeatureVersionType,
-  PlanVersionFeatureDragDrop,
-} from "@builderai/db/validators"
+import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
@@ -26,13 +23,11 @@ import {
 interface FeatureListProps {
   featuresPromise: Promise<RouterOutputs["features"]["searchBy"]>
   planVersion: RouterOutputs["planVersions"]["getById"]["planVersion"]
-  type: FeatureVersionType
 }
 
 export function FeatureList({
   featuresPromise,
   planVersion,
-  type,
 }: FeatureListProps) {
   const initialFeatures = use(featuresPromise)
   const [filter, setFilter] = useState("")
@@ -55,20 +50,12 @@ export function FeatureList({
     }
   )
 
-  const selectedFeaturesIds = planVersion.planFeatures
-    .filter((feature) =>
-      type === "addon" ? feature.type === "feature" : feature.type === "addon"
-    )
-    .map((feature) => feature.feature.id)
-
   const planFeatureIds = planVersionFeatureList.map(
     (feature) => feature.feature.id
   )
 
   const searchableFeatures = data.features.filter(
-    (feature) =>
-      !planFeatureIds.includes(feature.id) &&
-      !selectedFeaturesIds.includes(feature.id)
+    (feature) => !planFeatureIds.includes(feature.id)
   )
 
   return (
@@ -124,7 +111,6 @@ export function FeatureList({
                 featureId: feature.id,
                 featureType: "flat", // default type for featurePlan
                 feature: feature,
-                type: type,
                 order: 1024, // first element
                 // default config price
                 config: {

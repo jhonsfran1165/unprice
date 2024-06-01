@@ -31,7 +31,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import {
@@ -51,6 +50,7 @@ import {
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"
+import { InputWithAddons } from "~/components/test"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -90,14 +90,12 @@ export function SubscriptionForm({
     published: true,
   })
 
-  const subscriptionType = form.watch("type")
   const subscriptionPlanId = form.watch("planVersionId")
 
   useMemo(() => {
     if (selectedPlanVersion && subscriptionPlanId) {
       const { err, val: itemsConfig } = createDefaultSubscriptionConfig({
         planVersion: selectedPlanVersion,
-        type: subscriptionType === "plan" ? "feature" : "addon",
       })
 
       if (err) {
@@ -108,7 +106,7 @@ export function SubscriptionForm({
       items.replace(itemsConfig)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subscriptionPlanId, subscriptionType])
+  }, [subscriptionPlanId])
 
   const { data: paymentProviders } =
     api.customers.listPaymentProviders.useQuery({
@@ -202,7 +200,7 @@ export function SubscriptionForm({
                   onOpenChange={setSwitcherPlanOpen}
                 >
                   <PopoverTrigger asChild>
-                    <div className="px-2">
+                    <div className="">
                       <FormControl>
                         <Button
                           type="button"
@@ -269,7 +267,7 @@ export function SubscriptionForm({
             )}
           />
 
-          <div className="flex flex-col items-center justify-between gap-4 px-2 lg:flex-row">
+          <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
             <FormField
               control={form.control}
               name="type"
@@ -383,27 +381,16 @@ export function SubscriptionForm({
             render={({ field }) => (
               <FormItem className="space-y-2">
                 <FormLabel>Trial Days</FormLabel>
-                <div className="flex flex-col">
-                  <FormControl className="w-full lg:w-1/2">
-                    <div className="flex flex-row items-center">
-                      <div className="relative flex-1">
-                        <Input
-                          {...field}
-                          className="rounded-e-none rounded-s-md"
-                          value={field.value ?? ""}
-                        />
-                      </div>
-                      <div
-                        className={
-                          "bg-background-bg inline-flex h-9 items-center justify-center rounded-e-md rounded-s-none border border-l-0 px-3 text-sm font-medium"
-                        }
-                      >
-                        days
-                      </div>
-                    </div>
+                <div className="flex w-full flex-col lg:w-1/2">
+                  <FormControl className="w-full">
+                    <InputWithAddons
+                      {...field}
+                      trailing={"days"}
+                      value={field.value ?? ""}
+                    />
                   </FormControl>
 
-                  <FormMessage className="self-start px-2" />
+                  <FormMessage className="self-start pt-1" />
                 </div>
               </FormItem>
             )}

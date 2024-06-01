@@ -77,16 +77,13 @@ export default async function OverviewVersionPage({
 
                     <Suspense fallback={<div>loading</div>}>
                       <FeatureList
-                        type="feature"
                         planVersion={planVersion}
                         featuresPromise={api.features.listByActiveProject()}
                       />
                     </Suspense>
                   </>
                 }
-                planFeatureList={
-                  <PlanFeatureList type="feature" planVersion={planVersion} />
-                }
+                planFeatureList={<PlanFeatureList planVersion={planVersion} />}
               />
             </DragDrop>
           </Card>

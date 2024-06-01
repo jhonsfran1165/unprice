@@ -44,6 +44,8 @@ export const customers = pgTableProject(
   })
 )
 
+// TODO: add provider method here
+// TODO: add type to see if it's card or bank account
 export const customerPaymentProviders = pgTableProject(
   "customer_payment_providers",
   {
@@ -75,6 +77,11 @@ export const customerPaymentProviders = pgTableProject(
     ),
   })
 )
+
+// TODO: create provider payment method table
+// success_url
+// token
+// name
 
 export const customersRelations = relations(customers, ({ one, many }) => ({
   project: one(projects, {

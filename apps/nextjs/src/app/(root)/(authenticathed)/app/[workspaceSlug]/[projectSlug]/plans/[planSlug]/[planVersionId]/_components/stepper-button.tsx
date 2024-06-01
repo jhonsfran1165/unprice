@@ -20,17 +20,6 @@ export default function StepperButton({
 
   if (step === planVersionId) {
     return (
-      <SuperLink href={`${baseUrl}/addons`}>
-        <Button>
-          continue
-          <ChevronRight className="ml-1 h-4 w-4" />
-        </Button>
-      </SuperLink>
-    )
-  }
-
-  if (step === "addons") {
-    return (
       <SuperLink href={`${baseUrl}/review`}>
         <Button>
           continue
