@@ -123,7 +123,7 @@ export default async function PlanPage({
                               {version.title} - v{version.version}
                             </div>
                             {version.description && (
-                              <div className="hidden text-xs text-muted-foreground md:inline">
+                              <div className="text-muted-foreground hidden text-xs md:inline">
                                 {version.description.slice(0, 20) + "..."}
                               </div>
                             )}
@@ -267,7 +267,7 @@ export default async function PlanPage({
             </div>
           </CardContent>
           <CardFooter className="flex flex-row items-center border-t px-6 py-3">
-            <div className="text-xs text-muted-foreground">
+            <div className="text-muted-foreground text-xs">
               Updated{" "}
               <time dateTime="2023-11-23">10:45am, November 23, 2023</time>
             </div>

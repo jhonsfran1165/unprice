@@ -36,7 +36,7 @@ export function FeatureConfig({
                 </div>
               </div>
             </div>
-            <div className="ml-auto text-xs text-muted-foreground">
+            <div className="text-muted-foreground ml-auto text-xs">
               {activeFeature.id}
             </div>
           </div>
@@ -51,7 +51,7 @@ export function FeatureConfig({
           </div>
         </div>
       ) : (
-        <div className="p-8 text-center text-muted-foreground">
+        <div className="text-muted-foreground p-8 text-center">
           No feature selected
         </div>
       )}

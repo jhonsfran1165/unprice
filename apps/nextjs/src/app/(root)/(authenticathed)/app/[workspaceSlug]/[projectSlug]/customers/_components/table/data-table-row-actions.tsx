@@ -106,7 +106,7 @@ export function DataTableRowActions<TData>({
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="h-8 w-8 p-0 data-[state=open]:bg-accent"
+            className="data-[state=open]:bg-accent h-8 w-8 p-0"
           >
             <span className="sr-only">Open menu</span>
             <MoreHorizontal className="h-4 w-4" />

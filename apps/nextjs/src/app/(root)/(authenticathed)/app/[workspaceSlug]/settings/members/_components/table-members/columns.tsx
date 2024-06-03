@@ -56,7 +56,7 @@ export const columns: ColumnDef<Member>[] = [
         </Avatar>
         <div className="flex flex-col">
           <span>{row.original.user.name}</span>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-muted-foreground text-sm">
             {row.original.user.email}
           </span>
         </div>

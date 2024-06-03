@@ -55,19 +55,19 @@ export default function VersionOverview({
             <div className="font-semibold">Basic Information</div>
             <dl className="grid gap-3">
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-1 text-muted-foreground">
+                <dt className="text-muted-foreground flex items-center gap-1">
                   Currency
                 </dt>
                 <dd>{planVersion.currency}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-1 text-muted-foreground">
+                <dt className="text-muted-foreground flex items-center gap-1">
                   Type
                 </dt>
                 <dd>{planVersion.planType}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-1 text-muted-foreground">
+                <dt className="text-muted-foreground flex items-center gap-1">
                   Billing Period
                 </dt>
                 <dd>{planVersion.billingPeriod}</dd>
@@ -79,19 +79,19 @@ export default function VersionOverview({
             <div className="font-semibold">Billing Information</div>
             <dl className="grid gap-3">
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-1 text-muted-foreground">
+                <dt className="text-muted-foreground flex items-center gap-1">
                   Provider
                 </dt>
                 <dd>{planVersion.paymentProvider}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-1 text-muted-foreground">
+                <dt className="text-muted-foreground flex items-center gap-1">
                   Grace period
                 </dt>
                 <dd>{planVersion.gracePeriod}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-1 text-muted-foreground">
+                <dt className="text-muted-foreground flex items-center gap-1">
                   start Cycle
                 </dt>
                 <dd>{planVersion.startCycle}</dd>
@@ -100,7 +100,7 @@ export default function VersionOverview({
           </div>
         </CardContent>
         <CardFooter className="flex flex-row items-center border-t px-4 py-3">
-          <div className="text-xs text-muted-foreground">{planVersion.id}</div>
+          <div className="text-muted-foreground text-xs">{planVersion.id}</div>
         </CardFooter>
       </Card>
       {planVersion.status === "published" && <BannerPublishedVersion />}

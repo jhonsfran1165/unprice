@@ -39,7 +39,7 @@ export default function PaymentMethodsFormField({
         control={form.control}
         name="metadata.defaultPaymentMethodId"
         render={({ field }) => (
-          <FormItem className="w-full space-y-1 ">
+          <FormItem className="w-full space-y-1">
             <FormLabel>Payment information</FormLabel>
             <FormDescription>
               Select the payment method you want to use for this subscription.

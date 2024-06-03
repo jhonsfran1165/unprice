@@ -197,7 +197,7 @@ export function FeatureConfigForm({
                 All units price based on final tier reached. Needs a record for
                 Stripe to track customer service usage.
               </div>
-              <div className="flex flex-col gap-1  px-2">
+              <div className="flex flex-col gap-1 px-2">
                 <FormField
                   control={form.control}
                   name="featureType"

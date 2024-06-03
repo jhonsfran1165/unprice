@@ -43,7 +43,7 @@ export const columns: ColumnDef<Member>[] = [
       <DataTableColumnHeader column={column} title="Email" />
     ),
     cell: ({ row }) => (
-      <div className="text-sm text-muted-foreground">{row.original.email}</div>
+      <div className="text-muted-foreground text-sm">{row.original.email}</div>
     ),
   },
   {

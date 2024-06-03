@@ -18,7 +18,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
             }}
           />
 
-          <div className="to-background/60 md:to-background/40 absolute inset-0 bg-gradient-to-t from-background" />
+          <div className="to-background/60 md:to-background/40 from-background absolute inset-0 bg-gradient-to-t" />
           <Link
             href="/"
             className="absolute left-8 top-8 z-20 flex items-center text-lg font-bold tracking-tight"

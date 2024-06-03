@@ -49,12 +49,12 @@ export default function Done(props: { workspaceSlug: string }) {
           <h1 className="text-2xl font-bold transition-colors sm:text-3xl">
             You are all set!
           </h1>
-          <p className="max-w-md text-muted-foreground transition-colors sm:text-lg">
+          <p className="text-muted-foreground max-w-md transition-colors sm:text-lg">
             Congratulations, you have successfully created your first project.
             Check out the <Link href="/docs">docs</Link> to learn more on how to
             use the platform.
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             You will be redirected to your project momentarily.
           </p>
         </m.div>

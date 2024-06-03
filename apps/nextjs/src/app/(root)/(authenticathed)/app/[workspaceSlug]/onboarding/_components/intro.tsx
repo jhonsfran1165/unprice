@@ -48,7 +48,7 @@ export default function Intro() {
               <Balancer>Welcome to Acme Corp</Balancer>
             </m.h1>
             <m.p
-              className="max-w-md text-muted-foreground transition-colors sm:text-lg"
+              className="text-muted-foreground max-w-md transition-colors sm:text-lg"
               variants={{
                 hidden: { opacity: 0, y: 50 },
                 show: {

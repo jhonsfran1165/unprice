@@ -13,7 +13,7 @@ export default function NotFound() {
       </EmptyPlaceholder.Description>
       <div className="flex flex-col items-center justify-center gap-2 md:flex-row">
         <Link href="/">
-          <Button variant="secondary" className="w-full items-center gap-2 ">
+          <Button variant="secondary" className="w-full items-center gap-2">
             Go Back
           </Button>
         </Link>

@@ -30,13 +30,13 @@ export default function Home() {
           </p>
         </a> */}
         <h1
-          className="animate-fade-up bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-center text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm md:text-7xl/[5rem]"
+          className="animate-fade-up from-foreground to-muted-foreground bg-gradient-to-br bg-clip-text text-center text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm md:text-7xl/[5rem]"
           style={{ animationDelay: "0.20s", animationFillMode: "forwards" }}
         >
           <Balancer>Your all-in-one, enterprise ready starting point</Balancer>
         </h1>
         <p
-          className="text-muted-foreground/80 mt-6 animate-fade-up text-center opacity-0 md:text-xl"
+          className="text-muted-foreground/80 animate-fade-up mt-6 text-center opacity-0 md:text-xl"
           style={{ animationDelay: "0.30s", animationFillMode: "forwards" }}
         >
           <Balancer>
@@ -46,7 +46,7 @@ export default function Home() {
           </Balancer>
         </p>
         <div
-          className="mx-auto mt-6 flex animate-fade-up items-center justify-center space-x-5 opacity-0"
+          className="animate-fade-up mx-auto mt-6 flex items-center justify-center space-x-5 opacity-0"
           style={{ animationDelay: "0.40s", animationFillMode: "forwards" }}
         >
           <a
@@ -60,7 +60,7 @@ export default function Home() {
           </a>
         </div>
       </div>
-      <div className="my-16 w-full max-w-screen-lg animate-fade-up gap-5 border-t p-5 xl:px-0">
+      <div className="animate-fade-up my-16 w-full max-w-screen-lg gap-5 border-t p-5 xl:px-0">
         <h2 className="pt-4 text-center text-3xl font-bold md:text-4xl">
           What&apos;s included?
         </h2>

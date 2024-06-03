@@ -1,1 +1,770 @@
-{"openapi":"3.0.3","info":{"title":"tRPC OpenAPI","description":"API for Unprice","version":"1.0.0"},"servers":[{"url":"http://app.localhost:3000/api/trpc"}],"paths":{"/edge/customers.create":{"post":{"operationId":"customers-create","security":[{"Authorization":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string","minLength":3,"format":"email"},"name":{"type":"string","minLength":3},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"metadataPaymentProviderSchema":{"type":"object","required":["stripe","lemonsqueezy"],"properties":{"stripe":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false},"lemonsqueezy":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false}},"additionalProperties":false},"externalId":{"type":"string"}},"required":["metadataPaymentProviderSchema"],"additionalProperties":false,"nullable":true}},"required":["email","name"],"additionalProperties":false}}}},"parameters":[],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"customer":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"metadataPaymentProviderSchema":{"type":"object","required":["stripe","lemonsqueezy"],"properties":{"stripe":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false},"lemonsqueezy":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false}},"additionalProperties":false},"externalId":{"type":"string"}},"required":["metadataPaymentProviderSchema"],"additionalProperties":false,"nullable":true}},"required":["id","projectId","createdAt","updatedAt","email","name","description","metadata"],"additionalProperties":false}},"required":["customer"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.remove":{"post":{"operationId":"customers-remove","security":[{"Authorization":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"id":{"type":"string"}},"required":["id"],"additionalProperties":false}}}},"parameters":[],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"customer":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"metadataPaymentProviderSchema":{"type":"object","required":["stripe","lemonsqueezy"],"properties":{"stripe":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false},"lemonsqueezy":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false}},"additionalProperties":false},"externalId":{"type":"string"}},"required":["metadataPaymentProviderSchema"],"additionalProperties":false,"nullable":true}},"required":["id","projectId","createdAt","updatedAt","email","name","description","metadata"],"additionalProperties":false}},"required":["customer"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.update":{"post":{"operationId":"customers-update","security":[{"Authorization":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"email":{"type":"string"},"metadata":{"type":"object","properties":{"metadataPaymentProviderSchema":{"type":"object","required":["stripe","lemonsqueezy"],"properties":{"stripe":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false},"lemonsqueezy":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false}},"additionalProperties":false},"externalId":{"type":"string"}},"required":["metadataPaymentProviderSchema"],"additionalProperties":false,"nullable":true}},"required":["id","name","email"],"additionalProperties":false}}}},"parameters":[],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"customer":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"metadataPaymentProviderSchema":{"type":"object","required":["stripe","lemonsqueezy"],"properties":{"stripe":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false},"lemonsqueezy":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false}},"additionalProperties":false},"externalId":{"type":"string"}},"required":["metadataPaymentProviderSchema"],"additionalProperties":false,"nullable":true}},"required":["id","projectId","createdAt","updatedAt","email","name","description","metadata"],"additionalProperties":false}},"required":["customer"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.exist":{"post":{"operationId":"customers-exist","security":[{"Authorization":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"email":{"type":"string"}},"required":["email"],"additionalProperties":false}}}},"parameters":[],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"exist":{"type":"boolean"}},"required":["exist"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.getByEmail":{"post":{"operationId":"customers-getByEmail","security":[{"Authorization":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"email":{"type":"string"}},"required":["email"],"additionalProperties":false}}}},"parameters":[],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"customer":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"metadataPaymentProviderSchema":{"type":"object","required":["stripe","lemonsqueezy"],"properties":{"stripe":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false},"lemonsqueezy":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false}},"additionalProperties":false},"externalId":{"type":"string"}},"required":["metadataPaymentProviderSchema"],"additionalProperties":false,"nullable":true}},"required":["id","projectId","createdAt","updatedAt","email","name","description","metadata"],"additionalProperties":false}},"required":["customer"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.getById":{"get":{"operationId":"customers-getById","security":[{"Authorization":[]}],"parameters":[{"name":"id","in":"query","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"customer":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"metadataPaymentProviderSchema":{"type":"object","required":["stripe","lemonsqueezy"],"properties":{"stripe":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false},"lemonsqueezy":{"type":"object","properties":{"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false}},"additionalProperties":false},"externalId":{"type":"string"}},"required":["metadataPaymentProviderSchema"],"additionalProperties":false,"nullable":true}},"required":["id","projectId","createdAt","updatedAt","email","name","description","metadata"],"additionalProperties":false}},"required":["customer"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.can":{"get":{"operationId":"customers-can","security":[{"Authorization":[]}],"parameters":[{"name":"customerId","in":"query","required":true,"schema":{"type":"string"}},{"name":"featureSlug","in":"query","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"access":{"type":"boolean"},"deniedReason":{"type":"string","enum":["RATE_LIMITED","USAGE_EXCEEDED","FEATURE_NOT_FOUND_IN_SUBSCRIPTION"]},"currentUsage":{"type":"number"},"limit":{"type":"number"}},"required":["access"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.reportUsage":{"get":{"operationId":"customers-reportUsage","security":[{"Authorization":[]}],"parameters":[{"name":"customerId","in":"query","required":true,"schema":{"type":"string"}},{"name":"featureSlug","in":"query","required":true,"schema":{"type":"string"}},{"name":"usage","in":"query","required":true,"schema":{"type":"number"}}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"success":{"type":"boolean"}},"required":["success"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}}},"components":{"securitySchemes":{"Authorization":{"type":"http","scheme":"bearer"}},"responses":{"error":{"description":"Error response","content":{"application/json":{"schema":{"type":"object","properties":{"message":{"type":"string"},"code":{"type":"string"},"issues":{"type":"array","items":{"type":"object","properties":{"message":{"type":"string"}},"required":["message"],"additionalProperties":false}}},"required":["message","code"],"additionalProperties":false}}}}},"schemas":{}},"tags":[{"name":"unprice","description":"Operations related to unprice"}],"externalDocs":{"url":"http://example.com/docs"},"x-speakeasy-retries":{"strategy":"backoff","backoff":{"initialInterval":500,"maxInterval":60000,"maxElapsedTime":3600000,"exponent":1.5},"statusCodes":["5XX"],"retryConnectionErrors":true}}
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "tRPC OpenAPI",
+    "description": "API for Unprice",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "http://app.localhost:3000/api/trpc" }],
+  "paths": {
+    "/edge/customers.create": {
+      "post": {
+        "operationId": "customers-create",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "projectId": { "type": "string" },
+                  "createdAt": { "type": "string", "format": "date-time" },
+                  "updatedAt": { "type": "string", "format": "date-time" },
+                  "email": {
+                    "type": "string",
+                    "minLength": 3,
+                    "format": "email"
+                  },
+                  "name": { "type": "string", "minLength": 3 },
+                  "description": { "type": "string", "nullable": true },
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "metadataPaymentProviderSchema": {
+                        "type": "object",
+                        "required": ["stripe", "lemonsqueezy"],
+                        "properties": {
+                          "stripe": {
+                            "type": "object",
+                            "properties": {
+                              "customerId": { "type": "string" },
+                              "defaultPaymentMethodId": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                          },
+                          "lemonsqueezy": {
+                            "type": "object",
+                            "properties": {
+                              "customerId": { "type": "string" },
+                              "defaultPaymentMethodId": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      "externalId": { "type": "string" }
+                    },
+                    "required": ["metadataPaymentProviderSchema"],
+                    "additionalProperties": false,
+                    "nullable": true
+                  }
+                },
+                "required": ["email", "name"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "projectId": { "type": "string" },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "metadataPaymentProviderSchema": {
+                              "type": "object",
+                              "required": ["stripe", "lemonsqueezy"],
+                              "properties": {
+                                "stripe": {
+                                  "type": "object",
+                                  "properties": {
+                                    "customerId": { "type": "string" },
+                                    "defaultPaymentMethodId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                },
+                                "lemonsqueezy": {
+                                  "type": "object",
+                                  "properties": {
+                                    "customerId": { "type": "string" },
+                                    "defaultPaymentMethodId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            "externalId": { "type": "string" }
+                          },
+                          "required": ["metadataPaymentProviderSchema"],
+                          "additionalProperties": false,
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAt",
+                        "updatedAt",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.remove": {
+      "post": {
+        "operationId": "customers-remove",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "id": { "type": "string" } },
+                "required": ["id"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "projectId": { "type": "string" },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "metadataPaymentProviderSchema": {
+                              "type": "object",
+                              "required": ["stripe", "lemonsqueezy"],
+                              "properties": {
+                                "stripe": {
+                                  "type": "object",
+                                  "properties": {
+                                    "customerId": { "type": "string" },
+                                    "defaultPaymentMethodId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                },
+                                "lemonsqueezy": {
+                                  "type": "object",
+                                  "properties": {
+                                    "customerId": { "type": "string" },
+                                    "defaultPaymentMethodId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            "externalId": { "type": "string" }
+                          },
+                          "required": ["metadataPaymentProviderSchema"],
+                          "additionalProperties": false,
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAt",
+                        "updatedAt",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.update": {
+      "post": {
+        "operationId": "customers-update",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "description": { "type": "string", "nullable": true },
+                  "email": { "type": "string" },
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "metadataPaymentProviderSchema": {
+                        "type": "object",
+                        "required": ["stripe", "lemonsqueezy"],
+                        "properties": {
+                          "stripe": {
+                            "type": "object",
+                            "properties": {
+                              "customerId": { "type": "string" },
+                              "defaultPaymentMethodId": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                          },
+                          "lemonsqueezy": {
+                            "type": "object",
+                            "properties": {
+                              "customerId": { "type": "string" },
+                              "defaultPaymentMethodId": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      "externalId": { "type": "string" }
+                    },
+                    "required": ["metadataPaymentProviderSchema"],
+                    "additionalProperties": false,
+                    "nullable": true
+                  }
+                },
+                "required": ["id", "name", "email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "projectId": { "type": "string" },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "metadataPaymentProviderSchema": {
+                              "type": "object",
+                              "required": ["stripe", "lemonsqueezy"],
+                              "properties": {
+                                "stripe": {
+                                  "type": "object",
+                                  "properties": {
+                                    "customerId": { "type": "string" },
+                                    "defaultPaymentMethodId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                },
+                                "lemonsqueezy": {
+                                  "type": "object",
+                                  "properties": {
+                                    "customerId": { "type": "string" },
+                                    "defaultPaymentMethodId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            "externalId": { "type": "string" }
+                          },
+                          "required": ["metadataPaymentProviderSchema"],
+                          "additionalProperties": false,
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAt",
+                        "updatedAt",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.exist": {
+      "post": {
+        "operationId": "customers-exist",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "email": { "type": "string" } },
+                "required": ["email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "exist": { "type": "boolean" } },
+                  "required": ["exist"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.getByEmail": {
+      "post": {
+        "operationId": "customers-getByEmail",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "email": { "type": "string" } },
+                "required": ["email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "projectId": { "type": "string" },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "metadataPaymentProviderSchema": {
+                              "type": "object",
+                              "required": ["stripe", "lemonsqueezy"],
+                              "properties": {
+                                "stripe": {
+                                  "type": "object",
+                                  "properties": {
+                                    "customerId": { "type": "string" },
+                                    "defaultPaymentMethodId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                },
+                                "lemonsqueezy": {
+                                  "type": "object",
+                                  "properties": {
+                                    "customerId": { "type": "string" },
+                                    "defaultPaymentMethodId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            "externalId": { "type": "string" }
+                          },
+                          "required": ["metadataPaymentProviderSchema"],
+                          "additionalProperties": false,
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAt",
+                        "updatedAt",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.getById": {
+      "get": {
+        "operationId": "customers-getById",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "projectId": { "type": "string" },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "metadataPaymentProviderSchema": {
+                              "type": "object",
+                              "required": ["stripe", "lemonsqueezy"],
+                              "properties": {
+                                "stripe": {
+                                  "type": "object",
+                                  "properties": {
+                                    "customerId": { "type": "string" },
+                                    "defaultPaymentMethodId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                },
+                                "lemonsqueezy": {
+                                  "type": "object",
+                                  "properties": {
+                                    "customerId": { "type": "string" },
+                                    "defaultPaymentMethodId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            "externalId": { "type": "string" }
+                          },
+                          "required": ["metadataPaymentProviderSchema"],
+                          "additionalProperties": false,
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAt",
+                        "updatedAt",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.can": {
+      "get": {
+        "operationId": "customers-can",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "featureSlug",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access": { "type": "boolean" },
+                    "deniedReason": {
+                      "type": "string",
+                      "enum": [
+                        "RATE_LIMITED",
+                        "USAGE_EXCEEDED",
+                        "FEATURE_NOT_FOUND_IN_SUBSCRIPTION"
+                      ]
+                    },
+                    "currentUsage": { "type": "number" },
+                    "limit": { "type": "number" }
+                  },
+                  "required": ["access"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.reportUsage": {
+      "get": {
+        "operationId": "customers-reportUsage",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "featureSlug",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "usage",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "success": { "type": "boolean" } },
+                  "required": ["success"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Authorization": { "type": "http", "scheme": "bearer" }
+    },
+    "responses": {
+      "error": {
+        "description": "Error response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "code": { "type": "string" },
+                "issues": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": { "message": { "type": "string" } },
+                    "required": ["message"],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": ["message", "code"],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "schemas": {}
+  },
+  "tags": [
+    { "name": "unprice", "description": "Operations related to unprice" }
+  ],
+  "externalDocs": { "url": "http://example.com/docs" },
+  "x-speakeasy-retries": {
+    "strategy": "backoff",
+    "backoff": {
+      "initialInterval": 500,
+      "maxInterval": 60000,
+      "maxElapsedTime": 3600000,
+      "exponent": 1.5
+    },
+    "statusCodes": ["5XX"],
+    "retryConnectionErrors": true
+  }
+}

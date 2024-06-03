@@ -68,7 +68,7 @@ export function DeleteProject({
               <DialogTitle>{title}</DialogTitle>
               <DialogDescription>{description}</DialogDescription>
             </DialogHeader>
-            <div className="flex items-center font-bold text-destructive">
+            <div className="text-destructive flex items-center font-bold">
               <Warning className="mr-2 h-6 w-6" />
               <p>This action can not be reverted</p>
             </div>

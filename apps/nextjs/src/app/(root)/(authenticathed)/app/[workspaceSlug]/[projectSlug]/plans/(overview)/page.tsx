@@ -43,7 +43,7 @@ export default async function PlansPage(props: {
               <h2 className="text-2xl font-bold">
                 This project has no plans yet
               </h2>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-muted-foreground text-lg">
                 Create your first plan to get started
               </p>
             </Balancer>

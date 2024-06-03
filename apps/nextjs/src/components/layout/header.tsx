@@ -17,12 +17,12 @@ const ThemeToggle = dynamic(() => import("~/components/layout/theme-toggle"), {
 
 export default function Header({ children }: { children?: React.ReactNode }) {
   return (
-    <header className="top-0 mx-auto w-full border-b bg-background-base px-3 shadow-sm">
+    <header className="bg-background-base top-0 mx-auto w-full border-b px-3 shadow-sm">
       <div className="flex h-14 items-center space-x-2 sm:justify-between sm:space-x-0">
         <div className="flex items-center justify-start">
           <Logo />
           {children && (
-            <span className="ml-6 mr-4 text-lg font-bold text-muted-foreground">
+            <span className="text-muted-foreground ml-6 mr-4 text-lg font-bold">
               /
             </span>
           )}

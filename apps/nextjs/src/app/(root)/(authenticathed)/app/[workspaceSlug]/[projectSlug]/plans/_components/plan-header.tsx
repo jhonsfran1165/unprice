@@ -44,7 +44,7 @@ export default function PlanHeader(props: {
                   danger: !plan.active,
                 })}
               >
-                <span className="flex h-2 w-2 rounded-full bg-success-solid" />
+                <span className="bg-success-solid flex h-2 w-2 rounded-full" />
                 <span className="ml-1">
                   {plan.active ? "active" : "inactive"}
                 </span>
@@ -61,7 +61,7 @@ export default function PlanHeader(props: {
         </div>
 
         <div className="flex items-center px-6">
-          <div className="button-primary flex items-center space-x-1 rounded-md ">
+          <div className="button-primary flex items-center space-x-1 rounded-md">
             <div className="sm:col-span-full">
               <PlanVersionDialog
                 defaultValues={{

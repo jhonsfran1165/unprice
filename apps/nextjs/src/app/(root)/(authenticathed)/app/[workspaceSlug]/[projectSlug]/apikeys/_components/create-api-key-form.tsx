@@ -128,7 +128,7 @@ export default function CreateApiKeyForm(props: {
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting && (
             <div className="mr-1" role="status">
-              <div className="h-3 w-3 animate-spin rounded-full border-2 border-background border-r-transparent" />
+              <div className="border-background h-3 w-3 animate-spin rounded-full border-2 border-r-transparent" />
             </div>
           )}
           Create Key

@@ -17,7 +17,7 @@ import { navItems, siteConfig } from "~/constants/layout"
 export default function MarketingLayout(props: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <nav className="z-50 flex h-16 items-center border-b bg-background">
+      <nav className="bg-background z-50 flex h-16 items-center border-b">
         <MaxWidthWrapper className="flex max-w-screen-2xl">
           <div className="mr-8 hidden items-center md:flex">
             <Logo className="mr-2 h-6 w-6" />
@@ -46,7 +46,7 @@ export default function MarketingLayout(props: { children: ReactNode }) {
                       key={item.href}
                       href={item.href}
                       // className="mt-2 flex items-center text-lg font-semibold sm:text-sm"
-                      className="flex py-1 text-base font-medium text-muted-foreground transition-colors hover:text-primary"
+                      className="text-muted-foreground hover:text-primary flex py-1 text-base font-medium transition-colors"
                     >
                       {item.title}
                     </Link>

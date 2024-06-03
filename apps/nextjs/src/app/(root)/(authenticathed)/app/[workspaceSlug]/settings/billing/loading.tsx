@@ -13,7 +13,7 @@ export const runtime = "edge"
 export default function WorkSpaceSettingsDangerLoading() {
   return (
     <>
-      <Card className="animate-pulse bg-muted">
+      <Card className="bg-muted animate-pulse">
         <CardHeader>
           <CardTitle>Subscription</CardTitle>
         </CardHeader>
@@ -25,7 +25,7 @@ export default function WorkSpaceSettingsDangerLoading() {
           <Button className="text-transparent">Manage Subscription</Button>
         </CardFooter>
       </Card>
-      <Card className="mt-4 animate-pulse bg-muted">
+      <Card className="bg-muted mt-4 animate-pulse">
         <CardHeader>
           <CardTitle>Usage</CardTitle>
         </CardHeader>

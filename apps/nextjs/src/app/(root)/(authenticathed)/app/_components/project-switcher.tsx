@@ -37,7 +37,7 @@ export function ProjectSwitcher({
 
   return (
     <>
-      <span className="mx-4 hidden text-lg font-bold text-muted-foreground md:block">
+      <span className="text-muted-foreground mx-4 hidden text-lg font-bold md:block">
         /
       </span>
 

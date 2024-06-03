@@ -111,7 +111,7 @@ export default function NewTeamDialog(props: { closeDialog: () => void }) {
                   <FormLabel>Subscription plan *</FormLabel>
                   <Link
                     href="/pricing"
-                    className="text-xs text-muted-foreground hover:underline"
+                    className="text-muted-foreground text-xs hover:underline"
                   >
                     What&apos;s included in each plan?
                   </Link>

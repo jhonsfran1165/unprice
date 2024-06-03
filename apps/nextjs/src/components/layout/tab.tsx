@@ -50,9 +50,9 @@ export const Tab = ({
           >
             <p
               className={cn(
-                "flex items-center justify-center whitespace-nowrap text-sm text-background-text",
+                "text-background-text flex items-center justify-center whitespace-nowrap text-sm",
                 {
-                  "opacity-50 hover:text-background-solid": route.disabled,
+                  "hover:text-background-solid opacity-50": route.disabled,
                   "hover:text-background-textContrast": !active,
                   "text-primary-text dark:text-primary-solid": active,
                 }

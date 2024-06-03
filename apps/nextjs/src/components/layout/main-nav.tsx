@@ -12,7 +12,7 @@ export function MainNav({ ...props }: React.HTMLAttributes<HTMLElement>) {
         <Link
           href={item.href}
           key={`${item.href}-${idx}`}
-          className="text-sm font-medium transition-colors hover:text-background-textContrast"
+          className="hover:text-background-textContrast text-sm font-medium transition-colors"
         >
           {item.title}
         </Link>

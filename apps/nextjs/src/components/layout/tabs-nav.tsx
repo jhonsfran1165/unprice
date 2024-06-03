@@ -17,7 +17,7 @@ export default function TabsNav(props: {
   return (
     <div
       className={cn(
-        "border-t-1 sticky inset-x-0 left-0 top-0 z-30 block w-12 items-center justify-start border-r border-t-primary-solid bg-background-bgSubtle px-2 transition-all",
+        "border-t-1 border-t-primary-solid bg-background-bgSubtle sticky inset-x-0 left-0 top-0 z-30 block w-12 items-center justify-start border-r px-2 transition-all",
         props.className
       )}
     >

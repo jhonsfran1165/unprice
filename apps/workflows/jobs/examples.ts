@@ -1,5 +1,5 @@
-import { eventTrigger } from "@trigger.dev/sdk";
-import { client } from "@/trigger";
+import { client } from "@/trigger"
+import { eventTrigger } from "@trigger.dev/sdk"
 
 // Your first job
 // This Job will be triggered by an event, log a joke to the console, and then wait 5 seconds before logging the punchline.
@@ -17,14 +17,16 @@ client.defineJob({
     const result = await io.runTask("generate-random-number", async () => {
       return {
         num: Math.floor(Math.random() * 10000),
-      };
-    });
+      }
+    })
 
     // Use the random number in a joke and log it to the console.
-    await io.logger.info(`Why was the number ${result.num} afraid of the number 7?`);
+    await io.logger.info(
+      `Why was the number ${result.num} afraid of the number 7?`
+    )
 
     // Wait for 5 seconds, the second parameter is the number of seconds to wait, you can add delays of up to a year.
-    await io.wait("Wait 5 seconds for the punchline...", 5);
+    await io.wait("Wait 5 seconds for the punchline...", 5)
 
     // Use a Task to display the answer. Tasks are important to use in all Jobs as they allow your Runs to resume again after e.g. a serverless function timeout. Learn more about Tasks in the docs: https://trigger.dev/docs/documentation/concepts/tasks
     await io.runTask(
@@ -32,13 +34,13 @@ client.defineJob({
       async () => {
         return {
           foo: "bar",
-        };
+        }
       },
       { name: `Answer: Because 7,8,9! And ${result.num} was next 🤦` }
-    );
+    )
     await io.logger.info(
       "✨ Congratulations, You just ran your first successful Trigger.dev Job! ✨"
-    );
+    )
     // To learn how to write much more complex (and probably funnier) Jobs, check out our docs: https://trigger.dev/docs/documentation/guides/create-a-job
   },
-});
+})

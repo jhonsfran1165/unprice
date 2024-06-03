@@ -134,7 +134,7 @@ export const columns: ColumnDef<ApiKey>[] = [
 
       if (row.original.revokedAt !== null) {
         return (
-          <div className="flex flex-col text-destructive">
+          <div className="text-destructive flex flex-col">
             <span>Revoked</span>
             <span>{formatDate(row.original.revokedAt)}</span>
           </div>
@@ -147,7 +147,7 @@ export const columns: ColumnDef<ApiKey>[] = [
 
       if (expiresAt < new Date()) {
         return (
-          <div className="flex flex-col text-destructive">
+          <div className="text-destructive flex flex-col">
             <span>Expired</span>
             <span>{formatDate(expiresAt)}</span>
           </div>

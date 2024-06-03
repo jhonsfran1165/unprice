@@ -53,7 +53,7 @@ export default async function UserNav() {
             <p className="truncate text-sm font-medium leading-none">
               {user.name ?? user.email}
             </p>
-            <p className="truncate text-xs leading-none text-muted-foreground">
+            <p className="text-muted-foreground truncate text-xs leading-none">
               {user.email}
             </p>
           </div>

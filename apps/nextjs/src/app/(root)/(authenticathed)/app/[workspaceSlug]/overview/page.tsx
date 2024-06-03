@@ -39,7 +39,7 @@ export default async function WorkspaceOverviewPage(props: {
               <h2 className="text-2xl font-bold">
                 This workspace has no projects yet
               </h2>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-muted-foreground text-lg">
                 Create your first project to get started
               </p>
             </Balancer>

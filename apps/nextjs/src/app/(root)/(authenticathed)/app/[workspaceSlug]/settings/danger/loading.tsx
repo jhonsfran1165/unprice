@@ -9,7 +9,7 @@ import {
 
 export default function WorkSpaceSettingsDangerLoading() {
   return (
-    <Card className="animate-pulse bg-muted">
+    <Card className="bg-muted animate-pulse">
       <CardHeader>
         <CardTitle>Delete</CardTitle>
         <CardDescription>

@@ -18,7 +18,7 @@ export const InlineSnippet = ({
   return (
     <span
       className={cn(
-        "inline-block rounded-md bg-muted px-1 py-0.5 font-mono",
+        "bg-muted inline-block rounded-md px-1 py-0.5 font-mono",
         className
       )}
     >
@@ -60,7 +60,7 @@ export default function DomainConfiguration({
             <InlineSnippet>{domainJson.apexName}</InlineSnippet> to prove
             ownership of <InlineSnippet>{domainJson.name}</InlineSnippet>:
           </p>
-          <div className="my-5 flex items-start justify-start space-x-10 rounded-md bg-muted p-2">
+          <div className="bg-muted my-5 flex items-start justify-start space-x-10 rounded-md p-2">
             <div>
               <p className="text-sm font-bold">Type</p>
               <p className="mt-2 font-mono text-sm">{txtVerification.type}</p>
@@ -83,7 +83,7 @@ export default function DomainConfiguration({
               </p>
             </div>
           </div>
-          <p className="text-sm font-normal text-muted-foreground">
+          <p className="text-muted-foreground text-sm font-normal">
             <b>Warning:</b> if you are using this domain for another site,
             setting this TXT record will transfer domain ownership away from
             that site and break it. Please exercise caution when setting this
@@ -111,7 +111,7 @@ export default function DomainConfiguration({
                   ), set the following A record on your DNS provider to
                   continue:
                 </p>
-                <div className="flex items-center justify-start space-x-10 rounded-md bg-muted p-2">
+                <div className="bg-muted flex items-center justify-start space-x-10 rounded-md p-2">
                   <div>
                     <p className="text-sm font-bold">Type</p>
                     <p className="mt-2 font-mono text-sm">A</p>
@@ -139,7 +139,7 @@ export default function DomainConfiguration({
                   ), set the following A record on your DNS provider to
                   continue:
                 </p>
-                <div className="flex items-center justify-start space-x-10 rounded-md bg-muted p-2">
+                <div className="bg-muted flex items-center justify-start space-x-10 rounded-md p-2">
                   <div>
                     <p className="text-sm font-bold">Type</p>
                     <p className="mt-2 font-mono text-sm">CNAME</p>
@@ -180,12 +180,12 @@ const DomainConfigSkeleton = () => (
     <div className="mb-4 flex items-center space-x-2">
       <Skeleton className="h-6 w-[200px]" />
     </div>
-    <div className="my-3 flex flex-col space-y-4 text-left ">
+    <div className="my-3 flex flex-col space-y-4 text-left">
       <Skeleton className="h-6 w-[250px]" />
       <div className="my-5 text-sm">
         <Skeleton className="h-4 w-full" />
       </div>
-      <Skeleton className="h-[48px] w-full space-x-10 rounded-md  bg-muted p-2" />
+      <Skeleton className="bg-muted h-[48px] w-full space-x-10 rounded-md p-2" />
       <Skeleton className="h-4 w-full" />
     </div>
   </div>

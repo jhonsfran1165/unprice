@@ -17,7 +17,7 @@ export default function HeaderTab({
         <h1 className="text-lg font-semibold leading-none tracking-tight">
           {title}
         </h1>
-        <h4 className="text-sm text-muted-foreground">{description}</h4>
+        <h4 className="text-muted-foreground text-sm">{description}</h4>
       </div>
       <div>{action}</div>
     </div>

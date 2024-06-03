@@ -45,7 +45,7 @@ export default function CustomerHeader(props: {
                   danger: !customer.active,
                 })}
               >
-                <span className="flex h-2 w-2 rounded-full bg-success-solid" />
+                <span className="bg-success-solid flex h-2 w-2 rounded-full" />
                 <span className="ml-1">
                   {customer.active ? "active" : "inactive"}
                 </span>
@@ -55,7 +55,7 @@ export default function CustomerHeader(props: {
         </div>
 
         <div className="flex items-center px-6">
-          <div className="button-primary flex items-center space-x-1 rounded-md ">
+          <div className="button-primary flex items-center space-x-1 rounded-md">
             <div className="sm:col-span-full">
               <SubscriptionSheet
                 defaultValues={{

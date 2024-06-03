@@ -13,11 +13,11 @@ export function WorkspaceSwitcherSkeleton() {
     >
       <Avatar className="mr-2 h-5 w-5">
         <AvatarFallback>
-          <Skeleton className="aspect-square h-full w-full bg-background-bgHover" />
+          <Skeleton className="bg-background-bgHover aspect-square h-full w-full" />
         </AvatarFallback>
       </Avatar>
-      <Skeleton className="h-[20px] w-full bg-background-bgHover" />
-      <Skeleton className="ml-2 h-4 w-4 shrink-0 bg-background-bgHover" />
+      <Skeleton className="bg-background-bgHover h-[20px] w-full" />
+      <Skeleton className="bg-background-bgHover ml-2 h-4 w-4 shrink-0" />
     </Button>
   )
 }
