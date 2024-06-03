@@ -8,6 +8,7 @@ import {
   User2,
 } from "lucide-react"
 
+import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
@@ -28,7 +29,6 @@ import {
 } from "@builderai/ui/dropdown-menu"
 
 import { PropagationStopper } from "~/components/prevent-propagation"
-import type { RouterOutputs } from "~/trpc/shared"
 import { PlanForm } from "../../_components/plan-form"
 
 export function PlanCard(props: {

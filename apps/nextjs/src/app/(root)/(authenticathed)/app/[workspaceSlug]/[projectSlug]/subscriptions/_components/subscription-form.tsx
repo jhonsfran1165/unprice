@@ -122,7 +122,7 @@ export function SubscriptionForm({
     },
   })
 
-  const updateCustomer = api.customers.update.useMutation({
+  const _updateCustomer = api.customers.update.useMutation({
     onSuccess: ({ customer }) => {
       form.reset(customer)
       toastAction("updated")

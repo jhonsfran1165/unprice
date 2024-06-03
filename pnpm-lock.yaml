@@ -780,7 +780,7 @@ importers:
         specifier: 0.1.0
         version: link:../../tooling/prettier
       '@builderai/tailwind-config':
-        specifier: 0.1.0
+        specifier: workspace:^
         version: link:../../tooling/tailwind
       '@builderai/tsconfig':
         specifier: 0.1.0

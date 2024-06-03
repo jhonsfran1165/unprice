@@ -6,8 +6,8 @@ export function parseZodErrorMessage(err: z.ZodError): string {
       message: string;
       path: Array<string>;
     }>;
-    const { path, message } = arr[0];
-    return `${path.join(".")}: ${message}`;
+    const data = arr[0];
+    return `${data?.path.join(".")}: ${data?.message}`;
   } catch {
     return err.message;
   }

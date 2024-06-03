@@ -7,10 +7,9 @@ import { Checkbox } from "@builderai/ui/checkbox"
 
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { formatDate } from "~/lib/dates"
-import { DataTableRowActions } from "./data-table-row-actions"
 
 export const columns: ColumnDef<
-  RouterOutputs["subscriptions"]["listByPlan"]["subscriptions"][number]
+  RouterOutputs["subscriptions"]["listByPlanVersion"]["subscriptions"][number]
 >[] = [
   {
     id: "select",
@@ -41,18 +40,14 @@ export const columns: ColumnDef<
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Name" />
     ),
-    cell: ({ row }) => (
-      <div className="lowercase">{row.original.customer.name}</div>
-    ),
+    cell: ({ row }) => <div className="lowercase">{row.original.id}</div>,
   },
   {
     accessorKey: "email",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Email" />
     ),
-    cell: ({ row }) => (
-      <div className="w-[80px]">{row.original.customer.email}</div>
-    ),
+    cell: ({ row }) => <div className="w-[80px]">{row.original.id}</div>,
     enableSorting: false,
     enableHiding: false,
   },
@@ -64,9 +59,5 @@ export const columns: ColumnDef<
     cell: ({ row }) => <div>{formatDate(row.getValue("createdAt"))}</div>,
     enableSorting: true,
     enableHiding: true,
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]

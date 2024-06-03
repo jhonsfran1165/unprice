@@ -65,7 +65,9 @@ export class StripePaymentProvider {
         const { price } = configFlatSchema.parse(config)
 
         // we need to transform price to cents without rounding
-        const priceInCents = Math.floor(parseFloat(price) * 100).toFixed(2)
+        const priceInCents = Math.floor(
+          parseFloat(price.displayAmount) * 100
+        ).toFixed(2)
 
         try {
           const priceExist = await this.listPrices([id], 1)
@@ -111,10 +113,12 @@ export class StripePaymentProvider {
           return {
             up_to: tier.lastUnit ?? ("inf" as const),
             unit_amount_decimal: Math.floor(
-              parseFloat(tier.unitPrice) * 100
+              parseFloat(tier.unitPrice.displayAmount) * 100
             ).toFixed(2),
             flat_amount_decimal: tier.flatPrice
-              ? Math.floor(parseFloat(tier.flatPrice) * 100).toFixed(2)
+              ? Math.floor(
+                  parseFloat(tier.flatPrice.displayAmount) * 100
+                ).toFixed(2)
               : undefined,
           }
         })
@@ -179,10 +183,12 @@ export class StripePaymentProvider {
             return {
               up_to: tier.lastUnit ?? ("inf" as const),
               unit_amount_decimal: Math.floor(
-                parseFloat(tier.unitPrice) * 100
+                parseFloat(tier.unitPrice.displayAmount) * 100
               ).toFixed(2),
               flat_amount_decimal: tier.flatPrice
-                ? Math.floor(parseFloat(tier.flatPrice) * 100).toFixed(2)
+                ? Math.floor(
+                    parseFloat(tier.flatPrice.displayAmount) * 100
+                  ).toFixed(2)
                 : undefined,
             }
           })
@@ -222,9 +228,9 @@ export class StripePaymentProvider {
                 aggregate_usage: aggregationMethod,
                 interval_count: 1,
               },
-              unit_amount_decimal: Math.floor(parseFloat(price) * 100).toFixed(
-                2
-              ),
+              unit_amount_decimal: Math.floor(
+                parseFloat(price.displayAmount) * 100
+              ).toFixed(2),
               billing_scheme: "per_unit",
               metadata: {
                 planVersionFeatureId: id,
@@ -247,9 +253,9 @@ export class StripePaymentProvider {
                 interval_count: 1,
               },
 
-              unit_amount_decimal: Math.floor(parseFloat(price) * 100).toFixed(
-                2
-              ),
+              unit_amount_decimal: Math.floor(
+                parseFloat(price.displayAmount) * 100
+              ).toFixed(2),
               billing_scheme: "per_unit",
               metadata: {
                 planVersionFeatureId: id,

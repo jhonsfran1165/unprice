@@ -17,6 +17,14 @@ export const featureGuard = async ({
   const workspaceId = project.workspaceId
   const unpriceCustomerId = project.workspace.unPriceCustomerId
 
+  // TODO: solve this
+  if (!unpriceCustomerId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "This feature is not available for free",
+    })
+  }
+
   const result = await verifyFeature({
     customerId: unpriceCustomerId,
     featureSlug: featureSlug,

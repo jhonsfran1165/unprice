@@ -115,8 +115,8 @@ export default function ConfigItemsFormField({
             <TableBody>
               {fields.map((item, index) => {
                 const feature =
-                  versionFeatures.get(item.itemId) ??
-                  versionAddons.get(item.itemId)!
+                  versionFeatures.get(item.featurePlanId) ??
+                  versionAddons.get(item.featurePlanId)!
 
                 const quantity = form.watch(`items.${index}.quantity`)
 
@@ -127,7 +127,9 @@ export default function ConfigItemsFormField({
                   >
                     <TableCell className="pl-1">
                       <div className="flex items-center gap-1">
-                        <span className="font-semibold">{item.slug}</span>
+                        <span className="font-semibold">
+                          {item.featureSlug}
+                        </span>
                         <PropagationStopper>
                           <Dialog>
                             <DialogTrigger asChild>
@@ -174,7 +176,7 @@ export default function ConfigItemsFormField({
                       </div>
                       <ConfigItemPrice
                         selectedPlanVersion={selectedPlanVersion!}
-                        quantity={quantity}
+                        quantity={quantity ?? 0}
                         feature={feature}
                         type="unit"
                       />
@@ -213,12 +215,12 @@ export default function ConfigItemsFormField({
                     <TableCell className="flex h-24 items-center justify-end gap-1 pr-1">
                       <ConfigItemPrice
                         selectedPlanVersion={selectedPlanVersion!}
-                        quantity={quantity}
+                        quantity={quantity ?? 0}
                         feature={feature}
                         type="total"
                       />
                       {isSubscriptionTypeAddons &&
-                        isDelete.get(item.itemId) && (
+                        isDelete.get(item.featurePlanId) && (
                           <div className="flex flex-row items-center">
                             <Button
                               className="px-0"
@@ -231,7 +233,7 @@ export default function ConfigItemsFormField({
 
                                 setConfirmDelete(
                                   (prev) =>
-                                    new Map(prev.set(item.itemId, false))
+                                    new Map(prev.set(item.featurePlanId, false))
                                 )
                               }}
                             >
@@ -240,7 +242,7 @@ export default function ConfigItemsFormField({
                           </div>
                         )}
                       {isSubscriptionTypeAddons &&
-                        !isDelete.get(item.itemId) && (
+                        !isDelete.get(item.featurePlanId) && (
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
@@ -252,14 +254,18 @@ export default function ConfigItemsFormField({
                                   e.preventDefault()
                                   setConfirmDelete(
                                     (prev) =>
-                                      new Map(prev.set(item.itemId, true))
+                                      new Map(
+                                        prev.set(item.featurePlanId, true)
+                                      )
                                   )
 
                                   // set timeout to reset the delete confirmation
                                   setTimeout(() => {
                                     setConfirmDelete(
                                       (prev) =>
-                                        new Map(prev.set(item.itemId, false))
+                                        new Map(
+                                          prev.set(item.featurePlanId, false)
+                                        )
                                     )
                                   }, 2000)
                                 }}

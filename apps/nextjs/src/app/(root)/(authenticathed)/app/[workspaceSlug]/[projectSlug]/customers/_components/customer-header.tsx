@@ -66,6 +66,8 @@ export default function CustomerHeader(props: {
                   collectionMethod: "charge_automatically",
                   autoRenew: true,
                   items: [],
+                  paymentProviderId: "stripe",
+                  startDate: new Date(),
                 }}
               >
                 <Button variant={"custom"}>Add Subscription</Button>

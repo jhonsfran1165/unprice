@@ -35,6 +35,7 @@ export const workspaces = pgTableProject(
       { nulls: "not distinct" }
     ),
 
+    // TODO: remove this
     plan: plansEnum("legacy_plans").default("FREE").notNull(),
 
     /**

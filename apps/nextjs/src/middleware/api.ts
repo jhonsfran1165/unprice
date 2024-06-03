@@ -1,10 +1,11 @@
-import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
+
+import type { NextAuthRequest } from "@builderai/auth/server"
 
 import { API_AUTH_ROUTE_PREFIX } from "~/constants"
 import { parse } from "./utils"
 
-export default function ApiMiddleware(req: NextRequest) {
+export default function ApiMiddleware(req: NextAuthRequest) {
   const { path, fullPath } = parse(req)
   const isApiAuthRoute = path.startsWith(API_AUTH_ROUTE_PREFIX)
 

@@ -22,7 +22,7 @@ export async function handleEvent(event: Stripe.Event) {
         typeof subscription.customer === "string"
           ? subscription.customer
           : subscription.customer.id
-      const { userId, workspaceName } = subscription.metadata
+      const { userId } = subscription.metadata
 
       if (!userId) {
         throw new Error("Missing user id")
@@ -34,7 +34,7 @@ export async function handleEvent(event: Stripe.Event) {
           id: true,
         },
         where: (workspace, { eq, and }) =>
-          and(eq(workspace.stripeId, stripeId)),
+          and(eq(workspace.unPriceCustomerId, stripeId)),
       })
 
       // const subscriptionPlan = stripePriceToSubscriptionPlan(
@@ -49,8 +49,7 @@ export async function handleEvent(event: Stripe.Event) {
         return await db
           .update(schema.workspaces)
           .set({
-            subscriptionId: subscription.id,
-            billingPeriodEnd: new Date(subscription.current_period_end * 1000),
+            // billingPeriodEnd: new Date(subscription.current_period_end * 1000),
             plan: "PRO", // TODO: fix this
           })
           .where(eq(schema.workspaces.id, workspaceData.id))
@@ -60,25 +59,9 @@ export async function handleEvent(event: Stripe.Event) {
        * User is not subscribed, create a new customer and workspace
        */
       // TODO: should be able to retry if the slug already exists
-      const workspaceSlug = utils.generateSlug(2)
       const workspaceId = utils.newId("workspace")
 
-      await db.insert(schema.workspaces).values({
-        id: workspaceId,
-        slug: workspaceSlug,
-        name: workspaceName ?? workspaceSlug,
-        createdBy: userId,
-        isPersonal: false,
-        stripeId,
-        subscriptionId: subscription.id,
-        // plan: subscriptionPlan?.key,
-        billingPeriodStart: new Date(subscription.current_period_start * 1000),
-        billingPeriodEnd: new Date(subscription.current_period_end * 1000),
-        trialEnds:
-          subscription.status === "trialing" && subscription.trial_end
-            ? new Date(subscription.trial_end * 1000)
-            : null,
-      })
+      // TODO: create workspace
 
       // create membership
       await db.insert(schema.members).values({
@@ -105,10 +88,9 @@ export async function handleEvent(event: Stripe.Event) {
       await db
         .update(schema.workspaces)
         .set({
-          billingPeriodEnd: new Date(subscription.current_period_end * 1000),
           plan: "PRO", // TODO: fix this
         })
-        .where(eq(schema.workspaces.subscriptionId, subscription.id))
+        .where(eq(schema.workspaces.unPriceCustomerId, subscription.id))
 
       break
     }
@@ -126,12 +108,10 @@ export async function handleEvent(event: Stripe.Event) {
       await db
         .update(schema.workspaces)
         .set({
-          subscriptionId: null,
           plan: "FREE",
           isPersonal: true,
-          billingPeriodEnd: null,
         })
-        .where(eq(schema.workspaces.stripeId, stripeId))
+        .where(eq(schema.workspaces.unPriceCustomerId, stripeId))
 
       break
     }
@@ -150,9 +130,9 @@ export async function handleEvent(event: Stripe.Event) {
         .update(schema.workspaces)
         .set({
           plan: "PRO", // TODO: fix this
-          billingPeriodEnd: new Date(subscription.current_period_end * 1000),
+          // billingPeriodEnd
         })
-        .where(eq(schema.workspaces.stripeId, stripeId))
+        .where(eq(schema.workspaces.unPriceCustomerId, stripeId))
 
       break
     }

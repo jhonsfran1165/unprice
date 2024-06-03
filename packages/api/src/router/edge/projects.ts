@@ -423,18 +423,28 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const { slug: projectSlug } = opts.input
+      const workspace = opts.ctx.workspace
 
-      const { project: projectData } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
+      const projectData = await opts.ctx.db.query.projects.findFirst({
+        with: {
+          workspace: true,
+        },
+        where: (project, { eq, and }) =>
+          and(
+            eq(project.slug, opts.input.slug),
+            eq(project.workspaceId, workspace.id)
+          ),
       })
 
+      if (!projectData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found",
+        })
+      }
+
       return {
-        project: {
-          ...projectData,
-          workspace: projectData.workspace,
-        },
+        project: projectData,
       }
     }),
   getById: protectedActiveWorkspaceProcedure
@@ -447,18 +457,28 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const { id: projectId } = opts.input
+      const workspace = opts.ctx.workspace
 
-      const { project: projectData } = await projectGuard({
-        projectId,
-        ctx: opts.ctx,
+      const projectData = await opts.ctx.db.query.projects.findFirst({
+        with: {
+          workspace: true,
+        },
+        where: (project, { eq, and }) =>
+          and(
+            eq(project.slug, opts.input.id),
+            eq(project.workspaceId, workspace.id)
+          ),
       })
 
+      if (!projectData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found",
+        })
+      }
+
       return {
-        project: {
-          ...projectData,
-          workspace: projectData.workspace,
-        },
+        project: projectData,
       }
     }),
 })

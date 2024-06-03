@@ -16,7 +16,7 @@
       ]
     }
   },
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "generate:local": "pnpm with-env drizzle-kit generate --config=local.config.ts",

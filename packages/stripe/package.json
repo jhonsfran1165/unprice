@@ -15,7 +15,7 @@
       ]
     }
   },
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "dev": "stripe listen --forward-to localhost:3000/api/webhooks/stripe",

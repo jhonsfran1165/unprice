@@ -1,20 +1,17 @@
 {
   "name": "@builderai/unprice",
   "private": false,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "license": "AGPL-3.0",
+  "files": [
+    "./dist/**"
+  ],
   "publishConfig": {
     "access": "public"
-  },
-  "type": "module",
-  "version": "0.1.0",
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "src/*"
-      ]
-    }
   },
   "keywords": [
     "builderai",
@@ -25,7 +22,6 @@
     "url": "https://github.com/jhonsfran1165/builderai/issues"
   },
   "homepage": "https://github.com/jhonsfran1165/builderai#readme",
-  "license": "MIT",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
