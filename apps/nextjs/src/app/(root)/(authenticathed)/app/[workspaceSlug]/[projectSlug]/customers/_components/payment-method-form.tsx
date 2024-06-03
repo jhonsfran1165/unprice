@@ -61,7 +61,7 @@ export function PaymentMethodForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Payment Method</CardTitle>
+        <CardTitle>Default Payment Method</CardTitle>
         <CardDescription>
           Default payment method for this customer
         </CardDescription>

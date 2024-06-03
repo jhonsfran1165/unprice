@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
-import { waitUntil } from "@vercel/functions"
 import { z, ZodError } from "zod"
 
+import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import type { SubscriptionItem } from "@builderai/db/validators"
@@ -88,6 +88,7 @@ export const subscriptionRouter = createTRPCRouter({
         with: {
           subscriptions: {
             with: {
+              features: true,
               planVersion: {
                 with: {
                   planFeatures: true,
@@ -113,20 +114,21 @@ export const subscriptionRouter = createTRPCRouter({
 
       // check the active subscriptions of the customer.
       // The plan version the customer is attempting to subscript can't have any feature that the customer already has
-      const activeSubscriptions = customerData.subscriptions
-      const activeFeatures = activeSubscriptions.flatMap((sub) =>
-        sub.planVersion.planFeatures.map((f) => f.id)
+      const newFeatures = versionData.planFeatures.map((f) => f.feature.slug)
+      const subscriptionFeatureSlugs = customerData.subscriptions.flatMap(
+        (sub) => sub.features.map((f) => f.featureSlug)
       )
-      const newFeatures = versionData.planFeatures.map((f) => f.id)
-      const commonFeatures = activeFeatures.filter((f) =>
+
+      const commonFeatures = subscriptionFeatureSlugs.filter((f) =>
         newFeatures.includes(f)
       )
 
       if (commonFeatures.length > 0) {
         throw new TRPCError({
           code: "CONFLICT",
-          message:
-            "The customer is trying to subscribe to a feature already active in another subscription",
+          message: `The customer is trying to subscribe to features that are already active in another subscription: ${commonFeatures.join(
+            ", "
+          )}`,
         })
       }
 
@@ -156,28 +158,66 @@ export const subscriptionRouter = createTRPCRouter({
         configItemsSubscription = val
       }
 
-      const subscriptionId = utils.newId("subscription")
+      // execute this in a transaction
+      const subscriptionData = await opts.ctx.db.transaction(async (trx) => {
+        // create the subscription
 
-      const subscriptionData = await opts.ctx.db
-        .insert(schema.subscriptions)
-        .values({
-          id: subscriptionId,
-          projectId: project.id,
-          planVersionId: versionData.id,
-          customerId: customerData.id,
-          startDate: startDate,
-          endDate: endDate,
-          autoRenew: true,
-          trialDays: trialDays,
-          isNew: true,
-          collectionMethod: collectionMethod,
-          status: "active",
-          items: configItemsSubscription,
-          metadata: metadata,
-          paymentProviderId: paymentProviderId,
+        const subscriptionId = utils.newId("subscription")
+
+        const newSubscription = await trx
+          .insert(schema.subscriptions)
+          .values({
+            id: subscriptionId,
+            projectId: project.id,
+            planVersionId: versionData.id,
+            customerId: customerData.id,
+            startDate: startDate,
+            endDate: endDate,
+            autoRenew: true,
+            trialDays: trialDays,
+            isNew: true,
+            collectionMethod: collectionMethod,
+            status: "active",
+            metadata: metadata,
+            paymentProviderId: paymentProviderId,
+          })
+          .returning()
+          .then((re) => re[0])
+
+        if (!newSubscription) {
+          trx.rollback()
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error while creating subscription",
+          })
+        }
+
+        // add features to the subscription and send all promise at once
+        await Promise.all(
+          configItemsSubscription.map((item) =>
+            trx.insert(schema.subscriptionFeatures).values({
+              id: utils.newId("subscription_feature"),
+              projectId: newSubscription.projectId,
+              subscriptionId: newSubscription.id,
+              featurePlanId: item.itemId,
+              quantity: item.quantity,
+              limit: item.limit,
+              min: item.min,
+              featureSlug: item.slug,
+              usage: item.usage,
+            })
+          )
+        ).catch((e) => {
+          console.error(e)
+          trx.rollback()
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error while creating subscription features",
+          })
         })
-        .returning()
-        .then((re) => re[0])
+
+        return newSubscription
+      })
 
       if (!subscriptionData) {
         throw new TRPCError({
@@ -187,88 +227,88 @@ export const subscriptionRouter = createTRPCRouter({
       }
 
       // every time a subscription is created, we need to update the cache
-      waitUntil(
-        opts.ctx.db.query.customers
-          .findFirst({
-            with: {
-              subscriptions: {
-                columns: {
-                  id: true,
-                  planVersionId: true,
-                  customerId: true,
-                  status: true,
-                  items: true,
-                  metadata: true,
-                },
-                where: (sub, { eq }) => eq(sub.status, "active"),
-                orderBy(fields, operators) {
-                  return [operators.desc(fields.startDate)]
-                },
-                with: {
-                  planVersion: {
-                    columns: {
-                      id: true,
-                      planId: true,
-                      status: true,
-                      planType: true,
-                      active: true,
-                      currency: true,
-                      billingPeriod: true,
-                      startCycle: true,
-                      gracePeriod: true,
-                      whenToBill: true,
-                      paymentProvider: true,
-                      metadata: true,
-                    },
-                    with: {
-                      plan: {
-                        columns: {
-                          slug: true,
-                        },
-                      },
-                      planFeatures: {
-                        columns: {
-                          id: true,
-                          featureId: true,
-                          featureType: true,
-                          planVersionId: true,
-                          config: true,
-                          metadata: true,
-                          limit: true,
-                        },
-                        with: {
-                          feature: {
-                            columns: {
-                              slug: true,
-                              id: true,
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            where: (customer, { eq, and }) =>
-              and(
-                eq(customer.id, customerData.id),
-                eq(customer.projectId, customerData.projectId)
-              ),
-          })
-          .then(async (customer) => {
-            if (!customer) {
-              // TODO: log error
-              console.error("Customer not found")
-              return
-            }
+      // waitUntil(
+      //   opts.ctx.db.query.customers
+      //     .findFirst({
+      //       with: {
+      //         subscriptions: {
+      //           columns: {
+      //             id: true,
+      //             planVersionId: true,
+      //             customerId: true,
+      //             status: true,
+      //             items: true,
+      //             metadata: true,
+      //           },
+      //           where: (sub, { eq }) => eq(sub.status, "active"),
+      //           orderBy(fields, operators) {
+      //             return [operators.desc(fields.startDate)]
+      //           },
+      //           with: {
+      //             planVersion: {
+      //               columns: {
+      //                 id: true,
+      //                 planId: true,
+      //                 status: true,
+      //                 planType: true,
+      //                 active: true,
+      //                 currency: true,
+      //                 billingPeriod: true,
+      //                 startCycle: true,
+      //                 gracePeriod: true,
+      //                 whenToBill: true,
+      //                 paymentProvider: true,
+      //                 metadata: true,
+      //               },
+      //               with: {
+      //                 plan: {
+      //                   columns: {
+      //                     slug: true,
+      //                   },
+      //                 },
+      //                 planFeatures: {
+      //                   columns: {
+      //                     id: true,
+      //                     featureId: true,
+      //                     featureType: true,
+      //                     planVersionId: true,
+      //                     config: true,
+      //                     metadata: true,
+      //                     limit: true,
+      //                   },
+      //                   with: {
+      //                     feature: {
+      //                       columns: {
+      //                         slug: true,
+      //                         id: true,
+      //                       },
+      //                     },
+      //                   },
+      //                 },
+      //               },
+      //             },
+      //           },
+      //         },
+      //       },
+      //       where: (customer, { eq, and }) =>
+      //         and(
+      //           eq(customer.id, customerData.id),
+      //           eq(customer.projectId, customerData.projectId)
+      //         ),
+      //     })
+      //     .then(async (customer) => {
+      //       if (!customer) {
+      //         // TODO: log error
+      //         console.error("Customer not found")
+      //         return
+      //       }
 
-            await opts.ctx.cache.setCustomerActiveSubs(
-              customer.id,
-              customer?.subscriptions ?? []
-            )
-          })
-      )
+      //       await opts.ctx.cache.setCustomerActiveSubs(
+      //         customer.id,
+      //         customer?.subscriptions ?? []
+      //       )
+      //     })
+      // )
 
       return {
         subscription: subscriptionData,
@@ -307,6 +347,129 @@ export const subscriptionRouter = createTRPCRouter({
 
       return {
         subscriptions: subscriptionData,
+      }
+    }),
+
+  remove: protectedActiveProjectAdminProcedure
+    .input(
+      subscriptionSelectSchema.pick({
+        id: true,
+        customerId: true,
+      })
+    )
+    .output(z.object({ subscription: subscriptionSelectSchema }))
+    .mutation(async (opts) => {
+      const { id, customerId } = opts.input
+      const project = opts.ctx.project
+
+      const subscriptionData = await opts.ctx.db.query.subscriptions.findFirst({
+        where: (subscription, { eq, and }) =>
+          and(
+            eq(subscription.id, id),
+            eq(subscription.projectId, project.id),
+            eq(subscription.customerId, customerId)
+          ),
+        with: {
+          features: true,
+        },
+      })
+
+      if (!subscriptionData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Subscription not found. Please check the id and customerId",
+        })
+      }
+
+      if (subscriptionData.status !== "active") {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message:
+            "Subscription is not active, only active subscriptions can be removed. You have to downgrade the subscription to a free plan first",
+        })
+      }
+
+      // delete the subscription
+      const deletedSubscription = await opts.ctx.db
+        .delete(schema.subscriptions)
+        .where(
+          and(
+            eq(schema.subscriptions.projectId, subscriptionData.projectId),
+            eq(schema.subscriptions.customerId, subscriptionData.customerId),
+            eq(schema.subscriptions.id, subscriptionData.id)
+          )
+        )
+        .returning()
+        .then((re) => re[0])
+
+      if (!deletedSubscription) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error deleting subscription",
+        })
+      }
+
+      return {
+        subscription: deletedSubscription,
+      }
+    }),
+  end: protectedActiveProjectAdminProcedure
+    .input(
+      subscriptionSelectSchema.pick({
+        id: true,
+        customerId: true,
+        endDate: true,
+      })
+    )
+    .output(z.object({ subscription: subscriptionSelectSchema }))
+    .mutation(async (opts) => {
+      const { id, customerId, endDate } = opts.input
+      const project = opts.ctx.project
+
+      const subscriptionData = await opts.ctx.db.query.subscriptions.findFirst({
+        where: (subscription, { eq, and }) =>
+          and(
+            eq(subscription.id, id),
+            eq(subscription.projectId, project.id),
+            eq(subscription.customerId, customerId)
+          ),
+        with: {
+          features: true,
+        },
+      })
+
+      if (!subscriptionData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Subscription not found. Please check the id and customerId",
+        })
+      }
+
+      // finish date for the subscription
+      const subscription = await opts.ctx.db
+        .update(schema.subscriptions)
+        .set({
+          endDate: endDate ?? new Date(),
+        })
+        .where(
+          and(
+            eq(schema.subscriptions.id, id),
+            eq(schema.subscriptions.projectId, project.id),
+            eq(schema.subscriptions.customerId, customerId)
+          )
+        )
+        .returning()
+        .then((re) => re[0])
+
+      if (!subscription) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error ending subscription",
+        })
+      }
+
+      return {
+        subscription,
       }
     }),
 })

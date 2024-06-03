@@ -12,6 +12,7 @@ export const dbNameSpaces = {
   customer: "cus",
   customer_provider: "cusp",
   subscription: "sub",
+  subscription_feature: "subf",
   domain: "dom",
   plan_version: "pv",
 } as const

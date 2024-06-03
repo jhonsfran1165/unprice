@@ -26,9 +26,8 @@ export default async function CustomerVersionPage(props: {
       (filter.toDate = parsed.data.toDate)
   }
 
-  const { subscriptions } = await api.subscriptions.listByPlan({
-    planSlug: props.params.planSlug,
-    planVersionId: Number(props.params.planVersionId),
+  const { subscriptions } = await api.subscriptions.listByPlanVersion({
+    planVersionId: props.params.planVersionId,
   })
 
   return (

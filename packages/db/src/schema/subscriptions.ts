@@ -5,6 +5,7 @@ import {
   integer,
   json,
   primaryKey,
+  text,
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core"
@@ -12,16 +13,14 @@ import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
-import type {
-  subscriptionItemsSchema,
-  subscriptionMetadataSchema,
-} from "../validators/subscription"
+import type { subscriptionMetadataSchema } from "../validators/subscription"
 import { customerPaymentProviders, customers } from "./customers"
 import {
   collectionMethodEnum,
   subscriptionStatusEnum,
   typeSubscriptionEnum,
 } from "./enums"
+import { planVersionFeatures } from "./planVersionFeatures"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
 
@@ -83,14 +82,6 @@ export const subscriptions = pgTableProject(
     // status of the subscription - active, inactive, canceled, paused, etc.
     status: subscriptionStatusEnum("status").default("active"),
 
-    // items information for the subscription - can be features or addons information
-    // if null means that the subscription is for the whole plan
-    items: json("items")
-      .$type<z.infer<typeof subscriptionItemsSchema>>()
-      .notNull(),
-
-    // TODO: create invoice table
-
     // metadata for the subscription
     metadata:
       json("metadata").$type<z.infer<typeof subscriptionMetadataSchema>>(),
@@ -124,17 +115,72 @@ export const subscriptions = pgTableProject(
   })
 )
 
-export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
-  project: one(projects, {
-    fields: [subscriptions.projectId],
-    references: [projects.id],
-  }),
-  customer: one(customers, {
-    fields: [subscriptions.customerId, subscriptions.projectId],
-    references: [customers.id, customers.projectId],
-  }),
-  planVersion: one(versions, {
-    fields: [subscriptions.planVersionId, subscriptions.projectId],
-    references: [versions.id, versions.projectId],
-  }),
-}))
+export const subscriptionFeatures = pgTableProject(
+  "subscription_features",
+  {
+    ...projectID,
+    ...timestamps,
+    quantity: integer("quantity"),
+    subscriptionId: cuid("subscription_id").notNull(),
+    featurePlanId: cuid("feature_plan_id").notNull(),
+    limit: integer("limit"),
+    min: integer("min"),
+    featureSlug: text("feature_slug").notNull(),
+    usage: integer("usage"),
+  },
+  (table) => ({
+    primary: primaryKey({
+      columns: [table.id, table.projectId],
+      name: "subscription_features_pkey",
+    }),
+    subscriptionfk: foreignKey({
+      columns: [table.subscriptionId, table.projectId],
+      foreignColumns: [subscriptions.id, subscriptions.projectId],
+      name: "subscription_features_subscription_id_fkey",
+    }).onDelete("cascade"),
+    featurefk: foreignKey({
+      columns: [table.featurePlanId, table.projectId],
+      foreignColumns: [planVersionFeatures.id, planVersionFeatures.projectId],
+      name: "subscription_features_plan_id_fkey",
+    }),
+  })
+)
+
+export const subscriptionFeatureRelations = relations(
+  subscriptionFeatures,
+  ({ one }) => ({
+    subscription: one(subscriptions, {
+      fields: [
+        subscriptionFeatures.subscriptionId,
+        subscriptionFeatures.projectId,
+      ],
+      references: [subscriptions.id, subscriptions.projectId],
+    }),
+    featurePlan: one(planVersionFeatures, {
+      fields: [
+        subscriptionFeatures.featurePlanId,
+        subscriptionFeatures.projectId,
+      ],
+      references: [planVersionFeatures.id, planVersionFeatures.projectId],
+    }),
+  })
+)
+
+export const subscriptionRelations = relations(
+  subscriptions,
+  ({ one, many }) => ({
+    project: one(projects, {
+      fields: [subscriptions.projectId],
+      references: [projects.id],
+    }),
+    customer: one(customers, {
+      fields: [subscriptions.customerId, subscriptions.projectId],
+      references: [customers.id, customers.projectId],
+    }),
+    planVersion: one(versions, {
+      fields: [subscriptions.planVersionId, subscriptions.projectId],
+      references: [versions.id, versions.projectId],
+    }),
+    features: many(subscriptionFeatures),
+  })
+)

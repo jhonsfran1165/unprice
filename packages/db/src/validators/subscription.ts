@@ -98,7 +98,6 @@ export const subscriptionItemsSchema = z
 
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   metadata: subscriptionMetadataSchema,
-  items: subscriptionItemsSchema,
   type: subscriptionTypeSchema,
 })
 
@@ -107,9 +106,11 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   startDate: z.coerce.date({ message: "Start date is required" }),
   trialDays: z.coerce.number().int().min(0).max(30).default(0),
   metadata: subscriptionMetadataSchema,
-  items: subscriptionItemsSchema,
   type: subscriptionTypeSchema,
 })
+  .extend({
+    items: subscriptionItemsSchema,
+  })
   .omit({
     createdAt: true,
     updatedAt: true,
@@ -130,7 +131,6 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
     planVersionId: true,
     customerId: true,
     status: true,
-    items: true,
     metadata: true,
   })
   .extend({

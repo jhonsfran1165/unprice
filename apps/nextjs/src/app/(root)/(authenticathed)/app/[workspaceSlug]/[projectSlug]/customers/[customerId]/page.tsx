@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowUp, ListFilter, MoreVertical } from "lucide-react"
 
@@ -195,16 +194,13 @@ export default async function PlanPage({
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem>
-                                  Edit version
+                                  Edit Subscription
                                 </DropdownMenuItem>
-
                                 <DropdownMenuItem>
-                                  <Link
-                                    href={`/${workspaceSlug}/${projectSlug}/customers/${customerId}/plans/${sub.id}/features`}
-                                    prefetch={false}
-                                  >
-                                    Configure features
-                                  </Link>
+                                  Downgrade/Upgrade
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  End Subscription
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -288,7 +284,7 @@ export default async function PlanPage({
             </div>
           </CardContent>
           <CardFooter className="flex flex-row items-center border-t px-6 py-3">
-            <div className="text-xs text-muted-foreground">
+            <div className="text-muted-foreground text-xs">
               Updated{" "}
               <time dateTime="2023-11-23">10:45am, November 23, 2023</time>
             </div>

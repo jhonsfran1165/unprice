@@ -11,6 +11,7 @@
     "analyze": "ANALYZE=true pnpm --filter nextjs run build",
     "preview": "pnpm with-env next build && pnpm with-env next start",
     "clean": "git clean -xdf .next .turbo node_modules",
+    "dev:turbo": "pnpm with-env next dev --turbo",
     "dev": "pnpm with-env next dev",
     "lint": "next lint",
     "format": "prettier --check \"**/*.{js,cjs,mjs,ts,tsx,md,json}\"",
