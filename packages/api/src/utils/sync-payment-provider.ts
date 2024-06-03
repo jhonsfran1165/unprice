@@ -80,7 +80,7 @@ export const syncPaymentProvider = async ({
   for (const feature of planVersionFeatures) {
     // create product and price in the payment provider
     await paymentProviderClient.createProduct(feature)
-    const price = await paymentProviderClient.createPrice(feature)
+    // const price = await paymentProviderClient.createPrice(feature)
   }
 
   return {

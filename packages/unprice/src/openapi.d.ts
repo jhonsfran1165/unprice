@@ -139,9 +139,7 @@ export interface components {
   responses: {
     /** @description Error response */
     error: {
-      headers: {
-        [name: string]: unknown
-      }
+      headers: Record<string, unknown>
       content: {
         "application/json": {
           message: string
@@ -199,9 +197,7 @@ export interface operations {
     responses: {
       /** @description Successful response */
       200: {
-        headers: {
-          [name: string]: unknown
-        }
+        headers: Record<string, unknown>
         content: {
           "application/json": {
             customer: {
@@ -251,9 +247,7 @@ export interface operations {
     responses: {
       /** @description Successful response */
       200: {
-        headers: {
-          [name: string]: unknown
-        }
+        headers: Record<string, unknown>
         content: {
           "application/json": {
             customer: {
@@ -319,9 +313,7 @@ export interface operations {
     responses: {
       /** @description Successful response */
       200: {
-        headers: {
-          [name: string]: unknown
-        }
+        headers: Record<string, unknown>
         content: {
           "application/json": {
             customer: {
@@ -371,9 +363,7 @@ export interface operations {
     responses: {
       /** @description Successful response */
       200: {
-        headers: {
-          [name: string]: unknown
-        }
+        headers: Record<string, unknown>
         content: {
           "application/json": {
             exist: boolean
@@ -400,9 +390,7 @@ export interface operations {
     responses: {
       /** @description Successful response */
       200: {
-        headers: {
-          [name: string]: unknown
-        }
+        headers: Record<string, unknown>
         content: {
           "application/json": {
             customer: {
@@ -448,9 +436,7 @@ export interface operations {
     responses: {
       /** @description Successful response */
       200: {
-        headers: {
-          [name: string]: unknown
-        }
+        headers: Record<string, unknown>
         content: {
           "application/json": {
             customer: {
@@ -497,9 +483,7 @@ export interface operations {
     responses: {
       /** @description Successful response */
       200: {
-        headers: {
-          [name: string]: unknown
-        }
+        headers: Record<string, unknown>
         content: {
           "application/json": {
             access: boolean
@@ -531,9 +515,7 @@ export interface operations {
     responses: {
       /** @description Successful response */
       200: {
-        headers: {
-          [name: string]: unknown
-        }
+        headers: Record<string, unknown>
         content: {
           "application/json": {
             success: boolean

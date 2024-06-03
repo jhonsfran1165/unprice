@@ -1,7 +1,10 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { selectWorkspaceSchema } from "@builderai/db/validators"
+import {
+  planVersionSelectBaseSchema,
+  subscriptionSelectSchema,
+} from "@builderai/db/validators"
 
 import {
   createTRPCRouter,
@@ -11,44 +14,48 @@ import {
 
 export const authRouter = createTRPCRouter({
   // TODO: this should query the user's active subscriptions
-  mySubscription: protectedActiveWorkspaceOwnerProcedure
+  mySubscriptions: protectedActiveWorkspaceOwnerProcedure
     .input(z.void())
     .output(
       z.object({
-        subscription: selectWorkspaceSchema
-          .pick({
-            plan: true,
-            billingPeriodEnd: true,
-            billingPeriodStart: true,
+        subscriptions: subscriptionSelectSchema
+          .extend({
+            planVersion: planVersionSelectBaseSchema,
           })
-          .optional(),
+          .array(),
       })
     )
     .query(async (opts) => {
-      const activeWorkspaceSlug = opts.ctx.activeWorkspaceSlug
+      const workspace = opts.ctx.workspace
+      const customerId = workspace.unPriceCustomerId
 
-      const workspace = await opts.ctx.db.query.workspaces.findFirst({
-        columns: {
-          plan: true,
-          billingPeriodStart: true,
-          billingPeriodEnd: true,
+      if (!customerId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not a customer of this workspace",
+        })
+      }
+
+      const customerData = await opts.ctx.db.query.customers.findFirst({
+        with: {
+          subscriptions: {
+            with: {
+              planVersion: true,
+            },
+          },
         },
-        where: (workspace, { eq }) => eq(workspace.slug, activeWorkspaceSlug),
+        where: (customer, { eq }) => eq(customer.id, customerId),
       })
 
-      if (!workspace?.plan) {
+      if (!customerData) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Workspace not found",
+          message: "You are not subscribed to this workspace",
         })
       }
 
       return {
-        subscription: {
-          plan: workspace.plan,
-          billingPeriodEnd: workspace.billingPeriodEnd,
-          billingPeriodStart: workspace.billingPeriodStart,
-        },
+        subscriptions: customerData.subscriptions,
       }
     }),
   listOrganizations: protectedProcedure.query(async (opts) => {

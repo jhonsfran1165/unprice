@@ -12,7 +12,7 @@ import {
   membersSelectBase,
   renameWorkspaceSchema,
   searchDataParamsSchema,
-  selectWorkspaceSchema,
+  workspaceSelectSchema,
 } from "@builderai/db/validators"
 import { sendEmail, WelcomeEmail } from "@builderai/email"
 
@@ -97,7 +97,7 @@ export const workspaceRouter = createTRPCRouter({
   listMembers: protectedProcedure
     .input(
       searchDataParamsSchema.extend({
-        workspaceSlug: selectWorkspaceSchema.shape.slug,
+        workspaceSlug: workspaceSelectSchema.shape.slug,
       })
     )
     .output(
@@ -135,10 +135,10 @@ export const workspaceRouter = createTRPCRouter({
       }
     }),
   getBySlug: protectedProcedure
-    .input(selectWorkspaceSchema.pick({ slug: true }))
+    .input(workspaceSelectSchema.pick({ slug: true }))
     .output(
       z.object({
-        workspace: selectWorkspaceSchema.optional(),
+        workspace: workspaceSelectSchema.optional(),
       })
     )
     .query(async (opts) => {
@@ -156,7 +156,7 @@ export const workspaceRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteWorkspaceSchema)
-    .output(z.object({ workspace: selectWorkspaceSchema.optional() }))
+    .output(z.object({ workspace: workspaceSelectSchema.optional() }))
     .mutation(async (opts) => {
       const { slug: workspaceSlug } = opts.input
 
@@ -197,7 +197,7 @@ export const workspaceRouter = createTRPCRouter({
     .output(
       z.object({
         workspaces: z.array(
-          selectWorkspaceSchema
+          workspaceSelectSchema
             .pick({
               id: true,
               name: true,
@@ -250,7 +250,7 @@ export const workspaceRouter = createTRPCRouter({
     }),
   renameWorkspace: protectedProcedure
     .input(renameWorkspaceSchema)
-    .output(selectWorkspaceSchema)
+    .output(workspaceSelectSchema)
     .mutation(async (opts) => {
       const { slug: workspaceSlug, name } = opts.input
 

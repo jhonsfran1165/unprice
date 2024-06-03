@@ -94,7 +94,7 @@ export const customersRelations = relations(customers, ({ one, many }) => ({
 
 export const customersProvidersRelations = relations(
   customerPaymentProviders,
-  ({ one, many }) => ({
+  ({ one }) => ({
     project: one(projects, {
       fields: [customerPaymentProviders.projectId],
       references: [projects.id],

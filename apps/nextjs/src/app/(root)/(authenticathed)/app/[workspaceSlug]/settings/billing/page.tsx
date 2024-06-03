@@ -22,8 +22,10 @@ export default function BillingPage() {
 }
 
 async function SubscriptionCard() {
-  const { subscription } = await api.auth.mySubscription()
+  const { subscriptions } = await api.auth.mySubscriptions()
 
+  // TODO: customer can have multiple subscriptions
+  const subscription = subscriptions[0]
   return (
     <Card>
       <CardHeader>
@@ -32,11 +34,12 @@ async function SubscriptionCard() {
       <CardContent>
         {subscription ? (
           <div>
-            You are currently on the <strong>{subscription.plan}</strong> plan.
-            {subscription.billingPeriodEnd && (
+            You are currently on the{" "}
+            <strong>{subscription.planVersion.title}</strong> plan.
+            {subscription.startDate && (
               <strong>
                 Your subscription will renew on{" "}
-                {formatDate(subscription.billingPeriodEnd)}.{" "}
+                {formatDate(subscription.startDate)}.{" "}
               </strong>
             )}
           </div>

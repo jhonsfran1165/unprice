@@ -60,7 +60,6 @@ export class UnpriceCustomer {
             planVersionId: true,
             customerId: true,
             status: true,
-            items: true,
             metadata: true,
           },
           where: (sub, { eq }) => eq(sub.status, "active"),
@@ -68,6 +67,7 @@ export class UnpriceCustomer {
             return [operators.desc(fields.startDate)]
           },
           with: {
+            features: true,
             planVersion: {
               columns: {
                 id: true,
@@ -362,8 +362,8 @@ export class UnpriceCustomer {
       const ip = opts.ctx.headers.get("x-real-ip") ?? ""
       const userAgent = opts.ctx.headers.get("user-agent") ?? ""
 
-      const limit = subscription.items.find(
-        (item) => item.itemId === feature.id
+      const limit = subscription.features.find(
+        (item) => item.featurePlanId === feature.id
       )?.limit
 
       // TODO: add params to usage so we can count or max and get data by date
@@ -503,13 +503,14 @@ export class UnpriceCustomer {
       return Ok({
         currentUsage: usage,
         featureType: feature.featureType,
-        limit: limit,
+        limit: limit ?? 0,
         access: true,
         currentPlan: subscription.planVersion.plan.slug,
         remaining: limit ? limit - usage : undefined,
       })
     } catch (e) {
       const error = e as Error
+      console.error("Error getting customer data", error)
       // TODO: sent log
       // this.logger.error("Unhandled error while verifying key", {
       //   error: err.message,
@@ -577,6 +578,7 @@ export class UnpriceCustomer {
     } catch (e) {
       // TODO: log the error
       const error = e as Error
+      console.error("Error reporting usage", error)
       throw e
     }
   }

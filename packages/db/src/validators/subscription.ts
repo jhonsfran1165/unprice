@@ -7,7 +7,7 @@ import { z } from "zod"
 import type { Result } from "@builderai/error"
 import { Err, Ok, SchemaError } from "@builderai/error"
 
-import { subscriptions } from "../schema/subscriptions"
+import { subscriptionFeatures, subscriptions } from "../schema/subscriptions"
 import { UnPriceCalculationError } from "./errors"
 import type { PlanVersionExtended } from "./planVersionFeatures"
 import {
@@ -20,34 +20,32 @@ import {
   priceSchema,
 } from "./planVersionFeatures"
 import type { Currency } from "./shared"
-import {
-  currencySymbol,
-  subscriptionTypeSchema,
-  typeFeatureSchema,
-} from "./shared"
+import { currencySymbol, subscriptionTypeSchema } from "./shared"
 
 export const subscriptionMetadataSchema = z.object({
   externalId: z.string().optional(),
   defaultPaymentMethodId: z.string().optional(),
 })
 
-const itemConfigSubscriptionSchema = z.object({
-  itemType: typeFeatureSchema,
-  // quantity for the item, for flat features it's always 1, usage features it's the current usage
-  quantity: z.coerce.number().min(1).optional(),
-  // min quantity for the item
-  min: z.coerce.number().optional(),
-  // limit for the item if any
-  limit: z.coerce.number().optional(),
-  itemId: z.string(),
-  slug: z.string(),
-  // current usage for the item in the current billing period
-  usage: z.coerce.number().min(0).optional(),
-})
+export const subscriptionFeaturesSelectSchema = createSelectSchema(
+  subscriptionFeatures,
+  {
+    // quantity for the item, for flat features it's always 1, usage features it's the current usage
+    quantity: z.coerce.number().min(1).optional(),
+    // min quantity for the item
+    min: z.coerce.number().optional(),
+    // limit for the item if any
+    limit: z.coerce.number().optional(),
+    featurePlanId: z.string(),
+    featureSlug: z.string(),
+    // current usage for the item in the current billing period
+    usage: z.coerce.number().min(0).optional(),
+  }
+)
 
 // stripe won't allow more than 250 items in a single invoice
 export const subscriptionItemsSchema = z
-  .array(itemConfigSubscriptionSchema)
+  .array(subscriptionFeaturesSelectSchema)
   .superRefine((items, ctx) => {
     if (items.length > 50) {
       // TODO: add a better message and map to the correct path
@@ -135,11 +133,12 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
   })
   .extend({
     planVersion: planVersionExtendedSchema,
+    features: subscriptionFeaturesSelectSchema.array(),
   })
 
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>
-export type SubscriptionItem = z.infer<typeof itemConfigSubscriptionSchema>
+export type SubscriptionItem = z.infer<typeof subscriptionFeaturesSelectSchema>
 export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
 
 export const createDefaultSubscriptionConfig = ({
@@ -158,18 +157,16 @@ export const createDefaultSubscriptionConfig = ({
     switch (planFeature.featureType) {
       case "flat":
         return {
-          itemType: planFeature.featureType,
-          itemId: planFeature.id,
-          slug: planFeature.feature.slug,
+          featurePlanId: planFeature.id,
+          featureSlug: planFeature.feature.slug,
           quantity: 1,
           limit: 1,
           min: 1,
         } as SubscriptionItem
       case "tier": {
         return {
-          itemType: planFeature.featureType,
-          itemId: planFeature.id,
-          slug: planFeature.feature.slug,
+          featurePlanId: planFeature.id,
+          featureSlug: planFeature.feature.slug,
           quantity: planFeature.defaultQuantity ?? 1,
           min: 1,
           limit: planFeature.limit,
@@ -177,9 +174,8 @@ export const createDefaultSubscriptionConfig = ({
       }
       case "usage":
         return {
-          itemType: planFeature.featureType,
-          itemId: planFeature.id,
-          slug: planFeature.feature.slug,
+          featurePlanId: planFeature.id,
+          featureSlug: planFeature.feature.slug,
           usage: 0,
           limit: planFeature.limit,
         } as SubscriptionItem
@@ -187,9 +183,8 @@ export const createDefaultSubscriptionConfig = ({
       case "package": {
         const config = configPackageSchema.parse(planFeature.config)
         return {
-          itemType: planFeature.featureType,
-          itemId: planFeature.id,
-          slug: planFeature.feature.slug,
+          featurePlanId: planFeature.id,
+          featureSlug: planFeature.feature.slug,
           quantity: config.units,
           limit: config.units,
           min: config.units,
@@ -198,9 +193,8 @@ export const createDefaultSubscriptionConfig = ({
 
       default:
         return {
-          itemType: planFeature.featureType,
-          itemId: planFeature.id,
-          slug: planFeature.feature.slug,
+          featurePlanId: planFeature.id,
+          featureSlug: planFeature.feature.slug,
           quantity: planFeature.defaultQuantity,
           limit: planFeature.defaultQuantity,
           min: 1,
@@ -221,7 +215,7 @@ interface CalculatedPrice {
   totalPrice: z.infer<typeof calculatePriceSchema>
 }
 
-const calculatePricePerFeatureSchema = itemConfigSubscriptionSchema
+const calculatePricePerFeatureSchema = subscriptionFeaturesSelectSchema
   .pick({ quantity: true })
   .extend({
     feature: planVersionFeatureInsertBaseSchema,

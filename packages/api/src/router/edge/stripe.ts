@@ -4,66 +4,64 @@ import { dinero, multiply, toDecimal, toUnits, transformScale } from "dinero.js"
 import { z } from "zod"
 
 import { APP_DOMAIN, PLANS } from "@builderai/config"
-import { projects } from "@builderai/db/schema"
 import { purchaseWorkspaceSchema } from "@builderai/db/validators"
 import { stripe } from "@builderai/stripe"
 
 import {
   createTRPCRouter,
-  protectedActiveProjectProcedure,
   protectedActiveWorkspaceProcedure,
   publicProcedure,
 } from "../../trpc"
 
 export const stripeRouter = createTRPCRouter({
-  createLinkAccount: protectedActiveProjectProcedure
-    .input(z.void())
-    .output(
-      z.object({
-        success: z.boolean(),
-        url: z.string(),
-      })
-    )
-    .mutation(async (opts) => {
-      const user = opts.ctx.session.user
-      const project = opts.ctx.project
-      const workspace = opts.ctx.workspace
+  // createLinkAccount: protectedActiveProjectProcedure
+  //   .input(z.void())
+  //   .output(
+  //     z.object({
+  //       success: z.boolean(),
+  //       url: z.string(),
+  //     })
+  //   )
+  //   .mutation(async (opts) => {
+  //     const user = opts.ctx.session.user
+  //     const project = opts.ctx.project
+  //     const workspace = opts.ctx.workspace
 
-      const accountId = project.stripeAccountId
-      let account
+  //     const accountId = project.stripeAccountId
+  //     let account
 
-      if (!accountId) {
-        account = await stripe.accounts.create({
-          type: "standard",
-          email: user.email ?? "",
-          country: "DE", // TODO: fix country
-          capabilities: {
-            card_payments: { requested: false },
-            transfers: { requested: false },
-          },
-        })
-      } else {
-        account = await stripe.accounts.retrieve(accountId)
-      }
+  //     if (!accountId) {
+  //       account = await stripe.accounts.create({
+  //         type: "standard",
+  //         email: user.email ?? "",
+  //         country: "DE", // TODO: fix country
+  //         capabilities: {
+  //           card_payments: { requested: false },
+  //           transfers: { requested: false },
+  //         },
+  //       })
+  //     } else {
+  //       account = await stripe.accounts.retrieve(accountId)
+  //     }
 
-      const accountLink = await stripe.accountLinks.create({
-        account: account.id,
-        refresh_url:
-          `${APP_DOMAIN}` +
-          `${workspace.slug}/${project.slug}/settings/billing`,
-        return_url: `${APP_DOMAIN}` + `${workspace.slug}/${project.slug}/`,
-        type: "account_onboarding",
-        collect: "currently_due",
-      })
+  //     const accountLink = await stripe.accountLinks.create({
+  //       account: account.id,
+  //       refresh_url:
+  //         `${APP_DOMAIN}` +
+  //         `${workspace.slug}/${project.slug}/settings/billing`,
+  //       return_url: `${APP_DOMAIN}` + `${workspace.slug}/${project.slug}/`,
+  //       type: "account_onboarding",
+  //       collect: "currently_due",
+  //     })
 
-      // save the account id to the project
-      await opts.ctx.db.update(projects).set({
-        stripeAccountId: account.id,
-      })
+  //     // save the account id to the project
+  //     await opts.ctx.db.update(projects).set({
+  //       stripeAccountId: account.id,
+  //     })
 
-      if (!accountLink.url) return { success: false as const, url: "" }
-      return { success: true as const, url: accountLink.url }
-    }),
+  //     if (!accountLink.url) return { success: false as const, url: "" }
+  //     return { success: true as const, url: accountLink.url }
+  //   }),
   createSession: protectedActiveWorkspaceProcedure
     .input(z.object({ planId: z.string() }))
     .output(z.object({ success: z.boolean(), url: z.string() }))
@@ -80,12 +78,16 @@ export const stripeRouter = createTRPCRouter({
         })
       }
 
-      if (workspace && workspace.plan !== "FREE" && workspace.stripeId) {
+      if (
+        workspace &&
+        workspace.plan !== "FREE" &&
+        workspace.unPriceCustomerId
+      ) {
         /**
          * User is subscribed, create a billing portal session
          */
         const session = await stripe.billingPortal.sessions.create({
-          customer: workspace.stripeId,
+          customer: workspace.unPriceCustomerId ?? "",
           return_url: returnUrl,
         })
         return { success: true as const, url: session.url }

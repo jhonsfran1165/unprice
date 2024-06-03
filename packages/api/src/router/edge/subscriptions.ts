@@ -199,11 +199,11 @@ export const subscriptionRouter = createTRPCRouter({
               id: utils.newId("subscription_feature"),
               projectId: newSubscription.projectId,
               subscriptionId: newSubscription.id,
-              featurePlanId: item.itemId,
+              featurePlanId: item.featurePlanId,
               quantity: item.quantity,
               limit: item.limit,
               min: item.min,
-              featureSlug: item.slug,
+              featureSlug: item.featureSlug,
               usage: item.usage,
             })
           )

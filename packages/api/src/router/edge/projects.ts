@@ -9,9 +9,9 @@ import {
   deleteProjectSchema,
   projectSelectBaseSchema,
   renameProjectSchema,
-  selectWorkspaceSchema,
   transferToPersonalProjectSchema,
   transferToWorkspaceSchema,
+  workspaceSelectSchema,
 } from "@builderai/db/validators"
 
 import {
@@ -315,7 +315,7 @@ export const projectRouter = createTRPCRouter({
             styles: z.object({
               backgroundImage: z.string(),
             }),
-            workspace: selectWorkspaceSchema.pick({
+            workspace: workspaceSelectSchema.pick({
               slug: true,
             }),
           })
@@ -366,7 +366,7 @@ export const projectRouter = createTRPCRouter({
             styles: z.object({
               backgroundImage: z.string(),
             }),
-            workspace: selectWorkspaceSchema.pick({
+            workspace: workspaceSelectSchema.pick({
               slug: true,
             }),
           })
@@ -418,7 +418,7 @@ export const projectRouter = createTRPCRouter({
     .output(
       z.object({
         project: projectSelectBaseSchema.extend({
-          workspace: selectWorkspaceSchema,
+          workspace: workspaceSelectSchema,
         }),
       })
     )
@@ -442,7 +442,7 @@ export const projectRouter = createTRPCRouter({
     .output(
       z.object({
         project: projectSelectBaseSchema.extend({
-          workspace: selectWorkspaceSchema,
+          workspace: workspaceSelectSchema,
         }),
       })
     )

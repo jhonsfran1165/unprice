@@ -41,10 +41,10 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
       const { description, name, email, metadata } = opts.input
-      const { apiKey, project, ...ctx } = opts.ctx
+      const { project } = opts.ctx
 
-      const unpriceCustomerId = project.workspace.unPriceCustomerId
-      const workspaceId = project.workspaceId
+      // const unpriceCustomerId = project.workspace.unPriceCustomerId
+      // const workspaceId = project.workspaceId
 
       const customerId = utils.newId("customer")
 
@@ -96,10 +96,10 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
       const { id } = opts.input
-      const { apiKey, project, ...ctx } = opts.ctx
+      const { project } = opts.ctx
 
-      const unpriceCustomerId = project.workspace.unPriceCustomerId
-      const workspaceId = project.workspaceId
+      // const unpriceCustomerId = project.workspace.unPriceCustomerId
+      // const workspaceId = project.workspaceId
 
       // we just need to validate the entitlements
       // await entitlementGuard({
@@ -166,7 +166,7 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
       const { email, id, description, metadata, name } = opts.input
-      const { apiKey, project, ...ctx } = opts.ctx
+      const { project } = opts.ctx
 
       // we just need to validate the entitlements
       // await entitlementGuard({
@@ -386,7 +386,7 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ exist: z.boolean() }))
     .mutation(async (opts) => {
       const { email } = opts.input
-      const { apiKey, project, ...ctx } = opts.ctx
+      const { project } = opts.ctx
 
       // we just need to validate the entitlements
       // await entitlementGuard({
@@ -420,7 +420,8 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
       const { email } = opts.input
-      const { apiKey, project, ...ctx } = opts.ctx
+      // const { apiKey, project, ...ctx } = opts.ctx
+      const { project } = opts.ctx
 
       // we just need to validate the entitlements
       // await entitlementGuard({
@@ -457,7 +458,7 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ customer: customerSelectSchema }))
     .query(async (opts) => {
       const { id } = opts.input
-      const { apiKey, project, ...ctx } = opts.ctx
+      const { project } = opts.ctx
 
       // we just need to validate the entitlements
       // await entitlementGuard({
@@ -507,7 +508,7 @@ export const customersRouter = createTRPCRouter({
     )
     .query(async (opts) => {
       const { id } = opts.input
-      const { apiKey, project, ...ctx } = opts.ctx
+      const { project } = opts.ctx
 
       // we just need to validate the entitlements
       // await entitlementGuard({
@@ -555,7 +556,7 @@ export const customersRouter = createTRPCRouter({
     .output(z.object({ customers: z.array(customerSelectSchema) }))
     .query(async (opts) => {
       const { fromDate, toDate } = opts.input
-      const { apiKey, project, ...ctx } = opts.ctx
+      const { project } = opts.ctx
 
       // we just need to validate the entitlements
       // await entitlementGuard({
