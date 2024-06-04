@@ -1,11 +1,5 @@
 import { relations } from "drizzle-orm"
-import {
-  boolean,
-  foreignKey,
-  primaryKey,
-  text,
-  timestamp,
-} from "drizzle-orm/pg-core"
+import { boolean, foreignKey, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, id, timestamps, workspaceID } from "../utils/sql"
@@ -27,20 +21,20 @@ export const workspaces = pgTableProject(
       .notNull()
       .references(() => users.id),
     imageUrl: text("image_url"),
-    // stripe stuff
-    stripeId: text("stripe_id").unique(),
-    // TODO: define the way subscriptions will work
-    // a workspace can have multiple projects and each project can have a different plan
-    // workspaces with subscribed projects will have a plan tag here to differentiate them so we can show the right features in the UI
-    // plan: plansEnum("legacy_plans").default("free").notNull(),
-    subscriptionId: cuid("subscription_id").unique(),
-    // null means there was no trial
-    trialEnds: timestamp("trial_ends", { mode: "date" }),
-    // if null, you should fall back to start of month
-    billingPeriodStart: timestamp("billing_period_start", { mode: "date" }),
-    // if null, you should fall back to end of month
-    billingPeriodEnd: timestamp("billing_period_end", { mode: "date" }),
+
+    // unprice id
+    // in Postgres 15.0+ NULLS NOT DISTINCT is available
+    unPriceCustomerId: text("unprice_customer_id").unique("unprice_customer_id", {
+      nulls: "not distinct",
+    }),
+
+    // TODO: remove this
     plan: plansEnum("legacy_plans").default("FREE").notNull(),
+
+    /**
+     * if the workspace is disabled, all API requests will be rejected
+     */
+    enabled: boolean("enabled").notNull().default(true),
   },
   (_table) => ({})
 )

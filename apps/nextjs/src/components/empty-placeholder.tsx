@@ -1,4 +1,4 @@
-import * as React from "react"
+import type * as React from "react"
 
 import { cn } from "@builderai/ui"
 
@@ -27,11 +27,7 @@ EmptyPlaceholder.Icon = function EmptyPlaceHolderIcon({
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <div className="flex items-center justify-center rounded-full">
-      {children}
-    </div>
-  )
+  return <div className="flex items-center justify-center rounded-full">{children}</div>
 }
 
 type EmptyPlaceholderTitleProps = React.HTMLAttributes<HTMLHeadingElement>
@@ -40,10 +36,7 @@ EmptyPlaceholder.Title = function EmptyPlaceholderTitle({
   className,
   ...props
 }: EmptyPlaceholderTitleProps) {
-  return (
-    // eslint-disable-next-line jsx-a11y/heading-has-content
-    <h2 className={cn("mt-4 text-lg font-semibold", className)} {...props} />
-  )
+  return <h2 className={cn("mt-4 text-lg font-semibold", className)} {...props} />
 }
 
 EmptyPlaceholder.Action = function EmptyPlaceHolderAction({
@@ -51,24 +44,14 @@ EmptyPlaceholder.Action = function EmptyPlaceHolderAction({
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <div className="flex items-center justify-center rounded-full">
-      {children}
-    </div>
-  )
+  return <div className="flex items-center justify-center rounded-full">{children}</div>
 }
 
-type EmptyPlaceholderDescriptionProps =
-  React.HTMLAttributes<HTMLParagraphElement>
+type EmptyPlaceholderDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>
 
 EmptyPlaceholder.Description = function EmptyPlaceholderDescription({
   className,
   ...props
 }: EmptyPlaceholderDescriptionProps) {
-  return (
-    <p
-      className={cn("mb-4 mt-2 text-sm text-muted-foreground", className)}
-      {...props}
-    />
-  )
+  return <p className={cn("text-muted-foreground mb-4 mt-2 text-sm", className)} {...props} />
 }

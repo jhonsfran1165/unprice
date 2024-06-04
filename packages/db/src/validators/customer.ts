@@ -2,43 +2,62 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import * as schema from "../schema"
+import { paymentProviderSchema } from "./shared"
 
-export const customerSelectSchema = createSelectSchema(schema.customers)
+export const customerProvidersMetadataSchema = z.object({
+  externalId: z.string().optional(),
+  stripeSubscriptionId: z.string().optional(),
+  defaultPaymentMethodId: z.string().optional(),
+})
+
+export const customerMetadataSchema = z.object({
+  externalId: z.string().optional(),
+})
+
+export const customerPaymentProviderSelectSchema = createSelectSchema(
+  schema.customerPaymentProviders,
+  {
+    metadata: customerProvidersMetadataSchema,
+    paymentProvider: paymentProviderSchema,
+  }
+)
+
+export const customerPaymentProviderInsertSchema = createInsertSchema(
+  schema.customerPaymentProviders,
+  {
+    metadata: customerProvidersMetadataSchema,
+    paymentProvider: paymentProviderSchema,
+  }
+)
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
+  .partial({
+    id: true,
+    projectId: true,
+  })
+
+export const customerSelectSchema = createSelectSchema(schema.customers, {
+  metadata: customerMetadataSchema,
+})
+
 export const customerInsertBaseSchema = createInsertSchema(schema.customers, {
+  metadata: customerMetadataSchema,
   email: z.string().min(3).email(),
   name: z.string().min(3),
 })
-
-export const customerSubscriptionSchema = customerSelectSchema.pick({
-  email: true,
-  name: true,
-  id: true,
-})
-
-export const customerInsertSchema = customerInsertBaseSchema
-  .pick({
-    email: true,
-    name: true,
+  .omit({
+    createdAt: true,
+    updatedAt: true,
   })
-  .extend({
-    projectSlug: z.string(),
-  })
-
-export const updateCustomerSchema = customerSelectSchema
-  .extend({
-    email: z.string().email(),
-    name: z.string().min(3),
-  })
-  .pick({
-    email: true,
-    name: true,
+  .partial({
     id: true,
-  })
-  .extend({
-    projectSlug: z.string(),
+    projectId: true,
   })
 
 export type Customer = z.infer<typeof customerSelectSchema>
-export type UserSubscription = z.infer<typeof customerSubscriptionSchema>
-export type CreateCustomer = z.infer<typeof customerInsertSchema>
-export type UpdateCustomer = z.infer<typeof updateCustomerSchema>
+export type InsertCustomer = z.infer<typeof customerInsertBaseSchema>
+
+export type CustomerPaymentProvider = z.infer<typeof customerPaymentProviderSelectSchema>
+export type InsertCustomerPaymentProvider = z.infer<typeof customerPaymentProviderInsertSchema>

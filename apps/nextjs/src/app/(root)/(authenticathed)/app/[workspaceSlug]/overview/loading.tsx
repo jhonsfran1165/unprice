@@ -11,7 +11,7 @@ export default function Loading() {
   return (
     <>
       <div className="flex w-full justify-end">
-        <Link href={`/`} aria-disabled>
+        <Link href={"/"} aria-disabled>
           <Button className="h-8 w-8" size={"icon"}>
             <Add className="h-4 w-4" />
           </Button>

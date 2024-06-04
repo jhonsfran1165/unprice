@@ -1,13 +1,6 @@
 import { format } from "date-fns"
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@builderai/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
 
 import { api } from "~/trpc/server"
 
@@ -26,7 +19,7 @@ export default async function IngestionPage(props: {
     <>
       <Table>
         <TableHeader>
-          <TableRow className="pointer-events-none bg-muted">
+          <TableRow className="bg-muted pointer-events-none">
             <TableHead>Id</TableHead>
             <TableHead>Created At</TableHead>
             <TableHead>Commit</TableHead>
@@ -37,9 +30,7 @@ export default async function IngestionPage(props: {
         <TableBody>
           <TableRow>
             <TableCell>{ingestion.id}</TableCell>
-            <TableCell>
-              {format(ingestion.createdAt, "yyyy-MM-dd HH:mm:ss")}
-            </TableCell>
+            <TableCell>{format(ingestion.createdAt, "yyyy-MM-dd HH:mm:ss")}</TableCell>
             <TableCell>{ingestion.hash}</TableCell>
             <TableCell>{ingestion.origin}</TableCell>
             <TableCell>{ingestion.parent}</TableCell>
@@ -47,7 +38,7 @@ export default async function IngestionPage(props: {
         </TableBody>
       </Table>
       <h3 className="text-lg font-medium">Schema</h3>
-      <pre className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
+      <pre className="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
         {JSON.stringify(ingestion.schema, null, 4)}
       </pre>
     </>

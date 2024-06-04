@@ -3,7 +3,7 @@ import { z } from "zod"
 
 import { and, eq } from "@builderai/db"
 import { domains } from "@builderai/db/schema"
-import { newIdEdge } from "@builderai/db/utils"
+import { newId } from "@builderai/db/utils"
 import type { DomainVerificationStatusProps } from "@builderai/db/validators"
 import {
   domainCreateBaseSchema,
@@ -13,10 +13,7 @@ import {
   domainVerificationStatusSchema,
 } from "@builderai/db/validators"
 
-import {
-  createTRPCRouter,
-  protectedActiveWorkspaceAdminProcedure,
-} from "../../trpc"
+import { createTRPCRouter, protectedActiveWorkspaceAdminProcedure } from "../../trpc"
 import {
   addDomainToVercel,
   getConfigResponseVercel,
@@ -78,7 +75,7 @@ export const domainRouter = createTRPCRouter({
         })
       }
 
-      const domainId = newIdEdge("domain")
+      const domainId = newId("domain")
 
       const domainData = await opts.ctx.db
         .insert(domains)
@@ -111,8 +108,7 @@ export const domainRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const workspace = opts.ctx.workspace
       const domain = await opts.ctx.db.query.domains.findFirst({
-        where: (d, { eq, and }) =>
-          and(eq(d.id, opts.input.id), eq(d.workspaceId, workspace.id)),
+        where: (d, { eq, and }) => and(eq(d.id, opts.input.id), eq(d.workspaceId, workspace.id)),
       })
 
       if (!domain) {
@@ -152,8 +148,7 @@ export const domainRouter = createTRPCRouter({
       const { id, name: domain } = opts.input
 
       const oldDomain = await opts.ctx.db.query.domains.findFirst({
-        where: (d, { eq, and }) =>
-          and(eq(d.id, id), eq(d.workspaceId, workspace.id)),
+        where: (d, { eq, and }) => and(eq(d.id, id), eq(d.workspaceId, workspace.id)),
       })
 
       if (!oldDomain) {
@@ -270,10 +265,7 @@ export const domainRouter = createTRPCRouter({
           verified: status === "Valid Configuration",
         })
         .where(
-          and(
-            eq(domains.name, opts.input.domain),
-            eq(domains.workspaceId, opts.ctx.workspace.id)
-          )
+          and(eq(domains.name, opts.input.domain), eq(domains.workspaceId, opts.ctx.workspace.id))
         )
 
       return {

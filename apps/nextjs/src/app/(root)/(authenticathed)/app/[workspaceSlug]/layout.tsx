@@ -29,9 +29,7 @@ export default function DashboardLayout(props: {
           )}
 
           <Suspense fallback={<ProjectSwitcherSkeleton />}>
-            <ProjectSwitcher
-              projectPromise={api.projects.listByActiveWorkspace()}
-            />
+            <ProjectSwitcher projectPromise={api.projects.listByActiveWorkspace()} />
           </Suspense>
         </>
       </Header>

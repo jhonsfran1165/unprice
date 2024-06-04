@@ -1,7 +1,7 @@
 "use client"
 
+import { LazyMotion, domAnimation, m } from "framer-motion"
 import { useParams, useRouter } from "next/navigation"
-import { domAnimation, LazyMotion, m } from "framer-motion"
 import { Balancer } from "react-wrap-balancer"
 
 import { Button } from "@builderai/ui/button"
@@ -48,7 +48,7 @@ export default function Intro() {
               <Balancer>Welcome to Acme Corp</Balancer>
             </m.h1>
             <m.p
-              className="max-w-md text-muted-foreground transition-colors sm:text-lg"
+              className="text-muted-foreground max-w-md transition-colors sm:text-lg"
               variants={{
                 hidden: { opacity: 0, y: 50 },
                 show: {
@@ -58,8 +58,8 @@ export default function Intro() {
                 },
               }}
             >
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+              incididunt.
             </m.p>
             <m.div
               variants={{

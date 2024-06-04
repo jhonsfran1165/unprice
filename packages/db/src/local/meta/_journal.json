@@ -1,131 +1,61 @@
 {
-  "version": "5",
-  "dialect": "pg",
+  "version": "6",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1708774055433,
-      "tag": "0000_absent_steel_serpent",
+      "version": "6",
+      "when": 1716983496291,
+      "tag": "0000_cooing_red_ghost",
       "breakpoints": true
     },
     {
       "idx": 1,
-      "version": "5",
-      "when": 1708985442020,
-      "tag": "0001_glamorous_fabian_cortez",
+      "version": "6",
+      "when": 1716984048713,
+      "tag": "0001_parallel_human_cannonball",
       "breakpoints": true
     },
     {
       "idx": 2,
-      "version": "5",
-      "when": 1709210343314,
-      "tag": "0002_nice_scarlet_spider",
+      "version": "6",
+      "when": 1716987233460,
+      "tag": "0002_chief_titania",
       "breakpoints": true
     },
     {
       "idx": 3,
-      "version": "5",
-      "when": 1709210950261,
-      "tag": "0003_known_odin",
+      "version": "6",
+      "when": 1716992449422,
+      "tag": "0003_sturdy_sir_ram",
       "breakpoints": true
     },
     {
       "idx": 4,
-      "version": "5",
-      "when": 1709213165847,
-      "tag": "0004_yielding_morlocks",
+      "version": "6",
+      "when": 1716992488644,
+      "tag": "0004_previous_zemo",
       "breakpoints": true
     },
     {
       "idx": 5,
-      "version": "5",
-      "when": 1709474985122,
-      "tag": "0005_flawless_dormammu",
+      "version": "6",
+      "when": 1717412981868,
+      "tag": "0005_mature_george_stacy",
       "breakpoints": true
     },
     {
       "idx": 6,
-      "version": "5",
-      "when": 1709475191850,
-      "tag": "0006_eager_venus",
+      "version": "6",
+      "when": 1717414865136,
+      "tag": "0006_quick_hercules",
       "breakpoints": true
     },
     {
       "idx": 7,
-      "version": "5",
-      "when": 1709475377978,
-      "tag": "0007_reflective_starhawk",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "5",
-      "when": 1709639120866,
-      "tag": "0008_icy_scarecrow",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "5",
-      "when": 1709642453936,
-      "tag": "0009_brave_mystique",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "5",
-      "when": 1709649167824,
-      "tag": "0010_premium_deathstrike",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "5",
-      "when": 1709653968351,
-      "tag": "0011_tan_beast",
-      "breakpoints": true
-    },
-    {
-      "idx": 12,
-      "version": "5",
-      "when": 1710596873078,
-      "tag": "0012_deep_ikaris",
-      "breakpoints": true
-    },
-    {
-      "idx": 13,
-      "version": "5",
-      "when": 1710618239160,
-      "tag": "0013_clean_corsair",
-      "breakpoints": true
-    },
-    {
-      "idx": 14,
-      "version": "5",
-      "when": 1710618526288,
-      "tag": "0014_careful_doomsday",
-      "breakpoints": true
-    },
-    {
-      "idx": 15,
-      "version": "5",
-      "when": 1710854636441,
-      "tag": "0015_lyrical_the_leader",
-      "breakpoints": true
-    },
-    {
-      "idx": 16,
-      "version": "5",
-      "when": 1710940856633,
-      "tag": "0016_puzzling_baron_zemo",
-      "breakpoints": true
-    },
-    {
-      "idx": 17,
-      "version": "5",
-      "when": 1711324215866,
-      "tag": "0017_clammy_surge",
+      "version": "6",
+      "when": 1717414968574,
+      "tag": "0007_white_scream",
       "breakpoints": true
     }
   ]

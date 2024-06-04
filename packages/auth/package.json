@@ -6,22 +6,19 @@
   "exports": {
     ".": "./src/index.ts",
     "./server": "./src/server.ts",
+    "./server-rsc": "./src/server-rsc.ts",
     "./config": "./src/config.ts",
     "./react": "./src/react.ts",
     "./env": "./src/env.mjs"
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "src/*"
-      ]
+      "*": ["src/*"]
     }
   },
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint .",
-    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -29,21 +26,14 @@
     "@builderai/db": "^0.1.0",
     "@t3-oss/env-nextjs": "0.9.1",
     "encoding": "^0.1.13",
-    "next-auth": "5.0.0-beta.15",
-    "zod": "^3.22.4"
+    "next": "14.2.3",
+    "next-auth": "5.0.0-beta.19",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@builderai/eslint-config": "^0.2.0",
-    "@builderai/prettier-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
-  },
-  "eslintConfig": {
-    "extends": [
-      "@builderai/eslint-config/base"
-    ]
-  },
-  "prettier": "@builderai/prettier-config"
+  }
 }

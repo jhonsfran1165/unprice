@@ -16,6 +16,9 @@ export const workspaceSelectBase = createSelectSchema(schema.workspaces)
 export const workspaceInsertBase = createInsertSchema(schema.workspaces, {
   name: z.string().min(3, "Name must be at least 3 characters"),
   slug: z.string().min(3, "Slug must be at least 3 characters"),
+}).omit({
+  createdAt: true,
+  updatedAt: true,
 })
 
 export const listMembersSchema = membersSelectBase.extend({
@@ -67,14 +70,16 @@ export const purchaseWorkspaceSchema = workspaceInsertBase
     ),
   })
 
-export const selectWorkspaceSchema = createSelectSchema(schema.workspaces)
+export const workspaceSelectSchema = createSelectSchema(schema.workspaces)
 
-export const workspacesJWTPayload = selectWorkspaceSchema
+export const workspacesJWTPayload = workspaceSelectSchema
   .pick({
     id: true,
     slug: true,
     isPersonal: true,
     plan: true,
+    enabled: true,
+    unPriceCustomerId: true,
   })
   .extend({
     role: membersSelectBase.shape.role,
@@ -82,9 +87,9 @@ export const workspacesJWTPayload = selectWorkspaceSchema
 
 export type WorkspacesJWTPayload = z.infer<typeof workspacesJWTPayload>
 export type WorkspaceRole = z.infer<typeof membersSelectBase.shape.role>
-export type WorkspacePlan = z.infer<typeof selectWorkspaceSchema.shape.plan>
+export type WorkspacePlan = z.infer<typeof workspaceSelectSchema.shape.plan>
 export type PurchaseOrg = z.infer<typeof purchaseWorkspaceSchema>
-export type Workspace = z.infer<typeof selectWorkspaceSchema>
+export type Workspace = z.infer<typeof workspaceSelectSchema>
 export type Member = z.infer<typeof membersSelectBase>
 export type InviteOrgMember = z.infer<typeof inviteOrgMemberSchema>
 export type RenameWorkspace = z.infer<typeof renameWorkspaceSchema>

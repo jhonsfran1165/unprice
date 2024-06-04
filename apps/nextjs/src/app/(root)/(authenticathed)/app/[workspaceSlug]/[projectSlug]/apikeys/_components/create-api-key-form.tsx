@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import { add, format } from "date-fns"
+import { useState } from "react"
 
 import type { CreateApiKey } from "@builderai/db/validators"
 import { createApiKeySchema } from "@builderai/db/validators"
@@ -67,8 +67,7 @@ export default function CreateApiKeyForm(props: {
                 <Input {...field} placeholder="api-key-prod" />
               </FormControl>
               <FormDescription>
-                Enter a unique name for your token to differentiate it from
-                other tokens.
+                Enter a unique name for your token to differentiate it from other tokens.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -84,16 +83,11 @@ export default function CreateApiKeyForm(props: {
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className="pl-3 text-left font-normal"
-                    >
+                    <Button variant={"outline"} className="pl-3 text-left font-normal">
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span className="text-muted-foreground">
-                          Pick a date
-                        </span>
+                        <span className="text-muted-foreground">Pick a date</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -116,9 +110,8 @@ export default function CreateApiKeyForm(props: {
                 </PopoverContent>
               </Popover>
               <FormDescription>
-                We <b>strongly recommend</b> you setting an expiration date for
-                your API key, but you can also leave it blank to create a
-                permanent key.
+                We <b>strongly recommend</b> you setting an expiration date for your API key, but
+                you can also leave it blank to create a permanent key.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -128,7 +121,7 @@ export default function CreateApiKeyForm(props: {
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting && (
             <div className="mr-1" role="status">
-              <div className="h-3 w-3 animate-spin rounded-full border-2 border-background border-r-transparent" />
+              <div className="border-background h-3 w-3 animate-spin rounded-full border-2 border-r-transparent" />
             </div>
           )}
           Create Key

@@ -11,13 +11,11 @@ export const PROJECT_TIER = {
   STANDARD: "STANDARD",
 } as const
 
-export const PLANS_APP = Object.keys(PLANS) as unknown as readonly [
+export const PLANS_APP = Object.keys(PLANS) as unknown as readonly [string, ...string[]]
+
+export const PROJECT_TIERS_APP = Object.keys(PROJECT_TIER) as unknown as readonly [
   string,
   ...string[],
 ]
-
-export const PROJECT_TIERS_APP = Object.keys(
-  PROJECT_TIER
-) as unknown as readonly [string, ...string[]]
 
 export type ProjectTier = (typeof PROJECT_TIER)[keyof typeof PROJECT_TIER]

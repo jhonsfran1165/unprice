@@ -1,7 +1,7 @@
-import type { ReactNode } from "react"
-import { Suspense } from "react"
 import { cookies } from "next/headers"
 import Link from "next/link"
+import type { ReactNode } from "react"
+import { Suspense } from "react"
 
 import { Button, buttonVariants } from "@builderai/ui/button"
 import { ChevronRight, Logo } from "@builderai/ui/icons"
@@ -17,13 +17,11 @@ import { navItems, siteConfig } from "~/constants/layout"
 export default function MarketingLayout(props: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <nav className="z-50 flex h-16 items-center border-b bg-background">
+      <nav className="bg-background z-50 flex h-16 items-center border-b">
         <MaxWidthWrapper className="flex max-w-screen-2xl">
           <div className="mr-8 hidden items-center md:flex">
             <Logo className="mr-2 h-6 w-6" />
-            <span className="text-lg font-bold tracking-tight">
-              {siteConfig.name}
-            </span>
+            <span className="text-lg font-bold tracking-tight">{siteConfig.name}</span>
           </div>
           <Suspense>
             {/* TODO: fix this -> pass as much props as possible to MobileDropdown */}
@@ -34,9 +32,7 @@ export default function MarketingLayout(props: { children: ReactNode }) {
                   className="mr-2 px-0 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
                 >
                   <Logo className="mr-2 h-6 w-6" />
-                  <span className="text-lg font-bold tracking-tight">
-                    {siteConfig.name}
-                  </span>
+                  <span className="text-lg font-bold tracking-tight">{siteConfig.name}</span>
                 </Button>
               }
               navTabs={
@@ -46,7 +42,7 @@ export default function MarketingLayout(props: { children: ReactNode }) {
                       key={item.href}
                       href={item.href}
                       // className="mt-2 flex items-center text-lg font-semibold sm:text-sm"
-                      className="flex py-1 text-base font-medium text-muted-foreground transition-colors hover:text-primary"
+                      className="text-muted-foreground hover:text-primary flex py-1 text-base font-medium transition-colors"
                     >
                       {item.title}
                     </Link>
@@ -88,10 +84,7 @@ function DashboardLink() {
   }
 
   return (
-    <Link
-      href={`${APP_DOMAIN}${workspaceSlug}`}
-      className={buttonVariants({ variant: "outline" })}
-    >
+    <Link href={`${APP_DOMAIN}${workspaceSlug}`} className={buttonVariants({ variant: "outline" })}>
       Dashboard
       <ChevronRight className="ml-1 h-4 w-4" />
     </Link>

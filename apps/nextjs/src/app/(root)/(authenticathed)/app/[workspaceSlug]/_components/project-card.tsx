@@ -4,12 +4,7 @@ import type { RouterOutputs } from "@builderai/api"
 import type { ProjectTier } from "@builderai/config"
 import { PROJECT_TIER } from "@builderai/config"
 import { cn } from "@builderai/ui"
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
 
 function ProjectTierIndicator(props: { tier: ProjectTier }) {
   return (
@@ -33,10 +28,7 @@ export function ProjectCard(props: {
   const { project } = props
   const projectTier = (project.tier as ProjectTier) ?? ("FREE" as ProjectTier)
   return (
-    <Link
-      prefetch={false}
-      href={`/${props.workspaceSlug}/${project.slug}/overview`}
-    >
+    <Link prefetch={false} href={`/${props.workspaceSlug}/${project.slug}/overview`}>
       <Card className="overflow-hidden">
         <div className="h-32" style={project.styles} />
         <CardHeader>
@@ -55,12 +47,10 @@ export function ProjectCardSkeleton(props: { pulse?: boolean }) {
   const { pulse = true } = props
   return (
     <Card>
-      <div className={cn("h-32 bg-muted", pulse && "animate-pulse")} />
+      <div className={cn("bg-muted h-32", pulse && "animate-pulse")} />
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span className={cn("flex-1 bg-muted", pulse && "animate-pulse")}>
-            &nbsp;
-          </span>
+          <span className={cn("bg-muted flex-1", pulse && "animate-pulse")}>&nbsp;</span>
           <ProjectTierIndicator tier={PROJECT_TIER.FREE} />
         </CardTitle>
         <CardDescription className={cn("bg-muted", pulse && "animate-pulse")}>

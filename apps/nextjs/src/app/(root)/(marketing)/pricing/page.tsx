@@ -2,13 +2,7 @@ import { toDecimal } from "dinero.js"
 import { Balancer } from "react-wrap-balancer"
 
 import type { RouterOutputs } from "@builderai/api"
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import { CheckCircle2 } from "@builderai/ui/icons"
 
 import { currencySymbol } from "~/lib/currency"
@@ -62,7 +56,7 @@ function PricingCard(props: {
         )}
         {props.plan.features.map((feature) => (
           <li key={feature} className="flex items-center">
-            <CheckCircle2 className="mr-2 h-6 w-6 fill-primary text-primary-foreground" />
+            <CheckCircle2 className="fill-primary text-primary-foreground mr-2 h-6 w-6" />
             {feature}
           </li>
         ))}

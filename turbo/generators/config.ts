@@ -1,5 +1,5 @@
-import type { PackageJson, PlopTypes } from "@turbo/gen";
-import { execSync } from "node:child_process";
+import { execSync } from "node:child_process"
+import type { PackageJson, PlopTypes } from "@turbo/gen"
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
   plop.setGenerator("init", {
@@ -8,24 +8,22 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
       {
         type: "input",
         name: "name",
-        message:
-          "What is the name of the package? (You can skip the `@builderai/` prefix)",
+        message: "What is the name of the package? (You can skip the `@builderai/` prefix)",
       },
       {
         type: "input",
         name: "deps",
-        message:
-          "Enter a space separated list of dependencies you would like to install",
+        message: "Enter a space separated list of dependencies you would like to install",
       },
     ],
     actions: [
       (answers) => {
         if ("name" in answers && typeof answers.name === "string") {
           if (answers.name.startsWith("@builderai/")) {
-            answers.name = answers.name.replace("@builderai/", "");
+            answers.name = answers.name.replace("@builderai/", "")
           }
         }
-        return "Config sanitized";
+        return "Config sanitized"
       },
       {
         type: "add",
@@ -51,16 +49,14 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         type: "modify",
         path: "packages/{{ name }}/package.json",
         async transform(content, answers) {
-          const pkg = JSON.parse(content) as PackageJson;
+          const pkg = JSON.parse(content) as PackageJson
           for (const dep of answers.deps.split(" ").filter(Boolean)) {
-            const version = await fetch(
-              `https://registry.npmjs.org/-/package/${dep}/dist-tags`,
-            )
+            const version = await fetch(`https://registry.npmjs.org/-/package/${dep}/dist-tags`)
               .then((res) => res.json())
-              .then((json) => json.latest);
-            pkg.dependencies![dep] = `^${version}`;
+              .then((json) => json.latest)
+            pkg.dependencies![dep] = `^${version}`
           }
-          return JSON.stringify(pkg, null, 2);
+          return JSON.stringify(pkg, null, 2)
         },
       },
       async (answers) => {
@@ -69,14 +65,12 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
          */
         execSync("pnpm manypkg fix", {
           stdio: "inherit",
-        });
+        })
         execSync(
-          `pnpm prettier --write packages/${
-            (answers as { name: string }).name
-          }/** --list-different`,
-        );
-        return "Package scaffolded";
+          `pnpm fmt --write packages/${(answers as { name: string }).name}/** --list-different`
+        )
+        return "Package scaffolded"
       },
     ],
-  });
+  })
 }

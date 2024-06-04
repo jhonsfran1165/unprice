@@ -56,9 +56,7 @@ export interface SiteConfig {
 export function isSidebarRoute(item: object | undefined): item is SidebarRoute {
   return (item as SidebarRoute) !== undefined
 }
-export function isSubTabsRoutes(
-  item: object | undefined
-): item is SubTabsRoutes {
+export function isSubTabsRoutes(item: object | undefined): item is SubTabsRoutes {
   return (item as SubTabsRoutes) !== undefined
 }
 

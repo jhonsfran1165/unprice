@@ -3,36 +3,22 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
-import type { PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 
 import type { FeaturePlanProps } from "./feature-plan"
 import { FeaturePlan } from "./feature-plan"
 
-export interface DragData extends FeaturePlanProps {
-  mode: "Feature" | "FeaturePlan"
-  feature: PlanVersionFeature
-  className?: string
-  disabled?: boolean
-}
-
-export function SortableFeature(props: DragData) {
-  const {
-    setNodeRef,
-    listeners,
-    isDragging,
-    attributes,
-    transform,
-    transition,
-  } = useSortable({
-    id: props.feature.id,
+export function SortableFeature(props: FeaturePlanProps) {
+  const { setNodeRef, listeners, isDragging, attributes, transform, transition } = useSortable({
+    id: props.planFeatureVersion.featureId,
     data: {
       mode: props.mode,
-      feature: props.feature,
-    } satisfies DragData,
+      planFeatureVersion: props.planFeatureVersion,
+    },
     attributes: {
       roleDescription: props.mode,
     },
+    disabled: props.disabled,
   })
 
   const style = {
@@ -51,8 +37,7 @@ export function SortableFeature(props: DragData) {
       className={cn(props.className, {
         "cursor-pointer": !isFeature,
         "cursor-grab": isFeature,
-        "cursor-pointer border-dashed border-primary-solid opacity-80 ":
-          isDragging && !isFeature,
+        "cursor-pointer border-dashed opacity-80": isDragging && !isFeature,
       })}
       {...props}
     />

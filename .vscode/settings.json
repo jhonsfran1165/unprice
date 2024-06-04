@@ -1,43 +1,16 @@
 {
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+  "[jsonc]": {
+    "editor.defaultFormatter": "biomejs.biome"
   },
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,
-  "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
-  "eslint.workingDirectories": [
-    { "pattern": "apps/*/" },
-    { "pattern": "packages/*/" },
-    { "pattern": "tooling/*/" }
-  ],
-  "tailwindCSS.experimental.configFile": "./tooling/tailwind/index.ts",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
   "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.preferences.autoImportFileExcludePatterns": [
-    "next/router.d.ts",
-    "next/dist/client/router.d.ts"
-  ],
-  "[typescriptreact]": {
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit",
-      "source.fixAll": "explicit"
-    },
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit",
-      "source.fixAll": "explicit"
-    },
-    "editor.formatOnSave": true
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[javascriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
   },
   "cSpell.words": [
     "apikey",
@@ -45,15 +18,23 @@
     "asociated",
     "builderai",
     "Configurator",
+    "datasource",
     "dinero",
+    "hget",
+    "hgetall",
+    "hset",
     "ianvs",
     "ingestions",
+    "LEMONSQUEEZY",
     "openai",
     "openapi",
     "satoshi",
     "sidemodule",
+    "tinybird",
     "typecheck",
-    "uidx"
+    "uidx",
+    "Unprice",
+    "UPSTASH"
   ],
   "search.exclude": {
     "**/.git": true,
@@ -61,11 +42,5 @@
     "**/bower_components": true,
     "**/**/.next": true,
     "**/tmp": true
-  },
-  "[typescript][typescriptreact]": {
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit",
-      "source.fixAll": "explicit"
-    }
   }
 }

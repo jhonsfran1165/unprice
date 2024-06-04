@@ -1,14 +1,7 @@
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
-import { SubscriptionForm } from "./subscription-form"
 
 export const preferredRegion = ["fra1"]
 export const runtime = "edge"
@@ -23,8 +16,10 @@ export default function BillingPage() {
 }
 
 async function SubscriptionCard() {
-  const { subscription } = await api.auth.mySubscription()
+  const { subscriptions } = await api.auth.mySubscriptions()
 
+  // TODO: customer can have multiple subscriptions
+  const subscription = subscriptions[0]
   return (
     <Card>
       <CardHeader>
@@ -33,11 +28,10 @@ async function SubscriptionCard() {
       <CardContent>
         {subscription ? (
           <div>
-            You are currently on the <strong>{subscription.plan}</strong> plan.
-            {subscription.billingPeriodEnd && (
+            You are currently on the <strong>{subscription.planVersion.title}</strong> plan.
+            {subscription.startDate && (
               <strong>
-                Your subscription will renew on{" "}
-                {formatDate(subscription.billingPeriodEnd)}.{" "}
+                Your subscription will renew on {formatDate(subscription.startDate)}.{" "}
               </strong>
             )}
           </div>
@@ -45,9 +39,7 @@ async function SubscriptionCard() {
           <div>You are not subscribed to any plan.</div>
         )}
       </CardContent>
-      <CardFooter>
-        <SubscriptionForm hasSubscription={!!subscription} />
-      </CardFooter>
+      <CardFooter />
     </Card>
   )
 }

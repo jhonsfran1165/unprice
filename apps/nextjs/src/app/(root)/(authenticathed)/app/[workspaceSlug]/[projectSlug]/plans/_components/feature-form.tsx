@@ -1,7 +1,7 @@
 "use client"
 
-import { startTransition } from "react"
 import { useRouter } from "next/navigation"
+import { startTransition } from "react"
 import { z } from "zod"
 
 import { slugify } from "@builderai/db/utils"
@@ -37,7 +37,7 @@ export function FeatureForm({
   const apiUtils = api.useUtils()
   const featureExist = api.features.exist.useMutation()
 
-  const editMode = defaultValues.id ? true : false
+  const editMode = !!defaultValues.id
 
   // async validation only when creating a new feature
   const forSchema = editMode
@@ -65,8 +65,8 @@ export function FeatureForm({
       form.reset(feature)
       await apiUtils.features.searchBy.invalidate()
       toastAction("saved")
-      router.refresh()
       setDialogOpen?.(false)
+      router.refresh()
     },
   })
 
@@ -75,8 +75,18 @@ export function FeatureForm({
       form.reset(feature)
       await apiUtils.features.searchBy.invalidate()
       toastAction("updated")
-      router.refresh()
+
       setDialogOpen?.(false)
+      // Only needed when the form is inside a uncontrolled dialog - normally updates
+      // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+      if (!setDialogOpen) {
+        const escKeyEvent = new KeyboardEvent("keydown", {
+          key: "Escape",
+        })
+        document.dispatchEvent(escKeyEvent)
+      }
+
+      router.refresh()
     },
   })
 
@@ -85,7 +95,6 @@ export function FeatureForm({
       await apiUtils.features.searchBy.invalidate()
       toastAction("deleted")
       form.reset()
-      router.refresh()
     },
   })
 
@@ -109,85 +118,92 @@ export function FeatureForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6">
-        <div className="flex justify-between gap-2">
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Custom Domains"
-                      onChange={(e) => {
-                        field.onChange(e)
-                        if (!editMode) {
-                          const slug = slugify(e.target.value)
-                          form.setValue("slug", slug)
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <div className="space-y-8">
+          <div className="flex justify-between gap-2">
+            <div className="w-full">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Custom Domains"
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (!editMode) {
+                            const slug = slugify(e.target.value)
+                            form.setValue("slug", slug)
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="w-full">
+              <FormField
+                control={form.control}
+                name="slug"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Slug</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="custom-domains" readOnly disabled />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
 
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="slug"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Slug</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="custom-domains"
-                      readOnly
-                      disabled
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder="Grants the user the access to custom domains feature"
+                  />
+                </FormControl>
+                <FormDescription>Enter a short description of the feature.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  {...field}
-                  value={field.value ?? ""}
-                  placeholder="Grants the user the access to custom domains feature"
-                />
-              </FormControl>
-              <FormDescription>
-                Enter a short description of the feature.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="mt-8 flex justify-end space-x-2">
+        <div className="mt-8 flex justify-end space-x-4">
           {editMode && (
             <ConfirmAction
               confirmAction={() => {
                 setDialogOpen?.(false)
+
+                // Only needed when the form is inside a uncontrolled dialog - normally updates
+                // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+                if (!setDialogOpen) {
+                  const escKeyEvent = new KeyboardEvent("keydown", {
+                    key: "Escape",
+                  })
+                  document.dispatchEvent(escKeyEvent)
+                }
+
                 onDelete()
               }}
             >
-              <Button variant={"destructive"}>Delete</Button>
+              <Button variant={"link"} disabled={deleteFeature.isPending}>
+                Delete
+              </Button>
             </ConfirmAction>
           )}
           <SubmitButton

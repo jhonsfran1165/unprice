@@ -1,10 +1,10 @@
-"use server"
+import "server-only"
 
-import { cache } from "react"
 import { cookies, headers } from "next/headers"
+import { cache } from "react"
 
 import { createCaller, createTRPCContext } from "@builderai/api"
-import { auth } from "@builderai/auth/server"
+import { auth } from "@builderai/auth/server-rsc"
 
 import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "~/constants"
 

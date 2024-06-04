@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import type { NextAuthRequest } from "@builderai/auth/server"
+import type { NextAuthRequest } from "@builderai/auth"
 
 import { parse } from "./utils"
 

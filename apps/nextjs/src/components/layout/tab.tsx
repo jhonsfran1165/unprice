@@ -1,12 +1,7 @@
 import Link from "next/link"
 
 import { cn } from "@builderai/ui"
-import {
-  Tooltip,
-  TooltipArrow,
-  TooltipContent,
-  TooltipTrigger,
-} from "@builderai/ui/tooltip"
+import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
 import { Ping } from "~/components/ping"
 import type { DashboardRoute } from "~/types"
@@ -50,9 +45,9 @@ export const Tab = ({
           >
             <p
               className={cn(
-                "flex items-center justify-center whitespace-nowrap text-sm text-background-text",
+                "text-background-text flex items-center justify-center whitespace-nowrap text-sm",
                 {
-                  "opacity-50 hover:text-background-solid": route.disabled,
+                  "hover:text-background-solid opacity-50": route.disabled,
                   "hover:text-background-textContrast": !active,
                   "text-primary-text dark:text-primary-solid": active,
                 }
@@ -64,7 +59,7 @@ export const Tab = ({
         </Link>
       </TooltipTrigger>
       <TooltipContent
-        className="bg-background-bg"
+        className="bg-background-bgSubtle"
         sideOffset={10}
         align="center"
         side="right"

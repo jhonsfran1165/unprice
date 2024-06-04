@@ -1,8 +1,8 @@
 "use client"
 
-import { Suspense, use, useState } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
+import { Suspense, use, useState } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
@@ -44,9 +44,7 @@ export function WorkspaceSwitcher({
 
   if (!user) throw new Error("User not found, how did you get here?")
 
-  const activeWorkspace = workspaces.find(
-    (workspace) => workspace.slug === workspaceSlug
-  )
+  const activeWorkspace = workspaces.find((workspace) => workspace.slug === workspaceSlug)
 
   const personalWorkspace = workspaces.find((wk) => wk.isPersonal)
   const teams = workspaces.filter((wk) => !wk.isPersonal)
@@ -61,7 +59,6 @@ export function WorkspaceSwitcher({
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            size="sm"
             role="combobox"
             aria-expanded={switcherOpen}
             aria-label="Select a workspace"
@@ -69,18 +66,11 @@ export function WorkspaceSwitcher({
           >
             <Avatar className="mr-2 h-5 w-5">
               <AvatarImage
-                src={
-                  activeWorkspace?.imageUrl ??
-                  `https://avatar.vercel.sh/${activeWorkspace.id}`
-                }
+                src={activeWorkspace?.imageUrl ?? `https://avatar.vercel.sh/${activeWorkspace.id}`}
               />
-              <AvatarFallback>
-                {activeWorkspace.slug?.substring(0, 2)}
-              </AvatarFallback>
+              <AvatarFallback>{activeWorkspace.slug?.substring(0, 2)}</AvatarFallback>
             </Avatar>
-            <span className="z-10 truncate font-semibold">
-              {activeWorkspace.name}
-            </span>
+            <span className="z-10 truncate font-semibold">{activeWorkspace.name}</span>
             <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -110,19 +100,13 @@ export function WorkspaceSwitcher({
                         }
                         alt={`user-${personalWorkspace.name}`}
                       />
-                      <AvatarFallback>
-                        {activeWorkspace.slug?.substring(0, 2)}
-                      </AvatarFallback>
+                      <AvatarFallback>{activeWorkspace.slug?.substring(0, 2)}</AvatarFallback>
                     </Avatar>
-                    <span className="z-10 truncate font-semibold">
-                      {personalWorkspace.name}
-                    </span>
+                    <span className="z-10 truncate font-semibold">{personalWorkspace.name}</span>
                     <Check
                       className={cn(
                         "ml-auto h-4 w-4",
-                        activeWorkspace.id === personalWorkspace.id
-                          ? "opacity-100"
-                          : "opacity-0"
+                        activeWorkspace.id === personalWorkspace.id ? "opacity-100" : "opacity-0"
                       )}
                     />
                   </CommandItem>
@@ -149,25 +133,16 @@ export function WorkspaceSwitcher({
                     >
                       <Avatar className="mr-2 h-5 w-5">
                         <AvatarImage
-                          src={
-                            workspace.imageUrl ??
-                            `https://avatar.vercel.sh/${workspace.id}`
-                          }
+                          src={workspace.imageUrl ?? `https://avatar.vercel.sh/${workspace.id}`}
                           alt={`user-${workspace.name}`}
                         />
-                        <AvatarFallback>
-                          {workspace.name.substring(0, 2)}
-                        </AvatarFallback>
+                        <AvatarFallback>{workspace.name.substring(0, 2)}</AvatarFallback>
                       </Avatar>
-                      <span className="z-10 truncate font-semibold">
-                        {workspace.name}
-                      </span>
+                      <span className="z-10 truncate font-semibold">{workspace.name}</span>
                       <Check
                         className={cn(
                           "ml-auto h-4 w-4",
-                          activeWorkspace?.id === workspace.id
-                            ? "opacity-100"
-                            : "opacity-0"
+                          activeWorkspace?.id === workspace.id ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>

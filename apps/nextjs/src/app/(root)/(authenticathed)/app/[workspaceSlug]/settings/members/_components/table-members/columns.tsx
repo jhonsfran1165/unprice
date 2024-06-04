@@ -10,8 +10,7 @@ import { Checkbox } from "@builderai/ui/checkbox"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { DataTableRowActions } from "./data-table-row-actions"
 
-export type Member =
-  RouterOutputs["workspaces"]["listMembers"]["members"][number]
+export type Member = RouterOutputs["workspaces"]["listMembers"]["members"][number]
 
 export const columns: ColumnDef<Member>[] = [
   {
@@ -19,8 +18,7 @@ export const columns: ColumnDef<Member>[] = [
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
@@ -40,45 +38,30 @@ export const columns: ColumnDef<Member>[] = [
   },
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <Avatar>
-          <AvatarImage
-            src={row.original.user.image ?? ""}
-            alt={row.original.user.name ?? ""}
-          />
-          <AvatarFallback>
-            {row.original.user.name?.substring(3)}
-          </AvatarFallback>
+          <AvatarImage src={row.original.user.image ?? ""} alt={row.original.user.name ?? ""} />
+          <AvatarFallback>{row.original.user.name?.substring(3)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
           <span>{row.original.user.name}</span>
-          <span className="text-sm text-muted-foreground">
-            {row.original.user.email}
-          </span>
+          <span className="text-muted-foreground text-sm">{row.original.user.email}</span>
         </div>
       </div>
     ),
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Joined at" />
-    ),
-    cell: ({ row }) => (
-      <div>{formatRelative(row.getValue("createdAt"), new Date())}</div>
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Joined at" />,
+    cell: ({ row }) => <div>{formatRelative(row.getValue("createdAt"), new Date())}</div>,
     enableSorting: true,
     enableHiding: true,
   },
   {
     accessorKey: "role",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Role" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
     cell: ({ row }) => <div>{row.getValue("role")}</div>,
     enableSorting: false,
     enableHiding: true,

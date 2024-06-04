@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import type { ColumnDef } from "@tanstack/react-table"
+import { useState } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
@@ -21,14 +21,11 @@ export const columns: ColumnDef<ApiKey>[] = [
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         disabled={
           table.getRowModel().rows.length === 0 ||
-          table
-            .getRowModel()
-            .rows.every((row) => row.original.revokedAt !== null)
+          table.getRowModel().rows.every((row) => row.original.revokedAt !== null)
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
@@ -48,22 +45,16 @@ export const columns: ColumnDef<ApiKey>[] = [
   },
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
     cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
     enableSorting: false,
     enableHiding: false,
   },
   {
     accessorKey: "key",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Key" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Key" />,
     cell: ({ row }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
       const [show, setShow] = useState(false)
-      // eslint-disable-next-line react-hooks/rules-of-hooks
       const [copied, setCopied] = useState(false)
 
       const key = row.original.key
@@ -72,12 +63,7 @@ export const columns: ColumnDef<ApiKey>[] = [
 
       return (
         <div className="flex items-center justify-between">
-          <span
-            className={cn(
-              "font-mono",
-              row.original.revokedAt !== null && "line-through"
-            )}
-          >
+          <span className={cn("font-mono", row.original.revokedAt !== null && "line-through")}>
             {displayText}
           </span>
           <div className="flex items-center gap-2">
@@ -117,24 +103,20 @@ export const columns: ColumnDef<ApiKey>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Created At" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
     cell: ({ row }) => <div>{formatDate(row.getValue("createdAt"))}</div>,
     enableSorting: true,
     enableHiding: true,
   },
   {
     accessorKey: "expiresAt",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Expires At" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Expires At" />,
     cell: ({ row }) => {
       const expiresAt = row.original.expiresAt
 
       if (row.original.revokedAt !== null) {
         return (
-          <div className="flex flex-col text-destructive">
+          <div className="text-destructive flex flex-col">
             <span>Revoked</span>
             <span>{formatDate(row.original.revokedAt)}</span>
           </div>
@@ -147,7 +129,7 @@ export const columns: ColumnDef<ApiKey>[] = [
 
       if (expiresAt < new Date()) {
         return (
-          <div className="flex flex-col text-destructive">
+          <div className="text-destructive flex flex-col">
             <span>Expired</span>
             <span>{formatDate(expiresAt)}</span>
           </div>
@@ -160,9 +142,7 @@ export const columns: ColumnDef<ApiKey>[] = [
   },
   {
     accessorKey: "lastUsed",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Last used" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Last used" />,
     cell: ({ row }) => {
       const lastUsed = row.original.lastUsed
       if (lastUsed === null) {

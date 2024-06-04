@@ -1,0 +1,28 @@
+{
+  "name": "@builderai/error",
+  "version": "0.0.1",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": ["src/*"]
+    }
+  },
+  "description": "",
+  "keywords": [],
+  "scripts": {
+    "build": "tsup"
+  },
+  "author": "Andreas Thomas",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "tsup": "^8.0.2",
+    "tsx": "^4.7.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "zod": "^3.23.5"
+  }
+}

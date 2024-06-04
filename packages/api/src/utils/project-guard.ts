@@ -1,18 +1,12 @@
 import { TRPCError } from "@trpc/server"
 
 import { prepared } from "@builderai/db"
-import type {
-  Project,
-  User,
-  Workspace,
-  WorkspaceRole,
-} from "@builderai/db/validators"
+import type { ProjectExtended, User, WorkspaceRole } from "@builderai/db/validators"
 
 import type { Context } from "../trpc"
 
 interface ProjectGuardType {
-  project: Project
-  workspace: Workspace
+  project: ProjectExtended
   member: User & { role: WorkspaceRole }
   verifyRole: (roles: WorkspaceRole[]) => void
 }
@@ -29,9 +23,7 @@ export const projectGuard = async ({
   const activeWorkspaceSlug = ctx.activeWorkspaceSlug
   const userId = ctx.session?.user.id
   const workspaces = ctx.session?.user?.workspaces
-  const activeWorkspace = workspaces?.find(
-    (workspace) => workspace.slug === activeWorkspaceSlug
-  )
+  const activeWorkspace = workspaces?.find((workspace) => workspace.slug === activeWorkspaceSlug)
 
   if (!activeWorkspace?.id) {
     throw new TRPCError({
@@ -77,6 +69,20 @@ export const projectGuard = async ({
     })
   }
 
+  if (!project.enabled) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Project is disabled, please contact support",
+    })
+  }
+
+  if (!workspace.enabled) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Workspace is disabled, please contact support",
+    })
+  }
+
   const verifyRole = (roles: WorkspaceRole[]) => {
     if (roles && !roles.includes(member.role)) {
       throw new TRPCError({
@@ -88,9 +94,12 @@ export const projectGuard = async ({
     }
   }
 
+  // TODO: fix the query so we can we ProjectExtended without this
   return {
-    project: project,
-    workspace: workspace,
+    project: {
+      ...project,
+      workspace,
+    } as ProjectExtended,
     member: member,
     verifyRole,
   }

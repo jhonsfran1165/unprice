@@ -8,7 +8,7 @@ export default function DomainPageLoading() {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div className="flex flex-row items-center ">
+          <div className="flex flex-row items-center">
             <Skeleton className="h-6 w-[150px]" />
 
             <Skeleton className="ml-2 h-6 w-6" />
@@ -24,7 +24,7 @@ export default function DomainPageLoading() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="bg-background-bg p-4"></div>
+        <div className="bg-background-bg p-4" />
       </CardContent>
       <CardFooter>dasdasdsad</CardFooter>
     </Card>

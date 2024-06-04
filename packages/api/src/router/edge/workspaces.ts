@@ -12,9 +12,9 @@ import {
   membersSelectBase,
   renameWorkspaceSchema,
   searchDataParamsSchema,
-  selectWorkspaceSchema,
+  workspaceSelectSchema,
 } from "@builderai/db/validators"
-import { sendEmail, WelcomeEmail } from "@builderai/email"
+import { WelcomeEmail, sendEmail } from "@builderai/email"
 
 import {
   createTRPCRouter,
@@ -67,8 +67,7 @@ export const workspaceRouter = createTRPCRouter({
         with: {
           members: true,
         },
-        where: (workspace, operators) =>
-          operators.and(operators.eq(workspace.id, workspaceId)),
+        where: (workspace, operators) => operators.and(operators.eq(workspace.id, workspaceId)),
       })
 
       if (ownerCount && ownerCount.members.length <= 1) {
@@ -81,10 +80,7 @@ export const workspaceRouter = createTRPCRouter({
       const deletedMember = await opts.ctx.db
         .delete(schema.members)
         .where(
-          and(
-            eq(schema.members.workspaceId, workspace.id),
-            eq(schema.members.userId, user.id)
-          )
+          and(eq(schema.members.workspaceId, workspace.id), eq(schema.members.userId, user.id))
         )
         .returning()
         .then((members) => members[0] ?? undefined)
@@ -97,7 +93,7 @@ export const workspaceRouter = createTRPCRouter({
   listMembers: protectedProcedure
     .input(
       searchDataParamsSchema.extend({
-        workspaceSlug: selectWorkspaceSchema.shape.slug,
+        workspaceSlug: workspaceSelectSchema.shape.slug,
       })
     )
     .output(
@@ -135,10 +131,10 @@ export const workspaceRouter = createTRPCRouter({
       }
     }),
   getBySlug: protectedProcedure
-    .input(selectWorkspaceSchema.pick({ slug: true }))
+    .input(workspaceSelectSchema.pick({ slug: true }))
     .output(
       z.object({
-        workspace: selectWorkspaceSchema.optional(),
+        workspace: workspaceSelectSchema.optional(),
       })
     )
     .query(async (opts) => {
@@ -156,7 +152,7 @@ export const workspaceRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteWorkspaceSchema)
-    .output(z.object({ workspace: selectWorkspaceSchema.optional() }))
+    .output(z.object({ workspace: workspaceSelectSchema.optional() }))
     .mutation(async (opts) => {
       const { slug: workspaceSlug } = opts.input
 
@@ -168,8 +164,7 @@ export const workspaceRouter = createTRPCRouter({
       if (workspace?.isPersonal) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message:
-            "Cannot delete personal workspace. Contact support to delete your account.",
+          message: "Cannot delete personal workspace. Contact support to delete your account.",
         })
       }
 
@@ -197,7 +192,7 @@ export const workspaceRouter = createTRPCRouter({
     .output(
       z.object({
         workspaces: z.array(
-          selectWorkspaceSchema
+          workspaceSelectSchema
             .pick({
               id: true,
               name: true,
@@ -250,7 +245,7 @@ export const workspaceRouter = createTRPCRouter({
     }),
   renameWorkspace: protectedProcedure
     .input(renameWorkspaceSchema)
-    .output(selectWorkspaceSchema)
+    .output(workspaceSelectSchema)
     .mutation(async (opts) => {
       const { slug: workspaceSlug, name } = opts.input
 
@@ -294,12 +289,7 @@ export const workspaceRouter = createTRPCRouter({
       const member = await opts.ctx.db
         .update(schema.members)
         .set({ role })
-        .where(
-          and(
-            eq(schema.members.workspaceId, workspace.id),
-            eq(schema.members.userId, userId)
-          )
-        )
+        .where(and(eq(schema.members.workspaceId, workspace.id), eq(schema.members.userId, userId)))
         .returning()
         .then((wk) => wk[0] ?? undefined)
 
@@ -366,12 +356,7 @@ export const workspaceRouter = createTRPCRouter({
 
       const deletedInvite = await opts.ctx.db
         .delete(schema.invites)
-        .where(
-          and(
-            eq(schema.invites.email, email),
-            eq(schema.invites.workspaceId, workspace.id)
-          )
-        )
+        .where(and(eq(schema.invites.email, email), eq(schema.invites.workspaceId, workspace.id)))
         .returning()
         .then((inv) => inv[0] ?? undefined)
 
@@ -413,18 +398,17 @@ export const workspaceRouter = createTRPCRouter({
             code: "BAD_REQUEST",
             message: "User is already a member of the workspace",
           })
-        } else {
-          // add the user as a member of the workspace
-          await opts.ctx.db.insert(schema.members).values({
-            userId: userByEmail.id,
-            workspaceId: workspace.id,
-            role: role,
-          })
+        }
+        // add the user as a member of the workspace
+        await opts.ctx.db.insert(schema.members).values({
+          userId: userByEmail.id,
+          workspaceId: workspace.id,
+          role: role,
+        })
 
-          // no need to send an invite email
-          return {
-            invite: undefined,
-          }
+        // no need to send an invite email
+        return {
+          invite: undefined,
         }
       }
 

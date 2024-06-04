@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: ["*"]
+    branches: ['*']
   push:
-    branches: ["main"]
+    branches: ['main']
   merge_group:
 
 # You can leverage Vercel Remote Caching with Turbo to speed up your builds
@@ -28,6 +28,7 @@ jobs:
         uses: pnpm/action-setup@v3
         with:
           version: 8.6.12
+          run_install: false
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
@@ -48,12 +49,15 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install deps (with cache)
-        run: pnpm install
+        run: pnpm install --recursive
 
       - run: cp .env.example .env.local
 
-      - name: Build, lint and type-check
-        run: pnpm turbo build lint typecheck format
+      - name: Type-check
+        run: pmpm turbo typecheck
+
+      - name: Check formatting
+        run: pnpm biome ci .
 
       - name: Check workspaces
         run: pnpm manypkg check

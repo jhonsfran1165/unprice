@@ -1,19 +1,5 @@
-@import "@radix-ui/colors/gray.css";
-@import "@radix-ui/colors/blue.css";
-@import "@radix-ui/colors/green.css";
-@import "@radix-ui/colors/sand.css";
-@import "@radix-ui/colors/crimson.css";
-@import "@radix-ui/colors/yellow.css";
-@import "@radix-ui/colors/red.css";
-@import "@radix-ui/colors/amber.css";
-@import "@radix-ui/colors/amber-dark.css";
-@import "@radix-ui/colors/sand-dark.css";
-@import "@radix-ui/colors/yellow-dark.css";
-@import "@radix-ui/colors/crimson-dark.css";
-@import "@radix-ui/colors/gray-dark.css";
-@import "@radix-ui/colors/blue-dark.css";
-@import "@radix-ui/colors/green-dark.css";
-@import "@radix-ui/colors/red-dark.css";
+@import "@builderai/tailwind-config/themes/sunset.css";
+/* @import "@builderai/tailwind-config/themes/slate.css"; */
 
 @tailwind base;
 @tailwind components;
@@ -25,12 +11,10 @@
 
 @layer base {
   :root {
-    --ring: 215deg 20.2% 65.1%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --ring: 216 34% 17%;
     --radius: 0.5rem;
   }
 
@@ -56,7 +40,7 @@
   }
 
   body {
-    @apply bg-background-base font-secondary text-background-text;
+    @apply bg-background-bg font-secondary text-background-text;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
@@ -68,7 +52,7 @@
 }
 
 /* alias classes to override shadcn ui */
-@layer utilities {
+@layer components {
   .primary {
     @apply border border-primary-border bg-primary-bg text-primary-text;
   }
@@ -82,6 +66,10 @@
   }
 
   .default {
+    @apply border bg-background-bg text-background-text;
+  }
+
+  .transparent {
     @apply bg-transparent text-background-text;
   }
 
@@ -98,27 +86,35 @@
   }
 
   .button-ghost {
-    @apply bg-transparent text-background-text hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
+    @apply transparent hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
   }
 
   .button-default {
-    @apply default hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
+    @apply default text-background-text hover:bg-background-bgHover hover:text-background-textContrast active:bg-background-bgActive;
   }
 
   .link {
-    @apply bg-background-bgSubtle text-background-text;
+    @apply transparent;
   }
 
   .button-link {
-    @apply default hover:text-background-textContrast active:text-background-bgActive;
+    @apply transparent hover:text-background-textContrast active:text-background-bgActive;
   }
 
   .button-danger {
     @apply danger hover:border-danger-borderHover hover:bg-danger-solid hover:text-danger-foreground active:bg-danger-bgActive;
   }
 
+  .button-info {
+    @apply info hover:border-info-borderHover hover:bg-info-solid hover:text-info-foreground active:bg-info-bgActive;
+  }
+
   .button-primary {
     @apply primary hover:border-primary-borderHover hover:bg-primary-solid hover:text-primary-foreground active:bg-primary-bgActive;
+  }
+
+  .button-success {
+    @apply success hover:border-success-borderHover hover:bg-success-solid hover:text-success-foreground active:bg-success-bgActive;
   }
 
   .button-warning {

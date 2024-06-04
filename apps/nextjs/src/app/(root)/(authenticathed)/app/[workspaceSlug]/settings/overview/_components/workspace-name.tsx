@@ -1,7 +1,7 @@
 "use client"
 
-import { use } from "react"
 import { useRouter } from "next/navigation"
+import { use } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import type { RenameWorkspace } from "@builderai/db/validators"
@@ -14,14 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@builderai/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 
 import { SubmitButton } from "~/components/submit-button"
@@ -67,10 +60,7 @@ export function WorkspaceName(props: {
       </CardHeader>
 
       <Form {...form}>
-        <form
-          className="flex flex-col space-y-2"
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
+        <form className="flex flex-col space-y-2" onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent>
             <FormField
               control={form.control}

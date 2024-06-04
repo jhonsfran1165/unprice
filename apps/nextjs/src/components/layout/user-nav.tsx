@@ -33,29 +33,16 @@ export default async function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-6 w-6">
-            <AvatarImage
-              src={user.image ?? "/placeholder-avatar.svg"}
-              alt={user.name ?? ""}
-            />
+            <AvatarImage src={user.image ?? "/placeholder-avatar.svg"} alt={user.name ?? ""} />
             <AvatarFallback>{user.name?.substring(2)}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-56"
-        align="end"
-        forceMount
-        side="right"
-        sideOffset={20}
-      >
+      <DropdownMenuContent className="w-56" align="end" forceMount side="right" sideOffset={20}>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="truncate text-sm font-medium leading-none">
-              {user.name ?? user.email}
-            </p>
-            <p className="truncate text-xs leading-none text-muted-foreground">
-              {user.email}
-            </p>
+            <p className="truncate text-sm font-medium leading-none">{user.name ?? user.email}</p>
+            <p className="text-muted-foreground truncate text-xs leading-none">{user.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

@@ -1,20 +1,13 @@
 "use client"
 
-import { use } from "react"
 import { useRouter } from "next/navigation"
+import { use } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import type { RenameProject } from "@builderai/db/validators"
 import { renameProjectSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@builderai/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
 
@@ -72,9 +65,7 @@ export function RenameProjectForm(props: {
         <div className="flex pt-4">
           <Button type="submit" className="ml-auto">
             Save
-            {form.formState.isSubmitting && (
-              <LoadingAnimation variant={"destructive"} className="ml-2" />
-            )}
+            {form.formState.isSubmitting && <LoadingAnimation className="ml-2" />}
           </Button>
         </div>
       </form>

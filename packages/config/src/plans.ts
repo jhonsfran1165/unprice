@@ -6,8 +6,7 @@ export const SubscriptionPlanKey = {
   PRO: "PRO",
 } as const
 
-export type SubscriptionPlan =
-  (typeof SubscriptionPlanKey)[keyof typeof SubscriptionPlanKey]
+export type SubscriptionPlan = (typeof SubscriptionPlanKey)[keyof typeof SubscriptionPlanKey]
 
 interface PlanInfo {
   key: SubscriptionPlan

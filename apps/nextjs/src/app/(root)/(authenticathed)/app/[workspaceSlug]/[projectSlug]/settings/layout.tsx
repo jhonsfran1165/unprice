@@ -13,12 +13,7 @@ export default function ProjectSettingsLayout(props: {
   const tabs = Object.values(PROJECT_TABS_CONFIG)
   return (
     <DashboardShell
-      header={
-        <HeaderTab
-          title="General Settings"
-          description="Manage your workspace settings"
-        />
-      }
+      header={<HeaderTab title="General Settings" description="Manage your workspace settings" />}
       tabs={
         <TabsNav
           tabs={tabs}

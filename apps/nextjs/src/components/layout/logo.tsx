@@ -3,7 +3,7 @@ import { Logo as LogoIcon } from "@builderai/ui/icons"
 
 export function Logo({ className = "" }) {
   return (
-    <div className="flex items-center justify-center space-x-8 text-primary-text">
+    <div className="text-primary-text flex items-center justify-center space-x-8">
       <LogoIcon className={cn("h-6 w-6", className)} />
       <span
         className={cn(

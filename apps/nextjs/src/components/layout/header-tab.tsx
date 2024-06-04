@@ -1,43 +1,23 @@
-import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
+import { cn } from "@builderai/ui"
 
 export default function HeaderTab({
   title,
   description,
   action,
-  children,
+  className,
 }: {
   title?: string
   description?: string
   action?: React.ReactNode
-  children?: React.ReactNode
+  className?: string
 }) {
-  if (children) {
-    return (
-      <section>
-        <MaxWidthWrapper className="max-w-screen-2xl">
-          <div className="flex h-36 items-center rounded-md border px-4 backdrop-blur-sm md:px-10">
-            {children}
-          </div>
-        </MaxWidthWrapper>
-      </section>
-    )
-  }
-
   return (
-    <section>
-      <MaxWidthWrapper className="max-w-screen-2xl">
-        <div className="flex h-36 items-center rounded-md border px-4 backdrop-blur-sm md:px-10">
-          <div className="flex w-full items-center justify-between">
-            <div className="space-y-2">
-              <h1 className="text-4xl font-normal text-background-textContrast">
-                {title}
-              </h1>
-              <h4 className="text-base text-muted-foreground">{description}</h4>
-            </div>
-            <div>{action}</div>
-          </div>
-        </div>
-      </MaxWidthWrapper>
-    </section>
+    <div className={cn("flex w-full items-center justify-between", className)}>
+      <div className="space-y-2 px-2">
+        <h1 className="text-lg font-semibold leading-none tracking-tight">{title}</h1>
+        <h4 className="text-muted-foreground text-sm">{description}</h4>
+      </div>
+      <div>{action}</div>
+    </div>
   )
 }

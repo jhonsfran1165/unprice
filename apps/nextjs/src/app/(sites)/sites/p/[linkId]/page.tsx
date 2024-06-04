@@ -31,11 +31,8 @@ export default function LinkPage({
 
   if (isPreview) {
     html = html.includes("</body>")
-      ? html.replace(
-          "</body>",
-          `<script>${SCRIPT_TO_INJECT_FOR_PREVIEW}</script></body>`
-        )
-      : html + `<script>${SCRIPT_TO_INJECT_FOR_PREVIEW}</script>`
+      ? html.replace("</body>", `<script>${SCRIPT_TO_INJECT_FOR_PREVIEW}</script></body>`)
+      : `${html}<script>${SCRIPT_TO_INJECT_FOR_PREVIEW}</script>`
   }
 
   return (

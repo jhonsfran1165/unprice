@@ -1,0 +1,99 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "maxSize": 1572864
+  },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git"
+  },
+  "organizeImports": {
+    "enabled": true,
+    "ignore": [
+      "node_modules",
+      ".next",
+      "dist",
+      "./packages/api/src/openapi.d.ts",
+      ".wrangler",
+      ".react-email",
+      ".contentlayer",
+      ".nitro"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noSvgWithoutTitle": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "error",
+        "useExhaustiveDependencies": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "style": {
+        "useBlockStatements": "off",
+        "noNonNullAssertion": "off"
+      },
+      "performance": {
+        "noDelete": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "error",
+        "noConsoleLog": "warn"
+      },
+      "complexity": {
+        "noForEach": "off"
+      }
+    },
+    "ignore": [
+      "node_modules",
+      ".next",
+      "dist",
+      "./packages/api/src/openapi.d.ts",
+      ".wrangler",
+      ".react-email",
+      ".contentlayer",
+      ".nitro"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "attributePosition": "auto",
+    "lineWidth": 100,
+    "ignore": [
+      "node_modules",
+      ".next",
+      "dist",
+      "./packages/api/src/openapi.d.ts",
+      ".wrangler",
+      ".react-email",
+      ".contentlayer",
+      ".nitro"
+    ]
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingComma": "es5",
+      "semicolons": "asNeeded",
+      "arrowParentheses": "always",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "quoteStyle": "double"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  }
+}

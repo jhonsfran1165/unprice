@@ -11,62 +11,48 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "src/*"
-      ]
+      "*": ["src/*"]
     }
   },
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "generate:local": "pnpm with-env drizzle-kit generate:pg --custom --config=local.config.ts",
-    "generate:neon": "pnpm with-env drizzle-kit generate:pg --custom --config=neon.config.ts",
-    "generate:custom": "pnpm with-env drizzle-kit generate:pg --custom --config=custom.config.ts",
-    "push:local": "pnpm with-env drizzle-kit push:pg --config=local.config.ts",
-    "push:neon": "pnpm with-env drizzle-kit push:pg --config=neon.config.ts",
+    "generate:local": "pnpm with-env drizzle-kit generate --config=local.config.ts",
+    "migrate:local": "pnpm with-env drizzle-kit migrate --config=local.config.ts",
+    "introspect:local": "pnpm with-env drizzle-kit introspect --config=local.config.ts",
+    "generate:neon": "pnpm with-env drizzle-kit generate --config=neon.config.ts",
+    "generate:custom": "pnpm with-env drizzle-kit generate --config=custom.config.ts",
+    "push:local": "pnpm with-env drizzle-kit push --config=local.config.ts",
+    "push:neon": "pnpm with-env drizzle-kit push --config=neon.config.ts",
     "push:all": "pnpm push && pnpm migrate:custom",
     "migrate:custom": "pnpm with-env ts-node --esm src/migrate.mts",
     "drop:custom": "pnpm with-env drizzle-kit drop --config=custom.config.ts",
     "drop": "pnpm with-env drizzle-kit drop",
-    "up": "pnpm with-env drizzle-kit up:pg",
-    "up:custom": "pnpm with-env drizzle-kit up:pg --config=custom.config.ts",
+    "up": "pnpm with-env drizzle-kit up",
+    "up:custom": "pnpm with-env drizzle-kit up --config=custom.config.ts",
     "studio:neon": "pnpm with-env drizzle-kit studio --config=neon.config.ts --verbose",
     "studio:local": "pnpm with-env drizzle-kit studio --config=local.config.ts --verbose",
-    "format": "prettier --check \"**/*.{mjs,ts}\"",
-    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env.local --"
   },
   "dependencies": {
     "@builderai/config": "^0.1.0",
+    "@builderai/error": "workspace:^",
     "@neondatabase/serverless": "^0.9.0",
     "@t3-oss/env-nextjs": "0.9.1",
-    "base-x": "^4.0.0",
+    "dinero.js": "2.0.0-alpha.14",
     "drizzle-orm": "^0.29.4",
     "drizzle-zod": "^0.5.1",
     "net": "^1.0.2",
     "postgres": "^3.4.3",
     "random-word-slugs": "^0.1.7",
-    "zod": "^3.22.4"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@builderai/eslint-config": "^0.2.0",
-    "@builderai/prettier-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
     "dotenv-cli": "^7.3.0",
-    "drizzle-kit": "^0.20.14",
-    "eslint": "^8.57.0",
+    "drizzle-kit": "^0.21.4",
     "pg": "^8.11.3",
-    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
-  },
-  "eslintConfig": {
-    "extends": [
-      "@builderai/eslint-config/base"
-    ],
-    "rules": {
-      "@typescript-eslint/consistent-type-definitions": "off"
-    }
-  },
-  "prettier": "@builderai/prettier-config"
+  }
 }

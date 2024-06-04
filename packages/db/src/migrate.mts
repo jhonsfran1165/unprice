@@ -12,11 +12,8 @@ async function main() {
     max: 1,
   })
   const db = drizzle(migrationConnection, { logger: true })
-  console.log("Running migrations")
 
   await migrate(db, { migrationsFolder: "src/custom" })
-
-  console.log("Migrated successfully")
 
   process.exit(0)
 }

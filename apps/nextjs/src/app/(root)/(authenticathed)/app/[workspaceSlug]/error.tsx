@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 import { Button } from "@builderai/ui/button"
 
-export default function Error({
+export default function ErrorPage({
   error,
   reset,
 }: {

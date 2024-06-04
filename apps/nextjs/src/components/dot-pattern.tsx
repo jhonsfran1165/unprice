@@ -32,7 +32,7 @@ export function DotPattern({
         <svg
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute inset-0 h-full w-screen fill-background-line",
+            "fill-background-line pointer-events-none absolute inset-0 h-full w-screen",
             className
           )}
           {...props}
@@ -50,12 +50,7 @@ export function DotPattern({
               <circle id="pattern-circle" cx={cy} cy={cy} r={cr} />
             </pattern>
           </defs>
-          <rect
-            width="100%"
-            height="100%"
-            strokeWidth={0}
-            fill={`url(#${id})`}
-          />
+          <rect width="100%" height="100%" strokeWidth={0} fill={`url(#${id})`} />
         </svg>
       </div>
     </div>

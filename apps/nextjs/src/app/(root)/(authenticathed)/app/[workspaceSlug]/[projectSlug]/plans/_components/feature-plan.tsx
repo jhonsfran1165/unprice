@@ -1,33 +1,32 @@
 "use client"
 
-import type { ComponentProps, ElementRef } from "react"
-import { forwardRef } from "react"
 import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
-import { ChevronRight, Settings2 } from "lucide-react"
+import { dinero, toDecimal } from "dinero.js"
+import { EyeOff, Settings, Trash2, X } from "lucide-react"
+import type React from "react"
+import type { ElementRef } from "react"
+import { forwardRef, useState } from "react"
 
-import type { FeatureType } from "@builderai/db/schema"
-import type { PlanVersionFeature } from "@builderai/db/validators"
+import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 
 import { Ping } from "~/components/ping"
+import { currencySymbol } from "~/lib/currency"
+import { api } from "~/trpc/client"
+import { PlanVersionFeatureSheet } from "../[planSlug]/_components/plan-version-feature-sheet"
 import { FeatureDialog } from "./feature-dialog"
-import {
-  useActiveFeature,
-  usePlanActiveTab,
-  usePlanFeaturesList,
-} from "./use-features"
+import { useActiveFeature, useActivePlanVersion, usePlanFeaturesList } from "./use-features"
 
 const featureVariants = cva(
-  "flex gap-2 rounded-lg border text-left text-sm transition-all",
+  "flex gap-2 rounded-lg border text-left text-sm transition-all bg-background-bgSubtle hover:bg-background-bgHover",
   {
     variants: {
       variant: {
-        feature:
-          "h-10 px-2 items-center bg-background hover:bg-background-bgHover disabled:opacity-50",
-        default: "flex-col items-start p-3 hover:bg-accent",
+        feature: "h-10 px-2 items-center disabled:opacity-50",
+        default: "flex-col items-start p-3",
       },
     },
     defaultVariants: {
@@ -35,137 +34,211 @@ const featureVariants = cva(
     },
   }
 )
+
 export interface FeaturePlanProps
   extends React.ComponentPropsWithoutRef<"div">,
     VariantProps<typeof featureVariants> {
-  feature: PlanVersionFeature
+  planFeatureVersion: PlanVersionFeatureDragDrop
   mode: "Feature" | "FeaturePlan"
-  isOverlay?: boolean
+  disabled?: boolean
 }
 
-const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>(
-  (props, ref) => {
-    const { mode, variant, className, feature, ...rest } = props
+// TODO: there is a bug with the sheet component that allow to drag the feature card
+const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref) => {
+  const { mode, variant, className, planFeatureVersion, ...rest } = props
+  const [isDelete, setConfirmDelete] = useState<boolean>(false)
 
-    const [active, setActiveFeature] = useActiveFeature()
-    const [planActiveTab] = usePlanActiveTab()
-    const [_planFeatures, setPlanFeatures] = usePlanFeaturesList()
+  const [active, setActiveFeature] = useActiveFeature()
+  const [activePlanVersion] = useActivePlanVersion()
 
-    const handleClick = (_event: React.MouseEvent<HTMLDivElement>) => {
-      setActiveFeature(feature)
+  const [_planFeatures, setPlanFeaturesList] = usePlanFeaturesList()
+
+  const removePlanVersionFeature = api.planVersionFeatures.remove.useMutation()
+
+  const feature = planFeatureVersion.feature
+
+  const handleClick = (_event: React.MouseEvent<HTMLDivElement>) => {
+    if (mode !== "FeaturePlan") return
+    setActiveFeature(planFeatureVersion)
+  }
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      if (mode !== "FeaturePlan") return
+
+      setActiveFeature(planFeatureVersion)
     }
+  }
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "Enter" || event.key === " ") {
-        setActiveFeature(feature)
-      }
-    }
+  const isPublished = activePlanVersion?.status === "published"
 
-    return (
-      <div
-        ref={ref}
-        {...rest}
-        className={cn(featureVariants({ variant, className }), {
-          "bg-background-bgHover":
-            mode === "FeaturePlan" && active?.id === feature.id,
-        })}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown} // Add onKeyDown event listener
-        role="button" // Add the role attribute to indicate interactive nature
-        tabIndex={0} // Add tabIndex to make it focusable
-      >
-        {mode === "Feature" ? (
-          <>
-            <FeatureDialog defaultValues={feature}>
-              <Button variant="link" size={"icon"}>
-                <Settings2 className="h-4 w-4" />
-              </Button>
-            </FeatureDialog>
-
-            <span className={cn("w-full truncate text-sm font-medium")}>
-              {feature.title}
-            </span>
-            <Button
-              variant="link"
-              size={"icon"}
-              onClick={() => {
-                setPlanFeatures((prev) => {
-                  return {
-                    ...prev,
-                    [planActiveTab]: [...prev[planActiveTab], feature],
-                  }
-                })
-
-                setActiveFeature(feature)
-              }}
-            >
-              <ChevronRight className="h-4 w-4" />
+  return (
+    <div
+      ref={ref}
+      {...rest}
+      className={cn(featureVariants({ variant, className }), {
+        "border-background-borderHover bg-background-bgHover relative z-0 border-2 shadow-sm":
+          mode === "FeaturePlan" && active?.featureId === planFeatureVersion.featureId,
+      })}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown} // Add onKeyDown event listener
+      role="button" // Add the role attribute to indicate interactive nature
+      tabIndex={0} // Add tabIndex to make it focusable
+    >
+      {mode === "Feature" ? (
+        <div className="flex flex-row items-center gap-2">
+          <FeatureDialog defaultValues={feature}>
+            <Button variant="link" size={"icon"}>
+              <Settings className="h-4 w-4" />
             </Button>
-          </>
-        ) : mode === "FeaturePlan" ? (
-          <>
+          </FeatureDialog>
+
+          <span className={cn("line-clamp-1 w-full text-sm font-medium")}>
+            {`${feature.title.substring(0, 10)}...`}
+          </span>
+        </div>
+      ) : mode === "FeaturePlan" ? (
+        <PlanVersionFeatureSheet>
+          <div className="flex w-full flex-col gap-2">
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="line-clamp-1 font-semibold">
-                    {feature.title}
+                <div className="flex flex-row gap-2">
+                  <div className="line-clamp-1 items-center gap-1 text-left font-bold">
+                    {feature.slug}
                   </div>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  {feature.type === "flat"
-                    ? `${
-                        feature?.config?.price === 0
-                          ? "Free"
-                          : `$${feature?.config?.price}`
-                      }`
-                    : ["volume", "tiered"].includes(feature.type)
-                      ? `${feature?.config?.tiers.length ?? 0} tiers`
-                      : null}
-
-                  {!feature?.config && (
-                    <div className="relative ">
-                      <div className="absolute -top-1 right-0">
+                  {/* // If there is no id it means that the feature is not saved */}
+                  {!planFeatureVersion?.id && (
+                    <div className="relative">
+                      <div className="1right-1 absolute top-2">
                         <Ping variant={"destructive"} />
                       </div>
                     </div>
                   )}
+                  {planFeatureVersion.hidden && (
+                    <div className="flex items-center gap-1">
+                      <EyeOff className="text-muted-foreground h-4 w-4" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 text-xs">
+                  <div className="flex- flex-row gap-1">
+                    {!isPublished && isDelete && (
+                      <div className="flex flex-row items-center">
+                        <Button
+                          className="px-0 text-xs font-light"
+                          variant="link"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                            setConfirmDelete(false)
+                          }}
+                        >
+                          cancel
+                          <span className="sr-only">cancel delete from plan</span>
+                        </Button>
+                        <Button
+                          className="px-0"
+                          variant="link"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
+
+                            if (active?.id === feature.id) {
+                              setActiveFeature(null)
+                            }
+
+                            if (planFeatureVersion.id) {
+                              // delete from plan
+                              void removePlanVersionFeature.mutateAsync({
+                                id: planFeatureVersion.id,
+                              })
+                            }
+
+                            // delete feature from the list in the drag and drop
+                            setPlanFeaturesList((features) => {
+                              const filteredFeatures = features.filter(
+                                (f) => f.featureId !== feature.id
+                              )
+
+                              return filteredFeatures
+                            })
+
+                            setConfirmDelete(false)
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                          <span className="sr-only">Confirm delete from plan</span>
+                        </Button>
+                      </div>
+                    )}
+                    {!isPublished && !isDelete && (
+                      <Button
+                        className="px-0"
+                        variant="link"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          e.preventDefault()
+                          setConfirmDelete(true)
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete from plan</span>
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="line-clamp-1 text-xs font-medium">
-                {feature.slug}
-              </div>
-            </div>
-            <div className="line-clamp-2 text-xs text-muted-foreground">
-              {feature?.description}
             </div>
 
-            {feature.type && (
-              <div className="flex items-center gap-2">
-                <Badge variant={getBadgeVariantFromType(feature.type)}>
-                  {feature.type}
-                </Badge>
+            <div className="text-muted-foreground line-clamp-1 text-xs font-normal">
+              {feature.description ?? "No description"}
+            </div>
+
+            {planFeatureVersion.featureType && (
+              <div className="mt-2 flex w-full flex-row items-center justify-between gap-2">
+                <div className="flex flex-row gap-1">
+                  <Badge variant={"secondary"}>{planFeatureVersion.featureType}</Badge>
+                  {planFeatureVersion.config?.usageMode && (
+                    <Badge>{planFeatureVersion.config.usageMode}</Badge>
+                  )}
+                  {planFeatureVersion.config?.aggregationMethod && (
+                    <Badge>{planFeatureVersion.config.aggregationMethod}</Badge>
+                  )}
+                  {planFeatureVersion.config?.tierMode && (
+                    <Badge>{planFeatureVersion.config.tierMode}</Badge>
+                  )}
+                </div>
+                <div className="line-clamp-1 pr-3 text-xs font-light">
+                  {/* // TODO: fix this */}
+                  {planFeatureVersion?.config?.price
+                    ? `${
+                        planFeatureVersion?.config?.price.dinero.amount === 0
+                          ? "Free"
+                          : planFeatureVersion?.config?.units
+                            ? `${toDecimal(
+                                dinero(planFeatureVersion?.config?.price.dinero),
+                                ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
+                              )} per ${planFeatureVersion?.config?.units} units`
+                            : toDecimal(
+                                dinero(planFeatureVersion?.config?.price.dinero),
+                                ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
+                              )
+                      }`
+                    : planFeatureVersion.config?.tiers?.length?.toString()
+                      ? `${planFeatureVersion?.config?.tiers?.length ?? 0} tiers`
+                      : null}
+                </div>
               </div>
             )}
-          </>
-        ) : null}
-      </div>
-    )
-  }
-)
-
-function getBadgeVariantFromType(
-  type: FeatureType
-): ComponentProps<typeof Badge>["variant"] {
-  if (["tiered"].includes(type.toLowerCase())) {
-    return "info"
-  }
-
-  if (["volume"].includes(type.toLowerCase())) {
-    return "secondary"
-  }
-
-  return "default"
-}
+          </div>
+        </PlanVersionFeatureSheet>
+      ) : null}
+    </div>
+  )
+})
 
 FeaturePlan.displayName = "FeatureCard"
 

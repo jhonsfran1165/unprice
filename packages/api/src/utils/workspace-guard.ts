@@ -54,6 +54,13 @@ export const workspaceGuard = async ({
     })
   }
 
+  if (!workspace.enabled) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Workspace is disabled, please contact support",
+    })
+  }
+
   const verifyRole = (roles: WorkspaceRole[]) => {
     if (roles && !roles.includes(member.role)) {
       throw new TRPCError({

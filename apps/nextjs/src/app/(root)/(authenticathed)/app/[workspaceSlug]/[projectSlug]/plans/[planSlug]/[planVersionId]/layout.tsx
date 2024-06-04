@@ -1,18 +1,14 @@
-import React from "react"
-import { notFound, redirect } from "next/navigation"
-import { Provider } from "jotai"
-
-import { Separator } from "@builderai/ui/separator"
+import type React from "react"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
-import { api } from "~/trpc/server"
-import CreateNewVersion from "../../_components/create-new-version"
-import PlanHeader from "../../_components/plan-header"
-import PlanVersionList from "../../_components/plan-versions-list"
+import HeaderTab from "~/components/layout/header-tab"
+import TabsNav from "~/components/layout/tabs-nav"
+import { PROJECT_TABS_CONFIG } from "~/constants/projects"
+import StepperButton from "./_components/stepper-button"
 
 export const runtime = "edge"
 
-export default async function PriceLayout(props: {
+export default function PriceLayout(props: {
   children: React.ReactNode
   params: {
     workspaceSlug: string
@@ -21,84 +17,33 @@ export default async function PriceLayout(props: {
     planVersionId: string
   }
 }) {
-  const { projectSlug, workspaceSlug, planSlug, planVersionId } = props.params
-  const { plan } = await api.plans.getBySlug({
-    slug: planSlug,
-  })
-
-  if (!plan) {
-    notFound()
-  }
-
-  if (planVersionId !== "latest" && isNaN(parseInt(planVersionId))) {
-    notFound()
-  }
-
-  if (planVersionId === "latest") {
-    const latestVersion = plan.versions.find(
-      (version) => version.latest === true
-    )
-
-    if (!latestVersion) {
-      redirect(
-        `/${workspaceSlug}/${projectSlug}/plans/${planSlug}/create-version`
-      )
-    }
-
-    // redirect to the latest version
-    redirect(
-      `/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${latestVersion?.version}`
-    )
-  }
-
-  const activeVersion = plan.versions.find(
-    (version) => version.version === Number(planVersionId)
-  )
-
-  if (!activeVersion) {
-    redirect(
-      `/${workspaceSlug}/${projectSlug}/plans/${planSlug}/create-version`
-    )
-  }
+  const { workspaceSlug, projectSlug } = props.params
+  const tabs = Object.values(PROJECT_TABS_CONFIG)
 
   return (
-    <Provider>
-      <DashboardShell
-        header={
-          <PlanHeader
-            workspaceSlug={workspaceSlug}
-            projectSlug={projectSlug}
-            planVersionId={planVersionId}
-            plan={plan}
-          >
-            <div className="flex items-center justify-end space-x-6">
-              <PlanVersionList
-                plan={plan}
-                activePlanVersionId={Number(planVersionId)}
-                workspaceSlug={workspaceSlug}
-                projectSlug={projectSlug}
-              />
-              <Separator orientation="vertical" className="h-12" />
-              <div className="flex items-center justify-end space-x-6">
-                <CreateNewVersion
-                  plan={plan}
-                  projectSlug={projectSlug}
-                  workspaceSlug={workspaceSlug}
-                  planVersionId={Number(planVersionId)}
-                />
-              </div>
-            </div>
-          </PlanHeader>
-        }
-      >
-        <div className="relative">
-          <section>
-            <div className="overflow-hidden rounded-[0.5rem] border bg-background shadow-md md:shadow-xl">
-              {props.children}
-            </div>
-          </section>
-        </div>
-      </DashboardShell>
-    </Provider>
+    <DashboardShell
+      backLink={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}`}
+      header={
+        <HeaderTab
+          title="Plan Version Settings"
+          description="Manage different settings for this plan version."
+          action={
+            <StepperButton
+              planVersionId={props.params.planVersionId}
+              baseUrl={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}/${props.params.planVersionId}`}
+            />
+          }
+        />
+      }
+      tabs={
+        <TabsNav
+          tabs={tabs}
+          activeTab={PROJECT_TABS_CONFIG.plans}
+          basePath={`/${workspaceSlug}/${projectSlug}`}
+        />
+      }
+    >
+      {props.children}
+    </DashboardShell>
   )
 }

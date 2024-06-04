@@ -10,8 +10,7 @@ import type { WorkspacesJWTPayload } from "@builderai/db/validators"
 const useSecureCookies = process.env.VERCEL_ENV === "production"
 
 export const authConfig = {
-  trustHost:
-    Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
+  trustHost: Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
   session: {
     strategy: "jwt",
     updateAge: 24 * 60 * 60, // 24 hours for update session
@@ -32,7 +31,7 @@ export const authConfig = {
   },
   debug: process.env.NODE_ENV === "development",
   adapter: {
-    ...DrizzleAdapter(db, tableCreator),
+    ...DrizzleAdapter(db.$primary, tableCreator),
 
     // override the default create user
     async createUser(data) {
@@ -78,18 +77,21 @@ export const authConfig = {
 
       // create the workspace for the user and then add it as a member
       await db.transaction(async (db) => {
+        // TODO: should be able to retry if the slug already exists
         const slug = utils.generateSlug(2)
-        const workspaceId = utils.newIdEdge("workspace")
+        const workspaceId = utils.newId("workspace")
+        const workspaceName = user.name ?? slug
 
         const workspace = await db
           .insert(schema.workspaces)
           .values({
             id: workspaceId,
             slug: slug,
-            name: user.name ?? slug,
+            name: workspaceName,
             imageUrl: user.image,
             isPersonal: true,
             createdBy: user.id,
+            enabled: true,
           })
           .onConflictDoNothing()
           .returning()
@@ -166,10 +168,9 @@ export const authConfig = {
           return token
         }
 
-        const userWithWorkspaces =
-          await prepared.workspacesByUserPrepared.execute({
-            userId,
-          })
+        const userWithWorkspaces = await prepared.workspacesByUserPrepared.execute({
+          userId,
+        })
 
         const workspaces = userWithWorkspaces?.members.map((member) => ({
           id: member.workspace.id,
@@ -177,6 +178,8 @@ export const authConfig = {
           role: member.role,
           isPersonal: member.workspace.isPersonal,
           plan: member.workspace.plan,
+          enabled: member.workspace.enabled,
+          unPriceCustomerId: member.workspace.unPriceCustomerId,
         }))
 
         token.workspaces = workspaces ? workspaces : []

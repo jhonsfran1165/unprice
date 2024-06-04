@@ -4,17 +4,16 @@ import * as z from "zod"
 export const env = createEnv({
   server: {
     NEXTJS_URL: z.preprocess(
-      (str) =>
-        process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str,
+      (str) => (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str),
       process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
     ),
-    UPSTASH_REDIS_REST_TOKEN: z.string(),
-    UPSTASH_REDIS_REST_URL: z.string().url(),
-    DATABASE_URL: z.string().url(),
+    UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+    UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     STRIPE_WEBHOOK_SECRET: z.string(),
     PROJECT_ID_VERCEL: z.string(),
     TEAM_ID_VERCEL: z.string(),
     VERCEL_AUTH_BEARER_TOKEN: z.string(),
+    TINYBIRD_TOKEN: z.string(),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis
@@ -23,7 +22,5 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     VERCEL_ENV: process.env.VERCEL_ENV,
   },
-  skipValidation:
-    !!process.env.SKIP_ENV_VALIDATION ||
-    process.env.npm_lifecycle_event === "lint",
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
 })

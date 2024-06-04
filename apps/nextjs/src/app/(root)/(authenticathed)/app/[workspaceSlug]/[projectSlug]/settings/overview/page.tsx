@@ -1,17 +1,12 @@
 import { Suspense } from "react"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
 import { Label } from "@builderai/ui/label"
 import { Skeleton } from "@builderai/ui/skeleton"
 
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
+import { RegisterAccountForm } from "../_components/register-account-form"
 import { RenameProjectForm } from "../_components/rename-project"
 
 export default async function ProjectSettingsPage(props: {
@@ -25,9 +20,7 @@ export default async function ProjectSettingsPage(props: {
     <Card>
       <CardHeader>
         <CardTitle>Project name</CardTitle>
-        <CardDescription>
-          Change the display name of your project
-        </CardDescription>
+        <CardDescription>Change the display name of your project</CardDescription>
       </CardHeader>
       <CardContent>
         <Suspense
@@ -46,6 +39,8 @@ export default async function ProjectSettingsPage(props: {
               slug: props.params.projectSlug,
             })}
           />
+
+          <RegisterAccountForm />
         </Suspense>
       </CardContent>
     </Card>

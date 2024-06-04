@@ -2,26 +2,48 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import * as schema from "../schema"
+import { workspaceSelectBase } from "./workspace"
 
-export const insertProjectBaseSchema = createInsertSchema(schema.projects, {
+export const projectInserBaseSchema = createInsertSchema(schema.projects, {
   slug: z.string().min(1),
   name: z.string().min(1),
   url: z.string().url().optional(),
 })
 
-export const createProjectSchema = insertProjectBaseSchema.pick({
-  name: true,
-  url: true,
-})
+export const createProjectSchema = projectInserBaseSchema
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
+  .pick({
+    name: true,
+    url: true,
+  })
 
-export const selectProjectSchema = createSelectSchema(schema.projects, {
+export const projectSelectBaseSchema = createSelectSchema(schema.projects, {
   name: z.string().min(4, "Name must be at least 5 characters"),
 })
 
-export const renameProjectSchema = selectProjectSchema.pick({
+export const renameProjectSchema = projectSelectBaseSchema.pick({
   slug: true,
   name: true,
 })
+
+export const projectExtendedSelectSchema = projectSelectBaseSchema
+  .pick({
+    id: true,
+    enabled: true,
+    workspaceId: true,
+    slug: true,
+  })
+  .extend({
+    workspace: workspaceSelectBase.pick({
+      unPriceCustomerId: true,
+      enabled: true,
+      plan: true,
+      isPersonal: true,
+    }),
+  })
 
 export const deleteProjectSchema = z.object({
   slug: z.string(),
@@ -37,11 +59,9 @@ export const transferToWorkspaceSchema = z.object({
 })
 
 export type ProjectInsert = z.infer<typeof createProjectSchema>
-export type Project = z.infer<typeof selectProjectSchema>
+export type Project = z.infer<typeof projectSelectBaseSchema>
 export type RenameProject = z.infer<typeof renameProjectSchema>
-export type ProjectTransferToWorkspace = z.infer<
-  typeof transferToWorkspaceSchema
->
-export type ProjectTransferToPersonal = z.infer<
-  typeof transferToPersonalProjectSchema
->
+export type ProjectTransferToWorkspace = z.infer<typeof transferToWorkspaceSchema>
+export type ProjectTransferToPersonal = z.infer<typeof transferToPersonalProjectSchema>
+
+export type ProjectExtended = z.infer<typeof projectExtendedSelectSchema>

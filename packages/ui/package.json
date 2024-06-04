@@ -5,10 +5,8 @@
   "type": "module",
   "scripts": {
     "clean": "git clean -xdf .turbo node_modules",
-    "format": "prettier --check \"**/*.{ts,tsx}\"",
     "add:ui": "pnpm dlx shadcn-ui@latest add",
     "init:ui": "pnpm dlx shadcn-ui@latest init",
-    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -16,10 +14,12 @@
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-checkbox": "^1.0.4",
+    "@radix-ui/react-collapsible": "^1.0.3",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-popover": "^1.0.7",
+    "@radix-ui/react-progress": "^1.0.3",
     "@radix-ui/react-radio-group": "^1.1.3",
     "@radix-ui/react-scroll-area": "^1.0.5",
     "@radix-ui/react-select": "^2.0.0",
@@ -38,7 +38,7 @@
     "sonner": "^1.4.3",
     "tailwind-merge": "^2.2.1",
     "vaul": "^0.9.0",
-    "zod": "^3.22.4"
+    "zod": "^3.23.8"
   },
   "peerDependencies": {
     "@tanstack/react-table": "^8.13.2",
@@ -50,38 +50,30 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@builderai/eslint-config": "0.2.0",
-    "@builderai/prettier-config": "0.1.0",
-    "@builderai/tailwind-config": "0.1.0",
+    "@builderai/tailwind-config": "workspace:^",
     "@builderai/tsconfig": "0.1.0",
     "@tanstack/react-table": "^8.13.2",
     "@types/react": "^18.2.61",
     "@types/react-dom": "^18.2.19",
     "date-fns": "^3.3.1",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "react": "18.2.0",
+    "react": "18.3.1",
     "react-day-picker": "^8.10.0",
-    "react-dom": "18.2.0",
+    "react-dom": "18.3.1",
     "react-hook-form": "^7.51.0",
     "tailwindcss": "3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.3.3"
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@builderai/eslint-config/base",
-      "@builderai/eslint-config/react"
-    ]
-  },
-  "prettier": "@builderai/prettier-config",
   "exports": {
     ".": "./src/index.ts",
     "./loading-animation": "./src/loading-animation.tsx",
+    "./alert": "./src/alert.tsx",
     "./skeleton": "./src/skeleton.tsx",
     "./switch": "./src/switch.tsx",
     "./sonner": "./src/sonner.tsx",
+    "./progress": "./src/progress.tsx",
+    "./pagination": "./src/pagination.tsx",
+    "./breadcrumb": "./src/breadcrumb.tsx",
     "./radio-group": "./src/radio-group.tsx",
     "./alert-dialog": "./src/alert-dialog.tsx",
     "./resizable": "./src/resizable.tsx",
@@ -115,9 +107,7 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "src/*"
-      ]
+      "*": ["src/*"]
     }
   }
 }

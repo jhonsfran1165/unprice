@@ -7,11 +7,11 @@ import * as utils from "@builderai/db/utils"
 import {
   createProjectSchema,
   deleteProjectSchema,
+  projectSelectBaseSchema,
   renameProjectSchema,
-  selectProjectSchema,
-  selectWorkspaceSchema,
   transferToPersonalProjectSchema,
   transferToWorkspaceSchema,
+  workspaceSelectSchema,
 } from "@builderai/db/validators"
 
 import {
@@ -35,7 +35,7 @@ export const projectRouter = createTRPCRouter({
     .input(createProjectSchema)
     .output(
       z.object({
-        project: selectProjectSchema,
+        project: projectSelectBaseSchema,
       })
     )
     .mutation(async (opts) => {
@@ -53,7 +53,8 @@ export const projectRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST", message: "Limit reached" })
       }
 
-      const projectId = utils.newIdEdge("project")
+      // TODO: should be able to retry if the slug already exists
+      const projectId = utils.newId("project")
       const projectSlug = utils.generateSlug(2)
 
       const newProject = await opts.ctx.db
@@ -85,7 +86,7 @@ export const projectRouter = createTRPCRouter({
     .input(renameProjectSchema)
     .output(
       z.object({
-        project: selectProjectSchema.optional(),
+        project: projectSelectBaseSchema.optional(),
       })
     )
     .mutation(async (opts) => {
@@ -114,7 +115,7 @@ export const projectRouter = createTRPCRouter({
     .input(deleteProjectSchema)
     .output(
       z.object({
-        project: selectProjectSchema.optional(),
+        project: projectSelectBaseSchema.optional(),
       })
     )
     .mutation(async (opts) => {
@@ -144,12 +145,12 @@ export const projectRouter = createTRPCRouter({
       const { slug: projectSlug, needsToBeInTier: tier } = opts.input
 
       try {
-        const { project: projectData, workspace } = await projectGuard({
+        const { project: projectData } = await projectGuard({
           projectSlug,
           ctx: opts.ctx,
         })
 
-        if (tier.includes(workspace.plan)) {
+        if (tier.includes(projectData.workspace.plan)) {
           return {
             haveAccess: true,
             isInTier: true,
@@ -158,9 +159,9 @@ export const projectRouter = createTRPCRouter({
 
         return {
           haveAccess: projectData.slug === projectSlug,
-          isInTier: tier.includes(workspace.plan),
+          isInTier: tier.includes(projectData.workspace.plan),
         }
-      } catch (error) {
+      } catch (_error) {
         return { haveAccess: false, isInTier: false }
       }
     }),
@@ -169,7 +170,7 @@ export const projectRouter = createTRPCRouter({
     .input(transferToPersonalProjectSchema)
     .output(
       z.object({
-        project: selectProjectSchema.optional(),
+        project: projectSelectBaseSchema.optional(),
         workspaceSlug: z.string().optional(),
       })
     )
@@ -177,30 +178,26 @@ export const projectRouter = createTRPCRouter({
       const { slug: projectSlug } = opts.input
       const userId = opts.ctx.userId
 
-      const { project: projectData, workspace } = await projectGuard({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
 
-      if (workspace.isPersonal) {
+      if (projectData.workspace.isPersonal) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Project is already in the personal workspace",
         })
       }
 
-      const personalTargetWorkspace =
-        await opts.ctx.db.query.workspaces.findFirst({
-          columns: {
-            id: true,
-            slug: true,
-          },
-          where: (workspace, { eq, and }) =>
-            and(
-              eq(workspace.createdBy, userId),
-              eq(workspace.isPersonal, true)
-            ),
-        })
+      const personalTargetWorkspace = await opts.ctx.db.query.workspaces.findFirst({
+        columns: {
+          id: true,
+          slug: true,
+        },
+        where: (workspace, { eq, and }) =>
+          and(eq(workspace.createdBy, userId), eq(workspace.isPersonal, true)),
+      })
 
       if (!personalTargetWorkspace?.id) {
         throw new TRPCError({
@@ -245,19 +242,19 @@ export const projectRouter = createTRPCRouter({
     .input(transferToWorkspaceSchema)
     .output(
       z.object({
-        project: selectProjectSchema.optional(),
+        project: projectSelectBaseSchema.optional(),
         workspaceSlug: z.string().optional(),
       })
     )
     .mutation(async (opts) => {
       const { targetWorkspaceId, projectSlug } = opts.input
 
-      const { project: projectData, workspace } = await projectGuard({
+      const { project: projectData } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
 
-      if (workspace.id === targetWorkspaceId) {
+      if (projectData.workspaceId === targetWorkspaceId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Project is already in the target workspace",
@@ -310,11 +307,11 @@ export const projectRouter = createTRPCRouter({
     .output(
       z.object({
         projects: z.array(
-          selectProjectSchema.extend({
+          projectSelectBaseSchema.extend({
             styles: z.object({
               backgroundImage: z.string(),
             }),
-            workspace: selectWorkspaceSchema.pick({
+            workspace: workspaceSelectSchema.pick({
               slug: true,
             }),
           })
@@ -361,11 +358,11 @@ export const projectRouter = createTRPCRouter({
     .output(
       z.object({
         projects: z.array(
-          selectProjectSchema.extend({
+          projectSelectBaseSchema.extend({
             styles: z.object({
               backgroundImage: z.string(),
             }),
-            workspace: selectWorkspaceSchema.pick({
+            workspace: workspaceSelectSchema.pick({
               slug: true,
             }),
           })
@@ -416,48 +413,62 @@ export const projectRouter = createTRPCRouter({
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
-        project: selectProjectSchema.extend({
-          workspace: selectWorkspaceSchema,
+        project: projectSelectBaseSchema.extend({
+          workspace: workspaceSelectSchema,
         }),
       })
     )
     .query(async (opts) => {
-      const { slug: projectSlug } = opts.input
+      const workspace = opts.ctx.workspace
 
-      const { project: projectData, workspace } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
+      const projectData = await opts.ctx.db.query.projects.findFirst({
+        with: {
+          workspace: true,
+        },
+        where: (project, { eq, and }) =>
+          and(eq(project.slug, opts.input.slug), eq(project.workspaceId, workspace.id)),
       })
 
+      if (!projectData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found",
+        })
+      }
+
       return {
-        project: {
-          ...projectData,
-          workspace: workspace,
-        },
+        project: projectData,
       }
     }),
   getById: protectedActiveWorkspaceProcedure
     .input(z.object({ id: z.string() }))
     .output(
       z.object({
-        project: selectProjectSchema.extend({
-          workspace: selectWorkspaceSchema,
+        project: projectSelectBaseSchema.extend({
+          workspace: workspaceSelectSchema,
         }),
       })
     )
     .query(async (opts) => {
-      const { id: projectId } = opts.input
+      const workspace = opts.ctx.workspace
 
-      const { project: projectData, workspace } = await projectGuard({
-        projectId,
-        ctx: opts.ctx,
+      const projectData = await opts.ctx.db.query.projects.findFirst({
+        with: {
+          workspace: true,
+        },
+        where: (project, { eq, and }) =>
+          and(eq(project.slug, opts.input.id), eq(project.workspaceId, workspace.id)),
       })
 
+      if (!projectData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found",
+        })
+      }
+
       return {
-        project: {
-          ...projectData,
-          workspace: workspace,
-        },
+        project: projectData,
       }
     }),
 })

@@ -1,4 +1,7 @@
+import "server-only"
+
 import type { DefaultSession, User } from "next-auth"
+import { cache } from "react"
 
 import type { WorkspacesJWTPayload } from "@builderai/db/validators"
 
@@ -6,8 +9,6 @@ import NextAuth from "."
 import { authConfig } from "./config"
 
 export type { DefaultSession as DefaultAuthSession, Session } from "next-auth"
-
-export type { NextAuthRequest } from "next-auth/lib"
 
 declare module "next-auth" {
   interface Session {
@@ -24,11 +25,15 @@ declare module "@auth/core/adapters" {
   }
 }
 
-export const {
+const {
   handlers: { GET, POST },
-  auth,
+  auth: defaultAuth,
   signIn,
   signOut,
 } = NextAuth({
   ...authConfig,
 })
+
+const auth = defaultAuth
+
+export { GET, POST, auth, signIn, signOut }

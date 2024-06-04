@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useTransition } from "react"
+import { LazyMotion, domAnimation, m } from "framer-motion"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { domAnimation, LazyMotion, m } from "framer-motion"
+import { useEffect, useTransition } from "react"
 
 export default function Done(props: { workspaceSlug: string }) {
   const router = useRouter()
@@ -46,15 +46,12 @@ export default function Done(props: { workspaceSlug: string }) {
           animate="show"
           className="bg-background/60 flex flex-col space-y-4 rounded-xl p-8"
         >
-          <h1 className="text-2xl font-bold transition-colors sm:text-3xl">
-            You are all set!
-          </h1>
-          <p className="max-w-md text-muted-foreground transition-colors sm:text-lg">
-            Congratulations, you have successfully created your first project.
-            Check out the <Link href="/docs">docs</Link> to learn more on how to
-            use the platform.
+          <h1 className="text-2xl font-bold transition-colors sm:text-3xl">You are all set!</h1>
+          <p className="text-muted-foreground max-w-md transition-colors sm:text-lg">
+            Congratulations, you have successfully created your first project. Check out the{" "}
+            <Link href="/docs">docs</Link> to learn more on how to use the platform.
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             You will be redirected to your project momentarily.
           </p>
         </m.div>

@@ -1,20 +1,63 @@
 import * as currencies from "@dinero.js/currencies"
 import { TRPCError } from "@trpc/server"
-import { dinero } from "dinero.js"
+import { dinero, multiply, toDecimal, toUnits, transformScale } from "dinero.js"
 import { z } from "zod"
 
-import { PLANS } from "@builderai/config"
+import { APP_DOMAIN, PLANS } from "@builderai/config"
 import { purchaseWorkspaceSchema } from "@builderai/db/validators"
 import { stripe } from "@builderai/stripe"
 
-import { env } from "../../env.mjs"
-import {
-  createTRPCRouter,
-  protectedActiveWorkspaceProcedure,
-  publicProcedure,
-} from "../../trpc"
+import { createTRPCRouter, protectedActiveWorkspaceProcedure, publicProcedure } from "../../trpc"
 
 export const stripeRouter = createTRPCRouter({
+  // createLinkAccount: protectedActiveProjectProcedure
+  //   .input(z.void())
+  //   .output(
+  //     z.object({
+  //       success: z.boolean(),
+  //       url: z.string(),
+  //     })
+  //   )
+  //   .mutation(async (opts) => {
+  //     const user = opts.ctx.session.user
+  //     const project = opts.ctx.project
+  //     const workspace = opts.ctx.workspace
+
+  //     const accountId = project.stripeAccountId
+  //     let account
+
+  //     if (!accountId) {
+  //       account = await stripe.accounts.create({
+  //         type: "standard",
+  //         email: user.email ?? "",
+  //         country: "DE", // TODO: fix country
+  //         capabilities: {
+  //           card_payments: { requested: false },
+  //           transfers: { requested: false },
+  //         },
+  //       })
+  //     } else {
+  //       account = await stripe.accounts.retrieve(accountId)
+  //     }
+
+  //     const accountLink = await stripe.accountLinks.create({
+  //       account: account.id,
+  //       refresh_url:
+  //         `${APP_DOMAIN}` +
+  //         `${workspace.slug}/${project.slug}/settings/billing`,
+  //       return_url: `${APP_DOMAIN}` + `${workspace.slug}/${project.slug}/`,
+  //       type: "account_onboarding",
+  //       collect: "currently_due",
+  //     })
+
+  //     // save the account id to the project
+  //     await opts.ctx.db.update(projects).set({
+  //       stripeAccountId: account.id,
+  //     })
+
+  //     if (!accountLink.url) return { success: false as const, url: "" }
+  //     return { success: true as const, url: accountLink.url }
+  //   }),
   createSession: protectedActiveWorkspaceProcedure
     .input(z.object({ planId: z.string() }))
     .output(z.object({ success: z.boolean(), url: z.string() }))
@@ -22,7 +65,7 @@ export const stripeRouter = createTRPCRouter({
       const workspace = opts.ctx.workspace
       const user = opts.ctx.session.user
       // TODO: fix returnUrl
-      const returnUrl = `app.${env.NEXTJS_URL}` + "/"
+      const returnUrl = `${APP_DOMAIN}/`
 
       if (!user?.email) {
         throw new TRPCError({
@@ -31,12 +74,12 @@ export const stripeRouter = createTRPCRouter({
         })
       }
 
-      if (workspace && workspace.plan !== "FREE" && workspace.stripeId) {
+      if (workspace && workspace.plan !== "FREE" && workspace.unPriceCustomerId) {
         /**
          * User is subscribed, create a billing portal session
          */
         const session = await stripe.billingPortal.sessions.create({
-          customer: workspace.stripeId,
+          customer: workspace.unPriceCustomerId ?? "",
           return_url: returnUrl,
         })
         return { success: true as const, url: session.url }
@@ -70,18 +113,52 @@ export const stripeRouter = createTRPCRouter({
         ...PLANS.STANDARD,
         price: dinero({
           amount: stdPrice.unit_amount!,
-          currency:
-            currencies[stdPrice.currency as keyof typeof currencies] ??
-            currencies.USD,
+          currency: currencies[stdPrice.currency as keyof typeof currencies] ?? currencies.USD,
         }),
       },
       {
         ...PLANS.PRO,
         price: dinero({
           amount: proPrice.unit_amount!,
-          currency:
-            currencies[proPrice.currency as keyof typeof currencies] ??
-            currencies.USD,
+          currency: currencies[proPrice.currency as keyof typeof currencies] ?? currencies.USD,
+        }),
+      },
+    ]
+  }),
+
+  // TODO: add output
+  dinero: publicProcedure.input(z.void()).query(async () => {
+    // TODO: fix priceId
+    const proPrice = await stripe.prices.retrieve(PLANS.PRO?.priceId ?? "")
+    const stdPrice = await stripe.prices.retrieve(PLANS.STANDARD?.priceId ?? "")
+
+    // TODO: DINERO from string
+    const priceCentsTest = "1000.00"
+
+    const scale = priceCentsTest.includes(".") ? priceCentsTest.split(".")[1]?.length : undefined
+
+    const priceDecimal = dinero({
+      amount: Number.parseInt(priceCentsTest.replace(".", "")),
+      currency: currencies[stdPrice.currency as keyof typeof currencies] ?? currencies.USD,
+      scale: scale ? currencies.USD.exponent + scale : currencies.USD.exponent,
+    })
+
+    const usage = multiply(priceDecimal, 10)
+
+    return [
+      {
+        ...PLANS.STANDARD,
+        price: priceDecimal,
+        toDecimal: toDecimal(priceDecimal),
+        usage: toDecimal(usage),
+        units: toUnits(usage),
+        total: toDecimal(transformScale(usage, currencies.USD.exponent)),
+      },
+      {
+        ...PLANS.PRO,
+        price: dinero({
+          amount: proPrice.unit_amount!,
+          currency: currencies[proPrice.currency as keyof typeof currencies] ?? currencies.USD,
         }),
       },
     ]
@@ -95,7 +172,7 @@ export const stripeRouter = createTRPCRouter({
       const user = opts.ctx.session.user
 
       // TODO: fix returnUrl
-      const returnUrl = `app.${env.NEXTJS_URL}` + "/"
+      const returnUrl = `${APP_DOMAIN}/`
 
       if (!returnUrl) {
         throw new TRPCError({

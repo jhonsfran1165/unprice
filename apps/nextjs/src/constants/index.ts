@@ -1,7 +1,5 @@
 import { env } from "../env.mjs"
 
-export const APP_NAME = "builderai"
-
 export const APP_BASE_DOMAIN = `app.${env.NEXT_PUBLIC_APP_DOMAIN}`
 
 export const APP_HOSTNAMES = new Set([
@@ -15,7 +13,7 @@ export const APP_DOMAIN =
     ? "https://app.builderai.sh/"
     : env.VERCEL_ENV === "preview"
       ? `https://${env.NEXT_PUBLIC_APP_DOMAIN}`
-      : `http://app.localhost:3000/`
+      : "http://app.localhost:3000/"
 
 export const API_HOSTNAMES = new Set([
   "api.builderai.sh",
@@ -34,12 +32,7 @@ export const SITES_HOSTNAMES = new Set([
  * These routes do not require authentication
  * @type {string[]}
  */
-export const APP_PUBLIC_ROUTES = new Set([
-  "/opengraph-image.png",
-  "/terms",
-  "/pricing",
-  "/privacy",
-])
+export const APP_PUBLIC_ROUTES = new Set(["/opengraph-image.png", "/terms", "/pricing", "/privacy"])
 
 export const AUTH_ROUTES = {
   SIGNIN: "/auth/signin",

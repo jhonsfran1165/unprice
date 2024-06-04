@@ -1,7 +1,7 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
+import { useRouter } from "next/navigation"
 
 import { useSession } from "@builderai/auth/react"
 import { Button } from "@builderai/ui/button"
@@ -29,8 +29,7 @@ export function SubscribeNow(props: { planId: string }) {
         toaster.toast({
           title: "Error creting payment link",
           variant: "destructive",
-          description:
-            "An issue occurred while creating payment link. Please try again.",
+          description: "An issue occurred while creating payment link. Please try again.",
         })
       }
     },
@@ -39,8 +38,7 @@ export function SubscribeNow(props: { planId: string }) {
   return (
     <Button
       onClick={() => {
-        if (session.status === "unauthenticated")
-          router.push(AUTH_ROUTES.SIGNIN)
+        if (session.status === "unauthenticated") router.push(AUTH_ROUTES.SIGNIN)
 
         createSession.mutate({
           planId: props.planId,

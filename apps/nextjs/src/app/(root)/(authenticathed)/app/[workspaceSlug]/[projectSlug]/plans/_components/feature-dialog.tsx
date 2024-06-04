@@ -28,13 +28,11 @@ export function FeatureDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Feature Data"}</DialogTitle>
+          <DialogTitle>Feature Form</DialogTitle>
         </DialogHeader>
 
         <FeatureForm
-          defaultValues={
-            defaultValues ?? { title: "", slug: "", description: "" }
-          }
+          defaultValues={defaultValues ?? { title: "", slug: "", description: "" }}
           setDialogOpen={setDialogOpen}
         />
       </DialogContent>

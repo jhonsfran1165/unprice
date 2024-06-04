@@ -4,16 +4,14 @@ const submodulesProject = [
   "overview",
   "plans",
   "apikeys",
-  "settings",
   "usage",
   "customers",
+  "settings",
+  "planVersion",
   "ingestions",
 ] as const
 
-export const PROJECT_TABS_CONFIG: Record<
-  (typeof submodulesProject)[number],
-  DashboardRoute
-> = {
+export const PROJECT_TABS_CONFIG: Record<(typeof submodulesProject)[number], DashboardRoute> = {
   overview: {
     titleTab: "Dashboard",
     icon: "Dashboard",
@@ -44,6 +42,29 @@ export const PROJECT_TABS_CONFIG: Record<
       },
     },
   },
+  planVersion: {
+    titleTab: "usage",
+    icon: "BarChartIcon",
+    href: "/ingestions/overview",
+    disabled: true,
+    sidebar: {
+      overview: {
+        title: "Features",
+        href: "/",
+        icon: "Settings",
+      },
+      subscriptions: {
+        title: "subscriptions",
+        href: "/subscriptions",
+        icon: "CreditCard",
+      },
+      preview: {
+        title: "preview",
+        href: "/preview",
+        icon: "CreditCard",
+      },
+    },
+  },
   apikeys: {
     titleTab: "Api Keys",
     href: "/apikeys",
@@ -52,7 +73,12 @@ export const PROJECT_TABS_CONFIG: Record<
   ingestions: {
     titleTab: "Ingestions",
     href: "/ingestions",
-    icon: "Key",
+    icon: "BarChartIcon",
+  },
+  customers: {
+    titleTab: "Customers",
+    href: "/customers",
+    icon: "Users",
   },
   settings: {
     titleTab: "Settings",
@@ -68,18 +94,6 @@ export const PROJECT_TABS_CONFIG: Record<
         title: "Danger",
         href: "/settings/danger",
         icon: "Warning",
-      },
-    },
-  },
-  customers: {
-    titleTab: "Customers",
-    href: "/customers/overview",
-    icon: "User2",
-    sidebar: {
-      overview: {
-        title: "Customers",
-        href: "/customers/overview",
-        icon: "User2",
       },
     },
   },

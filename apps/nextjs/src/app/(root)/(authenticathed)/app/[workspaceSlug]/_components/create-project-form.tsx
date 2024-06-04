@@ -1,7 +1,7 @@
 "use client"
 
-import { useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useTransition } from "react"
 
 import type { Project, ProjectInsert } from "@builderai/db/validators"
 import { createProjectSchema } from "@builderai/db/validators"
@@ -77,9 +77,7 @@ const CreateProjectForm = (props: {
               <FormControl>
                 <Input {...field} placeholder="builderai" />
               </FormControl>
-              <FormDescription>
-                A name to identify your app in the dashboard.
-              </FormDescription>
+              <FormDescription>A name to identify your app in the dashboard.</FormDescription>
               <FormMessage />
             </FormItem>
           )}

@@ -17,14 +17,12 @@ export default async function AuthenticatedLayout(props: {
     <>
       <SessionProvider session={session}>
         <TRPCReactProvider>
-          <TooltipProvider delayDuration={300}>
-            {props.children}
-          </TooltipProvider>
+          <TooltipProvider delayDuration={300}>{props.children}</TooltipProvider>
         </TRPCReactProvider>
         <TailwindIndicator />
       </SessionProvider>
       {/* <Analytics /> */}
-      <Toaster richColors closeButton />
+      <Toaster richColors closeButton position="bottom-left" />
     </>
   )
 }

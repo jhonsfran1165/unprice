@@ -4,10 +4,7 @@ import { z } from "zod"
 import { eq, sql } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
-import {
-  createApiKeySchema,
-  selectApiKeySchema,
-} from "@builderai/db/validators"
+import { createApiKeySchema, selectApiKeySchema } from "@builderai/db/validators"
 
 import {
   createTRPCRouter,
@@ -68,16 +65,33 @@ export const apiKeyRouter = createTRPCRouter({
     )
     .mutation(async (opts) => {
       const { projectSlug, name, expiresAt } = opts.input
+      const { workspaces, email } = opts.ctx.session.user
+
+      const workspaceName = workspaces?.[0]?.slug ?? email
+
+      if (!workspaceName) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Workspace name is required",
+        })
+      }
+
+      if (!email) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "email is required",
+        })
+      }
 
       const { project } = await projectGuard({
         projectSlug,
         ctx: opts.ctx,
       })
 
-      const apiKeyId = utils.newIdEdge("apikey")
+      const apiKeyId = utils.newId("apikey")
 
       // Generate the key
-      const apiKey = utils.newIdEdge("apikey_key")
+      const apiKey = utils.newId("apikey_key")
 
       // TODO: change returning for .then((res) => res[0])
       const newApiKey = await opts.ctx.db
@@ -140,8 +154,7 @@ export const apiKeyRouter = createTRPCRouter({
       })
 
       const apiKey = await opts.ctx.db.query.apikeys.findFirst({
-        where: (apikey, { eq, and }) =>
-          and(eq(apikey.id, id), eq(apikey.projectId, project.id)),
+        where: (apikey, { eq, and }) => and(eq(apikey.id, id), eq(apikey.projectId, project.id)),
       })
 
       if (!apiKey) {
@@ -152,7 +165,7 @@ export const apiKeyRouter = createTRPCRouter({
       }
 
       // Generate the key
-      const newKey = utils.newIdEdge("apikey_key")
+      const newKey = utils.newId("apikey_key")
 
       const newApiKey = await opts.ctx.db
         .update(schema.apikeys)

@@ -6,36 +6,36 @@
  * @see https://www.radix-ui.com/docs/colors/palette-composition/composing-a-palette
  */
 const grayScalePairs = {
-  tomato: "mauvedark",
-  red: "mauvedark",
-  crimson: "mauvedark",
-  pink: "mauvedark",
-  plum: "mauvedark",
-  purple: "mauvedark",
-  violet: "mauvedark",
-  mauve: "mauvedark",
+  tomato: "mauve",
+  red: "mauve",
+  crimson: "mauve",
+  pink: "mauve",
+  plum: "mauve",
+  purple: "mauve",
+  violet: "mauve",
+  mauve: "mauve",
   sky: "slate",
-  indigo: "slatedark",
-  blue: "slatedark",
-  cyan: "slatedark",
-  slate: "slatedark",
+  indigo: "slate",
+  blue: "slate",
+  cyan: "slate",
+  slate: "slate",
   mint: "sage",
-  teal: "sagedark",
-  green: "sagedark",
-  sage: "sagedark",
+  teal: "sage",
+  green: "sage",
+  sage: "sage",
   lime: "olive",
-  grass: "olivedark",
-  olive: "olivedark",
+  grass: "olive",
+  olive: "olive",
   yellow: "sand",
   amber: "sand",
-  orange: "sanddark",
-  brown: "sanddark",
-  sand: "sanddark",
+  orange: "sand",
+  brown: "sand",
+  sand: "sand",
   white: "gray",
-  gray: "graydark",
-  gold: "graydark",
-  bronze: "graydark",
-  black: "graydark",
+  gray: "gray",
+  gold: "gray",
+  bronze: "gray",
+  black: "gray",
 } as Record<string, string>
 
 const foregroundPairs = {
@@ -53,15 +53,15 @@ const themeNames = {
     warning: "yellow",
     info: "blue",
     primary: "amber",
-    secondary: "crimson",
+    secondary: "bronze",
   },
   slate: {
     success: "teal",
     destructive: "tomato",
     warning: "amber",
-    info: "cyan",
-    primary: "indigo",
-    secondary: "blue",
+    info: "indigo",
+    primary: "blue",
+    secondary: "cyan",
   },
 }
 
@@ -85,58 +85,65 @@ const generateVariantRadixColors = (color: string) => {
     textContrast: `var(--${color}-12)`,
   }
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 interface RecursiveKeyValuePair<K extends keyof any = string, V = string> {
   [key: string]: V | RecursiveKeyValuePair<K, V>
 }
 
-export const generateTheme = (
-  themeName: keyof typeof themeNames
-): RecursiveKeyValuePair => {
+export const generateTheme = (themeName: keyof typeof themeNames): RecursiveKeyValuePair => {
   const theme = themeNames[themeName]
   const grayscale = grayScalePairs[theme.primary] ?? "gray"
 
   return {
-    transparent: "transparent",
-    current: "currentColor",
-    black: "#000",
-    white: "#FFF",
-    gray: generateVariantRadixColors(grayscale),
-    success: generateVariantRadixColors(theme.success),
-    danger: generateVariantRadixColors(theme.destructive),
-    warning: generateVariantRadixColors(theme.warning),
-    info: generateVariantRadixColors(theme.info),
-    error: generateVariantRadixColors(theme.destructive),
-    // shadcn variables
-    background: {
-      ...generateVariantRadixColors(grayscale),
-      DEFAULT: `var(--${grayscale}-2)`,
-    },
-    primary: generateVariantRadixColors(theme.primary),
-    secondary: generateVariantRadixColors(theme.secondary),
-    border: `var(--${grayscale}-5)`,
-    input: `var(--${grayscale}-6)`,
-    ring: `var(--${grayscale}-8)`,
-    foreground: `var(--${grayscale}-11)`,
-    destructive: {
-      DEFAULT: `var(--${theme.destructive}-9)`,
-      foreground: `var(--${theme.destructive}-3)`,
-    },
-    muted: {
-      DEFAULT: `var(--${grayscale}-3)`,
+    colors: {
+      transparent: "transparent",
+      current: "currentColor",
+      black: "#000",
+      white: "#fff",
+      gray: generateVariantRadixColors(grayscale),
+      success: generateVariantRadixColors(theme.success),
+      danger: generateVariantRadixColors(theme.destructive),
+      warning: generateVariantRadixColors(theme.warning),
+      info: generateVariantRadixColors(theme.info),
+      error: generateVariantRadixColors(theme.destructive),
+      // shadcn variables
+      background: {
+        ...generateVariantRadixColors(grayscale),
+        DEFAULT: `var(--${grayscale}-2)`,
+      },
+      primary: generateVariantRadixColors(theme.primary),
+      secondary: generateVariantRadixColors(theme.secondary),
+      border: `var(--${grayscale}-6)`,
+      input: `var(--${grayscale}-6)`,
+      ring: `var(--${grayscale}-8)`,
       foreground: `var(--${grayscale}-11)`,
+      destructive: {
+        DEFAULT: `var(--${theme.destructive}-9)`,
+        foreground: `var(--${theme.destructive}-3)`,
+      },
+      muted: {
+        DEFAULT: `var(--${grayscale}-4)`,
+        foreground: `var(--${grayscale}-11)`,
+      },
+      accent: {
+        DEFAULT: `var(--${grayscale}-6)`,
+        foreground: `var(--${grayscale}-12)`,
+      },
+      popover: {
+        DEFAULT: `var(--${grayscale}-2)`,
+        foreground: `var(--${grayscale}-11)`,
+      },
+      card: {
+        DEFAULT: `var(--${grayscale}-2)`,
+        foreground: `var(--${grayscale}-11)`,
+      },
     },
-    accent: {
+    borderColor: {
       DEFAULT: `var(--${grayscale}-6)`,
-      foreground: `var(--${grayscale}-12)`,
     },
-    popover: {
-      DEFAULT: `var(--${grayscale}-3)`,
-      foreground: `var(--${grayscale}-11)`,
-    },
-    card: {
-      DEFAULT: `var(--${grayscale}-2)`,
-      foreground: `var(--${grayscale}-11)`,
+    ringColor: {
+      DEFAULT: `var(--${grayscale}-8)`,
     },
   }
 }

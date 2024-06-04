@@ -12,8 +12,13 @@ export const runtime = "edge"
 export const preferredRegion = ["fra1"]
 
 const handler = auth(async (req) => {
+  // when we use the middleware to rewrite the request, the path doesn't include the /api prefix
+  // trpc under the hood uses the path to determine the procedure
+  const pathName = req.nextUrl.pathname
+  const endpoint = pathName.startsWith("/api") ? "/api/trpc/edge" : "/trpc/edge"
+
   const response = await fetchRequestHandler({
-    endpoint: "/api/trpc/edge",
+    endpoint: endpoint,
     router: edgeRouter,
     req,
     createContext: () =>
@@ -23,7 +28,7 @@ const handler = auth(async (req) => {
         req,
       }),
     onError: ({ error, path }) => {
-      console.log("❌ Error in tRPC handler (edge) on path", path)
+      console.info("❌  Error in tRPC handler (edge) on path", path)
       console.error(error)
     },
   })

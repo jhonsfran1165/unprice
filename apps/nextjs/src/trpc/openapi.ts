@@ -4,7 +4,7 @@ import type { OpenAPIV3 } from "openapi-types"
 import { appRouter } from "@builderai/api"
 
 export type IExtensionName = `x-${string}`
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type IExtensionType = any
 export type ISpecificationExtension = Record<IExtensionName, IExtensionType>
 export type ExtendedDocument = OpenAPIV3.Document & ISpecificationExtension
@@ -13,15 +13,15 @@ const openApiDocument = generateOpenApiDocument(appRouter, {
   title: "tRPC OpenAPI",
   version: "1.0.0",
   baseUrl: "http://app.localhost:3000/api/trpc",
-  description: "API for Builderai",
+  description: "API for Unprice",
   docsUrl: "http://example.com/docs",
-  tags: ["builderai"],
+  tags: ["unprice"],
 })
 
 openApiDocument.tags = [
   {
-    name: "builderai",
-    description: "Operations related to builderai",
+    name: "unprice",
+    description: "Operations related to unprice",
   },
 ]
 

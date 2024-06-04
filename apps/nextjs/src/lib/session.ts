@@ -7,9 +7,7 @@ export function getWorkspacesUser(session: Session | null): {
   const userSession = session?.user
 
   const userBelongsToWorkspace = (workspaceSlug: string) =>
-    userSession?.workspaces.some(
-      (workspace) => workspace.slug === workspaceSlug
-    ) ?? false
+    userSession?.workspaces.some((workspace) => workspace.slug === workspaceSlug) ?? false
 
   return {
     user: userSession,

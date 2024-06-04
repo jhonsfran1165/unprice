@@ -1,75 +1,82 @@
-import React from "react"
-import Link from "next/link"
-import { DollarSign, RefreshCcw } from "lucide-react"
+import { BadgeCheck } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
-import { ChevronLeft } from "@builderai/ui/icons"
+import { Button } from "@builderai/ui/button"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
+import { Separator } from "@builderai/ui/separator"
 
-import HeaderTab from "~/components/layout/header-tab"
-import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
+import { PlanVersionDialog } from "../[planSlug]/_components/plan-version-dialog"
+import { PlanActions } from "./plan-actions"
 
 export const runtime = "edge"
 
 export default function PlanHeader(props: {
-  children: React.ReactNode
   workspaceSlug: string
   projectSlug: string
   planVersionId: string
   plan: RouterOutputs["plans"]["getBySlug"]["plan"]
+  className?: string
 }) {
-  const { workspaceSlug, projectSlug, planVersionId, plan } = props
+  const { plan } = props
   return (
-    <div className="flex flex-col">
-      <MaxWidthWrapper className="max-w-screen-2xl">
-        <div className="mb-6 flex justify-between align-middle">
-          <Link
-            className="flex items-center justify-start align-middle text-sm"
-            prefetch={false}
-            href={`/${workspaceSlug}/${projectSlug}/plans`}
-          >
-            <Badge variant={"outline"} className="py-1">
-              <ChevronLeft className="h-4 w-4" />
-              back
-            </Badge>
-          </Link>
-        </div>
-      </MaxWidthWrapper>
-      <HeaderTab>
-        <div className="flex w-full items-center justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-normal text-background-textContrast">
-              {`${plan.title}: ${planVersionId === undefined ? "new version" : `version ${planVersionId}`}`}
-            </h1>
-            <h4 className="text-base text-muted-foreground">
+    <Card>
+      <div className="flex flex-row justify-between">
+        <div className="flex flex-col">
+          <CardHeader className="pb-3">
+            <CardTitle>{plan.slug.toUpperCase()}</CardTitle>
+            <CardDescription className="line-clamp-2 h-12 max-w-lg text-balance leading-relaxed">
               {plan.description}
-            </h4>
-            <div className="flex space-x-1">
+            </CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <div className="flex space-x-2">
               <Badge
                 className={cn({
                   success: plan.active,
                   danger: !plan.active,
                 })}
               >
-                <span className="flex h-2 w-2 rounded-full bg-success-solid" />
-                <span className="ml-1">
-                  {plan.active ? "active" : "inactive"}
-                </span>
+                <span className="bg-success-solid flex h-2 w-2 rounded-full" />
+                <span className="ml-1">{plan.active ? "active" : "inactive"}</span>
               </Badge>
-              <Badge className="info">
-                <DollarSign className="h-3 w-3" />
-                <span className="ml-1">{plan.currency}</span>
-              </Badge>
-              <Badge className="warning">
-                <RefreshCcw className="h-3 w-3" />
-                <span className="ml-1">{plan.billingPeriod}</span>
-              </Badge>
+
+              {plan.defaultPlan && (
+                <Badge>
+                  <BadgeCheck className="h-3 w-3" />
+                  <span className="ml-1">{"default"}</span>
+                </Badge>
+              )}
             </div>
-          </div>
-          <div>{props.children}</div>
+          </CardFooter>
         </div>
-      </HeaderTab>
-    </div>
+
+        <div className="flex items-center px-6">
+          <div className="button-primary flex items-center space-x-1 rounded-md">
+            <div className="sm:col-span-full">
+              <PlanVersionDialog
+                defaultValues={{
+                  planId: plan.id,
+                  description: plan.description,
+                  title: plan.slug,
+                  projectId: plan.projectId,
+                  // TODO: use default currency from org settings
+                  currency: "USD",
+                  planType: "recurring",
+                  paymentProvider: "stripe",
+                }}
+              >
+                <Button variant={"custom"}>Add Version</Button>
+              </PlanVersionDialog>
+            </div>
+
+            <Separator orientation="vertical" className="h-[20px] p-0" />
+
+            <PlanActions plan={plan} />
+          </div>
+        </div>
+      </div>
+    </Card>
   )
 }

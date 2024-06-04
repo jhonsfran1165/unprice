@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import dynamic from "next/dynamic"
+import { useState } from "react"
 
 import { Button } from "@builderai/ui/button"
 import {
@@ -39,9 +39,7 @@ export default function NewApiKeyDialog(props: { projectSlug: string }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create API Key</DialogTitle>
-          <DialogDescription>
-            Fill out the form to create an API key.
-          </DialogDescription>
+          <DialogDescription>Fill out the form to create an API key.</DialogDescription>
         </DialogHeader>
         <CreateApiKeyForm
           projectSlug={props.projectSlug}

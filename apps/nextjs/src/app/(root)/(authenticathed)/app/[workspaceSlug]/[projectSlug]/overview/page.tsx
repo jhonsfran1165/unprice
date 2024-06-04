@@ -1,6 +1,6 @@
-import { Suspense } from "react"
-import Link from "next/link"
 import { formatRelative } from "date-fns"
+import Link from "next/link"
+import { Suspense } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
@@ -13,13 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
-import {
-  Activity,
-  ChevronRight,
-  CreditCard,
-  DollarSign,
-  Users,
-} from "@builderai/ui/icons"
+import { Activity, ChevronRight, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
@@ -43,53 +37,45 @@ export default async function DashboardPage(props: {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% from last month
-            </p>
+            <p className="text-muted-foreground text-xs">+20.1% from last month</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Subscriptions</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+2350</div>
-            <p className="text-xs text-muted-foreground">
-              +180.1% from last month
-            </p>
+            <p className="text-muted-foreground text-xs">+180.1% from last month</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Sales</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
+            <CreditCard className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+12,234</div>
-            <p className="text-xs text-muted-foreground">
-              +19% from last month
-            </p>
+            <p className="text-muted-foreground text-xs">+19% from last month</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Now</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <Activity className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+573</div>
-            <p className="text-xs text-muted-foreground">
-              +201 since last hour
-            </p>
+            <p className="text-muted-foreground text-xs">+201 since last hour</p>
           </CardContent>
         </Card>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-7 md:col-span-2 lg:col-span-4">
           <CardHeader>
             <CardTitle>Overview</CardTitle>
@@ -110,10 +96,7 @@ export default async function DashboardPage(props: {
             />
           }
         >
-          <RecentIngestions
-            projectSlug={projectSlug}
-            workspaceSlug={workspaceSlug}
-          />
+          <RecentIngestions projectSlug={projectSlug} workspaceSlug={workspaceSlug} />
         </Suspense>
       </div>
     </>
@@ -134,13 +117,11 @@ function IngestionCard(props: {
   const truncatedHash = ingestion.hash.slice(0, 15)
 
   return (
-    <Link
-      href={`/${props.workspaceSlug}/${props.projectSlug}/ingestions/${ingestion.id}`}
-    >
-      <div className="flex items-center rounded p-1 hover:bg-muted">
+    <Link href={`/${props.workspaceSlug}/${props.projectSlug}/ingestions/${ingestion.id}`}>
+      <div className="hover:bg-muted flex items-center rounded p-1">
         <div className="space-y-1">
           <p className="text-sm font-medium leading-none">{truncatedHash}</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {formatRelative(new Date(ingestion.createdAt), new Date())}
           </p>
         </div>
@@ -151,7 +132,7 @@ function IngestionCard(props: {
           <div className="flex gap-[2px]">
             {new Array(N_SQUARES).fill(null).map((_, i) => (
               <span
-                key={i}
+                key={Math.random()}
                 className={cn(
                   "inline-block h-2 w-2",
                   i < addSquares ? "bg-green-500" : "bg-red-500",
@@ -182,8 +163,7 @@ async function RecentIngestions(props: {
       <CardHeader>
         <CardTitle>Recent Ingestions</CardTitle>
         <CardDescription>
-          {ingestions.length} ingestion{ingestions.length > 1 ? "s" : null}{" "}
-          recorded this period.
+          {ingestions.length} ingestion{ingestions.length > 1 ? "s" : null} recorded this period.
         </CardDescription>
       </CardHeader>
       <CardContent>

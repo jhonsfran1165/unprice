@@ -41,10 +41,7 @@ export const ingestionRouter = createTRPCRouter({
 
       const ingestion = await opts.ctx.db.query.ingestions.findFirst({
         where: (ingestion, { eq, and }) =>
-          and(
-            eq(ingestion.id, opts.input.id),
-            eq(ingestion.projectId, project.id)
-          ),
+          and(eq(ingestion.id, opts.input.id), eq(ingestion.projectId, project.id)),
       })
 
       if (!ingestion) {
@@ -64,11 +61,7 @@ export const ingestionRouter = createTRPCRouter({
         limit: z.number().optional(),
       })
     )
-    .output(
-      z.array(
-        ingestionSelectSchema.extend({ adds: z.number(), subs: z.number() })
-      )
-    )
+    .output(z.array(ingestionSelectSchema.extend({ adds: z.number(), subs: z.number() })))
     .query(async (opts) => {
       const projectSlug = opts.input.projectSlug
 

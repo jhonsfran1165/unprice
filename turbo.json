@@ -7,25 +7,11 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "next-env.d.ts",
-        ".expo/**",
-        ".output/**"
-      ]
+      "outputs": [".next/**", "!.next/cache/**", "next-env.d.ts", ".expo/**", ".output/**"]
     },
     "dev": {
       "persistent": true,
       "cache": false
-    },
-    "format": {
-      "outputs": ["node_modules/.cache/.prettiercache"],
-      "outputMode": "new-only"
-    },
-    "lint": {
-      "dependsOn": ["^topo"],
-      "outputs": ["node_modules/.cache/.eslintcache"]
     },
     "typecheck": {
       "dependsOn": ["^topo"],
@@ -39,7 +25,9 @@
     }
   },
   "globalEnv": [
-    "DATABASE_URL",
+    "DATABASE_PRIMARY_URL",
+    "DATABASE_READ1_URL",
+    "DATABASE_READ2_URL",
     "NEXTJS_URL",
     "SKIP_ENV_VALIDATION",
     "STRIPE_API_KEY",

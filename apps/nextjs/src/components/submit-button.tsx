@@ -1,3 +1,4 @@
+import { cn } from "@builderai/ui"
 import type { ButtonProps } from "@builderai/ui/button"
 import { Button } from "@builderai/ui/button"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
@@ -10,12 +11,12 @@ interface SubmitButtonProps extends ButtonProps {
 }
 
 export const SubmitButton = ({
-  variant = "default",
-  component,
+  variant = "primary",
   isSubmitting,
   isDisabled,
   label,
   onClick,
+  className,
   ...props
 }: SubmitButtonProps) => {
   return (
@@ -23,17 +24,12 @@ export const SubmitButton = ({
       variant={variant}
       type={onClick ? "button" : "submit"}
       disabled={isDisabled}
+      className={className}
       onClick={onClick}
       {...props}
     >
       {label}
-      {isSubmitting && (
-        <LoadingAnimation
-          className="ml-2"
-          variant={variant}
-          component={component ?? "default"}
-        />
-      )}
+      {isSubmitting && <LoadingAnimation className={cn("ml-2", className)} />}
     </Button>
   )
 }

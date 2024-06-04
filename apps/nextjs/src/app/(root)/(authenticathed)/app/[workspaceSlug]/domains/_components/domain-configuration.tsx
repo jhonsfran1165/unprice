@@ -16,12 +16,7 @@ export const InlineSnippet = ({
   children?: string
 }) => {
   return (
-    <span
-      className={cn(
-        "inline-block rounded-md bg-muted px-1 py-0.5 font-mono",
-        className
-      )}
-    >
+    <span className={cn("bg-muted inline-block rounded-md px-1 py-0.5 font-mono", className)}>
       {children}
     </span>
   )
@@ -43,7 +38,7 @@ export default function DomainConfiguration({
 
   const txtVerification =
     (status === "Pending Verification" &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       domainJson?.verification?.find((x: any) => x.type === "TXT")) ??
     null
 
@@ -57,10 +52,10 @@ export default function DomainConfiguration({
         <>
           <p className="text-sm">
             Please set the following TXT record on{" "}
-            <InlineSnippet>{domainJson.apexName}</InlineSnippet> to prove
-            ownership of <InlineSnippet>{domainJson.name}</InlineSnippet>:
+            <InlineSnippet>{domainJson.apexName}</InlineSnippet> to prove ownership of{" "}
+            <InlineSnippet>{domainJson.name}</InlineSnippet>:
           </p>
-          <div className="my-5 flex items-start justify-start space-x-10 rounded-md bg-muted p-2">
+          <div className="bg-muted my-5 flex items-start justify-start space-x-10 rounded-md p-2">
             <div>
               <p className="text-sm font-bold">Type</p>
               <p className="mt-2 font-mono text-sm">{txtVerification.type}</p>
@@ -70,9 +65,7 @@ export default function DomainConfiguration({
               <p className="mt-2 font-mono text-sm">
                 {txtVerification.domain.slice(
                   0,
-                  txtVerification.domain.length -
-                    (domainJson?.apexName?.length ?? 0) -
-                    1
+                  txtVerification.domain.length - (domainJson?.apexName?.length ?? 0) - 1
                 )}
               </p>
             </div>
@@ -83,11 +76,10 @@ export default function DomainConfiguration({
               </p>
             </div>
           </div>
-          <p className="text-sm font-normal text-muted-foreground">
-            <b>Warning:</b> if you are using this domain for another site,
-            setting this TXT record will transfer domain ownership away from
-            that site and break it. Please exercise caution when setting this
-            record.
+          <p className="text-muted-foreground text-sm font-normal">
+            <b>Warning:</b> if you are using this domain for another site, setting this TXT record
+            will transfer domain ownership away from that site and break it. Please exercise caution
+            when setting this record.
           </p>
         </>
       ) : status === "Unknown Error" ? (
@@ -96,22 +88,17 @@ export default function DomainConfiguration({
         <>
           <Tabs defaultValue={subdomain ? "CNAME" : "A"}>
             <TabsList>
-              <TabsTrigger value="A">
-                A Record{!subdomain && " (recommended)"}
-              </TabsTrigger>
-              <TabsTrigger value="CNAME">
-                CNAME Record{subdomain && " (recommended)"}
-              </TabsTrigger>
+              <TabsTrigger value="A">A Record{!subdomain && " (recommended)"}</TabsTrigger>
+              <TabsTrigger value="CNAME">CNAME Record{subdomain && " (recommended)"}</TabsTrigger>
             </TabsList>
             <TabsContent value="A">
               <div className="my-3 text-left">
                 <p className="my-5 text-sm">
                   To configure your apex domain (
                   <InlineSnippet>{domainJson.apexName}</InlineSnippet>
-                  ), set the following A record on your DNS provider to
-                  continue:
+                  ), set the following A record on your DNS provider to continue:
                 </p>
-                <div className="flex items-center justify-start space-x-10 rounded-md bg-muted p-2">
+                <div className="bg-muted flex items-center justify-start space-x-10 rounded-md p-2">
                   <div>
                     <p className="text-sm font-bold">Type</p>
                     <p className="mt-2 font-mono text-sm">A</p>
@@ -134,27 +121,21 @@ export default function DomainConfiguration({
             <TabsContent value="CNAME">
               <div className="my-3 text-left">
                 <p className="my-5 text-sm">
-                  To configure your subdomain (
-                  <InlineSnippet>{domainJson.name}</InlineSnippet>
-                  ), set the following A record on your DNS provider to
-                  continue:
+                  To configure your subdomain (<InlineSnippet>{domainJson.name}</InlineSnippet>
+                  ), set the following A record on your DNS provider to continue:
                 </p>
-                <div className="flex items-center justify-start space-x-10 rounded-md bg-muted p-2">
+                <div className="bg-muted flex items-center justify-start space-x-10 rounded-md p-2">
                   <div>
                     <p className="text-sm font-bold">Type</p>
                     <p className="mt-2 font-mono text-sm">CNAME</p>
                   </div>
                   <div>
                     <p className="text-sm font-bold">Name</p>
-                    <p className="mt-2 font-mono text-sm">
-                      {subdomain ?? "www"}
-                    </p>
+                    <p className="mt-2 font-mono text-sm">{subdomain ?? "www"}</p>
                   </div>
                   <div>
                     <p className="text-sm font-bold">Value</p>
-                    <p className="mt-2 font-mono text-sm">
-                      {`cname.vercel-dns.com`}
-                    </p>
+                    <p className="mt-2 font-mono text-sm">{"cname.vercel-dns.com"}</p>
                   </div>
                   <div>
                     <p className="text-sm font-bold">TTL</p>
@@ -165,9 +146,8 @@ export default function DomainConfiguration({
             </TabsContent>
           </Tabs>
           <p className="muted-foreground mt-5 text-sm">
-            Note: for TTL, if <InlineSnippet>86400</InlineSnippet> is not
-            available, set the highest value possible. Also, domain propagation
-            can take up to an hour.
+            Note: for TTL, if <InlineSnippet>86400</InlineSnippet> is not available, set the highest
+            value possible. Also, domain propagation can take up to an hour.
           </p>
         </>
       )}
@@ -180,12 +160,12 @@ const DomainConfigSkeleton = () => (
     <div className="mb-4 flex items-center space-x-2">
       <Skeleton className="h-6 w-[200px]" />
     </div>
-    <div className="my-3 flex flex-col space-y-4 text-left ">
+    <div className="my-3 flex flex-col space-y-4 text-left">
       <Skeleton className="h-6 w-[250px]" />
       <div className="my-5 text-sm">
         <Skeleton className="h-4 w-full" />
       </div>
-      <Skeleton className="h-[48px] w-full space-x-10 rounded-md  bg-muted p-2" />
+      <Skeleton className="bg-muted h-[48px] w-full space-x-10 rounded-md p-2" />
       <Skeleton className="h-4 w-full" />
     </div>
   </div>

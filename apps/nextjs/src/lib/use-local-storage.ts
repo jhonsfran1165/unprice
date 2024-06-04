@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react"
 
-const useLocalStorage = <T>(
-  key: string,
-  initialValue: T
-): [T, (value: T) => void] => {
+const useLocalStorage = <T>(key: string, initialValue: T): [T, (value: T) => void] => {
   const item = window.localStorage.getItem(key)
 
   const getItemSafe = (item: string | null) => {
@@ -18,9 +15,7 @@ const useLocalStorage = <T>(
     }
   }
 
-  const [storedValue, setStoredValue] = useState(
-    item ? getItemSafe(item) : initialValue
-  )
+  const [storedValue, setStoredValue] = useState(item ? getItemSafe(item) : initialValue)
 
   useEffect(() => {
     // Retrieve from localStorage
@@ -28,7 +23,6 @@ const useLocalStorage = <T>(
     if (item) {
       setStoredValue(getItemSafe(item))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key])
 
   const setValue = (value: T) => {

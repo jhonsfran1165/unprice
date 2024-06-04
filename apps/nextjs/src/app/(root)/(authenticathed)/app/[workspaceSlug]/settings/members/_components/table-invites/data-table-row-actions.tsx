@@ -1,9 +1,9 @@
 "use client"
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
 import type { Row } from "@tanstack/react-table"
 import { MoreHorizontal } from "lucide-react"
+import { useRouter } from "next/navigation"
+import * as React from "react"
 
 import { invitesSelectBase } from "@builderai/db/validators"
 import {
@@ -34,9 +34,7 @@ interface DataTableRowActionsProps<TData> {
 }
 
 // TODO: improve this - use as reference the domain-dialog.tsx
-export function DataTableRowActions<TData>({
-  row,
-}: DataTableRowActionsProps<TData>) {
+export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
   const invite = invitesSelectBase.parse(row.original)
   const [alertOpen, setAlertOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
@@ -68,10 +66,7 @@ export function DataTableRowActions<TData>({
     <AlertDialog open={alertOpen} onOpenChange={(value) => setAlertOpen(value)}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="h-8 w-8 p-0 data-[state=open]:bg-accent"
-          >
+          <Button variant="ghost" className="data-[state=open]:bg-accent h-8 w-8 p-0">
             <span className="sr-only">Open menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
@@ -84,10 +79,7 @@ export function DataTableRowActions<TData>({
           >
             Change role
           </DropdownMenuItem>
-          <AlertDialogTrigger
-            asChild
-            disabled={!["OWNER", "ADMIN"].includes(invite.role)}
-          >
+          <AlertDialogTrigger asChild disabled={!["OWNER", "ADMIN"].includes(invite.role)}>
             <DropdownMenuItem className="text-destructive focus:bg-destructive focus:text-background">
               Delete invite from workspace
             </DropdownMenuItem>
@@ -99,8 +91,7 @@ export function DataTableRowActions<TData>({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will remove the user from your
-            team.
+            This action cannot be undone. This will remove the user from your team.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

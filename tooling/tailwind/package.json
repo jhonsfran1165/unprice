@@ -1,36 +1,36 @@
 {
   "name": "@builderai/tailwind-config",
+  "private": true,
   "version": "0.1.0",
-  "main": "index.ts",
-  "license": "MIT",
-  "files": [
-    "index.ts",
-    "postcss.js"
-  ],
+  "license": "AGPL-3.0",
+  "exports": {
+    ".": "./index.ts",
+    "./themes/slate.css": "./themes/slate.css",
+    "./themes/sunset.css": "./themes/sunset.css"
+  },
+  "typesVersions": {
+    "*": {
+      "*": ["src/*"]
+    }
+  },
+  "type": "module",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint .",
-    "format": "prettier --check \"**/*.{js,ts,json}\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@radix-ui/colors": "3.0.0",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.13",
     "autoprefixer": "^10.4.18",
     "postcss": "8.4.35",
-    "tailwindcss": "3.4.1"
+    "tailwindcss": "3.4.1",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@builderai/eslint-config": "0.2.0",
-    "@builderai/prettier-config": "0.1.0",
     "@builderai/tsconfig": "0.1.0",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@builderai/eslint-config/base"
-    ]
-  },
-  "prettier": "@builderai/prettier-config"
+  }
 }

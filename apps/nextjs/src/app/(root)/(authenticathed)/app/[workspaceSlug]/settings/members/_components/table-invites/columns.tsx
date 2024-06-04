@@ -9,8 +9,7 @@ import { Checkbox } from "@builderai/ui/checkbox"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { DataTableRowActions } from "./data-table-row-actions"
 
-export type Member =
-  RouterOutputs["workspaces"]["listInvites"]["invites"][number]
+export type Member = RouterOutputs["workspaces"]["listInvites"]["invites"][number]
 
 export const columns: ColumnDef<Member>[] = [
   {
@@ -18,8 +17,7 @@ export const columns: ColumnDef<Member>[] = [
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
@@ -39,29 +37,19 @@ export const columns: ColumnDef<Member>[] = [
   },
   {
     accessorKey: "email",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Email" />
-    ),
-    cell: ({ row }) => (
-      <div className="text-sm text-muted-foreground">{row.original.email}</div>
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
+    cell: ({ row }) => <div className="text-muted-foreground text-sm">{row.original.email}</div>,
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Created at" />
-    ),
-    cell: ({ row }) => (
-      <div>{formatRelative(row.getValue("createdAt"), new Date())}</div>
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
+    cell: ({ row }) => <div>{formatRelative(row.getValue("createdAt"), new Date())}</div>,
     enableSorting: true,
     enableHiding: true,
   },
   {
     accessorKey: "role",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Role" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
     cell: ({ row }) => <div>{row.getValue("role")}</div>,
     enableSorting: false,
     enableHiding: true,

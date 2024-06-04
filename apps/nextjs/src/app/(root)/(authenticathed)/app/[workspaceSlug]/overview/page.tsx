@@ -19,10 +19,7 @@ export default async function WorkspaceOverviewPage(props: {
       <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {projects.map((project) => (
           <li key={project.id}>
-            <ProjectCard
-              project={project}
-              workspaceSlug={props.params.workspaceSlug}
-            />
+            <ProjectCard project={project} workspaceSlug={props.params.workspaceSlug} />
           </li>
         ))}
       </ul>
@@ -36,10 +33,8 @@ export default async function WorkspaceOverviewPage(props: {
           </ul>
           <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center">
             <Balancer>
-              <h2 className="text-2xl font-bold">
-                This workspace has no projects yet
-              </h2>
-              <p className="text-lg text-muted-foreground">
+              <h2 className="text-2xl font-bold">This workspace has no projects yet</h2>
+              <p className="text-muted-foreground text-lg">
                 Create your first project to get started
               </p>
             </Balancer>

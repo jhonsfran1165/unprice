@@ -14,12 +14,7 @@ export default function WorkspaceLayout(props: {
 
   return (
     <DashboardShell
-      header={
-        <HeaderTab
-          title="General Settings"
-          description="Manage your workspace settings"
-        />
-      }
+      header={<HeaderTab title="General Settings" description="Manage your workspace settings" />}
       tabs={
         <TabsNav
           tabs={tabs}
@@ -28,10 +23,7 @@ export default function WorkspaceLayout(props: {
         />
       }
       sidebar={
-        <SidebarNav
-          activeTab={WORKSPACE_TABS_CONFIG.settings}
-          basePath={`/${workspaceSlug}`}
-        />
+        <SidebarNav activeTab={WORKSPACE_TABS_CONFIG.settings} basePath={`/${workspaceSlug}`} />
       }
     >
       {props.children}

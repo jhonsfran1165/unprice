@@ -1,8 +1,8 @@
 "use client"
 
-import Link from "next/link"
 import { TRPCClientError } from "@trpc/client"
 import { toDecimal } from "dinero.js"
+import Link from "next/link"
 
 import type { PurchaseOrg } from "@builderai/db/validators"
 import { purchaseWorkspaceSchema } from "@builderai/db/validators"
@@ -14,22 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@builderai/ui/dialog"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@builderai/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@builderai/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 import { useToast } from "@builderai/ui/use-toast"
 
 import { currencySymbol } from "~/lib/currency"
@@ -64,8 +51,7 @@ export default function NewTeamDialog(props: { closeDialog: () => void }) {
       } else {
         toast({
           title: "Error",
-          description:
-            "There was an error setting up your workspace. Please try again.",
+          description: "There was an error setting up your workspace. Please try again.",
           variant: "destructive",
         })
       }
@@ -109,34 +95,24 @@ export default function NewTeamDialog(props: { closeDialog: () => void }) {
               <FormItem>
                 <div className="flex justify-between">
                   <FormLabel>Subscription plan *</FormLabel>
-                  <Link
-                    href="/pricing"
-                    className="text-xs text-muted-foreground hover:underline"
-                  >
+                  <Link href="/pricing" className="text-muted-foreground text-xs hover:underline">
                     What&apos;s included in each plan?
                   </Link>
                 </div>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a plan" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {plans?.data?.map((plan, index) => (
-                      <SelectItem
-                        key={plan.priceId + index}
-                        value={plan.priceId}
-                      >
+                    {plans?.data?.map((plan) => (
+                      <SelectItem key={plan.priceId} value={plan.priceId}>
                         <span className="font-medium">{plan.name}</span> -{" "}
                         <span className="text-muted-foreground">
                           {toDecimal(
                             plan.price,
-                            ({ value, currency }) =>
-                              `${currencySymbol(currency.code)}${value}`
+                            ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
                           )}{" "}
                           per month
                         </span>

@@ -1,8 +1,8 @@
 "use client"
 
+import { AnimatePresence } from "framer-motion"
 import dynamic from "next/dynamic"
 import { useSearchParams } from "next/navigation"
-import { AnimatePresence } from "framer-motion"
 
 const Intro = dynamic(() => import("./intro"), {
   ssr: false,

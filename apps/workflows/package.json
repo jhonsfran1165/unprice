@@ -1,0 +1,32 @@
+{
+  "name": "@builderai/workflows",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm with-env next build",
+    "clean": "git clean -xdf .next .turbo node_modules",
+    "dev": "pnpm with-env next dev --port 3200",
+    "start": "pnpm with-env next start",
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env.local --",
+    "triggers": "pnpm dlx @trigger.dev/cli@latest dev --port 3200"
+  },
+  "dependencies": {
+    "@trigger.dev/nextjs": "^2.3.18",
+    "@trigger.dev/react": "^2.3.18",
+    "@trigger.dev/sdk": "^2.3.18",
+    "next": "14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@builderai/tsconfig": "^0.1.0",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "dotenv-cli": "^7.3.0",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3"
+  }
+}
