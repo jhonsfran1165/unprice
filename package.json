@@ -6,7 +6,7 @@
   },
   "workspaces": ["packages/*", "apps/*", "tooling/*"],
   "engineStrict": true,
-  "packageManager": "pnpm@8.15.4",
+  "packageManager": "pnpm@9.1.4",
   "scripts": {
     "build": "turbo build",
     "clean": "git clean -xdf node_modules dist .next",
