@@ -68,9 +68,7 @@
       "indexes": {
         "key": {
           "name": "key",
-          "columns": [
-            "key"
-          ],
+          "columns": ["key"],
           "isUnique": false
         }
       },
@@ -79,12 +77,8 @@
           "name": "builderai_apikeys_project_id_builderai_projects_id_fk",
           "tableFrom": "builderai_apikeys",
           "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -92,19 +86,14 @@
       "compositePrimaryKeys": {
         "pk_apikeys": {
           "name": "pk_apikeys",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
         "name_unique": {
           "name": "name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       }
     },
@@ -185,12 +174,8 @@
           "name": "builderai_account_userId_builderai_user_id_fk",
           "tableFrom": "builderai_account",
           "tableTo": "builderai_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -198,10 +183,7 @@
       "compositePrimaryKeys": {
         "builderai_account_provider_providerAccountId_pk": {
           "name": "builderai_account_provider_providerAccountId_pk",
-          "columns": [
-            "provider",
-            "providerAccountId"
-          ]
+          "columns": ["provider", "providerAccountId"]
         }
       },
       "uniqueConstraints": {}
@@ -235,12 +217,8 @@
           "name": "builderai_session_userId_builderai_user_id_fk",
           "tableFrom": "builderai_session",
           "tableTo": "builderai_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -329,10 +307,7 @@
       "compositePrimaryKeys": {
         "builderai_verificationToken_identifier_token_pk": {
           "name": "builderai_verificationToken_identifier_token_pk",
-          "columns": [
-            "identifier",
-            "token"
-          ]
+          "columns": ["identifier", "token"]
         }
       },
       "uniqueConstraints": {}
@@ -396,10 +371,7 @@
       "indexes": {
         "unique_payment_provider": {
           "name": "unique_payment_provider",
-          "columns": [
-            "customer_id",
-            "payment_provider"
-          ],
+          "columns": ["customer_id", "payment_provider"],
           "isUnique": true
         }
       },
@@ -408,12 +380,8 @@
           "name": "builderai_customer_payment_providers_project_id_builderai_projects_id_fk",
           "tableFrom": "builderai_customer_payment_providers",
           "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -421,14 +389,8 @@
           "name": "payment_customer_id_fkey",
           "tableFrom": "builderai_customer_payment_providers",
           "tableTo": "builderai_customers",
-          "columnsFrom": [
-            "customer_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["customer_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -436,19 +398,14 @@
       "compositePrimaryKeys": {
         "pk_customer_payment_method": {
           "name": "pk_customer_payment_method",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
         "builderai_customer_payment_providers_payment_provider_customer_id_unique": {
           "name": "builderai_customer_payment_providers_payment_provider_customer_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "payment_provider_customer_id"
-          ]
+          "columns": ["payment_provider_customer_id"]
         }
       }
     },
@@ -525,9 +482,7 @@
       "indexes": {
         "email": {
           "name": "email",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": false
         }
       },
@@ -536,12 +491,8 @@
           "name": "builderai_customers_project_id_builderai_projects_id_fk",
           "tableFrom": "builderai_customers",
           "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -549,20 +500,14 @@
       "compositePrimaryKeys": {
         "pk_customer": {
           "name": "pk_customer",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
         "unique_email_project": {
           "name": "unique_email_project",
           "nullsNotDistinct": false,
-          "columns": [
-            "email",
-            "project_id"
-          ]
+          "columns": ["email", "project_id"]
         }
       }
     },
@@ -619,9 +564,7 @@
       "indexes": {
         "name": {
           "name": "name",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": false
         }
       },
@@ -630,12 +573,8 @@
           "name": "builderai_domains_workspace_id_builderai_workspaces_id_fk",
           "tableFrom": "builderai_domains",
           "tableTo": "builderai_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -645,9 +584,7 @@
         "builderai_domains_name_unique": {
           "name": "builderai_domains_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       }
     },
@@ -712,12 +649,8 @@
           "name": "builderai_features_project_id_builderai_projects_id_fk",
           "tableFrom": "builderai_features",
           "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -725,20 +658,14 @@
       "compositePrimaryKeys": {
         "features_pkey": {
           "name": "features_pkey",
-          "columns": [
-            "project_id",
-            "id"
-          ]
+          "columns": ["project_id", "id"]
         }
       },
       "uniqueConstraints": {
         "slug_feature": {
           "name": "slug_feature",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug",
-            "project_id"
-          ]
+          "columns": ["slug", "project_id"]
         }
       }
     },
@@ -809,12 +736,8 @@
           "name": "builderai_ingestions_project_id_builderai_projects_id_fk",
           "tableFrom": "builderai_ingestions",
           "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -822,14 +745,8 @@
           "name": "ingestions_apikey_id_fkey",
           "tableFrom": "builderai_ingestions",
           "tableTo": "builderai_apikeys",
-          "columnsFrom": [
-            "apikey_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["apikey_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -837,10 +754,7 @@
       "compositePrimaryKeys": {
         "ingestions_pkey": {
           "name": "ingestions_pkey",
-          "columns": [
-            "project_id",
-            "id"
-          ]
+          "columns": ["project_id", "id"]
         }
       },
       "uniqueConstraints": {}
@@ -938,12 +852,8 @@
           "name": "builderai_plan_versions_features_project_id_builderai_projects_id_fk",
           "tableFrom": "builderai_plan_versions_features",
           "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -951,14 +861,8 @@
           "name": "plan_versions_id_fkey",
           "tableFrom": "builderai_plan_versions_features",
           "tableTo": "builderai_plan_versions",
-          "columnsFrom": [
-            "plan_version_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["plan_version_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -966,14 +870,8 @@
           "name": "features_id_fkey",
           "tableFrom": "builderai_plan_versions_features",
           "tableTo": "builderai_features",
-          "columnsFrom": [
-            "feature_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["feature_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -981,22 +879,14 @@
       "compositePrimaryKeys": {
         "plan_versions_pkey": {
           "name": "plan_versions_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
         "unique_version_feature": {
           "name": "unique_version_feature",
           "nullsNotDistinct": true,
-          "columns": [
-            "plan_version_id",
-            "feature_id",
-            "project_id",
-            "order"
-          ]
+          "columns": ["plan_version_id", "feature_id", "project_id", "order"]
         }
       }
     },
@@ -1178,12 +1068,8 @@
           "name": "builderai_plan_versions_project_id_builderai_projects_id_fk",
           "tableFrom": "builderai_plan_versions",
           "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1191,12 +1077,8 @@
           "name": "builderai_plan_versions_published_by_builderai_user_id_fk",
           "tableFrom": "builderai_plan_versions",
           "tableTo": "builderai_user",
-          "columnsFrom": [
-            "published_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["published_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1204,12 +1086,8 @@
           "name": "builderai_plan_versions_archived_by_builderai_user_id_fk",
           "tableFrom": "builderai_plan_versions",
           "tableTo": "builderai_user",
-          "columnsFrom": [
-            "archived_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["archived_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1217,14 +1095,8 @@
           "name": "plan_versions_plan_id_pkey",
           "tableFrom": "builderai_plan_versions",
           "tableTo": "builderai_plans",
-          "columnsFrom": [
-            "plan_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["plan_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1232,10 +1104,7 @@
       "compositePrimaryKeys": {
         "plan_versions_plan_id_fkey": {
           "name": "plan_versions_plan_id_fkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {}
@@ -1309,12 +1178,8 @@
           "name": "builderai_plans_project_id_builderai_projects_id_fk",
           "tableFrom": "builderai_plans",
           "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1322,20 +1187,14 @@
       "compositePrimaryKeys": {
         "plans_pkey": {
           "name": "plans_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
         "slug_plan": {
           "name": "slug_plan",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug",
-            "project_id"
-          ]
+          "columns": ["slug", "project_id"]
         }
       }
     },
@@ -1429,9 +1288,7 @@
       "indexes": {
         "slug_index": {
           "name": "slug_index",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "isUnique": false
         }
       },
@@ -1440,12 +1297,8 @@
           "name": "builderai_projects_workspace_id_builderai_workspaces_id_fk",
           "tableFrom": "builderai_projects",
           "tableTo": "builderai_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1455,9 +1308,7 @@
         "unique_slug": {
           "name": "unique_slug",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       }
     },
@@ -1595,11 +1446,7 @@
       "indexes": {
         "unique_active_planversion_subscription": {
           "name": "unique_active_planversion_subscription",
-          "columns": [
-            "customers_id",
-            "plan_version_id",
-            "project_id"
-          ],
+          "columns": ["customers_id", "plan_version_id", "project_id"],
           "isUnique": true
         }
       },
@@ -1608,12 +1455,8 @@
           "name": "builderai_subscriptions_project_id_builderai_projects_id_fk",
           "tableFrom": "builderai_subscriptions",
           "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1621,14 +1464,8 @@
           "name": "subscriptions_customer_id_fkey",
           "tableFrom": "builderai_subscriptions",
           "tableTo": "builderai_customers",
-          "columnsFrom": [
-            "customers_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["customers_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1636,14 +1473,8 @@
           "name": "subscriptions_payment_method_id_fkey",
           "tableFrom": "builderai_subscriptions",
           "tableTo": "builderai_customer_payment_providers",
-          "columnsFrom": [
-            "payment_provider_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["payment_provider_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1651,14 +1482,8 @@
           "name": "subscriptions_planversion_id_fkey",
           "tableFrom": "builderai_subscriptions",
           "tableTo": "builderai_plan_versions",
-          "columnsFrom": [
-            "plan_version_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "columnsFrom": ["plan_version_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1666,10 +1491,7 @@
       "compositePrimaryKeys": {
         "subscriptions_pkey": {
           "name": "subscriptions_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {}
@@ -1725,12 +1547,8 @@
           "name": "builderai_invites_workspace_id_builderai_workspaces_id_fk",
           "tableFrom": "builderai_invites",
           "tableTo": "builderai_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1738,10 +1556,7 @@
       "compositePrimaryKeys": {
         "invites_pkey": {
           "name": "invites_pkey",
-          "columns": [
-            "email",
-            "workspace_id"
-          ]
+          "columns": ["email", "workspace_id"]
         }
       },
       "uniqueConstraints": {}
@@ -1791,12 +1606,8 @@
           "name": "builderai_members_workspace_id_builderai_workspaces_id_fk",
           "tableFrom": "builderai_members",
           "tableTo": "builderai_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1804,12 +1615,8 @@
           "name": "members_user_id_fkey",
           "tableFrom": "builderai_members",
           "tableTo": "builderai_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1817,10 +1624,7 @@
       "compositePrimaryKeys": {
         "members_pkey": {
           "name": "members_pkey",
-          "columns": [
-            "user_id",
-            "workspace_id"
-          ]
+          "columns": ["user_id", "workspace_id"]
         }
       },
       "uniqueConstraints": {}
@@ -1908,12 +1712,8 @@
           "name": "builderai_workspaces_created_by_builderai_user_id_fk",
           "tableFrom": "builderai_workspaces",
           "tableTo": "builderai_user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1923,16 +1723,12 @@
         "builderai_workspaces_slug_unique": {
           "name": "builderai_workspaces_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         },
         "unprice_customer_id": {
           "name": "unprice_customer_id",
           "nullsNotDistinct": true,
-          "columns": [
-            "unprice_customer_id"
-          ]
+          "columns": ["unprice_customer_id"]
         }
       }
     }
@@ -1941,146 +1737,87 @@
     "public.aggregation_method": {
       "name": "aggregation_method",
       "schema": "public",
-      "values": [
-        "sum",
-        "last_during_period",
-        "last_ever",
-        "max"
-      ]
+      "values": ["sum", "last_during_period", "last_ever", "max"]
     },
     "public.collection_method": {
       "name": "collection_method",
       "schema": "public",
-      "values": [
-        "charge_automatically",
-        "send_invoice"
-      ]
+      "values": ["charge_automatically", "send_invoice"]
     },
     "public.currency": {
       "name": "currency",
       "schema": "public",
-      "values": [
-        "USD",
-        "EUR"
-      ]
+      "values": ["USD", "EUR"]
     },
     "public.payment_providers": {
       "name": "payment_providers",
       "schema": "public",
-      "values": [
-        "stripe",
-        "lemonsqueezy"
-      ]
+      "values": ["stripe", "lemonsqueezy"]
     },
     "public.billing_period": {
       "name": "billing_period",
       "schema": "public",
-      "values": [
-        "month",
-        "year"
-      ]
+      "values": ["month", "year"]
     },
     "public.plan_type": {
       "name": "plan_type",
       "schema": "public",
-      "values": [
-        "recurring"
-      ]
+      "values": ["recurring"]
     },
     "public.legacy_plans": {
       "name": "legacy_plans",
       "schema": "public",
-      "values": [
-        "FREE",
-        "PRO",
-        "ENTERPRISE"
-      ]
+      "values": ["FREE", "PRO", "ENTERPRISE"]
     },
     "public.project_tier": {
       "name": "project_tier",
       "schema": "public",
-      "values": [
-        "FREE",
-        "PRO",
-        "ENTERPRISE"
-      ]
+      "values": ["FREE", "PRO", "ENTERPRISE"]
     },
     "public.app_stages": {
       "name": "app_stages",
       "schema": "public",
-      "values": [
-        "prod",
-        "test",
-        "dev"
-      ]
+      "values": ["prod", "test", "dev"]
     },
     "public.plan_version_status": {
       "name": "plan_version_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "published"
-      ]
+      "values": ["draft", "published"]
     },
     "public.subscription_status": {
       "name": "subscription_status",
       "schema": "public",
-      "values": [
-        "active",
-        "inactive"
-      ]
+      "values": ["active", "inactive"]
     },
     "public.team_roles": {
       "name": "team_roles",
       "schema": "public",
-      "values": [
-        "OWNER",
-        "ADMIN",
-        "MEMBER"
-      ]
+      "values": ["OWNER", "ADMIN", "MEMBER"]
     },
     "public.tier_mode": {
       "name": "tier_mode",
       "schema": "public",
-      "values": [
-        "volume",
-        "graduated"
-      ]
+      "values": ["volume", "graduated"]
     },
     "public.feature_types": {
       "name": "feature_types",
       "schema": "public",
-      "values": [
-        "flat",
-        "tier",
-        "package",
-        "usage"
-      ]
+      "values": ["flat", "tier", "package", "usage"]
     },
     "public.subscription_type": {
       "name": "subscription_type",
       "schema": "public",
-      "values": [
-        "plan",
-        "addons"
-      ]
+      "values": ["plan", "addons"]
     },
     "public.usage_mode": {
       "name": "usage_mode",
       "schema": "public",
-      "values": [
-        "tier",
-        "package",
-        "unit"
-      ]
+      "values": ["tier", "package", "unit"]
     },
     "public.when_to_bill": {
       "name": "when_to_bill",
       "schema": "public",
-      "values": [
-        "pay_in_advance",
-        "pay_in_arrear"
-      ]
+      "values": ["pay_in_advance", "pay_in_arrear"]
     }
   },
   "schemas": {},

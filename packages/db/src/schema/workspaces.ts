@@ -1,11 +1,5 @@
 import { relations } from "drizzle-orm"
-import {
-  boolean,
-  foreignKey,
-  primaryKey,
-  text,
-  timestamp,
-} from "drizzle-orm/pg-core"
+import { boolean, foreignKey, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, id, timestamps, workspaceID } from "../utils/sql"
@@ -30,10 +24,9 @@ export const workspaces = pgTableProject(
 
     // unprice id
     // in Postgres 15.0+ NULLS NOT DISTINCT is available
-    unPriceCustomerId: text("unprice_customer_id").unique(
-      "unprice_customer_id",
-      { nulls: "not distinct" }
-    ),
+    unPriceCustomerId: text("unprice_customer_id").unique("unprice_customer_id", {
+      nulls: "not distinct",
+    }),
 
     // TODO: remove this
     plan: plansEnum("legacy_plans").default("FREE").notNull(),

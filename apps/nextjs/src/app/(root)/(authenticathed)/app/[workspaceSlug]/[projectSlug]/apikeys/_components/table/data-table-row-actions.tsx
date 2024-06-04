@@ -1,8 +1,8 @@
 "use client"
 
-import { startTransition } from "react"
-import { useParams, useRouter } from "next/navigation"
 import type { Row } from "@tanstack/react-table"
+import { useParams, useRouter } from "next/navigation"
+import { startTransition } from "react"
 
 import { selectApiKeySchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
@@ -21,9 +21,7 @@ interface DataTableRowActionsProps<TData> {
   row: Row<TData>
 }
 
-export function DataTableRowActions<TData>({
-  row,
-}: DataTableRowActionsProps<TData>) {
+export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
   const apikey = selectApiKeySchema.parse(row.original)
   const router = useRouter()
   const projectSlug = useParams().projectSlug as string

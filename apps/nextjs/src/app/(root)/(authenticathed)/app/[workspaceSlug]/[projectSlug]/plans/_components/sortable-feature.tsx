@@ -9,14 +9,7 @@ import type { FeaturePlanProps } from "./feature-plan"
 import { FeaturePlan } from "./feature-plan"
 
 export function SortableFeature(props: FeaturePlanProps) {
-  const {
-    setNodeRef,
-    listeners,
-    isDragging,
-    attributes,
-    transform,
-    transition,
-  } = useSortable({
+  const { setNodeRef, listeners, isDragging, attributes, transform, transition } = useSortable({
     id: props.planFeatureVersion.featureId,
     data: {
       mode: props.mode,

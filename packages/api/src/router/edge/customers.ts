@@ -17,15 +17,8 @@ import {
 
 import { deniedReasonSchema } from "../../pkg/errors"
 import { StripePaymentProvider } from "../../pkg/payment-provider/stripe"
-import {
-  createTRPCRouter,
-  protectedApiOrActiveProjectProcedure,
-} from "../../trpc"
-import {
-  getEntitlements,
-  reportUsageFeature,
-  verifyFeature,
-} from "../../utils/shared"
+import { createTRPCRouter, protectedApiOrActiveProjectProcedure } from "../../trpc"
+import { getEntitlements, reportUsageFeature, verifyFeature } from "../../utils/shared"
 
 export const customersRouter = createTRPCRouter({
   // TODO: create should support apikeys as well
@@ -110,12 +103,7 @@ export const customersRouter = createTRPCRouter({
 
       const deletedCustomer = await opts.ctx.db
         .delete(schema.customers)
-        .where(
-          and(
-            eq(schema.customers.projectId, project.id),
-            eq(schema.customers.id, id)
-          )
-        )
+        .where(and(eq(schema.customers.projectId, project.id), eq(schema.customers.id, id)))
         .returning()
         .then((re) => re[0])
 
@@ -176,8 +164,7 @@ export const customersRouter = createTRPCRouter({
       // })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
-        where: (feature, { eq, and }) =>
-          and(eq(feature.id, id), eq(feature.projectId, project.id)),
+        where: (feature, { eq, and }) => and(eq(feature.id, id), eq(feature.projectId, project.id)),
       })
 
       if (!customerData?.id) {
@@ -201,12 +188,7 @@ export const customersRouter = createTRPCRouter({
           }),
           updatedAt: new Date(),
         })
-        .where(
-          and(
-            eq(schema.customers.id, id),
-            eq(schema.customers.projectId, project.id)
-          )
-        )
+        .where(and(eq(schema.customers.id, id), eq(schema.customers.projectId, project.id)))
         .returning()
         .then((data) => data[0])
 
@@ -277,10 +259,9 @@ export const customersRouter = createTRPCRouter({
                 paymentCustomerId: provider.paymentProviderCustomerId,
               })
 
-              const { err, val } =
-                await stripePaymentProvider.listPaymentMethods({
-                  limit: 3,
-                })
+              const { err, val } = await stripePaymentProvider.listPaymentMethods({
+                limit: 3,
+              })
 
               if (err ?? !val) {
                 throw new TRPCError({
@@ -570,11 +551,7 @@ export const customersRouter = createTRPCRouter({
           and(
             eq(customer.projectId, project.id),
             fromDate && toDate
-              ? between(
-                  customer.createdAt,
-                  new Date(fromDate),
-                  new Date(toDate)
-                )
+              ? between(customer.createdAt, new Date(fromDate), new Date(toDate))
               : undefined,
             fromDate ? gte(customer.createdAt, new Date(fromDate)) : undefined,
             toDate ? lte(customer.createdAt, new Date(toDate)) : undefined

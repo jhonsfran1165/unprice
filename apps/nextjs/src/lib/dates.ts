@@ -17,9 +17,7 @@ export function manipulateDate(
   const isToDateMidnight = String(date?.to?.getTime()).endsWith("00000")
 
   // We might wanna use `endOfDay(new Date(date.to))` here
-  const addOneDayToDate = date?.to
-    ? addDays(new Date(date.to), 1).getTime() - 1
-    : null
+  const addOneDayToDate = date?.to ? addDays(new Date(date.to), 1).getTime() - 1 : null
 
   return {
     fromDate: date?.from?.getTime() ?? null,

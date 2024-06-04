@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import type { ColumnDef } from "@tanstack/react-table"
+import Link from "next/link"
 
 import type { Customer } from "@builderai/db/validators"
 import { Checkbox } from "@builderai/ui/checkbox"
@@ -16,8 +16,7 @@ export const columns: ColumnDef<Customer>[] = [
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
@@ -37,9 +36,7 @@ export const columns: ColumnDef<Customer>[] = [
   },
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
     cell: ({ row }) => (
       <Link href={`./customers/${row.original.id}`} prefetch={false}>
         <div className="lowercase">{row.getValue("name")}</div>
@@ -48,18 +45,14 @@ export const columns: ColumnDef<Customer>[] = [
   },
   {
     accessorKey: "email",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Email" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
     cell: ({ row }) => <div className="w-[80px]">{row.getValue("email")}</div>,
     enableSorting: false,
     enableHiding: false,
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Creation Date" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Creation Date" />,
     cell: ({ row }) => <div>{formatDate(row.getValue("createdAt"))}</div>,
     enableSorting: true,
     enableHiding: true,

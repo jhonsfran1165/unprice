@@ -1,12 +1,6 @@
 import { Suspense } from "react"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
 import { Label } from "@builderai/ui/label"
 import { Skeleton } from "@builderai/ui/skeleton"
 
@@ -26,9 +20,7 @@ export default async function ProjectSettingsPage(props: {
     <Card>
       <CardHeader>
         <CardTitle>Project name</CardTitle>
-        <CardDescription>
-          Change the display name of your project
-        </CardDescription>
+        <CardDescription>Change the display name of your project</CardDescription>
       </CardHeader>
       <CardContent>
         <Suspense

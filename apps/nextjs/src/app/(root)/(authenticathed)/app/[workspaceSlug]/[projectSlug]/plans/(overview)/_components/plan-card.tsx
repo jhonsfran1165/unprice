@@ -1,4 +1,3 @@
-import Link from "next/link"
 import {
   GalleryHorizontalEnd,
   LayoutDashboard,
@@ -7,17 +6,12 @@ import {
   Settings,
   User2,
 } from "lucide-react"
+import Link from "next/link"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
 import {
   DropdownMenu,
@@ -40,10 +34,7 @@ export function PlanCard(props: {
   const { versions, ...rest } = plan
 
   return (
-    <Link
-      prefetch={false}
-      href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}
-    >
+    <Link prefetch={false} href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}>
       <Card className="hover:border-background-borderHover overflow-hidden">
         <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
           <div className="space-y-4">
@@ -58,9 +49,7 @@ export function PlanCard(props: {
                 )}
               </div>
             </CardTitle>
-            <CardDescription className="line-clamp-2 h-10">
-              {plan.description}
-            </CardDescription>
+            <CardDescription className="line-clamp-2 h-10">{plan.description}</CardDescription>
           </div>
           <div className="flex items-center space-x-1">
             <PropagationStopper>
@@ -71,11 +60,7 @@ export function PlanCard(props: {
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="w-[200px]"
-                    forceMount
-                  >
+                  <DropdownMenuContent align="start" className="w-[200px]" forceMount>
                     <DropdownMenuLabel>Plan Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
@@ -140,9 +125,7 @@ export function PlanCardSkeleton(props: { pulse?: boolean }) {
       <div className={cn("bg-muted h-20", pulse && "animate-pulse")} />
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span className={cn("bg-muted flex-1", pulse && "animate-pulse")}>
-            &nbsp;
-          </span>
+          <span className={cn("bg-muted flex-1", pulse && "animate-pulse")}>&nbsp;</span>
         </CardTitle>
         <CardDescription className={cn("bg-muted", pulse && "animate-pulse")}>
           &nbsp;

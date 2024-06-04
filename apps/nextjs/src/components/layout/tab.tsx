@@ -1,12 +1,7 @@
 import Link from "next/link"
 
 import { cn } from "@builderai/ui"
-import {
-  Tooltip,
-  TooltipArrow,
-  TooltipContent,
-  TooltipTrigger,
-} from "@builderai/ui/tooltip"
+import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
 import { Ping } from "~/components/ping"
 import type { DashboardRoute } from "~/types"

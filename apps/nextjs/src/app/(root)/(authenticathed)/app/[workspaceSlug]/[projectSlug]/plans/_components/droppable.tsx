@@ -15,11 +15,7 @@ interface FeatureGroupProps {
   disabled?: boolean
 }
 
-export function DroppableContainer({
-  id,
-  children,
-  disabled,
-}: FeatureGroupProps) {
+export function DroppableContainer({ id, children, disabled }: FeatureGroupProps) {
   const { setNodeRef } = useDroppable({
     id: id,
     data: {
@@ -30,9 +26,7 @@ export function DroppableContainer({
   return (
     <div
       ref={disabled ? undefined : setNodeRef}
-      className={cn(
-        "flex h-[700px] w-full flex-shrink-0 snap-center flex-col space-y-2"
-      )}
+      className={cn("flex h-[700px] w-full flex-shrink-0 snap-center flex-col space-y-2")}
     >
       {children}
     </div>

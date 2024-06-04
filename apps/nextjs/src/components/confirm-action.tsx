@@ -33,12 +33,8 @@ export function ConfirmAction({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="button-default">
-            Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction onClick={confirmAction}>
-            Continue
-          </AlertDialogAction>
+          <AlertDialogCancel className="button-default">Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmAction}>Continue</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

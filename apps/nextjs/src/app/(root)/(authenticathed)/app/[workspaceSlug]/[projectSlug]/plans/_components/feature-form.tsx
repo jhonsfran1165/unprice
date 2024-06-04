@@ -1,7 +1,7 @@
 "use client"
 
-import { startTransition } from "react"
 import { useRouter } from "next/navigation"
+import { startTransition } from "react"
 import { z } from "zod"
 
 import { slugify } from "@builderai/db/utils"
@@ -37,7 +37,7 @@ export function FeatureForm({
   const apiUtils = api.useUtils()
   const featureExist = api.features.exist.useMutation()
 
-  const editMode = defaultValues.id ? true : false
+  const editMode = !!defaultValues.id
 
   // async validation only when creating a new feature
   const forSchema = editMode
@@ -154,12 +154,7 @@ export function FeatureForm({
                   <FormItem>
                     <FormLabel>Slug</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="custom-domains"
-                        readOnly
-                        disabled
-                      />
+                      <Input {...field} placeholder="custom-domains" readOnly disabled />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -181,9 +176,7 @@ export function FeatureForm({
                     placeholder="Grants the user the access to custom domains feature"
                   />
                 </FormControl>
-                <FormDescription>
-                  Enter a short description of the feature.
-                </FormDescription>
+                <FormDescription>Enter a short description of the feature.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

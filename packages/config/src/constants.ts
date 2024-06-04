@@ -8,13 +8,13 @@ export const APP_DOMAIN =
     ? "https://app.builderai.sh/"
     : env.VERCEL_ENV === "preview"
       ? `https://${env.NEXT_PUBLIC_APP_DOMAIN}`
-      : `http://app.localhost:3000/`
+      : "http://app.localhost:3000/"
 
 export const API_DOMAIN =
   env.VERCEL_ENV === "production"
     ? "https://api.builderai.sh"
     : env.VERCEL_ENV === "preview"
       ? `https://api.${env.NEXT_PUBLIC_APP_DOMAIN}`
-      : `http://api.localhost:3000`
+      : "http://api.localhost:3000"
 
 export const APP_NAME = "builderai"

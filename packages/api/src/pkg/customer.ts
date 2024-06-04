@@ -1,10 +1,7 @@
 import { waitUntil } from "@vercel/functions"
 
 import type { Database } from "@builderai/db"
-import type {
-  PlanVersionExtended,
-  SubscriptionExtended,
-} from "@builderai/db/validators"
+import type { PlanVersionExtended, SubscriptionExtended } from "@builderai/db/validators"
 import type { FetchError, Result } from "@builderai/error"
 import { Err, Ok } from "@builderai/error"
 import type { Analytics } from "@builderai/tinybird"
@@ -14,10 +11,7 @@ import type { UnpriceCache } from "./cache"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
 
-type FeatureResponse = Pick<
-  PlanVersionExtended,
-  "planFeatures"
->["planFeatures"][number]
+type FeatureResponse = Pick<PlanVersionExtended, "planFeatures">["planFeatures"][number]
 
 export class UnpriceCustomer {
   private readonly cache: UnpriceCache
@@ -37,9 +31,7 @@ export class UnpriceCustomer {
   public async getCustomerActiveSubs(opts: {
     customerId: string
     projectId: string
-  }): Promise<
-    Result<SubscriptionExtended[], UnPriceCustomerError | FetchError>
-  > {
+  }): Promise<Result<SubscriptionExtended[], UnPriceCustomerError | FetchError>> {
     const res = await this.cache.getCustomerActiveSubs(opts.customerId)
 
     if (res.err) {
@@ -114,10 +106,7 @@ export class UnpriceCustomer {
         },
       },
       where: (customer, { eq, and }) =>
-        and(
-          eq(customer.id, opts.customerId),
-          eq(customer.projectId, opts.projectId)
-        ),
+        and(eq(customer.id, opts.customerId), eq(customer.projectId, opts.projectId)),
     })
 
     if (!customer) {
@@ -139,9 +128,7 @@ export class UnpriceCustomer {
     }
 
     // cache the active subscriptions
-    waitUntil(
-      this.cache.setCustomerActiveSubs(customer.id, customer.subscriptions)
-    )
+    waitUntil(this.cache.setCustomerActiveSubs(customer.id, customer.subscriptions))
 
     return Ok(customer.subscriptions)
   }
@@ -149,9 +136,7 @@ export class UnpriceCustomer {
   public async getEntitlements(opts: {
     customerId: string
     projectId: string
-  }): Promise<
-    Result<{ entitlements: string[] }, UnPriceCustomerError | FetchError>
-  > {
+  }): Promise<Result<{ entitlements: string[] }, UnPriceCustomerError | FetchError>> {
     const res = await this.cache.getCustomerEntitlements(opts.customerId)
 
     if (res.err) {
@@ -197,10 +182,7 @@ export class UnpriceCustomer {
         },
       },
       where: (customer, { eq, and }) =>
-        and(
-          eq(customer.id, opts.customerId),
-          eq(customer.projectId, opts.projectId)
-        ),
+        and(eq(customer.id, opts.customerId), eq(customer.projectId, opts.projectId)),
     })
 
     if (!customer) {
@@ -362,9 +344,7 @@ export class UnpriceCustomer {
       const ip = opts.ctx.headers.get("x-real-ip") ?? ""
       const userAgent = opts.ctx.headers.get("user-agent") ?? ""
 
-      const limit = subscription.features.find(
-        (item) => item.featurePlanId === feature.id
-      )?.limit
+      const limit = subscription.features.find((item) => item.featurePlanId === feature.id)?.limit
 
       // TODO: add params to usage so we can count or max and get data by date
       const usage = await this.analytics
@@ -532,8 +512,7 @@ export class UnpriceCustomer {
     ctx: Context
   }): Promise<Result<{ success: boolean }, UnPriceCustomerError | FetchError>> {
     try {
-      const { customerId, featureSlug, projectId, usage, workspaceId, ctx } =
-        opts
+      const { customerId, featureSlug, projectId, usage, workspaceId, ctx } = opts
       const res = await this.getCustomerActiveSubByFeature({
         customerId,
         projectId,

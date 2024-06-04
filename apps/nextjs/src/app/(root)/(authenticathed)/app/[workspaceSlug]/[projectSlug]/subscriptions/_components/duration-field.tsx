@@ -1,21 +1,15 @@
 "use client"
 
-import { useState } from "react"
 import { add, addDays, formatDate, startOfMonth } from "date-fns"
 import { ArrowRight, CalendarIcon } from "lucide-react"
+import { useState } from "react"
 import type { UseFormReturn } from "react-hook-form"
 
 import type { InsertSubscription } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Calendar } from "@builderai/ui/calendar"
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@builderai/ui/form"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 
 export default function DurationFormField({
@@ -23,12 +17,8 @@ export default function DurationFormField({
 }: {
   form: UseFormReturn<InsertSubscription>
 }) {
-  const [start, setStart] = useState<Date | undefined>(
-    form.getValues("startDate")
-  )
-  const [end, setEnd] = useState<Date | null | undefined>(
-    form.getValues("endDate")
-  )
+  const [start, setStart] = useState<Date | undefined>(form.getValues("startDate"))
+  const [end, setEnd] = useState<Date | null | undefined>(form.getValues("endDate"))
 
   const { errors } = form.formState
 
@@ -58,20 +48,12 @@ export default function DurationFormField({
                         !start && "text-muted-foreground"
                       )}
                     >
-                      {start ? (
-                        formatDate(start, "MMM dd, yyyy")
-                      ) : (
-                        <span>Start Date</span>
-                      )}
+                      {start ? formatDate(start, "MMM dd, yyyy") : <span>Start Date</span>}
                       <ArrowRight className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent
-                  className="flex w-auto p-0"
-                  side="bottom"
-                  align="end"
-                >
+                <PopoverContent className="flex w-auto p-0" side="bottom" align="end">
                   <div className="border-r">
                     <Calendar
                       mode="single"
@@ -123,9 +105,7 @@ export default function DurationFormField({
                         variant="ghost"
                         className="justify-start font-normal"
                         onClick={() => {
-                          const nextMonth = startOfMonth(
-                            add(new Date(), { months: 1 })
-                          )
+                          const nextMonth = startOfMonth(add(new Date(), { months: 1 }))
                           setStart(nextMonth)
                           field.onChange(nextMonth)
                         }}
@@ -154,20 +134,12 @@ export default function DurationFormField({
                         !end && "text-muted-foreground"
                       )}
                     >
-                      {end ? (
-                        formatDate(end, "MMM dd, yyyy")
-                      ) : (
-                        <span>Forever</span>
-                      )}
+                      {end ? formatDate(end, "MMM dd, yyyy") : <span>Forever</span>}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent
-                  className="flex w-auto p-0"
-                  side="bottom"
-                  align="end"
-                >
+                <PopoverContent className="flex w-auto p-0" side="bottom" align="end">
                   <div className="border-r">
                     <Calendar
                       mode="single"
@@ -267,9 +239,7 @@ export default function DurationFormField({
           )}
         />
       </div>
-      {errors.startDate && (
-        <FormMessage>{errors.startDate.message}</FormMessage>
-      )}
+      {errors.startDate && <FormMessage>{errors.startDate.message}</FormMessage>}
     </div>
   )
 }

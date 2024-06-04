@@ -28,7 +28,7 @@ const handler = auth(async (req) => {
         req,
       }),
     onError: ({ error, path }) => {
-      console.log("❌ Error in tRPC handler (edge) on path", path)
+      console.info("❌  Error in tRPC handler (edge) on path", path)
       console.error(error)
     },
   })

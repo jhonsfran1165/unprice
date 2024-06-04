@@ -13,8 +13,7 @@
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev:turbo": "pnpm with-env next dev --turbo",
     "dev": "pnpm with-env next dev",
-    "lint": "next lint",
-    "format": "prettier --check \"**/*.{js,cjs,mjs,ts,tsx,md,json}\"",
+    "fmt": "pnpm biome format . --write && pnpm biome check . --apply",
     "start": "pnpm with-env next start",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env.local --"
@@ -31,11 +30,9 @@
     "@dnd-kit/core": "^6.1.0",
     "@dnd-kit/sortable": "^8.0.0",
     "@hookform/resolvers": "^3.3.4",
-    "@million/lint": "1.0.0-rc.12",
     "@next/mdx": "14.1.1",
     "@potatohd/trpc-openapi": "^1.2.3",
     "@t3-oss/env-nextjs": "0.9.1",
-    "@tanstack/eslint-plugin-query": "^5.35.6",
     "@tanstack/react-query": "5.40.0",
     "@tanstack/react-query-next-experimental": "5.40.0",
     "@tanstack/react-table": "^8.13.2",
@@ -66,8 +63,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@builderai/eslint-config": "^0.2.0",
-    "@builderai/prettier-config": "^0.1.0",
     "@builderai/tailwind-config": "workspace:^",
     "@builderai/tsconfig": "^0.1.0",
     "@tanstack/react-query-devtools": "^5.24.8",
@@ -77,18 +72,7 @@
     "@types/react-dom": "^18.2.19",
     "autoprefixer": "^10.4.18",
     "dotenv-cli": "^7.3.0",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
     "tailwindcss": "3.4.1",
     "typescript": "^5.3.3"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@builderai/eslint-config/base",
-      "@builderai/eslint-config/nextjs",
-      "@builderai/eslint-config/react"
-    ]
-  },
-  "prettier": "@builderai/prettier-config"
+  }
 }

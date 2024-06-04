@@ -1,7 +1,7 @@
 "use client"
 
+import { LazyMotion, domAnimation, m } from "framer-motion"
 import { useParams, useRouter } from "next/navigation"
-import { domAnimation, LazyMotion, m } from "framer-motion"
 import { Balancer } from "react-wrap-balancer"
 
 import { Button } from "@builderai/ui/button"
@@ -58,8 +58,8 @@ export default function Intro() {
                 },
               }}
             >
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+              incididunt.
             </m.p>
             <m.div
               variants={{

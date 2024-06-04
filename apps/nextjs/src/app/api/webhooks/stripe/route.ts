@@ -10,18 +10,13 @@ export async function POST(req: NextRequest) {
   const signature = req.headers.get("Stripe-Signature")!
 
   try {
-    const event = stripe.webhooks.constructEvent(
-      payload,
-      signature,
-      env.STRIPE_WEBHOOK_SECRET
-    )
+    const event = stripe.webhooks.constructEvent(payload, signature, env.STRIPE_WEBHOOK_SECRET)
 
     await handleEvent(event)
 
     return NextResponse.json({ received: true }, { status: 200 })
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error"
-    console.log(`❌ Error when handling Stripe Event: ${message}`)
     return NextResponse.json({ error: message }, { status: 400 })
   }
 }

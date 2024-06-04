@@ -91,11 +91,7 @@ export default function Footer(props: { className?: string }) {
             </CommandList>
           </Search>
 
-          <Link
-            href={siteConfig.links.twitter}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <Link href={siteConfig.links.twitter} target="_blank" rel="noreferrer">
             <Button variant="ghost" size="sm" className="button-ghost">
               <Twitter className="hover:text-background-textContrast h-5 w-5 fill-current" />
               <span className="sr-only">User</span>

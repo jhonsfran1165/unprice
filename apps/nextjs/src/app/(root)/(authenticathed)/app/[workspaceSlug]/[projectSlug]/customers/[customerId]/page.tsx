@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation"
 import { ArrowUp, ListFilter, MoreVertical } from "lucide-react"
+import { notFound } from "next/navigation"
 
 import { APP_DOMAIN } from "@builderai/config"
 import { cn } from "@builderai/ui"
@@ -23,14 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
 import { Separator } from "@builderai/ui/separator"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@builderai/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
 import { formatDate } from "~/lib/dates"
@@ -79,11 +72,7 @@ export default async function PlanPage({
             <div className="ml-auto flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 gap-1 text-sm"
-                  >
+                  <Button variant="outline" size="sm" className="h-7 gap-1 text-sm">
                     <ListFilter className="h-3.5 w-3.5" />
                     <span className="sr-only sm:not-sr-only">Filter</span>
                   </Button>
@@ -91,9 +80,7 @@ export default async function PlanPage({
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem checked>
-                    Currency
-                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem checked>Currency</DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem>Status</DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem>Active</DropdownMenuCheckboxItem>
                 </DropdownMenuContent>
@@ -110,27 +97,13 @@ export default async function PlanPage({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="table-cell text-left">
-                        Plan Version
-                      </TableHead>
-                      <TableHead className="table-cell text-center">
-                        Currency
-                      </TableHead>
-                      <TableHead className="hidden text-center sm:table-cell">
-                        Type
-                      </TableHead>
-                      <TableHead className="table-cell text-center">
-                        Status
-                      </TableHead>
-                      <TableHead className="table-cell text-center">
-                        Start Date
-                      </TableHead>
-                      <TableHead className="table-cell text-center">
-                        End Date
-                      </TableHead>
-                      <TableHead className="table-cell text-left">
-                        Actions
-                      </TableHead>
+                      <TableHead className="table-cell text-left">Plan Version</TableHead>
+                      <TableHead className="table-cell text-center">Currency</TableHead>
+                      <TableHead className="hidden text-center sm:table-cell">Type</TableHead>
+                      <TableHead className="table-cell text-center">Status</TableHead>
+                      <TableHead className="table-cell text-center">Start Date</TableHead>
+                      <TableHead className="table-cell text-center">End Date</TableHead>
+                      <TableHead className="table-cell text-left">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -145,8 +118,7 @@ export default async function PlanPage({
                       <TableRow key={sub.id}>
                         <TableCell className="table-cell">
                           <div className="font-bold">
-                            {sub.planVersion.plan.slug} - v
-                            {sub.planVersion.version}
+                            {sub.planVersion.plan.slug} - v{sub.planVersion.version}
                           </div>
                         </TableCell>
                         <TableCell className="table-cell text-center">
@@ -167,25 +139,18 @@ export default async function PlanPage({
                           </Badge>
                         </TableCell>
                         <TableCell className="hidden text-center md:table-cell">
-                          <span className="text-xs">
-                            {formatDate(sub.startDate)}
-                          </span>
+                          <span className="text-xs">{formatDate(sub.startDate)}</span>
                         </TableCell>
                         <TableCell className="hidden text-center md:table-cell">
                           <span className="text-xs">
-                            {(sub.endDate && formatDate(sub.endDate)) ??
-                              "Forever"}
+                            {(sub.endDate && formatDate(sub.endDate)) ?? "Forever"}
                           </span>
                         </TableCell>
                         <TableCell className="table-cell justify-start">
                           <div className="flex flex-row space-x-1">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button
-                                  aria-haspopup="true"
-                                  size="icon"
-                                  variant="ghost"
-                                >
+                                <Button aria-haspopup="true" size="icon" variant="ghost">
                                   <MoreVertical className="h-4 w-4" />
                                   <span className="sr-only">Toggle menu</span>
                                 </Button>
@@ -193,15 +158,9 @@ export default async function PlanPage({
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>
-                                  Edit Subscription
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                  Downgrade/Upgrade
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                  End Subscription
-                                </DropdownMenuItem>
+                                <DropdownMenuItem>Edit Subscription</DropdownMenuItem>
+                                <DropdownMenuItem>Downgrade/Upgrade</DropdownMenuItem>
+                                <DropdownMenuItem>End Subscription</DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
@@ -213,7 +172,7 @@ export default async function PlanPage({
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="paymentMethods"></TabsContent>
+          <TabsContent value="paymentMethods" />
         </Tabs>
       </div>
       <div className="flex flex-col gap-4">
@@ -226,9 +185,7 @@ export default async function PlanPage({
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-start">
             <div className="grid gap-0.5">
-              <CardTitle className="group flex items-center gap-2 text-lg">
-                STATISTICS
-              </CardTitle>
+              <CardTitle className="group flex items-center gap-2 text-lg">STATISTICS</CardTitle>
             </div>
           </CardHeader>
           <Separator />
@@ -247,21 +204,15 @@ export default async function PlanPage({
               <div className="font-semibold">Subscriptions Details</div>
               <ul className="grid gap-3 font-light">
                 <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
-                    Active Subscriptions
-                  </span>
+                  <span className="text-muted-foreground">Active Subscriptions</span>
                   <span>49</span>
                 </li>
                 <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
-                    Inactive Subscriptions
-                  </span>
+                  <span className="text-muted-foreground">Inactive Subscriptions</span>
                   <span>11</span>
                 </li>
                 <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
-                    Churn Subscriptions
-                  </span>
+                  <span className="text-muted-foreground">Churn Subscriptions</span>
                   <span className="flex flex-row">
                     +3.5% <ArrowUp className="ml-2 h-4 w-4" />
                   </span>
@@ -285,8 +236,7 @@ export default async function PlanPage({
           </CardContent>
           <CardFooter className="flex flex-row items-center border-t px-6 py-3">
             <div className="text-muted-foreground text-xs">
-              Updated{" "}
-              <time dateTime="2023-11-23">10:45am, November 23, 2023</time>
+              Updated <time dateTime="2023-11-23">10:45am, November 23, 2023</time>
             </div>
           </CardFooter>
         </Card>

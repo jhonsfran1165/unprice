@@ -1,6 +1,6 @@
-import { Suspense } from "react"
-import Link from "next/link"
 import { formatRelative } from "date-fns"
+import Link from "next/link"
+import { Suspense } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
@@ -13,13 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@builderai/ui/card"
-import {
-  Activity,
-  ChevronRight,
-  CreditCard,
-  DollarSign,
-  Users,
-} from "@builderai/ui/icons"
+import { Activity, ChevronRight, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
@@ -47,9 +41,7 @@ export default async function DashboardPage(props: {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-muted-foreground text-xs">
-              +20.1% from last month
-            </p>
+            <p className="text-muted-foreground text-xs">+20.1% from last month</p>
           </CardContent>
         </Card>
         <Card>
@@ -59,9 +51,7 @@ export default async function DashboardPage(props: {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+2350</div>
-            <p className="text-muted-foreground text-xs">
-              +180.1% from last month
-            </p>
+            <p className="text-muted-foreground text-xs">+180.1% from last month</p>
           </CardContent>
         </Card>
         <Card>
@@ -71,9 +61,7 @@ export default async function DashboardPage(props: {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+12,234</div>
-            <p className="text-muted-foreground text-xs">
-              +19% from last month
-            </p>
+            <p className="text-muted-foreground text-xs">+19% from last month</p>
           </CardContent>
         </Card>
         <Card>
@@ -83,9 +71,7 @@ export default async function DashboardPage(props: {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+573</div>
-            <p className="text-muted-foreground text-xs">
-              +201 since last hour
-            </p>
+            <p className="text-muted-foreground text-xs">+201 since last hour</p>
           </CardContent>
         </Card>
       </div>
@@ -110,10 +96,7 @@ export default async function DashboardPage(props: {
             />
           }
         >
-          <RecentIngestions
-            projectSlug={projectSlug}
-            workspaceSlug={workspaceSlug}
-          />
+          <RecentIngestions projectSlug={projectSlug} workspaceSlug={workspaceSlug} />
         </Suspense>
       </div>
     </>
@@ -134,9 +117,7 @@ function IngestionCard(props: {
   const truncatedHash = ingestion.hash.slice(0, 15)
 
   return (
-    <Link
-      href={`/${props.workspaceSlug}/${props.projectSlug}/ingestions/${ingestion.id}`}
-    >
+    <Link href={`/${props.workspaceSlug}/${props.projectSlug}/ingestions/${ingestion.id}`}>
       <div className="hover:bg-muted flex items-center rounded p-1">
         <div className="space-y-1">
           <p className="text-sm font-medium leading-none">{truncatedHash}</p>
@@ -151,7 +132,7 @@ function IngestionCard(props: {
           <div className="flex gap-[2px]">
             {new Array(N_SQUARES).fill(null).map((_, i) => (
               <span
-                key={i}
+                key={Math.random()}
                 className={cn(
                   "inline-block h-2 w-2",
                   i < addSquares ? "bg-green-500" : "bg-red-500",
@@ -182,8 +163,7 @@ async function RecentIngestions(props: {
       <CardHeader>
         <CardTitle>Recent Ingestions</CardTitle>
         <CardDescription>
-          {ingestions.length} ingestion{ingestions.length > 1 ? "s" : null}{" "}
-          recorded this period.
+          {ingestions.length} ingestion{ingestions.length > 1 ? "s" : null} recorded this period.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -34,13 +34,9 @@ export const planVersionFeatures = pgTableProject(
     // type of the feature - flat, tier, usage, etc.
     featureType: typeFeatureEnum("feature_type").notNull(),
     // configuration of the feature
-    config:
-      json("features_config").$type<z.infer<typeof configFeatureSchema>>(),
+    config: json("features_config").$type<z.infer<typeof configFeatureSchema>>(),
     // metadata probably will be useful to save external data, etc.
-    metadata:
-      json("metadata").$type<
-        z.infer<typeof planVersionFeatureMetadataSchema>
-      >(),
+    metadata: json("metadata").$type<z.infer<typeof planVersionFeatureMetadataSchema>>(),
     order: doublePrecision("order").notNull(),
     // if nulls the feature quantity must be provided at subscription time
     defaultQuantity: integer("default_quantity"),
@@ -72,20 +68,17 @@ export const planVersionFeatures = pgTableProject(
   })
 )
 
-export const planVersionFeatureRelations = relations(
-  planVersionFeatures,
-  ({ one }) => ({
-    project: one(projects, {
-      fields: [planVersionFeatures.projectId],
-      references: [projects.id],
-    }),
-    planVersion: one(versions, {
-      fields: [planVersionFeatures.planVersionId],
-      references: [versions.id],
-    }),
-    feature: one(features, {
-      fields: [planVersionFeatures.featureId],
-      references: [features.id],
-    }),
-  })
-)
+export const planVersionFeatureRelations = relations(planVersionFeatures, ({ one }) => ({
+  project: one(projects, {
+    fields: [planVersionFeatures.projectId],
+    references: [projects.id],
+  }),
+  planVersion: one(versions, {
+    fields: [planVersionFeatures.planVersionId],
+    references: [versions.id],
+  }),
+  feature: one(features, {
+    fields: [planVersionFeatures.featureId],
+    references: [features.id],
+  }),
+}))

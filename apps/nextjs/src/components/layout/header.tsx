@@ -21,11 +21,7 @@ export default function Header({ children }: { children?: React.ReactNode }) {
       <div className="flex h-14 items-center space-x-2 sm:justify-between sm:space-x-0">
         <div className="flex items-center justify-start">
           <Logo />
-          {children && (
-            <span className="text-muted-foreground ml-6 mr-4 text-lg font-bold">
-              /
-            </span>
-          )}
+          {children && <span className="text-muted-foreground ml-6 mr-4 text-lg font-bold">/</span>}
 
           {children}
         </div>

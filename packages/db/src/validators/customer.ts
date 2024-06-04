@@ -59,9 +59,5 @@ export const customerInsertBaseSchema = createInsertSchema(schema.customers, {
 export type Customer = z.infer<typeof customerSelectSchema>
 export type InsertCustomer = z.infer<typeof customerInsertBaseSchema>
 
-export type CustomerPaymentProvider = z.infer<
-  typeof customerPaymentProviderSelectSchema
->
-export type InsertCustomerPaymentProvider = z.infer<
-  typeof customerPaymentProviderInsertSchema
->
+export type CustomerPaymentProvider = z.infer<typeof customerPaymentProviderSelectSchema>
+export type InsertCustomerPaymentProvider = z.infer<typeof customerPaymentProviderInsertSchema>

@@ -49,8 +49,7 @@ export const planVersionRouter = createTRPCRouter({
       const project = opts.ctx.project
 
       const planData = await opts.ctx.db.query.plans.findFirst({
-        where: (plan, { eq, and }) =>
-          and(eq(plan.id, planId), eq(plan.projectId, project.id)),
+        where: (plan, { eq, and }) => and(eq(plan.id, planId), eq(plan.projectId, project.id)),
       })
 
       if (!planData?.id) {
@@ -85,10 +84,7 @@ export const planVersionRouter = createTRPCRouter({
             .select({ count: sql<number>`count(*)` })
             .from(schema.versions)
             .where(
-              and(
-                eq(schema.versions.projectId, project.id),
-                eq(schema.versions.planId, planId)
-              )
+              and(eq(schema.versions.projectId, project.id), eq(schema.versions.planId, planId))
             )
             .then((res) => res[0]?.count ?? 0)
 
@@ -136,12 +132,11 @@ export const planVersionRouter = createTRPCRouter({
               code: "INTERNAL_SERVER_ERROR",
               message: error.message,
             })
-          } else {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "error creating version",
-            })
           }
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "error creating version",
+          })
         }
       })
 
@@ -164,8 +159,7 @@ export const planVersionRouter = createTRPCRouter({
       const project = opts.ctx.project
 
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
-        where: (version, { and, eq }) =>
-          and(eq(version.id, id), eq(version.projectId, project.id)),
+        where: (version, { and, eq }) => and(eq(version.id, id), eq(version.projectId, project.id)),
       })
 
       if (!planVersionData?.id) {
@@ -186,10 +180,7 @@ export const planVersionRouter = createTRPCRouter({
       const deletedPlanVersion = await opts.ctx.db
         .delete(schema.versions)
         .where(
-          and(
-            eq(schema.versions.projectId, project.id),
-            eq(schema.versions.id, planVersionData.id)
-          )
+          and(eq(schema.versions.projectId, project.id), eq(schema.versions.id, planVersionData.id))
         )
         .returning()
         .then((data) => data[0])
@@ -237,8 +228,7 @@ export const planVersionRouter = createTRPCRouter({
             },
           },
         },
-        where: (version, { and, eq }) =>
-          and(eq(version.id, id), eq(version.projectId, project.id)),
+        where: (version, { and, eq }) => and(eq(version.id, id), eq(version.projectId, project.id)),
       })
 
       if (!planVersionData?.id) {
@@ -293,9 +283,7 @@ export const planVersionRouter = createTRPCRouter({
                             },
                           },
                         })
-                        .where(
-                          and(eq(schema.planVersionFeatures.id, feature.id))
-                        )
+                        .where(and(eq(schema.planVersionFeatures.id, feature.id)))
                     }
 
                     case "tier": {
@@ -331,9 +319,7 @@ export const planVersionRouter = createTRPCRouter({
                             })),
                           },
                         })
-                        .where(
-                          and(eq(schema.planVersionFeatures.id, feature.id))
-                        )
+                        .where(and(eq(schema.planVersionFeatures.id, feature.id)))
                     }
 
                     case "usage": {
@@ -370,9 +356,7 @@ export const planVersionRouter = createTRPCRouter({
                               })),
                             },
                           })
-                          .where(
-                            and(eq(schema.planVersionFeatures.id, feature.id))
-                          )
+                          .where(and(eq(schema.planVersionFeatures.id, feature.id)))
                       }
 
                       if (config.price) {
@@ -393,9 +377,7 @@ export const planVersionRouter = createTRPCRouter({
                               },
                             },
                           })
-                          .where(
-                            and(eq(schema.planVersionFeatures.id, feature.id))
-                          )
+                          .where(and(eq(schema.planVersionFeatures.id, feature.id)))
                       }
 
                       break
@@ -421,9 +403,7 @@ export const planVersionRouter = createTRPCRouter({
                             },
                           },
                         })
-                        .where(
-                          and(eq(schema.planVersionFeatures.id, feature.id))
-                        )
+                        .where(and(eq(schema.planVersionFeatures.id, feature.id)))
                     }
 
                     default:
@@ -489,8 +469,7 @@ export const planVersionRouter = createTRPCRouter({
       const project = opts.ctx.project
 
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
-        where: (version, { and, eq }) =>
-          and(eq(version.id, id), eq(version.projectId, project.id)),
+        where: (version, { and, eq }) => and(eq(version.id, id), eq(version.projectId, project.id)),
         with: {
           planFeatures: true,
         },
@@ -583,12 +562,11 @@ export const planVersionRouter = createTRPCRouter({
               code: "INTERNAL_SERVER_ERROR",
               message: error.message,
             })
-          } else {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "error creating version",
-            })
           }
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "error creating version",
+          })
         }
       })
 
@@ -623,8 +601,7 @@ export const planVersionRouter = createTRPCRouter({
             },
           },
         },
-        where: (version, { and, eq }) =>
-          and(eq(version.id, id), eq(version.projectId, project.id)),
+        where: (version, { and, eq }) => and(eq(version.id, id), eq(version.projectId, project.id)),
       })
 
       if (!planVersionData?.id) {
@@ -707,8 +684,7 @@ export const planVersionRouter = createTRPCRouter({
             },
           },
         },
-        where: (version, { and, eq }) =>
-          and(eq(version.projectId, project.id), eq(version.id, id)),
+        where: (version, { and, eq }) => and(eq(version.projectId, project.id), eq(version.id, id)),
       })
 
       if (!planVersionData) {

@@ -10,11 +10,8 @@ const WaitingList = () => {
           Hello,
           <br />
           <br />
-          We're working hard to get you access to builderai. You can track our
-          progress on our{" "}
-          <Link href="https://github.com/builderaihq/builderai">
-            Github repository
-          </Link>
+          We're working hard to get you access to builderai. You can track our progress on our{" "}
+          <Link href="https://github.com/builderaihq/builderai">Github repository</Link>
           .
           <br />
           <br />

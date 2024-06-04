@@ -2,10 +2,7 @@
 
 import { Separator } from "@builderai/ui/separator"
 
-import {
-  useActiveFeature,
-  useActivePlanVersion,
-} from "../../_components/use-features"
+import { useActiveFeature, useActivePlanVersion } from "../../_components/use-features"
 import { FeatureConfigForm } from "./feature-config-form"
 
 export function FeatureConfig({
@@ -36,9 +33,7 @@ export function FeatureConfig({
                 </div>
               </div>
             </div>
-            <div className="text-muted-foreground ml-auto text-xs">
-              {activeFeature.id}
-            </div>
+            <div className="text-muted-foreground ml-auto text-xs">{activeFeature.id}</div>
           </div>
           <Separator />
 
@@ -51,9 +46,7 @@ export function FeatureConfig({
           </div>
         </div>
       ) : (
-        <div className="text-muted-foreground p-8 text-center">
-          No feature selected
-        </div>
+        <div className="text-muted-foreground p-8 text-center">No feature selected</div>
       )}
     </div>
   )

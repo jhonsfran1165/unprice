@@ -3,13 +3,7 @@
 import { useRouter } from "next/navigation"
 
 import { Button } from "@builderai/ui/button"
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import {
   Dialog,
   DialogClose,
@@ -54,9 +48,7 @@ export function DeleteProject({
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription className="flex items-center">
-          {description}
-        </CardDescription>
+        <CardDescription className="flex items-center">{description}</CardDescription>
       </CardHeader>
       <CardFooter className="flex justify-between">
         <Dialog>
@@ -87,9 +79,7 @@ export function DeleteProject({
               >
                 {`I'm sure. Delete this project`}
 
-                {deleteProject.isPending && (
-                  <LoadingAnimation className="ml-2" />
-                )}
+                {deleteProject.isPending && <LoadingAnimation className="ml-2" />}
               </Button>
             </DialogFooter>
           </DialogContent>

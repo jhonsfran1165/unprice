@@ -1,7 +1,7 @@
 "use client"
 
-import { startTransition } from "react"
 import { useRouter } from "next/navigation"
+import { startTransition } from "react"
 import { z } from "zod"
 
 import type { InsertCustomer } from "@builderai/db/validators"
@@ -33,7 +33,7 @@ export function CustomerForm({
   defaultValues: InsertCustomer
 }) {
   const router = useRouter()
-  const editMode = defaultValues.id ? true : false
+  const editMode = !!defaultValues.id
   const customerExist = api.plans.exist.useMutation()
 
   // async validation only when creating a new plan
@@ -159,9 +159,7 @@ export function CustomerForm({
                 <FormControl>
                   <Textarea {...field} value={field.value ?? ""} />
                 </FormControl>
-                <FormDescription>
-                  Enter a short description of the feature.
-                </FormDescription>
+                <FormDescription>Enter a short description of the feature.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

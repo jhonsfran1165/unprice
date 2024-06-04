@@ -1,4 +1,4 @@
-import * as React from "react"
+import type * as React from "react"
 
 import { cn } from "@builderai/ui"
 
@@ -27,11 +27,7 @@ EmptyPlaceholder.Icon = function EmptyPlaceHolderIcon({
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <div className="flex items-center justify-center rounded-full">
-      {children}
-    </div>
-  )
+  return <div className="flex items-center justify-center rounded-full">{children}</div>
 }
 
 type EmptyPlaceholderTitleProps = React.HTMLAttributes<HTMLHeadingElement>
@@ -51,24 +47,14 @@ EmptyPlaceholder.Action = function EmptyPlaceHolderAction({
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <div className="flex items-center justify-center rounded-full">
-      {children}
-    </div>
-  )
+  return <div className="flex items-center justify-center rounded-full">{children}</div>
 }
 
-type EmptyPlaceholderDescriptionProps =
-  React.HTMLAttributes<HTMLParagraphElement>
+type EmptyPlaceholderDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>
 
 EmptyPlaceholder.Description = function EmptyPlaceholderDescription({
   className,
   ...props
 }: EmptyPlaceholderDescriptionProps) {
-  return (
-    <p
-      className={cn("text-muted-foreground mb-4 mt-2 text-sm", className)}
-      {...props}
-    />
-  )
+  return <p className={cn("text-muted-foreground mb-4 mt-2 text-sm", className)} {...props} />
 }

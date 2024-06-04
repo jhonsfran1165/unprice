@@ -1,8 +1,8 @@
-import { Suspense } from "react"
-import { cookies } from "next/headers"
-import { notFound } from "next/navigation"
 import { Provider } from "jotai"
 import { PlusIcon } from "lucide-react"
+import { cookies } from "next/headers"
+import { notFound } from "next/navigation"
+import { Suspense } from "react"
 
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
@@ -10,13 +10,13 @@ import { Card } from "@builderai/ui/card"
 import { Separator } from "@builderai/ui/separator"
 
 import { api } from "~/trpc/server"
-import Stepper from "../_components/stepper"
-import VersionOverview from "../_components/version-overview"
-import { FeatureList } from "../../_components/feature-list"
-import { PlanFeatureList } from "../../_components/plan-feature-list"
 import DragDrop from "../../../_components/drag-drop"
 import { FeatureDialog } from "../../../_components/feature-dialog"
 import { ResizablePanelConfig } from "../../../_components/resizable"
+import { FeatureList } from "../../_components/feature-list"
+import { PlanFeatureList } from "../../_components/plan-feature-list"
+import Stepper from "../_components/stepper"
+import VersionOverview from "../_components/version-overview"
 
 export default async function OverviewVersionPage({
   params,
@@ -40,9 +40,7 @@ export default async function OverviewVersionPage({
 
   const layout = cookies().get("react-resizable-panels:layout")
 
-  const defaultLayout = layout?.value
-    ? (JSON.parse(layout.value) as [number, number])
-    : [30, 70]
+  const defaultLayout = layout?.value ? (JSON.parse(layout.value) as [number, number]) : [30, 70]
 
   return (
     <Provider>
@@ -59,13 +57,9 @@ export default async function OverviewVersionPage({
                 featureList={
                   <>
                     <div
-                      className={cn(
-                        "flex h-[70px] items-center justify-between space-x-1 px-4"
-                      )}
+                      className={cn("flex h-[70px] items-center justify-between space-x-1 px-4")}
                     >
-                      <h1 className="truncate text-xl font-bold">
-                        All features
-                      </h1>
+                      <h1 className="truncate text-xl font-bold">All features</h1>
                       <FeatureDialog>
                         <Button variant="default" size="sm">
                           <PlusIcon className="h-3.5 w-3.5" />

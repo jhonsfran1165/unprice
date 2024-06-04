@@ -12,18 +12,11 @@ class NoopCache extends Redis {
 
 // Cache interface so you can swap out the cache implementation
 export interface CacheInterface {
-  getCustomerEntitlements: (
-    customerId: string
-  ) => Promise<Result<string[], FetchError>>
+  getCustomerEntitlements: (customerId: string) => Promise<Result<string[], FetchError>>
 
-  setCustomerEntitlements: (
-    customerId: string,
-    activeSubs: string[]
-  ) => Promise<Result<number>>
+  setCustomerEntitlements: (customerId: string, activeSubs: string[]) => Promise<Result<number>>
 
-  getCustomerActiveSubs: (
-    customerId: string
-  ) => Promise<Result<SubscriptionExtended[], FetchError>>
+  getCustomerActiveSubs: (customerId: string) => Promise<Result<SubscriptionExtended[], FetchError>>
 
   setCustomerActiveSubs: (
     customerId: string,
@@ -62,9 +55,7 @@ export class UnpriceCache implements CacheInterface {
     return `app:${this.namespaces[key]}:${id}`
   }
 
-  public async getCustomerEntitlements(
-    customerId: string
-  ): Promise<Result<string[], FetchError>> {
+  public async getCustomerEntitlements(customerId: string): Promise<Result<string[], FetchError>> {
     try {
       const hash = this.getCustomerHash("customer", customerId)
 
@@ -124,10 +115,7 @@ export class UnpriceCache implements CacheInterface {
         return Ok([])
       }
 
-      const activeSubs = await this.client.hget<SubscriptionExtended[]>(
-        hash,
-        "activeSubscriptions"
-      )
+      const activeSubs = await this.client.hget<SubscriptionExtended[]>(hash, "activeSubscriptions")
 
       return Ok(activeSubs ?? [])
     } catch (error) {

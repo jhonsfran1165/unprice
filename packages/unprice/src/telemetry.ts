@@ -22,18 +22,14 @@ export function getTelemetry(opts: UnpriceOptions): Telemetry | null {
   let platform: string | undefined
   let runtime: string | undefined
   // TODO: add version and change this for unprice/api
-  const sdkVersions = [`@builderai/unprice@0.0.1`]
+  const sdkVersions = ["@builderai/unprice@0.0.1"]
 
   try {
     if (typeof process !== "undefined") {
       if (process.env.builderai_DISABLE_TELEMETRY) {
         return null
       }
-      platform = process.env.VERCEL
-        ? "vercel"
-        : process.env.AWS_REGION
-          ? "aws"
-          : undefined
+      platform = process.env.VERCEL ? "vercel" : process.env.AWS_REGION ? "aws" : undefined
 
       // @ts-expect-error - this is a runtime check
       if (typeof EdgeRuntime !== "undefined") {

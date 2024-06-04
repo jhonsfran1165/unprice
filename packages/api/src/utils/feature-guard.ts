@@ -39,23 +39,20 @@ export const featureGuard = async ({
     if (deniedReason === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message:
-          "Your plan does not have access to this feature, please upgrade your plan",
+        message: "Your plan does not have access to this feature, please upgrade your plan",
       })
     }
 
     if (limit && currentUsage >= limit) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message:
-          "You have reached the limit of customers, please upgrade your plan",
+        message: "You have reached the limit of customers, please upgrade your plan",
       })
     }
 
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message:
-        "You don't have access to this feature, please upgrade your plan",
+      message: "You don't have access to this feature, please upgrade your plan",
     })
   }
 

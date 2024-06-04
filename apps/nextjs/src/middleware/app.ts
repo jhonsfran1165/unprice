@@ -1,7 +1,4 @@
-import {
-  RequestCookies,
-  ResponseCookies,
-} from "next/dist/compiled/@edge-runtime/cookies"
+import { RequestCookies, ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies"
 import { NextResponse } from "next/server"
 
 import type { NextAuthRequest } from "@builderai/auth/server"
@@ -43,10 +40,7 @@ function applySetCookie(req: NextAuthRequest, res: NextResponse) {
 
   // 4. Copy the “request header overrides” headers from our dummy response to the real response
   dummyRes.headers.forEach((value, key) => {
-    if (
-      key === "x-middleware-override-headers" ||
-      key.startsWith("x-middleware-request-")
-    ) {
+    if (key === "x-middleware-override-headers" || key.startsWith("x-middleware-request-")) {
       res.headers.set(key, value)
     }
   })
@@ -76,9 +70,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
     // User is not signed in redirect to signin
     return NextResponse.redirect(
       new URL(
-        `${AUTH_ROUTES.SIGNIN}${
-          fullPath === "/" ? "" : `?next=${encodeURIComponent(fullPath)}`
-        }`,
+        `${AUTH_ROUTES.SIGNIN}${fullPath === "/" ? "" : `?next=${encodeURIComponent(fullPath)}`}`,
         req.url
       )
     )
@@ -86,9 +78,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
   // if the route is not a workspace specific route
   if (isNonWorkspaceRoute) {
-    return NextResponse.rewrite(
-      new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url)
-    )
+    return NextResponse.rewrite(new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url))
   }
 
   // if the user has no active workspace validate that the workspace exists in the jwt
@@ -106,7 +96,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
       if (!isUserMemberWorkspace) {
         // User is accessing a user that's not them form the cookie
-        url.pathname = `/`
+        url.pathname = "/"
         const response = NextResponse.redirect(url)
 
         // remove the workspace cookie
@@ -118,32 +108,26 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
       url.pathname = `/${cookieWorkspace}/overview`
       return NextResponse.redirect(url)
-    } else {
-      const firstWorkspace = user.workspaces[0]?.slug
-
-      if (!firstWorkspace) {
-        // this should never happen because every user should have at least one workspace which is their personal workspace by default
-        // if the user has no active workspace redirect to onboarding
-        // if this happens it's a bug when the user is created and the workspace is not set or the workspace is not created
-
-        return NextResponse.redirect(new URL("/error", req.url))
-      }
-
-      url.pathname = `/${firstWorkspace}/overview`
-      return NextResponse.redirect(url)
     }
+    const firstWorkspace = user.workspaces[0]?.slug
+
+    if (!firstWorkspace) {
+      // this should never happen because every user should have at least one workspace which is their personal workspace by default
+      // if the user has no active workspace redirect to onboarding
+      // if this happens it's a bug when the user is created and the workspace is not set or the workspace is not created
+
+      return NextResponse.redirect(new URL("/error", req.url))
+    }
+
+    url.pathname = `/${firstWorkspace}/overview`
+    return NextResponse.redirect(url)
   }
 
-  const response = NextResponse.rewrite(
-    new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url)
-  )
+  const response = NextResponse.rewrite(new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url))
 
   // check if the cookie workspace is the same as the current workspace
   // if not, update the cookie
-  if (
-    cookieWorkspace !== currentWorkspaceSlug &&
-    isSlug(currentWorkspaceSlug)
-  ) {
+  if (cookieWorkspace !== currentWorkspaceSlug && isSlug(currentWorkspaceSlug)) {
     // cookie for calling the api
     response.cookies.set(COOKIE_NAME_WORKSPACE, currentWorkspaceSlug, {
       httpOnly: true,
@@ -157,7 +141,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      path: `/`,
+      path: "/",
     })
   }
 

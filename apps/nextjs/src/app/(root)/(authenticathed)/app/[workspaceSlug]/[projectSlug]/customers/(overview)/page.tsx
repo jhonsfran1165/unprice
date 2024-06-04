@@ -22,8 +22,8 @@ export default async function ProjectUsersPage(props: {
   }
 
   if (parsed?.success) {
-    ;(filter.fromDate = parsed.data.fromDate),
-      (filter.toDate = parsed.data.toDate)
+    filter.fromDate = parsed.data.fromDate
+    filter.toDate = parsed.data.toDate
   }
 
   const { customers } = await api.customers.listByActiveProject(filter)

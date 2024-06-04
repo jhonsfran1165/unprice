@@ -39,10 +39,7 @@ interface DataTableToolbarProps<TData> {
   filterOptions?: FilterOptionDataTable
 }
 
-export function DataTableToolbar<TData>({
-  table,
-  filterOptions,
-}: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData>({ table, filterOptions }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
   const filterBy = filterOptions?.filterBy ?? ""
   const status = table.getAllColumns().find((column) => column.id === "status")
@@ -53,12 +50,8 @@ export function DataTableToolbar<TData>({
         {table.getColumn(filterBy) && (
           <Input
             placeholder={`filter by ${filterBy}...`}
-            value={
-              (table.getColumn(filterBy)?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn(filterBy)?.setFilterValue(event.target.value)
-            }
+            value={(table.getColumn(filterBy)?.getFilterValue() as string) ?? ""}
+            onChange={(event) => table.getColumn(filterBy)?.setFilterValue(event.target.value)}
             className="bg-background h-8 w-[150px] lg:w-[250px]"
           />
         )}

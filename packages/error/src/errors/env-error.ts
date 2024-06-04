@@ -1,11 +1,11 @@
-import { BaseError } from "./base";
+import { BaseError } from "./base"
 
 /**
  * Env Errors indicate an environment variable was not configured properly
  */
 export class EnvError extends BaseError<{
-  name: string;
+  name: string
 }> {
-  public readonly retry = false;
-  public readonly name = EnvError.name;
+  public readonly retry = false
+  public readonly name = EnvError.name
 }

@@ -1,8 +1,8 @@
 "use client"
 
-import { startTransition } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { startTransition } from "react"
 
 import {
   CURRENCIES,
@@ -23,13 +23,7 @@ import {
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@builderai/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 import { Textarea } from "@builderai/ui/text-area"
 
 import { ConfirmAction } from "~/components/confirm-action"
@@ -47,7 +41,7 @@ export function PlanVersionForm({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const editMode = defaultValues.id ? true : false
+  const editMode = !!defaultValues.id
   const isPublished = defaultValues.status === "published"
 
   const form = useZodForm({
@@ -135,15 +129,11 @@ export function PlanVersionForm({
               <FormItem>
                 <FormLabel>Plan version Title</FormLabel>
                 <FormDescription>
-                  This title will be displayed to your customers. You can use it
-                  for handling multiple languages.
+                  This title will be displayed to your customers. You can use it for handling
+                  multiple languages.
                 </FormDescription>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="FREE"
-                    onChange={field.onChange}
-                  />
+                  <Input {...field} placeholder="FREE" onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -167,21 +157,17 @@ export function PlanVersionForm({
                 </div>
 
                 <FormDescription>
-                  You can set a different currency for each version of your
-                  plan.
+                  You can set a different currency for each version of your plan.
                 </FormDescription>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? ""}
-                >
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a currency" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {CURRENCIES.map((currency, index) => (
-                      <SelectItem key={index} value={currency}>
+                    {CURRENCIES.map((currency) => (
+                      <SelectItem key={currency} value={currency}>
                         {currency}
                       </SelectItem>
                     ))}
@@ -210,13 +196,10 @@ export function PlanVersionForm({
                 </div>
 
                 <FormDescription>
-                  In oder to use a payment provider, you need to configure it
-                  first for your organization.
+                  In oder to use a payment provider, you need to configure it first for your
+                  organization.
                 </FormDescription>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? ""}
-                >
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a provider" />
@@ -224,8 +207,8 @@ export function PlanVersionForm({
                   </FormControl>
                   {/* // TODO: use the default payment provider from the organization */}
                   <SelectContent>
-                    {PAYMENT_PROVIDERS.map((provider, index) => (
-                      <SelectItem key={index} value={provider}>
+                    {PAYMENT_PROVIDERS.map((provider) => (
+                      <SelectItem key={provider} value={provider}>
                         {provider}
                       </SelectItem>
                     ))}
@@ -243,22 +226,17 @@ export function PlanVersionForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Type of the plan</FormLabel>
-                <FormDescription>
-                  Only recurring plans are supported at the moment.
-                </FormDescription>
+                <FormDescription>Only recurring plans are supported at the moment.</FormDescription>
 
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? ""}
-                >
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a plan type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {PLAN_TYPES.map((type, index) => (
-                      <SelectItem key={index} value={type}>
+                    {PLAN_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
                         {type}
                       </SelectItem>
                     ))}
@@ -279,18 +257,15 @@ export function PlanVersionForm({
                   <div className="flex justify-between">
                     <FormLabel>Billing period</FormLabel>
                   </div>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value ?? ""}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a billing period" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {PLAN_BILLING_PERIODS.map((period, index) => (
-                        <SelectItem key={index} value={period}>
+                      {PLAN_BILLING_PERIODS.map((period) => (
+                        <SelectItem key={period} value={period}>
                           {period}
                         </SelectItem>
                       ))}
@@ -312,9 +287,7 @@ export function PlanVersionForm({
                 <FormControl>
                   <Textarea {...field} value={field.value ?? ""} />
                 </FormControl>
-                <FormDescription>
-                  Enter a short description of the versions.
-                </FormDescription>
+                <FormDescription>Enter a short description of the versions.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

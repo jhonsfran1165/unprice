@@ -1,6 +1,6 @@
+import type { MDXComponents } from "mdx/types"
 import type { Route } from "next"
 import Link from "next/link"
-import type { MDXComponents } from "mdx/types"
 
 // This file is required to use MDX in `app` directory.
 export function useMDXComponents(components: MDXComponents): MDXComponents {
@@ -12,10 +12,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       </h1>
     ),
     h2: (props) => (
-      <h2
-        className="font-primary mt-10 scroll-m-20 border-b pb-2 text-3xl first:mt-0"
-        {...props}
-      >
+      <h2 className="font-primary mt-10 scroll-m-20 border-b pb-2 text-3xl first:mt-0" {...props}>
         {props.children}
       </h2>
     ),
@@ -29,9 +26,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {props.children}
       </h4>
     ),
-    p: (props) => (
-      <p className="leading-7 [&:not(:first-child)]:mt-6" {...props} />
-    ),
+    p: (props) => <p className="leading-7 [&:not(:first-child)]:mt-6" {...props} />,
     a: ({ children, href }) => {
       const isExternal = href?.startsWith("http")
       const Component = isExternal ? "a" : Link

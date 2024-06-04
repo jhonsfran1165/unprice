@@ -1,7 +1,7 @@
 "use client"
 
-import { useCallback, useState } from "react"
 import { EyeIcon, EyeOff, LayoutGrid, Trash2, X } from "lucide-react"
+import { useCallback, useState } from "react"
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form"
 
 import type { RouterOutputs } from "@builderai/api"
@@ -17,30 +17,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@builderai/ui/dialog"
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@builderai/ui/form"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@builderai/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { FeatureConfigForm } from "../../plans/[planSlug]/_components/feature-config-form"
 
-type PlanVersionResponse =
-  RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
+type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 
 type PlanVersionFeaturesResponse =
   RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]["planFeatures"][0]
@@ -59,9 +45,7 @@ export default function ConfigItemsFormField({
   const { fields } = items
 
   const [isDelete, setConfirmDelete] = useState<Map<string, boolean>>(
-    new Map<string, boolean>(
-      fields.map((item) => [item.id, false] as [string, boolean])
-    )
+    new Map<string, boolean>(fields.map((item) => [item.id, false] as [string, boolean]))
   )
 
   // TODO: use later for addons support
@@ -99,9 +83,7 @@ export default function ConfigItemsFormField({
             <TableHeader className="border-b border-t">
               <TableRow className="pointer-events-none">
                 <TableHead className="h-10 pl-1">Features</TableHead>
-                <TableHead className="h-10 px-0 text-center">
-                  Quantity Units
-                </TableHead>
+                <TableHead className="h-10 px-0 text-center">Quantity Units</TableHead>
                 <TableHead
                   className={cn("h-10 text-end", {
                     "pr-1": !isSubscriptionTypeAddons,
@@ -115,29 +97,19 @@ export default function ConfigItemsFormField({
             <TableBody>
               {fields.map((item, index) => {
                 const feature =
-                  versionFeatures.get(item.featurePlanId) ??
-                  versionAddons.get(item.featurePlanId)!
+                  versionFeatures.get(item.featurePlanId) ?? versionAddons.get(item.featurePlanId)!
 
                 const quantity = form.watch(`items.${index}.quantity`)
 
                 return (
-                  <TableRow
-                    key={item.id}
-                    className="border-b hover:bg-transparent"
-                  >
+                  <TableRow key={item.id} className="border-b hover:bg-transparent">
                     <TableCell className="pl-1">
                       <div className="flex items-center gap-1">
-                        <span className="font-semibold">
-                          {item.featureSlug}
-                        </span>
+                        <span className="font-semibold">{item.featureSlug}</span>
                         <PropagationStopper>
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button
-                                className="h-4 w-4"
-                                variant="link"
-                                size="icon"
-                              >
+                              <Button className="h-4 w-4" variant="link" size="icon">
                                 {feature.hidden ? (
                                   <EyeOff className="h-3 w-3" />
                                 ) : (
@@ -149,14 +121,10 @@ export default function ConfigItemsFormField({
 
                             <DialogContent className="flex max-h-[800px] w-full flex-col justify-between overflow-y-scroll md:w-1/2 lg:w-[600px]">
                               <DialogHeader>
-                                <DialogTitle>
-                                  Feature: {feature.feature.title}
-                                </DialogTitle>
+                                <DialogTitle>Feature: {feature.feature.title}</DialogTitle>
                               </DialogHeader>
                               {feature.feature?.description && (
-                                <DialogDescription>
-                                  {feature.feature.description}
-                                </DialogDescription>
+                                <DialogDescription>{feature.feature.description}</DialogDescription>
                               )}
                               <FeatureConfigForm
                                 defaultValues={feature}
@@ -219,9 +187,29 @@ export default function ConfigItemsFormField({
                         feature={feature}
                         type="total"
                       />
-                      {isSubscriptionTypeAddons &&
-                        isDelete.get(item.featurePlanId) && (
-                          <div className="flex flex-row items-center">
+                      {isSubscriptionTypeAddons && isDelete.get(item.featurePlanId) && (
+                        <div className="flex flex-row items-center">
+                          <Button
+                            className="px-0"
+                            variant="link"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              e.preventDefault()
+                              items.remove(index)
+
+                              setConfirmDelete(
+                                (prev) => new Map(prev.set(item.featurePlanId, false))
+                              )
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                      {isSubscriptionTypeAddons && !isDelete.get(item.featurePlanId) && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
                             <Button
                               className="px-0"
                               variant="link"
@@ -229,57 +217,28 @@ export default function ConfigItemsFormField({
                               onClick={(e) => {
                                 e.stopPropagation()
                                 e.preventDefault()
-                                items.remove(index)
-
                                 setConfirmDelete(
-                                  (prev) =>
-                                    new Map(prev.set(item.featurePlanId, false))
+                                  (prev) => new Map(prev.set(item.featurePlanId, true))
                                 )
+
+                                // set timeout to reset the delete confirmation
+                                setTimeout(() => {
+                                  setConfirmDelete(
+                                    (prev) => new Map(prev.set(item.featurePlanId, false))
+                                  )
+                                }, 2000)
                               }}
                             >
-                              <X className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
-                          </div>
-                        )}
-                      {isSubscriptionTypeAddons &&
-                        !isDelete.get(item.featurePlanId) && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                className="px-0"
-                                variant="link"
-                                size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  e.preventDefault()
-                                  setConfirmDelete(
-                                    (prev) =>
-                                      new Map(
-                                        prev.set(item.featurePlanId, true)
-                                      )
-                                  )
-
-                                  // set timeout to reset the delete confirmation
-                                  setTimeout(() => {
-                                    setConfirmDelete(
-                                      (prev) =>
-                                        new Map(
-                                          prev.set(item.featurePlanId, false)
-                                        )
-                                    )
-                                  }, 2000)
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <div className="max-w-[200px] text-sm">
-                                remove this addon from the subscription
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <div className="max-w-[200px] text-sm">
+                              remove this addon from the subscription
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </TableCell>
                   </TableRow>
                 )
@@ -326,11 +285,7 @@ function ConfigItemPrice({
   const { err, val: pricePerFeature } = calculatePrice()
 
   if (err) {
-    return (
-      <div className="text-muted-foreground inline text-xs italic">
-        provide quantity
-      </div>
-    )
+    return <div className="text-muted-foreground inline text-xs italic">provide quantity</div>
   }
 
   if (type === "total") {

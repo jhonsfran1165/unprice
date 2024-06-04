@@ -15,17 +15,9 @@ export default function DomainStatusIcon({
   return loading ? (
     <LoadingAnimation />
   ) : status === "Valid Configuration" ? (
-    <CheckCircle2
-      fill="#22c55e"
-      stroke="currentColor"
-      className="text-background"
-    />
+    <CheckCircle2 fill="#22c55e" stroke="currentColor" className="text-background" />
   ) : status === "Pending Verification" ? (
-    <AlertCircle
-      fill="#eab308"
-      stroke="currentColor"
-      className="text-background"
-    />
+    <AlertCircle fill="#eab308" stroke="currentColor" className="text-background" />
   ) : (
     <XCircle fill="#ef4444" stroke="currentColor" className="text-background" />
   )

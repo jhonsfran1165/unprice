@@ -20,7 +20,7 @@ export default function SidebarNav(props: {
 
   return (
     <nav className="sticky top-20 flex flex-col gap-2 rounded-md px-2 md:min-h-[300px]">
-      {activeSideBarRoutes.map((item, index) => {
+      {activeSideBarRoutes.map((item) => {
         const fullPath = props.basePath + item.href
         const active = item.href.includes(`/${segments[0]}`)
         const Icon = Icons[item.icon] as React.ElementType
@@ -28,7 +28,7 @@ export default function SidebarNav(props: {
         return (
           item.href && (
             <Link
-              key={index}
+              key={Math.random()}
               prefetch={false}
               href={item.disabled ? "#" : fullPath}
               aria-disabled={item.disabled}

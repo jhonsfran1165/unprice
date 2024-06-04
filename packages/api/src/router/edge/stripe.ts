@@ -7,11 +7,7 @@ import { APP_DOMAIN, PLANS } from "@builderai/config"
 import { purchaseWorkspaceSchema } from "@builderai/db/validators"
 import { stripe } from "@builderai/stripe"
 
-import {
-  createTRPCRouter,
-  protectedActiveWorkspaceProcedure,
-  publicProcedure,
-} from "../../trpc"
+import { createTRPCRouter, protectedActiveWorkspaceProcedure, publicProcedure } from "../../trpc"
 
 export const stripeRouter = createTRPCRouter({
   // createLinkAccount: protectedActiveProjectProcedure
@@ -69,7 +65,7 @@ export const stripeRouter = createTRPCRouter({
       const workspace = opts.ctx.workspace
       const user = opts.ctx.session.user
       // TODO: fix returnUrl
-      const returnUrl = `${APP_DOMAIN}` + "/"
+      const returnUrl = `${APP_DOMAIN}/`
 
       if (!user?.email) {
         throw new TRPCError({
@@ -78,11 +74,7 @@ export const stripeRouter = createTRPCRouter({
         })
       }
 
-      if (
-        workspace &&
-        workspace.plan !== "FREE" &&
-        workspace.unPriceCustomerId
-      ) {
+      if (workspace && workspace.plan !== "FREE" && workspace.unPriceCustomerId) {
         /**
          * User is subscribed, create a billing portal session
          */
@@ -121,18 +113,14 @@ export const stripeRouter = createTRPCRouter({
         ...PLANS.STANDARD,
         price: dinero({
           amount: stdPrice.unit_amount!,
-          currency:
-            currencies[stdPrice.currency as keyof typeof currencies] ??
-            currencies.USD,
+          currency: currencies[stdPrice.currency as keyof typeof currencies] ?? currencies.USD,
         }),
       },
       {
         ...PLANS.PRO,
         price: dinero({
           amount: proPrice.unit_amount!,
-          currency:
-            currencies[proPrice.currency as keyof typeof currencies] ??
-            currencies.USD,
+          currency: currencies[proPrice.currency as keyof typeof currencies] ?? currencies.USD,
         }),
       },
     ]
@@ -147,15 +135,11 @@ export const stripeRouter = createTRPCRouter({
     // TODO: DINERO from string
     const priceCentsTest = "1000.00"
 
-    const scale = priceCentsTest.includes(".")
-      ? priceCentsTest.split(".")[1]?.length
-      : undefined
+    const scale = priceCentsTest.includes(".") ? priceCentsTest.split(".")[1]?.length : undefined
 
     const priceDecimal = dinero({
-      amount: parseInt(priceCentsTest.replace(".", "")),
-      currency:
-        currencies[stdPrice.currency as keyof typeof currencies] ??
-        currencies.USD,
+      amount: Number.parseInt(priceCentsTest.replace(".", "")),
+      currency: currencies[stdPrice.currency as keyof typeof currencies] ?? currencies.USD,
       scale: scale ? currencies.USD.exponent + scale : currencies.USD.exponent,
     })
 
@@ -174,9 +158,7 @@ export const stripeRouter = createTRPCRouter({
         ...PLANS.PRO,
         price: dinero({
           amount: proPrice.unit_amount!,
-          currency:
-            currencies[proPrice.currency as keyof typeof currencies] ??
-            currencies.USD,
+          currency: currencies[proPrice.currency as keyof typeof currencies] ?? currencies.USD,
         }),
       },
     ]
@@ -190,7 +172,7 @@ export const stripeRouter = createTRPCRouter({
       const user = opts.ctx.session.user
 
       // TODO: fix returnUrl
-      const returnUrl = `${APP_DOMAIN}` + "/"
+      const returnUrl = `${APP_DOMAIN}/`
 
       if (!returnUrl) {
         throw new TRPCError({

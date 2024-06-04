@@ -14,8 +14,7 @@ import {
 } from "@builderai/ui/form"
 import { RadioGroup, RadioGroupItem } from "@builderai/ui/radio-group"
 
-type PlanVersionResponse =
-  RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
+type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 
 type PaymentMethodProviderData =
   RouterOutputs["customers"]["listPaymentProviders"]["providers"][number]
@@ -48,10 +47,7 @@ export default function PaymentMethodsFormField({
             <RadioGroup
               onValueChange={(value) => {
                 field.onChange(value)
-                form.setValue(
-                  "paymentProviderId",
-                  paymentProviderData?.id ?? ""
-                )
+                form.setValue("paymentProviderId", paymentProviderData?.id ?? "")
               }}
               defaultValue={field.value}
               className="flex flex-col gap-4 pt-2"

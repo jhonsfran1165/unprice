@@ -14,13 +14,7 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 import { Label } from "@builderai/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@builderai/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 
 import { SubmitButton } from "~/components/submit-button"
 import { api } from "~/trpc/client"
@@ -49,9 +43,7 @@ export function PaymentMethodForm({
     },
   })
 
-  const paymentMethod = paymentProviders.find(
-    (method) => method.paymentProvider === provider
-  )
+  const paymentMethod = paymentProviders.find((method) => method.paymentProvider === provider)
 
   const defaultPaymentMethod =
     paymentMethod?.paymentMethods.find(
@@ -62,9 +54,7 @@ export function PaymentMethodForm({
     <Card>
       <CardHeader>
         <CardTitle>Default Payment Method</CardTitle>
-        <CardDescription>
-          Default payment method for this customer
-        </CardDescription>
+        <CardDescription>Default payment method for this customer</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         <UserPaymentMethod paymentMethod={defaultPaymentMethod} />
@@ -80,8 +70,8 @@ export function PaymentMethodForm({
               <SelectValue placeholder="Select a provider" />
             </SelectTrigger>
             <SelectContent>
-              {PAYMENT_PROVIDERS.map((provider, index) => (
-                <SelectItem key={index} value={provider}>
+              {PAYMENT_PROVIDERS.map((provider) => (
+                <SelectItem key={provider} value={provider}>
                   {provider}
                 </SelectItem>
               ))}

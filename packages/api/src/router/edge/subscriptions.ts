@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import { z, ZodError } from "zod"
+import { ZodError, z } from "zod"
 
 import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
@@ -64,16 +64,14 @@ export const subscriptionRouter = createTRPCRouter({
       if (!versionData?.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message:
-            "Version not found. Please check the planVersionId and the project",
+          message: "Version not found. Please check the planVersionId and the project",
         })
       }
 
       if (versionData.status !== "published") {
         throw new TRPCError({
           code: "CONFLICT",
-          message:
-            "Plan version is not published, only published versions can be subscribed to",
+          message: "Plan version is not published, only published versions can be subscribed to",
         })
       }
 
@@ -115,13 +113,11 @@ export const subscriptionRouter = createTRPCRouter({
       // check the active subscriptions of the customer.
       // The plan version the customer is attempting to subscript can't have any feature that the customer already has
       const newFeatures = versionData.planFeatures.map((f) => f.feature.slug)
-      const subscriptionFeatureSlugs = customerData.subscriptions.flatMap(
-        (sub) => sub.features.map((f) => f.featureSlug)
+      const subscriptionFeatureSlugs = customerData.subscriptions.flatMap((sub) =>
+        sub.features.map((f) => f.featureSlug)
       )
 
-      const commonFeatures = subscriptionFeatureSlugs.filter((f) =>
-        newFeatures.includes(f)
-      )
+      const commonFeatures = subscriptionFeatureSlugs.filter((f) => newFeatures.includes(f))
 
       if (commonFeatures.length > 0) {
         throw new TRPCError({

@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { useHydrateAtoms } from "jotai/utils"
 import { FileStack, Search } from "lucide-react"
+import { useState } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { Button } from "@builderai/ui/button"
@@ -94,13 +94,10 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
                 </EmptyPlaceholder>
               ) : (
                 <div className="space-y-2">
-                  {filteredFeatures.map((feature, i) => (
+                  {filteredFeatures.map((feature) => (
                     <SortableFeature
-                      disabled={
-                        planVersionFeatureOpen ||
-                        activePlanVersion?.status === "published"
-                      }
-                      key={i}
+                      disabled={planVersionFeatureOpen || activePlanVersion?.status === "published"}
+                      key={Math.random()}
                       mode="FeaturePlan"
                       planFeatureVersion={feature}
                     />

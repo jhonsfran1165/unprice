@@ -21,9 +21,7 @@ export function authTxn(db: NeonDatabase<typeof schema>, tenantId: string) {
   ): Promise<Q> => {
     return db.transaction(async (tx) => {
       // set tenantId
-      await tx.execute(
-        sql`SELECT set_config('app.tenantId', '${sql.raw(tenantId)}', TRUE)`
-      )
+      await tx.execute(sql`SELECT set_config('app.tenantId', '${sql.raw(tenantId)}', TRUE)`)
 
       // set role to authenticated to target the RLS neon_superuser is the only I can use to don't bypass RLS
       await tx.execute(sql`SET LOCAL role 'neon_superuser'`)
@@ -40,9 +38,7 @@ export function authTxn(db: NeonDatabase<typeof schema>, tenantId: string) {
       await tx.execute(sql`set SESSION role 'authenticated'`)
 
       // unset tenantId
-      await tx.execute(
-        sql`SELECT set_config('app.tenantId', '${sql.raw("")}', TRUE)`
-      )
+      await tx.execute(sql`SELECT set_config('app.tenantId', '${sql.raw("")}', TRUE)`)
 
       return callback
     })
@@ -65,9 +61,7 @@ export function activateRLS(db: NeonDatabase<typeof schema>, tenantId: string) {
   return (): Promise<void> => {
     return db.transaction(async (tx) => {
       // set tenantId
-      await tx.execute(
-        sql`SELECT set_config('app.tenantId', '${sql.raw(tenantId)}', FALSE)`
-      )
+      await tx.execute(sql`SELECT set_config('app.tenantId', '${sql.raw(tenantId)}', FALSE)`)
 
       // set role to neon_superuser to target the RLS
       await tx.execute(sql`set SESSION role 'neon_superuser'`)
@@ -95,9 +89,7 @@ export function deactivateRLS(db: NeonDatabase<typeof schema>) {
       await tx.execute(sql`set SESSION role 'authenticated'`)
 
       // unset tenantId
-      await tx.execute(
-        sql`SELECT set_config('app.tenantId', '${sql.raw("")}', FALSE)`
-      )
+      await tx.execute(sql`SELECT set_config('app.tenantId', '${sql.raw("")}', FALSE)`)
     })
   }
 }

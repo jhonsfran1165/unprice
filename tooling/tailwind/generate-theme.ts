@@ -90,9 +90,7 @@ interface RecursiveKeyValuePair<K extends keyof any = string, V = string> {
   [key: string]: V | RecursiveKeyValuePair<K, V>
 }
 
-export const generateTheme = (
-  themeName: keyof typeof themeNames
-): RecursiveKeyValuePair => {
+export const generateTheme = (themeName: keyof typeof themeNames): RecursiveKeyValuePair => {
   const theme = themeNames[themeName]
   const grayscale = grayScalePairs[theme.primary] ?? "gray"
 
@@ -100,8 +98,8 @@ export const generateTheme = (
     colors: {
       transparent: "transparent",
       current: "currentColor",
-      black: `#000`,
-      white: `#fff`,
+      black: "#000",
+      white: "#fff",
       gray: generateVariantRadixColors(grayscale),
       success: generateVariantRadixColors(theme.success),
       danger: generateVariantRadixColors(theme.destructive),

@@ -27,21 +27,18 @@ export const subscriptionMetadataSchema = z.object({
   defaultPaymentMethodId: z.string().optional(),
 })
 
-export const subscriptionFeaturesSelectSchema = createSelectSchema(
-  subscriptionFeatures,
-  {
-    // quantity for the item, for flat features it's always 1, usage features it's the current usage
-    quantity: z.coerce.number().min(1).optional(),
-    // min quantity for the item
-    min: z.coerce.number().optional(),
-    // limit for the item if any
-    limit: z.coerce.number().optional(),
-    featurePlanId: z.string(),
-    featureSlug: z.string(),
-    // current usage for the item in the current billing period
-    usage: z.coerce.number().min(0).optional(),
-  }
-)
+export const subscriptionFeaturesSelectSchema = createSelectSchema(subscriptionFeatures, {
+  // quantity for the item, for flat features it's always 1, usage features it's the current usage
+  quantity: z.coerce.number().min(1).optional(),
+  // min quantity for the item
+  min: z.coerce.number().optional(),
+  // limit for the item if any
+  limit: z.coerce.number().optional(),
+  featurePlanId: z.string(),
+  featureSlug: z.string(),
+  // current usage for the item in the current billing period
+  usage: z.coerce.number().min(0).optional(),
+})
 
 // stripe won't allow more than 250 items in a single invoice
 export const subscriptionItemsSchema = z
@@ -240,7 +237,7 @@ export const calculateFlatPricePlan = ({
   const displayAmount = toDecimal(
     total,
     ({ value, currency }) =>
-      `${currencySymbol(currency.code as Currency)}${parseFloat(value)}`
+      `${currencySymbol(currency.code as Currency)}${Number.parseFloat(value)}`
   )
 
   return Ok({
@@ -269,8 +266,7 @@ export const calculatePricePerFeature = (
       const dineroPrice = dinero(data.dinero)
       const displayAmount = toDecimal(
         dineroPrice,
-        ({ value, currency }) =>
-          `${currencySymbol(currency.code as Currency)}${value}`
+        ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
       )
 
       return Ok({
@@ -299,10 +295,7 @@ export const calculatePricePerFeature = (
       const dineroFlatPrice = dinero(tier.flatPrice.dinero)
       const dineroUnitPrice = dinero(tier.unitPrice.dinero)
       const dineroTotalPrice = !isZero(dineroFlatPrice)
-        ? add(
-            multiply(dinero(tier.unitPrice.dinero), defaultQuantity),
-            dineroFlatPrice
-          )
+        ? add(multiply(dinero(tier.unitPrice.dinero), defaultQuantity), dineroFlatPrice)
         : multiply(dinero(tier.unitPrice.dinero), defaultQuantity)
 
       return Ok({
@@ -311,26 +304,24 @@ export const calculatePricePerFeature = (
           displayAmount: toDecimal(dineroUnitPrice, ({ value, currency }) => {
             if (isZero(dineroFlatPrice)) {
               return `${currencySymbol(currency.code as Currency)}${value}`
-            } else {
-              return `${currencySymbol(currency.code as Currency)}${toDecimal(dineroFlatPrice)} + ${currencySymbol(currency.code as Currency)}${value} per unit`
             }
+            return `${currencySymbol(currency.code as Currency)}${toDecimal(
+              dineroFlatPrice
+            )} + ${currencySymbol(currency.code as Currency)}${value} per unit`
           }),
         },
         totalPrice: {
           dinero: dineroTotalPrice,
           displayAmount: toDecimal(
             dineroTotalPrice,
-            ({ value, currency }) =>
-              `${currencySymbol(currency.code as Currency)}${value}`
+            ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
           ),
         },
       })
     }
 
     case "usage": {
-      const { tiers, usageMode, units, price } = configUsageSchema.parse(
-        feature.config
-      )
+      const { tiers, usageMode, units, price } = configUsageSchema.parse(feature.config)
 
       if (usageMode === "tier" && tiers && tiers.length > 0) {
         let remaining = defaultQuantity // make a copy, so we don't mutate the original
@@ -344,8 +335,7 @@ export const calculatePricePerFeature = (
           ) ?? tiers[0]!
 
         // we know the currency is the same for all tiers
-        const defaultCurrency = tier.unitPrice.dinero.currency
-          .code as keyof typeof currencies
+        const defaultCurrency = tier.unitPrice.dinero.currency.code as keyof typeof currencies
         // initialize the total price as 0
         let total: Dinero<number> = dinero({
           amount: 0,
@@ -372,7 +362,9 @@ export const calculatePricePerFeature = (
         }
 
         // add the flat price if it exists
-        tier?.flatPrice && (total = add(total, dinero(tier.flatPrice.dinero)))
+        if (tier?.flatPrice) {
+          total = add(total, dinero(tier.flatPrice.dinero))
+        }
 
         return Ok({
           unitPrice: {
@@ -387,8 +379,7 @@ export const calculatePricePerFeature = (
             dinero: total,
             displayAmount: toDecimal(
               total,
-              ({ value, currency }) =>
-                `${currencySymbol(currency.code as Currency)}${value}`
+              ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
             ),
           },
         })
@@ -411,8 +402,7 @@ export const calculatePricePerFeature = (
             dinero: total,
             displayAmount: toDecimal(
               total,
-              ({ value, currency }) =>
-                `${currencySymbol(currency.code as Currency)}${value}`
+              ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
             ),
           },
         })
@@ -438,16 +428,13 @@ export const calculatePricePerFeature = (
             dinero: total,
             displayAmount: toDecimal(
               total,
-              ({ value, currency }) =>
-                `${currencySymbol(currency.code as Currency)}${value}`
+              ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
             ),
           },
         })
       }
 
-      return Err(
-        new UnPriceCalculationError({ message: "unknown feature type usage" })
-      )
+      return Err(new UnPriceCalculationError({ message: "unknown feature type usage" }))
     }
 
     case "package": {
@@ -474,16 +461,13 @@ export const calculatePricePerFeature = (
           dinero: total,
           displayAmount: toDecimal(
             total,
-            ({ value, currency }) =>
-              `${currencySymbol(currency.code as Currency)}${value}`
+            ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
           ),
         },
       })
     }
 
     default:
-      return Err(
-        new UnPriceCalculationError({ message: "unknown feature type" })
-      )
+      return Err(new UnPriceCalculationError({ message: "unknown feature type" }))
   }
 }

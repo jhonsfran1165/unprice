@@ -12,7 +12,9 @@ export const planVersionMetadataSchema = z.object({
 export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
 
 export const startCycleSchema = z.union([
-  z.number().nonnegative(), // number of day from the start of the cycle
+  z
+    .number()
+    .nonnegative(), // number of day from the start of the cycle
   z.literal("last_day"), // last day of the month
   z.null(), // null means the first day of the month
 ])

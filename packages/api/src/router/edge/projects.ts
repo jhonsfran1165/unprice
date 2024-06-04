@@ -161,7 +161,7 @@ export const projectRouter = createTRPCRouter({
           haveAccess: projectData.slug === projectSlug,
           isInTier: tier.includes(projectData.workspace.plan),
         }
-      } catch (error) {
+      } catch (_error) {
         return { haveAccess: false, isInTier: false }
       }
     }),
@@ -190,18 +190,14 @@ export const projectRouter = createTRPCRouter({
         })
       }
 
-      const personalTargetWorkspace =
-        await opts.ctx.db.query.workspaces.findFirst({
-          columns: {
-            id: true,
-            slug: true,
-          },
-          where: (workspace, { eq, and }) =>
-            and(
-              eq(workspace.createdBy, userId),
-              eq(workspace.isPersonal, true)
-            ),
-        })
+      const personalTargetWorkspace = await opts.ctx.db.query.workspaces.findFirst({
+        columns: {
+          id: true,
+          slug: true,
+        },
+        where: (workspace, { eq, and }) =>
+          and(eq(workspace.createdBy, userId), eq(workspace.isPersonal, true)),
+      })
 
       if (!personalTargetWorkspace?.id) {
         throw new TRPCError({
@@ -430,10 +426,7 @@ export const projectRouter = createTRPCRouter({
           workspace: true,
         },
         where: (project, { eq, and }) =>
-          and(
-            eq(project.slug, opts.input.slug),
-            eq(project.workspaceId, workspace.id)
-          ),
+          and(eq(project.slug, opts.input.slug), eq(project.workspaceId, workspace.id)),
       })
 
       if (!projectData) {
@@ -464,10 +457,7 @@ export const projectRouter = createTRPCRouter({
           workspace: true,
         },
         where: (project, { eq, and }) =>
-          and(
-            eq(project.slug, opts.input.id),
-            eq(project.workspaceId, workspace.id)
-          ),
+          and(eq(project.slug, opts.input.id), eq(project.workspaceId, workspace.id)),
       })
 
       if (!projectData) {

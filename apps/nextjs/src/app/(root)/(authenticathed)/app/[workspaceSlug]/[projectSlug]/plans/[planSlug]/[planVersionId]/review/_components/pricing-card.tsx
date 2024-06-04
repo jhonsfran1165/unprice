@@ -1,17 +1,8 @@
 import type { RouterOutputs } from "@builderai/api"
 import type { BillingPeriod } from "@builderai/db/validators"
-import {
-  calculateFlatPricePlan,
-  calculatePricePerFeature,
-} from "@builderai/db/validators"
+import { calculateFlatPricePlan, calculatePricePerFeature } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-} from "@builderai/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@builderai/ui/card"
 import { CheckIcon, HelpCircle } from "@builderai/ui/icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
@@ -48,10 +39,7 @@ export function PricingCard({
               {planVersion.planFeatures.map((feature) => {
                 return (
                   <li key={feature.id} className="flex items-center">
-                    <ItemPriceCard
-                      feature={feature}
-                      billingPeriod={planVersion.billingPeriod}
-                    />
+                    <ItemPriceCard feature={feature} billingPeriod={planVersion.billingPeriod} />
                   </li>
                 )
               })}
@@ -76,11 +64,7 @@ function ItemPriceCard({
   })
 
   if (err) {
-    return (
-      <div className="text-muted-foreground inline text-xs italic">
-        error calculation
-      </div>
-    )
+    return <div className="text-muted-foreground inline text-xs italic">error calculation</div>
   }
 
   return (
@@ -105,9 +89,7 @@ function ItemPriceCard({
                 <HelpCircle className="h-4 w-4 font-light" />
               </TooltipTrigger>
               <TooltipContent>
-                <div className="max-w-[200px] text-sm">
-                  {feature.feature.description}
-                </div>
+                <div className="max-w-[200px] text-sm">{feature.feature.description}</div>
               </TooltipContent>
             </Tooltip>
           </div>

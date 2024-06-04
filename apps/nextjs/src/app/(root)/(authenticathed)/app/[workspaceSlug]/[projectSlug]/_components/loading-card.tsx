@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
 import { Spinner } from "@builderai/ui/icons"
 
 export function LoadingCard(props: {

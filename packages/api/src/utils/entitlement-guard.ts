@@ -37,8 +37,7 @@ export const entitlementGuard = async ({
   if (!access) {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message:
-        "You don't have access to this feature, please upgrade your plan",
+      message: "You don't have access to this feature, please upgrade your plan",
     })
   }
 

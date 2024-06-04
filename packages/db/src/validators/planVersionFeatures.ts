@@ -8,15 +8,10 @@ import { ZodError } from "zod"
 import { planVersionFeatures } from "../schema/planVersionFeatures"
 import { FEATURE_TYPES_MAPS, USAGE_MODES_MAP } from "../utils"
 import { featureSelectBaseSchema } from "./features"
-import { planSelectBaseSchema } from "./plans"
 import { planVersionSelectBaseSchema } from "./planVersions"
+import { planSelectBaseSchema } from "./plans"
 import { projectSelectBaseSchema } from "./project"
-import {
-  aggregationMethodSchema,
-  tierModeSchema,
-  unitSchema,
-  usageModeSchema,
-} from "./shared"
+import { aggregationMethodSchema, tierModeSchema, unitSchema, usageModeSchema } from "./shared"
 
 export const priceSchema = z.coerce
   .string()
@@ -42,15 +37,13 @@ export const dineroSchema = z
     const priceCents = data.displayAmount
 
     // only rely on the currency code because the scale is not always the same
-    const currencyDinero =
-      currencies[data.dinero.currency.code as keyof typeof currencies]
+    const currencyDinero = currencies[data.dinero.currency.code as keyof typeof currencies]
 
     // recalculate the scale base on the currency
-    const precision =
-      priceCents.split(".")[1]?.length ?? currencyDinero.exponent
+    const precision = priceCents.split(".")[1]?.length ?? currencyDinero.exponent
 
     // convert the price to the smallest unit
-    const amount = Math.round(Number(priceCents) * Math.pow(10, precision))
+    const amount = Math.round(Number(priceCents) * 10 ** precision)
 
     const price = dinero({
       amount: amount,
@@ -315,15 +308,12 @@ export const configFeatureSchema = z.union([
 ])
 
 // TODO: use discriminated union
-export const planVersionFeatureSelectBaseSchema = createSelectSchema(
-  planVersionFeatures,
-  {
-    config: configFeatureSchema,
-    metadata: planVersionFeatureMetadataSchema,
-    defaultQuantity: z.coerce.number().int().optional(),
-    limit: z.coerce.number().int().optional(),
-  }
-)
+export const planVersionFeatureSelectBaseSchema = createSelectSchema(planVersionFeatures, {
+  config: configFeatureSchema,
+  metadata: planVersionFeatureMetadataSchema,
+  defaultQuantity: z.coerce.number().int().optional(),
+  limit: z.coerce.number().int().optional(),
+})
 
 export const parseFeaturesConfig = (feature: PlanVersionFeature) => {
   switch (feature.featureType) {
@@ -341,15 +331,12 @@ export const parseFeaturesConfig = (feature: PlanVersionFeature) => {
 // We avoid the use of discriminated union because of the complexity of the schema
 // also zod is planning to deprecated it
 // TODO: improve this when switch api is available
-export const planVersionFeatureInsertBaseSchema = createInsertSchema(
-  planVersionFeatures,
-  {
-    config: configFeatureSchema.optional(),
-    metadata: planVersionFeatureMetadataSchema.optional(),
-    defaultQuantity: z.coerce.number().int().optional(),
-    limit: z.coerce.number().int().optional(),
-  }
-)
+export const planVersionFeatureInsertBaseSchema = createInsertSchema(planVersionFeatures, {
+  config: configFeatureSchema.optional(),
+  metadata: planVersionFeatureMetadataSchema.optional(),
+  defaultQuantity: z.coerce.number().int().optional(),
+  limit: z.coerce.number().int().optional(),
+})
   .omit({
     createdAt: true,
     updatedAt: true,
@@ -459,19 +446,17 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(
     return true
   })
 
-export const planVersionFeatureDragDropSchema =
-  planVersionFeatureSelectBaseSchema.extend({
-    feature: featureSelectBaseSchema,
-  })
+export const planVersionFeatureDragDropSchema = planVersionFeatureSelectBaseSchema.extend({
+  feature: featureSelectBaseSchema,
+})
 
-export const planVersionFeatureExtendedSchema =
-  planVersionFeatureSelectBaseSchema.extend({
-    feature: featureSelectBaseSchema,
-    planVersion: planVersionSelectBaseSchema.extend({
-      plan: planSelectBaseSchema,
-    }),
-    project: projectSelectBaseSchema,
-  })
+export const planVersionFeatureExtendedSchema = planVersionFeatureSelectBaseSchema.extend({
+  feature: featureSelectBaseSchema,
+  planVersion: planVersionSelectBaseSchema.extend({
+    plan: planSelectBaseSchema,
+  }),
+  project: projectSelectBaseSchema,
+})
 
 export const planVersionExtendedSchema = planVersionSelectBaseSchema
   .pick({
@@ -513,16 +498,10 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema
     ),
   })
 
-export type PlanVersionFeature = z.infer<
-  typeof planVersionFeatureInsertBaseSchema
->
+export type PlanVersionFeature = z.infer<typeof planVersionFeatureInsertBaseSchema>
 
-export type PlanVersionFeatureExtended = z.infer<
-  typeof planVersionFeatureExtendedSchema
->
+export type PlanVersionFeatureExtended = z.infer<typeof planVersionFeatureExtendedSchema>
 
-export type PlanVersionFeatureDragDrop = z.infer<
-  typeof planVersionFeatureDragDropSchema
->
+export type PlanVersionFeatureDragDrop = z.infer<typeof planVersionFeatureDragDropSchema>
 
 export type PlanVersionExtended = z.infer<typeof planVersionExtendedSchema>

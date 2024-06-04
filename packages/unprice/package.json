@@ -7,25 +7,17 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "AGPL-3.0",
-  "files": [
-    "./dist/**"
-  ],
+  "files": ["./dist/**"],
   "publishConfig": {
     "access": "public"
   },
-  "keywords": [
-    "builderai",
-    "client",
-    "api"
-  ],
+  "keywords": ["builderai", "client", "api"],
   "bugs": {
     "url": "https://github.com/jhonsfran1165/builderai/issues"
   },
   "homepage": "https://github.com/jhonsfran1165/builderai#readme",
   "scripts": {
-    "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint .",
-    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
+    "clean": "rm -rf .turbo node_modules dist",
     "typecheck": "tsc --noEmit",
     "generate:openapi": "curl http://api.localhost:3000/trpc/openapi > openapi-spec.json",
     "generate": "openapi-typescript http://api.localhost:3000/trpc/openapi -o ./src/openapi.d.ts",
@@ -33,22 +25,9 @@
     "generate:sdk": "speakeasy generate sdk --schema openapi-spec.json --lang typescript --out ./sdk"
   },
   "devDependencies": {
-    "@builderai/eslint-config": "^0.2.0",
-    "@builderai/prettier-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
-    "eslint": "^8.57.0",
     "openapi-typescript": "7.0.0-next.7",
-    "prettier": "^3.2.5",
     "tsup": "^8.0.2",
     "typescript": "^5.3.3"
-  },
-  "eslintConfig": {
-    "extends": [
-      "@builderai/eslint-config/base"
-    ]
-  },
-  "prettier": "@builderai/prettier-config",
-  "dependencies": {
-    "superjson": "2.2.1"
   }
 }

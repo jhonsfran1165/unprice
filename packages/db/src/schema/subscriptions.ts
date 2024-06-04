@@ -15,11 +15,7 @@ import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
 import type { subscriptionMetadataSchema } from "../validators/subscription"
 import { customerPaymentProviders, customers } from "./customers"
-import {
-  collectionMethodEnum,
-  subscriptionStatusEnum,
-  typeSubscriptionEnum,
-} from "./enums"
+import { collectionMethodEnum, subscriptionStatusEnum, typeSubscriptionEnum } from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
@@ -69,9 +65,7 @@ export const subscriptions = pgTableProject(
     // auto renew the subscription every billing period
     autoRenew: boolean("auto_renew").default(true),
 
-    collectionMethod: collectionMethodEnum("collection_method").default(
-      "charge_automatically"
-    ),
+    collectionMethod: collectionMethodEnum("collection_method").default("charge_automatically"),
     // whether the subscription is new or not. New means that the subscription was created in the current billing period
     isNew: boolean("is_new").default(true),
 
@@ -83,8 +77,7 @@ export const subscriptions = pgTableProject(
     status: subscriptionStatusEnum("status").default("active"),
 
     // metadata for the subscription
-    metadata:
-      json("metadata").$type<z.infer<typeof subscriptionMetadataSchema>>(),
+    metadata: json("metadata").$type<z.infer<typeof subscriptionMetadataSchema>>(),
   },
   (table) => ({
     primary: primaryKey({
@@ -98,10 +91,7 @@ export const subscriptions = pgTableProject(
     }),
     paymentmethodfk: foreignKey({
       columns: [table.paymentProviderId, table.projectId],
-      foreignColumns: [
-        customerPaymentProviders.id,
-        customerPaymentProviders.projectId,
-      ],
+      foreignColumns: [customerPaymentProviders.id, customerPaymentProviders.projectId],
       name: "subscriptions_payment_method_id_fkey",
     }),
     planversionfk: foreignKey({
@@ -146,41 +136,29 @@ export const subscriptionFeatures = pgTableProject(
   })
 )
 
-export const subscriptionFeatureRelations = relations(
-  subscriptionFeatures,
-  ({ one }) => ({
-    subscription: one(subscriptions, {
-      fields: [
-        subscriptionFeatures.subscriptionId,
-        subscriptionFeatures.projectId,
-      ],
-      references: [subscriptions.id, subscriptions.projectId],
-    }),
-    featurePlan: one(planVersionFeatures, {
-      fields: [
-        subscriptionFeatures.featurePlanId,
-        subscriptionFeatures.projectId,
-      ],
-      references: [planVersionFeatures.id, planVersionFeatures.projectId],
-    }),
-  })
-)
+export const subscriptionFeatureRelations = relations(subscriptionFeatures, ({ one }) => ({
+  subscription: one(subscriptions, {
+    fields: [subscriptionFeatures.subscriptionId, subscriptionFeatures.projectId],
+    references: [subscriptions.id, subscriptions.projectId],
+  }),
+  featurePlan: one(planVersionFeatures, {
+    fields: [subscriptionFeatures.featurePlanId, subscriptionFeatures.projectId],
+    references: [planVersionFeatures.id, planVersionFeatures.projectId],
+  }),
+}))
 
-export const subscriptionRelations = relations(
-  subscriptions,
-  ({ one, many }) => ({
-    project: one(projects, {
-      fields: [subscriptions.projectId],
-      references: [projects.id],
-    }),
-    customer: one(customers, {
-      fields: [subscriptions.customerId, subscriptions.projectId],
-      references: [customers.id, customers.projectId],
-    }),
-    planVersion: one(versions, {
-      fields: [subscriptions.planVersionId, subscriptions.projectId],
-      references: [versions.id, versions.projectId],
-    }),
-    features: many(subscriptionFeatures),
-  })
-)
+export const subscriptionRelations = relations(subscriptions, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [subscriptions.projectId],
+    references: [projects.id],
+  }),
+  customer: one(customers, {
+    fields: [subscriptions.customerId, subscriptions.projectId],
+    references: [customers.id, customers.projectId],
+  }),
+  planVersion: one(versions, {
+    fields: [subscriptions.planVersionId, subscriptions.projectId],
+    references: [versions.id, versions.projectId],
+  }),
+  features: many(subscriptionFeatures),
+}))

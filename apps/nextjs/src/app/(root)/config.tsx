@@ -16,8 +16,8 @@ export const marketingFeatures = [
     title: "UI Package",
     body: (
       <>
-        A UI package with all the components you need for your next application.
-        Built by the wonderful{" "}
+        A UI package with all the components you need for your next application. Built by the
+        wonderful{" "}
         <a
           href="https://ui.shadcn.com"
           target="_blank"
@@ -52,10 +52,7 @@ export const marketingFeatures = [
     icon: <Mdx className="h-10" />,
     title: "MDX",
     body: (
-      <>
-        Preconfigured MDX as Server Components. MDX is the best way to write
-        contentful pages.
-      </>
+      <>Preconfigured MDX as Server Components. MDX is the best way to write contentful pages.</>
     ),
   },
   {
@@ -68,8 +65,8 @@ export const marketingFeatures = [
     title: "Next.js 14 & React 18",
     body: (
       <>
-        Latest features from Next 14 using the brand new App Router with full
-        React 18 support including streaming.
+        Latest features from Next 14 using the brand new App Router with full React 18 support
+        including streaming.
       </>
     ),
   },
@@ -111,10 +108,7 @@ export const marketingFeatures = [
     icon: <Globe className="h-10 w-10" />,
     title: "Edge Compute",
     body: (
-      <>
-        Ready to deploy on Edge functions to ensure a blazingly fast application
-        with optimal UX.
-      </>
+      <>Ready to deploy on Edge functions to ensure a blazingly fast application with optimal UX.</>
     ),
   },
   {

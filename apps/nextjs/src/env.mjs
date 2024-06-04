@@ -8,8 +8,7 @@ export const env = createEnv({
   },
   server: {
     NEXTJS_URL: z.preprocess(
-      (str) =>
-        process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str,
+      (str) => (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str),
       process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
     ),
     STRIPE_WEBHOOK_SECRET: z.string(),
@@ -19,10 +18,7 @@ export const env = createEnv({
   },
   client: {
     NEXT_PUBLIC_APP_DOMAIN: z.preprocess(
-      (str) =>
-        process.env.NEXT_PUBLIC_VERCEL_URL
-          ? process.env.NEXT_PUBLIC_VERCEL_URL
-          : str,
+      (str) => (process.env.NEXT_PUBLIC_VERCEL_URL ? process.env.NEXT_PUBLIC_VERCEL_URL : str),
       z.string().min(1)
     ),
   },
@@ -33,7 +29,5 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     VERCEL_ENV: process.env.VERCEL_ENV,
   },
-  skipValidation:
-    !!process.env.SKIP_ENV_VALIDATION ||
-    process.env.npm_lifecycle_event === "lint",
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
 })

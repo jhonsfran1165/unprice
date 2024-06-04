@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 import {
   FEATURE_TYPES,
@@ -24,13 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@builderai/ui/form"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@builderai/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 import { Separator } from "@builderai/ui/separator"
 import { Switch } from "@builderai/ui/switch"
 
@@ -59,7 +53,7 @@ export function FeatureConfigForm({
   const router = useRouter()
   const [_planFeatureList, setPlanFeatureList] = usePlanFeaturesList()
 
-  const editMode = defaultValues.id ? true : false
+  const editMode = !!defaultValues.id
 
   // we set all possible values for the form so react-hook-form don't complain
   const controlledDefaultValues = {
@@ -167,19 +161,13 @@ export function FeatureConfigForm({
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <FormLabel className="text-sm font-semibold">
-                  Hide this feature from UI
-                </FormLabel>
+                <FormLabel className="text-sm font-semibold">Hide this feature from UI</FormLabel>
                 <FormDescription className="text-sm font-normal">
-                  When enabled, this feature will not be visible in pricing
-                  pages.
+                  When enabled, this feature will not be visible in pricing pages.
                 </FormDescription>
               </div>
               <FormControl>
-                <Switch
-                  checked={field.value ?? false}
-                  onCheckedChange={field.onChange}
-                />
+                <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
               </FormControl>
             </FormItem>
           )}
@@ -194,8 +182,8 @@ export function FeatureConfigForm({
                 Pricing Model
               </div>
               <div className="text-muted-foreground line-clamp-3 space-y-2 break-all px-2 text-justify text-xs font-normal leading-snug">
-                All units price based on final tier reached. Needs a record for
-                Stripe to track customer service usage.
+                All units price based on final tier reached. Needs a record for Stripe to track
+                customer service usage.
               </div>
               <div className="flex flex-col gap-1 px-2">
                 <FormField
@@ -216,8 +204,8 @@ export function FeatureConfigForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {FEATURE_TYPES.map((type, index) => (
-                            <SelectItem value={type} key={index}>
+                          {FEATURE_TYPES.map((type) => (
+                            <SelectItem value={type} key={type}>
                               <div className="text-muted-foreground flex items-start gap-3">
                                 <div className="grid gap-0.5">
                                   <p>{FEATURE_TYPES_MAPS[type].label}</p>
@@ -241,18 +229,15 @@ export function FeatureConfigForm({
                     render={({ field }) => (
                       <FormItem className="space-y-1">
                         <FormMessage className="self-start px-2" />
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value ?? ""}
-                        >
+                        <Select onValueChange={field.onChange} value={field.value ?? ""}>
                           <FormControl className="truncate">
                             <SelectTrigger className="items-start [&_[data-description]]:hidden">
                               <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {USAGE_MODES.map((mode, index) => (
-                              <SelectItem value={mode} key={index}>
+                            {USAGE_MODES.map((mode) => (
+                              <SelectItem value={mode} key={mode}>
                                 <div className="text-muted-foreground flex items-start gap-3">
                                   <div className="grid gap-0.5">
                                     <p>{USAGE_MODES_MAP[mode].label}</p>
@@ -270,26 +255,22 @@ export function FeatureConfigForm({
                   />
                 )}
 
-                {(featureType === "tier" ||
-                  (featureType === "usage" && usageMode === "tier")) && (
+                {(featureType === "tier" || (featureType === "usage" && usageMode === "tier")) && (
                   <FormField
                     control={form.control}
                     name="config.tierMode"
                     render={({ field }) => (
                       <FormItem className="space-y-1">
                         <FormMessage className="self-start px-2" />
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value ?? ""}
-                        >
+                        <Select onValueChange={field.onChange} value={field.value ?? ""}>
                           <FormControl className="truncate">
                             <SelectTrigger className="items-start [&_[data-description]]:hidden">
                               <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {TIER_MODES.map((mode, index) => (
-                              <SelectItem value={mode} key={index}>
+                            {TIER_MODES.map((mode) => (
+                              <SelectItem value={mode} key={mode}>
                                 <div className="text-muted-foreground flex items-start gap-3">
                                   <div className="grid gap-0.5">
                                     <p>{TIER_MODES_MAP[mode].label}</p>
@@ -313,21 +294,15 @@ export function FeatureConfigForm({
 
         <Separator />
 
-        {featureType === "flat" && (
-          <FlatFormFields form={form} currency={planVersion.currency} />
-        )}
+        {featureType === "flat" && <FlatFormFields form={form} currency={planVersion.currency} />}
 
         {featureType === "package" && (
           <PackageFormFields form={form} currency={planVersion.currency} />
         )}
 
-        {featureType === "usage" && (
-          <UsageFormFields form={form} currency={planVersion.currency} />
-        )}
+        {featureType === "usage" && <UsageFormFields form={form} currency={planVersion.currency} />}
 
-        {featureType === "tier" && (
-          <TierFormFields form={form} currency={planVersion.currency} />
-        )}
+        {featureType === "tier" && <TierFormFields form={form} currency={planVersion.currency} />}
 
         {planVersion.status !== "published" && (
           <div className="mt-8 flex justify-end space-x-4">

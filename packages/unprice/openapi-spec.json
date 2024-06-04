@@ -752,9 +752,7 @@
     },
     "schemas": {}
   },
-  "tags": [
-    { "name": "unprice", "description": "Operations related to unprice" }
-  ],
+  "tags": [{ "name": "unprice", "description": "Operations related to unprice" }],
   "externalDocs": { "url": "http://example.com/docs" },
   "x-speakeasy-retries": {
     "strategy": "backoff",

@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
@@ -34,12 +28,10 @@ async function SubscriptionCard() {
       <CardContent>
         {subscription ? (
           <div>
-            You are currently on the{" "}
-            <strong>{subscription.planVersion.title}</strong> plan.
+            You are currently on the <strong>{subscription.planVersion.title}</strong> plan.
             {subscription.startDate && (
               <strong>
-                Your subscription will renew on{" "}
-                {formatDate(subscription.startDate)}.{" "}
+                Your subscription will renew on {formatDate(subscription.startDate)}.{" "}
               </strong>
             )}
           </div>
@@ -47,7 +39,7 @@ async function SubscriptionCard() {
           <div>You are not subscribed to any plan.</div>
         )}
       </CardContent>
-      <CardFooter></CardFooter>
+      <CardFooter />
     </Card>
   )
 }

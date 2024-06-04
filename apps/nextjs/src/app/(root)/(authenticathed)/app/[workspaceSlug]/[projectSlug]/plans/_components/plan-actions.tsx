@@ -35,9 +35,7 @@ export function PlanActions({
           </DialogTrigger>
 
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive">
-            Another action
-          </DropdownMenuItem>
+          <DropdownMenuItem className="text-destructive">Another action</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <DialogContent>

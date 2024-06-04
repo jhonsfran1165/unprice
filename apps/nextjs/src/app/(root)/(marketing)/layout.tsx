@@ -1,7 +1,7 @@
-import type { ReactNode } from "react"
-import { Suspense } from "react"
 import { cookies } from "next/headers"
 import Link from "next/link"
+import type { ReactNode } from "react"
+import { Suspense } from "react"
 
 import { Button, buttonVariants } from "@builderai/ui/button"
 import { ChevronRight, Logo } from "@builderai/ui/icons"
@@ -21,9 +21,7 @@ export default function MarketingLayout(props: { children: ReactNode }) {
         <MaxWidthWrapper className="flex max-w-screen-2xl">
           <div className="mr-8 hidden items-center md:flex">
             <Logo className="mr-2 h-6 w-6" />
-            <span className="text-lg font-bold tracking-tight">
-              {siteConfig.name}
-            </span>
+            <span className="text-lg font-bold tracking-tight">{siteConfig.name}</span>
           </div>
           <Suspense>
             {/* TODO: fix this -> pass as much props as possible to MobileDropdown */}
@@ -34,9 +32,7 @@ export default function MarketingLayout(props: { children: ReactNode }) {
                   className="mr-2 px-0 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
                 >
                   <Logo className="mr-2 h-6 w-6" />
-                  <span className="text-lg font-bold tracking-tight">
-                    {siteConfig.name}
-                  </span>
+                  <span className="text-lg font-bold tracking-tight">{siteConfig.name}</span>
                 </Button>
               }
               navTabs={
@@ -88,10 +84,7 @@ function DashboardLink() {
   }
 
   return (
-    <Link
-      href={`${APP_DOMAIN}${workspaceSlug}`}
-      className={buttonVariants({ variant: "outline" })}
-    >
+    <Link href={`${APP_DOMAIN}${workspaceSlug}`} className={buttonVariants({ variant: "outline" })}>
       Dashboard
       <ChevronRight className="ml-1 h-4 w-4" />
     </Link>

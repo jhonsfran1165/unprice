@@ -1,11 +1,7 @@
 import { TRPCError } from "@trpc/server"
 
 import { prepared } from "@builderai/db"
-import type {
-  ProjectExtended,
-  User,
-  WorkspaceRole,
-} from "@builderai/db/validators"
+import type { ProjectExtended, User, WorkspaceRole } from "@builderai/db/validators"
 
 import type { Context } from "../trpc"
 
@@ -27,9 +23,7 @@ export const projectGuard = async ({
   const activeWorkspaceSlug = ctx.activeWorkspaceSlug
   const userId = ctx.session?.user.id
   const workspaces = ctx.session?.user?.workspaces
-  const activeWorkspace = workspaces?.find(
-    (workspace) => workspace.slug === activeWorkspaceSlug
-  )
+  const activeWorkspace = workspaces?.find((workspace) => workspace.slug === activeWorkspaceSlug)
 
   if (!activeWorkspace?.id) {
     throw new TRPCError({

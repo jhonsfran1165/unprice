@@ -53,8 +53,7 @@ export const ORGANIZATION_TYPES = {
 
 export const ORGANIZATION_ROLES = {
   MEMBER: {
-    description:
-      "Can view and make changes on pages. No chnages allowed on the organizaiton",
+    description: "Can view and make changes on pages. No chnages allowed on the organizaiton",
   },
   OWNER: {
     description: "Admin-level access to all resources.",

@@ -113,18 +113,17 @@ export const USAGE_MODES = Object.keys(USAGE_MODES_MAP) as unknown as readonly [
   ...UsageModes[],
 ]
 
-export const AGGREGATION_METHODS = Object.keys(
-  AGGREGATION_METHODS_MAP
-) as unknown as readonly [AggregationMethods, ...AggregationMethods[]]
+export const AGGREGATION_METHODS = Object.keys(AGGREGATION_METHODS_MAP) as unknown as readonly [
+  AggregationMethods,
+  ...AggregationMethods[],
+]
 
 export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
 export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
 export const FEATURE_VERSION_TYPES = ["feature", "addon"] as const
 export const SUBSCRIPTION_TYPES = ["plan", "addons"] as const
-export const COLLECTION_METHODS = [
-  "charge_automatically",
-  "send_invoice",
-] as const
-export const FEATURE_TYPES = Object.keys(
-  FEATURE_TYPES_MAPS
-) as unknown as readonly [FeatureTypes, ...FeatureTypes[]]
+export const COLLECTION_METHODS = ["charge_automatically", "send_invoice"] as const
+export const FEATURE_TYPES = Object.keys(FEATURE_TYPES_MAPS) as unknown as readonly [
+  FeatureTypes,
+  ...FeatureTypes[],
+]

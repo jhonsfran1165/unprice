@@ -11,9 +11,7 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "src/*"
-      ]
+      "*": ["src/*"]
     }
   },
   "license": "AGPL-3.0",
@@ -34,8 +32,6 @@
     "up:custom": "pnpm with-env drizzle-kit up --config=custom.config.ts",
     "studio:neon": "pnpm with-env drizzle-kit studio --config=neon.config.ts --verbose",
     "studio:local": "pnpm with-env drizzle-kit studio --config=local.config.ts --verbose",
-    "format": "prettier --check \"**/*.{mjs,ts}\"",
-    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env.local --"
   },
@@ -53,23 +49,10 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@builderai/eslint-config": "^0.2.0",
-    "@builderai/prettier-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
     "dotenv-cli": "^7.3.0",
     "drizzle-kit": "^0.21.4",
-    "eslint": "^8.57.0",
     "pg": "^8.11.3",
-    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
-  },
-  "eslintConfig": {
-    "extends": [
-      "@builderai/eslint-config/base"
-    ],
-    "rules": {
-      "@typescript-eslint/consistent-type-definitions": "off"
-    }
-  },
-  "prettier": "@builderai/prettier-config"
+  }
 }

@@ -1,5 +1,5 @@
 // TODO: export like this https://github.com/drizzle-team/drizzle-orm/issues/468
-import { neonConfig, Pool } from "@neondatabase/serverless"
+import { Pool, neonConfig } from "@neondatabase/serverless"
 import { and, eq, getTableColumns, or, sql } from "drizzle-orm"
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
 import { withReplicas } from "drizzle-orm/pg-core"
@@ -85,14 +85,8 @@ const projectGuardPrepared = db
       )
     )
   )
-  .innerJoin(
-    schema.workspaces,
-    eq(schema.projects.workspaceId, schema.workspaces.id)
-  )
-  .innerJoin(
-    schema.members,
-    eq(schema.members.workspaceId, schema.workspaces.id)
-  )
+  .innerJoin(schema.workspaces, eq(schema.projects.workspaceId, schema.workspaces.id))
+  .innerJoin(schema.members, eq(schema.members.workspaceId, schema.workspaces.id))
   .innerJoin(schema.users, eq(schema.members.userId, schema.users.id))
   .prepare("project_guard_prepared")
 
@@ -115,10 +109,7 @@ const workspaceGuardPrepared = db
       eq(schema.users.id, sql.placeholder("userId"))
     )
   )
-  .innerJoin(
-    schema.members,
-    eq(schema.members.workspaceId, schema.workspaces.id)
-  )
+  .innerJoin(schema.members, eq(schema.members.workspaceId, schema.workspaces.id))
   .innerJoin(schema.users, eq(schema.members.userId, schema.users.id))
   .prepare("workspace_guard_prepared")
 
@@ -144,8 +135,7 @@ const workspacesByUserPrepared = db.query.users
         },
       },
     },
-    where: (user, operators) =>
-      operators.eq(user.id, sql.placeholder("userId")),
+    where: (user, operators) => operators.eq(user.id, sql.placeholder("userId")),
   })
   .prepare("workspaces_by_user_prepared")
 
@@ -179,8 +169,7 @@ const apiKeyPrepared = db.query.apikeys
       expiresAt: true,
       revokedAt: true,
     },
-    where: (apikey, { and, eq }) =>
-      and(eq(apikey.key, sql.placeholder("apikey"))),
+    where: (apikey, { and, eq }) => and(eq(apikey.key, sql.placeholder("apikey"))),
   })
   .prepare("apikey_prepared")
 

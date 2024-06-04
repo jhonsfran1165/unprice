@@ -12,7 +12,7 @@ client.defineJob({
   trigger: eventTrigger({
     name: "example.event",
   }),
-  run: async (payload, io, ctx) => {
+  run: async (_payload, io, _ctx) => {
     // Use a Task to generate a random number. Using a Tasks means it only runs once.
     const result = await io.runTask("generate-random-number", async () => {
       return {
@@ -21,9 +21,7 @@ client.defineJob({
     })
 
     // Use the random number in a joke and log it to the console.
-    await io.logger.info(
-      `Why was the number ${result.num} afraid of the number 7?`
-    )
+    await io.logger.info(`Why was the number ${result.num} afraid of the number 7?`)
 
     // Wait for 5 seconds, the second parameter is the number of seconds to wait, you can add delays of up to a year.
     await io.wait("Wait 5 seconds for the punchline...", 5)

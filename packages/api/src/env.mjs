@@ -4,8 +4,7 @@ import * as z from "zod"
 export const env = createEnv({
   server: {
     NEXTJS_URL: z.preprocess(
-      (str) =>
-        process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str,
+      (str) => (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str),
       process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
     ),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
@@ -23,7 +22,5 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     VERCEL_ENV: process.env.VERCEL_ENV,
   },
-  skipValidation:
-    !!process.env.SKIP_ENV_VALIDATION ||
-    process.env.npm_lifecycle_event === "lint",
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
 })

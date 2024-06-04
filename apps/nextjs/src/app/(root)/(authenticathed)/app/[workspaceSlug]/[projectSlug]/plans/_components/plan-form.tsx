@@ -1,7 +1,7 @@
 "use client"
 
-import { startTransition } from "react"
 import { useRouter } from "next/navigation"
+import { startTransition } from "react"
 import { z } from "zod"
 
 import type { InsertPlan } from "@builderai/db/validators"
@@ -34,7 +34,7 @@ export function PlanForm({
   defaultValues: InsertPlan
 }) {
   const router = useRouter()
-  const editMode = defaultValues.id ? true : false
+  const editMode = !!defaultValues.id
   const planExist = api.plans.exist.useMutation()
 
   const formSchema = editMode
@@ -128,8 +128,7 @@ export function PlanForm({
               <FormItem>
                 <FormLabel>Plan Slug</FormLabel>
                 <FormDescription>
-                  The slug is a unique identifier for the plan and will be used
-                  for api calls.
+                  The slug is a unique identifier for the plan and will be used for api calls.
                 </FormDescription>
                 <FormControl>
                   <Input {...field} placeholder="free" disabled={editMode} />
@@ -148,9 +147,7 @@ export function PlanForm({
                 <FormControl>
                   <Textarea {...field} value={field.value ?? ""} />
                 </FormControl>
-                <FormDescription>
-                  Enter a short description of the plan.
-                </FormDescription>
+                <FormDescription>Enter a short description of the plan.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -164,15 +161,12 @@ export function PlanForm({
                 <div className="space-y-0.5">
                   <FormLabel className="text-base">Default plan</FormLabel>
                   <FormDescription>
-                    Mark this plan as the default so that new users are
-                    automatically assigned to it. Usually this is the free plan.
+                    Mark this plan as the default so that new users are automatically assigned to
+                    it. Usually this is the free plan.
                   </FormDescription>
                 </div>
                 <FormControl>
-                  <Switch
-                    checked={field.value ?? false}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
                 </FormControl>
               </FormItem>
             )}

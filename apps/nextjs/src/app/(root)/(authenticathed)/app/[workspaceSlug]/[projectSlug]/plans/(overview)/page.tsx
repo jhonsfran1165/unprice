@@ -22,11 +22,7 @@ export default async function PlansPage(props: {
       <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {plans.map((plan) => (
           <li key={plan.id}>
-            <PlanCard
-              plan={plan}
-              workspaceSlug={workspaceSlug}
-              projectSlug={projectSlug}
-            />
+            <PlanCard plan={plan} workspaceSlug={workspaceSlug} projectSlug={projectSlug} />
           </li>
         ))}
       </ul>
@@ -40,12 +36,8 @@ export default async function PlansPage(props: {
           </ul>
           <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center">
             <Balancer>
-              <h2 className="text-2xl font-bold">
-                This project has no plans yet
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Create your first plan to get started
-              </p>
+              <h2 className="text-2xl font-bold">This project has no plans yet</h2>
+              <p className="text-muted-foreground text-lg">Create your first plan to get started</p>
             </Balancer>
           </div>
         </div>

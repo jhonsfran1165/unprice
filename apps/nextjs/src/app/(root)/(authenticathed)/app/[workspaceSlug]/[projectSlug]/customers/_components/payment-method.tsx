@@ -51,9 +51,7 @@ const MissingPaymentMethod: React.FC = () => (
       <div className="from-background-bgSubtle to-background-line text-background-text relative m-auto aspect-[86/54] space-y-4 rounded-xl border bg-gradient-to-r p-8 shadow-lg transition-transform">
         <div>
           <div className="text-xs font-light">Name</div>
-          <div className="text-base font-medium tracking-wide blur-sm">
-            {"Anonymous"}
-          </div>
+          <div className="text-base font-medium tracking-wide blur-sm">{"Anonymous"}</div>
         </div>
         <div>
           <div className="text-xs font-light">Card Number</div>
@@ -62,9 +60,7 @@ const MissingPaymentMethod: React.FC = () => (
           </div>
         </div>
         <div>
-          <div className="text-base font-medium tracking-wide">
-            No payment method configured
-          </div>
+          <div className="text-base font-medium tracking-wide">No payment method configured</div>
         </div>
       </div>
     </div>

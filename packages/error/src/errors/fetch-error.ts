@@ -1,28 +1,28 @@
-import { BaseError } from "./base";
+import { BaseError } from "./base"
 
 /**
  * Fetch Errors
  */
 export class FetchError extends BaseError<{
-  url: string;
-  method: string;
-  [more: string]: unknown;
+  url: string
+  method: string
+  [more: string]: unknown
 }> {
-  public readonly retry: boolean;
-  public readonly name = FetchError.name;
+  public readonly retry: boolean
+  public readonly name = FetchError.name
 
   constructor(opts: {
-    message: string;
+    message: string
 
-    retry: boolean;
-    cause?: BaseError;
+    retry: boolean
+    cause?: BaseError
     context?: {
-      url: string;
-      method: string;
-      [more: string]: unknown;
-    };
+      url: string
+      method: string
+      [more: string]: unknown
+    }
   }) {
-    super(opts);
-    this.retry = opts.retry;
+    super(opts)
+    this.retry = opts.retry
   }
 }

@@ -1,4 +1,4 @@
-import React from "react"
+import type React from "react"
 
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"

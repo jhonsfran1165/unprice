@@ -1,19 +1,13 @@
 "use client"
 
-import { use } from "react"
 import { useRouter } from "next/navigation"
+import { use } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import type { ProjectTransferToWorkspace } from "@builderai/db/validators"
 import { transferToWorkspaceSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import {
   Dialog,
   DialogClose,
@@ -24,22 +18,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@builderai/ui/dialog"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@builderai/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@builderai/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
@@ -88,9 +69,7 @@ export function TransferProjectToTeam({
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription className="flex items-center">
-          {description}
-        </CardDescription>
+        <CardDescription className="flex items-center">{description}</CardDescription>
       </CardHeader>
       <CardFooter className="flex justify-between">
         <Dialog>
@@ -99,10 +78,7 @@ export function TransferProjectToTeam({
           </DialogTrigger>
           <DialogContent>
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <DialogHeader>
                   <DialogTitle>{title}</DialogTitle>
                   <DialogDescription>{description}</DialogDescription>
@@ -114,10 +90,7 @@ export function TransferProjectToTeam({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Organization</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a plan" />

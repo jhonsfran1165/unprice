@@ -1,17 +1,14 @@
 "use client"
 
-import { startTransition, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
 import { CheckIcon, ChevronDown, HelpCircle } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { startTransition, useMemo, useState } from "react"
 import { useFieldArray } from "react-hook-form"
 
 import type { RouterOutputs } from "@builderai/api"
 import { COLLECTION_METHODS, SUBSCRIPTION_TYPES } from "@builderai/db/utils"
 import type { InsertSubscription } from "@builderai/db/validators"
-import {
-  createDefaultSubscriptionConfig,
-  subscriptionInsertSchema,
-} from "@builderai/db/validators"
+import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
@@ -33,20 +30,9 @@ import {
 } from "@builderai/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 import { ScrollArea } from "@builderai/ui/scroll-area"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@builderai/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 import { Separator } from "@builderai/ui/separator"
-import {
-  Tooltip,
-  TooltipArrow,
-  TooltipContent,
-  TooltipTrigger,
-} from "@builderai/ui/tooltip"
+import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"
@@ -58,8 +44,7 @@ import DurationFormField from "./duration-field"
 import ConfigItemsFormField from "./items-fields"
 import PaymentMethodsFormField from "./payment-method-field"
 
-type PlanVersionResponse =
-  RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
+type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 
 export function SubscriptionForm({
   setDialogOpen,
@@ -69,10 +54,9 @@ export function SubscriptionForm({
   defaultValues: InsertSubscription
 }) {
   const router = useRouter()
-  const editMode = defaultValues.id ? true : false
+  const editMode = !!defaultValues.id
 
-  const [selectedPlanVersion, setSelectedPlanVersion] =
-    useState<PlanVersionResponse>()
+  const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersionResponse>()
 
   const [switcherPlanOpen, setSwitcherPlanOpen] = useState(false)
 
@@ -108,10 +92,9 @@ export function SubscriptionForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subscriptionPlanId])
 
-  const { data: paymentProviders } =
-    api.customers.listPaymentProviders.useQuery({
-      customerId: defaultValues.customerId,
-    })
+  const { data: paymentProviders } = api.customers.listPaymentProviders.useQuery({
+    customerId: defaultValues.customerId,
+  })
 
   const createSubscription = api.subscriptions.create.useMutation({
     onSuccess: ({ subscription }) => {
@@ -189,16 +172,11 @@ export function SubscriptionForm({
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Plan Version</FormLabel>
-                <FormDescription>
-                  Select the plan version for the subscription.
-                </FormDescription>
+                <FormDescription>Select the plan version for the subscription.</FormDescription>
                 <div className="text-xs font-normal leading-snug">
                   All the items will be configured based on the plan version
                 </div>
-                <Popover
-                  open={switcherPlanOpen}
-                  onOpenChange={setSwitcherPlanOpen}
-                >
+                <Popover open={switcherPlanOpen} onOpenChange={setSwitcherPlanOpen}>
                   <PopoverTrigger asChild>
                     <div className="">
                       <FormControl>
@@ -212,9 +190,8 @@ export function SubscriptionForm({
                           )}
                         >
                           {field.value
-                            ? data?.planVersions.find(
-                                (version) => version.id === field.value
-                              )?.title
+                            ? data?.planVersions.find((version) => version.id === field.value)
+                                ?.title
                             : "Select plan"}
                           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -226,14 +203,11 @@ export function SubscriptionForm({
                       <CommandInput placeholder="Search a plan..." />
                       <CommandEmpty>No plan found.</CommandEmpty>
                       <CommandGroup>
-                        {isLoading && (
-                          <CommandLoading>Loading...</CommandLoading>
-                        )}
+                        {isLoading && <CommandLoading>Loading...</CommandLoading>}
                         <ScrollArea
                           className={cn({
                             "max-h-24":
-                              data?.planVersions?.length &&
-                              data?.planVersions?.length > 5,
+                              data?.planVersions?.length && data?.planVersions?.length > 5,
                           })}
                         >
                           {data?.planVersions.map((version) => (
@@ -249,9 +223,7 @@ export function SubscriptionForm({
                               <CheckIcon
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  version.id === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
+                                  version.id === field.value ? "opacity-100" : "opacity-0"
                                 )}
                               />
                               {`${version.title} - v${version.version} - ${version.billingPeriod}`}
@@ -290,25 +262,21 @@ export function SubscriptionForm({
                           align="center"
                           side="right"
                         >
-                          First unit for the tier range. For the first tier,
-                          this should be 0.
+                          First unit for the tier range. For the first tier, this should be 0.
                           <TooltipArrow className="fill-background-bg" />
                         </TooltipContent>
                       </Tooltip>
                     </FormLabel>
                   </div>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value ?? ""}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a type" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {SUBSCRIPTION_TYPES.map((type, index) => (
-                        <SelectItem key={index} value={type}>
+                      {SUBSCRIPTION_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
                           {type}
                         </SelectItem>
                       ))}
@@ -341,25 +309,21 @@ export function SubscriptionForm({
                           align="center"
                           side="right"
                         >
-                          First unit for the tier range. For the first tier,
-                          this should be 0.
+                          First unit for the tier range. For the first tier, this should be 0.
                           <TooltipArrow className="fill-background-bg" />
                         </TooltipContent>
                       </Tooltip>
                     </FormLabel>
                   </div>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value ?? ""}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a currency" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {COLLECTION_METHODS.map((method, index) => (
-                        <SelectItem key={index} value={method}>
+                      {COLLECTION_METHODS.map((method) => (
+                        <SelectItem key={method} value={method}>
                           {method}
                         </SelectItem>
                       ))}
@@ -383,11 +347,7 @@ export function SubscriptionForm({
                 <FormLabel>Trial Days</FormLabel>
                 <div className="flex w-full flex-col lg:w-1/2">
                   <FormControl className="w-full">
-                    <InputWithAddons
-                      {...field}
-                      trailing={"days"}
-                      value={field.value ?? ""}
-                    />
+                    <InputWithAddons {...field} trailing={"days"} value={field.value ?? ""} />
                   </FormControl>
 
                   <FormMessage className="self-start pt-1" />

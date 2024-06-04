@@ -1,19 +1,12 @@
 "use client"
 
-import { useEffect, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useEffect, useTransition } from "react"
 
 import type { CreateDomain, Domain } from "@builderai/db/validators"
 import { domainCreateBaseSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@builderai/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"
@@ -116,9 +109,7 @@ export function DomainForm({
   }
 
   const submitDisabled =
-    form.formState.isSubmitting ||
-    domainExist.isPending ||
-    !form.formState.isValid
+    form.formState.isSubmitting || domainExist.isPending || !form.formState.isValid
 
   return (
     <Form {...form}>

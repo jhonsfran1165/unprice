@@ -1,7 +1,7 @@
 "use client"
 
-import { use, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { use, useState } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
@@ -37,9 +37,7 @@ export function ProjectSwitcher({
 
   return (
     <>
-      <span className="text-muted-foreground mx-4 hidden text-lg font-bold md:block">
-        /
-      </span>
+      <span className="text-muted-foreground mx-4 hidden text-lg font-bold md:block">/</span>
 
       <Popover open={switcherOpen} onOpenChange={setSwitcherOpen}>
         <PopoverTrigger asChild>
@@ -51,9 +49,7 @@ export function ProjectSwitcher({
             className="relative w-32 justify-between md:w-44"
           >
             <div className="absolute inset-1 opacity-25" />
-            <span className="z-10 truncate font-semibold">
-              {activeProject?.name}
-            </span>
+            <span className="z-10 truncate font-semibold">{activeProject?.name}</span>
             <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -67,15 +63,11 @@ export function ProjectSwitcher({
                     key={project.id}
                     onSelect={() => {
                       setSwitcherOpen(false)
-                      router.push(
-                        `/${project.workspace.slug}/${project.slug}/overview`
-                      )
+                      router.push(`/${project.workspace.slug}/${project.slug}/overview`)
                     }}
                     className={cn(
                       "cursor-pointer text-sm font-semibold",
-                      project.id === activeProject?.id
-                        ? "bg-background-bgActive"
-                        : "bg-transparent"
+                      project.id === activeProject?.id ? "bg-background-bgActive" : "bg-transparent"
                     )}
                   >
                     <div className="absolute inset-1 truncate opacity-25" />
@@ -83,9 +75,7 @@ export function ProjectSwitcher({
                     <Check
                       className={cn(
                         "ml-auto h-4 w-4",
-                        project.id === activeProject?.id
-                          ? "opacity-100"
-                          : "opacity-0"
+                        project.id === activeProject?.id ? "opacity-100" : "opacity-0"
                       )}
                     />
                   </CommandItem>

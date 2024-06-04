@@ -22,8 +22,8 @@ export default async function CustomerVersionPage(props: {
   }
 
   if (parsed?.success) {
-    ;(filter.fromDate = parsed.data.fromDate),
-      (filter.toDate = parsed.data.toDate)
+    filter.fromDate = parsed.data.fromDate
+    filter.toDate = parsed.data.toDate
   }
 
   const { subscriptions } = await api.subscriptions.listByPlanVersion({

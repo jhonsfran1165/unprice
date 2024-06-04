@@ -25,8 +25,6 @@ export async function userCanAccessProject({
   }
 
   if (!isInTier) {
-    throw new Error(
-      "This project is not in the right tier for this page, update you plan"
-    )
+    throw new Error("This project is not in the right tier for this page, update you plan")
   }
 }

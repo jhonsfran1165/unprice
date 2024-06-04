@@ -1,16 +1,10 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { TRPCClientError } from "@trpc/client"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@builderai/ui/button"
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import {
   Dialog,
   DialogClose,
@@ -35,25 +29,23 @@ export function TransferProjectToPersonal({
   const apiUtils = api.useUtils()
   const router = useRouter()
 
-  const transferProjectToPersonal = api.projects.transferToPersonal.useMutation(
-    {
-      onSettled: async () => {
-        await apiUtils.projects.getBySlug.invalidate({ slug: projectSlug })
-        router.refresh()
-      },
-      onSuccess: (data) => {
-        toastAction("success")
-        router.push(`/${data?.workspaceSlug}/overview`)
-      },
-      onError: (err) => {
-        if (err instanceof TRPCClientError) {
-          toastAction("error", err.message)
-        } else {
-          toastAction("error")
-        }
-      },
-    }
-  )
+  const transferProjectToPersonal = api.projects.transferToPersonal.useMutation({
+    onSettled: async () => {
+      await apiUtils.projects.getBySlug.invalidate({ slug: projectSlug })
+      router.refresh()
+    },
+    onSuccess: (data) => {
+      toastAction("success")
+      router.push(`/${data?.workspaceSlug}/overview`)
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        toastAction("error", err.message)
+      } else {
+        toastAction("error")
+      }
+    },
+  })
 
   const title = "Transfer to Personal"
   const description = "Transfer this project to your personal workspace"
@@ -62,9 +54,7 @@ export function TransferProjectToPersonal({
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription className="flex items-center">
-          {description}
-        </CardDescription>
+        <CardDescription className="flex items-center">{description}</CardDescription>
       </CardHeader>
       <CardFooter className="flex justify-between">
         <Dialog>
@@ -91,9 +81,7 @@ export function TransferProjectToPersonal({
                 }}
               >
                 {`I'm sure. Transfer this project`}
-                {transferProjectToPersonal.isPending && (
-                  <LoadingAnimation className="ml-2" />
-                )}
+                {transferProjectToPersonal.isPending && <LoadingAnimation className="ml-2" />}
               </Button>
             </DialogFooter>
           </DialogContent>

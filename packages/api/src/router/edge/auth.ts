@@ -1,10 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import {
-  planVersionSelectBaseSchema,
-  subscriptionSelectSchema,
-} from "@builderai/db/validators"
+import { planVersionSelectBaseSchema, subscriptionSelectSchema } from "@builderai/db/validators"
 
 import {
   createTRPCRouter,

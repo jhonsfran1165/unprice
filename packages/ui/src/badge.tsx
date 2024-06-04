@@ -1,6 +1,6 @@
-import * as React from "react"
 import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
+import type * as React from "react"
 
 import { cn } from "./utils"
 
@@ -13,8 +13,7 @@ const badgeVariants = cva(
         default: "default",
         secondary: "secondary",
         destructive: "danger",
-        outline:
-          "border bg-background-bgSubtle text-background-text; border-input",
+        outline: "border bg-background-bgSubtle text-background-text; border-input",
         info: "info",
         success: "success",
       },
@@ -30,9 +29,7 @@ export interface BadgeProps
     VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {
-  return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
-  )
+  return <div className={cn(badgeVariants({ variant }), className)} {...props} />
 }
 
 export { Badge, badgeVariants }

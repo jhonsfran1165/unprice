@@ -15,13 +15,7 @@ import {
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@builderai/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -71,8 +65,8 @@ export const InviteMemberForm = ({
                   <Input {...field} placeholder="john@doe.com" />
                 </FormControl>
                 <FormDescription>
-                  The email address of the person you want to invite. They must
-                  have an account on this app.
+                  The email address of the person you want to invite. They must have an account on
+                  this app.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -85,10 +79,7 @@ export const InviteMemberForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Role *</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a plan" />

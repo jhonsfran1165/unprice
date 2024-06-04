@@ -2,9 +2,9 @@
 // See it in action: https://demo.yournextstore.com
 "use client"
 
-import type { ComponentPropsWithRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import type { ComponentPropsWithRef } from "react"
 
 export const SuperLink = (props: ComponentPropsWithRef<typeof Link>) => {
   const router = useRouter()
@@ -12,8 +12,7 @@ export const SuperLink = (props: ComponentPropsWithRef<typeof Link>) => {
     <Link
       {...props}
       onMouseEnter={(e) => {
-        const href =
-          typeof props.href === "string" ? props.href : props.href.href
+        const href = typeof props.href === "string" ? props.href : props.href.href
         if (href) {
           router.prefetch(href)
         }

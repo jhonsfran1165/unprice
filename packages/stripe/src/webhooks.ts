@@ -14,14 +14,10 @@ export async function handleEvent(event: Stripe.Event) {
         throw new Error("Missing or invalid subscription id")
       }
 
-      const subscription = await stripe.subscriptions.retrieve(
-        session.subscription
-      )
+      const subscription = await stripe.subscriptions.retrieve(session.subscription)
 
       const stripeId =
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id
+        typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id
       const { userId } = subscription.metadata
 
       if (!userId) {
@@ -33,8 +29,7 @@ export async function handleEvent(event: Stripe.Event) {
         columns: {
           id: true,
         },
-        where: (workspace, { eq, and }) =>
-          and(eq(workspace.unPriceCustomerId, stripeId)),
+        where: (workspace, { eq, and }) => and(eq(workspace.unPriceCustomerId, stripeId)),
       })
 
       // const subscriptionPlan = stripePriceToSubscriptionPlan(
@@ -77,9 +72,7 @@ export async function handleEvent(event: Stripe.Event) {
       if (typeof invoice.subscription !== "string") {
         throw new Error("Missing or invalid subscription id")
       }
-      const subscription = await stripe.subscriptions.retrieve(
-        invoice.subscription
-      )
+      const subscription = await stripe.subscriptions.retrieve(invoice.subscription)
 
       // const subscriptionPlan = stripePriceToSubscriptionPlan(
       //   subscription.items.data[0]?.price.id
@@ -101,9 +94,7 @@ export async function handleEvent(event: Stripe.Event) {
     case "customer.subscription.deleted": {
       const subscription = event.data.object
       const stripeId =
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id
+        typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id
 
       await db
         .update(schema.workspaces)
@@ -118,9 +109,7 @@ export async function handleEvent(event: Stripe.Event) {
     case "customer.subscription.updated": {
       const subscription = event.data.object
       const stripeId =
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id
+        typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id
 
       // const subscriptionPlan = stripePriceToSubscriptionPlan(
       //   subscription.items.data[0]?.price.id
@@ -138,10 +127,7 @@ export async function handleEvent(event: Stripe.Event) {
     }
 
     default: {
-      console.log("🆗 Stripe Webhook Unhandled Event Type: ", event.type)
       return
     }
   }
-
-  console.log("✅ Stripe Webhook Processed")
 }

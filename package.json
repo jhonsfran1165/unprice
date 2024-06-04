@@ -4,11 +4,7 @@
   "engines": {
     "node": "20.11.1"
   },
-  "workspaces": [
-    "packages/*",
-    "apps/*",
-    "tooling/*"
-  ],
+  "workspaces": ["packages/*", "apps/*", "tooling/*"],
   "engineStrict": true,
   "packageManager": "pnpm@8.15.4",
   "scripts": {
@@ -17,21 +13,20 @@
     "clean:workspaces": "turbo clean --parallel",
     "dev": "cross-env FORCE_COLOR=1 turbo dev --parallel",
     "dev:web": "turbo dev --parallel --filter !@builderai/expo --filter !@builderai/db",
-    "format": "turbo format --continue -- --cache --cache-location='node_modules/.cache/.prettiercache' --ignore-path='../../.gitignore'",
-    "format:fix": "turbo format --continue -- --write --cache --cache-location='node_modules/.cache/.prettiercache' --ignore-path='../../.gitignore'",
-    "lint": "turbo lint --continue -- --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg check",
-    "lint:fix": "turbo lint --continue -- --fix --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg fix",
     "typecheck": "turbo typecheck",
-    "wh": "pnpm dlx webhookthing@latest"
+    "wh": "pnpm dlx webhookthing@latest",
+    "knip": "knip",
+    "fmt": "pnpm biome format . --write && pnpm biome check . --apply"
   },
   "dependencies": {
-    "@builderai/prettier-config": "^0.1.0",
     "@manypkg/cli": "^0.21.2",
     "@turbo/gen": "^1.12.4",
     "cross-env": "^7.0.3",
-    "prettier": "^3.2.5",
     "turbo": "^1.12.4",
     "typescript": "^5.3.3"
   },
-  "prettier": "@builderai/prettier-config"
+  "devDependencies": {
+    "@biomejs/biome": "1.7.3",
+    "knip": "^5.17.4"
+  }
 }

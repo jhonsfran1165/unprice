@@ -7,7 +7,7 @@
  * The pieces you will need to use are documented accordingly near the end
  */
 import type { OpenApiMeta } from "@potatohd/trpc-openapi"
-import { initTRPC, TRPCError } from "@trpc/server"
+import { TRPCError, initTRPC } from "@trpc/server"
 import { ZodError } from "zod"
 
 import type { NextAuthRequest, Session } from "@builderai/auth/server"
@@ -71,24 +71,20 @@ export const createTRPCContext = async (opts: {
   req?: NextAuthRequest
 }) => {
   const session = opts.session ?? (await auth())
-  const userId = session?.user?.id ?? "unknown"
+  const _userId = session?.user?.id ?? "unknown"
   const apikey = opts.headers.get("x-builderai-api-key")
-  const source = opts.headers.get("x-trpc-source") ?? "unknown"
+  const _source = opts.headers.get("x-trpc-source") ?? "unknown"
 
   // for client side we set the cookie on focus tab event
   // for server side we set a header from trpc invoker
   const activeWorkspaceSlug =
-    opts.req?.cookies.get("workspace-slug")?.value ??
-    opts.headers.get("workspace-slug") ??
-    ""
+    opts.req?.cookies.get("workspace-slug")?.value ?? opts.headers.get("workspace-slug") ?? ""
 
   // for client side we set the cookie on fo
   // for server side we set a header from trpc invoker
   // TODO: use utils here
   const activeProjectSlug =
-    opts.req?.cookies.get("project-slug")?.value ??
-    opts.headers.get("project-slug") ??
-    ""
+    opts.req?.cookies.get("project-slug")?.value ?? opts.headers.get("project-slug") ?? ""
 
   // TODO: is it a good idea to create a new instance for every request?
   const analytics = new Analytics({
@@ -99,8 +95,6 @@ export const createTRPCContext = async (opts: {
     url: env.UPSTASH_REDIS_REST_URL,
     token: env.UPSTASH_REDIS_REST_TOKEN,
   })
-
-  console.log(">>> tRPC Request from", source, "by", userId)
 
   return createInnerTRPCContext({
     session,
@@ -131,8 +125,7 @@ export const t = initTRPC
         ...shape,
         data: {
           ...shape.data,
-          zodError:
-            error.cause instanceof ZodError ? error.cause.flatten() : null,
+          zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
         },
       }
     },
@@ -190,135 +183,129 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 // it also sets the active workspace in the context
 // the active workspace is passed in the headers or cookies of the request
 // this way we can have a single endpoint for all requests and not have to pass the workspace slug in the body of the request every time
-export const protectedActiveWorkspaceProcedure = protectedProcedure.use(
-  async ({ ctx, next }) => {
-    const activeWorkspaceSlug = ctx.activeWorkspaceSlug
+export const protectedActiveWorkspaceProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const activeWorkspaceSlug = ctx.activeWorkspaceSlug
 
-    if (!activeWorkspaceSlug) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "No active workspace in the session",
-      })
-    }
-
-    const workspaces = ctx.session?.user?.workspaces
-    const activeWorkspace = workspaces?.find(
-      (workspace) => workspace.slug === activeWorkspaceSlug
-    )
-
-    if (!activeWorkspace) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message:
-          "Workspace not found or you don't have access to the workspace",
-      })
-    }
-
-    const data = await workspaceGuard({
-      workspaceId: activeWorkspace?.id,
-      ctx,
-    })
-
-    return next({
-      ctx: {
-        ...data,
-        session: {
-          ...ctx.session,
-        },
-      },
+  if (!activeWorkspaceSlug) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "No active workspace in the session",
     })
   }
-)
 
-export const protectedActiveWorkspaceAdminProcedure =
-  protectedActiveWorkspaceProcedure.use(({ ctx, next }) => {
+  const workspaces = ctx.session?.user?.workspaces
+  const activeWorkspace = workspaces?.find((workspace) => workspace.slug === activeWorkspaceSlug)
+
+  if (!activeWorkspace) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Workspace not found or you don't have access to the workspace",
+    })
+  }
+
+  const data = await workspaceGuard({
+    workspaceId: activeWorkspace?.id,
+    ctx,
+  })
+
+  return next({
+    ctx: {
+      ...data,
+      session: {
+        ...ctx.session,
+      },
+    },
+  })
+})
+
+export const protectedActiveWorkspaceAdminProcedure = protectedActiveWorkspaceProcedure.use(
+  ({ ctx, next }) => {
     ctx.verifyRole(["OWNER", "ADMIN"])
 
     return next({
       ctx,
     })
-  })
+  }
+)
 
-export const protectedActiveWorkspaceOwnerProcedure =
-  protectedActiveWorkspaceProcedure.use(({ ctx, next }) => {
+export const protectedActiveWorkspaceOwnerProcedure = protectedActiveWorkspaceProcedure.use(
+  ({ ctx, next }) => {
     ctx.verifyRole(["OWNER"])
 
     return next({
       ctx,
     })
-  })
-
-// for those endpoint that are used inside the app but they also can be used with an api key
-export const protectedApiOrActiveProjectProcedure = t.procedure.use(
-  async ({ ctx, next }) => {
-    const activeProjectSlug = ctx.activeProjectSlug
-    const apikey = ctx.apikey
-
-    // Check db for API key if apiKey is present
-    if (apikey) {
-      const { apiKey } = await apikeyGuard({
-        apikey,
-        ctx,
-      })
-
-      return next({
-        ctx: {
-          // pass the project data to the context to ensure all changes are applied to the correct project
-          project: apiKey.project,
-          apiKey: apiKey,
-        },
-      })
-    } else {
-      if (!ctx.session?.user?.id) {
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "User not found" })
-      }
-
-      const data = await projectGuard({
-        projectSlug: activeProjectSlug,
-        ctx,
-      })
-
-      return next({
-        ctx: {
-          userId: ctx.session?.user.id,
-          ...data,
-          session: {
-            ...ctx.session,
-          },
-        },
-      })
-    }
   }
 )
 
-export const protectedActiveProjectProcedure = protectedProcedure.use(
-  async ({ ctx, next }) => {
-    const activeProjectSlug = ctx.activeProjectSlug
+// for those endpoint that are used inside the app but they also can be used with an api key
+export const protectedApiOrActiveProjectProcedure = t.procedure.use(async ({ ctx, next }) => {
+  const activeProjectSlug = ctx.activeProjectSlug
+  const apikey = ctx.apikey
 
-    const data = await projectGuard({
-      projectSlug: activeProjectSlug,
+  // Check db for API key if apiKey is present
+  if (apikey) {
+    const { apiKey } = await apikeyGuard({
+      apikey,
       ctx,
     })
 
     return next({
       ctx: {
-        ...data,
-        session: {
-          ...ctx.session,
-        },
+        // pass the project data to the context to ensure all changes are applied to the correct project
+        project: apiKey.project,
+        apiKey: apiKey,
       },
     })
   }
-)
 
-export const protectedActiveProjectAdminProcedure =
-  protectedActiveProjectProcedure.use(({ ctx, next }) => {
+  if (!ctx.session?.user?.id) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "User not found" })
+  }
+
+  const data = await projectGuard({
+    projectSlug: activeProjectSlug,
+    ctx,
+  })
+
+  return next({
+    ctx: {
+      userId: ctx.session?.user.id,
+      ...data,
+      session: {
+        ...ctx.session,
+      },
+    },
+  })
+})
+
+export const protectedActiveProjectProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const activeProjectSlug = ctx.activeProjectSlug
+
+  const data = await projectGuard({
+    projectSlug: activeProjectSlug,
+    ctx,
+  })
+
+  return next({
+    ctx: {
+      ...data,
+      session: {
+        ...ctx.session,
+      },
+    },
+  })
+})
+
+export const protectedActiveProjectAdminProcedure = protectedActiveProjectProcedure.use(
+  ({ ctx, next }) => {
     ctx.verifyRole(["OWNER", "ADMIN"])
 
     return next({
       ctx,
     })
-  })
+  }
+)
 
 /**
  * Procedure to authenticate API requests with an API key
@@ -343,11 +330,11 @@ export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
  */
 export const protectedApiFormDataProcedure = protectedApiProcedure.use(
   async function formData(opts) {
-    const formData = await opts.ctx.req?.formData?.()
+    const data = await opts.ctx.req?.formData?.()
     if (!formData) throw new TRPCError({ code: "BAD_REQUEST" })
 
     return opts.next({
-      input: formData,
+      input: data,
     })
   }
 )

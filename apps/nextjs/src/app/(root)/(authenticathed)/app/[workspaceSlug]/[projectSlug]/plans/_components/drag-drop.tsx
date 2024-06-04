@@ -1,25 +1,20 @@
 "use client"
 
-import { startTransition, useState } from "react"
-import { useRouter } from "next/navigation"
-import type {
-  DragEndEvent,
-  DragOverEvent,
-  DragStartEvent,
-  DropAnimation,
-} from "@dnd-kit/core"
+import type { DragEndEvent, DragOverEvent, DragStartEvent, DropAnimation } from "@dnd-kit/core"
 import {
-  defaultDropAnimationSideEffects,
   DndContext,
   DragOverlay,
   MeasuringStrategy,
   MouseSensor,
-  pointerWithin,
   TouchSensor,
+  defaultDropAnimationSideEffects,
+  pointerWithin,
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
+import { useRouter } from "next/navigation"
+import { startTransition, useState } from "react"
 import { createPortal } from "react-dom"
 
 import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
@@ -39,9 +34,7 @@ const dropAnimation: DropAnimation = {
 }
 
 export default function DragDrop({ children }: { children: React.ReactNode }) {
-  const [clonedFeatures, setClonedFeatures] = useState<
-    PlanVersionFeatureDragDrop[] | null
-  >(null)
+  const [clonedFeatures, setClonedFeatures] = useState<PlanVersionFeatureDragDrop[] | null>(null)
   const router = useRouter()
 
   const [activeFeature, setActiveFeature] = useActiveFeature()
@@ -101,16 +94,12 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
         // create a new plan feature
         void createPlanVersionFeatures.mutateAsync({ ...planFeatureVersion })
       } else {
-        const clonedOrderFeatures =
-          clonedFeatures?.filter((f) => f.id).map((t) => t.order) ?? []
+        const clonedOrderFeatures = clonedFeatures?.filter((f) => f.id).map((t) => t.order) ?? []
 
-        const currentOrderFeatures =
-          planFeaturesList.filter((f) => f.id).map((t) => t.order) ?? []
+        const currentOrderFeatures = planFeaturesList.filter((f) => f.id).map((t) => t.order) ?? []
 
         // if the order of the features is the same we don't need to update
-        if (
-          clonedOrderFeatures.toString() === currentOrderFeatures.toString()
-        ) {
+        if (clonedOrderFeatures.toString() === currentOrderFeatures.toString()) {
           return
         }
 
@@ -150,8 +139,7 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
 
     if (!activeData) return
 
-    const planFeatureVersion =
-      activeData.planFeatureVersion as PlanVersionFeatureDragDrop
+    const planFeatureVersion = activeData.planFeatureVersion as PlanVersionFeatureDragDrop
 
     onChanges(planFeatureVersion)
 
@@ -171,15 +159,8 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
     // just copy the features in case the user cancels the drag
     setClonedFeatures(planFeaturesList)
 
-    if (
-      ["Feature", "FeaturePlan"].includes(
-        event.active.data.current?.mode as string
-      )
-    ) {
-      setActiveFeature(
-        event.active.data.current
-          ?.planFeatureVersion as PlanVersionFeatureDragDrop
-      )
+    if (["Feature", "FeaturePlan"].includes(event.active.data.current?.mode as string)) {
+      setActiveFeature(event.active.data.current?.planFeatureVersion as PlanVersionFeatureDragDrop)
 
       return
     }
@@ -208,13 +189,10 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
     // Feature represents a feature inside the feature list
     const isActiveAFeature = activeData?.mode === "Feature"
 
-    const planFeatureVersion =
-      activeData.planFeatureVersion as PlanVersionFeatureDragDrop
+    const planFeatureVersion = activeData.planFeatureVersion as PlanVersionFeatureDragDrop
 
     // look for the index of the active feature to see if it is already in the list
-    const activeIndex = planFeaturesList.findIndex(
-      (t) => t.featureId === activeId
-    )
+    const activeIndex = planFeaturesList.findIndex((t) => t.featureId === activeId)
     const activeFeatureInList = planFeaturesList[activeIndex]
 
     // set the new list of features given the new order
@@ -231,16 +209,15 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
           : arrayMove([...features, planFeatureVersion], activeIndex, overIndex)
 
         return result
-      } else {
-        // I'm dropping a Feature over the drop area
-        // if the active feature is not in the list we add it
-        // otherwise we just reorder the list
-        const result = activeFeatureInList
-          ? arrayMove(features, activeIndex, activeIndex)
-          : [...features, planFeatureVersion]
-
-        return result
       }
+      // I'm dropping a Feature over the drop area
+      // if the active feature is not in the list we add it
+      // otherwise we just reorder the list
+      const result = activeFeatureInList
+        ? arrayMove(features, activeIndex, activeIndex)
+        : [...features, planFeatureVersion]
+
+      return result
     })
   }
 
@@ -265,10 +242,7 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
         createPortal(
           <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
             {activeFeature && (
-              <FeaturePlan
-                mode={"FeaturePlan"}
-                planFeatureVersion={activeFeature}
-              />
+              <FeaturePlan mode={"FeaturePlan"} planFeatureVersion={activeFeature} />
             )}
           </DragOverlay>,
           document.body

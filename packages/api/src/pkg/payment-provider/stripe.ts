@@ -3,10 +3,7 @@ import type { Result } from "@builderai/error"
 import { Err, FetchError, Ok } from "@builderai/error"
 import { Stripe, stripe } from "@builderai/stripe"
 
-import type {
-  PaymentProviderCreateSession,
-  PaymentProviderInterface,
-} from "./interface"
+import type { PaymentProviderCreateSession, PaymentProviderInterface } from "./interface"
 
 export class StripePaymentProvider implements PaymentProviderInterface {
   private readonly client: Stripe

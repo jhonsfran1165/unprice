@@ -488,10 +488,7 @@ export interface operations {
           "application/json": {
             access: boolean
             /** @enum {string} */
-            deniedReason?:
-              | "RATE_LIMITED"
-              | "USAGE_EXCEEDED"
-              | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION"
+            deniedReason?: "RATE_LIMITED" | "USAGE_EXCEEDED" | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION"
             currentUsage?: number
             limit?: number
           }

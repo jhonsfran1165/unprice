@@ -11,10 +11,7 @@ export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get("session_id")
 
   if (!sessionId) {
-    return NextResponse.json(
-      { error: "Session ID is required" },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: "Session ID is required" }, { status: 400 })
   }
 
   // TODO: add logs and notifications if errors occur
@@ -25,10 +22,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (!session.metadata) {
-    return NextResponse.json(
-      { error: "Session metadata is required" },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: "Session metadata is required" }, { status: 400 })
   }
 
   const customerId = session?.metadata?.customerId
@@ -37,10 +31,7 @@ export async function GET(req: NextRequest) {
   const cancelUrl = session?.metadata?.cancelUrl
 
   if (!customerId || !projectId || !successUrl || !cancelUrl) {
-    return NextResponse.json(
-      { error: "Metadata is incomplete" },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: "Metadata is incomplete" }, { status: 400 })
   }
 
   const [customer, paymentMethods] = await Promise.all([
@@ -49,10 +40,7 @@ export async function GET(req: NextRequest) {
   ])
 
   if (!customer) {
-    return NextResponse.json(
-      { error: "Customer not found in stripe" },
-      { status: 404 }
-    )
+    return NextResponse.json({ error: "Customer not found in stripe" }, { status: 404 })
   }
 
   // check if the customer exists in the database
@@ -67,10 +55,7 @@ export async function GET(req: NextRequest) {
   })
 
   if (!customerData) {
-    return NextResponse.json(
-      { error: "Customer not found in database" },
-      { status: 404 }
-    )
+    return NextResponse.json({ error: "Customer not found in database" }, { status: 404 })
   }
 
   const paymentProviderData = customerData.providers.at(0)

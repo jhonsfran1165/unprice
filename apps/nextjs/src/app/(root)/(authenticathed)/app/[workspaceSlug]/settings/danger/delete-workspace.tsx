@@ -1,16 +1,10 @@
 "use client"
 
-import { startTransition } from "react"
 import { useRouter } from "next/navigation"
+import { startTransition } from "react"
 
 import { Button } from "@builderai/ui/button"
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import {
   Dialog,
   DialogClose,
@@ -31,9 +25,7 @@ import { api } from "~/trpc/client"
 export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
   const router = useRouter()
   const { user } = useUser()
-  const isPersonal = user?.workspaces.find(
-    (wk) => wk.slug === workspaceSlug
-  )?.isPersonal
+  const isPersonal = user?.workspaces.find((wk) => wk.slug === workspaceSlug)?.isPersonal
 
   const apiUtils = api.useUtils()
 
@@ -47,9 +39,7 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
     },
     onSuccess: () => {
       toastAction("deleted")
-      const nextWorkspace = user?.workspaces.find(
-        (wk) => wk.slug !== workspaceSlug
-      )
+      const nextWorkspace = user?.workspaces.find((wk) => wk.slug !== workspaceSlug)
 
       router.push(`/${nextWorkspace?.slug}/overview`)
     },
@@ -67,9 +57,7 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription className="flex items-center">
-          {description}
-        </CardDescription>
+        <CardDescription className="flex items-center">{description}</CardDescription>
       </CardHeader>
       <CardFooter className="flex justify-between">
         <Dialog>
@@ -80,8 +68,8 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
           </DialogTrigger>
           {!!isPersonal && (
             <span className="text-muted-foreground mr-auto px-2 text-xs">
-              You can not delete your personal workspace. Contact support if you
-              want to delete your account.
+              You can not delete your personal workspace. Contact support if you want to delete your
+              account.
             </span>
           )}
           <DialogContent>

@@ -11,8 +11,7 @@ const WelcomeEmail = () => {
           <br />
           <br />
           Welcome to Builderai! We're excited to have you on board.
-          <br /> I hope you will enjoy using our product as much as we enjoyed
-          building it.
+          <br /> I hope you will enjoy using our product as much as we enjoyed building it.
           <br />
           <br />
           What kind of apps are going to monitor?
@@ -25,13 +24,9 @@ const WelcomeEmail = () => {
           <br />
           Sebastian,
           <br />
-          <br />⭐ Star us on{" "}
-          <Link href="https://github.com/jhonsfran1165/builderai">GitHub</Link>
-          <br />
-          🚀 Login here{" "}
-          <Link href="https://builderai-git-main-jhonsfran.vercel.app/">
-            builderai
-          </Link>
+          <br />⭐ Star us on <Link href="https://github.com/jhonsfran1165/builderai">GitHub</Link>
+          <br />🚀 Login here{" "}
+          <Link href="https://builderai-git-main-jhonsfran.vercel.app/">builderai</Link>
         </Body>
       </Head>
     </Html>

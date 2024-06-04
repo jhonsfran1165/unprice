@@ -24,13 +24,13 @@ export function Ping(props: VariantProps<typeof variants>) {
           variants({ variant: props.variant }),
           "absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
         )}
-      ></span>
+      />
       <span
         className={cn(
           variants({ variant: props.variant }),
           "relative inline-flex h-[5px] w-[5px] rounded-full"
         )}
-      ></span>
+      />
     </span>
   )
 }

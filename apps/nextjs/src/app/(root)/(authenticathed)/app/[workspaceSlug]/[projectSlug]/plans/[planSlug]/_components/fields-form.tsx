@@ -4,10 +4,7 @@ import { DollarSignIcon, HelpCircle, Plus, XCircle } from "lucide-react"
 import type { UseFormReturn } from "react-hook-form"
 import { useFieldArray } from "react-hook-form"
 
-import {
-  AGGREGATION_METHODS,
-  AGGREGATION_METHODS_MAP,
-} from "@builderai/db/utils"
+import { AGGREGATION_METHODS, AGGREGATION_METHODS_MAP } from "@builderai/db/utils"
 import type { Currency, PlanVersionFeature } from "@builderai/db/validators"
 import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
@@ -20,19 +17,8 @@ import {
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@builderai/ui/select"
-import {
-  Tooltip,
-  TooltipArrow,
-  TooltipContent,
-  TooltipTrigger,
-} from "@builderai/ui/tooltip"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
+import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
 import { InputWithAddons } from "~/components/test"
 import { currencySymbol } from "~/lib/currency"
@@ -54,17 +40,12 @@ export function QuantityFormField({
               Default quantity of the feature when the subscription is created.
             </FormDescription>
             <div className="text-xs font-normal leading-snug">
-              If the quantity is not provided, it must be set at the time of the
-              subscription.
+              If the quantity is not provided, it must be set at the time of the subscription.
             </div>
 
             <div className="flex flex-col items-center space-y-1 px-2">
               <FormControl className="w-full">
-                <InputWithAddons
-                  {...field}
-                  trailing={"units"}
-                  value={field.value ?? ""}
-                />
+                <InputWithAddons {...field} trailing={"units"} value={field.value ?? ""} />
               </FormControl>
 
               <FormMessage className="self-start px-2" />
@@ -93,17 +74,13 @@ export function LimitFormField({
               Set a limit for the feature when the subscription is created.
             </FormDescription>
             <div className="text-xs font-normal leading-snug">
-              If you set a limit, the feature will be disabled when the limit is
-              reached. Otherwise the feature will be unlimited.
+              If you set a limit, the feature will be disabled when the limit is reached. Otherwise
+              the feature will be unlimited.
             </div>
 
             <div className="flex flex-col items-center space-y-1 px-2">
               <FormControl className="w-full">
-                <InputWithAddons
-                  {...field}
-                  trailing={"units"}
-                  value={field.value ?? ""}
-                />
+                <InputWithAddons {...field} trailing={"units"} value={field.value ?? ""} />
               </FormControl>
 
               <FormMessage className="self-start px-2" />
@@ -203,8 +180,8 @@ export function AggregationMethodFormField({
               <FormLabel>Aggregation Method</FormLabel>
               <FormDescription>Charge for metered usage by</FormDescription>
               <div className="text-xs font-normal leading-snug">
-                Usage based features meters usage over a period of time. Select
-                the aggregation method for the feature.
+                Usage based features meters usage over a period of time. Select the aggregation
+                method for the feature.
               </div>
             </div>
             <div className="px-2">
@@ -215,8 +192,8 @@ export function AggregationMethodFormField({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {AGGREGATION_METHODS.map((mode, index) => (
-                    <SelectItem value={mode} key={index}>
+                  {AGGREGATION_METHODS.map((mode) => (
+                    <SelectItem value={mode} key={mode}>
                       <div className="text-muted-foreground flex items-start gap-3">
                         <div className="grid gap-0.5">
                           <p>{AGGREGATION_METHODS_MAP[mode].label}</p>
@@ -263,14 +240,9 @@ export function TierFormField({
       {fields.length > 0 ? (
         <div className="px-2 py-2">
           {fields.map((field, index) => (
-            <div
-              key={index}
-              className="flex items-end justify-between gap-2 space-y-2"
-            >
+            <div key={field.id} className="flex items-end justify-between gap-2 space-y-2">
               <div className="flex items-center justify-start">
-                <span className="h-8 text-sm font-light leading-8">
-                  {index + 1}
-                </span>
+                <span className="h-8 text-sm font-light leading-8">{index + 1}</span>
               </div>
               <div className="w-full">
                 <FormField
@@ -295,8 +267,7 @@ export function TierFormField({
                             align="center"
                             side="right"
                           >
-                            First unit for the tier range. For the first tier,
-                            this should be 0.
+                            First unit for the tier range. For the first tier, this should be 0.
                             <TooltipArrow className="fill-background-bg" />
                           </TooltipContent>
                         </Tooltip>
@@ -304,11 +275,7 @@ export function TierFormField({
 
                       <FormMessage className="text-xs font-light" />
                       <FormControl>
-                        <Input
-                          {...field}
-                          className="h-8"
-                          disabled={index === 0}
-                        />
+                        <Input {...field} className="h-8" disabled={index === 0} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -338,9 +305,8 @@ export function TierFormField({
                             align="center"
                             side="right"
                           >
-                            If the usage is less than the tier up to value, then
-                            the flat price is charged. For infinite usage, use
-                            9999999.
+                            If the usage is less than the tier up to value, then the flat price is
+                            charged. For infinite usage, use 9999999.
                             <TooltipArrow className="fill-background-bg" />
                           </TooltipContent>
                         </Tooltip>
@@ -354,8 +320,7 @@ export function TierFormField({
                           className="h-8"
                           value={field.value ?? "∞"}
                           disabled={
-                            (index !== 0 && index === fields.length - 1) ||
-                            fields.length === 1
+                            (index !== 0 && index === fields.length - 1) || fields.length === 1
                           }
                         />
                       </FormControl>
@@ -386,8 +351,7 @@ export function TierFormField({
                             align="center"
                             side="right"
                           >
-                            Flat price of the tier, it will be sum to usage
-                            price.
+                            Flat price of the tier, it will be sum to usage price.
                             <TooltipArrow className="fill-background-bg" />
                           </TooltipContent>
                         </Tooltip>
@@ -496,14 +460,10 @@ export function TierFormField({
                   e.preventDefault()
 
                   const firstUnitValue = Number(
-                    form.getValues(
-                      `config.tiers.${fields.length - 1}.firstUnit`
-                    )
+                    form.getValues(`config.tiers.${fields.length - 1}.firstUnit`)
                   )
 
-                  const lastUnitValue = form.getValues(
-                    `config.tiers.${fields.length - 1}.lastUnit`
-                  )
+                  const lastUnitValue = form.getValues(`config.tiers.${fields.length - 1}.lastUnit`)
 
                   form.setValue(
                     `config.tiers.${fields.length - 1}.lastUnit`,
@@ -511,10 +471,7 @@ export function TierFormField({
                   )
 
                   append({
-                    firstUnit:
-                      lastUnitValue === null
-                        ? firstUnitValue + 2
-                        : lastUnitValue + 1,
+                    firstUnit: lastUnitValue === null ? firstUnitValue + 2 : lastUnitValue + 1,
                     lastUnit: null,
                     unitPrice: {
                       displayAmount: "0.00",

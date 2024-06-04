@@ -1,11 +1,7 @@
 import { NoopTinybird, Tinybird } from "@chronark/zod-bird"
 import { z } from "zod"
 
-import {
-  auditLogSchemaV1,
-  featureUsageSchemaV1,
-  featureVerificationSchemaV1,
-} from "./validators"
+import { auditLogSchemaV1, featureUsageSchemaV1, featureVerificationSchemaV1 } from "./validators"
 
 export class Analytics {
   public readonly readClient: Tinybird | NoopTinybird

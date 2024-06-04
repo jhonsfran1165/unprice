@@ -4,12 +4,7 @@ import { auth } from "@builderai/auth/server"
 
 import SitesMiddleware from "~/middleware/sites"
 import { parse } from "~/middleware/utils"
-import {
-  API_HOSTNAMES,
-  APP_HOSTNAMES,
-  APP_PUBLIC_ROUTES,
-  SITES_HOSTNAMES,
-} from "./constants"
+import { API_HOSTNAMES, APP_HOSTNAMES, APP_PUBLIC_ROUTES, SITES_HOSTNAMES } from "./constants"
 import ApiMiddleware from "./middleware/api"
 import AppMiddleware from "./middleware/app"
 

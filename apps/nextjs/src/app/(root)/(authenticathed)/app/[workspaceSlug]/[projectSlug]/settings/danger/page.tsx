@@ -1,13 +1,7 @@
 import { Suspense } from "react"
 
 import { Button } from "@builderai/ui/button"
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
 
 import { userCanAccessProject } from "~/lib/project-guard"

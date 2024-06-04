@@ -1,14 +1,7 @@
 import type { ExternalToast } from "sonner"
 import { toast } from "sonner"
 
-type ToastType =
-  | "default"
-  | "description"
-  | "success"
-  | "warning"
-  | "info"
-  | "error"
-  | "promise"
+type ToastType = "default" | "description" | "success" | "warning" | "info" | "error" | "promise"
 
 const config = {
   error: {

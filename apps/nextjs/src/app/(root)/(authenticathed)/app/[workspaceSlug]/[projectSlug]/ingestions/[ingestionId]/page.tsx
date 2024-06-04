@@ -1,13 +1,6 @@
 import { format } from "date-fns"
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@builderai/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
 
 import { api } from "~/trpc/server"
 
@@ -37,9 +30,7 @@ export default async function IngestionPage(props: {
         <TableBody>
           <TableRow>
             <TableCell>{ingestion.id}</TableCell>
-            <TableCell>
-              {format(ingestion.createdAt, "yyyy-MM-dd HH:mm:ss")}
-            </TableCell>
+            <TableCell>{format(ingestion.createdAt, "yyyy-MM-dd HH:mm:ss")}</TableCell>
             <TableCell>{ingestion.hash}</TableCell>
             <TableCell>{ingestion.origin}</TableCell>
             <TableCell>{ingestion.parent}</TableCell>

@@ -9,8 +9,7 @@ export const env = createEnv({
   },
   server: {
     NEXTJS_URL: z.preprocess(
-      (str) =>
-        process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str,
+      (str) => (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str),
       process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
     ),
     DATABASE_PRIMARY_URL: z.string().min(1).url(),
@@ -28,7 +27,5 @@ export const env = createEnv({
     VERCEL_ENV: process.env.VERCEL_ENV,
     DRIZZLE_LOG: process.env.DRIZZLE_LOG,
   },
-  skipValidation:
-    !!process.env.SKIP_ENV_VALIDATION ||
-    process.env.npm_lifecycle_event === "lint",
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.npm_lifecycle_event === "lint",
 })

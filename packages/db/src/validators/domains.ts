@@ -94,8 +94,6 @@ export const domainVerificationStatusSchema = z.union([
 export type DomainVerificationResponse = z.infer<typeof domainResponseSchema>
 export type DomainConfigResponse = z.infer<typeof domainConfigResponseSchema>
 export type DomainResponse = z.infer<typeof domainResponseSchema>
-export type DomainVerificationStatusProps = z.infer<
-  typeof domainVerificationStatusSchema
->
+export type DomainVerificationStatusProps = z.infer<typeof domainVerificationStatusSchema>
 export type Domain = z.infer<typeof domainSelectBaseSchema>
 export type CreateDomain = z.infer<typeof domainCreateBaseSchema>

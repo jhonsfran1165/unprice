@@ -14,9 +14,7 @@ export default function HeaderTab({
   return (
     <div className={cn("flex w-full items-center justify-between", className)}>
       <div className="space-y-2 px-2">
-        <h1 className="text-lg font-semibold leading-none tracking-tight">
-          {title}
-        </h1>
+        <h1 className="text-lg font-semibold leading-none tracking-tight">{title}</h1>
         <h4 className="text-muted-foreground text-sm">{description}</h4>
       </div>
       <div>{action}</div>

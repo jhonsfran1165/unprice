@@ -61,7 +61,7 @@ export const syncPaymentProvider = async ({
     })
   }
 
-  let paymentProviderClient
+  let paymentProviderClient = null
 
   if (paymentProvider === "stripe") {
     // TODO: pass the token from the payment provider configuration

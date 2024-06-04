@@ -1,12 +1,8 @@
 import { APP_NAME } from "@builderai/config"
 import type { PlanVersionFeatureExtended } from "@builderai/db/validators"
-import {
-  configFlatSchema,
-  configTierSchema,
-  configUsageSchema,
-} from "@builderai/db/validators"
+import { configFlatSchema, configTierSchema, configUsageSchema } from "@builderai/db/validators"
 import type { Stripe } from "@builderai/stripe"
-import { stripe, StripeClient } from "@builderai/stripe"
+import { StripeClient, stripe } from "@builderai/stripe"
 
 export class StripePaymentProvider {
   public readonly client: Stripe
@@ -30,7 +26,7 @@ export class StripePaymentProvider {
     // check if the product already exists
     try {
       await this.getProduct(planVersionFeature.featureId)
-    } catch (error) {
+    } catch (_error) {
       return this.client.products.create({
         id: planVersionFeature.featureId,
         name: productName,
@@ -65,16 +61,14 @@ export class StripePaymentProvider {
         const { price } = configFlatSchema.parse(config)
 
         // we need to transform price to cents without rounding
-        const priceInCents = Math.floor(
-          parseFloat(price.displayAmount) * 100
-        ).toFixed(2)
+        const priceInCents = Math.floor(Number.parseFloat(price.displayAmount) * 100).toFixed(2)
 
         try {
           const priceExist = await this.listPrices([id], 1)
           if (priceExist.data.length > 0) {
             return priceExist.data[0]
           }
-        } catch (error) {
+        } catch (_error) {
           // do nothing
         }
 
@@ -113,12 +107,10 @@ export class StripePaymentProvider {
           return {
             up_to: tier.lastUnit ?? ("inf" as const),
             unit_amount_decimal: Math.floor(
-              parseFloat(tier.unitPrice.displayAmount) * 100
+              Number.parseFloat(tier.unitPrice.displayAmount) * 100
             ).toFixed(2),
             flat_amount_decimal: tier.flatPrice
-              ? Math.floor(
-                  parseFloat(tier.flatPrice.displayAmount) * 100
-                ).toFixed(2)
+              ? Math.floor(Number.parseFloat(tier.flatPrice.displayAmount) * 100).toFixed(2)
               : undefined,
           }
         })
@@ -128,7 +120,7 @@ export class StripePaymentProvider {
           if (priceExist.data.length > 0) {
             return priceExist.data[0]
           }
-        } catch (error) {
+        } catch (_error) {
           // do nothing
         }
 
@@ -173,7 +165,7 @@ export class StripePaymentProvider {
           if (priceExist.data.length > 0) {
             return priceExist.data[0]
           }
-        } catch (error) {
+        } catch (_error) {
           // do nothing
         }
 
@@ -183,12 +175,10 @@ export class StripePaymentProvider {
             return {
               up_to: tier.lastUnit ?? ("inf" as const),
               unit_amount_decimal: Math.floor(
-                parseFloat(tier.unitPrice.displayAmount) * 100
+                Number.parseFloat(tier.unitPrice.displayAmount) * 100
               ).toFixed(2),
               flat_amount_decimal: tier.flatPrice
-                ? Math.floor(
-                    parseFloat(tier.flatPrice.displayAmount) * 100
-                  ).toFixed(2)
+                ? Math.floor(Number.parseFloat(tier.flatPrice.displayAmount) * 100).toFixed(2)
                 : undefined,
             }
           })
@@ -228,9 +218,9 @@ export class StripePaymentProvider {
                 aggregate_usage: aggregationMethod,
                 interval_count: 1,
               },
-              unit_amount_decimal: Math.floor(
-                parseFloat(price.displayAmount) * 100
-              ).toFixed(2),
+              unit_amount_decimal: Math.floor(Number.parseFloat(price.displayAmount) * 100).toFixed(
+                2
+              ),
               billing_scheme: "per_unit",
               metadata: {
                 planVersionFeatureId: id,
@@ -253,9 +243,9 @@ export class StripePaymentProvider {
                 interval_count: 1,
               },
 
-              unit_amount_decimal: Math.floor(
-                parseFloat(price.displayAmount) * 100
-              ).toFixed(2),
+              unit_amount_decimal: Math.floor(Number.parseFloat(price.displayAmount) * 100).toFixed(
+                2
+              ),
               billing_scheme: "per_unit",
               metadata: {
                 planVersionFeatureId: id,

@@ -10,8 +10,7 @@ import type { WorkspacesJWTPayload } from "@builderai/db/validators"
 const useSecureCookies = process.env.VERCEL_ENV === "production"
 
 export const authConfig = {
-  trustHost:
-    Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
+  trustHost: Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
   session: {
     strategy: "jwt",
     updateAge: 24 * 60 * 60, // 24 hours for update session
@@ -169,10 +168,9 @@ export const authConfig = {
           return token
         }
 
-        const userWithWorkspaces =
-          await prepared.workspacesByUserPrepared.execute({
-            userId,
-          })
+        const userWithWorkspaces = await prepared.workspacesByUserPrepared.execute({
+          userId,
+        })
 
         const workspaces = userWithWorkspaces?.members.map((member) => ({
           id: member.workspace.id,

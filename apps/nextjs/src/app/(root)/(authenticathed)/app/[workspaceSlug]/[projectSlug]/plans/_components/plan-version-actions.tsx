@@ -1,8 +1,8 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import type { ElementRef } from "react"
 import { forwardRef, startTransition } from "react"
-import { useRouter } from "next/navigation"
 
 import { Button } from "@builderai/ui/button"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
@@ -12,16 +12,12 @@ import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 import { usePlanFeaturesList } from "./use-features"
 
-const PlanVersionPublish: React.FC<{ planVersionId: string }> = ({
-  planVersionId,
-}) => {
+const PlanVersionPublish: React.FC<{ planVersionId: string }> = ({ planVersionId }) => {
   const router = useRouter()
   const [planFeatures] = usePlanFeaturesList()
 
   // is valid when all features have config
-  const isValidConfig = Object.values(planFeatures).every(
-    (f) => f.id !== undefined
-  )
+  const isValidConfig = Object.values(planFeatures).every((f) => f.id !== undefined)
 
   const publishVersion = api.planVersions.publish.useMutation({
     onSuccess: () => {
@@ -33,10 +29,7 @@ const PlanVersionPublish: React.FC<{ planVersionId: string }> = ({
   function onPublishVersion() {
     startTransition(() => {
       if (!isValidConfig) {
-        toastAction(
-          "error",
-          "There are some features without configuration. try again"
-        )
+        toastAction("error", "There are some features without configuration. try again")
         return
       }
 
@@ -62,55 +55,53 @@ const PlanVersionPublish: React.FC<{ planVersionId: string }> = ({
   )
 }
 
-export interface PlanVersionDuplicateProps
-  extends React.ComponentPropsWithoutRef<"button"> {
+export interface PlanVersionDuplicateProps extends React.ComponentPropsWithoutRef<"button"> {
   planVersionId: string
   classNames?: string
 }
 
-const PlanVersionDuplicate = forwardRef<
-  ElementRef<"button">,
-  PlanVersionDuplicateProps
->((props, ref) => {
-  const { planVersionId, classNames } = props
+const PlanVersionDuplicate = forwardRef<ElementRef<"button">, PlanVersionDuplicateProps>(
+  (props, ref) => {
+    const { planVersionId, classNames } = props
 
-  const router = useRouter()
+    const router = useRouter()
 
-  const duplicateVersion = api.planVersions.duplicate.useMutation({
-    onSuccess: () => {
-      toastAction("saved")
-      router.refresh()
-    },
-  })
-
-  function onDuplicateVersion() {
-    startTransition(() => {
-      void duplicateVersion.mutateAsync({
-        id: planVersionId,
-      })
+    const duplicateVersion = api.planVersions.duplicate.useMutation({
+      onSuccess: () => {
+        toastAction("saved")
+        router.refresh()
+      },
     })
-  }
 
-  return (
-    <ConfirmAction
-      message="Once you publish this version, it will be available to your customers. You won't be able to edit it anymore. Are you sure you want to publish this version?"
-      confirmAction={() => {
-        onDuplicateVersion()
-      }}
-    >
-      {/* // TODO: create a confetti animation or something in the first version published? */}
-      <Button
-        ref={ref}
-        className={classNames}
-        variant={"custom"}
-        disabled={duplicateVersion.isPending}
+    function onDuplicateVersion() {
+      startTransition(() => {
+        void duplicateVersion.mutateAsync({
+          id: planVersionId,
+        })
+      })
+    }
+
+    return (
+      <ConfirmAction
+        message="Once you publish this version, it will be available to your customers. You won't be able to edit it anymore. Are you sure you want to publish this version?"
+        confirmAction={() => {
+          onDuplicateVersion()
+        }}
       >
-        Duplicate version
-        {duplicateVersion.isPending && <LoadingAnimation className={"ml-2"} />}
-      </Button>
-    </ConfirmAction>
-  )
-})
+        {/* // TODO: create a confetti animation or something in the first version published? */}
+        <Button
+          ref={ref}
+          className={classNames}
+          variant={"custom"}
+          disabled={duplicateVersion.isPending}
+        >
+          Duplicate version
+          {duplicateVersion.isPending && <LoadingAnimation className={"ml-2"} />}
+        </Button>
+      </ConfirmAction>
+    )
+  }
+)
 
 PlanVersionDuplicate.displayName = "PlanVersionDuplicate"
 

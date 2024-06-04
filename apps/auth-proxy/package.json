@@ -4,31 +4,18 @@
   "type": "module",
   "scripts": {
     "build": "nitro build",
-    "clean": "rm -rf .turbo node_modules",
+    "clean": "rm -rf .turbo node_modules .nitro .output",
     "dev": "nitro dev --port 3100",
-    "lint": "eslint .",
-    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@auth/core": "^0.28.0"
   },
   "devDependencies": {
-    "@builderai/eslint-config": "^0.2.0",
-    "@builderai/prettier-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
     "@types/node": "20.11.24",
-    "eslint": "^8.57.0",
     "h3": "^1.11.1",
     "nitropack": "^2.9.1",
-    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@builderai/eslint-config/base"
-    ]
-  },
-  "prettier": "@builderai/prettier-config"
+  }
 }

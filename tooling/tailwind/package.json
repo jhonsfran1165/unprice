@@ -10,16 +10,12 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "src/*"
-      ]
+      "*": ["src/*"]
     }
   },
   "type": "module",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint .",
-    "format": "prettier --check \"**/*.{js,ts,json}\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -34,18 +30,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@builderai/eslint-config": "0.2.0",
-    "@builderai/prettier-config": "0.1.0",
     "@builderai/tsconfig": "0.1.0",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@builderai/eslint-config/base"
-    ]
-  },
-  "prettier": "@builderai/prettier-config"
+  }
 }

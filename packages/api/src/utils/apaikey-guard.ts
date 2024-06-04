@@ -41,8 +41,7 @@ export const apikeyGuard = async ({
   if (apiKeyData.project.enabled === false) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message:
-        "Project is disabled and all API requests will be rejected. Please contact support",
+      message: "Project is disabled and all API requests will be rejected. Please contact support",
     })
   }
 

@@ -2,13 +2,7 @@ import type { RouterOutputs } from "@builderai/api"
 import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import { Separator } from "@builderai/ui/separator"
 
 import { SubscriptionSheet } from "../../subscriptions/_components/subscription-sheet"
@@ -46,9 +40,7 @@ export default function CustomerHeader(props: {
                 })}
               >
                 <span className="bg-success-solid flex h-2 w-2 rounded-full" />
-                <span className="ml-1">
-                  {customer.active ? "active" : "inactive"}
-                </span>
+                <span className="ml-1">{customer.active ? "active" : "inactive"}</span>
               </Badge>
             </div>
           </CardFooter>

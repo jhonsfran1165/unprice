@@ -1,7 +1,7 @@
-import { useEffect } from "react"
+import { LazyMotion, domAnimation, m } from "framer-motion"
 import dynamic from "next/dynamic"
 import { useRouter, useSearchParams } from "next/navigation"
-import { domAnimation, LazyMotion, m } from "framer-motion"
+import { useEffect } from "react"
 import { Balancer } from "react-wrap-balancer"
 
 const CreateApiKeyForm = dynamic(
@@ -17,7 +17,7 @@ export default function CreateApiKey() {
 
   useEffect(() => {
     if (!projectSlug) {
-      router.push(`/onboarding`)
+      router.push("/onboarding")
     }
   }, [projectSlug, router])
 
@@ -51,9 +51,7 @@ export default function CreateApiKey() {
               },
             }}
           >
-            <Balancer>
-              {`Next, let's create an API key for your project`}
-            </Balancer>
+            <Balancer>{`Next, let's create an API key for your project`}</Balancer>
           </m.h1>
           <m.div
             variants={{

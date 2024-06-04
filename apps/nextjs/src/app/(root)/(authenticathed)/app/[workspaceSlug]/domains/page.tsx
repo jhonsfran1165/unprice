@@ -1,5 +1,5 @@
-import { Suspense } from "react"
 import { ExternalLink, Globe } from "lucide-react"
+import { Suspense } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { Badge } from "@builderai/ui/badge"
@@ -60,17 +60,12 @@ const DomainCard = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex flex-row items-center">
-            <CardTitle className="text-2xl font-semibold">
-              {domain.name}
-            </CardTitle>
+            <CardTitle className="text-2xl font-semibold">{domain.name}</CardTitle>
 
             <a href={`https://${domain.name}`} target="_blank" rel="noreferrer">
               <ExternalLink className="ml-2 h-5 w-5" />
             </a>
-            <Badge
-              className="ml-2"
-              variant={domainVerified ? "outline" : "secondary"}
-            >
+            <Badge className="ml-2" variant={domainVerified ? "outline" : "secondary"}>
               {domainVerified ? "verified" : "pending verification"}
             </Badge>
           </div>
@@ -84,9 +79,7 @@ const DomainCard = ({
 
       <CardContent className="border-t py-4">
         <Suspense fallback={<DomainConfiguration.Skeleton />}>
-          <DomainConfiguration
-            domainPromise={api.domains.verify({ domain: domain.name })}
-          />
+          <DomainConfiguration domainPromise={api.domains.verify({ domain: domain.name })} />
         </Suspense>
       </CardContent>
     </Card>

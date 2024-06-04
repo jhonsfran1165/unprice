@@ -24,7 +24,7 @@ export default function DomainPageLoading() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="bg-background-bg p-4"></div>
+        <div className="bg-background-bg p-4" />
       </CardContent>
       <CardFooter>dasdasdsad</CardFooter>
     </Card>

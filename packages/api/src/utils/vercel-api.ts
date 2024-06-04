@@ -1,9 +1,6 @@
 import { z } from "zod"
 
-import {
-  domainConfigResponseSchema,
-  domainResponseSchema,
-} from "@builderai/db/validators"
+import { domainConfigResponseSchema, domainResponseSchema } from "@builderai/db/validators"
 
 import { env } from "../env.mjs"
 

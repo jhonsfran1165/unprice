@@ -61,11 +61,7 @@ export const transferToWorkspaceSchema = z.object({
 export type ProjectInsert = z.infer<typeof createProjectSchema>
 export type Project = z.infer<typeof projectSelectBaseSchema>
 export type RenameProject = z.infer<typeof renameProjectSchema>
-export type ProjectTransferToWorkspace = z.infer<
-  typeof transferToWorkspaceSchema
->
-export type ProjectTransferToPersonal = z.infer<
-  typeof transferToPersonalProjectSchema
->
+export type ProjectTransferToWorkspace = z.infer<typeof transferToWorkspaceSchema>
+export type ProjectTransferToPersonal = z.infer<typeof transferToPersonalProjectSchema>
 
 export type ProjectExtended = z.infer<typeof projectExtendedSelectSchema>

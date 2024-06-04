@@ -99,18 +99,17 @@ export const planVersionFeatureRouter = createTRPCRouter({
         })
       }
 
-      const planVersionFeatureData =
-        await opts.ctx.db.query.planVersionFeatures.findFirst({
-          with: {
-            planVersion: true,
-            feature: true,
-          },
-          where: (planVersionFeature, { and, eq }) =>
-            and(
-              eq(planVersionFeature.id, planVersionFeatureCreated.id),
-              eq(planVersionFeature.projectId, project.id)
-            ),
-        })
+      const planVersionFeatureData = await opts.ctx.db.query.planVersionFeatures.findFirst({
+        with: {
+          planVersion: true,
+          feature: true,
+        },
+        where: (planVersionFeature, { and, eq }) =>
+          and(
+            eq(planVersionFeature.id, planVersionFeatureCreated.id),
+            eq(planVersionFeature.projectId, project.id)
+          ),
+      })
 
       if (!planVersionFeatureData?.id) {
         throw new TRPCError({
@@ -137,17 +136,13 @@ export const planVersionFeatureRouter = createTRPCRouter({
       const { id } = opts.input
       const project = opts.ctx.project
 
-      const planVersionFeatureData =
-        await opts.ctx.db.query.planVersionFeatures.findFirst({
-          with: {
-            planVersion: true,
-          },
-          where: (featureVersion, { and, eq }) =>
-            and(
-              eq(featureVersion.id, id),
-              eq(featureVersion.projectId, project.id)
-            ),
-        })
+      const planVersionFeatureData = await opts.ctx.db.query.planVersionFeatures.findFirst({
+        with: {
+          planVersion: true,
+        },
+        where: (featureVersion, { and, eq }) =>
+          and(eq(featureVersion.id, id), eq(featureVersion.projectId, project.id)),
+      })
 
       if (!planVersionFeatureData?.id) {
         throw new TRPCError({
@@ -186,11 +181,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
       }
     }),
   update: protectedActiveProjectAdminProcedure
-    .input(
-      planVersionFeatureSelectBaseSchema
-        .partial()
-        .required({ id: true, planVersionId: true })
-    )
+    .input(planVersionFeatureSelectBaseSchema.partial().required({ id: true, planVersionId: true }))
     .output(
       z.object({
         planVersionFeature: planVersionFeatureDragDropSchema,
@@ -266,18 +257,17 @@ export const planVersionFeatureRouter = createTRPCRouter({
         })
       }
 
-      const planVersionFeatureData =
-        await opts.ctx.db.query.planVersionFeatures.findFirst({
-          with: {
-            planVersion: true,
-            feature: true,
-          },
-          where: (planVersionFeature, { and, eq }) =>
-            and(
-              eq(planVersionFeature.id, planVersionFeatureUpdated.id),
-              eq(planVersionFeature.projectId, project.id)
-            ),
-        })
+      const planVersionFeatureData = await opts.ctx.db.query.planVersionFeatures.findFirst({
+        with: {
+          planVersion: true,
+          feature: true,
+        },
+        where: (planVersionFeature, { and, eq }) =>
+          and(
+            eq(planVersionFeature.id, planVersionFeatureUpdated.id),
+            eq(planVersionFeature.projectId, project.id)
+          ),
+      })
 
       if (!planVersionFeatureData?.id) {
         throw new TRPCError({
@@ -309,15 +299,14 @@ export const planVersionFeatureRouter = createTRPCRouter({
       const { id } = opts.input
       const project = opts.ctx.project
 
-      const planVersionFeatureData =
-        await opts.ctx.db.query.planVersionFeatures.findFirst({
-          with: {
-            planVersion: true,
-            feature: true,
-          },
-          where: (planVersion, { and, eq }) =>
-            and(eq(planVersion.id, id), eq(planVersion.projectId, project.id)),
-        })
+      const planVersionFeatureData = await opts.ctx.db.query.planVersionFeatures.findFirst({
+        with: {
+          planVersion: true,
+          feature: true,
+        },
+        where: (planVersion, { and, eq }) =>
+          and(eq(planVersion.id, id), eq(planVersion.projectId, project.id)),
+      })
 
       if (!planVersionFeatureData) {
         throw new TRPCError({
@@ -358,22 +347,21 @@ export const planVersionFeatureRouter = createTRPCRouter({
         })
       }
 
-      const planVersionFeatureData =
-        await opts.ctx.db.query.planVersionFeatures.findMany({
-          with: {
-            planVersion: {
-              columns: {
-                id: true,
-              },
+      const planVersionFeatureData = await opts.ctx.db.query.planVersionFeatures.findMany({
+        with: {
+          planVersion: {
+            columns: {
+              id: true,
             },
-            feature: true,
           },
-          where: (planVersionFeature, { and, eq }) =>
-            and(
-              eq(planVersionFeature.planVersionId, planVersionId),
-              eq(planVersionFeature.projectId, project.id)
-            ),
-        })
+          feature: true,
+        },
+        where: (planVersionFeature, { and, eq }) =>
+          and(
+            eq(planVersionFeature.planVersionId, planVersionId),
+            eq(planVersionFeature.projectId, project.id)
+          ),
+      })
 
       if (!planVersionFeatureData) {
         throw new TRPCError({

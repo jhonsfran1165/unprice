@@ -1,9 +1,9 @@
 "use client"
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
 import type { Row } from "@tanstack/react-table"
 import { MoreHorizontal } from "lucide-react"
+import { useRouter } from "next/navigation"
+import * as React from "react"
 
 import * as utils from "@builderai/db/utils"
 import type { WorkspaceRole } from "@builderai/db/validators"
@@ -35,13 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@builderai/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
@@ -50,14 +44,10 @@ interface DataTableRowActionsProps<TData> {
   row: Row<TData>
 }
 
-export function DataTableRowActions<TData>({
-  row,
-}: DataTableRowActionsProps<TData>) {
+export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
   const member = listMembersSchema.parse(row.original)
   const [open, setIsOpen] = React.useState(false)
-  const [selectedRole, setSelectedRole] = React.useState<WorkspaceRole>(
-    member.role
-  )
+  const [selectedRole, setSelectedRole] = React.useState<WorkspaceRole>(member.role)
   const [alertOpen, setAlertOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
 
@@ -108,10 +98,7 @@ export function DataTableRowActions<TData>({
     <AlertDialog open={alertOpen} onOpenChange={(value) => setAlertOpen(value)}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-accent h-8 w-8 p-0"
-          >
+          <Button variant="ghost" className="data-[state=open]:bg-accent h-8 w-8 p-0">
             <span className="sr-only">Open menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
@@ -125,10 +112,7 @@ export function DataTableRowActions<TData>({
           >
             Change role
           </DropdownMenuItem>
-          <AlertDialogTrigger
-            asChild
-            disabled={!["OWNER", "ADMIN"].includes(member.role)}
-          >
+          <AlertDialogTrigger asChild disabled={!["OWNER", "ADMIN"].includes(member.role)}>
             <DropdownMenuItem className="text-destructive focus:bg-destructive focus:text-background">
               Delete member from workspace
             </DropdownMenuItem>
@@ -140,9 +124,9 @@ export function DataTableRowActions<TData>({
           <DialogHeader>
             <DialogTitle>Change role</DialogTitle>
             <DialogDescription>
-              The content filter flags text that may violate our content policy.
-              It&apos;s powered by our moderation endpoint which is free to use
-              to moderate your OpenAI API traffic. Learn more.
+              The content filter flags text that may violate our content policy. It&apos;s powered
+              by our moderation endpoint which is free to use to moderate your OpenAI API traffic.
+              Learn more.
             </DialogDescription>
           </DialogHeader>
           <Select
@@ -187,8 +171,7 @@ export function DataTableRowActions<TData>({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will remove the user from your
-            team.
+            This action cannot be undone. This will remove the user from your team.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

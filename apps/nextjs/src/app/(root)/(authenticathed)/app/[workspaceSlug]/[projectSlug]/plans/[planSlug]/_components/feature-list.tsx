@@ -1,7 +1,7 @@
 "use client"
 
-import { use, useState } from "react"
 import { FileStack, Search } from "lucide-react"
+import { use, useState } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
@@ -25,10 +25,7 @@ interface FeatureListProps {
   planVersion: RouterOutputs["planVersions"]["getById"]["planVersion"]
 }
 
-export function FeatureList({
-  featuresPromise,
-  planVersion,
-}: FeatureListProps) {
+export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) {
   const initialFeatures = use(featuresPromise)
   const [filter, setFilter] = useState("")
   const filterDebounce = useDebounce(filter, 500)
@@ -50,13 +47,9 @@ export function FeatureList({
     }
   )
 
-  const planFeatureIds = planVersionFeatureList.map(
-    (feature) => feature.feature.id
-  )
+  const planFeatureIds = planVersionFeatureList.map((feature) => feature.feature.id)
 
-  const searchableFeatures = data.features.filter(
-    (feature) => !planFeatureIds.includes(feature.id)
-  )
+  const searchableFeatures = data.features.filter((feature) => !planFeatureIds.includes(feature.id))
 
   return (
     <>
@@ -77,7 +70,7 @@ export function FeatureList({
         <div className="flex h-[730px] flex-col gap-2 px-4 pt-0">
           {isFetching && (
             <div className="flex h-full items-center justify-center">
-              <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2 border-t-2"></div>
+              <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2 border-t-2" />
             </div>
           )}
           {!isFetching && searchableFeatures.length === 0 ? (
@@ -86,9 +79,7 @@ export function FeatureList({
                 <FileStack className="h-8 w-8" />
               </EmptyPlaceholder.Icon>
               <EmptyPlaceholder.Title>No features found</EmptyPlaceholder.Title>
-              <EmptyPlaceholder.Description>
-                Create feature
-              </EmptyPlaceholder.Description>
+              <EmptyPlaceholder.Description>Create feature</EmptyPlaceholder.Description>
               <EmptyPlaceholder.Action>
                 <FeatureDialog
                   defaultValues={{
@@ -103,7 +94,7 @@ export function FeatureList({
             </EmptyPlaceholder>
           ) : (
             !isFetching &&
-            searchableFeatures.map((feature, index) => {
+            searchableFeatures.map((feature) => {
               // define planFeatureVersion defaults
               // this will be used to create a new featurePlan optimistically from the drag and drop
               const planFeatureVersion = {
@@ -131,11 +122,8 @@ export function FeatureList({
 
               return (
                 <SortableFeature
-                  disabled={
-                    planVersionFeatureOpen ||
-                    activePlanVersion?.status === "published"
-                  }
-                  key={index}
+                  disabled={planVersionFeatureOpen || activePlanVersion?.status === "published"}
+                  key={Math.random()}
                   mode={"Feature"}
                   planFeatureVersion={planFeatureVersion}
                   variant={"feature"}

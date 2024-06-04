@@ -4,10 +4,7 @@ import { z } from "zod"
 import { eq, sql } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
-import {
-  createApiKeySchema,
-  selectApiKeySchema,
-} from "@builderai/db/validators"
+import { createApiKeySchema, selectApiKeySchema } from "@builderai/db/validators"
 
 import {
   createTRPCRouter,
@@ -157,8 +154,7 @@ export const apiKeyRouter = createTRPCRouter({
       })
 
       const apiKey = await opts.ctx.db.query.apikeys.findFirst({
-        where: (apikey, { eq, and }) =>
-          and(eq(apikey.id, id), eq(apikey.projectId, project.id)),
+        where: (apikey, { eq, and }) => and(eq(apikey.id, id), eq(apikey.projectId, project.id)),
       })
 
       if (!apiKey) {

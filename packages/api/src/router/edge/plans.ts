@@ -82,27 +82,19 @@ export const planRouter = createTRPCRouter({
       const countVersionsPlan = await opts.ctx.db
         .select({ count: sql<number>`count(*)` })
         .from(schema.versions)
-        .where(
-          and(
-            eq(schema.versions.projectId, project.id),
-            eq(schema.versions.planId, id)
-          )
-        )
+        .where(and(eq(schema.versions.projectId, project.id), eq(schema.versions.planId, id)))
         .then((res) => res[0]?.count ?? 0)
 
       if (countVersionsPlan > 0) {
         throw new TRPCError({
           code: "CONFLICT",
-          message:
-            "You cannot delete a plan that has versions. Please deactivate it instead",
+          message: "You cannot delete a plan that has versions. Please deactivate it instead",
         })
       }
 
       const deletedPlan = await opts.ctx.db
         .delete(schema.plans)
-        .where(
-          and(eq(schema.plans.projectId, project.id), eq(schema.plans.id, id))
-        )
+        .where(and(eq(schema.plans.projectId, project.id), eq(schema.plans.id, id)))
         .returning()
         .then((data) => data[0])
 
@@ -136,8 +128,7 @@ export const planRouter = createTRPCRouter({
             },
           },
         },
-        where: (plan, { eq, and }) =>
-          and(eq(plan.id, id), eq(plan.projectId, project.id)),
+        where: (plan, { eq, and }) => and(eq(plan.id, id), eq(plan.projectId, project.id)),
       })
 
       if (!planData?.id) {
@@ -173,9 +164,7 @@ export const planRouter = createTRPCRouter({
           defaultPlan: defaultPlan ?? false,
           updatedAt: new Date(),
         })
-        .where(
-          and(eq(schema.plans.id, id), eq(schema.plans.projectId, project.id))
-        )
+        .where(and(eq(schema.plans.id, id), eq(schema.plans.projectId, project.id)))
         .returning()
         .then((re) => re[0])
 
@@ -237,8 +226,7 @@ export const planRouter = createTRPCRouter({
           },
           project: true,
         },
-        where: (plan, { eq, and }) =>
-          and(eq(plan.slug, slug), eq(plan.projectId, project.id)),
+        where: (plan, { eq, and }) => and(eq(plan.slug, slug), eq(plan.projectId, project.id)),
       })
 
       if (!plan) {
@@ -274,8 +262,7 @@ export const planRouter = createTRPCRouter({
           },
           project: true,
         },
-        where: (plan, { eq, and }) =>
-          and(eq(plan.id, id), eq(plan.projectId, project.id)),
+        where: (plan, { eq, and }) => and(eq(plan.id, id), eq(plan.projectId, project.id)),
       })
 
       if (!plan) {

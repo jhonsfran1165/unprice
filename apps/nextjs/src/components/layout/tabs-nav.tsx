@@ -24,9 +24,9 @@ export default function TabsNav(props: {
       <div className="flex h-full flex-col items-center justify-between">
         <ScrollArea className="flex">
           <div className="flex flex-col items-center gap-4 pt-4">
-            {props.tabs.map((route, index) => (
+            {props.tabs.map((route) => (
               <Tab
-                key={route.href + index}
+                key={route.href + Math.random()}
                 href={props.basePath + route.href}
                 route={route}
                 active={route.href === props.activeTab.href}

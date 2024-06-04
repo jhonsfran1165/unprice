@@ -4,10 +4,7 @@ import { z } from "zod"
 import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
-import {
-  featureInsertBaseSchema,
-  featureSelectBaseSchema,
-} from "@builderai/db/validators"
+import { featureInsertBaseSchema, featureSelectBaseSchema } from "@builderai/db/validators"
 
 import { createTRPCRouter, protectedActiveProjectProcedure } from "../../trpc"
 
@@ -54,12 +51,7 @@ export const featureRouter = createTRPCRouter({
 
       const deletedFeature = await opts.ctx.db
         .delete(schema.features)
-        .where(
-          and(
-            eq(schema.features.projectId, project.id),
-            eq(schema.features.id, id)
-          )
-        )
+        .where(and(eq(schema.features.projectId, project.id), eq(schema.features.id, id)))
         .returning()
         .then((data) => data[0])
 
@@ -76,11 +68,9 @@ export const featureRouter = createTRPCRouter({
     }),
   update: protectedActiveProjectProcedure
     .input(
-      featureSelectBaseSchema
-        .pick({ id: true, title: true, description: true })
-        .partial({
-          description: true,
-        })
+      featureSelectBaseSchema.pick({ id: true, title: true, description: true }).partial({
+        description: true,
+      })
     )
     .output(z.object({ feature: featureSelectBaseSchema }))
     .mutation(async (opts) => {
@@ -88,8 +78,7 @@ export const featureRouter = createTRPCRouter({
       const project = opts.ctx.project
 
       const featureData = await opts.ctx.db.query.features.findFirst({
-        where: (feature, { eq, and }) =>
-          and(eq(feature.id, id), eq(feature.projectId, project.id)),
+        where: (feature, { eq, and }) => and(eq(feature.id, id), eq(feature.projectId, project.id)),
       })
 
       if (!featureData?.id) {
@@ -106,12 +95,7 @@ export const featureRouter = createTRPCRouter({
           description: description ?? "",
           updatedAt: new Date(),
         })
-        .where(
-          and(
-            eq(schema.features.id, id),
-            eq(schema.features.projectId, project.id)
-          )
-        )
+        .where(and(eq(schema.features.id, id), eq(schema.features.projectId, project.id)))
         .returning()
         .then((data) => data[0])
 
@@ -183,8 +167,7 @@ export const featureRouter = createTRPCRouter({
             },
           },
         },
-        where: (feature, { eq, and }) =>
-          and(eq(feature.projectId, project.id), eq(feature.id, id)),
+        where: (feature, { eq, and }) => and(eq(feature.projectId, project.id), eq(feature.id, id)),
       })
 
       return {
@@ -211,10 +194,7 @@ export const featureRouter = createTRPCRouter({
             eq(feature.projectId, project.id),
             or(ilike(feature.slug, filter), ilike(feature.title, filter))
           ),
-        orderBy: (feature, { desc }) => [
-          desc(feature.updatedAt),
-          desc(feature.title),
-        ],
+        orderBy: (feature, { desc }) => [desc(feature.updatedAt), desc(feature.title)],
       })
 
       return {

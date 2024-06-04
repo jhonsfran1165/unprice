@@ -1,12 +1,8 @@
 "use client"
 
-import React from "react"
+import type React from "react"
 
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@builderai/ui/resizable"
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@builderai/ui/resizable"
 
 interface ResizablePanelConfigProps {
   defaultLayout: number[] | undefined
@@ -23,18 +19,11 @@ export function ResizablePanelConfig({
     <ResizablePanelGroup
       direction="horizontal"
       onLayout={(sizes: number[]) => {
-        document.cookie = `react-resizable-panels:layout=${JSON.stringify(
-          sizes
-        )}`
+        document.cookie = `react-resizable-panels:layout=${JSON.stringify(sizes)}`
       }}
       className="h-full max-h-[900px] items-stretch"
     >
-      <ResizablePanel
-        defaultSize={defaultLayout[0]}
-        collapsible={false}
-        minSize={30}
-        maxSize={50}
-      >
+      <ResizablePanel defaultSize={defaultLayout[0]} collapsible={false} minSize={30} maxSize={50}>
         {featureList}
       </ResizablePanel>
       <ResizableHandle withHandle />

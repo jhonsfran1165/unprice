@@ -12,10 +12,7 @@ import {
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
-import type {
-  PlanVersionMetadata,
-  StartCycleType,
-} from "../validators/planVersions"
+import type { PlanVersionMetadata, StartCycleType } from "../validators/planVersions"
 import { users } from "./auth"
 import {
   currencyEnum,
@@ -25,8 +22,8 @@ import {
   statusPlanEnum,
   whenToBillEnum,
 } from "./enums"
-import { plans } from "./plans"
 import { planVersionFeatures } from "./planVersionFeatures"
+import { plans } from "./plans"
 import { projects } from "./projects"
 
 // plan_versions are the different versions of the plan

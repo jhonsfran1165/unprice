@@ -32,9 +32,7 @@ export function FeatureDialog({
         </DialogHeader>
 
         <FeatureForm
-          defaultValues={
-            defaultValues ?? { title: "", slug: "", description: "" }
-          }
+          defaultValues={defaultValues ?? { title: "", slug: "", description: "" }}
           setDialogOpen={setDialogOpen}
         />
       </DialogContent>

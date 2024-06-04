@@ -11,10 +11,7 @@ const submodulesProject = [
   "ingestions",
 ] as const
 
-export const PROJECT_TABS_CONFIG: Record<
-  (typeof submodulesProject)[number],
-  DashboardRoute
-> = {
+export const PROJECT_TABS_CONFIG: Record<(typeof submodulesProject)[number], DashboardRoute> = {
   overview: {
     titleTab: "Dashboard",
     icon: "Dashboard",

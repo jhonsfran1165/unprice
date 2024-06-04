@@ -24,24 +24,15 @@ export default function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => setTheme("light")}
-          className="button-ghost"
-        >
+        <DropdownMenuItem onClick={() => setTheme("light")} className="button-ghost">
           <Sun className="mr-2 h-4 w-4" />
           <span>Light</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setTheme("dark")}
-          className="button-ghost"
-        >
+        <DropdownMenuItem onClick={() => setTheme("dark")} className="button-ghost">
           <Moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setTheme("system")}
-          className="button-ghost"
-        >
+        <DropdownMenuItem onClick={() => setTheme("system")} className="button-ghost">
           <System className="mr-2 h-4 w-4" />
           <span>System</span>
         </DropdownMenuItem>

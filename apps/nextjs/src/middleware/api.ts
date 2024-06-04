@@ -18,9 +18,7 @@ export default function ApiMiddleware(req: NextAuthRequest) {
     if (!url) {
       return NextResponse.rewrite(new URL("/metatags", req.url))
     }
-    return NextResponse.rewrite(
-      new URL(`/api/edge/metatags?url=${url}`, req.url)
-    )
+    return NextResponse.rewrite(new URL(`/api/edge/metatags?url=${url}`, req.url))
   }
 
   // Note: we don't have to account for paths starting with `/api`

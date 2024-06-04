@@ -8,7 +8,5 @@ export const runtime = "edge"
 export default function ProjectPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
 }) {
-  redirect(
-    `/${props.params.workspaceSlug}/${props.params.projectSlug}/overview`
-  )
+  redirect(`/${props.params.workspaceSlug}/${props.params.projectSlug}/overview`)
 }
