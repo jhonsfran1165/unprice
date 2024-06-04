@@ -17,7 +17,8 @@
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip",
     "fmt": "pnpm biome format . --write && pnpm biome check . --apply",
-    "fmt:check": "pnpm biome format . && pnpm biome check ."
+    "fmt:check": "pnpm biome format . && pnpm biome check .",
+    "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:check"
   },
   "dependencies": {
     "@biomejs/biome": "1.7.3",

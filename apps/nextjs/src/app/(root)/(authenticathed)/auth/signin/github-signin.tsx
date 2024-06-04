@@ -10,7 +10,6 @@ export function SignInGithub() {
     <form>
       <div className="flex flex-col gap-2">
         <Button
-          className="bg-background"
           formAction={async () => {
             "use server"
             await signIn("github", {
