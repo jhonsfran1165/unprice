@@ -2,7 +2,7 @@ import { defineConfig } from "drizzle-kit"
 
 export default defineConfig({
   schema: "./src/schema.ts",
-  out: "./src/neon",
+  out: "./src/migrations/neon",
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL_MIGRATOR!,
