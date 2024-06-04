@@ -64,8 +64,6 @@ export function DomainForm({
           }
         })
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedDomain])
 
   const createDomain = api.domains.create.useMutation({

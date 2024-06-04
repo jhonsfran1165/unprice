@@ -38,7 +38,7 @@ export default function DomainConfiguration({
 
   const txtVerification =
     (status === "Pending Verification" &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       domainJson?.verification?.find((x: any) => x.type === "TXT")) ??
     null
 

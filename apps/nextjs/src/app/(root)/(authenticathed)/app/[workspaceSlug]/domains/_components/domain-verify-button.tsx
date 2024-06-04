@@ -23,7 +23,6 @@ export const VerifyDomainButton = ({ domain }: { domain: string }) => {
       // update server-side cache
       router.refresh()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.status])
 
   if (isLoading || isRefetching) {

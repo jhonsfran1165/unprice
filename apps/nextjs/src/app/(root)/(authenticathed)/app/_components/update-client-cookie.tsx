@@ -36,7 +36,6 @@ export function UpdateClientCookie() {
     return () => {
       window.removeEventListener("focus", onFocus)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectSlugParam, workspaceSlugParam])
 
   return null

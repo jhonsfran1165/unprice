@@ -23,7 +23,6 @@ const useLocalStorage = <T>(key: string, initialValue: T): [T, (value: T) => voi
     if (item) {
       setStoredValue(getItemSafe(item))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key])
 
   const setValue = (value: T) => {

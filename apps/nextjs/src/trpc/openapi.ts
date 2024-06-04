@@ -4,7 +4,7 @@ import type { OpenAPIV3 } from "openapi-types"
 import { appRouter } from "@builderai/api"
 
 export type IExtensionName = `x-${string}`
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type IExtensionType = any
 export type ISpecificationExtension = Record<IExtensionName, IExtensionType>
 export type ExtendedDocument = OpenAPIV3.Document & ISpecificationExtension

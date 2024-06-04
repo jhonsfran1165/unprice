@@ -32,7 +32,6 @@
     "@dinero.js/currencies": "2.0.0-alpha.14",
     "@potatohd/trpc-openapi": "^1.2.3",
     "@t3-oss/env-nextjs": "0.9.1",
-    "@tanstack/eslint-plugin-query": "5.35.6",
     "@tanstack/react-query": "5.40",
     "@tanstack/react-query-next-experimental": "5.40.0",
     "@trpc/client": "11.0.0-rc.382",

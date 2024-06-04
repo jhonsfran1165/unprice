@@ -125,7 +125,6 @@ export function FeatureConfigForm({
   // reset form values when feature changes
   useEffect(() => {
     form.reset(controlledDefaultValues)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues.id])
 
   // subscribe to type changes for conditional rendering in the forms

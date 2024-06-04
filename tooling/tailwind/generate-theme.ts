@@ -85,7 +85,8 @@ const generateVariantRadixColors = (color: string) => {
     textContrast: `var(--${color}-12)`,
   }
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 interface RecursiveKeyValuePair<K extends keyof any = string, V = string> {
   [key: string]: V | RecursiveKeyValuePair<K, V>
 }

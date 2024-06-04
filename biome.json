@@ -42,7 +42,7 @@
         "noDelete": "off"
       },
       "suspicious": {
-        "noExplicitAny": "off",
+        "noExplicitAny": "error",
         "noConsoleLog": "warn"
       },
       "complexity": {

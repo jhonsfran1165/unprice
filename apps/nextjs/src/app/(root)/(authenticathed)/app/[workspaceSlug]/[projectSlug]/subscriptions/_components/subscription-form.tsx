@@ -89,7 +89,6 @@ export function SubscriptionForm({
 
       items.replace(itemsConfig)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subscriptionPlanId])
 
   const { data: paymentProviders } = api.customers.listPaymentProviders.useQuery({
