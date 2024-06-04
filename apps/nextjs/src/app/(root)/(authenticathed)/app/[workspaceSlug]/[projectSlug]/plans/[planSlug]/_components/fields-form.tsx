@@ -20,7 +20,7 @@ import { Input } from "@builderai/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
-import { InputWithAddons } from "~/components/test"
+import { InputWithAddons } from "~/components/input-addons"
 import { currencySymbol } from "~/lib/currency"
 
 export function QuantityFormField({

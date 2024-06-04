@@ -10,7 +10,7 @@ export interface InputWithAddonsProps extends React.InputHTMLAttributes<HTMLInpu
 const InputWithAddons = React.forwardRef<HTMLInputElement, InputWithAddonsProps>(
   ({ leading, trailing, className, type, ...props }, ref) => {
     return (
-      <div className="border-input ring-offset-background focus-within:ring-ring group flex h-9 rounded-md border bg-transparent text-sm focus-within:outline-none focus-within:ring-1 focus-within:ring-offset-1">
+      <div className="border-input ring-offset-background focus-within:ring-ring group flex h-9 w-full rounded-md border bg-transparent text-sm focus-within:outline-none focus-within:ring-1 focus-within:ring-offset-1">
         {leading ? (
           <div className="border-input bg-background-bg rounded-e-none rounded-s-md border-r px-3 py-2">
             {leading}

@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"
-import { InputWithAddons } from "~/components/test"
+import { InputWithAddons } from "~/components/input-addons"
 import { toastAction } from "~/lib/toast"
 import { useDebounce } from "~/lib/use-debounce"
 import { useZodForm } from "~/lib/zod-form"
