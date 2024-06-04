@@ -10,7 +10,9 @@
   },
   "typesVersions": {
     "*": {
-      "*": ["src/*"]
+      "*": [
+        "src/*"
+      ]
     }
   },
   "type": "module",

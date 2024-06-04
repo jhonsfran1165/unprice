@@ -7,11 +7,17 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "AGPL-3.0",
-  "files": ["./dist/**"],
+  "files": [
+    "./dist/**"
+  ],
   "publishConfig": {
     "access": "public"
   },
-  "keywords": ["builderai", "client", "api"],
+  "keywords": [
+    "builderai",
+    "client",
+    "api"
+  ],
   "bugs": {
     "url": "https://github.com/jhonsfran1165/builderai/issues"
   },

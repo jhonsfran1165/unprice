@@ -4,7 +4,11 @@
   "engines": {
     "node": "20.11.1"
   },
-  "workspaces": ["packages/*", "apps/*", "tooling/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "tooling/*"
+  ],
   "engineStrict": true,
   "packageManager": "pnpm@8.15.4",
   "scripts": {
@@ -19,14 +23,12 @@
     "fmt": "pnpm biome format . --write && pnpm biome check . --apply"
   },
   "dependencies": {
+    "@biomejs/biome": "1.7.3",
     "@manypkg/cli": "^0.21.2",
     "@turbo/gen": "^1.12.4",
     "cross-env": "^7.0.3",
+    "knip": "^5.17.4",
     "turbo": "^1.12.4",
     "typescript": "^5.3.3"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.7.3",
-    "knip": "^5.17.4"
   }
 }
