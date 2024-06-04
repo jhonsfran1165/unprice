@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 
-import type { NextAuthRequest } from "@builderai/auth/server"
-
+import type { NextAuthRequest } from "@builderai/auth"
 import { API_AUTH_ROUTE_PREFIX } from "~/constants"
 import { parse } from "./utils"
 

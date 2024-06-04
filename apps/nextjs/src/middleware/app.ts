@@ -1,7 +1,7 @@
 import { RequestCookies, ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies"
 import { NextResponse } from "next/server"
 
-import type { NextAuthRequest } from "@builderai/auth/server"
+import type { NextAuthRequest } from "@builderai/auth"
 
 import {
   API_AUTH_ROUTE_PREFIX,

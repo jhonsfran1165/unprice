@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./server": "./src/server.ts",
+    "./server-rsc": "./src/server-rsc.ts",
     "./config": "./src/config.ts",
     "./react": "./src/react.ts",
     "./env": "./src/env.mjs"
@@ -25,7 +26,10 @@
     "@builderai/db": "^0.1.0",
     "@t3-oss/env-nextjs": "0.9.1",
     "encoding": "^0.1.13",
-    "next-auth": "5.0.0-beta.15",
+    "next": "14.2.3",
+    "next-auth": "5.0.0-beta.19",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {

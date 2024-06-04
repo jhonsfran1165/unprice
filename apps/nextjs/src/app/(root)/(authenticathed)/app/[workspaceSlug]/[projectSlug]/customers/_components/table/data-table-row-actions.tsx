@@ -55,7 +55,6 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const router = useRouter()
 
   const [open, setIsOpen] = React.useState(false)
-  const [selectedPlanVersionId, setSelectedPlanPlanVersionId] = React.useState<string>()
   const [alertOpen, setAlertOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
 
@@ -69,31 +68,9 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
     },
   })
 
-  const createPlanVersion = api.subscriptions.create.useMutation({
-    onSuccess: () => {
-      toastAction("saved")
-      setAlertOpen(false)
-      router.refresh()
-    },
-  })
-
   function onDelete() {
     startTransition(() => {
       void removeCustomer.mutateAsync({ id: customer.id })
-    })
-  }
-
-  function onChangePlan() {
-    startTransition(async () => {
-      if (!selectedPlanVersionId) {
-        toastAction("error", "Please select a plan")
-        return
-      }
-
-      await createPlanVersion.mutateAsync({
-        customerId: customer.id,
-        planVersionId: selectedPlanVersionId ?? "",
-      })
     })
   }
 
@@ -132,11 +109,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
               Learn more.
             </DialogDescription>
           </DialogHeader>
-          <Select
-            onValueChange={(data) => {
-              setSelectedPlanPlanVersionId(data)
-            }}
-          >
+          <Select>
             <SelectTrigger>
               <SelectValue placeholder="Select a verified email to display" />
             </SelectTrigger>
@@ -179,7 +152,6 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
             <Button
               onClick={(e) => {
                 e.preventDefault()
-                onChangePlan()
               }}
             >
               Save

@@ -1,7 +1,7 @@
 import type { Dinero, DineroSnapshot } from "dinero.js"
 import { dinero } from "dinero.js"
 import superjson from "superjson"
-import type { JSONValue } from "superjson/dist/types"
+import type { SuperJSONResult } from "superjson"
 
 superjson.registerCustom(
   {
@@ -15,7 +15,7 @@ superjson.registerCustom(
       }
     },
     serialize: (val) => {
-      return val.toJSON() as JSONValue
+      return val.toJSON() as SuperJSONResult["json"]
     },
     deserialize: (val) => {
       return dinero(val as DineroSnapshot<number>)

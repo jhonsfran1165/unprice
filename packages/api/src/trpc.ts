@@ -10,11 +10,13 @@ import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import { TRPCError, initTRPC } from "@trpc/server"
 import { ZodError } from "zod"
 
-import type { NextAuthRequest, Session } from "@builderai/auth/server"
+import type { Session } from "@builderai/auth/server"
+
 import { auth } from "@builderai/auth/server"
 import { db } from "@builderai/db"
 import { Analytics } from "@builderai/tinybird"
 
+import type { NextAuthRequest } from "@builderai/auth"
 import { env } from "./env.mjs"
 import { UnpriceCache } from "./pkg/cache"
 import { transformer } from "./transformer"
