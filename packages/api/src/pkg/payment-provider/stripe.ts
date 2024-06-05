@@ -22,6 +22,39 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     this.client = stripe
   }
 
+  public async getProduct(id: string) {
+    const product = await this.client.products.retrieve(id)
+
+    return Ok(product)
+  }
+
+  public async createProduct({
+    id,
+    name,
+    type,
+    description,
+  }: Stripe.ProductCreateParams): Promise<Result<Stripe.Product, FetchError>> {
+    try {
+      const product = await this.client.products.create({
+        id: id,
+        name: name,
+        type: type,
+        description: description,
+      })
+
+      return Ok(product)
+    } catch (error) {
+      const e = error as Error
+
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: true,
+        })
+      )
+    }
+  }
+
   public async createSession(opts: {
     customerId: string
     projectId: string

@@ -15,12 +15,14 @@ import {
   planVersionSelectBaseSchema,
   versionInsertBaseSchema,
 } from "@builderai/db/validators"
-
+import { StripePaymentProvider } from "../../pkg/payment-provider/stripe"
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
   protectedActiveProjectProcedure,
 } from "../../trpc"
+
+import { APP_NAME } from "@builderai/config"
 
 export const planVersionRouter = createTRPCRouter({
   create: protectedActiveProjectAdminProcedure
@@ -595,6 +597,12 @@ export const planVersionRouter = createTRPCRouter({
       const project = opts.ctx.project
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
         with: {
+          planFeatures: {
+            with: {
+              feature: true,
+            },
+          },
+          project: true,
           plan: {
             columns: {
               slug: true,
@@ -626,27 +634,75 @@ export const planVersionRouter = createTRPCRouter({
       //   planVersion: planVersionData,
       // })
 
-      const versionUpdated = await opts.ctx.db
-        .update(schema.versions)
-        .set({
-          status: "published",
-          updatedAt: new Date(),
-          publishedAt: new Date(),
-          publishedBy: opts.ctx.userId,
-        })
-        .where(and(eq(schema.versions.id, planVersionData.id)))
-        .returning()
-        .then((re) => re[0])
+      // we need to create each product on the payment provider
+      // execute on a transaction because we need to create the products
+      // and then update the plan version
+      const planVersionDataUpdated = await opts.ctx.db.transaction(async (tx) => {
+        try {
+          // depending on the provider we need to create the products
+          switch (planVersionData.paymentProvider) {
+            case "stripe": {
+              const stripePaymentProvider = new StripePaymentProvider({})
+              // create the products
+              await Promise.all(
+                planVersionData.planFeatures.map(async (planFeature) => {
+                  const productName = `${planVersionData.project.name} - ${planFeature.feature.slug} from ${APP_NAME}`
 
-      if (!versionUpdated) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error updating version",
-        })
-      }
+                  try {
+                    await stripePaymentProvider.createProduct({
+                      id: planFeature.featureId,
+                      name: productName,
+                      type: "service", // TODO: do we need to change this?
+                      description: planFeature.feature.description!,
+                    })
+                  } catch (error) {
+                    console.error(error)
+                  }
+                })
+              )
+
+              break
+            }
+            default:
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Payment provider not supported",
+              })
+          }
+
+          const versionUpdated = await opts.ctx.db
+            .update(schema.versions)
+            .set({
+              status: "published",
+              updatedAt: new Date(),
+              publishedAt: new Date(),
+              publishedBy: opts.ctx.userId,
+            })
+            .where(and(eq(schema.versions.id, planVersionData.id)))
+            .returning()
+            .then((re) => re[0])
+
+          if (!versionUpdated) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Error publishing version",
+            })
+          }
+
+          return versionUpdated
+        } catch (error) {
+          console.error(error)
+          tx.rollback()
+
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "error publishing version",
+          })
+        }
+      })
 
       return {
-        planVersion: versionUpdated,
+        planVersion: planVersionDataUpdated,
       }
     }),
   getById: protectedActiveProjectProcedure

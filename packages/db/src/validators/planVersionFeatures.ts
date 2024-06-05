@@ -69,8 +69,7 @@ export const dineroSchema = z
   })
 
 export const planVersionFeatureMetadataSchema = z.object({
-  externalId: z.string().optional(),
-  lastTimeSyncPaymentProvider: z.number().optional(),
+  stripeProductId: z.string().optional(),
 })
 
 export const tiersSchema = z.object({

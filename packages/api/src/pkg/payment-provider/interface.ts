@@ -1,4 +1,6 @@
 import type { FetchError, Result } from "@builderai/error"
+import type { Stripe } from "@builderai/stripe"
+import { S } from "@upstash/redis/zmscore-22fd48c7"
 
 export interface PaymentProviderCreateSession {
   success: boolean
@@ -15,6 +17,10 @@ export interface PaymentProviderInterface {
     successUrl: string
     cancelUrl: string
   }) => Promise<Result<PaymentProviderCreateSession, FetchError>>
+
+  getProduct: (id: string) => Promise<Result<Stripe.Response<Stripe.Product>, FetchError>>
+
+  createProduct: (opts: Stripe.ProductCreateParams) => Promise<Result<Stripe.Product, FetchError>>
 
   listPaymentMethods: (opts: { limit?: number }) => Promise<
     Result<

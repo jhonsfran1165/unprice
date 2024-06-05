@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
   // check if the customer exists in the database
   const customerData = await db.query.customers.findFirst({
     with: {
-      providers: {
+      paymentMethods: {
         where: (provider, { eq }) => eq(provider.paymentProvider, "stripe"),
       },
     },
@@ -58,36 +58,31 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Customer not found in database" }, { status: 404 })
   }
 
-  const paymentProviderData = customerData.providers.at(0)
+  const paymentProviderData = customerData.paymentMethods.at(0)
 
   if (!paymentProviderData) {
     // TODO: it would be a good idea to waitUntil here?
     const id = utils.newId("customer_provider")
     // if all checks pass, update the customer metadata with the stripe subscription id
     await db
-      .insert(schema.customerPaymentProviders)
+      .insert(schema.customerPaymentMethods)
       .values({
         id: id,
         customerId: customerData.id,
         projectId: customerData.projectId,
         paymentProvider: "stripe",
-        paymentProviderCustomerId: customer.id,
-        metadata: {
-          stripeSubscriptionId: (session.subscription as string) ?? "",
-          defaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
-        },
+        paymentMethodId: paymentMethods.data.at(0)?.id ?? "",
+        isDefault: true,
       })
       .execute()
   } else {
     await db
-      .update(schema.customerPaymentProviders)
+      .update(schema.customerPaymentMethods)
       .set({
-        metadata: {
-          ...paymentProviderData.metadata,
-          defaultPaymentMethodId: paymentMethods.data.at(0)?.id,
-        },
+        paymentMethodId: paymentMethods.data.at(0)?.id,
+        isDefault: true,
       })
-      .where(eq(schema.customerPaymentProviders.id, paymentProviderData.id))
+      .where(eq(schema.customerPaymentMethods.id, paymentProviderData.id))
   }
   // redirect the user to the success URL
   return NextResponse.redirect(successUrl)

@@ -21,7 +21,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@builderai/db": "workspace:^0.1.0",
+    "@builderai/db": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
     "@chronark/zod-bird": "^0.3.9",
     "typescript": "^5.3.3"

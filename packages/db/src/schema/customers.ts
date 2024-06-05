@@ -27,6 +27,9 @@ export const customers = pgTableProject(
     name: text("name").notNull(),
     description: text("description"),
     metadata: json("metadata").$type<z.infer<typeof customerMetadataSchema>>(),
+    stripeCustomerId: text("stripe_customer_id").unique("stripe_customer_id", {
+      nulls: "not distinct",
+    }),
     active: boolean("active").default(true),
     defaultCurrency: currencyEnum("default_currency").default("USD"),
     // beta features
@@ -43,14 +46,15 @@ export const customers = pgTableProject(
 
 // TODO: add provider method here
 // TODO: add type to see if it's card or bank account
-export const customerPaymentProviders = pgTableProject(
+export const customerPaymentMethods = pgTableProject(
   "customer_payment_providers",
   {
     ...projectID,
     ...timestamps,
     customerId: text("customer_id").notNull(),
     paymentProvider: paymentProviderEnum("payment_provider").notNull(),
-    paymentProviderCustomerId: text("payment_provider_customer_id").notNull().unique(),
+    isDefault: boolean("default").default(false),
+    paymentMethodId: text("payment_method_id").unique().notNull(),
     metadata: json("metadata").$type<z.infer<typeof customerProvidersMetadataSchema>>(),
   },
   (table) => ({
@@ -83,16 +87,16 @@ export const customersRelations = relations(customers, ({ one, many }) => ({
     references: [projects.id],
   }),
   subscriptions: many(subscriptions),
-  providers: many(customerPaymentProviders),
+  paymentMethods: many(customerPaymentMethods),
 }))
 
-export const customersProvidersRelations = relations(customerPaymentProviders, ({ one }) => ({
+export const customersMethodsRelations = relations(customerPaymentMethods, ({ one }) => ({
   project: one(projects, {
-    fields: [customerPaymentProviders.projectId],
+    fields: [customerPaymentMethods.projectId],
     references: [projects.id],
   }),
   customer: one(customers, {
-    fields: [customerPaymentProviders.customerId, customerPaymentProviders.projectId],
+    fields: [customerPaymentMethods.customerId, customerPaymentMethods.projectId],
     references: [customers.id, customers.projectId],
   }),
 }))

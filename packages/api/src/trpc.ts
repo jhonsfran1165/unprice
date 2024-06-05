@@ -73,9 +73,11 @@ export const createTRPCContext = async (opts: {
   req?: NextAuthRequest
 }) => {
   const session = opts.session ?? (await auth())
-  const _userId = session?.user?.id ?? "unknown"
+  const userId = session?.user?.id ?? "unknown"
   const apikey = opts.headers.get("x-builderai-api-key")
-  const _source = opts.headers.get("x-trpc-source") ?? "unknown"
+  const source = opts.headers.get("x-trpc-source") ?? "unknown"
+
+  console.info("Requesting user", userId, "from", source)
 
   // for client side we set the cookie on focus tab event
   // for server side we set a header from trpc invoker

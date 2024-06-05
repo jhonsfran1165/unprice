@@ -23,7 +23,7 @@
     "@builderai/auth": "^0.1.0",
     "@builderai/config": "^0.1.0",
     "@builderai/db": "^0.1.0",
-    "@builderai/error": "workspace:^",
+    "@builderai/error": "^0.1.0",
     "@builderai/stripe": "^0.1.0",
     "@builderai/ui": "^0.1.0",
     "@dinero.js/currencies": "2.0.0-alpha.14",
@@ -63,7 +63,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@builderai/tailwind-config": "workspace:^",
+    "@builderai/tailwind-config": "^0.1.0",
     "@builderai/tsconfig": "^0.1.0",
     "@tanstack/react-query-devtools": "^5.24.8",
     "@types/mdx": "^2.0.11",

@@ -235,7 +235,7 @@ export const customersRouter = createTRPCRouter({
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
         with: {
-          providers: true,
+          paymentMethods: true,
         },
         where: (customer, { and, eq }) =>
           and(eq(customer.id, customerId), eq(customer.projectId, project.id)),
@@ -248,12 +248,12 @@ export const customersRouter = createTRPCRouter({
         })
       }
 
-      const customerPaymentProviders = customerData.providers
+      const customerpaymentMethods = customerData.paymentMethods
 
       // we have to query the payment provider api to get up-to-date information
       const allDataProviders = await Promise.all(
-        customerPaymentProviders.map(async (provider) => {
-          switch (provider.paymentProvider) {
+        customerpaymentMethods.map(async (pm) => {
+          switch (pm.paymentProvider) {
             case "stripe": {
               const stripePaymentProvider = new StripePaymentProvider({
                 paymentCustomerId: provider.paymentProviderCustomerId,
