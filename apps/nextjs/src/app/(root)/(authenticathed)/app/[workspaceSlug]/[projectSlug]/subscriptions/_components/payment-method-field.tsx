@@ -14,29 +14,21 @@ import {
 } from "@builderai/ui/form"
 import { RadioGroup, RadioGroupItem } from "@builderai/ui/radio-group"
 
-type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
-
 type PaymentMethodProviderData =
-  RouterOutputs["customers"]["listPaymentProviders"]["providers"][number]
+  RouterOutputs["customers"]["listPaymentMethods"]["paymentMethods"][number]
 
 export default function PaymentMethodsFormField({
   form,
-  paymentProviders,
-  selectedPlanVersion,
+  paymentMethods,
 }: {
   form: UseFormReturn<InsertSubscription>
-  paymentProviders: PaymentMethodProviderData[]
-  selectedPlanVersion?: PlanVersionResponse
+  paymentMethods: PaymentMethodProviderData[]
 }) {
-  const paymentProviderData = paymentProviders.find((p) => {
-    return p.paymentProvider === selectedPlanVersion?.paymentProvider
-  })
-
   return (
     <div className="flex w-full flex-row gap-4">
       <FormField
         control={form.control}
-        name="metadata.defaultPaymentMethodId"
+        name="defaultPaymentMethodId"
         render={({ field }) => (
           <FormItem className="w-full space-y-1">
             <FormLabel>Payment information</FormLabel>
@@ -45,15 +37,12 @@ export default function PaymentMethodsFormField({
             </FormDescription>
             <FormMessage />
             <RadioGroup
-              onValueChange={(value) => {
-                field.onChange(value)
-                form.setValue("paymentProviderId", paymentProviderData?.id ?? "")
-              }}
-              defaultValue={field.value}
+              onValueChange={field.onChange}
+              defaultValue={field.value ?? ""}
               className="flex flex-col gap-4 pt-2"
             >
               {/* // TODO: add payment method link */}
-              {paymentProviderData?.paymentMethods.map((method) => (
+              {paymentMethods.map((method) => (
                 <FormItem key={method.id}>
                   <FormLabel className="[&:has([data-state=checked])>div]:border-background-borderHover">
                     <FormControl>

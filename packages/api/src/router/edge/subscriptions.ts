@@ -39,7 +39,7 @@ export const subscriptionRouter = createTRPCRouter({
         startDate,
         endDate,
         collectionMethod,
-        paymentProviderId,
+        defaultPaymentMethodId,
         metadata,
       } = opts.input
       const project = opts.ctx.project
@@ -175,7 +175,7 @@ export const subscriptionRouter = createTRPCRouter({
             collectionMethod: collectionMethod,
             status: "active",
             metadata: metadata,
-            paymentProviderId: paymentProviderId,
+            defaultPaymentMethodId: defaultPaymentMethodId,
           })
           .returning()
           .then((re) => re[0])

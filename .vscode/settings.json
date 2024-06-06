@@ -9,8 +9,9 @@
   "editor.formatOnSave": true,
   "typescript.tsdk": "node_modules/typescript/lib",
   "editor.codeActionsOnSave": {
-    "quickfix.biome": "explicit",
-    "source.organizeImports.biome": "explicit"
+    "source.fixAll": "explicit",
+    "quickfix.biome": true,
+    "source.organizeImports.biome": true
   },
   "cSpell.words": [
     "apikey",

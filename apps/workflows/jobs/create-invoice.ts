@@ -1,9 +1,3 @@
-import { Tinybird } from "@/lib/tinybird"
-import {
-  type FixedSubscription,
-  type TieredSubscription,
-  calculateTieredPrices,
-} from "@unkey/billing"
 import { z } from "zod"
 
 import { env } from "@/lib/env"
@@ -36,74 +30,99 @@ export const createInvoiceJob = client.defineJob({
       apiVersion: "2023-10-16",
       typescript: true,
     })
-    const tinybird = new Tinybird(env().TINYBIRD_TOKEN)
+    // const tinybird = new Tinybird(env().TINYBIRD_TOKEN)
 
-    const customer = await io.runTask(`get customer ${customerId}`, async () =>
-      db.query.customers.findFirst({
+    const subscription = await io.runTask(`get subscription ${subscriptionId}`, async () =>
+      db.query.subscriptions.findFirst({
         with: {
-          paymentMethods: true,
-          subscriptions: {
-            where: (sub, { eq }) => eq(sub.id, subscriptionId),
+          customer: true,
+          features: {
+            with: {
+              featurePlan: true,
+            },
+          },
+          planVersion: {
+            columns: {
+              paymentProvider: true,
+              currency: true,
+            },
           },
         },
-        where: (table, { and, eq, isNull }) => and(eq(table.id, customerId), isNull(table.active)),
+        where: (table, { and, eq }) =>
+          and(
+            eq(table.customerId, customerId),
+            eq(table.status, "active"),
+            eq(table.id, subscriptionId)
+          ),
       })
     )
 
-    if (!customer) {
-      throw new Error(`customer ${customerId} not found`)
+    if (!subscription) {
+      throw new Error(`subscription ${subscriptionId} not found`)
     }
 
-    if (!customer.stripeCustomerId) {
-      throw new Error(`customer ${customerId} has no stripe customer id`)
+    const provider = subscription.planVersion.paymentProvider
+    let customerPaymentProviderId = ""
+
+    switch (provider) {
+      case "stripe": {
+        customerPaymentProviderId = subscription.customer.stripeCustomerId ?? ""
+        break
+      }
+      case "lemonsqueezy": {
+        // TODO: change this to the correct customer id
+        customerPaymentProviderId = subscription.customer.stripeCustomerId ?? ""
+        break
+      }
+      default: {
+        throw new Error(`unknown payment provider ${provider}`)
+      }
     }
 
-    if (!customer.subscriptions?.at(0)) {
-      throw new Error(`customer ${customerId} has no subscription`)
-    }
-
-    const defaultPaymentMethodId =
-      customer.subscriptions.at(0)?.metadata?.defaultPaymentMethodId ??
-      customer.paymentMethods.at(0)?.paymentMethodId
-
-    if (!defaultPaymentMethodId) {
-      throw new Error(`customer ${customerId} has no default payment method`)
+    if (customerPaymentProviderId === "") {
+      throw new Error(`customer ${customerId} has no payment customer id`)
     }
 
     const paymentMethodId = await io.runTask(
       `get payment method for subscription ${subscriptionId}`,
       async () => {
         const paymentMethods = await stripe.paymentMethods.list({
-          customer: customer.stripeCustomerId!,
+          customer: customerPaymentProviderId,
           limit: 3,
         })
 
-        const defaultPaymentMethod = paymentMethods.data.filter(
-          (pm) => pm.id === defaultPaymentMethodId
-        )[0]
+        const defaultPaymentMethod = paymentMethods.data.find(
+          (pm) => pm.id === subscription.defaultPaymentMethodId
+        )
 
         if (!defaultPaymentMethod) {
-          throw new Error(`customer ${customerId} has no default payment method`)
+          return paymentMethods.data.at(0)?.id
         }
 
         return defaultPaymentMethod.id
       }
     )
 
-    const invoiceId = await io.runTask(`create invoice for ${customer.id}`, async () =>
+    if (!paymentMethodId) {
+      throw new Error(`customer ${customerId} has no payment method`)
+    }
+
+    // TODO: this should handle only stripe
+    const invoiceId = await io.runTask(`create invoice for ${customerId}`, async () =>
       stripe.invoices
         .create({
-          customer: customer.stripeCustomerId!,
+          customer: customerPaymentProviderId,
           default_payment_method: paymentMethodId,
-          auto_advance: false,
+          currency: subscription.planVersion.currency,
+          auto_advance: false, // configure depending on the plan
           custom_fields: [
             {
               name: "Customer",
-              value: customer.name,
+              value: subscription.customer.name,
             },
             {
               name: "Email",
-              value: customer.email,
+              value: subscription.customer.email,
             },
             {
               name: "Billing Period",
@@ -117,14 +136,19 @@ export const createInvoiceJob = client.defineJob({
         .then((invoice) => invoice.id)
     )
 
-    await createFixedCostInvoiceItem({
-      stripe,
-      invoiceId,
-      stripeCustomerId: customer.stripeCustomerId!,
-      io,
-      name: "Verifications",
-      sub: customer.subscriptions.at(0),
-    })
+    // create an invoice item for each feature
+    for (const feature of subscription.features) {
+      await createFixedCostInvoiceItem({
+        stripe,
+        invoiceId,
+        io,
+        stripeCustomerId: customerPaymentProviderId,
+        name: feature.featureSlug,
+        productId: feature.featurePlan.metadata?.stripeProductId ?? "",
+        amount: feature.featurePlan.config?.price?.displayAmount ?? "0",
+        currency: subscription.planVersion.currency,
+      })
+    }
 
     return {
       invoiceId,
@@ -138,15 +162,19 @@ async function createFixedCostInvoiceItem({
   io,
   stripeCustomerId,
   name,
-  sub,
+  productId,
   prorate,
+  amount,
+  currency,
 }: {
   stripe: Stripe
   invoiceId: string
   io: IO
   stripeCustomerId: string
   name: string
-  sub: FixedSubscription
+  productId: string
+  amount: string
+  currency: "USD" | "EUR"
   /**
    * number between 0 and 1 to indicate how much to charge
    * if they have had a fixed cost item for 15/30 days, this should be 0.5
@@ -159,14 +187,11 @@ async function createFixedCostInvoiceItem({
       invoice: invoiceId,
       quantity: 1,
       price_data: {
-        currency: "usd",
-        product: sub.productId,
-        unit_amount_decimal:
-          typeof prorate === "number"
-            ? (Number.parseInt(sub.cents) * prorate).toFixed(2)
-            : sub.cents,
+        currency: currency,
+        product: productId,
+        unit_amount_decimal: amount,
       },
-      currency: "usd",
+      currency: currency,
       description: typeof prorate === "number" ? `${name} (Prorated)` : name,
     })
   })

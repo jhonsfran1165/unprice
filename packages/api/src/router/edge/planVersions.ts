@@ -490,7 +490,7 @@ export const planVersionRouter = createTRPCRouter({
       const duplicatedVersion = await opts.ctx.db.transaction(async (tx) => {
         try {
           // set the latest version to false if there is a latest version
-          await tx
+          const latestVersion = await tx
             .update(schema.versions)
             .set({
               latest: false,
@@ -516,6 +516,7 @@ export const planVersionRouter = createTRPCRouter({
               status: "draft",
               createdAt: new Date(),
               updatedAt: new Date(),
+              version: latestVersion?.version ? latestVersion.version + 1 : 1,
             })
             .returning()
             .catch((err) => {
@@ -649,12 +650,57 @@ export const planVersionRouter = createTRPCRouter({
                   const productName = `${planVersionData.project.name} - ${planFeature.feature.slug} from ${APP_NAME}`
 
                   try {
-                    await stripePaymentProvider.createProduct({
+                    const { err, val } = await stripePaymentProvider.createProduct({
                       id: planFeature.featureId,
                       name: productName,
                       type: "service", // TODO: do we need to change this?
                       description: planFeature.feature.description!,
                     })
+
+                    if (err) {
+                      const product = await stripePaymentProvider.getProduct(planFeature.featureId)
+
+                      if (product.err) {
+                        throw new TRPCError({
+                          code: "INTERNAL_SERVER_ERROR",
+                          message: "Error syncs product with stripe",
+                        })
+                      }
+
+                      if (product.val) {
+                        // update the plan feature with the product id
+                        await tx
+                          .update(schema.planVersionFeatures)
+                          .set({
+                            metadata: {
+                              stripeProductId: product.val.id,
+                            },
+                          })
+                          .where(
+                            and(
+                              eq(schema.planVersionFeatures.id, planFeature.id),
+                              eq(schema.planVersionFeatures.projectId, planVersionData.project.id)
+                            )
+                          )
+                      }
+                    }
+
+                    if (val) {
+                      // update the plan feature with the product id
+                      await tx
+                        .update(schema.planVersionFeatures)
+                        .set({
+                          metadata: {
+                            stripeProductId: val.id,
+                          },
+                        })
+                        .where(
+                          and(
+                            eq(schema.planVersionFeatures.id, planFeature.id),
+                            eq(schema.planVersionFeatures.projectId, planVersionData.project.id)
+                          )
+                        )
+                    }
                   } catch (error) {
                     console.error(error)
                   }

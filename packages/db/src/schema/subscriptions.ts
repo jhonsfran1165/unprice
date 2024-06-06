@@ -14,7 +14,7 @@ import type { z } from "zod"
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
 import type { subscriptionMetadataSchema } from "../validators/subscription"
-import { customerPaymentProviders, customers } from "./customers"
+import { customers } from "./customers"
 import { collectionMethodEnum, subscriptionStatusEnum, typeSubscriptionEnum } from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
 import { versions } from "./planVersions"
@@ -34,7 +34,8 @@ export const subscriptions = pgTableProject(
     // customer to get the payment info from that customer
     customerId: cuid("customers_id").notNull(),
 
-    paymentProviderId: cuid("payment_provider_id").notNull(),
+    // payment method id of the customer - if not set, the first payment method will be used
+    defaultPaymentMethodId: text("default_payment_method_id"),
 
     // data from plan version when the subscription was created
     // payment provider configured for the plan. This should not changed after the subscription is created
@@ -88,11 +89,6 @@ export const subscriptions = pgTableProject(
       columns: [table.customerId, table.projectId],
       foreignColumns: [customers.id, customers.projectId],
       name: "subscriptions_customer_id_fkey",
-    }),
-    paymentmethodfk: foreignKey({
-      columns: [table.paymentProviderId, table.projectId],
-      foreignColumns: [customerPaymentProviders.id, customerPaymentProviders.projectId],
-      name: "subscriptions_payment_method_id_fkey",
     }),
     planversionfk: foreignKey({
       columns: [table.planVersionId, table.projectId],

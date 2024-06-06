@@ -2,40 +2,12 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import * as schema from "../schema"
-import { paymentProviderSchema } from "./shared"
-
-export const customerProvidersMetadataSchema = z.object({
-  externalId: z.string().optional(),
-})
 
 export const customerMetadataSchema = z.object({
   externalId: z.string().optional(),
   stripeSubscriptionId: z.string().optional(),
+  stripeDefaultPaymentMethodId: z.string().optional(),
 })
-
-export const customerPaymentProviderSelectSchema = createSelectSchema(
-  schema.customerPaymentProviders,
-  {
-    metadata: customerProvidersMetadataSchema,
-    paymentProvider: paymentProviderSchema,
-  }
-)
-
-export const customerPaymentProviderInsertSchema = createInsertSchema(
-  schema.customerPaymentProviders,
-  {
-    metadata: customerProvidersMetadataSchema,
-    paymentProvider: paymentProviderSchema,
-  }
-)
-  .omit({
-    createdAt: true,
-    updatedAt: true,
-  })
-  .partial({
-    id: true,
-    projectId: true,
-  })
 
 export const customerSelectSchema = createSelectSchema(schema.customers, {
   metadata: customerMetadataSchema,
@@ -57,6 +29,3 @@ export const customerInsertBaseSchema = createInsertSchema(schema.customers, {
 
 export type Customer = z.infer<typeof customerSelectSchema>
 export type InsertCustomer = z.infer<typeof customerInsertBaseSchema>
-
-export type CustomerPaymentProvider = z.infer<typeof customerPaymentProviderSelectSchema>
-export type InsertCustomerPaymentProvider = z.infer<typeof customerPaymentProviderInsertSchema>

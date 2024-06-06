@@ -57,6 +57,13 @@
       "when": 1717414968574,
       "tag": "0007_white_scream",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1717675135250,
+      "tag": "0008_chief_frog_thor",
+      "breakpoints": true
     }
   ]
 }

@@ -35,8 +35,8 @@ import { Separator } from "@builderai/ui/separator"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
 import { ConfirmAction } from "~/components/confirm-action"
-import { SubmitButton } from "~/components/submit-button"
 import { InputWithAddons } from "~/components/input-addons"
+import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -91,9 +91,15 @@ export function SubscriptionForm({
     }
   }, [subscriptionPlanId])
 
-  const { data: paymentProviders } = api.customers.listPaymentProviders.useQuery({
-    customerId: defaultValues.customerId,
-  })
+  const { data: paymentMethods } = api.customers.listPaymentMethods.useQuery(
+    {
+      customerId: defaultValues.customerId,
+      provider: selectedPlanVersion?.paymentProvider ?? "stripe",
+    },
+    {
+      enabled: !!selectedPlanVersion?.paymentProvider,
+    }
+  )
 
   const createSubscription = api.subscriptions.create.useMutation({
     onSuccess: ({ subscription }) => {
@@ -190,7 +196,7 @@ export function SubscriptionForm({
                         >
                           {field.value
                             ? data?.planVersions.find((version) => version.id === field.value)
-                              ?.title
+                                ?.title
                             : "Select plan"}
                           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -359,8 +365,7 @@ export function SubscriptionForm({
 
           <PaymentMethodsFormField
             form={form}
-            paymentProviders={paymentProviders?.providers ?? []}
-            selectedPlanVersion={selectedPlanVersion}
+            paymentMethods={paymentMethods?.paymentMethods ?? []}
           />
 
           <Separator />

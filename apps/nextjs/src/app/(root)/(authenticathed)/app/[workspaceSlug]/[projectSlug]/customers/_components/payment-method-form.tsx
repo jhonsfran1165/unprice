@@ -20,22 +20,22 @@ import { SubmitButton } from "~/components/submit-button"
 import { api } from "~/trpc/client"
 import { UserPaymentMethod } from "./payment-method"
 
-type PaymentMethodProviderData =
-  RouterOutputs["customers"]["listPaymentProviders"]["providers"][number]
-
 export function PaymentMethodForm({
   customer,
   successUrl,
   cancelUrl,
-  paymentProviders,
 }: {
   customer: Customer
   successUrl: string
   cancelUrl: string
-  paymentProviders: PaymentMethodProviderData[]
 }) {
   // TODO: set with the default payment provider for the project
   const [provider, setProvider] = useState<PaymentProvider>("stripe")
+
+  const { data } = api.customers.listPaymentMethods.useQuery({
+    customerId: customer.id,
+    provider: provider,
+  })
 
   const createSession = api.customers.createPaymentMethod.useMutation({
     onSettled: (data) => {
@@ -43,12 +43,7 @@ export function PaymentMethodForm({
     },
   })
 
-  const paymentMethod = paymentProviders.find((method) => method.paymentProvider === provider)
-
-  const defaultPaymentMethod =
-    paymentMethod?.paymentMethods.find(
-      (p) => p.id === paymentMethod.metadata?.defaultPaymentMethodId
-    ) ?? paymentMethod?.paymentMethods.at(0)
+  const defaultPaymentMethod = data?.paymentMethods.at(0)
 
   return (
     <Card>
@@ -92,7 +87,7 @@ export function PaymentMethodForm({
           }}
           isSubmitting={createSession.isPending}
           isDisabled={createSession.isPending}
-          label={!paymentMethod ? "Add Payment Method" : "Billing Portal"}
+          label={!defaultPaymentMethod ? "Add Payment Method" : "Billing Portal"}
         />
       </CardFooter>
     </Card>

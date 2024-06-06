@@ -46,10 +46,6 @@ export default async function PlanPage({
     id: customerId,
   })
 
-  const { providers } = await api.customers.listPaymentProviders({
-    customerId: customer.id,
-  })
-
   if (!customer) {
     notFound()
   }
@@ -177,7 +173,6 @@ export default async function PlanPage({
       </div>
       <div className="flex flex-col gap-4">
         <PaymentMethodForm
-          paymentProviders={providers}
           customer={customer}
           successUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
           cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}

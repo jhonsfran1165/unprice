@@ -11,7 +11,9 @@
   },
   "typesVersions": {
     "*": {
-      "*": ["src/*"]
+      "*": [
+        "src/*"
+      ]
     }
   },
   "license": "AGPL-3.0",
@@ -53,7 +55,7 @@
   "devDependencies": {
     "@builderai/tsconfig": "^0.1.0",
     "dotenv-cli": "^7.3.0",
-    "drizzle-kit": "^0.21.4",
+    "drizzle-kit": "^0.22.2",
     "pg": "^8.11.3",
     "typescript": "^5.3.3"
   }

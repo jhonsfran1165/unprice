@@ -6,7 +6,6 @@ import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
   customerInsertBaseSchema,
-  customerPaymentProviderSelectSchema,
   customerSelectSchema,
   paymentProviderSchema,
   planSelectBaseSchema,
@@ -204,39 +203,32 @@ export const customersRouter = createTRPCRouter({
       }
     }),
 
-  // TODO: move this and the second procedure to customers
-  listPaymentProviders: protectedApiOrActiveProjectProcedure
+  listPaymentMethods: protectedApiOrActiveProjectProcedure
     .input(
       z.object({
         customerId: z.string(),
+        provider: paymentProviderSchema,
       })
     )
     .output(
       z.object({
-        providers: customerPaymentProviderSelectSchema
-          .extend({
-            paymentMethods: z
-              .object({
-                id: z.string(),
-                name: z.string().nullable(),
-                last4: z.string().optional(),
-                expMonth: z.number().optional(),
-                expYear: z.number().optional(),
-                brand: z.string().optional(),
-              })
-              .array(),
+        paymentMethods: z
+          .object({
+            id: z.string(),
+            name: z.string().nullable(),
+            last4: z.string().optional(),
+            expMonth: z.number().optional(),
+            expYear: z.number().optional(),
+            brand: z.string().optional(),
           })
           .array(),
       })
     )
     .query(async (opts) => {
-      const { customerId } = opts.input
+      const { customerId, provider } = opts.input
       const project = opts.ctx.project
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
-        with: {
-          paymentMethods: true,
-        },
         where: (customer, { and, eq }) =>
           and(eq(customer.id, customerId), eq(customer.projectId, project.id)),
       })
@@ -248,44 +240,40 @@ export const customersRouter = createTRPCRouter({
         })
       }
 
-      const customerpaymentMethods = customerData.paymentMethods
-
+      // there is not information about the payment methods in our database
       // we have to query the payment provider api to get up-to-date information
-      const allDataProviders = await Promise.all(
-        customerpaymentMethods.map(async (pm) => {
-          switch (pm.paymentProvider) {
-            case "stripe": {
-              const stripePaymentProvider = new StripePaymentProvider({
-                paymentCustomerId: provider.paymentProviderCustomerId,
-              })
 
-              const { err, val } = await stripePaymentProvider.listPaymentMethods({
-                limit: 3,
-              })
-
-              if (err ?? !val) {
-                throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-                })
-              }
-
-              return {
-                ...provider,
-                paymentMethods: val,
-              }
+      switch (provider) {
+        case "stripe": {
+          if (!customerData.stripeCustomerId) {
+            return {
+              paymentMethods: [],
             }
-            default:
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Payment provider not supported",
-              })
           }
-        })
-      )
 
-      return {
-        providers: allDataProviders,
+          const stripePaymentProvider = new StripePaymentProvider({
+            paymentCustomerId: customerData.stripeCustomerId,
+          })
+
+          const { err, val } = await stripePaymentProvider.listPaymentMethods({
+            limit: 5,
+          })
+
+          if (err ?? !val) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: err.message,
+            })
+          }
+
+          return {
+            paymentMethods: val,
+          }
+        }
+        default:
+          return {
+            paymentMethods: [],
+          }
       }
     }),
 
@@ -304,9 +292,6 @@ export const customersRouter = createTRPCRouter({
       const { successUrl, cancelUrl, customerId } = opts.input
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
-        with: {
-          providers: true,
-        },
         where: (customer, { and, eq }) =>
           and(eq(customer.id, customerId), eq(customer.projectId, project.id)),
       })
@@ -320,12 +305,8 @@ export const customersRouter = createTRPCRouter({
 
       switch (opts.input.paymentProvider) {
         case "stripe": {
-          const stripeCustomerData = customerData.providers.find(
-            (provider) => provider.paymentProvider === "stripe"
-          )
-
           const stripePaymentProvider = new StripePaymentProvider({
-            paymentCustomerId: stripeCustomerData?.paymentProviderCustomerId,
+            paymentCustomerId: customerData.stripeCustomerId ?? undefined,
           })
 
           const { err, val } = await stripePaymentProvider.createSession({

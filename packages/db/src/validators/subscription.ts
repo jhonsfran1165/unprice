@@ -40,9 +40,28 @@ export const subscriptionFeaturesSelectSchema = createSelectSchema(subscriptionF
   usage: z.coerce.number().min(0).optional(),
 })
 
+export const subscriptionFeaturesInsertSchema = createInsertSchema(subscriptionFeatures, {
+  // quantity for the item, for flat features it's always 1, usage features it's the current usage
+  quantity: z.coerce.number().min(1).optional(),
+  // min quantity for the item
+  min: z.coerce.number().optional(),
+  // limit for the item if any
+  limit: z.coerce.number().optional(),
+  featurePlanId: z.string(),
+  featureSlug: z.string(),
+  // current usage for the item in the current billing period
+  usage: z.coerce.number().min(0).optional(),
+}).partial({
+  id: true,
+  subscriptionId: true,
+  createdAt: true,
+  updatedAt: true,
+  projectId: true,
+})
+
 // stripe won't allow more than 250 items in a single invoice
 export const subscriptionItemsSchema = z
-  .array(subscriptionFeaturesSelectSchema)
+  .array(subscriptionFeaturesInsertSchema)
   .superRefine((items, ctx) => {
     if (items.length > 50) {
       // TODO: add a better message and map to the correct path
