@@ -1,8 +1,18 @@
 import { Redis } from "@upstash/redis"
 
-import type { SubscriptionExtended } from "@builderai/db/validators"
+import type {
+  SubscriptionExtended,
+  SubscriptionItem,
+  SubscriptionItemCache,
+  SubscriptionItemExtended,
+} from "@builderai/db/validators"
 import type { Result } from "@builderai/error"
 import { Err, FetchError, Ok } from "@builderai/error"
+import { env } from "../env.mjs"
+import { formatFeatureCache } from "../utils/shared"
+
+export const LATENCY_LOGGING = env.NODE_ENV === "development"
+export const ENABLE_AUTO_PIPELINING = true
 
 class NoopCache extends Redis {
   constructor() {
@@ -44,20 +54,33 @@ export class UnpriceCache implements CacheInterface {
       this.client = new NoopCache()
       this.noop = true
     } else {
+      // TODO: extract this out of the constructor so we can reuse it from RSC
       this.client = new Redis({
         token: opts.token,
         url: opts.url,
+        // enable auto pipelining to improve performance
+        latencyLogging: LATENCY_LOGGING,
+        enableAutoPipelining: ENABLE_AUTO_PIPELINING,
       })
     }
   }
 
-  private getCustomerHash(key: keyof typeof namespaces, id: string) {
-    return `app:${this.namespaces[key]}:${id}`
+  public setIdempotentUsage(hash: string, result: boolean) {
+    // 1 minutes cache TTL
+    return this.client.set(`idempotent:${hash}`, result, { ex: 60 * 1 })
+  }
+
+  public async getIdempotentUsage(hash: string) {
+    return await this.client.get<boolean>(`idempotent:${hash}`)
+  }
+
+  private hash(namespace: keyof typeof namespaces, ...keys: string[]) {
+    return `app:${this.namespaces[namespace]}:${keys.join(":")}`
   }
 
   public async getCustomerEntitlements(customerId: string): Promise<Result<string[], FetchError>> {
     try {
-      const hash = this.getCustomerHash("customer", customerId)
+      const hash = this.hash("customer", customerId)
 
       if (this.noop) {
         return Ok([])
@@ -83,7 +106,7 @@ export class UnpriceCache implements CacheInterface {
     entitlements: string[]
   ): Promise<Result<number, FetchError>> {
     try {
-      const hash = this.getCustomerHash("customer", customerId)
+      const hash = this.hash("customer", customerId)
 
       if (this.noop) {
         return Ok(1)
@@ -109,7 +132,7 @@ export class UnpriceCache implements CacheInterface {
     customerId: string
   ): Promise<Result<SubscriptionExtended[], FetchError>> {
     try {
-      const hash = this.getCustomerHash("customer", customerId)
+      const hash = this.hash("customer", customerId)
 
       if (this.noop) {
         return Ok([])
@@ -134,7 +157,7 @@ export class UnpriceCache implements CacheInterface {
     activeSubs: SubscriptionExtended[]
   ): Promise<Result<number, FetchError>> {
     try {
-      const hash = this.getCustomerHash("customer", customerId)
+      const hash = this.hash("customer", customerId)
 
       if (this.noop) {
         return Ok(1)
@@ -145,6 +168,122 @@ export class UnpriceCache implements CacheInterface {
       })
 
       return Ok(success)
+    } catch (error) {
+      const e = error as Error
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: false,
+        })
+      )
+    }
+  }
+
+  public async getCustomerFeature(
+    customerId: string,
+    featureSlug: string
+  ): Promise<Result<SubscriptionItemCache | null, FetchError>> {
+    try {
+      if (this.noop) {
+        return Ok(null)
+      }
+
+      const hash = this.hash("customer", customerId, "feature", featureSlug)
+
+      const feature = await this.client.hgetall<SubscriptionItemCache>(hash)
+
+      return Ok(feature ?? null)
+    } catch (error) {
+      const e = error as Error
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: false,
+        })
+      )
+    }
+  }
+
+  public async getCustomerFeatures(
+    customerId: string
+  ): Promise<Result<Map<string, SubscriptionItemCache> | null, FetchError>> {
+    try {
+      if (this.noop) {
+        return Ok(null)
+      }
+
+      const hash = this.hash("customer", customerId, "feature", "*")
+      const keys = await this.client.scan(0, { match: hash })
+
+      const features = await Promise.all(
+        keys[1].map(async (key) => {
+          return this.client.hgetall<SubscriptionItemCache>(key) ?? {}
+        })
+      )
+
+      // convert to a map without null values
+      const featuresMap = new Map<string, SubscriptionItemCache>()
+      features.forEach((f) => {
+        if (f?.featureSlug) {
+          featuresMap.set(f.featureSlug, f)
+        }
+      })
+
+      return Ok(featuresMap)
+    } catch (error) {
+      const e = error as Error
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: false,
+        })
+      )
+    }
+  }
+
+  public async setCustomerFeatures(
+    customerId: string,
+    features: SubscriptionItemExtended[]
+  ): Promise<Result<number, FetchError>> {
+    try {
+      if (this.noop) {
+        return Ok(1)
+      }
+
+      await Promise.all(
+        features.map(async (feature) => {
+          const hash = this.hash("customer", customerId, "feature", feature.featureSlug)
+          return this.client.hset(hash, formatFeatureCache(feature))
+        })
+      )
+
+      return Ok(features.length)
+    } catch (error) {
+      const e = error as Error
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: false,
+        })
+      )
+    }
+  }
+
+  public async setCustomerFeatureUsage(
+    customerId: string,
+    featureSlug: string,
+    usage: number
+  ): Promise<Result<number, FetchError>> {
+    try {
+      if (this.noop) {
+        return Ok(0)
+      }
+
+      const hash = this.hash("customer", customerId, "feature", featureSlug)
+
+      const feature = await this.client.hincrby(hash, "usage", usage)
+
+      return Ok(feature)
     } catch (error) {
       const e = error as Error
       return Err(

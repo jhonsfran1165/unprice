@@ -14,6 +14,7 @@ import {
   subscriptionSelectSchema,
 } from "@builderai/db/validators"
 
+import { waitUntil } from "@vercel/functions"
 import { deniedReasonSchema } from "../../pkg/errors"
 import { StripePaymentProvider } from "../../pkg/payment-provider/stripe"
 import { createTRPCRouter, protectedApiOrActiveProjectProcedure } from "../../trpc"
@@ -610,7 +611,7 @@ export const customersRouter = createTRPCRouter({
         ctx,
       })
     }),
-  // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_6hASRQKH7vsq5WQH", featureSlug: "access", usage: 10}}}))
+  // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_UR25SSERij9HFMoU", featureSlug: "apikeys", usage: 100, requestId: "123"}}}))
   reportUsage: protectedApiOrActiveProjectProcedure
     .meta({
       openapi: {
@@ -624,6 +625,7 @@ export const customersRouter = createTRPCRouter({
         customerId: z.string(),
         featureSlug: z.string(),
         usage: z.number(),
+        requestId: z.string(),
       })
     )
     .output(
@@ -632,12 +634,28 @@ export const customersRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const { customerId, featureSlug, usage } = opts.input
+      const { customerId, featureSlug, usage, requestId } = opts.input
+
+      // implement idempotency here
+      // if the usage is the same as the last one, don't report it
+      // this is to avoid reporting the same usage multiple times
+      const body = JSON.stringify({ customerId, featureSlug, usage, requestId })
+      const hashKey = await utils.hashStringSHA256(body)
+
+      // create hash key
+      const result = await opts.ctx.cache.getIdempotentUsage(hashKey)
+
+      if (result) {
+        return {
+          success: result,
+        }
+      }
+
       const { apiKey, ...ctx } = opts.ctx
       const projectId = apiKey.projectId
       const workspaceId = apiKey.project.workspaceId
 
-      return await reportUsageFeature({
+      const response = await reportUsageFeature({
         customerId,
         featureSlug,
         projectId: projectId,
@@ -645,5 +663,11 @@ export const customersRouter = createTRPCRouter({
         usage: usage,
         ctx,
       })
+
+      waitUntil(opts.ctx.cache.setIdempotentUsage(hashKey, response.success))
+
+      return {
+        success: response.success,
+      }
     }),
 })

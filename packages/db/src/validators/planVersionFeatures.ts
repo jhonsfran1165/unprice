@@ -11,7 +11,13 @@ import { featureSelectBaseSchema } from "./features"
 import { planVersionSelectBaseSchema } from "./planVersions"
 import { planSelectBaseSchema } from "./plans"
 import { projectSelectBaseSchema } from "./project"
-import { aggregationMethodSchema, tierModeSchema, unitSchema, usageModeSchema } from "./shared"
+import {
+  aggregationMethodSchema,
+  tierModeSchema,
+  typeFeatureSchema,
+  unitSchema,
+  usageModeSchema,
+} from "./shared"
 
 export const priceSchema = z.coerce
   .string()
@@ -312,6 +318,7 @@ export const planVersionFeatureSelectBaseSchema = createSelectSchema(planVersion
   metadata: planVersionFeatureMetadataSchema,
   defaultQuantity: z.coerce.number().int().optional(),
   limit: z.coerce.number().int().optional(),
+  featureType: typeFeatureSchema,
 })
 
 export const parseFeaturesConfig = (feature: PlanVersionFeature) => {

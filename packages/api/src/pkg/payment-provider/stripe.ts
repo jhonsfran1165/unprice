@@ -9,8 +9,8 @@ export class StripePaymentProvider implements PaymentProviderInterface {
   private readonly client: Stripe
   private readonly paymentCustomerId?: string
 
-  constructor(opts: { token?: string; paymentCustomerId?: string }) {
-    this.paymentCustomerId = opts.paymentCustomerId
+  constructor(opts?: { token?: string; paymentCustomerId?: string }) {
+    this.paymentCustomerId = opts?.paymentCustomerId
 
     if (opts?.token) {
       this.client = new Stripe(opts.token, {
@@ -43,6 +43,34 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       })
 
       return Ok(product)
+    } catch (error) {
+      const e = error as Error
+
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: true,
+        })
+      )
+    }
+  }
+
+  public async upsertProduct(
+    props: Stripe.ProductCreateParams & { id: string }
+  ): Promise<Result<Stripe.Product, FetchError>> {
+    try {
+      const { id, ...rest } = props
+      const product = await this.client.products.retrieve(id)
+
+      if (product) {
+        return Ok(
+          await stripe.products.update(id, {
+            ...rest,
+          })
+        )
+      }
+
+      return Ok(await stripe.products.create(rest))
     } catch (error) {
       const e = error as Error
 

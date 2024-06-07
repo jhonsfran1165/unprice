@@ -1,5 +1,10 @@
 import { TRPCError } from "@trpc/server"
 
+import type {
+  SubscriptionItem,
+  SubscriptionItemCache,
+  SubscriptionItemExtended,
+} from "@builderai/db/validators"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
 import type { Context } from "../trpc"
@@ -11,7 +16,6 @@ export const verifyFeature = async ({
   customerId,
   featureSlug,
   projectId,
-  workspaceId,
   ctx,
 }: {
   customerId: string
@@ -30,7 +34,6 @@ export const verifyFeature = async ({
     customerId,
     featureSlug,
     projectId,
-    workspaceId,
     ctx,
   })
 
@@ -98,7 +101,6 @@ export const reportUsageFeature = async ({
   featureSlug,
   projectId,
   usage,
-  workspaceId,
   ctx,
 }: {
   customerId: string
@@ -118,9 +120,7 @@ export const reportUsageFeature = async ({
     customerId,
     featureSlug,
     projectId,
-    workspaceId,
     usage,
-    ctx,
   })
 
   if (err) {
@@ -140,4 +140,18 @@ export const reportUsageFeature = async ({
   }
 
   return val
+}
+
+export const formatFeatureCache = (feature: SubscriptionItemExtended): SubscriptionItemCache => {
+  return {
+    featureType: feature.featurePlan.featureType,
+    featurePlanId: feature.featurePlanId,
+    subscriptionId: feature.subscriptionId,
+    quantity: feature.quantity,
+    min: feature.min,
+    limit: feature.limit,
+    featureSlug: feature.featureSlug,
+    usage: feature.usage,
+    projectId: feature.projectId,
+  }
 }

@@ -1,17 +1,20 @@
 import { waitUntil } from "@vercel/functions"
 
 import type { Database } from "@builderai/db"
-import type { PlanVersionExtended, SubscriptionExtended } from "@builderai/db/validators"
+import type {
+  PlanVersionExtended,
+  SubscriptionExtended,
+  SubscriptionItemCache,
+} from "@builderai/db/validators"
 import type { FetchError, Result } from "@builderai/error"
 import { Err, Ok } from "@builderai/error"
 import type { Analytics } from "@builderai/tinybird"
 
 import type { Context } from "../trpc"
+import { formatFeatureCache } from "../utils/shared"
 import type { UnpriceCache } from "./cache"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
-
-type FeatureResponse = Pick<PlanVersionExtended, "planFeatures">["planFeatures"][number]
 
 export class UnpriceCustomer {
   private readonly cache: UnpriceCache
@@ -28,11 +31,12 @@ export class UnpriceCustomer {
     this.analytics = opts.analytics
   }
 
-  public async getCustomerActiveSubs(opts: {
+  public async getCustomerFeature(opts: {
     customerId: string
     projectId: string
-  }): Promise<Result<SubscriptionExtended[], UnPriceCustomerError | FetchError>> {
-    const res = await this.cache.getCustomerActiveSubs(opts.customerId)
+    featureSlug: string
+  }): Promise<Result<SubscriptionItemCache, UnPriceCustomerError | FetchError>> {
+    const res = await this.cache.getCustomerFeatures(opts.customerId)
 
     if (res.err) {
       // TODO: sent log
@@ -40,66 +44,24 @@ export class UnpriceCustomer {
       return res
     }
 
-    if (res.val && res.val.length > 0) {
-      return Ok(res.val)
+    const customerFeatures = res.val?.get(opts.featureSlug)
+
+    if (customerFeatures) {
+      return Ok(customerFeatures)
     }
 
+    // if not in cache, get from db
     const customer = await this.db.query.customers.findFirst({
       with: {
         subscriptions: {
           columns: {
             id: true,
-            planVersionId: true,
-            customerId: true,
-            status: true,
-            metadata: true,
           },
           where: (sub, { eq }) => eq(sub.status, "active"),
-          orderBy(fields, operators) {
-            return [operators.desc(fields.startDate)]
-          },
           with: {
-            features: true,
-            planVersion: {
-              columns: {
-                id: true,
-                planId: true,
-                status: true,
-                planType: true,
-                active: true,
-                currency: true,
-                billingPeriod: true,
-                startCycle: true,
-                gracePeriod: true,
-                whenToBill: true,
-                paymentProvider: true,
-                metadata: true,
-              },
+            features: {
               with: {
-                plan: {
-                  columns: {
-                    slug: true,
-                  },
-                },
-                planFeatures: {
-                  columns: {
-                    id: true,
-                    featureId: true,
-                    featureType: true,
-                    planVersionId: true,
-                    config: true,
-                    metadata: true,
-                    limit: true,
-                  },
-                  with: {
-                    feature: {
-                      columns: {
-                        slug: true,
-                        id: true,
-                      },
-                    },
-                  },
-                },
+                featurePlan: true,
               },
             },
           },
@@ -127,10 +89,26 @@ export class UnpriceCustomer {
       )
     }
 
-    // cache the active subscriptions
-    waitUntil(this.cache.setCustomerActiveSubs(customer.id, customer.subscriptions))
+    const features = customer.subscriptions.flatMap((sub) => sub.features)
 
-    return Ok(customer.subscriptions)
+    // cache the active subscription features
+    waitUntil(
+      // cache every feature for every subscription
+      this.cache.setCustomerFeatures(customer.id, features)
+    )
+
+    const customerFeatureDB = features.find((f) => f.featureSlug === opts.featureSlug)
+
+    if (!customerFeatureDB) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+          customerId: opts.customerId,
+        })
+      )
+    }
+
+    return Ok(formatFeatureCache(customerFeatureDB))
   }
 
   public async getEntitlements(opts: {
@@ -218,76 +196,11 @@ export class UnpriceCustomer {
     return Ok({ entitlements })
   }
 
-  public async getCustomerActiveSubByFeature(opts: {
-    customerId: string
-    projectId: string
-    featureSlug: string
-  }): Promise<
-    Result<
-      { feature: FeatureResponse; subscription: SubscriptionExtended },
-      UnPriceCustomerError | FetchError
-    >
-  > {
-    const res = await this.getCustomerActiveSubs({
-      customerId: opts.customerId,
-      projectId: opts.projectId,
-    })
-
-    // if we have an error, return it
-    if (res.err) {
-      console.error(`Error in getCustomerData: ${res.err.message}`)
-      return res
-    }
-
-    const customerActiveSubs = res.val
-    const allFeatures = new Map<string, FeatureResponse>()
-    const allSubscriptions = new Map<string, SubscriptionExtended>()
-
-    // get all the features and subscriptions
-    // TODO: is it true to assume that a subscription can have the same features multiple times and we just overwrite to the latest one?
-    customerActiveSubs.forEach((sub) => {
-      sub.planVersion.planFeatures.forEach((pf) => {
-        allFeatures.set(pf.feature.slug, pf)
-      })
-
-      allSubscriptions.set(sub.planVersionId, sub)
-    })
-
-    const feature = allFeatures.get(opts.featureSlug)
-
-    if (!feature) {
-      return Err(
-        new UnPriceCustomerError({
-          code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
-          customerId: opts.customerId,
-        })
-      )
-    }
-
-    // we need the subscription for the feature apply checks later on
-    const subscription = allSubscriptions.get(feature?.planVersionId)
-
-    if (!subscription) {
-      return Err(
-        new UnPriceCustomerError({
-          code: "CUSTOMER_HAS_NO_SUBSCRIPTIONS",
-          customerId: opts.customerId,
-        })
-      )
-    }
-
-    return Ok({
-      feature: feature,
-      subscription: subscription,
-    })
-  }
-
   // TODO: i should be able to verify my feature and return false access if the feature not exist in the subscription
   public async verifyFeature(opts: {
     customerId: string
     featureSlug: string
     projectId: string
-    workspaceId: string
     ctx: Context
   }): Promise<
     Result<
@@ -296,7 +209,6 @@ export class UnpriceCustomer {
         currentUsage: number
         limit?: number
         deniedReason?: DenyReason
-        currentPlan: string
         remaining?: number
         featureType: string
       },
@@ -304,10 +216,10 @@ export class UnpriceCustomer {
     >
   > {
     try {
-      const { customerId, projectId, featureSlug, workspaceId } = opts
+      const { customerId, projectId, featureSlug } = opts
       const start = performance.now()
 
-      const res = await this.getCustomerActiveSubByFeature({
+      const res = await this.getCustomerFeature({
         customerId,
         projectId,
         featureSlug,
@@ -317,7 +229,7 @@ export class UnpriceCustomer {
         const error = res.err
 
         // TODO: sent log
-        console.error(`Error in getCustomerData: ${res.err.message}`)
+        console.error(`Error in getCustomerFeature: ${res.err.message}`)
         switch (true) {
           case error instanceof UnPriceCustomerError: {
             if (error.code === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
@@ -338,35 +250,16 @@ export class UnpriceCustomer {
         }
       }
 
-      const { feature, subscription } = res.val
+      const feature = res.val
 
-      // basic data from the request
-      const ip = opts.ctx.headers.get("x-real-ip") ?? ""
-      const userAgent = opts.ctx.headers.get("user-agent") ?? ""
-
-      const limit = subscription.features.find((item) => item.featurePlanId === feature.id)?.limit
-
-      // TODO: add params to usage so we can count or max and get data by date
-      const usage = await this.analytics
-        .getUsageFeature({
-          planVersionFeatureId: feature.id,
-          workspaceId,
-          customerId,
-          projectId,
-        })
-        .then((res) => res.data.at(0)?.total_usage ?? 0)
+      const limit = feature.limit
+      const usage = feature.usage ?? 0
 
       const analyticsPayload = {
-        featureId: feature.featureId,
-        planVersionFeatureId: feature.id,
-        workspaceId: projectId,
-        planVersionId: subscription.planVersionId,
-        customerId,
-        subscriptionId: subscription.id,
-        projectId,
+        projectId: feature.projectId,
+        planVersionFeatureId: feature.featurePlanId,
+        subscriptionId: feature.subscriptionId,
         time: Date.now(),
-        ipAddress: ip,
-        userAgent: userAgent,
         latency: performance.now() - start,
       }
 
@@ -386,7 +279,6 @@ export class UnpriceCustomer {
               limit: limit,
               access: false,
               deniedReason: "USAGE_EXCEEDED",
-              currentPlan: subscription.planVersion.plan.slug,
               remaining: limit - usage,
             })
           }
@@ -411,7 +303,6 @@ export class UnpriceCustomer {
               featureType: feature.featureType,
               access: false,
               deniedReason: "USAGE_EXCEEDED",
-              currentPlan: subscription.planVersion.plan.slug,
               remaining: limit - usage,
             })
           }
@@ -433,7 +324,6 @@ export class UnpriceCustomer {
               featureType: feature.featureType,
               access: false,
               deniedReason: "USAGE_EXCEEDED",
-              currentPlan: subscription.planVersion.plan.slug,
               remaining: limit - usage,
             })
           }
@@ -456,7 +346,6 @@ export class UnpriceCustomer {
               limit: limit,
               featureType: feature.featureType,
               access: false,
-              currentPlan: subscription.planVersion.plan.slug,
               deniedReason: "USAGE_EXCEEDED",
               remaining: limit - usage,
             })
@@ -485,7 +374,6 @@ export class UnpriceCustomer {
         featureType: feature.featureType,
         limit: limit ?? 0,
         access: true,
-        currentPlan: subscription.planVersion.plan.slug,
         remaining: limit ? limit - usage : undefined,
       })
     } catch (e) {
@@ -507,13 +395,14 @@ export class UnpriceCustomer {
     customerId: string
     featureSlug: string
     projectId: string
-    workspaceId: string
     usage: number
-    ctx: Context
   }): Promise<Result<{ success: boolean }, UnPriceCustomerError | FetchError>> {
     try {
-      const { customerId, featureSlug, projectId, usage, workspaceId, ctx } = opts
-      const res = await this.getCustomerActiveSubByFeature({
+      const { customerId, featureSlug, projectId, usage } = opts
+
+      const start = performance.now()
+
+      const res = await this.getCustomerFeature({
         customerId,
         projectId,
         featureSlug,
@@ -523,32 +412,27 @@ export class UnpriceCustomer {
         return res
       }
 
-      const { feature, subscription } = res.val
-
-      const ip = ctx.headers.get("x-real-ip") ?? ""
-      const userAgent = ctx.headers.get("user-agent") ?? ""
-      const start = performance.now()
+      const feature = res.val
 
       waitUntil(
-        this.analytics
-          .ingestFeaturesUsage({
-            featureId: feature.featureId,
-            planVersionFeatureId: feature.id,
-            workspaceId: workspaceId,
-            planVersionId: subscription.planVersionId,
-            customerId,
-            subscriptionId: subscription.id,
-            usage: usage,
-            projectId,
-            time: Date.now(),
-            ipAddress: ip,
-            userAgent: userAgent,
-            latency: performance.now() - start,
-          })
-          .catch((error) => {
-            console.error("Error reporting usage", error)
-            // TODO: save the log to tinybird
-          })
+        Promise.all([
+          this.analytics
+            .ingestFeaturesUsage({
+              // TODO: add id of the subscription item
+              planVersionFeatureId: feature.featurePlanId,
+              subscriptionId: feature.subscriptionId,
+              projectId: feature.projectId,
+              usage: usage,
+              time: Date.now(),
+              latency: performance.now() - start,
+            })
+            .catch((error) => {
+              console.error("Error reporting usage", error)
+              // TODO: save the log to tinybird
+            }),
+          // set the usage in the cache
+          this.cache.setCustomerFeatureUsage(customerId, featureSlug, usage),
+        ])
       )
 
       return Ok({

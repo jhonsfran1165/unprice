@@ -1,10 +1,11 @@
 import { TRPCError } from "@trpc/server"
 import { ZodError, z } from "zod"
+import { features } from "./../../../../db/src/schema/features"
 
 import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
-import type { SubscriptionItem } from "@builderai/db/validators"
+import type { InsertSubscriptionItem, SubscriptionItem } from "@builderai/db/validators"
 import {
   createDefaultSubscriptionConfig,
   subscriptionInsertSchema,
@@ -12,6 +13,7 @@ import {
   subscriptionSelectSchema,
 } from "@builderai/db/validators"
 
+import { waitUntil } from "@vercel/functions"
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
@@ -128,7 +130,7 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      let configItemsSubscription: SubscriptionItem[] = []
+      let configItemsSubscription: InsertSubscriptionItem[] = []
 
       if (items) {
         const parseItems = subscriptionItemsSchema.safeParse(items)
@@ -157,7 +159,6 @@ export const subscriptionRouter = createTRPCRouter({
       // execute this in a transaction
       const subscriptionData = await opts.ctx.db.transaction(async (trx) => {
         // create the subscription
-
         const subscriptionId = utils.newId("subscription")
 
         const newSubscription = await trx
@@ -188,7 +189,7 @@ export const subscriptionRouter = createTRPCRouter({
           })
         }
 
-        // add features to the subscription and send all promise at once
+        // add features to the subscription
         await Promise.all(
           configItemsSubscription.map((item) =>
             trx.insert(schema.subscriptionFeatures).values({
@@ -222,89 +223,31 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      // every time a subscription is created, we need to update the cache
-      // waitUntil(
-      //   opts.ctx.db.query.customers
-      //     .findFirst({
-      //       with: {
-      //         subscriptions: {
-      //           columns: {
-      //             id: true,
-      //             planVersionId: true,
-      //             customerId: true,
-      //             status: true,
-      //             items: true,
-      //             metadata: true,
-      //           },
-      //           where: (sub, { eq }) => eq(sub.status, "active"),
-      //           orderBy(fields, operators) {
-      //             return [operators.desc(fields.startDate)]
-      //           },
-      //           with: {
-      //             planVersion: {
-      //               columns: {
-      //                 id: true,
-      //                 planId: true,
-      //                 status: true,
-      //                 planType: true,
-      //                 active: true,
-      //                 currency: true,
-      //                 billingPeriod: true,
-      //                 startCycle: true,
-      //                 gracePeriod: true,
-      //                 whenToBill: true,
-      //                 paymentProvider: true,
-      //                 metadata: true,
-      //               },
-      //               with: {
-      //                 plan: {
-      //                   columns: {
-      //                     slug: true,
-      //                   },
-      //                 },
-      //                 planFeatures: {
-      //                   columns: {
-      //                     id: true,
-      //                     featureId: true,
-      //                     featureType: true,
-      //                     planVersionId: true,
-      //                     config: true,
-      //                     metadata: true,
-      //                     limit: true,
-      //                   },
-      //                   with: {
-      //                     feature: {
-      //                       columns: {
-      //                         slug: true,
-      //                         id: true,
-      //                       },
-      //                     },
-      //                   },
-      //                 },
-      //               },
-      //             },
-      //           },
-      //         },
-      //       },
-      //       where: (customer, { eq, and }) =>
-      //         and(
-      //           eq(customer.id, customerData.id),
-      //           eq(customer.projectId, customerData.projectId)
-      //         ),
-      //     })
-      //     .then(async (customer) => {
-      //       if (!customer) {
-      //         // TODO: log error
-      //         console.error("Customer not found")
-      //         return
-      //       }
+      // every time a subscription is created, we save the subscription in the cache
+      waitUntil(
+        opts.ctx.db.query.subscriptions
+          .findFirst({
+            with: {
+              features: {
+                with: {
+                  featurePlan: true,
+                },
+              },
+            },
+            where: (sub, { eq, and }) =>
+              and(eq(sub.id, subscriptionData.id), eq(sub.projectId, subscriptionData.projectId)),
+          })
+          .then(async (subscription) => {
+            if (!subscription) {
+              // TODO: log error
+              console.error("Subscription not found")
+              return
+            }
 
-      //       await opts.ctx.cache.setCustomerActiveSubs(
-      //         customer.id,
-      //         customer?.subscriptions ?? []
-      //       )
-      //     })
-      // )
+            // save the features in the cache
+            await opts.ctx.cache.setCustomerFeatures(subscription.customerId, subscription.features)
+          })
+      )
 
       return {
         subscription: subscriptionData,

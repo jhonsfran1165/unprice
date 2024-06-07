@@ -20,7 +20,13 @@ import {
   priceSchema,
 } from "./planVersionFeatures"
 import type { Currency } from "./shared"
-import { currencySymbol, subscriptionTypeSchema } from "./shared"
+import {
+  collectionMethodSchema,
+  currencySymbol,
+  featureVersionType,
+  subscriptionTypeSchema,
+  typeFeatureSchema,
+} from "./shared"
 
 export const subscriptionMetadataSchema = z.object({
   externalId: z.string().optional(),
@@ -113,6 +119,7 @@ export const subscriptionItemsSchema = z
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   metadata: subscriptionMetadataSchema,
   type: subscriptionTypeSchema,
+  collectionMethod: collectionMethodSchema,
 })
 
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
@@ -121,6 +128,7 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   trialDays: z.coerce.number().int().min(0).max(30).default(0),
   metadata: subscriptionMetadataSchema,
   type: subscriptionTypeSchema,
+  collectionMethod: collectionMethodSchema,
 })
   .extend({
     items: subscriptionItemsSchema,
@@ -137,6 +145,7 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
     customerId: true,
     planVersionId: true,
     type: true,
+    startDate: true,
   })
 
 export const subscriptionExtendedSchema = subscriptionSelectSchema
@@ -152,10 +161,28 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
     features: subscriptionFeaturesSelectSchema.array(),
   })
 
+export const subscriptionItemCacheSchema = subscriptionFeaturesSelectSchema
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+    id: true,
+  })
+  .extend({
+    featureType: typeFeatureSchema,
+  })
+
+export const subscriptionItemExtendedSchema = subscriptionFeaturesSelectSchema.extend({
+  featurePlan: planVersionFeatureInsertBaseSchema,
+})
+
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>
 export type SubscriptionItem = z.infer<typeof subscriptionFeaturesSelectSchema>
+export type SubscriptionItemExtended = z.infer<typeof subscriptionItemExtendedSchema>
+export type InsertSubscriptionItem = z.infer<typeof subscriptionFeaturesInsertSchema>
 export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
+
+export type SubscriptionItemCache = z.infer<typeof subscriptionItemCacheSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,
@@ -169,6 +196,7 @@ export const createDefaultSubscriptionConfig = ({
       })
     )
   }
+
   const itemsConfig = planVersion.planFeatures.map((planFeature) => {
     switch (planFeature.featureType) {
       case "flat":

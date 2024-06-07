@@ -13,32 +13,20 @@ export const dateToUnixMilli = z
   .transform((t) => new Date(t.split(" ").at(0) ?? t).getTime())
 
 export const featureVerificationSchemaV1 = z.object({
-  workspaceId: z.string(),
   projectId: z.string(),
   planVersionFeatureId: z.string(),
-  featureId: z.string(),
   subscriptionId: z.string(),
-  customerId: z.string(),
-  planVersionId: z.string(),
   deniedReason: z.string().optional(),
   time: z.number(),
-  ipAddress: z.string().default(""),
-  userAgent: z.string().default(""),
   latency: z.number().optional(),
 })
 
 export const featureUsageSchemaV1 = z.object({
-  workspaceId: z.string(),
   projectId: z.string(),
   planVersionFeatureId: z.string(),
-  featureId: z.string(),
   subscriptionId: z.string(),
-  customerId: z.string(),
-  planVersionId: z.string(),
   usage: z.number(),
   time: z.number(),
-  ipAddress: z.string().default(""),
-  userAgent: z.string().default(""),
   latency: z.number().optional(),
 })
 

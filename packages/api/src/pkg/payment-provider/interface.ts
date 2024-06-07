@@ -19,8 +19,10 @@ export interface PaymentProviderInterface {
   }) => Promise<Result<PaymentProviderCreateSession, FetchError>>
 
   getProduct: (id: string) => Promise<Result<Stripe.Response<Stripe.Product>, FetchError>>
-
   createProduct: (opts: Stripe.ProductCreateParams) => Promise<Result<Stripe.Product, FetchError>>
+  upsertProduct: (
+    props: Stripe.ProductCreateParams & { id: string }
+  ) => Promise<Result<Stripe.Product, FetchError>>
 
   listPaymentMethods: (opts: { limit?: number }) => Promise<
     Result<

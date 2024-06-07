@@ -66,7 +66,9 @@ export const subscriptions = pgTableProject(
     // auto renew the subscription every billing period
     autoRenew: boolean("auto_renew").default(true),
 
-    collectionMethod: collectionMethodEnum("collection_method").default("charge_automatically"),
+    collectionMethod: collectionMethodEnum("collection_method")
+      .notNull()
+      .default("charge_automatically"),
     // whether the subscription is new or not. New means that the subscription was created in the current billing period
     isNew: boolean("is_new").default(true),
 

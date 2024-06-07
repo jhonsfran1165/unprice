@@ -203,7 +203,6 @@ export const planVersionFeatureRouter = createTRPCRouter({
 
       // we purposely don't allow to update the currency and the payment provider
       // those should be update from another method because they are related to the plan version
-      // but we have it inside the feature because that's easier to handle the feature as a product
 
       const project = opts.ctx.project
       const planVersionData = await opts.ctx.db.query.versions.findFirst({

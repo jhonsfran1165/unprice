@@ -3,6 +3,7 @@ import * as z from "zod"
 
 export const env = createEnv({
   server: {
+    NODE_ENV: z.enum(["development", "production"]).default("development"),
     NEXTJS_URL: z.preprocess(
       (str) => (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str),
       process.env.VERCEL_URL ? z.string().min(1) : z.string().url()

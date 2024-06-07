@@ -628,81 +628,46 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
-      // We don't need to sync with the payment provider because we only use it for
-      // invoicing and not for subscriptions
-      // await syncPaymentProvider({
-      //   ctx: opts.ctx,
-      //   planVersion: planVersionData,
-      // })
-
       // we need to create each product on the payment provider
-      // execute on a transaction because we need to create the products
-      // and then update the plan version
       const planVersionDataUpdated = await opts.ctx.db.transaction(async (tx) => {
         try {
           // depending on the provider we need to create the products
           switch (planVersionData.paymentProvider) {
             case "stripe": {
-              const stripePaymentProvider = new StripePaymentProvider({})
+              const stripePaymentProvider = new StripePaymentProvider()
               // create the products
               await Promise.all(
                 planVersionData.planFeatures.map(async (planFeature) => {
                   const productName = `${planVersionData.project.name} - ${planFeature.feature.slug} from ${APP_NAME}`
 
-                  try {
-                    const { err, val } = await stripePaymentProvider.createProduct({
-                      id: planFeature.featureId,
-                      name: productName,
-                      type: "service", // TODO: do we need to change this?
-                      description: planFeature.feature.description!,
+                  const { err, val } = await stripePaymentProvider.upsertProduct({
+                    id: planFeature.featureId,
+                    name: productName,
+                    type: "service",
+                    description: planFeature.feature.description!,
+                  })
+
+                  if (err)
+                    throw new TRPCError({
+                      code: "INTERNAL_SERVER_ERROR",
+                      message: "Error syncs product with stripe",
                     })
 
-                    if (err) {
-                      const product = await stripePaymentProvider.getProduct(planFeature.featureId)
-
-                      if (product.err) {
-                        throw new TRPCError({
-                          code: "INTERNAL_SERVER_ERROR",
-                          message: "Error syncs product with stripe",
-                        })
-                      }
-
-                      if (product.val) {
-                        // update the plan feature with the product id
-                        await tx
-                          .update(schema.planVersionFeatures)
-                          .set({
-                            metadata: {
-                              stripeProductId: product.val.id,
-                            },
-                          })
-                          .where(
-                            and(
-                              eq(schema.planVersionFeatures.id, planFeature.id),
-                              eq(schema.planVersionFeatures.projectId, planVersionData.project.id)
-                            )
-                          )
-                      }
-                    }
-
-                    if (val) {
-                      // update the plan feature with the product id
-                      await tx
-                        .update(schema.planVersionFeatures)
-                        .set({
-                          metadata: {
-                            stripeProductId: val.id,
-                          },
-                        })
-                        .where(
-                          and(
-                            eq(schema.planVersionFeatures.id, planFeature.id),
-                            eq(schema.planVersionFeatures.projectId, planVersionData.project.id)
-                          )
+                  if (val) {
+                    // update the plan feature with the product id
+                    await tx
+                      .update(schema.planVersionFeatures)
+                      .set({
+                        metadata: {
+                          stripeProductId: val.id,
+                        },
+                      })
+                      .where(
+                        and(
+                          eq(schema.planVersionFeatures.id, planFeature.id),
+                          eq(schema.planVersionFeatures.projectId, planVersionData.project.id)
                         )
-                    }
-                  } catch (error) {
-                    console.error(error)
+                      )
                   }
                 })
               )
