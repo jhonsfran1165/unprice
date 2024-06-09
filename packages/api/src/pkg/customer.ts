@@ -4,25 +4,28 @@ import type { Database } from "@builderai/db"
 import type {
   PlanVersionExtended,
   SubscriptionExtended,
+  SubscriptionItem,
   SubscriptionItemCache,
 } from "@builderai/db/validators"
-import type { FetchError, Result } from "@builderai/error"
+import { FetchError, Result } from "@builderai/error"
 import { Err, Ok } from "@builderai/error"
 import type { Analytics } from "@builderai/tinybird"
 
 import type { Context } from "../trpc"
 import { formatFeatureCache } from "../utils/shared"
-import type { UnpriceCache } from "./cache"
+import type {
+  Cache
+ } from "./cache"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
 
 export class UnpriceCustomer {
-  private readonly cache: UnpriceCache
+  private readonly cache: Cache
   private readonly db: Database
   private readonly analytics: Analytics
 
   constructor(opts: {
-    cache: UnpriceCache
+    cache: Cache
     db: Database
     analytics: Analytics
   }) {
@@ -35,87 +38,63 @@ export class UnpriceCustomer {
     customerId: string
     projectId: string
     featureSlug: string
-  }): Promise<Result<SubscriptionItemCache, UnPriceCustomerError | FetchError>> {
-    const res = await this.cache.getCustomerFeatures(opts.customerId)
+  }): Promise<Result<SubscriptionItem, UnPriceCustomerError | FetchError>> {
+    const res = await this.cache.featureByCustomerId.get(
+      `${opts.customerId}:${opts.featureSlug}`
+    )
 
     if (res.err) {
       // TODO: sent log
       console.error(`Error getting cache for customer: ${res.err.message}`)
-      return res
-    }
-
-    const customerFeatures = res.val?.get(opts.featureSlug)
-
-    if (customerFeatures) {
-      return Ok(customerFeatures)
-    }
-
-    // if not in cache, get from db
-    const customer = await this.db.query.customers.findFirst({
-      with: {
-        subscriptions: {
-          columns: {
-            id: true,
-          },
-          where: (sub, { eq }) => eq(sub.status, "active"),
-          with: {
-            features: {
-              with: {
-                featurePlan: true,
-              },
-            },
-          },
-        },
-      },
-      where: (customer, { eq, and }) =>
-        and(eq(customer.id, opts.customerId), eq(customer.projectId, opts.projectId)),
-    })
-
-    if (!customer) {
       return Err(
-        new UnPriceCustomerError({
-          code: "CUSTOMER_NOT_FOUND",
-          customerId: opts.customerId,
-        })
-      )
+        new FetchError({
+          message: "unable to fetch required data",
+          retry: true,
+          cause: res.err,
+        }),
+      );
     }
 
-    if (!customer.subscriptions || customer.subscriptions.length === 0) {
-      return Err(
-        new UnPriceCustomerError({
-          code: "CUSTOMER_HAS_NO_SUBSCRIPTIONS",
-          customerId: opts.customerId,
-        })
-      )
+    // cache miss, get from db
+    if (!res.val) {
+      return await this.db.query.subscriptionFeatures.findFirst({
+        where: (subFeature, { eq, and }) =>
+          and(
+            eq(subFeature.id, opts.customerId),
+            eq(subFeature.projectId, opts.projectId),
+            eq(subFeature.featureSlug, opts.featureSlug)
+          ),
+      }).then((res) => {
+        if (!res) {
+          return Err(
+            new UnPriceCustomerError({
+              code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+              customerId: opts.customerId,
+            })
+          )
+        }
+
+        // save the data in the cache
+        waitUntil(
+          this.cache.featureByCustomerId.set(
+            `${opts.customerId}:${opts.featureSlug}`,
+            res
+          )
+        )
+
+        return Ok(res)
+      })
     }
 
-    const features = customer.subscriptions.flatMap((sub) => sub.features)
 
-    // cache the active subscription features
-    waitUntil(
-      // cache every feature for every subscription
-      this.cache.setCustomerFeatures(customer.id, features)
-    )
-
-    const customerFeatureDB = features.find((f) => f.featureSlug === opts.featureSlug)
-
-    if (!customerFeatureDB) {
-      return Err(
-        new UnPriceCustomerError({
-          code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
-          customerId: opts.customerId,
-        })
-      )
-    }
-
-    return Ok(formatFeatureCache(customerFeatureDB))
+    return Ok(res.val)
   }
 
   public async getEntitlements(opts: {
     customerId: string
     projectId: string
   }): Promise<Result<{ entitlements: string[] }, UnPriceCustomerError | FetchError>> {
-    const res = await this.cache.getCustomerEntitlements(opts.customerId)
+    const res = await this.cache.entitlementsByCustomerId.get(opts.customerId)
 
     if (res.err) {
       // TODO: sent log
@@ -191,7 +170,7 @@ export class UnpriceCustomer {
     )
 
     // cache the active entitlements
-    waitUntil(this.cache.setCustomerEntitlements(customer.id, entitlements))
+    waitUntil(this.cache.entitlementsByCustomerId.set(customer.id, entitlements))
 
     return Ok({ entitlements })
   }
@@ -431,7 +410,10 @@ export class UnpriceCustomer {
               // TODO: save the log to tinybird
             }),
           // set the usage in the cache
-          this.cache.setCustomerFeatureUsage(customerId, featureSlug, usage),
+          this.cache.featureByCustomerId.set(`${opts.customerId}:${opts.featureSlug}`, {
+            ...feature,
+            usage: Number(feature.usage) + usage,
+          }),
         ])
       )
 

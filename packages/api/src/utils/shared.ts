@@ -153,5 +153,6 @@ export const formatFeatureCache = (feature: SubscriptionItemExtended): Subscript
     featureSlug: feature.featureSlug,
     usage: feature.usage,
     projectId: feature.projectId,
+    customerId: feature.customerId,
   }
 }

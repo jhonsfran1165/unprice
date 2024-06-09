@@ -19,6 +19,7 @@ import {
   protectedActiveProjectAdminProcedure,
   protectedActiveProjectProcedure,
 } from "../../trpc"
+import { formatFeatureCache } from "../../utils/shared"
 
 export const subscriptionRouter = createTRPCRouter({
   create: protectedActiveProjectAdminProcedure
@@ -202,6 +203,8 @@ export const subscriptionRouter = createTRPCRouter({
               min: item.min,
               featureSlug: item.featureSlug,
               usage: item.usage,
+              customerId: newSubscription.customerId,
+              featureType: item.featureType,
             })
           )
         ).catch((e) => {
@@ -244,8 +247,14 @@ export const subscriptionRouter = createTRPCRouter({
               return
             }
 
-            // save the features in the cache
-            await opts.ctx.cache.setCustomerFeatures(subscription.customerId, subscription.features)
+            Promise.all([
+              subscription.features.map((f) =>
+                opts.ctx.cache.featureByCustomerId.set(
+                  `${subscription.customerId}:${f.featureSlug}`,
+                  f
+                )
+              ),
+            ])
           })
       )
 

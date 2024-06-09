@@ -12,13 +12,15 @@ import { ZodError } from "zod"
 
 import type { Session } from "@builderai/auth/server"
 
+import type { NextAuthRequest } from "@builderai/auth"
 import { auth } from "@builderai/auth/server"
 import { db } from "@builderai/db"
 import { Analytics } from "@builderai/tinybird"
-
-import type { NextAuthRequest } from "@builderai/auth"
+import type { Cache } from "@unkey/cache"
+import { waitUntil } from "@vercel/functions"
 import { env } from "./env.mjs"
-import { UnpriceCache } from "./pkg/cache"
+import { initCache } from "./pkg/cache"
+import type { CacheNamespaces } from "./pkg/cache/namespaces"
 import { transformer } from "./transformer"
 import { projectGuard } from "./utils"
 import { apikeyGuard } from "./utils/apaikey-guard"
@@ -33,7 +35,7 @@ import { workspaceGuard } from "./utils/workspace-guard"
  * processing a request
  *
  */
-interface CreateContextOptions {
+export interface CreateContextOptions {
   headers: Headers
   session: Session | null
   apikey?: string | null
@@ -41,7 +43,7 @@ interface CreateContextOptions {
   activeWorkspaceSlug: string
   activeProjectSlug: string
   analytics: Analytics
-  cache: UnpriceCache
+  cache: Cache<CacheNamespaces>
 }
 
 /**
@@ -95,9 +97,8 @@ export const createTRPCContext = async (opts: {
     tinybirdToken: env.TINYBIRD_TOKEN,
   })
 
-  const cache = new UnpriceCache({
-    url: env.UPSTASH_REDIS_REST_URL,
-    token: env.UPSTASH_REDIS_REST_TOKEN,
+  const cache = initCache({
+    waitUntil,
   })
 
   return createInnerTRPCContext({

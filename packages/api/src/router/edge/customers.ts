@@ -643,7 +643,7 @@ export const customersRouter = createTRPCRouter({
       const hashKey = await utils.hashStringSHA256(body)
 
       // create hash key
-      const result = await opts.ctx.cache.getIdempotentUsage(hashKey)
+      const result = await opts.ctx.cache.idempotentRequestUsageByHash.get(hashKey)
 
       if (result) {
         return {
@@ -664,7 +664,7 @@ export const customersRouter = createTRPCRouter({
         ctx,
       })
 
-      waitUntil(opts.ctx.cache.setIdempotentUsage(hashKey, response.success))
+      waitUntil(opts.ctx.cache.idempotentRequestUsageByHash.set(hashKey, response.success))
 
       return {
         success: response.success,
