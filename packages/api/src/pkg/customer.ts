@@ -1,21 +1,14 @@
 import { waitUntil } from "@vercel/functions"
 
 import type { Database } from "@builderai/db"
-import type {
-  PlanVersionExtended,
-  SubscriptionExtended,
-  SubscriptionItem,
-  SubscriptionItemCache,
-} from "@builderai/db/validators"
-import { FetchError, Result } from "@builderai/error"
+
+import { FetchError, type Result } from "@builderai/error"
 import { Err, Ok } from "@builderai/error"
 import type { Analytics } from "@builderai/tinybird"
 
 import type { Context } from "../trpc"
-import { formatFeatureCache } from "../utils/shared"
-import type {
-  Cache
- } from "./cache"
+import type { Cache } from "./cache"
+import type { CacheNamespaces } from "./cache/namespaces"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
 
@@ -38,9 +31,45 @@ export class UnpriceCustomer {
     customerId: string
     projectId: string
     featureSlug: string
-  }): Promise<Result<SubscriptionItem, UnPriceCustomerError | FetchError>> {
-    const res = await this.cache.featureByCustomerId.get(
-      `${opts.customerId}:${opts.featureSlug}`
+  }): Promise<Result<CacheNamespaces["featureByCustomerId"], UnPriceCustomerError | FetchError>> {
+    const res = await this.cache.featureByCustomerId.swr(
+      `${opts.customerId}:${opts.featureSlug}`,
+      async () => {
+        return await this.db.query.subscriptionFeatures
+          .findFirst({
+            with: {
+              featurePlan: {
+                columns: {
+                  id: true,
+                  featureType: true,
+                },
+              },
+            },
+            where: (subFeature, { eq, and }) =>
+              and(
+                eq(subFeature.projectId, opts.projectId),
+                eq(subFeature.featureSlug, opts.featureSlug)
+              ),
+          })
+          .then((res) => {
+            const response = res
+              ? {
+                  id: res.id,
+                  projectId: res.projectId,
+                  featureSlug: res.featureSlug,
+                  featurePlanId: res.featurePlanId,
+                  subscriptionId: res.subscriptionId,
+                  quantity: res.quantity,
+                  min: res.min,
+                  limit: res.limit,
+                  featureType: res.featurePlan.featureType,
+                  usage: res.usage,
+                }
+              : null
+
+            return response
+          })
+      }
     )
 
     if (res.err) {
@@ -51,60 +80,173 @@ export class UnpriceCustomer {
           message: "unable to fetch required data",
           retry: true,
           cause: res.err,
-        }),
-      );
+        })
+      )
     }
 
     // cache miss, get from db
     if (!res.val) {
-      return await this.db.query.subscriptionFeatures.findFirst({
-        where: (subFeature, { eq, and }) =>
-          and(
-            eq(subFeature.id, opts.customerId),
-            eq(subFeature.projectId, opts.projectId),
-            eq(subFeature.featureSlug, opts.featureSlug)
-          ),
-      }).then((res) => {
-        if (!res) {
-          return Err(
-            new UnPriceCustomerError({
-              code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
-              customerId: opts.customerId,
-            })
-          )
-        }
-
-        // save the data in the cache
-        waitUntil(
-          this.cache.featureByCustomerId.set(
-            `${opts.customerId}:${opts.featureSlug}`,
-            res
-          )
-        )
-
-        return Ok(res)
+      // get the subscriptions for the customer
+      const subscriptions = await this.getSubscriptions({
+        customerId: opts.customerId,
+        projectId: opts.projectId,
       })
+
+      if (subscriptions.err) {
+        return Err(
+          new FetchError({
+            message: "unable to fetch required data",
+            retry: true,
+            cause: res.err,
+          })
+        )
+      }
+
+      const subscriptionIds = subscriptions.val
+
+      const feature = await this.db.query.subscriptionFeatures
+        .findFirst({
+          with: {
+            featurePlan: {
+              columns: {
+                id: true,
+                featureType: true,
+              },
+            },
+          },
+          where: (subFeature, { eq, and, inArray }) =>
+            and(
+              eq(subFeature.projectId, opts.projectId),
+              eq(subFeature.featureSlug, opts.featureSlug),
+              inArray(subFeature.subscriptionId, subscriptionIds)
+            ),
+        })
+        .then((res) => {
+          if (!res) {
+            return Err(
+              new UnPriceCustomerError({
+                code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+                customerId: opts.customerId,
+              })
+            )
+          }
+
+          const response = {
+            id: res.id,
+            projectId: res.projectId,
+            featureSlug: res.featureSlug,
+            featurePlanId: res.featurePlanId,
+            subscriptionId: res.subscriptionId,
+            quantity: res.quantity,
+            min: res.min,
+            limit: res.limit,
+            featureType: res.featurePlan.featureType,
+            usage: res.usage,
+          }
+
+          // save the data in the cache
+          waitUntil(
+            this.cache.featureByCustomerId.set(`${opts.customerId}:${opts.featureSlug}`, response)
+          )
+
+          return Ok(response)
+        })
+
+      return feature
     }
 
-
     return Ok(res.val)
+  }
+
+  public async getSubscriptions(opts: {
+    customerId: string
+    projectId: string
+  }): Promise<
+    Result<CacheNamespaces["subscriptionsByCustomerId"], UnPriceCustomerError | FetchError>
+  > {
+    const res = await this.cache.subscriptionsByCustomerId.get(opts.customerId)
+
+    if (res.err) {
+      return Err(
+        new FetchError({
+          message: "unable to fetch required data",
+          retry: true,
+          cause: res.err,
+        })
+      )
+    }
+
+    if (res.val) {
+      return Ok(res.val)
+    }
+
+    // cache miss, get from db
+    const customer = await this.db.query.customers.findFirst({
+      with: {
+        subscriptions: {
+          columns: {
+            id: true,
+          },
+          where: (sub, { eq }) => eq(sub.status, "active"),
+          orderBy(fields, operators) {
+            return [operators.desc(fields.startDate)]
+          },
+        },
+      },
+      where: (customer, { eq, and }) =>
+        and(eq(customer.id, opts.customerId), eq(customer.projectId, opts.projectId)),
+    })
+
+    if (!customer) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "CUSTOMER_NOT_FOUND",
+          customerId: opts.customerId,
+        })
+      )
+    }
+
+    if (!customer.subscriptions || customer.subscriptions.length === 0) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "CUSTOMER_HAS_NO_SUBSCRIPTIONS",
+          customerId: opts.customerId,
+        })
+      )
+    }
+
+    // get subscriptions Ids
+    const subscriptionIds = customer.subscriptions.map((sub) => sub.id)
+
+    // cache the active entitlements
+    waitUntil(this.cache.subscriptionsByCustomerId.set(customer.id, subscriptionIds))
+
+    return Ok(subscriptionIds)
   }
 
   public async getEntitlements(opts: {
     customerId: string
     projectId: string
-  }): Promise<Result<{ entitlements: string[] }, UnPriceCustomerError | FetchError>> {
+  }): Promise<
+    Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
+  > {
     const res = await this.cache.entitlementsByCustomerId.get(opts.customerId)
 
     if (res.err) {
-      // TODO: sent log
-      console.error(`Error getting cache for customer: ${res.err.message}`)
+      return Err(
+        new FetchError({
+          message: "unable to fetch required data",
+          retry: true,
+          cause: res.err,
+        })
+      )
     }
 
-    if (res.val && res.val.length > 0) {
-      return Ok({ entitlements: res.val })
+    if (res.val) {
+      return Ok(res.val)
     }
 
+    // cache miss, get from db
     const customer = await this.db.query.customers.findFirst({
       with: {
         subscriptions: {
@@ -172,7 +314,7 @@ export class UnpriceCustomer {
     // cache the active entitlements
     waitUntil(this.cache.entitlementsByCustomerId.set(customer.id, entitlements))
 
-    return Ok({ entitlements })
+    return Ok(entitlements)
   }
 
   // TODO: i should be able to verify my feature and return false access if the feature not exist in the subscription
@@ -231,6 +373,15 @@ export class UnpriceCustomer {
 
       const feature = res.val
 
+      if (!feature) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+            customerId: opts.customerId,
+          })
+        )
+      }
+
       const limit = feature.limit
       const usage = feature.usage ?? 0
 
@@ -266,29 +417,6 @@ export class UnpriceCustomer {
           break
         }
 
-        case "flat": {
-          if (limit && usage >= limit) {
-            // TODO: what happens if we have for instance a feature call access with quantity 1, should we check the usage or the customer suppose to
-            // have access to the feature if the quantity is 1?
-            waitUntil(
-              this.analytics.ingestFeaturesVerification({
-                ...analyticsPayload,
-                deniedReason: "USAGE_EXCEEDED",
-              })
-            )
-            return Ok({
-              currentUsage: usage,
-              limit: limit,
-              featureType: feature.featureType,
-              access: false,
-              deniedReason: "USAGE_EXCEEDED",
-              remaining: limit - usage,
-            })
-          }
-
-          // flat feature, just return the feature and the subscription
-          break
-        }
         case "tier": {
           if (limit && usage >= limit) {
             waitUntil(
@@ -334,12 +462,7 @@ export class UnpriceCustomer {
         }
 
         default:
-          return Err(
-            new UnPriceCustomerError({
-              code: "FEATURE_TYPE_NOT_SUPPORTED",
-              customerId,
-            })
-          )
+          break
       }
 
       waitUntil(
@@ -351,9 +474,7 @@ export class UnpriceCustomer {
       return Ok({
         currentUsage: usage,
         featureType: feature.featureType,
-        limit: limit ?? 0,
         access: true,
-        remaining: limit ? limit - usage : undefined,
       })
     } catch (e) {
       const error = e as Error
@@ -392,6 +513,15 @@ export class UnpriceCustomer {
       }
 
       const feature = res.val
+
+      if (!feature) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+            customerId: opts.customerId,
+          })
+        )
+      }
 
       waitUntil(
         Promise.all([

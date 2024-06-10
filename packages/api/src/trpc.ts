@@ -1,3 +1,5 @@
+import { tracing } from "@baselime/trpc-opentelemetry-middleware"
+import type { Session } from "@builderai/auth/server"
 /**
  * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
  * 1. You want to modify request context (see Part 1)
@@ -10,17 +12,17 @@ import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import { TRPCError, initTRPC } from "@trpc/server"
 import { ZodError } from "zod"
 
-import type { Session } from "@builderai/auth/server"
-
 import type { NextAuthRequest } from "@builderai/auth"
 import { auth } from "@builderai/auth/server"
 import { db } from "@builderai/db"
+import { newId } from "@builderai/db/utils"
+import { BaseLimeLogger, ConsoleLogger, type Logger } from "@builderai/logging"
 import { Analytics } from "@builderai/tinybird"
-import type { Cache } from "@unkey/cache"
 import { waitUntil } from "@vercel/functions"
 import { env } from "./env.mjs"
 import { initCache } from "./pkg/cache"
-import type { CacheNamespaces } from "./pkg/cache/namespaces"
+import { type Metrics, NoopMetrics } from "./pkg/metrics"
+import { LogdrainMetrics } from "./pkg/metrics/logdrain"
 import { transformer } from "./transformer"
 import { projectGuard } from "./utils"
 import { apikeyGuard } from "./utils/apaikey-guard"
@@ -42,8 +44,9 @@ export interface CreateContextOptions {
   req?: NextAuthRequest
   activeWorkspaceSlug: string
   activeProjectSlug: string
-  analytics: Analytics
-  cache: Cache<CacheNamespaces>
+  requestId: string
+  logger: Logger
+  metrics: Metrics
 }
 
 /**
@@ -59,6 +62,12 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     ...opts,
     db: db,
+    analytics: new Analytics({
+      tinybirdToken: env.TINYBIRD_TOKEN,
+    }),
+    cache: initCache({
+      waitUntil,
+    }),
     // INFO: better wait for native support for RLS in Drizzle
     // txRLS: rls.authTxn(db, opts.session?.user.id),
   }
@@ -78,8 +87,27 @@ export const createTRPCContext = async (opts: {
   const userId = session?.user?.id ?? "unknown"
   const apikey = opts.headers.get("x-builderai-api-key")
   const source = opts.headers.get("x-trpc-source") ?? "unknown"
+  const requestId = opts.headers.get("x-request-id") ?? newId("request")
 
-  console.info("Requesting user", userId, "from", source)
+  const logger = new BaseLimeLogger({
+    apiKey: env.BASELIME_APIKEY,
+    requestId,
+    defaultFields: { environment: env.NODE_ENV },
+    namespace: "api",
+    dataset: "api",
+    // isLocalDev: env.NODE_ENV === "development",
+    service: "api",
+    flushAfterMs: 10000, // flush after 10 secs
+    ctx: {
+      waitUntil, // flush will as a background task
+    },
+  })
+
+  // TODO: add env var to emit metrics to logdrain
+  const metrics = new LogdrainMetrics({ requestId, logger })
+  // env.NODE_ENV === "development" ? new LogdrainMetrics({ requestId, logger }) : new NoopMetrics()
+
+  logger.info(`Requesting user ${userId} from ${source}`)
 
   // for client side we set the cookie on focus tab event
   // for server side we set a header from trpc invoker
@@ -92,15 +120,6 @@ export const createTRPCContext = async (opts: {
   const activeProjectSlug =
     opts.req?.cookies.get("project-slug")?.value ?? opts.headers.get("project-slug") ?? ""
 
-  // TODO: is it a good idea to create a new instance for every request?
-  const analytics = new Analytics({
-    tinybirdToken: env.TINYBIRD_TOKEN,
-  })
-
-  const cache = initCache({
-    waitUntil,
-  })
-
   return createInnerTRPCContext({
     session,
     apikey,
@@ -108,8 +127,9 @@ export const createTRPCContext = async (opts: {
     req: opts.req,
     activeWorkspaceSlug,
     activeProjectSlug,
-    analytics,
-    cache,
+    requestId,
+    logger,
+    metrics,
   })
 }
 
@@ -163,7 +183,7 @@ export const mergeRouters = t.mergeRouters
  * tRPC API. It does not guarantee that a user querying is authorized, but you
  * can still access user session data if they are logged in
  */
-export const publicProcedure = t.procedure
+export const publicProcedure = t.procedure.use(tracing({ collectInput: true }))
 
 /**
  * Reusable procedure that enforces users are logged in before running the

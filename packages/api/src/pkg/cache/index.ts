@@ -41,7 +41,22 @@ export function initCache(c: Context): C<CacheNamespaces> {
   }
 
   return createCache({
-    usageByCustomerId: new Namespace<CacheNamespaces["usageByCustomerId"]>(c, defaultOpts),
+    featureByCustomerId: new Namespace<CacheNamespaces["featureByCustomerId"]>(c, defaultOpts),
+    entitlementsByCustomerId: new Namespace<CacheNamespaces["entitlementsByCustomerId"]>(
+      c,
+      defaultOpts
+    ),
+    idempotentRequestUsageByHash: new Namespace<CacheNamespaces["idempotentRequestUsageByHash"]>(
+      c,
+      {
+        ...defaultOpts,
+        stale: 60 * 1000, // 1 minute
+      }
+    ),
+    subscriptionsByCustomerId: new Namespace<CacheNamespaces["subscriptionsByCustomerId"]>(
+      c,
+      defaultOpts
+    ),
   })
 }
 

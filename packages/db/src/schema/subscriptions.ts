@@ -15,7 +15,12 @@ import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
 import type { subscriptionMetadataSchema } from "../validators/subscription"
 import { customers } from "./customers"
-import { collectionMethodEnum, subscriptionStatusEnum, typeFeatureEnum, typeSubscriptionEnum } from "./enums"
+import {
+  collectionMethodEnum,
+  subscriptionStatusEnum,
+  typeFeatureEnum,
+  typeSubscriptionEnum,
+} from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
@@ -103,6 +108,7 @@ export const subscriptions = pgTableProject(
   })
 )
 
+// TODO: rename this to subscription items
 export const subscriptionFeatures = pgTableProject(
   "subscription_features",
   {
@@ -110,12 +116,10 @@ export const subscriptionFeatures = pgTableProject(
     ...timestamps,
     quantity: integer("quantity"),
     subscriptionId: cuid("subscription_id").notNull(),
-    customerId: cuid("customer_id").notNull(),
     featurePlanId: cuid("feature_plan_id").notNull(),
     limit: integer("limit"),
     min: integer("min"),
     featureSlug: text("feature_slug").notNull(),
-    featureType: typeFeatureEnum("feature_type").notNull(),
     usage: integer("usage"),
   },
   (table) => ({
@@ -127,11 +131,6 @@ export const subscriptionFeatures = pgTableProject(
       columns: [table.subscriptionId, table.projectId],
       foreignColumns: [subscriptions.id, subscriptions.projectId],
       name: "subscription_features_subscription_id_fkey",
-    }).onDelete("cascade"),
-    customerfk: foreignKey({
-      columns: [table.customerId, table.projectId],
-      foreignColumns: [customers.id, customers.projectId],
-      name: "subscription_features_customer_id_fkey",
     }).onDelete("cascade"),
     featurefk: foreignKey({
       columns: [table.featurePlanId, table.projectId],

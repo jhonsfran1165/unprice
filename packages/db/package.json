@@ -44,6 +44,7 @@
     "@builderai/error": "^0.1.0",
     "@neondatabase/serverless": "^0.9.0",
     "@t3-oss/env-nextjs": "0.9.1",
+    "base-x": "^4.0.0",
     "dinero.js": "2.0.0-alpha.14",
     "drizzle-orm": "^0.31.0",
     "drizzle-zod": "^0.5.1",

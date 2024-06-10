@@ -203,8 +203,6 @@ export const subscriptionRouter = createTRPCRouter({
               min: item.min,
               featureSlug: item.featureSlug,
               usage: item.usage,
-              customerId: newSubscription.customerId,
-              featureType: item.featureType,
             })
           )
         ).catch((e) => {
@@ -229,7 +227,7 @@ export const subscriptionRouter = createTRPCRouter({
       // every time a subscription is created, we save the subscription in the cache
       waitUntil(
         opts.ctx.db.query.subscriptions
-          .findFirst({
+          .findMany({
             with: {
               features: {
                 with: {
@@ -238,20 +236,44 @@ export const subscriptionRouter = createTRPCRouter({
               },
             },
             where: (sub, { eq, and }) =>
-              and(eq(sub.id, subscriptionData.id), eq(sub.projectId, subscriptionData.projectId)),
+              and(
+                eq(sub.customerId, customerData.id),
+                eq(sub.projectId, subscriptionData.projectId)
+              ),
           })
-          .then(async (subscription) => {
-            if (!subscription) {
+          .then(async (subscriptions) => {
+            if (!subscriptions || subscriptions.length === 0) {
               // TODO: log error
-              console.error("Subscription not found")
+              console.error("Subscriptions not found")
               return
             }
 
-            Promise.all([
-              subscription.features.map((f) =>
-                opts.ctx.cache.featureByCustomerId.set(
-                  `${subscription.customerId}:${f.featureSlug}`,
-                  f
+            const customerEntitlements = subscriptions.flatMap((sub) =>
+              sub.features.map((f) => f.featureSlug)
+            )
+
+            const customerSubscriptions = subscriptions.map((sub) => sub.id)
+
+            return Promise.all([
+              // save the customer entitlements
+              opts.ctx.cache.entitlementsByCustomerId.set(customerData.id, customerEntitlements),
+              // save the customer subscriptions
+              opts.ctx.cache.subscriptionsByCustomerId.set(customerData.id, customerSubscriptions),
+              // save features
+              subscriptions.flatMap((sub) =>
+                sub.features.map((f) =>
+                  opts.ctx.cache.featureByCustomerId.set(`${sub.customerId}:${f.featureSlug}`, {
+                    id: f.id,
+                    projectId: f.projectId,
+                    featureSlug: f.featureSlug,
+                    featurePlanId: f.featurePlanId,
+                    subscriptionId: f.subscriptionId,
+                    quantity: f.quantity,
+                    min: f.min,
+                    limit: f.limit,
+                    featureType: f.featurePlan.featureType,
+                    usage: f.usage,
+                  })
                 )
               ),
             ])

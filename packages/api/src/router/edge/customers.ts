@@ -569,11 +569,15 @@ export const customersRouter = createTRPCRouter({
       const { apiKey, ...ctx } = opts.ctx
       const projectId = apiKey.projectId
 
-      return await getEntitlements({
+      const res = await getEntitlements({
         customerId,
         projectId: projectId,
         ctx,
       })
+
+      return {
+        entitlements: res,
+      }
     }),
   // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_6hASRQKH7vsq5WQH", featureSlug: "access" }}}))
   can: protectedApiOrActiveProjectProcedure
@@ -603,11 +607,18 @@ export const customersRouter = createTRPCRouter({
       const { apiKey, ...ctx } = opts.ctx
       const projectId = apiKey.projectId
 
+      ctx.metrics.emit({
+        metric: "metric.vault.latency",
+        op: "liveness",
+        latency: 5,
+      })
+
+      await ctx.metrics.flush()
+
       return await verifyFeature({
         customerId,
         featureSlug,
         projectId: projectId,
-        workspaceId: apiKey.project.workspaceId,
         ctx,
       })
     }),
@@ -625,7 +636,7 @@ export const customersRouter = createTRPCRouter({
         customerId: z.string(),
         featureSlug: z.string(),
         usage: z.number(),
-        requestId: z.string(),
+        idempotencyKey: z.string(),
       })
     )
     .output(
@@ -634,23 +645,22 @@ export const customersRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const { customerId, featureSlug, usage, requestId } = opts.input
+      const { customerId, featureSlug, usage, idempotencyKey } = opts.input
 
-      // implement idempotency here
-      // if the usage is the same as the last one, don't report it
       // this is to avoid reporting the same usage multiple times
-      const body = JSON.stringify({ customerId, featureSlug, usage, requestId })
+      const body = JSON.stringify({ customerId, featureSlug, usage, idempotencyKey })
       const hashKey = await utils.hashStringSHA256(body)
 
-      // create hash key
+      // get result if it exists
       const result = await opts.ctx.cache.idempotentRequestUsageByHash.get(hashKey)
 
-      if (result) {
+      if (result.val) {
         return {
-          success: result,
+          success: result.val,
         }
       }
 
+      // if cache miss, report usage
       const { apiKey, ...ctx } = opts.ctx
       const projectId = apiKey.projectId
       const workspaceId = apiKey.project.workspaceId

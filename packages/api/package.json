@@ -23,11 +23,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@baselime/trpc-opentelemetry-middleware": "^0.1.2",
     "@builderai/auth": "^0.1.0",
     "@builderai/config": "^0.1.0",
     "@builderai/db": "^0.1.0",
     "@builderai/email": "^0.1.0",
     "@builderai/error": "^0.1.0",
+    "@builderai/logging": "workspace:^",
+    "@builderai/logs": "workspace:^1.0.0",
     "@builderai/metrics": "workspace:^",
     "@builderai/stripe": "^0.1.0",
     "@builderai/tinybird": "^0.1.0",

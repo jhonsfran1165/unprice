@@ -48,12 +48,13 @@ export class UpstashStore<TNamespace extends string, TValue> implements Store<TN
         })
       )
     }
+
     if (!res) {
       return Ok(undefined)
     }
 
     try {
-      const entry = superjson.parse(res) as Entry<TValue>
+      const entry = superjson.parse(JSON.stringify(res)) as Entry<TValue>
       return Ok(entry)
     } catch (err) {
       return Err(

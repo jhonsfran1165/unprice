@@ -28,6 +28,7 @@ const nextConfig = {
   experimental: {
     mdxRs: true,
     optimizePackageImports: ["@builderai/ui"],
+    instrumentationHook: true,
   },
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },

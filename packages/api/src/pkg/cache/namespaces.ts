@@ -2,7 +2,12 @@ import type { SubscriptionItem } from "@builderai/db/validators"
 
 export type KeyHash = string
 export type CacheNamespaces = {
-  featureByCustomerId: SubscriptionItem
+  featureByCustomerId:
+    | (Omit<SubscriptionItem, "createdAt" | "updatedAt"> & {
+        featureType: string
+      })
+    | null
+  subscriptionsByCustomerId: Array<string>
   entitlementsByCustomerId: Array<string>
   idempotentRequestUsageByHash: boolean
 }

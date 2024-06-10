@@ -1,22 +1,3 @@
-export const dbNameSpaces = {
-  workspace: "ws",
-  ingestion: "ing",
-  project: "proj",
-  user: "user",
-  feature: "feat",
-  feature_version: "fv",
-  plan: "plan",
-  apikey: "api",
-  apikey_key: "builderai_live",
-  page: "page",
-  customer: "cus",
-  customer_provider: "cusp",
-  subscription: "sub",
-  subscription_feature: "subf",
-  domain: "dom",
-  plan_version: "pv",
-} as const
-
 export const TIER_MODES_MAP = {
   volume: {
     label: "Volume",
