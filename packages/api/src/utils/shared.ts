@@ -41,8 +41,6 @@ export const verifyFeature = async ({
 
   const end = performance.now()
 
-  console.log("adsdasdasd")
-
   ctx.metrics.emit({
     metric: "metric.feature.verification",
     duration: end - now,

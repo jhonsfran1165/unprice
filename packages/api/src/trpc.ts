@@ -96,10 +96,10 @@ export const createTRPCContext = async (opts: {
   const logger = new BaseLimeLogger({
     apiKey: env.BASELIME_APIKEY,
     requestId,
-    defaultFields: { userId, region, country },
-    namespace: source,
+    defaultFields: { userId, region, country, source },
+    namespace: "unprice-api",
     dataset: "unprice-api",
-    // isLocalDev: env.NODE_ENV === "development",
+    isLocalDev: env.NODE_ENV === "development",
     service: "api", // default service name
     flushAfterMs: 10000, // flush after 10 secs
     ctx: {
@@ -107,8 +107,9 @@ export const createTRPCContext = async (opts: {
     },
   })
 
-  // TODO: add env var to emit metrics to logdrain
-  const metrics = new LogdrainMetrics({ requestId, logger })
+  const metrics: Metrics = env.EMIT_METRICS_LOGS
+    ? new LogdrainMetrics({ requestId, logger })
+    : new NoopMetrics()
 
   const cache = initCache(
     {
@@ -116,14 +117,6 @@ export const createTRPCContext = async (opts: {
     },
     metrics
   )
-  // env.NODE_ENV === "development" ? new LogdrainMetrics({ requestId, logger }) : new NoopMetrics()
-
-  // logger.info(`Requesting user ${userId} from ${source}`, {
-  //   ...opts.req,
-  //   ...opts.headers,
-  //   ...opts.session,
-  //   duration: 599,
-  // })
 
   // for client side we set the cookie on focus tab event
   // for server side we set a header from trpc invoker
@@ -162,15 +155,21 @@ export const t = initTRPC
   .meta<OpenApiMeta>()
   .create({
     transformer,
-    errorFormatter({ shape, error }) {
-      // TODO: log error here
-      return {
+    errorFormatter({ shape, error, ctx }) {
+      const errorResponse = {
         ...shape,
         data: {
           ...shape.data,
           zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
         },
       }
+
+      ctx?.logger.error("Error in api", {
+        error: error,
+        response: errorResponse,
+      })
+
+      return errorResponse
     },
   })
 

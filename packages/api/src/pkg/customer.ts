@@ -81,7 +81,6 @@ export class UnpriceCustomer {
 
         const end = performance.now()
 
-        console.log("adsdasdasd")
         this.metrics.emit({
           metric: "metric.db.read",
           query: "subscriptionFeatureBySlug",
