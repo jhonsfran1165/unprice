@@ -6,25 +6,33 @@ import { FetchError, type Result } from "@builderai/error"
 import { Err, Ok } from "@builderai/error"
 import type { Analytics } from "@builderai/tinybird"
 
+import type { Logger } from "@builderai/logging"
 import type { Context } from "../trpc"
 import type { Cache } from "./cache"
 import type { CacheNamespaces } from "./cache/namespaces"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
+import type { Metrics } from "./metrics"
 
 export class UnpriceCustomer {
   private readonly cache: Cache
   private readonly db: Database
+  private readonly metrics: Metrics
+  private readonly logger: Logger
   private readonly analytics: Analytics
 
   constructor(opts: {
     cache: Cache
+    metrics: Metrics
     db: Database
     analytics: Analytics
+    logger: Logger
   }) {
     this.cache = opts.cache
     this.db = opts.db
+    this.metrics = opts.metrics
     this.analytics = opts.analytics
+    this.logger = opts.logger
   }
 
   public async getCustomerFeature(opts: {
@@ -35,7 +43,8 @@ export class UnpriceCustomer {
     const res = await this.cache.featureByCustomerId.swr(
       `${opts.customerId}:${opts.featureSlug}`,
       async () => {
-        return await this.db.query.subscriptionFeatures
+        const start = performance.now()
+        const feature = await this.db.query.subscriptionFeatures
           .findFirst({
             with: {
               featurePlan: {
@@ -69,6 +78,18 @@ export class UnpriceCustomer {
 
             return response
           })
+
+        const end = performance.now()
+
+        console.log("adsdasdasd")
+        this.metrics.emit({
+          metric: "metric.db.read",
+          query: "subscriptionFeatureBySlug",
+          duration: end - start,
+          service: "customer",
+        })
+
+        return feature
       }
     )
 

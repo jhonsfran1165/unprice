@@ -12,7 +12,7 @@ export const logSchema = z.discriminatedUnion("type", [
     requestId: z.string(),
     time: z.number(),
     message: z.string(),
-    context: z.record(z.any()),
+    context: z.record(z.any()).optional(),
   }),
   z.object({
     type: z.literal("metric"),

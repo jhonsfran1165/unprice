@@ -1,6 +1,3 @@
-import { TRPCError } from "@trpc/server"
-import { z } from "zod"
-
 import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
@@ -13,6 +10,8 @@ import {
   searchDataParamsSchema,
   subscriptionSelectSchema,
 } from "@builderai/db/validators"
+import { TRPCError } from "@trpc/server"
+import { z } from "zod"
 
 import { waitUntil } from "@vercel/functions"
 import { deniedReasonSchema } from "../../pkg/errors"
@@ -582,6 +581,7 @@ export const customersRouter = createTRPCRouter({
   // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_6hASRQKH7vsq5WQH", featureSlug: "access" }}}))
   can: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.can",
       openapi: {
         method: "GET",
         path: "/edge/customers.can",
@@ -606,14 +606,6 @@ export const customersRouter = createTRPCRouter({
       const { customerId, featureSlug } = opts.input
       const { apiKey, ...ctx } = opts.ctx
       const projectId = apiKey.projectId
-
-      ctx.metrics.emit({
-        metric: "metric.vault.latency",
-        op: "liveness",
-        latency: 5,
-      })
-
-      await ctx.metrics.flush()
 
       return await verifyFeature({
         customerId,

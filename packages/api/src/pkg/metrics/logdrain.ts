@@ -20,7 +20,12 @@ export class LogdrainMetrics implements Metrics {
       metric,
     })
 
-    this.logger.info(log.toString())
+    this.logger.emit(log.toString(), {
+      ...metric,
+      $baselime: {
+        metricName: metric.metric,
+      },
+    })
   }
 
   public async flush(): Promise<void> {

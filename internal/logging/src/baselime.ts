@@ -39,35 +39,64 @@ export class BaseLimeLogger implements Logger {
     })
   }
 
-  private marshal(
-    level: "debug" | "info" | "warn" | "error" | "fatal",
-    message: string,
-    fields?: Fields
-  ): string {
+  private marshal(level: "debug" | "info" | "warn" | "error" | "fatal", message: string): string {
     return new Log({
       type: "log",
       requestId: this.requestId,
       time: Date.now(),
       level,
       message,
-      context: { ...this.defaultFields, ...fields },
     }).toString()
   }
 
+  public emit(message: string, fields?: Fields): void {
+    this.client.info(message, fields)
+  }
   public debug(message: string, fields?: Fields): void {
-    this.client.debug(this.marshal("debug", message, fields))
+    this.client.debug(this.marshal("debug", message), {
+      ...fields,
+      ...this.defaultFields,
+      $baselime: {
+        type: "metric",
+      },
+    })
   }
   public info(message: string, fields?: Fields): void {
-    this.client.info(this.marshal("info", message, fields))
+    this.client.info(this.marshal("info", message), {
+      ...fields,
+      ...this.defaultFields,
+      $baselime: {
+        type: "metric",
+      },
+    })
   }
   public warn(message: string, fields?: Fields): void {
-    this.client.warn(this.marshal("warn", message, fields))
+    this.client.warn(this.marshal("warn", message), {
+      ...fields,
+      ...this.defaultFields,
+      $baselime: {
+        type: "metric",
+      },
+    })
   }
-  public error(message: string, fields?: Fields): void {
-    this.client.error(this.marshal("error", message, fields))
+  public error(message: string, error: unknown, fields?: Fields): void {
+    this.client.error(this.marshal("error", message), {
+      ...fields,
+      ...this.defaultFields,
+      $baselime: {
+        type: "metric",
+      },
+      error,
+    })
   }
   public fatal(message: string, fields?: Fields): void {
-    this.client.error(this.marshal("fatal", message, fields))
+    this.client.error(this.marshal("fatal", message), {
+      ...fields,
+      ...this.defaultFields,
+      $baselime: {
+        type: "metric",
+      },
+    })
   }
   public async flush(): Promise<void> {
     this.client.flush()

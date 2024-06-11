@@ -1,5 +1,7 @@
 import { tracing } from "@baselime/trpc-opentelemetry-middleware"
 import type { Session } from "@builderai/auth/server"
+import { cache } from "react"
+
 /**
  * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
  * 1. You want to modify request context (see Part 1)
@@ -18,9 +20,11 @@ import { db } from "@builderai/db"
 import { newId } from "@builderai/db/utils"
 import { BaseLimeLogger, ConsoleLogger, type Logger } from "@builderai/logging"
 import { Analytics } from "@builderai/tinybird"
+import type { Cache as C } from "@unkey/cache"
 import { waitUntil } from "@vercel/functions"
 import { env } from "./env.mjs"
 import { initCache } from "./pkg/cache"
+import type { CacheNamespaces } from "./pkg/cache/namespaces"
 import { type Metrics, NoopMetrics } from "./pkg/metrics"
 import { LogdrainMetrics } from "./pkg/metrics/logdrain"
 import { transformer } from "./transformer"
@@ -47,6 +51,7 @@ export interface CreateContextOptions {
   requestId: string
   logger: Logger
   metrics: Metrics
+  cache: C<CacheNamespaces>
 }
 
 /**
@@ -64,9 +69,6 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
     db: db,
     analytics: new Analytics({
       tinybirdToken: env.TINYBIRD_TOKEN,
-    }),
-    cache: initCache({
-      waitUntil,
     }),
     // INFO: better wait for native support for RLS in Drizzle
     // txRLS: rls.authTxn(db, opts.session?.user.id),
@@ -88,15 +90,17 @@ export const createTRPCContext = async (opts: {
   const apikey = opts.headers.get("x-builderai-api-key")
   const source = opts.headers.get("x-trpc-source") ?? "unknown"
   const requestId = opts.headers.get("x-request-id") ?? newId("request")
+  const region = opts.headers.get("x-vercel-id") ?? "unknown"
+  const country = opts.headers.get("x-vercel-ip-country") ?? "unknown"
 
   const logger = new BaseLimeLogger({
     apiKey: env.BASELIME_APIKEY,
     requestId,
-    defaultFields: { environment: env.NODE_ENV },
-    namespace: "api",
-    dataset: "api",
+    defaultFields: { userId, region, country },
+    namespace: source,
+    dataset: "unprice-api",
     // isLocalDev: env.NODE_ENV === "development",
-    service: "api",
+    service: "api", // default service name
     flushAfterMs: 10000, // flush after 10 secs
     ctx: {
       waitUntil, // flush will as a background task
@@ -105,9 +109,21 @@ export const createTRPCContext = async (opts: {
 
   // TODO: add env var to emit metrics to logdrain
   const metrics = new LogdrainMetrics({ requestId, logger })
+
+  const cache = initCache(
+    {
+      waitUntil,
+    },
+    metrics
+  )
   // env.NODE_ENV === "development" ? new LogdrainMetrics({ requestId, logger }) : new NoopMetrics()
 
-  logger.info(`Requesting user ${userId} from ${source}`)
+  // logger.info(`Requesting user ${userId} from ${source}`, {
+  //   ...opts.req,
+  //   ...opts.headers,
+  //   ...opts.session,
+  //   duration: 599,
+  // })
 
   // for client side we set the cookie on focus tab event
   // for server side we set a header from trpc invoker
@@ -130,6 +146,7 @@ export const createTRPCContext = async (opts: {
     requestId,
     logger,
     metrics,
+    cache,
   })
 }
 
@@ -146,6 +163,7 @@ export const t = initTRPC
   .create({
     transformer,
     errorFormatter({ shape, error }) {
+      // TODO: log error here
       return {
         ...shape,
         data: {
@@ -189,7 +207,7 @@ export const publicProcedure = t.procedure.use(tracing({ collectInput: true }))
  * Reusable procedure that enforces users are logged in before running the
  * procedure
  */
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
   if (!ctx.session?.user?.id) {
     throw new TRPCError({ code: "UNAUTHORIZED" })
   }
@@ -264,7 +282,7 @@ export const protectedActiveWorkspaceOwnerProcedure = protectedActiveWorkspacePr
 )
 
 // for those endpoint that are used inside the app but they also can be used with an api key
-export const protectedApiOrActiveProjectProcedure = t.procedure.use(async ({ ctx, next }) => {
+export const protectedApiOrActiveProjectProcedure = publicProcedure.use(async ({ ctx, next }) => {
   const activeProjectSlug = ctx.activeProjectSlug
   const apikey = ctx.apikey
 
@@ -335,7 +353,7 @@ export const protectedActiveProjectAdminProcedure = protectedActiveProjectProced
 /**
  * Procedure to authenticate API requests with an API key
  */
-export const protectedApiProcedure = t.procedure.use(async ({ ctx, next }) => {
+export const protectedApiProcedure = publicProcedure.use(async ({ ctx, next }) => {
   const apikey = ctx.apikey
 
   const { apiKey } = await apikeyGuard({

@@ -23,10 +23,13 @@ export const verifyFeature = async ({
   projectId: string
   ctx: Context
 }) => {
+  const now = performance.now()
   const customer = new UnpriceCustomer({
     cache: ctx.cache,
     db: ctx.db,
     analytics: ctx.analytics,
+    logger: ctx.logger,
+    metrics: ctx.metrics,
   })
 
   const { err, val } = await customer.verifyFeature({
@@ -34,6 +37,20 @@ export const verifyFeature = async ({
     featureSlug,
     projectId,
     ctx,
+  })
+
+  const end = performance.now()
+
+  console.log("adsdasdasd")
+
+  ctx.metrics.emit({
+    metric: "metric.feature.verification",
+    duration: end - now,
+    customerId,
+    featureSlug,
+    valid: !err,
+    code: err?.code ?? "",
+    service: "customer",
   })
 
   if (err) {
@@ -68,6 +85,8 @@ export const getEntitlements = async ({
     cache: ctx.cache,
     db: ctx.db,
     analytics: ctx.analytics,
+    logger: ctx.logger,
+    metrics: ctx.metrics,
   })
 
   const { err, val } = await customer.getEntitlements({
@@ -113,6 +132,8 @@ export const reportUsageFeature = async ({
     cache: ctx.cache,
     db: ctx.db,
     analytics: ctx.analytics,
+    logger: ctx.logger,
+    metrics: ctx.metrics,
   })
 
   const { err, val } = await customer.reportUsage({

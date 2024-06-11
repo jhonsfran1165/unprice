@@ -1,14 +1,15 @@
-import { type Cache as C, type Context, Namespace, createCache } from "@unkey/cache"
+import { type Cache as C, type Context, Namespace, createCache, withMetrics } from "@unkey/cache"
 import { MemoryStore, type Store } from "@unkey/cache"
 
 import { env } from "../../env.mjs"
+import type { Metrics } from "../metrics"
 import type { CacheNamespace, CacheNamespaces } from "./namespaces"
 import { CACHE_FRESHNESS_TIME_MS, CACHE_STALENESS_TIME_MS } from "./stale-while-revalidate"
 import { UpstashStore } from "./stores/upstash"
 
 const persistentMap = new Map()
 
-export function initCache(c: Context): C<CacheNamespaces> {
+export function initCache(c: Context, metrics: Metrics): C<CacheNamespaces> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const stores: Array<Store<CacheNamespace, any>> = []
 
@@ -31,11 +32,11 @@ export function initCache(c: Context): C<CacheNamespaces> {
   }
 
   // TODO: add metrics
-  // const emetricsMiddleware = withMetrics(metrics)
-  // const storesWithMetrics = stores.map((s) => emetricsMiddleware.wrap(s))
+  const metricsMiddleware = withMetrics(metrics)
+  const storesWithMetrics = stores.map((s) => metricsMiddleware(s))
 
   const defaultOpts = {
-    stores: stores,
+    stores: storesWithMetrics,
     fresh: CACHE_FRESHNESS_TIME_MS,
     stale: CACHE_STALENESS_TIME_MS,
   }

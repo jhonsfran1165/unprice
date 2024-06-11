@@ -8,6 +8,7 @@ export class FetchError extends BaseError<{
   method: string
   [more: string]: unknown
 }> {
+  public readonly code: string
   public readonly retry: boolean
   public readonly name = FetchError.name
 
@@ -24,5 +25,6 @@ export class FetchError extends BaseError<{
   }) {
     super(opts)
     this.retry = opts.retry
+    this.code = "FETCH_ERROR"
   }
 }

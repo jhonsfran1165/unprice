@@ -19,6 +19,7 @@
     "with-env": "dotenv -e ../../.env.local --"
   },
   "dependencies": {
+    "@baselime/node-opentelemetry": "^0.5.8",
     "@builderai/api": "^0.1.0",
     "@builderai/auth": "^0.1.0",
     "@builderai/config": "^0.1.0",

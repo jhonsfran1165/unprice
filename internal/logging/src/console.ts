@@ -28,6 +28,9 @@ export class ConsoleLogger implements Logger {
   public debug(message: string, fields?: Fields): void {
     console.debug(this.marshal("debug", message, fields))
   }
+  public emit(message: string, fields?: Fields): void {
+    console.info(this.marshal("debug", message, fields))
+  }
   public info(message: string, fields?: Fields): void {
     console.info(this.marshal("info", message, fields))
   }

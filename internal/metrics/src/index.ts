@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod"
 
 export const metricSchema = z.discriminatedUnion("metric", [
   z.object({
@@ -25,12 +25,14 @@ export const metricSchema = z.discriminatedUnion("metric", [
     latency: z.number(),
   }),
   z.object({
-    metric: z.literal("metric.key.verification"),
+    metric: z.literal("metric.feature.verification"),
     valid: z.boolean(),
     code: z.string(),
-    workspaceId: z.string().optional(),
+    customerId: z.string().optional(),
     apiId: z.string().optional(),
-    keyId: z.string().optional(),
+    featureSlug: z.string().optional(),
+    duration: z.number(),
+    service: z.string(),
   }),
   z.object({
     metric: z.literal("metric.http.request"),
@@ -38,65 +40,20 @@ export const metricSchema = z.discriminatedUnion("metric", [
     method: z.string(),
     status: z.number(),
     error: z.string().optional(),
-    serviceLatency: z.number(),
-    // Regional data might be different on non-cloudflare deployments
-    colo: z.string().optional(),
+    duration: z.number(),
     continent: z.string().optional(),
     country: z.string().optional(),
     city: z.string().optional(),
     userAgent: z.string().optional(),
     fromAgent: z.string().optional(),
+    service: z.string(),
   }),
   z.object({
     metric: z.literal("metric.db.read"),
-    query: z.enum(["getKeyAndApiByHash", "loadFromOrigin", "getKeysByKeyAuthId"]),
-    latency: z.number(),
+    query: z.enum(["subscriptionFeatureBySlug"]),
+    duration: z.number(),
+    service: z.string(),
   }),
-  z.object({
-    metric: z.literal("metric.ratelimit"),
-    workspaceId: z.string(),
-    namespaceId: z.string().optional(),
-    identifier: z.string(),
-    latency: z.number(),
-    mode: z.enum(["sync", "async"]),
-    success: z.boolean().optional(),
-    error: z.boolean().optional(),
-  }),
-  z.object({
-    metric: z.literal("metric.usagelimit"),
-    keyId: z.string(),
-    latency: z.number(),
-  }),
-  z.object({
-    metric: z.literal("metric.ratelimit.accuracy"),
-    workspaceId: z.string(),
-    namespaceId: z.string().optional(),
-    identifier: z.string(),
-    responded: z.boolean(),
-    correct: z.boolean(),
-  }),
+])
 
-  z.object({
-    metric: z.literal("metric.vault.latency"),
-    op: z.enum([
-      "encrypt",
-      "encryptBulk",
-      "decrypt",
-      "reEncrypt",
-      "createDEK",
-      "liveness",
-      "reEncryptDEKs",
-    ]),
-    latency: z.number(),
-  }),
-  z.object({
-    metric: z.literal("metric.server.latency"),
-    country: z.string(),
-    continent: z.string(),
-    latency: z.number(),
-    platform: z.string(),
-    colo: z.string(),
-  }),
-]);
-
-export type Metric = z.infer<typeof metricSchema>;
+export type Metric = z.infer<typeof metricSchema>
