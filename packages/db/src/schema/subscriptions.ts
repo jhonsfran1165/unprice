@@ -108,45 +108,40 @@ export const subscriptions = pgTableProject(
   })
 )
 
-// TODO: rename this to subscription items
-export const subscriptionFeatures = pgTableProject(
-  "subscription_features",
+export const subscriptionItems = pgTableProject(
+  "subscription_items",
   {
     ...projectID,
     ...timestamps,
-    quantity: integer("quantity"),
+    quantity: integer("quantity").notNull(),
     subscriptionId: cuid("subscription_id").notNull(),
-    featurePlanId: cuid("feature_plan_id").notNull(),
-    limit: integer("limit"),
-    min: integer("min"),
-    featureSlug: text("feature_slug").notNull(),
-    usage: integer("usage"),
+    featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
   },
   (table) => ({
     primary: primaryKey({
       columns: [table.id, table.projectId],
-      name: "subscription_features_pkey",
+      name: "subscription_items_pkey",
     }),
     subscriptionfk: foreignKey({
       columns: [table.subscriptionId, table.projectId],
       foreignColumns: [subscriptions.id, subscriptions.projectId],
-      name: "subscription_features_subscription_id_fkey",
+      name: "subscription_items_subscription_id_fkey",
     }).onDelete("cascade"),
     featurefk: foreignKey({
-      columns: [table.featurePlanId, table.projectId],
+      columns: [table.featurePlanVersionId, table.projectId],
       foreignColumns: [planVersionFeatures.id, planVersionFeatures.projectId],
-      name: "subscription_features_plan_id_fkey",
+      name: "subscription_items_plan_version_id_fkey",
     }),
   })
 )
 
-export const subscriptionFeatureRelations = relations(subscriptionFeatures, ({ one }) => ({
+export const subscriptionItemRelations = relations(subscriptionItems, ({ one }) => ({
   subscription: one(subscriptions, {
-    fields: [subscriptionFeatures.subscriptionId, subscriptionFeatures.projectId],
+    fields: [subscriptionItems.subscriptionId, subscriptionItems.projectId],
     references: [subscriptions.id, subscriptions.projectId],
   }),
-  featurePlan: one(planVersionFeatures, {
-    fields: [subscriptionFeatures.featurePlanId, subscriptionFeatures.projectId],
+  featurePlanVersion: one(planVersionFeatures, {
+    fields: [subscriptionItems.featurePlanVersionId, subscriptionItems.projectId],
     references: [planVersionFeatures.id, planVersionFeatures.projectId],
   }),
 }))
@@ -164,5 +159,5 @@ export const subscriptionRelations = relations(subscriptions, ({ one, many }) =>
     fields: [subscriptions.planVersionId, subscriptions.projectId],
     references: [versions.id, versions.projectId],
   }),
-  features: many(subscriptionFeatures),
+  items: many(subscriptionItems),
 }))

@@ -18,7 +18,7 @@ export const prefixes = {
   customer: "cus",
   customer_provider: "cusp",
   subscription: "sub",
-  subscription_feature: "subf",
+  subscription_item: "subi",
   domain: "dom",
   plan_version: "pv",
 } as const

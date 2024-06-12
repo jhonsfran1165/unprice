@@ -28,7 +28,7 @@ const nextConfig = {
   experimental: {
     mdxRs: true,
     optimizePackageImports: ["@builderai/ui"],
-    instrumentationHook: true,
+    // instrumentationHook: true,
   },
   webpack: (config, { isServer }) => {
     if (isServer) {

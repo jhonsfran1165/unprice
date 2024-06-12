@@ -7,7 +7,7 @@ import { z } from "zod"
 import type { Result } from "@builderai/error"
 import { Err, Ok, SchemaError } from "@builderai/error"
 
-import { subscriptionFeatures, subscriptions } from "../schema/subscriptions"
+import { subscriptionItems, subscriptions } from "../schema/subscriptions"
 import { UnPriceCalculationError } from "./errors"
 import type { PlanVersionExtended } from "./planVersionFeatures"
 import {
@@ -28,35 +28,34 @@ import {
   typeFeatureSchema,
 } from "./shared"
 
+const subscriptionItemConfigSchema = z.object({
+  featurePlanId: z.string(),
+  featureSlug: z.string(),
+  quantity: z.coerce
+    .number()
+    .min(1)
+    .optional()
+    .describe("quantity of the feature the user is subscribed to"),
+  min: z.coerce
+    .number()
+    .optional()
+    .describe("minimum quantity of the feature the user is subscribed to"),
+  limit: z.coerce.number().optional().describe("limit of the feature the user is subscribed to"),
+})
+
 export const subscriptionMetadataSchema = z.object({
   externalId: z.string().optional(),
   defaultPaymentMethodId: z.string().optional(),
 })
 
-export const subscriptionFeaturesSelectSchema = createSelectSchema(subscriptionFeatures, {
+export const subscriptionItemsSelectSchema = createSelectSchema(subscriptionItems, {
   // quantity for the item, for flat features it's always 1, usage features it's the current usage
-  quantity: z.coerce.number().min(1).optional(),
-  // min quantity for the item
-  min: z.coerce.number().optional(),
-  // limit for the item if any
-  limit: z.coerce.number().optional(),
-  featurePlanId: z.string(),
-  featureSlug: z.string(),
-  // current usage for the item in the current billing period
-  usage: z.coerce.number().min(0).optional(),
+  quantity: z.coerce.number().min(1),
 })
 
-export const subscriptionFeaturesInsertSchema = createInsertSchema(subscriptionFeatures, {
+export const subscriptionItemsInsertSchema = createInsertSchema(subscriptionItems, {
   // quantity for the item, for flat features it's always 1, usage features it's the current usage
-  quantity: z.coerce.number().min(1).optional(),
-  // min quantity for the item
-  min: z.coerce.number().optional(),
-  // limit for the item if any
-  limit: z.coerce.number().optional(),
-  featurePlanId: z.string(),
-  featureSlug: z.string(),
-  // current usage for the item in the current billing period
-  usage: z.coerce.number().min(0).optional(),
+  quantity: z.coerce.number().min(1),
 }).partial({
   id: true,
   subscriptionId: true,
@@ -66,8 +65,8 @@ export const subscriptionFeaturesInsertSchema = createInsertSchema(subscriptionF
 })
 
 // stripe won't allow more than 250 items in a single invoice
-export const subscriptionItemsSchema = z
-  .array(subscriptionFeaturesInsertSchema)
+export const subscriptionItemsConfigSchema = z
+  .array(subscriptionItemConfigSchema)
   .superRefine((items, ctx) => {
     if (items.length > 50) {
       // TODO: add a better message and map to the correct path
@@ -131,7 +130,7 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   collectionMethod: collectionMethodSchema,
 })
   .extend({
-    items: subscriptionItemsSchema,
+    config: subscriptionItemsConfigSchema,
   })
   .omit({
     createdAt: true,
@@ -158,10 +157,10 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
   })
   .extend({
     planVersion: planVersionExtendedSchema,
-    features: subscriptionFeaturesSelectSchema.array(),
+    features: subscriptionItemsSelectSchema.array(),
   })
 
-export const subscriptionItemCacheSchema = subscriptionFeaturesSelectSchema
+export const subscriptionItemCacheSchema = subscriptionItemsSelectSchema
   .omit({
     createdAt: true,
     updatedAt: true,
@@ -171,24 +170,23 @@ export const subscriptionItemCacheSchema = subscriptionFeaturesSelectSchema
     featureType: typeFeatureSchema,
   })
 
-export const subscriptionItemExtendedSchema = subscriptionFeaturesSelectSchema.extend({
+export const subscriptionItemExtendedSchema = subscriptionItemsSelectSchema.extend({
   featurePlan: planVersionFeatureInsertBaseSchema,
 })
 
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>
-export type SubscriptionItem = z.infer<typeof subscriptionFeaturesSelectSchema>
+export type SubscriptionItem = z.infer<typeof subscriptionItemsSelectSchema>
 export type SubscriptionItemExtended = z.infer<typeof subscriptionItemExtendedSchema>
-export type InsertSubscriptionItem = z.infer<typeof subscriptionFeaturesInsertSchema>
+export type InsertSubscriptionItem = z.infer<typeof subscriptionItemsInsertSchema>
 export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
-
-export type SubscriptionItemCache = z.infer<typeof subscriptionItemCacheSchema>
+export type SubscriptionItemConfig = z.infer<typeof subscriptionItemConfigSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,
 }: {
   planVersion: PlanVersionExtended
-}): Result<SubscriptionItem[], UnPriceCalculationError> => {
+}): Result<SubscriptionItemConfig[], UnPriceCalculationError> => {
   if (!planVersion.planFeatures || planVersion.planFeatures.length === 0) {
     return Err(
       new UnPriceCalculationError({
@@ -206,7 +204,7 @@ export const createDefaultSubscriptionConfig = ({
           quantity: 1,
           limit: 1,
           min: 1,
-        } as SubscriptionItem
+        }
       case "tier": {
         return {
           featurePlanId: planFeature.id,
@@ -214,15 +212,14 @@ export const createDefaultSubscriptionConfig = ({
           quantity: planFeature.defaultQuantity ?? 1,
           min: 1,
           limit: planFeature.limit,
-        } as SubscriptionItem
+        }
       }
       case "usage":
         return {
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
-          usage: 0,
           limit: planFeature.limit,
-        } as SubscriptionItem
+        }
 
       case "package": {
         const config = configPackageSchema.parse(planFeature.config)
@@ -232,7 +229,7 @@ export const createDefaultSubscriptionConfig = ({
           quantity: config.units,
           limit: config.units,
           min: config.units,
-        } as SubscriptionItem
+        }
       }
 
       default:
@@ -242,11 +239,11 @@ export const createDefaultSubscriptionConfig = ({
           quantity: planFeature.defaultQuantity,
           limit: planFeature.defaultQuantity,
           min: 1,
-        } as SubscriptionItem
+        }
     }
   })
 
-  return Ok(itemsConfig)
+  return Ok(itemsConfig as SubscriptionItemConfig[])
 }
 
 const calculatePriceSchema = z.object({
@@ -259,7 +256,7 @@ interface CalculatedPrice {
   totalPrice: z.infer<typeof calculatePriceSchema>
 }
 
-const calculatePricePerFeatureSchema = subscriptionFeaturesSelectSchema
+const calculatePricePerFeatureSchema = subscriptionItemsSelectSchema
   .pick({ quantity: true })
   .extend({
     feature: planVersionFeatureInsertBaseSchema,

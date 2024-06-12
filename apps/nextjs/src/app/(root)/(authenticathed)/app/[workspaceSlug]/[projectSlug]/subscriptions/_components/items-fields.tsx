@@ -38,7 +38,7 @@ export default function ConfigItemsFormField({
 }: {
   form: UseFormReturn<InsertSubscription>
   selectedPlanVersion?: PlanVersionResponse
-  items: UseFieldArrayReturn<InsertSubscription, "items", "id">
+  items: UseFieldArrayReturn<InsertSubscription, "config", "id">
 }) {
   const versionFeatures = new Map<string, PlanVersionFeaturesResponse>()
   const versionAddons = new Map<string, PlanVersionFeaturesResponse>()
@@ -63,7 +63,7 @@ export default function ConfigItemsFormField({
       <div className="mb-4 flex flex-col gap-2">
         <FormLabel
           className={cn({
-            "text-destructive": errors.items,
+            "text-destructive": errors.config,
           })}
         >
           <h4 className="my-auto block font-semibold">Feature configuration</h4>
@@ -74,7 +74,7 @@ export default function ConfigItemsFormField({
             "Configure the quantity for each feature, for usage based feature, the price will be calculated with the reported usage. You can't change the quantity for flat features"
           }
         </div>
-        {errors.items && <FormMessage>{errors.items.message}</FormMessage>}
+        {errors.config && <FormMessage>{errors.config.message}</FormMessage>}
       </div>
 
       <div className="flex items-center justify-center px-2 py-4">
@@ -99,7 +99,7 @@ export default function ConfigItemsFormField({
                 const feature =
                   versionFeatures.get(item.featurePlanId) ?? versionAddons.get(item.featurePlanId)!
 
-                const quantity = form.watch(`items.${index}.quantity`)
+                const quantity = form.watch(`config.${index}.quantity`)
 
                 return (
                   <TableRow key={item.id} className="border-b hover:bg-transparent">
@@ -157,7 +157,7 @@ export default function ConfigItemsFormField({
                       ) : (
                         <FormField
                           control={form.control}
-                          name={`items.${index}.quantity`}
+                          name={`config.${index}.quantity`}
                           render={({ field }) => (
                             <FormItem className="justify-center text-center">
                               <FormMessage className="text-xs font-light" />

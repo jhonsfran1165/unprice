@@ -1,17 +1,15 @@
-import { TRPCError } from "@trpc/server"
-import { ZodError, z } from "zod"
-import { features } from "./../../../../db/src/schema/features"
-
 import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
-import type { InsertSubscriptionItem, SubscriptionItem } from "@builderai/db/validators"
+import type { SubscriptionItemConfig } from "@builderai/db/validators"
 import {
   createDefaultSubscriptionConfig,
   subscriptionInsertSchema,
-  subscriptionItemsSchema,
+  subscriptionItemsConfigSchema,
   subscriptionSelectSchema,
 } from "@builderai/db/validators"
+import { TRPCError } from "@trpc/server"
+import { z } from "zod"
 
 import { waitUntil } from "@vercel/functions"
 import {
@@ -19,13 +17,12 @@ import {
   protectedActiveProjectAdminProcedure,
   protectedActiveProjectProcedure,
 } from "../../trpc"
-import { formatFeatureCache } from "../../utils/shared"
 
 export const subscriptionRouter = createTRPCRouter({
   create: protectedActiveProjectAdminProcedure
     .input(
       subscriptionInsertSchema.extend({
-        items: subscriptionItemsSchema.optional(),
+        config: subscriptionItemsConfigSchema.optional(),
       })
     )
     .output(
@@ -37,7 +34,7 @@ export const subscriptionRouter = createTRPCRouter({
       const {
         planVersionId,
         customerId,
-        items,
+        config,
         trialDays,
         startDate,
         endDate,
@@ -89,10 +86,13 @@ export const subscriptionRouter = createTRPCRouter({
         with: {
           subscriptions: {
             with: {
-              features: true,
-              planVersion: {
+              items: {
                 with: {
-                  planFeatures: true,
+                  featurePlanVersion: {
+                    with: {
+                      feature: true,
+                    },
+                  },
                 },
               },
             },
@@ -117,7 +117,7 @@ export const subscriptionRouter = createTRPCRouter({
       // The plan version the customer is attempting to subscript can't have any feature that the customer already has
       const newFeatures = versionData.planFeatures.map((f) => f.feature.slug)
       const subscriptionFeatureSlugs = customerData.subscriptions.flatMap((sub) =>
-        sub.features.map((f) => f.featureSlug)
+        sub.items.map((f) => f.featurePlanVersion.feature.slug)
       )
 
       const commonFeatures = subscriptionFeatureSlugs.filter((f) => newFeatures.includes(f))
@@ -131,18 +131,10 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      let configItemsSubscription: InsertSubscriptionItem[] = []
+      let configItemsSubscription: SubscriptionItemConfig[] = []
 
-      if (items) {
-        const parseItems = subscriptionItemsSchema.safeParse(items)
-
-        if (!parseItems.success) {
-          throw ZodError.create(parseItems.error.errors)
-        }
-
-        configItemsSubscription = parseItems.data
-      } else {
-        // if no items are passed, configuration is created from the default quantities of the plan features
+      if (!config) {
+        // if no items are passed, configuration is created from the default quantities of the plan version
         const { err, val } = createDefaultSubscriptionConfig({
           planVersion: versionData,
         })
@@ -155,6 +147,8 @@ export const subscriptionRouter = createTRPCRouter({
         }
 
         configItemsSubscription = val
+      } else {
+        configItemsSubscription = config
       }
 
       // execute this in a transaction
@@ -193,16 +187,12 @@ export const subscriptionRouter = createTRPCRouter({
         // add features to the subscription
         await Promise.all(
           configItemsSubscription.map((item) =>
-            trx.insert(schema.subscriptionFeatures).values({
-              id: utils.newId("subscription_feature"),
+            trx.insert(schema.subscriptionItems).values({
+              id: utils.newId("subscription_item"),
               projectId: newSubscription.projectId,
               subscriptionId: newSubscription.id,
-              featurePlanId: item.featurePlanId,
+              featurePlanVersionId: item.featurePlanId,
               quantity: item.quantity,
-              limit: item.limit,
-              min: item.min,
-              featureSlug: item.featureSlug,
-              usage: item.usage,
             })
           )
         ).catch((e) => {
@@ -229,9 +219,13 @@ export const subscriptionRouter = createTRPCRouter({
         opts.ctx.db.query.subscriptions
           .findMany({
             with: {
-              features: {
+              items: {
                 with: {
-                  featurePlan: true,
+                  featurePlanVersion: {
+                    with: {
+                      feature: true,
+                    },
+                  },
                 },
               },
             },
@@ -249,7 +243,7 @@ export const subscriptionRouter = createTRPCRouter({
             }
 
             const customerEntitlements = subscriptions.flatMap((sub) =>
-              sub.features.map((f) => f.featureSlug)
+              sub.items.map((f) => f.featurePlanVersion.feature.slug)
             )
 
             const customerSubscriptions = subscriptions.map((sub) => sub.id)
@@ -261,19 +255,19 @@ export const subscriptionRouter = createTRPCRouter({
               opts.ctx.cache.subscriptionsByCustomerId.set(customerData.id, customerSubscriptions),
               // save features
               subscriptions.flatMap((sub) =>
-                sub.features.map((f) =>
-                  opts.ctx.cache.featureByCustomerId.set(`${sub.customerId}:${f.featureSlug}`, {
-                    id: f.id,
-                    projectId: f.projectId,
-                    featureSlug: f.featureSlug,
-                    featurePlanId: f.featurePlanId,
-                    subscriptionId: f.subscriptionId,
-                    quantity: f.quantity,
-                    min: f.min,
-                    limit: f.limit,
-                    featureType: f.featurePlan.featureType,
-                    usage: f.usage,
-                  })
+                sub.items.map((f) =>
+                  opts.ctx.cache.featureByCustomerId.set(
+                    `${sub.customerId}:${f.featurePlanVersion.feature.slug}`,
+                    {
+                      id: f.id,
+                      projectId: f.projectId,
+                      featureSlug: f.featurePlanVersion.feature.slug,
+                      featurePlanVersionId: f.featurePlanVersion.id,
+                      subscriptionId: f.subscriptionId,
+                      quantity: f.quantity,
+                      featureType: f.featurePlanVersion.featureType,
+                    }
+                  )
                 )
               ),
             ])
@@ -339,9 +333,6 @@ export const subscriptionRouter = createTRPCRouter({
             eq(subscription.projectId, project.id),
             eq(subscription.customerId, customerId)
           ),
-        with: {
-          features: true,
-        },
       })
 
       if (!subscriptionData) {
@@ -403,9 +394,6 @@ export const subscriptionRouter = createTRPCRouter({
             eq(subscription.projectId, project.id),
             eq(subscription.customerId, customerId)
           ),
-        with: {
-          features: true,
-        },
       })
 
       if (!subscriptionData) {

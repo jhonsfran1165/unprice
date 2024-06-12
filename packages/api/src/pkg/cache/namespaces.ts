@@ -5,6 +5,7 @@ export type CacheNamespaces = {
   featureByCustomerId:
     | (Omit<SubscriptionItem, "createdAt" | "updatedAt"> & {
         featureType: string
+        featureSlug: string
       })
     | null
   subscriptionsByCustomerId: Array<string>

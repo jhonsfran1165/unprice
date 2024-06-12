@@ -67,7 +67,7 @@ export function SubscriptionForm({
 
   const items = useFieldArray({
     control: form.control,
-    name: "items",
+    name: "config",
   })
 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery({
@@ -196,7 +196,7 @@ export function SubscriptionForm({
                         >
                           {field.value
                             ? data?.planVersions.find((version) => version.id === field.value)
-                                ?.title
+                              ?.title
                             : "Select plan"}
                           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>

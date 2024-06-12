@@ -1,12 +1,15 @@
 import { waitUntil } from "@vercel/functions"
+import { features } from "./../../../db/src/schema/features"
 
-import type { Database } from "@builderai/db"
+import { type Database, and, eq } from "@builderai/db"
 
 import { FetchError, type Result } from "@builderai/error"
 import { Err, Ok } from "@builderai/error"
 import type { Analytics } from "@builderai/tinybird"
 
+import { planVersionFeatures, subscriptionItems, subscriptions } from "@builderai/db/schema"
 import type { Logger } from "@builderai/logging"
+import { getCustomerFeatureQuery } from "../queries"
 import type { Context } from "../trpc"
 import type { Cache } from "./cache"
 import type { CacheNamespaces } from "./cache/namespaces"
@@ -43,58 +46,26 @@ export class UnpriceCustomer {
     const res = await this.cache.featureByCustomerId.swr(
       `${opts.customerId}:${opts.featureSlug}`,
       async () => {
-        const start = performance.now()
-        const feature = await this.db.query.subscriptionFeatures
-          .findFirst({
-            with: {
-              featurePlan: {
-                columns: {
-                  id: true,
-                  featureType: true,
-                },
-              },
-            },
-            where: (subFeature, { eq, and }) =>
-              and(
-                eq(subFeature.projectId, opts.projectId),
-                eq(subFeature.featureSlug, opts.featureSlug)
-              ),
-          })
-          .then((res) => {
-            const response = res
-              ? {
-                  id: res.id,
-                  projectId: res.projectId,
-                  featureSlug: res.featureSlug,
-                  featurePlanId: res.featurePlanId,
-                  subscriptionId: res.subscriptionId,
-                  quantity: res.quantity,
-                  min: res.min,
-                  limit: res.limit,
-                  featureType: res.featurePlan.featureType,
-                  usage: res.usage,
-                }
-              : null
-
-            return response
-          })
-
-        const end = performance.now()
-
-        this.metrics.emit({
-          metric: "metric.db.read",
-          query: "subscriptionFeatureBySlug",
-          duration: end - start,
-          service: "customer",
+        return await getCustomerFeatureQuery({
+          projectId: opts.projectId,
+          featureSlug: opts.featureSlug,
+          customerId: opts.customerId,
+          db: this.db,
+          metrics: this.metrics,
+          logger: this.logger,
         })
-
-        return feature
       }
     )
 
     if (res.err) {
       // TODO: sent log
       console.error(`Error getting cache for customer: ${res.err.message}`)
+      this.logger.error(`Error getting cache for customer: ${res.err.message}`, {
+        error: res.err.message,
+        customerId: opts.customerId,
+        featureSlug: opts.featureSlug,
+        projectId: opts.projectId,
+      })
       return Err(
         new FetchError({
           message: "unable to fetch required data",
@@ -106,73 +77,21 @@ export class UnpriceCustomer {
 
     // cache miss, get from db
     if (!res.val) {
-      // get the subscriptions for the customer
-      const subscriptions = await this.getSubscriptions({
-        customerId: opts.customerId,
+      const feature = await getCustomerFeatureQuery({
         projectId: opts.projectId,
+        featureSlug: opts.featureSlug,
+        customerId: opts.customerId,
+        db: this.db,
+        metrics: this.metrics,
+        logger: this.logger,
       })
 
-      if (subscriptions.err) {
-        return Err(
-          new FetchError({
-            message: "unable to fetch required data",
-            retry: true,
-            cause: res.err,
-          })
-        )
-      }
+      // save the data in the cache
+      waitUntil(
+        this.cache.featureByCustomerId.set(`${opts.customerId}:${opts.featureSlug}`, feature)
+      )
 
-      const subscriptionIds = subscriptions.val
-
-      const feature = await this.db.query.subscriptionFeatures
-        .findFirst({
-          with: {
-            featurePlan: {
-              columns: {
-                id: true,
-                featureType: true,
-              },
-            },
-          },
-          where: (subFeature, { eq, and, inArray }) =>
-            and(
-              eq(subFeature.projectId, opts.projectId),
-              eq(subFeature.featureSlug, opts.featureSlug),
-              inArray(subFeature.subscriptionId, subscriptionIds)
-            ),
-        })
-        .then((res) => {
-          if (!res) {
-            return Err(
-              new UnPriceCustomerError({
-                code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
-                customerId: opts.customerId,
-              })
-            )
-          }
-
-          const response = {
-            id: res.id,
-            projectId: res.projectId,
-            featureSlug: res.featureSlug,
-            featurePlanId: res.featurePlanId,
-            subscriptionId: res.subscriptionId,
-            quantity: res.quantity,
-            min: res.min,
-            limit: res.limit,
-            featureType: res.featurePlan.featureType,
-            usage: res.usage,
-          }
-
-          // save the data in the cache
-          waitUntil(
-            this.cache.featureByCustomerId.set(`${opts.customerId}:${opts.featureSlug}`, response)
-          )
-
-          return Ok(response)
-        })
-
-      return feature
+      return Ok(feature)
     }
 
     return Ok(res.val)

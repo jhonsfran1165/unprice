@@ -93,23 +93,27 @@ export const createTRPCContext = async (opts: {
   const region = opts.headers.get("x-vercel-id") ?? "unknown"
   const country = opts.headers.get("x-vercel-ip-country") ?? "unknown"
 
-  const logger = new BaseLimeLogger({
-    apiKey: env.BASELIME_APIKEY,
-    requestId,
-    defaultFields: { userId, region, country, source },
-    namespace: "unprice-api",
-    dataset: "unprice-api",
-    isLocalDev: env.NODE_ENV === "development",
-    service: "api", // default service name
-    flushAfterMs: 10000, // flush after 10 secs
-    ctx: {
-      waitUntil, // flush will as a background task
-    },
-  })
+  const logger =
+    env.EMIT_METRICS_LOGS === true
+      ? new BaseLimeLogger({
+          apiKey: env.BASELIME_APIKEY,
+          requestId,
+          defaultFields: { userId, region, country, source },
+          namespace: "unprice-api",
+          dataset: "unprice-api",
+          service: "api", // default service name
+          flushAfterMs: 10000, // flush after 10 secs
+          ctx: {
+            waitUntil, // flush will as a background task
+          },
+        })
+      : new ConsoleLogger({
+          requestId,
+          defaultFields: { userId, region, country, source },
+        })
 
-  const metrics: Metrics = env.EMIT_METRICS_LOGS
-    ? new LogdrainMetrics({ requestId, logger })
-    : new NoopMetrics()
+  const metrics: Metrics =
+    env.EMIT_METRICS_LOGS === true ? new LogdrainMetrics({ requestId, logger }) : new NoopMetrics()
 
   const cache = initCache(
     {
