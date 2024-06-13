@@ -1,5 +1,4 @@
 import { waitUntil } from "@vercel/functions"
-import { features } from "./../../../db/src/schema/features"
 
 import { type Database, and, eq } from "@builderai/db"
 
@@ -10,7 +9,13 @@ import type { Analytics } from "@builderai/tinybird"
 import { planVersionFeatures, subscriptionItems, subscriptions } from "@builderai/db/schema"
 import type { FeatureType, Usage } from "@builderai/db/validators"
 import type { Logger } from "@builderai/logging"
-import { getCustomerFeatureQuery, reportUsageQuery } from "../queries"
+import {
+  createUsageQuery,
+  getCustomerFeatureQuery,
+  getCustomerFeatureUsageQuery,
+  getEntitlementsQuery,
+  reportUsageQuery,
+} from "../queries"
 import type { Context } from "../trpc"
 import type { Cache } from "./cache"
 import type { CacheNamespaces, CurrentUsageCached } from "./cache/namespaces"
@@ -39,7 +44,7 @@ export class UnpriceCustomer {
     this.logger = opts.logger
   }
 
-  public async getCustomerFeature(opts: {
+  private async _getCustomerFeature(opts: {
     customerId: string
     projectId: string
     featureSlug: string
@@ -59,10 +64,8 @@ export class UnpriceCustomer {
     )
 
     if (res.err) {
-      // TODO: sent log
-      console.error(`Error getting cache for customer: ${res.err.message}`)
       this.logger.error(`Error getting cache for customer: ${res.err.message}`, {
-        error: res.err.message,
+        error: JSON.stringify(res.err),
         customerId: opts.customerId,
         featureSlug: opts.featureSlug,
         projectId: opts.projectId,
@@ -98,7 +101,87 @@ export class UnpriceCustomer {
     return Ok(res.val)
   }
 
-  public async getSubscriptions(opts: {
+  private async _getCustomerUsageFeature(opts: {
+    customerId: string
+    projectId: string
+    featureSlug: string
+    year: number
+    month: number
+  }): Promise<Result<CurrentUsageCached, UnPriceCustomerError | FetchError>> {
+    const res = await this.cache.customerFeatureCurrentUsage.swr(
+      `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
+      async () => {
+        return await getCustomerFeatureUsageQuery({
+          projectId: opts.projectId,
+          featureSlug: opts.featureSlug,
+          customerId: opts.customerId,
+          db: this.db,
+          metrics: this.metrics,
+          logger: this.logger,
+          year: opts.year,
+          month: opts.month,
+        })
+      }
+    )
+
+    if (res.err) {
+      this.logger.error(`Error getting cache for usage: ${res.err.message}`, {
+        error: JSON.stringify(res.err),
+        customerId: opts.customerId,
+        featureSlug: opts.featureSlug,
+        projectId: opts.projectId,
+      })
+      return Err(
+        new FetchError({
+          message: "unable to fetch required data",
+          retry: true,
+          cause: res.err,
+        })
+      )
+    }
+
+    // cache miss, get from db
+    if (!res.val) {
+      let usage = await getCustomerFeatureUsageQuery({
+        projectId: opts.projectId,
+        featureSlug: opts.featureSlug,
+        customerId: opts.customerId,
+        db: this.db,
+        metrics: this.metrics,
+        logger: this.logger,
+        year: opts.year,
+        month: opts.month,
+      })
+
+      // if the feature has no current usage for the month, we need to create it
+      if (!usage) {
+        usage = await createUsageQuery({
+          projectId: opts.projectId,
+          featureSlug: opts.featureSlug,
+          customerId: opts.customerId,
+          db: this.db,
+          metrics: this.metrics,
+          logger: this.logger,
+          month: opts.month,
+          year: opts.year,
+        })
+      }
+
+      // save the data in the cache
+      waitUntil(
+        this.cache.customerFeatureCurrentUsage.set(
+          `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
+          usage
+        )
+      )
+
+      return Ok(usage)
+    }
+
+    return Ok(res.val)
+  }
+
+  private async _getSubscriptions(opts: {
     customerId: string
     projectId: string
   }): Promise<
@@ -170,9 +253,23 @@ export class UnpriceCustomer {
   }): Promise<
     Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
   > {
-    const res = await this.cache.entitlementsByCustomerId.get(opts.customerId)
+    const res = await this.cache.entitlementsByCustomerId.swr(opts.customerId, async () => {
+      return await getEntitlementsQuery({
+        customerId: opts.customerId,
+        projectId: opts.projectId,
+        db: this.db,
+        metrics: this.metrics,
+        logger: this.logger,
+      })
+    })
 
     if (res.err) {
+      this.logger.error("unable to fetch entitlements", {
+        error: JSON.stringify(res.err),
+        customerId: opts.customerId,
+        projectId: opts.projectId,
+      })
+
       return Err(
         new FetchError({
           message: "unable to fetch required data",
@@ -187,72 +284,16 @@ export class UnpriceCustomer {
     }
 
     // cache miss, get from db
-    const customer = await this.db.query.customers.findFirst({
-      with: {
-        subscriptions: {
-          columns: {
-            id: true,
-          },
-          where: (sub, { eq }) => eq(sub.status, "active"),
-          orderBy(fields, operators) {
-            return [operators.desc(fields.startDate)]
-          },
-          with: {
-            planVersion: {
-              columns: {
-                id: true,
-              },
-              with: {
-                planFeatures: {
-                  columns: {
-                    id: true,
-                  },
-                  with: {
-                    feature: {
-                      columns: {
-                        slug: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      where: (customer, { eq, and }) =>
-        and(eq(customer.id, opts.customerId), eq(customer.projectId, opts.projectId)),
+    const entitlements = await getEntitlementsQuery({
+      customerId: opts.customerId,
+      projectId: opts.projectId,
+      db: this.db,
+      metrics: this.metrics,
+      logger: this.logger,
     })
 
-    if (!customer) {
-      return Err(
-        new UnPriceCustomerError({
-          code: "CUSTOMER_NOT_FOUND",
-          customerId: opts.customerId,
-        })
-      )
-    }
-
-    if (!customer.subscriptions || customer.subscriptions.length === 0) {
-      return Err(
-        new UnPriceCustomerError({
-          code: "CUSTOMER_HAS_NO_SUBSCRIPTIONS",
-          customerId: opts.customerId,
-        })
-      )
-    }
-
-    // get entitlements for every subscriptions, entitlements won't be repeated
-    const entitlements = Array.from(
-      new Set(
-        customer.subscriptions.flatMap((sub) =>
-          sub.planVersion.planFeatures.map((pf) => pf.feature.slug)
-        )
-      )
-    )
-
     // cache the active entitlements
-    waitUntil(this.cache.entitlementsByCustomerId.set(customer.id, entitlements))
+    waitUntil(this.cache.entitlementsByCustomerId.set(opts.customerId, entitlements))
 
     return Ok(entitlements)
   }
@@ -279,7 +320,7 @@ export class UnpriceCustomer {
       const { customerId, projectId, featureSlug } = opts
       const start = performance.now()
 
-      const res = await this.getCustomerFeature({
+      const res = await this._getCustomerFeature({
         customerId,
         projectId,
         featureSlug,
@@ -287,8 +328,8 @@ export class UnpriceCustomer {
 
       if (res.err) {
         const error = res.err
-        this.logger.error("Error in getCustomerFeature", {
-          error: error.message,
+        this.logger.error("Error in verifyFeature", {
+          error: JSON.stringify(error),
           customerId: opts.customerId,
           featureSlug: opts.featureSlug,
           projectId: opts.projectId,
@@ -326,7 +367,6 @@ export class UnpriceCustomer {
         planVersionFeatureId: feature.featurePlanVersionId,
         subscriptionId: feature.subscriptionId,
         time: Date.now(),
-        latency: performance.now() - start,
       }
 
       switch (feature.featureType) {
@@ -339,20 +379,30 @@ export class UnpriceCustomer {
         case "usage":
         case "tier":
         case "package": {
-          let currentUsage: CurrentUsageCached = feature.currentUsage
+          // for now only support the current month and year
+          const today = new Date()
+          const year = today.getFullYear()
+          const month = today.getMonth() + 1
 
-          // if the feature has no current usage for the month, we need to create it
-          if (!feature.currentUsage) {
-            currentUsage = await reportUsageQuery({
-              projectId,
-              subscriptionItemId: feature.id,
-              db: this.db,
-              metrics: this.metrics,
-              logger: this.logger,
-              usage: 0,
-              limit: feature.units,
+          // get the current usage
+          const result = await this._getCustomerUsageFeature({
+            customerId,
+            projectId,
+            featureSlug,
+            year: year,
+            month: month,
+          })
+
+          if (result.err) {
+            this.logger.error("Error getting usage", {
+              error: JSON.stringify(result.err),
+              customerId: opts.customerId,
+              featureSlug: opts.featureSlug,
+              projectId: opts.projectId,
             })
           }
+
+          const currentUsage = result.val
 
           if (!currentUsage) {
             return Err(
@@ -370,6 +420,7 @@ export class UnpriceCustomer {
             waitUntil(
               this.analytics.ingestFeaturesVerification({
                 ...analyticsPayload,
+                latency: performance.now() - start,
                 deniedReason: "USAGE_EXCEEDED",
               })
             )
@@ -396,8 +447,16 @@ export class UnpriceCustomer {
 
       waitUntil(
         this.analytics
-          .ingestFeaturesVerification(analyticsPayload)
-          .catch((error) => this.logger.error("Error reporting usage", error))
+          .ingestFeaturesVerification({
+            ...analyticsPayload,
+            latency: performance.now() - start,
+          })
+          .catch((error) =>
+            this.logger.error("Error reporting usage", {
+              error: JSON.stringify(error),
+              analyticsPayload,
+            })
+          )
       )
 
       return Ok({
@@ -425,8 +484,12 @@ export class UnpriceCustomer {
       const { customerId, featureSlug, projectId, usage } = opts
 
       const start = performance.now()
+      // for now only support the current month and year
+      const today = new Date()
+      const year = today.getFullYear()
+      const month = today.getMonth() + 1
 
-      const res = await this.getCustomerFeature({
+      const res = await this._getCustomerFeature({
         customerId,
         projectId,
         featureSlug,
@@ -467,37 +530,13 @@ export class UnpriceCustomer {
           reportUsageQuery({
             projectId,
             subscriptionItemId: feature.id,
+            month: month,
+            year: year,
             db: this.db,
             metrics: this.metrics,
             logger: this.logger,
             usage: usage,
           }),
-          // set the usage in the cache
-          // TODO: we don't want to revalidate on every usage report
-          this.cache.featureByCustomerId
-            .swr(`${opts.customerId}:${opts.featureSlug}`, async () => {
-              const currentUsage = await reportUsageQuery({
-                projectId,
-                subscriptionItemId: feature.id,
-                db: this.db,
-                metrics: this.metrics,
-                logger: this.logger,
-                usage: usage,
-              })
-
-              return {
-                ...feature,
-                currentUsage: currentUsage,
-              }
-            })
-            .catch((error) => {
-              this.logger.error("Error reporting usage by customerId", {
-                customerId: opts.customerId,
-                featureSlug: opts.featureSlug,
-                error: JSON.stringify(error),
-              })
-              return null
-            }),
         ])
       )
 

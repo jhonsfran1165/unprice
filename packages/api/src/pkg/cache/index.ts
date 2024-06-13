@@ -10,7 +10,7 @@ import { UpstashStore } from "./stores/upstash"
 const persistentMap = new Map()
 
 export function initCache(c: Context, metrics: Metrics): C<CacheNamespaces> {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: because i like risky things
   const stores: Array<Store<CacheNamespace, any>> = []
 
   const memory = new MemoryStore<CacheNamespace, CacheNamespaces[CacheNamespace]>({
@@ -31,7 +31,6 @@ export function initCache(c: Context, metrics: Metrics): C<CacheNamespaces> {
     stores.push(upstash)
   }
 
-  // TODO: add metrics
   const metricsMiddleware = withMetrics(metrics)
   const storesWithMetrics = stores.map((s) => metricsMiddleware(s))
 
@@ -42,11 +41,14 @@ export function initCache(c: Context, metrics: Metrics): C<CacheNamespaces> {
   }
 
   return createCache({
-    featureByCustomerId: new Namespace<CacheNamespaces["featureByCustomerId"]>(c, defaultOpts),
-    entitlementsByCustomerId: new Namespace<CacheNamespaces["entitlementsByCustomerId"]>(
-      c,
-      defaultOpts
-    ),
+    featureByCustomerId: new Namespace<CacheNamespaces["featureByCustomerId"]>(c, {
+      ...defaultOpts,
+      fresh: 60 * 1000 * 10, // 10 minutes
+    }),
+    entitlementsByCustomerId: new Namespace<CacheNamespaces["entitlementsByCustomerId"]>(c, {
+      ...defaultOpts,
+      fresh: 24 * 60 * 60 * 1000, // we revalidate every day
+    }),
     idempotentRequestUsageByHash: new Namespace<CacheNamespaces["idempotentRequestUsageByHash"]>(
       c,
       {
@@ -55,6 +57,10 @@ export function initCache(c: Context, metrics: Metrics): C<CacheNamespaces> {
       }
     ),
     subscriptionsByCustomerId: new Namespace<CacheNamespaces["subscriptionsByCustomerId"]>(
+      c,
+      defaultOpts
+    ),
+    customerFeatureCurrentUsage: new Namespace<CacheNamespaces["customerFeatureCurrentUsage"]>(
       c,
       defaultOpts
     ),

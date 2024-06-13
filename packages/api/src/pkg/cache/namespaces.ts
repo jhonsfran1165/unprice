@@ -11,12 +11,11 @@ export type CurrentUsageCached = {
 export type SubscriptionItemCached =
   | (Omit<SubscriptionItem, "createdAt" | "updatedAt"> & {
       featureType: FeatureType
-      featureSlug: string
-      currentUsage: CurrentUsageCached
     })
   | null
 
 export type CacheNamespaces = {
+  customerFeatureCurrentUsage: CurrentUsageCached
   featureByCustomerId: SubscriptionItemCached
   subscriptionsByCustomerId: Array<string>
   entitlementsByCustomerId: Array<string>

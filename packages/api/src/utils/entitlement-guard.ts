@@ -24,13 +24,11 @@ export const entitlementGuard = async ({
     })
   }
 
-  const result = await getEntitlements({
+  const entitlements = await getEntitlements({
     customerId: unpriceCustomerId,
     projectId: project.id,
     ctx: ctx,
   })
-
-  const { entitlements } = result
 
   const access = entitlements.includes(featureSlug)
 
@@ -41,5 +39,5 @@ export const entitlementGuard = async ({
     })
   }
 
-  return result
+  return entitlements
 }
