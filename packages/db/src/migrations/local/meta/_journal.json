@@ -1,68 +1,26 @@
 {
-  "version": "6",
+  "version": "7",
   "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "6",
-      "when": 1716983496291,
-      "tag": "0000_cooing_red_ghost",
+      "version": "7",
+      "when": 1718273392098,
+      "tag": "0000_worried_naoko",
       "breakpoints": true
     },
     {
       "idx": 1,
-      "version": "6",
-      "when": 1716984048713,
-      "tag": "0001_parallel_human_cannonball",
+      "version": "7",
+      "when": 1718279496154,
+      "tag": "0001_broad_meteorite",
       "breakpoints": true
     },
     {
       "idx": 2,
-      "version": "6",
-      "when": 1716987233460,
-      "tag": "0002_chief_titania",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1716992449422,
-      "tag": "0003_sturdy_sir_ram",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1716992488644,
-      "tag": "0004_previous_zemo",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1717412981868,
-      "tag": "0005_mature_george_stacy",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1717414865136,
-      "tag": "0006_quick_hercules",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "6",
-      "when": 1717414968574,
-      "tag": "0007_white_scream",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
       "version": "7",
-      "when": 1717675135250,
-      "tag": "0008_chief_frog_thor",
+      "when": 1718280793510,
+      "tag": "0002_freezing_menace",
       "breakpoints": true
     }
   ]

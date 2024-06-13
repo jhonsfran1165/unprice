@@ -1,4 +1,4 @@
-import { eq, relations } from "drizzle-orm"
+import { eq, relations, sql } from "drizzle-orm"
 import {
   boolean,
   foreignKey,
@@ -7,6 +7,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uniqueIndex,
 } from "drizzle-orm/pg-core"
 import type { z } from "zod"
@@ -24,6 +25,7 @@ import {
 import { planVersionFeatures } from "./planVersionFeatures"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
+import { usage } from "./usage"
 
 // subscriptions contains the information about the subscriptions of the customers to different items
 // like plans, addons, etc.
@@ -113,7 +115,9 @@ export const subscriptionItems = pgTableProject(
   {
     ...projectID,
     ...timestamps,
-    quantity: integer("quantity").notNull(),
+    // how many units of the feature the user is subscribed to
+    // null means the feature is usage based
+    units: integer("units"),
     subscriptionId: cuid("subscription_id").notNull(),
     featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
   },
@@ -135,7 +139,7 @@ export const subscriptionItems = pgTableProject(
   })
 )
 
-export const subscriptionItemRelations = relations(subscriptionItems, ({ one }) => ({
+export const subscriptionItemRelations = relations(subscriptionItems, ({ one, many }) => ({
   subscription: one(subscriptions, {
     fields: [subscriptionItems.subscriptionId, subscriptionItems.projectId],
     references: [subscriptions.id, subscriptions.projectId],
@@ -144,6 +148,7 @@ export const subscriptionItemRelations = relations(subscriptionItems, ({ one }) 
     fields: [subscriptionItems.featurePlanVersionId, subscriptionItems.projectId],
     references: [planVersionFeatures.id, planVersionFeatures.projectId],
   }),
+  usages: many(usage),
 }))
 
 export const subscriptionRelations = relations(subscriptions, ({ one, many }) => ({

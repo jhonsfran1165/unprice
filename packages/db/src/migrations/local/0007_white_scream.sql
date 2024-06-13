@@ -1,1 +1,0 @@
-ALTER TABLE "builderai_subscriptions" DROP COLUMN IF EXISTS "items";

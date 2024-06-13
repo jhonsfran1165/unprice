@@ -2,6 +2,7 @@ import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
+  type FeatureType,
   customerInsertBaseSchema,
   customerSelectSchema,
   paymentProviderSchema,
@@ -253,6 +254,7 @@ export const customersRouter = createTRPCRouter({
 
           const stripePaymentProvider = new StripePaymentProvider({
             paymentCustomerId: customerData.stripeCustomerId,
+            logger: opts.ctx.logger,
           })
 
           const { err, val } = await stripePaymentProvider.listPaymentMethods({
@@ -306,7 +308,8 @@ export const customersRouter = createTRPCRouter({
       switch (opts.input.paymentProvider) {
         case "stripe": {
           const stripePaymentProvider = new StripePaymentProvider({
-            paymentCustomerId: customerData.stripeCustomerId ?? undefined,
+            paymentCustomerId: customerData.stripeCustomerId,
+            logger: opts.ctx.logger,
           })
 
           const { err, val } = await stripePaymentProvider.createSession({
@@ -600,6 +603,7 @@ export const customersRouter = createTRPCRouter({
         deniedReason: deniedReasonSchema.optional(),
         currentUsage: z.number().optional(),
         limit: z.number().optional(),
+        featureType: z.custom<FeatureType>().optional(),
       })
     )
     .query(async (opts) => {
@@ -617,6 +621,7 @@ export const customersRouter = createTRPCRouter({
   // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_UR25SSERij9HFMoU", featureSlug: "apikeys", usage: 100, requestId: "123"}}}))
   reportUsage: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.reportUsage",
       openapi: {
         method: "GET",
         path: "/edge/customers.reportUsage",

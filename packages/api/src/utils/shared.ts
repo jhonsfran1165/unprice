@@ -1,10 +1,6 @@
 import { TRPCError } from "@trpc/server"
 
-import type {
-  SubscriptionItem,
-  SubscriptionItemCache,
-  SubscriptionItemExtended,
-} from "@builderai/db/validators"
+import type { SubscriptionItem, SubscriptionItemExtended } from "@builderai/db/validators"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
 import type { Context } from "../trpc"
@@ -52,7 +48,6 @@ export const verifyFeature = async ({
   })
 
   if (err) {
-    console.error("Error verifing feature", err)
     switch (true) {
       case err instanceof UnPriceCustomerError:
         throw new TRPCError({
@@ -158,18 +153,4 @@ export const reportUsageFeature = async ({
   }
 
   return val
-}
-
-export const formatFeatureCache = (feature: SubscriptionItemExtended): SubscriptionItemCache => {
-  return {
-    featureType: feature.featurePlan.featureType,
-    featurePlanId: feature.featurePlanId,
-    subscriptionId: feature.subscriptionId,
-    quantity: feature.quantity,
-    min: feature.min,
-    limit: feature.limit,
-    featureSlug: feature.featureSlug,
-    usage: feature.usage,
-    projectId: feature.projectId,
-  }
 }

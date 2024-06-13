@@ -99,7 +99,7 @@ export default function ConfigItemsFormField({
                 const feature =
                   versionFeatures.get(item.featurePlanId) ?? versionAddons.get(item.featurePlanId)!
 
-                const quantity = form.watch(`config.${index}.quantity`)
+                const units = form.watch(`config.${index}.units`)
 
                 return (
                   <TableRow key={item.id} className="border-b hover:bg-transparent">
@@ -144,7 +144,7 @@ export default function ConfigItemsFormField({
                       </div>
                       <ConfigItemPrice
                         selectedPlanVersion={selectedPlanVersion!}
-                        quantity={quantity ?? 0}
+                        units={units ?? 0}
                         feature={feature}
                         type="unit"
                       />
@@ -153,11 +153,11 @@ export default function ConfigItemsFormField({
                       {feature.featureType === "usage" ? (
                         <div className="text-center">Varies</div>
                       ) : ["flat", "package"].includes(feature.featureType) ? (
-                        <div className="text-center">{item.quantity}</div>
+                        <div className="text-center">{item.units}</div>
                       ) : (
                         <FormField
                           control={form.control}
-                          name={`config.${index}.quantity`}
+                          name={`config.${index}.units`}
                           render={({ field }) => (
                             <FormItem className="justify-center text-center">
                               <FormMessage className="text-xs font-light" />
@@ -183,7 +183,7 @@ export default function ConfigItemsFormField({
                     <TableCell className="flex h-24 items-center justify-end gap-1 pr-1">
                       <ConfigItemPrice
                         selectedPlanVersion={selectedPlanVersion!}
-                        quantity={quantity ?? 0}
+                        units={units ?? 0}
                         feature={feature}
                         type="total"
                       />
@@ -265,22 +265,22 @@ export default function ConfigItemsFormField({
 
 function ConfigItemPrice({
   selectedPlanVersion,
-  quantity,
+  units,
   feature,
   type,
 }: {
   selectedPlanVersion: PlanVersionResponse
   feature: PlanVersionFeaturesResponse
-  quantity?: number
+  units: number | null
   type: "total" | "unit"
 }) {
   // useCallback to prevent re-rendering calculatePricePerFeature
   const calculatePrice = useCallback(() => {
     return calculatePricePerFeature({
       feature: feature,
-      quantity,
+      units
     })
-  }, [feature, quantity])
+  }, [feature, units])
 
   const { err, val: pricePerFeature } = calculatePrice()
 

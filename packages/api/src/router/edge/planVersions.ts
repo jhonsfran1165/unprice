@@ -634,40 +634,31 @@ export const planVersionRouter = createTRPCRouter({
           // depending on the provider we need to create the products
           switch (planVersionData.paymentProvider) {
             case "stripe": {
-              const stripePaymentProvider = new StripePaymentProvider()
+              const stripePaymentProvider = new StripePaymentProvider({
+                logger: opts.ctx.logger,
+              })
               // create the products
               await Promise.all(
                 planVersionData.planFeatures.map(async (planFeature) => {
                   const productName = `${planVersionData.project.name} - ${planFeature.feature.slug} from ${APP_NAME}`
 
-                  const { err, val } = await stripePaymentProvider.upsertProduct({
+                  const { err } = await stripePaymentProvider.upsertProduct({
                     id: planFeature.featureId,
                     name: productName,
                     type: "service",
-                    description: planFeature.feature.description!,
+                    // only pass the description if it is not empty
+                    ...(planFeature.feature.description
+                      ? {
+                          description: planFeature.feature.description,
+                        }
+                      : {}),
                   })
 
-                  if (err)
+                  if (err) {
                     throw new TRPCError({
                       code: "INTERNAL_SERVER_ERROR",
                       message: "Error syncs product with stripe",
                     })
-
-                  if (val) {
-                    // update the plan feature with the product id
-                    await tx
-                      .update(schema.planVersionFeatures)
-                      .set({
-                        metadata: {
-                          stripeProductId: val.id,
-                        },
-                      })
-                      .where(
-                        and(
-                          eq(schema.planVersionFeatures.id, planFeature.id),
-                          eq(schema.planVersionFeatures.projectId, planVersionData.project.id)
-                        )
-                      )
                   }
                 })
               )
@@ -675,6 +666,10 @@ export const planVersionRouter = createTRPCRouter({
               break
             }
             default:
+              opts.ctx.logger.error("Payment provider not supported", {
+                paymentProvider: planVersionData.paymentProvider,
+              })
+
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Payment provider not supported",
@@ -694,6 +689,10 @@ export const planVersionRouter = createTRPCRouter({
             .then((re) => re[0])
 
           if (!versionUpdated) {
+            opts.ctx.logger.error("Version not updated", {
+              planVersionData,
+            })
+
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
               message: "Error publishing version",
@@ -702,7 +701,10 @@ export const planVersionRouter = createTRPCRouter({
 
           return versionUpdated
         } catch (error) {
-          console.error(error)
+          opts.ctx.logger.error("Error publishing version", {
+            error,
+          })
+
           tx.rollback()
 
           throw new TRPCError({

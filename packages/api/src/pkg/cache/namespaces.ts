@@ -1,13 +1,23 @@
-import type { SubscriptionItem } from "@builderai/db/validators"
+import type { FeatureType, Month, SubscriptionItem, Year } from "@builderai/db/validators"
 
-export type KeyHash = string
+export type CurrentUsageCached = {
+  usage: number
+  limit: number | null
+  month: Month
+  year: Year
+  updatedAt: number
+} | null
+
+export type SubscriptionItemCached =
+  | (Omit<SubscriptionItem, "createdAt" | "updatedAt"> & {
+      featureType: FeatureType
+      featureSlug: string
+      currentUsage: CurrentUsageCached
+    })
+  | null
+
 export type CacheNamespaces = {
-  featureByCustomerId:
-    | (Omit<SubscriptionItem, "createdAt" | "updatedAt"> & {
-        featureType: string
-        featureSlug: string
-      })
-    | null
+  featureByCustomerId: SubscriptionItemCached
   subscriptionsByCustomerId: Array<string>
   entitlementsByCustomerId: Array<string>
   idempotentRequestUsageByHash: boolean

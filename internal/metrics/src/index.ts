@@ -50,7 +50,13 @@ export const metricSchema = z.discriminatedUnion("metric", [
   }),
   z.object({
     metric: z.literal("metric.db.read"),
-    query: z.enum(["subscriptionFeatureBySlug"]),
+    query: z.enum(["customerFeatureBySlug"]),
+    duration: z.number(),
+    service: z.string(),
+  }),
+  z.object({
+    metric: z.literal("metric.db.write"),
+    query: z.enum(["reportUsageFeature"]),
     duration: z.number(),
     service: z.string(),
   }),

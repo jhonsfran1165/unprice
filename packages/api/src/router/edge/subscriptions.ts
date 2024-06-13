@@ -177,6 +177,9 @@ export const subscriptionRouter = createTRPCRouter({
           .then((re) => re[0])
 
         if (!newSubscription) {
+          opts.ctx.logger.error("Error while creating subscription", {
+            input: opts.input,
+          })
           trx.rollback()
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -192,16 +195,16 @@ export const subscriptionRouter = createTRPCRouter({
               projectId: newSubscription.projectId,
               subscriptionId: newSubscription.id,
               featurePlanVersionId: item.featurePlanId,
-              quantity: item.quantity,
+              units: item.units,
             })
           )
         ).catch((e) => {
-          console.error(e)
-          trx.rollback()
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error while creating subscription features",
+          opts.ctx.logger.error("Error while creating subscription features", {
+            error: e,
+            configItemsSubscription,
           })
+
+          trx.rollback()
         })
 
         return newSubscription
@@ -264,8 +267,9 @@ export const subscriptionRouter = createTRPCRouter({
                       featureSlug: f.featurePlanVersion.feature.slug,
                       featurePlanVersionId: f.featurePlanVersion.id,
                       subscriptionId: f.subscriptionId,
-                      quantity: f.quantity,
+                      units: f.units,
                       featureType: f.featurePlanVersion.featureType,
+                      currentUsage: null,
                     }
                   )
                 )

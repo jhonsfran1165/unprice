@@ -486,11 +486,11 @@ importers:
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
       drizzle-orm:
-        specifier: ^0.31.0
-        version: 0.31.1(@neondatabase/serverless@0.9.3)(pg@8.12.0)(postgres@3.4.4)
+        specifier: ^0.31.2
+        version: 0.31.2(@neondatabase/serverless@0.9.3)(pg@8.12.0)(postgres@3.4.4)
       drizzle-zod:
         specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.31.1)(zod@3.23.8)
+        version: 0.5.1(drizzle-orm@0.31.2)(zod@3.23.8)
       net:
         specifier: ^1.0.2
         version: 1.0.2
@@ -511,8 +511,8 @@ importers:
         specifier: ^7.3.0
         version: 7.4.2
       drizzle-kit:
-        specifier: ^0.22.2
-        version: 0.22.2
+        specifier: ^0.22.7
+        version: 0.22.7
       pg:
         specifier: ^8.11.3
         version: 8.12.0
@@ -7573,8 +7573,8 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /drizzle-kit@0.22.2:
-    resolution: {integrity: sha512-dxluXlhT1N9bpj2eZR3N/z3u4H0PbbrBYgyouIobFF25tOt2Buy1abx26Jii96qcYV0JgxjhnuV+FBcgR0Xa0w==}
+  /drizzle-kit@0.22.7:
+    resolution: {integrity: sha512-9THPCb2l1GPt7wxhws9LvTR0YG565ZlVgTuqGMwjs590Kch1pXu4GyjEArVijSF5m0OBj3qgdeKmuJXhKXgWFw==}
     hasBin: true
     dependencies:
       '@esbuild-kit/esm-loader': 2.6.5
@@ -7584,8 +7584,8 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.31.1(@neondatabase/serverless@0.9.3)(pg@8.12.0)(postgres@3.4.4):
-    resolution: {integrity: sha512-hTbYne2XX3y6sV7WSxcPH6/vNSiQSUG9VZsFI27jBMCN0OT3Ok7ao3pIT5OMAqWkzJCRFgGjAaUeTAZWPgOKag==}
+  /drizzle-orm@0.31.2(@neondatabase/serverless@0.9.3)(pg@8.12.0)(postgres@3.4.4):
+    resolution: {integrity: sha512-QnenevbnnAzmbNzQwbhklvIYrDE8YER8K7kSrAWQSV1YvFCdSQPzj+jzqRdTSsV2cDqSpQ0NXGyL1G9I43LDLg==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=3'
@@ -7595,6 +7595,7 @@ packages:
       '@op-engineering/op-sqlite': '>=2'
       '@opentelemetry/api': ^1.4.1
       '@planetscale/database': '>=1'
+      '@tidbcloud/serverless': '*'
       '@types/better-sqlite3': '*'
       '@types/pg': '*'
       '@types/react': '>=18'
@@ -7628,6 +7629,8 @@ packages:
       '@opentelemetry/api':
         optional: true
       '@planetscale/database':
+        optional: true
+      '@tidbcloud/serverless':
         optional: true
       '@types/better-sqlite3':
         optional: true
@@ -7669,13 +7672,13 @@ packages:
       postgres: 3.4.4
     dev: false
 
-  /drizzle-zod@0.5.1(drizzle-orm@0.31.1)(zod@3.23.8):
+  /drizzle-zod@0.5.1(drizzle-orm@0.31.2)(zod@3.23.8):
     resolution: {integrity: sha512-C/8bvzUH/zSnVfwdSibOgFjLhtDtbKYmkbPbUCq46QZyZCH6kODIMSOgZ8R7rVjoI+tCj3k06MRJMDqsIeoS4A==}
     peerDependencies:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.31.1(@neondatabase/serverless@0.9.3)(pg@8.12.0)(postgres@3.4.4)
+      drizzle-orm: 0.31.2(@neondatabase/serverless@0.9.3)(pg@8.12.0)(postgres@3.4.4)
       zod: 3.23.8
     dev: false
 

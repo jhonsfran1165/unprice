@@ -3,23 +3,26 @@ import type { Result } from "@builderai/error"
 import { Err, FetchError, Ok } from "@builderai/error"
 import { Stripe, stripe } from "@builderai/stripe"
 
+import type { Logger } from "@builderai/logging"
 import type { PaymentProviderCreateSession, PaymentProviderInterface } from "./interface"
 
 export class StripePaymentProvider implements PaymentProviderInterface {
   private readonly client: Stripe
-  private readonly paymentCustomerId?: string
+  private readonly paymentCustomerId?: string | null
+  private readonly logger: Logger
 
-  constructor(opts?: { token?: string; paymentCustomerId?: string }) {
+  constructor(opts: { token?: string; paymentCustomerId?: string | null; logger: Logger }) {
     this.paymentCustomerId = opts?.paymentCustomerId
+    this.logger = opts?.logger
 
     if (opts?.token) {
       this.client = new Stripe(opts.token, {
         apiVersion: "2023-10-16",
         typescript: true,
       })
+    } else {
+      this.client = stripe
     }
-
-    this.client = stripe
   }
 
   public async getProduct(id: string) {
@@ -46,6 +49,14 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     } catch (error) {
       const e = error as Error
 
+      this.logger.error("Error creating product", {
+        error: e,
+        id,
+        name,
+        type,
+        description,
+      })
+
       return Err(
         new FetchError({
           message: e.message,
@@ -60,7 +71,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
   ): Promise<Result<Stripe.Product, FetchError>> {
     try {
       const { id, ...rest } = props
-      const product = await this.client.products.retrieve(id)
+      const product = await this.client.products.retrieve(id).catch(() => null)
 
       if (product) {
         return Ok(
@@ -73,6 +84,11 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       return Ok(await stripe.products.create(rest))
     } catch (error) {
       const e = error as Error
+
+      this.logger.error("Error upserting product", {
+        error: e,
+        ...props,
+      })
 
       return Err(
         new FetchError({
@@ -133,6 +149,11 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     } catch (error) {
       const e = error as Error
 
+      this.logger.error("Error creating session", {
+        error: e,
+        ...opts,
+      })
+
       return Err(
         new FetchError({
           message: e.message,
@@ -157,7 +178,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
   > {
     try {
       const paymentMethods = await this.client.paymentMethods.list({
-        customer: this.paymentCustomerId,
+        customer: this.paymentCustomerId ?? undefined,
         limit: opts.limit,
       })
 
@@ -173,6 +194,11 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       )
     } catch (error) {
       const e = error as Error
+
+      this.logger.error("Error listing payment methods", {
+        error: e,
+        ...opts,
+      })
 
       return Err(
         new FetchError({

@@ -8,11 +8,12 @@ import { Err, Ok } from "@builderai/error"
 import type { Analytics } from "@builderai/tinybird"
 
 import { planVersionFeatures, subscriptionItems, subscriptions } from "@builderai/db/schema"
+import type { FeatureType, Usage } from "@builderai/db/validators"
 import type { Logger } from "@builderai/logging"
-import { getCustomerFeatureQuery } from "../queries"
+import { getCustomerFeatureQuery, reportUsageQuery } from "../queries"
 import type { Context } from "../trpc"
 import type { Cache } from "./cache"
-import type { CacheNamespaces } from "./cache/namespaces"
+import type { CacheNamespaces, CurrentUsageCached } from "./cache/namespaces"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
 import type { Metrics } from "./metrics"
@@ -256,7 +257,6 @@ export class UnpriceCustomer {
     return Ok(entitlements)
   }
 
-  // TODO: i should be able to verify my feature and return false access if the feature not exist in the subscription
   public async verifyFeature(opts: {
     customerId: string
     featureSlug: string
@@ -266,11 +266,11 @@ export class UnpriceCustomer {
     Result<
       {
         access: boolean
-        currentUsage: number
+        currentUsage?: number
         limit?: number
         deniedReason?: DenyReason
         remaining?: number
-        featureType: string
+        featureType?: FeatureType
       },
       UnPriceCustomerError | FetchError
     >
@@ -287,18 +287,18 @@ export class UnpriceCustomer {
 
       if (res.err) {
         const error = res.err
-
-        // TODO: sent log
-        console.error(`Error in getCustomerFeature: ${res.err.message}`)
+        this.logger.error("Error in getCustomerFeature", {
+          error: error.message,
+          customerId: opts.customerId,
+          featureSlug: opts.featureSlug,
+          projectId: opts.projectId,
+        })
         switch (true) {
           case error instanceof UnPriceCustomerError: {
             if (error.code === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
               return Ok({
                 access: false,
                 deniedReason: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
-                currentUsage: 0,
-                currentPlan: "",
-                featureType: "",
               })
             }
 
@@ -321,72 +321,59 @@ export class UnpriceCustomer {
         )
       }
 
-      const limit = feature.limit
-      const usage = feature.usage ?? 0
-
       const analyticsPayload = {
         projectId: feature.projectId,
-        planVersionFeatureId: feature.featurePlanId,
+        planVersionFeatureId: feature.featurePlanVersionId,
         subscriptionId: feature.subscriptionId,
         time: Date.now(),
         latency: performance.now() - start,
       }
 
       switch (feature.featureType) {
-        case "usage": {
-          if (limit && usage >= limit) {
-            waitUntil(
-              this.analytics.ingestFeaturesVerification({
-                ...analyticsPayload,
-                deniedReason: "USAGE_EXCEEDED",
-              })
-            )
-
-            return Ok({
-              currentUsage: usage,
-              featureType: feature.featureType,
-              limit: limit,
-              access: false,
-              deniedReason: "USAGE_EXCEEDED",
-              remaining: limit - usage,
-            })
-          }
-
-          // flat feature, just return the feature and the subscription
+        case "flat": {
+          // we don't have to report usage or check the usage
+          // flat feature are like feature flags
           break
         }
-
-        case "tier": {
-          if (limit && usage >= limit) {
-            waitUntil(
-              this.analytics.ingestFeaturesVerification({
-                ...analyticsPayload,
-                deniedReason: "USAGE_EXCEEDED",
-              })
-            )
-            return Ok({
-              currentUsage: usage,
-              limit: limit,
-              featureType: feature.featureType,
-              access: false,
-              deniedReason: "USAGE_EXCEEDED",
-              remaining: limit - usage,
-            })
-          }
-
-          // flat feature, just return the feature and the subscription
-          break
-        }
+        // the rest of the features need to check the usage
+        case "usage":
+        case "tier":
         case "package": {
+          let currentUsage: CurrentUsageCached = feature.currentUsage
+
+          // if the feature has no current usage for the month, we need to create it
+          if (!feature.currentUsage) {
+            currentUsage = await reportUsageQuery({
+              projectId,
+              subscriptionItemId: feature.id,
+              db: this.db,
+              metrics: this.metrics,
+              logger: this.logger,
+              usage: 0,
+              limit: feature.units,
+            })
+          }
+
+          if (!currentUsage) {
+            return Err(
+              new UnPriceCustomerError({
+                code: "FEATURE_HAS_NO_USAGE_RECORD",
+                customerId: opts.customerId,
+              })
+            )
+          }
+
+          const limit = currentUsage.limit
+          const usage = currentUsage.usage
+
           if (limit && usage >= limit) {
-            // TODO: what happens if we have for instance a feature call access with quantity 1, should we check the usage or the customer suppose to
-            // have access to the feature if the quantity is 1?
             waitUntil(
               this.analytics.ingestFeaturesVerification({
                 ...analyticsPayload,
                 deniedReason: "USAGE_EXCEEDED",
               })
             )
+
             return Ok({
               currentUsage: usage,
               limit: limit,
@@ -401,30 +388,28 @@ export class UnpriceCustomer {
         }
 
         default:
+          this.logger.error("Unhandled feature type", {
+            featureType: feature.featureType,
+          })
           break
       }
 
       waitUntil(
         this.analytics
           .ingestFeaturesVerification(analyticsPayload)
-          .catch((error) => console.error("Error reporting usage", error))
+          .catch((error) => this.logger.error("Error reporting usage", error))
       )
 
       return Ok({
-        currentUsage: usage,
         featureType: feature.featureType,
         access: true,
       })
     } catch (e) {
       const error = e as Error
-      console.error("Error getting customer data", error)
-      // TODO: sent log
-      // this.logger.error("Unhandled error while verifying key", {
-      //   error: err.message,
-      //   stack: JSON.stringify(err.stack),
-      //   keyHash: await this.hash(req.key),
-      //   apiId: req.apiId,
-      // });
+      this.logger.error("Unhandled error while verifying feature", {
+        stack: JSON.stringify(error.stack),
+        error: error,
+      })
 
       throw e
     }
@@ -467,7 +452,7 @@ export class UnpriceCustomer {
           this.analytics
             .ingestFeaturesUsage({
               // TODO: add id of the subscription item
-              planVersionFeatureId: feature.featurePlanId,
+              planVersionFeatureId: feature.featurePlanVersionId,
               subscriptionId: feature.subscriptionId,
               projectId: feature.projectId,
               usage: usage,
@@ -478,11 +463,41 @@ export class UnpriceCustomer {
               console.error("Error reporting usage", error)
               // TODO: save the log to tinybird
             }),
-          // set the usage in the cache
-          this.cache.featureByCustomerId.set(`${opts.customerId}:${opts.featureSlug}`, {
-            ...feature,
-            usage: Number(feature.usage) + usage,
+          // TODO: if there is no analytics, we should report the usage to the db
+          reportUsageQuery({
+            projectId,
+            subscriptionItemId: feature.id,
+            db: this.db,
+            metrics: this.metrics,
+            logger: this.logger,
+            usage: usage,
           }),
+          // set the usage in the cache
+          // TODO: we don't want to revalidate on every usage report
+          this.cache.featureByCustomerId
+            .swr(`${opts.customerId}:${opts.featureSlug}`, async () => {
+              const currentUsage = await reportUsageQuery({
+                projectId,
+                subscriptionItemId: feature.id,
+                db: this.db,
+                metrics: this.metrics,
+                logger: this.logger,
+                usage: usage,
+              })
+
+              return {
+                ...feature,
+                currentUsage: currentUsage,
+              }
+            })
+            .catch((error) => {
+              this.logger.error("Error reporting usage by customerId", {
+                customerId: opts.customerId,
+                featureSlug: opts.featureSlug,
+                error: JSON.stringify(error),
+              })
+              return null
+            }),
         ])
       )
 

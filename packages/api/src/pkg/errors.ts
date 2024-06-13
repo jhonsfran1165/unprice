@@ -10,6 +10,7 @@ export const apiCustomerErrorSchema = z.enum([
   "CUSTOMER_NOT_FOUND",
   "FEATURE_TYPE_NOT_SUPPORTED",
   "FEATURE_IS_NOT_USAGE_TYPE",
+  "FEATURE_HAS_NO_USAGE_RECORD",
 ])
 
 export const deniedReasonSchema = z.enum([

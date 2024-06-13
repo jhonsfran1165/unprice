@@ -31,15 +31,15 @@ import {
 const subscriptionItemConfigSchema = z.object({
   featurePlanId: z.string(),
   featureSlug: z.string(),
-  quantity: z.coerce
+  units: z.coerce
     .number()
     .min(1)
     .optional()
-    .describe("quantity of the feature the user is subscribed to"),
+    .describe("units of the feature the user is subscribed to"),
   min: z.coerce
     .number()
     .optional()
-    .describe("minimum quantity of the feature the user is subscribed to"),
+    .describe("minimum units of the feature the user is subscribed to"),
   limit: z.coerce.number().optional().describe("limit of the feature the user is subscribed to"),
 })
 
@@ -49,13 +49,13 @@ export const subscriptionMetadataSchema = z.object({
 })
 
 export const subscriptionItemsSelectSchema = createSelectSchema(subscriptionItems, {
-  // quantity for the item, for flat features it's always 1, usage features it's the current usage
-  quantity: z.coerce.number().min(1),
+  // units for the item, for flat features it's always 1, usage features it's the current usage
+  units: z.coerce.number().min(1),
 })
 
 export const subscriptionItemsInsertSchema = createInsertSchema(subscriptionItems, {
-  // quantity for the item, for flat features it's always 1, usage features it's the current usage
-  quantity: z.coerce.number().min(1),
+  // units for the item, for flat features it's always 1, usage features it's the current usage
+  units: z.coerce.number().min(1),
 }).partial({
   id: true,
   subscriptionId: true,
@@ -83,22 +83,22 @@ export const subscriptionItemsConfigSchema = z
     for (let i = 0; i < items.length; i++) {
       const item = items[i]
 
-      if (item?.quantity && item.limit && item.quantity > item.limit) {
+      if (item?.units && item.limit && item.units > item.limit) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `limit is ${item.limit}`,
-          path: [i, "quantity"],
+          path: [i, "units"],
           fatal: true,
         })
 
         return false
       }
 
-      if (item?.quantity && item.min && item.quantity < item.min) {
+      if (item?.units && item.min && item.units < item.min) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `min is ${item.min}`,
-          path: [i, "quantity"],
+          path: [i, "units"],
           fatal: true,
         })
 
@@ -201,7 +201,7 @@ export const createDefaultSubscriptionConfig = ({
         return {
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
-          quantity: 1,
+          units: 1,
           limit: 1,
           min: 1,
         }
@@ -209,7 +209,7 @@ export const createDefaultSubscriptionConfig = ({
         return {
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
-          quantity: planFeature.defaultQuantity ?? 1,
+          units: planFeature.defaultQuantity ?? 1,
           min: 1,
           limit: planFeature.limit,
         }
@@ -226,7 +226,7 @@ export const createDefaultSubscriptionConfig = ({
         return {
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
-          quantity: config.units,
+          units: config.units,
           limit: config.units,
           min: config.units,
         }
@@ -236,7 +236,7 @@ export const createDefaultSubscriptionConfig = ({
         return {
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
-          quantity: planFeature.defaultQuantity,
+          units: planFeature.defaultQuantity,
           limit: planFeature.defaultQuantity,
           min: 1,
         }
@@ -256,11 +256,9 @@ interface CalculatedPrice {
   totalPrice: z.infer<typeof calculatePriceSchema>
 }
 
-const calculatePricePerFeatureSchema = subscriptionItemsSelectSchema
-  .pick({ quantity: true })
-  .extend({
-    feature: planVersionFeatureInsertBaseSchema,
-  })
+const calculatePricePerFeatureSchema = subscriptionItemsSelectSchema.pick({ units: true }).extend({
+  feature: planVersionFeatureInsertBaseSchema,
+})
 
 export const calculateFlatPricePlan = ({
   planVersion,
@@ -299,12 +297,12 @@ export const calculatePricePerFeature = (
     return Err(SchemaError.fromZod(parseData.error, data))
   }
 
-  // set default quantity to 0 if it's not provided
-  const { feature, quantity } = parseData.data
-  const defaultQuantity = Math.max(1, quantity ?? 0)
+  // set default units to 0 if it's not provided
+  const { feature, units } = parseData.data
+  const defaultQuantity = Math.max(1, units ?? 0)
 
   switch (feature.featureType) {
-    // flat features have a single price independent of the quantity
+    // flat features have a single price independent of the units
     case "flat": {
       const { price: data } = configFlatSchema.parse(feature.config)
       const dineroPrice = dinero(data.dinero)
@@ -484,7 +482,7 @@ export const calculatePricePerFeature = (
     case "package": {
       const { units, price } = configPackageSchema.parse(feature.config)
 
-      const defaultQuantity = Math.max(1, quantity ?? 0)
+      const defaultQuantity = Math.max(1, units ?? 0)
 
       // round up to the next package
       const packageCount = Math.ceil(defaultQuantity / units)

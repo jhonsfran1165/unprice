@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { boolean, foreignKey, index, text, unique } from "drizzle-orm/pg-core"
+import { boolean, foreignKey, index, integer, primaryKey, text, unique } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { id, projectID, timestamps } from "../utils/sql"
@@ -14,32 +14,27 @@ export const usage = pgTableProject(
   {
     ...projectID,
     ...timestamps,
-    customerId: text("customer_id").notNull(),
     subscriptionItemId: text("subscription_item_id").notNull(),
-    month: text("month").notNull(),
-    year: text("year").notNull(),
-    usage: text("usage").notNull(),
+    month: integer("month").notNull(),
+    year: integer("year").notNull(),
+    usage: integer("usage").notNull(),
+    limit: integer("limit"),
   },
   (table) => ({
-    slug: index("usage_customer_index").on(table.customerId),
+    primary: primaryKey({
+      columns: [table.id, table.projectId],
+      name: "usage_pkey",
+    }),
     subitemfk: foreignKey({
       columns: [table.subscriptionItemId, table.projectId],
       foreignColumns: [subscriptionItems.id, subscriptionItems.projectId],
       name: "usage_subitem_fkey",
     }),
-    customerfk: foreignKey({
-      columns: [table.customerId, table.projectId],
-      foreignColumns: [customers.id, customers.projectId],
-      name: "usage_customer_fkey",
-    }),
+    unique: unique("unique_usage_subitem").on(table.subscriptionItemId, table.month, table.year),
   })
 )
 
 export const usageRelations = relations(usage, ({ one }) => ({
-  customer: one(customers, {
-    fields: [usage.customerId, usage.projectId],
-    references: [customers.id, customers.projectId],
-  }),
   subscriptionItem: one(subscriptionItems, {
     fields: [usage.subscriptionItemId, usage.projectId],
     references: [subscriptionItems.id, subscriptionItems.projectId],

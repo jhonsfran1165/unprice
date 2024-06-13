@@ -21,6 +21,7 @@ export const prefixes = {
   subscription_item: "subi",
   domain: "dom",
   plan_version: "pv",
+  usage: "usage",
 } as const
 
 export function newId<TPrefix extends keyof typeof prefixes>(prefix: TPrefix) {
