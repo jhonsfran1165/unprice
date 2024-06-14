@@ -82,6 +82,26 @@ export const authConfig = {
         const workspaceId = utils.newId("workspace")
         const workspaceName = user.name ?? slug
 
+        // get default project for unprice. This project is seeded in the database as the internal project
+        const defaultProjectId = "default"
+
+        // every workspace is a customer for unprice
+        // TODO: create a new customer in the default project
+        const customer = await db
+          .insert(schema.customers)
+          .values({
+            id: utils.newId("customer"),
+            name: workspaceName,
+            projectId: defaultProjectId,
+            email: user.email,
+          })
+          .returning()
+          .then((project) => project[0] ?? null)
+
+        if (!customer) {
+          throw "Error creating customer"
+        }
+
         const workspace = await db
           .insert(schema.workspaces)
           .values({
@@ -92,6 +112,7 @@ export const authConfig = {
             isPersonal: true,
             createdBy: user.id,
             enabled: true,
+            unPriceCustomerId: customer.id,
           })
           .onConflictDoNothing()
           .returning()

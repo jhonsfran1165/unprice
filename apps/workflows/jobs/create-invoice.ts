@@ -36,9 +36,13 @@ export const createInvoiceJob = client.defineJob({
       db.query.subscriptions.findFirst({
         with: {
           customer: true,
-          features: {
+          items: {
             with: {
-              featurePlan: true,
+              featurePlanVersion: {
+                with: {
+                  feature: true,
+                },
+              },
             },
           },
           planVersion: {
@@ -137,15 +141,16 @@ export const createInvoiceJob = client.defineJob({
     )
 
     // create an invoice item for each feature
-    for (const feature of subscription.features) {
+    for (const item of subscription.items) {
       await createFixedCostInvoiceItem({
         stripe,
         invoiceId,
         io,
         stripeCustomerId: customerPaymentProviderId,
-        name: feature.featureSlug,
-        productId: feature.featurePlan.metadata?.stripeProductId ?? "",
-        amount: feature.featurePlan.config?.price?.displayAmount ?? "0",
+        name: item.featurePlanVersion.feature.slug,
+        // we need to make sure the product exists otherwise we get a 404
+        productId: item.featurePlanVersion.metadata?.stripeProductId ?? "",
+        amount: item.featurePlanVersion.config?.price?.displayAmount ?? "0",
         currency: subscription.planVersion.currency,
       })
     }

@@ -18,7 +18,8 @@
     "knip": "knip",
     "fmt": "pnpm biome format . --write && pnpm biome check . --apply",
     "fmt:check": "pnpm biome format . && pnpm biome check .",
-    "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:check"
+    "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:check",
+    "manypkg:fix": "pnpm manypkg fix"
   },
   "dependencies": {
     "@biomejs/biome": "1.7.3",

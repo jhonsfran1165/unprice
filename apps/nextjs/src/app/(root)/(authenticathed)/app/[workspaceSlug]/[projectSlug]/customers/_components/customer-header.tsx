@@ -57,8 +57,8 @@ export default function CustomerHeader(props: {
                   type: "plan",
                   collectionMethod: "charge_automatically",
                   autoRenew: true,
-                  items: [],
-                  paymentProviderId: "stripe",
+                  config: [],
+                  defaultPaymentMethodId: "",
                   startDate: new Date(),
                 }}
               >

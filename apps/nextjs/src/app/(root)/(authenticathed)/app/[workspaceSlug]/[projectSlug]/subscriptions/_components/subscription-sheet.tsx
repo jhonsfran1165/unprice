@@ -39,8 +39,8 @@ export function SubscriptionSheet({
               customerId: "",
               planVersionId: "",
               type: "plan",
-              items: [],
-              paymentProviderId: "",
+              config: [],
+              defaultPaymentMethodId: "",
             }
           }
         />
