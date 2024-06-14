@@ -1,6 +1,4 @@
 import { TRPCError } from "@trpc/server"
-
-import type { SubscriptionItem, SubscriptionItemExtended } from "@builderai/db/validators"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
 import type { Context } from "../trpc"
@@ -26,6 +24,7 @@ export const verifyFeature = async ({
     analytics: ctx.analytics,
     logger: ctx.logger,
     metrics: ctx.metrics,
+    waitUntil: ctx.waitUntil,
   })
 
   const { err, val } = await customer.verifyFeature({
@@ -51,7 +50,7 @@ export const verifyFeature = async ({
     switch (true) {
       case err instanceof UnPriceCustomerError:
         throw new TRPCError({
-          code: "BAD_REQUEST",
+          code: "INTERNAL_SERVER_ERROR",
           message: err.code,
         })
       default:
@@ -80,6 +79,7 @@ export const getEntitlements = async ({
     analytics: ctx.analytics,
     logger: ctx.logger,
     metrics: ctx.metrics,
+    waitUntil: ctx.waitUntil,
   })
 
   const { err, val } = await customer.getEntitlements({
@@ -127,6 +127,7 @@ export const reportUsageFeature = async ({
     analytics: ctx.analytics,
     logger: ctx.logger,
     metrics: ctx.metrics,
+    waitUntil: ctx.waitUntil,
   })
 
   const { err, val } = await customer.reportUsage({

@@ -14,7 +14,6 @@ import {
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { waitUntil } from "@vercel/functions"
 import { deniedReasonSchema } from "../../pkg/errors"
 import { StripePaymentProvider } from "../../pkg/payment-provider/stripe"
 import { createTRPCRouter, protectedApiOrActiveProjectProcedure } from "../../trpc"
@@ -671,7 +670,7 @@ export const customersRouter = createTRPCRouter({
         ctx,
       })
 
-      waitUntil(opts.ctx.cache.idempotentRequestUsageByHash.set(hashKey, response.success))
+      ctx.waitUntil(opts.ctx.cache.idempotentRequestUsageByHash.set(hashKey, response.success))
 
       return {
         success: response.success,

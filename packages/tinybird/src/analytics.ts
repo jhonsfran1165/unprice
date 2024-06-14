@@ -6,24 +6,30 @@ import { auditLogSchemaV1, featureUsageSchemaV1, featureVerificationSchemaV1 } f
 export class Analytics {
   public readonly readClient: Tinybird | NoopTinybird
   public readonly writeClient: Tinybird | NoopTinybird
+  public readonly isNoop: boolean
 
   constructor(opts: {
+    emit: boolean
     tinybirdToken?: string
     tinybirdProxy?: {
       url: string
       token: string
     }
   }) {
-    this.readClient = opts.tinybirdToken
-      ? new Tinybird({ token: opts.tinybirdToken })
-      : new NoopTinybird()
+    this.readClient =
+      opts.tinybirdToken && opts.emit
+        ? new Tinybird({ token: opts.tinybirdToken })
+        : new NoopTinybird()
 
-    this.writeClient = opts.tinybirdProxy
-      ? new Tinybird({
-          token: opts.tinybirdProxy.token,
-          baseUrl: opts.tinybirdProxy.url,
-        })
-      : this.readClient
+    this.writeClient =
+      opts.tinybirdProxy && opts.emit
+        ? new Tinybird({
+            token: opts.tinybirdProxy.token,
+            baseUrl: opts.tinybirdProxy.url,
+          })
+        : this.readClient
+
+    this.isNoop = this.writeClient instanceof NoopTinybird
   }
 
   public get ingestSdkTelemetry() {
@@ -38,8 +44,6 @@ export class Analytics {
       }),
     })
   }
-
-  // TODO: support audit logs
 
   public get ingestGenericAuditLogs() {
     return this.writeClient.buildIngestEndpoint({
@@ -79,8 +83,8 @@ export class Analytics {
         projectId: z.string(),
         customerId: z.string(),
         planVersionFeatureId: z.string(),
-        // start: z.number().optional(),
-        // end: z.number().optional(),
+        start: z.number().optional(),
+        end: z.number().optional(),
       }),
       data: z.object({
         total_usage: z.number(),

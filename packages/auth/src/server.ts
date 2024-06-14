@@ -1,7 +1,6 @@
 import "server-only"
 
 import type { DefaultSession, User } from "next-auth"
-import { cache } from "react"
 
 import type { WorkspacesJWTPayload } from "@builderai/db/validators"
 

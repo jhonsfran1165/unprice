@@ -31,6 +31,7 @@ export type FeatureType = z.infer<typeof typeFeatureSchema>
 export type FeatureVersionType = z.infer<typeof featureVersionType>
 export type Year = z.infer<typeof yearsSchema>
 export type Month = z.infer<typeof monthsSchema>
+export type AggregationMethod = z.infer<typeof aggregationMethodSchema>
 
 export const currencySymbol = (curr: Currency) =>
   ({

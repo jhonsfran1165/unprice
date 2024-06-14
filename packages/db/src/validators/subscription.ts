@@ -23,7 +23,6 @@ import type { Currency } from "./shared"
 import {
   collectionMethodSchema,
   currencySymbol,
-  featureVersionType,
   subscriptionTypeSchema,
   typeFeatureSchema,
 } from "./shared"

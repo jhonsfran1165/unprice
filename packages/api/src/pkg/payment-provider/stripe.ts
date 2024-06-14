@@ -81,7 +81,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         )
       }
 
-      return Ok(await stripe.products.create(rest))
+      return Ok(await stripe.products.create(props))
     } catch (error) {
       const e = error as Error
 

@@ -1,6 +1,5 @@
 import type { FetchError, Result } from "@builderai/error"
 import type { Stripe } from "@builderai/stripe"
-import { S } from "@upstash/redis/zmscore-22fd48c7"
 
 export interface PaymentProviderCreateSession {
   success: boolean

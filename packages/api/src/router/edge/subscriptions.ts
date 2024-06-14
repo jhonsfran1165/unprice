@@ -11,7 +11,6 @@ import {
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { waitUntil } from "@vercel/functions"
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
@@ -218,7 +217,7 @@ export const subscriptionRouter = createTRPCRouter({
       }
 
       // every time a subscription is created, we save the subscription in the cache
-      waitUntil(
+      opts.ctx.waitUntil(
         opts.ctx.db.query.subscriptions
           .findMany({
             with: {
@@ -264,12 +263,10 @@ export const subscriptionRouter = createTRPCRouter({
                     {
                       id: f.id,
                       projectId: f.projectId,
-                      featureSlug: f.featurePlanVersion.feature.slug,
                       featurePlanVersionId: f.featurePlanVersion.id,
                       subscriptionId: f.subscriptionId,
                       units: f.units,
                       featureType: f.featurePlanVersion.featureType,
-                      currentUsage: null,
                     }
                   )
                 )

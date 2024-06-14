@@ -1,4 +1,4 @@
-import { eq, relations, sql } from "drizzle-orm"
+import { eq, relations } from "drizzle-orm"
 import {
   boolean,
   foreignKey,
@@ -7,7 +7,6 @@ import {
   primaryKey,
   text,
   timestamp,
-  unique,
   uniqueIndex,
 } from "drizzle-orm/pg-core"
 import type { z } from "zod"
@@ -16,12 +15,7 @@ import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
 import type { subscriptionMetadataSchema } from "../validators/subscription"
 import { customers } from "./customers"
-import {
-  collectionMethodEnum,
-  subscriptionStatusEnum,
-  typeFeatureEnum,
-  typeSubscriptionEnum,
-} from "./enums"
+import { collectionMethodEnum, subscriptionStatusEnum, typeSubscriptionEnum } from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
 import { versions } from "./planVersions"
 import { projects } from "./projects"

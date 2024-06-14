@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server"
-import { waitUntil } from "@vercel/functions"
 
 import { eq, prepared } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
@@ -54,7 +53,7 @@ export const apikeyGuard = async ({
   }
 
   // update last used in background
-  waitUntil(
+  ctx.waitUntil(
     ctx.db
       .update(schema.apikeys)
       .set({

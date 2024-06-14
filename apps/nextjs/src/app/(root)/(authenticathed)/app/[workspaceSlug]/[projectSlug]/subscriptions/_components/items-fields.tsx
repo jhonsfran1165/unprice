@@ -278,7 +278,7 @@ function ConfigItemPrice({
   const calculatePrice = useCallback(() => {
     return calculatePricePerFeature({
       feature: feature,
-      units
+      units,
     })
   }, [feature, units])
 

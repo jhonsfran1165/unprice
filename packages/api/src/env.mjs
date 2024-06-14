@@ -23,6 +23,13 @@ export const env = createEnv({
       .transform((v) => {
         return v === "true"
       }),
+    EMIT_ANALYTICS: z
+      .string()
+      .optional()
+      .default("true")
+      .transform((v) => {
+        return v === "true"
+      }),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis

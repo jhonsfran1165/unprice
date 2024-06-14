@@ -1,13 +1,9 @@
 import { relations } from "drizzle-orm"
-import { boolean, foreignKey, index, integer, primaryKey, text, unique } from "drizzle-orm/pg-core"
+import { foreignKey, integer, primaryKey, text, unique } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { id, projectID, timestamps } from "../utils/sql"
-import { customers } from "./customers"
-import { currencyEnum, projectTierEnum } from "./enums"
-import { planVersionFeatures } from "./planVersionFeatures"
+import { projectID, timestamps } from "../utils/sql"
 import { subscriptionItems } from "./subscriptions"
-import { workspaces } from "./workspaces"
 
 export const usage = pgTableProject(
   "usage",

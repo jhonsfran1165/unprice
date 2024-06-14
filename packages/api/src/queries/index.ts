@@ -75,7 +75,6 @@ export const getCustomerFeatureQuery = async ({
             subscriptionId: data.subscriptionItem.subscriptionId,
             featurePlanVersionId: data.subscriptionItem.featurePlanVersionId,
             units: data.subscriptionItem.units,
-            featureSlug: data.feature.slug,
             featureType: data.featurePlanVersion.featureType,
           }
         : null
@@ -184,7 +183,7 @@ export const getCustomerFeatureUsageQuery = async ({
       return response
     })
     .catch((error) => {
-      logger.error("Error getting usage for feature", {
+      logger.error("Error in getCustomerFeatureUsageQuery", {
         error: JSON.stringify(error),
         projectId,
         featureSlug,

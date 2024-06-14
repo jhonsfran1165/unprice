@@ -1,6 +1,6 @@
 import { connectDatabase } from "@/lib/db"
 import { client } from "@/trigger"
-import { cronTrigger, eventTrigger } from "@trigger.dev/sdk"
+import { cronTrigger } from "@trigger.dev/sdk"
 import { createInvoiceJob } from "./create-invoice"
 
 // Your first job

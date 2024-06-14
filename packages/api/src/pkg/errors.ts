@@ -11,12 +11,14 @@ export const apiCustomerErrorSchema = z.enum([
   "FEATURE_TYPE_NOT_SUPPORTED",
   "FEATURE_IS_NOT_USAGE_TYPE",
   "FEATURE_HAS_NO_USAGE_RECORD",
+  "UNHANDLED_ERROR",
 ])
 
 export const deniedReasonSchema = z.enum([
   "RATE_LIMITED",
   "USAGE_EXCEEDED",
   "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+  "FEATURE_HAS_NO_USAGE_RECORD",
 ])
 
 export type ApiCustomerError = z.infer<typeof apiCustomerErrorSchema>

@@ -3,7 +3,6 @@ import { NextResponse } from "next/server"
 
 import { and, db, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
-import * as utils from "@builderai/db/utils"
 import { stripe } from "@builderai/stripe"
 
 export const runtime = "edge"

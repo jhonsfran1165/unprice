@@ -1,14 +1,10 @@
-import { waitUntil } from "@vercel/functions"
+import type { Database } from "@builderai/db"
 
-import { type Database, and, eq } from "@builderai/db"
-
+import type { FeatureType } from "@builderai/db/validators"
 import { FetchError, type Result } from "@builderai/error"
 import { Err, Ok } from "@builderai/error"
-import type { Analytics } from "@builderai/tinybird"
-
-import { planVersionFeatures, subscriptionItems, subscriptions } from "@builderai/db/schema"
-import type { FeatureType, Usage } from "@builderai/db/validators"
 import type { Logger } from "@builderai/logging"
+import type { Analytics } from "@builderai/tinybird"
 import {
   createUsageQuery,
   getCustomerFeatureQuery,
@@ -28,6 +24,7 @@ export class UnpriceCustomer {
   private readonly db: Database
   private readonly metrics: Metrics
   private readonly logger: Logger
+  private readonly waitUntil: (p: Promise<unknown>) => void
   private readonly analytics: Analytics
 
   constructor(opts: {
@@ -36,12 +33,14 @@ export class UnpriceCustomer {
     db: Database
     analytics: Analytics
     logger: Logger
+    waitUntil: (p: Promise<unknown>) => void
   }) {
     this.cache = opts.cache
     this.db = opts.db
     this.metrics = opts.metrics
     this.analytics = opts.analytics
     this.logger = opts.logger
+    this.waitUntil = opts.waitUntil
   }
 
   private async _getCustomerFeature(opts: {
@@ -64,12 +63,13 @@ export class UnpriceCustomer {
     )
 
     if (res.err) {
-      this.logger.error(`Error getting cache for customer: ${res.err.message}`, {
+      this.logger.error(`Error in _getCustomerFeature: ${res.err.message}`, {
         error: JSON.stringify(res.err),
         customerId: opts.customerId,
         featureSlug: opts.featureSlug,
         projectId: opts.projectId,
       })
+
       return Err(
         new FetchError({
           message: "unable to fetch required data",
@@ -91,7 +91,7 @@ export class UnpriceCustomer {
       })
 
       // save the data in the cache
-      waitUntil(
+      this.waitUntil(
         this.cache.featureByCustomerId.set(`${opts.customerId}:${opts.featureSlug}`, feature)
       )
 
@@ -101,6 +101,9 @@ export class UnpriceCustomer {
     return Ok(res.val)
   }
 
+  // TODO: we have to calculate the usage depending on the feature type and the current configuration
+  // we have to take into account the current month and year and the limit and the aggregated usage method
+  // for reporting the usage we have to support negative values when the usage is negative
   private async _getCustomerUsageFeature(opts: {
     customerId: string
     projectId: string
@@ -125,12 +128,13 @@ export class UnpriceCustomer {
     )
 
     if (res.err) {
-      this.logger.error(`Error getting cache for usage: ${res.err.message}`, {
+      this.logger.error(`Error in _getCustomerUsageFeature: ${res.err.message}`, {
         error: JSON.stringify(res.err),
         customerId: opts.customerId,
         featureSlug: opts.featureSlug,
         projectId: opts.projectId,
       })
+
       return Err(
         new FetchError({
           message: "unable to fetch required data",
@@ -153,7 +157,7 @@ export class UnpriceCustomer {
         month: opts.month,
       })
 
-      // if the feature has no current usage for the month, we need to create it
+      // if the feature has no current usage for the month-year, we need to create it
       if (!usage) {
         usage = await createUsageQuery({
           projectId: opts.projectId,
@@ -168,7 +172,7 @@ export class UnpriceCustomer {
       }
 
       // save the data in the cache
-      waitUntil(
+      this.waitUntil(
         this.cache.customerFeatureCurrentUsage.set(
           `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
           usage
@@ -242,7 +246,7 @@ export class UnpriceCustomer {
     const subscriptionIds = customer.subscriptions.map((sub) => sub.id)
 
     // cache the active entitlements
-    waitUntil(this.cache.subscriptionsByCustomerId.set(customer.id, subscriptionIds))
+    this.waitUntil(this.cache.subscriptionsByCustomerId.set(customer.id, subscriptionIds))
 
     return Ok(subscriptionIds)
   }
@@ -293,7 +297,7 @@ export class UnpriceCustomer {
     })
 
     // cache the active entitlements
-    waitUntil(this.cache.entitlementsByCustomerId.set(opts.customerId, entitlements))
+    this.waitUntil(this.cache.entitlementsByCustomerId.set(opts.customerId, entitlements))
 
     return Ok(entitlements)
   }
@@ -354,12 +358,10 @@ export class UnpriceCustomer {
       const feature = res.val
 
       if (!feature) {
-        return Err(
-          new UnPriceCustomerError({
-            code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
-            customerId: opts.customerId,
-          })
-        )
+        return Ok({
+          access: false,
+          deniedReason: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+        })
       }
 
       const analyticsPayload = {
@@ -400,24 +402,27 @@ export class UnpriceCustomer {
               featureSlug: opts.featureSlug,
               projectId: opts.projectId,
             })
+
+            return Ok({
+              access: false,
+              deniedReason: "FEATURE_HAS_NO_USAGE_RECORD",
+            })
           }
 
           const currentUsage = result.val
 
           if (!currentUsage) {
-            return Err(
-              new UnPriceCustomerError({
-                code: "FEATURE_HAS_NO_USAGE_RECORD",
-                customerId: opts.customerId,
-              })
-            )
+            return Ok({
+              access: false,
+              deniedReason: "FEATURE_HAS_NO_USAGE_RECORD",
+            })
           }
 
           const limit = currentUsage.limit
           const usage = currentUsage.usage
 
           if (limit && usage >= limit) {
-            waitUntil(
+            this.waitUntil(
               this.analytics.ingestFeaturesVerification({
                 ...analyticsPayload,
                 latency: performance.now() - start,
@@ -445,7 +450,7 @@ export class UnpriceCustomer {
           break
       }
 
-      waitUntil(
+      this.waitUntil(
         this.analytics
           .ingestFeaturesVerification({
             ...analyticsPayload,
@@ -466,11 +471,18 @@ export class UnpriceCustomer {
     } catch (e) {
       const error = e as Error
       this.logger.error("Unhandled error while verifying feature", {
-        stack: JSON.stringify(error.stack),
-        error: error,
+        error: JSON.stringify(error),
+        customerId: opts.customerId,
+        featureSlug: opts.featureSlug,
+        projectId: opts.projectId,
       })
 
-      throw e
+      return Err(
+        new UnPriceCustomerError({
+          code: "UNHANDLED_ERROR",
+          customerId: opts.customerId,
+        })
+      )
     }
   }
 
@@ -483,7 +495,6 @@ export class UnpriceCustomer {
     try {
       const { customerId, featureSlug, projectId, usage } = opts
 
-      const start = performance.now()
       // for now only support the current month and year
       const today = new Date()
       const year = today.getFullYear()
@@ -499,9 +510,9 @@ export class UnpriceCustomer {
         return res
       }
 
-      const feature = res.val
+      const subItem = res.val
 
-      if (!feature) {
+      if (!subItem) {
         return Err(
           new UnPriceCustomerError({
             code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
@@ -510,33 +521,39 @@ export class UnpriceCustomer {
         )
       }
 
-      waitUntil(
+      this.waitUntil(
         Promise.all([
           this.analytics
             .ingestFeaturesUsage({
-              // TODO: add id of the subscription item
-              planVersionFeatureId: feature.featurePlanVersionId,
-              subscriptionId: feature.subscriptionId,
-              projectId: feature.projectId,
+              planVersionFeatureId: subItem.featurePlanVersionId,
+              subscriptionId: subItem.subscriptionId,
+              projectId: subItem.projectId,
               usage: usage,
               time: Date.now(),
-              latency: performance.now() - start,
+              month: month,
+              year: year,
+              subItemId: subItem.id,
             })
             .catch((error) => {
-              console.error("Error reporting usage", error)
-              // TODO: save the log to tinybird
+              this.logger.error("Error reporting usage ingestFeaturesUsage", {
+                error: JSON.stringify(error),
+                subItem: subItem,
+                usage: usage,
+              })
             }),
-          // TODO: if there is no analytics, we should report the usage to the db
-          reportUsageQuery({
-            projectId,
-            subscriptionItemId: feature.id,
-            month: month,
-            year: year,
-            db: this.db,
-            metrics: this.metrics,
-            logger: this.logger,
-            usage: usage,
-          }),
+          // if there is no analytics, we should report the usage to the db
+          // this will sum to the usage but we only use the analytics to report the usage when billing
+          this.analytics.isNoop &&
+            reportUsageQuery({
+              projectId,
+              subscriptionItemId: subItem.id,
+              month: month,
+              year: year,
+              db: this.db,
+              metrics: this.metrics,
+              logger: this.logger,
+              usage: usage,
+            }),
         ])
       )
 

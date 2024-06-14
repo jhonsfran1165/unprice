@@ -1,20 +1,11 @@
 import { relations } from "drizzle-orm"
-import {
-  boolean,
-  foreignKey,
-  index,
-  json,
-  primaryKey,
-  text,
-  unique,
-  uniqueIndex,
-} from "drizzle-orm/pg-core"
+import { boolean, index, json, primaryKey, text, unique } from "drizzle-orm/pg-core"
 import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
 import { projectID, timestamps } from "../utils/sql"
 import type { customerMetadataSchema } from "../validators"
-import { currencyEnum, paymentProviderEnum } from "./enums"
+import { currencyEnum } from "./enums"
 import { projects } from "./projects"
 import { subscriptions } from "./subscriptions"
 

@@ -1,8 +1,5 @@
 "use client"
 
-import { useState } from "react"
-
-import type { RouterOutputs } from "@builderai/api"
 import { PAYMENT_PROVIDERS } from "@builderai/db/utils"
 import type { Customer, PaymentProvider } from "@builderai/db/validators"
 import {
@@ -15,6 +12,7 @@ import {
 } from "@builderai/ui/card"
 import { Label } from "@builderai/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
+import { useState } from "react"
 
 import { SubmitButton } from "~/components/submit-button"
 import { api } from "~/trpc/client"

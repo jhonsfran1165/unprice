@@ -22,12 +22,14 @@ export const featureVerificationSchemaV1 = z.object({
 })
 
 export const featureUsageSchemaV1 = z.object({
+  subItemId: z.string(),
+  month: z.number().int(),
+  year: z.number().int(),
   projectId: z.string(),
   planVersionFeatureId: z.string(),
   subscriptionId: z.string(),
   usage: z.number(),
   time: z.number(),
-  latency: z.number().optional(),
 })
 
 export const auditLogSchemaV1 = z.object({

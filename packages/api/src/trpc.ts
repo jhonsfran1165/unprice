@@ -1,6 +1,5 @@
 import { tracing } from "@baselime/trpc-opentelemetry-middleware"
 import type { Session } from "@builderai/auth/server"
-import { cache } from "react"
 
 /**
  * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
@@ -52,6 +51,8 @@ export interface CreateContextOptions {
   logger: Logger
   metrics: Metrics
   cache: C<CacheNamespaces>
+  // pass this in the context so we can migrate easily to other providers
+  waitUntil: (p: Promise<unknown>) => void
 }
 
 /**
@@ -69,6 +70,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
     db: db,
     analytics: new Analytics({
       tinybirdToken: env.TINYBIRD_TOKEN,
+      emit: env.EMIT_ANALYTICS,
     }),
     // INFO: better wait for native support for RLS in Drizzle
     // txRLS: rls.authTxn(db, opts.session?.user.id),
@@ -93,27 +95,27 @@ export const createTRPCContext = async (opts: {
   const region = opts.headers.get("x-vercel-id") ?? "unknown"
   const country = opts.headers.get("x-vercel-ip-country") ?? "unknown"
 
-  const logger =
-    env.EMIT_METRICS_LOGS === true
-      ? new BaseLimeLogger({
-          apiKey: env.BASELIME_APIKEY,
-          requestId,
-          defaultFields: { userId, region, country, source },
-          namespace: "unprice-api",
-          dataset: "unprice-api",
-          service: "api", // default service name
-          flushAfterMs: 10000, // flush after 10 secs
-          ctx: {
-            waitUntil, // flush will as a background task
-          },
-        })
-      : new ConsoleLogger({
-          requestId,
-          defaultFields: { userId, region, country, source },
-        })
+  const logger = env.EMIT_METRICS_LOGS
+    ? new BaseLimeLogger({
+        apiKey: env.BASELIME_APIKEY,
+        requestId,
+        defaultFields: { userId, region, country, source },
+        namespace: "unprice-api",
+        dataset: "unprice-api",
+        service: "api", // default service name
+        flushAfterMs: 10000, // flush after 10 secs
+        ctx: {
+          waitUntil, // flush will as a background task
+        },
+      })
+    : new ConsoleLogger({
+        requestId,
+        defaultFields: { userId, region, country, source },
+      })
 
-  const metrics: Metrics =
-    env.EMIT_METRICS_LOGS === true ? new LogdrainMetrics({ requestId, logger }) : new NoopMetrics()
+  const metrics: Metrics = env.EMIT_METRICS_LOGS
+    ? new LogdrainMetrics({ requestId, logger })
+    : new NoopMetrics()
 
   const cache = initCache(
     {
@@ -144,6 +146,7 @@ export const createTRPCContext = async (opts: {
     logger,
     metrics,
     cache,
+    waitUntil,
   })
 }
 
