@@ -11,6 +11,7 @@ export const apiCustomerErrorSchema = z.enum([
   "FEATURE_TYPE_NOT_SUPPORTED",
   "FEATURE_IS_NOT_USAGE_TYPE",
   "FEATURE_HAS_NO_USAGE_RECORD",
+  "FEATURE_NOT_SUPPORT_USAGE",
   "UNHANDLED_ERROR",
 ])
 

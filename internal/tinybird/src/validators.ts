@@ -19,10 +19,15 @@ export const featureVerificationSchemaV1 = z.object({
   deniedReason: z.string().optional(),
   time: z.number(),
   latency: z.number().optional(),
+  subItemId: z.string(),
+  featureSlug: z.string(),
+  customerId: z.string(),
 })
 
 export const featureUsageSchemaV1 = z.object({
   subItemId: z.string(),
+  featureSlug: z.string(),
+  customerId: z.string(),
   month: z.number().int(),
   year: z.number().int(),
   projectId: z.string(),

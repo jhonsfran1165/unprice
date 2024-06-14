@@ -88,7 +88,6 @@ export const getEntitlements = async ({
   })
 
   if (err) {
-    console.error("Error getting entitlements feature", err)
     switch (true) {
       case err instanceof UnPriceCustomerError:
         throw new TRPCError({
@@ -138,7 +137,6 @@ export const reportUsageFeature = async ({
   })
 
   if (err) {
-    console.error("Error reporting usage feature", err)
     switch (true) {
       case err instanceof UnPriceCustomerError:
         throw new TRPCError({

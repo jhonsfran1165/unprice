@@ -16,13 +16,13 @@ importers:
         version: 0.21.4
       '@turbo/gen':
         specifier: ^1.12.4
-        version: 1.13.4(@types/node@20.14.2)(typescript@5.4.5)
+        version: 1.13.4(@types/node@20.11.24)(typescript@5.4.5)
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
       knip:
         specifier: ^5.17.4
-        version: 5.17.4(@types/node@20.14.2)(typescript@5.4.5)
+        version: 5.17.4(@types/node@20.11.24)(typescript@5.4.5)
       turbo:
         specifier: ^1.12.4
         version: 1.13.4
@@ -59,25 +59,25 @@ importers:
         version: 0.5.8(@trpc/server@11.0.0-rc.382)
       '@builderai/api':
         specifier: ^0.1.0
-        version: link:../../packages/api
+        version: link:../../internal/api
       '@builderai/auth':
         specifier: ^0.1.0
-        version: link:../../packages/auth
+        version: link:../../internal/auth
       '@builderai/config':
         specifier: ^0.1.0
-        version: link:../../packages/config
+        version: link:../../internal/config
       '@builderai/db':
         specifier: ^0.1.0
-        version: link:../../packages/db
+        version: link:../../internal/db
       '@builderai/error':
         specifier: ^0.1.0
-        version: link:../../packages/error
+        version: link:../../internal/error
       '@builderai/stripe':
         specifier: ^0.1.0
-        version: link:../../packages/stripe
+        version: link:../../internal/stripe
       '@builderai/ui':
         specifier: ^0.1.0
-        version: link:../../packages/ui
+        version: link:../../internal/ui
       '@dinero.js/currencies':
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
@@ -225,7 +225,7 @@ importers:
     dependencies:
       '@builderai/db':
         specifier: ^0.1.0
-        version: link:../../packages/db
+        version: link:../../internal/db
       '@neondatabase/serverless':
         specifier: ^0.9.0
         version: 0.9.3
@@ -264,55 +264,7 @@ importers:
         specifier: ^5.3.3
         version: 5.4.5
 
-  internal/logging:
-    dependencies:
-      '@baselime/edge-logger':
-        specifier: ^0.4.2
-        version: 0.4.2
-      '@builderai/logs':
-        specifier: ^1.0.0
-        version: link:../logs
-    devDependencies:
-      typescript:
-        specifier: ^5.3.3
-        version: 5.4.5
-
-  internal/logs:
-    dependencies:
-      '@builderai/metrics':
-        specifier: workspace:^
-        version: link:../metrics
-      zod:
-        specifier: ^3.23.8
-        version: 3.23.8
-    devDependencies:
-      '@builderai/tsconfig':
-        specifier: 0.1.0
-        version: link:../../tooling/typescript
-      '@types/node':
-        specifier: ^20.12.7
-        version: 20.14.2
-      typescript:
-        specifier: ^5.3.3
-        version: 5.4.5
-
-  internal/metrics:
-    dependencies:
-      zod:
-        specifier: ^3.23.5
-        version: 3.23.8
-    devDependencies:
-      '@builderai/tsconfig':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      '@types/node':
-        specifier: ^20.12.7
-        version: 20.14.2
-      typescript:
-        specifier: ^5.3.3
-        version: 5.4.5
-
-  packages/api:
+  internal/api:
     dependencies:
       '@baselime/trpc-opentelemetry-middleware':
         specifier: ^0.1.2
@@ -334,13 +286,13 @@ importers:
         version: link:../error
       '@builderai/logging':
         specifier: workspace:^
-        version: link:../../internal/logging
+        version: link:../logging
       '@builderai/logs':
         specifier: workspace:^1.0.0
-        version: link:../../internal/logs
+        version: link:../logs
       '@builderai/metrics':
         specifier: workspace:^
-        version: link:../../internal/metrics
+        version: link:../metrics
       '@builderai/stripe':
         specifier: ^0.1.0
         version: link:../stripe
@@ -349,7 +301,7 @@ importers:
         version: link:../tinybird
       '@builderai/unprice':
         specifier: ^0.1.0
-        version: link:../unprice
+        version: link:../../packages/unprice
       '@dinero.js/currencies':
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
@@ -409,7 +361,7 @@ importers:
         specifier: ^5.3.3
         version: 5.4.5
 
-  packages/auth:
+  internal/auth:
     dependencies:
       '@auth/drizzle-adapter':
         specifier: 0.8.0
@@ -446,7 +398,7 @@ importers:
         specifier: ^5.3.3
         version: 5.4.5
 
-  packages/config:
+  internal/config:
     dependencies:
       '@builderai/ui':
         specifier: 0.1.0
@@ -465,7 +417,7 @@ importers:
         specifier: ^5.3.3
         version: 5.4.5
 
-  packages/db:
+  internal/db:
     dependencies:
       '@builderai/config':
         specifier: ^0.1.0
@@ -520,7 +472,7 @@ importers:
         specifier: ^5.3.3
         version: 5.4.5
 
-  packages/email:
+  internal/email:
     dependencies:
       '@react-email/button':
         specifier: ^0.0.14
@@ -566,7 +518,7 @@ importers:
         specifier: ^5.3.3
         version: 5.4.5
 
-  packages/error:
+  internal/error:
     dependencies:
       zod:
         specifier: ^3.23.8
@@ -585,7 +537,55 @@ importers:
         specifier: ^5.3.3
         version: 5.4.5
 
-  packages/stripe:
+  internal/logging:
+    dependencies:
+      '@baselime/edge-logger':
+        specifier: ^0.4.2
+        version: 0.4.2
+      '@builderai/logs':
+        specifier: ^1.0.0
+        version: link:../logs
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.4.5
+
+  internal/logs:
+    dependencies:
+      '@builderai/metrics':
+        specifier: workspace:^
+        version: link:../metrics
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@builderai/tsconfig':
+        specifier: 0.1.0
+        version: link:../../tooling/typescript
+      '@types/node':
+        specifier: 20.11.24
+        version: 20.11.24
+      typescript:
+        specifier: ^5.3.3
+        version: 5.4.5
+
+  internal/metrics:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@builderai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@types/node':
+        specifier: 20.11.24
+        version: 20.11.24
+      typescript:
+        specifier: ^5.3.3
+        version: 5.4.5
+
+  internal/stripe:
     dependencies:
       '@builderai/auth':
         specifier: ^0.1.0
@@ -613,7 +613,7 @@ importers:
         specifier: ^5.3.3
         version: 5.4.5
 
-  packages/tinybird:
+  internal/tinybird:
     dependencies:
       '@t3-oss/env-nextjs':
         specifier: 0.9.1
@@ -635,7 +635,7 @@ importers:
         specifier: ^5.3.3
         version: 5.4.5
 
-  packages/ui:
+  internal/ui:
     dependencies:
       '@radix-ui/react-accordion':
         specifier: ^1.1.2
@@ -779,6 +779,12 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.4.5
+
+  tooling/k6:
+    devDependencies:
+      k6:
+        specifier: ^0.0.0
+        version: 0.0.0
 
   tooling/tailwind:
     dependencies:
@@ -935,7 +941,7 @@ packages:
       '@babel/helper-compilation-targets': 7.24.7
       '@babel/helper-module-transforms': 7.24.7(@babel/core@7.24.5)
       '@babel/helpers': 7.24.7
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.7
       '@babel/template': 7.24.7
       '@babel/traverse': 7.24.7
       '@babel/types': 7.24.7
@@ -2511,7 +2517,7 @@ packages:
     engines: {node: ^8.13.0 || >=10.10.0}
     dependencies:
       '@grpc/proto-loader': 0.7.13
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
     dev: false
 
   /@grpc/proto-loader@0.7.13:
@@ -5830,7 +5836,7 @@ packages:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
     dev: false
 
-  /@turbo/gen@1.13.4(@types/node@20.14.2)(typescript@5.4.5):
+  /@turbo/gen@1.13.4(@types/node@20.11.24)(typescript@5.4.5):
     resolution: {integrity: sha512-PK38N1fHhDUyjLi0mUjv0RbX0xXGwDLQeRSGsIlLcVpP1B5fwodSIwIYXc9vJok26Yne94BX5AGjueYsUT3uUw==}
     hasBin: true
     dependencies:
@@ -5842,7 +5848,7 @@ packages:
       minimatch: 9.0.4
       node-plop: 0.26.3
       proxy-agent: 6.4.0
-      ts-node: 10.9.2(@types/node@20.14.2)(typescript@5.4.5)
+      ts-node: 10.9.2(@types/node@20.11.24)(typescript@5.4.5)
       update-check: 1.5.4
       validate-npm-package-name: 5.0.1
     transitivePeerDependencies:
@@ -5879,13 +5885,13 @@ packages:
     resolution: {integrity: sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==}
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
     dev: false
 
   /@types/connect@3.4.38:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
     dev: false
 
   /@types/cookie@0.4.1:
@@ -5899,7 +5905,7 @@ packages:
   /@types/cors@2.8.17:
     resolution: {integrity: sha512-8CGDvrBj1zgo2qE+oS3pOCyYNqCPryMWY2bGfwA0dcfopWGgxs+78df0Rs3rc9THP4JkOhLsAa+15VdpAqkcUA==}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
     dev: false
 
   /@types/debug@4.1.12:
@@ -5934,7 +5940,7 @@ packages:
   /@types/express-serve-static-core@4.19.3:
     resolution: {integrity: sha512-KOzM7MhcBFlmnlr/fzISFF5vGWVSvN6fTd4T+ExOt08bA/dA5kpSzY52nMsI1KDFmUREpJelPYyuslLRSjjgCg==}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
       '@types/qs': 6.9.15
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -5953,7 +5959,7 @@ packages:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
     dev: false
 
   /@types/hast@3.0.4:
@@ -5973,7 +5979,7 @@ packages:
   /@types/http-proxy@1.17.14:
     resolution: {integrity: sha512-SSrD0c1OQzlFX7pGu1eXxSEjemej64aaNPRhhVYUGqXh0BtldAAx37MG8btcumvpgKyZp1F5Gn3JkktdxiFv6w==}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
     dev: true
 
   /@types/inquirer@6.5.0:
@@ -6017,17 +6023,11 @@ packages:
     resolution: {integrity: sha512-Kza43ewS3xoLgCEpQrsT+xRo/EJej1y0kVYGiLFE1NEODXGzTfwiC6tXTLMQskn1X4/Rjlh0MQUvx9W+L9long==}
     dependencies:
       undici-types: 5.26.5
-    dev: true
-
-  /@types/node@20.14.2:
-    resolution: {integrity: sha512-xyu6WAMVwv6AKFLB+e/7ySZVr/0zLCzOa7rSpq6jNwpqOrUbcACDWC+53d4n2QHOnDou0fbIsg8wZu/sxrnI4Q==}
-    dependencies:
-      undici-types: 5.26.5
 
   /@types/pg@8.11.6:
     resolution: {integrity: sha512-/2WmmBXHLsfRqzfHW7BNZ8SbYzE8OSk7i3WjFYvfgRHj7S1xj+16Je5fUKv3lVdVzk/zn9TXOqf+avFCFIE0yQ==}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
       pg-protocol: 1.6.1
       pg-types: 4.0.2
     dev: false
@@ -6070,14 +6070,14 @@ packages:
     resolution: {integrity: sha512-x2EM6TJOybec7c52BX0ZspPodMsQUd5L6PRwOunVyVUhXiBSKf3AezDL8Dgvgt5o0UfKNfuA0eMLr2wLT4AiBA==}
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
     dev: false
 
   /@types/serve-static@1.15.7:
     resolution: {integrity: sha512-W8Ym+h8nhuRwaKPaDw34QUkwsGi6Rc4yYqvKFo5rm2FUEhCFbzVWrxXUxuKK8TASjWsysJY0nsmNCGhCOIsrOw==}
     dependencies:
       '@types/http-errors': 2.0.4
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
       '@types/send': 0.17.4
     dev: false
 
@@ -6088,7 +6088,7 @@ packages:
   /@types/through@0.0.33:
     resolution: {integrity: sha512-HsJ+z3QuETzP3cswwtzt2vEIiHBk/dCcHGhbmG5X3ecnwFD/lPrMpliGXxSCg03L9AhrdwA4Oz/qfspkDW+xGQ==}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
     dev: false
 
   /@types/tinycolor2@1.4.6:
@@ -6106,7 +6106,7 @@ packages:
   /@types/webpack@5.28.5(@swc/core@1.3.101)(esbuild@0.19.11):
     resolution: {integrity: sha512-wR87cgvxj3p6D0Crt1r5avwqffqPXUkNlnQ1mjU93G7gCuFjufZR4I6j8cz5g1F1tTYpfOOFvly+cmIQwL9wvw==}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
       tapable: 2.2.1
       webpack: 5.91.0(@swc/core@1.3.101)(esbuild@0.19.11)
     transitivePeerDependencies:
@@ -7757,7 +7757,7 @@ packages:
     dependencies:
       '@types/cookie': 0.4.1
       '@types/cors': 2.8.17
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
       accepts: 1.3.8
       base64id: 2.0.0
       cookie: 0.4.2
@@ -9259,7 +9259,7 @@ packages:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: false
@@ -9394,6 +9394,10 @@ packages:
     optionalDependencies:
       graceful-fs: 4.2.11
 
+  /k6@0.0.0:
+    resolution: {integrity: sha512-GAQSWayS2+LjbH5bkRi+pMPYyP1JSp7o+4j58ANZ762N/RH/SdlAT3CHHztnn8s/xgg8kYNM24Gd2IPo9b5W+g==}
+    dev: true
+
   /katex@0.16.10:
     resolution: {integrity: sha512-ZiqaC04tp2O5utMsl2TEZTXxa6WSC4yo0fv5ML++D3QZv/vx2Mct0mTlRx3O+uUkjfuAgOkzsCmq5MiUEsDDdA==}
     hasBin: true
@@ -9412,7 +9416,7 @@ packages:
     engines: {node: '>= 8'}
     dev: true
 
-  /knip@5.17.4(@types/node@20.14.2)(typescript@5.4.5):
+  /knip@5.17.4(@types/node@20.11.24)(typescript@5.4.5):
     resolution: {integrity: sha512-D6dQjauc3ZIPq0jTYgTeuxpeDKVOaV84S5TNeBDB2GjoPQVzEPW7PA83XijyGXNrflWq4zvWNn49gTUN0Lfeig==}
     engines: {node: '>=18.6.0'}
     hasBin: true
@@ -9423,7 +9427,7 @@ packages:
       '@ericcornelissen/bash-parser': 0.5.2
       '@nodelib/fs.walk': 2.0.0
       '@snyk/github-codeowners': 1.1.0
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
       easy-table: 1.2.0
       fast-glob: 3.3.2
       file-entry-cache: 8.0.0
@@ -10634,7 +10638,7 @@ packages:
     engines: {node: '>=14'}
     dependencies:
       '@types/express': 4.17.21
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
       accepts: 1.3.8
       content-disposition: 0.5.4
       depd: 1.1.2
@@ -11410,7 +11414,7 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
       long: 5.2.3
     dev: false
 
@@ -12537,7 +12541,7 @@ packages:
     resolution: {integrity: sha512-wQS3GNMofCXwH8TSje8E1SE8zr6ODiGtHQgPtO95p9Mb4FhKC9jvXR2NUTpZ9ZINlckJcFidCmaTFV4P6vsb9g==}
     engines: {node: '>=12.*'}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
       qs: 6.12.1
     dev: false
 
@@ -12665,7 +12669,7 @@ packages:
     dependencies:
       '@alloc/quick-lru': 5.2.0
       arg: 5.0.2
-      chokidar: 3.5.3
+      chokidar: 3.6.0
       didyoumean: 1.2.2
       dlv: 1.1.3
       fast-glob: 3.3.2
@@ -12895,7 +12899,7 @@ packages:
   /ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
 
-  /ts-node@10.9.2(@types/node@20.14.2)(typescript@5.4.5):
+  /ts-node@10.9.2(@types/node@20.11.24)(typescript@5.4.5):
     resolution: {integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==}
     hasBin: true
     peerDependencies:
@@ -12914,7 +12918,7 @@ packages:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 20.14.2
+      '@types/node': 20.11.24
       acorn: 8.11.3
       acorn-walk: 8.3.2
       arg: 4.1.3

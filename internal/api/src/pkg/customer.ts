@@ -355,9 +355,9 @@ export class UnpriceCustomer {
         }
       }
 
-      const feature = res.val
+      const subItem = res.val
 
-      if (!feature) {
+      if (!subItem) {
         return Ok({
           access: false,
           deniedReason: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
@@ -365,13 +365,17 @@ export class UnpriceCustomer {
       }
 
       const analyticsPayload = {
-        projectId: feature.projectId,
-        planVersionFeatureId: feature.featurePlanVersionId,
-        subscriptionId: feature.subscriptionId,
+        projectId: subItem.projectId,
+        planVersionFeatureId: subItem.featurePlanVersionId,
+        subscriptionId: subItem.subscriptionId,
+
+        subItemId: subItem.id,
+        featureSlug: featureSlug,
+        customerId: customerId,
         time: Date.now(),
       }
 
-      switch (feature.featureType) {
+      switch (subItem.featureType) {
         case "flat": {
           // we don't have to report usage or check the usage
           // flat feature are like feature flags
@@ -433,7 +437,7 @@ export class UnpriceCustomer {
             return Ok({
               currentUsage: usage,
               limit: limit,
-              featureType: feature.featureType,
+              featureType: subItem.featureType,
               access: false,
               deniedReason: "USAGE_EXCEEDED",
               remaining: limit - usage,
@@ -445,7 +449,7 @@ export class UnpriceCustomer {
 
         default:
           this.logger.error("Unhandled feature type", {
-            featureType: feature.featureType,
+            featureType: subItem.featureType,
           })
           break
       }
@@ -465,7 +469,7 @@ export class UnpriceCustomer {
       )
 
       return Ok({
-        featureType: feature.featureType,
+        featureType: subItem.featureType,
         access: true,
       })
     } catch (e) {
@@ -521,6 +525,15 @@ export class UnpriceCustomer {
         )
       }
 
+      if (subItem.featureType === "flat") {
+        return Err(
+          new UnPriceCustomerError({
+            code: "FEATURE_NOT_SUPPORT_USAGE",
+            customerId: opts.customerId,
+          })
+        )
+      }
+
       this.waitUntil(
         Promise.all([
           this.analytics
@@ -533,6 +546,8 @@ export class UnpriceCustomer {
               month: month,
               year: year,
               subItemId: subItem.id,
+              featureSlug: featureSlug,
+              customerId: customerId,
             })
             .catch((error) => {
               this.logger.error("Error reporting usage ingestFeaturesUsage", {
