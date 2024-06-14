@@ -79,12 +79,11 @@ export class Analytics {
     return this.readClient.buildPipe({
       pipe: "get_features_usage__v1",
       parameters: z.object({
-        workspaceId: z.string(),
         projectId: z.string(),
         customerId: z.string(),
-        planVersionFeatureId: z.string(),
-        start: z.number().optional(),
-        end: z.number().optional(),
+        subItemId: z.string(),
+        year: z.number(),
+        month: z.number(),
       }),
       data: z.object({
         total_usage: z.number(),

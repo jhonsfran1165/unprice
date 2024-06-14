@@ -2,4 +2,4 @@
 
 
 run:
-	docker run --rm -i grafana/k6 run - < load.js
+	docker run --rm --network=host -i grafana/k6 run - < index.js
