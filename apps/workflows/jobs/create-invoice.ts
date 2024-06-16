@@ -1,10 +1,11 @@
-import { z } from "zod"
-
+import { connectDatabase } from "@/lib/db"
 import { env } from "@/lib/env"
 import { client } from "@/trigger"
-
-import { connectDatabase } from "@/lib/db"
+import { configFlatSchema, configUsageSchema } from "@builderai/db/validators"
+import { Analytics } from "@builderai/tinybird"
 import { type IO, eventTrigger } from "@trigger.dev/sdk"
+import { dinero, multiply, toDecimal, trimScale } from "dinero.js"
+import { z } from "zod"
 
 import Stripe from "stripe"
 
@@ -30,7 +31,11 @@ export const createInvoiceJob = client.defineJob({
       apiVersion: "2023-10-16",
       typescript: true,
     })
-    // const tinybird = new Tinybird(env().TINYBIRD_TOKEN)
+
+    const tinybird = new Analytics({
+      tinybirdToken: env().TINYBIRD_TOKEN,
+      emit: true,
+    })
 
     const subscription = await io.runTask(`get subscription ${subscriptionId}`, async () =>
       db.query.subscriptions.findFirst({
@@ -142,17 +147,84 @@ export const createInvoiceJob = client.defineJob({
 
     // create an invoice item for each feature
     for (const item of subscription.items) {
-      await createFixedCostInvoiceItem({
-        stripe,
-        invoiceId,
-        io,
-        stripeCustomerId: customerPaymentProviderId,
-        name: item.featurePlanVersion.feature.slug,
-        // we need to make sure the product exists otherwise we get a 404
-        productId: item.featurePlanVersion.metadata?.stripeProductId ?? "",
-        amount: item.featurePlanVersion.config?.price?.displayAmount ?? "0",
-        currency: subscription.planVersion.currency,
-      })
+      const usage = await io.runTask(
+        `get usage for ${item.featurePlanVersion.feature.slug}`,
+        async () => {
+          const usage = await tinybird
+            .getUsageFeature({
+              featureSlug: item.featurePlanVersion.feature.slug,
+              customerId: customerId,
+              start: new Date(year, month, 1).getTime(),
+              end: new Date(year, month + 1, 0).getTime(),
+            })
+            .then((usage) => usage.data[0])
+
+          console.log(usage)
+
+          return usage
+        }
+      )
+
+      // calculate the price depending on the type of feature
+      switch (item.featurePlanVersion.featureType) {
+        case "usage": {
+          const usageConfig = configUsageSchema.parse(item.featurePlanVersion.config)
+          const usagePrice = dinero(usageConfig.price.dinero)
+          const aggregationMethod = usageConfig.aggregationMethod
+          const featureUsage = usage[aggregationMethod]
+          const total = toDecimal(trimScale(multiply(usagePrice, featureUsage)))
+
+          console.log(total)
+          console.log(usagePrice)
+
+          await createFixedCostInvoiceItem({
+            stripe,
+            invoiceId,
+            io,
+            stripeCustomerId: customerPaymentProviderId,
+            name: item.featurePlanVersion.feature.slug,
+            productId: item.featurePlanVersion.feature.id,
+            amount: total ?? "0",
+            currency: subscription.planVersion.currency,
+          })
+
+          break
+        }
+        case "flat": {
+          const flatConfig = configFlatSchema.parse(item.featurePlanVersion.config)
+          const price = dinero(flatConfig.price.dinero)
+          const total = toDecimal(trimScale(price))
+
+          await createFixedCostInvoiceItem({
+            stripe,
+            invoiceId,
+            io,
+            stripeCustomerId: customerPaymentProviderId,
+            name: item.featurePlanVersion.feature.slug,
+            productId: item.featurePlanVersion.feature.id,
+            amount: total ?? "0",
+            currency: subscription.planVersion.currency,
+          })
+          break
+        }
+        case "package":
+        case "tier": {
+          await createFixedCostInvoiceItem({
+            stripe,
+            invoiceId,
+            io,
+            stripeCustomerId: customerPaymentProviderId,
+            name: item.featurePlanVersion.feature.slug,
+            productId: item.featurePlanVersion.feature.id,
+            amount: "0.00",
+            currency: subscription.planVersion.currency,
+          })
+          break
+        }
+        default: {
+          throw new Error(`unknown feature type ${item.featurePlanVersion.featureType}`)
+        }
+      }
     }
 
     return {

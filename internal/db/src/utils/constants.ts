@@ -50,23 +50,22 @@ export const USAGE_MODES_MAP = {
   },
 } as const
 
-// TODO: change the description
 export const AGGREGATION_METHODS_MAP = {
   sum: {
     label: "Sum",
-    description: "Volume based pricing",
+    description: "Adds up all events values within a time period",
   },
   last_during_period: {
     label: "Last during period",
-    description: "Last usage during period",
+    description: "Last event value during a time period",
   },
-  last_ever: {
-    label: "Last ever",
-    description: "Last usage ever",
+  count: {
+    label: "Count",
+    description: "Counts the number of events within a time period",
   },
   max: {
     label: "Maximum",
-    description: "Volume based pricing",
+    description: "Maximum event value within a time period",
   },
 } as const
 

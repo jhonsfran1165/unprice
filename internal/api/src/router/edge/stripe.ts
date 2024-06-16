@@ -127,13 +127,27 @@ export const stripeRouter = createTRPCRouter({
   }),
 
   // TODO: add output
-  dinero: publicProcedure.input(z.void()).query(async () => {
+  dinero: publicProcedure.input(z.void()).query(async (opts) => {
     // TODO: fix priceId
     const proPrice = await stripe.prices.retrieve(PLANS.PRO?.priceId ?? "")
     const stdPrice = await stripe.prices.retrieve(PLANS.STANDARD?.priceId ?? "")
 
     // TODO: DINERO from string
     const priceCentsTest = "1000.00"
+    const now = new Date()
+
+    // Get the start of the current month
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+
+    // Get the end of the current month
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+
+    const usageTiny = await opts.ctx.analytics.getUsageFeature({
+      featureSlug: "apikeys",
+      customerId: "cus_ukrj1U1nsLyrNfXjycuzcTjtZc3",
+      start: startOfMonth.getTime(),
+      end: endOfMonth.getTime(),
+    })
 
     const scale = priceCentsTest.includes(".") ? priceCentsTest.split(".")[1]?.length : undefined
 
@@ -153,6 +167,7 @@ export const stripeRouter = createTRPCRouter({
         usage: toDecimal(usage),
         units: toUnits(usage),
         total: toDecimal(transformScale(usage, currencies.USD.exponent)),
+        usageTiny,
       },
       {
         ...PLANS.PRO,

@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@builderai/db": "^0.1.0",
+    "@builderai/tinybird": "workspace:^0.1.0",
+    "@dinero.js/currencies": "2.0.0-alpha.14",
     "@neondatabase/serverless": "^0.9.0",
     "@trigger.dev/nextjs": "^2.3.19",
     "@trigger.dev/react": "^2.3.19",

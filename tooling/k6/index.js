@@ -21,6 +21,10 @@ export const options = {
   },
 }
 
+function getRandomUsage(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
 export default function () {
   const endpoint = "http://host.docker.internal:3000/api/trpc/edge/customers.reportUsage"
 
@@ -30,7 +34,7 @@ export default function () {
   const payload = {
     customerId: "cus_ukrj1U1nsLyrNfXjycuzcTjtZc3",
     featureSlug: "apikeys",
-    usage: Math.floor(Math.random() * 100),
+    usage: getRandomUsage(1000, 2000),
     idempotencyKey: idempotencyKey,
   }
 

@@ -226,6 +226,12 @@ importers:
       '@builderai/db':
         specifier: ^0.1.0
         version: link:../../internal/db
+      '@builderai/tinybird':
+        specifier: workspace:^0.1.0
+        version: link:../../internal/tinybird
+      '@dinero.js/currencies':
+        specifier: 2.0.0-alpha.14
+        version: 2.0.0-alpha.14
       '@neondatabase/serverless':
         specifier: ^0.9.0
         version: 0.9.3

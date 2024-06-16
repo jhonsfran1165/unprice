@@ -13,12 +13,12 @@
       "node_modules",
       ".next",
       "dist",
-      "./packages/api/src/openapi.d.ts",
+      "./internal/api/src/openapi.d.ts",
       ".wrangler",
       ".react-email",
       ".contentlayer",
       ".nitro",
-      "./packages/db/src/migrations"
+      "./internal/db/src/migrations"
     ]
   },
   "linter": {
@@ -55,12 +55,12 @@
       "node_modules",
       ".next",
       "dist",
-      "./packages/api/src/openapi.d.ts",
+      "./internal/api/src/openapi.d.ts",
       ".wrangler",
       ".react-email",
       ".contentlayer",
       ".nitro",
-      "./packages/db/src/migrations"
+      "./internal/db/src/migrations"
     ]
   },
   "formatter": {
@@ -74,12 +74,12 @@
       "node_modules",
       ".next",
       "dist",
-      "./packages/api/src/openapi.d.ts",
+      "./internal/api/src/openapi.d.ts",
       ".wrangler",
       ".react-email",
       ".contentlayer",
       ".nitro",
-      "./packages/db/src/migrations"
+      "./internal/db/src/migrations"
     ]
   },
   "javascript": {

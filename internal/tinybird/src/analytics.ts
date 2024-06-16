@@ -77,16 +77,18 @@ export class Analytics {
 
   public get getUsageFeature() {
     return this.readClient.buildPipe({
-      pipe: "get_features_usage__v1",
+      pipe: "total_usage_per_feature_monthly__v1",
       parameters: z.object({
-        projectId: z.string(),
+        featureSlug: z.string(),
         customerId: z.string(),
-        subItemId: z.string(),
-        year: z.number(),
-        month: z.number(),
+        start: z.number(),
+        end: z.number(),
       }),
       data: z.object({
-        total_usage: z.number(),
+        sum: z.number(),
+        max: z.number(),
+        count: z.number(),
+        last_during_period: z.number(),
       }),
     })
   }
