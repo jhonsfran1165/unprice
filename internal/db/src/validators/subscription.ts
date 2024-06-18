@@ -481,8 +481,6 @@ export const calculatePricePerFeature = (
     case "package": {
       const { units, price } = configPackageSchema.parse(feature.config)
 
-      const defaultQuantity = Math.max(1, units ?? 0)
-
       // round up to the next package
       const packageCount = Math.ceil(defaultQuantity / units)
 

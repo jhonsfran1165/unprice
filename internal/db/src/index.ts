@@ -4,15 +4,13 @@ import { and, eq, getTableColumns, or, sql } from "drizzle-orm"
 // import { drizzle as drizzleHttp } from "drizzle-orm/neon-http"
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
 import { withReplicas } from "drizzle-orm/pg-core"
+import ws from "ws"
 import { env } from "../env.mjs"
 import * as schema from "./schema"
-// import ws from 'ws';
 
 // TODO: need to check if this is needed
 // export const http = neon(env.DATABASE_PRIMARY_URL)
 // export const dbHttp = drizzleHttp(http)
-
-// neonConfig.webSocketConstructor = ws;  // <-- this is the key bit
 
 // if we're running locally
 if (env.NODE_ENV === "development") {
@@ -22,6 +20,7 @@ if (env.NODE_ENV === "development") {
   neonConfig.useSecureWebSocket = false
   neonConfig.pipelineTLS = false
   neonConfig.pipelineConnect = false
+  neonConfig.webSocketConstructor = ws
 }
 
 export const primary =

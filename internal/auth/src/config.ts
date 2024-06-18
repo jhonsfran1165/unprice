@@ -36,7 +36,11 @@ export const authConfig = {
     // override the default create user
     async createUser(data) {
       const user = await db
-        .insert(schema.users)
+        .insert({
+          ...schema.users,
+          id: utils.newId("user"),
+          emailVerified: new Date(),
+        })
         .values(data)
         .returning()
         .then((user) => user[0] ?? null)

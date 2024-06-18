@@ -65,7 +65,6 @@ export const projectRouter = createTRPCRouter({
           name,
           slug: projectSlug,
           url,
-          tier: workspace.plan === "FREE" ? "FREE" : "PRO", // TODO: change this only apply when the user buy and addon for the project
         })
         .returning()
         .then((res) => res[0] ?? null)

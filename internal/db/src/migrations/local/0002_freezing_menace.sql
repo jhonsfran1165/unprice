@@ -1,1 +1,0 @@
-ALTER TABLE "builderai_usage" ADD CONSTRAINT "usage_pkey" PRIMARY KEY("id","project_id");

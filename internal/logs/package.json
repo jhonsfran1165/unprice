@@ -6,6 +6,9 @@
   "types": "src/index.ts",
   "keywords": [],
   "author": "Sebastian Franco",
+  "scripts": {
+    "clean": "git clean -xdf .next .turbo node_modules"
+  },
   "license": "AGPL-3.0",
   "devDependencies": {
     "@builderai/tsconfig": "0.1.0",

@@ -8,6 +8,9 @@
   "devDependencies": {
     "typescript": "^5.3.3"
   },
+  "scripts": {
+    "clean": "git clean -xdf .next .turbo node_modules"
+  },
   "dependencies": {
     "@baselime/edge-logger": "^0.4.2",
     "@builderai/logs": "^1.0.0"

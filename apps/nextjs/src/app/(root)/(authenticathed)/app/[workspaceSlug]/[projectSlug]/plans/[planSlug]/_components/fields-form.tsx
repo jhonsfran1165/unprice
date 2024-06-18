@@ -173,7 +173,7 @@ export function AggregationMethodFormField({
     <div className="w-full">
       <FormField
         control={form.control}
-        name="config.aggregationMethod"
+        name="aggregationMethod"
         render={({ field }) => (
           <FormItem className="flex flex-col">
             <div className="">

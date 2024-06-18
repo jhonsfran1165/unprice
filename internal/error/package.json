@@ -12,7 +12,8 @@
   "description": "",
   "keywords": [],
   "scripts": {
-    "build": "tsup"
+    "build": "tsup",
+    "clean": "git clean -xdf .next .turbo node_modules dist"
   },
   "author": "Andreas Thomas",
   "license": "AGPL-3.0",

@@ -19,18 +19,15 @@
     "clean": "rm -rf .turbo node_modules",
     "generate:local": "pnpm with-env drizzle-kit generate --config=local.config.ts",
     "migrate:local": "pnpm with-env drizzle-kit migrate --config=local.config.ts",
+    "migrate:custom": "pnpm with-env tsx src/migrate.ts",
     "migrate:neon": "pnpm with-env drizzle-kit migrate --config=neon.config.ts",
     "introspect:local": "pnpm with-env drizzle-kit introspect --config=local.config.ts",
     "generate:neon": "pnpm with-env drizzle-kit generate --config=neon.config.ts",
-    "generate:custom": "pnpm with-env drizzle-kit generate --config=custom.config.ts",
+    "generate:custom": "pnpm with-env drizzle-kit generate --custom --config=custom.config.ts",
     "push:local": "pnpm with-env drizzle-kit push --config=local.config.ts",
     "push:neon": "pnpm with-env drizzle-kit push --config=neon.config.ts",
-    "push:all": "pnpm push && pnpm migrate:custom",
-    "migrate:custom": "pnpm with-env ts-node --esm src/migrate.mts",
-    "drop:custom": "pnpm with-env drizzle-kit drop --config=custom.config.ts",
     "drop": "pnpm with-env drizzle-kit drop",
     "up:local": "pnpm with-env drizzle-kit up --config=local.config.ts",
-    "up:custom": "pnpm with-env drizzle-kit up --config=custom.config.ts",
     "up:neon": "pnpm with-env drizzle-kit up --config=neon.config.ts",
     "studio:neon": "pnpm with-env drizzle-kit studio --config=neon.config.ts --verbose",
     "studio:local": "pnpm with-env drizzle-kit studio --config=local.config.ts --verbose",
@@ -40,22 +37,22 @@
   "dependencies": {
     "@builderai/config": "^0.1.0",
     "@builderai/error": "^0.1.0",
-    "@neondatabase/serverless": "^0.9.0",
+    "@neondatabase/serverless": "^0.9.3",
     "@t3-oss/env-nextjs": "0.9.1",
     "base-x": "^4.0.0",
     "dinero.js": "2.0.0-alpha.14",
     "drizzle-orm": "^0.31.2",
     "drizzle-zod": "^0.5.1",
-    "net": "^1.0.2",
-    "postgres": "^3.4.3",
     "random-word-slugs": "^0.1.7",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@builderai/tsconfig": "^0.1.0",
+    "@types/ws": "^8.5.10",
     "dotenv-cli": "^7.3.0",
     "drizzle-kit": "^0.22.7",
-    "pg": "^8.11.3",
-    "typescript": "^5.3.3"
+    "tsx": "^4.7.2",
+    "typescript": "^5.3.3",
+    "ws": "^8.17.1"
   }
 }

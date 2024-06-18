@@ -16,7 +16,7 @@ import type {
   configFeatureSchema,
   planVersionFeatureMetadataSchema,
 } from "../validators/planVersionFeatures"
-import { typeFeatureEnum } from "./enums"
+import { aggregationMethodEnum, typeFeatureEnum } from "./enums"
 import { features } from "./features"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
@@ -37,6 +37,7 @@ export const planVersionFeatures = pgTableProject(
     config: json("features_config").$type<z.infer<typeof configFeatureSchema>>(),
     // metadata probably will be useful to save external data, etc.
     metadata: json("metadata").$type<z.infer<typeof planVersionFeatureMetadataSchema>>(),
+    aggregationMethod: aggregationMethodEnum("aggregation_method").default("count").notNull(),
     order: doublePrecision("order").notNull(),
     // if nulls the feature quantity must be provided at subscription time
     defaultQuantity: integer("default_quantity"),

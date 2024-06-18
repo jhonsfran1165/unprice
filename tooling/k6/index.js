@@ -3,18 +3,7 @@ import { check, sleep } from "k6"
 import http from "k6/http"
 
 export const options = {
-  stages: [
-    { duration: "10s", target: 1 },
-    { duration: "2m", target: 1 },
-    { duration: "10s", target: 2 },
-    { duration: "2m", target: 2 },
-    { duration: "10s", target: 3 },
-    { duration: "2m", target: 3 },
-    { duration: "10s", target: 4 },
-    { duration: "2m", target: 4 },
-    { duration: "10s", target: 5 },
-    { duration: "2m", target: 5 },
-  ],
+  stages: [{ duration: "10s", target: 10 }],
 
   thresholds: {
     http_req_duration: ["p(50)<25", "p(90)<100", "p(99)<300"],
@@ -31,10 +20,13 @@ export default function () {
   // create ramdom uuid for requestId
   const idempotencyKey = Math.floor(Math.random() * 10000000000).toString()
 
+  // pick ramdombly one of the following elemnnts in the array
+  const features = ["apikeys", "seats"]
+
   const payload = {
     customerId: "cus_ukrj1U1nsLyrNfXjycuzcTjtZc3",
-    featureSlug: "apikeys",
-    usage: getRandomUsage(1000, 2000),
+    featureSlug: features[Math.floor(Math.random() * features.length)],
+    usage: getRandomUsage(-1, 100),
     idempotencyKey: idempotencyKey,
   }
 

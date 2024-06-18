@@ -91,7 +91,6 @@ export function FeatureConfigForm({
         },
       ],
       usageMode: defaultValues.config?.usageMode ?? "tier",
-      aggregationMethod: defaultValues.config?.aggregationMethod ?? "sum",
       tierMode: defaultValues.config?.tierMode ?? "volume",
       units: defaultValues.config?.units ?? 1,
     },

@@ -1,12 +1,12 @@
 import { connectDatabase } from "@/lib/db"
 import { env } from "@/lib/env"
 import { client } from "@/trigger"
-import { configFlatSchema, configUsageSchema } from "@builderai/db/validators"
+import { calculatePricePerFeature } from "@builderai/db/validators"
 import { Analytics } from "@builderai/tinybird"
 import { type IO, eventTrigger } from "@trigger.dev/sdk"
-import { dinero, multiply, toDecimal, trimScale } from "dinero.js"
 import { z } from "zod"
 
+import { toStripeMoney } from "@builderai/db/utils"
 import Stripe from "stripe"
 
 export const createInvoiceJob = client.defineJob({
@@ -159,72 +159,34 @@ export const createInvoiceJob = client.defineJob({
             })
             .then((usage) => usage.data[0])
 
-          console.log(usage)
-
           return usage
         }
       )
 
       // calculate the price depending on the type of feature
-      switch (item.featurePlanVersion.featureType) {
-        case "usage": {
-          const usageConfig = configUsageSchema.parse(item.featurePlanVersion.config)
-          const usagePrice = dinero(usageConfig.price.dinero)
-          const aggregationMethod = usageConfig.aggregationMethod
-          const featureUsage = usage[aggregationMethod]
-          const total = toDecimal(trimScale(multiply(usagePrice, featureUsage)))
+      const priceCalculation = calculatePricePerFeature({
+        feature: item.featurePlanVersion,
+        units: usage ? usage[item.featurePlanVersion.aggregationMethod] || 1 : 1,
+      })
 
-          console.log(total)
-          console.log(usagePrice)
-
-          await createFixedCostInvoiceItem({
-            stripe,
-            invoiceId,
-            io,
-            stripeCustomerId: customerPaymentProviderId,
-            name: item.featurePlanVersion.feature.slug,
-            productId: item.featurePlanVersion.feature.id,
-            amount: total ?? "0",
-            currency: subscription.planVersion.currency,
-          })
-
-          break
-        }
-        case "flat": {
-          const flatConfig = configFlatSchema.parse(item.featurePlanVersion.config)
-          const price = dinero(flatConfig.price.dinero)
-          const total = toDecimal(trimScale(price))
-
-          await createFixedCostInvoiceItem({
-            stripe,
-            invoiceId,
-            io,
-            stripeCustomerId: customerPaymentProviderId,
-            name: item.featurePlanVersion.feature.slug,
-            productId: item.featurePlanVersion.feature.id,
-            amount: total ?? "0",
-            currency: subscription.planVersion.currency,
-          })
-          break
-        }
-        case "package":
-        case "tier": {
-          await createFixedCostInvoiceItem({
-            stripe,
-            invoiceId,
-            io,
-            stripeCustomerId: customerPaymentProviderId,
-            name: item.featurePlanVersion.feature.slug,
-            productId: item.featurePlanVersion.feature.id,
-            amount: "0.00",
-            currency: subscription.planVersion.currency,
-          })
-          break
-        }
-        default: {
-          throw new Error(`unknown feature type ${item.featurePlanVersion.featureType}`)
-        }
+      if (priceCalculation.err) {
+        throw new Error(`Error calculating price for ${item.featurePlanVersion.feature.slug}`)
       }
+
+      // get total in cents
+      // TODO: add support for other payment providers
+      const { amount, currency } = toStripeMoney(priceCalculation.val.totalPrice.dinero)
+
+      await createFixedCostInvoiceItem({
+        stripe,
+        invoiceId,
+        io,
+        stripeCustomerId: customerPaymentProviderId,
+        name: item.featurePlanVersion.feature.slug,
+        productId: item.featurePlanVersion.feature.id,
+        amount: amount,
+        currency: currency,
+      })
     }
 
     return {
@@ -250,8 +212,8 @@ async function createFixedCostInvoiceItem({
   stripeCustomerId: string
   name: string
   productId: string
-  amount: string
-  currency: "USD" | "EUR"
+  amount: number
+  currency: string
   /**
    * number between 0 and 1 to indicate how much to charge
    * if they have had a fixed cost item for 15/30 days, this should be 0.5
@@ -266,7 +228,7 @@ async function createFixedCostInvoiceItem({
       price_data: {
         currency: currency,
         product: productId,
-        unit_amount_decimal: amount,
+        unit_amount: amount,
       },
       currency: currency,
       description: typeof prorate === "number" ? `${name} (Prorated)` : name,

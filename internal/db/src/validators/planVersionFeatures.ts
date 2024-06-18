@@ -88,7 +88,6 @@ export const tiersSchema = z.object({
 export const configTierSchema = z
   .object({
     price: dineroSchema.optional(),
-    aggregationMethod: aggregationMethodSchema.optional(),
     tierMode: tierModeSchema,
     tiers: z.array(tiersSchema),
     usageMode: usageModeSchema.optional(),
@@ -165,7 +164,6 @@ export const configUsageSchema = z
   .object({
     price: dineroSchema.optional(),
     usageMode: usageModeSchema,
-    aggregationMethod: aggregationMethodSchema,
     tierMode: tierModeSchema.optional(),
     tiers: z.array(tiersSchema).optional(),
     units: unitSchema.optional(),
@@ -291,7 +289,6 @@ export const configFlatSchema = z.object({
   tiers: z.array(tiersSchema).optional(),
   price: dineroSchema,
   usageMode: usageModeSchema.optional(),
-  aggregationMethod: aggregationMethodSchema.optional(),
   tierMode: tierModeSchema.optional(),
   units: unitSchema.optional(),
 })
@@ -300,7 +297,6 @@ export const configPackageSchema = z.object({
   tiers: z.array(tiersSchema).optional(),
   price: dineroSchema,
   usageMode: usageModeSchema.optional(),
-  aggregationMethod: aggregationMethodSchema.optional(),
   tierMode: tierModeSchema.optional(),
   units: unitSchema,
 })
@@ -317,6 +313,7 @@ export const planVersionFeatureSelectBaseSchema = createSelectSchema(planVersion
   config: configFeatureSchema,
   metadata: planVersionFeatureMetadataSchema,
   defaultQuantity: z.coerce.number().int().optional(),
+  aggregationMethod: aggregationMethodSchema,
   limit: z.coerce.number().int().optional(),
   featureType: typeFeatureSchema,
 })
@@ -340,6 +337,7 @@ export const parseFeaturesConfig = (feature: PlanVersionFeature) => {
 export const planVersionFeatureInsertBaseSchema = createInsertSchema(planVersionFeatures, {
   config: configFeatureSchema.optional(),
   metadata: planVersionFeatureMetadataSchema.optional(),
+  aggregationMethod: aggregationMethodSchema.default("count"),
   defaultQuantity: z.coerce.number().int().optional(),
   limit: z.coerce.number().int().optional(),
 })
@@ -364,7 +362,6 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(planVersion
       switch (data.featureType) {
         case FEATURE_TYPES_MAPS.flat.code:
           delete data.config.tiers
-          delete data.config.aggregationMethod
           delete data.config.tierMode
           delete data.config.usageMode
           delete data.config.units
@@ -374,7 +371,6 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(planVersion
         case FEATURE_TYPES_MAPS.package.code:
           delete data.config.usageMode
           delete data.config.tiers
-          delete data.config.aggregationMethod
           delete data.config.tierMode
           delete data.config.usageMode
 
@@ -384,7 +380,6 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(planVersion
           delete data.config.price
           delete data.config.usageMode
           delete data.config.units
-          delete data.config.aggregationMethod
 
           return data
 

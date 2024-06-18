@@ -1,5 +1,5 @@
 {
-  "id": "f27ee6c7-955e-4457-b60e-03cbffe805d1",
+  "id": "b2f1f224-fda3-46c3-a990-56752f791aed",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -828,6 +828,14 @@
           "primaryKey": false,
           "notNull": false
         },
+        "aggregation_method": {
+          "name": "aggregation_method",
+          "type": "aggregation_method",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'count'"
+        },
         "order": {
           "name": "order",
           "type": "double precision",
@@ -1303,14 +1311,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "tier": {
-          "name": "tier",
-          "type": "project_tier",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'FREE'"
-        },
         "url": {
           "name": "url",
           "type": "text",
@@ -1318,26 +1318,19 @@
           "notNull": true,
           "default": "''"
         },
-        "stripe_account_id": {
-          "name": "stripe_account_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "''"
-        },
-        "stripe_account_verified": {
-          "name": "stripe_account_verified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
         "enabled": {
           "name": "enabled",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
           "default": true
+        },
+        "is_internal": {
+          "name": "is_internal",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "default_currency": {
           "name": "default_currency",
@@ -1421,11 +1414,11 @@
           "notNull": true,
           "default": "now()"
         },
-        "quantity": {
-          "name": "quantity",
+        "units": {
+          "name": "units",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "subscription_id": {
           "name": "subscription_id",
@@ -1615,13 +1608,6 @@
           "notNull": false,
           "default": "'active'"
         },
-        "active": {
-          "name": "active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
-        },
         "metadata": {
           "name": "metadata",
           "type": "json",
@@ -1653,7 +1639,7 @@
             }
           ],
           "isUnique": true,
-          "where": "\"builderai_subscriptions\".\"active\" = $1",
+          "where": "\"builderai_subscriptions\".\"status\" = $1",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -1909,6 +1895,13 @@
           "notNull": false,
           "default": false
         },
+        "is_internal": {
+          "name": "is_internal",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
         "created_by": {
           "name": "created_by",
           "type": "text",
@@ -1925,7 +1918,7 @@
           "name": "unprice_customer_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "legacy_plans": {
           "name": "legacy_plans",
@@ -1970,7 +1963,7 @@
         },
         "unprice_customer_id": {
           "name": "unprice_customer_id",
-          "nullsNotDistinct": true,
+          "nullsNotDistinct": false,
           "columns": [
             "unprice_customer_id"
           ]
@@ -2069,7 +2062,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "usage_pkey": {
+          "name": "usage_pkey",
+          "columns": [
+            "id",
+            "project_id"
+          ]
+        }
+      },
       "uniqueConstraints": {
         "unique_usage_subitem": {
           "name": "unique_usage_subitem",
@@ -2090,7 +2091,7 @@
       "values": [
         "sum",
         "last_during_period",
-        "last_ever",
+        "count",
         "max"
       ]
     },

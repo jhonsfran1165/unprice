@@ -1,12 +1,15 @@
 import * as currencies from "@dinero.js/currencies"
 import { TRPCError } from "@trpc/server"
-import { dinero, multiply, toDecimal, toUnits, transformScale } from "dinero.js"
+import { dinero } from "dinero.js"
 import { z } from "zod"
 
 import { APP_DOMAIN, PLANS } from "@builderai/config"
-import { purchaseWorkspaceSchema } from "@builderai/db/validators"
+import { calculatePricePerFeature, purchaseWorkspaceSchema } from "@builderai/db/validators"
 import { stripe } from "@builderai/stripe"
 
+import { and, eq } from "@builderai/db"
+import { features, planVersionFeatures } from "@builderai/db/schema"
+import { toStripeMoney } from "@builderai/db/utils"
 import { createTRPCRouter, protectedActiveWorkspaceProcedure, publicProcedure } from "../../trpc"
 
 export const stripeRouter = createTRPCRouter({
@@ -126,14 +129,11 @@ export const stripeRouter = createTRPCRouter({
     ]
   }),
 
-  // TODO: add output
+  // TODO: delete this just for testing
   dinero: publicProcedure.input(z.void()).query(async (opts) => {
     // TODO: fix priceId
     const proPrice = await stripe.prices.retrieve(PLANS.PRO?.priceId ?? "")
-    const stdPrice = await stripe.prices.retrieve(PLANS.STANDARD?.priceId ?? "")
 
-    // TODO: DINERO from string
-    const priceCentsTest = "1000.00"
     const now = new Date()
 
     // Get the start of the current month
@@ -142,32 +142,49 @@ export const stripeRouter = createTRPCRouter({
     // Get the end of the current month
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
-    const usageTiny = await opts.ctx.analytics.getUsageFeature({
-      featureSlug: "apikeys",
-      customerId: "cus_ukrj1U1nsLyrNfXjycuzcTjtZc3",
-      start: startOfMonth.getTime(),
-      end: endOfMonth.getTime(),
+    const usageTiny = await opts.ctx.analytics
+      .getUsageFeature({
+        featureSlug: "seats",
+        customerId: "cus_ukrj1U1nsLyrNfXjycuzcTjtZc3",
+        start: startOfMonth.getTime(),
+        end: endOfMonth.getTime(),
+      })
+      .then((usage) => usage.data[0])
+
+    const feature = await opts.ctx.db
+      .select({
+        planVersionFeatures,
+      })
+      .from(features)
+      .innerJoin(
+        planVersionFeatures,
+        and(
+          eq(features.id, planVersionFeatures.featureId),
+          eq(features.projectId, planVersionFeatures.projectId)
+        )
+      )
+      .where(eq(features.slug, "seats"))
+      .limit(1)
+      .then((res) => res?.[0])
+
+    if (!feature?.planVersionFeatures) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Feature not found",
+      })
+    }
+
+    const priceCalculation = calculatePricePerFeature({
+      feature: feature.planVersionFeatures,
+      units: usageTiny?.[feature.planVersionFeatures.aggregationMethod] ?? 1,
     })
-
-    const scale = priceCentsTest.includes(".") ? priceCentsTest.split(".")[1]?.length : undefined
-
-    const priceDecimal = dinero({
-      amount: Number.parseInt(priceCentsTest.replace(".", "")),
-      currency: currencies[stdPrice.currency as keyof typeof currencies] ?? currencies.USD,
-      scale: scale ? currencies.USD.exponent + scale : currencies.USD.exponent,
-    })
-
-    const usage = multiply(priceDecimal, 10)
 
     return [
       {
         ...PLANS.STANDARD,
-        price: priceDecimal,
-        toDecimal: toDecimal(priceDecimal),
-        usage: toDecimal(usage),
-        units: toUnits(usage),
-        total: toDecimal(transformScale(usage, currencies.USD.exponent)),
         usageTiny,
+        priceCalculation,
+        data: toStripeMoney(priceCalculation.val?.totalPrice.dinero),
       },
       {
         ...PLANS.PRO,

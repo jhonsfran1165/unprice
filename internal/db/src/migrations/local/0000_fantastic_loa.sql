@@ -1,5 +1,5 @@
 DO $$ BEGIN
- CREATE TYPE "public"."aggregation_method" AS ENUM('sum', 'last_during_period', 'last_ever', 'max');
+ CREATE TYPE "public"."aggregation_method" AS ENUM('sum', 'last_during_period', 'count', 'max');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -222,6 +222,7 @@ CREATE TABLE IF NOT EXISTS "builderai_plan_versions_features" (
 	"feature_type" "feature_types" NOT NULL,
 	"features_config" json,
 	"metadata" json,
+	"aggregation_method" "aggregation_method" DEFAULT 'count' NOT NULL,
 	"order" double precision NOT NULL,
 	"default_quantity" integer,
 	"limit" integer,
@@ -280,11 +281,9 @@ CREATE TABLE IF NOT EXISTS "builderai_projects" (
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"slug" text NOT NULL,
 	"name" text NOT NULL,
-	"tier" "project_tier" DEFAULT 'FREE' NOT NULL,
 	"url" text DEFAULT '' NOT NULL,
-	"stripe_account_id" text DEFAULT '',
-	"stripe_account_verified" boolean DEFAULT false,
 	"enabled" boolean DEFAULT true NOT NULL,
+	"is_internal" boolean DEFAULT false NOT NULL,
 	"default_currency" "currency" DEFAULT 'USD' NOT NULL,
 	CONSTRAINT "unique_slug" UNIQUE("slug")
 );
@@ -294,7 +293,7 @@ CREATE TABLE IF NOT EXISTS "builderai_subscription_items" (
 	"project_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"quantity" integer NOT NULL,
+	"units" integer,
 	"subscription_id" text NOT NULL,
 	"feature_plan_version_id" text NOT NULL,
 	CONSTRAINT "subscription_items_pkey" PRIMARY KEY("id","project_id")
@@ -318,7 +317,6 @@ CREATE TABLE IF NOT EXISTS "builderai_subscriptions" (
 	"collection_method" "collection_method" DEFAULT 'charge_automatically' NOT NULL,
 	"is_new" boolean DEFAULT true,
 	"status" "subscription_status" DEFAULT 'active',
-	"active" boolean DEFAULT true,
 	"metadata" json,
 	CONSTRAINT "subscriptions_pkey" PRIMARY KEY("id","project_id")
 );
@@ -349,13 +347,14 @@ CREATE TABLE IF NOT EXISTS "builderai_workspaces" (
 	"slug" text NOT NULL,
 	"name" text NOT NULL,
 	"is_personal" boolean DEFAULT false,
+	"is_internal" boolean DEFAULT false,
 	"created_by" text NOT NULL,
 	"image_url" text,
-	"unprice_customer_id" text,
+	"unprice_customer_id" text NOT NULL,
 	"legacy_plans" "legacy_plans" DEFAULT 'FREE' NOT NULL,
 	"enabled" boolean DEFAULT true NOT NULL,
 	CONSTRAINT "builderai_workspaces_slug_unique" UNIQUE("slug"),
-	CONSTRAINT "unprice_customer_id" UNIQUE NULLS NOT DISTINCT("unprice_customer_id")
+	CONSTRAINT "unprice_customer_id" UNIQUE("unprice_customer_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "builderai_usage" (
@@ -368,6 +367,7 @@ CREATE TABLE IF NOT EXISTS "builderai_usage" (
 	"year" integer NOT NULL,
 	"usage" integer NOT NULL,
 	"limit" integer,
+	CONSTRAINT "usage_pkey" PRIMARY KEY("id","project_id"),
 	CONSTRAINT "unique_usage_subitem" UNIQUE("subscription_item_id","month","year")
 );
 --> statement-breakpoint
@@ -549,4 +549,4 @@ CREATE INDEX IF NOT EXISTS "key" ON "builderai_apikeys" USING btree ("key");--> 
 CREATE INDEX IF NOT EXISTS "email" ON "builderai_customers" USING btree ("email");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "name" ON "builderai_domains" USING btree ("name");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "slug_index" ON "builderai_projects" USING btree ("slug");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "unique_active_planversion_subscription" ON "builderai_subscriptions" USING btree ("customers_id","plan_version_id","project_id") WHERE "builderai_subscriptions"."status" = 'active';
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_active_planversion_subscription" ON "builderai_subscriptions" USING btree ("customers_id","plan_version_id","project_id") WHERE "builderai_subscriptions"."status" = 'active';--> statement-breakpoint

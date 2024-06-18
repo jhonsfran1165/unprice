@@ -157,8 +157,7 @@ export class StripePaymentProvider {
           planVersion: { planType, billingPeriod, currency },
         } = planVersionFeature
 
-        const { tierMode, tiers, usageMode, aggregationMethod, units, price } =
-          configUsageSchema.parse(config)
+        const { tierMode, tiers, usageMode, units, price } = configUsageSchema.parse(config)
 
         try {
           const priceExist = await this.listPrices([id], 1)
@@ -191,7 +190,7 @@ export class StripePaymentProvider {
               recurring: {
                 interval: billingPeriod,
                 usage_type: "metered", // quantities are set at the end of the billing period as usage records
-                aggregate_usage: aggregationMethod,
+                aggregate_usage: "sum",
                 interval_count: 1,
               },
               billing_scheme: "tiered",
@@ -215,7 +214,7 @@ export class StripePaymentProvider {
               recurring: {
                 interval: billingPeriod,
                 usage_type: "metered", // quantities are set at the end of the billing period as usage records
-                aggregate_usage: aggregationMethod,
+                aggregate_usage: "sum",
                 interval_count: 1,
               },
               unit_amount_decimal: Math.floor(Number.parseFloat(price.displayAmount) * 100).toFixed(
@@ -239,7 +238,7 @@ export class StripePaymentProvider {
               recurring: {
                 interval: billingPeriod,
                 usage_type: "metered", // quantities are set at the end of the billing period as usage records
-                aggregate_usage: aggregationMethod,
+                aggregate_usage: "sum",
                 interval_count: 1,
               },
 

@@ -17,6 +17,7 @@ export const workspaces = pgTableProject(
 
     // wether or not is a personal workspace - meaning asociated to a user or a team
     isPersonal: boolean("is_personal").default(false),
+    isInternal: boolean("is_internal").default(false),
     createdBy: cuid("created_by")
       .notNull()
       .references(() => users.id),
