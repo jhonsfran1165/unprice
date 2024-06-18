@@ -9,7 +9,6 @@ import { stripe } from "@builderai/stripe"
 
 import { and, eq } from "@builderai/db"
 import { features, planVersionFeatures } from "@builderai/db/schema"
-import { toStripeMoney } from "@builderai/db/utils"
 import { createTRPCRouter, protectedActiveWorkspaceProcedure, publicProcedure } from "../../trpc"
 
 export const stripeRouter = createTRPCRouter({
@@ -145,7 +144,7 @@ export const stripeRouter = createTRPCRouter({
     const usageTiny = await opts.ctx.analytics
       .getUsageFeature({
         featureSlug: "seats",
-        customerId: "cus_ukrj1U1nsLyrNfXjycuzcTjtZc3",
+        customerId: "cus_2GGH1GE4864s4GrX6ttkjbStDP3k",
         start: startOfMonth.getTime(),
         end: endOfMonth.getTime(),
       })
@@ -176,22 +175,13 @@ export const stripeRouter = createTRPCRouter({
 
     const priceCalculation = calculatePricePerFeature({
       feature: feature.planVersionFeatures,
-      units: usageTiny?.[feature.planVersionFeatures.aggregationMethod] ?? 1,
+      units: usageTiny?.[feature.planVersionFeatures.aggregationMethod] ?? 0,
     })
 
     return [
       {
-        ...PLANS.STANDARD,
         usageTiny,
         priceCalculation,
-        data: toStripeMoney(priceCalculation.val?.totalPrice.dinero),
-      },
-      {
-        ...PLANS.PRO,
-        price: dinero({
-          amount: proPrice.unit_amount!,
-          currency: currencies[proPrice.currency as keyof typeof currencies] ?? currencies.USD,
-        }),
       },
     ]
   }),

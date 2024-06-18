@@ -36,12 +36,13 @@ export const authConfig = {
     // override the default create user
     async createUser(data) {
       const user = await db
-        .insert({
-          ...schema.users,
+        .insert(schema.users)
+        .values({
+          ...data,
+          // use our own id generator
           id: utils.newId("user"),
           emailVerified: new Date(),
         })
-        .values(data)
         .returning()
         .then((user) => user[0] ?? null)
 
@@ -87,7 +88,7 @@ export const authConfig = {
         const workspaceName = user.name ?? slug
 
         // get default project for unprice. This project is seeded in the database as the internal project
-        const defaultProjectId = "default"
+        const defaultProjectId = "proj_uhV7tetPJwCZAMox3L7Po4H5dgc"
 
         // every workspace is a customer for unprice
         // TODO: create a new customer in the default project

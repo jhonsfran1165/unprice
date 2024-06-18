@@ -49,7 +49,7 @@ export const subscriptionMetadataSchema = z.object({
 
 export const subscriptionItemsSelectSchema = createSelectSchema(subscriptionItems, {
   // units for the item, for flat features it's always 1, usage features it's the current usage
-  units: z.coerce.number().min(1),
+  units: z.coerce.number().min(0),
 })
 
 export const subscriptionItemsInsertSchema = createInsertSchema(subscriptionItems, {
@@ -298,7 +298,7 @@ export const calculatePricePerFeature = (
 
   // set default units to 0 if it's not provided
   const { feature, units } = parseData.data
-  const defaultQuantity = Math.max(1, units ?? 0)
+  const defaultQuantity = units ?? 0
 
   switch (feature.featureType) {
     // flat features have a single price independent of the units

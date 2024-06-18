@@ -9,12 +9,12 @@ import { z } from "zod"
 import { toStripeMoney } from "@builderai/db/utils"
 import Stripe from "stripe"
 
-export const createInvoiceJob = client.defineJob({
-  id: "billing.invoicing.createInvoice",
-  name: "Collect usage and create invoice",
+export const createInvoiceStripeJob = client.defineJob({
+  id: "billing.invoicing.stripe",
+  name: "Collect usage and create invoice for stripe payment provider",
   version: "0.0.1",
   trigger: eventTrigger({
-    name: "billing.invoicing.createInvoice",
+    name: "billing.invoicing.stripe",
     schema: z.object({
       customerId: z.string(),
       subscriptionId: z.string(),
@@ -70,25 +70,9 @@ export const createInvoiceJob = client.defineJob({
       throw new Error(`subscription ${subscriptionId} not found`)
     }
 
-    const provider = subscription.planVersion.paymentProvider
-    let customerPaymentProviderId = ""
+    const customerPaymentProviderId = subscription.customer.stripeCustomerId
 
-    switch (provider) {
-      case "stripe": {
-        customerPaymentProviderId = subscription.customer.stripeCustomerId ?? ""
-        break
-      }
-      case "lemonsqueezy": {
-        // TODO: change this to the correct customer id
-        customerPaymentProviderId = subscription.customer.stripeCustomerId ?? ""
-        break
-      }
-      default: {
-        throw new Error(`unknown payment provider ${provider}`)
-      }
-    }
-
-    if (customerPaymentProviderId === "") {
+    if (customerPaymentProviderId === "" || !customerPaymentProviderId) {
       throw new Error(`customer ${customerId} has no payment customer id`)
     }
 
@@ -116,8 +100,7 @@ export const createInvoiceJob = client.defineJob({
       throw new Error(`customer ${customerId} has no payment method`)
     }
 
-    // TODO: this should handle only stripe
-    const invoiceId = await io.runTask(`create invoice for ${customerId}`, async () =>
+    const invoiceId = await io.runTask(`create stripe invoice for ${customerId}`, async () =>
       stripe.invoices
         .create({
           customer: customerPaymentProviderId,
@@ -163,21 +146,33 @@ export const createInvoiceJob = client.defineJob({
         }
       )
 
+      // calculate the total units used
+      const units = usage ? usage[item.featurePlanVersion.aggregationMethod] || 0 : 0
+
+      if (units < 0) {
+        throw new Error(
+          `Usage is negative ${item.id} ${item.featurePlanVersion.feature.slug} ${units}`
+        )
+      }
+
       // calculate the price depending on the type of feature
       const priceCalculation = calculatePricePerFeature({
         feature: item.featurePlanVersion,
-        units: usage ? usage[item.featurePlanVersion.aggregationMethod] || 1 : 1,
+        units: units,
       })
 
       if (priceCalculation.err) {
-        throw new Error(`Error calculating price for ${item.featurePlanVersion.feature.slug}`)
+        throw new Error(
+          `Error calculating price for ${item.featurePlanVersion.feature.slug} ${JSON.stringify(
+            priceCalculation.err
+          )}`
+        )
       }
 
       // get total in cents
-      // TODO: add support for other payment providers
       const { amount, currency } = toStripeMoney(priceCalculation.val.totalPrice.dinero)
 
-      await createFixedCostInvoiceItem({
+      await createStripeCostInvoiceItem({
         stripe,
         invoiceId,
         io,
@@ -185,6 +180,7 @@ export const createInvoiceJob = client.defineJob({
         name: item.featurePlanVersion.feature.slug,
         productId: item.featurePlanVersion.feature.id,
         amount: amount,
+        quantity: units,
         currency: currency,
       })
     }
@@ -195,7 +191,7 @@ export const createInvoiceJob = client.defineJob({
   },
 })
 
-async function createFixedCostInvoiceItem({
+async function createStripeCostInvoiceItem({
   stripe,
   invoiceId,
   io,
@@ -204,6 +200,7 @@ async function createFixedCostInvoiceItem({
   productId,
   prorate,
   amount,
+  quantity,
   currency,
 }: {
   stripe: Stripe
@@ -214,17 +211,19 @@ async function createFixedCostInvoiceItem({
   productId: string
   amount: number
   currency: string
+  quantity: number
   /**
    * number between 0 and 1 to indicate how much to charge
    * if they have had a fixed cost item for 15/30 days, this should be 0.5
    */
   prorate?: number
 }): Promise<void> {
+  // TODO: support proration
   await io.runTask(name, async () => {
     await stripe.invoiceItems.create({
       customer: stripeCustomerId,
       invoice: invoiceId,
-      quantity: 1,
+      quantity: quantity,
       price_data: {
         currency: currency,
         product: productId,

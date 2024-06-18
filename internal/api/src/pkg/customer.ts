@@ -525,13 +525,11 @@ export class UnpriceCustomer {
         )
       }
 
+      // flat features don't have usage
       if (subItem.featureType === "flat") {
-        return Err(
-          new UnPriceCustomerError({
-            code: "FEATURE_NOT_SUPPORT_USAGE",
-            customerId: opts.customerId,
-          })
-        )
+        return Ok({
+          success: true,
+        })
       }
 
       this.waitUntil(

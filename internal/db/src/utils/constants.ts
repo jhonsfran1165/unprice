@@ -1,11 +1,11 @@
 export const TIER_MODES_MAP = {
   volume: {
     label: "Volume",
-    description: "Volume based pricing",
+    description: "All units priced based on final tier reached",
   },
   graduated: {
     label: "Graduated",
-    description: "Graduated pricing",
+    description: "Tiers applies progressively as quantity increases",
   },
 } as const
 
@@ -13,22 +13,22 @@ export const FEATURE_TYPES_MAPS = {
   flat: {
     code: "flat",
     label: "Flat",
-    description: "Single price per unit",
+    description: "Fixed price for a single unit or package",
   },
   tier: {
     code: "tier",
     label: "Tier",
-    description: "Price per tier",
+    description: "Offers different prices based on unit quantity",
   },
   package: {
     code: "package",
     label: "Package",
-    description: "Price per package of units",
+    description: "Price by package, bundle or group of units",
   },
   usage: {
     code: "usage",
     label: "Usage",
-    description: "Price per usage",
+    description: "Pay as you go based on usage",
   },
 } as const
 
@@ -36,17 +36,17 @@ export const USAGE_MODES_MAP = {
   tier: {
     code: "tier",
     label: "Tier",
-    description: "Volume based pricing",
+    description: "Price based on quantity of units",
   },
   package: {
     code: "package",
     label: "Package",
-    description: "Volume based pricing",
+    description: "Price by package, bundle or group of units",
   },
   unit: {
     code: "unit",
     label: "Unit",
-    description: "Volume based pricing",
+    description: "Price by number of units, like seats, users, etc",
   },
 } as const
 

@@ -3,12 +3,14 @@ import { db } from "."
 import * as schema from "./schema"
 import { newId } from "./utils"
 
-import { migrate } from "drizzle-orm/neon-serverless/migrator"
+// import { migrate } from "drizzle-orm/neon-serverless/migrator"
 
 async function main() {
-  await migrate(db, { migrationsFolder: "src/migrations/custom" })
+  // await migrate(db, { migrationsFolder: "src/migrations/custom" })
 
-  process.exit(0)
+  // process.exit(0)
+
+  const defaultProjectId = "proj_uhV7tetPJwCZAMox3L7Po4H5dgc"
 
   // create user
   const user = await db
@@ -29,7 +31,7 @@ async function main() {
   if (!user) throw "Error creating user"
 
   const unpriceWorkspace = await db.query.workspaces.findFirst({
-    where: (fields, operators) => operators.eq(fields.slug, "unprice"),
+    where: (fields, operators) => operators.eq(fields.slug, "unprice-admin"),
   })
 
   const workspaceId = unpriceWorkspace?.id ?? newId("workspace")
@@ -41,7 +43,7 @@ async function main() {
       .insert(schema.workspaces)
       .values({
         id: workspaceId,
-        slug: "unprice",
+        slug: "unprice-admin",
         name: "unprice",
         isPersonal: false,
         imageUrl: "",
@@ -70,21 +72,31 @@ async function main() {
 
   if (!workspace) throw "Error creating workspace"
 
-  // add the user as a member of the workspace
-  await db
-    .insert(schema.members)
-    .values({
-      userId: user.id,
-      workspaceId: workspace.id,
-      role: "OWNER",
-    })
-    .onConflictDoNothing()
-
-  const unpriceProject = await db.query.projects.findFirst({
-    where: (fields, operators) => operators.eq(fields.slug, "unprice"),
+  const member = await db.query.members.findFirst({
+    where: (fields, operators) =>
+      operators.and(
+        operators.eq(fields.userId, user.id),
+        operators.eq(fields.workspaceId, workspace.id)
+      ),
   })
 
-  const unpriceProjectId = unpriceProject?.id ?? newId("project")
+  if (!member) {
+    // add the user as a member of the workspace
+    await db
+      .insert(schema.members)
+      .values({
+        userId: user.id,
+        workspaceId: workspace.id,
+        role: "OWNER",
+      })
+      .onConflictDoNothing()
+  }
+
+  const unpriceProject = await db.query.projects.findFirst({
+    where: (fields, operators) => operators.eq(fields.slug, "unprice-admin"),
+  })
+
+  const unpriceProjectId = unpriceProject?.id ?? defaultProjectId
   let project: typeof schema.projects.$inferSelect | null = null
 
   if (!unpriceProject?.id) {
@@ -94,7 +106,7 @@ async function main() {
       .values({
         id: unpriceProjectId,
         name: "unprice",
-        slug: "unprice",
+        slug: "unprice-admin",
         workspaceId: workspaceId,
         url: "",
         enabled: true,
@@ -128,10 +140,11 @@ async function main() {
     unpriceOwner = await db
       .insert(schema.customers)
       .values({
-        id: newId("customer"),
+        id: "cus_2GGH1GE4864s4GrX6ttkjbStDP3k",
         name: "unprice",
         projectId: project.id,
         email: user.email,
+        stripeCustomerId: "cus_QCzIbAwmpxZeEA",
       })
       .returning()
       .then((customer) => customer[0])
@@ -159,6 +172,9 @@ async function main() {
   // })
 
   // print all relevant data and save it to unfisical
+  console.log("Project Id: ", project.id)
+  console.log("Workspace Id: ", workspace.id)
+  console.log("Customer Id: ", unpriceOwner.id)
 
   process.exit(0)
 }

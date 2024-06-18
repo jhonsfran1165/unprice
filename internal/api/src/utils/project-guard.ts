@@ -25,8 +25,6 @@ export const projectGuard = async ({
   const workspaces = ctx.session?.user?.workspaces
   const activeWorkspace = workspaces?.find((workspace) => workspace.slug === activeWorkspaceSlug)
 
-  console.log(workspaces)
-
   if (!activeWorkspace?.id) {
     throw new TRPCError({
       code: "BAD_REQUEST",

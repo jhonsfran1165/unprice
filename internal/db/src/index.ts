@@ -12,15 +12,18 @@ import * as schema from "./schema"
 // export const http = neon(env.DATABASE_PRIMARY_URL)
 // export const dbHttp = drizzleHttp(http)
 
+neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket : ws
+
 // if we're running locally
 if (env.NODE_ENV === "development") {
   // Set the WebSocket proxy to work with the local instance
-  neonConfig.wsProxy = (host) => `${host}:5433/v1`
+  neonConfig.wsProxy = (host) => {
+    return `${host}:5433/v1?address=db:5432`
+  }
   // Disable all authentication and encryption
   neonConfig.useSecureWebSocket = false
   neonConfig.pipelineTLS = false
   neonConfig.pipelineConnect = false
-  neonConfig.webSocketConstructor = ws
 }
 
 export const primary =
@@ -37,6 +40,8 @@ export const primary =
     : drizzleNeon(
         new Pool({
           connectionString: env.DATABASE_URL_LOCAL,
+        }).on("error", (err) => {
+          console.error("Database error:", err)
         }),
         {
           schema: schema,

@@ -3,7 +3,7 @@ import { check, sleep } from "k6"
 import http from "k6/http"
 
 export const options = {
-  stages: [{ duration: "10s", target: 10 }],
+  stages: [{ duration: "120s", target: 10 }],
 
   thresholds: {
     http_req_duration: ["p(50)<25", "p(90)<100", "p(99)<300"],
@@ -17,16 +17,16 @@ function getRandomUsage(min, max) {
 export default function () {
   const endpoint = "http://host.docker.internal:3000/api/trpc/edge/customers.reportUsage"
 
-  // create ramdom uuid for requestId
+  // create random uuid for requestId
   const idempotencyKey = Math.floor(Math.random() * 10000000000).toString()
 
-  // pick ramdombly one of the following elemnnts in the array
-  const features = ["apikeys", "seats"]
+  // pick randomly one of the following elements in the array
+  const features = ["apikeys", "seats", "basic-access", "verifications", "customers", "pro-access"]
 
   const payload = {
-    customerId: "cus_ukrj1U1nsLyrNfXjycuzcTjtZc3",
+    customerId: "cus_2GGH1GE4864s4GrX6ttkjbStDP3k",
     featureSlug: features[Math.floor(Math.random() * features.length)],
-    usage: getRandomUsage(-1, 100),
+    usage: getRandomUsage(-2, 10),
     idempotencyKey: idempotencyKey,
   }
 
@@ -34,7 +34,7 @@ export default function () {
 
   const res = http.get(`${endpoint}?batch=1&input=${trpcData}`, {
     headers: {
-      "x-builderai-api-key": "builderai_live_vixDq46bdgtm18Ztzh1XHefkSfs",
+      "x-builderai-api-key": "builderai_live_2H5X2YMU1RLbEky9R8NDHi3xzx8C",
     },
   })
 
