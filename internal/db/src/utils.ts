@@ -1,4 +1,4 @@
-import { type Dinero, allocate, toSnapshot, transformScale, up } from "dinero.js"
+import { type Dinero, multiply, toSnapshot, transformScale, up } from "dinero.js"
 
 export * from "./utils/_table"
 export * from "./utils/constants"
@@ -40,17 +40,15 @@ export function toStripeMoney(price: Dinero<number>) {
 }
 
 export function calculatePercentage(price: Dinero<number>, percentage: number) {
+  if (percentage < 0 || percentage > 1) {
+    throw new Error(`Percentage must be between 0 and 1, got ${percentage}`)
+  }
+
   const str = percentage.toString()
   const scale = str.split(".")[1]?.length ?? 0
   const rest = percentage * 10 ** scale
-  const total = 1 * 10 ** scale
 
-  const ratios = [
-    { amount: Math.round(rest), scale: scale },
-    { amount: Math.round(total) - Math.round(rest), scale: scale },
-  ]
+  const result = multiply(price, { amount: Math.round(rest), scale: scale })
 
-  const [result] = allocate(price, ratios)
-
-  return result!
+  return result
 }

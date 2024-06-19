@@ -162,7 +162,7 @@ export const stripeRouter = createTRPCRouter({
           eq(features.projectId, planVersionFeatures.projectId)
         )
       )
-      .where(eq(features.slug, "verifications"))
+      .where(eq(features.slug, "seats"))
       .limit(1)
       .then((res) => res?.[0])
 
@@ -176,7 +176,7 @@ export const stripeRouter = createTRPCRouter({
     const priceCalculation = calculatePricePerFeature({
       feature: feature.planVersionFeatures,
       quantity: usageTiny?.[feature.planVersionFeatures.aggregationMethod] ?? 0,
-      prorate: 0.0323123123123,
+      prorate: 0.5,
     })
 
     if (priceCalculation.err) {

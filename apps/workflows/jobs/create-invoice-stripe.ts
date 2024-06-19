@@ -235,6 +235,7 @@ export const createInvoiceStripeJob = client.defineJob({
         amount: amount,
         quantity: quantity,
         currency: currency,
+        isProrated: prorate !== undefined,
       })
     }
 
@@ -279,7 +280,7 @@ async function createStripeCostInvoiceItem({
         unit_amount: amount,
       },
       currency: currency,
-      description: isProrated ? `${name} (Prorated)` : name,
+      description: isProrated ? `${name} (prorated)` : name,
     })
   })
 }
