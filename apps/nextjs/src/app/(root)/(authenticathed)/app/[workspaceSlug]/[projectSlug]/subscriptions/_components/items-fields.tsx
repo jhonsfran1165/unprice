@@ -271,7 +271,7 @@ function ConfigItemPrice({
 }: {
   selectedPlanVersion: PlanVersionResponse
   feature: PlanVersionFeaturesResponse
-  units: number | null
+  units: number
   type: "total" | "unit"
 }) {
   // useCallback to prevent re-rendering calculatePricePerFeature

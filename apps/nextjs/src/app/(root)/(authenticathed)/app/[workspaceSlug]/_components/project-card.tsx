@@ -6,7 +6,7 @@ import { PROJECT_TIER } from "@builderai/config"
 import { cn } from "@builderai/ui"
 import { Card, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
 
-function ProjectTierIndicator(props: { tier: ProjectTier }) {
+function ProjectTierIndicator(props: { tier: ProjectTier; isInternal?: boolean }) {
   return (
     <span
       className={cn(
@@ -16,7 +16,7 @@ function ProjectTierIndicator(props: { tier: ProjectTier }) {
         props.tier === PROJECT_TIER.PRO && "bg-red-100 dark:bg-red-800"
       )}
     >
-      {props.tier}
+      {props.tier} {props.isInternal && " - INTERNAL"}
     </span>
   )
 }
@@ -26,7 +26,9 @@ export function ProjectCard(props: {
   project: RouterOutputs["projects"]["listByWorkspace"]["projects"][number]
 }) {
   const { project } = props
-  const projectTier = (project.tier as ProjectTier) ?? ("FREE" as ProjectTier)
+  // TODO: fix this
+  // const projectTier = (project.isInternal as ProjectTier) ?? ("FREE" as ProjectTier)
+  const projectTier = "PRO"
   return (
     <Link prefetch={false} href={`/${props.workspaceSlug}/${project.slug}/overview`}>
       <Card className="overflow-hidden">
@@ -34,7 +36,7 @@ export function ProjectCard(props: {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>{project.name}</span>
-            <ProjectTierIndicator tier={projectTier} />
+            <ProjectTierIndicator tier={projectTier} isInternal={project.isInternal} />
           </CardTitle>
           <CardDescription>{project.url}&nbsp;</CardDescription>
         </CardHeader>

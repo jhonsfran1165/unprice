@@ -13,7 +13,7 @@ import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
-import type { subscriptionMetadataSchema } from "../validators/subscription"
+import type { subscriptionMetadataSchema } from "../validators/subscriptions"
 import { customers } from "./customers"
 import { collectionMethodEnum, subscriptionStatusEnum, typeSubscriptionEnum } from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
