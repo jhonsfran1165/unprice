@@ -1,9 +1,8 @@
 "use client"
 
+import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
 import { useParams } from "next/navigation"
 import { useEffect } from "react"
-
-import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "~/constants"
 
 /**
  * Update the client cookie on focus tab event

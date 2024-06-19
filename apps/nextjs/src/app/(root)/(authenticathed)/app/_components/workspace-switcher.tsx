@@ -66,7 +66,11 @@ export function WorkspaceSwitcher({
           >
             <Avatar className="mr-2 h-5 w-5">
               <AvatarImage
-                src={activeWorkspace.imageUrl && activeWorkspace.imageUrl !== "" ? activeWorkspace.imageUrl : `https://avatar.vercel.sh/${activeWorkspace.id}`}
+                src={
+                  activeWorkspace.imageUrl && activeWorkspace.imageUrl !== ""
+                    ? activeWorkspace.imageUrl
+                    : `https://avatar.vercel.sh/${activeWorkspace.id}`
+                }
               />
               <AvatarFallback>{activeWorkspace.slug?.substring(0, 2)}</AvatarFallback>
             </Avatar>
@@ -94,7 +98,11 @@ export function WorkspaceSwitcher({
                   >
                     <Avatar className="mr-2 h-5 w-5">
                       <AvatarImage
-                        src={personalWorkspace.imageUrl && personalWorkspace.imageUrl !== "" ? personalWorkspace.imageUrl : `https://avatar.vercel.sh/${personalWorkspace.id}`}
+                        src={
+                          personalWorkspace.imageUrl && personalWorkspace.imageUrl !== ""
+                            ? personalWorkspace.imageUrl
+                            : `https://avatar.vercel.sh/${personalWorkspace.id}`
+                        }
                         alt={`user-${personalWorkspace.name}`}
                       />
                       <AvatarFallback>{activeWorkspace.slug?.substring(0, 2)}</AvatarFallback>
@@ -128,7 +136,11 @@ export function WorkspaceSwitcher({
                     >
                       <Avatar className="mr-2 h-5 w-5">
                         <AvatarImage
-                          src={workspace.imageUrl && workspace.imageUrl !== "" ? workspace.imageUrl : `https://avatar.vercel.sh/${workspace.id}`}
+                          src={
+                            workspace.imageUrl && workspace.imageUrl !== ""
+                              ? workspace.imageUrl
+                              : `https://avatar.vercel.sh/${workspace.id}`
+                          }
                           alt={`user-${workspace.name}`}
                         />
                         <AvatarFallback>{workspace.name.substring(0, 2)}</AvatarFallback>

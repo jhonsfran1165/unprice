@@ -263,12 +263,18 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.19
         version: 18.3.0
+      '@types/ws':
+        specifier: ^8.5.10
+        version: 8.5.10
       dotenv-cli:
         specifier: ^7.3.0
         version: 7.4.2
       typescript:
         specifier: ^5.3.3
         version: 5.4.5
+      ws:
+        specifier: ^8.17.1
+        version: 8.17.1
 
   internal/api:
     dependencies:
@@ -336,8 +342,8 @@ importers:
         specifier: 11.0.0-rc.382
         version: 11.0.0-rc.382
       '@unkey/cache':
-        specifier: ^0.0.3
-        version: 0.0.3
+        specifier: ^1.0.0
+        version: 1.0.0
       '@upstash/ratelimit':
         specifier: ^1.0.1
         version: 1.2.1
@@ -6274,8 +6280,8 @@ packages:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: false
 
-  /@unkey/cache@0.0.3:
-    resolution: {integrity: sha512-DUy8y4WviATvWCNfutU9UWsz9QgpRkv20Gt6kZ5xY7keDNOXR3t5tWhfZ5P60+7pIflrMLWRGNIY+GE6vMQjGQ==}
+  /@unkey/cache@1.0.0:
+    resolution: {integrity: sha512-IY/ZlLK+riFsyj4ZGNaaXwfEwWj5ztXJPQJE+MRBjSqsYdbcRXxJ+/hXs681jNR4YX/RhCja4GFp9PvUmOqdnw==}
     dependencies:
       '@opentelemetry/api': 1.8.0
       '@unkey/error': 0.0.2

@@ -5,8 +5,7 @@ import { cache } from "react"
 
 import { createCaller, createTRPCContext } from "@builderai/api"
 import { auth } from "@builderai/auth/server-rsc"
-
-import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "~/constants"
+import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when

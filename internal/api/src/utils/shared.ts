@@ -27,10 +27,18 @@ export const verifyFeature = async ({
     waitUntil: ctx.waitUntil,
   })
 
+  // current year and month - we only support current month and year for now
+  const t = new Date()
+  t.setUTCMonth(t.getUTCMonth() - 1)
+  const year = t.getUTCFullYear()
+  const month = t.getUTCMonth() + 1 // months are 0 indexed
+
   const { err, val } = await customer.verifyFeature({
     customerId,
     featureSlug,
     projectId,
+    year,
+    month,
     ctx,
   })
 
@@ -105,7 +113,6 @@ export const getEntitlements = async ({
   return val
 }
 
-// TODO: handling errors and logging here
 export const reportUsageFeature = async ({
   customerId,
   featureSlug,
@@ -129,11 +136,19 @@ export const reportUsageFeature = async ({
     waitUntil: ctx.waitUntil,
   })
 
+  // current year and month - we only support current month and year for now
+  const t = new Date()
+  t.setUTCMonth(t.getUTCMonth() - 1)
+  const year = t.getUTCFullYear()
+  const month = t.getUTCMonth() + 1 // months are 0 indexed
+
   const { err, val } = await customer.reportUsage({
     customerId,
     featureSlug,
     projectId,
     usage,
+    year,
+    month,
   })
 
   if (err) {

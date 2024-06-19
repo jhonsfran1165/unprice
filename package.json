@@ -16,7 +16,7 @@
     "typecheck": "turbo typecheck",
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip",
-    "fmt": "pnpm biome format . --write && pnpm biome check . --apply",
+    "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply",
     "fmt:check": "pnpm biome format . && pnpm biome check .",
     "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:check",
     "manypkg:fix": "pnpm manypkg fix"

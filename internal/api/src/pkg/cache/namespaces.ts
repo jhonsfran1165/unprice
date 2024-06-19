@@ -6,17 +6,15 @@ export type CurrentUsageCached = {
   month: Month
   year: Year
   updatedAt: number
-} | null
+}
 
-export type SubscriptionItemCached =
-  | (Omit<SubscriptionItem, "createdAt" | "updatedAt"> & {
-      featureType: FeatureType
-    })
-  | null
+export type SubscriptionItemCached = Omit<SubscriptionItem, "createdAt" | "updatedAt"> & {
+  featureType: FeatureType
+}
 
 export type CacheNamespaces = {
-  customerFeatureCurrentUsage: CurrentUsageCached
-  featureByCustomerId: SubscriptionItemCached
+  customerFeatureCurrentUsage: CurrentUsageCached | null
+  featureByCustomerId: SubscriptionItemCached | null
   subscriptionsByCustomerId: Array<string>
   entitlementsByCustomerId: Array<string>
   idempotentRequestUsageByHash: boolean

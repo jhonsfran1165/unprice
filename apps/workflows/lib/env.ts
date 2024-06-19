@@ -7,6 +7,7 @@ export function env() {
       TRIGGER_API_KEY: z.string(),
       TINYBIRD_TOKEN: z.string(),
       STRIPE_API_KEY: z.string(),
+      NODE_ENV: z.enum(["development", "production"]).default("development"),
     })
     .safeParse(process.env)
   if (!parsed.success) {

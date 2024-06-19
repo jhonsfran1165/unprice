@@ -172,9 +172,10 @@ async function main() {
   // })
 
   // print all relevant data and save it to unfisical
-  console.log("Project Id: ", project.id)
-  console.log("Workspace Id: ", workspace.id)
-  console.log("Customer Id: ", unpriceOwner.id)
+
+  console.info("Project Id: ", project.id)
+  console.info("Workspace Id: ", workspace.id)
+  console.info("Customer Id: ", unpriceOwner.id)
 
   process.exit(0)
 }

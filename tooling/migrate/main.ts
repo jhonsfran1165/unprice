@@ -165,13 +165,6 @@ async function main() {
   // create a plan
 
   // subscribe to the free plan
-  // await db.insert(subscriptions).values({
-  //   customerId: customer.id,
-  //   planId: "free",
-  //   status: "ACTIVE",
-  //   createdAt: new Date(),
-  //   updatedAt: new Date(),
-  // })
 
   // print all relevant data and save it to unfisical
 

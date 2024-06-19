@@ -29,6 +29,13 @@ client.defineJob({
       })
       .from(schema.subscriptions)
       .innerJoin(
+        schema.projects,
+        and(
+          eq(schema.subscriptions.projectId, schema.projects.id),
+          eq(schema.projects.isInternal, false)
+        )
+      )
+      .innerJoin(
         schema.versions,
         and(
           eq(schema.subscriptions.planVersionId, schema.versions.id),

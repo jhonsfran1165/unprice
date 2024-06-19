@@ -1,20 +1,13 @@
 import { tracing } from "@baselime/trpc-opentelemetry-middleware"
 import type { Session } from "@builderai/auth/server"
 
-/**
- * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
- * 1. You want to modify request context (see Part 1)
- * 2. You want to create a new middleware or type of procedure (see Part 3)
- *
- * tl;dr - this is where all the tRPC server stuff is created and plugged in.
- * The pieces you will need to use are documented accordingly near the end
- */
 import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import { TRPCError, initTRPC } from "@trpc/server"
 import { ZodError } from "zod"
 
 import type { NextAuthRequest } from "@builderai/auth"
 import { auth } from "@builderai/auth/server"
+import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
 import { db } from "@builderai/db"
 import { newId } from "@builderai/db/utils"
 import { BaseLimeLogger, ConsoleLogger, type Logger } from "@builderai/logging"
@@ -58,11 +51,6 @@ export interface CreateContextOptions {
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use
  * it, you can export it from here
- *
- * Examples of things you may need it for:
- * - testing, so we dont have to mock Next.js' req/res
- * - trpc's `createSSGHelpers` where we don't have req/res
- * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
 export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
@@ -80,7 +68,6 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
 /**
  * This is the actual context you'll use in your router. It will be used to
  * process every request that goes through your tRPC endpoint
- * @link https://trpc.io/docs/context
  */
 export const createTRPCContext = async (opts: {
   headers: Headers
@@ -105,7 +92,7 @@ export const createTRPCContext = async (opts: {
         service: "api", // default service name
         flushAfterMs: 10000, // flush after 10 secs
         ctx: {
-          waitUntil, // flush will as a background task
+          waitUntil, // flush will be executed as a background task
         },
       })
     : new ConsoleLogger({
@@ -124,16 +111,14 @@ export const createTRPCContext = async (opts: {
     metrics
   )
 
-  // for client side we set the cookie on focus tab event
-  // for server side we set a header from trpc invoker
+  // this comes from the cookies or headers of the request
   const activeWorkspaceSlug =
-    opts.req?.cookies.get("workspace-slug")?.value ?? opts.headers.get("workspace-slug") ?? ""
+    opts.req?.cookies.get(COOKIE_NAME_WORKSPACE)?.value ??
+    opts.headers.get(COOKIE_NAME_WORKSPACE) ??
+    ""
 
-  // for client side we set the cookie on fo
-  // for server side we set a header from trpc invoker
-  // TODO: use utils here
   const activeProjectSlug =
-    opts.req?.cookies.get("project-slug")?.value ?? opts.headers.get("project-slug") ?? ""
+    opts.req?.cookies.get(COOKIE_NAME_PROJECT)?.value ?? opts.headers.get(COOKIE_NAME_PROJECT) ?? ""
 
   return createInnerTRPCContext({
     session,
@@ -146,7 +131,7 @@ export const createTRPCContext = async (opts: {
     logger,
     metrics,
     cache,
-    waitUntil,
+    waitUntil, // abstracted to allow migration to other providers
   })
 }
 
@@ -201,7 +186,7 @@ export const createTRPCRouter = t.router
 export const mergeRouters = t.mergeRouters
 
 /**
- * Public (unauthed) procedure
+ * Public procedure
  *
  * This is the base piece you use to build new queries and mutations on your
  * tRPC API. It does not guarantee that a user querying is authorized, but you
@@ -231,7 +216,6 @@ export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
 // this is a procedure that requires a user to be logged in and have an active workspace
 // it also sets the active workspace in the context
 // the active workspace is passed in the headers or cookies of the request
-// this way we can have a single endpoint for all requests and not have to pass the workspace slug in the body of the request every time
 export const protectedActiveWorkspaceProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   const activeWorkspaceSlug = ctx.activeWorkspaceSlug
 
@@ -308,6 +292,7 @@ export const protectedApiOrActiveProjectProcedure = publicProcedure.use(async ({
     })
   }
 
+  // if no api key is present, check if the user is logged in
   if (!ctx.session?.user?.id) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "User not found" })
   }
@@ -387,14 +372,5 @@ export const protectedApiFormDataProcedure = protectedApiProcedure.use(
     })
   }
 )
-/**
- * Protected (authenticated) procedure
- *
- * If you want a query or mutation to ONLY be accessible to logged in users, use
- * this. It verifies the session is valid and guarantees ctx.session.user is not
- * null
- *
- * @see https://trpc.io/docs/procedures
- */
 
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>

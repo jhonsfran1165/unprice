@@ -18,3 +18,8 @@ export const API_DOMAIN =
       : "http://api.localhost:3000"
 
 export const APP_NAME = "builderai"
+
+export const COOKIE_NAME_WORKSPACE = "workspace-slug"
+export const COOKIE_NAME_CURRENT_WORKSPACE = "workspace-slug-current"
+export const COOKIE_NAME_PROJECT = "project-slug"
+export const COOKIE_NAME_STATE_APP = "app-status"

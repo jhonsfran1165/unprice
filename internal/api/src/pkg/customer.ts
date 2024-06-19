@@ -14,7 +14,11 @@ import {
 } from "../queries"
 import type { Context } from "../trpc"
 import type { Cache } from "./cache"
-import type { CacheNamespaces, CurrentUsageCached } from "./cache/namespaces"
+import type {
+  CacheNamespaces,
+  CurrentUsageCached,
+  SubscriptionItemCached,
+} from "./cache/namespaces"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
 import type { Metrics } from "./metrics"
@@ -47,7 +51,7 @@ export class UnpriceCustomer {
     customerId: string
     projectId: string
     featureSlug: string
-  }): Promise<Result<CacheNamespaces["featureByCustomerId"], UnPriceCustomerError | FetchError>> {
+  }): Promise<Result<SubscriptionItemCached, UnPriceCustomerError | FetchError>> {
     const res = await this.cache.featureByCustomerId.swr(
       `${opts.customerId}:${opts.featureSlug}`,
       async () => {
@@ -90,6 +94,15 @@ export class UnpriceCustomer {
         logger: this.logger,
       })
 
+      if (!feature) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+            customerId: opts.customerId,
+          })
+        )
+      }
+
       // save the data in the cache
       this.waitUntil(
         this.cache.featureByCustomerId.set(`${opts.customerId}:${opts.featureSlug}`, feature)
@@ -101,9 +114,6 @@ export class UnpriceCustomer {
     return Ok(res.val)
   }
 
-  // TODO: we have to calculate the usage depending on the feature type and the current configuration
-  // we have to take into account the current month and year and the limit and the aggregated usage method
-  // for reporting the usage we have to support negative values when the usage is negative
   private async _getCustomerUsageFeature(opts: {
     customerId: string
     projectId: string
@@ -169,6 +179,15 @@ export class UnpriceCustomer {
           month: opts.month,
           year: opts.year,
         })
+      }
+
+      if (!usage) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "FEATURE_HAS_NO_USAGE_RECORD",
+            customerId: opts.customerId,
+          })
+        )
       }
 
       // save the data in the cache
@@ -306,6 +325,8 @@ export class UnpriceCustomer {
     customerId: string
     featureSlug: string
     projectId: string
+    month: number
+    year: number
     ctx: Context
   }): Promise<
     Result<
@@ -321,7 +342,7 @@ export class UnpriceCustomer {
     >
   > {
     try {
-      const { customerId, projectId, featureSlug } = opts
+      const { customerId, projectId, featureSlug, month, year } = opts
       const start = performance.now()
 
       const res = await this._getCustomerFeature({
@@ -332,14 +353,17 @@ export class UnpriceCustomer {
 
       if (res.err) {
         const error = res.err
+
         this.logger.error("Error in verifyFeature", {
           error: JSON.stringify(error),
           customerId: opts.customerId,
           featureSlug: opts.featureSlug,
           projectId: opts.projectId,
         })
+
         switch (true) {
           case error instanceof UnPriceCustomerError: {
+            // we should return a response with the denied reason in this case
             if (error.code === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
               return Ok({
                 access: false,
@@ -377,7 +401,6 @@ export class UnpriceCustomer {
 
       switch (subItem.featureType) {
         case "flat": {
-          // we don't have to report usage or check the usage
           // flat feature are like feature flags
           break
         }
@@ -385,11 +408,6 @@ export class UnpriceCustomer {
         case "usage":
         case "tier":
         case "package": {
-          // for now only support the current month and year
-          const today = new Date()
-          const year = today.getFullYear()
-          const month = today.getMonth() + 1
-
           // get the current usage
           const result = await this._getCustomerUsageFeature({
             customerId,
@@ -414,14 +432,6 @@ export class UnpriceCustomer {
           }
 
           const currentUsage = result.val
-
-          if (!currentUsage) {
-            return Ok({
-              access: false,
-              deniedReason: "FEATURE_HAS_NO_USAGE_RECORD",
-            })
-          }
-
           const limit = currentUsage.limit
           const usage = currentUsage.usage
 
@@ -494,16 +504,14 @@ export class UnpriceCustomer {
     customerId: string
     featureSlug: string
     projectId: string
+    month: number
+    year: number
     usage: number
   }): Promise<Result<{ success: boolean }, UnPriceCustomerError | FetchError>> {
     try {
-      const { customerId, featureSlug, projectId, usage } = opts
+      const { customerId, featureSlug, projectId, usage, month, year } = opts
 
-      // for now only support the current month and year
-      const today = new Date()
-      const year = today.getFullYear()
-      const month = today.getMonth() + 1
-
+      // get the item details from the cache or the db
       const res = await this._getCustomerFeature({
         customerId,
         projectId,
@@ -516,15 +524,6 @@ export class UnpriceCustomer {
 
       const subItem = res.val
 
-      if (!subItem) {
-        return Err(
-          new UnPriceCustomerError({
-            code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
-            customerId: opts.customerId,
-          })
-        )
-      }
-
       // flat features don't have usage
       if (subItem.featureType === "flat") {
         return Ok({
@@ -534,6 +533,42 @@ export class UnpriceCustomer {
 
       this.waitUntil(
         Promise.all([
+          // just for notifying the customer if the usage is exceeding the limit
+          async () => {
+            const currentUsage = await this._getCustomerUsageFeature({
+              customerId,
+              projectId,
+              featureSlug,
+              year: year,
+              month: month,
+            })
+
+            if (currentUsage.err) {
+              return
+            }
+
+            const limit = currentUsage.val.limit
+
+            if (limit && usage >= limit) {
+              this.logger.warn("Usage exceeded", {
+                customerId: customerId,
+                featureSlug: featureSlug,
+                projectId: projectId,
+                usage: usage,
+                limit: limit,
+              })
+            }
+
+            // notify also if the usage is negative
+            if (usage < 0) {
+              this.logger.warn("Negative usage", {
+                customerId: customerId,
+                featureSlug: featureSlug,
+                projectId: projectId,
+                usage: usage,
+              })
+            }
+          },
           this.analytics
             .ingestFeaturesUsage({
               planVersionFeatureId: subItem.featurePlanVersionId,
@@ -574,9 +609,14 @@ export class UnpriceCustomer {
         success: true,
       })
     } catch (e) {
-      // TODO: log the error
       const error = e as Error
-      console.error("Error reporting usage", error)
+      this.logger.error("Unhandled error while reporting usage", {
+        error: JSON.stringify(error),
+        customerId: opts.customerId,
+        featureSlug: opts.featureSlug,
+        projectId: opts.projectId,
+      })
+
       throw e
     }
   }

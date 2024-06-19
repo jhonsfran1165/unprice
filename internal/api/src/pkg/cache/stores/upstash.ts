@@ -1,4 +1,6 @@
-import { CacheError, type Entry, type Store } from "@unkey/cache"
+import { CacheError } from "@unkey/cache"
+import type { Entry, Store } from "@unkey/cache/stores"
+
 import { Err, Ok, type Result } from "@unkey/error"
 import { Redis } from "@upstash/redis"
 import superjson from "superjson"

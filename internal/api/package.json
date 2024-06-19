@@ -42,7 +42,7 @@
     "@trpc/next": "11.0.0-rc.382",
     "@trpc/react-query": "11.0.0-rc.382",
     "@trpc/server": "11.0.0-rc.382",
-    "@unkey/cache": "^0.0.3",
+    "@unkey/cache": "^1.0.0",
     "@upstash/ratelimit": "^1.0.1",
     "@upstash/redis": "^1.31.3",
     "@vercel/functions": "^1.0.2",

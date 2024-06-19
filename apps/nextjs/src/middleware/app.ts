@@ -3,14 +3,13 @@ import { NextResponse } from "next/server"
 
 import type { NextAuthRequest } from "@builderai/auth"
 
+import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
 import {
   API_AUTH_ROUTE_PREFIX,
   API_TRPC_ROUTE_PREFIX,
   APP_AUTH_ROUTES,
   APP_NON_WORKSPACE_ROUTES,
   AUTH_ROUTES,
-  COOKIE_NAME_PROJECT,
-  COOKIE_NAME_WORKSPACE,
 } from "~/constants"
 import { getWorkspacesUser } from "~/lib/session"
 import { parse } from "~/middleware/utils"

@@ -131,7 +131,6 @@ export const stripeRouter = createTRPCRouter({
   // TODO: delete this just for testing
   dinero: publicProcedure.input(z.void()).query(async (opts) => {
     // TODO: fix priceId
-    const proPrice = await stripe.prices.retrieve(PLANS.PRO?.priceId ?? "")
 
     const now = new Date()
 

@@ -1,5 +1,6 @@
-import { type Cache as C, type Context, Namespace, createCache, withMetrics } from "@unkey/cache"
-import { MemoryStore, type Store } from "@unkey/cache"
+import { type Cache as C, type Context, Namespace, createCache } from "@unkey/cache"
+import { withMetrics } from "@unkey/cache/middleware"
+import { MemoryStore, type Store } from "@unkey/cache/stores"
 
 import { env } from "../../env.mjs"
 import type { Metrics } from "../metrics"
@@ -32,7 +33,7 @@ export function initCache(c: Context, metrics: Metrics): C<CacheNamespaces> {
   }
 
   const metricsMiddleware = withMetrics(metrics)
-  const storesWithMetrics = stores.map((s) => metricsMiddleware(s))
+  const storesWithMetrics = stores.map((s) => metricsMiddleware.wrap(s))
 
   const defaultOpts = {
     stores: storesWithMetrics,

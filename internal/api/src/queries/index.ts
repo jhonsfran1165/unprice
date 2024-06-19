@@ -26,7 +26,7 @@ export const getCustomerFeatureQuery = async ({
   db: Database
   metrics: Metrics
   logger: Logger
-}): Promise<SubscriptionItemCached> => {
+}): Promise<SubscriptionItemCached | null> => {
   const start = performance.now()
 
   const feature = await db
@@ -121,7 +121,7 @@ export const getCustomerFeatureUsageQuery = async ({
   db: Database
   metrics: Metrics
   logger: Logger
-}): Promise<CurrentUsageCached> => {
+}): Promise<CurrentUsageCached | null> => {
   const start = performance.now()
 
   const usage = await db
@@ -291,7 +291,7 @@ export const createUsageQuery = async ({
   db: Database
   metrics: Metrics
   logger: Logger
-}): Promise<CurrentUsageCached> => {
+}): Promise<CurrentUsageCached | null> => {
   const start = performance.now()
 
   const { limit } = getTableColumns(planVersionFeatures)
