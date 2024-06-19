@@ -37,7 +37,8 @@ export const planVersionFeatures = pgTableProject(
     config: json("features_config").$type<z.infer<typeof configFeatureSchema>>(),
     // metadata probably will be useful to save external data, etc.
     metadata: json("metadata").$type<z.infer<typeof planVersionFeatureMetadataSchema>>(),
-    aggregationMethod: aggregationMethodEnum("aggregation_method").default("count").notNull(),
+    // the method to aggregate the feature quantity - use for calculated the current usage of the feature
+    aggregationMethod: aggregationMethodEnum("aggregation_method").default("sum").notNull(),
     order: doublePrecision("order").notNull(),
     // if nulls the feature quantity must be provided at subscription time
     defaultQuantity: integer("default_quantity"),

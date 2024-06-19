@@ -9,6 +9,7 @@ import { stripe } from "@builderai/stripe"
 
 import { and, eq } from "@builderai/db"
 import { features, planVersionFeatures } from "@builderai/db/schema"
+import { toStripeMoney } from "@builderai/db/utils"
 import { createTRPCRouter, protectedActiveWorkspaceProcedure, publicProcedure } from "../../trpc"
 
 export const stripeRouter = createTRPCRouter({
@@ -142,7 +143,7 @@ export const stripeRouter = createTRPCRouter({
 
     const usageTiny = await opts.ctx.analytics
       .getUsageFeature({
-        featureSlug: "seats",
+        featureSlug: "verifications",
         customerId: "cus_2GGH1GE4864s4GrX6ttkjbStDP3k",
         start: startOfMonth.getTime(),
         end: endOfMonth.getTime(),
@@ -161,7 +162,7 @@ export const stripeRouter = createTRPCRouter({
           eq(features.projectId, planVersionFeatures.projectId)
         )
       )
-      .where(eq(features.slug, "seats"))
+      .where(eq(features.slug, "verifications"))
       .limit(1)
       .then((res) => res?.[0])
 
@@ -174,13 +175,21 @@ export const stripeRouter = createTRPCRouter({
 
     const priceCalculation = calculatePricePerFeature({
       feature: feature.planVersionFeatures,
-      units: usageTiny?.[feature.planVersionFeatures.aggregationMethod] ?? 0,
+      quantity: usageTiny?.[feature.planVersionFeatures.aggregationMethod] ?? 0,
+      prorate: 0.0323123123123,
     })
+
+    if (priceCalculation.err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Error calculating price",
+      })
+    }
 
     return [
       {
         usageTiny,
-        priceCalculation,
+        priceCalculation: toStripeMoney(priceCalculation.val.totalPrice.dinero),
       },
     ]
   }),

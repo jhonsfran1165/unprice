@@ -60,7 +60,7 @@ function ItemPriceCard({
 }) {
   const { err, val: pricePerFeature } = calculatePricePerFeature({
     feature: feature,
-    units: feature.defaultQuantity ?? 1,
+    quantity: feature.defaultQuantity ?? 1,
   })
 
   if (err) {

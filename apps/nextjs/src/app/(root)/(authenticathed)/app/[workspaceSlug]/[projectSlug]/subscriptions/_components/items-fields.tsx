@@ -144,7 +144,7 @@ export default function ConfigItemsFormField({
                       </div>
                       <ConfigItemPrice
                         selectedPlanVersion={selectedPlanVersion!}
-                        units={units ?? 0}
+                        quantity={units ?? 0}
                         feature={feature}
                         type="unit"
                       />
@@ -183,7 +183,7 @@ export default function ConfigItemsFormField({
                     <TableCell className="flex h-24 items-center justify-end gap-1 pr-1">
                       <ConfigItemPrice
                         selectedPlanVersion={selectedPlanVersion!}
-                        units={units ?? 0}
+                        quantity={units ?? 0}
                         feature={feature}
                         type="total"
                       />
@@ -265,22 +265,22 @@ export default function ConfigItemsFormField({
 
 function ConfigItemPrice({
   selectedPlanVersion,
-  units,
+  quantity,
   feature,
   type,
 }: {
   selectedPlanVersion: PlanVersionResponse
   feature: PlanVersionFeaturesResponse
-  units: number
+  quantity: number
   type: "total" | "unit"
 }) {
   // useCallback to prevent re-rendering calculatePricePerFeature
   const calculatePrice = useCallback(() => {
     return calculatePricePerFeature({
       feature: feature,
-      units,
+      quantity: quantity,
     })
-  }, [feature, units])
+  }, [feature, quantity])
 
   const { err, val: pricePerFeature } = calculatePrice()
 

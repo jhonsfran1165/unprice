@@ -4,7 +4,8 @@ import { add, dinero, isZero, multiply, toDecimal } from "dinero.js"
 import { z } from "zod"
 
 import type { Result } from "@builderai/error"
-import { Err, Ok, SchemaError } from "@builderai/error"
+import { Err, Ok, type SchemaError } from "@builderai/error"
+import { calculatePercentage } from "../../utils"
 import { UnPriceCalculationError } from "./../errors"
 import type { PlanVersionExtended, dineroSchema, tiersSchema } from "./../planVersionFeatures"
 import {
@@ -31,8 +32,13 @@ interface CalculatedPrice {
 }
 
 const calculatePricePerFeatureSchema = z.object({
-  units: unitsSchema,
+  quantity: unitsSchema,
   feature: planVersionFeatureInsertBaseSchema,
+  /**
+   * number between 0 and 1 to indicate how much to charge
+   * if they have had a fixed cost item for 15/30 days, this should be 0.5
+   */
+  prorate: z.number().min(0).max(1).optional(),
 })
 
 export const calculateFlatPricePlan = ({
@@ -68,11 +74,13 @@ export const calculateTierPrice = ({
   quantity,
   tierMode,
   isUsageBased,
+  prorate,
 }: {
   tiers: z.infer<typeof tiersSchema>[]
   quantity: z.infer<typeof unitsSchema>
   tierMode: z.infer<typeof configTierSchema>["tierMode"]
   isUsageBased: boolean
+  prorate?: number
 }): Result<CalculatedPrice, UnPriceCalculationError> => {
   // return 0 price if quantity is 0
   if (quantity === 0) {
@@ -114,7 +122,10 @@ export const calculateTierPrice = ({
       (tier) => quantity >= tier.firstUnit && (tier.lastUnit === null || quantity <= tier.lastUnit)
     )! // we are sure the quantity falls into a tier
 
-    const dineroFlatPrice = dinero(tier.flatPrice.dinero)
+    // flat price needs to be prorated as well
+    const dineroFlatPrice = prorate
+      ? calculatePercentage(dinero(tier.flatPrice.dinero), prorate)
+      : dinero(tier.flatPrice.dinero)
     const dineroUnitPrice = dinero(tier.unitPrice.dinero)
 
     const dineroTotalPrice = !isZero(dineroFlatPrice)
@@ -182,7 +193,11 @@ export const calculateTierPrice = ({
 
     // add the flat price of the tier the quantity falls into if it exists
     if (tier?.flatPrice) {
-      total = add(total, dinero(tier.flatPrice.dinero))
+      // flat price needs to be prorated as well
+      const dineroFlatPrice = prorate
+        ? calculatePercentage(dinero(tier.flatPrice.dinero), prorate)
+        : dinero(tier.flatPrice.dinero)
+      total = add(total, dineroFlatPrice)
     }
 
     return Ok({
@@ -214,11 +229,13 @@ export const calculatePackagePrice = ({
   quantity,
   units,
   isUsageBased,
+  prorate,
 }: {
   price: z.infer<typeof dineroSchema>
   quantity: z.infer<typeof unitsSchema>
   units: number
   isUsageBased: boolean
+  prorate?: number
 }): Result<CalculatedPrice, UnPriceCalculationError> => {
   // return 0 price if quantity is 0
   if (quantity === 0) {
@@ -251,7 +268,9 @@ export const calculatePackagePrice = ({
 
   const packageCount = Math.ceil(quantity / units)
   const dineroPrice = dinero(price.dinero)
-  const total = multiply(dineroPrice, packageCount)
+  const total = prorate
+    ? calculatePercentage(multiply(dineroPrice, packageCount), prorate)
+    : multiply(dineroPrice, packageCount)
 
   return Ok({
     unitPrice: {
@@ -277,13 +296,17 @@ export const calculateUnitPrice = ({
   price,
   quantity,
   isUsageBased,
+  prorate,
 }: {
   price: z.infer<typeof dineroSchema>
   quantity: z.infer<typeof unitsSchema>
   isUsageBased: boolean
+  prorate?: number
 }): Result<CalculatedPrice, UnPriceCalculationError> => {
   const dineroPrice = dinero(price.dinero)
-  const total = multiply(dineroPrice, quantity)
+  const total = prorate
+    ? calculatePercentage(multiply(dineroPrice, quantity), prorate)
+    : multiply(dineroPrice, quantity)
 
   return Ok({
     unitPrice: {
@@ -308,26 +331,27 @@ export const calculateUnitPrice = ({
 export const calculatePricePerFeature = (
   data: z.infer<typeof calculatePricePerFeatureSchema>
 ): Result<CalculatedPrice, UnPriceCalculationError | SchemaError> => {
-  const parseData = calculatePricePerFeatureSchema.safeParse(data)
-
-  if (!parseData.success) {
-    return Err(SchemaError.fromZod(parseData.error, data))
-  }
-
   // set default units to 0 if it's not provided
-  const { feature, units } = parseData.data
-  const defaultQuantity = units ?? 0
+  // proration only applies to fix costs per billing period
+  const { feature, quantity, prorate } = data
+  const defaultQuantity = quantity ?? 0
 
   switch (feature.featureType) {
     case "flat": {
       const { price } = configFlatSchema.parse(feature.config)
       // flat features have a single price independent of the units
-      return calculateUnitPrice({ price, quantity: 1, isUsageBased: false })
+      return calculateUnitPrice({ price, quantity: 1, isUsageBased: false, prorate })
     }
 
     case "tier": {
       const { tiers, tierMode } = configTierSchema.parse(feature.config)
-      return calculateTierPrice({ tiers, quantity: defaultQuantity, tierMode, isUsageBased: false })
+      return calculateTierPrice({
+        tiers,
+        quantity: defaultQuantity,
+        tierMode,
+        isUsageBased: false,
+        prorate,
+      })
     }
 
     case "usage": {
@@ -366,6 +390,7 @@ export const calculatePricePerFeature = (
         quantity: defaultQuantity,
         units,
         isUsageBased: false,
+        prorate,
       })
     }
 

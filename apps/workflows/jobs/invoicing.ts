@@ -32,7 +32,7 @@ client.defineJob({
         schema.projects,
         and(
           eq(schema.subscriptions.projectId, schema.projects.id),
-          eq(schema.projects.isInternal, false)
+          eq(schema.projects.isInternal, true) // TODO: change this to false
         )
       )
       .innerJoin(

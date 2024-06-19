@@ -128,37 +128,84 @@ export const createInvoiceStripeJob = client.defineJob({
         .then((invoice) => invoice.id)
     )
 
+    io.logger.info("dates", {
+      year,
+      month,
+      startDate: new Date(subscription.startDate),
+      createdAt: new Date(subscription.createdAt),
+    })
+
+    // calculate the proration for the invoice
+    // TODO: support plan changes
+    let monthProrate: number | undefined = undefined
+    if (
+      subscription.startDate &&
+      new Date(subscription.startDate).getUTCFullYear() === year &&
+      new Date(subscription.startDate).getUTCMonth() === month
+    ) {
+      const start = new Date(year, month, 1)
+      const end = new Date(year, month + 1)
+      monthProrate =
+        (end.getTime() - new Date(subscription.startDate).getTime()) /
+        (end.getTime() - start.getTime())
+
+      io.logger.info("prorating", { start, end, monthProrate })
+    }
+
     // create an invoice item for each feature
     for (const item of subscription.items) {
-      const usage = await io.runTask(
-        `get usage for ${item.featurePlanVersion.feature.slug}`,
-        async () => {
-          const usage = await tinybird
-            .getUsageFeature({
-              featureSlug: item.featurePlanVersion.feature.slug,
-              customerId: customerId,
-              start: new Date(year, month, 1).getTime(),
-              end: new Date(year, month + 1, 0).getTime(),
-            })
-            .then((usage) => usage.data[0])
+      let prorate = monthProrate
 
-          return usage
-        }
-      )
+      // proration is supported for fixed cost items - not for usage
+      if (item.featurePlanVersion.featureType === "usage") {
+        prorate = undefined
+      }
 
-      // calculate the total units used
-      const units = usage ? usage[item.featurePlanVersion.aggregationMethod] || 0 : 0
+      let quantity = 0
 
-      if (units < 0) {
+      // get usage only for usage features - the rest are calculated from the subscription items
+      if (item.featurePlanVersion.featureType !== "usage") {
+        quantity = item.units! // all non usage features have a default quantity
+      } else {
+        quantity = await io.runTask(
+          `get usage for ${item.featurePlanVersion.feature.slug}`,
+          async () => {
+            const usage = await tinybird
+              .getUsageFeature({
+                featureSlug: item.featurePlanVersion.feature.slug,
+                customerId: customerId,
+                start: new Date(year, month, 1).getTime(),
+                end: new Date(year, month + 1).getTime(),
+              })
+              .then((usage) => usage.data[0])
+
+            const units = usage ? usage[item.featurePlanVersion.aggregationMethod] || 0 : 0
+
+            return units
+          }
+        )
+      }
+
+      io.logger.info(`usage is ${item.featurePlanVersion.feature.slug}`, {
+        quantity,
+        feature: item.featurePlanVersion.feature.slug,
+        prorate,
+      })
+
+      // TODO: handle this issues - what happens with the invoice if this fails?
+      // better preview the invoice before creating it
+      // if the feature is not usage then the quantity is the number of units they bought in the subscription
+      if (quantity < 0) {
         throw new Error(
-          `Usage is negative ${item.id} ${item.featurePlanVersion.feature.slug} ${units}`
+          `quantity is negative ${item.id} ${item.featurePlanVersion.feature.slug} ${quantity}`
         )
       }
 
       // calculate the price depending on the type of feature
       const priceCalculation = calculatePricePerFeature({
         feature: item.featurePlanVersion,
-        units: units,
+        quantity: quantity,
+        prorate: prorate,
       })
 
       if (priceCalculation.err) {
@@ -172,6 +219,12 @@ export const createInvoiceStripeJob = client.defineJob({
       // get total in cents
       const { amount, currency } = toStripeMoney(priceCalculation.val.totalPrice.dinero)
 
+      io.logger.info(`priceCalculation is ${item.featurePlanVersion.feature.slug}`, {
+        amount,
+        currency,
+        feature: item.featurePlanVersion.feature.slug,
+      })
+
       await createStripeCostInvoiceItem({
         stripe,
         invoiceId,
@@ -180,7 +233,7 @@ export const createInvoiceStripeJob = client.defineJob({
         name: item.featurePlanVersion.feature.slug,
         productId: item.featurePlanVersion.feature.id,
         amount: amount,
-        quantity: units,
+        quantity: quantity,
         currency: currency,
       })
     }
@@ -198,7 +251,7 @@ async function createStripeCostInvoiceItem({
   stripeCustomerId,
   name,
   productId,
-  prorate,
+  isProrated,
   amount,
   quantity,
   currency,
@@ -212,11 +265,7 @@ async function createStripeCostInvoiceItem({
   amount: number
   currency: string
   quantity: number
-  /**
-   * number between 0 and 1 to indicate how much to charge
-   * if they have had a fixed cost item for 15/30 days, this should be 0.5
-   */
-  prorate?: number
+  isProrated?: boolean
 }): Promise<void> {
   // TODO: support proration
   await io.runTask(name, async () => {
@@ -230,7 +279,7 @@ async function createStripeCostInvoiceItem({
         unit_amount: amount,
       },
       currency: currency,
-      description: typeof prorate === "number" ? `${name} (Prorated)` : name,
+      description: isProrated ? `${name} (Prorated)` : name,
     })
   })
 }

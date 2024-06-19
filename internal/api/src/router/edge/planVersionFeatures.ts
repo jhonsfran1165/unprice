@@ -197,6 +197,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
         planVersionId,
         order,
         defaultQuantity,
+        aggregationMethod,
         limit,
         hidden,
       } = opts.input
@@ -238,6 +239,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
           }),
           ...(limit !== undefined && { limit: limit === 0 ? null : limit }),
           ...(hidden !== undefined && { hidden }),
+          ...(aggregationMethod && { aggregationMethod }),
           updatedAt: new Date(),
         })
         .where(

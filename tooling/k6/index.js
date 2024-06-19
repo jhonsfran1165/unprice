@@ -26,7 +26,7 @@ export default function () {
   const payload = {
     customerId: "cus_2GGH1GE4864s4GrX6ttkjbStDP3k",
     featureSlug: features[Math.floor(Math.random() * features.length)],
-    usage: getRandomUsage(-2, 10),
+    usage: getRandomUsage(-1, 100),
     idempotencyKey: idempotencyKey,
   }
 
