@@ -31,7 +31,7 @@ export function Sidebar({
 
                   {
                     item?.sidebar && (
-                      <ul className="space-y-1 pl-4">
+                      <ul className="space-y-0.5 pl-5">
                         {item.sidebar.map((subItem) => (
                           <li key={subItem.name}>
                             <Tab
