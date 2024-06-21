@@ -1,9 +1,8 @@
 import { formatRelative } from "date-fns"
 import Link from "next/link"
-import { Suspense } from "react"
+import { Fragment, Suspense } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Card,
@@ -14,7 +13,7 @@ import {
   CardTitle,
 } from "@builderai/ui/card"
 import { Activity, ChevronRight, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
-
+import { cn } from "@builderai/ui/utils"
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
@@ -32,7 +31,7 @@ export default async function DashboardPage(props: {
   })
 
   return (
-    <>
+    <Fragment>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -99,7 +98,7 @@ export default async function DashboardPage(props: {
           <RecentIngestions projectSlug={projectSlug} workspaceSlug={workspaceSlug} />
         </Suspense>
       </div>
-    </>
+    </Fragment>
   )
 }
 

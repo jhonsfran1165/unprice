@@ -25,11 +25,30 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay
     ref={ref}
-    className={cn("fixed inset-0 z-50 bg-black/80", className)}
+    className={cn(
+      // base
+      "fixed inset-0 z-50 overflow-y-auto",
+      // background color
+      "bg-black/80",
+      // transition
+      "data-[state=closed]:animate-hide data-[state=open]:animate-dialogOverlayShow",
+      className)}
     {...props}
+    style={{
+      animationDuration: "400ms",
+      animationFillMode: "backwards",
+    }}
   />
 ))
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
+
+const DrawerBody = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentPropsWithoutRef<"div">
+>(({ className, ...props }, ref) => {
+  return <div ref={ref} className={cn("flex-1 py-4", className)} {...props} />
+})
+DrawerBody.displayName = "Drawer.Body"
 
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
@@ -97,4 +116,5 @@ export {
   DrawerPortal,
   DrawerTitle,
   DrawerTrigger,
+  DrawerBody
 }

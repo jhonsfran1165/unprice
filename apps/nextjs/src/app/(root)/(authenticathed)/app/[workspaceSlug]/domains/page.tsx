@@ -5,7 +5,10 @@ import type { RouterOutputs } from "@builderai/api"
 import { Badge } from "@builderai/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@builderai/ui/card"
 
+import { Button } from "@builderai/ui/button"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
 import { api } from "~/trpc/server"
 import DomainConfiguration from "./_components/domain-configuration"
 import { DomainDialog } from "./_components/domain-dialog"
@@ -17,7 +20,17 @@ export default async function PageDomains() {
   const domains = await api.domains.getAllByActiveWorkspace()
 
   return (
-    <>
+    <DashboardShell
+      header={
+        <HeaderTab
+          title="Domains"
+          description="Domains for this workspace"
+          action={<DomainDialog>
+            <Button>Create Domain</Button>
+          </DomainDialog>}
+        />
+      }
+    >
       {domains.length === 0 ? (
         <Card>
           <CardContent className="my-0 p-6">
@@ -30,7 +43,9 @@ export default async function PageDomains() {
                 There are no domains for the workspace.
               </EmptyPlaceholder.Description>
               <EmptyPlaceholder.Action>
-                <DomainDialog />
+                <DomainDialog>
+                  <Button size={"sm"}>Create Domain</Button>
+                </DomainDialog>
               </EmptyPlaceholder.Action>
             </EmptyPlaceholder>
           </CardContent>
@@ -44,7 +59,7 @@ export default async function PageDomains() {
           ))}
         </ul>
       )}
-    </>
+    </DashboardShell>
   )
 }
 

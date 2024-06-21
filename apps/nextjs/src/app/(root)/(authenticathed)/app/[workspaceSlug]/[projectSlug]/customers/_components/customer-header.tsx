@@ -1,9 +1,9 @@
 import type { RouterOutputs } from "@builderai/api"
-import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import { Separator } from "@builderai/ui/separator"
+import { cn } from "@builderai/ui/utils"
 
 import { SubscriptionSheet } from "../../subscriptions/_components/subscription-sheet"
 import { CustomerActions } from "./customer-actions"

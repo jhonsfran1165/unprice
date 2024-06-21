@@ -1,6 +1,6 @@
 import type * as React from "react"
 
-import { cn } from "@builderai/ui"
+import { cn } from "@builderai/ui/utils"
 
 export function EmptyPlaceholder({
   className,

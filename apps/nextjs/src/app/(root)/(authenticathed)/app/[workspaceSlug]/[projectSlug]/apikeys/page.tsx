@@ -1,8 +1,11 @@
 import { searchDataParamsSchema } from "@builderai/db/validators"
 
 import { DataTable } from "~/components/data-table/data-table"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
+import NewApiKeyDialog from "./_components/new-api-key-dialog"
 import { columns } from "./_components/table/columns"
 
 export default async function ApiKeysPage(props: {
@@ -29,14 +32,26 @@ export default async function ApiKeysPage(props: {
   const { apikeys } = await api.apikeys.listApiKeys(filter)
 
   return (
-    <DataTable
-      columns={columns}
-      data={apikeys}
-      filterOptions={{
-        filterBy: "name",
-        filterColumns: true,
-        filterDateRange: true,
-      }}
-    />
+
+    <DashboardShell
+      header={
+        <HeaderTab
+          title="Api Keys"
+          description="All the apis of the system"
+          action={<NewApiKeyDialog projectSlug={props.params.projectSlug} />}
+        />
+      }
+    >
+      <DataTable
+        columns={columns}
+        data={apikeys}
+        filterOptions={{
+          filterBy: "name",
+          filterColumns: true,
+          filterDateRange: true,
+        }}
+      />
+    </DashboardShell>
+
   )
 }

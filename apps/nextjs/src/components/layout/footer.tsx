@@ -1,7 +1,6 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   CommandEmpty,
@@ -23,6 +22,7 @@ import {
   User,
 } from "@builderai/ui/icons"
 import { Skeleton } from "@builderai/ui/skeleton"
+import { cn } from "@builderai/ui/utils"
 
 import { Logo } from "~/components/layout/logo"
 import { siteConfig } from "~/constants/layout"

@@ -55,7 +55,7 @@ export const projectRouter = createTRPCRouter({
 
       // TODO: should be able to retry if the slug already exists
       const projectId = utils.newId("project")
-      const projectSlug = utils.generateSlug(2)
+      const projectSlug = utils.createSlug()
 
       const newProject = await opts.ctx.db
         .insert(schema.projects)

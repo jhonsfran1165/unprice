@@ -9,8 +9,14 @@ import type { WorkspacesJWTPayload } from "@builderai/db/validators"
 
 const useSecureCookies = process.env.VERCEL_ENV === "production"
 
+// TODO: check this out https://github.com/calcom/platform-starter-kit/blob/main/src/auth/config.edge.ts
 export const authConfig = {
   trustHost: Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
+  logger: {
+    debug: (message, metadata) => console.debug(message, { metadata }),
+    error: (error) => console.error(error),
+    warn: (message) => console.warn(message),
+  },
   session: {
     strategy: "jwt",
     updateAge: 24 * 60 * 60, // 24 hours for update session
@@ -83,7 +89,7 @@ export const authConfig = {
       // create the workspace for the user and then add it as a member
       await db.transaction(async (db) => {
         // TODO: should be able to retry if the slug already exists
-        const slug = utils.generateSlug(2)
+        const slug = utils.createSlug()
         const workspaceId = utils.newId("workspace")
         const workspaceName = user.name ?? slug
 

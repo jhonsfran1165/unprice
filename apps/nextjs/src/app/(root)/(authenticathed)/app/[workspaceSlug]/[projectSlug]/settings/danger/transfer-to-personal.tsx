@@ -36,7 +36,7 @@ export function TransferProjectToPersonal({
     },
     onSuccess: (data) => {
       toastAction("success")
-      router.push(`/${data?.workspaceSlug}/overview`)
+      router.push(`/${data?.workspaceSlug}`)
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {

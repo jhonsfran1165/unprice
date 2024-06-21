@@ -1,5 +1,5 @@
 import { SessionProvider } from "@builderai/auth/react"
-import { auth } from "@builderai/auth/server"
+import { auth } from "@builderai/auth/server-rsc"
 // import { Analytics } from "@vercel/analytics/react"
 
 import { Toaster } from "@builderai/ui/sonner"

@@ -1,10 +1,10 @@
 import { Pencil } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Card, CardContent, CardFooter } from "@builderai/ui/card"
 import { Separator } from "@builderai/ui/separator"
+import { cn } from "@builderai/ui/utils"
 
 import { PlanVersionDialog } from "../../_components/plan-version-dialog"
 import { BannerPublishedVersion } from "./banner"

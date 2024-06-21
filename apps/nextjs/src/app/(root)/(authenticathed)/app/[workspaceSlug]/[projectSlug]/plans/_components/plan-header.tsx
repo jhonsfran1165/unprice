@@ -1,11 +1,11 @@
 import { BadgeCheck } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
-import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import { Separator } from "@builderai/ui/separator"
+import { cn } from "@builderai/ui/utils"
 
 import { PlanVersionDialog } from "../[planSlug]/_components/plan-version-dialog"
 import { PlanActions } from "./plan-actions"

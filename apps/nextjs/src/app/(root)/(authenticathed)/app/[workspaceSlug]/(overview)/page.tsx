@@ -10,6 +10,7 @@ export const runtime = "edge"
 export default async function WorkspaceOverviewPage(props: {
   params: { workspaceSlug: string }
 }) {
+
   const { projects } = await api.projects.listByWorkspace({
     workspaceSlug: props.params.workspaceSlug,
   })

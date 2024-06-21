@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { Suspense, use, useState } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
-import { cn } from "@builderai/ui"
 import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
 import { Button } from "@builderai/ui/button"
 import {
@@ -19,6 +18,7 @@ import {
 import { Dialog, DialogTrigger } from "@builderai/ui/dialog"
 import { Check, ChevronsUpDown, PlusCircle } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
+import { cn } from "@builderai/ui/utils"
 
 import { useUser } from "~/lib/use-user"
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
@@ -62,23 +62,13 @@ export function WorkspaceSwitcher({
             role="combobox"
             aria-expanded={switcherOpen}
             aria-label="Select a workspace"
-            className="w-40 justify-between md:w-44"
+            className="justify-between w-24 md:w-56 lg:w-full"
           >
-            <Avatar className="mr-2 h-5 w-5">
-              <AvatarImage
-                src={
-                  activeWorkspace.imageUrl && activeWorkspace.imageUrl !== ""
-                    ? activeWorkspace.imageUrl
-                    : `https://avatar.vercel.sh/${activeWorkspace.id}`
-                }
-              />
-              <AvatarFallback>{activeWorkspace.slug?.substring(0, 2)}</AvatarFallback>
-            </Avatar>
-            <span className="z-10 truncate font-semibold">{activeWorkspace.name}</span>
-            <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+            <span className="truncate font-semibold">{activeWorkspace.name}</span>
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-52 p-0">
+        <PopoverContent className="w-56 p-0" align="start">
           <Command>
             <CommandList>
               <CommandInput placeholder="Search workspace..." />
@@ -87,7 +77,7 @@ export function WorkspaceSwitcher({
                   <CommandItem
                     onSelect={() => {
                       setSwitcherOpen(false)
-                      router.push(`/${personalWorkspace.slug}/overview`)
+                      router.push(`/${personalWorkspace.slug}`)
                     }}
                     className={cn(
                       "cursor-pointer text-sm font-semibold",
@@ -125,7 +115,7 @@ export function WorkspaceSwitcher({
                       key={workspace.name}
                       onSelect={() => {
                         setSwitcherOpen(false)
-                        router.push(`/${workspace.slug}/overview`)
+                        router.push(`/${workspace.slug}`)
                       }}
                       className={cn(
                         "cursor-pointer text-sm font-semibold",
@@ -179,7 +169,7 @@ export function WorkspaceSwitcher({
       </Popover>
 
       <Suspense>
-        <NewTeamDialog closeDialog={() => setNewOrgDialogOpen(false)} />
+        <NewTeamDialog closeDialog={() => setNewOrgDialogOpen(false)} isOpen={newOrgDialogOpen} />
       </Suspense>
     </Dialog>
   )

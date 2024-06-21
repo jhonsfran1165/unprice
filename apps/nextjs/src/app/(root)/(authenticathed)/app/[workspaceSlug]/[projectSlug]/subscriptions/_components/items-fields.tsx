@@ -7,7 +7,6 @@ import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form"
 import type { RouterOutputs } from "@builderai/api"
 import type { InsertSubscription } from "@builderai/db/validators"
 import { calculatePricePerFeature } from "@builderai/db/validators"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Dialog,
@@ -21,6 +20,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@build
 import { Input } from "@builderai/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
+import { cn } from "@builderai/ui/utils"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"

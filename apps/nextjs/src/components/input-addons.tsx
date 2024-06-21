@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { cn } from "@builderai/ui"
+import { cn } from "@builderai/ui/utils"
 
 export interface InputWithAddonsProps extends React.InputHTMLAttributes<HTMLInputElement> {
   leading?: React.ReactNode

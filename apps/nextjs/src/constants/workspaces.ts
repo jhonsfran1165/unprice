@@ -1,46 +1,53 @@
-import type { DashboardRoute } from "~/types"
+import { AppWindow, Globe, Link, Settings } from "lucide-react"
+import type { DashboardRoute, Shortcut } from "~/types"
 
-const submodulesWorkspace = ["overview", "settings", "domains"] as const
-
-// TODO: improve icons
-export const WORKSPACE_TABS_CONFIG: Record<(typeof submodulesWorkspace)[number], DashboardRoute> = {
-  overview: {
-    icon: "AppWindow",
-    titleTab: "Projects",
-    href: "/overview",
+export const WORKSPACE_NAV: DashboardRoute[] = [
+  {
+    icon: AppWindow,
+    name: "Projects",
+    href: "",
   },
-  domains: {
-    icon: "Globe",
-    titleTab: "Domains",
+  {
+    icon: Globe,
+    name: "Domains",
     href: "/domains",
   },
-  settings: {
-    icon: "Settings",
-    titleTab: "Settings",
-    href: "/settings/overview",
+  {
+    icon: Settings,
+    name: "Settings",
+    href: "/settings",
     disabled: false,
-    sidebar: {
-      overview: {
-        title: "General",
-        href: "/settings/overview",
-        icon: "Settings",
-      },
-      members: {
-        title: "Members",
+    sidebar: [
+      {
+        name: "Members",
         href: "/settings/members",
-        icon: "User2",
-        description: "Cabeza de AppWindow",
       },
-      billing: {
-        title: "Billing",
+      {
+        name: "Billing",
         href: "/settings/billing",
-        icon: "CreditCard",
       },
-      danger: {
-        title: "Danger",
+      {
+        name: "Danger",
         href: "/settings/danger",
-        icon: "Warning",
       },
-    },
+    ],
   },
-}
+]
+
+export const WORKSPACE_SHORTCUTS: Shortcut[] = [
+  {
+    name: "Add member",
+    href: "#",
+    icon: Link,
+  },
+  {
+    name: "Workspace usage",
+    href: "#",
+    icon: Link,
+  },
+  {
+    name: "Add domain",
+    href: "#",
+    icon: Link,
+  },
+]

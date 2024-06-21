@@ -54,7 +54,7 @@ export function TransferProjectToTeam({
     onSuccess: (data) => {
       toastAction("success")
       // redirect to the new workspace
-      router.push(`/${data?.workspaceSlug}/overview`)
+      router.push(`/${data?.workspaceSlug}`)
     },
   })
 

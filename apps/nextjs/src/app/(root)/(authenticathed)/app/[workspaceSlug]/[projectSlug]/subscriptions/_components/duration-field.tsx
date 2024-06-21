@@ -6,11 +6,11 @@ import { useState } from "react"
 import type { UseFormReturn } from "react-hook-form"
 
 import type { InsertSubscription } from "@builderai/db/validators"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Calendar } from "@builderai/ui/calendar"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
+import { cn } from "@builderai/ui/utils"
 
 export default function DurationFormField({
   form,

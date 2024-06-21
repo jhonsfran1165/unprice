@@ -1,7 +1,13 @@
 import Balancer from "react-wrap-balancer"
 
+import { Button } from "@builderai/ui/button"
+import { Plus } from "@builderai/ui/icons"
+import { Fragment } from "react"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
 import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
+import { PlanDialog } from "../_components/plan-dialog"
 import { PlanCard, PlanCardSkeleton } from "./_components/plan-card"
 
 export default async function PlansPage(props: {
@@ -18,30 +24,49 @@ export default async function PlansPage(props: {
   const { plans } = await api.plans.listByActiveProject({})
 
   return (
-    <>
-      <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {plans.map((plan) => (
-          <li key={plan.id}>
-            <PlanCard plan={plan} workspaceSlug={workspaceSlug} projectSlug={projectSlug} />
-          </li>
-        ))}
-      </ul>
 
-      {plans.length === 0 && (
-        <div className="relative">
-          <ul className="grid select-none grid-cols-1 gap-4 opacity-40 lg:grid-cols-3">
-            <PlanCardSkeleton pulse={false} />
-            <PlanCardSkeleton pulse={false} />
-            <PlanCardSkeleton pulse={false} />
-          </ul>
-          <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center">
-            <Balancer>
-              <h2 className="text-2xl font-bold">This project has no plans yet</h2>
-              <p className="text-muted-foreground text-lg">Create your first plan to get started</p>
-            </Balancer>
+    <DashboardShell
+      header={
+        <HeaderTab
+          title="Plans"
+          description="Create and manage your plans"
+          action={
+            <PlanDialog>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Plan
+              </Button>
+            </PlanDialog>
+          }
+        />
+      }
+    >
+      <Fragment>
+        <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {plans.map((plan) => (
+            <li key={plan.id}>
+              <PlanCard plan={plan} workspaceSlug={workspaceSlug} projectSlug={projectSlug} />
+            </li>
+          ))}
+        </ul>
+
+        {plans.length === 0 && (
+          <div className="relative">
+            <ul className="grid select-none grid-cols-1 gap-4 opacity-40 lg:grid-cols-3">
+              <PlanCardSkeleton pulse={false} />
+              <PlanCardSkeleton pulse={false} />
+              <PlanCardSkeleton pulse={false} />
+            </ul>
+            <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center">
+              <Balancer>
+                <h2 className="text-2xl font-bold">This project has no plans yet</h2>
+                <p className="text-muted-foreground text-lg">Create your first plan to get started</p>
+              </Balancer>
+            </div>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </Fragment>
+    </DashboardShell>
+
   )
 }

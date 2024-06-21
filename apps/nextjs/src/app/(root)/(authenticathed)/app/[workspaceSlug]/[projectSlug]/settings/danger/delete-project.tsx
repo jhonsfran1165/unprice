@@ -37,7 +37,7 @@ export function DeleteProject({
     },
     onSuccess: () => {
       toastAction("success")
-      router.push(`/${workspaceSlug}/overview`)
+      router.push(`/${workspaceSlug}`)
     },
   })
 

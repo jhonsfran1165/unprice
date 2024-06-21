@@ -4,10 +4,10 @@ import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Card } from "@builderai/ui/card"
 import { Separator } from "@builderai/ui/separator"
+import { cn } from "@builderai/ui/utils"
 
 import { api } from "~/trpc/server"
 import DragDrop from "../../../_components/drag-drop"

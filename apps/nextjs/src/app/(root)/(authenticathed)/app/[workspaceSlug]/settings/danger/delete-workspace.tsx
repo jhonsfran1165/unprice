@@ -41,7 +41,7 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
       toastAction("deleted")
       const nextWorkspace = user?.workspaces.find((wk) => wk.slug !== workspaceSlug)
 
-      router.push(`/${nextWorkspace?.slug}/overview`)
+      router.push(`/${nextWorkspace?.slug}`)
     },
   })
 

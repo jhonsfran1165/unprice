@@ -18,8 +18,8 @@ import {
 } from "@tanstack/react-table"
 import * as React from "react"
 
-import { cn } from "@builderai/ui"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
+import { cn } from "@builderai/ui/utils"
 
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"

@@ -4,7 +4,7 @@ import { useDroppable } from "@dnd-kit/core"
 import type { AnimateLayoutChanges } from "@dnd-kit/sortable"
 import { defaultAnimateLayoutChanges } from "@dnd-kit/sortable"
 
-import { cn } from "@builderai/ui"
+import { cn } from "@builderai/ui/utils"
 
 export const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true })

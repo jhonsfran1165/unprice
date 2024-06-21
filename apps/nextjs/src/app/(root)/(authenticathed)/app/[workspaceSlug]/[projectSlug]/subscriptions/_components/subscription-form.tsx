@@ -9,7 +9,6 @@ import type { RouterOutputs } from "@builderai/api"
 import { COLLECTION_METHODS, SUBSCRIPTION_TYPES } from "@builderai/db/utils"
 import type { InsertSubscription } from "@builderai/db/validators"
 import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@builderai/db/validators"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Command,
@@ -33,6 +32,7 @@ import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 import { Separator } from "@builderai/ui/separator"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
+import { cn } from "@builderai/ui/utils"
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { InputWithAddons } from "~/components/input-addons"
@@ -196,7 +196,7 @@ export function SubscriptionForm({
                         >
                           {field.value
                             ? data?.planVersions.find((version) => version.id === field.value)
-                                ?.title
+                              ?.title
                             : "Select plan"}
                           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>

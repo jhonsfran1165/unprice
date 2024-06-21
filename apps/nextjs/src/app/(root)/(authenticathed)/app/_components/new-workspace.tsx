@@ -23,10 +23,11 @@ import { currencySymbol } from "~/lib/currency"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export default function NewTeamDialog(props: { closeDialog: () => void }) {
+export default function NewTeamDialog(props: { closeDialog: () => void, isOpen: boolean }) {
   const { toast } = useToast()
   const plans = api.stripe.plans.useQuery(undefined, {
     refetchOnWindowFocus: false,
+    enabled: props.isOpen,  // only fetch plans when dialog is open
   })
 
   // TODO: plans should be fetch from the plan versions endpoint

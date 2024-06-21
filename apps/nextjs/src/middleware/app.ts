@@ -79,7 +79,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
     // there is a cookie/jwt claim for the workspace redirect
     if (redirectWorkspaceSlug && redirectWorkspaceSlug !== "") {
-      url.pathname = `/${redirectWorkspaceSlug}/overview`
+      url.pathname = `/${redirectWorkspaceSlug}`
       return NextResponse.redirect(url)
     }
 

@@ -46,7 +46,7 @@ const CreateProjectForm = (props: {
       if (props.onSuccess) {
         props.onSuccess(newProject)
       } else {
-        router.push(`/${props.workspaceSlug}/${newProject?.slug}/overview`)
+        router.push(`/${props.workspaceSlug}/${newProject?.slug}`)
       }
 
       toastAction("success")

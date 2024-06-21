@@ -9,7 +9,6 @@ import {
 import Link from "next/link"
 
 import type { RouterOutputs } from "@builderai/api"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
@@ -21,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
+import { cn } from "@builderai/ui/utils"
 
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { PlanForm } from "../../_components/plan-form"

@@ -1,7 +1,7 @@
 import { Combine, Target } from "lucide-react"
 
-import { cn } from "@builderai/ui"
 import { Separator } from "@builderai/ui/separator"
+import { cn } from "@builderai/ui/utils"
 
 import { SuperLink } from "~/components/super-link"
 

@@ -2,7 +2,6 @@ import { ArrowUp, ListFilter, MoreVertical } from "lucide-react"
 import { notFound } from "next/navigation"
 
 import { APP_DOMAIN } from "@builderai/config"
-import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import {
@@ -25,6 +24,7 @@ import {
 import { Separator } from "@builderai/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
+import { cn } from "@builderai/ui/utils"
 
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"

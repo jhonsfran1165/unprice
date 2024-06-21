@@ -13,7 +13,6 @@ import {
 } from "@builderai/db/utils"
 import type { PlanVersion, PlanVersionFeature } from "@builderai/db/validators"
 import { planVersionFeatureInsertBaseSchema } from "@builderai/db/validators"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -27,6 +26,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 import { Separator } from "@builderai/ui/separator"
 import { Switch } from "@builderai/ui/switch"
+import { cn } from "@builderai/ui/utils"
 
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"

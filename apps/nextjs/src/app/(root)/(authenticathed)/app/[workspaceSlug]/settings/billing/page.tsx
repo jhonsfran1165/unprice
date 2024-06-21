@@ -1,4 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
+import { Fragment } from "react"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
 
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
@@ -8,10 +11,15 @@ export const runtime = "edge"
 
 export default function BillingPage() {
   return (
-    <>
-      <SubscriptionCard />
-      <UsageCard />
-    </>
+    <DashboardShell
+      header={<HeaderTab title="General Settings" description="Manage your workspace settings" />}
+
+    >
+      <Fragment>
+        <SubscriptionCard />
+        <UsageCard />
+      </Fragment>
+    </DashboardShell>
   )
 }
 

@@ -3,7 +3,7 @@ import type { SiteConfig } from "../types"
 export const navItems = [
   {
     href: "/",
-    title: "Overview",
+    title: "Dashboard",
   },
   {
     href: "/pricing",
@@ -11,11 +11,7 @@ export const navItems = [
   },
   {
     href: "/",
-    title: "Products",
-  },
-  {
-    href: "/",
-    title: "Settings",
+    title: "Docs",
   },
 ] satisfies { href: string; title: string }[]
 
