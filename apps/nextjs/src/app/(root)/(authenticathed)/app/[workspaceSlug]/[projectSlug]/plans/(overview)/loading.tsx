@@ -5,8 +5,6 @@ import HeaderTab from "~/components/layout/header-tab"
 import { PlanDialog } from "../_components/plan-dialog"
 import { PlanCardSkeleton } from "./_components/plan-card"
 
-export const runtime = "edge"
-
 export default function Loading() {
   return (
     <DashboardShell

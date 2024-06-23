@@ -6,6 +6,7 @@ import * as schema from "@builderai/db/schema"
 import { stripe } from "@builderai/stripe"
 
 export const runtime = "edge"
+export const preferredRegion = ["fra1"]
 
 export async function GET(req: NextRequest) {
   // TODO: add rate limiting

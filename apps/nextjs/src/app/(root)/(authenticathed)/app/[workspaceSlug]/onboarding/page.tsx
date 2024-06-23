@@ -1,7 +1,5 @@
 import { Onboarding } from "./_components/multi-step-form"
 
-export const runtime = "edge"
-
 export default function OnboardingPage({
   params: { workspaceSlug },
 }: {

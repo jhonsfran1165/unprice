@@ -4,9 +4,11 @@ import "@builderai/stripe/env"
 import "./src/env.mjs"
 
 // import MillionLint from "@million/lint"
-import withMDX from "@next/mdx"
+import createMDX from "@next/mdx"
 
-/** @type {import('next').NextConfig} */
+/**
+ * @type {import('next').NextConfig}
+ */
 const nextConfig = {
   reactStrictMode: true,
   /** Enables hot reloading for local packages without a build step */
@@ -16,7 +18,7 @@ const nextConfig = {
     "@builderai/stripe",
     "@builderai/ui",
     "@builderai/auth",
-    "@builderai/unprice",
+    // "@builderai/unprice",
     "@builderai/config",
     "@builderai/tailwind-config",
   ],
@@ -26,22 +28,33 @@ const nextConfig = {
   },
   // swcMinify: true,
   experimental: {
+    ppr: true,
     mdxRs: true,
-    optimizePackageImports: ["@builderai/ui"],
+    optimizePackageImports: ["@builderai/ui", "@builderai/api", "@builderai/auth", "@builderai/db"],
     // instrumentationHook: true,
   },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.ignoreWarnings = [{ module: /opentelemetry/ }]
-    }
-    return config
-  },
+  // webpack: (config, { isServer }) => {
+  //   if (isServer) {
+  //     config.ignoreWarnings = [{ module: /opentelemetry/ }]
+  //   }
+  //   return config
+  // },
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
 }
 
-export default withMDX()(nextConfig)
+const withMDX = createMDX({
+  // Add markdown plugins here, as desired
+  options: {
+    remarkPlugins: [],
+    rehypePlugins: [],
+  },
+})
+
+// @ts-ignore
+export default withMDX(nextConfig)
+
 // TODO: try to use million
 // export default MillionLint.next({
 //   rsc: true,

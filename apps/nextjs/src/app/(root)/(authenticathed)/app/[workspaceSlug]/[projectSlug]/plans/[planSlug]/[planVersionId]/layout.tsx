@@ -8,8 +8,6 @@ import Stepper from "./_components/stepper"
 import StepperButton from "./_components/stepper-button"
 import VersionOverview from "./_components/version-overview"
 
-export const runtime = "edge"
-
 export default async function PlanVersionLayout(props: {
   children: React.ReactNode
   params: {

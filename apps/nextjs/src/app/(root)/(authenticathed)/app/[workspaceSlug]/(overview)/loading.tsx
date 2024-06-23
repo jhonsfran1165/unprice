@@ -8,7 +8,6 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { ProjectCardSkeleton } from "../_components/project-card"
 
-export const runtime = "edge"
 
 export default function Loading() {
   return (

@@ -18,9 +18,6 @@ import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
 
-export const runtime = "edge"
-export const preferredRegion = ["fra1"]
-
 export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
 }) {

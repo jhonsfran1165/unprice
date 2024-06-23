@@ -9,8 +9,6 @@ import { currencySymbol } from "~/lib/currency"
 import { api } from "~/trpc/server"
 import { SubscribeNow } from "./subscribe-now"
 
-export const dynamic = "force-dynamic"
-export const runtime = "edge"
 
 export default async function PricingPage() {
   const plans = await api.stripe.plans()

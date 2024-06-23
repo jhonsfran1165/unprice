@@ -34,14 +34,14 @@ export default function Page(props: {
 
   let baseUrl = "/"
 
-  if (isSlug(workspaceSlug)) {
-    baseUrl += `${workspaceSlug}`
+  if (isSlug(workspaceSlug) || isSlug(all.at(0))) {
+    baseUrl += `${workspaceSlug ?? all.at(0)}`
     // delete workspace slug from segments
     all.shift()
   }
 
-  if (isSlug(projectSlug)) {
-    baseUrl += `/${projectSlug}`
+  if (isSlug(projectSlug) || isSlug(all.at(1))) {
+    baseUrl += `/${projectSlug ?? all.at(1)}`
     // delete project slug from segments
     all.shift()
   }

@@ -10,8 +10,6 @@ const SCRIPT_TO_INJECT_FOR_PREVIEW = `
     }, { passive: false })
 `
 
-export const runtime = "edge"
-
 export default function LinkPage({
   searchParams,
 }: {

@@ -38,7 +38,7 @@ export function Sidebar({
                     <ul className="space-y-0.5 pl-7">
                       {item.sidebar.map((subItem) => (
                         <li key={subItem.name}>
-                          <Tab href={subItem.href} baseUrl={baseUrl}>
+                          <Tab href={subItem.href} baseUrl={baseUrl} isSubmenu>
                             {subItem.icon && (
                               <subItem.icon className="size-3 shrink-0" aria-hidden="true" />
                             )}
@@ -97,7 +97,7 @@ export function Sidebar({
                       <ul className="space-y-0.5 pl-7">
                         {item.sidebar.map((subItem) => (
                           <li key={subItem.name}>
-                            <Tab href={item.href} baseUrl={baseUrl}>
+                            <Tab href={item.href} baseUrl={baseUrl} isSubmenu>
                               {subItem.icon && (
                                 <subItem.icon className="size-3 shrink-0" aria-hidden="true" />
                               )}

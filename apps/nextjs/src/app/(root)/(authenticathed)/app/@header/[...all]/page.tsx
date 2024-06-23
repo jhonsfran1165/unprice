@@ -1,3 +1,4 @@
+import { isSlug } from "@builderai/db/utils"
 import { Separator } from "@builderai/ui/separator"
 import { Fragment, Suspense } from "react"
 import Header from "~/components/layout/header"
@@ -16,21 +17,35 @@ export default function Page(props: {
     projectSlug: string
   }
 }) {
+  const { all } = props.params
   const { workspaceSlug, projectSlug } = props.searchParams
+
+  // delete first segment because it's always "/app" for the redirection from the middleware
+  all.shift()
+  let workspace = null
+  let project = null
+
+  if (isSlug(workspaceSlug) || isSlug(all.at(0))) {
+    workspace = `${workspaceSlug ?? all.at(0)}`
+  }
+
+  if (isSlug(projectSlug) || isSlug(all.at(1))) {
+    project = `/${projectSlug ?? all.at(1)}`
+  }
 
   return (
     <Header>
       <Fragment>
-        {workspaceSlug && (
+        {workspace && (
           <Suspense fallback={<WorkspaceSwitcherSkeleton />}>
             <WorkspaceSwitcher
-              workspaceSlug={workspaceSlug}
+              workspaceSlug={workspace}
               workspacesPromise={api.workspaces.listWorkspaces()}
             />
           </Suspense>
         )}
 
-        {projectSlug && (
+        {project && (
           <Fragment>
             <div className="flex size-4 items-center justify-center px-2">
               <Separator className="rotate-[30deg]" orientation="vertical" />

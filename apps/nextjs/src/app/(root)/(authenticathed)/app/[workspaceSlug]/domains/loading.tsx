@@ -6,8 +6,6 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { DomainDialog } from "./_components/domain-dialog"
 
-export const runtime = "edge"
-
 export default function DomainPageLoading() {
   return (
     <DashboardShell

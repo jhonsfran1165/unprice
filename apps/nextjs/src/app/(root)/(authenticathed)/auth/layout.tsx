@@ -2,12 +2,13 @@ import Link from "next/link"
 
 import { Logo } from "@builderai/ui/icons"
 
+import { Fragment } from "react"
 import Footer from "~/components/layout/footer"
 import { siteConfig } from "~/constants/layout"
 
 export default function AuthLayout(props: { children: React.ReactNode }) {
   return (
-    <>
+    <Fragment>
       <div className="relative grid min-h-screen grid-cols-1 overflow-hidden md:grid-cols-3 lg:grid-cols-2">
         <div className="relative">
           <div
@@ -33,6 +34,6 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
         </div>
       </div>
       <Footer className="border-none" />
-    </>
+    </Fragment>
   )
 }

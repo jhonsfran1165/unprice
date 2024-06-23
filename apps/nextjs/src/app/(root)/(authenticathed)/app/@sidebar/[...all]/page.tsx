@@ -23,20 +23,16 @@ export default function DashboardNavigationDesktopSlot(props: {
   let shortcuts = [] as Shortcut[]
   let baseUrl = "/"
 
-  if (isSlug(workspaceSlug)) {
+  if (isSlug(workspaceSlug) || isSlug(all.at(0))) {
     routes = WORKSPACE_NAV
     shortcuts = WORKSPACE_SHORTCUTS
-    baseUrl += `${workspaceSlug}`
-    // delete workspace slug from segments
-    all.shift()
+    baseUrl += `${workspaceSlug ?? all.at(0)}`
   }
 
-  if (isSlug(projectSlug)) {
+  if (isSlug(projectSlug) || isSlug(all.at(1))) {
     routes = PROJECT_NAV
     shortcuts = PROJECT_SHORTCUTS
-    baseUrl += `/${projectSlug}`
-    // delete project slug from segments
-    all.shift()
+    baseUrl += `/${projectSlug ?? all.at(1)}`
   }
 
   return <Sidebar routes={routes} shortcuts={shortcuts} baseUrl={baseUrl} />

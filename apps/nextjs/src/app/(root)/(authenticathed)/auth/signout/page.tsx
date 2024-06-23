@@ -1,10 +1,7 @@
-import { signOut } from "@builderai/auth/server"
+import { signOut } from "@builderai/auth/server-rsc"
 import { Button } from "@builderai/ui/button"
 
 import { AUTH_ROUTES } from "~/constants"
-
-export const runtime = "edge"
-export const preferredRegion = ["fra1"]
 
 export default function AuthenticationPage() {
   return (

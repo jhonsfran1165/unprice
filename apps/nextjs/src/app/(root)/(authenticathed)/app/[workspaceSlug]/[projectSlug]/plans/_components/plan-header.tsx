@@ -10,8 +10,6 @@ import { cn } from "@builderai/ui/utils"
 import { PlanVersionDialog } from "../[planSlug]/_components/plan-version-dialog"
 import { PlanActions } from "./plan-actions"
 
-export const runtime = "edge"
-
 export default function PlanHeader(props: {
   workspaceSlug: string
   projectSlug: string

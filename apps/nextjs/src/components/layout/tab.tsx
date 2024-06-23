@@ -12,11 +12,13 @@ export function Tab({
   href,
   baseUrl,
   children,
+  isSubmenu,
 }: {
   disabled?: boolean
   isNew?: boolean
   href: string
   baseUrl: string
+  isSubmenu?: boolean
   children: React.ReactNode
 }) {
   const pathname = usePathname()
@@ -25,10 +27,9 @@ export function Tab({
     // delete last slash for comparison
     const path = pathname.replace(baseUrl, "")
     const href = itemHref.replace(/\/$/, "")
-    const numberSegments = path.split("/").filter((segment) => segment !== "").length
 
     return (
-      path === href || (numberSegments >= 2 && !["", "/"].includes(href) && path.startsWith(href))
+      path === href || path.startsWith(href) && !["", "/"].includes(href)
     )
   }
 
@@ -39,8 +40,10 @@ export function Tab({
         focusRing,
         {
           "cursor-not-allowed opacity-80": disabled,
-          "bg-background-bgHover text-background-textContrast": isActive(href),
+          "bg-background-bgHover": isActive(href) && !isSubmenu,
+          "text-background-textContrast": isActive(href) && isSubmenu,
           transparent: !isActive(href),
+
         }
       )}
       href={disabled ? "#" : baseUrl + href}

@@ -8,8 +8,6 @@ import { cn } from "@builderai/ui/utils"
 import { SubscriptionSheet } from "../../subscriptions/_components/subscription-sheet"
 import { CustomerActions } from "./customer-actions"
 
-export const runtime = "edge"
-
 export default function CustomerHeader(props: {
   workspaceSlug: string
   projectSlug: string

@@ -7,9 +7,6 @@ import { InviteMemberDialog } from "./_components/invite-member-dialog"
 import { columns as columnsInvites } from "./_components/table-invites/columns"
 import { columns as columnsMembers } from "./_components/table-members/columns"
 
-export const preferredRegion = ["fra1"]
-export const runtime = "edge"
-
 export default async function WorkspaceMembersPage(props: {
   params: { workspaceSlug: string }
   searchParams: Record<string, string | string[] | undefined>

@@ -14,8 +14,6 @@ import DomainConfiguration from "./_components/domain-configuration"
 import { DomainDialog } from "./_components/domain-dialog"
 import { VerifyDomainButton } from "./_components/domain-verify-button"
 
-export const runtime = "edge"
-
 export default async function PageDomains() {
   const domains = await api.domains.getAllByActiveWorkspace()
 
