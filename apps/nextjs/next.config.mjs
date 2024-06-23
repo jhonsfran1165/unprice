@@ -52,7 +52,6 @@ const withMDX = createMDX({
   },
 })
 
-// @ts-ignore
 export default withMDX(nextConfig)
 
 // TODO: try to use million

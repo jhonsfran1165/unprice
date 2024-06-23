@@ -28,9 +28,7 @@ export function Tab({
     const path = pathname.replace(baseUrl, "")
     const href = itemHref.replace(/\/$/, "")
 
-    return (
-      path === href || path.startsWith(href) && !["", "/"].includes(href)
-    )
+    return path === href || (path.startsWith(href) && !["", "/"].includes(href))
   }
 
   return (
@@ -43,7 +41,6 @@ export function Tab({
           "bg-background-bgHover": isActive(href) && !isSubmenu,
           "text-background-textContrast": isActive(href) && isSubmenu,
           transparent: !isActive(href),
-
         }
       )}
       href={disabled ? "#" : baseUrl + href}

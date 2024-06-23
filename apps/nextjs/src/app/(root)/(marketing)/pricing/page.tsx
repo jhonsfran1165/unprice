@@ -9,7 +9,6 @@ import { currencySymbol } from "~/lib/currency"
 import { api } from "~/trpc/server"
 import { SubscribeNow } from "./subscribe-now"
 
-
 export default async function PricingPage() {
   const plans = await api.stripe.plans()
 

@@ -237,7 +237,7 @@ importers:
         version: 0.9.3
       '@trigger.dev/nextjs':
         specifier: ^2.3.19
-        version: 2.3.19(@trigger.dev/sdk@2.3.19)(next@14.2.3)
+        version: 2.3.19(@trigger.dev/sdk@2.3.19)(next@14.3.0-canary.37)
       '@trigger.dev/react':
         specifier: ^2.3.19
         version: 2.3.19(react-dom@18.3.1)(react@18.3.1)
@@ -245,8 +245,8 @@ importers:
         specifier: ^2.3.19
         version: 2.3.19
       next:
-        specifier: 14.2.3
-        version: 14.2.3(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+        specifier: 14.3.0-canary.37
+        version: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -258,10 +258,10 @@ importers:
         specifier: 20.11.24
         version: 20.11.24
       '@types/react':
-        specifier: ^18.2.61
+        specifier: ^18.3.1
         version: 18.3.3
       '@types/react-dom':
-        specifier: ^18.2.19
+        specifier: ^18.3.0
         version: 18.3.0
       '@types/ws':
         specifier: ^8.5.10
@@ -388,11 +388,11 @@ importers:
         specifier: ^0.1.13
         version: 0.1.13
       next:
-        specifier: 14.2.3
-        version: 14.2.3(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+        specifier: 14.3.0-canary.37
+        version: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       next-auth:
         specifier: 5.0.0-beta.19
-        version: 5.0.0-beta.19(next@14.2.3)(react@18.3.1)
+        version: 5.0.0-beta.19(next@14.3.0-canary.37)(react@18.3.1)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -521,7 +521,7 @@ importers:
         specifier: 20.11.24
         version: 20.11.24
       '@types/react':
-        specifier: ^18.2.61
+        specifier: ^18.3.1
         version: 18.3.3
       react:
         specifier: 18.3.1
@@ -747,10 +747,10 @@ importers:
         specifier: ^8.13.2
         version: 8.17.3(react-dom@18.3.1)(react@18.3.1)
       '@types/react':
-        specifier: ^18.2.61
+        specifier: ^18.3.1
         version: 18.3.3
       '@types/react-dom':
-        specifier: ^18.2.19
+        specifier: ^18.3.0
         version: 18.3.0
       date-fns:
         specifier: ^3.3.1
@@ -6666,7 +6666,7 @@ packages:
       zod-error: 1.5.0
     dev: false
 
-  /@trigger.dev/nextjs@2.3.19(@trigger.dev/sdk@2.3.19)(next@14.2.3):
+  /@trigger.dev/nextjs@2.3.19(@trigger.dev/sdk@2.3.19)(next@14.3.0-canary.37):
     resolution: {integrity: sha512-HzNyuasNNvAWwdDTxPrA7ij8b3nKFX4tSDaT+3oPOwvZTkTlPF08ekRX/RWRLo4jVSdj3HOddqZO/B699pFV/Q==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
@@ -6675,7 +6675,7 @@ packages:
     dependencies:
       '@trigger.dev/sdk': 2.3.19
       debug: 4.3.5(supports-color@9.4.0)
-      next: 14.2.3(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+      next: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -11388,7 +11388,7 @@ packages:
     engines: {node: '>= 0.4.0'}
     dev: false
 
-  /next-auth@5.0.0-beta.19(next@14.2.3)(react@18.3.1):
+  /next-auth@5.0.0-beta.19(next@14.3.0-canary.37)(react@18.3.1):
     resolution: {integrity: sha512-YHu1igcAxZPh8ZB7GIM93dqgY6gcAzq66FOhQFheAdOx1raxNcApt05nNyNCSB6NegSiyJ4XOPsaNow4pfDmsg==}
     peerDependencies:
       '@simplewebauthn/browser': ^9.0.1
@@ -11405,7 +11405,7 @@ packages:
         optional: true
     dependencies:
       '@auth/core': 0.32.0
-      next: 14.2.3(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+      next: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       react: 18.3.1
     dev: false
 

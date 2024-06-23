@@ -18,7 +18,7 @@
     "knip": "knip",
     "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply",
     "fmt": "pnpm biome format . && pnpm biome check .",
-    "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:check",
+    "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt",
     "manypkg:fix": "pnpm manypkg fix"
   },
   "dependencies": {
