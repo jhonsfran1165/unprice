@@ -18,7 +18,7 @@ export const UserProfileDesktop = async () => {
   return (
     <UserProfile session={session} align="center">
       <Button variant="ghost" className="flex justify-between">
-        <span className="flex items-center">
+        <span className="flex items-center space-x-1">
           <Avatar className="h-6 w-6">
             <AvatarImage src={user.image ?? "/placeholder-avatar.svg"} alt={user.name ?? ""} />
             <AvatarFallback>{user.name?.substring(2)}</AvatarFallback>

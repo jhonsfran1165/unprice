@@ -19,9 +19,7 @@ export default async function IngestionPage(props: {
   })
 
   return (
-    <DashboardShell
-      header={<HeaderTab title="Ingestions" />}
-    >
+    <DashboardShell header={<HeaderTab title="Ingestions" />}>
       <Fragment>
         <Table>
           <TableHeader>

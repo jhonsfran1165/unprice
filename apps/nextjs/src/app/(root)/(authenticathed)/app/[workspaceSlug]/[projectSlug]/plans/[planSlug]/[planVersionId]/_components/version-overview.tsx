@@ -16,9 +16,9 @@ export default function VersionOverview({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden bg-background-base border-none">
         <div className="flex flex-col">
-          <div className="flex h-[70px] shrink-0 items-center justify-between space-x-1 px-4 py-2">
+          <div className="flex h-[70px] shrink-0 items-center justify-between space-x-1 px-0 py-2">
             <div className="flex items-center space-x-2">
               <h3 className="truncate text-xl font-bold">{planVersion.title.toUpperCase()}</h3>
 
@@ -45,7 +45,7 @@ export default function VersionOverview({
           </div>
         </div>
         <Separator />
-        <CardContent className="p-4 text-sm">
+        <CardContent className="px-0 py-4 text-sm">
           <div className="grid gap-3">
             <div className="font-semibold">Basic Information</div>
             <dl className="grid gap-3">
@@ -82,7 +82,7 @@ export default function VersionOverview({
             </dl>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-row items-center border-t px-4 py-3">
+        <CardFooter className="flex flex-row items-center border-t px-0 py-4">
           <div className="text-muted-foreground text-xs">{planVersion.id}</div>
         </CardFooter>
       </Card>

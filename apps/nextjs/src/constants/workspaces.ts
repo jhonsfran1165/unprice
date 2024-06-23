@@ -26,10 +26,6 @@ export const WORKSPACE_NAV: DashboardRoute[] = [
         name: "Billing",
         href: "/settings/billing",
       },
-      {
-        name: "Danger",
-        href: "/settings/danger",
-      },
     ],
   },
 ]

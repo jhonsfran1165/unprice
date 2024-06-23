@@ -1,10 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { use } from "react"
-
-import type { RouterOutputs } from "@builderai/api"
-import type { RenameWorkspace } from "@builderai/db/validators"
+import type { RenameWorkspace, Workspace } from "@builderai/db/validators"
 import { renameWorkspaceSchema } from "@builderai/db/validators"
 import {
   Card,
@@ -16,6 +12,7 @@ import {
 } from "@builderai/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
+import { useRouter } from "next/navigation"
 
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -23,18 +20,16 @@ import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
 export function WorkspaceName(props: {
-  workspacePromise: Promise<RouterOutputs["workspaces"]["getBySlug"]>
-  workspaceSlug: string
+  workspace: Workspace
 }) {
   const router = useRouter()
   const apiUtils = api.useUtils()
-  const { workspace } = use(props.workspacePromise)
 
   const form = useZodForm({
     schema: renameWorkspaceSchema,
     defaultValues: {
-      name: workspace?.name ?? "",
-      slug: props.workspaceSlug,
+      name: props.workspace.name,
+      slug: props.workspace.slug,
     },
   })
 

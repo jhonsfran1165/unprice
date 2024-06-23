@@ -1,3 +1,3 @@
 export default function HeaderSlot() {
-  return null;
+  return null
 }

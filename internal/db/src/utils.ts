@@ -14,8 +14,8 @@ export const createSlug = () => {
   })
 }
 
-export const isSlug = (str: string) => {
-  return /^[a-z0-9-]+-[a-z0-9-]+$/.test(str)
+export const isSlug = (str?: string) => {
+  return /^[a-z0-9-]+-[a-z0-9-]+$/.test(str ?? "")
 }
 
 export const slugify = (str: string, forDisplayingInput?: boolean) => {

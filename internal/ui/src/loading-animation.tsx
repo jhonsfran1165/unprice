@@ -10,7 +10,8 @@ export function LoadingAnimation({ className, ...props }: Props) {
       <Loader
         className="h-4 w-4 animate-spin"
         // 1s feels a bit fast
-        style={{ animationDuration: "2s" }} />
+        style={{ animationDuration: "2s" }}
+      />
     </div>
   )
 }

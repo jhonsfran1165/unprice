@@ -39,7 +39,7 @@ const RadioCardItem = React.forwardRef<
         "data-[disabled]:border-gray-100 data-[disabled]:dark:border-gray-800",
         "data-[disabled]:bg-gray-50 data-[disabled]:shadow-none data-[disabled]:dark:bg-gray-900",
         focusInput,
-        className,
+        className
       )}
       {...props}
     >
@@ -69,7 +69,7 @@ const RadioCardGroupIndicator = React.forwardRef<
         "group-data-[disabled]:dark:border-gray-700 group-data-[disabled]:dark:bg-gray-800",
         // focus
         focusRing,
-        className,
+        className
       )}
     >
       <RadioGroupPrimitives.Indicator
@@ -84,7 +84,7 @@ const RadioCardGroupIndicator = React.forwardRef<
             // indicator
             "bg-white",
             // disabled
-            "group-data-[disabled]:bg-gray-400 group-data-[disabled]:dark:bg-gray-500",
+            "group-data-[disabled]:bg-gray-400 group-data-[disabled]:dark:bg-gray-500"
           )}
         />
       </RadioGroupPrimitives.Indicator>

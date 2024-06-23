@@ -30,14 +30,16 @@ export default function Page(props: {
           </Suspense>
         )}
 
-        {projectSlug && (<Fragment>
-          <div className="flex size-4 items-center justify-center">
-            <Separator className="rotate-[30deg]" orientation="vertical" />
-          </div>
-          <Suspense fallback={<ProjectSwitcherSkeleton />}>
-            <ProjectSwitcher projectPromise={api.projects.listByActiveWorkspace()} />
-          </Suspense>
-        </Fragment>)}
+        {projectSlug && (
+          <Fragment>
+            <div className="flex size-4 items-center justify-center px-2">
+              <Separator className="rotate-[30deg]" orientation="vertical" />
+            </div>
+            <Suspense fallback={<ProjectSwitcherSkeleton />}>
+              <ProjectSwitcher projectPromise={api.projects.listByActiveWorkspace()} />
+            </Suspense>
+          </Fragment>
+        )}
       </Fragment>
     </Header>
   )

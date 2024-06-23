@@ -16,7 +16,7 @@ export default function DashboardNavigationDesktopSlot(props: {
   const { all } = props.params
   const { workspaceSlug, projectSlug } = props.searchParams
 
-  // delete first segment because it's always "app"
+  // delete first segment because it's always "/app" for the redirection from the middleware
   all.shift()
 
   let routes = [] as DashboardRoute[]
@@ -26,7 +26,7 @@ export default function DashboardNavigationDesktopSlot(props: {
   if (isSlug(workspaceSlug)) {
     routes = WORKSPACE_NAV
     shortcuts = WORKSPACE_SHORTCUTS
-    baseUrl += `${workspaceSlug}/`
+    baseUrl += `${workspaceSlug}`
     // delete workspace slug from segments
     all.shift()
   }
@@ -34,12 +34,10 @@ export default function DashboardNavigationDesktopSlot(props: {
   if (isSlug(projectSlug)) {
     routes = PROJECT_NAV
     shortcuts = PROJECT_SHORTCUTS
-    baseUrl += `${projectSlug}`
+    baseUrl += `/${projectSlug}`
     // delete project slug from segments
     all.shift()
   }
-
-  // const pathname = all.length ? `${all.join("/")}` : ""
 
   return <Sidebar routes={routes} shortcuts={shortcuts} baseUrl={baseUrl} />
 }

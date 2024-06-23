@@ -13,7 +13,6 @@ export default function BillingPage() {
   return (
     <DashboardShell
       header={<HeaderTab title="General Settings" description="Manage your workspace settings" />}
-
     >
       <Fragment>
         <SubscriptionCard />

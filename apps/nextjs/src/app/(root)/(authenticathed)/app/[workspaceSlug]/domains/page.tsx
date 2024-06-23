@@ -1,4 +1,4 @@
-import { ExternalLink, Globe } from "lucide-react"
+import { ExternalLink, Globe, Plus } from "lucide-react"
 import { Suspense } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
@@ -25,9 +25,11 @@ export default async function PageDomains() {
         <HeaderTab
           title="Domains"
           description="Domains for this workspace"
-          action={<DomainDialog>
-            <Button>Create Domain</Button>
-          </DomainDialog>}
+          action={
+            <DomainDialog>
+              <Button>Create Domain</Button>
+            </DomainDialog>
+          }
         />
       }
     >
@@ -87,7 +89,12 @@ const DomainCard = ({
 
           <div className="flex flex-row items-center justify-between space-x-2">
             <VerifyDomainButton domain={domain.name} />
-            <DomainDialog defaultValues={domain} label="Edit" />
+            <DomainDialog defaultValues={domain}>
+              <Button>
+                <Plus className="size-4 mr-2" />
+                Create Domain
+              </Button>
+            </DomainDialog>
           </div>
         </div>
       </CardHeader>

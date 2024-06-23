@@ -32,7 +32,6 @@ export default async function ApiKeysPage(props: {
   const { apikeys } = await api.apikeys.listApiKeys(filter)
 
   return (
-
     <DashboardShell
       header={
         <HeaderTab
@@ -52,6 +51,5 @@ export default async function ApiKeysPage(props: {
         }}
       />
     </DashboardShell>
-
   )
 }

@@ -1,4 +1,4 @@
-import { Calendar, Clock, Home, User } from "lucide-react";
+import { Calendar, Clock, Home, User } from "lucide-react"
 
 export const dashboardNavigationData = [
   {
@@ -21,4 +21,4 @@ export const dashboardNavigationData = [
     href: "/dashboard/settings/availability",
     icon: (props: { className?: string }) => <Clock className={props.className} />,
   },
-];
+]

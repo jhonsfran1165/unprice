@@ -19,8 +19,6 @@ import { Dialog, DialogTrigger } from "@builderai/ui/dialog"
 import { Check, ChevronsUpDown, PlusCircle } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 import { cn } from "@builderai/ui/utils"
-
-import { useUser } from "~/lib/use-user"
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 
 const NewTeamDialog = dynamic(() => import("./new-workspace"), {
@@ -40,16 +38,12 @@ export function WorkspaceSwitcher({
 
   const { workspaces } = use(workspacesPromise)
 
-  const { user, status: statusSession } = useUser()
-
-  if (!user) throw new Error("User not found, how did you get here?")
-
   const activeWorkspace = workspaces.find((workspace) => workspace.slug === workspaceSlug)
 
   const personalWorkspace = workspaces.find((wk) => wk.isPersonal)
   const teams = workspaces.filter((wk) => !wk.isPersonal)
 
-  if (statusSession === "loading" || !activeWorkspace) {
+  if (!activeWorkspace) {
     return <WorkspaceSwitcherSkeleton />
   }
 
@@ -62,8 +56,19 @@ export function WorkspaceSwitcher({
             role="combobox"
             aria-expanded={switcherOpen}
             aria-label="Select a workspace"
-            className="justify-between w-24 md:w-56 lg:w-full"
+            className="justify-between w-24 md:w-full"
           >
+            <Avatar className="mr-2 h-5 w-5">
+              <AvatarImage
+                src={
+                  activeWorkspace.imageUrl && activeWorkspace.imageUrl !== ""
+                    ? activeWorkspace.imageUrl
+                    : `https://avatar.vercel.sh/${activeWorkspace.id}`
+                }
+                alt={`user-${activeWorkspace.name}`}
+              />
+              <AvatarFallback>{activeWorkspace.slug?.substring(0, 2)}</AvatarFallback>
+            </Avatar>
             <span className="truncate font-semibold">{activeWorkspace.name}</span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -95,7 +100,7 @@ export function WorkspaceSwitcher({
                         }
                         alt={`user-${personalWorkspace.name}`}
                       />
-                      <AvatarFallback>{activeWorkspace.slug?.substring(0, 2)}</AvatarFallback>
+                      <AvatarFallback>{personalWorkspace.slug?.substring(0, 2)}</AvatarFallback>
                     </Avatar>
                     <span className="z-10 truncate font-semibold">{personalWorkspace.name}</span>
                     <Check

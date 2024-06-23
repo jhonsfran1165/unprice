@@ -46,7 +46,6 @@ export default function ThemeToggle() {
   )
 }
 
-
 export function ThemeToggleItems() {
   const { theme, setTheme } = useTheme()
 
@@ -60,24 +59,15 @@ export function ThemeToggleItems() {
             setTheme(value)
           }}
         >
-          <DropdownMenuRadioItem
-            aria-label="Switch to Light Mode"
-            value="light"
-          >
+          <DropdownMenuRadioItem aria-label="Switch to Light Mode" value="light">
             <Sun className="mr-2 h-4 w-4" />
             <span>Light</span>
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem
-            aria-label="Switch to Dark Mode"
-            value="dark"
-          >
+          <DropdownMenuRadioItem aria-label="Switch to Dark Mode" value="dark">
             <Moon className="mr-2 h-4 w-4" />
             <span>Dark</span>
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem
-            aria-label="Switch to System Mode"
-            value="system"
-          >
+          <DropdownMenuRadioItem aria-label="Switch to System Mode" value="system">
             <System className="mr-2 h-4 w-4" />
             <span>System</span>
           </DropdownMenuRadioItem>

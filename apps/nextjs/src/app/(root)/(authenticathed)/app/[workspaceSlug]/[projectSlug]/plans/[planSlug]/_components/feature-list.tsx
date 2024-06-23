@@ -1,7 +1,7 @@
 "use client"
 
 import { FileStack, Search } from "lucide-react"
-import { use, useState } from "react"
+import { Fragment, use, useState } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
@@ -52,7 +52,7 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
   const searchableFeatures = data.features.filter((feature) => !planFeatureIds.includes(feature.id))
 
   return (
-    <>
+    <Fragment>
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">
         <div className="relative">
           <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
@@ -133,6 +133,6 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
           )}
         </div>
       </ScrollArea>
-    </>
+    </Fragment>
   )
 }

@@ -34,7 +34,6 @@ export default async function ProjectUsersPage(props: {
   const { customers } = await api.customers.listByActiveProject(filter)
 
   return (
-
     <DashboardShell
       header={
         <HeaderTab
@@ -61,7 +60,5 @@ export default async function ProjectUsersPage(props: {
         }}
       />
     </DashboardShell>
-
-
   )
 }

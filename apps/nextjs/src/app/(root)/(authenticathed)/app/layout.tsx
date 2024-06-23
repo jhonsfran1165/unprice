@@ -23,7 +23,7 @@ export default async function TestPage({
         {header}
         <div className="px-2 md:px-6 py-2 md:py-4">{breadcrumbs}</div>
 
-        <div className="lg:px-6 lg:py-4">{children}</div>
+        <div className="lg:px-6 py-4">{children}</div>
       </main>
     </div>
   )

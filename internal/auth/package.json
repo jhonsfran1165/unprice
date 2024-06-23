@@ -8,7 +8,6 @@
     "./server": "./src/server.ts",
     "./server-rsc": "./src/server-rsc.ts",
     "./config": "./src/config.ts",
-    "./react": "./src/react.ts",
     "./env": "./src/env.mjs"
   },
   "typesVersions": {

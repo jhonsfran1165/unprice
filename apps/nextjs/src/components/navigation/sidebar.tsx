@@ -24,32 +24,35 @@ export function Sidebar({
             <ul className="space-y-1">
               {routes.map((item) => (
                 <li key={item.name}>
-                  <Tab href={baseUrl + item.href} disabled={item.disabled} isNew={item.isNew}>
+                  <Tab
+                    href={item.href}
+                    baseUrl={baseUrl}
+                    disabled={item.disabled}
+                    isNew={item.isNew}
+                  >
                     <item.icon className="size-4 shrink-0" aria-hidden="true" />
                     {item.name}
                   </Tab>
 
-                  {
-                    item?.sidebar && (
-                      <ul className="space-y-0.5 pl-5">
-                        {item.sidebar.map((subItem) => (
-                          <li key={subItem.name}>
-                            <Tab
-                              href={baseUrl + subItem.href}
-                            >
-                              {subItem.icon && (<subItem.icon className="size-3 shrink-0" aria-hidden="true" />)}
-                              {subItem.name}
-                            </Tab>
-                          </li>
-                        ))}
-                      </ul>
-                    )
-                  }
+                  {item?.sidebar && (
+                    <ul className="space-y-0.5 pl-7">
+                      {item.sidebar.map((subItem) => (
+                        <li key={subItem.name}>
+                          <Tab href={subItem.href} baseUrl={baseUrl}>
+                            {subItem.icon && (
+                              <subItem.icon className="size-3 shrink-0" aria-hidden="true" />
+                            )}
+                            {subItem.name}
+                          </Tab>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
               ))}
             </ul>
             <div>
-              <span className="text-xs font-medium leading-6 text-gray-500">Shortcuts</span>
+              <span className="text-xs font-medium leading-6 text-background-solid">Shortcuts</span>
               <ul aria-label="shortcuts" className="space-y-0.5">
                 {shortcuts.map((item) => (
                   <li key={baseUrl + item.name}>
@@ -72,7 +75,58 @@ export function Sidebar({
         <Logo />
         <div className="flex items-center gap-1 sm:gap-2">
           <UserProfileMobile />
-          <MobileSidebar />
+          <MobileSidebar>
+            <nav
+              aria-label="core mobile navigation links"
+              className="flex flex-1 flex-col space-y-10"
+            >
+              <ul className="space-y-1.5">
+                {routes.map((item) => (
+                  <li key={item.name}>
+                    <Tab
+                      href={item.href}
+                      baseUrl={baseUrl}
+                      disabled={item.disabled}
+                      isNew={item.isNew}
+                    >
+                      <item.icon className="size-4 shrink-0" aria-hidden="true" />
+                      {item.name}
+                    </Tab>
+
+                    {item?.sidebar && (
+                      <ul className="space-y-0.5 pl-7">
+                        {item.sidebar.map((subItem) => (
+                          <li key={subItem.name}>
+                            <Tab href={item.href} baseUrl={baseUrl}>
+                              {subItem.icon && (
+                                <subItem.icon className="size-3 shrink-0" aria-hidden="true" />
+                              )}
+                              {subItem.name}
+                            </Tab>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <div>
+                <span className="text-sm font-medium leading-6 text-gray-500 sm:text-xs">
+                  Shortcuts
+                </span>
+                <ul aria-label="shortcuts" className="space-y-0.5">
+                  {shortcuts.map((item) => (
+                    <li key={item.name}>
+                      <ShortLink href={item.href}>
+                        <item.icon className="size-3 shrink-0" aria-hidden="true" />
+                        {item.name}
+                      </ShortLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </nav>
+          </MobileSidebar>
         </div>
       </div>
     </Fragment>

@@ -21,7 +21,6 @@ export function ResizablePanelConfig({
       onLayout={(sizes: number[]) => {
         document.cookie = `react-resizable-panels:layout=${JSON.stringify(sizes)}`
       }}
-      className="h-full max-h-[900px] items-stretch"
     >
       <ResizablePanel defaultSize={defaultLayout[0]} collapsible={false} minSize={30} maxSize={50}>
         {featureList}

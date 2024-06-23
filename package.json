@@ -17,7 +17,7 @@
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip",
     "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply",
-    "fmt:check": "pnpm biome format . && pnpm biome check .",
+    "fmt": "pnpm biome format . && pnpm biome check .",
     "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:check",
     "manypkg:fix": "pnpm manypkg fix"
   },

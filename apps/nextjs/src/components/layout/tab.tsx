@@ -10,31 +10,40 @@ export function Tab({
   disabled,
   isNew,
   href,
+  baseUrl,
   children,
 }: {
   disabled?: boolean
   isNew?: boolean
   href: string
+  baseUrl: string
   children: React.ReactNode
 }) {
   const pathname = usePathname()
 
   const isActive = (itemHref: string) => {
     // delete last slash for comparison
-    const path = pathname.replace(/\/$/, "")
+    const path = pathname.replace(baseUrl, "")
     const href = itemHref.replace(/\/$/, "")
-    return path === href || ["", "/"].includes(path) && path.startsWith(href)
+    const numberSegments = path.split("/").filter((segment) => segment !== "").length
+
+    return (
+      path === href || (numberSegments >= 2 && !["", "/"].includes(href) && path.startsWith(href))
+    )
   }
 
   return (
     <SuperLink
-      className={cn("flex items-center gap-x-2.5 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-200 hover:text-background-textContrast",
-        focusRing, {
-        "cursor-not-allowed opacity-80": disabled,
-        "bg-background-bgHover text-background-textContrast": isActive(href),
-        transparent: !isActive(href),
-      })}
-      href={disabled ? "#" : href}
+      className={cn(
+        "flex items-center gap-x-2.5 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-200 hover:text-background-textContrast",
+        focusRing,
+        {
+          "cursor-not-allowed opacity-80": disabled,
+          "bg-background-bgHover text-background-textContrast": isActive(href),
+          transparent: !isActive(href),
+        }
+      )}
+      href={disabled ? "#" : baseUrl + href}
       aria-disabled={disabled}
       prefetch={false}
     >
@@ -50,7 +59,6 @@ export function Tab({
     </SuperLink>
   )
 }
-
 
 export function ShortLink({
   href,
@@ -68,14 +76,16 @@ export function ShortLink({
   return (
     <SuperLink
       href={href}
-      className={cn("flex items-center gap-x-2.5 rounded-md px-2 py-1.5 text-sm font-medium transition",
-        focusRing, {
-        "bg-background-bgHover text-background-textContrast": isActive(href),
-        "hover:text-background-textContrast": !isActive(href),
-      })}
+      className={cn(
+        "flex items-center gap-x-2.5 rounded-md px-2 py-1.5 text-sm font-medium transition",
+        focusRing,
+        {
+          "bg-background-bgHover text-background-textContrast": isActive(href),
+          "hover:text-background-textContrast": !isActive(href),
+        }
+      )}
     >
       {children}
     </SuperLink>
   )
 }
-

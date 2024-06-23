@@ -29,7 +29,7 @@ export function PlanActions({
             <ChevronDown className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent className="w-44" align="end">
           <DialogTrigger asChild>
             <DropdownMenuItem>Edit plan</DropdownMenuItem>
           </DialogTrigger>

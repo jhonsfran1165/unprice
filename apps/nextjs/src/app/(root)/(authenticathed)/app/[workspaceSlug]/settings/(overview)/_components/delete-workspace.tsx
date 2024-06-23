@@ -17,15 +17,14 @@ import {
 } from "@builderai/ui/dialog"
 import { Warning } from "@builderai/ui/icons"
 
+import type { Workspace } from "@builderai/db/validators"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
-import { useUser } from "~/lib/use-user"
 import { api } from "~/trpc/client"
 
-export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
+export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
   const router = useRouter()
-  const { user } = useUser()
-  const isPersonal = user?.workspaces.find((wk) => wk.slug === workspaceSlug)?.isPersonal
+  const isPersonal = workspace.isPersonal
 
   const apiUtils = api.useUtils()
 
@@ -39,16 +38,14 @@ export function DeleteWorkspace({ workspaceSlug }: { workspaceSlug: string }) {
     },
     onSuccess: () => {
       toastAction("deleted")
-      const nextWorkspace = user?.workspaces.find((wk) => wk.slug !== workspaceSlug)
-
-      router.push(`/${nextWorkspace?.slug}`)
+      router.push("/")
     },
   })
 
   function handleDelete() {
     startTransition(() => {
       deleteWorkspace.mutate({
-        slug: workspaceSlug,
+        slug: workspace.slug,
       })
     })
   }

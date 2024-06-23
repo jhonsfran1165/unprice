@@ -134,7 +134,7 @@ export const workspaceRouter = createTRPCRouter({
     .input(workspaceSelectSchema.pick({ slug: true }))
     .output(
       z.object({
-        workspace: workspaceSelectSchema.optional(),
+        workspace: workspaceSelectSchema,
       })
     )
     .query(async (opts) => {
@@ -144,6 +144,13 @@ export const workspaceRouter = createTRPCRouter({
         ctx: opts.ctx,
         workspaceSlug,
       })
+
+      if (!workspace) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Workspace not found",
+        })
+      }
 
       return {
         workspace: workspace,
