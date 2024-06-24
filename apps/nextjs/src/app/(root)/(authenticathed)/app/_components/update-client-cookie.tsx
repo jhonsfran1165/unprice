@@ -13,13 +13,11 @@ export function UpdateClientCookie({
   projectSlug,
   workspaceSlug,
 }: { projectSlug: string | null; workspaceSlug: string | null }) {
-
   useEffect(() => {
     if (document) {
-      document.cookie = `${COOKIE_NAME_PROJECT}=${projectSlug}; path=/`;
-      document.cookie = `${COOKIE_NAME_WORKSPACE}=${workspaceSlug}; path=/`;
+      document.cookie = `${COOKIE_NAME_PROJECT}=${projectSlug}; path=/`
+      document.cookie = `${COOKIE_NAME_WORKSPACE}=${workspaceSlug}; path=/`
     }
-
   }, [projectSlug, workspaceSlug])
 
   return null

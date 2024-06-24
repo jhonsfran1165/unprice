@@ -13,11 +13,7 @@ export default function WorkSpaceSettingsDangerLoading() {
           </CardDescription>
         </CardHeader>
         <CardFooter className="border-t px-6 py-4">
-          <Button
-            variant="destructive"
-          >
-            Transfer to Personal
-          </Button>
+          <Button variant="destructive">Transfer to Personal</Button>
         </CardFooter>
       </Card>
       <Card className="border-danger">
@@ -28,11 +24,7 @@ export default function WorkSpaceSettingsDangerLoading() {
           </CardDescription>
         </CardHeader>
         <CardFooter className="border-t px-6 py-4">
-          <Button
-            variant="destructive"
-          >
-            Delete project
-          </Button>
+          <Button variant="destructive">Delete project</Button>
         </CardFooter>
       </Card>
       <Card className="border-danger">
@@ -43,11 +35,7 @@ export default function WorkSpaceSettingsDangerLoading() {
           </CardDescription>
         </CardHeader>
         <CardFooter className="border-t px-6 py-4">
-          <Button
-            variant="destructive"
-          >
-            Transfer to Team
-          </Button>
+          <Button variant="destructive">Transfer to Team</Button>
         </CardFooter>
       </Card>
     </Fragment>

@@ -11,7 +11,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@builderai/ui/input"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@builderai/ui/card"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -56,7 +63,6 @@ export function RenameProjectForm(props: {
             <CardDescription>Change the display name of your project</CardDescription>
           </CardHeader>
           <CardContent>
-
             <FormField
               control={form.control}
               name="name"
