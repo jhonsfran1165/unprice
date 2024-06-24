@@ -9,7 +9,10 @@ export function MainNav({ ...props }: React.HTMLAttributes<HTMLElement>) {
         <SuperLink
           href={item.href}
           key={`${item.href}-${idx}`}
-          className={cn("hover:text-background-textContrast text-sm font-medium transition-colors px-2 py-1.5 rounded-md", focusRing)}
+          className={cn(
+            "hover:text-background-textContrast text-sm font-medium transition-colors px-2 py-1.5 rounded-md",
+            focusRing
+          )}
         >
           {item.title}
         </SuperLink>
