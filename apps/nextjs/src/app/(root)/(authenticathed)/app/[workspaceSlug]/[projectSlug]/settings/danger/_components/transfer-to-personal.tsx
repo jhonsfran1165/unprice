@@ -51,12 +51,13 @@ export function TransferProjectToPersonal({
   const description = "Transfer this project to your personal workspace"
 
   return (
-    <Card>
+    <Card className="border-danger">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription className="flex items-center">{description}</CardDescription>
       </CardHeader>
-      <CardFooter className="flex justify-between">
+
+      <CardFooter className="border-t px-6 py-4">
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="destructive">{title}</Button>

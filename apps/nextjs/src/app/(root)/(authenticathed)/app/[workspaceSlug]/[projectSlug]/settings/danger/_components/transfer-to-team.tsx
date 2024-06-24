@@ -66,12 +66,12 @@ export function TransferProjectToTeam({
   const description = "Transfer this project to a team workspace"
 
   return (
-    <Card>
+    <Card className="border-danger">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription className="flex items-center">{description}</CardDescription>
       </CardHeader>
-      <CardFooter className="flex justify-between">
+      <CardFooter className="border-t px-6 py-4">
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="destructive">{title}</Button>

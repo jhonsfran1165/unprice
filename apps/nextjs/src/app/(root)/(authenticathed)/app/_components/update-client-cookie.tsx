@@ -14,33 +14,12 @@ export function UpdateClientCookie({
   workspaceSlug,
 }: { projectSlug: string | null; workspaceSlug: string | null }) {
 
-  // update on focus tab event
-  const onFocus = () => {
-    if (document) {
-      document.cookie = projectSlug
-        ? `${COOKIE_NAME_PROJECT}=${projectSlug}; path=/${workspaceSlug}/`
-        : `${COOKIE_NAME_PROJECT}=; path=/${workspaceSlug}/; "max-age=0"`
-      document.cookie = workspaceSlug
-        ? `${COOKIE_NAME_WORKSPACE}=${workspaceSlug}; path=/${workspaceSlug}/`
-        : `${COOKIE_NAME_WORKSPACE}=; path=/${workspaceSlug}; "max-age=0"`
-    }
-  }
-
   useEffect(() => {
-    if (!document) return
-
-    document.cookie = projectSlug
-      ? `${COOKIE_NAME_PROJECT}=${projectSlug}; path=/${workspaceSlug}/`
-      : `${COOKIE_NAME_PROJECT}=; path=/${workspaceSlug}/; "max-age=0"`
-    document.cookie = workspaceSlug
-      ? `${COOKIE_NAME_WORKSPACE}=${workspaceSlug}; path=/${workspaceSlug}/`
-      : `${COOKIE_NAME_WORKSPACE}=; path=/${workspaceSlug}/; "max-age=0"`
-
-    window.addEventListener("focus", onFocus)
-
-    return () => {
-      window.removeEventListener("focus", onFocus)
+    if (document) {
+      document.cookie = `${COOKIE_NAME_PROJECT}=${projectSlug}; path=/`;
+      document.cookie = `${COOKIE_NAME_WORKSPACE}=${workspaceSlug}; path=/`;
     }
+
   }, [projectSlug, workspaceSlug])
 
   return null

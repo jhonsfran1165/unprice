@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@builderai/ui/input"
 import { LoadingAnimation } from "@builderai/ui/loading-animation"
 
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -49,25 +50,35 @@ export function RenameProjectForm(props: {
         })}
         className="space-y-2"
       >
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="my-project" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex pt-4">
-          <Button type="submit" className="ml-auto">
-            Save
-            {form.formState.isSubmitting && <LoadingAnimation className="ml-2" />}
-          </Button>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Project name</CardTitle>
+            <CardDescription>Change the display name of your project</CardDescription>
+          </CardHeader>
+          <CardContent>
+
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="my-project" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+
+          <CardFooter className="border-t px-6 py-4">
+            <Button type="submit">
+              Save
+              {form.formState.isSubmitting && <LoadingAnimation className="ml-2" />}
+            </Button>
+          </CardFooter>
+        </Card>
       </form>
     </Form>
   )

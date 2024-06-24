@@ -34,8 +34,6 @@ export default function Page(props: {
     project = `${projectSlug ?? all.at(1)}`
   }
 
-  console.log("workspace", workspace, project)
-
   return (
     <Header>
       <UpdateClientCookie workspaceSlug={workspace} projectSlug={project} />

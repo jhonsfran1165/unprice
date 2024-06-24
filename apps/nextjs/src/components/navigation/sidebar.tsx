@@ -17,7 +17,7 @@ export function Sidebar({
   return (
     <Fragment>
       {/* sidebar (lg+) */}
-      <nav className="hidden sticky top-0 z-40 h-full max-h-screen gap-2 lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col xl:w-72">
+      <nav className="hidden top-0 z-40 h-full max-h-screen gap-2 lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col xl:w-72">
         <aside className="flex grow flex-col gap-y-6 overflow-y-auto border-r p-4">
           <Logo />
           <nav aria-label="core navigation links" className="flex flex-1 flex-col space-y-10">
@@ -97,7 +97,7 @@ export function Sidebar({
                       <ul className="space-y-0.5 pl-7">
                         {item.sidebar.map((subItem) => (
                           <li key={subItem.name}>
-                            <Tab href={item.href} baseUrl={baseUrl} isSubmenu>
+                            <Tab href={subItem.href} baseUrl={baseUrl} isSubmenu>
                               {subItem.icon && (
                                 <subItem.icon className="size-3 shrink-0" aria-hidden="true" />
                               )}

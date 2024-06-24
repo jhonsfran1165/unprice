@@ -105,7 +105,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: `/${currentWorkspaceSlug}/`,
+    path: "/",
   })
 
   // TODO: what happen if the project slug is not xxx-xxx format?
@@ -116,7 +116,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: `/${currentWorkspaceSlug}/`,
+    path: "/",
   })
 
   // Apply those cookies to the request
