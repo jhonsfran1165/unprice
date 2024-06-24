@@ -8,14 +8,21 @@ import * as utils from "@builderai/db/utils"
 import type { WorkspacesJWTPayload } from "@builderai/db/validators"
 
 const useSecureCookies = process.env.VERCEL_ENV === "production"
+const log = console // createLogger('auth')
 
 // TODO: check this out https://github.com/calcom/platform-starter-kit/blob/main/src/auth/config.edge.ts
 export const authConfig = {
   trustHost: Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
   logger: {
-    debug: (message, metadata) => console.debug(message, { metadata }),
-    error: (error) => console.error(error),
-    warn: (message) => console.warn(message),
+    debug: (message, metadata) => log.debug(message, { metadata }),
+    error: (error) => log.error(error),
+    warn: (message) => {
+      if (message.includes("experimental-webauthn")) {
+        // don't spam the console with this
+        return
+      }
+      log.warn(message)
+    },
   },
   session: {
     strategy: "jwt",

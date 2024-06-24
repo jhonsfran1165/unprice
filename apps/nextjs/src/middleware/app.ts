@@ -70,8 +70,6 @@ export default function AppMiddleware(req: NextAuthRequest) {
     return NextResponse.rewrite(new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url))
   }
 
-  // TODO: recording page hits
-
   // if not workspace in path check cookies or jwt
   if (!currentWorkspaceSlug) {
     const redirectWorkspaceSlug =

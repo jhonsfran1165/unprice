@@ -1,18 +1,18 @@
-import Link from "next/link"
-
+import { cn, focusRing } from "@builderai/ui/utils"
 import { navItems } from "~/constants/layout"
+import { SuperLink } from "../super-link"
 
 export function MainNav({ ...props }: React.HTMLAttributes<HTMLElement>) {
   return (
-    <nav className="hidden items-center space-x-4 lg:flex lg:space-x-6" {...props}>
+    <nav className="hidden items-center lg:flex" {...props}>
       {navItems.map((item, idx) => (
-        <Link
+        <SuperLink
           href={item.href}
           key={`${item.href}-${idx}`}
-          className="hover:text-background-textContrast text-sm font-medium transition-colors"
+          className={cn("hover:text-background-textContrast text-sm font-medium transition-colors px-2 py-1.5 rounded-md", focusRing)}
         >
           {item.title}
-        </Link>
+        </SuperLink>
       ))}
     </nav>
   )

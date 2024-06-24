@@ -1,4 +1,4 @@
-import { signOut } from "@builderai/auth/server-rsc"
+import { signOut } from "@builderai/auth/server"
 import { Button } from "@builderai/ui/button"
 
 import { AUTH_ROUTES } from "~/constants"

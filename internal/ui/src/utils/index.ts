@@ -8,16 +8,16 @@ export function cn(...inputs: ClassValue[]) {
 
 export const focusRing = [
   // base
-  "outline outline-offset-2 outline-0 focus-visible:outline-2",
+  "outline outline-offset-1 outline-0 focus-visible:outline-1",
   // outline color
-  "outline-primary",
+  "outline-background-solid",
 ]
 
 export const focusInput = [
   // base
-  "focus:ring-2",
+  "focus:ring-1",
   // ring color
-  "focus:outline-primary",
+  "focus:outline-background-solid",
   // border color
-  "focus:outline-primary",
+  "focus:outline-background-solid",
 ]

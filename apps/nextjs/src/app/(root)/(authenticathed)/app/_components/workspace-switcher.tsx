@@ -56,7 +56,7 @@ export function WorkspaceSwitcher({
             role="combobox"
             aria-expanded={switcherOpen}
             aria-label="Select a workspace"
-            className="justify-between w-24 md:w-full"
+            className="w-24 sm:w-full"
           >
             <Avatar className="mr-2 h-5 w-5">
               <AvatarImage

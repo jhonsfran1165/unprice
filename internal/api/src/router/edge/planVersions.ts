@@ -628,6 +628,13 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
+      if (planVersionData.planFeatures.length === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot publish a version without features",
+        })
+      }
+
       // we need to create each product on the payment provider
       const planVersionDataUpdated = await opts.ctx.db.transaction(async (tx) => {
         try {

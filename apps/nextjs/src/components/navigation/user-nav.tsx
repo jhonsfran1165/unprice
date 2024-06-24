@@ -1,13 +1,13 @@
 import { Button } from "@builderai/ui/button"
 import UserProfile from "../layout/user-profile"
 
-import { auth } from "@builderai/auth/server-rsc"
+import { getSession } from "@builderai/auth/server-rsc"
 import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
 import { MoreVertical } from "lucide-react"
 import UserNavSkeleton from "../layout/user-nav-skeleton"
 
 export const UserProfileDesktop = async () => {
-  const session = await auth()
+  const session = await getSession()
 
   if (!session?.user) {
     return <UserNavSkeleton />
@@ -32,7 +32,7 @@ export const UserProfileDesktop = async () => {
 }
 
 export const UserProfileMobile = async () => {
-  const session = await auth()
+  const session = await getSession()
 
   if (!session?.user) {
     return <UserNavSkeleton />

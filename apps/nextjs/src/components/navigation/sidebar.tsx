@@ -35,7 +35,7 @@ export function Sidebar({
                   </Tab>
 
                   {item?.sidebar && (
-                    <ul className="space-y-0.5 pl-7">
+                    <ul className="space-y-0.5 py-1 pl-7">
                       {item.sidebar.map((subItem) => (
                         <li key={subItem.name}>
                           <Tab href={subItem.href} baseUrl={baseUrl} isSubmenu>

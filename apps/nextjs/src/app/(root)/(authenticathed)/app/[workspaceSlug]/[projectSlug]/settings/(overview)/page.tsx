@@ -3,8 +3,6 @@ import { Suspense } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
 import { Label } from "@builderai/ui/label"
 import { Skeleton } from "@builderai/ui/skeleton"
-
-import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 import { RegisterAccountForm } from "../_components/register-account-form"
 import { RenameProjectForm } from "../_components/rename-project"
@@ -12,10 +10,6 @@ import { RenameProjectForm } from "../_components/rename-project"
 export default async function ProjectSettingsPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
 }) {
-  await userCanAccessProject({
-    projectSlug: props.params.projectSlug,
-  })
-
   return (
     <Card>
       <CardHeader>

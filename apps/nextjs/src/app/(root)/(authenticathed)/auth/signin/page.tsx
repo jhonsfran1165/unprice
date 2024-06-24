@@ -2,12 +2,12 @@ import type { Route } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
-import { auth } from "@builderai/auth/server"
+import { getSession } from "@builderai/auth/server-rsc"
 
 import { SignInGithub } from "./github-signin"
 
 export default async function AuthenticationPage() {
-  const session = await auth()
+  const session = await getSession()
 
   if (session?.user?.id) {
     redirect("/")

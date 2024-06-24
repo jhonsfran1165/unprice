@@ -10,6 +10,8 @@ async function main() {
 
   // process.exit(0)
 
+  console.log(process.env)
+
   const defaultProjectId = "proj_uhV7tetPJwCZAMox3L7Po4H5dgc"
 
   // create user

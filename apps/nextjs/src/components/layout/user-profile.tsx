@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import type { Session } from "@builderai/auth/server-rsc"
+import type { Session } from "@builderai/auth/server"
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -1,8 +1,7 @@
 import "server-only"
 
-import type { DefaultSession, User } from "next-auth"
-
 import type { WorkspacesJWTPayload } from "@builderai/db/validators"
+import type { DefaultSession, User } from "next-auth"
 
 import NextAuth from "."
 import { authConfig } from "./config"
@@ -26,13 +25,11 @@ declare module "@auth/core/adapters" {
 
 const {
   handlers: { GET, POST },
-  auth: defaultAuth,
+  auth,
   signIn,
   signOut,
 } = NextAuth({
   ...authConfig,
 })
 
-const auth = defaultAuth
-
-export { GET, POST, auth, signIn, signOut }
+export { GET, POST, signIn, signOut, auth }

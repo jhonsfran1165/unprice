@@ -16,7 +16,7 @@ export default function Loading() {
             <CustomerDialog>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Customer
+                Customer
               </Button>
             </CustomerDialog>
           }

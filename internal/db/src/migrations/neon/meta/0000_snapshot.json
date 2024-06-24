@@ -1,7 +1,7 @@
 {
-  "id": "88ab009e-abe9-4175-a5d1-5db6f65f0adc",
+  "id": "37bf6b47-7fa9-4d35-afb8-ae1ed94fea10",
   "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "6",
+  "version": "7",
   "dialect": "postgresql",
   "tables": {
     "public.builderai_apikeys": {
@@ -69,9 +69,17 @@
         "key": {
           "name": "key",
           "columns": [
-            "key"
+            {
+              "expression": "key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -337,121 +345,6 @@
       },
       "uniqueConstraints": {}
     },
-    "public.builderai_customer_payment_providers": {
-      "name": "builderai_customer_payment_providers",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "customer_id": {
-          "name": "customer_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "payment_provider": {
-          "name": "payment_provider",
-          "type": "payment_providers",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "payment_provider_customer_id": {
-          "name": "payment_provider_customer_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "unique_payment_provider": {
-          "name": "unique_payment_provider",
-          "columns": [
-            "customer_id",
-            "payment_provider"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {
-        "builderai_customer_payment_providers_project_id_builderai_projects_id_fk": {
-          "name": "builderai_customer_payment_providers_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_customer_payment_providers",
-          "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payment_customer_id_fkey": {
-          "name": "payment_customer_id_fkey",
-          "tableFrom": "builderai_customer_payment_providers",
-          "tableTo": "builderai_customers",
-          "columnsFrom": [
-            "customer_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "pk_customer_payment_method": {
-          "name": "pk_customer_payment_method",
-          "columns": [
-            "id",
-            "project_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "builderai_customer_payment_providers_payment_provider_customer_id_unique": {
-          "name": "builderai_customer_payment_providers_payment_provider_customer_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "payment_provider_customer_id"
-          ]
-        }
-      }
-    },
     "public.builderai_customers": {
       "name": "builderai_customers",
       "schema": "",
@@ -506,6 +399,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "stripe_customer_id": {
+          "name": "stripe_customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "active": {
           "name": "active",
           "type": "boolean",
@@ -526,9 +425,17 @@
         "email": {
           "name": "email",
           "columns": [
-            "email"
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -556,6 +463,13 @@
         }
       },
       "uniqueConstraints": {
+        "stripe_customer_unique": {
+          "name": "stripe_customer_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "stripe_customer_id"
+          ]
+        },
         "unique_email_project": {
           "name": "unique_email_project",
           "nullsNotDistinct": false,
@@ -620,9 +534,17 @@
         "name": {
           "name": "name",
           "columns": [
-            "name"
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -905,6 +827,14 @@
           "type": "json",
           "primaryKey": false,
           "notNull": false
+        },
+        "aggregation_method": {
+          "name": "aggregation_method",
+          "type": "aggregation_method",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'sum'"
         },
         "order": {
           "name": "order",
@@ -1381,14 +1311,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "tier": {
-          "name": "tier",
-          "type": "project_tier",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'FREE'"
-        },
         "url": {
           "name": "url",
           "type": "text",
@@ -1396,26 +1318,19 @@
           "notNull": true,
           "default": "''"
         },
-        "stripe_account_id": {
-          "name": "stripe_account_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "''"
-        },
-        "stripe_account_verified": {
-          "name": "stripe_account_verified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
         "enabled": {
           "name": "enabled",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
           "default": true
+        },
+        "is_internal": {
+          "name": "is_internal",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "default_currency": {
           "name": "default_currency",
@@ -1430,9 +1345,17 @@
         "slug_index": {
           "name": "slug_index",
           "columns": [
-            "slug"
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -1461,8 +1384,8 @@
         }
       }
     },
-    "public.builderai_subscription_features": {
-      "name": "builderai_subscription_features",
+    "public.builderai_subscription_items": {
+      "name": "builderai_subscription_items",
       "schema": "",
       "columns": {
         "id": {
@@ -1491,8 +1414,8 @@
           "notNull": true,
           "default": "now()"
         },
-        "quantity": {
-          "name": "quantity",
+        "units": {
+          "name": "units",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -1503,42 +1426,18 @@
           "primaryKey": false,
           "notNull": true
         },
-        "feature_plan_id": {
-          "name": "feature_plan_id",
+        "feature_plan_version_id": {
+          "name": "feature_plan_version_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "limit": {
-          "name": "limit",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "min": {
-          "name": "min",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "feature_slug": {
-          "name": "feature_slug",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "usage": {
-          "name": "usage",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "builderai_subscription_features_project_id_builderai_projects_id_fk": {
-          "name": "builderai_subscription_features_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_subscription_features",
+        "builderai_subscription_items_project_id_builderai_projects_id_fk": {
+          "name": "builderai_subscription_items_project_id_builderai_projects_id_fk",
+          "tableFrom": "builderai_subscription_items",
           "tableTo": "builderai_projects",
           "columnsFrom": [
             "project_id"
@@ -1549,9 +1448,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "subscription_features_subscription_id_fkey": {
-          "name": "subscription_features_subscription_id_fkey",
-          "tableFrom": "builderai_subscription_features",
+        "subscription_items_subscription_id_fkey": {
+          "name": "subscription_items_subscription_id_fkey",
+          "tableFrom": "builderai_subscription_items",
           "tableTo": "builderai_subscriptions",
           "columnsFrom": [
             "subscription_id",
@@ -1564,12 +1463,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "subscription_features_plan_id_fkey": {
-          "name": "subscription_features_plan_id_fkey",
-          "tableFrom": "builderai_subscription_features",
+        "subscription_items_plan_version_id_fkey": {
+          "name": "subscription_items_plan_version_id_fkey",
+          "tableFrom": "builderai_subscription_items",
           "tableTo": "builderai_plan_versions_features",
           "columnsFrom": [
-            "feature_plan_id",
+            "feature_plan_version_id",
             "project_id"
           ],
           "columnsTo": [
@@ -1581,8 +1480,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "subscription_features_pkey": {
-          "name": "subscription_features_pkey",
+        "subscription_items_pkey": {
+          "name": "subscription_items_pkey",
           "columns": [
             "id",
             "project_id"
@@ -1627,11 +1526,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "payment_provider_id": {
-          "name": "payment_provider_id",
+        "default_payment_method_id": {
+          "name": "default_payment_method_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "plan_version_id": {
           "name": "plan_version_id",
@@ -1691,7 +1590,7 @@
           "type": "collection_method",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "'charge_automatically'"
         },
         "is_new": {
@@ -1720,11 +1619,30 @@
         "unique_active_planversion_subscription": {
           "name": "unique_active_planversion_subscription",
           "columns": [
-            "customers_id",
-            "plan_version_id",
-            "project_id"
+            {
+              "expression": "customers_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "plan_version_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "isUnique": true,
+          "where": "\"builderai_subscriptions\".\"status\" = $1",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -1747,21 +1665,6 @@
           "tableTo": "builderai_customers",
           "columnsFrom": [
             "customers_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "subscriptions_payment_method_id_fkey": {
-          "name": "subscriptions_payment_method_id_fkey",
-          "tableFrom": "builderai_subscriptions",
-          "tableTo": "builderai_customer_payment_providers",
-          "columnsFrom": [
-            "payment_provider_id",
             "project_id"
           ],
           "columnsTo": [
@@ -1992,6 +1895,13 @@
           "notNull": false,
           "default": false
         },
+        "is_internal": {
+          "name": "is_internal",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
         "created_by": {
           "name": "created_by",
           "type": "text",
@@ -2008,7 +1918,7 @@
           "name": "unprice_customer_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "legacy_plans": {
           "name": "legacy_plans",
@@ -2053,9 +1963,122 @@
         },
         "unprice_customer_id": {
           "name": "unprice_customer_id",
-          "nullsNotDistinct": true,
+          "nullsNotDistinct": false,
           "columns": [
             "unprice_customer_id"
+          ]
+        }
+      }
+    },
+    "public.builderai_usage": {
+      "name": "builderai_usage",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "subscription_item_id": {
+          "name": "subscription_item_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "month": {
+          "name": "month",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "year": {
+          "name": "year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usage": {
+          "name": "usage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "limit": {
+          "name": "limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "builderai_usage_project_id_builderai_projects_id_fk": {
+          "name": "builderai_usage_project_id_builderai_projects_id_fk",
+          "tableFrom": "builderai_usage",
+          "tableTo": "builderai_projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "usage_subitem_fkey": {
+          "name": "usage_subitem_fkey",
+          "tableFrom": "builderai_usage",
+          "tableTo": "builderai_subscription_items",
+          "columnsFrom": [
+            "subscription_item_id",
+            "project_id"
+          ],
+          "columnsTo": [
+            "id",
+            "project_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "usage_pkey": {
+          "name": "usage_pkey",
+          "columns": [
+            "id",
+            "project_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "unique_usage_subitem": {
+          "name": "unique_usage_subitem",
+          "nullsNotDistinct": false,
+          "columns": [
+            "subscription_item_id",
+            "month",
+            "year"
           ]
         }
       }
@@ -2068,7 +2091,7 @@
       "values": [
         "sum",
         "last_during_period",
-        "last_ever",
+        "count",
         "max"
       ]
     },
@@ -2150,8 +2173,10 @@
       "name": "subscription_status",
       "schema": "public",
       "values": [
+        "canceled",
         "active",
-        "inactive"
+        "inactive",
+        "paused"
       ]
     },
     "public.team_roles": {

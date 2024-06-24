@@ -65,9 +65,9 @@ export function WorkspaceName(props: {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="builderai" />
+                    <Input {...field} placeholder="unprice" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
