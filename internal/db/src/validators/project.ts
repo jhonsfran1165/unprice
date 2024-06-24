@@ -4,21 +4,14 @@ import { z } from "zod"
 import * as schema from "../schema"
 import { workspaceSelectBase } from "./workspace"
 
-export const projectInserBaseSchema = createInsertSchema(schema.projects, {
+export const projectInsertBaseSchema = createInsertSchema(schema.projects, {
   slug: z.string().min(1),
   name: z.string().min(1),
   url: z.string().url().optional(),
+}).pick({
+  name: true,
+  url: true,
 })
-
-export const createProjectSchema = projectInserBaseSchema
-  .omit({
-    createdAt: true,
-    updatedAt: true,
-  })
-  .pick({
-    name: true,
-    url: true,
-  })
 
 export const projectSelectBaseSchema = createSelectSchema(schema.projects, {
   name: z.string().min(4, "Name must be at least 5 characters"),
@@ -58,7 +51,7 @@ export const transferToWorkspaceSchema = z.object({
   targetWorkspaceId: z.string(),
 })
 
-export type ProjectInsert = z.infer<typeof createProjectSchema>
+export type ProjectInsert = z.infer<typeof projectInsertBaseSchema>
 export type Project = z.infer<typeof projectSelectBaseSchema>
 export type RenameProject = z.infer<typeof renameProjectSchema>
 export type ProjectTransferToWorkspace = z.infer<typeof transferToWorkspaceSchema>

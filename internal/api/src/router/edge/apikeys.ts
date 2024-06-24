@@ -6,18 +6,12 @@ import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import { createApiKeySchema, selectApiKeySchema } from "@builderai/db/validators"
 
-import {
-  createTRPCRouter,
-  protectedActiveWorkspaceAdminProcedure,
-  protectedActiveWorkspaceProcedure,
-} from "../../trpc"
-import { projectGuard } from "../../utils"
+import { createTRPCRouter, protectedActiveProjectProcedure } from "../../trpc"
 
 export const apiKeyRouter = createTRPCRouter({
-  listApiKeys: protectedActiveWorkspaceAdminProcedure
+  listByActiveProject: protectedActiveProjectProcedure
     .input(
       z.object({
-        projectSlug: z.string(),
         fromDate: z.number().optional(),
         toDate: z.number().optional(),
       })
@@ -28,12 +22,8 @@ export const apiKeyRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const { projectSlug, fromDate, toDate } = opts.input
-
-      const { project } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      const { fromDate, toDate } = opts.input
+      const project = opts.ctx.project
 
       const apikeys = await opts.ctx.db.query.apikeys.findMany({
         where: (apikey, { eq, and, between, gte, lte }) =>
@@ -56,44 +46,22 @@ export const apiKeyRouter = createTRPCRouter({
       return { apikeys }
     }),
 
-  createApiKey: protectedActiveWorkspaceProcedure
+  create: protectedActiveProjectProcedure
     .input(createApiKeySchema)
     .output(
       z.object({
-        apikey: selectApiKeySchema.optional(),
+        apikey: selectApiKeySchema,
       })
     )
     .mutation(async (opts) => {
-      const { projectSlug, name, expiresAt } = opts.input
-      const { workspaces, email } = opts.ctx.session.user
-
-      const workspaceName = workspaces?.[0]?.slug ?? email
-
-      if (!workspaceName) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Workspace name is required",
-        })
-      }
-
-      if (!email) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "email is required",
-        })
-      }
-
-      const { project } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      const { name, expiresAt } = opts.input
+      const project = opts.ctx.project
 
       const apiKeyId = utils.newId("apikey")
 
       // Generate the key
       const apiKey = utils.newId("apikey_key")
 
-      // TODO: change returning for .then((res) => res[0])
       const newApiKey = await opts.ctx.db
         .insert(schema.apikeys)
         .values({
@@ -106,19 +74,22 @@ export const apiKeyRouter = createTRPCRouter({
         .returning()
         .then((res) => res[0])
 
+      if (!newApiKey) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create API key",
+        })
+      }
+
       return { apikey: newApiKey }
     }),
 
-  revokeApiKeys: protectedActiveWorkspaceAdminProcedure
-    .input(z.object({ ids: z.string().array(), projectSlug: z.string() }))
+  revoke: protectedActiveProjectProcedure
+    .input(z.object({ ids: z.string().array() }))
     .output(z.object({ success: z.boolean(), numRevoked: z.number() }))
     .mutation(async (opts) => {
-      const { ids, projectSlug } = opts.input
-
-      const { project } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      const { ids } = opts.input
+      const project = opts.ctx.project
 
       const result = await opts.ctx.db
         .update(schema.apikeys)
@@ -138,20 +109,16 @@ export const apiKeyRouter = createTRPCRouter({
       return { success: true, numRevoked: result.length }
     }),
 
-  rollApiKey: protectedActiveWorkspaceAdminProcedure
-    .input(z.object({ id: z.string(), projectSlug: z.string() }))
+  roll: protectedActiveProjectProcedure
+    .input(z.object({ id: z.string() }))
     .output(
       z.object({
-        apikey: selectApiKeySchema.optional(),
+        apikey: selectApiKeySchema,
       })
     )
     .mutation(async (opts) => {
-      const { id, projectSlug } = opts.input
-
-      const { project } = await projectGuard({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      const { id } = opts.input
+      const project = opts.ctx.project
 
       const apiKey = await opts.ctx.db.query.apikeys.findFirst({
         where: (apikey, { eq, and }) => and(eq(apikey.id, id), eq(apikey.projectId, project.id)),
@@ -164,15 +131,23 @@ export const apiKeyRouter = createTRPCRouter({
         })
       }
 
-      // Generate the key
+      // Generate a new key
       const newKey = utils.newId("apikey_key")
 
       const newApiKey = await opts.ctx.db
         .update(schema.apikeys)
-        .set({ key: newKey })
+        .set({ key: newKey, updatedAt: new Date() })
         .where(eq(schema.apikeys.id, opts.input.id))
         .returning()
+        .then((res) => res[0])
 
-      return { apikey: newApiKey?.[0] }
+      if (!newApiKey) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to roll API key",
+        })
+      }
+
+      return { apikey: newApiKey }
     }),
 })

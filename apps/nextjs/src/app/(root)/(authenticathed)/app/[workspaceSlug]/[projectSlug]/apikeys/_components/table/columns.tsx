@@ -13,7 +13,7 @@ import { DataTableColumnHeader } from "~/components/data-table/data-table-column
 import { formatDate } from "~/lib/dates"
 import { DataTableRowActions } from "./data-table-row-actions"
 
-export type ApiKey = RouterOutputs["apikeys"]["listApiKeys"]["apikeys"][number]
+export type ApiKey = RouterOutputs["apikeys"]["listByActiveProject"]["apikeys"][number]
 
 export const columns: ColumnDef<ApiKey>[] = [
   {

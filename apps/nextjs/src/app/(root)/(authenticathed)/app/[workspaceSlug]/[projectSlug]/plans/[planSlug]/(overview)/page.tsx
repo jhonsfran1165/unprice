@@ -53,6 +53,7 @@ export default async function PlanPage({
         <HeaderTab
           title={plan.slug}
           description={plan.description}
+          label={plan.active ? "Active" : "Inactive"}
           action={
             <div className="button-primary flex items-center space-x-1 rounded-md">
               <div className="sm:col-span-full">

@@ -19,7 +19,6 @@ import {
   configActivePlanVersionAtom,
   configPlanFeaturesListAtom,
   usePlanFeaturesList,
-  usePlanVersionFeatureOpen,
 } from "../../_components/use-features"
 
 interface PlanFeatureListProps {
@@ -38,8 +37,6 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
   useHydrateAtoms([[configActivePlanAtom, plan]])
 
   const [featuresList] = usePlanFeaturesList()
-  // this avoid to drag and drop features when the planVersionFeature is open
-  const [planVersionFeatureOpen] = usePlanVersionFeatureOpen()
 
   const filteredFeatures =
     featuresList.filter((feature) =>
@@ -94,7 +91,7 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
               <div className="space-y-2">
                 {filteredFeatures.map((feature) => (
                   <SortableFeature
-                    disabled={planVersionFeatureOpen || activePlanVersion?.status === "published"}
+                    disabled={activePlanVersion?.status === "published"}
                     key={Math.random()}
                     mode="FeaturePlan"
                     planFeatureVersion={feature}

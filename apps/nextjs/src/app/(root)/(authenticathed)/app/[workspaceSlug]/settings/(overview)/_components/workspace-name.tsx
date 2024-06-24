@@ -53,10 +53,10 @@ export function WorkspaceName(props: {
         <CardTitle>Workspace Name</CardTitle>
         <CardDescription>Change the name of your workspace</CardDescription>
       </CardHeader>
+      <CardContent>
 
-      <Form {...form}>
-        <form className="flex flex-col space-y-2" onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent>
+        <Form {...form}>
+          <form id="workspace-name" className="flex flex-col space-y-2" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="name"
@@ -70,16 +70,18 @@ export function WorkspaceName(props: {
                 </FormItem>
               )}
             />
-          </CardContent>
-          <CardFooter className="flex justify-end">
-            <SubmitButton
-              isDisabled={form.formState.isSubmitting}
-              isSubmitting={form.formState.isSubmitting}
-              label="Save"
-            />
-          </CardFooter>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </CardContent>
+      <CardFooter className="border-t px-6 py-4">
+        <SubmitButton
+          form="workspace-name"
+          type="submit"
+          isDisabled={form.formState.isSubmitting}
+          isSubmitting={form.formState.isSubmitting}
+          label="Save"
+        />
+      </CardFooter>
     </Card>
   )
 }

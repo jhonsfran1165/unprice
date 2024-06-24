@@ -20,6 +20,7 @@ export const SuperLink = (props: ComponentPropsWithRef<typeof Link>) => {
     <Link
       {...props}
       prefetch={false}
+      scroll={false}
       onMouseEnter={(e) => {
         conditionalPrefetch()
         return props.onMouseEnter?.(e)

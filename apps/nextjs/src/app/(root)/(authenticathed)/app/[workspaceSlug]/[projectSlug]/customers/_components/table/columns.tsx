@@ -1,12 +1,12 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import Link from "next/link"
 
 import type { Customer } from "@builderai/db/validators"
 import { Checkbox } from "@builderai/ui/checkbox"
 
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
+import { SuperLink } from "~/components/super-link"
 import { formatDate } from "~/lib/dates"
 import { DataTableRowActions } from "./data-table-row-actions"
 
@@ -38,9 +38,9 @@ export const columns: ColumnDef<Customer>[] = [
     accessorKey: "name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
     cell: ({ row }) => (
-      <Link href={`./customers/${row.original.id}`} prefetch={false}>
+      <SuperLink href={`./customers/${row.original.id}`} scroll={false}>
         <div className="lowercase">{row.getValue("name")}</div>
-      </Link>
+      </SuperLink>
     ),
   },
   {

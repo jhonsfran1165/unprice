@@ -5,8 +5,8 @@ import { eq, sql } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import {
-  createProjectSchema,
   deleteProjectSchema,
+  projectInsertBaseSchema,
   projectSelectBaseSchema,
   renameProjectSchema,
   transferToPersonalProjectSchema,
@@ -32,7 +32,7 @@ const PROJECT_LIMITS = {
 
 export const projectRouter = createTRPCRouter({
   create: protectedActiveWorkspaceProcedure
-    .input(createProjectSchema)
+    .input(projectInsertBaseSchema)
     .output(
       z.object({
         project: projectSelectBaseSchema,

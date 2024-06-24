@@ -18,7 +18,7 @@ import { currencySymbol } from "~/lib/currency"
 import { api } from "~/trpc/client"
 import { PlanVersionFeatureSheet } from "../[planSlug]/_components/plan-version-feature-sheet"
 import { FeatureDialog } from "./feature-dialog"
-import { useActiveFeature, useActivePlanVersion, usePlanFeaturesList } from "./use-features"
+import { useActiveFeature, useActivePlanVersion, usePlanFeaturesList, usePlanVersionFeatureOpen } from "./use-features"
 
 const featureVariants = cva(
   "flex gap-2 rounded-lg border text-left text-sm transition-all bg-background-bgSubtle hover:bg-background-bgHover",
@@ -37,7 +37,7 @@ const featureVariants = cva(
 
 export interface FeaturePlanProps
   extends React.ComponentPropsWithoutRef<"div">,
-    VariantProps<typeof featureVariants> {
+  VariantProps<typeof featureVariants> {
   planFeatureVersion: PlanVersionFeatureDragDrop
   mode: "Feature" | "FeaturePlan"
   disabled?: boolean
@@ -50,7 +50,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
 
   const [active, setActiveFeature] = useActiveFeature()
   const [activePlanVersion] = useActivePlanVersion()
-
+  const [planVersionFeatureOpen] = usePlanVersionFeatureOpen()
   const [_planFeatures, setPlanFeaturesList] = usePlanFeaturesList()
 
   const removePlanVersionFeature = api.planVersionFeatures.remove.useMutation()
@@ -58,13 +58,13 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
   const feature = planFeatureVersion.feature
 
   const handleClick = (_event: React.MouseEvent<HTMLDivElement>) => {
-    if (mode !== "FeaturePlan") return
+    if (planVersionFeatureOpen || mode !== "FeaturePlan") return
     setActiveFeature(planFeatureVersion)
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
-      if (mode !== "FeaturePlan") return
+      if (planVersionFeatureOpen || mode !== "FeaturePlan") return
 
       setActiveFeature(planFeatureVersion)
     }
@@ -74,7 +74,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
 
   return (
     <div
-      ref={ref}
+      ref={planVersionFeatureOpen ? undefined : ref}
       {...rest}
       className={cn(featureVariants({ variant, className }), {
         "border-background-borderHover bg-background-bgHover relative z-0 border-2 shadow-sm":
@@ -106,7 +106,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
                   <div className="line-clamp-1 items-center gap-1 text-left font-bold">
                     {feature.slug}
                   </div>
-                  {/* // If there is no id it means that the feature is not saved */}
+                  {/* // If there is no id it means that the feature is not saved yet */}
                   {!planFeatureVersion?.id && (
                     <div className="relative">
                       <div className="1right-1 absolute top-2">
@@ -212,19 +212,18 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
                 <div className="line-clamp-1 pr-3 text-xs font-light">
                   {/* // TODO: fix this */}
                   {planFeatureVersion?.config?.price
-                    ? `${
-                        planFeatureVersion?.config?.price.dinero.amount === 0
-                          ? "Free"
-                          : planFeatureVersion?.config?.units
-                            ? `${toDecimal(
-                                dinero(planFeatureVersion?.config?.price.dinero),
-                                ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
-                              )} per ${planFeatureVersion?.config?.units} units`
-                            : toDecimal(
-                                dinero(planFeatureVersion?.config?.price.dinero),
-                                ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
-                              )
-                      }`
+                    ? `${planFeatureVersion?.config?.price.dinero.amount === 0
+                      ? "Free"
+                      : planFeatureVersion?.config?.units
+                        ? `${toDecimal(
+                          dinero(planFeatureVersion?.config?.price.dinero),
+                          ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
+                        )} per ${planFeatureVersion?.config?.units} units`
+                        : toDecimal(
+                          dinero(planFeatureVersion?.config?.price.dinero),
+                          ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
+                        )
+                    }`
                     : planFeatureVersion.config?.tiers?.length?.toString()
                       ? `${planFeatureVersion?.config?.tiers?.length ?? 0} tiers`
                       : null}

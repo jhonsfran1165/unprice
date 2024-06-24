@@ -1,25 +1,19 @@
 import { LazyMotion, domAnimation, m } from "framer-motion"
-import dynamic from "next/dynamic"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
 import { Balancer } from "react-wrap-balancer"
+import CreateApiKeyForm from "../../[projectSlug]/apikeys/_components/create-api-key-form"
 
-const CreateApiKeyForm = dynamic(
-  () => import("../../[projectSlug]/apikeys/_components/create-api-key-form"),
-  {
-    ssr: false,
-  }
-)
 
 export default function CreateApiKey() {
   const router = useRouter()
-  const projectSlug = useSearchParams().get("projectSlug")
+  const workspaceSlug = useSearchParams().get("workspaceSlug")
 
   useEffect(() => {
-    if (!projectSlug) {
+    if (!workspaceSlug) {
       router.push("/onboarding")
     }
-  }, [projectSlug, router])
+  }, [workspaceSlug, router])
 
   return (
     <LazyMotion features={domAnimation}>
@@ -64,7 +58,6 @@ export default function CreateApiKey() {
             }}
           >
             <CreateApiKeyForm
-              projectSlug={projectSlug!}
               onSuccess={(key: string) => {
                 const searchParams = new URLSearchParams(window.location.search)
                 searchParams.set("step", "done")

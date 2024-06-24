@@ -1,6 +1,4 @@
 "use client"
-
-import dynamic from "next/dynamic"
 import { useState } from "react"
 
 import { Button } from "@builderai/ui/button"
@@ -12,28 +10,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@builderai/ui/dialog"
-import { Add, Spinner } from "@builderai/ui/icons"
+import { Add } from "@builderai/ui/icons"
+import CreateApiKeyForm from "./create-api-key-form"
 
-import { api } from "~/trpc/client"
-
-const CreateApiKeyForm = dynamic(() => import("./create-api-key-form"), {
-  ssr: false,
-  loading: () => (
-    <div className="m-auto flex justify-center align-middle">
-      <Spinner className="m-6 h-16 w-16 animate-spin" />
-    </div>
-  ),
-})
-
-export default function NewApiKeyDialog(props: { projectSlug: string }) {
+export default function NewApiKeyDialog() {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const apiUtils = api.useUtils()
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button size={"icon"} className="h-8 w-8">
-          <Add className="h-4 w-4" />
+        <Button>
+          <Add className="h-4 w-4 mr-2" /> Create API Key
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -42,12 +29,10 @@ export default function NewApiKeyDialog(props: { projectSlug: string }) {
           <DialogDescription>Fill out the form to create an API key.</DialogDescription>
         </DialogHeader>
         <CreateApiKeyForm
-          projectSlug={props.projectSlug}
-          onSuccess={async () => {
-            setDialogOpen(false)
-            await apiUtils.apikeys.listApiKeys.invalidate({
-              projectSlug: props.projectSlug,
-            })
+          setDialogOpen={setDialogOpen}
+          defaultValues={{
+            name: "",
+            expiresAt: null,
           }}
         />
       </DialogContent>

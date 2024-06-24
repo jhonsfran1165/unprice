@@ -16,7 +16,7 @@ export default function VersionOverview({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <Card className="overflow-hidden bg-background-base border-none">
+      <Card className="bg-background-base border-none">
         <div className="flex flex-col">
           <div className="flex h-[70px] shrink-0 items-center justify-between space-x-1 px-0 py-2">
             <div className="flex items-center space-x-2">

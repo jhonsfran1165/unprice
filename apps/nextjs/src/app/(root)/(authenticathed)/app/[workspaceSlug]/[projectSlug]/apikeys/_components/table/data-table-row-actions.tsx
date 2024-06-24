@@ -1,7 +1,7 @@
 "use client"
 
 import type { Row } from "@tanstack/react-table"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { startTransition } from "react"
 
 import { selectApiKeySchema } from "@builderai/db/validators"
@@ -24,16 +24,15 @@ interface DataTableRowActionsProps<TData> {
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
   const apikey = selectApiKeySchema.parse(row.original)
   const router = useRouter()
-  const projectSlug = useParams().projectSlug as string
 
-  const revokeApiKeys = api.apikeys.revokeApiKeys.useMutation({
+  const revokeApiKeys = api.apikeys.revoke.useMutation({
     onSuccess: () => {
       toastAction("saved")
       router.refresh()
     },
   })
 
-  const rollApiKey = api.apikeys.rollApiKey.useMutation({
+  const rollApiKey = api.apikeys.roll.useMutation({
     onSuccess: () => {
       toastAction("success")
       router.refresh()
@@ -44,7 +43,6 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
     startTransition(() => {
       void revokeApiKeys.mutateAsync({
         ids: [apikey.id],
-        projectSlug,
       })
     })
   }
@@ -53,7 +51,6 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
     startTransition(() => {
       void rollApiKey.mutateAsync({
         id: apikey.id,
-        projectSlug,
       })
     })
   }

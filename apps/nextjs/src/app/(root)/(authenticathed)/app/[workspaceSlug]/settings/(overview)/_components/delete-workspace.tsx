@@ -51,12 +51,12 @@ export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
   }
 
   return (
-    <Card>
+    <Card className="border-danger">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription className="flex items-center">{description}</CardDescription>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardFooter className="flex justify-between">
+      <CardFooter className="border-t px-6 py-4">
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="destructive" disabled={!!isPersonal}>
