@@ -5,6 +5,7 @@ import Header from "~/components/layout/header"
 import { api } from "~/trpc/server"
 import { ProjectSwitcher } from "../../_components/project-switcher"
 import { ProjectSwitcherSkeleton } from "../../_components/project-switcher-skeleton"
+import { UpdateClientCookie } from "../../_components/update-client-cookie"
 import { WorkspaceSwitcher } from "../../_components/workspace-switcher"
 import { WorkspaceSwitcherSkeleton } from "../../_components/workspace-switcher-skeleton"
 
@@ -30,11 +31,14 @@ export default function Page(props: {
   }
 
   if (isSlug(projectSlug) || isSlug(all.at(1))) {
-    project = `/${projectSlug ?? all.at(1)}`
+    project = `${projectSlug ?? all.at(1)}`
   }
+
+  console.log("workspace", workspace, project)
 
   return (
     <Header>
+      <UpdateClientCookie workspaceSlug={workspace} projectSlug={project} />
       <Fragment>
         {workspace && (
           <Suspense fallback={<WorkspaceSwitcherSkeleton />}>

@@ -105,18 +105,18 @@ export default function AppMiddleware(req: NextAuthRequest) {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: "/api/",
+    path: `/${currentWorkspaceSlug}/`,
   })
 
   // TODO: what happen if the project slug is not xxx-xxx format?
-  const currentProjectSlug = path.split("/")[2] ?? ""
+  const currentProjectSlug = decodeURIComponent(path.split("/")[2] ?? "")
 
   // cookie for calling the api
   response.cookies.set(COOKIE_NAME_PROJECT, currentProjectSlug, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: "/api/",
+    path: `/${currentWorkspaceSlug}/`,
   })
 
   // Apply those cookies to the request

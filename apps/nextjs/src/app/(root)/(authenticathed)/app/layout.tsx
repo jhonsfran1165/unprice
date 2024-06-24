@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-import { UpdateClientCookie } from "./_components/update-client-cookie"
 
 export default async function RootLayout({
   children,
@@ -14,7 +13,6 @@ export default async function RootLayout({
 }) {
   return (
     <div className="min-h-screen w-full">
-      <UpdateClientCookie />
       {sidebar}
       <main className="lg:pl-64 xl:pl-72">
         {header}
