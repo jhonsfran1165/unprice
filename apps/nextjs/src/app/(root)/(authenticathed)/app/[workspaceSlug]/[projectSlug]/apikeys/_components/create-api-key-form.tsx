@@ -26,7 +26,6 @@ import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-
 export default function CreateApiKeyForm(props: {
   setDialogOpen?: (open: boolean) => void
   onSuccess?: (key: string) => void
@@ -131,7 +130,6 @@ export default function CreateApiKeyForm(props: {
             label={"Create"}
           />
         </div>
-
       </form>
     </Form>
   )

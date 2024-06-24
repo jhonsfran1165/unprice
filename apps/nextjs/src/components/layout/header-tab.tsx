@@ -19,12 +19,12 @@ export default function HeaderTab({
       <div className="space-y-2">
         <div className="flex items-center space-x-2">
           <h1 className="text-xl font-semibold leading-none tracking-tight">{title}</h1>
-          {label && (<Badge
-            className={"info ml-2"}
-          >
-            <span className="bg-info-solid flex h-2 w-2 rounded-full" />
-            <span className="ml-1">{label}</span>
-          </Badge>)}
+          {label && (
+            <Badge className={"info ml-2"}>
+              <span className="bg-info-solid flex h-2 w-2 rounded-full" />
+              <span className="ml-1">{label}</span>
+            </Badge>
+          )}
         </div>
         {description && <h4 className="text-muted-foreground text-sm">{description}</h4>}
       </div>

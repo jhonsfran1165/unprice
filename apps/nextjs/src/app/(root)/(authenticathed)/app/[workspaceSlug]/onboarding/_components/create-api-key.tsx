@@ -4,7 +4,6 @@ import { useEffect } from "react"
 import { Balancer } from "react-wrap-balancer"
 import CreateApiKeyForm from "../../[projectSlug]/apikeys/_components/create-api-key-form"
 
-
 export default function CreateApiKey() {
   const router = useRouter()
   const workspaceSlug = useSearchParams().get("workspaceSlug")

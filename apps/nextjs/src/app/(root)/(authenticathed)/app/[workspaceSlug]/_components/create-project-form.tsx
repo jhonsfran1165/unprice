@@ -97,7 +97,6 @@ const CreateProjectForm = (props: {
           />
         </div>
 
-
         <div className="mt-8 flex justify-end space-x-4">
           <SubmitButton
             isDisabled={form.formState.isSubmitting}

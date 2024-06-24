@@ -54,9 +54,12 @@ export function WorkspaceName(props: {
         <CardDescription>Change the name of your workspace</CardDescription>
       </CardHeader>
       <CardContent>
-
         <Form {...form}>
-          <form id="workspace-name" className="flex flex-col space-y-2" onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            id="workspace-name"
+            className="flex flex-col space-y-2"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
             <FormField
               control={form.control}
               name="name"

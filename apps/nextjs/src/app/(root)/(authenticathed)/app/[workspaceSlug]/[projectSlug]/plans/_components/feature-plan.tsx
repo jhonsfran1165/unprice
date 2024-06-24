@@ -18,7 +18,12 @@ import { currencySymbol } from "~/lib/currency"
 import { api } from "~/trpc/client"
 import { PlanVersionFeatureSheet } from "../[planSlug]/_components/plan-version-feature-sheet"
 import { FeatureDialog } from "./feature-dialog"
-import { useActiveFeature, useActivePlanVersion, usePlanFeaturesList, usePlanVersionFeatureOpen } from "./use-features"
+import {
+  useActiveFeature,
+  useActivePlanVersion,
+  usePlanFeaturesList,
+  usePlanVersionFeatureOpen,
+} from "./use-features"
 
 const featureVariants = cva(
   "flex gap-2 rounded-lg border text-left text-sm transition-all bg-background-bgSubtle hover:bg-background-bgHover",
@@ -37,7 +42,7 @@ const featureVariants = cva(
 
 export interface FeaturePlanProps
   extends React.ComponentPropsWithoutRef<"div">,
-  VariantProps<typeof featureVariants> {
+    VariantProps<typeof featureVariants> {
   planFeatureVersion: PlanVersionFeatureDragDrop
   mode: "Feature" | "FeaturePlan"
   disabled?: boolean
@@ -212,18 +217,19 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
                 <div className="line-clamp-1 pr-3 text-xs font-light">
                   {/* // TODO: fix this */}
                   {planFeatureVersion?.config?.price
-                    ? `${planFeatureVersion?.config?.price.dinero.amount === 0
-                      ? "Free"
-                      : planFeatureVersion?.config?.units
-                        ? `${toDecimal(
-                          dinero(planFeatureVersion?.config?.price.dinero),
-                          ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
-                        )} per ${planFeatureVersion?.config?.units} units`
-                        : toDecimal(
-                          dinero(planFeatureVersion?.config?.price.dinero),
-                          ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
-                        )
-                    }`
+                    ? `${
+                        planFeatureVersion?.config?.price.dinero.amount === 0
+                          ? "Free"
+                          : planFeatureVersion?.config?.units
+                            ? `${toDecimal(
+                                dinero(planFeatureVersion?.config?.price.dinero),
+                                ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
+                              )} per ${planFeatureVersion?.config?.units} units`
+                            : toDecimal(
+                                dinero(planFeatureVersion?.config?.price.dinero),
+                                ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
+                              )
+                      }`
                     : planFeatureVersion.config?.tiers?.length?.toString()
                       ? `${planFeatureVersion?.config?.tiers?.length ?? 0} tiers`
                       : null}
