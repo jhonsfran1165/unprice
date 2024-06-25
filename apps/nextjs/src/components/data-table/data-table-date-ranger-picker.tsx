@@ -11,8 +11,8 @@ import { Calendar } from "@builderai/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 import { cn } from "@builderai/ui/utils"
 
+import useUpdateSearchParams from "~/hooks/use-update-search-params"
 import { manipulateDate } from "~/lib/dates"
-import useUpdateSearchParams from "~/lib/use-update-search-params"
 
 type DataTableDateRangePicker = React.HTMLAttributes<HTMLDivElement>
 

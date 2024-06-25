@@ -40,7 +40,8 @@
     "typecheck",
     "uidx",
     "Unprice",
-    "UPSTASH"
+    "UPSTASH",
+    "webauthn"
   ],
   "search.exclude": {
     "**/.git": true,

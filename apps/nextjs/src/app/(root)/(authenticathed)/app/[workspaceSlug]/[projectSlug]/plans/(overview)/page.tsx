@@ -5,7 +5,6 @@ import { Plus } from "@builderai/ui/icons"
 import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
-import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 import { PlanDialog } from "../_components/plan-dialog"
 import { PlanCard, PlanCardSkeleton } from "./_components/plan-card"
@@ -15,11 +14,6 @@ export default async function PlansPage(props: {
   searchParams: Record<string, string | string[] | undefined>
 }) {
   const { projectSlug, workspaceSlug } = props.params
-
-  await userCanAccessProject({
-    projectSlug,
-    needsToBeInTier: ["FREE", "PRO"],
-  })
 
   const { plans } = await api.plans.listByActiveProject({})
 

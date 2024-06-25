@@ -6,7 +6,6 @@ import { columns } from "~/app/(root)/(authenticathed)/app/[workspaceSlug]/[proj
 import { DataTable } from "~/components/data-table/data-table"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
-import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 import { CustomerDialog } from "../_components/customer-dialog"
 
@@ -14,10 +13,6 @@ export default async function ProjectUsersPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
   searchParams: Record<string, string | string[] | undefined>
 }) {
-  await userCanAccessProject({
-    projectSlug: props.params.projectSlug,
-  })
-
   const parsed = searchDataParamsSchema.safeParse(props.searchParams)
 
   const filter = {

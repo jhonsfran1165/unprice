@@ -33,7 +33,7 @@ export type Year = z.infer<typeof yearsSchema>
 export type Month = z.infer<typeof monthsSchema>
 export type AggregationMethod = z.infer<typeof aggregationMethodSchema>
 
-export const currencySymbol = (curr: Currency) =>
+export const currencySymbol = (curr: string) =>
   ({
     USD: "$",
     EUR: "€",

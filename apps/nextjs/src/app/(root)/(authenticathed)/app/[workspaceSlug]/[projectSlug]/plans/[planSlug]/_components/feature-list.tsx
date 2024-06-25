@@ -10,7 +10,7 @@ import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import { useDebounce } from "~/lib/use-debounce"
+import { useDebounce } from "~/hooks/use-debounce"
 import { api } from "~/trpc/client"
 import { FeatureDialog } from "../../_components/feature-dialog"
 import { SortableFeature } from "../../_components/sortable-feature"

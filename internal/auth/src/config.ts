@@ -229,6 +229,7 @@ export const authConfig = {
         console.error(error)
         token.refreshWorkspacesAt = 0 // invalidate the token if there is an error
         token.workspaces = [] // invalidate the token if there is an error
+        log.error("Error getting workspaces for user")
         throw "Error getting workspaces for user"
       }
 

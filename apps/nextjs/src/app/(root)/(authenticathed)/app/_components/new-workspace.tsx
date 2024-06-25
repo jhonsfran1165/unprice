@@ -6,6 +6,7 @@ import Link from "next/link"
 
 import type { PurchaseOrg } from "@builderai/db/validators"
 import { purchaseWorkspaceSchema } from "@builderai/db/validators"
+import { currencySymbol } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   DialogContent,
@@ -19,7 +20,6 @@ import { Input } from "@builderai/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 import { useToast } from "@builderai/ui/use-toast"
 
-import { currencySymbol } from "~/lib/currency"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 

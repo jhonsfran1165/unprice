@@ -5,7 +5,7 @@ import type { UseFormReturn } from "react-hook-form"
 import { useFieldArray } from "react-hook-form"
 
 import { AGGREGATION_METHODS, AGGREGATION_METHODS_MAP } from "@builderai/db/utils"
-import type { Currency, PlanVersionFeature } from "@builderai/db/validators"
+import { type Currency, type PlanVersionFeature, currencySymbol } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   FormControl,
@@ -21,7 +21,6 @@ import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@buildera
 import { cn } from "@builderai/ui/utils"
 
 import { InputWithAddons } from "~/components/input-addons"
-import { currencySymbol } from "~/lib/currency"
 
 export function QuantityFormField({
   form,

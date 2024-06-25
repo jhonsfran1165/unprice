@@ -6,7 +6,7 @@ import { Balancer } from "react-wrap-balancer"
 
 import { Button } from "@builderai/ui/button"
 
-import { useDebounce } from "~/lib/use-debounce"
+import { useDebounce } from "~/hooks/use-debounce"
 
 export default function Intro() {
   const router = useRouter()

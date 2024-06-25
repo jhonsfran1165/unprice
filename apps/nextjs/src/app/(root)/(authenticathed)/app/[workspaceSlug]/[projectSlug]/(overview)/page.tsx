@@ -14,7 +14,6 @@ import {
 } from "@builderai/ui/card"
 import { Activity, ChevronRight, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 import { cn } from "@builderai/ui/utils"
-import { userCanAccessProject } from "~/lib/project-guard"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
 
@@ -22,10 +21,6 @@ export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
 }) {
   const { projectSlug, workspaceSlug } = props.params
-
-  await userCanAccessProject({
-    projectSlug,
-  })
 
   return (
     <div className="px-2">
