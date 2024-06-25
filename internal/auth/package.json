@@ -21,7 +21,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@auth/drizzle-adapter": "0.8.0",
+    "@auth/drizzle-adapter": "1.4.1",
     "@builderai/db": "^0.1.0",
     "@t3-oss/env-nextjs": "0.9.1",
     "encoding": "^0.1.13",
