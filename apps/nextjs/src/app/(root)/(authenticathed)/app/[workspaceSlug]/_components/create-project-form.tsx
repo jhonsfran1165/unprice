@@ -1,10 +1,9 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useTransition } from "react"
 
-import type { Project, ProjectInsert } from "@builderai/db/validators"
-import { createProjectSchema } from "@builderai/db/validators"
+import { type Project, type ProjectInsert, projectInsertBaseSchema } from "@builderai/db/validators"
 import {
   Form,
   FormControl,
@@ -22,31 +21,29 @@ import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
 const CreateProjectForm = (props: {
-  workspaceSlug: string
   onSuccess?: (project: Project) => void
+  defaultValues?: Project
 }) => {
   const router = useRouter()
+  const workspaceSlug = useParams().workspaceSlug as string
 
-  const apiUtils = api.useUtils()
   const [_isPending, startTransition] = useTransition()
 
   const form = useZodForm({
-    schema: createProjectSchema,
-    defaultValues: {
-      name: "",
-    },
+    schema: projectInsertBaseSchema,
+    defaultValues: props.defaultValues,
   })
 
   const createProject = api.projects.create.useMutation({
     onSettled: async () => {
-      await apiUtils.projects.listByWorkspace.invalidate()
+      router.refresh()
     },
     onSuccess: (data) => {
       const { project: newProject } = data
       if (props.onSuccess) {
         props.onSuccess(newProject)
       } else {
-        router.push(`/${props.workspaceSlug}/${newProject?.slug}/overview`)
+        router.push(`/${workspaceSlug}/${newProject?.slug}`)
       }
 
       toastAction("success")
@@ -66,39 +63,41 @@ const CreateProjectForm = (props: {
         onSubmit={async (e) => {
           await form.handleSubmit(onSubmit)(e)
         }}
-        className="space-y-4"
+        className="space-y-6"
       >
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name *</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="builderai" />
-              </FormControl>
-              <FormDescription>A name to identify your app in the dashboard.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-8">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name *</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="builderai" />
+                </FormControl>
+                <FormDescription>A name to identify your app in the dashboard.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="https://builderai.com" />
-              </FormControl>
-              <FormDescription>The URL of your app</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="https://builderai.com" />
+                </FormControl>
+                <FormDescription>The URL of your app</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        <div className="sm:col-span-full">
+        <div className="mt-8 flex justify-end space-x-4">
           <SubmitButton
             isDisabled={form.formState.isSubmitting}
             isSubmitting={form.formState.isSubmitting}

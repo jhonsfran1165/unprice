@@ -1,9 +1,7 @@
 "use client"
 
-import { useParams } from "next/navigation"
+import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
 import { useEffect } from "react"
-
-import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "~/constants"
 
 /**
  * Update the client cookie on focus tab event
@@ -11,32 +9,30 @@ import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "~/constants"
  * normally used in the layout component for client side api calls
  * for server side api calls or rsc, the middleware will handle the cookie update
  */
-export function UpdateClientCookie() {
-  const params = useParams()
-  const projectSlugParam = params.projectSlug as string
-  const workspaceSlugParam = params.workspaceSlug as string
-
-  // update on focus tab event
+export function UpdateClientCookie({
+  projectSlug,
+  workspaceSlug,
+}: { projectSlug: string | null; workspaceSlug: string | null }) {
+  // just to make we sync the cookie with the current project and workspace
   const onFocus = () => {
     if (document) {
-      document.cookie = projectSlugParam
-        ? `${COOKIE_NAME_PROJECT}=${projectSlugParam}; path=/api/`
-        : `${COOKIE_NAME_PROJECT}=; path=/api/; "max-age=0"`
-      document.cookie = workspaceSlugParam
-        ? `${COOKIE_NAME_WORKSPACE}=${workspaceSlugParam}; path=/api/`
-        : `${COOKIE_NAME_WORKSPACE}=; path=/api/; "max-age=0"`
+      document.cookie = `${COOKIE_NAME_PROJECT}=${projectSlug}; path=/`
+      document.cookie = `${COOKIE_NAME_WORKSPACE}=${workspaceSlug}; path=/`
     }
   }
 
   useEffect(() => {
-    window.addEventListener("focus", onFocus)
+    if (document) {
+      document.cookie = `${COOKIE_NAME_PROJECT}=${projectSlug}; path=/`
+      document.cookie = `${COOKIE_NAME_WORKSPACE}=${workspaceSlug}; path=/`
+    }
 
-    onFocus()
+    window.addEventListener("focus", onFocus)
 
     return () => {
       window.removeEventListener("focus", onFocus)
     }
-  }, [projectSlugParam, workspaceSlugParam])
+  }, [projectSlug, workspaceSlug])
 
   return null
 }

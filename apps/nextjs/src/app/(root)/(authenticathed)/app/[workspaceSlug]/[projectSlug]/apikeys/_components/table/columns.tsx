@@ -4,16 +4,16 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { useState } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Checkbox } from "@builderai/ui/checkbox"
 import { Copy, CopyDone, Eye, EyeOff } from "@builderai/ui/icons"
+import { cn } from "@builderai/ui/utils"
 
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { formatDate } from "~/lib/dates"
 import { DataTableRowActions } from "./data-table-row-actions"
 
-export type ApiKey = RouterOutputs["apikeys"]["listApiKeys"]["apikeys"][number]
+export type ApiKey = RouterOutputs["apikeys"]["listByActiveProject"]["apikeys"][number]
 
 export const columns: ColumnDef<ApiKey>[] = [
   {

@@ -9,7 +9,6 @@ import type { RouterOutputs } from "@builderai/api"
 import { COLLECTION_METHODS, SUBSCRIPTION_TYPES } from "@builderai/db/utils"
 import type { InsertSubscription } from "@builderai/db/validators"
 import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@builderai/db/validators"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Command,
@@ -33,10 +32,11 @@ import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 import { Separator } from "@builderai/ui/separator"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
+import { cn } from "@builderai/ui/utils"
 
 import { ConfirmAction } from "~/components/confirm-action"
+import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
-import { InputWithAddons } from "~/components/test"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -67,7 +67,7 @@ export function SubscriptionForm({
 
   const items = useFieldArray({
     control: form.control,
-    name: "items",
+    name: "config",
   })
 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery({
@@ -91,9 +91,15 @@ export function SubscriptionForm({
     }
   }, [subscriptionPlanId])
 
-  const { data: paymentProviders } = api.customers.listPaymentProviders.useQuery({
-    customerId: defaultValues.customerId,
-  })
+  const { data: paymentMethods } = api.customers.listPaymentMethods.useQuery(
+    {
+      customerId: defaultValues.customerId,
+      provider: selectedPlanVersion?.paymentProvider ?? "stripe",
+    },
+    {
+      enabled: !!selectedPlanVersion?.paymentProvider,
+    }
+  )
 
   const createSubscription = api.subscriptions.create.useMutation({
     onSuccess: ({ subscription }) => {
@@ -359,8 +365,7 @@ export function SubscriptionForm({
 
           <PaymentMethodsFormField
             form={form}
-            paymentProviders={paymentProviders?.providers ?? []}
-            selectedPlanVersion={selectedPlanVersion}
+            paymentMethods={paymentMethods?.paymentMethods ?? []}
           />
 
           <Separator />

@@ -3,16 +3,12 @@
 import { TRPCClientError } from "@trpc/client"
 import { useRouter } from "next/navigation"
 
-import { useSession } from "@builderai/auth/react"
 import { Button } from "@builderai/ui/button"
 import { useToast } from "@builderai/ui/use-toast"
-
-import { AUTH_ROUTES } from "~/constants"
 import { api } from "~/trpc/client"
 
 export function SubscribeNow(props: { planId: string }) {
   const router = useRouter()
-  const session = useSession()
   const toaster = useToast()
 
   const createSession = api.stripe.createSession.useMutation({
@@ -38,8 +34,6 @@ export function SubscribeNow(props: { planId: string }) {
   return (
     <Button
       onClick={() => {
-        if (session.status === "unauthenticated") router.push(AUTH_ROUTES.SIGNIN)
-
         createSession.mutate({
           planId: props.planId,
         })

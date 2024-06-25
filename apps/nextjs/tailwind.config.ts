@@ -3,7 +3,7 @@ import type { Config } from "tailwindcss"
 import { unPriceTailwindPreset } from "@builderai/tailwind-config"
 
 const config: Config = {
-  content: ["src/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "../../packages/ui/src/**/*.{ts,tsx}"],
+  content: ["src/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "../../internal/ui/src/**/*.{ts,tsx}"],
   darkMode: "class",
   presets: [unPriceTailwindPreset],
 }

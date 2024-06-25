@@ -5,12 +5,10 @@ import type { RouterOutputs } from "@builderai/api"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import { CheckCircle2 } from "@builderai/ui/icons"
 
-import { currencySymbol } from "~/lib/currency"
+import { currencySymbol } from "@builderai/db/validators"
+
 import { api } from "~/trpc/server"
 import { SubscribeNow } from "./subscribe-now"
-
-export const dynamic = "force-dynamic"
-export const runtime = "edge"
 
 export default async function PricingPage() {
   const plans = await api.stripe.plans()

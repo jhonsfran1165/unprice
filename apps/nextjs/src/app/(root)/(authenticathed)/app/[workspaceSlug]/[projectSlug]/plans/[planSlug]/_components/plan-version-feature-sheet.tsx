@@ -26,6 +26,7 @@ export function PlanVersionFeatureSheet({
   return (
     <Sheet
       open={isOpen}
+      // TODO: there is an issue here when opening the sheet
       onOpenChange={(open) => {
         setIsOpen(open)
         setPlanVersionFeatureOpen(open)

@@ -4,9 +4,8 @@ import { cookies, headers } from "next/headers"
 import { cache } from "react"
 
 import { createCaller, createTRPCContext } from "@builderai/api"
-import { auth } from "@builderai/auth/server-rsc"
-
-import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "~/constants"
+import { getSession } from "@builderai/auth/server-rsc"
+import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
@@ -22,7 +21,7 @@ const createContext = cache(async () => {
   heads.set(COOKIE_NAME_PROJECT, activeProjectSlug)
 
   return createTRPCContext({
-    session: await auth(),
+    session: await getSession(),
     headers: heads,
   })
 })

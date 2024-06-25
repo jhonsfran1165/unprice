@@ -4,7 +4,14 @@ import { ChevronDown } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { Button } from "@builderai/ui/button"
-import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@builderai/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +36,7 @@ export function PlanActions({
             <ChevronDown className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent className="w-44" align="end">
           <DialogTrigger asChild>
             <DropdownMenuItem>Edit plan</DropdownMenuItem>
           </DialogTrigger>
@@ -39,6 +46,10 @@ export function PlanActions({
         </DropdownMenuContent>
       </DropdownMenu>
       <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Plan Form</DialogTitle>
+          <DialogDescription>Modify the plan details below.</DialogDescription>
+        </DialogHeader>
         <PlanForm defaultValues={plan} />
       </DialogContent>
     </Dialog>

@@ -6,6 +6,7 @@ import type { InsertCustomer } from "@builderai/db/validators"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -28,7 +29,9 @@ export function CustomerDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Feature Data"}</DialogTitle>
+          <DialogTitle>Customer Form</DialogTitle>
+
+          <DialogDescription>Modify the customer details below.</DialogDescription>
         </DialogHeader>
 
         <CustomerForm

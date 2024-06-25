@@ -6,13 +6,18 @@ import {
   Settings,
   User2,
 } from "lucide-react"
-import Link from "next/link"
 
 import type { RouterOutputs } from "@builderai/api"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
-import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@builderai/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,8 +26,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
+import { cn } from "@builderai/ui/utils"
 
 import { PropagationStopper } from "~/components/prevent-propagation"
+import { SuperLink } from "~/components/super-link"
 import { PlanForm } from "../../_components/plan-form"
 
 export function PlanCard(props: {
@@ -34,7 +41,7 @@ export function PlanCard(props: {
   const { versions, ...rest } = plan
 
   return (
-    <Link prefetch={false} href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}>
+    <SuperLink href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}>
       <Card className="hover:border-background-borderHover overflow-hidden">
         <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
           <div className="space-y-4">
@@ -64,31 +71,31 @@ export function PlanCard(props: {
                     <DropdownMenuLabel>Plan Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Link
+                      <SuperLink
                         href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}/create-version`}
                         className="flex items-center"
                       >
                         <PlusIcon className="mr-2 h-4 w-4" />
                         Create version
-                      </Link>
+                      </SuperLink>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link
+                      <SuperLink
                         href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}
                         className="flex items-center"
                       >
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         Dashboard
-                      </Link>
+                      </SuperLink>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link
+                      <SuperLink
                         href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}
                         className="flex items-center"
                       >
                         <User2 className="mr-2 h-4 w-4" />
                         Customer
-                      </Link>
+                      </SuperLink>
                     </DropdownMenuItem>
 
                     <DialogTrigger asChild>
@@ -101,6 +108,11 @@ export function PlanCard(props: {
                 </DropdownMenu>
 
                 <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Plan Form</DialogTitle>
+
+                    <DialogDescription>Modify the plan details below.</DialogDescription>
+                  </DialogHeader>
                   <PlanForm defaultValues={rest} />
                 </DialogContent>
               </Dialog>
@@ -114,7 +126,7 @@ export function PlanCard(props: {
           </div>
         </CardFooter>
       </Card>
-    </Link>
+    </SuperLink>
   )
 }
 

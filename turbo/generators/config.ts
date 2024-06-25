@@ -27,27 +27,27 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
       },
       {
         type: "add",
-        path: "packages/{{ name }}/package.json",
+        path: "internal/{{ name }}/package.json",
         templateFile: "templates/package.json.hbs",
       },
       {
         type: "add",
-        path: "packages/{{ name }}/tsconfig.json",
+        path: "internal/{{ name }}/tsconfig.json",
         templateFile: "templates/tsconfig.json.hbs",
       },
       {
         type: "add",
-        path: "packages/{{ name }}/index.ts",
+        path: "internal/{{ name }}/index.ts",
         template: "export * from './src';",
       },
       {
         type: "add",
-        path: "packages/{{ name }}/src/index.ts",
+        path: "internal/{{ name }}/src/index.ts",
         template: "export const name = '{{ name }}';",
       },
       {
         type: "modify",
-        path: "packages/{{ name }}/package.json",
+        path: "internal/{{ name }}/package.json",
         async transform(content, answers) {
           const pkg = JSON.parse(content) as PackageJson
           for (const dep of answers.deps.split(" ").filter(Boolean)) {
@@ -67,7 +67,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           stdio: "inherit",
         })
         execSync(
-          `pnpm fmt --write packages/${(answers as { name: string }).name}/** --list-different`
+          `pnpm fmt --write internal/${(answers as { name: string }).name}/** --list-different`
         )
         return "Package scaffolded"
       },

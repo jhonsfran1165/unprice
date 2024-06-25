@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
 import type { NextAuthRequest } from "@builderai/auth"
 import { API_AUTH_ROUTE_PREFIX } from "~/constants"

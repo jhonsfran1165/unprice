@@ -1,8 +1,9 @@
+import type { NextAuthRequest } from "@builderai/auth"
 import type { NextRequest } from "next/server"
 
 import { APP_BASE_DOMAIN } from "~/constants"
 
-export const parse = (req: NextRequest) => {
+export const parse = (req: NextAuthRequest | NextRequest) => {
   let domain = req.headers.get("host")!
   domain = domain.replace("www.", "") // remove www. from domain
 

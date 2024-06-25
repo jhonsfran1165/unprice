@@ -15,6 +15,7 @@ export const env = createEnv({
     PROJECT_ID_VERCEL: z.string(),
     TEAM_ID_VERCEL: z.string(),
     VERCEL_AUTH_BEARER_TOKEN: z.string(),
+    BASELIME_APIKEY: z.string(),
   },
   client: {
     NEXT_PUBLIC_APP_DOMAIN: z.preprocess(

@@ -1,0 +1,38 @@
+{
+  "name": "@builderai/auth",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./server-rsc": "./src/server-rsc.ts",
+    "./config": "./src/config.ts",
+    "./env": "./src/env.mjs"
+  },
+  "typesVersions": {
+    "*": {
+      "*": ["src/*"]
+    }
+  },
+  "license": "AGPL-3.0",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@auth/drizzle-adapter": "0.8.0",
+    "@builderai/db": "^0.1.0",
+    "@t3-oss/env-nextjs": "0.9.1",
+    "encoding": "^0.1.13",
+    "next": "14.3.0-canary.54",
+    "next-auth": "5.0.0-beta.19",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@builderai/tsconfig": "^0.1.0",
+    "typescript": "^5.3.3"
+  }
+}

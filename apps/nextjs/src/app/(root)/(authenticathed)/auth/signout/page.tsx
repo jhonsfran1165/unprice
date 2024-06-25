@@ -3,9 +3,6 @@ import { Button } from "@builderai/ui/button"
 
 import { AUTH_ROUTES } from "~/constants"
 
-export const runtime = "edge"
-export const preferredRegion = ["fra1"]
-
 export default function AuthenticationPage() {
   return (
     <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">

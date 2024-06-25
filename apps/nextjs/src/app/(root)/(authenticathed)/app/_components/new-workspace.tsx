@@ -6,6 +6,7 @@ import Link from "next/link"
 
 import type { PurchaseOrg } from "@builderai/db/validators"
 import { purchaseWorkspaceSchema } from "@builderai/db/validators"
+import { currencySymbol } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   DialogContent,
@@ -19,14 +20,14 @@ import { Input } from "@builderai/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 import { useToast } from "@builderai/ui/use-toast"
 
-import { currencySymbol } from "~/lib/currency"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export default function NewTeamDialog(props: { closeDialog: () => void }) {
+export default function NewTeamDialog(props: { closeDialog: () => void; isOpen: boolean }) {
   const { toast } = useToast()
   const plans = api.stripe.plans.useQuery(undefined, {
     refetchOnWindowFocus: false,
+    enabled: props.isOpen, // only fetch plans when dialog is open
   })
 
   // TODO: plans should be fetch from the plan versions endpoint
@@ -60,6 +61,12 @@ export default function NewTeamDialog(props: { closeDialog: () => void }) {
 
   return (
     <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Create new team</DialogTitle>
+        <DialogDescription>
+          Add a new workspace to invite other people to collaborate.
+        </DialogDescription>
+      </DialogHeader>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit((data: PurchaseOrg) => {

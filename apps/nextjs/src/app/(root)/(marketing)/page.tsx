@@ -1,9 +1,9 @@
 import { Balancer } from "react-wrap-balancer"
 
-import { cn } from "@builderai/ui"
 import { buttonVariants } from "@builderai/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
 import { GitHub } from "@builderai/ui/icons"
+import { cn } from "@builderai/ui/utils"
 
 import { marketingFeatures } from "~/app/(root)/config"
 import { siteConfig } from "~/constants/layout"

@@ -1,100 +1,63 @@
+import { Dashboard } from "@builderai/ui/icons"
+import { BarChartIcon, Calculator, Key, Link, Settings, Users } from "lucide-react"
 import type { DashboardRoute } from "~/types"
 
-const submodulesProject = [
-  "overview",
-  "plans",
-  "apikeys",
-  "usage",
-  "customers",
-  "settings",
-  "planVersion",
-  "ingestions",
-] as const
-
-export const PROJECT_TABS_CONFIG: Record<(typeof submodulesProject)[number], DashboardRoute> = {
-  overview: {
-    titleTab: "Dashboard",
-    icon: "Dashboard",
-    href: "/overview",
+export const PROJECT_NAV: DashboardRoute[] = [
+  {
+    name: "Dashboard",
+    icon: Dashboard,
+    href: "/",
   },
-  plans: {
-    titleTab: "Plans",
-    icon: "Calculator",
+  {
+    name: "Plans",
+    icon: Calculator,
     href: "/plans",
     disabled: false,
     isNew: true,
   },
-  usage: {
-    titleTab: "usage",
-    icon: "BarChartIcon",
-    href: "/ingestions/overview",
-    disabled: true,
-    sidebar: {
-      overview: {
-        title: "General",
-        href: "/ingestions/overview",
-        icon: "Settings",
-      },
-      danger: {
-        title: "Danger",
-        href: "/ingestions/danger",
-        icon: "CreditCard",
-      },
-    },
-  },
-  planVersion: {
-    titleTab: "usage",
-    icon: "BarChartIcon",
-    href: "/ingestions/overview",
-    disabled: true,
-    sidebar: {
-      overview: {
-        title: "Features",
-        href: "/",
-        icon: "Settings",
-      },
-      subscriptions: {
-        title: "subscriptions",
-        href: "/subscriptions",
-        icon: "CreditCard",
-      },
-      preview: {
-        title: "preview",
-        href: "/preview",
-        icon: "CreditCard",
-      },
-    },
-  },
-  apikeys: {
-    titleTab: "Api Keys",
-    href: "/apikeys",
-    icon: "Key",
-  },
-  ingestions: {
-    titleTab: "Ingestions",
+  {
+    name: "usage",
+    icon: BarChartIcon,
     href: "/ingestions",
-    icon: "BarChartIcon",
+    disabled: true,
   },
-  customers: {
-    titleTab: "Customers",
+  {
+    name: "Api Keys",
+    href: "/apikeys",
+    icon: Key,
+  },
+  {
+    name: "Customers",
     href: "/customers",
-    icon: "Users",
+    icon: Users,
   },
-  settings: {
-    titleTab: "Settings",
-    href: "/settings/overview",
-    icon: "Settings",
-    sidebar: {
-      overview: {
-        title: "General",
-        href: "/settings/overview",
-        icon: "Settings",
-      },
-      danger: {
-        title: "Danger",
+  {
+    name: "Settings",
+    href: "/settings",
+    icon: Settings,
+    sidebar: [
+      {
+        name: "Danger",
         href: "/settings/danger",
-        icon: "Warning",
       },
-    },
+    ],
   },
-}
+]
+
+export const PROJECT_SHORTCUTS = [
+  {
+    name: "Add Plan",
+    href: "/",
+    icon: Link,
+  },
+  {
+    name: "Subscribe to plan",
+    href: "#",
+    icon: Link,
+  },
+  {
+    name: "Add Customer",
+    href: "#",
+    icon: Link,
+  },
+]

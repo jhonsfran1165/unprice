@@ -16,7 +16,7 @@ export function PricingCard({
   })
 
   return (
-    <Card className="w-[400px]">
+    <Card className="w-[400px] mx-auto">
       <CardHeader>
         <h3 className="text-2xl font-bold">{planVersion.title}</h3>
       </CardHeader>

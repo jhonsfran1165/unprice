@@ -2,8 +2,6 @@ import { Button } from "@builderai/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import { Skeleton } from "@builderai/ui/skeleton"
 
-export const runtime = "edge"
-
 export default function WorkSpaceSettingsDangerLoading() {
   return (
     <>

@@ -8,7 +8,6 @@ import { useState } from "react"
 import type { RouterOutputs } from "@builderai/api"
 import { Button } from "@builderai/ui/button"
 import { Input } from "@builderai/ui/input"
-import { ScrollArea } from "@builderai/ui/scroll-area"
 import { Separator } from "@builderai/ui/separator"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
@@ -20,7 +19,6 @@ import {
   configActivePlanVersionAtom,
   configPlanFeaturesListAtom,
   usePlanFeaturesList,
-  usePlanVersionFeatureOpen,
 } from "../../_components/use-features"
 
 interface PlanFeatureListProps {
@@ -39,8 +37,6 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
   useHydrateAtoms([[configActivePlanAtom, plan]])
 
   const [featuresList] = usePlanFeaturesList()
-  // this avoid to drag and drop features when the planVersionFeature is open
-  const [planVersionFeatureOpen] = usePlanVersionFeatureOpen()
 
   const filteredFeatures =
     featuresList.filter((feature) =>
@@ -48,7 +44,7 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
     ) ?? featuresList
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       <div className="flex h-[70px] items-center justify-between space-x-1 px-4 py-2">
         <h1 className="truncate text-xl font-bold">Features on this version</h1>
       </div>
@@ -64,50 +60,48 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
           />
         </div>
       </div>
-      <ScrollArea className="h-[750px] pb-4">
-        <div className="flex flex-col gap-2 p-4 pt-0">
-          <DroppableContainer id={"planVersionFeaturesList"}>
-            <SortableContext
-              items={featuresList.map((feature) => feature.featureId)}
-              strategy={verticalListSortingStrategy}
-            >
-              {filteredFeatures.length === 0 ? (
-                <EmptyPlaceholder>
-                  <EmptyPlaceholder.Icon>
-                    <FileStack className="h-8 w-8" />
-                  </EmptyPlaceholder.Icon>
-                  <EmptyPlaceholder.Title>No features</EmptyPlaceholder.Title>
-                  <EmptyPlaceholder.Description>
-                    Create feature and drag it here
-                  </EmptyPlaceholder.Description>
-                  <EmptyPlaceholder.Action>
-                    <FeatureDialog
-                      defaultValues={{
-                        title: filter,
-                        slug: filter,
-                        description: "",
-                      }}
-                    >
-                      <Button size={"sm"}>Create feature</Button>
-                    </FeatureDialog>
-                  </EmptyPlaceholder.Action>
-                </EmptyPlaceholder>
-              ) : (
-                <div className="space-y-2">
-                  {filteredFeatures.map((feature) => (
-                    <SortableFeature
-                      disabled={planVersionFeatureOpen || activePlanVersion?.status === "published"}
-                      key={Math.random()}
-                      mode="FeaturePlan"
-                      planFeatureVersion={feature}
-                    />
-                  ))}
-                </div>
-              )}
-            </SortableContext>
-          </DroppableContainer>
-        </div>
-      </ScrollArea>
+      <div className="flex h-min-[750px] flex-col gap-2 p-4 pt-1">
+        <DroppableContainer id={"planVersionFeaturesList"}>
+          <SortableContext
+            items={featuresList.map((feature) => feature.featureId)}
+            strategy={verticalListSortingStrategy}
+          >
+            {filteredFeatures.length === 0 ? (
+              <EmptyPlaceholder>
+                <EmptyPlaceholder.Icon>
+                  <FileStack className="h-8 w-8" />
+                </EmptyPlaceholder.Icon>
+                <EmptyPlaceholder.Title>No features</EmptyPlaceholder.Title>
+                <EmptyPlaceholder.Description>
+                  Create feature and drag it here
+                </EmptyPlaceholder.Description>
+                <EmptyPlaceholder.Action>
+                  <FeatureDialog
+                    defaultValues={{
+                      title: filter,
+                      slug: filter,
+                      description: "",
+                    }}
+                  >
+                    <Button size={"sm"}>Create feature</Button>
+                  </FeatureDialog>
+                </EmptyPlaceholder.Action>
+              </EmptyPlaceholder>
+            ) : (
+              <div className="space-y-2">
+                {filteredFeatures.map((feature) => (
+                  <SortableFeature
+                    disabled={activePlanVersion?.status === "published"}
+                    key={Math.random()}
+                    mode="FeaturePlan"
+                    planFeatureVersion={feature}
+                  />
+                ))}
+              </div>
+            )}
+          </SortableContext>
+        </DroppableContainer>
+      </div>
     </div>
   )
 }

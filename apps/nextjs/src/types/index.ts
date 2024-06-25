@@ -1,39 +1,24 @@
-import * as Icons from "@builderai/ui/icons"
+import type { LucideIcon } from "lucide-react"
 
-export interface RootDomainProps {
-  target: string
-  rewrite?: boolean
+export interface Shortcut {
+  name: string
+  href: string
+  icon: LucideIcon
 }
 
 export interface SidebarRoute {
-  title: string
-  action?: JSX.Element
-  description?: string
-  disabled?: boolean
-  tier?: string
-  icon: keyof typeof Icons
+  name: string
+  icon?: LucideIcon
   href: string
 }
 
-export interface SubTabRoute {
-  title: string
-  icon?: keyof typeof Icons
-  action?: JSX.Element
-  description?: string
-}
-
-export type SubTabsRoutes = Record<string, SubTabRoute>
-export type SidebarRoutes = Record<string, SidebarRoute>
-
 export interface DashboardRoute {
-  titleTab: string
+  name: string
   isNew?: boolean
   href: string
   disabled?: boolean
-  icon: keyof typeof Icons
-  sidebar?: SidebarRoutes
-  // we can use this for further customization from here
-  // testing?: JSX.Element
+  icon: LucideIcon
+  sidebar?: SidebarRoute[]
 }
 
 export interface Route {
@@ -52,13 +37,3 @@ export interface SiteConfig {
     dashboard: string
   }
 }
-
-export function isSidebarRoute(item: object | undefined): item is SidebarRoute {
-  return (item as SidebarRoute) !== undefined
-}
-export function isSubTabsRoutes(item: object | undefined): item is SubTabsRoutes {
-  return (item as SubTabsRoutes) !== undefined
-}
-
-export const createIcon = (name: keyof typeof Icons): Icons.LucideIcon =>
-  Icons[name] as Icons.LucideIcon

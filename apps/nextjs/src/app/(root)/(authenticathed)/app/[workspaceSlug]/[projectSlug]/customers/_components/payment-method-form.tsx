@@ -1,8 +1,5 @@
 "use client"
 
-import { useState } from "react"
-
-import type { RouterOutputs } from "@builderai/api"
 import { PAYMENT_PROVIDERS } from "@builderai/db/utils"
 import type { Customer, PaymentProvider } from "@builderai/db/validators"
 import {
@@ -15,27 +12,28 @@ import {
 } from "@builderai/ui/card"
 import { Label } from "@builderai/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
+import { useState } from "react"
 
 import { SubmitButton } from "~/components/submit-button"
 import { api } from "~/trpc/client"
 import { UserPaymentMethod } from "./payment-method"
 
-type PaymentMethodProviderData =
-  RouterOutputs["customers"]["listPaymentProviders"]["providers"][number]
-
 export function PaymentMethodForm({
   customer,
   successUrl,
   cancelUrl,
-  paymentProviders,
 }: {
   customer: Customer
   successUrl: string
   cancelUrl: string
-  paymentProviders: PaymentMethodProviderData[]
 }) {
   // TODO: set with the default payment provider for the project
   const [provider, setProvider] = useState<PaymentProvider>("stripe")
+
+  const { data } = api.customers.listPaymentMethods.useQuery({
+    customerId: customer.id,
+    provider: provider,
+  })
 
   const createSession = api.customers.createPaymentMethod.useMutation({
     onSettled: (data) => {
@@ -43,12 +41,7 @@ export function PaymentMethodForm({
     },
   })
 
-  const paymentMethod = paymentProviders.find((method) => method.paymentProvider === provider)
-
-  const defaultPaymentMethod =
-    paymentMethod?.paymentMethods.find(
-      (p) => p.id === paymentMethod.metadata?.defaultPaymentMethodId
-    ) ?? paymentMethod?.paymentMethods.at(0)
+  const defaultPaymentMethod = data?.paymentMethods.at(0)
 
   return (
     <Card>
@@ -56,9 +49,9 @@ export function PaymentMethodForm({
         <CardTitle>Default Payment Method</CardTitle>
         <CardDescription>Default payment method for this customer</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-6">
+      <CardContent className="flex flex-col gap-12">
         <UserPaymentMethod paymentMethod={defaultPaymentMethod} />
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-1/2 mx-auto">
           <Label htmlFor="provider">Payment Provider</Label>
           <Select
             value={provider}
@@ -82,6 +75,7 @@ export function PaymentMethodForm({
       <CardFooter className="flex flex-col justify-center">
         <SubmitButton
           variant="default"
+          className="w-56 mx-auto"
           onClick={() => {
             createSession.mutate({
               paymentProvider: provider,
@@ -92,7 +86,7 @@ export function PaymentMethodForm({
           }}
           isSubmitting={createSession.isPending}
           isDisabled={createSession.isPending}
-          label={!paymentMethod ? "Add Payment Method" : "Billing Portal"}
+          label={!defaultPaymentMethod ? "Add Payment Method" : "Billing Portal"}
         />
       </CardFooter>
     </Card>

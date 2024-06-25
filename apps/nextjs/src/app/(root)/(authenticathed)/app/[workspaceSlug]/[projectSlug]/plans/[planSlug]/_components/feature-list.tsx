@@ -1,7 +1,7 @@
 "use client"
 
 import { FileStack, Search } from "lucide-react"
-import { use, useState } from "react"
+import { Fragment, use, useState } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
@@ -10,15 +10,11 @@ import { Input } from "@builderai/ui/input"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import { useDebounce } from "~/lib/use-debounce"
+import { useDebounce } from "~/hooks/use-debounce"
 import { api } from "~/trpc/client"
 import { FeatureDialog } from "../../_components/feature-dialog"
 import { SortableFeature } from "../../_components/sortable-feature"
-import {
-  useActivePlanVersion,
-  usePlanFeaturesList,
-  usePlanVersionFeatureOpen,
-} from "../../_components/use-features"
+import { useActivePlanVersion, usePlanFeaturesList } from "../../_components/use-features"
 
 interface FeatureListProps {
   featuresPromise: Promise<RouterOutputs["features"]["searchBy"]>
@@ -31,8 +27,6 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
   const filterDebounce = useDebounce(filter, 500)
 
   const [planVersionFeatureList] = usePlanFeaturesList()
-  // this avoid to drag and drop features when the planVersionFeature is open
-  const [planVersionFeatureOpen] = usePlanVersionFeatureOpen()
   const [activePlanVersion] = useActivePlanVersion()
 
   const { data, isFetching } = api.features.searchBy.useQuery(
@@ -52,7 +46,7 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
   const searchableFeatures = data.features.filter((feature) => !planFeatureIds.includes(feature.id))
 
   return (
-    <>
+    <Fragment>
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">
         <div className="relative">
           <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
@@ -67,7 +61,7 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
         </div>
       </div>
       <ScrollArea className="h-[750px] pb-4">
-        <div className="flex h-[730px] flex-col gap-2 px-4 pt-0">
+        <div className="flex h-[730px] flex-col gap-2 px-4 pt-1">
           {isFetching && (
             <div className="flex h-full items-center justify-center">
               <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2 border-t-2" />
@@ -122,7 +116,7 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
 
               return (
                 <SortableFeature
-                  disabled={planVersionFeatureOpen || activePlanVersion?.status === "published"}
+                  disabled={activePlanVersion?.status === "published"}
                   key={Math.random()}
                   mode={"Feature"}
                   planFeatureVersion={planFeatureVersion}
@@ -133,6 +127,6 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
           )}
         </div>
       </ScrollArea>
-    </>
+    </Fragment>
   )
 }

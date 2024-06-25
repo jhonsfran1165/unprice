@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 
-import { cn } from "@builderai/ui"
+import { cn } from "@builderai/ui/utils"
 
 export default function MaxWidthWrapper({
   className,
@@ -9,7 +9,5 @@ export default function MaxWidthWrapper({
   className?: string
   children: ReactNode
 }) {
-  return (
-    <div className={cn("container mx-auto w-full max-w-screen-xl px-8", className)}>{children}</div>
-  )
+  return <div className={cn("container mx-auto w-full max-w-screen-xl", className)}>{children}</div>
 }

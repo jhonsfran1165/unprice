@@ -40,7 +40,7 @@
   }
 
   body {
-    @apply bg-background-bg font-secondary text-background-text;
+    @apply bg-background-base font-secondary text-background-text;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;

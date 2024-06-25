@@ -1,18 +1,17 @@
-import { ArrowUp, MoreVertical } from "lucide-react"
+import { MoreVertical, Plus } from "lucide-react"
 import { notFound } from "next/navigation"
 
-import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
-import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@builderai/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,12 +23,15 @@ import {
 import { Separator } from "@builderai/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
-
+import { cn } from "@builderai/ui/utils"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
-import PlanHeader from "../../_components/plan-header"
+import { PlanActions } from "../../_components/plan-actions"
 import { PlanVersionDuplicate } from "../../_components/plan-version-actions"
+import { PlanVersionDialog } from "../_components/plan-version-dialog"
 import { PlanVersionForm } from "../_components/plan-version-form"
 
 export default async function PlanPage({
@@ -42,7 +44,7 @@ export default async function PlanPage({
     planVersionId: string
   }
 }) {
-  const { planSlug, planVersionId, workspaceSlug, projectSlug } = params
+  const { planSlug, workspaceSlug, projectSlug } = params
 
   const { plan } = await api.plans.getBySlug({
     slug: planSlug,
@@ -53,14 +55,42 @@ export default async function PlanPage({
   }
 
   return (
-    <div className="grid flex-1 items-start gap-4 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-      <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-        <PlanHeader
-          workspaceSlug={workspaceSlug}
-          projectSlug={projectSlug}
-          planVersionId={planVersionId}
-          plan={plan}
+    <DashboardShell
+      header={
+        <HeaderTab
+          title={plan.slug}
+          description={plan.description}
+          label={plan.active ? "active" : "inactive"}
+          action={
+            <div className="button-primary flex items-center space-x-1 rounded-md">
+              <div className="sm:col-span-full">
+                <PlanVersionDialog
+                  defaultValues={{
+                    planId: plan.id,
+                    description: plan.description,
+                    title: plan.slug,
+                    projectId: plan.projectId,
+                    // TODO: use default currency from org settings
+                    currency: "USD",
+                    planType: "recurring",
+                    paymentProvider: "stripe",
+                  }}
+                >
+                  <Button variant={"custom"}>
+                    <Plus className="h-4 w-4 mr-2" /> Version
+                  </Button>
+                </PlanVersionDialog>
+              </div>
+
+              <Separator orientation="vertical" className="h-[20px] p-0" />
+
+              <PlanActions plan={plan} />
+            </div>
+          }
         />
+      }
+    >
+      <div className="flex flex-col">
         <Tabs defaultValue="versions">
           <div className="flex items-center">
             <TabsList>
@@ -164,6 +194,12 @@ export default async function PlanPage({
                               </DropdownMenu>
 
                               <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Plan Version Form</DialogTitle>
+                                  <DialogDescription>
+                                    Modify the plan version details below.
+                                  </DialogDescription>
+                                </DialogHeader>
                                 <PlanVersionForm defaultValues={version} />
                               </DialogContent>
                             </Dialog>
@@ -178,66 +214,6 @@ export default async function PlanPage({
           </TabsContent>
         </Tabs>
       </div>
-      <div>
-        <Card className="overflow-hidden">
-          <CardHeader className="flex flex-row items-start">
-            <div className="grid gap-0.5">
-              <CardTitle className="group flex items-center gap-2 text-lg">STATISTICS</CardTitle>
-            </div>
-          </CardHeader>
-          <Separator />
-          <CardContent className="p-6 text-sm">
-            <div className="grid gap-3">
-              <div className="font-semibold">Revenue</div>
-              <dl className="grid gap-3">
-                <div className="flex items-center justify-between">
-                  <dt className="text-muted-foreground">Total revenue</dt>
-                  <dd>$ 10.456</dd>
-                </div>
-              </dl>
-            </div>
-            <Separator className="my-4" />
-            <div className="grid gap-3">
-              <div className="font-semibold">Subscriptions Details</div>
-              <ul className="grid gap-3 font-light">
-                <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Active Subscriptions</span>
-                  <span>49</span>
-                </li>
-                <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Inactive Subscriptions</span>
-                  <span>11</span>
-                </li>
-                <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Churn Subscriptions</span>
-                  <span className="flex flex-row">
-                    +3.5% <ArrowUp className="ml-2 h-4 w-4" />
-                  </span>
-                </li>
-              </ul>
-            </div>
-            <Separator className="my-4" />
-            <div className="grid gap-3">
-              <div className="font-semibold">Versions</div>
-              <dl className="grid gap-3">
-                <div className="flex items-center justify-between">
-                  <dt className="text-muted-foreground">Best version</dt>
-                  <dd>version 1</dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-muted-foreground">Worse version</dt>
-                  <dd>version 2</dd>
-                </div>
-              </dl>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-row items-center border-t px-6 py-3">
-            <div className="text-muted-foreground text-xs">
-              Updated <time dateTime="2023-11-23">10:45am, November 23, 2023</time>
-            </div>
-          </CardFooter>
-        </Card>
-      </div>
-    </div>
+    </DashboardShell>
   )
 }

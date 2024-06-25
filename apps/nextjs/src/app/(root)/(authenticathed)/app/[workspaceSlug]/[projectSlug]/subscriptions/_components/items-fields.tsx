@@ -7,7 +7,6 @@ import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form"
 import type { RouterOutputs } from "@builderai/api"
 import type { InsertSubscription } from "@builderai/db/validators"
 import { calculatePricePerFeature } from "@builderai/db/validators"
-import { cn } from "@builderai/ui"
 import { Button } from "@builderai/ui/button"
 import {
   Dialog,
@@ -21,6 +20,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@build
 import { Input } from "@builderai/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
+import { cn } from "@builderai/ui/utils"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"
@@ -38,7 +38,7 @@ export default function ConfigItemsFormField({
 }: {
   form: UseFormReturn<InsertSubscription>
   selectedPlanVersion?: PlanVersionResponse
-  items: UseFieldArrayReturn<InsertSubscription, "items", "id">
+  items: UseFieldArrayReturn<InsertSubscription, "config", "id">
 }) {
   const versionFeatures = new Map<string, PlanVersionFeaturesResponse>()
   const versionAddons = new Map<string, PlanVersionFeaturesResponse>()
@@ -63,7 +63,7 @@ export default function ConfigItemsFormField({
       <div className="mb-4 flex flex-col gap-2">
         <FormLabel
           className={cn({
-            "text-destructive": errors.items,
+            "text-destructive": errors.config,
           })}
         >
           <h4 className="my-auto block font-semibold">Feature configuration</h4>
@@ -74,7 +74,7 @@ export default function ConfigItemsFormField({
             "Configure the quantity for each feature, for usage based feature, the price will be calculated with the reported usage. You can't change the quantity for flat features"
           }
         </div>
-        {errors.items && <FormMessage>{errors.items.message}</FormMessage>}
+        {errors.config && <FormMessage>{errors.config.message}</FormMessage>}
       </div>
 
       <div className="flex items-center justify-center px-2 py-4">
@@ -99,7 +99,7 @@ export default function ConfigItemsFormField({
                 const feature =
                   versionFeatures.get(item.featurePlanId) ?? versionAddons.get(item.featurePlanId)!
 
-                const quantity = form.watch(`items.${index}.quantity`)
+                const units = form.watch(`config.${index}.units`)
 
                 return (
                   <TableRow key={item.id} className="border-b hover:bg-transparent">
@@ -123,9 +123,9 @@ export default function ConfigItemsFormField({
                               <DialogHeader>
                                 <DialogTitle>Feature: {feature.feature.title}</DialogTitle>
                               </DialogHeader>
-                              {feature.feature?.description && (
-                                <DialogDescription>{feature.feature.description}</DialogDescription>
-                              )}
+                              <DialogDescription>
+                                {feature.feature.description ?? ""}
+                              </DialogDescription>
                               <FeatureConfigForm
                                 defaultValues={feature}
                                 planVersion={selectedPlanVersion!}
@@ -144,7 +144,7 @@ export default function ConfigItemsFormField({
                       </div>
                       <ConfigItemPrice
                         selectedPlanVersion={selectedPlanVersion!}
-                        quantity={quantity ?? 0}
+                        quantity={units ?? 0}
                         feature={feature}
                         type="unit"
                       />
@@ -153,11 +153,11 @@ export default function ConfigItemsFormField({
                       {feature.featureType === "usage" ? (
                         <div className="text-center">Varies</div>
                       ) : ["flat", "package"].includes(feature.featureType) ? (
-                        <div className="text-center">{item.quantity}</div>
+                        <div className="text-center">{item.units}</div>
                       ) : (
                         <FormField
                           control={form.control}
-                          name={`items.${index}.quantity`}
+                          name={`config.${index}.units`}
                           render={({ field }) => (
                             <FormItem className="justify-center text-center">
                               <FormMessage className="text-xs font-light" />
@@ -183,7 +183,7 @@ export default function ConfigItemsFormField({
                     <TableCell className="flex h-24 items-center justify-end gap-1 pr-1">
                       <ConfigItemPrice
                         selectedPlanVersion={selectedPlanVersion!}
-                        quantity={quantity ?? 0}
+                        quantity={units ?? 0}
                         feature={feature}
                         type="total"
                       />
@@ -271,14 +271,14 @@ function ConfigItemPrice({
 }: {
   selectedPlanVersion: PlanVersionResponse
   feature: PlanVersionFeaturesResponse
-  quantity?: number
+  quantity: number
   type: "total" | "unit"
 }) {
   // useCallback to prevent re-rendering calculatePricePerFeature
   const calculatePrice = useCallback(() => {
     return calculatePricePerFeature({
       feature: feature,
-      quantity,
+      quantity: quantity,
     })
   }, [feature, quantity])
 

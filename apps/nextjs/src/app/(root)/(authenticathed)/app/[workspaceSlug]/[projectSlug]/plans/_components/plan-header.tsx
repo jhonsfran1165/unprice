@@ -1,16 +1,14 @@
-import { BadgeCheck } from "lucide-react"
+import { BadgeCheck, Plus } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
-import { cn } from "@builderai/ui"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
 import { Separator } from "@builderai/ui/separator"
+import { cn } from "@builderai/ui/utils"
 
 import { PlanVersionDialog } from "../[planSlug]/_components/plan-version-dialog"
 import { PlanActions } from "./plan-actions"
-
-export const runtime = "edge"
 
 export default function PlanHeader(props: {
   workspaceSlug: string
@@ -67,7 +65,9 @@ export default function PlanHeader(props: {
                   paymentProvider: "stripe",
                 }}
               >
-                <Button variant={"custom"}>Add Version</Button>
+                <Button variant={"custom"}>
+                  <Plus className="h-4 w-4 mr-2" /> Version
+                </Button>
               </PlanVersionDialog>
             </div>
 

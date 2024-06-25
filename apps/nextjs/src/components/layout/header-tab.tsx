@@ -1,21 +1,32 @@
-import { cn } from "@builderai/ui"
+import { Badge } from "@builderai/ui/badge"
+import { cn } from "@builderai/ui/utils"
 
 export default function HeaderTab({
   title,
   description,
   action,
   className,
+  label,
 }: {
   title?: string
-  description?: string
+  description?: string | null
   action?: React.ReactNode
   className?: string
+  label?: string
 }) {
   return (
-    <div className={cn("flex w-full items-center justify-between", className)}>
-      <div className="space-y-2 px-2">
-        <h1 className="text-lg font-semibold leading-none tracking-tight">{title}</h1>
-        <h4 className="text-muted-foreground text-sm">{description}</h4>
+    <div className={cn("flex w-full items-center justify-between px-0", className)}>
+      <div className="space-y-2">
+        <div className="flex items-center space-x-2">
+          <h1 className="text-xl font-semibold leading-none tracking-tight">{title}</h1>
+          {label && (
+            <Badge className={"info ml-2"}>
+              <span className="bg-info-solid flex h-2 w-2 rounded-full" />
+              <span className="ml-1">{label}</span>
+            </Badge>
+          )}
+        </div>
+        {description && <h4 className="text-muted-foreground text-sm">{description}</h4>}
       </div>
       <div>{action}</div>
     </div>

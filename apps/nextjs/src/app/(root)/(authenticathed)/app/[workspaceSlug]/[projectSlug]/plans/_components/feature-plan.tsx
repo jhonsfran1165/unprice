@@ -8,17 +8,21 @@ import type React from "react"
 import type { ElementRef } from "react"
 import { forwardRef, useState } from "react"
 
-import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
-import { cn } from "@builderai/ui"
+import { type PlanVersionFeatureDragDrop, currencySymbol } from "@builderai/db/validators"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
+import { cn, focusRing } from "@builderai/ui/utils"
 
 import { Ping } from "~/components/ping"
-import { currencySymbol } from "~/lib/currency"
 import { api } from "~/trpc/client"
 import { PlanVersionFeatureSheet } from "../[planSlug]/_components/plan-version-feature-sheet"
 import { FeatureDialog } from "./feature-dialog"
-import { useActiveFeature, useActivePlanVersion, usePlanFeaturesList } from "./use-features"
+import {
+  useActiveFeature,
+  useActivePlanVersion,
+  usePlanFeaturesList,
+  usePlanVersionFeatureOpen,
+} from "./use-features"
 
 const featureVariants = cva(
   "flex gap-2 rounded-lg border text-left text-sm transition-all bg-background-bgSubtle hover:bg-background-bgHover",
@@ -50,7 +54,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
 
   const [active, setActiveFeature] = useActiveFeature()
   const [activePlanVersion] = useActivePlanVersion()
-
+  const [planVersionFeatureOpen] = usePlanVersionFeatureOpen()
   const [_planFeatures, setPlanFeaturesList] = usePlanFeaturesList()
 
   const removePlanVersionFeature = api.planVersionFeatures.remove.useMutation()
@@ -58,13 +62,13 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
   const feature = planFeatureVersion.feature
 
   const handleClick = (_event: React.MouseEvent<HTMLDivElement>) => {
-    if (mode !== "FeaturePlan") return
+    if (planVersionFeatureOpen || mode !== "FeaturePlan") return
     setActiveFeature(planFeatureVersion)
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
-      if (mode !== "FeaturePlan") return
+      if (planVersionFeatureOpen || mode !== "FeaturePlan") return
 
       setActiveFeature(planFeatureVersion)
     }
@@ -74,12 +78,16 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
 
   return (
     <div
-      ref={ref}
+      ref={planVersionFeatureOpen ? undefined : ref}
       {...rest}
-      className={cn(featureVariants({ variant, className }), {
-        "border-background-borderHover bg-background-bgHover relative z-0 border-2 shadow-sm":
-          mode === "FeaturePlan" && active?.featureId === planFeatureVersion.featureId,
-      })}
+      className={cn(
+        featureVariants({ variant, className }),
+        {
+          "border-background-borderHover bg-background-bgHover relative z-0 border-2 shadow-sm":
+            mode === "FeaturePlan" && active?.featureId === planFeatureVersion.featureId,
+        },
+        focusRing
+      )}
       onClick={handleClick}
       onKeyDown={handleKeyDown} // Add onKeyDown event listener
       role="button" // Add the role attribute to indicate interactive nature
@@ -106,7 +114,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
                   <div className="line-clamp-1 items-center gap-1 text-left font-bold">
                     {feature.slug}
                   </div>
-                  {/* // If there is no id it means that the feature is not saved */}
+                  {/* // If there is no id it means that the feature is not saved yet */}
                   {!planFeatureVersion?.id && (
                     <div className="relative">
                       <div className="1right-1 absolute top-2">
@@ -204,9 +212,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
                   {planFeatureVersion.config?.usageMode && (
                     <Badge>{planFeatureVersion.config.usageMode}</Badge>
                   )}
-                  {planFeatureVersion.config?.aggregationMethod && (
-                    <Badge>{planFeatureVersion.config.aggregationMethod}</Badge>
-                  )}
+                  <Badge>{planFeatureVersion.aggregationMethod}</Badge>
                   {planFeatureVersion.config?.tierMode && (
                     <Badge>{planFeatureVersion.config.tierMode}</Badge>
                   )}

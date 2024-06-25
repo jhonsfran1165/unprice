@@ -1,0 +1,54 @@
+{
+  "name": "@builderai/api",
+  "private": true,
+  "version": "0.1.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./env": "./src/env.mjs",
+    "./edge": "./src/edge.ts",
+    "./root": "./src/root.ts",
+    "./lambda": "./src/lambda.ts",
+    "./transformer": "./src/transformer.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": ["src/*"]
+    }
+  },
+  "license": "AGPL-3.0",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@baselime/trpc-opentelemetry-middleware": "^0.1.2",
+    "@builderai/auth": "^0.1.0",
+    "@builderai/config": "^0.1.0",
+    "@builderai/db": "^0.1.0",
+    "@builderai/email": "^0.1.0",
+    "@builderai/error": "^0.1.0",
+    "@builderai/logging": "workspace:^",
+    "@builderai/logs": "workspace:^1.0.0",
+    "@builderai/metrics": "workspace:^",
+    "@builderai/stripe": "^0.1.0",
+    "@builderai/tinybird": "^0.1.0",
+    "@builderai/unprice": "^0.1.0",
+    "@dinero.js/currencies": "2.0.0-alpha.14",
+    "@potatohd/trpc-openapi": "^1.2.3",
+    "@t3-oss/env-nextjs": "0.9.1",
+    "@trpc/next": "11.0.0-rc.421",
+    "@trpc/server": "11.0.0-rc.421",
+    "@unkey/cache": "^1.0.0",
+    "@upstash/ratelimit": "^1.0.1",
+    "@upstash/redis": "^1.31.3",
+    "@vercel/functions": "^1.0.2",
+    "dinero.js": "2.0.0-alpha.14",
+    "superjson": "2.2.1",
+    "zod": "^3.23.8",
+    "zod-form-data": "^2.0.2"
+  },
+  "devDependencies": {
+    "@builderai/tsconfig": "^0.1.0",
+    "typescript": "^5.3.3"
+  }
+}

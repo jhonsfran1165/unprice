@@ -1,9 +1,9 @@
 import { use } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
-import { cn } from "@builderai/ui"
 import { Skeleton } from "@builderai/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
+import { cn } from "@builderai/ui/utils"
 
 import { getSubdomain } from "~/lib/domains"
 import DomainStatusIcon from "./domain-status-icon"

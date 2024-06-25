@@ -2,9 +2,6 @@ import { signIn } from "@builderai/auth/server"
 import { Button } from "@builderai/ui/button"
 import { GitHub } from "@builderai/ui/icons"
 
-export const runtime = "edge"
-export const preferredRegion = ["fra1"]
-
 export function SignInGithub() {
   return (
     <form>

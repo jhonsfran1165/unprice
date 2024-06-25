@@ -3,22 +3,17 @@ import { NextResponse } from "next/server"
 
 import type { NextAuthRequest } from "@builderai/auth"
 
+import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
+import { isSlug } from "@builderai/db/utils"
 import {
   API_AUTH_ROUTE_PREFIX,
   API_TRPC_ROUTE_PREFIX,
   APP_AUTH_ROUTES,
   APP_NON_WORKSPACE_ROUTES,
   AUTH_ROUTES,
-  COOKIE_NAME_CURRENT_WORKSPACE,
-  COOKIE_NAME_PROJECT,
-  COOKIE_NAME_WORKSPACE,
 } from "~/constants"
 import { getWorkspacesUser } from "~/lib/session"
 import { parse } from "~/middleware/utils"
-
-function isSlug(str: string) {
-  return /^[a-z0-9-]+-[a-z0-9-]+$/.test(str)
-}
 
 /**
  * Copy cookies from the Set-Cookie header of the response to the Cookie header of the request,
@@ -57,17 +52,12 @@ export default function AppMiddleware(req: NextAuthRequest) {
   const isNonWorkspaceRoute = APP_NON_WORKSPACE_ROUTES.has(path)
 
   // API routes we don't need to check if the user is logged in
-  if (isApiAuthRoute || isApiTrpcRoute) {
-    return NextResponse.next()
-  }
-
-  // AUTH routes we check is the user is logged in
-  if (isAppAuthRoute) {
+  if (isApiAuthRoute || isApiTrpcRoute || isAppAuthRoute) {
     return NextResponse.next()
   }
 
   if (!isLoggedIn || !user) {
-    // User is not signed in redirect to signin
+    // User is not signed in redirect to sign in
     return NextResponse.redirect(
       new URL(
         `${AUTH_ROUTES.SIGNIN}${fullPath === "/" ? "" : `?next=${encodeURIComponent(fullPath)}`}`,
@@ -76,68 +66,45 @@ export default function AppMiddleware(req: NextAuthRequest) {
     )
   }
 
-  // if the route is not a workspace specific route
+  // if the route is not a workspace route
   if (isNonWorkspaceRoute) {
     return NextResponse.rewrite(new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url))
   }
 
-  // if the user has no active workspace validate that the workspace exists in the jwt
-  // and set the cookie to the first workspace, if no workspace exists redirect to signup
-  const cookieWorkspace = req.cookies.get(COOKIE_NAME_CURRENT_WORKSPACE)?.value
-  const isUserMemberWorkspace = userBelongsToWorkspace(currentWorkspaceSlug)
+  // if not workspace in path check cookies or jwt
+  if (!currentWorkspaceSlug) {
+    const redirectWorkspaceSlug =
+      req.cookies.get(COOKIE_NAME_WORKSPACE)?.value ?? user.workspaces[0]?.slug
 
-  // TODO: recording page hits
-
-  // if the user is trying to access a workspace specific route check if they have access
-  // by checking if the workspace is in their list of workspaces from the jwt
-  if (!currentWorkspaceSlug || !isUserMemberWorkspace) {
-    if (cookieWorkspace) {
-      const isUserMemberWorkspace = userBelongsToWorkspace(cookieWorkspace)
-
-      if (!isUserMemberWorkspace) {
-        // User is accessing a user that's not them form the cookie
-        url.pathname = "/"
-        const response = NextResponse.redirect(url)
-
-        // remove the workspace cookie
-        response.cookies.delete(COOKIE_NAME_WORKSPACE)
-        // Apply those cookies to the request
-        applySetCookie(req, response)
-        return response
-      }
-
-      url.pathname = `/${cookieWorkspace}/overview`
+    // there is a cookie/jwt claim for the workspace redirect
+    if (redirectWorkspaceSlug && redirectWorkspaceSlug !== "") {
+      url.pathname = `/${redirectWorkspaceSlug}`
       return NextResponse.redirect(url)
     }
-    const firstWorkspace = user.workspaces[0]?.slug
 
-    if (!firstWorkspace) {
-      // this should never happen because every user should have at least one workspace which is their personal workspace by default
-      // if the user has no active workspace redirect to onboarding
-      // if this happens it's a bug when the user is created and the workspace is not set or the workspace is not created
+    // TODO: if the user has no active workspace redirect to onboarding
 
-      return NextResponse.redirect(new URL("/error", req.url))
-    }
+    // this should never happen because every user should have at least one workspace that is created on signup
+    return NextResponse.redirect(new URL("/error", req.url))
+  }
 
-    url.pathname = `/${firstWorkspace}/overview`
+  // check jwt claim for the workspace
+  const isUserMemberWorkspace = userBelongsToWorkspace(currentWorkspaceSlug)
+  const response = NextResponse.rewrite(new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url))
+
+  // if the user is not a member of the workspace redirect to root path to be handled by the middleware again
+  if (!isUserMemberWorkspace) {
+    url.pathname = "/"
     return NextResponse.redirect(url)
   }
 
-  const response = NextResponse.rewrite(new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url))
+  // we use this cookies to forward them to the API on RSC calls
+  // client calls are handled by the UpdateClientCookie component
+  const cookieWorkspace = req.cookies.get(COOKIE_NAME_WORKSPACE)?.value
 
-  // check if the cookie workspace is the same as the current workspace
-  // if not, update the cookie
-  if (cookieWorkspace !== currentWorkspaceSlug && isSlug(currentWorkspaceSlug)) {
-    // cookie for calling the api
+  if (currentWorkspaceSlug !== cookieWorkspace && isSlug(currentWorkspaceSlug)) {
+    // set cookies if the user has access to the workspace
     response.cookies.set(COOKIE_NAME_WORKSPACE, currentWorkspaceSlug, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: `/${currentWorkspaceSlug}/`,
-    })
-
-    // cookie for redirection
-    response.cookies.set(COOKIE_NAME_CURRENT_WORKSPACE, currentWorkspaceSlug, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
@@ -145,8 +112,9 @@ export default function AppMiddleware(req: NextAuthRequest) {
     })
   }
 
-  const currentProjectSlug = path.split("/")[2] ?? ""
-  // check if the current project slug is a valid slug, slug can only contain lowercase letters, numbers and hyphens and no spaces, and at least 2 words
+  const currentProjectSlug = decodeURIComponent(path.split("/")[2] ?? "")
+
+  // check if the current project slug is a valid slug
   const cookieProject = req.cookies.get(COOKIE_NAME_PROJECT)?.value
 
   if (currentProjectSlug !== cookieProject && isSlug(currentProjectSlug)) {
@@ -155,13 +123,12 @@ export default function AppMiddleware(req: NextAuthRequest) {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      path: `/${currentWorkspaceSlug}/${currentProjectSlug}/`,
+      path: "/",
     })
   }
 
   // Apply those cookies to the request
   applySetCookie(req, response)
 
-  // otherwise, rewrite the path to /app
   return response
 }

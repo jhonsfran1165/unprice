@@ -5,8 +5,7 @@ import type { UseFormReturn } from "react-hook-form"
 import { useFieldArray } from "react-hook-form"
 
 import { AGGREGATION_METHODS, AGGREGATION_METHODS_MAP } from "@builderai/db/utils"
-import type { Currency, PlanVersionFeature } from "@builderai/db/validators"
-import { cn } from "@builderai/ui"
+import { type Currency, type PlanVersionFeature, currencySymbol } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   FormControl,
@@ -19,9 +18,9 @@ import {
 import { Input } from "@builderai/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
+import { cn } from "@builderai/ui/utils"
 
-import { InputWithAddons } from "~/components/test"
-import { currencySymbol } from "~/lib/currency"
+import { InputWithAddons } from "~/components/input-addons"
 
 export function QuantityFormField({
   form,
@@ -173,7 +172,7 @@ export function AggregationMethodFormField({
     <div className="w-full">
       <FormField
         control={form.control}
-        name="config.aggregationMethod"
+        name="aggregationMethod"
         render={({ field }) => (
           <FormItem className="flex flex-col">
             <div className="">

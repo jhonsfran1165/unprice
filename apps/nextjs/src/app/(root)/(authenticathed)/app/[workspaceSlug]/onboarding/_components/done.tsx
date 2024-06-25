@@ -17,7 +17,7 @@ export default function Done(props: { workspaceSlug: string }) {
     if (step === "done") {
       setTimeout(() => {
         startTransition(() => {
-          router.push(`${props.workspaceSlug}/${projectSlug}/overview`)
+          router.push(`${props.workspaceSlug}/${projectSlug}`)
           router.refresh()
         })
       }, 2000)

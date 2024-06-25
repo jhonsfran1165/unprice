@@ -31,6 +31,8 @@ const handler = auth(async (req) => {
       console.info("❌  Error in tRPC handler (edge) on path", path)
       console.error(error)
     },
+    // TODO: handling cache headers for public routes
+    // https://trpc.io/docs/server/caching
   })
 
   setCorsHeaders(response)

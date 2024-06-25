@@ -4,7 +4,7 @@
   "engines": {
     "node": "20.11.1"
   },
-  "workspaces": ["packages/*", "apps/*", "tooling/*"],
+  "workspaces": ["packages/*", "apps/*", "tooling/*", "internal/*"],
   "engineStrict": true,
   "packageManager": "pnpm@8.15.4",
   "scripts": {
@@ -16,9 +16,10 @@
     "typecheck": "turbo typecheck",
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip",
-    "fmt": "pnpm biome format . --write && pnpm biome check . --apply",
-    "fmt:check": "pnpm biome format . && pnpm biome check .",
-    "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:check"
+    "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply",
+    "fmt": "pnpm biome format . && pnpm biome check .",
+    "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt",
+    "manypkg:fix": "pnpm manypkg fix"
   },
   "dependencies": {
     "@biomejs/biome": "1.7.3",
@@ -28,5 +29,12 @@
     "knip": "^5.17.4",
     "turbo": "^1.12.4",
     "typescript": "^5.3.3"
+  },
+
+  "git": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*": "pnpm fmt:fix"
   }
 }
