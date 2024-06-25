@@ -22,7 +22,7 @@ importers:
         version: 7.0.3
       knip:
         specifier: ^5.17.4
-        version: 5.22.2(@types/node@20.11.24)(typescript@5.5.2)
+        version: 5.23.0(@types/node@20.11.24)(typescript@5.5.2)
       turbo:
         specifier: ^1.12.4
         version: 1.13.4
@@ -91,8 +91,8 @@ importers:
         specifier: ^3.3.4
         version: 3.6.0(react-hook-form@7.52.0)
       '@next/mdx':
-        specifier: 14.3.0-canary.37
-        version: 14.3.0-canary.37
+        specifier: 14.3.0-canary.54
+        version: 14.3.0-canary.54
       '@potatohd/trpc-openapi':
         specifier: ^1.2.3
         version: 1.2.3(@trpc/server@11.0.0-rc.421)(zod@3.23.8)
@@ -104,7 +104,7 @@ importers:
         version: 5.45.1(react@18.3.1)
       '@tanstack/react-query-next-experimental':
         specifier: 5.46.0
-        version: 5.46.0(@tanstack/react-query@5.45.1)(next@14.3.0-canary.37)(react@18.3.1)
+        version: 5.46.0(@tanstack/react-query@5.45.1)(next@14.3.0-canary.54)(react@18.3.1)
       '@tanstack/react-table':
         specifier: ^8.17.3
         version: 8.17.3(react-dom@18.3.1)(react@18.3.1)
@@ -119,10 +119,10 @@ importers:
         version: 11.0.0-rc.421
       '@vercel/analytics':
         specifier: ^1.2.2
-        version: 1.3.1(next@14.3.0-canary.37)(react@18.3.1)
+        version: 1.3.1(next@14.3.0-canary.54)(react@18.3.1)
       '@vercel/otel':
         specifier: ^1.8.3
-        version: 1.8.4(@opentelemetry/api-logs@0.46.0)(@opentelemetry/api@1.9.0)(@opentelemetry/instrumentation@0.46.0)(@opentelemetry/resources@1.25.1)(@opentelemetry/sdk-logs@0.46.0)(@opentelemetry/sdk-metrics@1.25.1)(@opentelemetry/sdk-trace-base@1.25.1)
+        version: 1.9.1(@opentelemetry/api-logs@0.50.0)(@opentelemetry/api@1.9.0)(@opentelemetry/resources@1.25.1)(@opentelemetry/sdk-metrics@1.25.1)(@opentelemetry/sdk-trace-base@1.25.1)
       date-fns:
         specifier: ^3.3.1
         version: 3.6.0
@@ -131,7 +131,7 @@ importers:
         version: 2.0.0-alpha.14
       framer-motion:
         specifier: ^11.0.8
-        version: 11.2.11(react-dom@18.3.1)(react@18.3.1)
+        version: 11.2.12(react-dom@18.3.1)(react@18.3.1)
       jotai:
         specifier: ^2.7.0
         version: 2.8.3(@types/react@18.3.3)(react@18.3.1)
@@ -139,11 +139,11 @@ importers:
         specifier: 0.344.0
         version: 0.344.0(react@18.3.1)
       next:
-        specifier: 14.3.0-canary.37
-        version: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+        specifier: 14.3.0-canary.54
+        version: 14.3.0-canary.54(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       next-themes:
         specifier: ^0.2.1
-        version: 0.2.1(next@14.3.0-canary.37)(react-dom@18.3.1)(react@18.3.1)
+        version: 0.2.1(next@14.3.0-canary.54)(react-dom@18.3.1)(react@18.3.1)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -192,7 +192,7 @@ importers:
         version: link:../../tooling/typescript
       '@tanstack/react-query-devtools':
         specifier: ^5.24.8
-        version: 5.45.1(@tanstack/react-query@5.45.1)(react@18.3.1)
+        version: 5.47.0(@tanstack/react-query@5.45.1)(react@18.3.1)
       '@types/mdx':
         specifier: ^2.0.13
         version: 2.0.13
@@ -234,7 +234,7 @@ importers:
         version: 0.9.3
       '@trigger.dev/nextjs':
         specifier: ^2.3.19
-        version: 2.3.19(@trigger.dev/sdk@2.3.19)(next@14.3.0-canary.37)
+        version: 2.3.19(@trigger.dev/sdk@2.3.19)(next@14.3.0-canary.54)
       '@trigger.dev/react':
         specifier: ^2.3.19
         version: 2.3.19(react-dom@18.3.1)(react@18.3.1)
@@ -242,8 +242,8 @@ importers:
         specifier: ^2.3.19
         version: 2.3.19
       next:
-        specifier: 14.3.0-canary.37
-        version: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+        specifier: 14.3.0-canary.54
+        version: 14.3.0-canary.54(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -373,11 +373,11 @@ importers:
         specifier: ^0.1.13
         version: 0.1.13
       next:
-        specifier: 14.3.0-canary.37
-        version: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+        specifier: 14.3.0-canary.54
+        version: 14.3.0-canary.54(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       next-auth:
         specifier: 5.0.0-beta.19
-        version: 5.0.0-beta.19(next@14.3.0-canary.37)(react@18.3.1)
+        version: 5.0.0-beta.19(next@14.3.0-canary.54)(react@18.3.1)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -2518,36 +2518,36 @@ packages:
     engines: {node: '>=14'}
     dev: true
 
-  /@floating-ui/core@1.6.2:
-    resolution: {integrity: sha512-+2XpQV9LLZeanU4ZevzRnGFg2neDeKHgFLjP6YLW+tly0IvrhqT4u8enLGjLH3qeh85g19xY5rsAusfwTdn5lg==}
+  /@floating-ui/core@1.6.3:
+    resolution: {integrity: sha512-1ZpCvYf788/ZXOhRQGFxnYQOVgeU+pi0i+d0Ow34La7qjIXETi6RNswGVKkA6KcDO8/+Ysu2E/CeUmmeEBDvTg==}
     dependencies:
-      '@floating-ui/utils': 0.2.2
+      '@floating-ui/utils': 0.2.3
     dev: false
 
-  /@floating-ui/dom@1.6.5:
-    resolution: {integrity: sha512-Nsdud2X65Dz+1RHjAIP0t8z5e2ff/IRbei6BqFrl1urT8sDVzM1HMQ+R0XcU5ceRfyO3I6ayeqIfh+6Wb8LGTw==}
+  /@floating-ui/dom@1.6.6:
+    resolution: {integrity: sha512-qiTYajAnh3P+38kECeffMSQgbvXty2VB6rS+42iWR4FPIlZjLK84E9qtLnMTLIpPz2znD/TaFqaiavMUrS+Hcw==}
     dependencies:
-      '@floating-ui/core': 1.6.2
-      '@floating-ui/utils': 0.2.2
+      '@floating-ui/core': 1.6.3
+      '@floating-ui/utils': 0.2.3
     dev: false
 
-  /@floating-ui/react-dom@2.1.0(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-lNzj5EQmEKn5FFKc04+zasr09h/uX8RtJRNj5gUXsSQIXHVWTVh+hVAg1vOMCexkX8EgvemMvIFpQfkosnVNyA==}
+  /@floating-ui/react-dom@2.1.1(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-4h84MJt3CHrtG18mGsXuLCHMrug49d7DFkU0RMIyshRveBeyV2hmV/pDaF2Uxtu8kgq5r46llp5E5FQiR0K2Yg==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@floating-ui/dom': 1.6.5
+      '@floating-ui/dom': 1.6.6
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
-  /@floating-ui/utils@0.2.2:
-    resolution: {integrity: sha512-J4yDIIthosAsRZ5CPYP/jQvUAQtlZTTD/4suA08/FEnlxqW3sKS9iAhgsa9VYLZ6vDHn/ixJgIqRQPotoBjxIw==}
+  /@floating-ui/utils@0.2.3:
+    resolution: {integrity: sha512-XGndio0l5/Gvd6CLIABvsav9HHezgDFFhDfHk1bvLfr9ni8dojqLSvBbotJEjmIwNHL7vK4QzBJTdBRoB+c1ww==}
     dev: false
 
-  /@grpc/grpc-js@1.10.9:
-    resolution: {integrity: sha512-5tcgUctCG0qoNyfChZifz2tJqbRbXVO9J7X6duFcOjY3HUNCxg5D0ZCK7EP9vIcZ0zRpLU9bWkyCqVCLZ46IbQ==}
+  /@grpc/grpc-js@1.10.10:
+    resolution: {integrity: sha512-HPa/K5NX6ahMoeBv15njAc/sfF4/jmiXLar9UlC2UfHFKZzsCVLc3wbe7+7qua7w9VPh2/L6EBxyAV7/E8Wftg==}
     engines: {node: '>=12.10.0'}
     dependencies:
       '@grpc/proto-loader': 0.7.13
@@ -2939,12 +2939,12 @@ packages:
     resolution: {integrity: sha512-3EtkY5VDkuV2+lNmKlbkibIJxcO4oIHEhBWne6PaAp+76J9KoSsGvNikp6ivzAT8dhhBMYrm6op2pS1ApG0Hzg==}
     dev: false
 
-  /@next/env@14.3.0-canary.37:
-    resolution: {integrity: sha512-pZMCjC6cG4MEemm3mG+Ac1qzUgAABrqCnB71hjgPXe1adacL/wK7YliSUtoyC9Eurw4Pm0mBi4SCg0z6ymbMVg==}
+  /@next/env@14.3.0-canary.54:
+    resolution: {integrity: sha512-1SQxiA1Mr/LQQQs+K9z/RjOKrGWJaQCjhg74XCnv/v3wSvypq0XXuut9SJOqohx7DUQ4ftQdANoDnfDLn8mJQw==}
     dev: false
 
-  /@next/mdx@14.3.0-canary.37:
-    resolution: {integrity: sha512-yGyjeA8MfbmRiugXleAlmpJ35Dum4WKte5Nrtucjk3ZiUPplRp4s0NY/kpYZpuxgg7NwZy1F7gMKu4jf4n4QDA==}
+  /@next/mdx@14.3.0-canary.54:
+    resolution: {integrity: sha512-1myHFXnzG8blfLoI3S2gi8elW7ck1gvpx0DBGTF1hUoAKW3nm61O8BlxxRTvAJKU1VcfTQs4UJFbXHdgCW6Yjg==}
     peerDependencies:
       '@mdx-js/loader': '>=0.15.0'
       '@mdx-js/react': '>=0.15.0'
@@ -2975,8 +2975,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-darwin-arm64@14.3.0-canary.37:
-    resolution: {integrity: sha512-AMH81oibPiLqhDpSuTinVwO27mvGtXCgq7puAhuFhVTTGfATBh/flwed7utC+/K6bC8dkd5QsRMV4+sxySdLeA==}
+  /@next/swc-darwin-arm64@14.3.0-canary.54:
+    resolution: {integrity: sha512-hHppmp+2Ey/I+Ty4Gedqfn1sOlrFOztNhryTppDk1exoEDyBV5EtzwfPHz2J8Uh58mjirxO/8z6mHuN4mmSFtw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
@@ -3002,8 +3002,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-darwin-x64@14.3.0-canary.37:
-    resolution: {integrity: sha512-fsFpGflXJyEXwD5k9fjMHOie6hj641hKAn4em8e3ohagH8nnb7OpC2QAtxv9WCkdSnH2Lv3OcLqsL4quieMKmg==}
+  /@next/swc-darwin-x64@14.3.0-canary.54:
+    resolution: {integrity: sha512-TT1bMDDCnSegAf9CgCnumz4YoEZUzNKiV3dihJ2HSyRrDceQ4dGjmvN/jtU3rt7/9BLFK2QZ/G5W32KFUPqmNQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
@@ -3029,8 +3029,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-arm64-gnu@14.3.0-canary.37:
-    resolution: {integrity: sha512-+PtZuhB5WwMICXMfmtK6Ax3S+CZkgj2++M/G/8wJfifghoeesVQgmVlFLgVtjApE2wQXwYJture3LlqteeM7vw==}
+  /@next/swc-linux-arm64-gnu@14.3.0-canary.54:
+    resolution: {integrity: sha512-daf1g5eeVF7YJzrq/mOp31V3gZTrX+vWCqRizrEPTb6v5/ZiKJjjn7akp3QS4PEK/dqNdCQOuiMaAQJj7L4PHg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -3056,8 +3056,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-arm64-musl@14.3.0-canary.37:
-    resolution: {integrity: sha512-tgvJKQq68cGyrsIjm0X5jkGOlHMvJwRfUf7UAHTHcqtbwXF/SLLDkQHlCtnPXgaBYEEIH6GG9loo3+v/nzLzQg==}
+  /@next/swc-linux-arm64-musl@14.3.0-canary.54:
+    resolution: {integrity: sha512-xPcTzMff+b6eEIZL7OhntWLcmdzVaYt9DiJCY0gTyCIzZ3gj1cGbWIqBNvwT6xtPcpG55Lk+0LKFEnjXG/EPdw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -3083,8 +3083,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-x64-gnu@14.3.0-canary.37:
-    resolution: {integrity: sha512-tmQmL6WJ6DUFOLcIy8BFHwTzjJKLK7xp35OWdoOV/GibL4T9OSDkMAtKxRALvFsQ71LsIF+O69qDrvZ+35i+rA==}
+  /@next/swc-linux-x64-gnu@14.3.0-canary.54:
+    resolution: {integrity: sha512-c3AaWZWXmjy8aBdDODg7N7rciq8A5fa7u21rsEMOHAOhLx2jdVjWz0lLk6hpWqdh6lN4JP/zXakFkuSAQsUntA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -3110,8 +3110,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-x64-musl@14.3.0-canary.37:
-    resolution: {integrity: sha512-kXs2JVLdL1MWkFKMfVavlRJl9+Ep0xFLyrrJrxxyxBFp2qNXYqKXjEXXqYpKv0btnSHf7Tokt89TZztRxoaJlw==}
+  /@next/swc-linux-x64-musl@14.3.0-canary.54:
+    resolution: {integrity: sha512-2N0NP6XZ38ES49Bh50iWJ1yjJyu8dNXyODl74BGg3/1ttkPpDEdcEdIaUf5Tvt8MbfaNY1t2KBiVn3Ybh4VL2w==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -3137,8 +3137,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-win32-arm64-msvc@14.3.0-canary.37:
-    resolution: {integrity: sha512-HU18Co5cE7Hgrjwac6CzdtxErJJ1KHVBoVegMpH6BWBjWASv05vM9yK6fJyRsWG1mJu152Ozr0TgpXBOAkA7UQ==}
+  /@next/swc-win32-arm64-msvc@14.3.0-canary.54:
+    resolution: {integrity: sha512-YcQW1cvZnQjukJ5grZITamDDAiGwWAAOq3qjwdxLcv5+2QktzkcSPMMGIjSofjZ76kANRsdu5SkYMOwSvxpqyA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
@@ -3164,8 +3164,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-win32-ia32-msvc@14.3.0-canary.37:
-    resolution: {integrity: sha512-sSq2frpcGuriFymNBFyppV7Vli8q6+jEyYBbqJo9QHXj5swvTksirnws9vwPM0PALfM6HPMgA1YkEW3DITWq9Q==}
+  /@next/swc-win32-ia32-msvc@14.3.0-canary.54:
+    resolution: {integrity: sha512-mMA01NqTbBeDxK5LYc/KPmifn+GiZuvzlisauVvHLlN2ItYQMIyUJ/guz+b96qUdX3C+LHCjTqaQD4ReUQhmQw==}
     engines: {node: '>= 10'}
     cpu: [ia32]
     os: [win32]
@@ -3191,8 +3191,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-win32-x64-msvc@14.3.0-canary.37:
-    resolution: {integrity: sha512-Qs4JJYMRG7wq/BTDHoNIz8kmbEk4O08dswfgCH3nKbDKCYJ1z/UYedksNrydRFmVyHmYMLyqtxlbUXgPwI02yA==}
+  /@next/swc-win32-x64-msvc@14.3.0-canary.54:
+    resolution: {integrity: sha512-Tkl8y5OYSNr0Z54l/Bw2aK5VXoqHePFEDHc5zgfvGm+eljLMGRbDzXnHRtdyAB6pyKZblH8Kxek8hQuKvLY9iQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -3243,13 +3243,6 @@ packages:
     resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
     dev: false
 
-  /@opentelemetry/api-logs@0.46.0:
-    resolution: {integrity: sha512-+9BcqfiEDGPXEIo+o3tso/aqGM5dGbGwAkGVp3FPpZ8GlkK1YlaKRd9gMVyPaeRATwvO5wYGGnCsAc/sMMM9Qw==}
-    engines: {node: '>=14'}
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-    dev: false
-
   /@opentelemetry/api-logs@0.50.0:
     resolution: {integrity: sha512-JdZuKrhOYggqOpUljAq4WWNi5nB10PmgoF0y2CvedLGXd0kSawb/UBnWT8gg1ND3bHCNHStAIVT0ELlxJJRqrA==}
     engines: {node: '>=14'}
@@ -3295,16 +3288,6 @@ packages:
     dependencies:
       '@opentelemetry/api': 1.9.0
 
-  /@opentelemetry/core@1.19.0(@opentelemetry/api@1.9.0):
-    resolution: {integrity: sha512-w42AukJh3TP8R0IZZOVJVM/kMWu8g+lm4LzT70WtuKqhwq7KVhcDzZZuZinWZa6TtQCl7Smt2wolEYzpHabOgw==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.8.0'
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/semantic-conventions': 1.19.0
-    dev: false
-
   /@opentelemetry/core@1.23.0(@opentelemetry/api@1.9.0):
     resolution: {integrity: sha512-hdQ/a9TMzMQF/BO8Cz1juA43/L5YGtCSiKoOHmrTEf7VMDAZgy8ucpWx3eQTnQ3gBloRcWtzvcrMZABC3PTSKQ==}
     engines: {node: '>=14'}
@@ -3330,7 +3313,7 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
     dependencies:
-      '@grpc/grpc-js': 1.10.9
+      '@grpc/grpc-js': 1.10.10
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.23.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/otlp-grpc-exporter-base': 0.50.0(@opentelemetry/api@1.9.0)
@@ -3345,7 +3328,7 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
     dependencies:
-      '@grpc/grpc-js': 1.10.9
+      '@grpc/grpc-js': 1.10.10
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/otlp-grpc-exporter-base': 0.52.1(@opentelemetry/api@1.9.0)
@@ -3452,22 +3435,6 @@ packages:
       - supports-color
     dev: false
 
-  /@opentelemetry/instrumentation@0.46.0(@opentelemetry/api@1.9.0):
-    resolution: {integrity: sha512-a9TijXZZbk0vI5TGLZl+0kxyFfrXHhX6Svtz7Pp2/VBlCSKrazuULEyoJQrOknJyFWNMEmbbJgOciHCCpQcisw==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.3.0
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@types/shimmer': 1.0.5
-      import-in-the-middle: 1.7.1
-      require-in-the-middle: 7.3.0
-      semver: 7.6.2
-      shimmer: 1.2.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /@opentelemetry/instrumentation@0.50.0(@opentelemetry/api@1.9.0):
     resolution: {integrity: sha512-bhGhbJiZKpuu7wTaSak4hyZcFPlnDeuSF/2vglze8B4w2LubcSbbOnkVTzTs5SXtzh4Xz8eRjaNnAm+u2GYufQ==}
     engines: {node: '>=14'}
@@ -3529,7 +3496,7 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
     dependencies:
-      '@grpc/grpc-js': 1.10.9
+      '@grpc/grpc-js': 1.10.10
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.23.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/otlp-exporter-base': 0.50.0(@opentelemetry/api@1.9.0)
@@ -3542,7 +3509,7 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
     dependencies:
-      '@grpc/grpc-js': 1.10.9
+      '@grpc/grpc-js': 1.10.10
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/otlp-exporter-base': 0.52.1(@opentelemetry/api@1.9.0)
@@ -3642,17 +3609,6 @@ packages:
       '@opentelemetry/semantic-conventions': 1.25.1
     dev: false
 
-  /@opentelemetry/resources@1.19.0(@opentelemetry/api@1.9.0):
-    resolution: {integrity: sha512-RgxvKuuMOf7nctOeOvpDjt2BpZvZGr9Y0vf7eGtY5XYZPkh2p7e2qub1S2IArdBMf9kEbz0SfycqCviOu9isqg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.8.0'
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.19.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.19.0
-    dev: false
-
   /@opentelemetry/resources@1.23.0(@opentelemetry/api@1.9.0):
     resolution: {integrity: sha512-iPRLfVfcEQynYGo7e4Di+ti+YQTAY0h5mQEUJcHlU9JOqpb4x965O6PZ+wMcwYVY63G96KtdS86YCM1BF1vQZg==}
     engines: {node: '>=14'}
@@ -3673,19 +3629,6 @@ packages:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.25.1
-
-  /@opentelemetry/sdk-logs@0.46.0(@opentelemetry/api-logs@0.46.0)(@opentelemetry/api@1.9.0):
-    resolution: {integrity: sha512-Knlyk4+G72uEzNh6GRN1Fhmrj+/rkATI5/lOrevN7zRDLgp4kfyZBGGoWk7w+qQjlYvwhIIdPVxlIcipivdZIg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.4.0 <1.8.0'
-      '@opentelemetry/api-logs': '>=0.39.1'
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/api-logs': 0.46.0
-      '@opentelemetry/core': 1.19.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/resources': 1.19.0(@opentelemetry/api@1.9.0)
-    dev: false
 
   /@opentelemetry/sdk-logs@0.50.0(@opentelemetry/api-logs@0.50.0)(@opentelemetry/api@1.9.0):
     resolution: {integrity: sha512-PeUEupBB29p9nlPNqXoa1PUWNLsZnxG0DCDj3sHqzae+8y76B/A5hvZjg03ulWdnvBLYpnJslqzylG9E0IL87g==}
@@ -3834,11 +3777,6 @@ packages:
       '@opentelemetry/propagator-jaeger': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 1.25.1(@opentelemetry/api@1.9.0)
       semver: 7.6.2
-
-  /@opentelemetry/semantic-conventions@1.19.0:
-    resolution: {integrity: sha512-14jRpC8f5c0gPSwoZ7SbEJni1PqI+AhAE8m1bMz6v+RPM4OlP1PT2UHBJj5Qh/ALLPjhVU/aZUK3YyjTUqqQVg==}
-    engines: {node: '>=14'}
-    dev: false
 
   /@opentelemetry/semantic-conventions@1.23.0:
     resolution: {integrity: sha512-MiqFvfOzfR31t8cc74CTP1OZfz7MbqpAnLCra8NqQoaHJX6ncIRTdYOQYBDQ2uFISDq0WY8Y9dDTWvsgzzBYRg==}
@@ -4870,7 +4808,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.24.7
-      '@floating-ui/react-dom': 2.1.0(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react-dom': 2.1.1(react-dom@18.3.1)(react@18.3.1)
       '@radix-ui/react-arrow': 1.0.3(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
       '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.3.3)(react@18.3.1)
       '@radix-ui/react-context': 1.0.1(@types/react@18.3.3)(react@18.3.1)
@@ -4899,7 +4837,7 @@ packages:
       '@types/react-dom':
         optional: true
     dependencies:
-      '@floating-ui/react-dom': 2.1.0(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react-dom': 2.1.1(react-dom@18.3.1)(react@18.3.1)
       '@radix-ui/react-arrow': 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
       '@radix-ui/react-compose-refs': 1.1.0(@types/react@18.3.3)(react@18.3.1)
       '@radix-ui/react-context': 1.1.0(@types/react@18.3.3)(react@18.3.1)
@@ -6019,8 +5957,8 @@ packages:
       uri-js: 4.4.1
     dev: true
 
-  /@redocly/config@0.6.0:
-    resolution: {integrity: sha512-hNVN3eTxFj2nHYX0gGzZxxXwdE0DXWeWou1TIK3HYf0S9VKVxTxjO9EZbMB7iVUqaHkeqy4PSjlBQcEgD0Ftjg==}
+  /@redocly/config@0.6.1:
+    resolution: {integrity: sha512-p4mlj+CD3Byec3wOxDlDln0B0gOcNvEkpl4jn3/e9y8h11ogzXnWxnlJAtE5Kcr1ByujS/7Mbt01df9z1xfMbg==}
     dev: true
 
   /@redocly/openapi-core@1.16.0(supports-color@9.4.0):
@@ -6028,7 +5966,7 @@ packages:
     engines: {node: '>=14.19.0', npm: '>=7.0.0'}
     dependencies:
       '@redocly/ajv': 8.11.0
-      '@redocly/config': 0.6.0
+      '@redocly/config': 0.6.1
       colorette: 1.4.0
       https-proxy-agent: 7.0.4(supports-color@9.4.0)
       js-levenshtein: 1.1.6
@@ -6553,22 +6491,22 @@ packages:
   /@tanstack/query-core@5.45.0:
     resolution: {integrity: sha512-RVfIZQmFUTdjhSAAblvueimfngYyfN6HlwaJUPK71PKd7yi43Vs1S/rdimmZedPWX/WGppcq/U1HOj7O7FwYxw==}
 
-  /@tanstack/query-devtools@5.37.1:
-    resolution: {integrity: sha512-XcG4IIHIv0YQKrexTqo2zogQWR1Sz672tX2KsfE9kzB+9zhx44vRKH5si4WDILE1PIWQpStFs/NnrDQrBAUQpg==}
+  /@tanstack/query-devtools@5.47.0:
+    resolution: {integrity: sha512-oo10s7Nqaf/Q3QF4vuSwS0xw7zuYr5nXef4RHQIXVJKvRQeo9WowPLAnB0SF/voB0c4GTX6Vq8wfQ1G72ezEdw==}
     dev: true
 
-  /@tanstack/react-query-devtools@5.45.1(@tanstack/react-query@5.45.1)(react@18.3.1):
-    resolution: {integrity: sha512-4mrbk1g5jqlqh0pifZNsKzy7FtgeqgwzMICL4d6IJGayrrcrKq9K4N/OzRNbgRWrTn6YTY63qcAcKo+NJU2QMw==}
+  /@tanstack/react-query-devtools@5.47.0(@tanstack/react-query@5.45.1)(react@18.3.1):
+    resolution: {integrity: sha512-XAHM9LCWE3li+lzuexaBigD3YRgRWd9BZilFFjN93r3zhNLHemwKbZh1i66hsz8o3ywRk/T6UIpQ8dSzRfEy0g==}
     peerDependencies:
-      '@tanstack/react-query': ^5.45.1
+      '@tanstack/react-query': ^5.47.0
       react: ^18 || ^19
     dependencies:
-      '@tanstack/query-devtools': 5.37.1
+      '@tanstack/query-devtools': 5.47.0
       '@tanstack/react-query': 5.45.1(react@18.3.1)
       react: 18.3.1
     dev: true
 
-  /@tanstack/react-query-next-experimental@5.46.0(@tanstack/react-query@5.45.1)(next@14.3.0-canary.37)(react@18.3.1):
+  /@tanstack/react-query-next-experimental@5.46.0(@tanstack/react-query@5.45.1)(next@14.3.0-canary.54)(react@18.3.1):
     resolution: {integrity: sha512-eSM5KuX5VhD5CA0ul9peUyCAUKLhJG3ViJrEDxpVulBWRmuntjSKZkGjzjiHyx78zFP6LEmg+XVJBGHCRyqt/A==}
     peerDependencies:
       '@tanstack/react-query': ^5.45.1
@@ -6576,7 +6514,7 @@ packages:
       react: ^18 || ^19
     dependencies:
       '@tanstack/react-query': 5.45.1(react@18.3.1)
-      next: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+      next: 14.3.0-canary.54(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       react: 18.3.1
     dev: false
 
@@ -6639,7 +6577,7 @@ packages:
       zod-error: 1.5.0
     dev: false
 
-  /@trigger.dev/nextjs@2.3.19(@trigger.dev/sdk@2.3.19)(next@14.3.0-canary.37):
+  /@trigger.dev/nextjs@2.3.19(@trigger.dev/sdk@2.3.19)(next@14.3.0-canary.54):
     resolution: {integrity: sha512-HzNyuasNNvAWwdDTxPrA7ij8b3nKFX4tSDaT+3oPOwvZTkTlPF08ekRX/RWRLo4jVSdj3HOddqZO/B699pFV/Q==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
@@ -6648,7 +6586,7 @@ packages:
     dependencies:
       '@trigger.dev/sdk': 2.3.19
       debug: 4.3.5(supports-color@9.4.0)
-      next: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+      next: 14.3.0-canary.54(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -7084,7 +7022,7 @@ packages:
       crypto-js: 4.2.0
     dev: false
 
-  /@vercel/analytics@1.3.1(next@14.3.0-canary.37)(react@18.3.1):
+  /@vercel/analytics@1.3.1(next@14.3.0-canary.54)(react@18.3.1):
     resolution: {integrity: sha512-xhSlYgAuJ6Q4WQGkzYTLmXwhYl39sWjoMA3nHxfkvG+WdBT25c563a7QhwwKivEOZtPJXifYHR1m2ihoisbWyA==}
     peerDependencies:
       next: '>= 13'
@@ -7095,7 +7033,7 @@ packages:
       react:
         optional: true
     dependencies:
-      next: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+      next: 14.3.0-canary.54(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       react: 18.3.1
       server-only: 0.0.1
     dev: false
@@ -7127,23 +7065,21 @@ packages:
       - supports-color
     dev: true
 
-  /@vercel/otel@1.8.4(@opentelemetry/api-logs@0.46.0)(@opentelemetry/api@1.9.0)(@opentelemetry/instrumentation@0.46.0)(@opentelemetry/resources@1.25.1)(@opentelemetry/sdk-logs@0.46.0)(@opentelemetry/sdk-metrics@1.25.1)(@opentelemetry/sdk-trace-base@1.25.1):
-    resolution: {integrity: sha512-vORAljRdxcQZ2KwBJGFip6yUuPwlHoirYOYZ3bBkqS0yT2spornZa/XzmdS+4+edmXZ1gy7bRPAbPRqTiNjIEw==}
+  /@vercel/otel@1.9.1(@opentelemetry/api-logs@0.50.0)(@opentelemetry/api@1.9.0)(@opentelemetry/resources@1.25.1)(@opentelemetry/sdk-metrics@1.25.1)(@opentelemetry/sdk-trace-base@1.25.1):
+    resolution: {integrity: sha512-ZSTqgvd+w/lcB1nxEW8EHSBBqd4ZdeJ1t5op1CFo/nKFdG/EshwMon0qKc2ZxVEZXOZJI/x+LKf8Y5/Y/VHqEA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@opentelemetry/api': ^1.7.0
-      '@opentelemetry/api-logs': ^0.46.0
-      '@opentelemetry/instrumentation': ^0.46.0
+      '@opentelemetry/api-logs': '>=0.46.0 && <1.0.0'
+      '@opentelemetry/instrumentation': '>=0.46.0 && <1.0.0'
       '@opentelemetry/resources': ^1.19.0
-      '@opentelemetry/sdk-logs': ^0.46.0
+      '@opentelemetry/sdk-logs': '>=0.46.0 && <1.0.0'
       '@opentelemetry/sdk-metrics': ^1.19.0
       '@opentelemetry/sdk-trace-base': ^1.19.0
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/api-logs': 0.46.0
-      '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/api-logs': 0.50.0
       '@opentelemetry/resources': 1.25.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-logs': 0.46.0(@opentelemetry/api-logs@0.46.0)(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-metrics': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 1.25.1(@opentelemetry/api@1.9.0)
     dev: false
@@ -7634,7 +7570,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001636
-      electron-to-chromium: 1.4.810
+      electron-to-chromium: 1.4.811
       node-releases: 2.0.14
       update-browserslist-db: 1.0.16(browserslist@4.23.1)
 
@@ -8659,8 +8595,8 @@ packages:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: true
 
-  /electron-to-chromium@1.4.810:
-    resolution: {integrity: sha512-Kaxhu4T7SJGpRQx99tq216gCq2nMxJo+uuT6uzz9l8TVN2stL7M06MIIXAtr9jsrLs2Glflgf2vMQRepxawOdQ==}
+  /electron-to-chromium@1.4.811:
+    resolution: {integrity: sha512-CDyzcJ5XW78SHzsIOdn27z8J4ist8eaFLhdto2hSMSJQgsiwvbv2fbizcKUICryw1Wii1TI/FEkvzvJsR3awrA==}
 
   /emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -9313,8 +9249,8 @@ packages:
       '@emotion/is-prop-valid': 0.8.8
     dev: false
 
-  /framer-motion@11.2.11(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-n+ozoEzgJu/2h9NoQMokF+CwNqIRVyuRC4RwMPwklfrrTjbVV32k9uBIgqYAwn7Jfpt5LuDVCtT57MWz1FbaLw==}
+  /framer-motion@11.2.12(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-lCjkV4nA9rWOy2bhR4RZzkp2xpB++kFmUZ6D44V9VQaxk+JDmbDd5lq+u58DjJIIllE8AZEXp9OG/TyDN4FB/w==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0
@@ -10374,8 +10310,8 @@ packages:
     engines: {node: '>= 8'}
     dev: true
 
-  /knip@5.22.2(@types/node@20.11.24)(typescript@5.5.2):
-    resolution: {integrity: sha512-eMEnuLOkLN5wn1Os9v0cujZQAhcZ8dYZ23ZsVizfWaaeIx9/s8PaaW4HlbnePQ+ci463X61/+CboGSkmmB8OZA==}
+  /knip@5.23.0(@types/node@20.11.24)(typescript@5.5.2):
+    resolution: {integrity: sha512-kHXcxmbbpTa+ZPx29KfAbBGP6TK81wXjvHyUPTCbGNFwOVnVUminesaO/of+9KleCzw3pUPiK/k4UsEu+aFK4Q==}
     engines: {node: '>=18.6.0'}
     hasBin: true
     peerDependencies:
@@ -10395,7 +10331,7 @@ packages:
       picomatch: 4.0.2
       pretty-ms: 9.0.0
       resolve: 1.22.8
-      smol-toml: 1.2.1
+      smol-toml: 1.2.2
       strip-json-comments: 5.0.1
       summary: 2.1.0
       tsconfig-paths: 4.2.0
@@ -11334,7 +11270,7 @@ packages:
     engines: {node: '>= 0.4.0'}
     dev: false
 
-  /next-auth@5.0.0-beta.19(next@14.3.0-canary.37)(react@18.3.1):
+  /next-auth@5.0.0-beta.19(next@14.3.0-canary.54)(react@18.3.1):
     resolution: {integrity: sha512-YHu1igcAxZPh8ZB7GIM93dqgY6gcAzq66FOhQFheAdOx1raxNcApt05nNyNCSB6NegSiyJ4XOPsaNow4pfDmsg==}
     peerDependencies:
       '@simplewebauthn/browser': ^9.0.1
@@ -11351,7 +11287,7 @@ packages:
         optional: true
     dependencies:
       '@auth/core': 0.32.0
-      next: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+      next: 14.3.0-canary.54(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       react: 18.3.1
     dev: false
 
@@ -11367,14 +11303,14 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
-  /next-themes@0.2.1(next@14.3.0-canary.37)(react-dom@18.3.1)(react@18.3.1):
+  /next-themes@0.2.1(next@14.3.0-canary.54)(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-B+AKNfYNIzh0vqQQKqQItTS8evEouKD7H5Hj3kmuPERwddR2TxvDSFZuTj6T7Jfn1oyeUyJMydPl1Bkxkh0W7A==}
     peerDependencies:
       next: '*'
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+      next: 14.3.0-canary.54(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     dev: false
@@ -11461,15 +11397,15 @@ packages:
       - babel-plugin-macros
     dev: false
 
-  /next@14.3.0-canary.37(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-tWIT0Lep3IS+O3RELN4RUWqNHsQeqWJgf43riJgV3mJoWdRSlX610xyif63ZGwaz8Qd6MbvuGbtNWDnWCBZf0w==}
+  /next@14.3.0-canary.54(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-J080ML+aJ9SNHOa17bUp9xDrosY9AxmwtA3ByZb8iFOfec+++0efNoO7MOCdgqMOgT743p5fRu45QqmRLkmlFw==}
     engines: {node: '>=18.17.0'}
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
       '@playwright/test': ^1.41.2
-      react: ^18.2.0
-      react-dom: ^18.2.0
+      react: 19.0.0-beta-4508873393-20240430
+      react-dom: 19.0.0-beta-4508873393-20240430
       sass: ^1.3.0
     peerDependenciesMeta:
       '@opentelemetry/api':
@@ -11479,7 +11415,7 @@ packages:
       sass:
         optional: true
     dependencies:
-      '@next/env': 14.3.0-canary.37
+      '@next/env': 14.3.0-canary.54
       '@opentelemetry/api': 1.9.0
       '@swc/helpers': 0.5.11
       busboy: 1.6.0
@@ -11488,17 +11424,17 @@ packages:
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(@babel/core@7.24.5)(react@18.3.1)
+      styled-jsx: 5.1.3(react@18.3.1)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 14.3.0-canary.37
-      '@next/swc-darwin-x64': 14.3.0-canary.37
-      '@next/swc-linux-arm64-gnu': 14.3.0-canary.37
-      '@next/swc-linux-arm64-musl': 14.3.0-canary.37
-      '@next/swc-linux-x64-gnu': 14.3.0-canary.37
-      '@next/swc-linux-x64-musl': 14.3.0-canary.37
-      '@next/swc-win32-arm64-msvc': 14.3.0-canary.37
-      '@next/swc-win32-ia32-msvc': 14.3.0-canary.37
-      '@next/swc-win32-x64-msvc': 14.3.0-canary.37
+      '@next/swc-darwin-arm64': 14.3.0-canary.54
+      '@next/swc-darwin-x64': 14.3.0-canary.54
+      '@next/swc-linux-arm64-gnu': 14.3.0-canary.54
+      '@next/swc-linux-arm64-musl': 14.3.0-canary.54
+      '@next/swc-linux-x64-gnu': 14.3.0-canary.54
+      '@next/swc-linux-x64-musl': 14.3.0-canary.54
+      '@next/swc-win32-arm64-msvc': 14.3.0-canary.54
+      '@next/swc-win32-ia32-msvc': 14.3.0-canary.54
+      '@next/swc-win32-x64-msvc': 14.3.0-canary.54
       sharp: 0.33.4
     transitivePeerDependencies:
       - '@babel/core'
@@ -13264,9 +13200,9 @@ packages:
     resolution: {integrity: sha512-g6T+p7QO8npa+/hNx9ohv1E5pVCmWrVCUzUXJyLdMmftX6ER0oiWY/w9knEonLpnOp6b6FenKnMfR8gqwWdwig==}
     dev: true
 
-  /smol-toml@1.2.1:
-    resolution: {integrity: sha512-OtZKrVrGIT+m++lxyF0z5n68nkwdgZotPhy89bfA4T7nSWe0xeQtfbjM1z5VLTilJdWXH46g8i0oAcpQNkzZTg==}
-    engines: {node: '>= 18', pnpm: '>= 9'}
+  /smol-toml@1.2.2:
+    resolution: {integrity: sha512-fVEjX2ybKdJKzFL46VshQbj9PuA4IUKivalgp48/3zwS9vXzyykzQ6AX92UxHSvWJagziMRLeHMgEzoGO7A8hQ==}
+    engines: {node: '>= 18'}
     dev: false
 
   /snake-case@2.1.0:
@@ -13562,6 +13498,23 @@ packages:
         optional: true
     dependencies:
       '@babel/core': 7.24.5
+      client-only: 0.0.1
+      react: 18.3.1
+    dev: false
+
+  /styled-jsx@5.1.3(react@18.3.1):
+    resolution: {integrity: sha512-qLRShOWTE/Mf6Bvl72kFeKBl8N2Eq9WIFfoAuvbtP/6tqlnj1SCjv117n2MIjOPpa1jTorYqLJgsHKy5Y3ziww==}
+    engines: {node: '>= 12.0.0'}
+    peerDependencies:
+      '@babel/core': '*'
+      babel-plugin-macros: '*'
+      react: '>= 16.8.0 || 17.x.x || ^18.0.0-0 || ^19.0.0-0'
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+      babel-plugin-macros:
+        optional: true
+    dependencies:
       client-only: 0.0.1
       react: 18.3.1
     dev: false
