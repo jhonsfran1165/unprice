@@ -2,10 +2,10 @@ import { Balancer } from "react-wrap-balancer"
 
 import { Button } from "@builderai/ui/button"
 import { Plus } from "lucide-react"
-import Link from "next/link"
 import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
+import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/server"
 import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
 
@@ -23,12 +23,12 @@ export default async function WorkspaceOverviewPage(props: {
           title="Apps"
           description="All your for this Workspace"
           action={
-            <Link href={`/${props.params.workspaceSlug}/onboarding`}>
+            <SuperLink href={`/${props.params.workspaceSlug}/onboarding`}>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Create App
               </Button>
-            </Link>
+            </SuperLink>
           }
         />
       }

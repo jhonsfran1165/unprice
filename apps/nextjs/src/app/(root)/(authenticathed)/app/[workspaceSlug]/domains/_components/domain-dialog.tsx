@@ -6,6 +6,7 @@ import type { CreateDomain } from "@builderai/db/validators"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -27,7 +28,9 @@ export function DomainDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Domain for this workspace"}</DialogTitle>
+          <DialogTitle>Domain for this workspace</DialogTitle>
+
+          <DialogDescription>Modify the domain details below.</DialogDescription>
         </DialogHeader>
 
         <DomainForm

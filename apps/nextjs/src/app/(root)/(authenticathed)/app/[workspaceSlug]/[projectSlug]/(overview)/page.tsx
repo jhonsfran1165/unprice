@@ -1,5 +1,4 @@
 import { formatRelative } from "date-fns"
-import Link from "next/link"
 import { Suspense } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
@@ -14,6 +13,7 @@ import {
 } from "@builderai/ui/card"
 import { Activity, ChevronRight, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 import { cn } from "@builderai/ui/utils"
+import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
 
@@ -108,7 +108,7 @@ function IngestionCard(props: {
   const truncatedHash = ingestion.hash.slice(0, 15)
 
   return (
-    <Link href={`/${props.workspaceSlug}/${props.projectSlug}/ingestions/${ingestion.id}`}>
+    <SuperLink href={`/${props.workspaceSlug}/${props.projectSlug}/ingestions/${ingestion.id}`}>
       <div className="hover:bg-muted flex items-center rounded p-1">
         <div className="space-y-1">
           <p className="text-sm font-medium leading-none">{truncatedHash}</p>
@@ -136,7 +136,7 @@ function IngestionCard(props: {
 
         <ChevronRight className="ml-2 h-4 w-4" />
       </div>
-    </Link>
+    </SuperLink>
   )
 }
 

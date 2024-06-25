@@ -199,18 +199,10 @@ export const workspaceRouter = createTRPCRouter({
     .output(
       z.object({
         workspaces: z.array(
-          workspaceSelectSchema
-            .pick({
-              id: true,
-              name: true,
-              slug: true,
-              imageUrl: true,
-              isPersonal: true,
-            })
-            .extend({
-              role: z.string(),
-              userId: z.string(),
-            })
+          workspaceSelectSchema.extend({
+            role: z.string(),
+            userId: z.string(),
+          })
         ),
       })
     )
@@ -226,15 +218,7 @@ export const workspaceRouter = createTRPCRouter({
 
       const memberships = await opts.ctx.db.query.members.findMany({
         with: {
-          workspace: {
-            columns: {
-              id: true,
-              name: true,
-              slug: true,
-              imageUrl: true,
-              isPersonal: true,
-            },
-          },
+          workspace: true,
         },
         where: (member, operators) => operators.eq(member.userId, userId),
         orderBy: (member) => member.createdAt,

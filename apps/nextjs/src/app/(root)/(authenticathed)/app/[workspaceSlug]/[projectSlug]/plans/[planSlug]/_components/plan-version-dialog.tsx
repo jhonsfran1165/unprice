@@ -6,6 +6,7 @@ import type { InsertPlanVersion } from "@builderai/db/validators"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -26,9 +27,11 @@ export function PlanVersionDialog({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-screen overflow-y-scroll">
         <DialogHeader>
           <DialogTitle>Plan version form</DialogTitle>
+
+          <DialogDescription>Modify the plan version details below.</DialogDescription>
         </DialogHeader>
 
         <PlanVersionForm

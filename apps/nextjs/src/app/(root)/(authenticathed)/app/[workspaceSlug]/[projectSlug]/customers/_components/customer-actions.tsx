@@ -4,7 +4,14 @@ import { ChevronDown } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { Button } from "@builderai/ui/button"
-import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@builderai/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +46,10 @@ export function CustomerActions({
         </DropdownMenuContent>
       </DropdownMenu>
       <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Customer Form</DialogTitle>
+          <DialogDescription>Modify the customer details below.</DialogDescription>
+        </DialogHeader>
         <CustomerForm defaultValues={customer} />
       </DialogContent>
     </Dialog>

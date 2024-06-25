@@ -3,6 +3,7 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -25,11 +26,14 @@ export default function MobileSidebar({
           <MoreVertical className="h-4 w-4 shrink-0" aria-hidden="true" />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="mx-auto w-full">
+      <DrawerContent className="w-full">
         <div className="p-4 pb-0">
-          <div className="flex flex-col items-center justify-center space-x-2">
-            <DrawerHeader>
+          <div className="flex flex-col items-center space-x-2">
+            <DrawerHeader className="w-full">
               <DrawerTitle>Menu</DrawerTitle>
+              <DrawerDescription>
+                <span className="text-muted-foreground">Quick access to</span>
+              </DrawerDescription>
             </DrawerHeader>
             <DrawerBody className="w-full">{children}</DrawerBody>
           </div>

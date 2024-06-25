@@ -1,5 +1,5 @@
 import { cn } from "@builderai/ui/utils"
-import Link from "next/link"
+import { SuperLink } from "~/components/super-link"
 import { dashboardNavigationData } from "./data"
 
 // Note: The root breadcrum is required since optional catch-all routes aren't supported yet by Nextjs parallel routes
@@ -9,7 +9,7 @@ export default function DashboardNavigationDesktopDefault() {
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
       {dashboardNavigationData.map((navigationItem) => {
         return (
-          <Link
+          <SuperLink
             key={navigationItem.href}
             href={navigationItem.href}
             className={cn(
@@ -20,7 +20,7 @@ export default function DashboardNavigationDesktopDefault() {
           >
             <navigationItem.icon className="size-4" />
             {navigationItem.label}
-          </Link>
+          </SuperLink>
         )
       })}
     </nav>

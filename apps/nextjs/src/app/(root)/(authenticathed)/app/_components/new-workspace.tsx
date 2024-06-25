@@ -61,6 +61,12 @@ export default function NewTeamDialog(props: { closeDialog: () => void; isOpen: 
 
   return (
     <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Create new team</DialogTitle>
+        <DialogDescription>
+          Add a new workspace to invite other people to collaborate.
+        </DialogDescription>
+      </DialogHeader>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit((data: PurchaseOrg) => {

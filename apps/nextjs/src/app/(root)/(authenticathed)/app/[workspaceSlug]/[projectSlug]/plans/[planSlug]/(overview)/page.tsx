@@ -1,10 +1,17 @@
-import { MoreVertical } from "lucide-react"
+import { MoreVertical, Plus } from "lucide-react"
 import { notFound } from "next/navigation"
 
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
-import { Dialog, DialogContent, DialogTrigger } from "@builderai/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@builderai/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,7 +60,7 @@ export default async function PlanPage({
         <HeaderTab
           title={plan.slug}
           description={plan.description}
-          label={plan.active ? "Active" : "Inactive"}
+          label={plan.active ? "active" : "inactive"}
           action={
             <div className="button-primary flex items-center space-x-1 rounded-md">
               <div className="sm:col-span-full">
@@ -69,7 +76,9 @@ export default async function PlanPage({
                     paymentProvider: "stripe",
                   }}
                 >
-                  <Button variant={"custom"}>Add Version</Button>
+                  <Button variant={"custom"}>
+                    <Plus className="h-4 w-4 mr-2" /> Version
+                  </Button>
                 </PlanVersionDialog>
               </div>
 
@@ -185,6 +194,12 @@ export default async function PlanPage({
                               </DropdownMenu>
 
                               <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Plan Version Form</DialogTitle>
+                                  <DialogDescription>
+                                    Modify the plan version details below.
+                                  </DialogDescription>
+                                </DialogHeader>
                                 <PlanVersionForm defaultValues={version} />
                               </DialogContent>
                             </Dialog>

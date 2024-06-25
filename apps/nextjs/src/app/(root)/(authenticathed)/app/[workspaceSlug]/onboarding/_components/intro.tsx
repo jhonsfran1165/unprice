@@ -72,7 +72,6 @@ export default function Intro() {
               }}
             >
               <Button
-                size="lg"
                 onClick={() =>
                   router.push(`
                   /${workspaceSlug}/onboarding?step=create-project

@@ -4,6 +4,7 @@ import { Button } from "@builderai/ui/button"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -23,7 +24,8 @@ export const InviteMemberDialog = ({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Invite to workspace"}</DialogTitle>
+          <DialogTitle>Invite to workspace</DialogTitle>
+          <DialogDescription>Invite a member to this workspace</DialogDescription>
         </DialogHeader>
         <InviteMemberForm workspaceSlug={workspaceSlug} />
       </DialogContent>

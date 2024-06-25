@@ -55,6 +55,7 @@ export function PlanForm({
   const form = useZodForm({
     schema: formSchema,
     defaultValues: defaultValues,
+    reValidateMode: "onSubmit",
   })
 
   const createPlan = api.plans.create.useMutation({

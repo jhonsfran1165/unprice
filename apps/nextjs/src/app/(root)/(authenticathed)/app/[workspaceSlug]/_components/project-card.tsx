@@ -1,10 +1,9 @@
-import Link from "next/link"
-
 import type { RouterOutputs } from "@builderai/api"
 import type { ProjectTier } from "@builderai/config"
 import { PROJECT_TIER } from "@builderai/config"
 import { Card, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
 import { cn } from "@builderai/ui/utils"
+import { SuperLink } from "~/components/super-link"
 
 function ProjectTierIndicator(props: { tier: ProjectTier; isInternal?: boolean }) {
   return (
@@ -30,7 +29,7 @@ export function ProjectCard(props: {
   // const projectTier = (project.isInternal as ProjectTier) ?? ("FREE" as ProjectTier)
   const projectTier = "PRO"
   return (
-    <Link prefetch={false} href={`/${props.workspaceSlug}/${project.slug}`}>
+    <SuperLink href={`/${props.workspaceSlug}/${project.slug}`}>
       <Card className="overflow-hidden">
         <div className="h-32" style={project.styles} />
         <CardHeader>
@@ -41,7 +40,7 @@ export function ProjectCard(props: {
           <CardDescription>{project.url}&nbsp;</CardDescription>
         </CardHeader>
       </Card>
-    </Link>
+    </SuperLink>
   )
 }
 

@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation"
 import { use, useState } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
+import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import {
   Command,
@@ -45,7 +46,10 @@ export function ProjectSwitcher({
           aria-label="Select a project"
           className="w-24 sm:w-full"
         >
-          <span className="truncate font-semibold">{activeProject?.name}</span>
+          <span className="truncate font-semibold">
+            {activeProject.name}
+            <Badge className={"ml-2"}>{activeProject.isInternal ? "pro - internal" : "pro"}</Badge>
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

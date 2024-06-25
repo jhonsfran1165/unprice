@@ -1,11 +1,10 @@
 "use client"
-
-import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { Suspense, use, useState } from "react"
+import { use, useState } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
+import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
 import {
   Command,
@@ -19,11 +18,8 @@ import { Dialog, DialogTrigger } from "@builderai/ui/dialog"
 import { Check, ChevronsUpDown, PlusCircle } from "@builderai/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 import { cn } from "@builderai/ui/utils"
+import NewTeamDialog from "./new-workspace"
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
-
-const NewTeamDialog = dynamic(() => import("./new-workspace"), {
-  ssr: false,
-})
 
 export function WorkspaceSwitcher({
   workspacesPromise,
@@ -69,7 +65,12 @@ export function WorkspaceSwitcher({
               />
               <AvatarFallback>{activeWorkspace.slug?.substring(0, 2)}</AvatarFallback>
             </Avatar>
-            <span className="truncate font-semibold">{activeWorkspace.name}</span>
+            <span className="truncate font-semibold">
+              {activeWorkspace.name}
+              <Badge className={"ml-2"}>
+                {activeWorkspace.isInternal ? "pro - internal" : "pro"}
+              </Badge>
+            </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -173,9 +174,7 @@ export function WorkspaceSwitcher({
         </PopoverContent>
       </Popover>
 
-      <Suspense>
-        <NewTeamDialog closeDialog={() => setNewOrgDialogOpen(false)} isOpen={newOrgDialogOpen} />
-      </Suspense>
+      <NewTeamDialog closeDialog={() => setNewOrgDialogOpen(false)} isOpen={newOrgDialogOpen} />
     </Dialog>
   )
 }

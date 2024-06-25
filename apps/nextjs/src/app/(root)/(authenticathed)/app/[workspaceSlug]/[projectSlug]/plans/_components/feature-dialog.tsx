@@ -6,6 +6,7 @@ import type { InsertFeature } from "@builderai/db/validators"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -29,6 +30,8 @@ export function FeatureDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Feature Form</DialogTitle>
+
+          <DialogDescription>Modify the feature details below.</DialogDescription>
         </DialogHeader>
 
         <FeatureForm

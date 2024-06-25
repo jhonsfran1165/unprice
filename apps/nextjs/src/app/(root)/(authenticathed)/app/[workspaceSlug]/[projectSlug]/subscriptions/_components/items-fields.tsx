@@ -123,9 +123,9 @@ export default function ConfigItemsFormField({
                               <DialogHeader>
                                 <DialogTitle>Feature: {feature.feature.title}</DialogTitle>
                               </DialogHeader>
-                              {feature.feature?.description && (
-                                <DialogDescription>{feature.feature.description}</DialogDescription>
-                              )}
+                              <DialogDescription>
+                                {feature.feature.description ?? ""}
+                              </DialogDescription>
                               <FeatureConfigForm
                                 defaultValues={feature}
                                 planVersion={selectedPlanVersion!}

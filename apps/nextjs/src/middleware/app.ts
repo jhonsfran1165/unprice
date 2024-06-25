@@ -4,6 +4,7 @@ import { NextResponse } from "next/server"
 import type { NextAuthRequest } from "@builderai/auth"
 
 import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
+import { isSlug } from "@builderai/db/utils"
 import {
   API_AUTH_ROUTE_PREFIX,
   API_TRPC_ROUTE_PREFIX,
@@ -99,25 +100,32 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
   // we use this cookies to forward them to the API on RSC calls
   // client calls are handled by the UpdateClientCookie component
+  const cookieWorkspace = req.cookies.get(COOKIE_NAME_WORKSPACE)?.value
 
-  // set cookies if the user has access to the workspace
-  response.cookies.set(COOKIE_NAME_WORKSPACE, currentWorkspaceSlug, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-  })
+  if (currentWorkspaceSlug !== cookieWorkspace && isSlug(currentWorkspaceSlug)) {
+    // set cookies if the user has access to the workspace
+    response.cookies.set(COOKIE_NAME_WORKSPACE, currentWorkspaceSlug, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    })
+  }
 
-  // TODO: what happen if the project slug is not xxx-xxx format?
   const currentProjectSlug = decodeURIComponent(path.split("/")[2] ?? "")
 
-  // cookie for calling the api
-  response.cookies.set(COOKIE_NAME_PROJECT, currentProjectSlug, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-  })
+  // check if the current project slug is a valid slug
+  const cookieProject = req.cookies.get(COOKIE_NAME_PROJECT)?.value
+
+  if (currentProjectSlug !== cookieProject && isSlug(currentProjectSlug)) {
+    // cookie for calling the api
+    response.cookies.set(COOKIE_NAME_PROJECT, currentProjectSlug, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    })
+  }
 
   // Apply those cookies to the request
   applySetCookie(req, response)
