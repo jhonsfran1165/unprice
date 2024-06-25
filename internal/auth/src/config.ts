@@ -2,7 +2,7 @@ import GitHub from "@auth/core/providers/github"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import type { NextAuthConfig } from "next-auth"
 
-import { and, db, eq, prepared, sql, tableCreator } from "@builderai/db"
+import { and, db, eq, prepared, sql } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import type { WorkspacesJWTPayload } from "@builderai/db/validators"
@@ -44,7 +44,13 @@ export const authConfig = {
   },
   debug: process.env.NODE_ENV === "development",
   adapter: {
-    ...DrizzleAdapter(db.$primary, tableCreator),
+    ...DrizzleAdapter(db.$primary, {
+      usersTable: schema.users,
+      accountsTable: schema.accounts,
+      sessionsTable: schema.sessions,
+      verificationTokensTable: schema.verificationTokens,
+      authenticatorsTable: schema.authenticators,
+    }),
 
     // override the default create user
     async createUser(data) {

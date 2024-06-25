@@ -1,6 +1,6 @@
 import type { AdapterAccount } from "@auth/core/adapters"
 import { relations } from "drizzle-orm"
-import { integer, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
+import { boolean, integer, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid } from "../utils/sql"
@@ -57,6 +57,27 @@ export const verificationTokens = pgTableProject(
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+  })
+)
+
+export const authenticators = pgTableProject(
+  "authenticator",
+  {
+    credentialID: text("credentialID").notNull().unique(),
+    userId: cuid("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    providerAccountId: text("providerAccountId").notNull(),
+    credentialPublicKey: text("credentialPublicKey").notNull(),
+    counter: integer("counter").notNull(),
+    credentialDeviceType: text("credentialDeviceType").notNull(),
+    credentialBackedUp: boolean("credentialBackedUp").notNull(),
+    transports: text("transports"),
+  },
+  (authenticator) => ({
+    compositePK: primaryKey({
+      columns: [authenticator.userId, authenticator.credentialID],
+    }),
   })
 )
 

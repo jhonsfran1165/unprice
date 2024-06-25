@@ -1,10 +1,9 @@
 "use client"
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { type QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental"
 import type { TRPCLink } from "@trpc/client"
-import { TRPCClientError, loggerLink, unstable_httpBatchStreamLink } from "@trpc/client"
+import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client"
 import type { HTTPBatchStreamLinkOptions, HTTPHeaders } from "@trpc/react-query"
 import { createTRPCReact } from "@trpc/react-query"
 import type { AnyRootTypes } from "@trpc/server/unstable-core-do-not-import"
@@ -12,9 +11,7 @@ import { useState } from "react"
 
 import type { AppRouter } from "@builderai/api"
 import { transformer } from "@builderai/api/transformer"
-
-import { toastAction } from "~/lib/toast"
-import { getBaseUrl, lambdas } from "./shared"
+import { createQueryClient, getBaseUrl, lambdas } from "./shared"
 
 export const api = createTRPCReact<AppRouter>()
 
@@ -50,28 +47,21 @@ export const endingLinkClient = (opts?: {
     }
   }) satisfies TRPCLink<AppRouter>
 
-export function TRPCReactProvider(props: { children: React.ReactNode }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 5 * 1000,
-          },
-          mutations: {
-            onError: (err) => {
-              console.error(err)
+let clientQueryClientSingleton: QueryClient | undefined = undefined
 
-              if (err instanceof TRPCClientError) {
-                toastAction("error", err.message)
-              } else {
-                toastAction("error-contact")
-              }
-            },
-          },
-        },
-      })
-  )
+const getQueryClient = () => {
+  if (typeof window === "undefined") {
+    // Server: always make a new query client
+    return createQueryClient()
+  }
+
+  // Browser: use singleton pattern to keep the same query client
+  clientQueryClientSingleton ??= createQueryClient(true)
+  return clientQueryClientSingleton
+}
+
+export function TRPCReactProvider(props: { children: React.ReactNode }) {
+  const queryClient = getQueryClient()
 
   const [trpcClient] = useState(() =>
     api.createClient({
@@ -82,11 +72,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             (opts.direction === "down" && opts.result instanceof Error),
         }),
         endingLinkClient({
-          headers: () => {
-            const headers = new Headers()
-            headers.set("x-trpc-source", "nextjs-react")
-            return headers
-          },
+          headers: { "x-trpc-source": "react-query" },
         }),
       ],
     })
@@ -95,9 +81,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
   return (
     <api.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <ReactQueryStreamedHydration transformer={transformer}>
-          {props.children}
-        </ReactQueryStreamedHydration>
+        {props.children}
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </api.Provider>

@@ -64,7 +64,7 @@ export const verifyFeature = async ({
       default:
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Error verifying feature",
+          message: `Error verifying feature: ${err.toString()}`,
         })
     }
   }
@@ -161,7 +161,7 @@ export const reportUsageFeature = async ({
       default:
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Error verifying feature",
+          message: `Error verifying feature: ${err.toString()}`,
         })
     }
   }

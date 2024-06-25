@@ -28,6 +28,11 @@ const handler = auth(async (req) => {
         req,
       }),
     onError: ({ error, path }) => {
+      if (error.code === "INTERNAL_SERVER_ERROR") {
+        // TODO: send to bug reporting
+        console.error("Something went wrong", error)
+      }
+
       console.info("❌  Error in tRPC handler (edge) on path", path)
       console.error(error)
     },
