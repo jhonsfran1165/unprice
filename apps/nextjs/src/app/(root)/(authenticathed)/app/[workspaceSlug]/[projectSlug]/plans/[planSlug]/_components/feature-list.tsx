@@ -61,7 +61,7 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
         </div>
       </div>
       <ScrollArea className="h-[750px] pb-4">
-        <div className="flex h-[730px] flex-col gap-2 px-4 pt-0">
+        <div className="flex h-[730px] flex-col gap-2 px-4 pt-1">
           {isFetching && (
             <div className="flex h-full items-center justify-center">
               <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2 border-t-2" />

@@ -11,7 +11,7 @@ import { forwardRef, useState } from "react"
 import { type PlanVersionFeatureDragDrop, currencySymbol } from "@builderai/db/validators"
 import { Badge } from "@builderai/ui/badge"
 import { Button } from "@builderai/ui/button"
-import { cn } from "@builderai/ui/utils"
+import { cn, focusRing } from "@builderai/ui/utils"
 
 import { Ping } from "~/components/ping"
 import { api } from "~/trpc/client"
@@ -41,7 +41,7 @@ const featureVariants = cva(
 
 export interface FeaturePlanProps
   extends React.ComponentPropsWithoutRef<"div">,
-    VariantProps<typeof featureVariants> {
+  VariantProps<typeof featureVariants> {
   planFeatureVersion: PlanVersionFeatureDragDrop
   mode: "Feature" | "FeaturePlan"
   disabled?: boolean
@@ -83,7 +83,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
       className={cn(featureVariants({ variant, className }), {
         "border-background-borderHover bg-background-bgHover relative z-0 border-2 shadow-sm":
           mode === "FeaturePlan" && active?.featureId === planFeatureVersion.featureId,
-      })}
+      }, focusRing)}
       onClick={handleClick}
       onKeyDown={handleKeyDown} // Add onKeyDown event listener
       role="button" // Add the role attribute to indicate interactive nature
@@ -216,19 +216,18 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
                 <div className="line-clamp-1 pr-3 text-xs font-light">
                   {/* // TODO: fix this */}
                   {planFeatureVersion?.config?.price
-                    ? `${
-                        planFeatureVersion?.config?.price.dinero.amount === 0
-                          ? "Free"
-                          : planFeatureVersion?.config?.units
-                            ? `${toDecimal(
-                                dinero(planFeatureVersion?.config?.price.dinero),
-                                ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
-                              )} per ${planFeatureVersion?.config?.units} units`
-                            : toDecimal(
-                                dinero(planFeatureVersion?.config?.price.dinero),
-                                ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
-                              )
-                      }`
+                    ? `${planFeatureVersion?.config?.price.dinero.amount === 0
+                      ? "Free"
+                      : planFeatureVersion?.config?.units
+                        ? `${toDecimal(
+                          dinero(planFeatureVersion?.config?.price.dinero),
+                          ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
+                        )} per ${planFeatureVersion?.config?.units} units`
+                        : toDecimal(
+                          dinero(planFeatureVersion?.config?.price.dinero),
+                          ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
+                        )
+                    }`
                     : planFeatureVersion.config?.tiers?.length?.toString()
                       ? `${planFeatureVersion?.config?.tiers?.length ?? 0} tiers`
                       : null}

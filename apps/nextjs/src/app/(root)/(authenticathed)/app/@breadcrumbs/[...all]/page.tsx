@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@builderai/ui/dropdown-menu"
+import { cn, focusRing } from "@builderai/ui/utils"
 import { Fragment } from "react"
 import { SuperLink } from "~/components/super-link"
 
@@ -50,16 +51,16 @@ export default function Page(props: {
   const breadcrumbPage = all.pop()
 
   return (
-    <Breadcrumb>
+    <Breadcrumb className="h-[36px] flex items-center w-full">
       <BreadcrumbList>
         {all.length > 3 ? (
           <Fragment>
-            <BreadcrumbItem>
+            <BreadcrumbItem className="border-primary">
               <BreadcrumbPage>
                 <DropdownMenu>
-                  <DropdownMenuTrigger>
+                  <DropdownMenuTrigger className={cn(focusRing)}>
                     <BreadcrumbLink asChild>
-                      <BreadcrumbEllipsis className="text-xs text-background-solid" />
+                      <BreadcrumbEllipsis className={"text-xs text-background-solid"} />
                     </BreadcrumbLink>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">

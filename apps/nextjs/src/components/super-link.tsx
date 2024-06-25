@@ -2,6 +2,7 @@
 // See it in action: https://demo.yournextstore.com
 "use client"
 
+import { cn, focusRing } from "@builderai/ui/utils"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { ComponentPropsWithRef } from "react"
@@ -18,6 +19,7 @@ export const SuperLink = (props: ComponentPropsWithRef<typeof Link>) => {
 
   return (
     <Link
+      className={cn("cursor-pointer", focusRing, props.className)}
       {...props}
       prefetch={false}
       scroll={false}

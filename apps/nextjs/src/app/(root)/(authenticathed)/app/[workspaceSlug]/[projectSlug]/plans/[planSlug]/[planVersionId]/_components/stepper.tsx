@@ -4,7 +4,7 @@ import { Combine, Target } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 import { Separator } from "@builderai/ui/separator"
-import { cn } from "@builderai/ui/utils"
+import { cn, focusRing } from "@builderai/ui/utils"
 
 import { SuperLink } from "~/components/super-link"
 
@@ -30,7 +30,7 @@ export default function Stepper({
           href={`${baseUrl}`}
           className={cn("flex flex-row items-center gap-2 text-xs", {
             "text-primary-text": ["overview", "review"].includes(step),
-          })}
+          }, focusRing)}
         >
           <Combine className="h-5 w-5" />
           <span className="hidden sm:inline">Features</span>
@@ -46,7 +46,7 @@ export default function Stepper({
           className={cn("flex flex-row items-center gap-2 text-xs", {
             "text-primary-text": ["review"].includes(step),
             "hover:text-background-textContrast": step !== "review",
-          })}
+          }, focusRing)}
         >
           <Target className="h-5 w-5" />
           <span className="hidden sm:inline">Review</span>

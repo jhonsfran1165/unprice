@@ -2,7 +2,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { ChevronRight, MoreHorizontal } from "lucide-react"
 import * as React from "react"
 
-import { cn } from "./utils"
+import { cn, focusRing } from "./utils"
 
 const Breadcrumb = React.forwardRef<
   HTMLElement,
@@ -28,7 +28,7 @@ BreadcrumbList.displayName = "BreadcrumbList"
 
 const BreadcrumbItem = React.forwardRef<HTMLLIElement, React.ComponentPropsWithoutRef<"li">>(
   ({ className, ...props }, ref) => (
-    <li ref={ref} className={cn("inline-flex items-center gap-1.5", className)} {...props} />
+    <li ref={ref} className={cn("inline-flex items-center gap-1.5", className, focusRing)} {...props} />
   )
 )
 BreadcrumbItem.displayName = "BreadcrumbItem"
@@ -44,7 +44,7 @@ const BreadcrumbLink = React.forwardRef<
   return (
     <Comp
       ref={ref}
-      className={cn("hover:text-foreground transition-colors", className)}
+      className={cn("hover:text-foreground transition-colors", className, focusRing)}
       {...props}
     />
   )

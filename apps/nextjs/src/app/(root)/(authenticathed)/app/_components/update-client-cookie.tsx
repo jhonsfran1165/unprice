@@ -13,10 +13,24 @@ export function UpdateClientCookie({
   projectSlug,
   workspaceSlug,
 }: { projectSlug: string | null; workspaceSlug: string | null }) {
+  // just to make we sync the cookie with the current project and workspace
+  const onFocus = () => {
+    if (document) {
+      document.cookie = `${COOKIE_NAME_PROJECT}=${projectSlug}; path=/`
+      document.cookie = `${COOKIE_NAME_WORKSPACE}=${workspaceSlug}; path=/`
+    }
+  }
+
   useEffect(() => {
     if (document) {
       document.cookie = `${COOKIE_NAME_PROJECT}=${projectSlug}; path=/`
       document.cookie = `${COOKIE_NAME_WORKSPACE}=${workspaceSlug}; path=/`
+    }
+
+    window.addEventListener("focus", onFocus)
+
+    return () => {
+      window.removeEventListener("focus", onFocus)
     }
   }, [projectSlug, workspaceSlug])
 
