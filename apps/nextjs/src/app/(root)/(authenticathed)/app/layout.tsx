@@ -16,8 +16,8 @@ export default async function RootLayout({
       {sidebar}
       <main className="lg:pl-64 xl:pl-72">
         {header}
-        <div className="px-2 md:px-6 py-2 md:py-4">{breadcrumbs}</div>
-        <div className="lg:px-6 py-4">{children}</div>
+        <div className="px-4 md:px-6">{breadcrumbs}</div>
+        <div className="py-4">{children}</div>
       </main>
     </div>
   )

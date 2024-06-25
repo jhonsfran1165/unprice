@@ -144,7 +144,7 @@ export const planRouter = createTRPCRouter({
             and(eq(plan.projectId, project.id), eq(plan.defaultPlan, true)),
         })
 
-        if (defaultPlanData?.id) {
+        if (defaultPlanData && defaultPlanData.id !== id) {
           throw new TRPCError({
             code: "CONFLICT",
             message: "There is already a default plan for this project",

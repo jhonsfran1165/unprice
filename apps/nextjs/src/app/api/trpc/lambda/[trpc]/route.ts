@@ -4,7 +4,7 @@ import { createTRPCContext } from "@builderai/api"
 import { lambdaRouter } from "@builderai/api/lambda"
 import { auth } from "@builderai/auth/server"
 
-import { setCorsHeaders } from "~/app/api/_enableCors"
+// import { setCorsHeaders } from "~/app/api/_enableCors"
 
 export const preferredRegion = ["fra1"]
 export const runtime = "nodejs"
@@ -31,7 +31,6 @@ const handler = auth(async (req) => {
     },
   })
 
-  setCorsHeaders(response)
   return response
 })
 

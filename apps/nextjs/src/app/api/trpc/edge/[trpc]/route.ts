@@ -6,8 +6,6 @@ import { createTRPCContext } from "@builderai/api"
 import { edgeRouter } from "@builderai/api/edge"
 import { auth } from "@builderai/auth/server"
 
-import { CorsOptions, setCorsHeaders } from "../../../_enableCors"
-
 export const runtime = "edge"
 export const preferredRegion = ["fra1"]
 
@@ -35,8 +33,8 @@ const handler = auth(async (req) => {
     // https://trpc.io/docs/server/caching
   })
 
-  setCorsHeaders(response)
+  // setCorsHeaders(response)
   return response
 })
 
-export { handler as GET, CorsOptions as OPTIONS, handler as POST }
+export { handler as GET, handler as POST }
