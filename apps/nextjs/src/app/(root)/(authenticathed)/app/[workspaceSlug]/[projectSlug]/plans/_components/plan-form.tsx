@@ -89,6 +89,17 @@ export function PlanForm({
   const deleteFeature = api.plans.remove.useMutation({
     onSuccess: () => {
       toastAction("deleted")
+
+      setDialogOpen?.(false)
+      // Only needed when the form is inside a uncontrolled dialog - normally updates
+      // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
+      if (!setDialogOpen) {
+        const escKeyEvent = new KeyboardEvent("keydown", {
+          key: "Escape",
+        })
+        document.dispatchEvent(escKeyEvent)
+      }
+
       form.reset()
       router.refresh()
     },
