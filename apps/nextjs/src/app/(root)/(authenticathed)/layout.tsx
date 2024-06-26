@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 import { Toaster } from "@builderai/ui/sonner"
 import { TooltipProvider } from "@builderai/ui/tooltip"
@@ -16,6 +17,7 @@ export default async function AuthenticatedLayout(props: {
       </TRPCReactProvider>
       <TailwindIndicator />
       <Analytics />
+      <SpeedInsights />
       <Toaster richColors closeButton position="bottom-left" />
     </>
   )
