@@ -1,10 +1,13 @@
 import { Button } from "@builderai/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
-import { Fragment } from "react"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
 
 export default function WorkSpaceSettingsDangerLoading() {
   return (
-    <Fragment>
+    <DashboardShell
+      header={<HeaderTab title="General Settings" description="Manage your workspace settings" />}
+    >
       <Card className="bg-muted animate-pulse">
         <CardHeader>
           <CardTitle>Workspace Name</CardTitle>
@@ -27,6 +30,6 @@ export default function WorkSpaceSettingsDangerLoading() {
           </Button>
         </CardFooter>
       </Card>
-    </Fragment>
+    </DashboardShell>
   )
 }

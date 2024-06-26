@@ -9,7 +9,9 @@ import { api } from "~/trpc/server"
 export default function BillingPage() {
   return (
     <DashboardShell
-      header={<HeaderTab title="General Settings" description="Manage your workspace settings" />}
+      header={
+        <HeaderTab title="Billing Settings" description="Manage your payments for this workspace" />
+      }
     >
       <Fragment>
         <SubscriptionCard />

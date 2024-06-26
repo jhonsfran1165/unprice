@@ -1,4 +1,4 @@
-// import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react"
 
 import { Toaster } from "@builderai/ui/sonner"
 import { TooltipProvider } from "@builderai/ui/tooltip"
@@ -15,7 +15,7 @@ export default async function AuthenticatedLayout(props: {
         <TooltipProvider delayDuration={300}>{props.children}</TooltipProvider>
       </TRPCReactProvider>
       <TailwindIndicator />
-      {/* <Analytics /> */}
+      <Analytics />
       <Toaster richColors closeButton position="bottom-left" />
     </>
   )

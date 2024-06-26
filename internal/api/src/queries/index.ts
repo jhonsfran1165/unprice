@@ -252,7 +252,7 @@ export const reportUsageQuery = async ({
         : null
     })
     .catch((error) => {
-      logger.error("Error reporting usage", {
+      logger.error("Error reporting usage to the database reportUsageQuery", {
         error: JSON.stringify(error),
         projectId,
         subscriptionItemId,
@@ -383,7 +383,7 @@ export const createUsageQuery = async ({
         : null
     })
     .catch((error) => {
-      logger.error("Error reporting usage", {
+      logger.error("Error reporting usage to the database createUsageQuery", {
         error: JSON.stringify(error),
         projectId,
       })

@@ -2,6 +2,8 @@ import { searchDataParamsSchema } from "@builderai/db/validators"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 
 import { DataTable } from "~/components/data-table/data-table"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
 import { api } from "~/trpc/server"
 import { InviteMemberDialog } from "./_components/invite-member-dialog"
 import { columns as columnsInvites } from "./_components/table-invites/columns"
@@ -28,17 +30,20 @@ export default async function WorkspaceMembersPage(props: {
   const { invites } = await api.workspaces.listInvites(filter)
 
   return (
-    <div className="flex flex-col">
+    <DashboardShell
+      header={
+        <HeaderTab
+          title="Members Settings"
+          description="Manage your users for this workspace"
+          action={<InviteMemberDialog workspaceSlug={""} />}
+        />
+      }
+    >
       <Tabs defaultValue="members" className="space-y-4">
-        <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="invites">Invites</TabsTrigger>
-          </TabsList>
-
-          <InviteMemberDialog workspaceSlug={props.params.workspaceSlug} />
-        </div>
-
+        <TabsList>
+          <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="invites">Invites</TabsTrigger>
+        </TabsList>
         <TabsContent value="members" className="space-y-4">
           <DataTable
             className="mt-10"
@@ -65,6 +70,6 @@ export default async function WorkspaceMembersPage(props: {
           />
         </TabsContent>
       </Tabs>
-    </div>
+    </DashboardShell>
   )
 }

@@ -13,6 +13,7 @@ import {
 } from "@builderai/ui/card"
 import { Activity, ChevronRight, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
 import { cn } from "@builderai/ui/utils"
+import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
@@ -23,7 +24,7 @@ export default async function DashboardPage(props: {
   const { projectSlug, workspaceSlug } = props.params
 
   return (
-    <div className="px-2">
+    <DashboardShell>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -90,7 +91,7 @@ export default async function DashboardPage(props: {
           <RecentIngestions projectSlug={projectSlug} workspaceSlug={workspaceSlug} />
         </Suspense>
       </div>
-    </div>
+    </DashboardShell>
   )
 }
 

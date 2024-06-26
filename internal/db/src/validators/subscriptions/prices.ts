@@ -60,7 +60,7 @@ export const calculateFlatPricePlan = ({
   const displayAmount = toDecimal(
     total,
     ({ value, currency }) =>
-      `${currencySymbol(currency.code as Currency)}${Number.parseFloat(value)}`
+      `${currencySymbol(currency.code as Currency)}${Number.parseFloat(value).toFixed(2)}`
   )
 
   return Ok({

@@ -3,11 +3,18 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@builderai
 import { Skeleton } from "@builderai/ui/skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
+import { InviteMemberDialog } from "./_components/invite-member-dialog"
 
-export default function WorkSpaceSettingsDangerLoading() {
+export default function WorkSpaceSettingsMembersLoading() {
   return (
     <DashboardShell
-      header={<HeaderTab title="General Settings" description="Manage your workspace settings" />}
+      header={
+        <HeaderTab
+          title="Members Settings"
+          description="Manage your users for this workspace"
+          action={<InviteMemberDialog workspaceSlug={""} />}
+        />
+      }
     >
       <Card className="bg-muted animate-pulse">
         <CardHeader>

@@ -52,8 +52,8 @@ export function RenameProjectForm(props: {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data: RenameProject) => {
-          renameProject.mutate(data)
+        onSubmit={form.handleSubmit(async (data: RenameProject) => {
+          await renameProject.mutateAsync(data)
         })}
         className="space-y-2"
       >

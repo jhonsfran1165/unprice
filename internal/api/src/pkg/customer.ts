@@ -471,7 +471,7 @@ export class UnpriceCustomer {
             latency: performance.now() - start,
           })
           .catch((error) =>
-            this.logger.error("Error reporting usage", {
+            this.logger.error("Error reporting usage to analytics verifyFeature", {
               error: JSON.stringify(error),
               analyticsPayload,
             })
@@ -583,7 +583,7 @@ export class UnpriceCustomer {
               customerId: customerId,
             })
             .catch((error) => {
-              this.logger.error("Error reporting usage ingestFeaturesUsage", {
+              this.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
                 error: JSON.stringify(error),
                 subItem: subItem,
                 usage: usage,
