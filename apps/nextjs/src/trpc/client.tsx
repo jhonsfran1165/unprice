@@ -56,7 +56,7 @@ const getQueryClient = () => {
   }
 
   // Browser: use singleton pattern to keep the same query client
-  clientQueryClientSingleton ??= createQueryClient(true)
+  clientQueryClientSingleton ??= createQueryClient()
   return clientQueryClientSingleton
 }
 

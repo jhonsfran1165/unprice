@@ -8,7 +8,7 @@ import { auth } from "@builderai/auth/server"
 
 import { CorsOptions, setCorsHeaders } from "../../../_enableCors"
 
-export const runtime = "edge"
+export const runtime = "nodejs"
 export const preferredRegion = ["fra1"]
 
 const handler = auth(async (req) => {

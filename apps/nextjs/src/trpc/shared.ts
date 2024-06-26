@@ -13,7 +13,7 @@ export const getBaseUrl = () => {
 // lambdas keys must match the first part of the path
 export const lambdas = ["ingestion"]
 
-export const createQueryClient = (isClient = false) =>
+export const createQueryClient = () =>
   new QueryClient({
     defaultOptions: {
       queries: {
@@ -21,21 +21,17 @@ export const createQueryClient = (isClient = false) =>
         // queries aren't immediately refetched on the client
         staleTime: 1000 * 30,
       },
-      ...(isClient
-        ? {
-            mutations: {
-              onError: (err) => {
-                console.error(err)
+      mutations: {
+        onError: (err) => {
+          console.error(err)
 
-                if (err instanceof TRPCClientError) {
-                  toastAction("error", err.message)
-                } else {
-                  toastAction("error-contact")
-                }
-              },
-            },
+          if (err instanceof TRPCClientError) {
+            toastAction("error", err.message)
+          } else {
+            toastAction("error-contact")
           }
-        : {}),
+        },
+      },
       dehydrate: {
         // include pending queries in dehydration
         // this allows us to prefetch in RSC and
