@@ -90,7 +90,7 @@ export const createTRPCContext = async (opts: {
         namespace: "unprice-api",
         dataset: "unprice-api",
         service: "api", // default service name
-        flushAfterMs: 10000, // flush after 10 secs
+        flushAfterMs: 3000, // flush after 3 secs
         ctx: {
           waitUntil, // flush will be executed as a background task
         },

@@ -70,7 +70,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     props: Stripe.ProductCreateParams & { id: string }
   ): Promise<Result<Stripe.Product, FetchError>> {
     try {
-      const { id, ...rest } = props
+      const { id, type, ...rest } = props
       const product = await this.client.products.retrieve(id).catch(() => null)
 
       if (product) {
@@ -86,7 +86,8 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       const e = error as Error
 
       this.logger.error("Error upserting product", {
-        error: e,
+        error: JSON.stringify(e.message),
+        context: e,
         ...props,
       })
 
