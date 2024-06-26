@@ -43,6 +43,7 @@ export function CustomerForm({
         email: z
           .string()
           .min(3)
+          .email()
           .refine(async (slug) => {
             const { exist } = await customerExist.mutateAsync({
               slug: slug,

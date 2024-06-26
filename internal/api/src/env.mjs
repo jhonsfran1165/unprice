@@ -16,6 +16,7 @@ export const env = createEnv({
     VERCEL_AUTH_BEARER_TOKEN: z.string(),
     TINYBIRD_TOKEN: z.string(),
     BASELIME_APIKEY: z.string(),
+    CACHE_ENCRYPTION_KEY: z.string(),
     EMIT_METRICS_LOGS: z
       .string()
       .optional()

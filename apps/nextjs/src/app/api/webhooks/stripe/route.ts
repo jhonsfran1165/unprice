@@ -5,6 +5,8 @@ import { handleEvent, stripe } from "@builderai/stripe"
 
 import { env } from "~/env.mjs"
 
+export const preferredRegion = ["fra1"]
+
 export async function POST(req: NextRequest) {
   const payload = await req.text()
   const signature = req.headers.get("Stripe-Signature")!

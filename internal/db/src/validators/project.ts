@@ -28,6 +28,7 @@ export const projectExtendedSelectSchema = projectSelectBaseSchema
     enabled: true,
     workspaceId: true,
     slug: true,
+    defaultCurrency: true,
   })
   .extend({
     workspace: workspaceSelectBase.pick({

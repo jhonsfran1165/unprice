@@ -1,4 +1,10 @@
-import type { FeatureType, Month, SubscriptionItem, Year } from "@builderai/db/validators"
+import type {
+  ApiKeyExtended,
+  FeatureType,
+  Month,
+  SubscriptionItem,
+  Year,
+} from "@builderai/db/validators"
 
 export type CurrentUsageCached = {
   usage: number
@@ -13,6 +19,7 @@ export type SubscriptionItemCached = Omit<SubscriptionItem, "createdAt" | "updat
 }
 
 export type CacheNamespaces = {
+  apiKeyByHash: ApiKeyExtended | null
   customerFeatureCurrentUsage: CurrentUsageCached | null
   featureByCustomerId: SubscriptionItemCached | null
   subscriptionsByCustomerId: Array<string>

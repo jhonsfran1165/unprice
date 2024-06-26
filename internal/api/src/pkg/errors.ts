@@ -15,6 +15,15 @@ export const apiCustomerErrorSchema = z.enum([
   "UNHANDLED_ERROR",
 ])
 
+export const apiKeyErrorSchema = z.enum([
+  "NOT_FOUND",
+  "REVOKED",
+  "EXPIRED",
+  "PROJECT_DISABLED",
+  "WORKSPACE_DISABLED",
+  "UNHANDLED_ERROR",
+])
+
 export const deniedReasonSchema = z.enum([
   "RATE_LIMITED",
   "USAGE_EXCEEDED",
@@ -23,6 +32,7 @@ export const deniedReasonSchema = z.enum([
 ])
 
 export type ApiCustomerError = z.infer<typeof apiCustomerErrorSchema>
+export type ApiKeyError = z.infer<typeof apiKeyErrorSchema>
 export type DenyReason = z.infer<typeof deniedReasonSchema>
 
 export class UnPriceCustomerError extends BaseError<{ customerId: string }> {
@@ -42,6 +52,23 @@ export class UnPriceCustomerError extends BaseError<{ customerId: string }> {
       context: {
         customerId,
       },
+    })
+    this.code = code
+  }
+}
+
+export class UnPriceApiKeyError extends BaseError<{ customerId: string }> {
+  public readonly retry = false
+  public readonly name = UnPriceApiKeyError.name
+  public readonly code: ApiKeyError
+
+  constructor({
+    code,
+  }: {
+    code: ApiKeyError
+  }) {
+    super({
+      message: "Apikey API error",
     })
     this.code = code
   }

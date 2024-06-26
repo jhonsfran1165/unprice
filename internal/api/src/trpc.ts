@@ -104,7 +104,7 @@ export const createTRPCContext = async (opts: {
     ? new LogdrainMetrics({ requestId, logger })
     : new NoopMetrics()
 
-  const cache = initCache(
+  const cache = await initCache(
     {
       waitUntil,
     },

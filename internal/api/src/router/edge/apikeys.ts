@@ -106,6 +106,15 @@ export const apiKeyRouter = createTRPCRouter({
         })
       }
 
+      // remove from cache
+      opts.ctx.waitUntil(
+        Promise.all(
+          result.map(async (apikey) =>
+            opts.ctx.cache.apiKeyByHash.remove(await utils.hashStringSHA256(apikey.key))
+          )
+        )
+      )
+
       return { success: true, numRevoked: result.length }
     }),
 

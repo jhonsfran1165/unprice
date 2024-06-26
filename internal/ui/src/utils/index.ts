@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export const focusRing = [
   // base
-  "ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 focus:outline-none",
+  "ring-offset-background focus-visible:outline-1 focus-visible:ring-none focus-visible:ring-ring focus-visible:ring-offset-1 focus:outline-ring focus:outline-1",
 ]
 
 export const focusInput = [

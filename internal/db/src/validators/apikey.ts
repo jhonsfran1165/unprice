@@ -2,6 +2,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import * as schema from "../schema"
+import { projectExtendedSelectSchema } from "./project"
 
 export const insertApiKeySchema = createInsertSchema(schema.apikeys, {
   expiresAt: z.coerce.date().optional(),
@@ -21,4 +22,18 @@ export const selectApiKeyHeaderSchema = selectApiKeySchema.pick({
   key: true,
 })
 
+export const ApiKeyExtended = selectApiKeySchema
+  .pick({
+    id: true,
+    projectId: true,
+    key: true,
+    expiresAt: true,
+    revokedAt: true,
+  })
+  .extend({
+    project: projectExtendedSelectSchema,
+  })
+
 export type CreateApiKey = z.infer<typeof createApiKeySchema>
+export type ApiKey = z.infer<typeof selectApiKeySchema>
+export type ApiKeyExtended = z.infer<typeof ApiKeyExtended>

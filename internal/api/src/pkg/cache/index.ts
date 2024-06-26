@@ -1,5 +1,5 @@
 import { type Cache as C, type Context, Namespace, createCache } from "@unkey/cache"
-import { withMetrics } from "@unkey/cache/middleware"
+import { withEncryption, withMetrics } from "@unkey/cache/middleware"
 import { MemoryStore, type Store } from "@unkey/cache/stores"
 
 import { env } from "../../env.mjs"
@@ -10,16 +10,13 @@ import { UpstashStore } from "./stores/upstash"
 
 const persistentMap = new Map()
 
-export function initCache(c: Context, metrics: Metrics): C<CacheNamespaces> {
-  // biome-ignore lint/suspicious/noExplicitAny: because i like risky things
-  const stores: Array<Store<CacheNamespace, any>> = []
-
+export async function initCache(c: Context, metrics: Metrics): Promise<C<CacheNamespaces>> {
+  // in memory cache
   const memory = new MemoryStore<CacheNamespace, CacheNamespaces[CacheNamespace]>({
     persistentMap,
   })
 
-  stores.push(memory)
-
+  // redis cache
   const upstash: Store<CacheNamespace, CacheNamespaces[CacheNamespace]> | undefined =
     env.UPSTASH_REDIS_REST_TOKEN && env.UPSTASH_REDIS_REST_URL
       ? new UpstashStore({
@@ -28,20 +25,29 @@ export function initCache(c: Context, metrics: Metrics): C<CacheNamespaces> {
         })
       : undefined
 
-  if (upstash) {
-    stores.push(upstash)
-  }
-
   const metricsMiddleware = withMetrics(metrics)
-  const storesWithMetrics = stores.map((s) => metricsMiddleware.wrap(s))
+  const encryptionMiddleware = await withEncryption(env.CACHE_ENCRYPTION_KEY)
+
+  // add metrics middleware
+  const upstashStoreWithMetrics = upstash ? metricsMiddleware.wrap(upstash) : undefined
+  const memoryStoreWithMetrics = metricsMiddleware.wrap(memory)
 
   const defaultOpts = {
-    stores: storesWithMetrics,
+    stores: [memoryStoreWithMetrics, ...(upstashStoreWithMetrics ? [upstashStoreWithMetrics] : [])],
     fresh: CACHE_FRESHNESS_TIME_MS,
     stale: CACHE_STALENESS_TIME_MS,
   }
 
   return createCache({
+    apiKeyByHash: new Namespace<CacheNamespaces["apiKeyByHash"]>(c, {
+      ...defaultOpts,
+      // add encryption middleware for this namespace
+      stores: [
+        ...(upstashStoreWithMetrics ? [encryptionMiddleware.wrap(upstashStoreWithMetrics)] : []),
+        memoryStoreWithMetrics,
+      ],
+      fresh: 60 * 1000 * 10, // 1 minute
+    }),
     featureByCustomerId: new Namespace<CacheNamespaces["featureByCustomerId"]>(c, {
       ...defaultOpts,
       fresh: 60 * 1000 * 10, // 10 minutes

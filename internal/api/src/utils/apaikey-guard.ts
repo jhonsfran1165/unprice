@@ -1,8 +1,7 @@
 import { TRPCError } from "@trpc/server"
 
-import { eq, prepared } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
-
+import { UnpriceApiKey } from "../pkg/apikeys"
+import { UnPriceApiKeyError } from "../pkg/errors"
 import type { Context } from "../trpc"
 
 export const apikeyGuard = async ({
@@ -19,51 +18,36 @@ export const apikeyGuard = async ({
     })
   }
 
-  // Check db for API key
-  // TODO: does it make sense to cache this in redis
-  const apiKeyData = await prepared.apiKeyPrepared.execute({
-    apikey,
+  const ApiKey = new UnpriceApiKey({
+    cache: ctx.cache,
+    db: ctx.db,
+    analytics: ctx.analytics,
+    logger: ctx.logger,
+    metrics: ctx.metrics,
+    waitUntil: ctx.waitUntil,
   })
 
-  if (!apiKeyData) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Api key not found" })
-  }
+  const apiKeyData = await ApiKey.getApiKey({
+    key: apikey,
+  })
 
-  if (apiKeyData.revokedAt !== null) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Api key is revoked" })
+  if (apiKeyData.err) {
+    const err = apiKeyData.err
+    switch (true) {
+      case err instanceof UnPriceApiKeyError:
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: err.code,
+        })
+      default:
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Error getting apikey: ${err.toString()}`,
+        })
+    }
   }
-
-  if (apiKeyData.expiresAt && apiKeyData.expiresAt < new Date()) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Api key is expired" })
-  }
-
-  if (apiKeyData.project.enabled === false) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Project is disabled and all API requests will be rejected. Please contact support",
-    })
-  }
-
-  if (apiKeyData.project.workspace.enabled === false) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message:
-        "Workspace is disabled and all API requests will be rejected. Please contact support",
-    })
-  }
-
-  // update last used in background
-  ctx.waitUntil(
-    ctx.db
-      .update(schema.apikeys)
-      .set({
-        lastUsed: new Date(),
-      })
-      .where(eq(schema.apikeys.id, apiKeyData.id))
-      .execute()
-  )
 
   return {
-    apiKey: apiKeyData,
+    apiKey: apiKeyData.val,
   }
 }

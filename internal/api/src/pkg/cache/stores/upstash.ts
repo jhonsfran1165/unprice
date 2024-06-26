@@ -6,8 +6,8 @@ import { Redis } from "@upstash/redis"
 import superjson from "superjson"
 import { env } from "../../../env.mjs"
 
-export const LATENCY_LOGGING = env.NODE_ENV === "development"
-export const ENABLE_AUTO_PIPELINING = true
+const LATENCY_LOGGING = env.NODE_ENV === "development"
+const ENABLE_AUTO_PIPELINING = true
 
 export type UpstashCacheConfig = {
   url: string
@@ -18,13 +18,10 @@ export type UpstashCacheConfig = {
 }
 
 export class UpstashStore<TNamespace extends string, TValue> implements Store<TNamespace, TValue> {
-  private readonly config: UpstashCacheConfig
-  public readonly name = "Upstash"
+  public readonly name = "upstash"
   private readonly client: Redis
 
   constructor(config: UpstashCacheConfig) {
-    this.config = config
-
     this.client = new Redis({
       token: config.token,
       url: config.url,

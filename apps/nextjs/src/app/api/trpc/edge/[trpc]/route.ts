@@ -8,6 +8,7 @@ import { auth } from "@builderai/auth/server"
 
 import { CorsOptions, setCorsHeaders } from "../../../_enableCors"
 
+// TODO: vercel is having trouble with the runtime edge so for now we are using nodejs
 export const runtime = "nodejs"
 export const preferredRegion = ["fra1"]
 
