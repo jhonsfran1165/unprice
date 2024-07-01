@@ -1,5 +1,6 @@
-import { type Database, eq, prepared } from "@builderai/db"
+import { type Database, eq } from "@builderai/db"
 
+import { apiKeyPrepared } from "@builderai/db/queries"
 import * as schema from "@builderai/db/schema"
 import { hashStringSHA256 } from "@builderai/db/utils"
 import type { ApiKeyExtended } from "@builderai/db/validators"
@@ -40,7 +41,7 @@ export class UnpriceApiKey {
   }): Promise<Result<ApiKeyExtended, UnPriceApiKeyError | FetchError>> {
     const apiKeyHash = await hashStringSHA256(opts.key)
     const res = await this.cache.apiKeyByHash.swr(apiKeyHash, async () => {
-      return await prepared.apiKeyPrepared.execute({
+      return await apiKeyPrepared.execute({
         apikey: opts.key,
       })
     })
@@ -62,7 +63,7 @@ export class UnpriceApiKey {
 
     // cache miss, get from db
     if (!res.val) {
-      const apikey = await prepared.apiKeyPrepared.execute({
+      const apikey = await apiKeyPrepared.execute({
         apikey: opts.key,
       })
 

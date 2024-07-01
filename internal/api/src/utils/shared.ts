@@ -1,4 +1,14 @@
+import { subscriptionItems, subscriptions } from "@builderai/db/schema"
+import { newId } from "@builderai/db/utils"
+import {
+  type ProjectExtended,
+  type SubscriptionItemConfig,
+  createDefaultSubscriptionConfig,
+  subscriptionInsertSchema,
+  subscriptionItemsConfigSchema,
+} from "@builderai/db/validators"
 import { TRPCError } from "@trpc/server"
+import type { z } from "zod"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
 import type { Context } from "../trpc"
@@ -167,4 +177,263 @@ export const reportUsageFeature = async ({
   }
 
   return val
+}
+
+const input = subscriptionInsertSchema.extend({
+  config: subscriptionItemsConfigSchema.optional(),
+})
+
+export const createSubscription = async ({
+  subscription,
+  ctx,
+  project,
+}: {
+  subscription: z.infer<typeof input>
+  project: ProjectExtended
+  ctx: Context
+}) => {
+  const {
+    planVersionId,
+    customerId,
+    config,
+    trialDays,
+    startDate,
+    endDate,
+    collectionMethod,
+    defaultPaymentMethodId,
+    metadata,
+  } = subscription
+
+  const versionData = await ctx.db.query.versions.findFirst({
+    with: {
+      planFeatures: {
+        with: {
+          feature: true,
+        },
+      },
+      plan: true,
+    },
+    where(fields, operators) {
+      return operators.and(
+        operators.eq(fields.id, planVersionId),
+        operators.eq(fields.projectId, project.id)
+      )
+    },
+  })
+
+  if (!versionData?.id) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Version not found. Please check the planVersionId",
+    })
+  }
+
+  if (versionData.status !== "published") {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "Plan version is not published, only published versions can be subscribed to",
+    })
+  }
+
+  if (!versionData.planFeatures || versionData.planFeatures.length === 0) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Plan version has no features",
+    })
+  }
+
+  const customerData = await ctx.db.query.customers.findFirst({
+    with: {
+      subscriptions: {
+        with: {
+          items: {
+            with: {
+              featurePlanVersion: {
+                with: {
+                  feature: true,
+                },
+              },
+            },
+          },
+        },
+        where: (sub, { eq }) => eq(sub.status, "active"),
+      },
+    },
+    where: (customer, operators) =>
+      operators.and(
+        operators.eq(customer.id, customerId),
+        operators.eq(customer.projectId, project.id)
+      ),
+  })
+
+  if (!customerData?.id) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Customer not found. Please check the customerId",
+    })
+  }
+
+  // check the active subscriptions of the customer.
+  // The plan version the customer is attempting to subscript can't have any feature that the customer already has
+  const newFeatures = versionData.planFeatures.map((f) => f.feature.slug)
+  const subscriptionFeatureSlugs = customerData.subscriptions.flatMap((sub) =>
+    sub.items.map((f) => f.featurePlanVersion.feature.slug)
+  )
+
+  const commonFeatures = subscriptionFeatureSlugs.filter((f) => newFeatures.includes(f))
+
+  if (commonFeatures.length > 0) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: `The customer is trying to subscribe to features that are already active in another subscription: ${commonFeatures.join(
+        ", "
+      )}`,
+    })
+  }
+
+  let configItemsSubscription: SubscriptionItemConfig[] = []
+
+  if (!config) {
+    // if no items are passed, configuration is created from the default quantities of the plan version
+    const { err, val } = createDefaultSubscriptionConfig({
+      planVersion: versionData,
+    })
+
+    if (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: err.message,
+      })
+    }
+
+    configItemsSubscription = val
+  } else {
+    configItemsSubscription = config
+  }
+
+  // execute this in a transaction
+  const subscriptionData = await ctx.db.transaction(async (trx) => {
+    // create the subscription
+    const subscriptionId = newId("subscription")
+
+    const newSubscription = await trx
+      .insert(subscriptions)
+      .values({
+        id: subscriptionId,
+        projectId: project.id,
+        planVersionId: versionData.id,
+        customerId: customerData.id,
+        startDate: startDate,
+        endDate: endDate,
+        autoRenew: true,
+        trialDays: trialDays,
+        isNew: true,
+        collectionMethod: collectionMethod,
+        status: "active",
+        metadata: metadata,
+        defaultPaymentMethodId: defaultPaymentMethodId,
+      })
+      .returning()
+      .then((re) => re[0])
+
+    if (!newSubscription) {
+      ctx.logger.error("Error while creating subscription", {
+        subscription: subscription,
+      })
+      trx.rollback()
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Error while creating subscription",
+      })
+    }
+
+    // add features to the subscription
+    await Promise.all(
+      configItemsSubscription.map((item) =>
+        trx.insert(subscriptionItems).values({
+          id: newId("subscription_item"),
+          projectId: newSubscription.projectId,
+          subscriptionId: newSubscription.id,
+          featurePlanVersionId: item.featurePlanId,
+          units: item.units,
+        })
+      )
+    ).catch((e) => {
+      ctx.logger.error("Error while creating subscription features", {
+        error: e,
+        configItemsSubscription,
+      })
+
+      trx.rollback()
+    })
+
+    return newSubscription
+  })
+
+  if (!subscriptionData) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Error creating subscription",
+    })
+  }
+
+  // every time a subscription is created, we save the subscription in the cache
+  ctx.waitUntil(
+    ctx.db.query.subscriptions
+      .findMany({
+        with: {
+          items: {
+            with: {
+              featurePlanVersion: {
+                with: {
+                  feature: true,
+                },
+              },
+            },
+          },
+        },
+        where: (sub, { eq, and }) =>
+          and(eq(sub.customerId, customerData.id), eq(sub.projectId, subscriptionData.projectId)),
+      })
+      .then(async (subscriptions) => {
+        if (!subscriptions || subscriptions.length === 0) {
+          // TODO: log error
+          console.error("Subscriptions not found")
+          return
+        }
+
+        const customerEntitlements = subscriptions.flatMap((sub) =>
+          sub.items.map((f) => f.featurePlanVersion.feature.slug)
+        )
+
+        const customerSubscriptions = subscriptions.map((sub) => sub.id)
+
+        return Promise.all([
+          // save the customer entitlements
+          ctx.cache.entitlementsByCustomerId.set(customerData.id, customerEntitlements),
+          // save the customer subscriptions
+          ctx.cache.subscriptionsByCustomerId.set(customerData.id, customerSubscriptions),
+          // save features
+          subscriptions.flatMap((sub) =>
+            sub.items.map((f) =>
+              ctx.cache.featureByCustomerId.set(
+                `${sub.customerId}:${f.featurePlanVersion.feature.slug}`,
+                {
+                  id: f.id,
+                  projectId: f.projectId,
+                  featurePlanVersionId: f.featurePlanVersion.id,
+                  subscriptionId: f.subscriptionId,
+                  units: f.units,
+                  featureType: f.featurePlanVersion.featureType,
+                }
+              )
+            )
+          ),
+        ])
+      })
+  )
+
+  return {
+    subscription: subscriptionData,
+  }
 }

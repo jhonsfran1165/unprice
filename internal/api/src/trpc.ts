@@ -1,3 +1,4 @@
+import "server-only"
 import { tracing } from "@baselime/trpc-opentelemetry-middleware"
 import type { Session } from "@builderai/auth/server"
 

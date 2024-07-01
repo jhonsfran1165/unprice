@@ -330,8 +330,8 @@ importers:
         specifier: 11.0.0-rc.421
         version: 11.0.0-rc.421
       '@unkey/cache':
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^1.0.2
+        version: 1.0.2
       '@upstash/ratelimit':
         specifier: ^1.0.1
         version: 1.2.1
@@ -344,6 +344,9 @@ importers:
       dinero.js:
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
+      server-only:
+        specifier: ^0.0.1
+        version: 0.0.1
       superjson:
         specifier: 2.2.1
         version: 2.2.1
@@ -6991,8 +6994,8 @@ packages:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: false
 
-  /@unkey/cache@1.0.0:
-    resolution: {integrity: sha512-IY/ZlLK+riFsyj4ZGNaaXwfEwWj5ztXJPQJE+MRBjSqsYdbcRXxJ+/hXs681jNR4YX/RhCja4GFp9PvUmOqdnw==}
+  /@unkey/cache@1.0.2:
+    resolution: {integrity: sha512-c7ZkAn55FpckYCzc2Ib1G//zKbBEcBKHg/ZkVazzE34kiQEsNhWp3d0jtAR8B56SB02bM6bduOkAbZKLrPkLlg==}
     dependencies:
       '@opentelemetry/api': 1.8.0
       '@unkey/error': 0.0.2

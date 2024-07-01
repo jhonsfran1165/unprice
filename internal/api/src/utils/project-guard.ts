@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server"
 
-import { prepared } from "@builderai/db"
+import { projectGuardPrepared } from "@builderai/db/queries"
 import type { ProjectExtended, User, WorkspaceRole } from "@builderai/db/validators"
 
 import type { Context } from "../trpc"
@@ -49,7 +49,7 @@ export const projectGuard = async ({
   // we execute this in a prepared statement to improve performance
   // INFO: keep in mind that this executes outside of the context of trpc
   // apart from checking the project is part of the workspace, we also check if the user has access to the workspace
-  const data = await prepared.projectGuardPrepared
+  const data = await projectGuardPrepared
     .execute({
       projectId: projectId,
       projectSlug: projectSlug,

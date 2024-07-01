@@ -1,6 +1,10 @@
 import { type Database, and, eq, getTableColumns, sql } from "@builderai/db"
 
 import {
+  getCustomerFeatureUsagePrepared,
+  getFeatureItemBySlugPrepared,
+} from "@builderai/db/queries"
+import {
   features,
   planVersionFeatures,
   subscriptionItems,
@@ -16,56 +20,23 @@ export const getCustomerFeatureQuery = async ({
   projectId,
   featureSlug,
   customerId,
-  db,
   metrics,
   logger,
 }: {
   projectId: string
   featureSlug: string
   customerId: string
-  db: Database
   metrics: Metrics
   logger: Logger
 }): Promise<SubscriptionItemCached | null> => {
   const start = performance.now()
 
-  const feature = await db
-    .select({
-      feature: features,
-      featurePlanVersion: planVersionFeatures,
-      subscriptionItem: subscriptionItems,
+  const feature = await getFeatureItemBySlugPrepared
+    .execute({
+      projectId,
+      customerId,
+      featureSlug,
     })
-    .from(subscriptions)
-    .innerJoin(
-      subscriptionItems,
-      and(
-        eq(subscriptions.id, subscriptionItems.subscriptionId),
-        eq(subscriptions.projectId, subscriptionItems.projectId)
-      )
-    )
-    .innerJoin(
-      planVersionFeatures,
-      and(
-        eq(subscriptionItems.featurePlanVersionId, planVersionFeatures.id),
-        eq(subscriptionItems.projectId, planVersionFeatures.projectId)
-      )
-    )
-    .innerJoin(
-      features,
-      and(
-        eq(planVersionFeatures.featureId, features.id),
-        eq(planVersionFeatures.projectId, features.projectId),
-        eq(features.slug, featureSlug)
-      )
-    )
-    .where(
-      and(
-        eq(subscriptions.status, "active"),
-        eq(subscriptions.customerId, customerId),
-        eq(subscriptions.projectId, projectId)
-      )
-    )
-    .limit(1)
     .then((res) => {
       const data = res?.[0]
       const response = data
@@ -107,7 +78,6 @@ export const getCustomerFeatureUsageQuery = async ({
   projectId,
   featureSlug,
   customerId,
-  db,
   metrics,
   logger,
   month,
@@ -118,56 +88,19 @@ export const getCustomerFeatureUsageQuery = async ({
   customerId: string
   year: number
   month: number
-  db: Database
   metrics: Metrics
   logger: Logger
 }): Promise<CurrentUsageCached | null> => {
   const start = performance.now()
 
-  const usage = await db
-    .select({
-      usage: usageTable,
+  const usage = await getCustomerFeatureUsagePrepared
+    .execute({
+      projectId,
+      customerId,
+      featureSlug,
+      month,
+      year,
     })
-    .from(subscriptions)
-    .innerJoin(
-      subscriptionItems,
-      and(
-        eq(subscriptions.id, subscriptionItems.subscriptionId),
-        eq(subscriptions.projectId, subscriptionItems.projectId)
-      )
-    )
-    .innerJoin(
-      planVersionFeatures,
-      and(
-        eq(subscriptionItems.featurePlanVersionId, planVersionFeatures.id),
-        eq(subscriptionItems.projectId, planVersionFeatures.projectId)
-      )
-    )
-    .innerJoin(
-      features,
-      and(
-        eq(planVersionFeatures.featureId, features.id),
-        eq(planVersionFeatures.projectId, features.projectId),
-        eq(features.slug, featureSlug)
-      )
-    )
-    .where(
-      and(
-        eq(subscriptions.status, "active"),
-        eq(subscriptions.customerId, customerId),
-        eq(subscriptions.projectId, projectId)
-      )
-    )
-    .innerJoin(
-      usageTable,
-      and(
-        eq(subscriptionItems.id, usageTable.subscriptionItemId),
-        eq(subscriptionItems.projectId, usageTable.projectId),
-        eq(usageTable.month, month),
-        eq(usageTable.year, year)
-      )
-    )
-    .limit(1)
     .then((res) => {
       const data = res?.[0]
       const response = data?.usage

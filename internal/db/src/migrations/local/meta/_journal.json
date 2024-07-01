@@ -8,6 +8,13 @@
       "when": 1718646981790,
       "tag": "0000_fantastic_loa",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1719832688464,
+      "tag": "0001_fearless_jimmy_woo",
+      "breakpoints": true
     }
   ]
 }

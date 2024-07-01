@@ -41,21 +41,20 @@ export async function initCache(c: Context, metrics: Metrics): Promise<C<CacheNa
   return createCache({
     apiKeyByHash: new Namespace<CacheNamespaces["apiKeyByHash"]>(c, {
       ...defaultOpts,
-      // add encryption middleware for this namespace
+      // add encryption middleware for upstash only for this namespace
       stores: [
         ...(upstashStoreWithMetrics ? [encryptionMiddleware.wrap(upstashStoreWithMetrics)] : []),
         memoryStoreWithMetrics,
       ],
-      fresh: 60 * 1000 * 10, // 1 minute
     }),
     featureByCustomerId: new Namespace<CacheNamespaces["featureByCustomerId"]>(c, {
       ...defaultOpts,
       fresh: 60 * 1000 * 10, // 10 minutes
     }),
-    entitlementsByCustomerId: new Namespace<CacheNamespaces["entitlementsByCustomerId"]>(c, {
-      ...defaultOpts,
-      fresh: 24 * 60 * 60 * 1000, // we revalidate every day
-    }),
+    entitlementsByCustomerId: new Namespace<CacheNamespaces["entitlementsByCustomerId"]>(
+      c,
+      defaultOpts
+    ),
     idempotentRequestUsageByHash: new Namespace<CacheNamespaces["idempotentRequestUsageByHash"]>(
       c,
       {

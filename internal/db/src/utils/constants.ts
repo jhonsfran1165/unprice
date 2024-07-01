@@ -78,7 +78,7 @@ export const PAYMENT_PROVIDERS = ["stripe", "lemonsqueezy"] as const
 export const CURRENCIES = ["USD", "EUR"] as const
 export const STAGES = ["prod", "test", "dev"] as const
 export const STATUS_PLAN = ["draft", "published"] as const
-export const STATUS_SUBSCRIPTION = ["canceled", "active", "inactive", "paused"] as const
+export const STATUS_SUBSCRIPTION = ["active", "inactive"] as const
 // TODO: delete this
 export const PLANS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
 export const PROJECT_TIERS_APP = ["FREE", "PRO", "ENTERPRISE"] as const

@@ -82,6 +82,20 @@ export const subscriptions = pgTableProject(
 
     // metadata for the subscription
     metadata: json("metadata").$type<z.infer<typeof subscriptionMetadataSchema>>(),
+
+    /**
+     * If a user requests to downgrade, we mark the workspace and downgrade it after the next
+     * billing happened.
+     */
+    nextPlanVersionTo: text("next_plan_version_to"),
+
+    // when the plan was changed
+    planChanged: timestamp("plan_changed", {
+      mode: "date",
+    }),
+
+    // next subscription id is the id of the subscription that will be created when the user changes the plan
+    nextSubscriptionId: cuid("next_subscription_id"),
   },
   (table) => ({
     primary: primaryKey({

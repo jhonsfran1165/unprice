@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server"
 
-import { prepared } from "@builderai/db"
 import type { User, Workspace, WorkspaceRole } from "@builderai/db/validators"
 
+import { workspaceGuardPrepared } from "@builderai/db/queries"
 import type { Context } from "../trpc"
 
 interface WorkspaceGuardType {
@@ -36,7 +36,7 @@ export const workspaceGuard = async ({
     })
   }
 
-  const data = await prepared.workspaceGuardPrepared
+  const data = await workspaceGuardPrepared
     .execute({
       workspaceId,
       workspaceSlug,

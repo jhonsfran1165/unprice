@@ -20,7 +20,8 @@ export const customers = pgTableProject(
     metadata: json("metadata").$type<z.infer<typeof customerMetadataSchema>>(),
     stripeCustomerId: text("stripe_customer_id").unique("stripe_customer_unique"),
     active: boolean("active").default(true),
-    defaultCurrency: currencyEnum("default_currency").default("USD"),
+    // all customers will have a default currency - normally the currency of the project
+    defaultCurrency: currencyEnum("default_currency").default("USD").notNull(),
     // beta features
   },
   (table) => ({

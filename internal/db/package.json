@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./validators": "./src/validators.ts",
     "./schema": "./src/schema.ts",
+    "./queries": "./src/queries.ts",
     "./utils": "./src/utils.ts"
   },
   "typesVersions": {

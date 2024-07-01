@@ -33,6 +33,7 @@
     "Logdrain",
     "openai",
     "openapi",
+    "opentelemetry",
     "satoshi",
     "sidemodule",
     "SIGNIN",

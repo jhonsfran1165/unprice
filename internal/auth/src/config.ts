@@ -2,7 +2,8 @@ import GitHub from "@auth/core/providers/github"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import type { NextAuthConfig } from "next-auth"
 
-import { and, db, eq, prepared, sql } from "@builderai/db"
+import { and, db, eq, sql } from "@builderai/db"
+import { workspacesByUserPrepared } from "@builderai/db/queries"
 import * as schema from "@builderai/db/schema"
 import * as utils from "@builderai/db/utils"
 import type { WorkspacesJWTPayload } from "@builderai/db/validators"
@@ -213,7 +214,7 @@ export const authConfig = {
           return token
         }
 
-        const userWithWorkspaces = await prepared.workspacesByUserPrepared.execute({
+        const userWithWorkspaces = await workspacesByUserPrepared.execute({
           userId,
         })
 

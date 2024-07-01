@@ -31,14 +31,14 @@ const nextConfig = {
     ppr: true,
     mdxRs: true,
     optimizePackageImports: ["@builderai/ui", "@builderai/api", "@builderai/auth", "@builderai/db"],
-    // instrumentationHook: true,
+    instrumentationHook: true,
   },
-  // webpack: (config, { isServer }) => {
-  //   if (isServer) {
-  //     config.ignoreWarnings = [{ module: /opentelemetry/ }]
-  //   }
-  //   return config
-  // },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.ignoreWarnings = [{ module: /opentelemetry/ }]
+    }
+    return config
+  },
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },

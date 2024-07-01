@@ -59,7 +59,6 @@ export class UnpriceCustomer {
           projectId: opts.projectId,
           featureSlug: opts.featureSlug,
           customerId: opts.customerId,
-          db: this.db,
           metrics: this.metrics,
           logger: this.logger,
         })
@@ -89,7 +88,6 @@ export class UnpriceCustomer {
         projectId: opts.projectId,
         featureSlug: opts.featureSlug,
         customerId: opts.customerId,
-        db: this.db,
         metrics: this.metrics,
         logger: this.logger,
       })
@@ -128,7 +126,6 @@ export class UnpriceCustomer {
           projectId: opts.projectId,
           featureSlug: opts.featureSlug,
           customerId: opts.customerId,
-          db: this.db,
           metrics: this.metrics,
           logger: this.logger,
           year: opts.year,
@@ -160,7 +157,6 @@ export class UnpriceCustomer {
         projectId: opts.projectId,
         featureSlug: opts.featureSlug,
         customerId: opts.customerId,
-        db: this.db,
         metrics: this.metrics,
         logger: this.logger,
         year: opts.year,
