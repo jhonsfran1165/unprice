@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@auth/core": "^0.28.0"
+    "@auth/core": "^0.34.1"
   },
   "devDependencies": {
     "@builderai/tsconfig": "^0.1.0",
