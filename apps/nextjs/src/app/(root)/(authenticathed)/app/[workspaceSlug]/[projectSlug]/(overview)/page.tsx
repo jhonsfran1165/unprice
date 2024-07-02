@@ -24,19 +24,15 @@ export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
 }) {
   const { projectSlug, workspaceSlug } = props.params
+  const { verifications } = await api.analytics.getAllFeatureVerificationsActiveProject({
+    year: 2024,
+    month: 7,
+  })
 
-  const verifications = [
-    { name: "/home", value: 843 },
-    { name: "/imprint", value: 46 },
-    { name: "/cancellation", value: 3 },
-    { name: "/blocks", value: 108 },
-    { name: "/documentation", value: 384 },
-    { name: "/asdad", value: 384 },
-    { name: "/rere", value: 384 },
-    { name: "/fdfd", value: 384 },
-    { name: "/ere", value: 384 },
-    { name: "/434", value: 600 },
-  ]
+  const dataVerifications = verifications.map((v) => ({
+    name: v.featureSlug,
+    value: v.total,
+  }))
 
   const usage = [
     { name: "/dsd", value: 46655645 },
@@ -96,7 +92,7 @@ export default async function DashboardPage(props: {
           title="Feature Verifications & Usage"
           description="Feature verifications and usage recorded in the last 30 days."
           tabs={[
-            { id: "verifications", label: "Verifications", data: verifications },
+            { id: "verifications", label: "Verifications", data: dataVerifications },
             { id: "usage", label: "Usage", data: usage },
           ]}
           defaultTab="verifications"

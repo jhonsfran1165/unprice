@@ -22,6 +22,13 @@
       "when": 1719841994105,
       "tag": "0002_bored_magik",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1719929564146,
+      "tag": "0003_puzzling_iron_fist",
+      "breakpoints": true
     }
   ]
 }

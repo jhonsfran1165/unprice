@@ -20,7 +20,6 @@ import { createTRPCRouter, protectedApiOrActiveProjectProcedure } from "../../tr
 import { getEntitlements, reportUsageFeature, verifyFeature } from "../../utils/shared"
 
 export const customersRouter = createTRPCRouter({
-  // TODO: create should support apikeys as well
   create: protectedApiOrActiveProjectProcedure
     .meta({
       openapi: {
@@ -617,7 +616,7 @@ export const customersRouter = createTRPCRouter({
         ctx,
       })
     }),
-  // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_UR25SSERij9HFMoU", featureSlug: "apikeys", usage: 100, requestId: "123"}}}))
+  // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_UR25SSERij9HFMoU", featureSlug: "apikeys", usage: 100, idempotenceKey: "123"}}}))
   reportUsage: protectedApiOrActiveProjectProcedure
     .meta({
       span: "customers.reportUsage",
@@ -632,7 +631,7 @@ export const customersRouter = createTRPCRouter({
         customerId: z.string(),
         featureSlug: z.string(),
         usage: z.number(),
-        idempotencyKey: z.string(),
+        idempotenceKey: z.string(),
       })
     )
     .output(
@@ -641,10 +640,10 @@ export const customersRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const { customerId, featureSlug, usage, idempotencyKey } = opts.input
+      const { customerId, featureSlug, usage, idempotenceKey } = opts.input
 
       // this is to avoid reporting the same usage multiple times
-      const body = JSON.stringify({ customerId, featureSlug, usage, idempotencyKey })
+      const body = JSON.stringify({ customerId, featureSlug, usage, idempotenceKey })
       const hashKey = await utils.hashStringSHA256(body)
 
       // get result if it exists

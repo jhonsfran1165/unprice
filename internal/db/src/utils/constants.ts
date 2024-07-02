@@ -69,7 +69,7 @@ export const AGGREGATION_METHODS_MAP = {
   },
 } as const
 
-export type AggregationMethod = keyof typeof AGGREGATION_METHODS_MAP
+type AggregationMethod = keyof typeof AGGREGATION_METHODS_MAP
 export type TierMode = keyof typeof TIER_MODES_MAP
 export type UsageMode = keyof typeof USAGE_MODES_MAP
 export type FeatureType = keyof typeof FEATURE_TYPES_MAPS

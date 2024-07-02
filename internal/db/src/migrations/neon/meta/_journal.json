@@ -15,6 +15,13 @@
       "when": 1719833450867,
       "tag": "0001_bored_puff_adder",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1719923862748,
+      "tag": "0002_lonely_wind_dancer",
+      "breakpoints": true
     }
   ]
 }

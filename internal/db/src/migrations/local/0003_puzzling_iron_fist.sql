@@ -1,0 +1,2 @@
+ALTER TABLE "builderai_usage" DROP CONSTRAINT "unique_usage_subitem";--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_usage_subitem" ON "builderai_usage" USING btree ("project_id","subscription_item_id","month","year");

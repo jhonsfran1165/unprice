@@ -5,13 +5,7 @@ import { FetchError, type Result } from "@builderai/error"
 import { Err, Ok } from "@builderai/error"
 import type { Logger } from "@builderai/logging"
 import type { Analytics } from "@builderai/tinybird"
-import {
-  createUsageQuery,
-  getCustomerFeatureQuery,
-  getCustomerFeatureUsageQuery,
-  getEntitlementsQuery,
-  reportUsageQuery,
-} from "../queries"
+import { getCustomerFeatureQuery, getEntitlementsQuery, reportUsageQuery } from "../queries"
 import type { Context } from "../trpc"
 import type { Cache } from "./cache"
 import type {
@@ -113,6 +107,7 @@ export class UnpriceCustomer {
   }
 
   private async _getCustomerUsageFeature(opts: {
+    subItem: SubscriptionItemCached
     customerId: string
     projectId: string
     featureSlug: string
@@ -122,15 +117,37 @@ export class UnpriceCustomer {
     const res = await this.cache.customerFeatureCurrentUsage.swr(
       `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
       async () => {
-        return await getCustomerFeatureUsageQuery({
+        const usageData = await this.analytics
+          .getUsageFeature({
+            customerId: opts.customerId,
+            featureSlug: opts.featureSlug,
+            projectId: opts.projectId,
+            start: new Date(opts.year, opts.month, 1).getTime(),
+            end: new Date(opts.year, opts.month + 1).getTime(),
+          })
+          .then((usage) => usage.data[0])
+
+        // this will be the usage of the feature for the period
+        const data = usageData ? usageData[opts.subItem.aggregationMethod] || 0 : 0
+
+        const usage = {
+          usage: data,
+          limit: opts.subItem.units,
+          month: opts.month,
+          year: opts.year,
+          updatedAt: Date.now(),
+        }
+
+        await reportUsageQuery({
           projectId: opts.projectId,
-          featureSlug: opts.featureSlug,
-          customerId: opts.customerId,
+          subscriptionItemId: opts.subItem.id,
+          db: this.db,
           metrics: this.metrics,
           logger: this.logger,
-          year: opts.year,
-          month: opts.month,
+          usage: usage,
         })
+
+        return usage
       }
     )
 
@@ -153,28 +170,25 @@ export class UnpriceCustomer {
 
     // cache miss, get from db
     if (!res.val) {
-      let usage = await getCustomerFeatureUsageQuery({
-        projectId: opts.projectId,
-        featureSlug: opts.featureSlug,
-        customerId: opts.customerId,
-        metrics: this.metrics,
-        logger: this.logger,
-        year: opts.year,
-        month: opts.month,
-      })
-
-      // if the feature has no current usage for the month-year, we need to create it
-      if (!usage) {
-        usage = await createUsageQuery({
-          projectId: opts.projectId,
-          featureSlug: opts.featureSlug,
+      const usageData = await this.analytics
+        .getUsageFeature({
           customerId: opts.customerId,
-          db: this.db,
-          metrics: this.metrics,
-          logger: this.logger,
-          month: opts.month,
-          year: opts.year,
+          featureSlug: opts.featureSlug,
+          projectId: opts.projectId,
+          start: new Date(opts.year, opts.month, 1).getTime(),
+          end: new Date(opts.year, opts.month + 1).getTime(),
         })
+        .then((usage) => usage.data[0])
+
+      // this will be the usage of the feature for the period
+      const data = usageData ? usageData[opts.subItem.aggregationMethod] || 0 : 0
+
+      const usage = {
+        usage: data,
+        limit: opts.subItem.units,
+        month: opts.month,
+        year: opts.year,
+        updatedAt: Date.now(),
       }
 
       if (!usage) {
@@ -186,84 +200,28 @@ export class UnpriceCustomer {
         )
       }
 
-      // save the data in the cache
+      // save the data in the cache & report the usage to db
       this.waitUntil(
-        this.cache.customerFeatureCurrentUsage.set(
-          `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
-          usage
-        )
+        Promise.all([
+          this.cache.customerFeatureCurrentUsage.set(
+            `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
+            usage
+          ),
+          reportUsageQuery({
+            projectId: opts.projectId,
+            subscriptionItemId: opts.subItem.id,
+            db: this.db,
+            metrics: this.metrics,
+            logger: this.logger,
+            usage: usage,
+          }),
+        ])
       )
 
       return Ok(usage)
     }
 
     return Ok(res.val)
-  }
-
-  private async _getSubscriptions(opts: {
-    customerId: string
-    projectId: string
-  }): Promise<
-    Result<CacheNamespaces["subscriptionsByCustomerId"], UnPriceCustomerError | FetchError>
-  > {
-    const res = await this.cache.subscriptionsByCustomerId.get(opts.customerId)
-
-    if (res.err) {
-      return Err(
-        new FetchError({
-          message: "unable to fetch required data",
-          retry: true,
-          cause: res.err,
-        })
-      )
-    }
-
-    if (res.val) {
-      return Ok(res.val)
-    }
-
-    // cache miss, get from db
-    const customer = await this.db.query.customers.findFirst({
-      with: {
-        subscriptions: {
-          columns: {
-            id: true,
-          },
-          where: (sub, { eq }) => eq(sub.status, "active"),
-          orderBy(fields, operators) {
-            return [operators.desc(fields.startDate)]
-          },
-        },
-      },
-      where: (customer, { eq, and }) =>
-        and(eq(customer.id, opts.customerId), eq(customer.projectId, opts.projectId)),
-    })
-
-    if (!customer) {
-      return Err(
-        new UnPriceCustomerError({
-          code: "CUSTOMER_NOT_FOUND",
-          customerId: opts.customerId,
-        })
-      )
-    }
-
-    if (!customer.subscriptions || customer.subscriptions.length === 0) {
-      return Err(
-        new UnPriceCustomerError({
-          code: "CUSTOMER_HAS_NO_SUBSCRIPTIONS",
-          customerId: opts.customerId,
-        })
-      )
-    }
-
-    // get subscriptions Ids
-    const subscriptionIds = customer.subscriptions.map((sub) => sub.id)
-
-    // cache the active entitlements
-    this.waitUntil(this.cache.subscriptionsByCustomerId.set(customer.id, subscriptionIds))
-
-    return Ok(subscriptionIds)
   }
 
   public async getEntitlements(opts: {
@@ -388,7 +346,6 @@ export class UnpriceCustomer {
         projectId: subItem.projectId,
         planVersionFeatureId: subItem.featurePlanVersionId,
         subscriptionId: subItem.subscriptionId,
-
         subItemId: subItem.id,
         featureSlug: featureSlug,
         customerId: customerId,
@@ -406,6 +363,7 @@ export class UnpriceCustomer {
         case "package": {
           // get the current usage
           const result = await this._getCustomerUsageFeature({
+            subItem,
             customerId,
             projectId,
             featureSlug,
@@ -530,16 +488,33 @@ export class UnpriceCustomer {
       this.waitUntil(
         Promise.all([
           // just for notifying the customer if the usage is exceeding the limit
-          async () => {
-            const currentUsage = await this._getCustomerUsageFeature({
-              customerId,
-              projectId,
-              featureSlug,
-              year: year,
-              month: month,
-            })
-
+          this._getCustomerUsageFeature({
+            subItem,
+            customerId,
+            projectId,
+            featureSlug,
+            year: year,
+            month: month,
+          }).then((currentUsage) => {
             if (currentUsage.err) {
+              this.logger.warn("Usage error", {
+                customerId: customerId,
+                featureSlug: featureSlug,
+                projectId: projectId,
+                usage: usage,
+                error: JSON.stringify(currentUsage.err),
+              })
+
+              return
+            }
+
+            if (!currentUsage.val) {
+              this.logger.warn("Usage val is null", {
+                customerId: customerId,
+                featureSlug: featureSlug,
+                projectId: projectId,
+                currentUsage: JSON.stringify(currentUsage),
+              })
               return
             }
 
@@ -564,7 +539,9 @@ export class UnpriceCustomer {
                 usage: usage,
               })
             }
-          },
+          }),
+
+          // report the usage to analytics db
           this.analytics
             .ingestFeaturesUsage({
               planVersionFeatureId: subItem.featurePlanVersionId,
@@ -584,19 +561,6 @@ export class UnpriceCustomer {
                 subItem: subItem,
                 usage: usage,
               })
-            }),
-          // if there is no analytics, we should report the usage to the db
-          // this will sum to the usage but we only use the analytics to report the usage when billing
-          this.analytics.isNoop &&
-            reportUsageQuery({
-              projectId,
-              subscriptionItemId: subItem.id,
-              month: month,
-              year: year,
-              db: this.db,
-              metrics: this.metrics,
-              logger: this.logger,
-              usage: usage,
             }),
         ])
       )

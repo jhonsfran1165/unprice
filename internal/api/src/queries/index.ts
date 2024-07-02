@@ -1,16 +1,10 @@
-import { type Database, and, eq, getTableColumns, sql } from "@builderai/db"
+import type { Database } from "@builderai/db"
 
 import {
   getCustomerFeatureUsagePrepared,
   getFeatureItemBySlugPrepared,
 } from "@builderai/db/queries"
-import {
-  features,
-  planVersionFeatures,
-  subscriptionItems,
-  subscriptions,
-  usage as usageTable,
-} from "@builderai/db/schema"
+import { usage as usageTable } from "@builderai/db/schema"
 import { newId } from "@builderai/db/utils"
 import type { Logger } from "@builderai/logging"
 import type { CurrentUsageCached, SubscriptionItemCached } from "../pkg/cache/namespaces"
@@ -47,6 +41,7 @@ export const getCustomerFeatureQuery = async ({
             featurePlanVersionId: data.subscriptionItem.featurePlanVersionId,
             units: data.subscriptionItem.units,
             featureType: data.featurePlanVersion.featureType,
+            aggregationMethod: data.featurePlanVersion.aggregationMethod,
           }
         : null
 
@@ -143,35 +138,43 @@ export const reportUsageQuery = async ({
   db,
   metrics,
   logger,
-  month,
-  year,
   usage,
 }: {
   projectId: string
   subscriptionItemId: string
-  year: number
-  month: number
   db: Database
   metrics: Metrics
   logger: Logger
-  usage: number
+  usage: CurrentUsageCached
 }): Promise<CurrentUsageCached | null> => {
   const start = performance.now()
 
   // update the usage in database
   const usageData = await db
-    .update(usageTable)
-    .set({
-      usage: sql`${usageTable.usage} + ${usage}`,
+    .insert(usageTable)
+    .values({
+      id: newId("usage"),
+      projectId: projectId,
+      subscriptionItemId: subscriptionItemId,
+      usage: usage.usage,
+      limit: usage.limit,
+      updatedAt: new Date(usage.updatedAt),
+      year: usage.year,
+      month: usage.month,
     })
-    .where(
-      and(
-        eq(usageTable.projectId, projectId),
-        eq(usageTable.subscriptionItemId, subscriptionItemId),
-        eq(usageTable.month, month),
-        eq(usageTable.year, year)
-      )
-    )
+    .onConflictDoUpdate({
+      target: [
+        usageTable.projectId,
+        usageTable.subscriptionItemId,
+        usageTable.month,
+        usageTable.year,
+      ],
+      set: {
+        usage: usage.usage,
+        limit: usage.limit,
+        updatedAt: new Date(usage.updatedAt),
+      },
+    })
     .returning()
     .then((res) => {
       return res?.[0]
@@ -199,135 +202,6 @@ export const reportUsageQuery = async ({
   metrics.emit({
     metric: "metric.db.write",
     query: "reportUsageFeature",
-    duration: end - start,
-    service: "customer",
-  })
-
-  return usageData
-}
-
-export const createUsageQuery = async ({
-  projectId,
-  customerId,
-  featureSlug,
-  db,
-  metrics,
-  logger,
-  month,
-  year,
-}: {
-  projectId: string
-  customerId: string
-  featureSlug: string
-  year: number
-  month: number
-  db: Database
-  metrics: Metrics
-  logger: Logger
-}): Promise<CurrentUsageCached | null> => {
-  const start = performance.now()
-
-  const { limit } = getTableColumns(planVersionFeatures)
-  const { id } = getTableColumns(subscriptionItems)
-
-  // get the feature
-  const feature = await db
-    .select({
-      featurePlanVersion: {
-        limit,
-      },
-      subscriptionItem: {
-        id,
-      },
-    })
-    .from(subscriptions)
-    .innerJoin(
-      subscriptionItems,
-      and(
-        eq(subscriptions.id, subscriptionItems.subscriptionId),
-        eq(subscriptions.projectId, subscriptionItems.projectId)
-      )
-    )
-    .innerJoin(
-      planVersionFeatures,
-      and(
-        eq(subscriptionItems.featurePlanVersionId, planVersionFeatures.id),
-        eq(subscriptionItems.projectId, planVersionFeatures.projectId)
-      )
-    )
-    .innerJoin(
-      features,
-      and(
-        eq(planVersionFeatures.featureId, features.id),
-        eq(planVersionFeatures.projectId, features.projectId),
-        eq(features.slug, featureSlug)
-      )
-    )
-    .where(
-      and(
-        eq(subscriptions.status, "active"),
-        eq(subscriptions.customerId, customerId),
-        eq(subscriptions.projectId, projectId)
-      )
-    )
-    .limit(1)
-    .then((res) => res?.[0] ?? null)
-    .catch((error) => {
-      logger.error("Error in createUsageQuery", {
-        error: JSON.stringify(error),
-        projectId,
-        featureSlug,
-      })
-
-      return null
-    })
-
-  if (!feature) {
-    logger.error("Error in createUsageQuery", {
-      error: "Feature not found",
-      projectId,
-      featureSlug,
-    })
-    return null
-  }
-
-  // await db.insert(users)
-  const usageData = await db
-    .insert(usageTable)
-    .values({
-      id: newId("usage"),
-      projectId: projectId,
-      subscriptionItemId: feature.subscriptionItem.id,
-      usage: 0,
-      month: month,
-      year: year,
-      limit: feature.featurePlanVersion.limit,
-    })
-    .returning()
-    .then((res) => {
-      return res?.[0]
-        ? {
-            usage: res[0].usage,
-            limit: res[0].limit,
-            month: res[0].month,
-            year: res[0].year,
-            updatedAt: res[0].updatedAt.getTime(),
-          }
-        : null
-    })
-    .catch((error) => {
-      logger.error("Error reporting usage to the database createUsageQuery", {
-        error: JSON.stringify(error),
-        projectId,
-      })
-      return null
-    })
-
-  const end = performance.now()
-
-  metrics.emit({
-    metric: "metric.db.write",
-    query: "createUsageFeature",
     duration: end - start,
     service: "customer",
   })
