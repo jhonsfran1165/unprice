@@ -1,6 +1,7 @@
 import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import {
+  type PlanVersion,
   subscriptionInsertSchema,
   subscriptionItemsConfigSchema,
   subscriptionSelectSchema,
@@ -75,15 +76,25 @@ export const subscriptionRouter = createTRPCRouter({
     }),
   end: protectedActiveProjectAdminProcedure
     .input(
-      subscriptionSelectSchema.pick({
-        id: true,
-        customerId: true,
-        endDate: true,
-      })
+      subscriptionInsertSchema
+        .extend({
+          config: subscriptionItemsConfigSchema.optional(),
+        })
+        .required({
+          id: true,
+        })
     )
     .output(z.object({ result: z.boolean(), message: z.string() }))
     .mutation(async (opts) => {
-      const { id, customerId, endDate } = opts.input
+      const {
+        id: subscriptionId,
+        customerId,
+        endDate,
+        planVersionId,
+        collectionMethod,
+        type,
+        defaultPaymentMethodId,
+      } = opts.input
       const project = opts.ctx.project
 
       const subscriptionData = await opts.ctx.db.query.subscriptions.findFirst({
@@ -92,7 +103,7 @@ export const subscriptionRouter = createTRPCRouter({
         },
         where: (subscription, { eq, and }) =>
           and(
-            eq(subscription.id, id),
+            eq(subscription.id, subscriptionId),
             eq(subscription.projectId, project.id),
             eq(subscription.customerId, customerId)
           ),
@@ -105,30 +116,107 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      // find the default plan to downgrade the customer
-      // by default we downgrade to the latest published plan version
-      const defaultPlanVersion = await opts.ctx.db.query.plans
-        .findFirst({
-          with: {
-            versions: {
-              where: (version, { eq, and }) =>
-                and(
-                  eq(version.projectId, project.id),
-                  eq(version.status, "published"),
-                  eq(version.currency, subscriptionData.customer.defaultCurrency)
-                ),
-              orderBy: (version, { desc }) => [desc(version.publishedAt)],
-            },
-          },
-          where: (plan, { eq, and }) =>
-            and(eq(plan.projectId, project.id), eq(plan.defaultPlan, true)),
+      if (subscriptionData.status === "inactive") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Subscription is already inactive",
         })
-        .then((re) => re?.versions[0] ?? null)
+      }
 
-      if (!defaultPlanVersion) {
+      if (subscriptionData.planVersionId === planVersionId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You cannot end the subscription with the same planVersionId",
+        })
+      }
+
+      // if the customer has trials left we should not end the subscription until the trial ends
+      if (subscriptionData?.trialEnds && subscriptionData.trialEnds > new Date()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `The customer has a trial until ${subscriptionData.trialEnds}. Please set the endDate after the trial ends`,
+        })
+      }
+
+      // if there is no planVersionId provided, we downgrade the customer to the default plan
+      let defaultPlanVersion: PlanVersion
+
+      if (!planVersionId) {
+        // find the default plan to downgrade the customer
+        // by default we downgrade to the latest published plan version
+        const plan = await opts.ctx.db.query.plans
+          .findFirst({
+            with: {
+              versions: {
+                where: (version, { eq, and }) =>
+                  and(
+                    eq(version.projectId, project.id),
+                    eq(version.status, "published"),
+                    eq(version.currency, subscriptionData.customer.defaultCurrency)
+                  ),
+                orderBy: (version, { desc }) => [desc(version.publishedAt)],
+              },
+            },
+            where: (plan, { eq, and }) =>
+              and(eq(plan.projectId, project.id), eq(plan.defaultPlan, true)),
+          })
+          .then((re) => re?.versions[0] ?? null)
+
+        if (!plan) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message:
+              "Default plan version not found or there is no published plan version with the currency of the customer",
+          })
+        }
+
+        defaultPlanVersion = plan
+      } else {
+        const version = await opts.ctx.db.query.versions.findFirst({
+          where: (version, { eq, and }) =>
+            and(
+              eq(version.id, planVersionId),
+              eq(version.projectId, project.id),
+              eq(version.status, "published"),
+              eq(version.currency, subscriptionData.customer.defaultCurrency)
+            ),
+        })
+
+        if (!version) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message:
+              "Provided plan version not found or there is no published plan version with the currency of the customer",
+          })
+        }
+
+        defaultPlanVersion = version
+      }
+
+      // if the endDate is provided, we set the endDate and the nextPlanVersionTo
+      // there is a cron job that will downgrade the customer to the default plan version
+      const updatedSubscription = await opts.ctx.db
+        .update(schema.subscriptions)
+        .set({
+          endDate: endDate,
+          nextPlanVersionTo: defaultPlanVersion.id,
+          planChanged: new Date(),
+          status: "ended",
+        })
+        .where(
+          and(
+            eq(schema.subscriptions.id, subscriptionId),
+            eq(schema.subscriptions.projectId, project.id),
+            eq(schema.subscriptions.customerId, customerId)
+          )
+        )
+        .returning()
+        .then((re) => re[0])
+
+      if (!updatedSubscription) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Default plan version not found",
+          message: "Error ending subscription",
         })
       }
 
@@ -147,12 +235,10 @@ export const subscriptionRouter = createTRPCRouter({
             .set({
               status: "inactive",
               endDate: new Date(),
-              nextPlanVersionTo: defaultPlanVersion.id,
-              planChanged: new Date(),
             })
             .where(
               and(
-                eq(schema.subscriptions.id, id),
+                eq(schema.subscriptions.id, subscriptionId),
                 eq(schema.subscriptions.projectId, project.id),
                 eq(schema.subscriptions.customerId, customerId)
               )
@@ -173,13 +259,14 @@ export const subscriptionRouter = createTRPCRouter({
               customerId: customerId,
               planVersionId: defaultPlanVersion.id,
               projectId: project.id,
-              collectionMethod: subscriptionData.collectionMethod,
+              collectionMethod: collectionMethod ?? subscriptionData.collectionMethod,
               startDate: new Date(),
               autoRenew: subscriptionData.autoRenew,
               isNew: true,
-              defaultPaymentMethodId: subscriptionData.defaultPaymentMethodId,
+              defaultPaymentMethodId:
+                defaultPaymentMethodId ?? subscriptionData.defaultPaymentMethodId,
               trialDays: 0,
-              type: "plan",
+              type: type ?? subscriptionData.type,
             },
             project: opts.ctx.project,
             ctx: opts.ctx,
@@ -193,7 +280,7 @@ export const subscriptionRouter = createTRPCRouter({
             })
             .where(
               and(
-                eq(schema.subscriptions.id, id),
+                eq(schema.subscriptions.id, subscriptionId),
                 eq(schema.subscriptions.projectId, project.id),
                 eq(schema.subscriptions.customerId, customerId)
               )
@@ -213,32 +300,6 @@ export const subscriptionRouter = createTRPCRouter({
           result: true,
           message: "Subscription ended successfully",
         }
-      }
-
-      // if the endDate is provided, we set the endDate and the nextPlanVersionTo
-      // there is a cron job that will downgrade the customer to the default plan version
-      const updatedSubscription = await opts.ctx.db
-        .update(schema.subscriptions)
-        .set({
-          endDate: endDate,
-          nextPlanVersionTo: defaultPlanVersion.id,
-          planChanged: new Date(),
-        })
-        .where(
-          and(
-            eq(schema.subscriptions.id, id),
-            eq(schema.subscriptions.projectId, project.id),
-            eq(schema.subscriptions.customerId, customerId)
-          )
-        )
-        .returning()
-        .then((re) => re[0])
-
-      if (!updatedSubscription) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error ending subscription",
-        })
       }
 
       return {

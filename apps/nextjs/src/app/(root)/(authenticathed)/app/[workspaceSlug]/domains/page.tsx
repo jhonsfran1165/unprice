@@ -1,4 +1,4 @@
-import { ExternalLink, Globe, Plus } from "lucide-react"
+import { ExternalLink, Globe } from "lucide-react"
 import { Suspense } from "react"
 
 import type { RouterOutputs } from "@builderai/api"
@@ -88,10 +88,7 @@ const DomainCard = ({
           <div className="flex flex-row items-center justify-between space-x-2">
             <VerifyDomainButton domain={domain.name} />
             <DomainDialog defaultValues={domain}>
-              <Button>
-                <Plus className="size-4 mr-2" />
-                Create Domain
-              </Button>
+              <Button variant={"default"}>Edit Domain</Button>
             </DomainDialog>
           </div>
         </div>

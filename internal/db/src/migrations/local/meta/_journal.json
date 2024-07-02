@@ -15,6 +15,13 @@
       "when": 1719832688464,
       "tag": "0001_fearless_jimmy_woo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1719841994105,
+      "tag": "0002_bored_magik",
+      "breakpoints": true
     }
   ]
 }

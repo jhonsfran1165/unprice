@@ -3,10 +3,10 @@ import { db } from "."
 import * as schema from "./schema"
 import { newId } from "./utils"
 
-// import { migrate } from "drizzle-orm/neon-serverless/migrator"
+import { migrate } from "drizzle-orm/neon-serverless/migrator"
 
 async function main() {
-  // await migrate(db, { migrationsFolder: "src/migrations/custom" })
+  await migrate(db, { migrationsFolder: "src/migrations/local" })
 
   // process.exit(0)
 

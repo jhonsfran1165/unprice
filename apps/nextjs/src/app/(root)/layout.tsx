@@ -2,9 +2,6 @@ import "~/styles/globals.css"
 
 import type { Metadata } from "next"
 
-// TODO: analytics
-// import { Analytics } from "@vercel/analytics/react"
-
 import { cn } from "@builderai/ui/utils"
 
 import { ThemeProvider } from "~/components/layout/theme-provider"

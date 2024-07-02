@@ -1,15 +1,16 @@
 "use client"
 
-import { CheckIcon, ChevronDown, HelpCircle } from "lucide-react"
+import { CalendarIcon, CheckIcon, ChevronDown, HelpCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { startTransition, useMemo, useState } from "react"
+import { Fragment, useMemo, useState } from "react"
 import { useFieldArray } from "react-hook-form"
 
 import type { RouterOutputs } from "@builderai/api"
 import { COLLECTION_METHODS, SUBSCRIPTION_TYPES } from "@builderai/db/utils"
-import type { InsertSubscription } from "@builderai/db/validators"
+import type { InsertSubscription, Subscription } from "@builderai/db/validators"
 import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
+import { Calendar } from "@builderai/ui/calendar"
 import {
   Command,
   CommandEmpty,
@@ -33,8 +34,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@builderai/ui/separator"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 import { cn } from "@builderai/ui/utils"
-
-import { ConfirmAction } from "~/components/confirm-action"
+import { add, format } from "date-fns"
 import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -49,19 +49,26 @@ type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"][
 export function SubscriptionForm({
   setDialogOpen,
   defaultValues,
+  isEndSubscription,
 }: {
   setDialogOpen?: (open: boolean) => void
-  defaultValues: InsertSubscription
+  defaultValues: InsertSubscription | Subscription
+  isEndSubscription?: boolean
 }) {
   const router = useRouter()
-  const editMode = !!defaultValues.id
 
   const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersionResponse>()
 
   const [switcherPlanOpen, setSwitcherPlanOpen] = useState(false)
 
+  const formSchema = isEndSubscription
+    ? subscriptionInsertSchema.required({
+        id: true,
+      })
+    : subscriptionInsertSchema
+
   const form = useZodForm({
-    schema: subscriptionInsertSchema,
+    schema: formSchema,
     defaultValues: defaultValues,
   })
 
@@ -110,57 +117,23 @@ export function SubscriptionForm({
     },
   })
 
-  const _updateCustomer = api.customers.update.useMutation({
-    onSuccess: ({ customer }) => {
-      form.reset(customer)
-      toastAction("updated")
-      setDialogOpen?.(false)
-
-      // Only needed when the form is inside a uncontrolled dialog - normally updates
-      // FIXME: hack to close the dialog when the form is inside a uncontrolled dialog
-      if (!setDialogOpen) {
-        const escKeyEvent = new KeyboardEvent("keydown", {
-          key: "Escape",
-        })
-        document.dispatchEvent(escKeyEvent)
-      }
-
-      router.refresh()
-    },
-  })
-
-  const deleteCustomer = api.customers.remove.useMutation({
-    onSuccess: () => {
-      toastAction("deleted")
+  const endSubscription = api.subscriptions.end.useMutation({
+    onSuccess: ({ message }) => {
       form.reset()
+      toastAction("success", message)
+      setDialogOpen?.(false)
       router.refresh()
     },
   })
 
-  const onSubmitForm = async (data: InsertSubscription) => {
-    if (!defaultValues.id) {
-      await createSubscription.mutateAsync(data)
+  const onSubmitForm = async (data: InsertSubscription | Subscription) => {
+    if (!defaultValues.id && !isEndSubscription) {
+      await createSubscription.mutateAsync(data as InsertSubscription)
     }
 
-    // if (defaultValues.id && defaultValues.projectId) {
-    //   await updateCustomer.mutateAsync({
-    //     ...data,
-    //     id: defaultValues.id,
-    //   })
-    // }
-  }
-
-  function onDelete() {
-    startTransition(() => {
-      if (!defaultValues.id) {
-        toastAction("error", "no data defined")
-        return
-      }
-
-      void deleteCustomer.mutateAsync({
-        id: defaultValues.id,
-      })
-    })
+    if (defaultValues.id && isEndSubscription) {
+      await endSubscription.mutateAsync(data as Subscription)
+    }
   }
 
   return (
@@ -177,7 +150,11 @@ export function SubscriptionForm({
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Plan Version</FormLabel>
-                <FormDescription>Select the plan version for the subscription.</FormDescription>
+                <FormDescription>
+                  {isEndSubscription
+                    ? "Select the plan the customer will fall back to after the subscription ends. If no plan provided the customer will be downgraded to the default plan."
+                    : "Select the plan version to create the subscription"}
+                </FormDescription>
                 <div className="text-xs font-normal leading-snug">
                   All the items will be configured based on the plan version
                 </div>
@@ -340,26 +317,78 @@ export function SubscriptionForm({
             />
           </div>
 
-          <Separator />
+          {!isEndSubscription && (
+            <Fragment>
+              <Separator />
+              <DurationFormField form={form} />
+              <FormField
+                control={form.control}
+                name="trialDays"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Trial Days</FormLabel>
+                    <div className="flex w-full flex-col lg:w-1/2">
+                      <FormControl className="w-full">
+                        <InputWithAddons {...field} trailing={"days"} value={field.value ?? ""} />
+                      </FormControl>
 
-          <DurationFormField form={form} />
+                      <FormMessage className="self-start pt-1" />
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </Fragment>
+          )}
 
-          <FormField
-            control={form.control}
-            name="trialDays"
-            render={({ field }) => (
-              <FormItem className="space-y-2">
-                <FormLabel>Trial Days</FormLabel>
-                <div className="flex w-full flex-col lg:w-1/2">
-                  <FormControl className="w-full">
-                    <InputWithAddons {...field} trailing={"days"} value={field.value ?? ""} />
-                  </FormControl>
+          {isEndSubscription && (
+            <Fragment>
+              <Separator />
 
-                  <FormMessage className="self-start pt-1" />
-                </div>
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>End date</FormLabel>
+
+                    <FormDescription>
+                      Set the end date for the subscription. If not set, the subscription will end
+                      immediately.
+                    </FormDescription>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button variant={"outline"} className="pl-3 text-left font-normal">
+                            {field.value ? (
+                              format(field.value, "MMM dd, yyyy")
+                            ) : (
+                              <span className="text-muted-foreground">End date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ?? undefined}
+                          onSelect={(date) => {
+                            field.onChange(date)
+                          }}
+                          disabled={(date) =>
+                            // future dates up to 1 year only
+                            date < new Date() || date > add(new Date(), { years: 1 })
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </Fragment>
+          )}
 
           <Separator />
 
@@ -378,24 +407,12 @@ export function SubscriptionForm({
         </div>
 
         <div className="mt-8 flex justify-end space-x-4">
-          {editMode && (
-            <ConfirmAction
-              confirmAction={() => {
-                setDialogOpen?.(false)
-                onDelete()
-              }}
-            >
-              <Button variant={"link"} disabled={deleteCustomer.isPending}>
-                Delete
-              </Button>
-            </ConfirmAction>
-          )}
           <SubmitButton
             form="subscription-form"
             onClick={() => form.handleSubmit(onSubmitForm)()}
             isSubmitting={form.formState.isSubmitting}
             isDisabled={form.formState.isSubmitting}
-            label={editMode ? "Update" : "Create"}
+            label={isEndSubscription ? "End Subscription" : "Create Subscription"}
           />
         </div>
       </form>

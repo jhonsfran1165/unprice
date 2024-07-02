@@ -297,11 +297,13 @@ export const calculateUnitPrice = ({
   quantity,
   isUsageBased,
   prorate,
+  isFlat = false,
 }: {
   price: z.infer<typeof dineroSchema>
   quantity: z.infer<typeof unitsSchema>
   isUsageBased: boolean
   prorate?: number
+  isFlat?: boolean
 }): Result<CalculatedPrice, UnPriceCalculationError> => {
   const dineroPrice = dinero(price.dinero)
   const total = prorate
@@ -315,7 +317,7 @@ export const calculateUnitPrice = ({
         if (isUsageBased) {
           return `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
         }
-        return `${currencySymbol(currency.code as Currency)}${value} per unit`
+        return `${currencySymbol(currency.code as Currency)}${value} ${isFlat ? "" : "per unit"}`
       }),
     },
     totalPrice: {
@@ -340,7 +342,7 @@ export const calculatePricePerFeature = (
     case "flat": {
       const { price } = configFlatSchema.parse(feature.config)
       // flat features have a single price independent of the units
-      return calculateUnitPrice({ price, quantity: 1, isUsageBased: false, prorate })
+      return calculateUnitPrice({ price, quantity: 1, isUsageBased: false, prorate, isFlat: true })
     }
 
     case "tier": {

@@ -5,9 +5,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer base {
   :root {
@@ -24,23 +21,31 @@
 
   /* default styles */
   h1 {
-    @apply font-primary text-4xl font-extrabold leading-[1.15] text-background-textContrast sm:leading-[1.15] md:text-6xl;
+    @apply font-primary text-2xl font-extrabold leading-[1.15] sm:leading-[1.15] md:text-4xl;
   }
 
   h2 {
-    @apply font-primary text-2xl font-bold text-background-textContrast md:text-3xl;
+    @apply font-primary text-xl font-bold md:text-2xl;
   }
 
-  h3 {
-    @apply font-primary text-xl font-semibold text-background-textContrast md:text-2xl;
+  h3, h4 {
+    @apply font-primary text-sm font-bold md:text-lg;
+  }
+
+  h5, h6 {
+    @apply font-primary font-bold leading-none tracking-tight;
   }
 
   p {
-    @apply font-secondary text-base font-semibold text-background-text md:text-xs;
+    @apply font-secondary text-base font-normal md:text-xs;
   }
 
   body {
-    @apply bg-background-base font-secondary text-background-text;
+    @apply bg-background-base font-secondary text-background-text font-normal;
+
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
