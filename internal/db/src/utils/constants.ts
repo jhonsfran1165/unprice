@@ -69,7 +69,7 @@ export const AGGREGATION_METHODS_MAP = {
   },
 } as const
 
-export type AggregationMethod = keyof typeof AGGREGATION_METHODS_MAP
+type AggregationMethod = keyof typeof AGGREGATION_METHODS_MAP
 export type TierMode = keyof typeof TIER_MODES_MAP
 export type UsageMode = keyof typeof USAGE_MODES_MAP
 export type FeatureType = keyof typeof FEATURE_TYPES_MAPS
@@ -78,7 +78,7 @@ export const PAYMENT_PROVIDERS = ["stripe", "lemonsqueezy"] as const
 export const CURRENCIES = ["USD", "EUR"] as const
 export const STAGES = ["prod", "test", "dev"] as const
 export const STATUS_PLAN = ["draft", "published"] as const
-export const STATUS_SUBSCRIPTION = ["active", "inactive"] as const
+export const STATUS_SUBSCRIPTION = ["active", "inactive", "ended", "cancelled"] as const
 // TODO: delete this
 export const PLANS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
 export const PROJECT_TIERS_APP = ["FREE", "PRO", "ENTERPRISE"] as const

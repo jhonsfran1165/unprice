@@ -50,7 +50,8 @@ export const authConfig = {
       accountsTable: schema.accounts,
       sessionsTable: schema.sessions,
       verificationTokensTable: schema.verificationTokens,
-      authenticatorsTable: schema.authenticators,
+      // TODO: add the authenticators support for passkey
+      // authenticatorsTable: schema.authenticators,
     }),
 
     // override the default create user

@@ -15,6 +15,41 @@
       "when": 1719832688464,
       "tag": "0001_fearless_jimmy_woo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1719841994105,
+      "tag": "0002_bored_magik",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1719929564146,
+      "tag": "0003_puzzling_iron_fist",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1720007869473,
+      "tag": "0004_solid_deathstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1720008142117,
+      "tag": "0005_old_boomerang",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1720008283182,
+      "tag": "0006_swift_santa_claus",
+      "breakpoints": true
     }
   ]
 }

@@ -19,10 +19,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 import { cn } from "@builderai/ui/utils"
 
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@builderai/ui/sheet"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
+import { PropagationStopper } from "~/components/prevent-propagation"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
+import { SubscriptionForm } from "../../subscriptions/_components/subscription-form"
 import { SubscriptionSheet } from "../../subscriptions/_components/subscription-sheet"
 import { CustomerActions } from "../_components/customer-actions"
 import { PaymentMethodForm } from "../_components/payment-method-form"
@@ -167,21 +177,44 @@ export default async function PlanPage({
                       </TableCell>
                       <TableCell className="table-cell justify-start">
                         <div className="flex flex-row space-x-1">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button aria-haspopup="true" size="icon" variant="ghost">
-                                <MoreVertical className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem>Edit Subscription</DropdownMenuItem>
-                              <DropdownMenuItem>Downgrade/Upgrade</DropdownMenuItem>
-                              <DropdownMenuItem>End Subscription</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <PropagationStopper>
+                            <Sheet>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button aria-haspopup="true" size="icon" variant="ghost">
+                                    <MoreVertical className="h-4 w-4" />
+                                    <span className="sr-only">Toggle menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem>Downgrade/Upgrade</DropdownMenuItem>
+                                  <SheetTrigger asChild>
+                                    <DropdownMenuItem>End Subscription</DropdownMenuItem>
+                                  </SheetTrigger>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+
+                              <SheetContent className="flex max-h-screen w-full flex-col space-y-4 overflow-y-scroll md:w-1/2 lg:w-[700px]">
+                                <SheetHeader>
+                                  <SheetTitle className="text-2xl">
+                                    Subscription End Form
+                                  </SheetTitle>
+                                  <SheetDescription>
+                                    End the current subscription for this customer
+                                  </SheetDescription>
+                                </SheetHeader>
+
+                                <SubscriptionForm
+                                  defaultValues={{
+                                    ...sub,
+                                  }}
+                                  isEndSubscription
+                                />
+                              </SheetContent>
+                            </Sheet>
+                          </PropagationStopper>
                         </div>
                       </TableCell>
                     </TableRow>

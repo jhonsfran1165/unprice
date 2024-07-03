@@ -74,17 +74,50 @@ export class Analytics {
       wait: true,
     })
   }
-
-  public get getUsageFeature() {
+  public get getFeaturesVerifications() {
     return this.readClient.buildPipe({
-      pipe: "total_usage_per_feature_monthly__v1",
+      pipe: "get_features_verifications__v1",
       parameters: z.object({
-        featureSlug: z.string(),
-        customerId: z.string(),
+        projectId: z.string(),
         start: z.number(),
         end: z.number(),
       }),
       data: z.object({
+        featureSlug: z.string(),
+        total: z.number(),
+      }),
+    })
+  }
+
+  public get getUsageFeature() {
+    return this.readClient.buildPipe({
+      pipe: "total_usage_per_feature__v1",
+      parameters: z.object({
+        featureSlug: z.string(),
+        customerId: z.string(),
+        projectId: z.string(),
+        start: z.number(),
+        end: z.number(),
+      }),
+      data: z.object({
+        sum: z.number(),
+        max: z.number(),
+        count: z.number(),
+        last_during_period: z.number(),
+      }),
+    })
+  }
+
+  public get getUsageAllFeaturesProject() {
+    return this.readClient.buildPipe({
+      pipe: "total_usage_per_all_feature__v1",
+      parameters: z.object({
+        projectId: z.string(),
+        start: z.number(),
+        end: z.number(),
+      }),
+      data: z.object({
+        featureSlug: z.string(),
         sum: z.number(),
         max: z.number(),
         count: z.number(),

@@ -132,15 +132,18 @@ export class UnpriceApiKey {
         )
       }
 
-      // update last used in background
       this.waitUntil(
-        this.db
-          .update(schema.apikeys)
-          .set({
-            lastUsed: new Date(),
-          })
-          .where(eq(schema.apikeys.id, apiKey.id))
-          .execute()
+        Promise.all([
+          // update last used in background
+          this.db
+            .update(schema.apikeys)
+            .set({
+              lastUsed: new Date(),
+            })
+            .where(eq(schema.apikeys.id, apiKey.id))
+            .execute(),
+          // TODO: report usage of this feature
+        ])
       )
 
       return Ok(apiKey)

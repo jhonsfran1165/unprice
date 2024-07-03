@@ -425,6 +425,7 @@ export const createSubscription = async ({
                   subscriptionId: f.subscriptionId,
                   units: f.units,
                   featureType: f.featurePlanVersion.featureType,
+                  aggregationMethod: f.featurePlanVersion.aggregationMethod,
                 }
               )
             )

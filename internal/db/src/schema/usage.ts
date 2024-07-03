@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { foreignKey, integer, primaryKey, text, unique } from "drizzle-orm/pg-core"
+import { foreignKey, integer, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { projectID, timestamps } from "../utils/sql"
@@ -26,7 +26,12 @@ export const usage = pgTableProject(
       foreignColumns: [subscriptionItems.id, subscriptionItems.projectId],
       name: "usage_subitem_fkey",
     }),
-    unique: unique("unique_usage_subitem").on(table.subscriptionItemId, table.month, table.year),
+    unique: uniqueIndex("unique_usage_subitem").on(
+      table.projectId,
+      table.subscriptionItemId,
+      table.month,
+      table.year
+    ),
   })
 )
 

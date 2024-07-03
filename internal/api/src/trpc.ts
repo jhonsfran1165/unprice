@@ -153,13 +153,15 @@ export const t = initTRPC
         ...shape,
         data: {
           ...shape.data,
-          zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
+          zodError:
+            error.code === "BAD_REQUEST" && error.cause instanceof ZodError
+              ? error.cause.flatten()
+              : null,
         },
       }
 
-      ctx?.logger.error("Error in api", {
-        error: error,
-        response: errorResponse,
+      ctx?.logger.error("Error in trpc api", {
+        error: JSON.stringify(errorResponse),
       })
 
       return errorResponse

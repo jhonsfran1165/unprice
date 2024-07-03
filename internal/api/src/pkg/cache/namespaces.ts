@@ -1,4 +1,5 @@
 import type {
+  AggregationMethod,
   ApiKeyExtended,
   FeatureType,
   Month,
@@ -16,6 +17,7 @@ export type CurrentUsageCached = {
 
 export type SubscriptionItemCached = Omit<SubscriptionItem, "createdAt" | "updatedAt"> & {
   featureType: FeatureType
+  aggregationMethod: AggregationMethod
 }
 
 export type CacheNamespaces = {

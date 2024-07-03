@@ -143,6 +143,7 @@ export const stripeRouter = createTRPCRouter({
 
     const usageTiny = await opts.ctx.analytics
       .getUsageFeature({
+        projectId: "prj_2GGH1GE4864s4GrX6ttkjbStDP3k",
         featureSlug: "verifications",
         customerId: "cus_2GGH1GE4864s4GrX6ttkjbStDP3k",
         start: startOfMonth.getTime(),

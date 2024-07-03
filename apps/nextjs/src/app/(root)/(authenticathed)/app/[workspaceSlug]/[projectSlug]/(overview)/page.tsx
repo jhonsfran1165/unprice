@@ -16,12 +16,33 @@ import { cn } from "@builderai/ui/utils"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/server"
+import { AnalyticsCard } from "../_components/analytics-card"
+import { BarListAnalytics } from "../_components/bar-list"
 import { LoadingCard } from "../_components/loading-card"
 
 export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
 }) {
   const { projectSlug, workspaceSlug } = props.params
+  const { verifications } = await api.analytics.getAllFeatureVerificationsActiveProject({
+    year: 2024,
+    month: 7,
+  })
+
+  const dataVerifications = verifications.map((v) => ({
+    name: v.featureSlug,
+    value: v.total,
+  }))
+
+  const { usage } = await api.analytics.getUsageAllFeatureActiveProject({
+    year: 2024,
+    month: 7,
+  })
+
+  const dataUsage = usage.map((v) => ({
+    name: v.featureSlug,
+    value: v.max,
+  }))
 
   return (
     <DashboardShell>
@@ -58,7 +79,7 @@ export default async function DashboardPage(props: {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Now</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
             <Activity className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
@@ -67,17 +88,19 @@ export default async function DashboardPage(props: {
           </CardContent>
         </Card>
       </div>
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-7 md:col-span-2 lg:col-span-4">
-          <CardHeader>
-            <CardTitle>Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            {/* <Suspense>
-              <Overview />
-            </Suspense> */}
-          </CardContent>
-        </Card>
+      <div className="mt-4 flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+        <AnalyticsCard
+          className="w-full md:w-2/3"
+          title="Feature Verifications & Usage"
+          description="Feature verifications and usage recorded for this month."
+          tabs={[
+            { id: "verifications", label: "Verifications", data: dataVerifications, limit: 5 },
+            { id: "usage", label: "Usage", data: dataUsage, limit: 2 },
+          ]}
+          defaultTab="verifications"
+        >
+          {({ limit, tab, data }) => <BarListAnalytics tab={tab} data={data} limit={limit} />}
+        </AnalyticsCard>
 
         <Suspense
           fallback={
@@ -88,7 +111,11 @@ export default async function DashboardPage(props: {
             />
           }
         >
-          <RecentIngestions projectSlug={projectSlug} workspaceSlug={workspaceSlug} />
+          <RecentIngestions
+            className="w-full md:w-1/3"
+            projectSlug={projectSlug}
+            workspaceSlug={workspaceSlug}
+          />
         </Suspense>
       </div>
     </DashboardShell>
@@ -144,6 +171,7 @@ function IngestionCard(props: {
 async function RecentIngestions(props: {
   projectSlug: string
   workspaceSlug: string
+  className?: string
 }) {
   const ingestions = await api.ingestions.list({
     projectSlug: props.projectSlug,
@@ -151,7 +179,7 @@ async function RecentIngestions(props: {
   })
 
   return (
-    <Card className="col-span-7 md:col-span-2 lg:col-span-3">
+    <Card className={cn("flex flex-col", props.className)}>
       <CardHeader>
         <CardTitle>Recent Ingestions</CardTitle>
         <CardDescription>

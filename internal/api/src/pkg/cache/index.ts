@@ -66,10 +66,10 @@ export async function initCache(c: Context, metrics: Metrics): Promise<C<CacheNa
       c,
       defaultOpts
     ),
-    customerFeatureCurrentUsage: new Namespace<CacheNamespaces["customerFeatureCurrentUsage"]>(
-      c,
-      defaultOpts
-    ),
+    customerFeatureCurrentUsage: new Namespace<CacheNamespaces["customerFeatureCurrentUsage"]>(c, {
+      ...defaultOpts,
+      fresh: 60 * 1000 * 5, // refresh usage every 5 minutes
+    }),
   })
 }
 

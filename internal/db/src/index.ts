@@ -14,16 +14,16 @@ import * as schema from "./schema"
 neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket : ws
 
 // if we're running locally
-// if (env.NODE_ENV === "development") {
-//   // Set the WebSocket proxy to work with the local instance
-//   neonConfig.wsProxy = (host) => {
-//     return `${host}:5433/v1?address=db:5432`
-//   }
-//   // Disable all authentication and encryption
-//   neonConfig.useSecureWebSocket = false
-//   neonConfig.pipelineTLS = false
-//   neonConfig.pipelineConnect = false
-// }
+if (env.NODE_ENV === "development") {
+  // Set the WebSocket proxy to work with the local instance
+  neonConfig.wsProxy = (host) => {
+    return `${host}:5433/v1?address=db:5432`
+  }
+  // Disable all authentication and encryption
+  neonConfig.useSecureWebSocket = false
+  neonConfig.pipelineTLS = false
+  neonConfig.pipelineConnect = false
+}
 
 export const primary =
   env.NODE_ENV === "production"
