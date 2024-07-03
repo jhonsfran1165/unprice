@@ -1,25 +1,17 @@
-import { Button } from "@builderai/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@builderai/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
+import type { Bar } from "@builderai/ui/charts"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
 import { cn } from "@builderai/ui/utils"
 import type { ReactNode } from "react"
+// import { HydrateClient, trpc } from "~/trpc/server"
 
 export function AnalyticsCard<T extends string>({
   tabs,
-  expandLimit,
-  hasMore,
-  children,
   defaultTab,
   title,
   description,
   className,
+  children,
 }: {
   title: string
   className?: string
@@ -27,27 +19,23 @@ export function AnalyticsCard<T extends string>({
   tabs: {
     id: T
     label: string
-    data: {
-      key?: string
-      href?: string
-      value: number
-      name: string
-    }[]
+    data: Bar<unknown>[]
+    limit?: number
   }[]
-  expandLimit?: number
   defaultTab: T
-  hasMore?: boolean
   children: (props: {
     limit?: number
     tab: T
-    data: {
-      key?: string
-      href?: string
-      value: number
-      name: string
-    }[]
+    data: Bar<unknown>[]
   }) => ReactNode
 }) {
+  // TODO: prefetch data when trpc update is released
+  // https://github.com/trpc/trpc/pull/5828
+  // void trpc.analytics.getAllFeatureVerificationsActiveProject.prefetch({
+  //   year: 2024,
+  //   month: 7,
+  // });
+
   return (
     <Card className={cn("flex flex-col", className)}>
       <CardHeader>
@@ -63,21 +51,16 @@ export function AnalyticsCard<T extends string>({
               </TabsTrigger>
             ))}
           </TabsList>
-          {tabs.map(({ id, data }) => (
+
+          {/* <HydrateClient> */}
+          {tabs.map(({ id, data, limit }) => (
             <TabsContent key={id} value={id}>
-              {children({ limit: expandLimit, tab: id, data })}
+              {children({ limit, tab: id, data })}
             </TabsContent>
           ))}
+          {/* </HydrateClient> */}
         </Tabs>
       </CardContent>
-
-      <CardFooter>
-        {hasMore && (
-          <Button size={"sm"} className="w-44 mx-auto">
-            View All
-          </Button>
-        )}
-      </CardFooter>
     </Card>
   )
 }

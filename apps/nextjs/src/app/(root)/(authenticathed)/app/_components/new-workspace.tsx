@@ -1,6 +1,4 @@
 "use client"
-
-import { TRPCClientError } from "@trpc/client"
 import { toDecimal } from "dinero.js"
 import Link from "next/link"
 
@@ -18,13 +16,11 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
-import { useToast } from "@builderai/ui/use-toast"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
 export default function NewTeamDialog(props: { closeDialog: () => void; isOpen: boolean }) {
-  const { toast } = useToast()
   const plans = api.stripe.plans.useQuery(undefined, {
     refetchOnWindowFocus: false,
     enabled: props.isOpen, // only fetch plans when dialog is open
@@ -42,20 +38,6 @@ export default function NewTeamDialog(props: { closeDialog: () => void; isOpen: 
   const stripePurchase = api.stripe.purchaseOrg.useMutation({
     onSettled: (data) => {
       if (window && data?.success) window.location.href = data.url
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toast({
-          title: err.message,
-          variant: "destructive",
-        })
-      } else {
-        toast({
-          title: "Error",
-          description: "There was an error setting up your workspace. Please try again.",
-          variant: "destructive",
-        })
-      }
     },
   })
 

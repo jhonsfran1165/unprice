@@ -1,6 +1,4 @@
 "use client"
-
-import { TRPCClientError } from "@trpc/client"
 import { useRouter } from "next/navigation"
 
 import { Button } from "@builderai/ui/button"
@@ -37,13 +35,6 @@ export function TransferProjectToPersonal({
     onSuccess: (data) => {
       toastAction("success")
       router.push(`/${data?.workspaceSlug}`)
-    },
-    onError: (err) => {
-      if (err instanceof TRPCClientError) {
-        toastAction("error", err.message)
-      } else {
-        toastAction("error")
-      }
     },
   })
 

@@ -38,15 +38,7 @@ export const featureUsageSchemaV1 = z.object({
 })
 
 export const auditLogSchemaV1 = z.object({
-  /**
-   * The workspace owning this audit log
-   */
   workspaceId: z.string(),
-
-  /**
-   * Buckets are used as namespaces for different logs belonging to a single workspace
-   */
-  bucket: z.string(),
   auditLogId: z.string(),
   event: z.string(),
   description: z.string().optional(),

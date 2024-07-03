@@ -17,7 +17,7 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/server"
 import { AnalyticsCard } from "../_components/analytics-card"
-import BarList from "../_components/dashboards/bar-list"
+import { BarListAnalytics } from "../_components/bar-list"
 import { LoadingCard } from "../_components/loading-card"
 
 export default async function DashboardPage(props: {
@@ -34,13 +34,15 @@ export default async function DashboardPage(props: {
     value: v.total,
   }))
 
-  const usage = [
-    { name: "/dsd", value: 46655645 },
-    { name: "/vcv", value: 46 },
-    { name: "/cancdfdfellation", value: 3 },
-    { name: "/ere", value: 1048 },
-    { name: "/asd", value: 3842 },
-  ]
+  const { usage } = await api.analytics.getUsageAllFeatureActiveProject({
+    year: 2024,
+    month: 7,
+  })
+
+  const dataUsage = usage.map((v) => ({
+    name: v.featureSlug,
+    value: v.max,
+  }))
 
   return (
     <DashboardShell>
@@ -90,16 +92,14 @@ export default async function DashboardPage(props: {
         <AnalyticsCard
           className="w-full md:w-2/3"
           title="Feature Verifications & Usage"
-          description="Feature verifications and usage recorded in the last 30 days."
+          description="Feature verifications and usage recorded for this month."
           tabs={[
-            { id: "verifications", label: "Verifications", data: dataVerifications },
-            { id: "usage", label: "Usage", data: usage },
+            { id: "verifications", label: "Verifications", data: dataVerifications, limit: 5 },
+            { id: "usage", label: "Usage", data: dataUsage, limit: 2 },
           ]}
           defaultTab="verifications"
-          expandLimit={5}
-          hasMore={true}
         >
-          {({ limit, tab, data }) => <BarList tab={tab} data={data} limit={limit} />}
+          {({ limit, tab, data }) => <BarListAnalytics tab={tab} data={data} limit={limit} />}
         </AnalyticsCard>
 
         <Suspense
