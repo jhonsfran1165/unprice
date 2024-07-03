@@ -1,4 +1,6 @@
+import { TooltipProvider } from "@builderai/ui/tooltip"
 import { siteConfig } from "~/constants/layout"
+import "~/styles/globals.css"
 
 export const metadata = {
   title: {
@@ -31,7 +33,9 @@ export default function SitesLayout(props: { children: React.ReactNode }) {
           content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
         />
       </head>
-      {props.children}
+      <body className={"font-secondary min-h-screen antialiased"}>
+        <TooltipProvider delayDuration={300}>{props.children}</TooltipProvider>
+      </body>
     </html>
   )
 }

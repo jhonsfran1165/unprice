@@ -37,6 +37,7 @@
     "openai",
     "openapi",
     "opentelemetry",
+    "pkey",
     "satoshi",
     "sidemodule",
     "SIGNIN",

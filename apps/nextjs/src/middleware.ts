@@ -4,7 +4,7 @@ import { auth } from "@builderai/auth/server"
 
 import SitesMiddleware from "~/middleware/sites"
 import { parse } from "~/middleware/utils"
-import { API_HOSTNAMES, APP_HOSTNAMES, APP_PUBLIC_ROUTES, SITES_HOSTNAMES } from "./constants"
+import { API_HOSTNAMES, APP_HOSTNAMES, APP_PUBLIC_ROUTES } from "./constants"
 import ApiMiddleware from "./middleware/api"
 import AppMiddleware from "./middleware/app"
 
@@ -28,12 +28,7 @@ export default auth((req) => {
   }
 
   // 3. validate site routes
-  if (SITES_HOSTNAMES.has(domain)) {
-    return SitesMiddleware(req)
-  }
-
-  // 0. public routes
-  return NextResponse.next()
+  return SitesMiddleware(req)
 })
 
 export const config = {

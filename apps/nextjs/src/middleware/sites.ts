@@ -5,11 +5,9 @@ import type { NextAuthRequest } from "@builderai/auth"
 import { parse } from "./utils"
 
 export default function SitesMiddleware(req: NextAuthRequest) {
-  const { domain, path } = parse(req)
+  const { domain, path, suddomain } = parse(req)
   // retrieve the current response
   const url = req.nextUrl
-
-  // console.log("sites middleware", domain, path, suddomain)
 
   if (!domain) {
     return NextResponse.next()
@@ -21,7 +19,7 @@ export default function SitesMiddleware(req: NextAuthRequest) {
     return NextResponse.next()
   }
 
-  rewrittenUrl.pathname = `/sites${path === "/" ? "" : path}`
+  rewrittenUrl.pathname = `/sites/${suddomain ?? domain}/${path === "/" ? "" : path}`
 
   // console.log(`rewriting ${url} to ${rewrittenUrl}`)
 
