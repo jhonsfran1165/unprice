@@ -2,10 +2,11 @@ import { NextResponse } from "next/server"
 
 import type { NextAuthRequest } from "@builderai/auth"
 
-import { parse } from "./utils"
+import { getValidSubdomain, parse } from "./utils"
 
 export default function SitesMiddleware(req: NextAuthRequest) {
-  const { domain, path, suddomain } = parse(req)
+  const { domain, path } = parse(req)
+  const subdomain = getValidSubdomain(domain)
   // retrieve the current response
   const url = req.nextUrl
 
@@ -19,9 +20,7 @@ export default function SitesMiddleware(req: NextAuthRequest) {
     return NextResponse.next()
   }
 
-  rewrittenUrl.pathname = `/sites/${suddomain ?? domain}/${path === "/" ? "" : path}`
-
-  // console.log(`rewriting ${url} to ${rewrittenUrl}`)
+  rewrittenUrl.pathname = `/sites/${subdomain ?? domain}/${path === "/" ? "" : path}`
 
   return NextResponse.rewrite(rewrittenUrl)
 }

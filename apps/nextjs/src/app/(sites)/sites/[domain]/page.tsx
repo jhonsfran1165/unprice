@@ -20,4 +20,5 @@ export default async function DomainPage({
   return planVersions.map((planVersion) => (
     <PricingCard key={planVersion.id} planVersion={planVersion} />
   ))
+
 }

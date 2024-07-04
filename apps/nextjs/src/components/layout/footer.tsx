@@ -2,31 +2,12 @@ import dynamic from "next/dynamic"
 import Link from "next/link"
 
 import { Button } from "@builderai/ui/button"
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "@builderai/ui/command"
-import {
-  Calculator,
-  Calendar,
-  CreditCard,
-  Github,
-  Settings,
-  Smile,
-  Twitter,
-  User,
-} from "@builderai/ui/icons"
+import { Github, Twitter } from "@builderai/ui/icons"
 import { Skeleton } from "@builderai/ui/skeleton"
 import { cn } from "@builderai/ui/utils"
 
 import { Logo } from "~/components/layout/logo"
 import { siteConfig } from "~/constants/layout"
-import { Search } from "./search"
 
 const ThemeToggle = dynamic(() => import("~/components/layout/theme-toggle"), {
   ssr: false,
@@ -52,45 +33,6 @@ export default function Footer(props: { className?: string }) {
       <div className="flex flex-1 items-center justify-end">
         <nav className="flex items-center">
           {/* // TODO: add command for the most important actions in the platform - dev exp focused */}
-          <Search>
-            <CommandInput placeholder="Type a command or search..." />
-            <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup heading="Suggestions">
-                <CommandItem>
-                  <Calendar className="mr-2 h-4 w-4" />
-                  <span>Calendar</span>
-                </CommandItem>
-                <CommandItem>
-                  <Smile className="mr-2 h-4 w-4" />
-                  <span>Search Emoji</span>
-                </CommandItem>
-                <CommandItem>
-                  <Calculator className="mr-2 h-4 w-4" />
-                  <span>Calculator</span>
-                </CommandItem>
-              </CommandGroup>
-              <CommandSeparator />
-              <CommandGroup heading="Settings">
-                <CommandItem>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                  <CommandShortcut>⌘P</CommandShortcut>
-                </CommandItem>
-                <CommandItem>
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  <span>Billing</span>
-                  <CommandShortcut>⌘B</CommandShortcut>
-                </CommandItem>
-                <CommandItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                  <CommandShortcut>⌘S</CommandShortcut>
-                </CommandItem>
-              </CommandGroup>
-            </CommandList>
-          </Search>
-
           <Link href={siteConfig.links.twitter} target="_blank" rel="noreferrer">
             <Button variant="ghost" size="sm" className="button-ghost">
               <Twitter className="hover:text-background-textContrast h-5 w-5 fill-current" />

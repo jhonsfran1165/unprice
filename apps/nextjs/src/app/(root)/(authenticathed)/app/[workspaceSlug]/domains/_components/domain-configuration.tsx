@@ -27,19 +27,19 @@ export default function DomainConfiguration({
 }: {
   domainPromise: Promise<RouterOutputs["domains"]["verify"]>
 }) {
-  const { status, domainJson } = use(domainPromise)
+  const { status, domainProvider } = use(domainPromise)
 
-  if (!status || !domainJson) return null
+  if (!status || !domainProvider) return null
 
   const subdomain =
-    domainJson?.name && domainJson?.apexName
-      ? getSubdomain(domainJson.name, domainJson.apexName)
+    domainProvider?.name && domainProvider?.apexName
+      ? getSubdomain(domainProvider.name, domainProvider.apexName)
       : null
 
   const txtVerification =
     (status === "Pending Verification" &&
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      domainJson?.verification?.find((x: any) => x.type === "TXT")) ??
+      domainProvider?.verification?.find((x: any) => x.type === "TXT")) ??
     null
 
   return (
@@ -52,8 +52,8 @@ export default function DomainConfiguration({
         <>
           <p className="text-sm">
             Please set the following TXT record on{" "}
-            <InlineSnippet>{domainJson.apexName}</InlineSnippet> to prove ownership of{" "}
-            <InlineSnippet>{domainJson.name}</InlineSnippet>:
+            <InlineSnippet>{domainProvider.apexName}</InlineSnippet> to prove ownership of{" "}
+            <InlineSnippet>{domainProvider.name}</InlineSnippet>:
           </p>
           <div className="bg-muted my-5 flex items-start justify-start space-x-10 rounded-md p-2">
             <div>
@@ -65,7 +65,7 @@ export default function DomainConfiguration({
               <p className="mt-2 font-mono text-sm">
                 {txtVerification.domain.slice(
                   0,
-                  txtVerification.domain.length - (domainJson?.apexName?.length ?? 0) - 1
+                  txtVerification.domain.length - (domainProvider?.apexName?.length ?? 0) - 1
                 )}
               </p>
             </div>
@@ -83,7 +83,7 @@ export default function DomainConfiguration({
           </p>
         </>
       ) : status === "Unknown Error" ? (
-        <p className="mb-5 text-sm">{domainJson?.error?.message}</p>
+        <p className="mb-5 text-sm">{status}</p>
       ) : (
         <>
           <Tabs defaultValue={subdomain ? "CNAME" : "A"}>
@@ -95,7 +95,7 @@ export default function DomainConfiguration({
               <div className="my-3 text-left">
                 <p className="my-5 text-sm">
                   To configure your apex domain (
-                  <InlineSnippet>{domainJson.apexName}</InlineSnippet>
+                  <InlineSnippet>{domainProvider.apexName}</InlineSnippet>
                   ), set the following A record on your DNS provider to continue:
                 </p>
                 <div className="bg-muted flex items-center justify-start space-x-10 rounded-md p-2">
@@ -121,7 +121,7 @@ export default function DomainConfiguration({
             <TabsContent value="CNAME">
               <div className="my-3 text-left">
                 <p className="my-5 text-sm">
-                  To configure your subdomain (<InlineSnippet>{domainJson.name}</InlineSnippet>
+                  To configure your subdomain (<InlineSnippet>{domainProvider.name}</InlineSnippet>
                   ), set the following A record on your DNS provider to continue:
                 </p>
                 <div className="bg-muted flex items-center justify-start space-x-10 rounded-md p-2">

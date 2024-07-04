@@ -7,8 +7,8 @@ import { CheckCircle2 } from "@builderai/ui/icons"
 
 import { currencySymbol } from "@builderai/db/validators"
 
+import { Button } from "@builderai/ui/button"
 import { api } from "~/trpc/server"
-import { SubscribeNow } from "./subscribe-now"
 
 export default async function PricingPage() {
   const plans = await api.stripe.plans()
@@ -61,7 +61,7 @@ function PricingCard(props: {
       </ul>
 
       <CardFooter>
-        <SubscribeNow planId={props.plan.priceId} />
+        <Button>Subscribe</Button>
       </CardFooter>
     </Card>
   )

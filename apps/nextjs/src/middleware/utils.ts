@@ -1,7 +1,39 @@
 import type { NextAuthRequest } from "@builderai/auth"
 import type { NextRequest } from "next/server"
+import { RESTRICTED_SUBDOMAINS } from "./../constants/index"
 
 import { APP_BASE_DOMAIN } from "~/constants"
+import { env } from "~/env.mjs"
+
+// validate the subdomain from the host and return it
+// if the host is a custom domain, return the full domain
+// if the subdomain is restricted or invalid, return null
+export const getValidSubdomain = (host?: string | null) => {
+  let subdomain: string | null = null
+
+  // we should improve here for custom vercel deploy page
+  if (host?.includes(".") && !host.includes(".vercel.app")) {
+    const candidate = host.split(".")[0]
+    if (candidate && !RESTRICTED_SUBDOMAINS.has(candidate)) {
+      // Valid candidate
+      subdomain = candidate
+    }
+  }
+
+  // In case the host is a custom domain
+  if (
+    host &&
+    !(
+      host?.includes(env.NEXTJS_URL) ||
+      host?.endsWith(".vercel.app") ||
+      host?.includes("localhost")
+    )
+  ) {
+    subdomain = host
+  }
+
+  return subdomain
+}
 
 export const parse = (req: NextAuthRequest | NextRequest) => {
   let domain = req.headers.get("host")!
@@ -12,7 +44,7 @@ export const parse = (req: NextAuthRequest | NextRequest) => {
     domain = APP_BASE_DOMAIN
   }
 
-  const suddomain = domain.split(".")[0]
+  const subdomain = domain.split(".")[0] === domain ? null : domain.split(".")[0]
   const ip = req.ip ?? "127.0.0.1"
   const path = req.nextUrl.pathname
 
@@ -24,7 +56,7 @@ export const parse = (req: NextAuthRequest | NextRequest) => {
   const key = decodeURIComponent(path.split("/")[1] ?? "") // key is the first part of the path
   const fullKey = decodeURIComponent(path.slice(1)) // fullKey is the full path without the first slash
 
-  return { domain, path, fullPath, key, fullKey, suddomain, ip }
+  return { domain, path, fullPath, key, fullKey, subdomain, ip }
 }
 
 export const detectBot = (req: NextRequest) => {

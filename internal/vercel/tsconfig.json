@@ -1,0 +1,9 @@
+{
+  "extends": "@builderai/tsconfig/base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "moduleResolution": "Bundler"
+  },
+  "include": ["src", "*.ts"],
+  "exclude": ["node_modules"]
+}

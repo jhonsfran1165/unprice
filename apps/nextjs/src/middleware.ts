@@ -3,19 +3,13 @@ import { NextResponse } from "next/server"
 import { auth } from "@builderai/auth/server"
 
 import SitesMiddleware from "~/middleware/sites"
-import { parse } from "~/middleware/utils"
-import { API_HOSTNAMES, APP_HOSTNAMES, APP_PUBLIC_ROUTES } from "./constants"
+import { getValidSubdomain, parse } from "~/middleware/utils"
+import { API_HOSTNAMES, APP_HOSTNAMES } from "./constants"
 import ApiMiddleware from "./middleware/api"
 import AppMiddleware from "./middleware/app"
 
 export default auth((req) => {
-  const { domain, path } = parse(req)
-  const isPublicRoute = APP_PUBLIC_ROUTES.has(path)
-
-  // 0. public routes
-  if (isPublicRoute) {
-    return NextResponse.next()
-  }
+  const { domain } = parse(req)
 
   // 1. we validate api routes
   if (API_HOSTNAMES.has(domain)) {
@@ -27,8 +21,12 @@ export default auth((req) => {
     return AppMiddleware(req)
   }
 
-  // 3. validate site routes
-  return SitesMiddleware(req)
+  if (getValidSubdomain(domain)) {
+    // 3. validate site routes
+    return SitesMiddleware(req)
+  }
+
+  return NextResponse.next()
 })
 
 export const config = {
