@@ -7,6 +7,8 @@ import animate from "tailwindcss-animate"
 
 import { generateTheme } from "./generate-theme"
 
+export const defaultTheme = "sunset"
+
 export const unPriceTailwindPreset: Config = {
   content: ["src/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
   // disable hover on mobiles
@@ -15,7 +17,7 @@ export const unPriceTailwindPreset: Config = {
   },
   theme: {
     extend: {
-      ...generateTheme("sunset"),
+      ...generateTheme(defaultTheme),
       container: {
         center: true,
         padding: "2rem",

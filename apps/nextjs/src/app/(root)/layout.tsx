@@ -1,4 +1,5 @@
 import "~/styles/globals.css"
+import "~/styles/prosemirror.css"
 
 import type { Metadata } from "next"
 

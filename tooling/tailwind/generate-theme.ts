@@ -5,7 +5,7 @@
  *
  * @see https://www.radix-ui.com/docs/colors/palette-composition/composing-a-palette
  */
-const grayScalePairs = {
+export const grayScalePairs = {
   tomato: "mauve",
   red: "mauve",
   crimson: "mauve",
@@ -46,7 +46,7 @@ const foregroundPairs = {
   amber: "black",
 } as Record<string, string>
 
-const themeNames = {
+export const themeNames = {
   sunset: {
     success: "green",
     destructive: "red",
@@ -65,7 +65,7 @@ const themeNames = {
   },
 }
 
-const generateVariantRadixColors = (color: string) => {
+export const generateVariantRadixColors = (color: string) => {
   // there are some colors that only works on especial foreground
   const foreground = foregroundPairs[color] ?? "white"
   return {
@@ -91,7 +91,13 @@ interface RecursiveKeyValuePair<K extends keyof any = string, V = string> {
   [key: string]: V | RecursiveKeyValuePair<K, V>
 }
 
-export const generateTheme = (themeName: keyof typeof themeNames): RecursiveKeyValuePair => {
+export const generateTheme = (
+  themeName: keyof typeof themeNames
+): {
+  colors: RecursiveKeyValuePair
+  borderColor: RecursiveKeyValuePair
+  ringColor: RecursiveKeyValuePair
+} => {
   const theme = themeNames[themeName]
   const grayscale = grayScalePairs[theme.primary] ?? "gray"
 
@@ -99,8 +105,14 @@ export const generateTheme = (themeName: keyof typeof themeNames): RecursiveKeyV
     colors: {
       transparent: "transparent",
       current: "currentColor",
-      black: "#000",
-      white: "#fff",
+      black: {
+        DEFAULT: "#000",
+        foreground: "#fff",
+      },
+      white: {
+        DEFAULT: "#fff",
+        foreground: "#000",
+      },
       gray: generateVariantRadixColors(grayscale),
       success: generateVariantRadixColors(theme.success),
       danger: generateVariantRadixColors(theme.destructive),

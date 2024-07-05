@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { PricingCard } from "~/app/(root)/(authenticathed)/app/[workspaceSlug]/[projectSlug]/plans/[planSlug]/[planVersionId]/review/_components/pricing-card"
+import EditorComponent from "~/components/editor/components/editor"
 import { api } from "~/trpc/server"
 
 export default async function DomainPage({
@@ -17,8 +17,9 @@ export default async function DomainPage({
     notFound()
   }
 
-  return planVersions.map((planVersion) => (
-    <PricingCard key={planVersion.id} planVersion={planVersion} />
-  ))
+  // return planVersions.map((planVersion) => (
+  //   <PricingCard key={planVersion.id} planVersion={planVersion} />
+  // ))
 
+  return <EditorComponent />
 }

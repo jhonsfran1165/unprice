@@ -1,6 +1,8 @@
+import { Toaster } from "@builderai/ui/sonner"
 import { TooltipProvider } from "@builderai/ui/tooltip"
 import { siteConfig } from "~/constants/layout"
 import "~/styles/globals.css"
+import "~/styles/prosemirror.css"
 
 export const metadata = {
   title: {
@@ -35,6 +37,8 @@ export default function SitesLayout(props: { children: React.ReactNode }) {
       </head>
       <body className={"font-secondary min-h-screen antialiased"}>
         <TooltipProvider delayDuration={300}>{props.children}</TooltipProvider>
+
+        <Toaster richColors closeButton position="bottom-left" />
       </body>
     </html>
   )
