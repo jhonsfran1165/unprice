@@ -4,25 +4,29 @@ import ContentEditable from "react-contenteditable"
 import { cn } from "@builderai/ui/utils"
 import { TextSettings } from "./settings"
 
-export type TextProps = {
-  fontSize: string
-  textAlign: string
-  fontWeight: string
-  color: Record<"r" | "g" | "b" | "a", string>
+export type TextProps = React.CSSProperties & {
   shadow: number
   text: string
-  margin: [string, string, string, string]
 }
 
-export const TextComponent = ({
-  fontSize,
-  textAlign,
-  fontWeight,
-  color,
-  shadow,
-  text = "Text",
-  margin = ["0", "0", "0", "0"],
-}: Partial<TextProps>) => {
+const defaultProps = {
+  paddingLeft: 10,
+  paddingRight: 10,
+  paddingTop: 10,
+  paddingBottom: 10,
+  marginLeft: 0,
+  marginRight: 0,
+  marginTop: 0,
+  marginBottom: 0,
+  color: "black",
+  shadow: 0,
+  text: "Text",
+  fontSize: 15,
+  textAlign: "left",
+  fontWeight: "500",
+} as TextProps
+
+export const TextComponent = (props: Partial<TextProps>) => {
   const {
     connectors: { connect },
     setProp,
@@ -30,6 +34,25 @@ export const TextComponent = ({
   const { enabled } = useEditor((state) => ({
     enabled: state.options.enabled,
   }))
+
+  const {
+    text,
+    color,
+    fontSize,
+    fontWeight,
+    textAlign,
+    paddingTop,
+    paddingRight,
+    paddingBottom,
+    paddingLeft,
+    marginTop,
+    marginRight,
+    marginBottom,
+    marginLeft,
+    shadow,
+  } = {
+    ...props,
+  }
 
   return (
     <ContentEditable
@@ -46,8 +69,9 @@ export const TextComponent = ({
       )}
       style={{
         width: "100%",
-        margin: `${margin[0]}px ${margin[1]}px ${margin[2]}px ${margin[3]}px`,
-        color: `rgba(${Object.values(color)})`,
+        padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
+        margin: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
+        color: color,
         fontSize: `${fontSize}px`,
         textShadow: `0px 0px 2px rgba(0,0,0,${(shadow || 0) / 100})`,
         fontWeight,
@@ -59,15 +83,7 @@ export const TextComponent = ({
 
 TextComponent.craft = {
   displayName: "Text",
-  props: {
-    fontSize: "15",
-    textAlign: "left",
-    fontWeight: "500",
-    color: { r: 92, g: 90, b: 90, a: 1 },
-    margin: [0, 0, 0, 0],
-    shadow: 0,
-    text: "Text",
-  },
+  props: defaultProps,
   related: {
     toolbar: TextSettings,
   },

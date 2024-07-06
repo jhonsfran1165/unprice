@@ -1,6 +1,7 @@
 import { Label } from "@builderai/ui/label"
 import { RadioGroupItem } from "@builderai/ui/radio-group"
 import { ToolbarItem, ToolbarSection } from "../../toolbar"
+import type { TextProps } from "./text"
 
 export const capitalize = (text: string) => text.toUpperCase() + text.substring(1, text.length)
 export const weightDescription = (weight: number) =>
@@ -11,9 +12,9 @@ export const TextSettings = () => {
     <ToolbarSection
       title="Typography"
       props={["fontSize", "fontWeight", "textAlign"]}
-      summary={({ fontSize, fontWeight, textAlign }: any) => {
-        return `${fontSize || ""}, ${weightDescription(Number.parseInt(fontWeight))}, ${capitalize(
-          textAlign
+      summary={({ fontSize, fontWeight, textAlign }: TextProps) => {
+        return `${fontSize || ""}, ${weightDescription(fontWeight as number)}, ${capitalize(
+          textAlign as string
         )}`
       }}
     >

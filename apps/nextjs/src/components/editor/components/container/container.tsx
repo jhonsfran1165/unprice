@@ -26,6 +26,7 @@ const defaultProps = {
   color: "black",
   shadow: 0,
   radius: 0,
+  gap: 10,
   width: "100%",
   height: "auto",
 } as ContainerProps
@@ -47,6 +48,7 @@ export const ContainerElement = (props: Partial<ContainerProps> & {
     marginRight,
     marginTop,
     marginBottom,
+    gap,
     shadow,
     radius,
     fillSpace,
@@ -58,6 +60,7 @@ export const ContainerElement = (props: Partial<ContainerProps> & {
       propKey={{ width: "width", height: "height" }}
       style={{
         justifyContent,
+        gap: gap,
         flexDirection,
         alignItems,
         background: background,

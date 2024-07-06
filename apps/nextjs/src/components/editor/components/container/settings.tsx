@@ -12,6 +12,7 @@ export const ContainerSettings = () => {
     >
       <ToolbarItem full={true} propKey="marginLeft" type="slider" label="Margin" />
       <ToolbarItem full={true} propKey="padding" type="slider" label="Padding" />
+      <ToolbarItem full={true} propKey="gap" type="slider" label="Gap" />
     </ToolbarSection>
   )
 }
