@@ -7,10 +7,10 @@ export const ContainerSettings = () => {
       title="Container Settings"
       props={["padding", "margin"]}
       summary={(props: ContainerProps) => {
-        return `${props.margin || ""}, ${props.padding || ""}`
+        return `${props.marginLeft || ""}, ${props.padding || ""}`
       }}
     >
-      <ToolbarItem full={true} propKey="margin" type="slider" label="Margin" />
+      <ToolbarItem full={true} propKey="marginLeft" type="slider" label="Margin" />
       <ToolbarItem full={true} propKey="padding" type="slider" label="Padding" />
     </ToolbarSection>
   )

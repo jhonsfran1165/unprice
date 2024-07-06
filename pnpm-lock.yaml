@@ -138,6 +138,9 @@ importers:
       date-fns:
         specifier: ^3.3.1
         version: 3.6.0
+      debounce:
+        specifier: ^2.1.0
+        version: 2.1.0
       dinero.js:
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
@@ -165,6 +168,9 @@ importers:
       novel:
         specifier: ^0.4.3
         version: 0.4.3(@tiptap/extension-code-block@2.4.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
+      re-resizable:
+        specifier: ^6.9.17
+        version: 6.9.17(react-dom@18.3.1)(react@18.3.1)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -9168,6 +9174,11 @@ packages:
     engines: {node: '>=18'}
     dev: false
 
+  /debounce@2.1.0:
+    resolution: {integrity: sha512-OkL3+0pPWCqoBc/nhO9u6TIQNTK44fnBnzuVtJAbp13Naxw9R6u21x+8tVTka87AhDZ3htqZ2pSSsZl9fqL2Wg==}
+    engines: {node: '>=18'}
+    dev: false
+
   /debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
     peerDependencies:
@@ -13937,6 +13948,16 @@ packages:
       ini: 1.3.8
       minimist: 1.2.8
       strip-json-comments: 2.0.1
+    dev: false
+
+  /re-resizable@6.9.17(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-OBqd1BwVXpEJJn/yYROG+CbeqIDBWIp6wathlpB0kzZWWZIY1gPTsgK2yJEui5hOvkCdC2mcexF2V3DZVfLq2g==}
+    peerDependencies:
+      react: ^16.13.1 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.13.1 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
     dev: false
 
   /react-contenteditable@3.3.7(react@18.3.1):

@@ -59,8 +59,10 @@ export const Novel = ({
   return (
     <EditorRoot>
       <EditorContent
-        ref={connect}
-        disabled={!enabled}
+        ref={(ref) => {
+          ref && connect(ref)
+        }}
+        editable={enabled}
         extensions={extensions}
         {...(content && { initialContent: content })}
         onUpdate={({ editor }) => {
@@ -78,7 +80,7 @@ export const Novel = ({
           // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
           setProp((props) => (props.content = json), 500)
         }}
-        className="border py-4 px-8 rounded-sm"
+        className="border py-4 px-8 rounded-none border-none w-full"
         editorProps={{
           handleDOMEvents: {
             keydown: (_view, event) => handleCommandNavigation(event),

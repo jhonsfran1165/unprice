@@ -9,15 +9,12 @@ import { TextComponent } from "./text"
 
 export default function EditorComponent() {
   return (
-    <div class="h-screen flex flex-col">
+    <div className="h-screen flex flex-col">
       <Editor resolver={{ TextComponent, ContainerElement, Novel }} onRender={RenderNode} >
         <Viewport>
           <Frame>
             <Element
               is={ContainerElement}
-              padding={50}
-              margin={20}
-              background="#999"
               canvas
               custom={{
                 displayName: "App",

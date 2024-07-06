@@ -1,42 +1,84 @@
-import { useNode } from "@craftjs/core"
 import type React from "react"
 import { ContainerSettings } from "./settings"
 
-export type ContainerProps = {
-  margin?: number
-  padding?: number
-  background: string
+import { Resizer } from "./resizer"
+
+export type ContainerProps = React.CSSProperties & {
+  fillSpace: string
+  shadow: number
+  radius: number
 }
 
-export const ContainerElement = ({
-  margin = 0,
-  padding = 0,
-  background,
-  children,
-}: ContainerProps & {
+const defaultProps = {
+  flexDirection: "column",
+  alignItems: "flex-start",
+  justifyContent: "flex-start",
+  fillSpace: "no",
+  paddingLeft: 10,
+  paddingRight: 10,
+  paddingTop: 10,
+  paddingBottom: 10,
+  marginLeft: 0,
+  marginRight: 0,
+  marginTop: 0,
+  marginBottom: 0,
+  backgroundColor: "gray",
+  color: "black",
+  shadow: 0,
+  radius: 0,
+  width: "100%",
+  height: "auto",
+} as ContainerProps
+
+export const ContainerElement = (props: Partial<ContainerProps> & {
   children: React.ReactNode
 }) => {
   const {
-    connectors: { connect },
-  } = useNode()
-
+    flexDirection = "column",
+    alignItems,
+    justifyContent,
+    background,
+    color,
+    paddingLeft,
+    paddingRight,
+    paddingTop,
+    paddingBottom,
+    marginLeft,
+    marginRight,
+    marginTop,
+    marginBottom,
+    shadow,
+    radius,
+    fillSpace,
+    children
+  } = props
 
   return (
-    <div
-      style={{ margin: `${margin}px`, padding: `${padding}px` }}
-      ref={connect}
-      className={"space-y-6 rounded-none border flex flex-col"}
+    <Resizer
+      propKey={{ width: "width", height: "height" }}
+      style={{
+        justifyContent,
+        flexDirection,
+        alignItems,
+        background: background,
+        color: color,
+        padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
+        margin: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
+        boxShadow: shadow === 0 ? "none" : `0px 3px 100px ${shadow}px rgba(0, 0, 0, 0.13)`,
+        borderRadius: `${radius}px`,
+        flex: fillSpace === "yes" ? 1 : "unset",
+      }}
     >
       {children}
-    </div>
+    </Resizer>
   )
 }
 
 ContainerElement.craft = {
   displayName: "Container",
-  props: {
-    margin: 0,
-    padding: 0,
+  props: defaultProps,
+  rules: {
+    canDrag: () => true,
   },
   related: {
     toolbar: ContainerSettings,

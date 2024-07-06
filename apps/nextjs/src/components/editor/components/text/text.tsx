@@ -1,7 +1,7 @@
 import { useEditor, useNode } from "@craftjs/core"
 import ContentEditable from "react-contenteditable"
 
-import { cn, focusRing } from "@builderai/ui/utils"
+import { cn } from "@builderai/ui/utils"
 import { TextSettings } from "./settings"
 
 export type TextProps = {
@@ -40,8 +40,10 @@ export const TextComponent = ({
         // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
         setProp((prop) => (prop.text = e.target.value), 500)
       }} // use true to disable editing
-      tagName="h2" // Use a custom HTML tag (uses a div by default)
-      className={cn("border-input ring-offset-background placeholder:text-muted-foreground focus:border-ring focus-visible:ring-ring w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50", focusRing)}
+      tagName="div" // Use a custom HTML tag (uses a div by default)
+      className={cn(
+        "border-input-none ring-offset-none focus:border-ring-none focus-visible:ring-none w-full rounded-none border-none transition-colors file:border-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+      )}
       style={{
         width: "100%",
         margin: `${margin[0]}px ${margin[1]}px ${margin[2]}px ${margin[3]}px`,

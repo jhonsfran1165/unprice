@@ -42,7 +42,7 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
     }
   }, [dom, isActive, isHover])
 
-  const getPos = useCallback((dom: HTMLElement) => {
+  const getPos = useCallback((dom: HTMLElement | null) => {
     const { top, left, bottom } = dom ? dom.getBoundingClientRect() : { top: 0, left: 0, bottom: 0 }
 
 
@@ -55,7 +55,6 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
   const scroll = useCallback(() => {
     const { current: currentDOM } = currentRef
 
-    console.log("scroll", currentDOM)
     if (!currentDOM) return
     const { top, left } = getPos(dom)
 
@@ -77,7 +76,7 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
         ? ReactDOM.createPortal(
           <div
             ref={currentRef}
-            className="px-2 py-2 h-[30px] -mt-[32px] fixed flex items-center space-x-1 rounded-sm border bg-background-bg"
+            className="px-2 py-2 h-[30px] -mt-[29px] fixed flex items-center space-x-1 rounded-none border info"
             style={{
               left: getPos(dom).left,
               top: getPos(dom).top,
@@ -86,17 +85,20 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
           >
             <h6 className="flex-1 mr-4 text-sm">{name}</h6>
             {moveable ? (
-              <Button size={"xs"} variant={"ghost"} className="cursor-move" ref={drag}>
+              <Button size={"xs"} variant={"custom"} className="cursor-move" ref={(ref) => {
+                ref && drag(ref)
+              }}>
                 <Move className="size-3" />
               </Button>
             ) : null}
             {id !== ROOT_NODE && (
               <Button
                 size={"xs"}
-                variant={"ghost"}
+                variant={"custom"}
                 className="cursor-pointer"
                 onClick={() => {
-                  actions.selectNode(parent)
+                  // there is always a parent - for the root node this option is disabled
+                  actions.selectNode(parent!)
                 }}
               >
                 <ArrowUp className="size-4" />
@@ -105,7 +107,7 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
             {deletable ? (
               <Button
                 size={"xs"}
-                variant={"ghost"}
+                variant={"custom"}
                 className="cursor-pointer"
                 onMouseDown={(e: React.MouseEvent) => {
                   e.stopPropagation()
