@@ -9,10 +9,9 @@ import { TextComponent } from "./text"
 
 export default function EditorComponent() {
   return (
-    <Editor resolver={{ TextComponent, ContainerElement, Novel }} onRender={RenderNode}>
-      <Viewport>
-        <div className="flex-1">
-
+    <div class="h-screen flex flex-col">
+      <Editor resolver={{ TextComponent, ContainerElement, Novel }} onRender={RenderNode} >
+        <Viewport>
           <Frame>
             <Element
               is={ContainerElement}
@@ -29,8 +28,8 @@ export default function EditorComponent() {
             </Element>
           </Frame>
 
-        </div>
-      </Viewport>
-    </Editor>
+        </Viewport>
+      </Editor>
+    </div>
   )
 }
