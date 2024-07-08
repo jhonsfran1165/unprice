@@ -43,7 +43,7 @@ export const Viewport: React.FC<{ children?: React.ReactNode }> = ({ children })
       <ElementsSidebar />
       <main className="page-container flex-1 flex flex-col">
         {/* header */}
-        <div className="bg-background-base h-16 sticky top-0 z-40 flex items-center px-2 backdrop-blur-[2px] border-b shadow-sm">
+        <div className="bg-background-base h-14 sticky top-0 z-40 flex items-center px-2 backdrop-blur-[2px] border-b shadow-sm">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon">
               <Undo className="h-5 w-5" />

@@ -54,10 +54,11 @@ export const Resizer = ({
     height: nodeHeight,
   })
 
-  const nodeDimensions = useRef<Size>({
+  const nodeDimensions = useRef<Size | null>(null)
+  nodeDimensions.current = {
     width: nodeWidth,
     height: nodeHeight,
-  })
+  }
 
   /**
    * Using an internal value to ensure the width/height set in the node is converted to px
@@ -69,15 +70,15 @@ export const Resizer = ({
   })
 
   const updateInternalDimensionsInPx = useCallback(() => {
-    const { width: nodeWidth, height: nodeHeight } = nodeDimensions.current
+    const dimensions = nodeDimensions.current
 
     const width = percentToPx(
       getElementDimensions(resizable.current?.resizable?.parentElement!).width,
-      nodeWidth
+      dimensions?.width
     )
     const height = percentToPx(
       getElementDimensions(resizable.current?.resizable?.parentElement!).height,
-      nodeHeight
+      dimensions?.height
     )
 
     setInternalDimensions({
@@ -87,10 +88,10 @@ export const Resizer = ({
   }, [])
 
   const updateInternalDimensionsWithOriginal = useCallback(() => {
-    const { width: nodeWidth, height: nodeHeight } = nodeDimensions.current
+    const dimensions = nodeDimensions.current
     setInternalDimensions({
-      width: nodeWidth,
-      height: nodeHeight,
+      width: dimensions?.width,
+      height: dimensions?.height,
     })
   }, [])
 

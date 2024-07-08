@@ -19,6 +19,7 @@ const defaultProps = {
   marginTop: 0,
   marginBottom: 0,
   color: "black",
+  backgroundColor: "transparent",
   shadow: 0,
   text: "Text",
   fontSize: 15,
@@ -29,7 +30,7 @@ const defaultProps = {
 export const TextComponent = (props: Partial<TextProps>) => {
   const {
     connectors: { connect },
-    setProp,
+    actions: { setProp },
   } = useNode()
   const { enabled } = useEditor((state) => ({
     enabled: state.options.enabled,
@@ -49,6 +50,7 @@ export const TextComponent = (props: Partial<TextProps>) => {
     marginRight,
     marginBottom,
     marginLeft,
+    backgroundColor,
     shadow,
   } = {
     ...props,
@@ -60,9 +62,12 @@ export const TextComponent = (props: Partial<TextProps>) => {
       html={text ?? ""}
       disabled={!enabled}
       onChange={(e) => {
-        // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-        setProp((prop) => (prop.text = e.target.value), 500)
-      }} // use true to disable editing
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        setProp((props: Record<string, any>) => {
+          props.text = e.target.value
+          return props
+        }, 500)
+      }}
       tagName="div" // Use a custom HTML tag (uses a div by default)
       className={cn(
         "border-input-none ring-offset-none focus:border-ring-none focus-visible:ring-none w-full rounded-none border-none transition-colors file:border-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -76,6 +81,7 @@ export const TextComponent = (props: Partial<TextProps>) => {
         textShadow: `0px 0px 2px rgba(0,0,0,${(shadow || 0) / 100})`,
         fontWeight,
         textAlign,
+        backgroundColor,
       }}
     />
   )

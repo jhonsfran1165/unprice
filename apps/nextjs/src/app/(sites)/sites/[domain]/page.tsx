@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import EditorComponent from "~/components/editor/components/editor"
+import EditorComponent from "~/components/page-builder/editor"
 import { api } from "~/trpc/server"
 
 export default async function DomainPage({

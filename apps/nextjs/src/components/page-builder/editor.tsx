@@ -1,11 +1,11 @@
 "use client"
 
 import { Editor, Element, Frame } from "@craftjs/core"
-import { RenderNode } from "../viewport/render-node"
-import { Viewport } from "../viewport/viewport"
-import { ContainerElement } from "./container"
-import { Novel } from "./novel/editor"
-import { TextComponent } from "./text"
+import { ContainerElement } from "./components/container"
+import { Novel } from "./components/novel"
+import { TextComponent } from "./components/text"
+import { RenderNode } from "./viewport/render-node"
+import { Viewport } from "./viewport/viewport"
 
 export default function EditorComponent() {
   return (
@@ -20,7 +20,7 @@ export default function EditorComponent() {
                 displayName: "App",
               }}
             >
-              <TextComponent fontSize="10px" text="It's me again!" />
+              <TextComponent text="It's me again!" />
               <Novel />
             </Element>
           </Frame>

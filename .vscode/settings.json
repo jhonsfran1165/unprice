@@ -52,7 +52,8 @@
     "uidx",
     "Unprice",
     "UPSTASH",
-    "webauthn"
+    "webauthn",
+    "ytregex"
   ],
   "search.exclude": {
     "**/.git": true,

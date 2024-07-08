@@ -22,13 +22,13 @@ const defaultProps = {
   marginRight: 0,
   marginTop: 0,
   marginBottom: 0,
-  backgroundColor: "gray",
   color: "black",
   shadow: 0,
   radius: 0,
   gap: 10,
   width: "100%",
   height: "auto",
+  backgroundColor: "white",
 } as ContainerProps
 
 export const ContainerElement = (props: Partial<ContainerProps> & {
@@ -38,7 +38,6 @@ export const ContainerElement = (props: Partial<ContainerProps> & {
     flexDirection = "column",
     alignItems,
     justifyContent,
-    background,
     color,
     paddingLeft,
     paddingRight,
@@ -52,24 +51,29 @@ export const ContainerElement = (props: Partial<ContainerProps> & {
     shadow,
     radius,
     fillSpace,
+    backgroundColor,
+    border,
+    borderColor,
     children
   } = props
 
   return (
     <Resizer
-      propKey={{ width: "width", height: "height" }}
+      propKey={{ width: 'width', height: 'height' }}
       style={{
         justifyContent,
         gap: gap,
         flexDirection,
         alignItems,
-        background: background,
+        border: `${border}px solid ${borderColor}`,
+        borderColor,
+        backgroundColor: backgroundColor,
         color: color,
         padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
         margin: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
         boxShadow: shadow === 0 ? "none" : `0px 3px 100px ${shadow}px rgba(0, 0, 0, 0.13)`,
         borderRadius: `${radius}px`,
-        flex: fillSpace === "yes" ? 1 : "unset",
+        flexShrink: fillSpace === "yes" ? 1 : 0,
       }}
     >
       {children}
