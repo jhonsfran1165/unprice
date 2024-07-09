@@ -35,23 +35,23 @@
 
   /* default styles */
   h1 {
-    @apply font-primary text-2xl font-extrabold leading-[1.15] sm:leading-[1.15] md:text-4xl;
+    @apply font-primary text-2xl font-extrabold;
   }
 
   h2 {
-    @apply font-primary text-xl font-bold md:text-2xl;
+    @apply font-primary font-bold text-xl;
   }
 
   h3, h4 {
-    @apply font-primary text-sm font-bold md:text-lg;
+    @apply font-primary text-lg font-bold;
   }
 
   h5, h6 {
-    @apply font-primary font-bold leading-none tracking-tight;
+    @apply font-primary font-semibold leading-none tracking-tight;
   }
 
   p {
-    @apply font-secondary text-base font-normal md:text-xs;
+    @apply font-secondary text-base font-normal;
   }
 
   body {

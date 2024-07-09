@@ -77,6 +77,7 @@ export function ToolbarItem<T>({
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
+                  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
                   handleChange((e.target as any).value);
                 }
               }}
@@ -96,7 +97,7 @@ export function ToolbarItem<T>({
                   "text-xs font-normal": props.size === "sm",
                 })}
               >
-                {props.label}
+                {props.label} {value}
               </Label>
             )}
             <Slider

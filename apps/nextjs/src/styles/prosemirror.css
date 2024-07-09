@@ -1,14 +1,14 @@
 .ProseMirror .is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   pointer-events: none;
   height: 0;
 }
 .ProseMirror .is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   pointer-events: none;
   height: 0;
 }
@@ -69,24 +69,34 @@ ul[data-type="taskList"] li > label {
 ul[data-type="taskList"] li > label input[type="checkbox"] {
   -webkit-appearance: none;
   appearance: none;
-  background-color: hsl(var(--background));
+  background-color: var(--sand-2);
   margin: 0;
   cursor: pointer;
   width: 1.2em;
   height: 1.2em;
-  position: relative;
-  top: 5px;
-  border: 2px solid hsl(var(--border));
-  margin-right: 0.3rem;
+  color: var(--sand-11);
+  border: 2px solid var(--sand-7);
+  border-radius: 0.15em;
+  transform: translateY(-0.075em);
   display: grid;
   place-content: center;
+  position: relative;
+  top: 5px;
+  margin-right: 0.3rem;
+  margin-left: 0.3rem;
 
   &:hover {
-    background-color: hsl(var(--accent));
+    background-color: var(--sand-2);
+    border: 2px solid var(--sand-8);
+  }
+
+  &:focus {
+    background-color: var(--sand-4);
+    box-shadow: inset 0em 0em;
   }
 
   &:active {
-    background-color: hsl(var(--accent));
+    background-color: var(--sand-2);
   }
 
   &::before {
@@ -95,8 +105,10 @@ ul[data-type="taskList"] li > label input[type="checkbox"] {
     height: 0.65em;
     transform: scale(0);
     transition: 120ms transform ease-in-out;
-    box-shadow: inset 1em 1em;
+    box-shadow: inset 1em 1em var(--sand-11);
+    background-color: CanvasText;
     transform-origin: center;
+    -webkit-clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
     clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
   }
 
@@ -106,9 +118,9 @@ ul[data-type="taskList"] li > label input[type="checkbox"] {
 }
 
 ul[data-type="taskList"] li[data-checked="true"] > div > p {
-  color: var(--muted-foreground);
+  color: var(--sand-11);
   text-decoration: line-through;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1px;
 }
 
 /* Overwrite tippy-box original max-width */
@@ -119,7 +131,7 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
 
 .ProseMirror:not(.dragging) .ProseMirror-selectednode {
   outline: none !important;
-  background-color: var(--info);
+  background-color: var(--blue-9);
   transition: background-color 0.2s;
   box-shadow: none;
 }
@@ -135,17 +147,17 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   background-repeat: no-repeat;
   background-position: center;
   width: 1.2rem;
-  height: 1.5rem;
+  height: 1.3rem;
   z-index: 50;
   cursor: grab;
 
   &:hover {
-    background-color: var(--background);
+    background-color: transparent;
     transition: background-color 0.2s;
   }
 
   &:active {
-    background-color: var(--background);
+    background-color: var(--sand-6);
     transition: background-color 0.2s;
     cursor: grabbing;
   }

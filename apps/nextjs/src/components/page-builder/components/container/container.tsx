@@ -28,7 +28,7 @@ const defaultProps = {
   gap: 10,
   width: "100%",
   height: "auto",
-  backgroundColor: "white",
+  backgroundColor: "var(--sand-3)",
 } as ContainerProps
 
 export const ContainerElement = (props: Partial<ContainerProps> & {

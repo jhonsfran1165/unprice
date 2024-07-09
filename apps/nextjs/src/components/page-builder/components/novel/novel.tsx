@@ -37,8 +37,8 @@ export type NovelProps = React.CSSProperties & {
 }
 
 const defaultProps = {
-  paddingLeft: 10,
-  paddingRight: 10,
+  paddingLeft: 20,
+  paddingRight: 20,
   paddingTop: 10,
   paddingBottom: 10,
   marginLeft: 0,
@@ -48,7 +48,7 @@ const defaultProps = {
   color: "black",
   shadow: 0,
   radius: 0,
-  backgroundColor: "white",
+  backgroundColor: "transparent",
   content: {
     type: "doc",
     content: [
@@ -132,7 +132,7 @@ export const Novel = ({ content,
       handleDrop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
       attributes: {
         class:
-          "prose prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full",
+          "prose prose-lg dark:prose-invert prose-headings:font-primary focus:outline-none max-w-full prose-background-text font-normal",
       },
     }),
     []
@@ -140,26 +140,26 @@ export const Novel = ({ content,
 
   return (
     <div className="flex flex-col w-full"
+      ref={(ref) => {
+        ref && connect(ref)
+      }}
       style={{
         border: `${border}px solid ${borderColor}`,
         borderColor,
         backgroundColor: backgroundColor,
         padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
         margin: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
-        boxShadow: shadow === 0 ? "none" : `0px 3px 100px ${shadow}px rgba(0, 0, 0, 0.13)`,
+        boxShadow: shadow === 0 ? "none" : `0px 3px 10px ${shadow}px rgba(0, 0, 0, 0.13)`,
         borderRadius: `${radius}px`,
       }}
     >
       <EditorRoot>
         <EditorContent
-          ref={(ref) => {
-            ref && connect(ref)
-          }}
           editable={enabled}
           extensions={extensions}
           initialContent={content}
           onUpdate={handleUpdate}
-          className="border py-4 px-8 rounded-none border-none w-full"
+          className="rounded-none border-none w-full"
           editorProps={editorProps}
           slotAfter={<ImageResizer />}
         >

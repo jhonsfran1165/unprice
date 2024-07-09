@@ -24,6 +24,9 @@
   "linter": {
     "enabled": true,
     "rules": {
+      "nursery": {
+        "useSortedClasses": "error"
+      },
       "recommended": true,
       "a11y": {
         "noSvgWithoutTitle": "off"

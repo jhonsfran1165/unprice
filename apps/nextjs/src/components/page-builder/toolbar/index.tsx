@@ -24,9 +24,9 @@ export const Toolbar = () => {
 
   if (selectedNodes.length === 0) {
     return (
-      <div className="px-5 py-2 flex flex-col items-center justify-center text-center h-full">
-        <h2 className="pb-1 text-sm">Click on a component to start editing.</h2>
-        <p>
+      <div className="px-5 py-10 flex flex-col items-center justify-center text-center h-full">
+        <h2 className="pb-1 text-md">Click on a component to start editing.</h2>
+        <p className="text-sm">
           You could also double click on the layers below to edit their names,
           like in Photoshop
         </p>
@@ -35,7 +35,7 @@ export const Toolbar = () => {
   }
 
   return (
-    <div className="py-1 h-full">
+    <div className="pt-1 h-full">
       {toolbars}
     </div>
   );

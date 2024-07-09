@@ -18,7 +18,7 @@ const defaultProps = {
   marginRight: 0,
   marginTop: 0,
   marginBottom: 0,
-  color: "black",
+  color: "var(--sand-11)",
   backgroundColor: "transparent",
   shadow: 0,
   text: "Text",
@@ -70,7 +70,7 @@ export const TextComponent = (props: Partial<TextProps>) => {
       }}
       tagName="div" // Use a custom HTML tag (uses a div by default)
       className={cn(
-        "border-input-none ring-offset-none focus:border-ring-none focus-visible:ring-none w-full rounded-none border-none transition-colors file:border-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+        "w-full rounded-none border-input-none border-none ring-offset-none transition-colors file:border-0 focus:border-ring-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-none focus-visible:ring-offset-0"
       )}
       style={{
         width: "100%",

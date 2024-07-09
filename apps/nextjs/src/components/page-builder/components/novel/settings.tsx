@@ -123,7 +123,7 @@ export const NovelEditorSettings = () => {
         }}
       >
         <ToolbarItem size="sm" propKey="border" type="slider" label="Border" max={5} min={0} />
-        <ToolbarItem size="sm" propKey="shadow" type="slider" label="Shadow" max={100} min={0} />
+        <ToolbarItem size="sm" propKey="shadow" type="slider" label="Shadow" max={20} min={0} />
         <ToolbarItem size="sm" propKey="radius" type="slider" label="Radius" max={100} min={0} />
 
         <ToolbarItem

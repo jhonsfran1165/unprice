@@ -4,6 +4,7 @@ import { useEditor } from "@craftjs/core"
 import { Redo, Undo } from "lucide-react"
 import type React from "react"
 import { useEffect } from "react"
+import ThemeToggle from "~/components/layout/theme-toggle"
 import { ConfiguratorSidebar } from "./configurator-sidebar"
 import { ElementsSidebar } from "./elements-sidebar"
 
@@ -43,7 +44,7 @@ export const Viewport: React.FC<{ children?: React.ReactNode }> = ({ children })
       <ElementsSidebar />
       <main className="page-container flex-1 flex flex-col">
         {/* header */}
-        <div className="bg-background-base h-14 sticky top-0 z-40 flex items-center px-2 backdrop-blur-[2px] border-b shadow-sm">
+        <div className="flex flex-row bg-background-base h-14 sticky top-0 z-40 items-center px-2 backdrop-blur-[2px] border-b shadow-sm">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon">
               <Undo className="h-5 w-5" />
@@ -54,9 +55,12 @@ export const Viewport: React.FC<{ children?: React.ReactNode }> = ({ children })
               <span className="sr-only">Redo</span>
             </Button>
           </div>
+          <div className="flex flex-1 items-center justify-end space-x-2">
+            <ThemeToggle />
+          </div>
         </div>
         <div
-          className={cn("craftjs-renderer transition flex flex-col flex-1 p-8 overflow-y-auto", {
+          className={cn("craftjs-renderer flex flex-1 flex-col overflow-y-auto p-8 transition", {
             "bg-background": enabled,
           })}
           ref={(ref) => {
