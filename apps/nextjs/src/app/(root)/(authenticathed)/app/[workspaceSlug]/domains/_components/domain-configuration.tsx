@@ -16,7 +16,7 @@ export const InlineSnippet = ({
   children?: string
 }) => {
   return (
-    <span className={cn("bg-muted inline-block rounded-md px-1 py-0.5 font-mono", className)}>
+    <span className={cn("inline-block rounded-md bg-muted px-1 py-0.5 font-mono", className)}>
       {children}
     </span>
   )
@@ -46,7 +46,7 @@ export default function DomainConfiguration({
     <div>
       <div className="mb-4 flex items-center space-x-2">
         <DomainStatusIcon status={status} />
-        <p className="text-lg font-semibold">{status}</p>
+        <p className="font-semibold text-lg">{status}</p>
       </div>
       {txtVerification ? (
         <>
@@ -55,13 +55,13 @@ export default function DomainConfiguration({
             <InlineSnippet>{domainProvider.apexName}</InlineSnippet> to prove ownership of{" "}
             <InlineSnippet>{domainProvider.name}</InlineSnippet>:
           </p>
-          <div className="bg-muted my-5 flex items-start justify-start space-x-10 rounded-md p-2">
+          <div className="my-5 flex items-start justify-start space-x-10 rounded-md bg-muted p-2">
             <div>
-              <p className="text-sm font-bold">Type</p>
+              <p className="font-bold text-sm">Type</p>
               <p className="mt-2 font-mono text-sm">{txtVerification.type}</p>
             </div>
             <div>
-              <p className="text-sm font-bold">Name</p>
+              <p className="font-bold text-sm">Name</p>
               <p className="mt-2 font-mono text-sm">
                 {txtVerification.domain.slice(
                   0,
@@ -70,13 +70,13 @@ export default function DomainConfiguration({
               </p>
             </div>
             <div>
-              <p className="text-sm font-bold">Value</p>
+              <p className="font-bold text-sm">Value</p>
               <p className="mt-2 font-mono text-sm">
                 <span className="text-ellipsis">{txtVerification.value}</span>
               </p>
             </div>
           </div>
-          <p className="text-muted-foreground text-sm font-normal">
+          <p className="font-normal text-muted-foreground text-sm">
             <b>Warning:</b> if you are using this domain for another site, setting this TXT record
             will transfer domain ownership away from that site and break it. Please exercise caution
             when setting this record.
@@ -98,21 +98,21 @@ export default function DomainConfiguration({
                   <InlineSnippet>{domainProvider.apexName}</InlineSnippet>
                   ), set the following A record on your DNS provider to continue:
                 </p>
-                <div className="bg-muted flex items-center justify-start space-x-10 rounded-md p-2">
+                <div className="flex items-center justify-start space-x-10 rounded-md bg-muted p-2">
                   <div>
-                    <p className="text-sm font-bold">Type</p>
+                    <p className="font-bold text-sm">Type</p>
                     <p className="mt-2 font-mono text-sm">A</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold">Name</p>
+                    <p className="font-bold text-sm">Name</p>
                     <p className="mt-2 font-mono text-sm">@</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold">Value</p>
+                    <p className="font-bold text-sm">Value</p>
                     <p className="mt-2 font-mono text-sm">76.76.21.21</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold">TTL</p>
+                    <p className="font-bold text-sm">TTL</p>
                     <p className="mt-2 font-mono text-sm">86400</p>
                   </div>
                 </div>
@@ -124,21 +124,21 @@ export default function DomainConfiguration({
                   To configure your subdomain (<InlineSnippet>{domainProvider.name}</InlineSnippet>
                   ), set the following A record on your DNS provider to continue:
                 </p>
-                <div className="bg-muted flex items-center justify-start space-x-10 rounded-md p-2">
+                <div className="flex items-center justify-start space-x-10 rounded-md bg-muted p-2">
                   <div>
-                    <p className="text-sm font-bold">Type</p>
+                    <p className="font-bold text-sm">Type</p>
                     <p className="mt-2 font-mono text-sm">CNAME</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold">Name</p>
+                    <p className="font-bold text-sm">Name</p>
                     <p className="mt-2 font-mono text-sm">{subdomain ?? "www"}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold">Value</p>
+                    <p className="font-bold text-sm">Value</p>
                     <p className="mt-2 font-mono text-sm">{"cname.vercel-dns.com"}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold">TTL</p>
+                    <p className="font-bold text-sm">TTL</p>
                     <p className="mt-2 font-mono text-sm">86400</p>
                   </div>
                 </div>
@@ -165,7 +165,7 @@ const DomainConfigSkeleton = () => (
       <div className="my-5 text-sm">
         <Skeleton className="h-4 w-full" />
       </div>
-      <Skeleton className="bg-muted h-[48px] w-full space-x-10 rounded-md p-2" />
+      <Skeleton className="h-[48px] w-full space-x-10 rounded-md bg-muted p-2" />
       <Skeleton className="h-4 w-full" />
     </div>
   </div>

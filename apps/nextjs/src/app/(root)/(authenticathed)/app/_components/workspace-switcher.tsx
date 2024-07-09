@@ -86,7 +86,7 @@ export function WorkspaceSwitcher({
                       router.push(`/${personalWorkspace.slug}`)
                     }}
                     className={cn(
-                      "cursor-pointer text-sm font-semibold",
+                      "cursor-pointer font-semibold text-sm",
                       activeWorkspace.id === personalWorkspace.id
                         ? "bg-background-bgActive"
                         : "bg-transparent"
@@ -124,7 +124,7 @@ export function WorkspaceSwitcher({
                         router.push(`/${workspace.slug}`)
                       }}
                       className={cn(
-                        "cursor-pointer text-sm font-semibold",
+                        "cursor-pointer font-semibold text-sm",
                         activeWorkspace?.id === workspace.id
                           ? "bg-background-bgActive"
                           : "bg-transparent"

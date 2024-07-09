@@ -9,7 +9,7 @@ export default async function DomainPage({
     domain: string
   }
 }) {
-  const { page, planVersions } = await api.pages.getByDomain({
+  const { page, _planVersions } = await api.pages.getByDomain({
     domain,
   })
 

@@ -31,9 +31,11 @@ const defaultProps = {
   backgroundColor: "var(--sand-3)",
 } as ContainerProps
 
-export const ContainerElement = (props: Partial<ContainerProps> & {
-  children: React.ReactNode
-}) => {
+export const ContainerElement = (
+  props: Partial<ContainerProps> & {
+    children: React.ReactNode
+  }
+) => {
   const {
     flexDirection = "column",
     alignItems,
@@ -54,12 +56,12 @@ export const ContainerElement = (props: Partial<ContainerProps> & {
     backgroundColor,
     border,
     borderColor,
-    children
+    children,
   } = props
 
   return (
     <Resizer
-      propKey={{ width: 'width', height: 'height' }}
+      propKey={{ width: "width", height: "height" }}
       style={{
         justifyContent,
         gap: gap,

@@ -42,7 +42,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       </head>
       <body
         className={cn(
-          "font-secondary min-h-screen antialiased",
+          "min-h-screen font-secondary antialiased",
           fontMapper["font-primary"],
           fontMapper["font-secondary"]
         )}

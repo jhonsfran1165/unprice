@@ -44,8 +44,8 @@ export default async function UserProfile({
       >
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="truncate text-sm font-medium leading-none">{user.name ?? user.email}</p>
-            <p className="text-muted-foreground truncate text-xs leading-none">{user.email}</p>
+            <p className="truncate font-medium text-sm leading-none">{user.name ?? user.email}</p>
+            <p className="truncate text-muted-foreground text-xs leading-none">{user.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

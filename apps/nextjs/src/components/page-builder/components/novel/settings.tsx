@@ -12,8 +12,8 @@ export const NovelEditorSettings = () => {
           return `${marginLeft}px, ${marginRight}px, ${marginTop}px, ${marginBottom}px`
         }}
       >
-        <div className="flex items-center space-x-2 w-full">
-          <div className="flex flex-col w-1/2">
+        <div className="flex w-full items-center space-x-2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="marginLeft"
               size="sm"
@@ -32,7 +32,7 @@ export const NovelEditorSettings = () => {
             />
           </div>
 
-          <div className="flex flex-col w-1/2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="marginTop"
               size="sm"
@@ -59,8 +59,8 @@ export const NovelEditorSettings = () => {
           return `${paddingLeft}px, ${paddingRight}px, ${paddingTop}px, ${paddingBottom}px`
         }}
       >
-        <div className="flex items-center space-x-2 w-full">
-          <div className="flex flex-col w-1/2">
+        <div className="flex w-full items-center space-x-2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="paddingLeft"
               size="sm"
@@ -79,7 +79,7 @@ export const NovelEditorSettings = () => {
             />
           </div>
 
-          <div className="flex flex-col w-1/2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="paddingTop"
               size="sm"

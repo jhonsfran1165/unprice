@@ -185,11 +185,17 @@ export const Resizer = ({
         else calculatedHeight = `${height}px`
 
         if (isPercentage(width) && dom?.parentElement?.style.width === "auto") {
-          calculatedWidth = `${Number.parseInt((editingDimensions.current.width ?? 0).toString()) + Number.parseInt(d.width.toString())}px`
+          calculatedWidth = `${
+            Number.parseInt((editingDimensions.current.width ?? 0).toString()) +
+            Number.parseInt(d.width.toString())
+          }px`
         }
 
         if (isPercentage(height) && dom?.parentElement?.style.height === "auto") {
-          calculatedHeight = `${Number.parseInt((editingDimensions.current.height ?? 0).toString()) + Number.parseInt(d.height.toString())}px`
+          calculatedHeight = `${
+            Number.parseInt((editingDimensions.current.height ?? 0).toString()) +
+            Number.parseInt(d.height.toString())
+          }px`
         }
 
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -206,15 +212,15 @@ export const Resizer = ({
     >
       {children}
       {active && (
-        <div className={"absolute top-0 left-0 w-full h-full pointer-events-none"}>
+        <div className={"pointer-events-none absolute top-0 left-0 h-full w-full"}>
           <span
             className={cn(
-              "absolute size-2 rounded-full block shadow-sm z-40 pointer-events-none border-2 border-info -left-1 -top-1 bg-background-base"
+              "-left-1 -top-1 pointer-events-none absolute z-40 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm"
             )}
           />
-          <span className="absolute size-2 rounded-full block shadow-sm z-40 pointer-events-none border-2 border-info -right-1 -top-1 bg-background-base" />
-          <span className="absolute size-2 rounded-full block shadow-sm z-40 pointer-events-none border-2 border-info -left-1 -bottom-1 bg-background-base" />
-          <span className="absolute size-2 rounded-full block shadow-sm z-40 pointer-events-none border-2 border-info -right-1 -bottom-1 bg-background-base" />
+          <span className="-right-1 -top-1 pointer-events-none absolute z-40 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm" />
+          <span className="-left-1 -bottom-1 pointer-events-none absolute z-40 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm" />
+          <span className="-right-1 -bottom-1 pointer-events-none absolute z-40 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm" />
         </div>
       )}
     </Resizable>

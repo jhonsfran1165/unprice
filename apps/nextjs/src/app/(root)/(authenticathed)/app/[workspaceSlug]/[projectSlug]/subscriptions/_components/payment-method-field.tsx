@@ -48,7 +48,7 @@ export default function PaymentMethodsFormField({
                     <FormControl>
                       <RadioGroupItem value={method.id} className="sr-only" />
                     </FormControl>
-                    <div className="border-muted hover:border-accent cursor-pointer items-center rounded-md border-2 p-6">
+                    <div className="cursor-pointer items-center rounded-md border-2 border-muted p-6 hover:border-accent">
                       <div className="flex flex-row items-center justify-between">
                         <div className="inline-flex gap-2">
                           <span>{method?.brand}</span>

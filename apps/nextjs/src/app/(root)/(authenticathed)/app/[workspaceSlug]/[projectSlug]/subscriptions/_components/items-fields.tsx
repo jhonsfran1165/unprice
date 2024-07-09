@@ -69,7 +69,7 @@ export default function ConfigItemsFormField({
           <h4 className="my-auto block font-semibold">Feature configuration</h4>
         </FormLabel>
 
-        <div className="text-xs font-normal leading-snug">
+        <div className="font-normal text-xs leading-snug">
           {
             "Configure the quantity for each feature, for usage based feature, the price will be calculated with the reported usage. You can't change the quantity for flat features"
           }
@@ -80,7 +80,7 @@ export default function ConfigItemsFormField({
       <div className="flex items-center justify-center px-2 py-4">
         {fields.length > 0 ? (
           <Table>
-            <TableHeader className="border-b border-t">
+            <TableHeader className="border-t border-b">
               <TableRow className="pointer-events-none">
                 <TableHead className="h-10 pl-1">Features</TableHead>
                 <TableHead className="h-10 px-0 text-center">Quantity Units</TableHead>
@@ -119,7 +119,7 @@ export default function ConfigItemsFormField({
                               </Button>
                             </DialogTrigger>
 
-                            <DialogContent className="flex max-h-[800px] w-full flex-col justify-between overflow-y-scroll md:w-1/2 lg:w-[600px]">
+                            <DialogContent className="flex max-h-[800px] w-full flex-col justify-between overflow-y-scroll lg:w-[600px] md:w-1/2">
                               <DialogHeader>
                                 <DialogTitle>Feature: {feature.feature.title}</DialogTitle>
                               </DialogHeader>
@@ -136,7 +136,7 @@ export default function ConfigItemsFormField({
                         </PropagationStopper>
                       </div>
 
-                      <div className="text-muted-foreground hidden text-xs md:block">
+                      <div className="hidden text-muted-foreground text-xs md:block">
                         {feature.config?.usageMode
                           ? `${feature.featureType} rate per
                       ${feature.config.usageMode}`
@@ -160,7 +160,7 @@ export default function ConfigItemsFormField({
                           name={`config.${index}.units`}
                           render={({ field }) => (
                             <FormItem className="justify-center text-center">
-                              <FormMessage className="text-xs font-light" />
+                              <FormMessage className="font-light text-xs" />
                               {/* // TODO: depending on the feature quantity should be disabled */}
                               <FormControl>
                                 <div className="flex flex-col">
@@ -285,7 +285,7 @@ function ConfigItemPrice({
   const { err, val: pricePerFeature } = calculatePrice()
 
   if (err) {
-    return <div className="text-muted-foreground inline text-xs italic">provide quantity</div>
+    return <div className="inline text-muted-foreground text-xs italic">provide quantity</div>
   }
 
   if (type === "total") {
@@ -298,7 +298,7 @@ function ConfigItemPrice({
   }
 
   return (
-    <div className="text-muted-foreground inline text-xs italic">
+    <div className="inline text-muted-foreground text-xs italic">
       {pricePerFeature?.unitPrice.displayAmount &&
         `${pricePerFeature.unitPrice.displayAmount}/ ${selectedPlanVersion?.billingPeriod}`}
     </div>

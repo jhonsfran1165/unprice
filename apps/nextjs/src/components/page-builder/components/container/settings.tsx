@@ -14,7 +14,7 @@ export const ContainerSettings = () => {
           return `${width} x ${height}`
         }}
       >
-        <div className="flex items-center space-x-2 w-full">
+        <div className="flex w-full items-center space-x-2">
           <ToolbarItem propKey="width" type="text" size={"sm"} label="Width" />
           <ToolbarItem propKey="height" type="text" size={"sm"} label="Height" />
         </div>
@@ -26,8 +26,8 @@ export const ContainerSettings = () => {
           return `${marginLeft}px, ${marginRight}px, ${marginTop}px, ${marginBottom}px`
         }}
       >
-        <div className="flex items-center space-x-2 w-full">
-          <div className="flex flex-col w-1/2">
+        <div className="flex w-full items-center space-x-2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="marginLeft"
               size="sm"
@@ -46,7 +46,7 @@ export const ContainerSettings = () => {
             />
           </div>
 
-          <div className="flex flex-col w-1/2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="marginTop"
               size="sm"
@@ -73,8 +73,8 @@ export const ContainerSettings = () => {
           return `${paddingLeft}px, ${paddingRight}px, ${paddingTop}px, ${paddingBottom}px`
         }}
       >
-        <div className="flex items-center space-x-2 w-full">
-          <div className="flex flex-col w-1/2">
+        <div className="flex w-full items-center space-x-2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="paddingLeft"
               size="sm"
@@ -93,7 +93,7 @@ export const ContainerSettings = () => {
             />
           </div>
 
-          <div className="flex flex-col w-1/2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="paddingTop"
               size="sm"
@@ -140,7 +140,13 @@ export const ContainerSettings = () => {
         <ToolbarItem size="sm" propKey="shadow" type="slider" label="Shadow" max={100} min={0} />
         <ToolbarItem size="sm" propKey="radius" type="slider" label="Radius" max={100} min={0} />
 
-        <ToolbarItem propKey="borderColor" size="sm" type="select" label="Border Color" options={TEXT_COLORS} />
+        <ToolbarItem
+          propKey="borderColor"
+          size="sm"
+          type="select"
+          label="Border Color"
+          options={TEXT_COLORS}
+        />
         <ToolbarItem propKey="color" size="sm" type="select" label="Color" options={TEXT_COLORS} />
         <ToolbarItem
           propKey="backgroundColor"
@@ -151,31 +157,22 @@ export const ContainerSettings = () => {
         />
       </ToolbarSection>
 
-
-
       <ToolbarSection
         title="Alignment"
         props={["justifyContent", "flexDirection", "alignItems", "fillSpace", "gap"]}
       >
-        <ToolbarItem
-          size="sm"
-          propKey="gap"
-          type="slider"
-          label="Gap"
-          max={100}
-          min={0}
-        />
-        <div className="flex items-center space-x-2 w-full">
+        <ToolbarItem size="sm" propKey="gap" type="slider" label="Gap" max={100} min={0} />
+        <div className="flex w-full items-center space-x-2">
           <ToolbarItem propKey="flexDirection" size="sm" type="radio" label="Flex Direction">
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="row" id="row" />
-              <Label htmlFor="row" className="text-xs font-normal">
+              <Label htmlFor="row" className="font-normal text-xs">
                 Row
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="column" id="column" />
-              <Label htmlFor="column" className="text-xs font-normal">
+              <Label htmlFor="column" className="font-normal text-xs">
                 Column
               </Label>
             </div>
@@ -183,35 +180,35 @@ export const ContainerSettings = () => {
           <ToolbarItem propKey="fillSpace" size="sm" type="radio" label="Fill Space">
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="yes" id="yes" />
-              <Label htmlFor="yes" className="text-xs font-normal">
+              <Label htmlFor="yes" className="font-normal text-xs">
                 Yes
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="no" id="no" />
-              <Label htmlFor="no" className="text-xs font-normal">
+              <Label htmlFor="no" className="font-normal text-xs">
                 No
               </Label>
             </div>
           </ToolbarItem>
         </div>
-        <div className="flex items-center space-x-2 w-full">
+        <div className="flex w-full items-center space-x-2">
           <ToolbarItem propKey="alignItems" size="sm" type="radio" label="Align Items">
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="flex-start" id="flex-start" />
-              <Label htmlFor="flex-start" className="text-xs font-normal">
+              <Label htmlFor="flex-start" className="font-normal text-xs">
                 Flex-start
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="center" id="center" />
-              <Label htmlFor="center" className="text-xs font-normal">
+              <Label htmlFor="center" className="font-normal text-xs">
                 Center
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="flex-end" id="flex-end" />
-              <Label htmlFor="flex-end" className="text-xs font-normal">
+              <Label htmlFor="flex-end" className="font-normal text-xs">
                 Flex-end
               </Label>
             </div>
@@ -219,25 +216,25 @@ export const ContainerSettings = () => {
           <ToolbarItem propKey="justifyContent" size="sm" type="radio" label="Justify Content">
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="flex-start" id="flex-start" />
-              <Label htmlFor="flex-start" className="text-xs font-normal">
+              <Label htmlFor="flex-start" className="font-normal text-xs">
                 Flex-start
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="center" id="center" />
-              <Label htmlFor="center" className="text-xs font-normal">
+              <Label htmlFor="center" className="font-normal text-xs">
                 Center
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="flex-end" id="flex-end" />
-              <Label htmlFor="flex-end" className="text-xs font-normal">
+              <Label htmlFor="flex-end" className="font-normal text-xs">
                 Flex-end
               </Label>
             </div>
           </ToolbarItem>
         </div>
       </ToolbarSection>
-    </Fragment >
+    </Fragment>
   )
 }

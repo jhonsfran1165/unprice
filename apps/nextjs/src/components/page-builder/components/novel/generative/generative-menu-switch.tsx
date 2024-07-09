@@ -1,31 +1,31 @@
-import { Button } from "@builderai/ui/button";
-import { EditorBubble, useEditor } from "novel";
-import { removeAIHighlight } from "novel/extensions";
-import { } from "novel/plugins";
-import { Fragment, type ReactNode, useEffect } from "react";
-import Magic from "~/components/icons/magic";
-import { AISelector } from "./ai-selector";
+import { Button } from "@builderai/ui/button"
+import { EditorBubble, useEditor } from "novel"
+import { removeAIHighlight } from "novel/extensions"
+import {} from "novel/plugins"
+import { Fragment, type ReactNode, useEffect } from "react"
+import Magic from "~/components/icons/magic"
+import { AISelector } from "./ai-selector"
 
 interface GenerativeMenuSwitchProps {
-  children: ReactNode;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  children: ReactNode
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSwitchProps) => {
-  const { editor } = useEditor();
+  const { editor } = useEditor()
 
-  if (!editor) return null;
+  if (!editor) return null
 
   useEffect(() => {
-    if (!open) removeAIHighlight(editor);
-  }, [open]);
+    if (!open) removeAIHighlight(editor)
+  }, [open])
   return (
     <EditorBubble
       tippyOptions={{
         placement: open ? "bottom-start" : "top",
         onHidden: () => {
-          onOpenChange(false);
-          editor.chain().unsetHighlight().run();
+          onOpenChange(false)
+          editor.chain().unsetHighlight().run()
         },
       }}
       className="flex w-fit max-w-[100vw] overflow-hidden rounded-md border border-muted bg-background shadow-xl"
@@ -34,7 +34,7 @@ const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSw
       {!open && (
         <Fragment>
           <Button
-            className="gap-1 rounded-none text-success truncate"
+            className="gap-1 truncate rounded-none text-success"
             variant="ghost"
             onClick={() => onOpenChange(true)}
             size="sm"
@@ -46,7 +46,7 @@ const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSw
         </Fragment>
       )}
     </EditorBubble>
-  );
-};
+  )
+}
 
-export default GenerativeMenuSwitch;
+export default GenerativeMenuSwitch

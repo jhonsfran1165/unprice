@@ -35,7 +35,7 @@ export default function Intro() {
             className="mx-5 flex flex-col items-center space-y-6 text-center sm:mx-auto"
           >
             <m.h1
-              className="text-4xl font-bold transition-colors sm:text-5xl"
+              className="font-bold text-4xl transition-colors sm:text-5xl"
               variants={{
                 hidden: { opacity: 0, y: 50 },
                 show: {
@@ -48,7 +48,7 @@ export default function Intro() {
               <Balancer>Welcome to Acme Corp</Balancer>
             </m.h1>
             <m.p
-              className="text-muted-foreground max-w-md transition-colors sm:text-lg"
+              className="max-w-md text-muted-foreground transition-colors sm:text-lg"
               variants={{
                 hidden: { opacity: 0, y: 50 },
                 show: {

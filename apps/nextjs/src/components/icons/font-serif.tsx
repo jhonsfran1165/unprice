@@ -19,5 +19,5 @@ export default function FontSerif({ className }: { className?: string }) {
         fill="currentColor"
       />
     </svg>
-  );
+  )
 }

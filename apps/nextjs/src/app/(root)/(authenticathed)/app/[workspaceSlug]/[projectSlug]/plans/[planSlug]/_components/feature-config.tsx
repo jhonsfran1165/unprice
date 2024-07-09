@@ -21,7 +21,7 @@ export function FeatureConfig({
           <div className="flex items-start py-4">
             <div className="flex items-start gap-4 text-sm">
               <div className="grid gap-1">
-                <div className="line-clamp-1 text-lg font-semibold">
+                <div className="line-clamp-1 font-semibold text-lg">
                   {activeFeature.feature.title}
                 </div>
                 <div className="line-clamp-1 text-xs">
@@ -33,7 +33,7 @@ export function FeatureConfig({
                 </div>
               </div>
             </div>
-            <div className="text-muted-foreground ml-auto text-xs">{activeFeature.id}</div>
+            <div className="ml-auto text-muted-foreground text-xs">{activeFeature.id}</div>
           </div>
           <Separator />
 
@@ -46,7 +46,7 @@ export function FeatureConfig({
           </div>
         </div>
       ) : (
-        <div className="text-muted-foreground p-8 text-center">No feature selected</div>
+        <div className="p-8 text-center text-muted-foreground">No feature selected</div>
       )}
     </div>
   )

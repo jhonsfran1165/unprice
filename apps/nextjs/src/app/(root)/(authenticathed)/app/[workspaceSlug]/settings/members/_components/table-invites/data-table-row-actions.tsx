@@ -66,7 +66,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
     <AlertDialog open={alertOpen} onOpenChange={(value) => setAlertOpen(value)}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="data-[state=open]:bg-accent h-8 w-8 p-0">
+          <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-accent">
             <span className="sr-only">Open menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
@@ -102,7 +102,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
               onDelete()
             }}
             disabled={isPending}
-            className="hover:bg-destructive/90 bg-destructive text-destructive-foreground"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {!isPending ? "Remove" : <LoadingAnimation />}
           </AlertDialogAction>

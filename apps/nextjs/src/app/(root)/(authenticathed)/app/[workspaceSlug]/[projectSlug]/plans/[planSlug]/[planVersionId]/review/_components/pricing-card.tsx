@@ -16,15 +16,15 @@ export function PricingCard({
   })
 
   return (
-    <Card className="w-[400px] mx-auto">
+    <Card className="mx-auto w-[400px]">
       <CardHeader>
-        <h3 className="text-2xl font-bold">{planVersion.title}</h3>
+        <h3 className="font-bold text-2xl">{planVersion.title}</h3>
       </CardHeader>
 
       <CardContent>
         <CardDescription>{planVersion.description}</CardDescription>
         <div className="mt-8 flex items-baseline space-x-2">
-          <span className="text-5xl font-extrabold">
+          <span className="font-extrabold text-5xl">
             {err ? "Error" : totalPricePlan.displayAmount}
           </span>
           <span className="">/ {planVersion.billingPeriod} + usage</span>
@@ -34,7 +34,7 @@ export function PricingCard({
       <CardFooter className="border-t px-6 py-6">
         <div className="space-y-6">
           <div className="space-y-2">
-            <h4 className="text-lg font-semibold">Features Included</h4>
+            <h4 className="font-semibold text-lg">Features Included</h4>
             <ul className="space-y-6 px-2">
               {planVersion.planFeatures.map((feature) => {
                 return (
@@ -64,13 +64,13 @@ function ItemPriceCard({
   })
 
   if (err) {
-    return <div className="text-muted-foreground inline text-xs italic">error calculation</div>
+    return <div className="inline text-muted-foreground text-xs italic">error calculation</div>
   }
 
   return (
     <div className="flex flex-row items-center justify-between gap-1">
       <div className="flex justify-start">
-        <CheckIcon className="text-success mr-2 h-5 w-5" />
+        <CheckIcon className="mr-2 h-5 w-5 text-success" />
       </div>
       <div className="flex flex-col items-center gap-1">
         <div className="flex flex-col">

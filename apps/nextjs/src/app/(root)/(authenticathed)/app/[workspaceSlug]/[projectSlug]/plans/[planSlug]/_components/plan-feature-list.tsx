@@ -44,14 +44,14 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
     ) ?? featuresList
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <div className="flex h-[70px] items-center justify-between space-x-1 px-4 py-2">
-        <h1 className="truncate text-xl font-bold">Features on this version</h1>
+        <h1 className="truncate font-bold text-xl">Features on this version</h1>
       </div>
       <Separator />
-      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">
+      <div className="bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="relative">
-          <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
+          <Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search feature in plan"

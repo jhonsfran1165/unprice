@@ -31,10 +31,10 @@ export default function CreateApiKey() {
           }}
           initial="hidden"
           animate="show"
-          className="bg-background/60 flex flex-col rounded-xl p-8"
+          className="flex flex-col rounded-xl bg-background/60 p-8"
         >
           <m.h1
-            className="mb-4 text-2xl font-bold transition-colors sm:text-3xl"
+            className="mb-4 font-bold text-2xl transition-colors sm:text-3xl"
             variants={{
               hidden: { opacity: 0, x: 250 },
               show: {

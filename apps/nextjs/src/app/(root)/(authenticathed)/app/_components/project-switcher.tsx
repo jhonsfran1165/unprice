@@ -66,7 +66,7 @@ export function ProjectSwitcher({
                     router.push(`/${project.workspace.slug}/${project.slug}`)
                   }}
                   className={cn(
-                    "cursor-pointer text-sm font-semibold",
+                    "cursor-pointer font-semibold text-sm",
                     project.id === activeProject?.id ? "bg-background-bgActive" : "bg-transparent"
                   )}
                 >

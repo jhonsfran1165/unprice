@@ -77,7 +77,7 @@ export default async function PlanPage({
                   }}
                 >
                   <Button variant={"custom"}>
-                    <Plus className="h-4 w-4 mr-2" /> Version
+                    <Plus className="mr-2 h-4 w-4" /> Version
                   </Button>
                 </PlanVersionDialog>
               </div>
@@ -134,7 +134,7 @@ export default async function PlanPage({
                               {version.title} - v{version.version}
                             </div>
                             {version.description && (
-                              <div className="text-muted-foreground hidden text-xs md:inline">
+                              <div className="hidden text-muted-foreground text-xs md:inline">
                                 {`${version.description.slice(0, 20)}...`}
                               </div>
                             )}

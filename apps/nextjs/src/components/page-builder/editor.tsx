@@ -9,8 +9,8 @@ import { Viewport } from "./viewport/viewport"
 
 export default function EditorComponent() {
   return (
-    <div className="h-screen flex flex-col">
-      <Editor resolver={{ TextComponent, ContainerElement, Novel }} onRender={RenderNode} >
+    <div className="flex h-screen flex-col">
+      <Editor resolver={{ TextComponent, ContainerElement, Novel }} onRender={RenderNode}>
         <Viewport>
           <Frame>
             <Element
@@ -24,7 +24,6 @@ export default function EditorComponent() {
               <Novel />
             </Element>
           </Frame>
-
         </Viewport>
       </Editor>
     </div>

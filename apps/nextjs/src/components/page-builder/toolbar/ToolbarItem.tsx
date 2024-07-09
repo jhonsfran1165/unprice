@@ -76,13 +76,13 @@ export function ToolbarItem<T>({
                 setInputValue(e.target.value as T)
               }}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-                  handleChange((e.target as any).value);
+                  handleChange((e.target as any).value)
                 }
               }}
               className={cn("w-full", {
-                "text-xs font-normal h-7 px-2": props.size === "sm",
+                "h-7 px-2 font-normal text-xs": props.size === "sm",
               })}
             />
           </div>
@@ -94,7 +94,7 @@ export function ToolbarItem<T>({
               <Label
                 className={cn("", {
                   "mb-2": full,
-                  "text-xs font-normal": props.size === "sm",
+                  "font-normal text-xs": props.size === "sm",
                 })}
               >
                 {props.label} {value}
@@ -116,7 +116,7 @@ export function ToolbarItem<T>({
               <Label
                 className={cn("", {
                   "mb-2": full,
-                  "text-xs font-normal": props.size === "sm",
+                  "font-normal text-xs": props.size === "sm",
                 })}
               >
                 {props.label}
@@ -146,7 +146,7 @@ export function ToolbarItem<T>({
   }
 
   return (
-    <div className="flex flex-col w-full px-4 mb-2">
+    <div className="mb-2 flex w-full flex-col px-4">
       <div className={cn("", className)}>{renderInput()}</div>
     </div>
   )

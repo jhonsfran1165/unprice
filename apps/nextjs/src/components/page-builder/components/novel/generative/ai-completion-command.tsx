@@ -1,17 +1,17 @@
-import { CommandGroup, CommandItem, CommandSeparator } from "@builderai/ui/command";
-import { Check, TextQuote, TrashIcon } from "lucide-react";
-import { useEditor } from "novel";
+import { CommandGroup, CommandItem, CommandSeparator } from "@builderai/ui/command"
+import { Check, TextQuote, TrashIcon } from "lucide-react"
+import { useEditor } from "novel"
 
 const AICompletionCommands = ({
   completion,
   onDiscard,
 }: {
-  completion: string;
-  onDiscard: () => void;
+  completion: string
+  onDiscard: () => void
 }) => {
-  const { editor } = useEditor();
+  const { editor } = useEditor()
 
-  if (!editor) return null;
+  if (!editor) return null
 
   return (
     <>
@@ -20,7 +20,7 @@ const AICompletionCommands = ({
           className="gap-2 px-4"
           value="replace"
           onSelect={() => {
-            const selection = editor.view.state.selection;
+            const selection = editor.view.state.selection
 
             editor
               .chain()
@@ -30,9 +30,9 @@ const AICompletionCommands = ({
                   from: selection.from,
                   to: selection.to,
                 },
-                completion,
+                completion
               )
-              .run();
+              .run()
           }}
         >
           <Check className="h-4 w-4 text-muted-foreground" />
@@ -42,12 +42,12 @@ const AICompletionCommands = ({
           className="gap-2 px-4"
           value="insert"
           onSelect={() => {
-            const selection = editor.view.state.selection;
+            const selection = editor.view.state.selection
             editor
               .chain()
               .focus()
               .insertContentAt(selection.to + 1, completion)
-              .run();
+              .run()
           }}
         >
           <TextQuote className="h-4 w-4 text-muted-foreground" />
@@ -63,7 +63,7 @@ const AICompletionCommands = ({
         </CommandItem>
       </CommandGroup>
     </>
-  );
-};
+  )
+}
 
-export default AICompletionCommands;
+export default AICompletionCommands

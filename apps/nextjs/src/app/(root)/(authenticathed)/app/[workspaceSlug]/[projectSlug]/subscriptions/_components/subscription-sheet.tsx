@@ -25,7 +25,7 @@ export function SubscriptionSheet({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="flex max-h-screen w-full flex-col space-y-4 overflow-y-scroll md:w-1/2 lg:w-[700px]">
+      <SheetContent className="flex max-h-screen w-full flex-col space-y-4 overflow-y-scroll lg:w-[700px] md:w-1/2">
         <SheetHeader>
           <SheetTitle className="text-2xl">Subscription Form</SheetTitle>
           <SheetDescription>Configure the subscription for the customer</SheetDescription>

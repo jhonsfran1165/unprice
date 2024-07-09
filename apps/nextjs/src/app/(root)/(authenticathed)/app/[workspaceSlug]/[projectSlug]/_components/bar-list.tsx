@@ -35,7 +35,7 @@ export function BarListAnalytics<T = unknown>({
 
   const bars =
     filteredData.length === 0 ? (
-      <div className="text-muted-foreground text-center py-4">No data available</div>
+      <div className="py-4 text-center text-muted-foreground">No data available</div>
     ) : (
       <BarList
         key={tab}
@@ -52,9 +52,9 @@ export function BarListAnalytics<T = unknown>({
 
   return (
     <>
-      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 py-4 px-2 backdrop-blur">
+      <div className="bg-background/95 px-2 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="relative">
-          <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
+          <Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             className="pl-8"
@@ -69,16 +69,16 @@ export function BarListAnalytics<T = unknown>({
 
       {hasMore ? (
         <m.div
-          className="text-center mt-4"
+          className="mt-4 text-center"
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.3, type: "spring" }}
         >
-          <Button size={"sm"} className="w-44 mx-auto" onClick={() => setCurrentLimit(undefined)}>
+          <Button size={"sm"} className="mx-auto w-44" onClick={() => setCurrentLimit(undefined)}>
             View All
           </Button>
         </m.div>
       ) : (
-        <div className="text-center mt-4">
+        <div className="mt-4 text-center">
           <div className="h-7" />
         </div>
       )}

@@ -83,7 +83,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
       className={cn(
         featureVariants({ variant, className }),
         {
-          "border-background-borderHover bg-background-bgHover relative z-0 border-2 shadow-sm":
+          "relative z-0 border-2 border-background-borderHover bg-background-bgHover shadow-sm":
             mode === "FeaturePlan" && active?.featureId === planFeatureVersion.featureId,
         },
         focusRing
@@ -101,7 +101,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
             </Button>
           </FeatureDialog>
 
-          <span className={cn("line-clamp-1 w-full text-sm font-medium")}>
+          <span className={cn("line-clamp-1 w-full font-medium text-sm")}>
             {`${feature.title.substring(0, 10)}...`}
           </span>
         </div>
@@ -124,7 +124,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
                   )}
                   {planFeatureVersion.hidden && (
                     <div className="flex items-center gap-1">
-                      <EyeOff className="text-muted-foreground h-4 w-4" />
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
                     </div>
                   )}
                 </div>
@@ -133,7 +133,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
                     {!isPublished && isDelete && (
                       <div className="flex flex-row items-center">
                         <Button
-                          className="px-0 text-xs font-light"
+                          className="px-0 font-light text-xs"
                           variant="link"
                           size="icon"
                           onClick={(e) => {
@@ -201,7 +201,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
               </div>
             </div>
 
-            <div className="text-muted-foreground line-clamp-1 text-xs font-normal">
+            <div className="line-clamp-1 font-normal text-muted-foreground text-xs">
               {feature.description ?? "No description"}
             </div>
 
@@ -217,7 +217,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
                     <Badge>{planFeatureVersion.config.tierMode}</Badge>
                   )}
                 </div>
-                <div className="line-clamp-1 pr-3 text-xs font-light">
+                <div className="line-clamp-1 pr-3 font-light text-xs">
                   {/* // TODO: fix this */}
                   {planFeatureVersion?.config?.price
                     ? `${

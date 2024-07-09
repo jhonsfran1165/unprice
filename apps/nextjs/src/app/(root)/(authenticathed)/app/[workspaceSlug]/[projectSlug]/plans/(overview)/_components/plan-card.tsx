@@ -42,15 +42,15 @@ export function PlanCard(props: {
 
   return (
     <SuperLink href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}>
-      <Card className="hover:border-background-borderHover overflow-hidden">
+      <Card className="overflow-hidden hover:border-background-borderHover">
         <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
           <div className="space-y-4">
             <CardTitle className={"line-clamp-1"}>
               <div className="flex items-center space-x-3">
                 <span>{plan.slug}</span>
                 {plan.defaultPlan && (
-                  <div className="font-secondary text-info inline-flex items-center text-xs font-semibold">
-                    <span className="bg-info flex h-2 w-2 rounded-full" />
+                  <div className="inline-flex items-center font-secondary font-semibold text-info text-xs">
+                    <span className="flex h-2 w-2 rounded-full bg-info" />
                     <span className="ml-1">{"default"}</span>
                   </div>
                 )}
@@ -119,8 +119,8 @@ export function PlanCard(props: {
             </PropagationStopper>
           </div>
         </CardHeader>
-        <CardFooter className="text-muted-foreground flex flex-row justify-between space-x-4 text-sm">
-          <div className="text-muted-foreground flex items-center text-xs">
+        <CardFooter className="flex flex-row justify-between space-x-4 text-muted-foreground text-sm">
+          <div className="flex items-center text-muted-foreground text-xs">
             <GalleryHorizontalEnd className="mr-2 h-3 w-3" />
             {versions.length === 0 ? "no" : versions.length} versions
           </div>
@@ -134,10 +134,10 @@ export function PlanCardSkeleton(props: { pulse?: boolean }) {
   const { pulse = true } = props
   return (
     <Card>
-      <div className={cn("bg-muted h-20", pulse && "animate-pulse")} />
+      <div className={cn("h-20 bg-muted", pulse && "animate-pulse")} />
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span className={cn("bg-muted flex-1", pulse && "animate-pulse")}>&nbsp;</span>
+          <span className={cn("flex-1 bg-muted", pulse && "animate-pulse")}>&nbsp;</span>
         </CardTitle>
         <CardDescription className={cn("bg-muted", pulse && "animate-pulse")}>
           &nbsp;

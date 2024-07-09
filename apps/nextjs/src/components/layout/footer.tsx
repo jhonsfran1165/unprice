@@ -22,11 +22,11 @@ export default function Footer(props: { className?: string }) {
   return (
     <footer
       className={cn(
-        "bg-background-bgSubtle z-30 mx-auto flex w-full items-center justify-between gap-4 border-t px-6 md:h-16 md:flex-row md:py-0",
+        "z-30 mx-auto flex w-full items-center justify-between gap-4 border-t bg-background-bgSubtle px-6 md:h-16 md:flex-row md:py-0",
         props.className
       )}
     >
-      <div className="text-primary-text flex items-center gap-4 md:flex-row md:gap-2 md:px-0">
+      <div className="flex items-center gap-4 text-primary-text md:flex-row md:gap-2 md:px-0">
         <Logo />
       </div>
 
@@ -35,13 +35,13 @@ export default function Footer(props: { className?: string }) {
           {/* // TODO: add command for the most important actions in the platform - dev exp focused */}
           <Link href={siteConfig.links.twitter} target="_blank" rel="noreferrer">
             <Button variant="ghost" size="sm" className="button-ghost">
-              <Twitter className="hover:text-background-textContrast h-5 w-5 fill-current" />
+              <Twitter className="h-5 w-5 fill-current hover:text-background-textContrast" />
               <span className="sr-only">User</span>
             </Button>
           </Link>
           <Link href={siteConfig.links.github} target="_blank" rel="noreferrer">
             <Button variant="ghost" size="sm" className="button-ghost">
-              <Github className="hover:text-background-textContrast h-5 w-5 fill-current" />
+              <Github className="h-5 w-5 fill-current hover:text-background-textContrast" />
               <span className="sr-only">User</span>
             </Button>
           </Link>

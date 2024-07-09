@@ -16,7 +16,7 @@ export default function WorkSpaceSettingsMembersLoading() {
         />
       }
     >
-      <Card className="bg-muted animate-pulse">
+      <Card className="animate-pulse bg-muted">
         <CardHeader>
           <CardTitle>Subscription</CardTitle>
         </CardHeader>
@@ -27,7 +27,7 @@ export default function WorkSpaceSettingsMembersLoading() {
           <Button className="text-transparent">Manage Subscription</Button>
         </CardFooter>
       </Card>
-      <Card className="bg-muted mt-4 animate-pulse">
+      <Card className="mt-4 animate-pulse bg-muted">
         <CardHeader>
           <CardTitle>Usage</CardTitle>
         </CardHeader>

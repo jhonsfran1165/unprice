@@ -61,8 +61,8 @@ const defaultProps = {
   } as JSONContent,
 } as NovelProps
 
-
-export const Novel = ({ content,
+export const Novel = ({
+  content,
   paddingTop,
   paddingRight,
   paddingBottom,
@@ -75,7 +75,7 @@ export const Novel = ({ content,
   radius,
   borderColor,
   backgroundColor,
-  border
+  border,
 }: Partial<NovelProps>) => {
   const {
     connectors: { connect },
@@ -102,7 +102,9 @@ export const Novel = ({ content,
   const memoizedSuggestionItems = useMemo(() => suggestionItems, [])
 
   const handleUpdate = useCallback(
-    ({ editor }: {
+    ({
+      editor,
+    }: {
       editor: EditorInstance
     }) => {
       const json = editor.getJSON()
@@ -139,7 +141,8 @@ export const Novel = ({ content,
   )
 
   return (
-    <div className="flex flex-col w-full"
+    <div
+      className="flex w-full flex-col"
       ref={(ref) => {
         ref && connect(ref)
       }}
@@ -159,18 +162,20 @@ export const Novel = ({ content,
           extensions={extensions}
           initialContent={content}
           onUpdate={handleUpdate}
-          className="rounded-none border-none w-full"
+          className="w-full rounded-none border-none"
           editorProps={editorProps}
           slotAfter={<ImageResizer />}
         >
           <EditorCommand className="z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
-            <EditorCommandEmpty className="px-2 text-muted-foreground">No results</EditorCommandEmpty>
+            <EditorCommandEmpty className="px-2 text-muted-foreground">
+              No results
+            </EditorCommandEmpty>
             <EditorCommandList>
               {memoizedSuggestionItems.map((item) => (
                 <EditorCommandItem
                   value={item.title}
                   onCommand={(val) => item.command!(val)}
-                  className="flex w-full items-center space-x-2 rounded-md px-2 py-2 text-left text-sm hover:bg-accent aria-selected:bg-accent"
+                  className="flex w-full items-center space-x-2 rounded-md px-2 py-2 text-left text-sm aria-selected:bg-accent hover:bg-accent"
                   key={item.title}
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-md border border-muted bg-background">
@@ -178,7 +183,7 @@ export const Novel = ({ content,
                   </div>
                   <div>
                     <p className="font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                    <p className="text-muted-foreground text-xs">{item.description}</p>
                   </div>
                 </EditorCommandItem>
               ))}
@@ -198,7 +203,6 @@ export const Novel = ({ content,
         </EditorContent>
       </EditorRoot>
     </div>
-
   )
 }
 

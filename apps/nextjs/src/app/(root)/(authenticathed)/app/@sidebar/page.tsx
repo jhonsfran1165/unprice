@@ -6,7 +6,7 @@ import { dashboardNavigationData } from "./data"
 export default function DashboardNavigationDesktopDefault() {
   const pathname = "/dashboard"
   return (
-    <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+    <nav className="grid items-start px-2 font-medium text-sm lg:px-4">
       {dashboardNavigationData.map((navigationItem) => {
         return (
           <SuperLink

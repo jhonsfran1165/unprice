@@ -8,7 +8,7 @@ export default function WorkSpaceSettingsDangerLoading() {
     <DashboardShell
       header={<HeaderTab title="General Settings" description="Manage your workspace settings" />}
     >
-      <Card className="bg-muted animate-pulse">
+      <Card className="animate-pulse bg-muted">
         <CardHeader>
           <CardTitle>Workspace Name</CardTitle>
           <CardDescription>Change the name of your workspace</CardDescription>
@@ -19,7 +19,7 @@ export default function WorkSpaceSettingsDangerLoading() {
           </Button>
         </CardFooter>
       </Card>
-      <Card className="bg-muted animate-pulse">
+      <Card className="animate-pulse bg-muted">
         <CardHeader>
           <CardTitle>Delete</CardTitle>
           <CardDescription>This will delete the workspace and all of its data.</CardDescription>

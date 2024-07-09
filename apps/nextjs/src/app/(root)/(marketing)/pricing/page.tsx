@@ -38,12 +38,12 @@ function PricingCard(props: {
     <Card>
       <CardHeader>
         <CardTitle>{props.plan.name}</CardTitle>
-        <div className="text-2xl font-bold">
+        <div className="font-bold text-2xl">
           {toDecimal(
             props.plan.price,
             ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
           )}
-          <span className="text-base font-normal"> / month</span>
+          <span className="font-normal text-base"> / month</span>
         </div>{" "}
         <CardDescription>{props.plan.description}</CardDescription>
       </CardHeader>
@@ -54,7 +54,7 @@ function PricingCard(props: {
         )}
         {props.plan.features.map((feature) => (
           <li key={feature} className="flex items-center">
-            <CheckCircle2 className="fill-primary text-primary-foreground mr-2 h-6 w-6" />
+            <CheckCircle2 className="mr-2 h-6 w-6 fill-primary text-primary-foreground" />
             {feature}
           </li>
         ))}

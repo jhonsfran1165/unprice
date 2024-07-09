@@ -150,7 +150,7 @@ export function PlanVersionForm({
                   <FormLabel>Currency of this version</FormLabel>
                   <Link
                     href="#"
-                    className="text-info ml-auto inline-block text-xs underline opacity-70"
+                    className="ml-auto inline-block text-info text-xs underline opacity-70"
                   >
                     Set default currency for this organization
                   </Link>
@@ -189,7 +189,7 @@ export function PlanVersionForm({
                   {/* // TODO: add link to payment provider configuration */}
                   <Link
                     href="#"
-                    className="text-info ml-auto inline-block text-xs underline opacity-70"
+                    className="ml-auto inline-block text-info text-xs underline opacity-70"
                   >
                     Configure payment provider
                   </Link>

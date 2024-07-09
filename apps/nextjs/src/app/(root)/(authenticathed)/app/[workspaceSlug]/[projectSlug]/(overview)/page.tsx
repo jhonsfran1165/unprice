@@ -46,49 +46,49 @@ export default async function DashboardPage(props: {
 
   return (
     <DashboardShell>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 lg:grid-cols-4 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="font-medium text-sm">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
+            <div className="font-bold text-2xl">$45,231.89</div>
             <p className="text-muted-foreground text-xs">+20.1% from last month</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Subscriptions</CardTitle>
-            <Users className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="font-medium text-sm">Subscriptions</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+2350</div>
+            <div className="font-bold text-2xl">+2350</div>
             <p className="text-muted-foreground text-xs">+180.1% from last month</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sales</CardTitle>
-            <CreditCard className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="font-medium text-sm">Sales</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+12,234</div>
+            <div className="font-bold text-2xl">+12,234</div>
             <p className="text-muted-foreground text-xs">+19% from last month</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
-            <Activity className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="font-medium text-sm">Active Customers</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+573</div>
+            <div className="font-bold text-2xl">+573</div>
             <p className="text-muted-foreground text-xs">+201 since last hour</p>
           </CardContent>
         </Card>
       </div>
-      <div className="mt-4 flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+      <div className="mt-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
         <AnalyticsCard
           className="w-full md:w-2/3"
           title="Feature Verifications & Usage"
@@ -107,7 +107,7 @@ export default async function DashboardPage(props: {
             <LoadingCard
               title="Recent Ingestions"
               description="Loading recent ingestions..."
-              className="col-span-7 md:col-span-2 lg:col-span-3"
+              className="col-span-7 lg:col-span-3 md:col-span-2"
             />
           }
         >
@@ -137,9 +137,9 @@ function IngestionCard(props: {
 
   return (
     <SuperLink href={`/${props.workspaceSlug}/${props.projectSlug}/ingestions/${ingestion.id}`}>
-      <div className="hover:bg-muted flex items-center rounded p-1">
+      <div className="flex items-center rounded p-1 hover:bg-muted">
         <div className="space-y-1">
-          <p className="text-sm font-medium leading-none">{truncatedHash}</p>
+          <p className="font-medium text-sm leading-none">{truncatedHash}</p>
           <p className="text-muted-foreground text-sm">
             {formatRelative(new Date(ingestion.createdAt), new Date())}
           </p>

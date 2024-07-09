@@ -41,7 +41,7 @@ export function SearchTool() {
 
   return (
     <div>
-      <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+      <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border px-1.5 font-medium font-mono text-[10px] opacity-100 sm:flex">
         <span className="text-xs">⌘</span>K
       </kbd>
       <CommandDialog open={open} onOpenChange={setOpen}>

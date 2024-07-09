@@ -10,18 +10,18 @@ import {
   type LucideIcon,
   TextIcon,
   TextQuote,
-} from "lucide-react";
-import { EditorBubbleItem, useEditor } from "novel";
+} from "lucide-react"
+import { EditorBubbleItem, useEditor } from "novel"
 
-import { Button } from "@builderai/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover";
+import { Button } from "@builderai/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
 
 export type SelectorItem = {
-  name: string;
-  icon: LucideIcon;
-  command: (editor: ReturnType<typeof useEditor>["editor"]) => void;
-  isActive: (editor: ReturnType<typeof useEditor>["editor"]) => boolean;
-};
+  name: string
+  icon: LucideIcon
+  command: (editor: ReturnType<typeof useEditor>["editor"]) => void
+  isActive: (editor: ReturnType<typeof useEditor>["editor"]) => boolean
+}
 
 const items: SelectorItem[] = [
   {
@@ -30,7 +30,9 @@ const items: SelectorItem[] = [
     command: (editor) => editor!.chain().focus().clearNodes().run(),
     // I feel like there has to be a more efficient way to do this – feel free to PR if you know how!
     isActive: (editor) =>
-      editor!.isActive("paragraph") && !editor!.isActive("bulletList") && !editor!.isActive("orderedList"),
+      editor!.isActive("paragraph") &&
+      !editor!.isActive("bulletList") &&
+      !editor!.isActive("orderedList"),
   },
   {
     name: "Heading 1",
@@ -80,19 +82,19 @@ const items: SelectorItem[] = [
     command: (editor) => editor!.chain().focus().clearNodes().toggleCodeBlock().run(),
     isActive: (editor) => editor!.isActive("codeBlock"),
   },
-];
+]
 
 interface NodeSelectorProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 export const NodeSelector = ({ open, onOpenChange }: NodeSelectorProps) => {
-  const { editor } = useEditor();
-  if (!editor) return null;
+  const { editor } = useEditor()
+  if (!editor) return null
   const activeItem = items.filter((item) => item.isActive(editor)).pop() ?? {
     name: "Multiple",
-  };
+  }
 
   return (
     <Popover modal={true} open={open} onOpenChange={onOpenChange}>
@@ -107,10 +109,10 @@ export const NodeSelector = ({ open, onOpenChange }: NodeSelectorProps) => {
           <EditorBubbleItem
             key={item.name}
             onSelect={(editor) => {
-              item.command(editor);
-              onOpenChange(false);
+              item.command(editor)
+              onOpenChange(false)
             }}
-            className="flex hover:bg-background-bgHover hover:text-background-textContrast cursor-pointer items-center justify-between rounded-sm px-1 py-1 text-sm"
+            className="flex cursor-pointer items-center justify-between rounded-sm px-1 py-1 text-sm hover:bg-background-bgHover hover:text-background-textContrast"
           >
             <div className="flex items-center space-x-2">
               <div className="rounded-sm border p-1">
@@ -123,5 +125,5 @@ export const NodeSelector = ({ open, onOpenChange }: NodeSelectorProps) => {
         ))}
       </PopoverContent>
     </Popover>
-  );
-};
+  )
+}

@@ -51,7 +51,7 @@ export function PaymentMethodForm({
       </CardHeader>
       <CardContent className="flex flex-col gap-12">
         <UserPaymentMethod paymentMethod={defaultPaymentMethod} />
-        <div className="flex flex-col gap-2 w-1/2 mx-auto">
+        <div className="mx-auto flex w-1/2 flex-col gap-2">
           <Label htmlFor="provider">Payment Provider</Label>
           <Select
             value={provider}
@@ -75,7 +75,7 @@ export function PaymentMethodForm({
       <CardFooter className="flex flex-col justify-center">
         <SubmitButton
           variant="default"
-          className="w-56 mx-auto"
+          className="mx-auto w-56"
           onClick={() => {
             createSession.mutate({
               paymentProvider: provider,

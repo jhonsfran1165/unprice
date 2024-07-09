@@ -38,7 +38,7 @@ export function QuantityFormField({
             <FormDescription>
               Default quantity of the feature when the subscription is created.
             </FormDescription>
-            <div className="text-xs font-normal leading-snug">
+            <div className="font-normal text-xs leading-snug">
               If the quantity is not provided, it must be set at the time of the subscription.
             </div>
 
@@ -72,7 +72,7 @@ export function LimitFormField({
             <FormDescription>
               Set a limit for the feature when the subscription is created.
             </FormDescription>
-            <div className="text-xs font-normal leading-snug">
+            <div className="font-normal text-xs leading-snug">
               If you set a limit, the feature will be disabled when the limit is reached. Otherwise
               the feature will be unlimited.
             </div>
@@ -109,7 +109,7 @@ export function PriceFormField({
             <FormDescription>
               Price of the feature in the selected currency of the plan.
             </FormDescription>
-            <div className="text-xs font-normal leading-snug">
+            <div className="font-normal text-xs leading-snug">
               Prices can be set as decimal values. For example, $1.99.
             </div>
 
@@ -178,7 +178,7 @@ export function AggregationMethodFormField({
             <div className="">
               <FormLabel>Aggregation Method</FormLabel>
               <FormDescription>Charge for metered usage by</FormDescription>
-              <div className="text-xs font-normal leading-snug">
+              <div className="font-normal text-xs leading-snug">
                 Usage based features meters usage over a period of time. Select the aggregation
                 method for the feature.
               </div>
@@ -193,7 +193,7 @@ export function AggregationMethodFormField({
                 <SelectContent>
                   {AGGREGATION_METHODS.map((mode) => (
                     <SelectItem value={mode} key={mode}>
-                      <div className="text-muted-foreground flex items-start gap-3">
+                      <div className="flex items-start gap-3 text-muted-foreground">
                         <div className="grid gap-0.5">
                           <p>{AGGREGATION_METHODS_MAP[mode].label}</p>
                           <p className="text-xs" data-description>
@@ -229,7 +229,7 @@ export function TierFormField({
     <div className="flex w-full flex-col">
       <div className="mb-4 flex flex-col">
         <h4 className="my-auto block font-semibold">Tier Configuration</h4>
-        <div className="text-xs font-normal leading-snug">
+        <div className="font-normal text-xs leading-snug">
           {form.getValues("featureType") === "usage"
             ? "Configure the tiers for the feature, the price will be calculated with the reported usage"
             : "Configure the tiers for the feature, the price will be calculated when the subscription is created."}
@@ -241,7 +241,7 @@ export function TierFormField({
           {fields.map((field, index) => (
             <div key={field.id} className="flex items-end justify-between gap-2 space-y-2">
               <div className="flex items-center justify-start">
-                <span className="h-8 text-sm font-light leading-8">{index + 1}</span>
+                <span className="h-8 font-light text-sm leading-8">{index + 1}</span>
               </div>
               <div className="w-full">
                 <FormField
@@ -252,7 +252,7 @@ export function TierFormField({
                     <FormItem>
                       <FormLabel className={cn(index !== 0 && "sr-only")}>
                         <Tooltip>
-                          <div className="flex items-center justify-center gap-2 text-xs font-normal">
+                          <div className="flex items-center justify-center gap-2 font-normal text-xs">
                             First Unit
                             <span>
                               <TooltipTrigger asChild>
@@ -262,7 +262,7 @@ export function TierFormField({
                           </div>
 
                           <TooltipContent
-                            className="bg-background-bg w-32 text-xs font-normal"
+                            className="w-32 bg-background-bg font-normal text-xs"
                             align="center"
                             side="right"
                           >
@@ -272,7 +272,7 @@ export function TierFormField({
                         </Tooltip>
                       </FormLabel>
 
-                      <FormMessage className="text-xs font-light" />
+                      <FormMessage className="font-light text-xs" />
                       <FormControl>
                         <Input {...field} className="h-8" disabled={index === 0} />
                       </FormControl>
@@ -290,7 +290,7 @@ export function TierFormField({
                     <FormItem>
                       <FormLabel className={cn(index !== 0 && "sr-only")}>
                         <Tooltip>
-                          <div className="flex items-center justify-center gap-2 text-xs font-normal">
+                          <div className="flex items-center justify-center gap-2 font-normal text-xs">
                             Last Unit
                             <span>
                               <TooltipTrigger asChild>
@@ -300,7 +300,7 @@ export function TierFormField({
                           </div>
 
                           <TooltipContent
-                            className="bg-background-bg w-48 text-xs font-normal"
+                            className="w-48 bg-background-bg font-normal text-xs"
                             align="center"
                             side="right"
                           >
@@ -311,7 +311,7 @@ export function TierFormField({
                         </Tooltip>
                       </FormLabel>
 
-                      <FormMessage className="text-xs font-light" />
+                      <FormMessage className="font-light text-xs" />
 
                       <FormControl>
                         <Input
@@ -336,7 +336,7 @@ export function TierFormField({
                     <FormItem>
                       <FormLabel className={cn(index !== 0 && "sr-only")}>
                         <Tooltip>
-                          <div className="flex items-center justify-center gap-2 text-xs font-normal">
+                          <div className="flex items-center justify-center gap-2 font-normal text-xs">
                             Flat price
                             <span>
                               <TooltipTrigger asChild>
@@ -346,7 +346,7 @@ export function TierFormField({
                           </div>
 
                           <TooltipContent
-                            className="bg-background-bg w-32 text-xs font-normal"
+                            className="w-32 bg-background-bg font-normal text-xs"
                             align="center"
                             side="right"
                           >
@@ -356,11 +356,11 @@ export function TierFormField({
                         </Tooltip>
                       </FormLabel>
 
-                      <FormMessage className="text-xs font-light" />
+                      <FormMessage className="font-light text-xs" />
 
                       <FormControl>
                         <div className="relative">
-                          <DollarSignIcon className="text-muted-foreground absolute left-2 top-2 h-4 w-4" />
+                          <DollarSignIcon className="absolute top-2 left-2 h-4 w-4 text-muted-foreground" />
                           <Input
                             {...field}
                             value={field.value ?? ""}
@@ -392,7 +392,7 @@ export function TierFormField({
                     <FormItem>
                       <FormLabel className={cn(index !== 0 && "sr-only")}>
                         <Tooltip>
-                          <div className="flex items-center justify-center gap-2 text-xs font-normal">
+                          <div className="flex items-center justify-center gap-2 font-normal text-xs">
                             Unit price
                             <span>
                               <TooltipTrigger asChild>
@@ -402,7 +402,7 @@ export function TierFormField({
                           </div>
 
                           <TooltipContent
-                            className="bg-background-bg w-32 text-xs font-normal"
+                            className="w-32 bg-background-bg font-normal text-xs"
                             align="center"
                             side="right"
                           >
@@ -412,11 +412,11 @@ export function TierFormField({
                         </Tooltip>
                       </FormLabel>
 
-                      <FormMessage className="text-xs font-light" />
+                      <FormMessage className="font-light text-xs" />
 
                       <FormControl>
                         <div className="relative">
-                          <DollarSignIcon className="text-muted-foreground absolute left-2 top-2 h-4 w-4" />
+                          <DollarSignIcon className="absolute top-2 left-2 h-4 w-4 text-muted-foreground" />
                           <Input {...field} className="h-8 pl-8" />
                         </div>
                       </FormControl>
@@ -510,8 +510,8 @@ export function TierFormField({
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <div className="grid gap-2">
-                <p className="self-center text-sm font-semibold">No tiers</p>
-                <p className="text-muted-foreground justify-center text-xs font-normal leading-snug">
+                <p className="self-center font-semibold text-sm">No tiers</p>
+                <p className="justify-center font-normal text-muted-foreground text-xs leading-snug">
                   Something went wrong, please add the first tier.
                 </p>
                 <Button

@@ -15,11 +15,11 @@ import { siteConfig } from "~/constants/layout"
 export default function MarketingLayout(props: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <nav className="bg-background z-50 flex h-16 items-center border-b">
+      <nav className="z-50 flex h-16 items-center border-b bg-background">
         <MaxWidthWrapper className="flex max-w-screen-2xl">
           <div className="mr-8 hidden items-center md:flex">
             <Logo className="mr-2 h-6 w-6" />
-            <span className="text-lg font-bold tracking-tight">{siteConfig.name}</span>
+            <span className="font-bold text-lg tracking-tight">{siteConfig.name}</span>
           </div>
 
           <MainNav />

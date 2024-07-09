@@ -21,7 +21,7 @@ export default function MobileSidebar({
         <Button
           variant="ghost"
           aria-label="open sidebar"
-          className="group flex items-center rounded-md p-2 text-sm font-medium"
+          className="group flex items-center rounded-md p-2 font-medium text-sm"
         >
           <MoreVertical className="h-4 w-4 shrink-0" aria-hidden="true" />
         </Button>

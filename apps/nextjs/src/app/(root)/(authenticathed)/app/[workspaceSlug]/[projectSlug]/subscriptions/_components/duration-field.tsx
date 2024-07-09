@@ -32,7 +32,7 @@ export default function DurationFormField({
         Duration
       </FormLabel>
 
-      <div className="bg-background-bg mb-1 mt-3 flex flex-row rounded-md border">
+      <div className="mt-3 mb-1 flex flex-row rounded-md border bg-background-bg">
         <FormField
           control={form.control}
           name="startDate"
@@ -44,7 +44,7 @@ export default function DurationFormField({
                     <Button
                       variant={"custom"}
                       className={cn(
-                        "hover:bg-muted hover:text-background-textContrast focus-visible:ring-ring h-9 rounded-e-none pl-3 text-left font-normal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-1",
+                        "h-9 rounded-e-none pl-3 text-left font-normal hover:bg-muted hover:text-background-textContrast focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1",
                         !start && "text-muted-foreground"
                       )}
                     >
@@ -67,7 +67,7 @@ export default function DurationFormField({
                     />
                   </div>
                   <div className="flex flex-col gap-2 px-2 py-4">
-                    <div className="px-3 text-sm font-medium">Shortcuts</div>
+                    <div className="px-3 font-medium text-sm">Shortcuts</div>
                     <div className="grid gap-1">
                       <Button
                         variant="ghost"
@@ -130,7 +130,7 @@ export default function DurationFormField({
                     <Button
                       variant={"custom"}
                       className={cn(
-                        "hover:bg-muted hover:text-background-textContrast focus-visible:ring-ring rounded-s-none pl-3 text-left font-normal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-1",
+                        "rounded-s-none pl-3 text-left font-normal hover:bg-muted hover:text-background-textContrast focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1",
                         !end && "text-muted-foreground"
                       )}
                     >
@@ -153,7 +153,7 @@ export default function DurationFormField({
                     />
                   </div>
                   <div className="flex flex-col gap-2 px-2 py-4">
-                    <div className="px-3 text-sm font-medium">Shortcuts</div>
+                    <div className="px-3 font-medium text-sm">Shortcuts</div>
                     <div className="grid gap-1">
                       <Button
                         variant="ghost"

@@ -159,8 +159,8 @@ export function FeatureConfigForm({
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <FormLabel className="text-sm font-semibold">Hide this feature from UI</FormLabel>
-                <FormDescription className="text-sm font-normal">
+                <FormLabel className="font-semibold text-sm">Hide this feature from UI</FormLabel>
+                <FormDescription className="font-normal text-sm">
                   When enabled, this feature will not be visible in pricing pages.
                 </FormDescription>
               </div>
@@ -174,12 +174,12 @@ export function FeatureConfigForm({
         <Separator />
 
         <div className="flex flex-col gap-2">
-          <div className="border-1 items-center rounded-md">
+          <div className="items-center rounded-md border-1">
             <div className="space-y-2">
-              <div className="bg-background-bg rounded-md p-2 text-center font-semibold shadow-sm">
+              <div className="rounded-md bg-background-bg p-2 text-center font-semibold shadow-sm">
                 Pricing Model
               </div>
-              <div className="text-muted-foreground line-clamp-3 space-y-2 break-all px-2 text-justify text-xs font-normal leading-snug">
+              <div className="line-clamp-3 space-y-2 break-all px-2 text-justify font-normal text-muted-foreground text-xs leading-snug">
                 All units price based on final tier reached. Needs a record for Stripe to track
                 customer service usage.
               </div>
@@ -204,7 +204,7 @@ export function FeatureConfigForm({
                         <SelectContent>
                           {FEATURE_TYPES.map((type) => (
                             <SelectItem value={type} key={type}>
-                              <div className="text-muted-foreground flex items-start gap-3">
+                              <div className="flex items-start gap-3 text-muted-foreground">
                                 <div className="grid gap-0.5">
                                   <p>{FEATURE_TYPES_MAPS[type].label}</p>
                                   <p className="text-xs" data-description>
@@ -236,7 +236,7 @@ export function FeatureConfigForm({
                           <SelectContent>
                             {USAGE_MODES.map((mode) => (
                               <SelectItem value={mode} key={mode}>
-                                <div className="text-muted-foreground flex items-start gap-3">
+                                <div className="flex items-start gap-3 text-muted-foreground">
                                   <div className="grid gap-0.5">
                                     <p>{USAGE_MODES_MAP[mode].label}</p>
                                     <p className="text-xs" data-description>
@@ -269,7 +269,7 @@ export function FeatureConfigForm({
                           <SelectContent>
                             {TIER_MODES.map((mode) => (
                               <SelectItem value={mode} key={mode}>
-                                <div className="text-muted-foreground flex items-start gap-3">
+                                <div className="flex items-start gap-3 text-muted-foreground">
                                   <div className="grid gap-0.5">
                                     <p>{TIER_MODES_MAP[mode].label}</p>
                                     <p className="text-xs" data-description>

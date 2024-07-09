@@ -1,12 +1,12 @@
-import { Button } from "@builderai/ui/button";
-import { cn } from "@builderai/ui/utils";
-import { BoldIcon, CodeIcon, ItalicIcon, StrikethroughIcon, UnderlineIcon } from "lucide-react";
-import { EditorBubbleItem, useEditor } from "novel";
-import type { SelectorItem } from "./node-selector";
+import { Button } from "@builderai/ui/button"
+import { cn } from "@builderai/ui/utils"
+import { BoldIcon, CodeIcon, ItalicIcon, StrikethroughIcon, UnderlineIcon } from "lucide-react"
+import { EditorBubbleItem, useEditor } from "novel"
+import type { SelectorItem } from "./node-selector"
 
 export const TextButtons = () => {
-  const { editor } = useEditor();
-  if (!editor) return null;
+  const { editor } = useEditor()
+  if (!editor) return null
   const items: SelectorItem[] = [
     {
       name: "bold",
@@ -38,14 +38,14 @@ export const TextButtons = () => {
       command: (editor) => editor!.chain().focus().toggleCode().run(),
       icon: CodeIcon,
     },
-  ];
+  ]
   return (
     <div className="flex">
       {items.map((item) => (
         <EditorBubbleItem
           key={item.name}
           onSelect={(editor) => {
-            item.command(editor);
+            item.command(editor)
           }}
         >
           <Button size="sm" className="rounded-none" variant="ghost">
@@ -58,5 +58,5 @@ export const TextButtons = () => {
         </EditorBubbleItem>
       ))}
     </div>
-  );
-};
+  )
+}

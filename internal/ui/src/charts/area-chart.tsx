@@ -48,7 +48,7 @@ const LegendItem = ({ name, color, onClick, activeLegend }: LegendItemProps) => 
         // base
         "group inline-flex flex-nowrap items-center gap-1.5 whitespace-nowrap rounded px-2 py-1 transition",
         hasOnValueChange
-          ? "cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+          ? "cursor-pointer dark:hover:bg-gray-800 hover:bg-gray-100"
           : "cursor-default"
       )}
       onClick={(e) => {
@@ -70,7 +70,7 @@ const LegendItem = ({ name, color, onClick, activeLegend }: LegendItemProps) => 
           "truncate whitespace-nowrap text-xs",
           // text color
           "text-gray-700 dark:text-gray-300",
-          hasOnValueChange && "group-hover:text-gray-900 dark:group-hover:text-gray-50",
+          hasOnValueChange && "dark:group-hover:text-gray-50 group-hover:text-gray-900",
           activeLegend && activeLegend !== name ? "opacity-40" : "opacity-100"
         )}
       >
@@ -117,7 +117,7 @@ const ScrollButton = ({ icon, onClick, disabled }: ScrollButtonProps) => {
         "group inline-flex size-5 items-center truncate rounded transition",
         disabled
           ? "cursor-not-allowed text-gray-400 dark:text-gray-600"
-          : "cursor-pointer text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-50"
+          : "cursor-pointer text-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 dark:hover:text-gray-50 dark:text-gray-300 hover:text-gray-900"
       )}
       disabled={disabled}
       onClick={(e) => {
@@ -255,7 +255,7 @@ const Legend = React.forwardRef<HTMLOListElement, LegendProps>((props, ref) => {
           "flex h-full",
           enableLegendSlider
             ? hasScroll?.right || hasScroll?.left
-              ? "snap-mandatory items-center overflow-auto pl-4 pr-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              ? "snap-mandatory items-center overflow-auto pr-12 pl-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               : ""
             : "flex-wrap"
         )}
@@ -276,7 +276,7 @@ const Legend = React.forwardRef<HTMLOListElement, LegendProps>((props, ref) => {
           <div
             className={cn(
               // base
-              "absolute bottom-0 right-0 top-0 flex h-full items-center justify-center pr-1",
+              "absolute top-0 right-0 bottom-0 flex h-full items-center justify-center pr-1",
               // background color
               "bg-white dark:bg-gray-950"
             )}
@@ -425,7 +425,7 @@ const ChartTooltip = ({
         <div
           className={cn(
             // base
-            "border-b border-inherit px-4 py-2"
+            "border-inherit border-b px-4 py-2"
           )}
         >
           <p
@@ -656,7 +656,7 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>((props, ref) 
         >
           {showGridLines ? (
             <CartesianGrid
-              className={cn("stroke-gray-200 stroke-1 dark:stroke-gray-800")}
+              className={cn("stroke-1 stroke-gray-200 dark:stroke-gray-800")}
               horizontal={true}
               vertical={false}
             />
@@ -684,7 +684,7 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>((props, ref) 
               <Label
                 position="insideBottom"
                 offset={-20}
-                className="fill-gray-800 text-sm font-medium dark:fill-gray-200"
+                className="fill-gray-800 font-medium text-sm dark:fill-gray-200"
               >
                 {xAxisLabel}
               </Label>
@@ -715,7 +715,7 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>((props, ref) 
                 style={{ textAnchor: "middle" }}
                 angle={-90}
                 offset={-15}
-                className="fill-gray-800 text-sm font-medium dark:fill-gray-200"
+                className="fill-gray-800 font-medium text-sm dark:fill-gray-200"
               >
                 {yAxisLabel}
               </Label>

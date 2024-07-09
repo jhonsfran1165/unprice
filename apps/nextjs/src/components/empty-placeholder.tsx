@@ -36,7 +36,7 @@ EmptyPlaceholder.Title = function EmptyPlaceholderTitle({
   className,
   ...props
 }: EmptyPlaceholderTitleProps) {
-  return <h2 className={cn("mt-4 text-lg font-semibold", className)} {...props} />
+  return <h2 className={cn("mt-4 font-semibold text-lg", className)} {...props} />
 }
 
 EmptyPlaceholder.Action = function EmptyPlaceHolderAction({
@@ -53,5 +53,5 @@ EmptyPlaceholder.Description = function EmptyPlaceholderDescription({
   className,
   ...props
 }: EmptyPlaceholderDescriptionProps) {
-  return <p className={cn("text-muted-foreground mb-4 mt-2 text-sm", className)} {...props} />
+  return <p className={cn("mt-2 mb-4 text-muted-foreground text-sm", className)} {...props} />
 }

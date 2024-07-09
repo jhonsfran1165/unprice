@@ -36,7 +36,7 @@ export default function PlanHeader(props: {
                   danger: !plan.active,
                 })}
               >
-                <span className="bg-success-solid flex h-2 w-2 rounded-full" />
+                <span className="flex h-2 w-2 rounded-full bg-success-solid" />
                 <span className="ml-1">{plan.active ? "active" : "inactive"}</span>
               </Badge>
 
@@ -66,7 +66,7 @@ export default function PlanHeader(props: {
                 }}
               >
                 <Button variant={"custom"}>
-                  <Plus className="h-4 w-4 mr-2" /> Version
+                  <Plus className="mr-2 h-4 w-4" /> Version
                 </Button>
               </PlanVersionDialog>
             </div>

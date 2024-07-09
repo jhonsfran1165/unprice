@@ -64,7 +64,7 @@ export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
             </Button>
           </DialogTrigger>
           {!!isPersonal && (
-            <span className="text-muted-foreground mr-auto px-2 text-xs">
+            <span className="mr-auto px-2 text-muted-foreground text-xs">
               You can not delete your personal workspace. Contact support if you want to delete your
               account.
             </span>
@@ -74,7 +74,7 @@ export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
               <DialogTitle>{title}</DialogTitle>
               <DialogDescription>{description}</DialogDescription>
             </DialogHeader>
-            <div className="text-destructive flex items-center font-bold">
+            <div className="flex items-center font-bold text-destructive">
               <Warning className="mr-2 h-6 w-6" />
               <p>This action can not be reverted</p>
             </div>

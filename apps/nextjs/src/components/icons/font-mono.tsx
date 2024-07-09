@@ -18,5 +18,5 @@ export default function FontMono({ className }: { className?: string }) {
         fill="currentColor"
       />
     </svg>
-  );
+  )
 }

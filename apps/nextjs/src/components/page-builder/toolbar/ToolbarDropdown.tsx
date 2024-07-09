@@ -34,7 +34,7 @@ export const ToolbarDropdown = ({
       <PopoverTrigger asChild>
         <Button variant="outline" size={"sm"} className="w-full">
           <div className="flex items-center gap-2">
-            <div className="rounded-full size-3 border" style={{ background: value }} />
+            <div className="size-3 rounded-full border" style={{ background: value }} />
             <span>{label}</span>
           </div>
         </Button>
@@ -48,7 +48,7 @@ export const ToolbarDropdown = ({
               placeholder={`Search ${label.toLowerCase()}...`}
             />
 
-            <ScrollArea className="pr-2 h-[200px]">
+            <ScrollArea className="h-[200px] pr-2">
               <CommandGroup heading={`All ${label.toLowerCase()}...`}>
                 {options.map(({ name, option }) => (
                   <CommandItem
@@ -57,11 +57,11 @@ export const ToolbarDropdown = ({
                       setSwitcherOpen(false)
                       onChange(option)
                     }}
-                    className="rounded-sm flex cursor-pointer items-center justify-between py-1 px-1 text-sm hover:bg-background-bgHover hover:text-background-textContrast"
+                    className="flex cursor-pointer items-center justify-between rounded-sm px-1 py-1 text-sm hover:bg-background-bgHover hover:text-background-textContrast"
                   >
                     <div className="flex items-center gap-2">
                       <div
-                        className="rounded-sm border border-background-border size-5 font-medium"
+                        className="size-5 rounded-sm border border-background-border font-medium"
                         style={{ backgroundColor: option }}
                       />
                       <span>{name}</span>

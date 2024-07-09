@@ -75,7 +75,7 @@ const DomainCard = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex flex-row items-center">
-            <CardTitle className="text-2xl font-semibold">{domain.name}</CardTitle>
+            <CardTitle className="font-semibold text-2xl">{domain.name}</CardTitle>
 
             <a href={`https://${domain.name}`} target="_blank" rel="noreferrer">
               <ExternalLink className="ml-2 h-5 w-5" />

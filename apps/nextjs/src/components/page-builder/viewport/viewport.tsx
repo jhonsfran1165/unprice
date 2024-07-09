@@ -42,9 +42,9 @@ export const Viewport: React.FC<{ children?: React.ReactNode }> = ({ children })
   return (
     <div className={"flex flex-1 overflow-hidden"}>
       <ElementsSidebar />
-      <main className="page-container flex-1 flex flex-col">
+      <main className="page-container flex flex-1 flex-col">
         {/* header */}
-        <div className="flex flex-row bg-background-base h-14 sticky top-0 z-40 items-center px-2 backdrop-blur-[2px] border-b shadow-sm">
+        <div className="sticky top-0 z-40 flex h-14 flex-row items-center border-b bg-background-base px-2 shadow-sm backdrop-blur-[2px]">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon">
               <Undo className="h-5 w-5" />

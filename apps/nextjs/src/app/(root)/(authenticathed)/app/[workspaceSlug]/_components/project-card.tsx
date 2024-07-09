@@ -48,10 +48,10 @@ export function ProjectCardSkeleton(props: { pulse?: boolean }) {
   const { pulse = true } = props
   return (
     <Card>
-      <div className={cn("bg-muted h-32", pulse && "animate-pulse")} />
+      <div className={cn("h-32 bg-muted", pulse && "animate-pulse")} />
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span className={cn("bg-muted flex-1", pulse && "animate-pulse")}>&nbsp;</span>
+          <span className={cn("flex-1 bg-muted", pulse && "animate-pulse")}>&nbsp;</span>
           <ProjectTierIndicator tier={PROJECT_TIER.FREE} />
         </CardTitle>
         <CardDescription className={cn("bg-muted", pulse && "animate-pulse")}>

@@ -50,10 +50,10 @@ export default async function PlansPage(props: {
               <PlanCardSkeleton pulse={false} />
               <PlanCardSkeleton pulse={false} />
             </ul>
-            <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center">
+            <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 w-full text-center">
               <Balancer>
-                <h2 className="text-2xl font-bold">This project has no plans yet</h2>
-                <p className="text-muted-foreground text-lg">
+                <h2 className="font-bold text-2xl">This project has no plans yet</h2>
+                <p className="text-lg text-muted-foreground">
                   Create your first plan to get started
                 </p>
               </Balancer>

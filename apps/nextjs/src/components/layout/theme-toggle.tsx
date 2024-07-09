@@ -22,9 +22,9 @@ export default function ThemeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hidden lg:inline-flex">
-          <Sun className="hover:text-background-textContrast h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="hover:text-background-textContrast absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        <Button variant="ghost" size="icon" className="hidden h-8 w-8 rounded-full lg:inline-flex">
+          <Sun className="dark:-rotate-90 h-5 w-5 rotate-0 scale-100 transition-all dark:scale-0 hover:text-background-textContrast" />
+          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 hover:text-background-textContrast" />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>

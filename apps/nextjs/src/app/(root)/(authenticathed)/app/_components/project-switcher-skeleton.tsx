@@ -10,8 +10,8 @@ export function ProjectSwitcherSkeleton() {
       aria-label="project"
       className="w-44 justify-between opacity-50"
     >
-      <Skeleton className="bg-background-bgHover h-[20px] w-full" />
-      <Skeleton className="bg-background-bgHover ml-2 h-4 w-4 shrink-0" />
+      <Skeleton className="h-[20px] w-full bg-background-bgHover" />
+      <Skeleton className="ml-2 h-4 w-4 shrink-0 bg-background-bgHover" />
     </Button>
   )
 }

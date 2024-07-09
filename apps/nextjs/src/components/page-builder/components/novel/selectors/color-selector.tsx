@@ -40,10 +40,10 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
       </PopoverTrigger>
 
       <PopoverContent sideOffset={5} align="start" className="p-1">
-        <ScrollArea className="h-[200px] p-2 my-1">
-          <div className="flex flex-row justify-between space-x-2 mx-1">
+        <ScrollArea className="my-1 h-[200px] p-2">
+          <div className="mx-1 flex flex-row justify-between space-x-2">
             <div className="w-1/2">
-              <div className="mb-2 px-1 text-sm font-semibold text-background-textContrast">
+              <div className="mb-2 px-1 font-semibold text-background-textContrast text-sm">
                 Color
               </div>
               {TEXT_COLORS.map(({ name, option }) => (
@@ -58,7 +58,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
                       .setColor(option || "")
                       .run()
                   }}
-                  className="rounded-sm flex cursor-pointer items-center justify-between py-1 px-1 text-sm hover:bg-background-bgHover hover:text-background-textContrast"
+                  className="flex cursor-pointer items-center justify-between rounded-sm px-1 py-1 text-sm hover:bg-background-bgHover hover:text-background-textContrast"
                 >
                   <div className="flex items-center gap-2">
                     <div
@@ -76,7 +76,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
               ))}
             </div>
             <div className="w-1/2">
-              <div className="mb-2 px-1 text-sm font-semibold text-background-textContrast">
+              <div className="mb-2 px-1 font-semibold text-background-textContrast text-sm">
                 Background
               </div>
               {BACKGROUND_COLORS.map(({ name, option }) => (
@@ -86,7 +86,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
                     editor.commands.unsetHighlight()
                     editor.commands.setHighlight({ color: option })
                   }}
-                  className="rounded-sm flex cursor-pointer items-center justify-between py-1 px-1 text-sm hover:bg-background-bgHover hover:text-background-textContrast"
+                  className="flex cursor-pointer items-center justify-between rounded-sm px-1 py-1 text-sm hover:bg-background-bgHover hover:text-background-textContrast"
                 >
                   <div className="flex items-center gap-2">
                     <div

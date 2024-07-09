@@ -1,4 +1,4 @@
-import { Twitter, Youtube } from "@builderai/ui/icons";
+import { Twitter, Youtube } from "@builderai/ui/icons"
 import {
   CheckSquare,
   Code,
@@ -11,10 +11,10 @@ import {
   MessageSquarePlus,
   Text,
   TextQuote,
-} from "lucide-react";
-import { createSuggestionItems } from "novel/extensions";
-import { Command, renderItems } from "novel/extensions";
-import { uploadFn } from "./image-upload";
+} from "lucide-react"
+import { createSuggestionItems } from "novel/extensions"
+import { Command, renderItems } from "novel/extensions"
+import { uploadFn } from "./image-upload"
 
 export const suggestionItems = createSuggestionItems([
   {
@@ -22,8 +22,8 @@ export const suggestionItems = createSuggestionItems([
     description: "Let us know how we can improve.",
     icon: <MessageSquarePlus size={18} />,
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).run();
-      window.open("/feedback", "_blank");
+      editor.chain().focus().deleteRange(range).run()
+      window.open("/feedback", "_blank")
     },
   },
   {
@@ -32,12 +32,7 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["p", "paragraph"],
     icon: <Text size={18} />,
     command: ({ editor, range }) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .toggleNode("paragraph", "paragraph")
-        .run();
+      editor.chain().focus().deleteRange(range).toggleNode("paragraph", "paragraph").run()
     },
   },
   {
@@ -46,7 +41,7 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["todo", "task", "list", "check", "checkbox"],
     icon: <CheckSquare size={18} />,
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).toggleTaskList().run();
+      editor.chain().focus().deleteRange(range).toggleTaskList().run()
     },
   },
   {
@@ -55,12 +50,7 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["title", "big", "large"],
     icon: <Heading1 size={18} />,
     command: ({ editor, range }) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .setNode("heading", { level: 1 })
-        .run();
+      editor.chain().focus().deleteRange(range).setNode("heading", { level: 1 }).run()
     },
   },
   {
@@ -69,12 +59,7 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["subtitle", "medium"],
     icon: <Heading2 size={18} />,
     command: ({ editor, range }) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .setNode("heading", { level: 2 })
-        .run();
+      editor.chain().focus().deleteRange(range).setNode("heading", { level: 2 }).run()
     },
   },
   {
@@ -83,12 +68,7 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["subtitle", "small"],
     icon: <Heading3 size={18} />,
     command: ({ editor, range }) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .setNode("heading", { level: 3 })
-        .run();
+      editor.chain().focus().deleteRange(range).setNode("heading", { level: 3 }).run()
     },
   },
   {
@@ -97,7 +77,7 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["unordered", "point"],
     icon: <List size={18} />,
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).toggleBulletList().run();
+      editor.chain().focus().deleteRange(range).toggleBulletList().run()
     },
   },
   {
@@ -106,7 +86,7 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["ordered"],
     icon: <ListOrdered size={18} />,
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).toggleOrderedList().run();
+      editor.chain().focus().deleteRange(range).toggleOrderedList().run()
     },
   },
   {
@@ -137,11 +117,11 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["video", "youtube", "embed"],
     icon: <Youtube size={18} />,
     command: ({ editor, range }) => {
-      const videoLink = prompt("Please enter Youtube Video Link");
+      const videoLink = prompt("Please enter Youtube Video Link")
       //From https://regexr.com/3dj5t
       const ytregex = new RegExp(
-        /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/,
-      );
+        /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/
+      )
 
       // TODO: improve this
       if (ytregex.test(videoLink ?? "")) {
@@ -152,10 +132,10 @@ export const suggestionItems = createSuggestionItems([
           .setYoutubeVideo({
             src: videoLink ?? "",
           })
-          .run();
+          .run()
       } else {
         if (videoLink !== null) {
-          alert("Please enter a correct Youtube Video Link");
+          alert("Please enter a correct Youtube Video Link")
         }
       }
     },
@@ -166,8 +146,10 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["twitter", "embed"],
     icon: <Twitter size={18} />,
     command: ({ editor, range }) => {
-      const tweetLink = prompt("Please enter Twitter Link");
-      const tweetRegex = new RegExp(/^https?:\/\/(www\.)?x\.com\/([a-zA-Z0-9_]{1,15})(\/status\/(\d+))?(\/\S*)?$/);
+      const tweetLink = prompt("Please enter Twitter Link")
+      const tweetRegex = new RegExp(
+        /^https?:\/\/(www\.)?x\.com\/([a-zA-Z0-9_]{1,15})(\/status\/(\d+))?(\/\S*)?$/
+      )
 
       // TODO: improve this
       if (tweetRegex.test(tweetLink ?? "")) {
@@ -178,10 +160,10 @@ export const suggestionItems = createSuggestionItems([
           .setTweet({
             src: tweetLink ?? "",
           })
-          .run();
+          .run()
       } else {
         if (tweetLink !== null) {
-          alert("Please enter a correct Twitter Link");
+          alert("Please enter a correct Twitter Link")
         }
       }
     },
@@ -192,26 +174,26 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["photo", "picture", "media"],
     icon: <ImageIcon size={18} />,
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).run();
+      editor.chain().focus().deleteRange(range).run()
       // upload image
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "image/*";
+      const input = document.createElement("input")
+      input.type = "file"
+      input.accept = "image/*"
       input.onchange = async () => {
         if (input.files?.length) {
-          const file = input.files[0]!;
-          const pos = editor.view.state.selection.from;
-          uploadFn(file, editor.view, pos);
+          const file = input.files[0]!
+          const pos = editor.view.state.selection.from
+          uploadFn(file, editor.view, pos)
         }
-      };
-      input.click();
+      }
+      input.click()
     },
   },
-]);
+])
 
 export const slashCommand = Command.configure({
   suggestion: {
     items: () => suggestionItems,
     render: renderItems,
   },
-});
+})

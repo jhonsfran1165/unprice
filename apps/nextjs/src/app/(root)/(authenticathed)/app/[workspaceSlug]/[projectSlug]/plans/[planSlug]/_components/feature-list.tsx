@@ -47,9 +47,9 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
 
   return (
     <Fragment>
-      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">
+      <div className="bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="relative">
-          <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
+          <Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search feature"
@@ -64,7 +64,7 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
         <div className="flex h-[730px] flex-col gap-2 px-4 pt-1">
           {isFetching && (
             <div className="flex h-full items-center justify-center">
-              <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2 border-t-2" />
+              <div className="h-8 w-8 animate-spin rounded-full border-primary border-t-2 border-b-2" />
             </div>
           )}
           {!isFetching && searchableFeatures.length === 0 ? (

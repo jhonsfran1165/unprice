@@ -16,7 +16,7 @@ export default function DomainPageLoading() {
           action={
             <DomainDialog>
               <Button>
-                <Plus className="size-4 mr-2" />
+                <Plus className="mr-2 size-4" />
                 Create Domain
               </Button>
             </DomainDialog>

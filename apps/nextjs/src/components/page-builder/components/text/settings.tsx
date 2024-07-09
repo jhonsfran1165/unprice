@@ -22,23 +22,23 @@ export const TextSettings = () => {
           max={120}
           min={5}
         />
-        <div className="flex items-center space-x-2 w-full">
+        <div className="flex w-full items-center space-x-2">
           <ToolbarItem propKey="textAlign" type="radio" label="Align">
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="left" id="left" />
-              <Label htmlFor="left" className="text-xs font-normal">
+              <Label htmlFor="left" className="font-normal text-xs">
                 Left
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="center" id="center" />
-              <Label htmlFor="center" className="text-xs font-normal">
+              <Label htmlFor="center" className="font-normal text-xs">
                 Center
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="right" id="right" />
-              <Label htmlFor="right" className="text-xs font-normal">
+              <Label htmlFor="right" className="font-normal text-xs">
                 Right
               </Label>
             </div>
@@ -46,19 +46,19 @@ export const TextSettings = () => {
           <ToolbarItem propKey="fontWeight" type="radio" label="Weight">
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="400" id="400" />
-              <Label htmlFor="400" className="text-xs font-normal">
+              <Label htmlFor="400" className="font-normal text-xs">
                 Regular
               </Label>
             </div>{" "}
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="500" id="500" />
-              <Label htmlFor="500" className="text-xs font-normal">
+              <Label htmlFor="500" className="font-normal text-xs">
                 Medium
               </Label>
             </div>{" "}
             <div className="flex items-center space-x-2">
               <RadioGroupItem size="sm" value="700" id="700" />
-              <Label htmlFor="700" className="text-xs font-normal">
+              <Label htmlFor="700" className="font-normal text-xs">
                 Bold
               </Label>
             </div>
@@ -72,8 +72,8 @@ export const TextSettings = () => {
           return `${marginLeft}px, ${marginRight}px, ${marginTop}px, ${marginBottom}px`
         }}
       >
-        <div className="flex items-center space-x-2 w-full">
-          <div className="flex flex-col w-1/2">
+        <div className="flex w-full items-center space-x-2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="marginLeft"
               size="sm"
@@ -92,7 +92,7 @@ export const TextSettings = () => {
             />
           </div>
 
-          <div className="flex flex-col w-1/2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="marginTop"
               size="sm"
@@ -119,8 +119,8 @@ export const TextSettings = () => {
           return `${paddingLeft}px, ${paddingRight}px, ${paddingTop}px, ${paddingBottom}px`
         }}
       >
-        <div className="flex items-center space-x-2 w-full">
-          <div className="flex flex-col w-1/2">
+        <div className="flex w-full items-center space-x-2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="paddingLeft"
               size="sm"
@@ -139,7 +139,7 @@ export const TextSettings = () => {
             />
           </div>
 
-          <div className="flex flex-col w-1/2">
+          <div className="flex w-1/2 flex-col">
             <ToolbarItem
               propKey="paddingTop"
               size="sm"
@@ -168,8 +168,9 @@ export const TextSettings = () => {
               <div
                 className="rounded-sm border border-background-border px-2 py-1 font-medium"
                 style={{
-                  color: color as string, backgroundColor: backgroundColor as string,
-                  textShadow: `0px 0px 2px rgba(0,0,0,${(shadow as number || 0) / 100})`,
+                  color: color as string,
+                  backgroundColor: backgroundColor as string,
+                  textShadow: `0px 0px 2px rgba(0,0,0,${((shadow as number) || 0) / 100})`,
                 }}
               >
                 A
@@ -178,16 +179,15 @@ export const TextSettings = () => {
           )
         }}
       >
-        <ToolbarItem
-          size="sm"
-          propKey="shadow"
-          type="slider"
-          label="Shadow"
-          max={100}
-          min={0}
-        />
+        <ToolbarItem size="sm" propKey="shadow" type="slider" label="Shadow" max={100} min={0} />
         <ToolbarItem propKey="color" size="sm" type="select" label="Color" options={TEXT_COLORS} />
-        <ToolbarItem propKey="backgroundColor" size="sm" type="select" label="Background" options={BACKGROUND_COLORS} />
+        <ToolbarItem
+          propKey="backgroundColor"
+          size="sm"
+          type="select"
+          label="Background"
+          options={BACKGROUND_COLORS}
+        />
       </ToolbarSection>
     </Fragment>
   )

@@ -20,7 +20,7 @@ export default async function IngestionPage(props: {
       <Fragment>
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted pointer-events-none">
+            <TableRow className="pointer-events-none bg-muted">
               <TableHead>Id</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead>Commit</TableHead>
@@ -38,8 +38,8 @@ export default async function IngestionPage(props: {
             </TableRow>
           </TableBody>
         </Table>
-        <h3 className="text-lg font-medium">Schema</h3>
-        <pre className="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
+        <h3 className="font-medium text-lg">Schema</h3>
+        <pre className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono font-semibold text-sm">
           {JSON.stringify(ingestion.schema, null, 4)}
         </pre>
       </Fragment>

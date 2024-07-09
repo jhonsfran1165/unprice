@@ -51,7 +51,7 @@ export default function Page(props: {
   const breadcrumbPage = all.pop()
 
   return (
-    <Breadcrumb className="h-[36px] flex items-center w-full">
+    <Breadcrumb className="flex h-[36px] w-full items-center">
       <BreadcrumbList>
         {all.length > 3 ? (
           <Fragment>
@@ -60,7 +60,7 @@ export default function Page(props: {
                 <DropdownMenu>
                   <DropdownMenuTrigger className={cn(focusRing)}>
                     <BreadcrumbLink asChild>
-                      <BreadcrumbEllipsis className={"text-xs text-background-solid"} />
+                      <BreadcrumbEllipsis className={"text-background-solid text-xs"} />
                     </BreadcrumbLink>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
@@ -75,7 +75,7 @@ export default function Page(props: {
                         <Fragment key={href}>
                           <DropdownMenuItem>
                             <SuperLink
-                              className="transition-colors text-xs text-background-solid"
+                              className="text-background-solid text-xs transition-colors"
                               href={href}
                             >
                               {segment}
@@ -98,11 +98,11 @@ export default function Page(props: {
 
             return (
               <Fragment key={href}>
-                {idx > 0 && <BreadcrumbSeparator className="text-xs text-background-solid" />}
+                {idx > 0 && <BreadcrumbSeparator className="text-background-solid text-xs" />}
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
                     <SuperLink
-                      className="transition-colors text-xs text-background-solid"
+                      className="text-background-solid text-xs transition-colors"
                       href={href}
                     >
                       {segment}
@@ -113,9 +113,9 @@ export default function Page(props: {
             )
           })
         )}
-        {all.length > 0 && <BreadcrumbSeparator className="text-xs text-background-solid" />}
+        {all.length > 0 && <BreadcrumbSeparator className="text-background-solid text-xs" />}
         <BreadcrumbItem>
-          <BreadcrumbPage className="text-xs text-background-text">{breadcrumbPage}</BreadcrumbPage>
+          <BreadcrumbPage className="text-background-text text-xs">{breadcrumbPage}</BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>

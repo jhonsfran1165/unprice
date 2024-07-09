@@ -17,7 +17,7 @@ export function Sidebar({
   return (
     <Fragment>
       {/* sidebar (lg+) */}
-      <nav className="hidden top-0 z-40 h-full max-h-screen gap-2 lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col xl:w-72">
+      <nav className="top-0 z-40 hidden h-full max-h-screen gap-2 lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 xl:w-72 lg:flex-col">
         <aside className="flex grow flex-col gap-y-6 overflow-y-auto border-r p-4">
           <Logo />
           <nav aria-label="core navigation links" className="flex flex-1 flex-col space-y-10">
@@ -52,7 +52,7 @@ export function Sidebar({
               ))}
             </ul>
             <div>
-              <span className="text-xs font-medium leading-6 text-background-solid">Shortcuts</span>
+              <span className="font-medium text-background-solid text-xs leading-6">Shortcuts</span>
               <ul aria-label="shortcuts" className="space-y-0.5">
                 {shortcuts.map((item) => (
                   <li key={baseUrl + item.name}>
@@ -71,7 +71,7 @@ export function Sidebar({
         </aside>
       </nav>
       {/* top navbar (xs-lg) */}
-      <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b px-2 shadow-sm sm:gap-x-6 sm:px-4 lg:hidden">
+      <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b px-2 shadow-sm lg:hidden sm:gap-x-6 sm:px-4">
         <Logo />
         <div className="flex items-center gap-1 sm:gap-2">
           <UserProfileMobile />
@@ -111,7 +111,7 @@ export function Sidebar({
                 ))}
               </ul>
               <div>
-                <span className="text-sm font-medium leading-6 text-gray-500 sm:text-xs">
+                <span className="font-medium text-gray-500 text-sm leading-6 sm:text-xs">
                   Shortcuts
                 </span>
                 <ul aria-label="shortcuts" className="space-y-0.5">

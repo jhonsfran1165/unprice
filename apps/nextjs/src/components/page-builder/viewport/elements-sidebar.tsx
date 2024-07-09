@@ -18,8 +18,8 @@ export function ElementsSidebar() {
   }
 
   return (
-    <nav className="left-0 z-40 h-full max-h-screen gap-2 inset-y-0 flex w-14 flex-col">
-      <aside className="flex grow flex-col gap-y-6 overflow-y-auto border-r p-4 justify-center">
+    <nav className="inset-y-0 left-0 z-40 flex h-full max-h-screen w-14 flex-col gap-2">
+      <aside className="flex grow flex-col justify-center gap-y-6 overflow-y-auto border-r p-4">
         <LogoIcon className={"size-6 text-primary-text"} />
         <nav aria-label="core navigation links" className="flex flex-1 flex-col space-y-6 py-6">
           <div
@@ -37,49 +37,35 @@ export function ElementsSidebar() {
               <TooltipTrigger asChild>
                 <ContainerIcon className="size-6 cursor-grab" />
               </TooltipTrigger>
-              <TooltipContent
-                align="center"
-                side="right" className="z-50 cursor-move">
+              <TooltipContent align="center" side="right" className="z-50 cursor-move">
                 <div className="max-w-[200px] text-sm">Container Element</div>
               </TooltipContent>
             </Tooltip>
           </div>
           <div
             ref={(ref) => {
-              ref &&
-                create(
-                  ref,
-                  <TextComponent text="It's me again!" />
-                )
+              ref && create(ref, <TextComponent text="It's me again!" />)
             }}
           >
             <Tooltip>
               <TooltipTrigger asChild>
                 <Text className="size-6 cursor-grab" />
               </TooltipTrigger>
-              <TooltipContent
-                align="center"
-                side="right" className="z-50 cursor-move">
+              <TooltipContent align="center" side="right" className="z-50 cursor-move">
                 <div className="max-w-[200px] text-sm">Text Element</div>
               </TooltipContent>
             </Tooltip>
           </div>
           <div
             ref={(ref) => {
-              ref &&
-                create(
-                  ref,
-                  <Novel />
-                )
+              ref && create(ref, <Novel />)
             }}
           >
             <Tooltip>
               <TooltipTrigger asChild>
                 <FilePenLine className="size-6 cursor-grab" />
               </TooltipTrigger>
-              <TooltipContent
-                align="center"
-                side="right" className="z-50 cursor-move">
+              <TooltipContent align="center" side="right" className="z-50 cursor-move">
                 <div className="max-w-[200px] text-sm">Notion like editor</div>
               </TooltipContent>
             </Tooltip>

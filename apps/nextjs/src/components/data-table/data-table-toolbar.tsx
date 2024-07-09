@@ -52,7 +52,7 @@ export function DataTableToolbar<TData>({ table, filterOptions }: DataTableToolb
             placeholder={`filter by ${filterBy}...`}
             value={(table.getColumn(filterBy)?.getFilterValue() as string) ?? ""}
             onChange={(event) => table.getColumn(filterBy)?.setFilterValue(event.target.value)}
-            className="bg-background h-8 w-[150px] lg:w-[250px]"
+            className="h-8 w-[150px] bg-background lg:w-[250px]"
           />
         )}
         {status && (

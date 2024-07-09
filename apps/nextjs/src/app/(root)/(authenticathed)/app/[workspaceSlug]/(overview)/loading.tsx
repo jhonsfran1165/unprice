@@ -17,7 +17,7 @@ export default function Loading() {
           action={
             <SuperLink href={"/onboarding"}>
               <Button>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 Create App
               </Button>
             </SuperLink>

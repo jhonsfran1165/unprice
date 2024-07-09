@@ -9,7 +9,7 @@ export default function WorkSpaceSettingsDangerLoading() {
     <DashboardShell
       header={<HeaderTab title="General Settings" description="Manage your workspace settings" />}
     >
-      <Card className="bg-muted animate-pulse">
+      <Card className="animate-pulse bg-muted">
         <CardHeader>
           <CardTitle>Subscription</CardTitle>
         </CardHeader>
@@ -20,7 +20,7 @@ export default function WorkSpaceSettingsDangerLoading() {
           <Button className="text-transparent">Manage Subscription</Button>
         </CardFooter>
       </Card>
-      <Card className="bg-muted mt-4 animate-pulse">
+      <Card className="mt-4 animate-pulse bg-muted">
         <CardHeader>
           <CardTitle>Usage</CardTitle>
         </CardHeader>

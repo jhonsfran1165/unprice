@@ -155,7 +155,7 @@ export function SubscriptionForm({
                     ? "Select the plan the customer will fall back to after the subscription ends. If no plan provided the customer will be downgraded to the default plan."
                     : "Select the plan version to create the subscription"}
                 </FormDescription>
-                <div className="text-xs font-normal leading-snug">
+                <div className="font-normal text-xs leading-snug">
                   All the items will be configured based on the plan version
                 </div>
                 <Popover open={switcherPlanOpen} onOpenChange={setSwitcherPlanOpen}>
@@ -240,7 +240,7 @@ export function SubscriptionForm({
                         </div>
 
                         <TooltipContent
-                          className="bg-background-bg w-32 text-xs font-normal"
+                          className="w-32 bg-background-bg font-normal text-xs"
                           align="center"
                           side="right"
                         >
@@ -287,7 +287,7 @@ export function SubscriptionForm({
                         </div>
 
                         <TooltipContent
-                          className="bg-background-bg w-32 text-xs font-normal"
+                          className="w-32 bg-background-bg font-normal text-xs"
                           align="center"
                           side="right"
                         >

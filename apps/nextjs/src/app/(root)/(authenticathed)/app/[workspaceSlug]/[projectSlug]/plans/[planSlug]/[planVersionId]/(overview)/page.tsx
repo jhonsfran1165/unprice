@@ -48,7 +48,7 @@ export default async function OverviewVersionPage({
             featureList={
               <Fragment>
                 <div className={cn("flex h-[70px] items-center justify-between space-x-1 px-4")}>
-                  <h1 className="truncate text-xl font-bold">All features</h1>
+                  <h1 className="truncate font-bold text-xl">All features</h1>
                   <FeatureDialog>
                     <Button variant="default" size="sm">
                       <PlusIcon className="h-3.5 w-3.5" />

@@ -45,7 +45,6 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
   const getPos = useCallback((dom: HTMLElement | null) => {
     const { top, left, bottom } = dom ? dom.getBoundingClientRect() : { top: 0, left: 0, bottom: 0 }
 
-
     return {
       top: `${top > 0 ? top : bottom}px`,
       left: `${left}px`,
@@ -74,52 +73,57 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
     <Fragment>
       {isHover || isActive
         ? ReactDOM.createPortal(
-          <div
-            ref={currentRef}
-            className="px-2 py-2 h-[30px] -mt-[29px] fixed flex items-center space-x-1 rounded-none border info"
-            style={{
-              left: getPos(dom).left,
-              top: getPos(dom).top,
-              zIndex: 30,
-            }}
-          >
-            <h6 className="flex-1 mr-4 text-sm">{name}</h6>
-            {moveable ? (
-              <Button size={"xs"} variant={"custom"} className="cursor-move" ref={(ref) => {
-                ref && drag(ref)
-              }}>
-                <Move className="size-3" />
-              </Button>
-            ) : null}
-            {id !== ROOT_NODE && (
-              <Button
-                size={"xs"}
-                variant={"custom"}
-                className="cursor-pointer"
-                onClick={() => {
-                  // there is always a parent - for the root node this option is disabled
-                  actions.selectNode(parent!)
-                }}
-              >
-                <ArrowUp className="size-4" />
-              </Button>
-            )}
-            {deletable ? (
-              <Button
-                size={"xs"}
-                variant={"custom"}
-                className="cursor-pointer"
-                onMouseDown={(e: React.MouseEvent) => {
-                  e.stopPropagation()
-                  actions.delete(id)
-                }}
-              >
-                <Trash className="size-4" />
-              </Button>
-            ) : null}
-          </div>,
-          document.querySelector(".page-container")!
-        )
+            <div
+              ref={currentRef}
+              className="-mt-[29px] info fixed flex h-[30px] items-center space-x-1 rounded-none border px-2 py-2"
+              style={{
+                left: getPos(dom).left,
+                top: getPos(dom).top,
+                zIndex: 30,
+              }}
+            >
+              <h6 className="mr-4 flex-1 text-sm">{name}</h6>
+              {moveable ? (
+                <Button
+                  size={"xs"}
+                  variant={"custom"}
+                  className="cursor-move"
+                  ref={(ref) => {
+                    ref && drag(ref)
+                  }}
+                >
+                  <Move className="size-3" />
+                </Button>
+              ) : null}
+              {id !== ROOT_NODE && (
+                <Button
+                  size={"xs"}
+                  variant={"custom"}
+                  className="cursor-pointer"
+                  onClick={() => {
+                    // there is always a parent - for the root node this option is disabled
+                    actions.selectNode(parent!)
+                  }}
+                >
+                  <ArrowUp className="size-4" />
+                </Button>
+              )}
+              {deletable ? (
+                <Button
+                  size={"xs"}
+                  variant={"custom"}
+                  className="cursor-pointer"
+                  onMouseDown={(e: React.MouseEvent) => {
+                    e.stopPropagation()
+                    actions.delete(id)
+                  }}
+                >
+                  <Trash className="size-4" />
+                </Button>
+              ) : null}
+            </div>,
+            document.querySelector(".page-container")!
+          )
         : null}
       {render}
     </Fragment>

@@ -36,12 +36,10 @@ export default function SitesLayout(props: { children: React.ReactNode }) {
           content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
         />
       </head>
-      <body className={"font-secondary min-h-screen antialiased"}>
-
+      <body className={"min-h-screen font-secondary antialiased"}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TooltipProvider delayDuration={300}>{props.children}</TooltipProvider>
         </ThemeProvider>
-
 
         <Toaster richColors closeButton position="bottom-left" />
       </body>
