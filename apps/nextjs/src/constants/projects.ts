@@ -1,5 +1,5 @@
 import { Dashboard } from "@builderai/ui/icons"
-import { BarChartIcon, Calculator, Key, Link, Settings, Users } from "lucide-react"
+import { BarChartIcon, Calculator, Key, Link, Settings, Sticker, Users } from "lucide-react"
 import type { DashboardRoute } from "~/types"
 
 export const PROJECT_NAV: DashboardRoute[] = [
@@ -16,7 +16,12 @@ export const PROJECT_NAV: DashboardRoute[] = [
     isNew: true,
   },
   {
-    name: "usage",
+    name: "Pages",
+    icon: Sticker,
+    href: "/pages",
+  },
+  {
+    name: "Usage",
     icon: BarChartIcon,
     href: "/ingestions",
     disabled: true,

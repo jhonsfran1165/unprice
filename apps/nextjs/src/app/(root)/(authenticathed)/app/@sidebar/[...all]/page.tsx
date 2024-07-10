@@ -19,6 +19,11 @@ export default function DashboardNavigationDesktopSlot(props: {
   // delete first segment because it's always "/app" for the redirection from the middleware
   all.shift()
 
+  // pages has another layout
+  if (all.length > 3 && all.includes("pages")) {
+    return null
+  }
+
   let routes = [] as DashboardRoute[]
   let shortcuts = [] as Shortcut[]
   let baseUrl = "/"

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { primaryKey, serial, text, unique, varchar } from "drizzle-orm/pg-core"
+import { primaryKey, serial, text, uniqueIndex, varchar } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { projectID, timestamps } from "../utils/sql"
@@ -23,7 +23,7 @@ export const features = pgTableProject(
       columns: [table.projectId, table.id],
       name: "features_pkey",
     }),
-    slug: unique("slug_feature").on(table.slug, table.projectId),
+    slug: uniqueIndex("slug_feature").on(table.slug, table.projectId),
   })
 )
 

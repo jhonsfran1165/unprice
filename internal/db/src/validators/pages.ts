@@ -6,16 +6,13 @@ export const pageContentSchema = z.object({
   planVersions: z.array(z.string()),
 })
 
-export const pageSelectBaseSchema = createSelectSchema(pages, {
-  content: pageContentSchema,
-})
+export const pageSelectBaseSchema = createSelectSchema(pages)
 
-export const pageInsertBaseSchema = createInsertSchema(pages, {
-  content: pageContentSchema,
-})
+export const pageInsertBaseSchema = createInsertSchema(pages)
   .omit({
     createdAt: true,
     updatedAt: true,
+    slug: true,
   })
   .partial({
     id: true,

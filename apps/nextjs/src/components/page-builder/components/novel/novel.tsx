@@ -9,7 +9,6 @@ import {
   EditorCommandItem,
   EditorCommandList,
   EditorContent,
-  type EditorInstance,
   EditorRoot,
   type JSONContent,
 } from "novel"
@@ -25,6 +24,7 @@ import { NodeSelector } from "./selectors/node-selector"
 import { TextButtons } from "./selectors/text-buttons"
 import { NovelEditorSettings } from "./settings"
 import { slashCommand, suggestionItems } from "./slash-command"
+import { NovelUpdate } from "./update-novel"
 
 const hljs = require("highlight.js")
 
@@ -101,30 +101,6 @@ export const Novel = ({
 
   const memoizedSuggestionItems = useMemo(() => suggestionItems, [])
 
-  const handleUpdate = useCallback(
-    ({
-      editor,
-    }: {
-      editor: EditorInstance
-    }) => {
-      const json = editor.getJSON()
-
-      // const html = highlightCodeblocks(editor.getHTML())
-      // const content = JSON.stringify(json)
-      // const markdown = editor.storage.markdown.getMarkdown()
-
-      // console.log("html", html)
-      // console.log("content", content)
-      // console.log("markdown", markdown)
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      setProp((props: Record<string, any>) => {
-        props.content = json
-        return props
-      }, 500)
-    },
-    [setProp]
-  )
-
   const editorProps: EditorProps = useMemo(
     () => ({
       handleDOMEvents: {
@@ -148,7 +124,6 @@ export const Novel = ({
       }}
       style={{
         border: `${border}px solid ${borderColor}`,
-        borderColor,
         backgroundColor: backgroundColor,
         padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
         margin: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
@@ -161,11 +136,27 @@ export const Novel = ({
           editable={enabled}
           extensions={extensions}
           initialContent={content}
-          onUpdate={handleUpdate}
+          onUpdate={({ editor }) => {
+            const json = editor.getJSON() as JSONContent
+
+            // const html = highlightCodeblocks(editor.getHTML())
+            // const content = JSON.stringify(json)
+            // const markdown = editor.storage.markdown.getMarkdown()
+
+            // console.log("html", html)
+            // console.log("content", content)
+            // console.log("markdown", markdown)
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            setProp((props: Record<string, any>) => {
+              props.content = json
+              return props
+            }, 500)
+          }}
           className="w-full rounded-none border-none"
           editorProps={editorProps}
           slotAfter={<ImageResizer />}
         >
+          <NovelUpdate content={content} />
           <EditorCommand className="z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
             <EditorCommandEmpty className="px-2 text-muted-foreground">
               No results

@@ -68,14 +68,13 @@ export const ContainerElement = (
         flexDirection,
         alignItems,
         border: `${border}px solid ${borderColor}`,
-        borderColor,
         backgroundColor: backgroundColor,
         color: color,
         padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
         margin: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
         boxShadow: shadow === 0 ? "none" : `0px 3px 100px ${shadow}px rgba(0, 0, 0, 0.13)`,
         borderRadius: `${radius}px`,
-        flexShrink: fillSpace === "yes" ? 1 : 0,
+        flexGrow: fillSpace === "yes" ? 1 : 0,
       }}
     >
       {children}

@@ -1,3 +1,5 @@
+"use client"
+
 import { useEditor } from "@craftjs/core"
 import React, { useMemo } from "react"
 
@@ -27,7 +29,7 @@ export const Toolbar = () => {
   if (selectedNodes.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-5 py-10 text-center">
-        <h2 className="pb-1 text-md">Click on a component to start editing.</h2>
+        <h2 className="pb-6 text-md">Click on a component to start editing.</h2>
         <p className="text-sm">
           You could also double click on the layers below to edit their names, like in Photoshop
         </p>

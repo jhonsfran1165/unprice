@@ -12,9 +12,14 @@ import {
   CommandShortcut,
 } from "@builderai/ui/command"
 import { CreditCard, Settings, User } from "@builderai/ui/icons"
+import { cn } from "@builderai/ui/utils"
 import { useParams, useRouter } from "next/navigation"
 
-export function SearchTool() {
+export function SearchTool({
+  className,
+}: {
+  className?: string
+}) {
   const [open, setOpen] = React.useState(false)
   const router = useRouter()
   const params = useParams()
@@ -40,7 +45,7 @@ export function SearchTool() {
   }, [])
 
   return (
-    <div>
+    <div className={cn(className)}>
       <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border px-1.5 font-medium font-mono text-[10px] opacity-100 sm:flex">
         <span className="text-xs">⌘</span>K
       </kbd>

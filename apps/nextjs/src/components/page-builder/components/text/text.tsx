@@ -1,3 +1,5 @@
+"use client"
+
 import { useEditor, useNode } from "@craftjs/core"
 import ContentEditable from "react-contenteditable"
 

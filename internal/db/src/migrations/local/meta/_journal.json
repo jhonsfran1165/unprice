@@ -50,6 +50,20 @@
       "when": 1720008283182,
       "tag": "0006_swift_santa_claus",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1720626967060,
+      "tag": "0007_many_shaman",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1720627158932,
+      "tag": "0008_little_rictor",
+      "breakpoints": true
     }
   ]
 }

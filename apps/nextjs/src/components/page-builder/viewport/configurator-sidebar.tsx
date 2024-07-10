@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Accordion,
   AccordionContent,
@@ -6,7 +8,6 @@ import {
 } from "@builderai/ui/accordion"
 import { ScrollArea } from "@builderai/ui/scroll-area"
 import { useEditor } from "@craftjs/core"
-import { Layers } from "@craftjs/layers"
 import { Edit, Layers as LayersIcon } from "lucide-react"
 import { Toolbar } from "../toolbar"
 
@@ -49,9 +50,7 @@ export function ConfiguratorSidebar() {
               </div>
             </AccordionTrigger>
             <AccordionContent className="flex h-full flex-col p-0">
-              <ScrollArea>
-                <Layers expandRootOnLoad />
-              </ScrollArea>
+              <ScrollArea>{/* <Layers expandRootOnLoad /> */}</ScrollArea>
             </AccordionContent>
           </AccordionItem>
         </Accordion>

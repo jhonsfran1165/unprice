@@ -2,10 +2,9 @@
 
 import { useRouter } from "next/navigation"
 import { startTransition } from "react"
-import { z } from "zod"
 
-import type { InsertPlan } from "@builderai/db/validators"
-import { planInsertBaseSchema } from "@builderai/db/validators"
+import type { InsertPage } from "@builderai/db/validators"
+import { pageInsertBaseSchema } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import {
   Form,
@@ -17,8 +16,6 @@ import {
   FormMessage,
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
-import { Switch } from "@builderai/ui/switch"
-import { Textarea } from "@builderai/ui/text-area"
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"
@@ -26,31 +23,17 @@ import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export function PlanForm({
+export function PageForm({
   setDialogOpen,
   defaultValues,
 }: {
   setDialogOpen?: (open: boolean) => void
-  defaultValues: InsertPlan
+  defaultValues: InsertPage
 }) {
   const router = useRouter()
   const editMode = !!defaultValues.id
-  const planExist = api.plans.exist.useMutation()
 
-  const formSchema = editMode
-    ? planInsertBaseSchema
-    : planInsertBaseSchema.extend({
-        slug: z
-          .string()
-          .min(3)
-          .refine(async (slug) => {
-            const { exist } = await planExist.mutateAsync({
-              slug: slug,
-            })
-
-            return !exist
-          }, "Plan slug already exists in this app."),
-      })
+  const formSchema = pageInsertBaseSchema
 
   const form = useZodForm({
     schema: formSchema,
@@ -58,18 +41,18 @@ export function PlanForm({
     reValidateMode: "onSubmit",
   })
 
-  const createPlan = api.plans.create.useMutation({
-    onSuccess: ({ plan }) => {
-      form.reset(plan)
+  const createPage = api.pages.create.useMutation({
+    onSuccess: ({ page }) => {
+      form.reset(page)
       toastAction("saved")
       setDialogOpen?.(false)
       router.refresh()
     },
   })
 
-  const updatePlan = api.plans.update.useMutation({
-    onSuccess: ({ plan }) => {
-      form.reset(plan)
+  const updatePage = api.pages.update.useMutation({
+    onSuccess: ({ page }) => {
+      form.reset(page)
       toastAction("updated")
       setDialogOpen?.(false)
 
@@ -86,7 +69,7 @@ export function PlanForm({
     },
   })
 
-  const deletePlan = api.plans.remove.useMutation({
+  const deletePage = api.pages.remove.useMutation({
     onSuccess: () => {
       toastAction("deleted")
 
@@ -105,13 +88,13 @@ export function PlanForm({
     },
   })
 
-  const onSubmitForm = async (data: InsertPlan) => {
+  const onSubmitForm = async (data: InsertPage) => {
     if (!defaultValues.id) {
-      await createPlan.mutateAsync(data)
+      await createPage.mutateAsync(data)
     }
 
     if (defaultValues.id && defaultValues.projectId) {
-      await updatePlan.mutateAsync({
+      await updatePage.mutateAsync({
         ...data,
         id: defaultValues.id,
       })
@@ -125,7 +108,7 @@ export function PlanForm({
         return
       }
 
-      void deletePlan.mutateAsync({ id: defaultValues.id })
+      void deletePage.mutateAsync({ id: defaultValues.id })
     })
   }
 
@@ -135,10 +118,10 @@ export function PlanForm({
         <div className="space-y-8">
           <FormField
             control={form.control}
-            name="slug"
+            name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Plan Slug</FormLabel>
+                <FormLabel>Page name</FormLabel>
                 <FormDescription>
                   The slug is a unique identifier for the plan and will be used for api calls.
                 </FormDescription>
@@ -152,14 +135,21 @@ export function PlanForm({
 
           <FormField
             control={form.control}
-            name="description"
+            name="subdomain"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Page name</FormLabel>
+                <FormDescription>
+                  The slug is a unique identifier for the plan and will be used for api calls.
+                </FormDescription>
                 <FormControl>
-                  <Textarea {...field} value={field.value ?? ""} />
+                  <Input
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder="free"
+                    disabled={editMode}
+                  />
                 </FormControl>
-                <FormDescription>Enter a short description of the plan.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -167,19 +157,22 @@ export function PlanForm({
 
           <FormField
             control={form.control}
-            name="defaultPlan"
+            name="customDomain"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">Default plan</FormLabel>
-                  <FormDescription>
-                    Mark this plan as the default so that new users are automatically assigned to
-                    it. Usually this is the free plan.
-                  </FormDescription>
-                </div>
+              <FormItem>
+                <FormLabel>Page name</FormLabel>
+                <FormDescription>
+                  The slug is a unique identifier for the plan and will be used for api calls.
+                </FormDescription>
                 <FormControl>
-                  <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
+                  <Input
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder="free"
+                    disabled={editMode}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -193,7 +186,7 @@ export function PlanForm({
                 onDelete()
               }}
             >
-              <Button variant={"link"} disabled={deletePlan.isPending}>
+              <Button variant={"link"} disabled={deletePage.isPending}>
                 Delete
               </Button>
             </ConfirmAction>

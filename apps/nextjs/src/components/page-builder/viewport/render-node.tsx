@@ -11,8 +11,9 @@ import ReactDOM from "react-dom"
 export const RenderNode = ({ render }: { render: React.ReactElement }) => {
   const { id } = useNode()
 
-  const { actions, query, isActive } = useEditor((_, query) => ({
+  const { enabled, actions, query, isActive } = useEditor((state, query) => ({
     isActive: query.getEvent("selected").contains(id),
+    enabled: state.options.enabled,
   }))
 
   const {
@@ -62,16 +63,16 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
   }, [getPos])
 
   useEffect(() => {
-    document.querySelector(".craftjs-renderer")!.addEventListener("scroll", scroll)
+    document.querySelector(".craftjs-renderer")?.addEventListener("scroll", scroll)
 
     return () => {
-      document.querySelector(".craftjs-renderer")!.removeEventListener("scroll", scroll)
+      document.querySelector(".craftjs-renderer")?.removeEventListener("scroll", scroll)
     }
   }, [scroll])
 
   return (
     <Fragment>
-      {isHover || isActive
+      {(isHover || isActive) && enabled
         ? ReactDOM.createPortal(
             <div
               ref={currentRef}

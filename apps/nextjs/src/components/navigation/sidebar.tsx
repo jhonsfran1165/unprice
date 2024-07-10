@@ -17,7 +17,7 @@ export function Sidebar({
   return (
     <Fragment>
       {/* sidebar (lg+) */}
-      <nav className="top-0 z-40 hidden h-full max-h-screen gap-2 lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 xl:w-72 lg:flex-col">
+      <nav className="top-0 z-40 hidden h-full min-h-screen gap-2 lg:inset-y-0 lg:z-50 lg:flex lg:w-64 xl:w-72 lg:flex-col">
         <aside className="flex grow flex-col gap-y-6 overflow-y-auto border-r p-4">
           <Logo />
           <nav aria-label="core navigation links" className="flex flex-1 flex-col space-y-10">

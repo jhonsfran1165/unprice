@@ -1,3 +1,5 @@
+"use client"
+
 import { Logo as LogoIcon } from "@builderai/ui/icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 import { Element, useEditor } from "@craftjs/core"
@@ -6,7 +8,11 @@ import { ContainerElement } from "../components/container"
 import { Novel } from "../components/novel"
 import { TextComponent } from "../components/text"
 
-export function ElementsSidebar() {
+export function ElementsSidebar({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const {
     enabled,
     connectors: { create },
@@ -21,7 +27,7 @@ export function ElementsSidebar() {
     <nav className="inset-y-0 left-0 z-40 flex h-full max-h-screen w-14 flex-col gap-2">
       <aside className="flex grow flex-col justify-center gap-y-6 overflow-y-auto border-r p-4">
         <LogoIcon className={"size-6 text-primary-text"} />
-        <nav aria-label="core navigation links" className="flex flex-1 flex-col space-y-6 py-6">
+        <nav aria-label="core navigation links" className="flex flex-1 flex-col space-y-6 pt-6">
           <div
             ref={(ref) => {
               ref &&
@@ -70,6 +76,8 @@ export function ElementsSidebar() {
               </TooltipContent>
             </Tooltip>
           </div>
+
+          {children}
         </nav>
       </aside>
     </nav>
