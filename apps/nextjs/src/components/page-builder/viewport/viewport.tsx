@@ -38,7 +38,7 @@ export const Viewport: React.FC<{ children?: React.ReactNode }> = ({ children })
 
   return (
     <div
-      className={cn("craftjs-renderer flex flex-1 flex-col overflow-y-auto p-8 transition", {
+      className={cn("craftjs-renderer flex flex-1 flex-col overflow-y-auto transition", {
         "bg-background-base": enabled,
       })}
       ref={(ref) => {
@@ -46,7 +46,7 @@ export const Viewport: React.FC<{ children?: React.ReactNode }> = ({ children })
         connectors.select(connectors.hover(ref, ""), "")
       }}
     >
-      <div className="flex flex-col items-center">{children}</div>
+      {children}
     </div>
   )
 }

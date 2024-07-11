@@ -26,7 +26,7 @@ export default async function DomainPage({
 
   // return <EditorComponent />
 
-  const json = lz.decompress(lz.decodeBase64(page.content ?? ""))
+  const data = lz.decompress(lz.decodeBase64(page.content ?? "")) as string
 
-  return <EditorPreview json={json} />
+  return <EditorPreview data={data} />
 }

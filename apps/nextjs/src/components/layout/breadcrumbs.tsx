@@ -20,6 +20,7 @@ import { SuperLink } from "~/components/super-link"
 export default function BreadcrumbsApp(props: {
   breadcrumbs: string[]
   baseUrl: string
+  className?: string
 }) {
   const { breadcrumbs, baseUrl } = props
 
@@ -27,7 +28,7 @@ export default function BreadcrumbsApp(props: {
   const breadcrumbPage = breadcrumbs.pop()
 
   return (
-    <Breadcrumb className="flex h-[36px] w-full items-center">
+    <Breadcrumb className={cn("flex h-[36px] w-full items-center", props.className)}>
       <BreadcrumbList>
         {breadcrumbs.length > 3 ? (
           <Fragment>

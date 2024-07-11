@@ -32,7 +32,7 @@ export const HeaderEditor: React.FC = () => {
   }
 
   return (
-    <div className="sticky top-0 z-40 flex h-14 flex-row items-center border-b bg-background-base px-2 shadow-sm backdrop-blur-[2px]">
+    <div className="sticky top-0 z-40 flex h-14 flex-row items-center border-b bg-background-bgSubtle px-2 shadow-sm backdrop-blur-[2px]">
       {enabled && (
         <div className="flex items-center gap-2">
           <Button

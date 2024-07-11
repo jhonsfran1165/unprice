@@ -93,6 +93,31 @@ export const pageRouter = createTRPCRouter({
         page: updatedPage,
       }
     }),
+
+  getById: protectedActiveProjectProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .output(
+      z.object({
+        page: pageSelectBaseSchema.optional(),
+      })
+    )
+    .query(async (opts) => {
+      const { id } = opts.input
+      const project = opts.ctx.project
+
+      const pageData = await opts.ctx.db.query.pages.findFirst({
+        where: (page, { eq, or }) => or(eq(page.id, id), eq(page.projectId, project.id)),
+      })
+
+      return {
+        page: pageData,
+      }
+    }),
+
   getByDomain: publicProcedure
     .input(
       z.object({

@@ -1,36 +1,10 @@
-import type React from "react"
-import { ContainerSettings } from "./settings"
-
-import { Resizer } from "./resizer"
-
 export type ContainerProps = React.CSSProperties & {
   fillSpace: string
   shadow: number
   radius: number
 }
 
-const defaultProps = {
-  flexDirection: "column",
-  alignItems: "flex-start",
-  justifyContent: "flex-start",
-  fillSpace: "no",
-  paddingLeft: 10,
-  paddingRight: 10,
-  paddingTop: 10,
-  paddingBottom: 10,
-  marginLeft: 0,
-  marginRight: 0,
-  marginTop: 0,
-  marginBottom: 0,
-  shadow: 0,
-  radius: 0,
-  gap: 10,
-  width: "100%",
-  height: "auto",
-  backgroundColor: "var(--sand-3)",
-} as ContainerProps
-
-export const ContainerElement = (
+export const ContainerElementPreview = (
   props: Partial<ContainerProps> & {
     children: React.ReactNode
   }
@@ -54,13 +28,16 @@ export const ContainerElement = (
     backgroundColor,
     border,
     borderColor,
+    height,
+    width,
     children,
   } = props
 
   return (
-    <Resizer
-      propKey={{ width: "width", height: "height" }}
+    <div
       style={{
+        height,
+        width,
         justifyContent,
         gap: gap,
         flexDirection,
@@ -75,17 +52,6 @@ export const ContainerElement = (
       }}
     >
       {children}
-    </Resizer>
+    </div>
   )
-}
-
-ContainerElement.craft = {
-  displayName: "Container",
-  props: defaultProps,
-  rules: {
-    canDrag: () => true,
-  },
-  related: {
-    toolbar: ContainerSettings,
-  },
 }

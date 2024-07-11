@@ -116,14 +116,13 @@ export const ContainerSettings = () => {
 
       <ToolbarSection
         title="Appearance"
-        props={["color", "backgroundColor", "shadow", "radius", "border", "borderColor"]}
-        summary={({ color, backgroundColor, shadow, radius, border, borderColor }) => {
+        props={["backgroundColor", "shadow", "radius", "border", "borderColor"]}
+        summary={({ backgroundColor, shadow, radius, border, borderColor }) => {
           return (
             <div className="flex items-center gap-2">
               <div
                 className="px-2 py-1 font-medium"
                 style={{
-                  color: color as string,
                   backgroundColor: backgroundColor as string,
                   textShadow: `0px 0px 2px rgba(0,0,0,${((shadow as number) || 0) / 100})`,
                   borderRadius: `${radius}px`,
@@ -147,7 +146,6 @@ export const ContainerSettings = () => {
           label="Border Color"
           options={TEXT_COLORS}
         />
-        <ToolbarItem propKey="color" size="sm" type="select" label="Color" options={TEXT_COLORS} />
         <ToolbarItem
           propKey="backgroundColor"
           size="sm"

@@ -19,8 +19,12 @@ const defineColor = (
 
 export const TEXT_COLORS = [
   {
-    name: "Default",
+    name: "Default 1",
     option: defineColor("background", "text"),
+  },
+  {
+    name: "Default 2",
+    option: defineColor("background", "textContrast"),
   },
   {
     name: "Green",

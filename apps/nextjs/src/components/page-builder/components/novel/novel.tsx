@@ -32,6 +32,8 @@ const extensions = [...defaultExtensions, slashCommand]
 
 export type NovelProps = React.CSSProperties & {
   content: JSONContent
+  html: string
+  markdown: string
   radius: number
   shadow: number
 }
@@ -45,10 +47,10 @@ const defaultProps = {
   marginRight: 0,
   marginTop: 0,
   marginBottom: 0,
-  color: "black",
   shadow: 0,
   radius: 0,
-  backgroundColor: "transparent",
+  html: "",
+  markdown: "",
   content: {
     type: "doc",
     content: [
@@ -74,7 +76,6 @@ export const Novel = ({
   shadow,
   radius,
   borderColor,
-  backgroundColor,
   border,
 }: Partial<NovelProps>) => {
   const {
@@ -91,7 +92,7 @@ export const Novel = ({
     enabled: state.options.enabled,
   }))
 
-  const _highlightCodeblocks = useCallback((content: string) => {
+  const highlightCodeblocks = useCallback((content: string) => {
     const doc = new DOMParser().parseFromString(content, "text/html")
     doc.querySelectorAll("pre code").forEach((el) => {
       hljs.highlightElement(el)
@@ -110,7 +111,7 @@ export const Novel = ({
       handleDrop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
       attributes: {
         class:
-          "prose prose-lg dark:prose-invert prose-headings:font-primary focus:outline-none max-w-full prose-background-text font-normal",
+          "prose prose-lg transition-colors dark:prose-invert prose-headings:font-primary prose-headings:text-background-textContrast focus:outline-none max-w-full prose-background-text font-normal",
       },
     }),
     []
@@ -124,7 +125,6 @@ export const Novel = ({
       }}
       style={{
         border: `${border}px solid ${borderColor}`,
-        backgroundColor: backgroundColor,
         padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
         margin: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
         boxShadow: shadow === 0 ? "none" : `0px 3px 10px ${shadow}px rgba(0, 0, 0, 0.13)`,
@@ -137,18 +137,19 @@ export const Novel = ({
           extensions={extensions}
           initialContent={content}
           onUpdate={({ editor }) => {
-            const json = editor.getJSON() as JSONContent
-
-            // const html = highlightCodeblocks(editor.getHTML())
-            // const content = JSON.stringify(json)
-            // const markdown = editor.storage.markdown.getMarkdown()
+            const content = editor.getJSON() as JSONContent
+            // html is useful for rendering the code blocks with styles
+            const html = highlightCodeblocks(editor.getHTML()) as string
+            // get the markdown content
+            const markdown = editor.storage.markdown.getMarkdown() as string
 
             // console.log("html", html)
-            // console.log("content", content)
             // console.log("markdown", markdown)
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
             setProp((props: Record<string, any>) => {
-              props.content = json
+              props.content = content
+              props.html = html
+              props.markdown = markdown
               return props
             }, 500)
           }}

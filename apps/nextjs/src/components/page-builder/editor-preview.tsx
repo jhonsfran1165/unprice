@@ -1,20 +1,16 @@
-"use client"
-
-import { Editor, Frame } from "@craftjs/core"
-import { ContainerElement } from "./components/container"
-import { Novel } from "./components/novel"
-import { TextComponent } from "./components/text"
+import { Preview } from "./viewport/preview"
 
 export function EditorPreview({
-  json,
+  data,
 }: {
-  json: string
+  data: string
 }) {
   return (
     <div className="flex h-screen w-full flex-col">
-      <Editor enabled={false} resolver={{ TextComponent, ContainerElement, Novel }}>
-        <Frame json={json} />
-      </Editor>
+      {/* <Editor enabled={false} resolver={{ TextComponent, ContainerElement, Novel }}>
+        <Frame data={data} />
+      </Editor> */}
+      <Preview data={data} />
     </div>
   )
 }

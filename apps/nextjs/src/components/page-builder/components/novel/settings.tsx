@@ -1,5 +1,5 @@
 import { Fragment } from "react"
-import { BACKGROUND_COLORS, TEXT_COLORS } from "~/lib/theme"
+import { TEXT_COLORS } from "~/lib/theme"
 import { ToolbarItem, ToolbarSection } from "../../toolbar"
 
 export const NovelEditorSettings = () => {
@@ -102,15 +102,13 @@ export const NovelEditorSettings = () => {
 
       <ToolbarSection
         title="Appearance"
-        props={["color", "backgroundColor", "shadow", "radius", "border", "borderColor"]}
-        summary={({ color, backgroundColor, shadow, radius, border, borderColor }) => {
+        props={["shadow", "radius", "border", "borderColor"]}
+        summary={({ shadow, radius, border, borderColor }) => {
           return (
             <div className="flex items-center gap-2">
               <div
                 className="px-2 py-1 font-medium"
                 style={{
-                  color: color as string,
-                  backgroundColor: backgroundColor as string,
                   textShadow: `0px 0px 2px rgba(0,0,0,${((shadow as number) || 0) / 100})`,
                   borderRadius: `${radius}px`,
                   border: `${border}px solid ${borderColor}`,
@@ -132,14 +130,6 @@ export const NovelEditorSettings = () => {
           type="select"
           label="Border Color"
           options={TEXT_COLORS}
-        />
-        <ToolbarItem propKey="color" size="sm" type="select" label="Color" options={TEXT_COLORS} />
-        <ToolbarItem
-          propKey="backgroundColor"
-          size="sm"
-          type="select"
-          label="Background"
-          options={BACKGROUND_COLORS}
         />
       </ToolbarSection>
     </Fragment>

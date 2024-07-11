@@ -57,6 +57,7 @@
     "lucide-react": "0.344.0",
     "lzutf8": "^0.6.3",
     "next": "14.3.0-canary.54",
+    "next-mdx-remote": "^5.0.0",
     "next-themes": "^0.2.1",
     "novel": "^0.4.3",
     "re-resizable": "^6.9.17",

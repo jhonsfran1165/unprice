@@ -1,9 +1,7 @@
 "use client"
 
 import { Editor, Element, Frame } from "@craftjs/core"
-import { ContainerElement } from "./components/container"
-import { Novel } from "./components/novel"
-import { TextComponent } from "./components/text"
+import { ContainerElement, Novel, TextComponent } from "./components"
 import { ConfiguratorSidebar } from "./viewport/configurator-sidebar"
 import { HeaderEditor } from "./viewport/header-editor"
 import { RenderNode } from "./viewport/render-node"
@@ -12,9 +10,11 @@ import { Viewport } from "./viewport/viewport"
 export function EditorPageComponent({
   breadcrumbs,
   sidebar,
+  data,
 }: {
   breadcrumbs?: React.ReactNode
   sidebar?: React.ReactNode
+  data?: string
 }) {
   // const handleContentChange =
 
@@ -23,7 +23,10 @@ export function EditorPageComponent({
       <Editor
         resolver={{ TextComponent, ContainerElement, Novel }}
         onRender={RenderNode}
-        onNodesChange={(_query) => {
+        onNodesChange={(query) => {
+          const json = query.serialize()
+
+          console.log(json)
           // TODO: save content on change
           // console.log("dasdasdasd")
         }}
@@ -38,20 +41,20 @@ export function EditorPageComponent({
 
           <main className="page-container flex flex-1 flex-col">
             <HeaderEditor />
-            {breadcrumbs}
             <Viewport>
-              <Frame>
-                <Element
-                  is={ContainerElement}
-                  canvas
-                  custom={{
-                    displayName: "App",
-                  }}
-                >
-                  <TextComponent text="It's me again!" />
-                  <Novel />
-                </Element>
-              </Frame>
+              {breadcrumbs}
+              <div className="flex flex-col items-center px-8 py-10">
+                <Frame data={data}>
+                  {/* // initial content if json is empty */}
+                  {data === "" && (
+                    <Element canvas is={ContainerElement} custom={{ displayName: "App" }} >
+                      <TextComponent text="It's me again!" />
+                      <Novel />
+                    </Element>
+                  )}
+                </Frame>
+              </div>
+
             </Viewport>
           </main>
           <ConfiguratorSidebar />
