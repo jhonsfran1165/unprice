@@ -1,9 +1,8 @@
 import type { SerializedNode, SerializedNodes } from "@craftjs/core"
+
 import { ContainerElementPreview } from "../components/container/container-preview"
 import { NovelPreview } from "../components/novel/novel-preview"
 import { TextComponentPreview } from "../components/text/text-preview"
-
-import { serialize } from "next-mdx-remote/serialize";
 
 export const Preview = ({
   data,
@@ -44,11 +43,8 @@ const NodePreview = async ({
       return <ContainerElementPreview {...node.props}>{Children}</ContainerElementPreview>
     case "TextComponent":
       return <TextComponentPreview {...node.props} />
-    case "Novel": {
-
-      const mdxSource = await serialize(node.props.markdown ?? "");
-      return <NovelPreview mdxSource={mdxSource} />
-    }
+    case "Novel":
+      return <NovelPreview {...node.props} html={node.props.html} />
     default:
       return null
   }

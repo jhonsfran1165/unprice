@@ -24,9 +24,9 @@ export function EditorPageComponent({
         resolver={{ TextComponent, ContainerElement, Novel }}
         onRender={RenderNode}
         onNodesChange={(query) => {
-          const json = query.serialize()
+          const _content = query.serialize()
 
-          console.log(json)
+          // console.log(json)
           // TODO: save content on change
           // console.log("dasdasdasd")
         }}
@@ -47,14 +47,13 @@ export function EditorPageComponent({
                 <Frame data={data}>
                   {/* // initial content if json is empty */}
                   {data === "" && (
-                    <Element canvas is={ContainerElement} custom={{ displayName: "App" }} >
+                    <Element canvas is={ContainerElement} custom={{ displayName: "App" }}>
                       <TextComponent text="It's me again!" />
                       <Novel />
                     </Element>
                   )}
                 </Frame>
               </div>
-
             </Viewport>
           </main>
           <ConfiguratorSidebar />

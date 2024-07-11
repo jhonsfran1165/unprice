@@ -12,7 +12,7 @@ import {
   EditorRoot,
   type JSONContent,
 } from "novel"
-import { ImageResizer, handleCommandNavigation } from "novel/extensions"
+import { ImageResizer, handleCommandNavigation, simpleExtensions } from "novel/extensions"
 import { handleImageDrop, handleImagePaste } from "novel/plugins"
 import { useCallback, useMemo, useState } from "react"
 import { defaultExtensions } from "./extensions"
@@ -26,14 +26,13 @@ import { NovelEditorSettings } from "./settings"
 import { slashCommand, suggestionItems } from "./slash-command"
 import { NovelUpdate } from "./update-novel"
 
-const hljs = require("highlight.js")
+export const extensions = [...simpleExtensions, ...defaultExtensions, slashCommand]
 
-const extensions = [...defaultExtensions, slashCommand]
+const hljs = require("highlight.js")
 
 export type NovelProps = React.CSSProperties & {
   content: JSONContent
   html: string
-  markdown: string
   radius: number
   shadow: number
 }
@@ -50,7 +49,6 @@ const defaultProps = {
   shadow: 0,
   radius: 0,
   html: "",
-  markdown: "",
   content: {
     type: "doc",
     content: [
@@ -92,14 +90,6 @@ export const Novel = ({
     enabled: state.options.enabled,
   }))
 
-  const highlightCodeblocks = useCallback((content: string) => {
-    const doc = new DOMParser().parseFromString(content, "text/html")
-    doc.querySelectorAll("pre code").forEach((el) => {
-      hljs.highlightElement(el)
-    })
-    return new XMLSerializer().serializeToString(doc)
-  }, [])
-
   const memoizedSuggestionItems = useMemo(() => suggestionItems, [])
 
   const editorProps: EditorProps = useMemo(
@@ -116,6 +106,23 @@ export const Novel = ({
     }),
     []
   )
+
+  const highlightCodeblocks = useCallback((content: string) => {
+    const doc = new DOMParser().parseFromString(content, "text/html")
+
+    // add styles for code blocks
+    doc.querySelectorAll("pre code").forEach((el) => {
+      hljs.highlightElement(el)
+    })
+
+    // add read only to checkboxes in task lists
+    doc.querySelectorAll("input[type=checkbox]").forEach((el) => {
+      el.setAttribute("readonly", "true")
+      el.setAttribute("disabled", "true")
+    })
+
+    return new XMLSerializer().serializeToString(doc)
+  }, [])
 
   return (
     <div
@@ -137,21 +144,15 @@ export const Novel = ({
           extensions={extensions}
           initialContent={content}
           onUpdate={({ editor }) => {
-            const content = editor.getJSON() as JSONContent
-            // html is useful for rendering the code blocks with styles
-            const html = highlightCodeblocks(editor.getHTML()) as string
-            // get the markdown content
-            const markdown = editor.storage.markdown.getMarkdown() as string
-
-            // console.log("html", html)
-            // console.log("markdown", markdown)
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
             setProp((props: Record<string, any>) => {
+              const content = editor.getJSON() as JSONContent
+              const html = highlightCodeblocks(editor.getHTML()) as string
+
               props.content = content
               props.html = html
-              props.markdown = markdown
               return props
-            }, 500)
+            }, 700)
           }}
           className="w-full rounded-none border-none"
           editorProps={editorProps}

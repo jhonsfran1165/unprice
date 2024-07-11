@@ -34,6 +34,7 @@
     "ingestions",
     "LEMONSQUEEZY",
     "Logdrain",
+    "Lowlight",
     "lucide",
     "nformatter",
     "openai",
@@ -61,5 +62,8 @@
     "**/bower_components": true,
     "**/**/.next": true,
     "**/tmp": true
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
   }
 }

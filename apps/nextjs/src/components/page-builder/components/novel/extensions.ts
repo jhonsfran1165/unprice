@@ -23,10 +23,11 @@ import { common, createLowlight } from "lowlight"
 const aiHighlight = AIHighlight
 //You can overwrite the placeholder with your own configuration
 const placeholder = Placeholder
+
 const tiptapLink = TiptapLink.configure({
   HTMLAttributes: {
     class: cx(
-      "text-muted-foreground underline underline-offset-[3px] hover:text-primary transition-colors cursor-pointer"
+      "underline decoration-1 underline-offset-[4px] hover:text-primary transition-colors cursor-pointer"
     ),
   },
 })
