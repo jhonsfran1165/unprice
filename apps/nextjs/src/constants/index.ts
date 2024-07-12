@@ -1,5 +1,8 @@
 import { env } from "../env.mjs"
 
+// TODO: this to constants inside config package
+
+export const PAGES_BASE_DOMAIN = env.NEXT_PUBLIC_APP_DOMAIN
 export const APP_BASE_DOMAIN = `app.${env.NEXT_PUBLIC_APP_DOMAIN}`
 
 export const APP_HOSTNAMES = new Set([

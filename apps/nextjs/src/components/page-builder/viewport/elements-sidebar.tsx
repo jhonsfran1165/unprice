@@ -1,10 +1,12 @@
 "use client"
 
+import { Button } from "@builderai/ui/button"
 import { Logo as LogoIcon } from "@builderai/ui/icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 import { Element, useEditor } from "@craftjs/core"
-import { ContainerIcon, FilePenLine, Text } from "lucide-react"
+import { ContainerIcon, FilePenLine, Layout, Text } from "lucide-react"
 import { ContainerElement } from "../components/container"
+import { HeaderComponent } from "../components/header/header"
 import { Novel } from "../components/novel"
 import { TextComponent } from "../components/text"
 
@@ -19,63 +21,96 @@ export function ElementsSidebar({
   } = useEditor((state) => ({
     enabled: state.options.enabled,
   }))
+
   if (!enabled) {
     return null
   }
 
   return (
     <nav className="inset-y-0 left-0 z-40 flex h-full max-h-screen w-14 flex-col gap-2">
-      <aside className="flex grow flex-col justify-center gap-y-6 overflow-y-auto border-r p-4">
+      <aside className="flex grow flex-col items-center justify-center gap-y-6 overflow-y-auto border-r py-4">
         <LogoIcon className={"size-6 text-primary-text"} />
-        <nav aria-label="core navigation links" className="flex flex-1 flex-col space-y-6 pt-6">
-          <div
-            ref={(ref) => {
-              ref &&
-                create(
-                  ref,
-                  <Element canvas is={ContainerElement} height={300} width={300}>
-                    {""}
-                  </Element>
-                )
-            }}
-          >
-            <Tooltip>
-              <TooltipTrigger asChild>
+        <nav
+          aria-label="core navigation links"
+          className="flex flex-1 flex-col space-y-6 pt-6 transition"
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size={"icon"}
+                variant={"ghost"}
+                className="cursor-grab"
+                ref={(ref) => {
+                  ref &&
+                    create(
+                      ref,
+                      <Element canvas is={ContainerElement} height={300} width={300}>
+                        {""}
+                      </Element>
+                    )
+                }}
+              >
                 <ContainerIcon className="size-6 cursor-grab" />
-              </TooltipTrigger>
-              <TooltipContent align="center" side="right" className="z-50 cursor-move">
-                <div className="max-w-[200px] text-sm">Container Element</div>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <div
-            ref={(ref) => {
-              ref && create(ref, <TextComponent text="It's me again!" />)
-            }}
-          >
-            <Tooltip>
-              <TooltipTrigger asChild>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" align="end" alignOffset={25} className="w-[200px]">
+              <div className="font-semibold text-sm">Container Element</div>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size={"icon"}
+                variant={"ghost"}
+                className="cursor-grab"
+                ref={(ref) => {
+                  ref && create(ref, <TextComponent text="It's me again!" />)
+                }}
+              >
                 <Text className="size-6 cursor-grab" />
-              </TooltipTrigger>
-              <TooltipContent align="center" side="right" className="z-50 cursor-move">
-                <div className="max-w-[200px] text-sm">Text Element</div>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <div
-            ref={(ref) => {
-              ref && create(ref, <Novel />)
-            }}
-          >
-            <Tooltip>
-              <TooltipTrigger asChild>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" align="end" alignOffset={25} className="w-[200px]">
+              <div className="font-semibold text-sm">Text Element</div>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size={"icon"}
+                variant={"ghost"}
+                className="cursor-grab"
+                ref={(ref) => {
+                  ref && create(ref, <Novel />)
+                }}
+              >
                 <FilePenLine className="size-6 cursor-grab" />
-              </TooltipTrigger>
-              <TooltipContent align="center" side="right" className="z-50 cursor-move">
-                <div className="max-w-[200px] text-sm">Notion like editor</div>
-              </TooltipContent>
-            </Tooltip>
-          </div>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" align="end" alignOffset={25} className="w-[200px]">
+              <div className="font-semibold text-sm">Notion like editor</div>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size={"icon"}
+                variant={"ghost"}
+                className="cursor-grab"
+                ref={(ref) => {
+                  ref && create(ref, <HeaderComponent />)
+                }}
+              >
+                <Layout className="size-6 cursor-grab" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" align="end" alignOffset={25} className="w-[200px]">
+              <div className="font-semibold text-sm">Notion like editor</div>
+            </TooltipContent>
+          </Tooltip>
 
           {children}
         </nav>

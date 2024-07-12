@@ -11,7 +11,7 @@ export const pages = pgTableProject(
     name: text("name").notNull(),
     customDomain: text("custom_domain"),
     // TODO: add unique constraint to custom domain
-    subdomain: text("subdomain"),
+    subdomain: text("subdomain").notNull(),
     slug: text("slug").notNull(),
   },
   (table) => ({

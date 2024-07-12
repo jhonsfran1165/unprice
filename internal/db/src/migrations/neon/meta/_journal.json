@@ -36,6 +36,13 @@
       "when": 1720013075840,
       "tag": "0004_tough_daredevil",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1720719521247,
+      "tag": "0005_stiff_justin_hammer",
+      "breakpoints": true
     }
   ]
 }

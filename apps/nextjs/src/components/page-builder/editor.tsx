@@ -1,7 +1,9 @@
 "use client"
 
+import type { Page } from "@builderai/db/validators"
 import { Editor, Element, Frame } from "@craftjs/core"
 import { ContainerElement, Novel, TextComponent } from "./components"
+import { HeaderComponent } from "./components/header/header"
 import { ConfiguratorSidebar } from "./viewport/configurator-sidebar"
 import { HeaderEditor } from "./viewport/header-editor"
 import { RenderNode } from "./viewport/render-node"
@@ -11,17 +13,17 @@ export function EditorPageComponent({
   breadcrumbs,
   sidebar,
   data,
+  page,
 }: {
   breadcrumbs?: React.ReactNode
   sidebar?: React.ReactNode
   data?: string
+  page: Omit<Page, "content">
 }) {
-  // const handleContentChange =
-
   return (
     <div className="flex h-screen flex-col">
       <Editor
-        resolver={{ TextComponent, ContainerElement, Novel }}
+        resolver={{ TextComponent, ContainerElement, Novel, HeaderComponent }}
         onRender={RenderNode}
         onNodesChange={(query) => {
           const _content = query.serialize()
@@ -40,7 +42,7 @@ export function EditorPageComponent({
           {sidebar}
 
           <main className="page-container flex flex-1 flex-col">
-            <HeaderEditor />
+            <HeaderEditor page={page} />
             <Viewport>
               {breadcrumbs}
               <div className="flex flex-col items-center px-8 py-10">
@@ -48,6 +50,7 @@ export function EditorPageComponent({
                   {/* // initial content if json is empty */}
                   {data === "" && (
                     <Element canvas is={ContainerElement} custom={{ displayName: "App" }}>
+                      <HeaderComponent />
                       <TextComponent text="It's me again!" />
                       <Novel />
                     </Element>

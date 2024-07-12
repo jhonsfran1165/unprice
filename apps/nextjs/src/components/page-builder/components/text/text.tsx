@@ -72,10 +72,10 @@ export const TextComponent = (props: Partial<TextProps>) => {
       }}
       tagName="div" // Use a custom HTML tag (uses a div by default)
       className={cn(
-        "w-full rounded-none border-input-none border-none ring-offset-none transition-colors file:border-0 focus:border-ring-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-none focus-visible:ring-offset-0"
+        "w-auto rounded-none border-input-none border-none ring-offset-none transition-colors file:border-0 focus:border-ring-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-none focus-visible:ring-offset-0"
       )}
       style={{
-        width: "100%",
+        width: "auto",
         padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
         margin: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
         color: color,

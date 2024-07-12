@@ -1,5 +1,6 @@
 "use client"
 
+import type { Page } from "@builderai/db/validators"
 import { Button } from "@builderai/ui/button"
 import { useEditor } from "@craftjs/core"
 import { Redo, Undo } from "lucide-react"
@@ -9,15 +10,19 @@ import type React from "react"
 import { startTransition } from "react"
 import { SearchTool } from "~/components/layout/search"
 import { SubmitButton } from "~/components/submit-button"
+import { PAGES_BASE_DOMAIN } from "~/constants"
 import { api } from "~/trpc/client"
 
-export const HeaderEditor: React.FC = () => {
+export const HeaderEditor: React.FC<{
+  page: Omit<Page, "content">
+}> = ({ page }) => {
   const { enabled, canUndo, canRedo, actions, query } = useEditor((state, query) => ({
     enabled: state.options.enabled,
     canUndo: query.history.canUndo(),
     canRedo: query.history.canRedo(),
   }))
 
+  const domain = page.customDomain ? page.customDomain : `${page.subdomain}.${PAGES_BASE_DOMAIN}`
   const updatePage = api.pages.update.useMutation({})
 
   function onUpdate() {
@@ -27,7 +32,7 @@ export const HeaderEditor: React.FC = () => {
       //   options.enabled = !enabled
       // })
       const content = lz.encodeBase64(lz.compress(json))
-      void updatePage.mutateAsync({ id: "page_3s3D1uaFwdmabGWHbcDSaJEvUu3m", content: content })
+      void updatePage.mutateAsync({ id: page.id, content: content })
     })
   }
 
@@ -64,7 +69,7 @@ export const HeaderEditor: React.FC = () => {
           onClick={onUpdate}
           label={"Save"}
         />
-        <Link href={"http://test.localhost:3000"} target="_blank">
+        <Link href={domain} target="_blank">
           <Button size="sm" variant={"default"}>
             Preview
           </Button>

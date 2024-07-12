@@ -21,11 +21,14 @@ export default async function PageEditor({
     notFound()
   }
 
+  const { content, ...rest } = page
+
   // convert to json string
-  const data = lz.decompress(lz.decodeBase64(page.content ?? ""))
+  const data = lz.decompress(lz.decodeBase64(content ?? ""))
 
   return (
     <EditorPageComponent
+      page={rest}
       data={data}
       breadcrumbs={
         <div className="px-4 md:px-6">

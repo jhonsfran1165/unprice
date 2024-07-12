@@ -13,7 +13,7 @@ const defaultProps = {
   flexDirection: "column",
   alignItems: "flex-start",
   justifyContent: "flex-start",
-  fillSpace: "no",
+  fillSpace: "yes",
   paddingLeft: 10,
   paddingRight: 10,
   paddingTop: 10,
@@ -61,9 +61,11 @@ export const ContainerElement = (
     <Resizer
       propKey={{ width: "width", height: "height" }}
       style={{
+        display: "flex",
         justifyContent,
         gap: gap,
         flexDirection,
+        flexWrap: "wrap",
         alignItems,
         border: `${border}px solid ${borderColor}`,
         backgroundColor: backgroundColor,

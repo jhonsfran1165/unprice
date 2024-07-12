@@ -18,7 +18,9 @@ import {
 import { Input } from "@builderai/ui/input"
 
 import { ConfirmAction } from "~/components/confirm-action"
+import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
+import { PAGES_BASE_DOMAIN } from "~/constants"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -33,10 +35,8 @@ export function PageForm({
   const router = useRouter()
   const editMode = !!defaultValues.id
 
-  const formSchema = pageInsertBaseSchema
-
   const form = useZodForm({
-    schema: formSchema,
+    schema: pageInsertBaseSchema,
     defaultValues: defaultValues,
     reValidateMode: "onSubmit",
   })
@@ -123,10 +123,10 @@ export function PageForm({
               <FormItem>
                 <FormLabel>Page name</FormLabel>
                 <FormDescription>
-                  The slug is a unique identifier for the plan and will be used for api calls.
+                  Name this page so you can easily identify it later.
                 </FormDescription>
                 <FormControl>
-                  <Input {...field} placeholder="free" disabled={editMode} />
+                  <Input {...field} placeholder="production price page" disabled={editMode} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -138,16 +138,16 @@ export function PageForm({
             name="subdomain"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Page name</FormLabel>
+                <FormLabel>Page subdomain</FormLabel>
                 <FormDescription>
-                  The slug is a unique identifier for the plan and will be used for api calls.
+                  You can easily host this page on a subdomain of your choice.
                 </FormDescription>
                 <FormControl>
-                  <Input
+                  <InputWithAddons
                     {...field}
+                    leading={"https://"}
+                    trailing={PAGES_BASE_DOMAIN}
                     value={field.value ?? ""}
-                    placeholder="free"
-                    disabled={editMode}
                   />
                 </FormControl>
                 <FormMessage />
@@ -160,9 +160,10 @@ export function PageForm({
             name="customDomain"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Page name</FormLabel>
+                <FormLabel>Page custom domain</FormLabel>
                 <FormDescription>
-                  The slug is a unique identifier for the plan and will be used for api calls.
+                  You can bring your own domain to host this page. You have to include the protocol.
+                  e.g (https://example.com)
                 </FormDescription>
                 <FormControl>
                   <Input

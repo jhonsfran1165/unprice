@@ -7,7 +7,7 @@ import { Slider } from "@builderai/ui/slider"
 import { Input } from "@builderai/ui/input"
 import { Label } from "@builderai/ui/label"
 import { cn } from "@builderai/ui/utils"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ToolbarDropdown } from "./ToolbarDropdown"
 
 type ToolbarItemType = "text" | "color" | "bg" | "number" | "slider" | "radio" | "select"
@@ -47,6 +47,11 @@ export function ToolbarItem<T>({
   const value = Array.isArray(propValue) && index !== undefined ? propValue[index] : propValue
 
   const [inputValue, setInputValue] = useState<T>(value)
+
+  // keep the input value in sync with the prop value
+  useEffect(() => {
+    setInputValue(value)
+  }, [value])
 
   const handleChange = (newValue: T) => {
     setProp(

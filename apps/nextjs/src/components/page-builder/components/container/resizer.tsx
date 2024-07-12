@@ -26,7 +26,6 @@ export const Resizer = ({
     connectors: { connect },
     nodeWidth,
     nodeHeight,
-    parent,
     active,
     inNodeContext,
   } = useNode((node) => ({
@@ -34,30 +33,29 @@ export const Resizer = ({
     active: node.events.selected,
     nodeWidth: node.data.props[propKey.width] as Size["width"],
     nodeHeight: node.data.props[propKey.height] as Size["height"],
-    fillSpace: node.data.props.fillSpace ?? "no",
   }))
 
-  const { isRootNode } = useEditor((state, query) => {
+  const { isRootNode } = useEditor((_state, query) => {
     return {
-      parentDirection:
-        ((parent &&
-          state.nodes[parent] &&
-          state.nodes[parent].data.props.flexDirection) as string) ?? "column",
       isRootNode: query.node(id).isRoot(),
     }
   })
 
+  // won't allow resizing if the node is root
+  const defaultWidth = isRootNode ? "100%" : nodeWidth
+  const defaultHeight = isRootNode ? "auto" : nodeHeight
+
   const resizable = useRef<Resizable | null>(null)
   const isResizing = useRef<boolean>(false)
   const editingDimensions = useRef<Size>({
-    width: nodeWidth,
-    height: nodeHeight,
+    width: defaultWidth,
+    height: defaultHeight,
   })
 
   const nodeDimensions = useRef<Size | null>(null)
   nodeDimensions.current = {
-    width: nodeWidth,
-    height: nodeHeight,
+    width: defaultWidth,
+    height: defaultHeight,
   }
 
   /**
@@ -65,8 +63,8 @@ export const Resizer = ({
    * because for some reason the <re-resizable /> library does not work well with percentages.
    */
   const [internalDimensions, setInternalDimensions] = useState({
-    width: nodeWidth,
-    height: nodeHeight,
+    width: defaultWidth,
+    height: defaultHeight,
   })
 
   const updateInternalDimensionsInPx = useCallback(() => {
@@ -114,7 +112,7 @@ export const Resizer = ({
 
   useEffect(() => {
     if (!isResizing.current) updateInternalDimensionsWithOriginal()
-  }, [nodeWidth, nodeHeight, updateInternalDimensionsWithOriginal])
+  }, [defaultWidth, defaultHeight, updateInternalDimensionsWithOriginal])
 
   useEffect(() => {
     const listener = debounce(updateInternalDimensionsWithOriginal, 1)
@@ -141,12 +139,9 @@ export const Resizer = ({
         acc[key] = active && inNodeContext
         return acc
       }, {})}
-      className={cn([
-        {
-          "m-auto": isRootNode,
-          flex: true,
-        },
-      ])}
+      className={cn("flex", {
+        "m-auto border": isRootNode,
+      })}
       ref={(ref) => {
         if (ref) {
           resizable.current = ref
@@ -173,11 +168,11 @@ export const Resizer = ({
         let calculatedWidth = width.toString()
         let calculatedHeight = height.toString()
 
-        if (isPercentage(nodeWidth))
+        if (isPercentage(defaultWidth))
           calculatedWidth = `${pxToPercent(getElementDimensions(dom?.parentElement).width, width)}%`
         else calculatedWidth = `${width}px`
 
-        if (isPercentage(nodeHeight))
+        if (isPercentage(defaultHeight))
           calculatedHeight = `${pxToPercent(
             getElementDimensions(dom?.parentElement).height,
             height
@@ -211,16 +206,16 @@ export const Resizer = ({
       {...props}
     >
       {children}
-      {active && (
+      {active && !isRootNode && (
         <div className={"pointer-events-none absolute top-0 left-0 h-full w-full"}>
           <span
             className={cn(
-              "-left-1 -top-1 pointer-events-none absolute z-40 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm"
+              "-left-1 -top-1 pointer-events-none absolute z-30 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm"
             )}
           />
-          <span className="-right-1 -top-1 pointer-events-none absolute z-40 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm" />
-          <span className="-left-1 -bottom-1 pointer-events-none absolute z-40 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm" />
-          <span className="-right-1 -bottom-1 pointer-events-none absolute z-40 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm" />
+          <span className="-right-1 -top-1 pointer-events-none absolute z-30 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm" />
+          <span className="-left-1 -bottom-1 pointer-events-none absolute z-30 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm" />
+          <span className="-right-1 -bottom-1 pointer-events-none absolute z-30 block size-2 rounded-full border-2 border-info bg-background-base shadow-sm" />
         </div>
       )}
     </Resizable>
