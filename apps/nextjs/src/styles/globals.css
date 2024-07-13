@@ -172,7 +172,7 @@ body[style*="pointer-events: none"] .overflow-x-auto {
 }
 .component-selected::after {
   content: ' ';
-  @apply border-info border border-dashed w-full h-full absolute left-0 top-0 pointer-events-none block z-30;
+  @apply border-info border border-dashed w-full h-full absolute left-0 top-0 pointer-events-none block z-40;
 }
 
 

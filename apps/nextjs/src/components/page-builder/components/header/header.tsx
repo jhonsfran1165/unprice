@@ -14,6 +14,8 @@ export const HeaderComponent: UserComponent<{
 
   const { links, showThemeToggle } = props
 
+  console.log("links", props)
+
   return (
     <header
       ref={(ref) => {
@@ -23,7 +25,7 @@ export const HeaderComponent: UserComponent<{
     >
       <div className="flex h-14 w-full items-center space-x-2 sm:justify-between sm:space-x-0">
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 px-4">
             {links?.map((link) => (
               <a
                 key={Math.random()}

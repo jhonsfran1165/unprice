@@ -25,7 +25,7 @@ export function ConfiguratorSidebar() {
         >
           <AccordionItem
             value="customize"
-            className="flex flex-col transition data-[state=open]:h-1/2"
+            className="flex flex-col transition data-[state=open]:h-full"
           >
             <AccordionTrigger className="h-14 border-b bg-background-bgSubtle px-2 shadow-sm hover:no-underline">
               <div className="flex w-full items-center justify-start px-2">
@@ -41,7 +41,7 @@ export function ConfiguratorSidebar() {
           </AccordionItem>
           <AccordionItem
             value="layers"
-            className="flex flex-col transition data-[state=open]:h-1/2"
+            className="flex flex-col transition data-[state=open]:h-full"
           >
             <AccordionTrigger className="h-14 border-b bg-background-bgSubtle px-2 shadow-sm hover:no-underline">
               <div className="flex w-full items-center justify-start px-2">
