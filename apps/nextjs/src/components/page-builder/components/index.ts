@@ -1,3 +1,5 @@
 export { ContainerElement } from "./container"
-export { Novel } from "./novel"
+export { NovelComponent } from "./novel"
 export { TextComponent } from "./text"
+export { HeaderComponent } from "./header"
+export { PricingTableComponent } from "./pricing"

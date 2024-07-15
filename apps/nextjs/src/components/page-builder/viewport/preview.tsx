@@ -3,6 +3,7 @@ import type { SerializedNode, SerializedNodes } from "@craftjs/core"
 import { ContainerElementPreview } from "../components/container/container-preview"
 import { HeaderPreview } from "../components/header/header-preview"
 import { NovelPreview } from "../components/novel/novel-preview"
+import { PricingTablePreview } from "../components/pricing/pricing-table-preview"
 import { TextComponentPreview } from "../components/text/text-preview"
 
 export const Preview = ({
@@ -44,10 +45,12 @@ const NodePreview = async ({
       return <ContainerElementPreview {...node.props}>{Children}</ContainerElementPreview>
     case "TextComponent":
       return <TextComponentPreview {...node.props} />
-    case "Novel":
+    case "NovelComponent":
       return <NovelPreview {...node.props} html={node.props.html} />
     case "HeaderComponent":
       return <HeaderPreview {...node.props} />
+    case "PricingTableComponent":
+      return <PricingTablePreview {...node.props} />
     default:
       return null
   }

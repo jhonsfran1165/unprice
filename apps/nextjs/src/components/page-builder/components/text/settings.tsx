@@ -1,10 +1,25 @@
-import { Label } from "@builderai/ui/label"
-import { RadioGroupItem } from "@builderai/ui/radio-group"
+import { Button } from "@builderai/ui/button"
+import { useNode } from "@craftjs/core"
 import { Fragment } from "react"
 import { BACKGROUND_COLORS, TEXT_COLORS, weightDescription } from "~/lib/theme"
-import { ToolbarItem, ToolbarSection } from "../../toolbar"
+import {
+  ToolbarItemDropdown,
+  ToolbarItemRadio,
+  ToolbarItemSlider,
+  ToolbarSection,
+} from "../../toolbar"
+import type { TextComponentProps } from "./types"
 
 export const TextSettings = () => {
+  const { actions, data } = useNode((node) => ({
+    data: node.data.props as TextComponentProps,
+  }))
+
+  const setProp = actions.setProp as (
+    cb: (props: TextComponentProps) => void,
+    throttleRate?: number
+  ) => void
+
   return (
     <Fragment>
       <ToolbarSection
@@ -14,57 +29,51 @@ export const TextSettings = () => {
           return `${fontSize}px, ${weightDescription(fontWeight as number)}, ${textAlign}`
         }}
       >
-        <ToolbarItem
-          size="sm"
-          propKey="fontSize"
-          type="slider"
+        <ToolbarItemSlider
           label="Font Size"
           max={120}
           min={5}
+          value={(data.fontSize as number) ?? 0}
+          onChange={(fontSize) => {
+            setProp((props) => {
+              props.fontSize = fontSize
+            }, 500)
+          }}
         />
+
         <div className="flex w-full items-center space-x-2">
-          <ToolbarItem propKey="textAlign" type="radio" label="Align">
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem size="sm" value="left" id="left" />
-              <Label htmlFor="left" className="font-normal text-xs">
-                Left
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem size="sm" value="center" id="center" />
-              <Label htmlFor="center" className="font-normal text-xs">
-                Center
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem size="sm" value="right" id="right" />
-              <Label htmlFor="right" className="font-normal text-xs">
-                Right
-              </Label>
-            </div>
-          </ToolbarItem>
-          <ToolbarItem propKey="fontWeight" type="radio" label="Weight">
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem size="sm" value="400" id="400" />
-              <Label htmlFor="400" className="font-normal text-xs">
-                Regular
-              </Label>
-            </div>{" "}
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem size="sm" value="500" id="500" />
-              <Label htmlFor="500" className="font-normal text-xs">
-                Medium
-              </Label>
-            </div>{" "}
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem size="sm" value="700" id="700" />
-              <Label htmlFor="700" className="font-normal text-xs">
-                Bold
-              </Label>
-            </div>
-          </ToolbarItem>
+          <ToolbarItemRadio
+            label="Text Align"
+            options={[
+              { value: "left", label: "Left" },
+              { value: "center", label: "Center" },
+              { value: "right", label: "Right" },
+            ]}
+            value={data.textAlign as string}
+            onChange={(value) => {
+              setProp((props) => {
+                props.textAlign = value as React.CSSProperties["textAlign"]
+              }, 500)
+            }}
+          />
+
+          <ToolbarItemRadio
+            label="Font Weight"
+            options={[
+              { value: "400", label: "Regular" },
+              { value: "500", label: "Medium" },
+              { value: "700", label: "Bold" },
+            ]}
+            value={data.fontWeight as string}
+            onChange={(value) => {
+              setProp((props) => {
+                props.fontWeight = value
+              }, 500)
+            }}
+          />
         </div>
       </ToolbarSection>
+
       <ToolbarSection
         title="Margin"
         props={["marginLeft", "marginRight", "marginTop", "marginBottom"]}
@@ -72,46 +81,59 @@ export const TextSettings = () => {
           return `${marginLeft}px, ${marginRight}px, ${marginTop}px, ${marginBottom}px`
         }}
       >
-        <div className="flex w-full items-center space-x-2">
-          <div className="flex w-1/2 flex-col">
-            <ToolbarItem
-              propKey="marginLeft"
-              size="sm"
-              type="slider"
+        <div className="flex w-full items-center space-x-4">
+          <div className="flex w-1/2 flex-col gap-4">
+            <ToolbarItemSlider
               label="Left"
               max={120}
               min={0}
+              value={(data.marginLeft as number) ?? 0}
+              onChange={(marginLeft) => {
+                setProp((props) => {
+                  props.marginLeft = marginLeft
+                }, 500)
+              }}
             />
-            <ToolbarItem
-              propKey="marginRight"
-              size="sm"
-              type="slider"
+            <ToolbarItemSlider
               label="Right"
               max={120}
               min={0}
+              value={(data.marginRight as number) ?? 0}
+              onChange={(marginRight) => {
+                setProp((props) => {
+                  props.marginRight = marginRight
+                }, 500)
+              }}
             />
           </div>
 
-          <div className="flex w-1/2 flex-col">
-            <ToolbarItem
-              propKey="marginTop"
-              size="sm"
-              type="slider"
+          <div className="flex w-1/2 flex-col gap-4">
+            <ToolbarItemSlider
               label="Top"
               max={120}
               min={0}
+              value={(data.marginTop as number) ?? 0}
+              onChange={(marginTop) => {
+                setProp((props) => {
+                  props.marginTop = marginTop
+                }, 500)
+              }}
             />
-            <ToolbarItem
-              propKey="marginBottom"
-              size="sm"
-              type="slider"
+            <ToolbarItemSlider
               label="Bottom"
               max={120}
               min={0}
+              value={(data.marginBottom as number) ?? 0}
+              onChange={(marginBottom) => {
+                setProp((props) => {
+                  props.marginBottom = marginBottom
+                }, 500)
+              }}
             />
           </div>
         </div>
       </ToolbarSection>
+
       <ToolbarSection
         title="Padding"
         props={["paddingLeft", "paddingRight", "paddingTop", "paddingBottom"]}
@@ -119,46 +141,59 @@ export const TextSettings = () => {
           return `${paddingLeft}px, ${paddingRight}px, ${paddingTop}px, ${paddingBottom}px`
         }}
       >
-        <div className="flex w-full items-center space-x-2">
-          <div className="flex w-1/2 flex-col">
-            <ToolbarItem
-              propKey="paddingLeft"
-              size="sm"
-              type="slider"
+        <div className="flex w-full items-center space-x-4">
+          <div className="flex w-1/2 flex-col gap-4">
+            <ToolbarItemSlider
               label="Left"
               max={120}
               min={0}
+              value={(data.paddingLeft as number) ?? 0}
+              onChange={(paddingLeft) => {
+                setProp((props) => {
+                  props.paddingLeft = paddingLeft
+                }, 500)
+              }}
             />
-            <ToolbarItem
-              propKey="paddingRight"
-              size="sm"
-              type="slider"
+            <ToolbarItemSlider
               label="Right"
               max={120}
               min={0}
+              value={(data.paddingRight as number) ?? 0}
+              onChange={(paddingRight) => {
+                setProp((props) => {
+                  props.paddingRight = paddingRight
+                }, 500)
+              }}
             />
           </div>
 
-          <div className="flex w-1/2 flex-col">
-            <ToolbarItem
-              propKey="paddingTop"
-              size="sm"
-              type="slider"
+          <div className="flex w-1/2 flex-col gap-4">
+            <ToolbarItemSlider
               label="Top"
               max={120}
               min={0}
+              value={(data.paddingTop as number) ?? 0}
+              onChange={(paddingTop) => {
+                setProp((props) => {
+                  props.paddingTop = paddingTop
+                }, 500)
+              }}
             />
-            <ToolbarItem
-              propKey="paddingBottom"
-              size="sm"
-              type="slider"
+            <ToolbarItemSlider
               label="Bottom"
               max={120}
               min={0}
+              value={(data.paddingBottom as number) ?? 0}
+              onChange={(paddingBottom) => {
+                setProp((props) => {
+                  props.paddingBottom = paddingBottom
+                }, 500)
+              }}
             />
           </div>
         </div>
       </ToolbarSection>
+
       <ToolbarSection
         title="Appearance"
         props={["color", "backgroundColor", "shadow"]}
@@ -179,14 +214,71 @@ export const TextSettings = () => {
           )
         }}
       >
-        <ToolbarItem size="sm" propKey="shadow" type="slider" label="Shadow" max={100} min={0} />
-        <ToolbarItem propKey="color" size="sm" type="select" label="Color" options={TEXT_COLORS} />
-        <ToolbarItem
-          propKey="backgroundColor"
-          size="sm"
-          type="select"
+        <ToolbarItemSlider
+          label="Shadow"
+          max={100}
+          min={0}
+          value={(data.shadow as number) ?? 0}
+          onChange={(shadow) => {
+            setProp((props) => {
+              props.shadow = shadow
+            }, 500)
+          }}
+        />
+        <ToolbarItemDropdown
+          label="Color"
+          options={TEXT_COLORS}
+          value={data.color as string}
+          onChange={(color) => {
+            setProp((props) => {
+              props.color = color
+            }, 500)
+          }}
+          trigger={(value, label) => (
+            <Button variant="outline" size={"sm"} className="w-full">
+              <div className="flex items-center gap-2">
+                <div className="size-3 rounded-full border" style={{ backgroundColor: value }} />
+                <span>{label}</span>
+              </div>
+            </Button>
+          )}
+          optionChildren={({ option, name }) => (
+            <div className="flex items-center gap-2">
+              <div
+                className="size-5 rounded-sm border border-background-border font-medium"
+                style={{ backgroundColor: option }}
+              />
+              <span>{name}</span>
+            </div>
+          )}
+        />
+
+        <ToolbarItemDropdown
           label="Background"
           options={BACKGROUND_COLORS}
+          value={data.backgroundColor as string}
+          onChange={(backgroundColor) => {
+            setProp((props) => {
+              props.backgroundColor = backgroundColor
+            }, 500)
+          }}
+          trigger={(value, label) => (
+            <Button variant="outline" size={"sm"} className="w-full">
+              <div className="flex items-center gap-2">
+                <div className="size-3 rounded-full border" style={{ background: value }} />
+                <span>{label}</span>
+              </div>
+            </Button>
+          )}
+          optionChildren={({ option, name }) => (
+            <div className="flex items-center gap-2">
+              <div
+                className="size-5 rounded-sm border border-background-border font-medium"
+                style={{ backgroundColor: option }}
+              />
+              <span>{name}</span>
+            </div>
+          )}
         />
       </ToolbarSection>
     </Fragment>

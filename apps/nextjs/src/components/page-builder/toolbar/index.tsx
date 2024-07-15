@@ -1,11 +1,15 @@
 "use client"
 
+export * from "./ToolbarSection"
+export * from "./ToolbarItemArray"
+export * from "./ToolbarItemRadio"
+export * from "./ToolbarItemSelector"
+export * from "./ToolbarItemText"
+export * from "./ToolbarItemDropdown"
+export * from "./ToolbarItemSlider"
+
 import { useEditor } from "@craftjs/core"
 import React, { useMemo } from "react"
-
-export * from "./ToolbarItem"
-export * from "./ToolbarSection"
-export * from "./ToolbarDropdown"
 
 export const Toolbar = () => {
   const { selectedNodes, relatedToolbars } = useEditor((state, query) => {

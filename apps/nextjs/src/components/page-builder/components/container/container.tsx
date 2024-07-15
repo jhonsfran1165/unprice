@@ -1,19 +1,14 @@
-import type React from "react"
 import { ContainerSettings } from "./settings"
 
+import type { UserComponent } from "@craftjs/core"
 import { Resizer } from "./resizer"
-
-export type ContainerProps = React.CSSProperties & {
-  fillSpace: string
-  shadow: number
-  radius: number
-}
+import type { ContainerComponentProps } from "./types"
 
 const defaultProps = {
   flexDirection: "column",
   alignItems: "flex-start",
   justifyContent: "flex-start",
-  fillSpace: "yes",
+  fillSpace: true,
   paddingLeft: 10,
   paddingRight: 10,
   paddingTop: 10,
@@ -28,13 +23,9 @@ const defaultProps = {
   width: "100%",
   height: "auto",
   backgroundColor: "var(--sand-3)",
-} as ContainerProps
+} as ContainerComponentProps
 
-export const ContainerElement = (
-  props: Partial<ContainerProps> & {
-    children: React.ReactNode
-  }
-) => {
+export const ContainerElement: UserComponent<ContainerComponentProps> = (props) => {
   const {
     flexDirection = "column",
     alignItems,
@@ -69,11 +60,17 @@ export const ContainerElement = (
         alignItems,
         border: `${border}px solid ${borderColor}`,
         backgroundColor: backgroundColor,
-        padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
-        margin: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
+        marginLeft: `${marginLeft}px`,
+        marginRight: `${marginRight}px`,
+        marginTop: `${marginTop}px`,
+        marginBottom: `${marginBottom}px`,
+        paddingLeft: `${paddingLeft}px`,
+        paddingRight: `${paddingRight}px`,
+        paddingTop: `${paddingTop}px`,
+        paddingBottom: `${paddingBottom}px`,
         boxShadow: shadow === 0 ? "none" : `0px 3px 100px ${shadow}px rgba(0, 0, 0, 0.13)`,
         borderRadius: `${radius}px`,
-        flexGrow: fillSpace === "yes" ? 1 : 0,
+        flexGrow: fillSpace ? 1 : 0,
       }}
     >
       {children}

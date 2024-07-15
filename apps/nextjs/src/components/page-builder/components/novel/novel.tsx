@@ -1,7 +1,7 @@
 "use client"
 
 import { Separator } from "@builderai/ui/separator"
-import { useEditor as useEditorCraft, useNode } from "@craftjs/core"
+import { type UserComponent, useEditor as useEditorCraft, useNode } from "@craftjs/core"
 import type { EditorProps } from "@tiptap/pm/view"
 import {
   EditorCommand,
@@ -24,18 +24,12 @@ import { NodeSelector } from "./selectors/node-selector"
 import { TextButtons } from "./selectors/text-buttons"
 import { NovelEditorSettings } from "./settings"
 import { slashCommand, suggestionItems } from "./slash-command"
+import type { NovelComponentProps } from "./types"
 import { NovelUpdate } from "./update-novel"
 
 export const extensions = [...simpleExtensions, ...defaultExtensions, slashCommand]
 
 const hljs = require("highlight.js")
-
-export type NovelProps = React.CSSProperties & {
-  content: JSONContent
-  html: string
-  radius: number
-  shadow: number
-}
 
 const defaultProps = {
   paddingLeft: 20,
@@ -48,8 +42,8 @@ const defaultProps = {
   marginBottom: 0,
   shadow: 0,
   radius: 0,
-  html: "",
-  content: {
+  editorHtml: "",
+  editorContent: {
     type: "doc",
     content: [
       {
@@ -59,23 +53,25 @@ const defaultProps = {
       },
     ],
   } as JSONContent,
-} as NovelProps
+} as NovelComponentProps
 
-export const Novel = ({
-  content,
-  paddingTop,
-  paddingRight,
-  paddingBottom,
-  paddingLeft,
-  marginTop,
-  marginRight,
-  marginBottom,
-  marginLeft,
-  shadow,
-  radius,
-  borderColor,
-  border,
-}: Partial<NovelProps>) => {
+export const NovelComponent: UserComponent<NovelComponentProps> = (props) => {
+  const {
+    editorContent,
+    paddingLeft,
+    paddingRight,
+    paddingTop,
+    paddingBottom,
+    marginLeft,
+    marginRight,
+    marginTop,
+    marginBottom,
+    shadow,
+    radius,
+    borderColor,
+    border,
+  } = props
+
   const {
     connectors: { connect },
     actions: { setProp },
@@ -142,15 +138,14 @@ export const Novel = ({
         <EditorContent
           editable={enabled}
           extensions={extensions}
-          initialContent={content}
+          initialContent={editorContent}
           onUpdate={({ editor }) => {
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-            setProp((props: Record<string, any>) => {
+            setProp((props: NovelComponentProps) => {
               const content = editor.getJSON() as JSONContent
               const html = highlightCodeblocks(editor.getHTML()) as string
 
-              props.content = content
-              props.html = html
+              props.editorContent = content
+              props.editorHtml = html
               return props
             }, 700)
           }}
@@ -158,7 +153,7 @@ export const Novel = ({
           editorProps={editorProps}
           slotAfter={<ImageResizer />}
         >
-          <NovelUpdate content={content} />
+          <NovelUpdate content={editorContent} />
           <EditorCommand className="z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
             <EditorCommandEmpty className="px-2 text-muted-foreground">
               No results
@@ -199,7 +194,7 @@ export const Novel = ({
   )
 }
 
-Novel.craft = {
+NovelComponent.craft = {
   displayName: "My page",
   props: defaultProps,
   related: {

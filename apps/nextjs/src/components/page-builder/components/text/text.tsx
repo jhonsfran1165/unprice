@@ -1,15 +1,11 @@
 "use client"
 
-import { useEditor, useNode } from "@craftjs/core"
+import { type UserComponent, useEditor, useNode } from "@craftjs/core"
 import ContentEditable from "react-contenteditable"
 
 import { cn } from "@builderai/ui/utils"
 import { TextSettings } from "./settings"
-
-export type TextProps = React.CSSProperties & {
-  shadow: number
-  text: string
-}
+import type { TextComponentProps } from "./types"
 
 const defaultProps = {
   paddingLeft: 10,
@@ -27,9 +23,9 @@ const defaultProps = {
   fontSize: 15,
   textAlign: "left",
   fontWeight: "500",
-} as TextProps
+} as TextComponentProps
 
-export const TextComponent = (props: Partial<TextProps>) => {
+export const TextComponent: UserComponent<TextComponentProps> = (props) => {
   const {
     connectors: { connect },
     actions: { setProp },
@@ -72,10 +68,9 @@ export const TextComponent = (props: Partial<TextProps>) => {
       }}
       tagName="div" // Use a custom HTML tag (uses a div by default)
       className={cn(
-        "w-auto rounded-none border-input-none border-none ring-offset-none transition-colors file:border-0 focus:border-ring-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-none focus-visible:ring-offset-0"
+        "w-full rounded-none border-input-none border-none ring-offset-none transition-colors file:border-0 focus:border-ring-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-none focus-visible:ring-offset-0"
       )}
       style={{
-        width: "auto",
         padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
         margin: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
         color: color,

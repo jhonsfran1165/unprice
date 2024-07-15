@@ -2,7 +2,7 @@
 
 import type { Page } from "@builderai/db/validators"
 import { Editor, Element, Frame } from "@craftjs/core"
-import { ContainerElement, Novel, TextComponent } from "./components"
+import { ContainerElement, NovelComponent, PricingTableComponent, TextComponent } from "./components"
 import { HeaderComponent } from "./components/header/header"
 import { ConfiguratorSidebar } from "./viewport/configurator-sidebar"
 import { HeaderEditor } from "./viewport/header-editor"
@@ -23,7 +23,7 @@ export function EditorPageComponent({
   return (
     <div className="flex h-screen flex-col">
       <Editor
-        resolver={{ TextComponent, ContainerElement, Novel, HeaderComponent }}
+        resolver={{ TextComponent, ContainerElement, NovelComponent, HeaderComponent, PricingTableComponent }}
         onRender={RenderNode}
         onNodesChange={(query) => {
           const _content = query.serialize()
@@ -52,7 +52,8 @@ export function EditorPageComponent({
                     <Element canvas is={ContainerElement} custom={{ displayName: "App" }}>
                       <HeaderComponent />
                       <TextComponent text="It's me again!" />
-                      <Novel />
+                      <PricingTableComponent plans={[]} />
+                      <NovelComponent />
                     </Element>
                   )}
                 </Frame>

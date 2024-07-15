@@ -5,10 +5,8 @@ import { Logo as LogoIcon } from "@builderai/ui/icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 import { Element, useEditor } from "@craftjs/core"
 import { ContainerIcon, FilePenLine, Layout, Text } from "lucide-react"
-import { ContainerElement } from "../components/container"
-import { HeaderComponent } from "../components/header/header"
-import { Novel } from "../components/novel"
-import { TextComponent } from "../components/text"
+
+import { ContainerElement, HeaderComponent, NovelComponent, TextComponent } from "../components"
 
 export function ElementsSidebar({
   children,
@@ -83,7 +81,7 @@ export function ElementsSidebar({
                 variant={"ghost"}
                 className="cursor-grab"
                 ref={(ref) => {
-                  ref && create(ref, <Novel />)
+                  ref && create(ref, <NovelComponent />)
                 }}
               >
                 <FilePenLine className="size-6 cursor-grab" />

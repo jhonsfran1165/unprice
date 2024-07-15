@@ -7,9 +7,6 @@ export function EditorPreview({
 }) {
   return (
     <div className="flex h-screen w-full flex-col">
-      {/* <Editor enabled={false} resolver={{ TextComponent, ContainerElement, Novel }}>
-        <Frame data={data} />
-      </Editor> */}
       <Preview data={data} />
     </div>
   )

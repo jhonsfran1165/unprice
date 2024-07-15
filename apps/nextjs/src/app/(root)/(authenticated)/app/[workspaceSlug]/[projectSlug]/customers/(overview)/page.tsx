@@ -2,7 +2,7 @@ import { searchDataParamsSchema } from "@builderai/db/validators"
 
 import { Button } from "@builderai/ui/button"
 import { Plus } from "lucide-react"
-import { columns } from "~/app/(root)/(authenticathed)/app/[workspaceSlug]/[projectSlug]/customers/_components/table/columns"
+import { columns } from "~/app/(root)/(authenticated)/app/[workspaceSlug]/[projectSlug]/customers/_components/table/columns"
 import { DataTable } from "~/components/data-table/data-table"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"

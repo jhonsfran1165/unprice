@@ -1,14 +1,6 @@
-import type { JSONContent } from "novel"
+import type { NovelComponentProps } from "./types"
 
-export type NovelProps = React.CSSProperties & {
-  content: JSONContent
-  html: string
-  markdown: string
-  radius: number
-  shadow: number
-}
-
-export const NovelPreview = (props: NovelProps) => {
+export const NovelPreview = (props: NovelComponentProps) => {
   const {
     paddingTop,
     paddingRight,
@@ -22,11 +14,11 @@ export const NovelPreview = (props: NovelProps) => {
     radius,
     borderColor,
     border,
-    html,
+    editorHtml,
   } = props
 
   // Extract the content from the body tag
-  const bodyContent = html?.match(/<body>([\s\S]*?)<\/body>/)?.[1] || ""
+  const bodyContent = editorHtml?.match(/<body>([\s\S]*?)<\/body>/)?.[1] || ""
 
   return (
     <div

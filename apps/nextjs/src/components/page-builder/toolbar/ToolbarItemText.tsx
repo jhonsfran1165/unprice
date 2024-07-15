@@ -3,14 +3,12 @@ import { Label } from "@builderai/ui/label"
 import { cn } from "@builderai/ui/utils"
 import { useEffect, useState } from "react"
 
-type ToolbarItemType = "text" | "color" | "bg" | "number" | "slider" | "radio" | "select"
 
-export interface ToolbarItemProps<T> {
+interface ToolbarItemTextProps<T> {
   label?: string
   value: T
   onChange: (value: T) => void
   className?: string
-  size?: "sm" | "md" | "lg"
 }
 
 export function ToolbarItemText<T>({
@@ -18,8 +16,7 @@ export function ToolbarItemText<T>({
   className,
   value,
   ...props
-}: ToolbarItemProps<T>) {
-
+}: ToolbarItemTextProps<T>) {
   const [inputValue, setInputValue] = useState(value)
 
   // keep the input value in sync with the prop value
@@ -28,22 +25,20 @@ export function ToolbarItemText<T>({
   }, [value])
 
   return (
-    <div className="flex flex-col gap-2">
-      <Label>{props.label}</Label>
+    <div className={cn("flex flex-col gap-2", className)}>
+      {props.label && <Label className="font-normal text-xs">{props.label}</Label>}
       <Input
+        className={"h-7 w-full px-2 font-normal text-xs"}
         value={inputValue as string}
         onChange={(e) => {
-          setInputValue(e.target.value as T)
+          const value = e.target.value as T
+          setInputValue(value)
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-            onChange((e.target as any).value)
+            onChange(inputValue)
           }
         }}
-        className={cn("w-full", {
-          "h-7 px-2 font-normal text-xs": props.size === "sm",
-        })}
       />
     </div>
   )

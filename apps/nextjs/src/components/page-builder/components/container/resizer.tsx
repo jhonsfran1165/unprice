@@ -45,6 +45,12 @@ export const Resizer = ({
   const defaultWidth = isRootNode ? "100%" : nodeWidth
   const defaultHeight = isRootNode ? "auto" : nodeHeight
 
+  // don't pass width and height to resizable if the node is root
+  if (isRootNode) {
+    delete props.style?.height
+    delete props.style?.width
+  }
+
   const resizable = useRef<Resizable | null>(null)
   const isResizing = useRef<boolean>(false)
   const editingDimensions = useRef<Size>({
@@ -140,7 +146,7 @@ export const Resizer = ({
         return acc
       }, {})}
       className={cn("flex", {
-        "m-auto border": isRootNode,
+        "m-auto min-h-screen w-full border": isRootNode,
       })}
       ref={(ref) => {
         if (ref) {
@@ -150,6 +156,7 @@ export const Resizer = ({
       }}
       size={internalDimensions}
       onResizeStart={(e) => {
+        if (isRootNode) return
         updateInternalDimensionsInPx()
         e.preventDefault()
         e.stopPropagation()
@@ -162,6 +169,7 @@ export const Resizer = ({
         isResizing.current = true
       }}
       onResize={(_, __, ___, d) => {
+        if (isRootNode) return
         const dom = resizable.current?.resizable
         const { width, height } = getUpdatedDimensions(d?.width, d?.height)
 
@@ -180,17 +188,15 @@ export const Resizer = ({
         else calculatedHeight = `${height}px`
 
         if (isPercentage(width) && dom?.parentElement?.style.width === "auto") {
-          calculatedWidth = `${
-            Number.parseInt((editingDimensions.current.width ?? 0).toString()) +
+          calculatedWidth = `${Number.parseInt((editingDimensions.current.width ?? 0).toString()) +
             Number.parseInt(d.width.toString())
-          }px`
+            }px`
         }
 
         if (isPercentage(height) && dom?.parentElement?.style.height === "auto") {
-          calculatedHeight = `${
-            Number.parseInt((editingDimensions.current.height ?? 0).toString()) +
+          calculatedHeight = `${Number.parseInt((editingDimensions.current.height ?? 0).toString()) +
             Number.parseInt(d.height.toString())
-          }px`
+            }px`
         }
 
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>

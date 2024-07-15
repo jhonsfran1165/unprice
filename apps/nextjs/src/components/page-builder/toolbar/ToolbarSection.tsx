@@ -35,7 +35,7 @@ export const ToolbarSection = <T extends Record<string, unknown>>({
   return (
     <Accordion type="multiple" className="w-full">
       <AccordionItem value="item-1">
-        <AccordionTrigger className="h-10 border-background-bgSubtle border-b bg-background-base px-2 [&>svg]:hidden hover:no-underline">
+        <AccordionTrigger className="h-10 border-background-bgSubtle border-b bg-background-base px-4 [&>svg]:hidden hover:no-underline">
           <div className="flex w-full items-center justify-between">
             <h6>{title}</h6>
             {summary && props ? (
@@ -45,7 +45,7 @@ export const ToolbarSection = <T extends Record<string, unknown>>({
             ) : null}
           </div>
         </AccordionTrigger>
-        <AccordionContent className="flex w-full flex-col gap-4 pt-2 pb-4">
+        <AccordionContent className="flex w-full flex-col gap-6 px-4 pt-4 pb-6">
           {children}
         </AccordionContent>
       </AccordionItem>

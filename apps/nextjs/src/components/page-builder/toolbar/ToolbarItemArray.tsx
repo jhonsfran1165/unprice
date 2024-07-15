@@ -2,8 +2,9 @@ import type React from "react"
 
 import { Button } from "@builderai/ui/button"
 import { Label } from "@builderai/ui/label"
+import { cn } from "@builderai/ui/utils"
 import { Trash } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 
 export interface ToolbarItemProps<T> {
@@ -15,24 +16,26 @@ export interface ToolbarItemProps<T> {
   onChange?: (value: T[]) => void
   data: T[]
   className?: string
-  size?: "sm" | "md" | "lg"
-  options?: { name: string; option: string }[]
 }
 
 export function ToolbarItemArray<T>({ data, className, ...props }: ToolbarItemProps<T>) {
 
   const [fields, setFields] = useState(data)
 
+  useEffect(() => {
+    setFields(data)
+  }, [data])
+
   if (!Array.isArray(fields)) {
     return null
   }
 
   return (
-    <div className="mb-2 flex w-full flex-col px-4">
-      <Label>{props.label}</Label>
+    <div className={cn("mb-2 flex w-full flex-col space-y-2", className)}>
+      {props.label && <Label className="font-normal text-xs">{props.label}</Label>}
 
       {fields.map((field, i) => (
-        <div key={Math.random()} className="flex items-end space-x-1">
+        <div key={Math.random()} className="flex items-end space-x-2">
 
           {props.children({
             value: field,
@@ -40,10 +43,13 @@ export function ToolbarItemArray<T>({ data, className, ...props }: ToolbarItemPr
           })}
 
           <Button
-            size="sm"
+            size={"sm"}
             variant="ghost"
             onClick={() => {
-              const newFields = fields.filter(f => f !== field)
+              if (i === 0) return // don't remove the first field
+
+              // remove the field at index i
+              const newFields = fields.filter((_, index) => index !== i)
               setFields(newFields)
               props.onChange?.(newFields)
             }}
@@ -52,6 +58,19 @@ export function ToolbarItemArray<T>({ data, className, ...props }: ToolbarItemPr
           </Button>
         </div>
       ))}
+      <Button
+        size={"sm"}
+        onClick={() => {
+          const newFields = [
+            ...fields,
+            data[data.length - 1] as T
+          ]
+          setFields(newFields)
+          props.onChange?.(newFields)
+        }}
+      >
+        Add
+      </Button>
     </div>
   )
 }

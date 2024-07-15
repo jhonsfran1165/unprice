@@ -1,83 +1,87 @@
-import { Label } from "@builderai/ui/label"
-import { RadioGroupItem } from "@builderai/ui/radio-group"
 import { useNode } from "@craftjs/core"
 import { Fragment } from "react"
-import { ToolbarItem, ToolbarSection } from "../../toolbar"
+import { ToolbarSection } from "../../toolbar"
 import { ToolbarItemArray } from "../../toolbar/ToolbarItemArray"
+import { ToolbarItemRadio } from "../../toolbar/ToolbarItemRadio"
 import { ToolbarItemText } from "../../toolbar/ToolbarItemText"
+import type { HeaderComponentProps } from "./types"
 
 export const HeaderSettings = () => {
-
-  const {
-    actions: { setProp },
-    data,
-  } = useNode((node) => ({
-    data: node.data.props as {
-      links?: { text: string; href: string }[]
-      showThemeToggle?: string
-      children?: React.ReactNode
-    }
+  const { actions, data } = useNode((node) => ({
+    data: node.data.props as HeaderComponentProps,
   }))
 
+  const setProp = actions.setProp as (
+    cb: (props: HeaderComponentProps) => void,
+    throttleRate?: number
+  ) => void
 
   return (
     <Fragment>
       <ToolbarSection title="Links" props={["showThemeToggle"]}>
-        <ToolbarItem propKey="showThemeToggle" size="sm" type="radio" label="Theme toggle?">
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem size="sm" value={"yes"} id="yes" />
-            <Label htmlFor="yes" className="font-normal text-xs">
-              Yes
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem size="sm" value="no" id="no" />
-            <Label htmlFor="no" className="font-normal text-xs">
-              No
-            </Label>
-          </div>
-        </ToolbarItem>
+        <div className="flex w-full items-center space-x-2">
+          <ToolbarItemRadio
+            label="Theme toggle?"
+            options={[
+              { value: "yes", label: "Yes" },
+              { value: "no", label: "No" },
+            ]}
+            value={data.showThemeToggle ? "yes" : "no"}
+            onChange={(value) => {
+              setProp((props) => {
+                props.showThemeToggle = value === "yes"
+              }, 500)
+            }}
+          />
 
-        <ToolbarItemArray data={data.links ?? []} size="sm" label="Links" onChange={(value) => {
-          setProp((props: {
-            links?: { text: string; href: string }[]
-            showThemeToggle?: string
-          }) => {
-            props.links = value
-          }, 500)
-        }
-        }>
-          {({ value, index }) => (
-            <Fragment>
-              <ToolbarItemText size={"sm"} value={value.href} label="href" onChange={
-                (value) => {
-                  setProp((props: {
-                    links: { text: string; href: string }[]
-                    showThemeToggle?: string
-                  }) => {
-                    if (props.links[index]) {
-                      props.links[index].href = value;
-                    }
-                  }, 500)
-                }
+          <ToolbarItemRadio
+            label="Links?"
+            options={[
+              { value: "yes", label: "Yes" },
+              { value: "no", label: "No" },
+            ]}
+            value={data.showLinks ? "yes" : "no"}
+            onChange={(value) => {
+              setProp((props) => {
+                props.showLinks = value === "yes"
+              }, 500)
+            }}
+          />
+        </div>
 
-              } />
-              <ToolbarItemText size={"sm"} value={value.text} label="text" onChange={
-                (value) => {
-                  setProp((props: {
-                    links: { text: string; href: string }[]
-                    showThemeToggle?: string
-                  }) => {
-                    if (props.links[index]) {
-                      props.links[index].text = value;
-                    }
-                  }, 500)
-                }
-
-              } />
-            </Fragment>
-          )}
-        </ToolbarItemArray>
+        {data.showLinks && (
+          <ToolbarItemArray
+            data={data.links ?? []}
+            onChange={(value) => {
+              setProp((props) => {
+                props.links = value
+              }, 500)
+            }}
+          >
+            {({ value, index }) => (
+              <Fragment>
+                <ToolbarItemText
+                  value={value.href}
+                  label={index === 0 ? "href" : undefined}
+                  onChange={(href) => {
+                    setProp((props) => {
+                      props.links![index]!.href = href
+                    }, 500)
+                  }}
+                />
+                <ToolbarItemText
+                  value={value.title}
+                  label={index === 0 ? "title" : undefined}
+                  onChange={(title) => {
+                    setProp((props) => {
+                      props.links![index]!.title = title
+                    }, 500)
+                  }}
+                />
+              </Fragment>
+            )}
+          </ToolbarItemArray>
+        )}
       </ToolbarSection>
     </Fragment>
   )
