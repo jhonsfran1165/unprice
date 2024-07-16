@@ -44,7 +44,6 @@ export {
   Eye,
   EyeOff,
   FileStack,
-  Github,
   Globe,
   HelpCircle,
   Key,

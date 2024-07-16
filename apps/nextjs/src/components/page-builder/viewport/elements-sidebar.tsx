@@ -4,9 +4,15 @@ import { Button } from "@builderai/ui/button"
 import { Logo as LogoIcon } from "@builderai/ui/icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 import { Element, useEditor } from "@craftjs/core"
-import { ContainerIcon, FilePenLine, Layout, Text } from "lucide-react"
+import { ContainerIcon, FilePenLine, Layout, Table, Text } from "lucide-react"
 
-import { ContainerElement, HeaderComponent, NovelComponent, TextComponent } from "../components"
+import {
+  ContainerElement,
+  HeaderComponent,
+  NovelComponent,
+  PricingTableComponent,
+  TextComponent,
+} from "../components"
 
 export function ElementsSidebar({
   children,
@@ -99,14 +105,32 @@ export function ElementsSidebar({
                 variant={"ghost"}
                 className="cursor-grab"
                 ref={(ref) => {
-                  ref && create(ref, <HeaderComponent />)
+                  ref && create(ref, <HeaderComponent links={[]} />)
                 }}
               >
                 <Layout className="size-6 cursor-grab" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" align="end" alignOffset={25} className="w-[200px]">
-              <div className="font-semibold text-sm">Notion like editor</div>
+              <div className="font-semibold text-sm">Header</div>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size={"icon"}
+                variant={"ghost"}
+                className="cursor-grab"
+                ref={(ref) => {
+                  ref && create(ref, <PricingTableComponent plans={[]} />)
+                }}
+              >
+                <Table className="size-6 cursor-grab" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" align="end" alignOffset={25} className="w-[200px]">
+              <div className="font-semibold text-sm">Pricing table</div>
             </TooltipContent>
           </Tooltip>
 

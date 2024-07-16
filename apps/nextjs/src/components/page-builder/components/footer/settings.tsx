@@ -4,15 +4,15 @@ import { ToolbarSection } from "../../toolbar"
 import { ToolbarItemArray } from "../../toolbar/ToolbarItemArray"
 import { ToolbarItemRadio } from "../../toolbar/ToolbarItemRadio"
 import { ToolbarItemText } from "../../toolbar/ToolbarItemText"
-import type { HeaderComponentProps } from "./types"
+import type { FooterComponentProps } from "./types"
 
-export const HeaderSettings = () => {
+export const FooterSettings = () => {
   const { actions, data } = useNode((node) => ({
-    data: node.data.props as HeaderComponentProps,
+    data: node.data.props as FooterComponentProps,
   }))
 
   const setProp = actions.setProp as (
-    cb: (props: HeaderComponentProps) => void,
+    cb: (props: FooterComponentProps) => void,
     throttleRate?: number
   ) => void
 

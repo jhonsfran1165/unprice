@@ -254,7 +254,6 @@ export const ContainerSettings = () => {
                   <span>{label}</span>
                 </div>
               </Button>
-
             )}
             optionChildren={({ option, name }) => (
               <div className="flex items-center gap-2">
@@ -399,6 +398,7 @@ export const ContainerSettings = () => {
               { value: "flex-start", label: "Flex-start" },
               { value: "center", label: "Center" },
               { value: "flex-end", label: "Flex-end" },
+              { value: "stretch", label: "Stretch" },
             ]}
             value={data.alignItems as string}
             onChange={(value) => {
@@ -414,6 +414,7 @@ export const ContainerSettings = () => {
               { value: "flex-start", label: "Flex-start" },
               { value: "center", label: "Center" },
               { value: "flex-end", label: "Flex-end" },
+              { value: "space-between", label: "Space-between" },
             ]}
             value={data.justifyContent as string}
             onChange={(value) => {

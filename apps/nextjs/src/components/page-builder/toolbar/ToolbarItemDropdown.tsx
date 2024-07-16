@@ -21,6 +21,7 @@ interface ToolbarItemDropdownProps {
   className?: string
   options: { name: string; option: string }[]
   trigger?: (value: string, label?: string) => React.ReactNode
+  isLoading?: boolean
   optionChildren?: (props: {
     option: string
     name: string
@@ -36,6 +37,7 @@ export const ToolbarItemDropdown = ({
   label,
   trigger,
   optionChildren,
+  isLoading,
 }: ToolbarItemDropdownProps) => {
   const [inputValue, setInputValue] = useState(value)
   const [switcherOpen, setSwitcherOpen] = useState(false)
@@ -71,6 +73,17 @@ export const ToolbarItemDropdown = ({
 
               <ScrollArea className="h-[200px] pr-2">
                 <CommandGroup heading={`All ${label?.toLowerCase()}...`}>
+                  {isLoading && (
+                    <CommandItem className="flex cursor-pointer items-center justify-between rounded-sm px-1 py-1 text-sm hover:bg-background-bgHover hover:text-background-textContrast">
+                      Loading options...
+                    </CommandItem>
+                  )}
+
+                  {!isLoading && options.length === 0 && (
+                    <CommandItem className="flex cursor-pointer items-center justify-between rounded-sm px-1 py-1 text-sm hover:bg-background-bgHover hover:text-background-textContrast">
+                      No options available
+                    </CommandItem>
+                  )}
                   {options.map(({ name, option }) => (
                     <CommandItem
                       key={name}
@@ -85,7 +98,6 @@ export const ToolbarItemDropdown = ({
                         optionChildren({ name, option, index: 0 })
                       ) : (
                         <div className="flex items-center gap-2">
-                          <div className="size-5 rounded-sm border border-background-border font-medium" />
                           <span>{name}</span>
                         </div>
                       )}

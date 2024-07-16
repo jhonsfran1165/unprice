@@ -4,6 +4,7 @@ import { calculateFlatPricePlan, calculatePricePerFeature } from "@builderai/db/
 import { Button } from "@builderai/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@builderai/ui/card"
 import { CheckIcon, HelpCircle } from "@builderai/ui/icons"
+import { Skeleton } from "@builderai/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 
 export function PricingCard({
@@ -40,6 +41,45 @@ export function PricingCard({
                 return (
                   <li key={feature.id} className="flex items-center">
                     <ItemPriceCard feature={feature} billingPeriod={planVersion.billingPeriod} />
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </div>
+      </CardFooter>
+    </Card>
+  )
+}
+
+export function PricingCardSkeleton() {
+  return (
+    <Card className="mx-auto max-w-[300px]">
+      <CardHeader>
+        <h3 className="font-bold text-2xl">
+          <Skeleton className="h-[36px]" />
+        </h3>
+      </CardHeader>
+
+      <CardContent>
+        <CardDescription>
+          <Skeleton className="h-[20px] w-full" />
+        </CardDescription>
+        <div className="mt-8 flex items-baseline space-x-2">
+          <span className="font-extrabold text-5xl">$0</span>
+          <span className="">month</span>
+        </div>
+        <Button className="mt-8 w-full">Get Started</Button>
+      </CardContent>
+      <CardFooter className="border-t px-6 py-6">
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h4 className="font-semibold text-lg">Features Included</h4>
+            <ul className="space-y-6 px-2">
+              {[1, 2, 3, 4, 5].map((e) => {
+                return (
+                  <li key={e} className="flex flex-col items-center">
+                    <Skeleton className="h-[20px] w-full" />
                   </li>
                 )
               })}

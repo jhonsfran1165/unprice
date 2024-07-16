@@ -1,4 +1,4 @@
-export interface HeaderComponentProps {
+export interface FooterComponentProps {
   links: { title: string; href: string }[]
   showThemeToggle?: boolean
   showLinks?: boolean

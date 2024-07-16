@@ -2,7 +2,13 @@
 
 import type { Page } from "@builderai/db/validators"
 import { Editor, Element, Frame } from "@craftjs/core"
-import { ContainerElement, NovelComponent, PricingTableComponent, TextComponent } from "./components"
+import {
+  ContainerElement,
+  FooterComponent,
+  NovelComponent,
+  PricingTableComponent,
+  TextComponent,
+} from "./components"
 import { HeaderComponent } from "./components/header/header"
 import { ConfiguratorSidebar } from "./viewport/configurator-sidebar"
 import { HeaderEditor } from "./viewport/header-editor"
@@ -23,7 +29,14 @@ export function EditorPageComponent({
   return (
     <div className="flex h-screen flex-col">
       <Editor
-        resolver={{ TextComponent, ContainerElement, NovelComponent, HeaderComponent, PricingTableComponent }}
+        resolver={{
+          TextComponent,
+          ContainerElement,
+          NovelComponent,
+          HeaderComponent,
+          PricingTableComponent,
+          FooterComponent,
+        }}
         onRender={RenderNode}
         onNodesChange={(query) => {
           const _content = query.serialize()
@@ -50,10 +63,11 @@ export function EditorPageComponent({
                   {/* // initial content if json is empty */}
                   {data === "" && (
                     <Element canvas is={ContainerElement} custom={{ displayName: "App" }}>
-                      <HeaderComponent />
+                      <HeaderComponent links={[]} />
                       <TextComponent text="It's me again!" />
                       <PricingTableComponent plans={[]} />
                       <NovelComponent />
+                      <FooterComponent links={[]} />
                     </Element>
                   )}
                 </Frame>

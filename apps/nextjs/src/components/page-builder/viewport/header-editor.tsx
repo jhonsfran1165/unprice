@@ -22,7 +22,9 @@ export const HeaderEditor: React.FC<{
     canRedo: query.history.canRedo(),
   }))
 
-  const domain = page.customDomain ? page.customDomain : `${page.subdomain}.${PAGES_BASE_DOMAIN}`
+  const domain = page.customDomain
+    ? page.customDomain
+    : `http://${page.subdomain}.${PAGES_BASE_DOMAIN}`
   const updatePage = api.pages.update.useMutation({})
 
   function onUpdate() {

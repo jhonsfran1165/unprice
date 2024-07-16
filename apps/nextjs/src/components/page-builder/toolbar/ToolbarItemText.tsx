@@ -3,7 +3,6 @@ import { Label } from "@builderai/ui/label"
 import { cn } from "@builderai/ui/utils"
 import { useEffect, useState } from "react"
 
-
 interface ToolbarItemTextProps<T> {
   label?: string
   value: T
@@ -33,6 +32,9 @@ export function ToolbarItemText<T>({
         onChange={(e) => {
           const value = e.target.value as T
           setInputValue(value)
+        }}
+        onBlur={() => {
+          onChange(inputValue)
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {

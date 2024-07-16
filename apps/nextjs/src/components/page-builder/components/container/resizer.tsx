@@ -188,15 +188,17 @@ export const Resizer = ({
         else calculatedHeight = `${height}px`
 
         if (isPercentage(width) && dom?.parentElement?.style.width === "auto") {
-          calculatedWidth = `${Number.parseInt((editingDimensions.current.width ?? 0).toString()) +
+          calculatedWidth = `${
+            Number.parseInt((editingDimensions.current.width ?? 0).toString()) +
             Number.parseInt(d.width.toString())
-            }px`
+          }px`
         }
 
         if (isPercentage(height) && dom?.parentElement?.style.height === "auto") {
-          calculatedHeight = `${Number.parseInt((editingDimensions.current.height ?? 0).toString()) +
+          calculatedHeight = `${
+            Number.parseInt((editingDimensions.current.height ?? 0).toString()) +
             Number.parseInt(d.height.toString())
-            }px`
+          }px`
         }
 
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>

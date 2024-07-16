@@ -1,3 +1,4 @@
+import { Button } from "@builderai/ui/button"
 import { useNode } from "@craftjs/core"
 import { Fragment } from "react"
 import { api } from "~/trpc/client"
@@ -14,10 +15,7 @@ export const PricingTableSettings = () => {
     throttleRate?: number
   ) => void
 
-  const {
-    data: planVersions,
-    isLoading,
-  } = api.planVersions.listByActiveProject.useQuery({
+  const { data: planVersions, isLoading } = api.planVersions.listByActiveProject.useQuery({
     published: true,
   })
 
@@ -32,10 +30,28 @@ export const PricingTableSettings = () => {
 
   return (
     <Fragment>
-
       <ToolbarSection title="Plans" props={["plans"]}>
-        {data.plans && !isLoading && (
+        {!data.plans ||
+          (data.plans.length === 0 && (
+            <ToolbarItemDropdown
+              label="Plan"
+              isLoading={isLoading}
+              options={options ?? []}
+              value={""}
+              onChange={(planId) => {
+                setProp((props) => {
+                  const plan = findPlan(planId)
+                  if (plan) {
+                    props.plans[0] = plan
+                  }
+                }, 500)
+              }}
+            />
+          ))}
+
+        {data.plans && data.plans.length > 0 && (
           <ToolbarItemArray
+            maxItems={3}
             data={data.plans}
             onChange={(plans) => {
               setProp((props) => {
@@ -46,7 +62,8 @@ export const PricingTableSettings = () => {
             {({ value, index }) => (
               <Fragment>
                 <ToolbarItemDropdown
-                  label={`${value.title} - ${value.version}`}
+                  label="Plan"
+                  isLoading={isLoading}
                   options={options ?? []}
                   value={value.id}
                   onChange={(planId) => {
@@ -57,12 +74,18 @@ export const PricingTableSettings = () => {
                       }
                     }, 500)
                   }}
+                  trigger={() => (
+                    <Button variant="outline" size={"sm"} className="w-full">
+                      <div className="flex items-center gap-2">
+                        <span>{`${value.title} - ${value.version}`}</span>
+                      </div>
+                    </Button>
+                  )}
                 />
               </Fragment>
             )}
           </ToolbarItemArray>
         )}
-
       </ToolbarSection>
     </Fragment>
   )
