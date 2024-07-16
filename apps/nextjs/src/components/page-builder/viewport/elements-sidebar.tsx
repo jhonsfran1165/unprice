@@ -4,10 +4,11 @@ import { Button } from "@builderai/ui/button"
 import { Logo as LogoIcon } from "@builderai/ui/icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 import { Element, useEditor } from "@craftjs/core"
-import { ContainerIcon, FilePenLine, Layout, Table, Text } from "lucide-react"
+import { ContainerIcon, FilePenLine, FootprintsIcon, Layout, Table, Text } from "lucide-react"
 
 import {
   ContainerElement,
+  FooterComponent,
   HeaderComponent,
   NovelComponent,
   PricingTableComponent,
@@ -57,7 +58,7 @@ export function ElementsSidebar({
                 <ContainerIcon className="size-6 cursor-grab" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right" align="end" alignOffset={25} className="w-[200px]">
+            <TooltipContent side="right" align="end" alignOffset={25} className="w-max-[200px]">
               <div className="font-semibold text-sm">Container Element</div>
             </TooltipContent>
           </Tooltip>
@@ -75,7 +76,7 @@ export function ElementsSidebar({
                 <Text className="size-6 cursor-grab" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right" align="end" alignOffset={25} className="w-[200px]">
+            <TooltipContent side="right" align="end" alignOffset={25} className="w-max-[200px]">
               <div className="font-semibold text-sm">Text Element</div>
             </TooltipContent>
           </Tooltip>
@@ -93,7 +94,7 @@ export function ElementsSidebar({
                 <FilePenLine className="size-6 cursor-grab" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right" align="end" alignOffset={25} className="w-[200px]">
+            <TooltipContent side="right" align="end" alignOffset={25} className="w-max-[200px]">
               <div className="font-semibold text-sm">Notion like editor</div>
             </TooltipContent>
           </Tooltip>
@@ -111,7 +112,7 @@ export function ElementsSidebar({
                 <Layout className="size-6 cursor-grab" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right" align="end" alignOffset={25} className="w-[200px]">
+            <TooltipContent side="right" align="end" alignOffset={25} className="w-max-[200px]">
               <div className="font-semibold text-sm">Header</div>
             </TooltipContent>
           </Tooltip>
@@ -129,11 +130,28 @@ export function ElementsSidebar({
                 <Table className="size-6 cursor-grab" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right" align="end" alignOffset={25} className="w-[200px]">
+            <TooltipContent side="right" align="end" alignOffset={25} className="w-max-[200px]">
               <div className="font-semibold text-sm">Pricing table</div>
             </TooltipContent>
           </Tooltip>
 
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size={"icon"}
+                variant={"ghost"}
+                className="cursor-grab"
+                ref={(ref) => {
+                  ref && create(ref, <FooterComponent links={[]} />)
+                }}
+              >
+                <FootprintsIcon className="size-6 cursor-grab" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" align="end" alignOffset={25} className="w-max-[200px]">
+              <div className="font-semibold text-sm">Footer</div>
+            </TooltipContent>
+          </Tooltip>
           {children}
         </nav>
       </aside>
