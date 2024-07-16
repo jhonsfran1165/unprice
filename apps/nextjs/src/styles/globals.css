@@ -46,7 +46,11 @@
     @apply font-primary text-lg font-bold;
   }
 
-  h5, h6 {
+  h5 {
+    @apply font-primary font-semibold text-base leading-none tracking-tight;
+  }
+
+  h6 {
     @apply font-primary font-semibold leading-none tracking-tight;
   }
 

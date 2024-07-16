@@ -31,7 +31,7 @@ export const pageRouter = createTRPCRouter({
           name,
           projectId: project.id,
           subdomain,
-          customDomain,
+          customDomain: customDomain || null,
         })
         .returning()
         .then((pageData) => {

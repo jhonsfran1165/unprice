@@ -10,6 +10,7 @@ import { ScrollArea } from "@builderai/ui/scroll-area"
 import { useEditor } from "@craftjs/core"
 import { Layers } from "@craftjs/layers"
 import { Edit, Layers as LayersIcon } from "lucide-react"
+import { LayersEditor } from "../layers"
 import { Toolbar } from "../toolbar"
 
 export function ConfiguratorSidebar() {
@@ -52,7 +53,7 @@ export function ConfiguratorSidebar() {
             </AccordionTrigger>
             <AccordionContent className="flex h-full flex-col p-0">
               <ScrollArea>
-                <Layers expandRootOnLoad />
+                <Layers expandRootOnLoad renderLayer={LayersEditor} />
               </ScrollArea>
             </AccordionContent>
           </AccordionItem>

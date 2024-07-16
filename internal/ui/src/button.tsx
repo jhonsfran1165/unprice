@@ -15,6 +15,7 @@ const buttonVariants = cva(
       variant: {
         default: "button-default",
         primary: "button-primary",
+        info: "button-info",
         destructive: "button-danger",
         outline: "border bg-background-bgSubtle text-background-text; border-input",
         secondary: "button-secondary",

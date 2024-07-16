@@ -1,9 +1,8 @@
 import type { NextAuthRequest } from "@builderai/auth"
 import type { NextRequest } from "next/server"
-import { RESTRICTED_SUBDOMAINS } from "./../constants/index"
+import { PAGES_BASE_DOMAIN, RESTRICTED_SUBDOMAINS } from "./../constants/index"
 
 import { APP_BASE_DOMAIN } from "~/constants"
-import { env } from "~/env.mjs"
 
 // validate the subdomain from the host and return it
 // if the host is a custom domain, return the full domain
@@ -21,14 +20,7 @@ export const getValidSubdomain = (host?: string | null) => {
   }
 
   // In case the host is a custom domain
-  if (
-    host &&
-    !(
-      host?.includes(env.NEXTJS_URL) ||
-      host?.endsWith(".vercel.app") ||
-      host?.includes("localhost")
-    )
-  ) {
+  if (host && !host?.includes(PAGES_BASE_DOMAIN)) {
     subdomain = host
   }
 

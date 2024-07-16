@@ -64,6 +64,34 @@
       "when": 1720627158932,
       "tag": "0008_little_rictor",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1721134171803,
+      "tag": "0009_vengeful_black_bolt",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1721141096956,
+      "tag": "0010_overrated_wonder_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1721141130740,
+      "tag": "0011_true_longshot",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1721141175337,
+      "tag": "0012_bouncy_starfox",
+      "breakpoints": true
     }
   ]
 }
