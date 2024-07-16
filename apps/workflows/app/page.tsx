@@ -1,3 +1,3 @@
 export default function Home() {
-  return <p>Workflows</p>
+  return <div>Workflows</div>
 }

@@ -114,7 +114,7 @@ const ScrollButton = ({ icon, onClick, disabled }: ScrollButtonProps) => {
         "group inline-flex size-5 items-center truncate rounded transition",
         disabled
           ? "cursor-not-allowed text-muted"
-          : "cursor-pointer text-background-text  hover:bg-background-bgHover bg-background-bg"
+          : "cursor-pointer bg-background-bg text-background-text hover:bg-background-bgHover"
       )}
       disabled={disabled}
       onClick={(e) => {
@@ -252,7 +252,7 @@ const Legend = React.forwardRef<HTMLOListElement, LegendProps>((props, ref) => {
           "flex h-full",
           enableLegendSlider
             ? hasScroll?.right || hasScroll?.left
-              ? "snap-mandatory items-center overflow-auto pl-4 pr-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              ? "snap-mandatory items-center overflow-auto pr-12 pl-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               : ""
             : "flex-wrap"
         )}
@@ -273,7 +273,7 @@ const Legend = React.forwardRef<HTMLOListElement, LegendProps>((props, ref) => {
           <div
             className={cn(
               // base
-              "absolute bottom-0 right-0 top-0 flex h-full items-center justify-center pr-1",
+              "absolute top-0 right-0 bottom-0 flex h-full items-center justify-center pr-1",
               // background color
               "bg-background-bg"
             )}
@@ -422,7 +422,7 @@ const ChartTooltip = ({
         <div
           className={cn(
             // base
-            "border-b border-inherit px-4 py-2"
+            "border-inherit border-b px-4 py-2"
           )}
         >
           <p
@@ -607,7 +607,7 @@ const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>((props, ref) 
         >
           {showGridLines ? (
             <CartesianGrid
-              className={cn("stroke-1 stroke-background-border fill-background-border")}
+              className={cn("fill-background-border stroke-1 stroke-background-border")}
               horizontal={true}
               vertical={true}
               strokeDasharray="3 3"
@@ -663,7 +663,7 @@ const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>((props, ref) 
                 style={{ textAnchor: "middle" }}
                 angle={-90}
                 offset={-15}
-                className="text-sm font-medium fill-background-text"
+                className="fill-background-text font-medium text-sm"
               >
                 {yAxisLabel}
               </Label>

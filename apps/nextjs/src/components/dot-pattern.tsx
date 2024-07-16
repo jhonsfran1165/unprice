@@ -27,12 +27,12 @@ export function DotPattern({
   const id = useId()
 
   return (
-    <div className="fixed left-0 top-0 -z-50">
-      <div className="sticky left-0 top-0 h-screen w-screen overflow-hidden">
+    <div className="-z-50 fixed top-0 left-0">
+      <div className="sticky top-0 left-0 h-screen w-screen overflow-hidden">
         <svg
           aria-hidden="true"
           className={cn(
-            "fill-background-line pointer-events-none absolute inset-0 h-full w-screen",
+            "pointer-events-none absolute inset-0 h-full w-screen fill-background-line",
             className
           )}
           {...props}

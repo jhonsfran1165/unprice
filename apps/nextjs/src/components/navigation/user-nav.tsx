@@ -25,7 +25,7 @@ export const UserProfileDesktop = async () => {
           </Avatar>
           <span className="line-clamp-1">{user.name}</span>
         </span>
-        <MoreVertical className="size-5 ml-2" aria-hidden="true" />
+        <MoreVertical className="ml-2 size-5" aria-hidden="true" />
       </Button>
     </UserProfile>
   )

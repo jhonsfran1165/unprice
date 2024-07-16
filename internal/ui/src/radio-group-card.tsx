@@ -37,7 +37,7 @@ const RadioCardItem = React.forwardRef<
         "data-[state=checked]:dark:border-blue-500",
         // disabled
         "data-[disabled]:border-gray-100 data-[disabled]:dark:border-gray-800",
-        "data-[disabled]:bg-gray-50 data-[disabled]:shadow-none data-[disabled]:dark:bg-gray-900",
+        "data-[disabled]:bg-gray-50 data-[disabled]:dark:bg-gray-900 data-[disabled]:shadow-none",
         focusInput,
         className
       )}

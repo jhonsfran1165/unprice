@@ -101,7 +101,7 @@ export const planRouter = createTRPCRouter({
       if (!deletedPlan) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Error deleting feature",
+          message: "Error deleting plan",
         })
       }
 

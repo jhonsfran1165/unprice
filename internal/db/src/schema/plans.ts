@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { boolean, json, primaryKey, text, unique } from "drizzle-orm/pg-core"
+import { boolean, json, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
 import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
@@ -33,7 +33,7 @@ export const plans = pgTableProject(
       columns: [table.id, table.projectId],
       name: "plans_pkey",
     }),
-    slug: unique("slug_plan").on(table.slug, table.projectId),
+    slug: uniqueIndex("slug_plan").on(table.slug, table.projectId),
   })
 )
 

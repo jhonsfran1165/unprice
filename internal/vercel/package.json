@@ -1,0 +1,31 @@
+{
+  "name": "@builderai/vercel",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": ["src/*"]
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "Sebastian Franco",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "@builderai/tsconfig": "workspace:^",
+    "@types/node": "20.11.24",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@builderai/error": "^0.1.0",
+    "zod": "^3.23.8"
+  }
+}

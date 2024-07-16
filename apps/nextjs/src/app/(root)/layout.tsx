@@ -1,4 +1,5 @@
 import "~/styles/globals.css"
+import "~/styles/prosemirror.css"
 
 import type { Metadata } from "next"
 
@@ -41,7 +42,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       </head>
       <body
         className={cn(
-          "font-secondary min-h-screen antialiased",
+          "min-h-screen font-secondary antialiased",
           fontMapper["font-primary"],
           fontMapper["font-secondary"]
         )}

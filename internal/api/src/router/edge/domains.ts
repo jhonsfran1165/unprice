@@ -7,20 +7,14 @@ import { newId } from "@builderai/db/utils"
 import type { DomainVerificationStatusProps } from "@builderai/db/validators"
 import {
   domainCreateBaseSchema,
-  domainResponseSchema,
   domainSelectBaseSchema,
   domainUpdateBaseSchema,
   domainVerificationStatusSchema,
 } from "@builderai/db/validators"
+import { type Domain, Vercel } from "@builderai/vercel"
 
+import { env } from "../../env.mjs"
 import { createTRPCRouter, protectedActiveWorkspaceAdminProcedure } from "../../trpc"
-import {
-  addDomainToVercel,
-  getConfigResponseVercel,
-  getDomainResponseVercel,
-  removeDomainFromVercelProject,
-  verifyDomainVercel,
-} from "../../utils/vercel-api"
 
 export const domainRouter = createTRPCRouter({
   // INFO: defined as a mutation so we can call it asynchronously
@@ -59,19 +53,26 @@ export const domainRouter = createTRPCRouter({
       }
 
       // verify the domain is not already added in vercel
-      const data = await addDomainToVercel(domain)
+      const vercel = new Vercel({
+        accessToken: env.VERCEL_AUTH_BEARER_TOKEN,
+        teamId: env.TEAM_ID_VERCEL,
+      })
 
-      if (data.error) {
+      const response = await vercel.addProjectDomain(env.PROJECT_ID_VERCEL, domain)
+
+      if (response.err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: data.error.message,
+          message: response.err.message,
         })
       }
 
-      if (!data.apexName || !data.name) {
+      const domainVercel = response.val
+
+      if (!domainVercel.apexName || !domainVercel.name) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Error adding domain",
+          message: "Error adding domain to domain provider",
         })
       }
 
@@ -81,8 +82,8 @@ export const domainRouter = createTRPCRouter({
         .insert(domains)
         .values({
           id: domainId,
-          name: data.name,
-          apexName: data.apexName,
+          name: domainVercel.name,
+          apexName: domainVercel.apexName,
           workspaceId: workspace.id,
         })
         .returning()
@@ -121,12 +122,19 @@ export const domainRouter = createTRPCRouter({
       // TODO: I also need to remove the domain from the vercel account
       // not that easy as delete it and we are done, but maybe that domain is used for another account
       // maybe with a cron job that verify if the domain is used by another account and then remove it from our account
-      const data = await removeDomainFromVercelProject(domain.name)
+      // for now, I will just remove it from the project
+      const vercel = new Vercel({
+        accessToken: env.VERCEL_AUTH_BEARER_TOKEN,
+        teamId: env.TEAM_ID_VERCEL,
+      })
 
-      if (data?.error) {
+      // remove the old domain from vercel
+      const removeData = await vercel.removeProjectDomain(env.PROJECT_ID_VERCEL, domain.name)
+
+      if (removeData.err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: data.error.message,
+          message: removeData.err.message,
         })
       }
 
@@ -174,23 +182,28 @@ export const domainRouter = createTRPCRouter({
         })
       }
 
-      // remove the old domain from vercel
-      const removeData = await removeDomainFromVercelProject(oldDomain.name)
+      const vercel = new Vercel({
+        accessToken: env.VERCEL_AUTH_BEARER_TOKEN,
+        teamId: env.TEAM_ID_VERCEL,
+      })
 
-      if (removeData?.error) {
+      // remove the old domain from vercel
+      const removeData = await vercel.removeProjectDomain(env.PROJECT_ID_VERCEL, oldDomain.name)
+
+      if (removeData.err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: removeData.error.message,
+          message: removeData.err.message,
         })
       }
 
       // add the new domain to vercel
-      const addData = await addDomainToVercel(domain)
+      const addData = await vercel.addProjectDomain(env.PROJECT_ID_VERCEL, domain)
 
-      if (addData.error) {
+      if (addData.err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: addData.error.message,
+          message: addData.err.message,
         })
       }
 
@@ -230,31 +243,41 @@ export const domainRouter = createTRPCRouter({
     .output(
       z.object({
         status: domainVerificationStatusSchema,
-        domainJson: domainResponseSchema.optional(),
+        domainProvider: z.custom<Domain>().optional(),
       })
     )
     .query(async (opts) => {
       let status: DomainVerificationStatusProps = "Valid Configuration"
 
-      const [domainJson, configJson] = await Promise.all([
-        getDomainResponseVercel(opts.input.domain),
-        getConfigResponseVercel(opts.input.domain),
+      const vercel = new Vercel({
+        accessToken: env.VERCEL_AUTH_BEARER_TOKEN,
+        teamId: env.TEAM_ID_VERCEL,
+      })
+
+      const [domainVercel, configDomain] = await Promise.all([
+        vercel.getProjectDomain(env.PROJECT_ID_VERCEL, opts.input.domain),
+        vercel.getDomainConfig(opts.input.domain),
       ])
 
-      if (domainJson?.error?.code === "not_found") {
+      if (domainVercel?.err?.code === "not_found") {
         // domain not found on Vercel project
         status = "Domain Not Found"
-      } else if (domainJson.error) {
+      } else if (domainVercel?.err) {
         status = "Unknown Error"
-      } else if (!domainJson.verified) {
+      } else if (!domainVercel?.val.verified) {
         status = "Pending Verification"
 
-        const verificationJson = await verifyDomainVercel(opts.input.domain)
+        const domainVerification = await vercel.verifyProjectDomain(
+          env.PROJECT_ID_VERCEL,
+          opts.input.domain
+        )
 
-        if (verificationJson.verified) {
+        if (domainVerification.val?.verified) {
           status = "Valid Configuration"
+        } else {
+          status = "Pending Verification"
         }
-      } else if (configJson.misconfigured) {
+      } else if (configDomain.val?.misconfigured) {
         status = "Invalid Configuration"
       }
 
@@ -270,7 +293,7 @@ export const domainRouter = createTRPCRouter({
 
       return {
         status,
-        domainJson,
+        domainProvider: domainVercel.val,
       }
     }),
 })

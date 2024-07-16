@@ -10,7 +10,7 @@ export function MainNav({ ...props }: React.HTMLAttributes<HTMLElement>) {
           href={item.href}
           key={`${item.href}-${idx}`}
           className={cn(
-            "hover:text-background-textContrast text-sm font-medium transition-colors px-2 py-1.5 rounded-md",
+            "rounded-md px-2 py-1.5 font-medium text-sm transition-colors hover:text-background-textContrast",
             focusRing
           )}
         >

@@ -34,7 +34,7 @@ export function Tab({
   return (
     <SuperLink
       className={cn(
-        "flex items-center gap-x-2.5 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-200 hover:text-background-textContrast",
+        "flex items-center gap-x-2.5 rounded-md px-2 py-1.5 font-medium text-sm transition-all duration-200 hover:text-background-textContrast",
         focusRing,
         {
           "cursor-not-allowed opacity-80": disabled,
@@ -49,9 +49,9 @@ export function Tab({
     >
       {children}
 
-      <div className="relative w-1 h-5">
+      <div className="relative h-5 w-1">
         {isNew && (
-          <div className="absolute right-1 top-1">
+          <div className="absolute top-1 right-1">
             <Ping />
           </div>
         )}
@@ -77,7 +77,7 @@ export function ShortLink({
     <SuperLink
       href={href}
       className={cn(
-        "flex items-center gap-x-2.5 rounded-md px-2 py-1.5 text-sm font-medium transition",
+        "flex items-center gap-x-2.5 rounded-md px-2 py-1.5 font-medium text-sm transition",
         focusRing,
         {
           "bg-background-bgHover text-background-textContrast": isActive(href),

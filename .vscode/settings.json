@@ -18,9 +18,11 @@
     "apikeys",
     "asociated",
     "baselime",
+    "basepath",
     "builderai",
     "clsx",
     "Configurator",
+    "craftjs",
     "datasource",
     "dinero",
     "hget",
@@ -32,21 +34,28 @@
     "ingestions",
     "LEMONSQUEEZY",
     "Logdrain",
+    "Lowlight",
     "lucide",
     "nformatter",
     "openai",
     "openapi",
+    "opengraph",
     "opentelemetry",
     "pkey",
+    "pxat",
     "satoshi",
     "sidemodule",
     "SIGNIN",
+    "signout",
     "tinybird",
+    "Tiptap",
+    "tsbuildinfo",
     "typecheck",
     "uidx",
     "Unprice",
     "UPSTASH",
-    "webauthn"
+    "webauthn",
+    "ytregex"
   ],
   "search.exclude": {
     "**/.git": true,
@@ -54,5 +63,8 @@
     "**/bower_components": true,
     "**/**/.next": true,
     "**/tmp": true
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
   }
 }

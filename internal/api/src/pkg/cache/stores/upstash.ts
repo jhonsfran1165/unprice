@@ -73,7 +73,7 @@ export class UpstashStore<TNamespace extends string, TValue> implements Store<TN
   ): Promise<Result<void, CacheError>> {
     try {
       await this.client.set(`${String(namespace)}/${key}`, superjson.stringify(entry), {
-        ex: Math.floor((new Date(entry.staleUntil).getTime() - Date.now()) / 1000),
+        pxat: entry.staleUntil,
       })
       return Ok()
     } catch (err) {

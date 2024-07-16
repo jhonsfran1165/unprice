@@ -12,6 +12,10 @@
     "@types/node": "20.11.24",
     "typescript": "^5.3.3"
   },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "zod": "^3.23.8"
   }

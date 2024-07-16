@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation"
-import { PricingCard } from "~/app/(root)/(authenticathed)/app/[workspaceSlug]/[projectSlug]/plans/[planSlug]/[planVersionId]/review/_components/pricing-card"
+// import EditorComponent from "~/components/page-builder/editor"
+import { EditorPreview } from "~/components/page-builder/editor-preview"
 import { api } from "~/trpc/server"
+
+import lz from "lzutf8"
 
 export default async function DomainPage({
   params: { domain },
@@ -9,7 +12,7 @@ export default async function DomainPage({
     domain: string
   }
 }) {
-  const { page, planVersions } = await api.pages.getByDomain({
+  const { page } = await api.pages.getByDomain({
     domain,
   })
 
@@ -17,7 +20,13 @@ export default async function DomainPage({
     notFound()
   }
 
-  return planVersions.map((planVersion) => (
-    <PricingCard key={planVersion.id} planVersion={planVersion} />
-  ))
+  // return planVersions.map((planVersion) => (
+  //   <PricingCard key={planVersion.id} planVersion={planVersion} />
+  // ))
+
+  // return <EditorComponent />
+
+  const data = lz.decompress(lz.decodeBase64(page.content ?? "")) as string
+
+  return <EditorPreview data={data} />
 }
