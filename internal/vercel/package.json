@@ -20,11 +20,12 @@
   "author": "Sebastian Franco",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "@types/node": "^20.12.7",
+    "@builderai/tsconfig": "workspace:^",
+    "@types/node": "20.11.24",
     "typescript": "^5.3.3"
   },
   "dependencies": {
     "@builderai/error": "^0.1.0",
-    "zod": "^3.23.5"
+    "zod": "^3.23.8"
   }
 }

@@ -1,8 +1,8 @@
-import { connectDatabase } from "@/lib/db"
-import { client } from "@/trigger"
 import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import { cronTrigger } from "@trigger.dev/sdk"
+import { connectDatabase } from "~/lib/db"
+import { client } from "~/trigger"
 import { createInvoiceStripeJob } from "."
 
 // Your first job

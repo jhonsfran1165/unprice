@@ -27,10 +27,9 @@
     "@turbo/gen": "^1.12.4",
     "cross-env": "^7.0.3",
     "knip": "^5.17.4",
-    "turbo": "^1.12.4",
+    "turbo": "^2.0.6",
     "typescript": "^5.3.3"
   },
-
   "git": {
     "pre-commit": "lint-staged"
   },
