@@ -1,31 +1,30 @@
-import { Twitter, Youtube } from "@builderai/ui/icons"
+import { Youtube } from "@builderai/ui/icons"
 import {
   CheckSquare,
   Code,
   Heading1,
   Heading2,
   Heading3,
-  ImageIcon,
   List,
   ListOrdered,
-  MessageSquarePlus,
+  // MessageSquarePlus,
   Text,
   TextQuote,
 } from "lucide-react"
 import { createSuggestionItems } from "novel/extensions"
 import { Command, renderItems } from "novel/extensions"
-import { uploadFn } from "./image-upload"
+import { toastAction } from "~/lib/toast"
 
 export const suggestionItems = createSuggestionItems([
-  {
-    title: "Send Feedback",
-    description: "Let us know how we can improve.",
-    icon: <MessageSquarePlus size={18} />,
-    command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).run()
-      window.open("/feedback", "_blank")
-    },
-  },
+  // {
+  //   title: "Send Feedback",
+  //   description: "Let us know how we can improve.",
+  //   icon: <MessageSquarePlus size={18} />,
+  //   command: ({ editor, range }) => {
+  //     editor.chain().focus().deleteRange(range).run()
+  //     window.open("/feedback", "_blank")
+  //   },
+  // },
   {
     title: "Text",
     description: "Just start typing with plain text.",
@@ -135,60 +134,63 @@ export const suggestionItems = createSuggestionItems([
           .run()
       } else {
         if (videoLink !== null) {
-          alert("Please enter a correct Youtube Video Link")
+          toastAction("error", "Please enter a correct Youtube Video Link")
         }
       }
     },
   },
-  {
-    title: "Twitter",
-    description: "Embed a Tweet.",
-    searchTerms: ["twitter", "embed"],
-    icon: <Twitter size={18} />,
-    command: ({ editor, range }) => {
-      const tweetLink = prompt("Please enter Twitter Link")
-      const tweetRegex = new RegExp(
-        /^https?:\/\/(www\.)?x\.com\/([a-zA-Z0-9_]{1,15})(\/status\/(\d+))?(\/\S*)?$/
-      )
+  // TODO: rendering the tweet seems to be broken
+  // TODO: Add Twitter embed with a better rendering method on the editor https://github.com/troop-dev/tiptap-react-render/tree/main
+  // {
+  //   title: "Twitter",
+  //   description: "Embed a Tweet.",
+  //   searchTerms: ["twitter", "embed"],
+  //   icon: <Twitter size={18} />,
+  //   command: ({ editor, range }) => {
+  //     const tweetLink = prompt("Please enter Twitter Link")
+  //     const tweetRegex = new RegExp(
+  //       /^https?:\/\/(www\.)?x\.com\/([a-zA-Z0-9_]{1,15})(\/status\/(\d+))?(\/\S*)?$/
+  //     )
 
-      // TODO: improve this
-      if (tweetRegex.test(tweetLink ?? "")) {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .setTweet({
-            src: tweetLink ?? "",
-          })
-          .run()
-      } else {
-        if (tweetLink !== null) {
-          alert("Please enter a correct Twitter Link")
-        }
-      }
-    },
-  },
-  {
-    title: "Image",
-    description: "Upload an image from your computer.",
-    searchTerms: ["photo", "picture", "media"],
-    icon: <ImageIcon size={18} />,
-    command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).run()
-      // upload image
-      const input = document.createElement("input")
-      input.type = "file"
-      input.accept = "image/*"
-      input.onchange = async () => {
-        if (input.files?.length) {
-          const file = input.files[0]!
-          const pos = editor.view.state.selection.from
-          uploadFn(file, editor.view, pos)
-        }
-      }
-      input.click()
-    },
-  },
+  //     // TODO: improve this
+  //     if (tweetRegex.test(tweetLink ?? "")) {
+  //       editor
+  //         .chain()
+  //         .focus()
+  //         .deleteRange(range)
+  //         .setTweet({
+  //           src: tweetLink ?? "",
+  //         })
+  //         .run()
+  //     } else {
+  //       if (tweetLink !== null) {
+  //         toastAction("error", "Please enter a correct Twitter Link")
+  //       }
+  //     }
+  //   },
+  // },
+  // TODO: Add image upload
+  // {
+  //   title: "Image",
+  //   description: "Upload an image from your computer.",
+  //   searchTerms: ["photo", "picture", "media"],
+  //   icon: <ImageIcon size={18} />,
+  //   command: ({ editor, range }) => {
+  //     editor.chain().focus().deleteRange(range).run()
+  //     // upload image
+  //     const input = document.createElement("input")
+  //     input.type = "file"
+  //     input.accept = "image/*"
+  //     input.onchange = async () => {
+  //       if (input.files?.length) {
+  //         const file = input.files[0]!
+  //         const pos = editor.view.state.selection.from
+  //         uploadFn(file, editor.view, pos)
+  //       }
+  //     }
+  //     input.click()
+  //   },
+  // },
 ])
 
 export const slashCommand = Command.configure({

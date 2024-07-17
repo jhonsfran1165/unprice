@@ -2,6 +2,7 @@
 
 import { Separator } from "@builderai/ui/separator"
 import { type UserComponent, useEditor as useEditorCraft, useNode } from "@craftjs/core"
+import type { AnyExtension } from "@tiptap/core"
 import type { EditorProps } from "@tiptap/pm/view"
 import {
   EditorCommand,
@@ -12,12 +13,13 @@ import {
   EditorRoot,
   type JSONContent,
 } from "novel"
-import { ImageResizer, handleCommandNavigation, simpleExtensions } from "novel/extensions"
+import { ImageResizer, handleCommandNavigation } from "novel/extensions"
 import { handleImageDrop, handleImagePaste } from "novel/plugins"
 import { useCallback, useMemo, useState } from "react"
 import { defaultExtensions } from "./extensions"
 import GenerativeMenuSwitch from "./generative/generative-menu-switch"
 import { uploadFn } from "./image-upload"
+import { AlignTextButtons } from "./selectors/align-text-buttons"
 import { ColorSelector } from "./selectors/color-selector"
 import { LinkSelector } from "./selectors/link-selector"
 import { NodeSelector } from "./selectors/node-selector"
@@ -27,7 +29,7 @@ import { slashCommand, suggestionItems } from "./slash-command"
 import type { NovelComponentProps } from "./types"
 import { NovelUpdate } from "./update-novel"
 
-export const extensions = [...simpleExtensions, ...defaultExtensions, slashCommand]
+export const extensions: AnyExtension[] = [...defaultExtensions, slashCommand]
 
 const hljs = require("highlight.js")
 
@@ -48,8 +50,8 @@ const defaultProps = {
     content: [
       {
         type: "heading",
-        attrs: { level: 2 },
-        content: [{ type: "text", text: "Builderai is awesome" }],
+        attrs: { level: 1 },
+        content: [{ type: "text", text: "Unprice" }],
       },
     ],
   } as JSONContent,
@@ -103,7 +105,7 @@ export const NovelComponent: UserComponent<NovelComponentProps> = (props) => {
     []
   )
 
-  const highlightCodeblocks = useCallback((content: string) => {
+  const parseHtml = useCallback((content: string) => {
     const doc = new DOMParser().parseFromString(content, "text/html")
 
     // add styles for code blocks
@@ -117,7 +119,7 @@ export const NovelComponent: UserComponent<NovelComponentProps> = (props) => {
       el.setAttribute("disabled", "true")
     })
 
-    return new XMLSerializer().serializeToString(doc)
+    return doc.body.innerHTML
   }, [])
 
   return (
@@ -142,8 +144,7 @@ export const NovelComponent: UserComponent<NovelComponentProps> = (props) => {
           onUpdate={({ editor }) => {
             setProp((props: NovelComponentProps) => {
               const content = editor.getJSON() as JSONContent
-              const html = highlightCodeblocks(editor.getHTML()) as string
-
+              const html = parseHtml(editor.getHTML()) as string
               props.editorContent = content
               props.editorHtml = html
               return props
@@ -185,6 +186,8 @@ export const NovelComponent: UserComponent<NovelComponentProps> = (props) => {
             <LinkSelector open={openLink} onOpenChange={setOpenLink} />
             <Separator orientation="vertical" />
             <TextButtons />
+            <Separator orientation="vertical" />
+            <AlignTextButtons />
             <Separator orientation="vertical" />
             <ColorSelector open={openColor} onOpenChange={setOpenColor} />
           </GenerativeMenuSwitch>

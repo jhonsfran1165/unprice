@@ -21,7 +21,7 @@ export const PricingTableComponent: UserComponent<PricingComponentProps> = (prop
       ref={(ref) => {
         ref && connect(ref)
       }}
-      className={cn("mx-auto flex w-full gap-5")}
+      className={cn("flex w-full justify-center gap-5")}
     >
       {plans.length > 0 &&
         plans.map((plan) => <PricingCard key={Math.random()} planVersion={plan} />)}

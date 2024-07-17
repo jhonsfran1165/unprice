@@ -6,7 +6,7 @@ export const PricingTablePreview: UserComponent<PricingComponentProps> = (props)
   const { plans } = props
 
   return (
-    <div className="mx-auto flex flex-shrink gap-5">
+    <div className="flex w-full flex-col items-center justify-center gap-5 md:flex-row md:items-stretch">
       {plans.length > 0 && plans.map((plan) => <PricingCard key={plan.id} planVersion={plan} />)}
     </div>
   )

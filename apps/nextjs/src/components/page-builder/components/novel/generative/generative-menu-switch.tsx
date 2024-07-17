@@ -1,9 +1,6 @@
-import { Button } from "@builderai/ui/button"
 import { EditorBubble, useEditor } from "novel"
 import { removeAIHighlight } from "novel/extensions"
-import {} from "novel/plugins"
 import { Fragment, type ReactNode, useEffect } from "react"
-import Magic from "~/components/icons/magic"
 import { AISelector } from "./ai-selector"
 
 interface GenerativeMenuSwitchProps {
@@ -33,7 +30,8 @@ const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSw
       {open && <AISelector open={open} onOpenChange={onOpenChange} />}
       {!open && (
         <Fragment>
-          <Button
+          {/* // TODO: no ai for now */}
+          {/* <Button
             className="gap-1 truncate rounded-none text-success"
             variant="ghost"
             onClick={() => onOpenChange(true)}
@@ -41,7 +39,7 @@ const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSw
           >
             <Magic className="h-5 w-5" />
             Ask AI
-          </Button>
+          </Button> */}
           {children}
         </Fragment>
       )}

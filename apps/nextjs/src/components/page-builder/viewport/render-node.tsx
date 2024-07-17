@@ -34,7 +34,7 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
     props: node.data.props,
   }))
 
-  const currentRef = useRef<HTMLDivElement>(null)
+  const currentRef = useRef<HTMLDivElement>()
 
   useEffect(() => {
     if (dom) {
@@ -75,8 +75,10 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
       {(isHover || isActive) && enabled
         ? ReactDOM.createPortal(
             <div
-              ref={currentRef}
-              className="-mt-[29px] info fixed z-10 flex h-[30px] items-center space-x-1 rounded-none border px-2 py-2"
+              ref={(ref) => {
+                if (ref) currentRef.current = ref
+              }}
+              className="-mt-[30px] info fixed z-30 flex h-[30px] items-center space-x-1 rounded-none border px-2 py-2"
               style={{
                 left: getPos(dom).left,
                 top: getPos(dom).top,

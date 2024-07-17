@@ -44,7 +44,11 @@ const NodePreview = async ({
 
   switch (typeName) {
     case "ContainerElement":
-      return <ContainerElementPreview {...node.props}>{Children}</ContainerElementPreview>
+      return (
+        <ContainerElementPreview {...node.props} isRoot={!node?.parent}>
+          {Children}
+        </ContainerElementPreview>
+      )
     case "TextComponent":
       return <TextComponentPreview {...node.props} />
     case "NovelComponent":

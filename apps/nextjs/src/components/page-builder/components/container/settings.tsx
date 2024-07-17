@@ -296,55 +296,6 @@ export const ContainerSettings = () => {
         </ToolbarSection>
       )}
 
-      {isRootNode && (
-        <ToolbarSection
-          title="Appearance"
-          props={["backgroundColor"]}
-          summary={({ backgroundColor }) => {
-            return (
-              <div className="flex items-center gap-2">
-                <div
-                  className="px-2 py-1 font-medium"
-                  style={{
-                    backgroundColor: backgroundColor as string,
-                  }}
-                >
-                  A
-                </div>
-              </div>
-            )
-          }}
-        >
-          <ToolbarItemDropdown
-            label="Background"
-            options={BACKGROUND_COLORS}
-            value={data.backgroundColor as string}
-            onChange={(backgroundColor) => {
-              setProp((props) => {
-                props.backgroundColor = backgroundColor
-              }, 500)
-            }}
-            trigger={(value, label) => (
-              <Button variant="outline" size={"sm"} className="w-full">
-                <div className="flex items-center gap-2">
-                  <div className="size-3 rounded-full border" style={{ background: value }} />
-                  <span>{label}</span>
-                </div>
-              </Button>
-            )}
-            optionChildren={({ option, name }) => (
-              <div className="flex items-center gap-2">
-                <div
-                  className="size-5 rounded-sm border border-background-border font-medium"
-                  style={{ backgroundColor: option }}
-                />
-                <span>{name}</span>
-              </div>
-            )}
-          />
-        </ToolbarSection>
-      )}
-
       <ToolbarSection
         title="Alignment"
         props={["justifyContent", "flexDirection", "alignItems", "fillSpace", "gap"]}

@@ -48,7 +48,13 @@ export const LayerHeader = () => {
           "line-clamp-1 flex w-full items-center justify-between space-x-2 font-normal text-xs lowercase"
         )}
       >
-        <Button size="icon" variant={"link"} onClick={() => actions.setHidden(id, !hidden)}>
+        <Button
+          size="icon"
+          variant={"link"}
+          onClick={() => {
+            actions.setHidden(id, !hidden)
+          }}
+        >
           {hidden ? (
             <EyeOffIcon
               className={cn("size-4", {

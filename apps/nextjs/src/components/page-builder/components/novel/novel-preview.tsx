@@ -18,7 +18,8 @@ export const NovelPreview = (props: NovelComponentProps) => {
   } = props
 
   // Extract the content from the body tag
-  const bodyContent = editorHtml?.match(/<body>([\s\S]*?)<\/body>/)?.[1] || ""
+  // const bodyContent = editorHtml?.match(/<body>([\s\S]*?)<\/body>/)?.[1] || ""
+  const bodyContent = editorHtml ?? ""
 
   return (
     <div

@@ -17,21 +17,23 @@ export function PricingCard({
   })
 
   return (
-    <Card className="mx-auto max-w-[300px]">
-      <CardHeader>
-        <h3 className="font-bold text-2xl">{planVersion.title}</h3>
-      </CardHeader>
+    <Card className="w-[300px]">
+      <CardHeader className="space-y-6">
+        <h1>{planVersion.title}</h1>
 
-      <CardContent>
-        <CardDescription>{planVersion.description}</CardDescription>
         <div className="mt-8 flex items-baseline space-x-2">
           <span className="font-extrabold text-5xl">
             {err ? "Error" : totalPricePlan.displayAmount}
           </span>
-          <span className="">/ {planVersion.billingPeriod} + usage</span>
+          <span className="text-sm">{planVersion.billingPeriod} + usage</span>
         </div>
-        <Button className="mt-8 w-full">Get Started</Button>
+      </CardHeader>
+
+      <CardContent className="flex flex-col gap-4">
+        <CardDescription>{planVersion.description}</CardDescription>
+        <Button className="w-full">Get Started</Button>
       </CardContent>
+
       <CardFooter className="border-t px-6 py-6">
         <div className="space-y-6">
           <div className="space-y-2">

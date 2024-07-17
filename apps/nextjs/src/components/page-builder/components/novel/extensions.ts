@@ -1,6 +1,9 @@
+import TextAlign from "@tiptap/extension-text-align"
+import { cx } from "class-variance-authority"
+import { common, createLowlight } from "lowlight"
 import {
-  AIHighlight,
-  CharacterCount,
+  // AIHighlight,
+  // CharacterCount,
   CodeBlockLowlight,
   GlobalDragHandle,
   HorizontalRule,
@@ -8,19 +11,15 @@ import {
   StarterKit,
   TaskItem,
   TaskList,
-  TiptapImage,
+  // TiptapImage,
   TiptapLink,
-  Twitter,
-  UpdatedImage,
+  // Twitter,
+  // UpdatedImage,
   Youtube,
 } from "novel/extensions"
-import { UploadImagesPlugin } from "novel/plugins"
-
-import { cx } from "class-variance-authority"
-import { common, createLowlight } from "lowlight"
 
 //TODO I am using cx here to get tailwind autocomplete working, idk if someone else can write a regex to just capture the class key in objects
-const aiHighlight = AIHighlight
+// const aiHighlight = AIHighlight
 //You can overwrite the placeholder with your own configuration
 const placeholder = Placeholder
 
@@ -32,26 +31,26 @@ const tiptapLink = TiptapLink.configure({
   },
 })
 
-const tiptapImage = TiptapImage.extend({
-  addProseMirrorPlugins() {
-    return [
-      UploadImagesPlugin({
-        imageClass: cx("opacity-40 rounded-lg border border-stone-200"),
-      }),
-    ]
-  },
-}).configure({
-  allowBase64: true,
-  HTMLAttributes: {
-    class: cx("rounded-lg border border-muted"),
-  },
-})
+// const tiptapImage = TiptapImage.extend({
+//   addProseMirrorPlugins() {
+//     return [
+//       UploadImagesPlugin({
+//         imageClass: cx("opacity-40 rounded-lg border border-stone-200"),
+//       }),
+//     ]
+//   },
+// }).configure({
+//   allowBase64: true,
+//   HTMLAttributes: {
+//     class: cx("rounded-lg border border-muted"),
+//   },
+// })
 
-const updatedImage = UpdatedImage.configure({
-  HTMLAttributes: {
-    class: cx("rounded-lg border border-muted"),
-  },
-})
+// const updatedImage = UpdatedImage.configure({
+//   HTMLAttributes: {
+//     class: cx("rounded-lg border border-muted"),
+//   },
+// })
 
 const taskList = TaskList.configure({
   HTMLAttributes: {
@@ -92,11 +91,7 @@ const starterKit = StarterKit.configure({
       class: cx("border-l-4 border-primary"),
     },
   },
-  codeBlock: {
-    HTMLAttributes: {
-      class: cx("rounded-md bg-muted text-muted-foreground border p-5 font-mono font-medium"),
-    },
-  },
+  codeBlock: false,
   code: {
     HTMLAttributes: {
       class: cx("rounded-md bg-muted  px-1.5 py-1 font-mono font-medium"),
@@ -109,12 +104,25 @@ const starterKit = StarterKit.configure({
     width: 4,
   },
   gapcursor: false,
+  paragraph: {
+    HTMLAttributes: {
+      class: cx("leading-6"),
+    },
+  },
+  heading: {
+    HTMLAttributes: {
+      class: cx(""),
+    },
+  },
 })
 
 const codeBlockLowlight = CodeBlockLowlight.configure({
   // configure lowlight: common /  all / use highlightJS in case there is a need to specify certain language grammars only
   // common: covers 37 language grammars which should be good enough in most cases
   lowlight: createLowlight(common),
+  HTMLAttributes: {
+    class: cx("rounded-md border p-5"),
+  },
 })
 
 const youtube = Youtube.configure({
@@ -124,28 +132,33 @@ const youtube = Youtube.configure({
   inline: false,
 })
 
-const twitter = Twitter.configure({
-  HTMLAttributes: {
-    class: cx("not-prose"),
-  },
-  inline: false,
-})
+// const twitter = Twitter.configure({
+//   HTMLAttributes: {
+//     class: cx("not-prose"),
+//   },
+//   inline: false,
+// })
 
-const characterCount = CharacterCount.configure()
+// const characterCount = CharacterCount.configure()
+
+const textAlign = TextAlign.configure({
+  types: ["heading", "paragraph"],
+})
 
 export const defaultExtensions = [
   starterKit,
   placeholder,
   tiptapLink,
-  tiptapImage,
-  updatedImage,
+  textAlign,
+  // tiptapImage,
+  // updatedImage,
   taskList,
   taskItem,
   horizontalRule,
-  aiHighlight,
+  // aiHighlight,
   codeBlockLowlight,
   youtube,
-  twitter,
-  characterCount,
+  // twitter,
+  // characterCount,
   GlobalDragHandle,
 ]

@@ -56,9 +56,9 @@ export const ContainerElement: UserComponent<ContainerComponentProps> = (props) 
         justifyContent,
         gap: gap,
         flexDirection,
-        flexWrap: "wrap",
+        flexWrap: flexDirection === "row" ? "wrap" : "nowrap",
         alignItems,
-        border: `${border}px solid ${borderColor}`,
+        border: border ? `${border}px solid ${borderColor}` : undefined,
         backgroundColor: backgroundColor,
         marginLeft: `${marginLeft}px`,
         marginRight: `${marginRight}px`,
@@ -69,7 +69,7 @@ export const ContainerElement: UserComponent<ContainerComponentProps> = (props) 
         paddingTop: `${paddingTop}px`,
         paddingBottom: `${paddingBottom}px`,
         boxShadow: shadow === 0 ? "none" : `0px 3px 100px ${shadow}px rgba(0, 0, 0, 0.13)`,
-        borderRadius: `${radius}px`,
+        borderRadius: radius ? `${radius}px` : undefined,
         flexGrow: fillSpace ? 1 : 0,
       }}
     >
