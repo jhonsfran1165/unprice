@@ -1,1 +1,960 @@
-{"openapi":"3.0.3","info":{"title":"tRPC OpenAPI","description":"API for Unprice","version":"1.0.0"},"servers":[{"url":"http://app.localhost:3000/api/trpc"}],"paths":{"/edge/customers.create":{"post":{"operationId":"customers-create","security":[{"Authorization":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"email":{"type":"string","minLength":3,"format":"email"},"name":{"type":"string","minLength":3},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"externalId":{"type":"string"},"stripeSubscriptionId":{"type":"string"},"stripeDefaultPaymentMethodId":{"type":"string"}},"additionalProperties":false,"nullable":true},"stripeCustomerId":{"type":"string","nullable":true},"active":{"type":"boolean","nullable":true},"defaultCurrency":{"type":"string","enum":["USD","EUR"]}},"required":["email","name"],"additionalProperties":false}}}},"parameters":[],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"customer":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"externalId":{"type":"string"},"stripeSubscriptionId":{"type":"string"},"stripeDefaultPaymentMethodId":{"type":"string"}},"additionalProperties":false,"nullable":true},"stripeCustomerId":{"type":"string","nullable":true},"active":{"type":"boolean","nullable":true},"defaultCurrency":{"type":"string","enum":["USD","EUR"]}},"required":["id","projectId","createdAt","updatedAt","email","name","description","metadata","stripeCustomerId","active","defaultCurrency"],"additionalProperties":false}},"required":["customer"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.remove":{"post":{"operationId":"customers-remove","security":[{"Authorization":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"id":{"type":"string"}},"required":["id"],"additionalProperties":false}}}},"parameters":[],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"customer":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"externalId":{"type":"string"},"stripeSubscriptionId":{"type":"string"},"stripeDefaultPaymentMethodId":{"type":"string"}},"additionalProperties":false,"nullable":true},"stripeCustomerId":{"type":"string","nullable":true},"active":{"type":"boolean","nullable":true},"defaultCurrency":{"type":"string","enum":["USD","EUR"]}},"required":["id","projectId","createdAt","updatedAt","email","name","description","metadata","stripeCustomerId","active","defaultCurrency"],"additionalProperties":false}},"required":["customer"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.update":{"post":{"operationId":"customers-update","security":[{"Authorization":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"email":{"type":"string"},"metadata":{"type":"object","properties":{"externalId":{"type":"string"},"stripeSubscriptionId":{"type":"string"},"stripeDefaultPaymentMethodId":{"type":"string"}},"additionalProperties":false,"nullable":true}},"required":["id","name","email"],"additionalProperties":false}}}},"parameters":[],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"customer":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"externalId":{"type":"string"},"stripeSubscriptionId":{"type":"string"},"stripeDefaultPaymentMethodId":{"type":"string"}},"additionalProperties":false,"nullable":true},"stripeCustomerId":{"type":"string","nullable":true},"active":{"type":"boolean","nullable":true},"defaultCurrency":{"type":"string","enum":["USD","EUR"]}},"required":["id","projectId","createdAt","updatedAt","email","name","description","metadata","stripeCustomerId","active","defaultCurrency"],"additionalProperties":false}},"required":["customer"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.listPaymentMethods":{"get":{"operationId":"customers-listPaymentMethods","security":[{"Authorization":[]}],"parameters":[{"name":"customerId","in":"query","required":true,"schema":{"type":"string"}},{"name":"provider","in":"query","required":true,"schema":{"type":"string","enum":["stripe","lemonsqueezy"]}}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"paymentMethods":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string","nullable":true},"last4":{"type":"string"},"expMonth":{"type":"number"},"expYear":{"type":"number"},"brand":{"type":"string"}},"required":["id","name"],"additionalProperties":false}}},"required":["paymentMethods"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.createPaymentMethod":{"post":{"operationId":"customers-createPaymentMethod","security":[{"Authorization":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"paymentProvider":{"type":"string","enum":["stripe","lemonsqueezy"]},"customerId":{"type":"string"},"successUrl":{"type":"string","format":"uri"},"cancelUrl":{"type":"string","format":"uri"}},"required":["paymentProvider","customerId","successUrl","cancelUrl"],"additionalProperties":false}}}},"parameters":[],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"success":{"type":"boolean"},"url":{"type":"string"}},"required":["success","url"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.exist":{"post":{"operationId":"customers-exist","security":[{"Authorization":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"email":{"type":"string"}},"required":["email"],"additionalProperties":false}}}},"parameters":[],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"exist":{"type":"boolean"}},"required":["exist"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.getByEmail":{"post":{"operationId":"customers-getByEmail","security":[{"Authorization":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"email":{"type":"string"}},"required":["email"],"additionalProperties":false}}}},"parameters":[],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"customer":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"externalId":{"type":"string"},"stripeSubscriptionId":{"type":"string"},"stripeDefaultPaymentMethodId":{"type":"string"}},"additionalProperties":false,"nullable":true},"stripeCustomerId":{"type":"string","nullable":true},"active":{"type":"boolean","nullable":true},"defaultCurrency":{"type":"string","enum":["USD","EUR"]}},"required":["id","projectId","createdAt","updatedAt","email","name","description","metadata","stripeCustomerId","active","defaultCurrency"],"additionalProperties":false}},"required":["customer"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.getById":{"get":{"operationId":"customers-getById","security":[{"Authorization":[]}],"parameters":[{"name":"id","in":"query","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"customer":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"externalId":{"type":"string"},"stripeSubscriptionId":{"type":"string"},"stripeDefaultPaymentMethodId":{"type":"string"}},"additionalProperties":false,"nullable":true},"stripeCustomerId":{"type":"string","nullable":true},"active":{"type":"boolean","nullable":true},"defaultCurrency":{"type":"string","enum":["USD","EUR"]}},"required":["id","projectId","createdAt","updatedAt","email","name","description","metadata","stripeCustomerId","active","defaultCurrency"],"additionalProperties":false}},"required":["customer"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.getSubscriptions":{"get":{"operationId":"customers-getSubscriptions","security":[{"Authorization":[]}],"parameters":[{"name":"id","in":"query","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"customer":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"externalId":{"type":"string"},"stripeSubscriptionId":{"type":"string"},"stripeDefaultPaymentMethodId":{"type":"string"}},"additionalProperties":false,"nullable":true},"stripeCustomerId":{"type":"string","nullable":true},"active":{"type":"boolean","nullable":true},"defaultCurrency":{"type":"string","enum":["USD","EUR"]},"subscriptions":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"customerId":{"type":"string"},"defaultPaymentMethodId":{"type":"string","nullable":true},"planVersionId":{"type":"string"},"type":{"type":"string","enum":["plan","addons"]},"prorated":{"type":"boolean","nullable":true},"trialDays":{"type":"number","nullable":true},"trialEnds":{"type":"string","format":"date-time","nullable":true},"startDate":{"type":"string","format":"date-time"},"endDate":{"type":"string","format":"date-time","nullable":true},"autoRenew":{"type":"boolean","nullable":true},"collectionMethod":{"type":"string","enum":["charge_automatically","send_invoice"]},"isNew":{"type":"boolean","nullable":true},"status":{"type":"string","enum":["active","inactive","ended","cancelled"],"nullable":true},"metadata":{"type":"object","properties":{"externalId":{"type":"string"},"defaultPaymentMethodId":{"type":"string"}},"additionalProperties":false,"nullable":true},"nextPlanVersionTo":{"type":"string","nullable":true},"planChanged":{"type":"string","format":"date-time","nullable":true},"nextSubscriptionId":{"type":"string","nullable":true},"planVersion":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"planId":{"type":"string"},"description":{"type":"string","nullable":true},"latest":{"type":"boolean","nullable":true},"title":{"type":"string","maxLength":50},"tags":{"type":"array","items":{"type":"string"},"nullable":true},"active":{"type":"boolean","nullable":true},"status":{"type":"string","enum":["draft","published"],"nullable":true},"publishedAt":{"type":"string","format":"date-time","nullable":true},"publishedBy":{"type":"string","nullable":true},"archived":{"type":"boolean","nullable":true},"archivedAt":{"type":"string","format":"date-time","nullable":true},"archivedBy":{"type":"string","nullable":true},"paymentProvider":{"type":"string","enum":["stripe","lemonsqueezy"]},"planType":{"type":"string","enum":["recurring"]},"currency":{"type":"string","enum":["USD","EUR"]},"whenToBill":{"type":"string","enum":["pay_in_advance","pay_in_arrear"],"nullable":true},"billingPeriod":{"type":"string","enum":["month","year"],"nullable":true},"startCycle":{"anyOf":[{"type":"number","minimum":0},{"type":"string","enum":["last_day"]},{"enum":["null"],"nullable":true}],"nullable":true},"gracePeriod":{"type":"number","nullable":true},"metadata":{"type":"object","properties":{"externalId":{"type":"string"}},"additionalProperties":false,"nullable":true},"version":{"type":"number"},"plan":{"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"slug":{"type":"string"},"active":{"type":"boolean","nullable":true},"description":{"type":"string","nullable":true},"metadata":{"type":"object","properties":{"externalId":{"type":"string"}},"additionalProperties":false,"nullable":true},"defaultPlan":{"type":"boolean","nullable":true}},"required":["id","projectId","createdAt","updatedAt","slug","active","description","metadata","defaultPlan"],"additionalProperties":false}},"required":["id","projectId","createdAt","updatedAt","planId","description","latest","title","tags","active","status","publishedAt","publishedBy","archived","archivedAt","archivedBy","paymentProvider","planType","currency","whenToBill","billingPeriod","startCycle","gracePeriod","metadata","version","plan"],"additionalProperties":false}},"required":["id","projectId","createdAt","updatedAt","customerId","defaultPaymentMethodId","planVersionId","type","prorated","trialDays","trialEnds","startDate","endDate","autoRenew","collectionMethod","isNew","status","metadata","nextPlanVersionTo","planChanged","nextSubscriptionId","planVersion"],"additionalProperties":false}}},"required":["id","projectId","createdAt","updatedAt","email","name","description","metadata","stripeCustomerId","active","defaultCurrency","subscriptions"],"additionalProperties":false}},"required":["customer"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.entitlements":{"get":{"operationId":"customers-entitlements","security":[{"Authorization":[]}],"parameters":[{"name":"customerId","in":"query","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"entitlements":{"type":"array","items":{"type":"string"}}},"required":["entitlements"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.can":{"get":{"operationId":"customers-can","security":[{"Authorization":[]}],"parameters":[{"name":"customerId","in":"query","required":true,"schema":{"type":"string"}},{"name":"featureSlug","in":"query","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"access":{"type":"boolean"},"deniedReason":{"type":"string","enum":["RATE_LIMITED","USAGE_EXCEEDED","FEATURE_NOT_FOUND_IN_SUBSCRIPTION","FEATURE_HAS_NO_USAGE_RECORD"]},"currentUsage":{"type":"number"},"limit":{"type":"number"},"featureType":{}},"required":["access"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}},"/edge/customers.reportUsage":{"get":{"operationId":"customers-reportUsage","security":[{"Authorization":[]}],"parameters":[{"name":"customerId","in":"query","required":true,"schema":{"type":"string"}},{"name":"featureSlug","in":"query","required":true,"schema":{"type":"string"}},{"name":"usage","in":"query","required":true,"schema":{"type":"number"}},{"name":"idempotenceKey","in":"query","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"success":{"type":"boolean"}},"required":["success"],"additionalProperties":false}}}},"default":{"$ref":"#/components/responses/error"}}}}},"components":{"securitySchemes":{"Authorization":{"type":"http","scheme":"bearer"}},"responses":{"error":{"description":"Error response","content":{"application/json":{"schema":{"type":"object","properties":{"message":{"type":"string"},"code":{"type":"string"},"issues":{"type":"array","items":{"type":"object","properties":{"message":{"type":"string"}},"required":["message"],"additionalProperties":false}}},"required":["message","code"],"additionalProperties":false}}}}},"schemas":{}},"tags":[{"name":"unprice","description":"Operations related to unprice"}],"externalDocs":{"url":"http://example.com/docs"},"x-speakeasy-retries":{"strategy":"backoff","backoff":{"initialInterval":500,"maxInterval":60000,"maxElapsedTime":3600000,"exponent":1.5},"statusCodes":["5XX"],"retryConnectionErrors":true}}
+{
+  "openapi": "3.0.3",
+  "info": { "title": "tRPC OpenAPI", "description": "API for Unprice", "version": "1.0.0" },
+  "servers": [{ "url": "http://app.localhost:3000/api/trpc" }],
+  "paths": {
+    "/edge/customers.create": {
+      "post": {
+        "operationId": "customers-create",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "projectId": { "type": "string" },
+                  "email": { "type": "string", "minLength": 3, "format": "email" },
+                  "name": { "type": "string", "minLength": 3 },
+                  "description": { "type": "string", "nullable": true },
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "externalId": { "type": "string" },
+                      "stripeSubscriptionId": { "type": "string" },
+                      "stripeDefaultPaymentMethodId": { "type": "string" }
+                    },
+                    "additionalProperties": false,
+                    "nullable": true
+                  },
+                  "stripeCustomerId": { "type": "string", "nullable": true },
+                  "active": { "type": "boolean", "nullable": true },
+                  "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] }
+                },
+                "required": ["email", "name"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "projectId": { "type": "string" },
+                        "createdAt": { "type": "string", "format": "date-time" },
+                        "updatedAt": { "type": "string", "format": "date-time" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAt",
+                        "updatedAt",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "defaultCurrency"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.remove": {
+      "post": {
+        "operationId": "customers-remove",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "id": { "type": "string" } },
+                "required": ["id"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "projectId": { "type": "string" },
+                        "createdAt": { "type": "string", "format": "date-time" },
+                        "updatedAt": { "type": "string", "format": "date-time" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAt",
+                        "updatedAt",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "defaultCurrency"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.update": {
+      "post": {
+        "operationId": "customers-update",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "description": { "type": "string", "nullable": true },
+                  "email": { "type": "string" },
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "externalId": { "type": "string" },
+                      "stripeSubscriptionId": { "type": "string" },
+                      "stripeDefaultPaymentMethodId": { "type": "string" }
+                    },
+                    "additionalProperties": false,
+                    "nullable": true
+                  }
+                },
+                "required": ["id", "name", "email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "projectId": { "type": "string" },
+                        "createdAt": { "type": "string", "format": "date-time" },
+                        "updatedAt": { "type": "string", "format": "date-time" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAt",
+                        "updatedAt",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "defaultCurrency"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.listPaymentMethods": {
+      "get": {
+        "operationId": "customers-listPaymentMethods",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "customerId", "in": "query", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "provider",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "enum": ["stripe", "lemonsqueezy"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "paymentMethods": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "name": { "type": "string", "nullable": true },
+                          "last4": { "type": "string" },
+                          "expMonth": { "type": "number" },
+                          "expYear": { "type": "number" },
+                          "brand": { "type": "string" }
+                        },
+                        "required": ["id", "name"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["paymentMethods"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.createPaymentMethod": {
+      "post": {
+        "operationId": "customers-createPaymentMethod",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paymentProvider": { "type": "string", "enum": ["stripe", "lemonsqueezy"] },
+                  "customerId": { "type": "string" },
+                  "successUrl": { "type": "string", "format": "uri" },
+                  "cancelUrl": { "type": "string", "format": "uri" }
+                },
+                "required": ["paymentProvider", "customerId", "successUrl", "cancelUrl"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "success": { "type": "boolean" }, "url": { "type": "string" } },
+                  "required": ["success", "url"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.exist": {
+      "post": {
+        "operationId": "customers-exist",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "email": { "type": "string" } },
+                "required": ["email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "exist": { "type": "boolean" } },
+                  "required": ["exist"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.getByEmail": {
+      "post": {
+        "operationId": "customers-getByEmail",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "email": { "type": "string" } },
+                "required": ["email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "projectId": { "type": "string" },
+                        "createdAt": { "type": "string", "format": "date-time" },
+                        "updatedAt": { "type": "string", "format": "date-time" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAt",
+                        "updatedAt",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "defaultCurrency"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.getById": {
+      "get": {
+        "operationId": "customers-getById",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "id", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "projectId": { "type": "string" },
+                        "createdAt": { "type": "string", "format": "date-time" },
+                        "updatedAt": { "type": "string", "format": "date-time" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAt",
+                        "updatedAt",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "defaultCurrency"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.getSubscriptions": {
+      "get": {
+        "operationId": "customers-getSubscriptions",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "id", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "projectId": { "type": "string" },
+                        "createdAt": { "type": "string", "format": "date-time" },
+                        "updatedAt": { "type": "string", "format": "date-time" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] },
+                        "subscriptions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string" },
+                              "projectId": { "type": "string" },
+                              "createdAt": { "type": "string", "format": "date-time" },
+                              "updatedAt": { "type": "string", "format": "date-time" },
+                              "customerId": { "type": "string" },
+                              "defaultPaymentMethodId": { "type": "string", "nullable": true },
+                              "planVersionId": { "type": "string" },
+                              "type": { "type": "string", "enum": ["plan", "addons"] },
+                              "prorated": { "type": "boolean", "nullable": true },
+                              "trialDays": { "type": "number", "nullable": true },
+                              "trialEnds": {
+                                "type": "string",
+                                "format": "date-time",
+                                "nullable": true
+                              },
+                              "startDate": { "type": "string", "format": "date-time" },
+                              "endDate": {
+                                "type": "string",
+                                "format": "date-time",
+                                "nullable": true
+                              },
+                              "autoRenew": { "type": "boolean", "nullable": true },
+                              "collectionMethod": {
+                                "type": "string",
+                                "enum": ["charge_automatically", "send_invoice"]
+                              },
+                              "isNew": { "type": "boolean", "nullable": true },
+                              "status": {
+                                "type": "string",
+                                "enum": ["active", "inactive", "ended", "cancelled"],
+                                "nullable": true
+                              },
+                              "metadata": {
+                                "type": "object",
+                                "properties": {
+                                  "externalId": { "type": "string" },
+                                  "defaultPaymentMethodId": { "type": "string" }
+                                },
+                                "additionalProperties": false,
+                                "nullable": true
+                              },
+                              "nextPlanVersionTo": { "type": "string", "nullable": true },
+                              "planChanged": {
+                                "type": "string",
+                                "format": "date-time",
+                                "nullable": true
+                              },
+                              "nextSubscriptionId": { "type": "string", "nullable": true },
+                              "planVersion": {
+                                "type": "object",
+                                "properties": {
+                                  "id": { "type": "string" },
+                                  "projectId": { "type": "string" },
+                                  "createdAt": { "type": "string", "format": "date-time" },
+                                  "updatedAt": { "type": "string", "format": "date-time" },
+                                  "planId": { "type": "string" },
+                                  "description": { "type": "string", "nullable": true },
+                                  "latest": { "type": "boolean", "nullable": true },
+                                  "title": { "type": "string", "maxLength": 50 },
+                                  "tags": {
+                                    "type": "array",
+                                    "items": { "type": "string" },
+                                    "nullable": true
+                                  },
+                                  "active": { "type": "boolean", "nullable": true },
+                                  "status": {
+                                    "type": "string",
+                                    "enum": ["draft", "published"],
+                                    "nullable": true
+                                  },
+                                  "publishedAt": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "nullable": true
+                                  },
+                                  "publishedBy": { "type": "string", "nullable": true },
+                                  "archived": { "type": "boolean", "nullable": true },
+                                  "archivedAt": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "nullable": true
+                                  },
+                                  "archivedBy": { "type": "string", "nullable": true },
+                                  "paymentProvider": {
+                                    "type": "string",
+                                    "enum": ["stripe", "lemonsqueezy"]
+                                  },
+                                  "planType": { "type": "string", "enum": ["recurring"] },
+                                  "currency": { "type": "string", "enum": ["USD", "EUR"] },
+                                  "whenToBill": {
+                                    "type": "string",
+                                    "enum": ["pay_in_advance", "pay_in_arrear"],
+                                    "nullable": true
+                                  },
+                                  "billingPeriod": {
+                                    "type": "string",
+                                    "enum": ["month", "year"],
+                                    "nullable": true
+                                  },
+                                  "startCycle": {
+                                    "anyOf": [
+                                      { "type": "number", "minimum": 0 },
+                                      { "type": "string", "enum": ["last_day"] },
+                                      { "enum": ["null"], "nullable": true }
+                                    ],
+                                    "nullable": true
+                                  },
+                                  "gracePeriod": { "type": "number", "nullable": true },
+                                  "metadata": {
+                                    "type": "object",
+                                    "properties": { "externalId": { "type": "string" } },
+                                    "additionalProperties": false,
+                                    "nullable": true
+                                  },
+                                  "version": { "type": "number" },
+                                  "plan": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": { "type": "string" },
+                                      "projectId": { "type": "string" },
+                                      "createdAt": { "type": "string", "format": "date-time" },
+                                      "updatedAt": { "type": "string", "format": "date-time" },
+                                      "slug": { "type": "string" },
+                                      "active": { "type": "boolean", "nullable": true },
+                                      "description": { "type": "string", "nullable": true },
+                                      "metadata": {
+                                        "type": "object",
+                                        "properties": { "externalId": { "type": "string" } },
+                                        "additionalProperties": false,
+                                        "nullable": true
+                                      },
+                                      "defaultPlan": { "type": "boolean", "nullable": true }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "projectId",
+                                      "createdAt",
+                                      "updatedAt",
+                                      "slug",
+                                      "active",
+                                      "description",
+                                      "metadata",
+                                      "defaultPlan"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "projectId",
+                                  "createdAt",
+                                  "updatedAt",
+                                  "planId",
+                                  "description",
+                                  "latest",
+                                  "title",
+                                  "tags",
+                                  "active",
+                                  "status",
+                                  "publishedAt",
+                                  "publishedBy",
+                                  "archived",
+                                  "archivedAt",
+                                  "archivedBy",
+                                  "paymentProvider",
+                                  "planType",
+                                  "currency",
+                                  "whenToBill",
+                                  "billingPeriod",
+                                  "startCycle",
+                                  "gracePeriod",
+                                  "metadata",
+                                  "version",
+                                  "plan"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "projectId",
+                              "createdAt",
+                              "updatedAt",
+                              "customerId",
+                              "defaultPaymentMethodId",
+                              "planVersionId",
+                              "type",
+                              "prorated",
+                              "trialDays",
+                              "trialEnds",
+                              "startDate",
+                              "endDate",
+                              "autoRenew",
+                              "collectionMethod",
+                              "isNew",
+                              "status",
+                              "metadata",
+                              "nextPlanVersionTo",
+                              "planChanged",
+                              "nextSubscriptionId",
+                              "planVersion"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAt",
+                        "updatedAt",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "defaultCurrency",
+                        "subscriptions"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.entitlements": {
+      "get": {
+        "operationId": "customers-entitlements",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "customerId", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entitlements": { "type": "array", "items": { "type": "string" } }
+                  },
+                  "required": ["entitlements"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.can": {
+      "get": {
+        "operationId": "customers-can",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "customerId", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "featureSlug", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access": { "type": "boolean" },
+                    "deniedReason": {
+                      "type": "string",
+                      "enum": [
+                        "RATE_LIMITED",
+                        "USAGE_EXCEEDED",
+                        "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+                        "FEATURE_HAS_NO_USAGE_RECORD"
+                      ]
+                    },
+                    "currentUsage": { "type": "number" },
+                    "limit": { "type": "number" },
+                    "featureType": {}
+                  },
+                  "required": ["access"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.reportUsage": {
+      "get": {
+        "operationId": "customers-reportUsage",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "customerId", "in": "query", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "featureSlug",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          { "name": "usage", "in": "query", "required": true, "schema": { "type": "number" } },
+          {
+            "name": "idempotenceKey",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "success": { "type": "boolean" } },
+                  "required": ["success"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": { "Authorization": { "type": "http", "scheme": "bearer" } },
+    "responses": {
+      "error": {
+        "description": "Error response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "code": { "type": "string" },
+                "issues": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": { "message": { "type": "string" } },
+                    "required": ["message"],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": ["message", "code"],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "schemas": {}
+  },
+  "tags": [{ "name": "unprice", "description": "Operations related to unprice" }],
+  "externalDocs": { "url": "http://example.com/docs" },
+  "x-speakeasy-retries": {
+    "strategy": "backoff",
+    "backoff": {
+      "initialInterval": 500,
+      "maxInterval": 60000,
+      "maxElapsedTime": 3600000,
+      "exponent": 1.5
+    },
+    "statusCodes": ["5XX"],
+    "retryConnectionErrors": true
+  }
+}

@@ -10,7 +10,7 @@ export interface Telemetry {
    * builderai-Telemetry-Platform
    * @example cloudflare
    */
-  platform?: string
+  platform: string
   /**
    * builderai-Telemetry-Runtime
    * @example node@v18
@@ -19,8 +19,8 @@ export interface Telemetry {
 }
 
 export function getTelemetry(opts: UnpriceOptions): Telemetry | null {
-  let platform: string | undefined
-  let runtime: string | undefined
+  let platform = "unknown"
+  let runtime = "unknown"
   // TODO: add version and change this for unprice/api
   const sdkVersions = ["@builderai/unprice@0.0.1"]
 
@@ -29,7 +29,7 @@ export function getTelemetry(opts: UnpriceOptions): Telemetry | null {
       if (process.env.builderai_DISABLE_TELEMETRY) {
         return null
       }
-      platform = process.env.VERCEL ? "vercel" : process.env.AWS_REGION ? "aws" : undefined
+      platform = process.env.VERCEL ? "vercel" : process.env.AWS_REGION ? "aws" : "unknown"
 
       // @ts-expect-error - this is a runtime check
       if (typeof EdgeRuntime !== "undefined") {

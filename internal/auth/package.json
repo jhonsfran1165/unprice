@@ -11,9 +11,7 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "src/*"
-      ]
+      "*": ["src/*"]
     }
   },
   "license": "AGPL-3.0",
