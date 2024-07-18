@@ -5,7 +5,7 @@ export function setCorsHeaders(res: Response) {
 
   res.headers.set(
     "Access-Control-Allow-Headers",
-    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, builderai-Telemetry-Platform builderai-Telemetry-Runtime builderai-Telemetry-SDK x-trpc-source"
+    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Builderai-Telemetry-Platform, Builderai-Telemetry-Runtime, Builderai-Telemetry-SDK, X-Trpc-Source"
   )
 }
 
