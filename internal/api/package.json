@@ -1,6 +1,5 @@
 {
   "name": "@builderai/api",
-  "private": true,
   "version": "0.1.0",
   "exports": {
     ".": "./src/index.ts",
@@ -12,9 +11,7 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "src/*"
-      ]
+      "*": ["src/*"]
     }
   },
   "license": "AGPL-3.0",
