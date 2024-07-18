@@ -17,10 +17,11 @@ import {
 } from "@builderai/ui/form"
 import { Input } from "@builderai/ui/input"
 
+import { Textarea } from "@builderai/ui/text-area"
 import { ConfirmAction } from "~/components/confirm-action"
 import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
-import { PAGES_BASE_DOMAIN } from "~/constants"
+import { SITES_BASE_DOMAIN } from "~/constants"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -118,15 +119,15 @@ export function PageForm({
         <div className="space-y-8">
           <FormField
             control={form.control}
-            name="name"
+            name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Page name</FormLabel>
+                <FormLabel>Page Title</FormLabel>
                 <FormDescription>
-                  Name this page so you can easily identify it later.
+                  The title is publicly visible and is used to identify the page.
                 </FormDescription>
                 <FormControl>
-                  <Input {...field} placeholder="production price page" disabled={editMode} />
+                  <Input {...field} placeholder="production price page" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -146,7 +147,7 @@ export function PageForm({
                   <InputWithAddons
                     {...field}
                     leading={"https://"}
-                    trailing={PAGES_BASE_DOMAIN}
+                    trailing={SITES_BASE_DOMAIN}
                     value={field.value ?? ""}
                   />
                 </FormControl>
@@ -162,17 +163,27 @@ export function PageForm({
               <FormItem>
                 <FormLabel>Page custom domain</FormLabel>
                 <FormDescription>
-                  You can bring your own domain to host this page. You have to include the protocol.
-                  e.g (https://example.com)
+                  You can bring your own domain to host this page. Don't include the protocol. e.g
+                  (example.com)
                 </FormDescription>
                 <FormControl>
-                  <Input
-                    {...field}
-                    value={field.value ?? ""}
-                    placeholder="free"
-                    disabled={editMode}
-                  />
+                  <Input {...field} value={field.value ?? ""} placeholder="mycustomdomain.com" />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea {...field} value={field.value ?? ""} />
+                </FormControl>
+                <FormDescription>Enter a short description of the page.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

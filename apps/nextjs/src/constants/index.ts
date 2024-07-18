@@ -1,33 +1,42 @@
 import { env } from "../env.mjs"
 
-// TODO: this to constants inside config package
+const MAIN_DOMAIN = "builderai.sh"
+const SITES_DOMAIN = "builderai.sh"
 
-export const PAGES_BASE_DOMAIN = env.NEXT_PUBLIC_APP_DOMAIN
-export const APP_BASE_DOMAIN = `app.${env.NEXT_PUBLIC_APP_DOMAIN}`
+// TODO: this to constants inside config package
+export const BASE_DOMAIN =
+  env.VERCEL_ENV === "production"
+    ? MAIN_DOMAIN
+    : env.VERCEL_ENV === "preview"
+      ? `${env.NEXT_PUBLIC_APP_DOMAIN}`
+      : "localhost:3000"
+
+export const APP_BASE_DOMAIN = `app.${BASE_DOMAIN}`
+
+export const SITES_BASE_DOMAIN =
+  env.VERCEL_ENV === "production"
+    ? SITES_DOMAIN
+    : env.VERCEL_ENV === "preview"
+      ? `${env.NEXT_PUBLIC_APP_DOMAIN}`
+      : "localhost:3000"
 
 export const APP_HOSTNAMES = new Set([
-  "app.builderai.sh",
+  `app.${MAIN_DOMAIN}`,
   `app.${env.NEXT_PUBLIC_APP_DOMAIN}`,
   "app.localhost:3000",
 ])
 
 export const APP_DOMAIN =
   env.VERCEL_ENV === "production"
-    ? "https://app.builderai.sh/"
+    ? `https://${MAIN_DOMAIN}/`
     : env.VERCEL_ENV === "preview"
-      ? `https://${env.NEXT_PUBLIC_APP_DOMAIN}`
+      ? `https://${env.NEXT_PUBLIC_APP_DOMAIN}/`
       : "http://app.localhost:3000/"
 
 export const API_HOSTNAMES = new Set([
-  "api.builderai.sh",
+  `api.${MAIN_DOMAIN}`,
   `api.${env.NEXT_PUBLIC_APP_DOMAIN}`,
   "api.localhost:3000",
-])
-
-export const SITES_HOSTNAMES = new Set([
-  "sites.builderai.sh",
-  `sites.${env.NEXT_PUBLIC_APP_DOMAIN}`,
-  "sites.localhost:3000",
 ])
 
 export const AUTH_ROUTES = {

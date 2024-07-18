@@ -17,7 +17,7 @@ export const pageRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { name, subdomain, customDomain } = opts.input
+      const { title, subdomain, customDomain, description } = opts.input
       const project = opts.ctx.project
 
       const pageId = newId("page")
@@ -28,8 +28,9 @@ export const pageRouter = createTRPCRouter({
         .values({
           id: pageId,
           slug,
-          name,
+          title,
           projectId: project.id,
+          description,
           subdomain,
           customDomain: customDomain || null,
         })
@@ -57,7 +58,7 @@ export const pageRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { id, subdomain, customDomain, name, content } = opts.input
+      const { id, subdomain, customDomain, title, content, description } = opts.input
       const project = opts.ctx.project
 
       const pageData = await opts.ctx.db.query.pages.findFirst({
@@ -76,7 +77,8 @@ export const pageRouter = createTRPCRouter({
         .set({
           subdomain,
           customDomain,
-          name,
+          description,
+          title,
           content,
           updatedAt: new Date(),
         })

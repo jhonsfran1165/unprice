@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import type { NextAuthRequest } from "@builderai/auth"
 
-import { getValidSubdomain, parse } from "./utils"
+import { getValidSubdomain, parse } from "~/lib/domains"
 
 export default function SitesMiddleware(req: NextAuthRequest) {
   const { domain, path } = parse(req)

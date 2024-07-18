@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation"
 import { EditorPreview } from "~/components/page-builder/editor-preview"
-import { api } from "~/trpc/server"
 
 import lz from "lzutf8"
+import { getPageData } from "~/lib/fetchers"
 
 export default async function DomainPage({
   params: { domain },
@@ -11,9 +11,8 @@ export default async function DomainPage({
     domain: string
   }
 }) {
-  const { page } = await api.pages.getByDomain({
-    domain,
-  })
+  // we use `getPageData` to fetch the page data and cache it. Instead of using `api.pages.findFirst` directly
+  const page = await getPageData(domain)
 
   if (!page) {
     notFound()

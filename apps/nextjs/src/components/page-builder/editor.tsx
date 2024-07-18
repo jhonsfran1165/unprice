@@ -62,6 +62,7 @@ export function EditorPageComponent({
                 <Frame data={data}>
                   {/* // initial content if json is empty */}
                   {data === "" && (
+                    // TODO: define a layout for the initial content
                     <Element canvas is={ContainerElement} custom={{ displayName: "App" }}>
                       <HeaderComponent links={[]} />
                       <TextComponent text="It's me again!" />

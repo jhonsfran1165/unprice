@@ -4,7 +4,14 @@ import { Button } from "@builderai/ui/button"
 import { Logo as LogoIcon } from "@builderai/ui/icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 import { Element, useEditor } from "@craftjs/core"
-import { ContainerIcon, FilePenLine, FootprintsIcon, Layout, Table, Text } from "lucide-react"
+import {
+  ContainerIcon,
+  FilePenLine,
+  GalleryHorizontalEnd,
+  PanelBottom,
+  PanelTop,
+  Text,
+} from "lucide-react"
 
 import {
   ContainerElement,
@@ -95,7 +102,7 @@ export function ElementsSidebar({
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" align="end" alignOffset={25} className="w-max-[200px]">
-              <div className="font-semibold text-sm">Notion like editor</div>
+              <div className="font-semibold text-sm">Text editor</div>
             </TooltipContent>
           </Tooltip>
 
@@ -109,7 +116,7 @@ export function ElementsSidebar({
                   ref && create(ref, <HeaderComponent links={[]} />)
                 }}
               >
-                <Layout className="size-6 cursor-grab" />
+                <PanelTop className="size-6 cursor-grab" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" align="end" alignOffset={25} className="w-max-[200px]">
@@ -127,13 +134,15 @@ export function ElementsSidebar({
                   ref && create(ref, <PricingTableComponent plans={[]} />)
                 }}
               >
-                <Table className="size-6 cursor-grab" />
+                <GalleryHorizontalEnd className="size-6 cursor-grab" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" align="end" alignOffset={25} className="w-max-[200px]">
               <div className="font-semibold text-sm">Pricing table</div>
             </TooltipContent>
           </Tooltip>
+
+          {/* // TODO: Add twitter component with react-tweet */}
 
           <Tooltip>
             <TooltipTrigger asChild>
@@ -145,7 +154,7 @@ export function ElementsSidebar({
                   ref && create(ref, <FooterComponent links={[]} />)
                 }}
               >
-                <FootprintsIcon className="size-6 cursor-grab" />
+                <PanelBottom className="size-6 cursor-grab" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" align="end" alignOffset={25} className="w-max-[200px]">

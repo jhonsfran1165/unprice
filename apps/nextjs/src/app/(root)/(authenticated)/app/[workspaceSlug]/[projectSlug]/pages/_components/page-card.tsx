@@ -1,11 +1,4 @@
-import {
-  GalleryHorizontalEnd,
-  LayoutDashboard,
-  MoreHorizontal,
-  PlusIcon,
-  Settings,
-  User2,
-} from "lucide-react"
+import { MoreHorizontal, PlusIcon, Settings } from "lucide-react"
 
 import type { RouterOutputs } from "@builderai/api"
 import { Button } from "@builderai/ui/button"
@@ -30,6 +23,7 @@ import { cn } from "@builderai/ui/utils"
 
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { SuperLink } from "~/components/super-link"
+import { SITES_BASE_DOMAIN } from "~/constants"
 import { PageForm } from "./page-form"
 
 export function PageCard(props: {
@@ -38,6 +32,7 @@ export function PageCard(props: {
   page: RouterOutputs["pages"]["listByActiveProject"]["pages"][number]
 }) {
   const { page } = props
+  const domain = page.customDomain ? page.customDomain : `${page.subdomain}.${SITES_BASE_DOMAIN}`
 
   return (
     <SuperLink href={`/${props.workspaceSlug}/${props.projectSlug}/pages/${page.id}`}>
@@ -46,16 +41,16 @@ export function PageCard(props: {
           <div className="space-y-4">
             <CardTitle className={"line-clamp-1"}>
               <div className="flex items-center space-x-3">
-                <span>{page.name}</span>
-                {page.customDomain && (
+                <span>{page.title}</span>
+                {page.published && (
                   <div className="inline-flex items-center font-secondary font-semibold text-info text-xs">
                     <span className="flex h-2 w-2 rounded-full bg-info" />
-                    <span className="ml-1">{"default"}</span>
+                    <span className="ml-1">{"published"}</span>
                   </div>
                 )}
               </div>
             </CardTitle>
-            <CardDescription className="line-clamp-2 h-10">{page.customDomain}</CardDescription>
+            <CardDescription className="line-clamp-2 h-10">{page.description}</CardDescription>
           </div>
           <div className="flex items-center space-x-1">
             <PropagationStopper>
@@ -71,29 +66,11 @@ export function PageCard(props: {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
                       <SuperLink
-                        href={`/${props.workspaceSlug}/${props.projectSlug}/pages/${page.name}/create-version`}
+                        href={`/${props.workspaceSlug}/${props.projectSlug}/pages/${page.id}`}
                         className="flex items-center"
                       >
                         <PlusIcon className="mr-2 h-4 w-4" />
-                        Create version
-                      </SuperLink>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <SuperLink
-                        href={`/${props.workspaceSlug}/${props.projectSlug}/pages/${page.name}`}
-                        className="flex items-center"
-                      >
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Dashboard
-                      </SuperLink>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <SuperLink
-                        href={`/${props.workspaceSlug}/${props.projectSlug}/pages/${page.name}`}
-                        className="flex items-center"
-                      >
-                        <User2 className="mr-2 h-4 w-4" />
-                        Customer
+                        Publish
                       </SuperLink>
                     </DropdownMenuItem>
 
@@ -119,8 +96,7 @@ export function PageCard(props: {
           </div>
         </CardHeader>
         <CardFooter className="flex flex-row justify-between space-x-4 text-muted-foreground text-sm">
-          <span>{page.customDomain}</span>
-          <GalleryHorizontalEnd className="h-4 w-4" />
+          {domain}
         </CardFooter>
       </Card>
     </SuperLink>

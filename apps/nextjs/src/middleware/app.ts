@@ -12,8 +12,8 @@ import {
   APP_NON_WORKSPACE_ROUTES,
   AUTH_ROUTES,
 } from "~/constants"
+import { parse } from "~/lib/domains"
 import { getWorkspacesUser } from "~/lib/session"
-import { parse } from "~/middleware/utils"
 
 /**
  * Copy cookies from the Set-Cookie header of the response to the Cookie header of the request,

@@ -48,7 +48,7 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
 
     return {
       top: `${top > 0 ? top : bottom}px`,
-      left: `${left}px`,
+      left: `${left > 0 ? left : currentRef.current?.style?.left}px`,
     }
   }, [])
 

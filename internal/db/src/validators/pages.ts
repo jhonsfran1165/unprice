@@ -12,7 +12,11 @@ const domainSchema = z.coerce.string().refine((customDomain) => {
     return true
   }
 
-  const parsed = z.string().url().safeParse(customDomain)
+  // custom domain regex
+  const parsed = z
+    .string()
+    .regex(/^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/)
+    .safeParse(customDomain)
 
   return parsed.success
 }, "Invalid domain")
@@ -38,7 +42,7 @@ export const pageSelectBaseSchema = createSelectSchema(pages, {
 export const pageInsertBaseSchema = createInsertSchema(pages, {
   customDomain: domainSchema.optional(),
   subdomain: subdomainSchema,
-  name: z.string().min(3).max(50),
+  title: z.string().min(3).max(50),
 })
   .omit({
     createdAt: true,

@@ -2,11 +2,11 @@ import { NextResponse } from "next/server"
 
 import { auth } from "@builderai/auth/server"
 
+import { getValidSubdomain, parse } from "~/lib/domains"
+import ApiMiddleware from "~/middleware/api"
+import AppMiddleware from "~/middleware/app"
 import SitesMiddleware from "~/middleware/sites"
-import { getValidSubdomain, parse } from "~/middleware/utils"
 import { API_HOSTNAMES, APP_HOSTNAMES } from "./constants"
-import ApiMiddleware from "./middleware/api"
-import AppMiddleware from "./middleware/app"
 
 export default auth((req) => {
   const { domain } = parse(req)

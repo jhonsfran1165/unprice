@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import type { NextAuthRequest } from "@builderai/auth"
 import { API_AUTH_ROUTE_PREFIX } from "~/constants"
-import { parse } from "./utils"
+import { parse } from "~/lib/domains"
 
 export default function ApiMiddleware(req: NextAuthRequest) {
   const { path, fullPath } = parse(req)

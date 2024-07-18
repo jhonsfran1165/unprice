@@ -10,7 +10,7 @@ import type React from "react"
 import { startTransition } from "react"
 import { SearchTool } from "~/components/layout/search"
 import { SubmitButton } from "~/components/submit-button"
-import { PAGES_BASE_DOMAIN } from "~/constants"
+import { SITES_BASE_DOMAIN } from "~/constants"
 import { api } from "~/trpc/client"
 
 export const HeaderEditor: React.FC<{
@@ -24,7 +24,7 @@ export const HeaderEditor: React.FC<{
 
   const domain = page.customDomain
     ? page.customDomain
-    : `http://${page.subdomain}.${PAGES_BASE_DOMAIN}`
+    : `http://${page.subdomain}.${SITES_BASE_DOMAIN}`
   const updatePage = api.pages.update.useMutation({})
 
   function onUpdate() {
