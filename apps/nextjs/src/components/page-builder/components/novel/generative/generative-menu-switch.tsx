@@ -24,6 +24,7 @@ const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSw
           onOpenChange(false)
           editor.chain().unsetHighlight().run()
         },
+        appendTo: () => document.body,
       }}
       className="flex w-fit max-w-[100vw] overflow-hidden rounded-md border border-muted bg-background shadow-xl"
     >

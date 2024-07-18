@@ -64,8 +64,8 @@ export function PricingCardSkeleton() {
       </CardHeader>
 
       <CardContent>
-        <CardDescription>
-          <Skeleton className="h-[20px] w-full" />
+        <CardDescription className="animate-pulse rounded-md bg-accent">
+          &nbsp;
         </CardDescription>
         <div className="mt-8 flex items-baseline space-x-2">
           <span className="font-extrabold text-5xl">$0</span>

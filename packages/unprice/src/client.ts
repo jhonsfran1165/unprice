@@ -207,177 +207,6 @@ export class Unprice {
     }
   }
 
-  // public get keys() {
-  //   return {
-  //     create: async (
-  //       req: paths["/v1/keys.createKey"]["post"]["requestBody"]["content"]["application/json"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/v1/keys.createKey"]["post"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["v1", "keys.createKey"],
-  //         method: "POST",
-  //         body: req,
-  //       })
-  //     },
-  //     update: async (
-  //       req: paths["/v1/keys.updateKey"]["post"]["requestBody"]["content"]["application/json"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/v1/keys.updateKey"]["post"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["v1", "keys.updateKey"],
-  //         method: "POST",
-  //         body: req,
-  //       })
-  //     },
-  //     verify: async (
-  //       req: paths["/v1/keys.verifyKey"]["post"]["requestBody"]["content"]["application/json"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/v1/keys.verifyKey"]["post"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["v1", "keys.verifyKey"],
-  //         method: "POST",
-  //         body: req,
-  //       })
-  //     },
-  //     delete: async (
-  //       req: paths["/v1/keys.deleteKey"]["post"]["requestBody"]["content"]["application/json"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/v1/keys.deleteKey"]["post"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["v1", "keys.deleteKey"],
-  //         method: "POST",
-  //         body: req,
-  //       })
-  //     },
-  //     updateRemaining: async (
-  //       req: paths["/v1/keys.updateRemaining"]["post"]["requestBody"]["content"]["application/json"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/v1/keys.updateRemaining"]["post"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["v1", "keys.updateRemaining"],
-  //         method: "POST",
-  //         body: req,
-  //       })
-  //     },
-  //     get: async (
-  //       req: paths["/v1/keys.getKey"]["get"]["parameters"]["query"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/v1/keys.getKey"]["get"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["v1", "keys.getKey"],
-  //         method: "GET",
-  //         query: req,
-  //       })
-  //     },
-  //     getVerifications: async (
-  //       req: paths["/v1/keys.getVerifications"]["get"]["parameters"]["query"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/v1/keys.getVerifications"]["get"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["v1", "keys.getVerifications"],
-  //         method: "GET",
-  //         query: req,
-  //       })
-  //     },
-  //   }
-  // }
-
-  // public get apis() {
-  //   return {
-  //     create: async (
-  //       req: paths["/v1/apis.createApi"]["post"]["requestBody"]["content"]["application/json"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/v1/apis.createApi"]["post"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["v1", "apis.createApi"],
-  //         method: "POST",
-  //         body: req,
-  //       })
-  //     },
-  //     delete: async (
-  //       req: paths["/v1/apis.deleteApi"]["post"]["requestBody"]["content"]["application/json"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/v1/apis.deleteApi"]["post"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["v1", "apis.deleteApi"],
-  //         method: "POST",
-  //         body: req,
-  //       })
-  //     },
-  //     get: async (
-  //       req: paths["/v1/apis.getApi"]["get"]["parameters"]["query"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/v1/apis.getApi"]["get"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["v1", "apis.getApi"],
-  //         method: "GET",
-  //         query: req,
-  //       })
-  //     },
-  //     listKeys: async (
-  //       req: paths["/v1/apis.listKeys"]["get"]["parameters"]["query"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/v1/apis.listKeys"]["get"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["v1", "apis.listKeys"],
-  //         method: "GET",
-  //         query: req,
-  //       })
-  //     },
-  //   }
-  // }
-
-  // public get projects() {
-  //   return {
-  //     get: async (
-  //       req: paths["/edge/project.l"]["get"]["parameters"]["query"]
-  //     ): Promise<
-  //       Result<
-  //         paths["/edge/project.listByActiveWorkspace"]["get"]["responses"]["200"]["content"]["application/json"]
-  //       >
-  //     > => {
-  //       return await this.fetch({
-  //         path: ["edge", "project.listByActiveWorkspace"],
-  //         method: "GET",
-  //         query: req,
-  //       })
-  //     },
-  //   }
-  // }
-
   public get customers() {
     return {
       create: async (
@@ -459,6 +288,62 @@ export class Unprice {
       > => {
         return await this.fetch({
           path: ["edge", "customers.getById"],
+          method: "GET",
+          query: req,
+        })
+      },
+
+      getSubscriptions: async (
+        req: paths["/edge/customers.getSubscriptions"]["get"]["parameters"]["query"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.getSubscriptions"]["get"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.getSubscriptions"],
+          method: "GET",
+          query: req,
+        })
+      },
+
+      entitlements: async (
+        req: paths["/edge/customers.entitlements"]["get"]["parameters"]["query"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.entitlements"]["get"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.entitlements"],
+          method: "GET",
+          query: req,
+        })
+      },
+
+      listPaymentMethods: async (
+        req: paths["/edge/customers.listPaymentMethods"]["get"]["parameters"]["query"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.listPaymentMethods"]["get"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.listPaymentMethods"],
+          method: "GET",
+          query: req,
+        })
+      },
+
+      createPaymentMethod: async (
+        req: paths["/edge/customers.createPaymentMethod"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.createPaymentMethod"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.createPaymentMethod"],
           method: "GET",
           query: req,
         })

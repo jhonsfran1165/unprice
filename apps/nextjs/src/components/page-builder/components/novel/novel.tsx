@@ -138,6 +138,8 @@ export const NovelComponent: UserComponent<NovelComponentProps> = (props) => {
     >
       <EditorRoot>
         <EditorContent
+          // avoid rendering the editor on the server
+          immediatelyRender={false}
           editable={enabled}
           extensions={extensions}
           initialContent={editorContent}

@@ -15,15 +15,21 @@
     "dev:web": "turbo dev --parallel --filter !@builderai/expo --filter !@builderai/db",
     "typecheck": "turbo typecheck",
     "wh": "pnpm dlx webhookthing@latest",
-    "knip": "knip",
+    "knip": "knip --include files,dependencies",
     "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply",
     "fmt": "pnpm biome format . && pnpm biome check .",
     "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt",
-    "manypkg:fix": "pnpm manypkg fix"
+    "manypkg:fix": "pnpm manypkg fix",
+    "commit": "cz",
+    "bump-versions": "pnpm changeset version && pnpm install"
   },
-  "dependencies": {
+  "devDependencies": {
     "@biomejs/biome": "1.7.3",
+    "@changesets/cli": "^2.27.7",
     "@manypkg/cli": "^0.21.2",
+    "cz-conventional-changelog": "^3.3.0",
+    "@types/node": "^20.14.9",
+    "lint-staged": "^15.2.2",
     "@turbo/gen": "^1.12.4",
     "cross-env": "^7.0.3",
     "knip": "^5.17.4",
@@ -34,6 +40,11 @@
     "pre-commit": "lint-staged"
   },
   "lint-staged": {
-    "*": "pnpm fmt:fix"
+    "*": "pnpm validate"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
   }
 }

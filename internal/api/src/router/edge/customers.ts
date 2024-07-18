@@ -203,6 +203,13 @@ export const customersRouter = createTRPCRouter({
     }),
 
   listPaymentMethods: protectedApiOrActiveProjectProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/edge/customers.listPaymentMethods",
+        protect: true,
+      },
+    })
     .input(
       z.object({
         customerId: z.string(),
@@ -278,6 +285,13 @@ export const customersRouter = createTRPCRouter({
     }),
 
   createPaymentMethod: protectedApiOrActiveProjectProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/edge/customers.createPaymentMethod",
+        protect: true,
+      },
+    })
     .input(
       z.object({
         paymentProvider: paymentProviderSchema,
@@ -508,13 +522,6 @@ export const customersRouter = createTRPCRouter({
       }
     }),
   listByActiveProject: protectedApiOrActiveProjectProcedure
-    .meta({
-      openapi: {
-        method: "GET",
-        path: "/edge/customers.listByActiveProject",
-        protect: true,
-      },
-    })
     .input(searchDataParamsSchema)
     .output(z.object({ customers: z.array(customerSelectSchema) }))
     .query(async (opts) => {

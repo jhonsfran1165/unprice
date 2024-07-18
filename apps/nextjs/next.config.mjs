@@ -18,7 +18,6 @@ const nextConfig = {
     "@builderai/stripe",
     "@builderai/ui",
     "@builderai/auth",
-    // "@builderai/unprice",
     "@builderai/config",
     "@builderai/tailwind-config",
   ],

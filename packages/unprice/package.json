@@ -1,13 +1,13 @@
 {
-  "name": "@builderai/unprice",
+  "name": "@jhonsfran/unprice",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "AGPL-3.0",
-  "files": ["./dist/**"],
+  "files": ["dist", "package.json"],
   "publishConfig": {
     "access": "public"
   },
