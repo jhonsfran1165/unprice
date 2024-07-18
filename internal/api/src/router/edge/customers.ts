@@ -388,15 +388,16 @@ export const customersRouter = createTRPCRouter({
   getByEmail: protectedApiOrActiveProjectProcedure
     .meta({
       openapi: {
-        method: "POST",
+        method: "GET",
         path: "/edge/customers.getByEmail",
         protect: true,
       },
     })
     .input(customerSelectSchema.pick({ email: true }))
     .output(z.object({ customer: customerSelectSchema }))
-    .mutation(async (opts) => {
+    .query(async (opts) => {
       const { email } = opts.input
+
       // const { apiKey, project, ...ctx } = opts.ctx
       const { project } = opts.ctx
 
@@ -552,7 +553,7 @@ export const customersRouter = createTRPCRouter({
       }
     }),
 
-  // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_6hASRQKH7vsq5WQH", featureSlug: "access" }}}))
+  // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_2GGH1GE4864s4GrX6ttkjbStDP3k" }}}))
   entitlements: protectedApiOrActiveProjectProcedure
     .meta({
       openapi: {

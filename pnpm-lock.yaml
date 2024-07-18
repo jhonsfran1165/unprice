@@ -849,6 +849,9 @@ importers:
       '@builderai/tsconfig':
         specifier: ^0.1.0
         version: link:../../tooling/typescript
+      '@types/node':
+        specifier: ^20.14.11
+        version: 20.14.11
       openapi-typescript:
         specifier: 7.0.0-next.7
         version: 7.0.0-next.7(typescript@5.5.3)

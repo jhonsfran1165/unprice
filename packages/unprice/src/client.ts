@@ -83,7 +83,7 @@ type Result<R> =
     }
 
 export class Unprice {
-  public readonly baseUrl: string
+  private readonly baseUrl: string
   private readonly token: string
   private readonly cache?: RequestCache
   private readonly telemetry?: Telemetry | null
@@ -100,7 +100,7 @@ export class Unprice {
       this.telemetry = getTelemetry(opts)
     }
 
-    this.cache = opts.cache
+    this.cache = opts.cache ?? "default"
     /**
      * Even though typescript should prevent this, some people still pass undefined or empty strings
      */
@@ -144,15 +144,14 @@ export class Unprice {
         method: req.method,
         headers: this.getHeaders(),
         cache: this.cache,
-        body: undefined as string | undefined,
-      }
+      } as RequestInit
 
       if (req.query) {
         // expected input for trpc
         const inputString = superjson.serialize(req.query)
         const stringifyRequest = JSON.stringify({ 0: inputString })
 
-        const encodedParams = `batch=0&input=${encodeURIComponent(stringifyRequest)}`
+        const encodedParams = `batch=1&input=${encodeURIComponent(stringifyRequest)}`
 
         url.search = encodedParams
       }
@@ -171,7 +170,7 @@ export class Unprice {
           data: SuperJSONResult
         }>
 
-        const data = response?.result?.data
+        const data = Array.isArray(response) ? response?.at(0).result?.data : response?.result?.data
         const result = data ? superjson.deserialize(data) : {}
 
         return { result: result as TResult }
@@ -266,16 +265,16 @@ export class Unprice {
       },
 
       getByEmail: async (
-        req: paths["/edge/customers.getByEmail"]["post"]["requestBody"]["content"]["application/json"]
+        req: paths["/edge/customers.getByEmail"]["get"]["parameters"]["query"]
       ): Promise<
         Result<
-          paths["/edge/customers.getByEmail"]["post"]["responses"]["200"]["content"]["application/json"]
+          paths["/edge/customers.getByEmail"]["get"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
           path: ["edge", "customers.getByEmail"],
-          method: "POST",
-          body: req,
+          method: "GET",
+          query: req,
         })
       },
 

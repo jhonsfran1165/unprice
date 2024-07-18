@@ -1,7 +1,6 @@
+import lz from "lzutf8"
 import { notFound } from "next/navigation"
 import { EditorPreview } from "~/components/page-builder/editor-preview"
-
-import lz from "lzutf8"
 import { getPageData } from "~/lib/fetchers"
 
 export default async function DomainPage({

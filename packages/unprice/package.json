@@ -1,13 +1,13 @@
 {
   "name": "@jhonsfran/unprice",
   "private": false,
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "module": "./dist/index.cjs",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
+      "import": "./dist/index.cjs",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@builderai/tsconfig": "^0.1.0",
+    "@types/node": "^20.14.11",
     "openapi-typescript": "7.0.0-next.7",
     "tsup": "^8.0.2",
     "typescript": "^5.3.3"

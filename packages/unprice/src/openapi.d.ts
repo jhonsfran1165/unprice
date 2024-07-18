@@ -107,9 +107,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["customers-getByEmail"];
         put?: never;
-        post: operations["customers-getByEmail"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -490,18 +490,14 @@ export interface operations {
     };
     "customers-getByEmail": {
         parameters: {
-            query?: never;
+            query: {
+                email: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": {
-                    email: string;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful response */
             200: {
