@@ -4,10 +4,7 @@
   "engines": {
     "node": "20.11.1"
   },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "workspaces": ["apps/*", "packages/*"],
   "engineStrict": true,
   "packageManager": "pnpm@8.15.4",
   "scripts": {
@@ -51,5 +48,8 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
+  },
+  "hooks": {
+    "pre-commit": "lint-staged"
   }
 }
