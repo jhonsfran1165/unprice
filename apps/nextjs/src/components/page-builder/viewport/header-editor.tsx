@@ -8,6 +8,7 @@ import lz from "lzutf8"
 import Link from "next/link"
 import type React from "react"
 import { startTransition } from "react"
+import { revalidatePageDomain } from "~/actions/pages"
 import { SearchTool } from "~/components/layout/search"
 import { SubmitButton } from "~/components/submit-button"
 import { SITES_BASE_DOMAIN } from "~/constants"
@@ -25,7 +26,12 @@ export const HeaderEditor: React.FC<{
   const domain = page.customDomain
     ? page.customDomain
     : `http://${page.subdomain}.${SITES_BASE_DOMAIN}`
-  const updatePage = api.pages.update.useMutation({})
+
+  const updatePage = api.pages.update.useMutation({
+    onSuccess: ({ page }) => {
+      revalidatePageDomain(page.customDomain || page.subdomain)
+    },
+  })
 
   function onUpdate() {
     startTransition(() => {
