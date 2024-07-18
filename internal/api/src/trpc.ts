@@ -77,7 +77,10 @@ export const createTRPCContext = async (opts: {
 }) => {
   const session = opts.session ?? (await auth())
   const userId = session?.user?.id ?? "unknown"
-  const apikey = opts.headers.get("x-builderai-api-key")
+
+  const authorizationHeader = opts.headers.get("Authorization") ?? ""
+  const apikey = authorizationHeader.split(" ")[1]
+
   const source = opts.headers.get("x-trpc-source") ?? "unknown"
   const requestId = opts.headers.get("x-request-id") ?? newId("request")
   const region = opts.headers.get("x-vercel-id") ?? "unknown"

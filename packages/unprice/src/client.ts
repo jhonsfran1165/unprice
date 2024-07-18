@@ -119,7 +119,7 @@ export class Unprice {
   private getHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      "x-builderai-api-key": this.token,
+      Authorization: `Bearer ${this.token}`,
       "x-trpc-source": "sdk", // TODO: add version here
     }
     if (this.telemetry?.sdkVersions) {
