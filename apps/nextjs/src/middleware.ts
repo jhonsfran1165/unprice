@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 
 import { auth } from "@builderai/auth/server"
 
+import { newId } from "@builderai/db/utils"
 import { getValidSubdomain, parse } from "~/lib/domains"
 import ApiMiddleware from "~/middleware/api"
 import AppMiddleware from "~/middleware/app"
@@ -10,6 +11,9 @@ import { API_HOSTNAMES, APP_HOSTNAMES } from "./constants"
 
 export default auth((req) => {
   const { domain } = parse(req)
+
+  // set request id if not present
+  req.headers.get("x-request-id") || req.headers.set("x-request-id", newId("request"))
 
   // 1. we validate api routes
   if (API_HOSTNAMES.has(domain)) {

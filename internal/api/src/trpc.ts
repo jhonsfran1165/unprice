@@ -2,10 +2,6 @@ import "server-only"
 import { tracing } from "@baselime/trpc-opentelemetry-middleware"
 import type { Session } from "@builderai/auth/server"
 
-import type { OpenApiMeta } from "@potatohd/trpc-openapi"
-import { TRPCError, initTRPC } from "@trpc/server"
-import { ZodError } from "zod"
-
 import type { NextAuthRequest } from "@builderai/auth"
 import { auth } from "@builderai/auth/server"
 import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
@@ -13,8 +9,15 @@ import { db } from "@builderai/db"
 import { newId } from "@builderai/db/utils"
 import { BaseLimeLogger, ConsoleLogger, type Logger } from "@builderai/logging"
 import { Analytics } from "@builderai/tinybird"
+import type { OpenApiMeta } from "@potatohd/trpc-openapi"
+import type { MwFn } from "@trpc-limiter/core"
+import { createTRPCStoreLimiter } from "@trpc-limiter/memory"
+import { createTRPCUpstashLimiter, defaultFingerPrint } from "@trpc-limiter/upstash"
+import { TRPCError, initTRPC } from "@trpc/server"
 import type { Cache as C } from "@unkey/cache"
+import { Ratelimit } from "@upstash/ratelimit"
 import { waitUntil } from "@vercel/functions"
+import { ZodError } from "zod"
 import { env } from "./env.mjs"
 import { initCache } from "./pkg/cache"
 import type { CacheNamespaces } from "./pkg/cache/namespaces"
@@ -23,6 +26,7 @@ import { LogdrainMetrics } from "./pkg/metrics/logdrain"
 import { transformer } from "./transformer"
 import { projectGuard } from "./utils"
 import { apikeyGuard } from "./utils/apaikey-guard"
+import { RATE_LIMIT_WINDOW, redis } from "./utils/upstash"
 import { workspaceGuard } from "./utils/workspace-guard"
 
 /**
@@ -47,6 +51,7 @@ export interface CreateContextOptions {
   cache: C<CacheNamespaces>
   // pass this in the context so we can migrate easily to other providers
   waitUntil: (p: Promise<unknown>) => void
+  ip: string
 }
 
 /**
@@ -78,19 +83,25 @@ export const createTRPCContext = async (opts: {
   const session = opts.session ?? (await auth())
   const userId = session?.user?.id ?? "unknown"
 
-  const authorizationHeader = opts.headers.get("Authorization") ?? ""
+  const authorizationHeader = opts.headers.get("Authorization") || ""
   const apikey = authorizationHeader.split(" ")[1]
 
-  const source = opts.headers.get("x-trpc-source") ?? "unknown"
-  const requestId = opts.headers.get("x-request-id") ?? newId("request")
-  const region = opts.headers.get("x-vercel-id") ?? "unknown"
-  const country = opts.headers.get("x-vercel-ip-country") ?? "unknown"
+  const source = opts.headers.get("x-trpc-source") || "unknown"
+  const pathname = opts.req?.nextUrl.pathname || "unknown"
+  const requestId = opts.headers.get("x-request-id") || newId("request")
+  const region = opts.headers.get("x-vercel-id") || "unknown"
+  const country = opts.headers.get("x-vercel-ip-country") || "unknown"
+  const ip =
+    opts.headers.get("x-real-ip") ||
+    opts.headers.get("x-forwarded-for") ||
+    opts.req?.ip ||
+    "localhost"
 
   const logger = env.EMIT_METRICS_LOGS
     ? new BaseLimeLogger({
         apiKey: env.BASELIME_APIKEY,
         requestId,
-        defaultFields: { userId, region, country, source },
+        defaultFields: { userId, region, country, source, ip, pathname },
         namespace: "unprice-api",
         dataset: "unprice-api",
         service: "api", // default service name
@@ -101,7 +112,7 @@ export const createTRPCContext = async (opts: {
       })
     : new ConsoleLogger({
         requestId,
-        defaultFields: { userId, region, country, source },
+        defaultFields: { userId, region, country, source, ip, pathname },
       })
 
   const metrics: Metrics = env.EMIT_METRICS_LOGS
@@ -126,6 +137,7 @@ export const createTRPCContext = async (opts: {
 
   return createInnerTRPCContext({
     session,
+    ip,
     apikey,
     headers: opts.headers,
     req: opts.req,
@@ -152,6 +164,12 @@ export const t = initTRPC
   .create({
     transformer,
     errorFormatter({ shape, error, ctx }) {
+      // don't show stack trace in production
+      if (env.NODE_ENV === "production") {
+        delete error.stack
+        delete shape.data.stack
+      }
+
       const errorResponse = {
         ...shape,
         data: {
@@ -163,13 +181,42 @@ export const t = initTRPC
         },
       }
 
-      ctx?.logger.error("Error in trpc api", {
-        error: JSON.stringify(errorResponse),
-      })
+      if (error.code === "INTERNAL_SERVER_ERROR") {
+        ctx?.logger.error("Error 500 in trpc api", {
+          error: JSON.stringify(errorResponse),
+        })
+      }
 
       return errorResponse
     },
   })
+
+// Ratelimit middlewares
+const rateLimiterRedis = createTRPCUpstashLimiter<typeof t>({
+  fingerprint: (ctx) => defaultFingerPrint(ctx.req ?? { ip: ctx.ip }),
+  message: (hitInfo) =>
+    `Ups! Too many requests, please try again in ${Math.ceil(
+      (hitInfo.reset - Date.now()) / 1000
+    )} seconds. Don't DDoS me pls 🥺`,
+  max: RATE_LIMIT_WINDOW.max,
+  windowMs: RATE_LIMIT_WINDOW.windowMs,
+  rateLimitOpts(opts) {
+    return {
+      redis: redis,
+      limiter: Ratelimit.fixedWindow(opts.max, `${opts.windowMs} ms`),
+      analytics: RATE_LIMIT_WINDOW.analytics,
+      prefix: RATE_LIMIT_WINDOW.prefix,
+    }
+  },
+}) as MwFn<typeof t>
+
+const rateLimiterMemory = createTRPCStoreLimiter<typeof t>({
+  fingerprint: (ctx) => defaultFingerPrint(ctx.req ?? { ip: ctx.ip }),
+  message: (hitInfo) =>
+    `Mem! Too many requests, please try again in ${hitInfo} seconds. Don't DDoS me pls 🥺`,
+  max: RATE_LIMIT_WINDOW.max,
+  windowMs: RATE_LIMIT_WINDOW.windowMs,
+})
 
 /**
  * Create a server-side caller
@@ -199,6 +246,10 @@ export const mergeRouters = t.mergeRouters
  * can still access user session data if they are logged in
  */
 export const publicProcedure = t.procedure.use(tracing({ collectInput: true }))
+
+// rate limit per tier, first memory then redis
+// useful for limiting public endpoints that don't need strict rate limiting
+export const rateLimiterProcedure = publicProcedure.use(rateLimiterMemory).use(rateLimiterRedis)
 
 /**
  * Reusable procedure that enforces users are logged in before running the

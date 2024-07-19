@@ -10,7 +10,11 @@ import { stripe } from "@builderai/stripe"
 import { and, eq } from "@builderai/db"
 import { features, planVersionFeatures } from "@builderai/db/schema"
 import { toStripeMoney } from "@builderai/db/utils"
-import { createTRPCRouter, protectedActiveWorkspaceProcedure, publicProcedure } from "../../trpc"
+import {
+  createTRPCRouter,
+  protectedActiveWorkspaceProcedure,
+  rateLimiterProcedure,
+} from "../../trpc"
 
 export const stripeRouter = createTRPCRouter({
   // createLinkAccount: protectedActiveProjectProcedure
@@ -106,7 +110,7 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   // TODO: add output
-  plans: publicProcedure.input(z.void()).query(async () => {
+  plans: rateLimiterProcedure.input(z.void()).query(async () => {
     // TODO: fix priceId
     const proPrice = await stripe.prices.retrieve(PLANS.PRO?.priceId ?? "")
     const stdPrice = await stripe.prices.retrieve(PLANS.STANDARD?.priceId ?? "")
@@ -130,7 +134,7 @@ export const stripeRouter = createTRPCRouter({
   }),
 
   // TODO: delete this just for testing
-  dinero: publicProcedure.input(z.void()).query(async (opts) => {
+  dinero: rateLimiterProcedure.input(z.void()).query(async (opts) => {
     // TODO: fix priceId
 
     const now = new Date()

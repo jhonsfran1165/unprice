@@ -6,7 +6,7 @@ import { pageInsertBaseSchema, pageSelectBaseSchema } from "@builderai/db/valida
 import { and, eq } from "@builderai/db"
 import * as schema from "@builderai/db/schema"
 import { createSlug, newId } from "@builderai/db/utils"
-import { createTRPCRouter, protectedActiveProjectProcedure, publicProcedure } from "../../trpc"
+import { createTRPCRouter, protectedActiveProjectProcedure, rateLimiterProcedure } from "../../trpc"
 
 export const pageRouter = createTRPCRouter({
   create: protectedActiveProjectProcedure
@@ -122,7 +122,7 @@ export const pageRouter = createTRPCRouter({
       }
     }),
 
-  getByDomain: publicProcedure
+  getByDomain: rateLimiterProcedure
     .input(
       z.object({
         domain: z.string(),

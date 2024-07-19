@@ -2,22 +2,11 @@ import { type Cache as C, type Context, Namespace, createCache } from "@unkey/ca
 import { withEncryption, withMetrics } from "@unkey/cache/middleware"
 import { MemoryStore, type Store, UpstashRedisStore } from "@unkey/cache/stores"
 
-import { Redis } from "@upstash/redis"
 import { env } from "../../env.mjs"
+import { redis } from "../../utils/upstash"
 import type { Metrics } from "../metrics"
 import type { CacheNamespace, CacheNamespaces } from "./namespaces"
 import { CACHE_FRESHNESS_TIME_MS, CACHE_STALENESS_TIME_MS } from "./stale-while-revalidate"
-
-const LATENCY_LOGGING = env.NODE_ENV === "development"
-const ENABLE_AUTO_PIPELINING = true
-
-export const redis = new Redis({
-  token: env.UPSTASH_REDIS_REST_TOKEN,
-  url: env.UPSTASH_REDIS_REST_URL,
-  // enable auto pipelining to improve performance
-  latencyLogging: LATENCY_LOGGING,
-  enableAutoPipelining: ENABLE_AUTO_PIPELINING,
-})
 
 const persistentMap = new Map()
 
@@ -31,7 +20,7 @@ export async function initCache(c: Context, metrics: Metrics): Promise<C<CacheNa
   const upstash: Store<CacheNamespace, CacheNamespaces[CacheNamespace]> | undefined =
     env.UPSTASH_REDIS_REST_TOKEN && env.UPSTASH_REDIS_REST_URL
       ? new UpstashRedisStore({
-          redis,
+          redis: redis,
         })
       : undefined
 

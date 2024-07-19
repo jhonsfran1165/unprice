@@ -42,7 +42,7 @@
     "pre-commit": "lint-staged"
   },
   "lint-staged": {
-    "*": "pnpm validate"
+    "*": "pnpm fmt:fix && pnpm validate"
   },
   "config": {
     "commitizen": {

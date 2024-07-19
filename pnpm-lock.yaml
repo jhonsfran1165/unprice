@@ -380,6 +380,12 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: 0.9.1
         version: 0.9.1(typescript@5.5.3)(zod@3.23.8)
+      '@trpc-limiter/memory':
+        specifier: ^1.0.0
+        version: 1.0.0(@trpc/server@11.0.0-rc.436)
+      '@trpc-limiter/upstash':
+        specifier: ^1.0.0
+        version: 1.0.0(@trpc/server@11.0.0-rc.436)(@upstash/ratelimit@2.0.0)(@upstash/redis@1.33.0)
       '@trpc/server':
         specifier: 11.0.0-rc.436
         version: 11.0.0-rc.436
@@ -387,10 +393,10 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
       '@upstash/ratelimit':
-        specifier: ^1.0.1
-        version: 1.2.1
+        specifier: ^2.0.0
+        version: 2.0.0
       '@upstash/redis':
-        specifier: ^1.31.3
+        specifier: ^1.33.0
         version: 1.33.0
       '@vercel/functions':
         specifier: ^1.0.2
@@ -7683,6 +7689,42 @@ packages:
       - utf-8-validate
     dev: false
 
+  /@trpc-limiter/core@1.0.0(@trpc/server@11.0.0-rc.436):
+    resolution: {integrity: sha512-Wjq2oTCmCdwNbZKRfKpzpl1Um9QXGE8OHXOab+EUSj5Wk+26I/V6Vs2p0VBFAz6eEsBn36982cCC/vaaznA8+Q==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@trpc/client': next
+      '@trpc/server': next
+    dependencies:
+      '@trpc/server': 11.0.0-rc.436
+    dev: false
+
+  /@trpc-limiter/memory@1.0.0(@trpc/server@11.0.0-rc.436):
+    resolution: {integrity: sha512-3ahqbHV7mVLH7+H69kOaNozMsID+3P4hoU178viPIGbfrOCiu2SGUFgB+TdGl2SZ6PNPmeCACF1AlfTfIerDvw==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@trpc/client': next
+      '@trpc/server': next
+    dependencies:
+      '@trpc-limiter/core': 1.0.0(@trpc/server@11.0.0-rc.436)
+      '@trpc/server': 11.0.0-rc.436
+    dev: false
+
+  /@trpc-limiter/upstash@1.0.0(@trpc/server@11.0.0-rc.436)(@upstash/ratelimit@2.0.0)(@upstash/redis@1.33.0):
+    resolution: {integrity: sha512-TsMkHd/a6GtXvsuSevBwaRHrTBWIz3IW9D5ggAJg5iYg6Ocew42iNqxX/n7L143z3C9vW1purBDdFaDK0zK/zQ==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@trpc/client': next
+      '@trpc/server': next
+      '@upstash/ratelimit': ^0.1.5
+      '@upstash/redis': ^1.18.0
+    dependencies:
+      '@trpc-limiter/core': 1.0.0(@trpc/server@11.0.0-rc.436)
+      '@trpc/server': 11.0.0-rc.436
+      '@upstash/ratelimit': 2.0.0
+      '@upstash/redis': 1.33.0
+    dev: false
+
   /@trpc/client@11.0.0-rc.436(@trpc/server@11.0.0-rc.436):
     resolution: {integrity: sha512-xI2+6PTs0rhFEIABhZdcGUtn/bfngkqzrcerXez3un2SGbf/7BRt93J0rg9qjiVi716U0QAc88ZD52s6iMvlew==}
     peerDependencies:
@@ -8181,8 +8223,8 @@ packages:
       '@upstash/redis': 1.33.0
     dev: false
 
-  /@upstash/ratelimit@1.2.1:
-    resolution: {integrity: sha512-o01lV1yFS5Fzj5KONZmNyVch/Qrlj785B2ob+kStUmxn8F6xXk7IHTQqVcHE+Ce3CmT/qQIwvMxDZftyJ5wYpQ==}
+  /@upstash/ratelimit@2.0.0:
+    resolution: {integrity: sha512-UbOdDpC6CFsrQyevfwbpxr92OkDccKr+KpC9+idxOrmr3U6XbIQq/UIunSLIZ7kYwxoY5j3i7Ky5nwHZ3/DTvA==}
     dependencies:
       '@upstash/core-analytics': 0.0.9
     dev: false

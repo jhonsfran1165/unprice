@@ -43,6 +43,7 @@
     "opentelemetry",
     "pkey",
     "pxat",
+    "Ratelimit",
     "satoshi",
     "sidemodule",
     "SIGNIN",
