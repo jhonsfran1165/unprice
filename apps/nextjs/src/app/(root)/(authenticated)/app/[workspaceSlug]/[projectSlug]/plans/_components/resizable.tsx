@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@builderai/ui/resizable"
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@unprice/ui/resizable"
 
 interface ResizablePanelConfigProps {
   defaultLayout: number[] | undefined

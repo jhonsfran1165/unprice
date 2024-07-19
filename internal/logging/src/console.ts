@@ -1,4 +1,4 @@
-import { Log } from "@builderai/logs"
+import { Log } from "@unprice/logs"
 import type { Fields, Logger } from "./interface"
 
 export class ConsoleLogger implements Logger {

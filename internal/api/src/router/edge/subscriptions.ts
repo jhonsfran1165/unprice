@@ -1,12 +1,12 @@
-import { and, eq } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
+import { TRPCError } from "@trpc/server"
+import { and, eq } from "@unprice/db"
+import * as schema from "@unprice/db/schema"
 import {
   type PlanVersion,
   subscriptionInsertSchema,
   subscriptionItemsConfigSchema,
   subscriptionSelectSchema,
-} from "@builderai/db/validators"
-import { TRPCError } from "@trpc/server"
+} from "@unprice/db/validators"
 import { z } from "zod"
 
 import {

@@ -1,20 +1,20 @@
 import "server-only"
 import { tracing } from "@baselime/trpc-opentelemetry-middleware"
-import type { Session } from "@builderai/auth/server"
+import type { Session } from "@unprice/auth/server"
 
-import type { NextAuthRequest } from "@builderai/auth"
-import { auth } from "@builderai/auth/server"
-import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
-import { db } from "@builderai/db"
-import { newId } from "@builderai/db/utils"
-import { BaseLimeLogger, ConsoleLogger, type Logger } from "@builderai/logging"
-import { Analytics } from "@builderai/tinybird"
 import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import type { MwFn } from "@trpc-limiter/core"
 import { createTRPCStoreLimiter } from "@trpc-limiter/memory"
-import { createTRPCUpstashLimiter, defaultFingerPrint } from "@trpc-limiter/upstash"
+import { createTRPCUpstashLimiter } from "@trpc-limiter/upstash"
 import { TRPCError, initTRPC } from "@trpc/server"
 import type { Cache as C } from "@unkey/cache"
+import type { NextAuthRequest } from "@unprice/auth"
+import { auth } from "@unprice/auth/server"
+import { COOKIES_APP } from "@unprice/config"
+import { db } from "@unprice/db"
+import { newId } from "@unprice/db/utils"
+import { BaseLimeLogger, ConsoleLogger, type Logger } from "@unprice/logging"
+import { Analytics } from "@unprice/tinybird"
 import { Ratelimit } from "@upstash/ratelimit"
 import { waitUntil } from "@vercel/functions"
 import { ZodError } from "zod"
@@ -91,11 +91,12 @@ export const createTRPCContext = async (opts: {
   const requestId = opts.headers.get("x-request-id") || newId("request")
   const region = opts.headers.get("x-vercel-id") || "unknown"
   const country = opts.headers.get("x-vercel-ip-country") || "unknown"
+
   const ip =
     opts.headers.get("x-real-ip") ||
     opts.headers.get("x-forwarded-for") ||
     opts.req?.ip ||
-    "localhost"
+    "127.0.0.1"
 
   const logger = env.EMIT_METRICS_LOGS
     ? new BaseLimeLogger({
@@ -128,12 +129,12 @@ export const createTRPCContext = async (opts: {
 
   // this comes from the cookies or headers of the request
   const activeWorkspaceSlug =
-    opts.req?.cookies.get(COOKIE_NAME_WORKSPACE)?.value ??
-    opts.headers.get(COOKIE_NAME_WORKSPACE) ??
+    opts.req?.cookies.get(COOKIES_APP.WORKSPACE)?.value ??
+    opts.headers.get(COOKIES_APP.WORKSPACE) ??
     ""
 
   const activeProjectSlug =
-    opts.req?.cookies.get(COOKIE_NAME_PROJECT)?.value ?? opts.headers.get(COOKIE_NAME_PROJECT) ?? ""
+    opts.req?.cookies.get(COOKIES_APP.PROJECT)?.value ?? opts.headers.get(COOKIES_APP.PROJECT) ?? ""
 
   return createInnerTRPCContext({
     session,
@@ -193,7 +194,7 @@ export const t = initTRPC
 
 // Ratelimit middlewares
 const rateLimiterRedis = createTRPCUpstashLimiter<typeof t>({
-  fingerprint: (ctx) => defaultFingerPrint(ctx.req ?? { ip: ctx.ip }),
+  fingerprint: (ctx) => ctx.req?.ip ?? ctx.ip,
   message: (hitInfo) =>
     `Ups! Too many requests, please try again in ${Math.ceil(
       (hitInfo.reset - Date.now()) / 1000
@@ -211,7 +212,7 @@ const rateLimiterRedis = createTRPCUpstashLimiter<typeof t>({
 }) as MwFn<typeof t>
 
 const rateLimiterMemory = createTRPCStoreLimiter<typeof t>({
-  fingerprint: (ctx) => defaultFingerPrint(ctx.req ?? { ip: ctx.ip }),
+  fingerprint: (ctx) => ctx.req?.ip ?? ctx.ip,
   message: (hitInfo) =>
     `Mem! Too many requests, please try again in ${hitInfo} seconds. Don't DDoS me pls 🥺`,
   max: RATE_LIMIT_WINDOW.max,

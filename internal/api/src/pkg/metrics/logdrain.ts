@@ -1,6 +1,6 @@
-import type { Logger } from "@builderai/logging"
-import { Log } from "@builderai/logs"
-import type { Metric } from "@builderai/metrics"
+import type { Logger } from "@unprice/logging"
+import { Log } from "@unprice/logs"
+import type { Metric } from "@unprice/metrics"
 import type { Metrics } from "./interface"
 
 export class LogdrainMetrics implements Metrics {

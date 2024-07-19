@@ -4,10 +4,10 @@ import { EyeIcon, EyeOff, LayoutGrid, Trash2, X } from "lucide-react"
 import { useCallback, useState } from "react"
 import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form"
 
-import type { RouterOutputs } from "@builderai/api"
-import type { InsertSubscription } from "@builderai/db/validators"
-import { calculatePricePerFeature } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
+import type { RouterOutputs } from "@unprice/api"
+import type { InsertSubscription } from "@unprice/db/validators"
+import { calculatePricePerFeature } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -15,12 +15,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@builderai/ui/dialog"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/dialog"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
+import { cn } from "@unprice/ui/utils"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"

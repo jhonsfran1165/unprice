@@ -1,5 +1,5 @@
 {
-  "name": "@builderai/migrate",
+  "name": "@unprice/migrate",
   "version": "1.0.0",
   "scripts": {
     "migrate": "pnpm with-env tsx main.ts",
@@ -10,13 +10,13 @@
   "author": "Sebastian Franco",
   "license": "AGPL-3.0",
   "dependencies": {
-    "@builderai/db": "^0.1.0",
+    "@unprice/db": "^0.1.0",
     "@neondatabase/serverless": "^0.9.0",
     "drizzle-orm": "^0.31.2",
     "ws": "^8.17.1"
   },
   "devDependencies": {
-    "@builderai/tsconfig": "^0.1.0",
+    "@unprice/tsconfig": "^0.1.0",
     "@types/node": "20.11.24",
     "dotenv-cli": "^7.3.0",
     "tsx": "^4.7.2",

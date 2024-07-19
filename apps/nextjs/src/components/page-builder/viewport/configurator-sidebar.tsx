@@ -1,14 +1,9 @@
 "use client"
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@builderai/ui/accordion"
-import { ScrollArea } from "@builderai/ui/scroll-area"
 import { useEditor } from "@craftjs/core"
 import { Layers } from "@craftjs/layers"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@unprice/ui/accordion"
+import { ScrollArea } from "@unprice/ui/scroll-area"
 import { Edit, Layers as LayersIcon } from "lucide-react"
 import { LayersEditor } from "../layers"
 import { Toolbar } from "../toolbar"

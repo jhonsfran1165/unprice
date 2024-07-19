@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation"
 import { Fragment, useMemo, useState } from "react"
 import { useFieldArray } from "react-hook-form"
 
-import type { RouterOutputs } from "@builderai/api"
-import { COLLECTION_METHODS, SUBSCRIPTION_TYPES } from "@builderai/db/utils"
-import type { InsertSubscription, Subscription } from "@builderai/db/validators"
-import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
-import { Calendar } from "@builderai/ui/calendar"
+import type { RouterOutputs } from "@unprice/api"
+import { COLLECTION_METHODS, SUBSCRIPTION_TYPES } from "@unprice/db/utils"
+import type { InsertSubscription, Subscription } from "@unprice/db/validators"
+import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
+import { Calendar } from "@unprice/ui/calendar"
 import {
   Command,
   CommandEmpty,
@@ -18,7 +18,7 @@ import {
   CommandInput,
   CommandItem,
   CommandLoading,
-} from "@builderai/ui/command"
+} from "@unprice/ui/command"
 import {
   Form,
   FormControl,
@@ -27,13 +27,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@builderai/ui/form"
-import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
-import { ScrollArea } from "@builderai/ui/scroll-area"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
-import { Separator } from "@builderai/ui/separator"
-import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/form"
+import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
+import { ScrollArea } from "@unprice/ui/scroll-area"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+import { Separator } from "@unprice/ui/separator"
+import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
+import { cn } from "@unprice/ui/utils"
 import { add, format } from "date-fns"
 import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"

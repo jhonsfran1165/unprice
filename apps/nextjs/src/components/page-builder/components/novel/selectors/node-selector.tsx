@@ -13,8 +13,8 @@ import {
 } from "lucide-react"
 import { EditorBubbleItem, useEditor } from "novel"
 
-import { Button } from "@builderai/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
+import { Button } from "@unprice/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 
 export type SelectorItem = {
   name: string

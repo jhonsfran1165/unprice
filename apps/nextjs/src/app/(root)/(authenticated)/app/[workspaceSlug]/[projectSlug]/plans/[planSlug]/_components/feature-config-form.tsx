@@ -10,10 +10,10 @@ import {
   TIER_MODES_MAP,
   USAGE_MODES,
   USAGE_MODES_MAP,
-} from "@builderai/db/utils"
-import type { PlanVersion, PlanVersionFeature } from "@builderai/db/validators"
-import { planVersionFeatureInsertBaseSchema } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
+} from "@unprice/db/utils"
+import type { PlanVersion, PlanVersionFeature } from "@unprice/db/validators"
+import { planVersionFeatureInsertBaseSchema } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import {
   Form,
   FormControl,
@@ -22,11 +22,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@builderai/ui/form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
-import { Separator } from "@builderai/ui/separator"
-import { Switch } from "@builderai/ui/switch"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/form"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+import { Separator } from "@unprice/ui/separator"
+import { Switch } from "@unprice/ui/switch"
+import { cn } from "@unprice/ui/utils"
 
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"

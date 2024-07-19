@@ -1,6 +1,6 @@
 import "server-only"
 
-import type { WorkspacesJWTPayload } from "@builderai/db/validators"
+import type { WorkspacesJWTPayload } from "@unprice/db/validators"
 import type { DefaultSession, User } from "next-auth"
 
 import NextAuth from "."

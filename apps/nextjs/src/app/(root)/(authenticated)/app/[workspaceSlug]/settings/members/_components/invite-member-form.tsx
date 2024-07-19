@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation"
 
-import * as utils from "@builderai/db/utils"
-import type { InviteMember } from "@builderai/db/validators"
-import { inviteMembersSchema } from "@builderai/db/validators"
+import * as utils from "@unprice/db/utils"
+import type { InviteMember } from "@unprice/db/validators"
+import { inviteMembersSchema } from "@unprice/db/validators"
 import {
   Form,
   FormControl,
@@ -13,9 +13,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
+} from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"

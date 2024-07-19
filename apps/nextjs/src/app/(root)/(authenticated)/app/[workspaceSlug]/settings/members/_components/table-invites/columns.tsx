@@ -3,8 +3,8 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { formatRelative } from "date-fns"
 
-import type { RouterOutputs } from "@builderai/api"
-import { Checkbox } from "@builderai/ui/checkbox"
+import type { RouterOutputs } from "@unprice/api"
+import { Checkbox } from "@unprice/ui/checkbox"
 
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { DataTableRowActions } from "./data-table-row-actions"

@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq, sql } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
-import * as utils from "@builderai/db/utils"
+import { and, eq, sql } from "@unprice/db"
+import * as schema from "@unprice/db/schema"
+import * as utils from "@unprice/db/utils"
 import {
   configFlatSchema,
   configPackageSchema,
@@ -14,7 +14,7 @@ import {
   planVersionFeatureSelectBaseSchema,
   planVersionSelectBaseSchema,
   versionInsertBaseSchema,
-} from "@builderai/db/validators"
+} from "@unprice/db/validators"
 import { StripePaymentProvider } from "../../pkg/payment-provider/stripe"
 import {
   createTRPCRouter,
@@ -22,7 +22,7 @@ import {
   protectedActiveProjectProcedure,
 } from "../../trpc"
 
-import { APP_NAME } from "@builderai/config"
+import { APP_NAME } from "@unprice/config"
 
 export const planVersionRouter = createTRPCRouter({
   create: protectedActiveProjectAdminProcedure

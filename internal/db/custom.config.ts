@@ -1,4 +1,5 @@
 import { defineConfig } from "drizzle-kit"
+import { projectPrefixBD } from "./src/utils"
 
 export default defineConfig({
   schema: "./src/schema.ts",
@@ -14,7 +15,7 @@ export default defineConfig({
   introspect: {
     casing: "preserve",
   },
-  tablesFilter: ["builderai_*"],
+  tablesFilter: [`${projectPrefixBD}_*`],
   verbose: true,
   strict: true,
 })

@@ -1,6 +1,6 @@
-import { Label } from "@builderai/ui/label"
-import { RadioGroup, RadioGroupItem } from "@builderai/ui/radio-group"
-import { cn } from "@builderai/ui/utils"
+import { Label } from "@unprice/ui/label"
+import { RadioGroup, RadioGroupItem } from "@unprice/ui/radio-group"
+import { cn } from "@unprice/ui/utils"
 import { useEffect, useState } from "react"
 
 interface ToolbarItemRadioProps {

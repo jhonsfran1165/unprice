@@ -1,6 +1,6 @@
-import { Label } from "@builderai/ui/label"
-import { Slider } from "@builderai/ui/slider"
-import { cn } from "@builderai/ui/utils"
+import { Label } from "@unprice/ui/label"
+import { Slider } from "@unprice/ui/slider"
+import { cn } from "@unprice/ui/utils"
 import { useEffect, useState } from "react"
 
 interface ToolbarItemSliderProps {

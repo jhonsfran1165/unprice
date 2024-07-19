@@ -1,4 +1,4 @@
 {
-  "extends": "@builderai/tsconfig/base.json",
+  "extends": "@unprice/tsconfig/base.json",
   "include": ["routes"]
 }

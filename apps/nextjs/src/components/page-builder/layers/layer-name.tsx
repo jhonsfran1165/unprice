@@ -1,7 +1,7 @@
-import { Input } from "@builderai/ui/input"
-import { cn } from "@builderai/ui/utils"
 import { useEditor } from "@craftjs/core"
 import { useLayer } from "@craftjs/layers"
+import { Input } from "@unprice/ui/input"
+import { cn } from "@unprice/ui/utils"
 import { useState } from "react"
 
 export const LayerName = ({

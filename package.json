@@ -1,5 +1,5 @@
 {
-  "name": "builderai",
+  "name": "unprice",
   "private": true,
   "engines": {
     "node": "20.11.1"
@@ -12,7 +12,6 @@
     "clean": "git clean -xdf node_modules dist .next",
     "clean:workspaces": "turbo clean --parallel",
     "dev": "cross-env FORCE_COLOR=1 turbo dev --parallel",
-    "dev:web": "turbo dev --parallel --filter !@builderai/expo --filter !@builderai/db",
     "typecheck": "turbo typecheck",
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip --include files,dependencies",

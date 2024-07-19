@@ -1,5 +1,5 @@
-import { Badge } from "@builderai/ui/badge"
-import { cn } from "@builderai/ui/utils"
+import { Badge } from "@unprice/ui/badge"
+import { cn } from "@unprice/ui/utils"
 
 export default function HeaderTab({
   title,

@@ -1,5 +1,5 @@
-import { searchDataParamsSchema } from "@builderai/db/validators"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
+import { searchDataParamsSchema } from "@unprice/db/validators"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
 
 import { DataTable } from "~/components/data-table/data-table"
 import { DashboardShell } from "~/components/layout/dashboard-shell"

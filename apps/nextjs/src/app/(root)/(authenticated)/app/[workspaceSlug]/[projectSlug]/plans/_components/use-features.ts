@@ -1,6 +1,6 @@
 import { atom, useAtom } from "jotai"
 
-import type { Plan, PlanVersion, PlanVersionFeatureDragDrop } from "@builderai/db/validators"
+import type { Plan, PlanVersion, PlanVersionFeatureDragDrop } from "@unprice/db/validators"
 
 const configActiveFeatureAtom = atom<PlanVersionFeatureDragDrop | null>(null)
 

@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
-import { handleEvent, stripe } from "@builderai/stripe"
+import { handleEvent, stripe } from "@unprice/stripe"
 
 import { env } from "~/env.mjs"
 

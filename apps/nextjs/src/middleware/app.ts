@@ -1,17 +1,17 @@
 import { RequestCookies, ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies"
 import { NextResponse } from "next/server"
 
-import type { NextAuthRequest } from "@builderai/auth"
+import type { NextAuthRequest } from "@unprice/auth"
 
-import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
-import { isSlug } from "@builderai/db/utils"
+import { COOKIES_APP } from "@unprice/config"
 import {
   API_AUTH_ROUTE_PREFIX,
   API_TRPC_ROUTE_PREFIX,
   APP_AUTH_ROUTES,
   APP_NON_WORKSPACE_ROUTES,
   AUTH_ROUTES,
-} from "~/constants"
+} from "@unprice/config"
+import { isSlug } from "@unprice/db/utils"
 import { parse } from "~/lib/domains"
 import { getWorkspacesUser } from "~/lib/session"
 
@@ -74,7 +74,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
   // if not workspace in path check cookies or jwt
   if (!currentWorkspaceSlug) {
     const redirectWorkspaceSlug =
-      req.cookies.get(COOKIE_NAME_WORKSPACE)?.value ?? user.workspaces[0]?.slug
+      req.cookies.get(COOKIES_APP.WORKSPACE)?.value ?? user.workspaces[0]?.slug
 
     // there is a cookie/jwt claim for the workspace redirect
     if (redirectWorkspaceSlug && redirectWorkspaceSlug !== "") {
@@ -100,11 +100,11 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
   // we use this cookies to forward them to the API on RSC calls
   // client calls are handled by the UpdateClientCookie component
-  const cookieWorkspace = req.cookies.get(COOKIE_NAME_WORKSPACE)?.value
+  const cookieWorkspace = req.cookies.get(COOKIES_APP.WORKSPACE)?.value
 
   if (currentWorkspaceSlug !== cookieWorkspace && isSlug(currentWorkspaceSlug)) {
     // set cookies if the user has access to the workspace
-    response.cookies.set(COOKIE_NAME_WORKSPACE, currentWorkspaceSlug, {
+    response.cookies.set(COOKIES_APP.WORKSPACE, currentWorkspaceSlug, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
@@ -115,11 +115,11 @@ export default function AppMiddleware(req: NextAuthRequest) {
   const currentProjectSlug = decodeURIComponent(path.split("/")[2] ?? "")
 
   // check if the current project slug is a valid slug
-  const cookieProject = req.cookies.get(COOKIE_NAME_PROJECT)?.value
+  const cookieProject = req.cookies.get(COOKIES_APP.PROJECT)?.value
 
   if (currentProjectSlug !== cookieProject && isSlug(currentProjectSlug)) {
     // cookie for calling the api
-    response.cookies.set(COOKIE_NAME_PROJECT, currentProjectSlug, {
+    response.cookies.set(COOKIES_APP.PROJECT, currentProjectSlug, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",

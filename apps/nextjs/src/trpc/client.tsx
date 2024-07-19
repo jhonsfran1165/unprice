@@ -9,8 +9,8 @@ import { createTRPCReact } from "@trpc/react-query"
 import type { AnyRootTypes } from "@trpc/server/unstable-core-do-not-import"
 import { useState } from "react"
 
-import type { AppRouter } from "@builderai/api"
-import { transformer } from "@builderai/api/transformer"
+import type { AppRouter } from "@unprice/api"
+import { transformer } from "@unprice/api/transformer"
 import { createQueryClient, getBaseUrl, lambdas } from "./shared"
 
 export const api = createTRPCReact<AppRouter>()

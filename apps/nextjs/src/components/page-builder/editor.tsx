@@ -1,7 +1,7 @@
 "use client"
 
-import type { Page } from "@builderai/db/validators"
 import { Editor, Element, Frame } from "@craftjs/core"
+import type { Page } from "@unprice/db/validators"
 import {
   ContainerElement,
   FooterComponent,

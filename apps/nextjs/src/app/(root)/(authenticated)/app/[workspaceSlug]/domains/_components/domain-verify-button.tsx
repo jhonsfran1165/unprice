@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
-import { Button } from "@builderai/ui/button"
-import { LoadingAnimation } from "@builderai/ui/loading-animation"
+import { Button } from "@unprice/ui/button"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
 import { api } from "~/trpc/client"
 

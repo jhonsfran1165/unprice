@@ -8,7 +8,7 @@ import {
   Nextjs,
   React,
   TRPC,
-} from "@builderai/ui/icons"
+} from "@unprice/ui/icons"
 
 export const marketingFeatures = [
   {

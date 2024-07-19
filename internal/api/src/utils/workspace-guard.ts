@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server"
 
-import type { User, Workspace, WorkspaceRole } from "@builderai/db/validators"
+import type { User, Workspace, WorkspaceRole } from "@unprice/db/validators"
 
-import { workspaceGuardPrepared } from "@builderai/db/queries"
+import { workspaceGuardPrepared } from "@unprice/db/queries"
 import type { Context } from "../trpc"
 
 interface WorkspaceGuardType {

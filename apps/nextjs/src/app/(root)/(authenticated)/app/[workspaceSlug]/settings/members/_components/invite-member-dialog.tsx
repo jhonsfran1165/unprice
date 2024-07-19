@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@builderai/ui/dialog"
+} from "@unprice/ui/dialog"
 
 import { InviteMemberForm } from "./invite-member-form"
 

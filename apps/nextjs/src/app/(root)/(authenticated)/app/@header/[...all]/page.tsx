@@ -1,5 +1,5 @@
-import { isSlug } from "@builderai/db/utils"
-import { Separator } from "@builderai/ui/separator"
+import { isSlug } from "@unprice/db/utils"
+import { Separator } from "@unprice/ui/separator"
 import { Fragment, Suspense } from "react"
 import Header from "~/components/layout/header"
 import { api } from "~/trpc/server"

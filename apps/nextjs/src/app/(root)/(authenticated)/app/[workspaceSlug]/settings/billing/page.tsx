@@ -1,4 +1,4 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"

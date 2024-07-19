@@ -1,4 +1,4 @@
-import { cn } from "@builderai/ui/utils"
+import { cn } from "@unprice/ui/utils"
 import { SuperLink } from "~/components/super-link"
 import { dashboardNavigationData } from "./data"
 

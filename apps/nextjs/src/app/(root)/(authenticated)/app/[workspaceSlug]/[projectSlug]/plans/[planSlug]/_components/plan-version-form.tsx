@@ -4,15 +4,10 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { startTransition } from "react"
 
-import {
-  CURRENCIES,
-  PAYMENT_PROVIDERS,
-  PLAN_BILLING_PERIODS,
-  PLAN_TYPES,
-} from "@builderai/db/utils"
-import type { InsertPlanVersion } from "@builderai/db/validators"
-import { versionInsertBaseSchema } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
+import { CURRENCIES, PAYMENT_PROVIDERS, PLAN_BILLING_PERIODS, PLAN_TYPES } from "@unprice/db/utils"
+import type { InsertPlanVersion } from "@unprice/db/validators"
+import { versionInsertBaseSchema } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import {
   Form,
   FormControl,
@@ -21,10 +16,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
-import { Textarea } from "@builderai/ui/text-area"
+} from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+import { Textarea } from "@unprice/ui/text-area"
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"

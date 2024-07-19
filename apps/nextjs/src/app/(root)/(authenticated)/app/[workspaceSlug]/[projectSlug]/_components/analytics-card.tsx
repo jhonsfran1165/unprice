@@ -1,7 +1,7 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
-import type { Bar } from "@builderai/ui/charts"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
-import { cn } from "@builderai/ui/utils"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
+import type { Bar } from "@unprice/ui/charts"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
+import { cn } from "@unprice/ui/utils"
 import type { ReactNode } from "react"
 // import { HydrateClient, trpc } from "~/trpc/server"
 

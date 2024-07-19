@@ -1,8 +1,8 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import type { Result } from "@builderai/error"
-import { Err, Ok } from "@builderai/error"
+import type { Result } from "@unprice/error"
+import { Err, Ok } from "@unprice/error"
 
 import { subscriptionItems, subscriptions } from "../../schema/subscriptions"
 import { UnPriceCalculationError } from "./../errors"

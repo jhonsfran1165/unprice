@@ -1,7 +1,7 @@
 import Balancer from "react-wrap-balancer"
 
-import { Button } from "@builderai/ui/button"
-import { Plus } from "@builderai/ui/icons"
+import { Button } from "@unprice/ui/button"
+import { Plus } from "@unprice/ui/icons"
 import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"

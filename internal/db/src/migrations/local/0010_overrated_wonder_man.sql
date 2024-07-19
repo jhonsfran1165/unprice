@@ -1,2 +1,0 @@
-ALTER TABLE "builderai_pages" DROP CONSTRAINT "builderai_pages_custom_domain_unique";--> statement-breakpoint
-ALTER TABLE "builderai_pages" ADD CONSTRAINT "custom_domain" UNIQUE NULLS NOT DISTINCT("custom_domain");

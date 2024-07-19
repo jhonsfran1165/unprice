@@ -4,7 +4,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 
 export default function ErrorPage({
   error,

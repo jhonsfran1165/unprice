@@ -1,4 +1,4 @@
-import { isSlug } from "@builderai/db/utils"
+import { isSlug } from "@unprice/db/utils"
 import { Sidebar } from "~/components/navigation/sidebar"
 import { PROJECT_NAV, PROJECT_SHORTCUTS } from "~/constants/projects"
 import { WORKSPACE_NAV, WORKSPACE_SHORTCUTS } from "~/constants/workspaces"

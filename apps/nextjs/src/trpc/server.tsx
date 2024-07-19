@@ -3,10 +3,10 @@ import "server-only"
 import { cookies, headers } from "next/headers"
 import { cache } from "react"
 
-import { type appRouter, createCaller, createTRPCContext } from "@builderai/api"
-import { getSession } from "@builderai/auth/server-rsc"
-import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
 import { createHydrationHelpers } from "@trpc/react-query/rsc"
+import { type appRouter, createCaller, createTRPCContext } from "@unprice/api"
+import { getSession } from "@unprice/auth/server-rsc"
+import { COOKIES_APP } from "@unprice/config"
 import { createQueryClient } from "./shared"
 
 /**
@@ -15,12 +15,12 @@ import { createQueryClient } from "./shared"
  */
 const createContext = cache(async () => {
   const heads = new Headers(headers())
-  const activeWorkspaceSlug = cookies().get(COOKIE_NAME_WORKSPACE)?.value ?? ""
-  const activeProjectSlug = cookies().get(COOKIE_NAME_PROJECT)?.value ?? ""
+  const activeWorkspaceSlug = cookies().get(COOKIES_APP.WORKSPACE)?.value ?? ""
+  const activeProjectSlug = cookies().get(COOKIES_APP.PROJECT)?.value ?? ""
 
   heads.set("x-trpc-source", "rsc")
-  heads.set(COOKIE_NAME_WORKSPACE, activeWorkspaceSlug)
-  heads.set(COOKIE_NAME_PROJECT, activeProjectSlug)
+  heads.set(COOKIES_APP.WORKSPACE, activeWorkspaceSlug)
+  heads.set(COOKIES_APP.PROJECT, activeProjectSlug)
 
   return createTRPCContext({
     session: await getSession(),

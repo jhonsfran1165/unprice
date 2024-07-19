@@ -1,6 +1,6 @@
-import { signIn } from "@builderai/auth/server"
-import { Button } from "@builderai/ui/button"
-import { GitHub } from "@builderai/ui/icons"
+import { signIn } from "@unprice/auth/server"
+import { Button } from "@unprice/ui/button"
+import { GitHub } from "@unprice/ui/icons"
 
 export function SignInGithub() {
   return (

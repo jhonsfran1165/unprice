@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
+import { and, eq } from "@unprice/db"
+import * as schema from "@unprice/db/schema"
 import {
   changeRoleMemberSchema,
   deleteWorkspaceSchema,
@@ -13,8 +13,8 @@ import {
   renameWorkspaceSchema,
   searchDataParamsSchema,
   workspaceSelectSchema,
-} from "@builderai/db/validators"
-import { WelcomeEmail, sendEmail } from "@builderai/email"
+} from "@unprice/db/validators"
+import { WelcomeEmail, sendEmail } from "@unprice/email"
 
 import {
   createTRPCRouter,
@@ -420,8 +420,8 @@ export const workspaceRouter = createTRPCRouter({
         from:
           process.env.NODE_ENV === "development"
             ? "delivered@resend.dev"
-            : "Sebastian Franco <sebastian@builderai.com>",
-        subject: "Welcome to Builderai 👋",
+            : "Sebastian Franco <sebastian@unprice.dev>",
+        subject: "Welcome to Unprice 👋",
         to: [email],
         react: WelcomeEmail(),
       })

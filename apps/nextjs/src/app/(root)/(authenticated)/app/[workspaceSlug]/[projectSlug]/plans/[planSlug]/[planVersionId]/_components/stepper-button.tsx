@@ -3,7 +3,7 @@
 import { ChevronRight } from "lucide-react"
 import { usePathname } from "next/navigation"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 
 import { SuperLink } from "~/components/super-link"
 import { PlanVersionPublish } from "../../../_components/plan-version-actions"

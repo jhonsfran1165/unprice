@@ -1,5 +1,5 @@
 "use client"
-import { Progress } from "@builderai/ui/progress"
+import { Progress } from "@unprice/ui/progress"
 import React from "react"
 
 export function ProgressDemo() {

@@ -1,5 +1,5 @@
 {
-  "name": "@builderai/workflows",
+  "name": "@unprice/workflows",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,8 +13,8 @@
     "triggers": "pnpm dlx @trigger.dev/cli@latest dev --port 3200"
   },
   "dependencies": {
-    "@builderai/db": "^0.1.0",
-    "@builderai/tinybird": "workspace:^0.1.0",
+    "@unprice/db": "^0.1.0",
+    "@unprice/tinybird": "workspace:^0.1.0",
     "@dinero.js/currencies": "2.0.0-alpha.14",
     "@neondatabase/serverless": "^0.9.0",
     "@trigger.dev/nextjs": "^2.3.19",
@@ -25,7 +25,7 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@builderai/tsconfig": "^0.1.0",
+    "@unprice/tsconfig": "^0.1.0",
     "@types/node": "20.11.24",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",

@@ -59,7 +59,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."subscription_status" AS ENUM('canceled', 'active', 'inactive', 'paused');
+ CREATE TYPE "public"."subscription_status" AS ENUM('active', 'inactive', 'ended', 'cancelled');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -106,7 +106,7 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_apikeys" (
+CREATE TABLE IF NOT EXISTS "unprice_apikeys" (
 	"id" text NOT NULL,
 	"project_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS "builderai_apikeys" (
 	CONSTRAINT "name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_account" (
+CREATE TABLE IF NOT EXISTS "unprice_account" (
 	"userId" text NOT NULL,
 	"type" text NOT NULL,
 	"provider" text NOT NULL,
@@ -132,16 +132,29 @@ CREATE TABLE IF NOT EXISTS "builderai_account" (
 	"scope" text,
 	"id_token" text,
 	"session_state" text,
-	CONSTRAINT "builderai_account_provider_providerAccountId_pk" PRIMARY KEY("provider","providerAccountId")
+	CONSTRAINT "unprice_account_provider_providerAccountId_pk" PRIMARY KEY("provider","providerAccountId")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_session" (
+CREATE TABLE IF NOT EXISTS "unprice_authenticator" (
+	"credentialID" text NOT NULL,
+	"userId" text NOT NULL,
+	"providerAccountId" text NOT NULL,
+	"credentialPublicKey" text NOT NULL,
+	"counter" integer NOT NULL,
+	"credentialDeviceType" text NOT NULL,
+	"credentialBackedUp" boolean NOT NULL,
+	"transports" text,
+	CONSTRAINT "unprice_authenticator_userId_credentialID_pk" PRIMARY KEY("userId","credentialID"),
+	CONSTRAINT "unprice_authenticator_credentialID_unique" UNIQUE("credentialID")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "unprice_session" (
 	"sessionToken" text PRIMARY KEY NOT NULL,
 	"userId" text NOT NULL,
 	"expires" timestamp NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_user" (
+CREATE TABLE IF NOT EXISTS "unprice_user" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text,
 	"email" text NOT NULL,
@@ -151,14 +164,14 @@ CREATE TABLE IF NOT EXISTS "builderai_user" (
 	"default_wk_slug" text
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_verificationToken" (
+CREATE TABLE IF NOT EXISTS "unprice_verificationToken" (
 	"identifier" text NOT NULL,
 	"token" text NOT NULL,
 	"expires" timestamp NOT NULL,
-	CONSTRAINT "builderai_verificationToken_identifier_token_pk" PRIMARY KEY("identifier","token")
+	CONSTRAINT "unprice_verificationToken_identifier_token_pk" PRIMARY KEY("identifier","token")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_customers" (
+CREATE TABLE IF NOT EXISTS "unprice_customers" (
 	"id" text NOT NULL,
 	"project_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -169,13 +182,13 @@ CREATE TABLE IF NOT EXISTS "builderai_customers" (
 	"metadata" json,
 	"stripe_customer_id" text,
 	"active" boolean DEFAULT true,
-	"default_currency" "currency" DEFAULT 'USD',
+	"default_currency" "currency" DEFAULT 'USD' NOT NULL,
 	CONSTRAINT "pk_customer" PRIMARY KEY("id","project_id"),
 	CONSTRAINT "stripe_customer_unique" UNIQUE("stripe_customer_id"),
 	CONSTRAINT "unique_email_project" UNIQUE("email","project_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_domains" (
+CREATE TABLE IF NOT EXISTS "unprice_domains" (
 	"id" text PRIMARY KEY NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -183,10 +196,10 @@ CREATE TABLE IF NOT EXISTS "builderai_domains" (
 	"name" text NOT NULL,
 	"apex_name" text NOT NULL,
 	"verified" boolean DEFAULT false,
-	CONSTRAINT "builderai_domains_name_unique" UNIQUE("name")
+	CONSTRAINT "unprice_domains_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_features" (
+CREATE TABLE IF NOT EXISTS "unprice_features" (
 	"id" text NOT NULL,
 	"project_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -195,11 +208,10 @@ CREATE TABLE IF NOT EXISTS "builderai_features" (
 	"code" serial NOT NULL,
 	"title" varchar(50) NOT NULL,
 	"description" text,
-	CONSTRAINT "features_pkey" PRIMARY KEY("project_id","id"),
-	CONSTRAINT "slug_feature" UNIQUE("slug","project_id")
+	CONSTRAINT "features_pkey" PRIMARY KEY("project_id","id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_ingestions" (
+CREATE TABLE IF NOT EXISTS "unprice_ingestions" (
 	"id" text NOT NULL,
 	"project_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -212,7 +224,7 @@ CREATE TABLE IF NOT EXISTS "builderai_ingestions" (
 	CONSTRAINT "ingestions_pkey" PRIMARY KEY("project_id","id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_plan_versions_features" (
+CREATE TABLE IF NOT EXISTS "unprice_plan_versions_features" (
 	"id" text NOT NULL,
 	"project_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -222,7 +234,7 @@ CREATE TABLE IF NOT EXISTS "builderai_plan_versions_features" (
 	"feature_type" "feature_types" NOT NULL,
 	"features_config" json,
 	"metadata" json,
-	"aggregation_method" "aggregation_method" DEFAULT 'count' NOT NULL,
+	"aggregation_method" "aggregation_method" DEFAULT 'sum' NOT NULL,
 	"order" double precision NOT NULL,
 	"default_quantity" integer,
 	"limit" integer,
@@ -231,7 +243,7 @@ CREATE TABLE IF NOT EXISTS "builderai_plan_versions_features" (
 	CONSTRAINT "unique_version_feature" UNIQUE NULLS NOT DISTINCT("plan_version_id","feature_id","project_id","order")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_plan_versions" (
+CREATE TABLE IF NOT EXISTS "unprice_plan_versions" (
 	"id" text NOT NULL,
 	"project_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -260,7 +272,7 @@ CREATE TABLE IF NOT EXISTS "builderai_plan_versions" (
 	CONSTRAINT "plan_versions_plan_id_fkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_plans" (
+CREATE TABLE IF NOT EXISTS "unprice_plans" (
 	"id" text NOT NULL,
 	"project_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -270,11 +282,10 @@ CREATE TABLE IF NOT EXISTS "builderai_plans" (
 	"description" text,
 	"metadata" json,
 	"default_plan" boolean DEFAULT false,
-	CONSTRAINT "plans_pkey" PRIMARY KEY("id","project_id"),
-	CONSTRAINT "slug_plan" UNIQUE("slug","project_id")
+	CONSTRAINT "plans_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_projects" (
+CREATE TABLE IF NOT EXISTS "unprice_projects" (
 	"id" text PRIMARY KEY NOT NULL,
 	"workspace_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -288,7 +299,7 @@ CREATE TABLE IF NOT EXISTS "builderai_projects" (
 	CONSTRAINT "unique_slug" UNIQUE("slug")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_subscription_items" (
+CREATE TABLE IF NOT EXISTS "unprice_subscription_items" (
 	"id" text NOT NULL,
 	"project_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -299,7 +310,7 @@ CREATE TABLE IF NOT EXISTS "builderai_subscription_items" (
 	CONSTRAINT "subscription_items_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_subscriptions" (
+CREATE TABLE IF NOT EXISTS "unprice_subscriptions" (
 	"id" text NOT NULL,
 	"project_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -318,10 +329,13 @@ CREATE TABLE IF NOT EXISTS "builderai_subscriptions" (
 	"is_new" boolean DEFAULT true,
 	"status" "subscription_status" DEFAULT 'active',
 	"metadata" json,
+	"next_plan_version_to" text,
+	"plan_changed" timestamp,
+	"next_subscription_id" text,
 	CONSTRAINT "subscriptions_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_invites" (
+CREATE TABLE IF NOT EXISTS "unprice_invites" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"workspace_id" text NOT NULL,
@@ -331,7 +345,7 @@ CREATE TABLE IF NOT EXISTS "builderai_invites" (
 	CONSTRAINT "invites_pkey" PRIMARY KEY("email","workspace_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_members" (
+CREATE TABLE IF NOT EXISTS "unprice_members" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"workspace_id" text NOT NULL,
@@ -340,7 +354,7 @@ CREATE TABLE IF NOT EXISTS "builderai_members" (
 	CONSTRAINT "members_pkey" PRIMARY KEY("user_id","workspace_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_workspaces" (
+CREATE TABLE IF NOT EXISTS "unprice_workspaces" (
 	"id" text PRIMARY KEY NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -353,11 +367,11 @@ CREATE TABLE IF NOT EXISTS "builderai_workspaces" (
 	"unprice_customer_id" text NOT NULL,
 	"legacy_plans" "legacy_plans" DEFAULT 'FREE' NOT NULL,
 	"enabled" boolean DEFAULT true NOT NULL,
-	CONSTRAINT "builderai_workspaces_slug_unique" UNIQUE("slug"),
+	CONSTRAINT "unprice_workspaces_slug_unique" UNIQUE("slug"),
 	CONSTRAINT "unprice_customer_id" UNIQUE("unprice_customer_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "builderai_usage" (
+CREATE TABLE IF NOT EXISTS "unprice_usage" (
 	"id" text NOT NULL,
 	"project_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -367,186 +381,222 @@ CREATE TABLE IF NOT EXISTS "builderai_usage" (
 	"year" integer NOT NULL,
 	"usage" integer NOT NULL,
 	"limit" integer,
-	CONSTRAINT "usage_pkey" PRIMARY KEY("id","project_id"),
-	CONSTRAINT "unique_usage_subitem" UNIQUE("subscription_item_id","month","year")
+	CONSTRAINT "usage_pkey" PRIMARY KEY("id","project_id")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "unprice_pages" (
+	"id" text NOT NULL,
+	"project_id" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"content" text,
+	"title" text NOT NULL,
+	"custom_domain" text,
+	"subdomain" text NOT NULL,
+	"slug" text NOT NULL,
+	"description" text,
+	"logo" text,
+	"font" text,
+	"published" boolean DEFAULT false NOT NULL,
+	CONSTRAINT "page_pkey" PRIMARY KEY("id","project_id"),
+	CONSTRAINT "unprice_pages_custom_domain_unique" UNIQUE("custom_domain"),
+	CONSTRAINT "unprice_pages_subdomain_unique" UNIQUE("subdomain")
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_apikeys" ADD CONSTRAINT "builderai_apikeys_project_id_builderai_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."builderai_projects"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_apikeys" ADD CONSTRAINT "unprice_apikeys_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_account" ADD CONSTRAINT "builderai_account_userId_builderai_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."builderai_user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_account" ADD CONSTRAINT "unprice_account_userId_unprice_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."unprice_user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_session" ADD CONSTRAINT "builderai_session_userId_builderai_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."builderai_user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_authenticator" ADD CONSTRAINT "unprice_authenticator_userId_unprice_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."unprice_user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_customers" ADD CONSTRAINT "builderai_customers_project_id_builderai_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."builderai_projects"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_session" ADD CONSTRAINT "unprice_session_userId_unprice_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."unprice_user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_domains" ADD CONSTRAINT "builderai_domains_workspace_id_builderai_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."builderai_workspaces"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_customers" ADD CONSTRAINT "unprice_customers_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_features" ADD CONSTRAINT "builderai_features_project_id_builderai_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."builderai_projects"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_domains" ADD CONSTRAINT "unprice_domains_workspace_id_unprice_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_ingestions" ADD CONSTRAINT "builderai_ingestions_project_id_builderai_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."builderai_projects"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_features" ADD CONSTRAINT "unprice_features_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_ingestions" ADD CONSTRAINT "ingestions_apikey_id_fkey" FOREIGN KEY ("apikey_id","project_id") REFERENCES "public"."builderai_apikeys"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_ingestions" ADD CONSTRAINT "unprice_ingestions_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_plan_versions_features" ADD CONSTRAINT "builderai_plan_versions_features_project_id_builderai_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."builderai_projects"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_ingestions" ADD CONSTRAINT "ingestions_apikey_id_fkey" FOREIGN KEY ("apikey_id","project_id") REFERENCES "public"."unprice_apikeys"("id","project_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_plan_versions_features" ADD CONSTRAINT "plan_versions_id_fkey" FOREIGN KEY ("plan_version_id","project_id") REFERENCES "public"."builderai_plan_versions"("id","project_id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_plan_versions_features" ADD CONSTRAINT "unprice_plan_versions_features_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_plan_versions_features" ADD CONSTRAINT "features_id_fkey" FOREIGN KEY ("feature_id","project_id") REFERENCES "public"."builderai_features"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_plan_versions_features" ADD CONSTRAINT "plan_versions_id_fkey" FOREIGN KEY ("plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions"("id","project_id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_plan_versions" ADD CONSTRAINT "builderai_plan_versions_project_id_builderai_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."builderai_projects"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_plan_versions_features" ADD CONSTRAINT "features_id_fkey" FOREIGN KEY ("feature_id","project_id") REFERENCES "public"."unprice_features"("id","project_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_plan_versions" ADD CONSTRAINT "builderai_plan_versions_published_by_builderai_user_id_fk" FOREIGN KEY ("published_by") REFERENCES "public"."builderai_user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_plan_versions" ADD CONSTRAINT "unprice_plan_versions_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_plan_versions" ADD CONSTRAINT "builderai_plan_versions_archived_by_builderai_user_id_fk" FOREIGN KEY ("archived_by") REFERENCES "public"."builderai_user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_plan_versions" ADD CONSTRAINT "unprice_plan_versions_published_by_unprice_user_id_fk" FOREIGN KEY ("published_by") REFERENCES "public"."unprice_user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_plan_versions" ADD CONSTRAINT "plan_versions_plan_id_pkey" FOREIGN KEY ("plan_id","project_id") REFERENCES "public"."builderai_plans"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_plan_versions" ADD CONSTRAINT "unprice_plan_versions_archived_by_unprice_user_id_fk" FOREIGN KEY ("archived_by") REFERENCES "public"."unprice_user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_plans" ADD CONSTRAINT "builderai_plans_project_id_builderai_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."builderai_projects"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_plan_versions" ADD CONSTRAINT "plan_versions_plan_id_pkey" FOREIGN KEY ("plan_id","project_id") REFERENCES "public"."unprice_plans"("id","project_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_projects" ADD CONSTRAINT "builderai_projects_workspace_id_builderai_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."builderai_workspaces"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_plans" ADD CONSTRAINT "unprice_plans_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_subscription_items" ADD CONSTRAINT "builderai_subscription_items_project_id_builderai_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."builderai_projects"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_projects" ADD CONSTRAINT "unprice_projects_workspace_id_unprice_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_subscription_items" ADD CONSTRAINT "subscription_items_subscription_id_fkey" FOREIGN KEY ("subscription_id","project_id") REFERENCES "public"."builderai_subscriptions"("id","project_id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "unprice_subscription_items_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_subscription_items" ADD CONSTRAINT "subscription_items_plan_version_id_fkey" FOREIGN KEY ("feature_plan_version_id","project_id") REFERENCES "public"."builderai_plan_versions_features"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "subscription_items_subscription_id_fkey" FOREIGN KEY ("subscription_id","project_id") REFERENCES "public"."unprice_subscriptions"("id","project_id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_subscriptions" ADD CONSTRAINT "builderai_subscriptions_project_id_builderai_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."builderai_projects"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "subscription_items_plan_version_id_fkey" FOREIGN KEY ("feature_plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions_features"("id","project_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_subscriptions" ADD CONSTRAINT "subscriptions_customer_id_fkey" FOREIGN KEY ("customers_id","project_id") REFERENCES "public"."builderai_customers"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_subscriptions" ADD CONSTRAINT "unprice_subscriptions_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_subscriptions" ADD CONSTRAINT "subscriptions_planversion_id_fkey" FOREIGN KEY ("plan_version_id","project_id") REFERENCES "public"."builderai_plan_versions"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_subscriptions" ADD CONSTRAINT "subscriptions_customer_id_fkey" FOREIGN KEY ("customers_id","project_id") REFERENCES "public"."unprice_customers"("id","project_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_invites" ADD CONSTRAINT "builderai_invites_workspace_id_builderai_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."builderai_workspaces"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_subscriptions" ADD CONSTRAINT "subscriptions_planversion_id_fkey" FOREIGN KEY ("plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions"("id","project_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_members" ADD CONSTRAINT "builderai_members_workspace_id_builderai_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."builderai_workspaces"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_invites" ADD CONSTRAINT "unprice_invites_workspace_id_unprice_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_members" ADD CONSTRAINT "members_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."builderai_user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_members" ADD CONSTRAINT "unprice_members_workspace_id_unprice_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_workspaces" ADD CONSTRAINT "builderai_workspaces_created_by_builderai_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."builderai_user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_members" ADD CONSTRAINT "members_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."unprice_user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_usage" ADD CONSTRAINT "builderai_usage_project_id_builderai_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."builderai_projects"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_workspaces" ADD CONSTRAINT "unprice_workspaces_created_by_unprice_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."unprice_user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "builderai_usage" ADD CONSTRAINT "usage_subitem_fkey" FOREIGN KEY ("subscription_item_id","project_id") REFERENCES "public"."builderai_subscription_items"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_usage" ADD CONSTRAINT "unprice_usage_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "key" ON "builderai_apikeys" USING btree ("key");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "email" ON "builderai_customers" USING btree ("email");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "name" ON "builderai_domains" USING btree ("name");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "slug_index" ON "builderai_projects" USING btree ("slug");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "unique_active_planversion_subscription" ON "builderai_subscriptions" USING btree ("customers_id","plan_version_id","project_id") WHERE "builderai_subscriptions"."status" = 'active';--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_usage" ADD CONSTRAINT "usage_subitem_fkey" FOREIGN KEY ("subscription_item_id","project_id") REFERENCES "public"."unprice_subscription_items"("id","project_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_pages" ADD CONSTRAINT "unprice_pages_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "key" ON "unprice_apikeys" USING btree ("key");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "email" ON "unprice_customers" USING btree ("email");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "name" ON "unprice_domains" USING btree ("name");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "slug_feature" ON "unprice_features" USING btree ("slug","project_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "slug_plan" ON "unprice_plans" USING btree ("slug","project_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "slug_index" ON "unprice_projects" USING btree ("slug");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_active_planversion_subscription" ON "unprice_subscriptions" USING btree ("customers_id","plan_version_id","project_id") WHERE "unprice_subscriptions"."status" = 'active';--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_usage_subitem" ON "unprice_usage" USING btree ("project_id","subscription_item_id","month","year");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "slug_page" ON "unprice_pages" USING btree ("slug","project_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "subdomain_index" ON "unprice_pages" USING btree ("subdomain");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "custom_domain_index" ON "unprice_pages" USING btree ("custom_domain");

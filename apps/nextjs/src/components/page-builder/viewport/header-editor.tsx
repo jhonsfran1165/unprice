@@ -1,8 +1,9 @@
 "use client"
 
-import type { Page } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
 import { useEditor } from "@craftjs/core"
+import { SITES_BASE_DOMAIN } from "@unprice/config"
+import type { Page } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import { Redo, Undo } from "lucide-react"
 import lz from "lzutf8"
 import Link from "next/link"
@@ -11,7 +12,6 @@ import { startTransition } from "react"
 import { revalidatePageDomain } from "~/actions/pages"
 import { SearchTool } from "~/components/layout/search"
 import { SubmitButton } from "~/components/submit-button"
-import { SITES_BASE_DOMAIN } from "~/constants"
 import { api } from "~/trpc/client"
 
 export const HeaderEditor: React.FC<{

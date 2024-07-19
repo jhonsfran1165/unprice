@@ -1,5 +1,5 @@
 {
-  "name": "@builderai/logs",
+  "name": "@unprice/logs",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.ts",
@@ -12,12 +12,12 @@
   },
   "license": "AGPL-3.0",
   "devDependencies": {
-    "@builderai/tsconfig": "0.1.0",
+    "@unprice/tsconfig": "0.1.0",
     "@types/node": "20.11.24",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@builderai/metrics": "workspace:^",
+    "@unprice/metrics": "workspace:^",
     "zod": "^3.23.8"
   }
 }

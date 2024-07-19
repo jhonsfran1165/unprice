@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation"
 import { useTransition } from "react"
 
-import { type Project, type ProjectInsert, projectInsertBaseSchema } from "@builderai/db/validators"
+import { type Project, type ProjectInsert, projectInsertBaseSchema } from "@unprice/db/validators"
 import {
   Form,
   FormControl,
@@ -12,8 +12,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
+} from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
 
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -73,7 +73,7 @@ const CreateProjectForm = (props: {
               <FormItem>
                 <FormLabel>Name *</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="builderai" />
+                  <Input {...field} placeholder="unprice" />
                 </FormControl>
                 <FormDescription>A name to identify your app in the dashboard.</FormDescription>
                 <FormMessage />
@@ -88,7 +88,7 @@ const CreateProjectForm = (props: {
               <FormItem>
                 <FormLabel>URL</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="https://builderai.com" />
+                  <Input {...field} placeholder="https://unprice.dev" />
                 </FormControl>
                 <FormDescription>The URL of your app</FormDescription>
                 <FormMessage />

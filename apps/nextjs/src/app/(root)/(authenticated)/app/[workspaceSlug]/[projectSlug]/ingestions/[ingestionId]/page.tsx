@@ -1,6 +1,6 @@
 import { format } from "date-fns"
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
 
 import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"

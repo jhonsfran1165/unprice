@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-import type { InsertPlan } from "@builderai/db/validators"
+import type { InsertPlan } from "@unprice/db/validators"
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@builderai/ui/dialog"
+} from "@unprice/ui/dialog"
 
 import { PlanForm } from "./plan-form"
 

@@ -1,11 +1,11 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { pageInsertBaseSchema, pageSelectBaseSchema } from "@builderai/db/validators"
+import { pageInsertBaseSchema, pageSelectBaseSchema } from "@unprice/db/validators"
 
-import { and, eq } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
-import { createSlug, newId } from "@builderai/db/utils"
+import { and, eq } from "@unprice/db"
+import * as schema from "@unprice/db/schema"
+import { createSlug, newId } from "@unprice/db/utils"
 import { createTRPCRouter, protectedActiveProjectProcedure, rateLimiterProcedure } from "../../trpc"
 
 export const pageRouter = createTRPCRouter({

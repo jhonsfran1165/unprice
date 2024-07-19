@@ -1,8 +1,8 @@
 import { formatRelative } from "date-fns"
 import { Suspense } from "react"
 
-import type { RouterOutputs } from "@builderai/api"
-import { Button } from "@builderai/ui/button"
+import type { RouterOutputs } from "@unprice/api"
+import { Button } from "@unprice/ui/button"
 import {
   Card,
   CardContent,
@@ -10,9 +10,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@builderai/ui/card"
-import { Activity, ChevronRight, CreditCard, DollarSign, Users } from "@builderai/ui/icons"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/card"
+import { Activity, ChevronRight, CreditCard, DollarSign, Users } from "@unprice/ui/icons"
+import { cn } from "@unprice/ui/utils"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/server"

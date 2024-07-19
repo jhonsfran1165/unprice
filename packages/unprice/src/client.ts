@@ -10,7 +10,7 @@ export type UnpriceOptions = {
   token: string
 } & {
   /**
-   * @default https://api.builderai.dev
+   * @default https://api.unprice.dev
    */
   baseUrl?: string
 
@@ -123,13 +123,13 @@ export class Unprice {
       "x-trpc-source": "sdk", // TODO: add version here
     }
     if (this.telemetry?.sdkVersions) {
-      headers["builderai-Telemetry-SDK"] = this.telemetry.sdkVersions.join(",")
+      headers["Unprice-Telemetry-SDK"] = this.telemetry.sdkVersions.join(",")
     }
     if (this.telemetry?.platform) {
-      headers["builderai-Telemetry-Platform"] = this.telemetry.platform
+      headers["Unprice-Telemetry-Platform"] = this.telemetry.platform
     }
     if (this.telemetry?.runtime) {
-      headers["builderai-Telemetry-Runtime"] = this.telemetry.runtime
+      headers["Unprice-Telemetry-Runtime"] = this.telemetry.runtime
     }
     return headers
   }

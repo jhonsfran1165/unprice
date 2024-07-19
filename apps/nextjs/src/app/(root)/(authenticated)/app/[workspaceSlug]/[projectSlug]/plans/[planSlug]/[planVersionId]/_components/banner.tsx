@@ -1,6 +1,6 @@
 import { AlertCircle } from "lucide-react"
 
-import { Alert, AlertDescription, AlertTitle } from "@builderai/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
 
 export function BannerPublishedVersion() {
   return (

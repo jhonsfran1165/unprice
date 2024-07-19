@@ -5,9 +5,9 @@ import { MoreHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import * as React from "react"
 
-import * as utils from "@builderai/db/utils"
-import type { WorkspaceRole } from "@builderai/db/validators"
-import { listMembersSchema } from "@builderai/db/validators"
+import * as utils from "@unprice/db/utils"
+import type { WorkspaceRole } from "@unprice/db/validators"
+import { listMembersSchema } from "@unprice/db/validators"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,8 +18,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@builderai/ui/alert-dialog"
-import { Button } from "@builderai/ui/button"
+} from "@unprice/ui/alert-dialog"
+import { Button } from "@unprice/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -27,15 +27,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@builderai/ui/dialog"
+} from "@unprice/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
-import { LoadingAnimation } from "@builderai/ui/loading-animation"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
+} from "@unprice/ui/dropdown-menu"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"

@@ -1,8 +1,6 @@
-import type { NextAuthRequest } from "@builderai/auth"
+import type { NextAuthRequest } from "@unprice/auth"
+import { APP_BASE_DOMAIN, BASE_DOMAIN, RESTRICTED_SUBDOMAINS } from "@unprice/config"
 import type { NextRequest } from "next/server"
-import { BASE_DOMAIN, RESTRICTED_SUBDOMAINS } from "./../constants/index"
-
-import { APP_BASE_DOMAIN } from "~/constants"
 
 // validate the subdomain from the host and return it
 // if the host is a custom domain, return the full domain

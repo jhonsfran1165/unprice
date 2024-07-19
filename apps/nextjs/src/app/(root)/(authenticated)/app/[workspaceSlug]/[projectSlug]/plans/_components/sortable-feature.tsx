@@ -3,7 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
-import { cn } from "@builderai/ui/utils"
+import { cn } from "@unprice/ui/utils"
 
 import type { FeaturePlanProps } from "./feature-plan"
 import { FeaturePlan } from "./feature-plan"

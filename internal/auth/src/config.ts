@@ -2,11 +2,11 @@ import GitHub from "@auth/core/providers/github"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import type { NextAuthConfig } from "next-auth"
 
-import { and, db, eq, sql } from "@builderai/db"
-import { workspacesByUserPrepared } from "@builderai/db/queries"
-import * as schema from "@builderai/db/schema"
-import * as utils from "@builderai/db/utils"
-import type { WorkspacesJWTPayload } from "@builderai/db/validators"
+import { and, db, eq, sql } from "@unprice/db"
+import { workspacesByUserPrepared } from "@unprice/db/queries"
+import * as schema from "@unprice/db/schema"
+import * as utils from "@unprice/db/utils"
+import type { WorkspacesJWTPayload } from "@unprice/db/validators"
 
 const useSecureCookies = process.env.VERCEL_ENV === "production"
 const log = console // createLogger('auth')

@@ -1,4 +1,4 @@
-import type { ProjectExtended } from "@builderai/db/validators"
+import type { ProjectExtended } from "@unprice/db/validators"
 
 import { TRPCError } from "@trpc/server"
 import type { Context } from "../trpc"

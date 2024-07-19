@@ -1,8 +1,8 @@
 "use client"
 
-import { Button } from "@builderai/ui/button"
 import { useEditor, useNode } from "@craftjs/core"
 import { ROOT_NODE } from "@craftjs/utils"
+import { Button } from "@unprice/ui/button"
 import { ArrowUp, Move, Trash } from "lucide-react"
 import type React from "react"
 import { Fragment, useCallback, useEffect, useRef } from "react"

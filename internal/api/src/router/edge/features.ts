@@ -1,10 +1,10 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
-import * as utils from "@builderai/db/utils"
-import { featureInsertBaseSchema, featureSelectBaseSchema } from "@builderai/db/validators"
+import { and, eq } from "@unprice/db"
+import * as schema from "@unprice/db/schema"
+import * as utils from "@unprice/db/utils"
+import { featureInsertBaseSchema, featureSelectBaseSchema } from "@unprice/db/validators"
 
 import { createTRPCRouter, protectedActiveProjectProcedure } from "../../trpc"
 

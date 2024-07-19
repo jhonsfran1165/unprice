@@ -5,7 +5,7 @@ import type {
   Month,
   SubscriptionItem,
   Year,
-} from "@builderai/db/validators"
+} from "@unprice/db/validators"
 
 export type CurrentUsageCached = {
   usage: number

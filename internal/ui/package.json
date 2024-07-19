@@ -1,5 +1,5 @@
 {
-  "name": "@builderai/ui",
+  "name": "@unprice/ui",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -52,8 +52,8 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@builderai/tailwind-config": "^0.1.0",
-    "@builderai/tsconfig": "0.1.0",
+    "@unprice/tailwind-config": "^0.1.0",
+    "@unprice/tsconfig": "0.1.0",
     "@tanstack/react-table": "^8.17.3",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",

@@ -5,7 +5,7 @@ import debounce from "debounce"
 import { Resizable, type ResizableProps, type Size } from "re-resizable"
 import { useCallback, useEffect, useRef, useState } from "react"
 
-import { cn } from "@builderai/ui/utils"
+import { cn } from "@unprice/ui/utils"
 import {
   getElementDimensions,
   isPercentage,

@@ -4,9 +4,9 @@ import { DollarSignIcon, HelpCircle, Plus, XCircle } from "lucide-react"
 import type { UseFormReturn } from "react-hook-form"
 import { useFieldArray } from "react-hook-form"
 
-import { AGGREGATION_METHODS, AGGREGATION_METHODS_MAP } from "@builderai/db/utils"
-import { type Currency, type PlanVersionFeature, currencySymbol } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
+import { AGGREGATION_METHODS, AGGREGATION_METHODS_MAP } from "@unprice/db/utils"
+import { type Currency, type PlanVersionFeature, currencySymbol } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import {
   FormControl,
   FormDescription,
@@ -14,11 +14,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
-import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
+import { cn } from "@unprice/ui/utils"
 
 import { InputWithAddons } from "~/components/input-addons"
 

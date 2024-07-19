@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation"
 import { startTransition } from "react"
 import { z } from "zod"
 
-import type { InsertCustomer } from "@builderai/db/validators"
-import { customerInsertBaseSchema } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
+import type { InsertCustomer } from "@unprice/db/validators"
+import { customerInsertBaseSchema } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import {
   Form,
   FormControl,
@@ -15,9 +15,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
-import { Textarea } from "@builderai/ui/text-area"
+} from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
+import { Textarea } from "@unprice/ui/text-area"
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"

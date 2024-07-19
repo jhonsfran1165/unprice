@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { BaseError } from "@builderai/error"
+import { BaseError } from "@unprice/error"
 
 export const apiCustomerErrorSchema = z.enum([
   "SUBSCRIPTION_EXPIRED",

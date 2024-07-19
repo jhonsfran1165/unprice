@@ -2,8 +2,8 @@
 
 import { AlertCircle, CheckCircle2, XCircle } from "lucide-react"
 
-import type { DomainVerificationStatusProps } from "@builderai/db/validators"
-import { LoadingAnimation } from "@builderai/ui/loading-animation"
+import type { DomainVerificationStatusProps } from "@unprice/db/validators"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
 export default function DomainStatusIcon({
   status,

@@ -9,7 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@builderai/ui/sheet"
+} from "@unprice/ui/sheet"
 
 import { usePlanVersionFeatureOpen } from "../../_components/use-features"
 import { FeatureConfig } from "./feature-config"

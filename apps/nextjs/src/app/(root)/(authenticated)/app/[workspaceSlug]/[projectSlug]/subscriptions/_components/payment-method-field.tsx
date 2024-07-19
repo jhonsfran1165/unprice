@@ -2,8 +2,8 @@
 
 import type { UseFormReturn } from "react-hook-form"
 
-import type { RouterOutputs } from "@builderai/api"
-import type { InsertSubscription } from "@builderai/db/validators"
+import type { RouterOutputs } from "@unprice/api"
+import type { InsertSubscription } from "@unprice/db/validators"
 import {
   FormControl,
   FormDescription,
@@ -11,8 +11,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@builderai/ui/form"
-import { RadioGroup, RadioGroupItem } from "@builderai/ui/radio-group"
+} from "@unprice/ui/form"
+import { RadioGroup, RadioGroupItem } from "@unprice/ui/radio-group"
 
 type PaymentMethodProviderData =
   RouterOutputs["customers"]["listPaymentMethods"]["paymentMethods"][number]

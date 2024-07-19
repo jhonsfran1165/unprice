@@ -1,4 +1,4 @@
-import { cn, focusRing } from "@builderai/ui/utils"
+import { cn, focusRing } from "@unprice/ui/utils"
 import { navItems } from "~/constants/layout"
 import { SuperLink } from "../super-link"
 

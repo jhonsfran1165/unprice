@@ -3,13 +3,13 @@ import Link from "next/link"
 import type { ReactNode } from "react"
 import { Suspense } from "react"
 
-import { buttonVariants } from "@builderai/ui/button"
-import { ChevronRight, Logo } from "@builderai/ui/icons"
+import { buttonVariants } from "@unprice/ui/button"
+import { ChevronRight, Logo } from "@unprice/ui/icons"
 
+import { APP_DOMAIN, AUTH_ROUTES } from "@unprice/config"
 import Footer from "~/components/layout/footer"
 import { MainNav } from "~/components/layout/main-nav"
 import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
-import { APP_DOMAIN, AUTH_ROUTES } from "~/constants"
 import { siteConfig } from "~/constants/layout"
 
 export default function MarketingLayout(props: { children: ReactNode }) {

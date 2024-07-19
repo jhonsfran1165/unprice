@@ -1,13 +1,13 @@
-import { subscriptionItems, subscriptions } from "@builderai/db/schema"
-import { newId } from "@builderai/db/utils"
+import { TRPCError } from "@trpc/server"
+import { subscriptionItems, subscriptions } from "@unprice/db/schema"
+import { newId } from "@unprice/db/utils"
 import {
   type ProjectExtended,
   type SubscriptionItemConfig,
   createDefaultSubscriptionConfig,
   subscriptionInsertSchema,
   subscriptionItemsConfigSchema,
-} from "@builderai/db/validators"
-import { TRPCError } from "@trpc/server"
+} from "@unprice/db/validators"
 import type { z } from "zod"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"

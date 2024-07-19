@@ -1,5 +1,5 @@
 {
-  "name": "@builderai/config",
+  "name": "@unprice/config",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -18,12 +18,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@builderai/ui": "0.1.0",
+    "@unprice/ui": "0.1.0",
     "@t3-oss/env-nextjs": "0.9.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@builderai/tsconfig": "0.1.0",
+    "@unprice/tsconfig": "0.1.0",
     "typescript": "^5.3.3"
   }
 }

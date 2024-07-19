@@ -1,10 +1,10 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 
-import { Button } from "@builderai/ui/button"
-import { GitHub, Twitter } from "@builderai/ui/icons"
-import { Skeleton } from "@builderai/ui/skeleton"
-import { cn } from "@builderai/ui/utils"
+import { Button } from "@unprice/ui/button"
+import { GitHub, Twitter } from "@unprice/ui/icons"
+import { Skeleton } from "@unprice/ui/skeleton"
+import { cn } from "@unprice/ui/utils"
 
 import { Logo } from "~/components/layout/logo"
 import { siteConfig } from "~/constants/layout"

@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 

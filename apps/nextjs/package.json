@@ -1,5 +1,5 @@
 {
-  "name": "@builderai/nextjs",
+  "name": "@unprice/nextjs",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -20,13 +20,13 @@
   },
   "dependencies": {
     "@baselime/node-opentelemetry": "^0.5.8",
-    "@builderai/api": "^0.1.0",
-    "@builderai/auth": "^0.1.0",
-    "@builderai/config": "^0.1.0",
-    "@builderai/db": "^0.1.0",
-    "@builderai/error": "^0.1.0",
-    "@builderai/stripe": "^0.1.0",
-    "@builderai/ui": "^0.1.0",
+    "@unprice/api": "^0.1.0",
+    "@unprice/auth": "^0.1.0",
+    "@unprice/config": "^0.1.0",
+    "@unprice/db": "^0.1.0",
+    "@unprice/error": "^0.1.0",
+    "@unprice/stripe": "^0.1.0",
+    "@unprice/ui": "^0.1.0",
     "@craftjs/core": "^0.2.8",
     "@craftjs/layers": "^0.2.3",
     "@dinero.js/currencies": "2.0.0-alpha.14",
@@ -78,8 +78,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@builderai/tailwind-config": "^0.1.0",
-    "@builderai/tsconfig": "^0.1.0",
+    "@unprice/tailwind-config": "^0.1.0",
+    "@unprice/tsconfig": "^0.1.0",
     "@tanstack/react-query-devtools": "^5.49.2",
     "@types/mdx": "^2.0.13",
     "@types/node": "20.11.24",

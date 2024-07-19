@@ -51,12 +51,12 @@ importers:
         specifier: ^0.34.1
         version: 0.34.1
     devDependencies:
-      '@builderai/tsconfig':
-        specifier: ^0.1.0
-        version: link:../../tooling/typescript
       '@types/node':
         specifier: 20.11.24
         version: 20.11.24
+      '@unprice/tsconfig':
+        specifier: ^0.1.0
+        version: link:../../tooling/typescript
       h3:
         specifier: ^1.11.1
         version: 1.12.0
@@ -72,27 +72,6 @@ importers:
       '@baselime/node-opentelemetry':
         specifier: ^0.5.8
         version: 0.5.8(@trpc/server@11.0.0-rc.436)
-      '@builderai/api':
-        specifier: ^0.1.0
-        version: link:../../internal/api
-      '@builderai/auth':
-        specifier: ^0.1.0
-        version: link:../../internal/auth
-      '@builderai/config':
-        specifier: ^0.1.0
-        version: link:../../internal/config
-      '@builderai/db':
-        specifier: ^0.1.0
-        version: link:../../internal/db
-      '@builderai/error':
-        specifier: ^0.1.0
-        version: link:../../internal/error
-      '@builderai/stripe':
-        specifier: ^0.1.0
-        version: link:../../internal/stripe
-      '@builderai/ui':
-        specifier: ^0.1.0
-        version: link:../../internal/ui
       '@craftjs/core':
         specifier: ^0.2.8
         version: 0.2.8(react@18.3.1)
@@ -147,6 +126,27 @@ importers:
       '@trpc/server':
         specifier: 11.0.0-rc.436
         version: 11.0.0-rc.436
+      '@unprice/api':
+        specifier: ^0.1.0
+        version: link:../../internal/api
+      '@unprice/auth':
+        specifier: ^0.1.0
+        version: link:../../internal/auth
+      '@unprice/config':
+        specifier: ^0.1.0
+        version: link:../../internal/config
+      '@unprice/db':
+        specifier: ^0.1.0
+        version: link:../../internal/db
+      '@unprice/error':
+        specifier: ^0.1.0
+        version: link:../../internal/error
+      '@unprice/stripe':
+        specifier: ^0.1.0
+        version: link:../../internal/stripe
+      '@unprice/ui':
+        specifier: ^0.1.0
+        version: link:../../internal/ui
       '@vercel/analytics':
         specifier: ^1.3.1
         version: 1.3.1(next@14.3.0-canary.54)(react@18.3.1)
@@ -155,10 +155,10 @@ importers:
         version: 1.9.1(@opentelemetry/api-logs@0.50.0)(@opentelemetry/api@1.9.0)(@opentelemetry/resources@1.25.1)(@opentelemetry/sdk-metrics@1.25.1)(@opentelemetry/sdk-trace-base@1.25.1)
       '@vercel/speed-insights':
         specifier: ^1.0.12
-        version: 1.0.12(next@14.3.0-canary.54)(react@18.3.1)(svelte@4.2.18)(vue@3.4.32)
+        version: 1.0.12(next@14.3.0-canary.54)(react@18.3.1)(svelte@4.2.18)(vue@3.4.33)
       ai:
         specifier: ^3.2.16
-        version: 3.2.28(react@18.3.1)(svelte@4.2.18)(vue@3.4.32)(zod@3.23.8)
+        version: 3.2.30(react@18.3.1)(svelte@4.2.18)(vue@3.4.33)(zod@3.23.8)
       date-fns:
         specifier: ^3.3.1
         version: 3.6.0
@@ -170,7 +170,7 @@ importers:
         version: 2.0.0-alpha.14
       framer-motion:
         specifier: ^11.0.8
-        version: 11.3.7(react-dom@18.3.1)(react@18.3.1)
+        version: 11.3.8(react-dom@18.3.1)(react@18.3.1)
       highlight.js:
         specifier: ^11.9.0
         version: 11.10.0
@@ -241,12 +241,6 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@builderai/tailwind-config':
-        specifier: ^0.1.0
-        version: link:../../tooling/tailwind
-      '@builderai/tsconfig':
-        specifier: ^0.1.0
-        version: link:../../tooling/typescript
       '@tanstack/react-query-devtools':
         specifier: ^5.49.2
         version: 5.51.9(@tanstack/react-query@5.49.2)(react@18.3.1)
@@ -262,6 +256,12 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.0
+      '@unprice/tailwind-config':
+        specifier: ^0.1.0
+        version: link:../../tooling/tailwind
+      '@unprice/tsconfig':
+        specifier: ^0.1.0
+        version: link:../../tooling/typescript
       autoprefixer:
         specifier: ^10.4.18
         version: 10.4.19(postcss@8.4.35)
@@ -277,12 +277,6 @@ importers:
 
   apps/workflows:
     dependencies:
-      '@builderai/db':
-        specifier: ^0.1.0
-        version: link:../../internal/db
-      '@builderai/tinybird':
-        specifier: workspace:^0.1.0
-        version: link:../../internal/tinybird
       '@dinero.js/currencies':
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
@@ -298,6 +292,12 @@ importers:
       '@trigger.dev/sdk':
         specifier: ^2.3.19
         version: 2.3.19
+      '@unprice/db':
+        specifier: ^0.1.0
+        version: link:../../internal/db
+      '@unprice/tinybird':
+        specifier: workspace:^0.1.0
+        version: link:../../internal/tinybird
       next:
         specifier: 14.3.0-canary.54
         version: 14.3.0-canary.54(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
@@ -308,9 +308,6 @@ importers:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
     devDependencies:
-      '@builderai/tsconfig':
-        specifier: ^0.1.0
-        version: link:../../tooling/typescript
       '@types/node':
         specifier: 20.11.24
         version: 20.11.24
@@ -323,6 +320,9 @@ importers:
       '@types/ws':
         specifier: ^8.5.10
         version: 8.5.11
+      '@unprice/tsconfig':
+        specifier: ^0.1.0
+        version: link:../../tooling/typescript
       dotenv-cli:
         specifier: ^7.3.0
         version: 7.4.2
@@ -338,39 +338,6 @@ importers:
       '@baselime/trpc-opentelemetry-middleware':
         specifier: ^0.1.2
         version: 0.1.2(@opentelemetry/api@1.9.0)(@trpc/server@11.0.0-rc.436)
-      '@builderai/auth':
-        specifier: ^0.1.0
-        version: link:../auth
-      '@builderai/config':
-        specifier: ^0.1.0
-        version: link:../config
-      '@builderai/db':
-        specifier: ^0.1.0
-        version: link:../db
-      '@builderai/email':
-        specifier: ^0.1.0
-        version: link:../email
-      '@builderai/error':
-        specifier: ^0.1.0
-        version: link:../error
-      '@builderai/logging':
-        specifier: workspace:^
-        version: link:../logging
-      '@builderai/logs':
-        specifier: workspace:^1.0.0
-        version: link:../logs
-      '@builderai/metrics':
-        specifier: workspace:^
-        version: link:../metrics
-      '@builderai/stripe':
-        specifier: ^0.1.0
-        version: link:../stripe
-      '@builderai/tinybird':
-        specifier: ^0.1.0
-        version: link:../tinybird
-      '@builderai/vercel':
-        specifier: workspace:^
-        version: link:../vercel
       '@dinero.js/currencies':
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
@@ -385,16 +352,49 @@ importers:
         version: 1.0.0(@trpc/server@11.0.0-rc.436)
       '@trpc-limiter/upstash':
         specifier: ^1.0.0
-        version: 1.0.0(@trpc/server@11.0.0-rc.436)(@upstash/ratelimit@2.0.0)(@upstash/redis@1.33.0)
+        version: 1.0.0(@trpc/server@11.0.0-rc.436)(@upstash/ratelimit@2.0.1)(@upstash/redis@1.33.0)
       '@trpc/server':
         specifier: 11.0.0-rc.436
         version: 11.0.0-rc.436
       '@unkey/cache':
         specifier: ^1.4.0
         version: 1.4.0
+      '@unprice/auth':
+        specifier: ^0.1.0
+        version: link:../auth
+      '@unprice/config':
+        specifier: ^0.1.0
+        version: link:../config
+      '@unprice/db':
+        specifier: ^0.1.0
+        version: link:../db
+      '@unprice/email':
+        specifier: ^0.1.0
+        version: link:../email
+      '@unprice/error':
+        specifier: ^0.1.0
+        version: link:../error
+      '@unprice/logging':
+        specifier: workspace:^
+        version: link:../logging
+      '@unprice/logs':
+        specifier: workspace:^1.0.0
+        version: link:../logs
+      '@unprice/metrics':
+        specifier: workspace:^
+        version: link:../metrics
+      '@unprice/stripe':
+        specifier: ^0.1.0
+        version: link:../stripe
+      '@unprice/tinybird':
+        specifier: ^0.1.0
+        version: link:../tinybird
+      '@unprice/vercel':
+        specifier: workspace:^
+        version: link:../vercel
       '@upstash/ratelimit':
         specifier: ^2.0.0
-        version: 2.0.0
+        version: 2.0.1
       '@upstash/redis':
         specifier: ^1.33.0
         version: 1.33.0
@@ -417,7 +417,7 @@ importers:
         specifier: ^2.0.2
         version: 2.0.2(zod@3.23.8)
     devDependencies:
-      '@builderai/tsconfig':
+      '@unprice/tsconfig':
         specifier: ^0.1.0
         version: link:../../tooling/typescript
       typescript:
@@ -429,12 +429,12 @@ importers:
       '@auth/drizzle-adapter':
         specifier: 1.4.1
         version: 1.4.1
-      '@builderai/db':
-        specifier: ^0.1.0
-        version: link:../db
       '@t3-oss/env-nextjs':
         specifier: 0.9.1
         version: 0.9.1(typescript@5.5.3)(zod@3.23.8)
+      '@unprice/db':
+        specifier: ^0.1.0
+        version: link:../db
       encoding:
         specifier: ^0.1.13
         version: 0.1.13
@@ -454,7 +454,7 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@builderai/tsconfig':
+      '@unprice/tsconfig':
         specifier: ^0.1.0
         version: link:../../tooling/typescript
       typescript:
@@ -463,17 +463,17 @@ importers:
 
   internal/config:
     dependencies:
-      '@builderai/ui':
-        specifier: 0.1.0
-        version: link:../ui
       '@t3-oss/env-nextjs':
         specifier: 0.9.1
         version: 0.9.1(typescript@5.5.3)(zod@3.23.8)
+      '@unprice/ui':
+        specifier: 0.1.0
+        version: link:../ui
       zod:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@builderai/tsconfig':
+      '@unprice/tsconfig':
         specifier: 0.1.0
         version: link:../../tooling/typescript
       typescript:
@@ -482,18 +482,18 @@ importers:
 
   internal/db:
     dependencies:
-      '@builderai/config':
-        specifier: ^0.1.0
-        version: link:../config
-      '@builderai/error':
-        specifier: ^0.1.0
-        version: link:../error
       '@neondatabase/serverless':
         specifier: ^0.9.0
         version: 0.9.4
       '@t3-oss/env-nextjs':
         specifier: 0.9.1
         version: 0.9.1(typescript@5.5.3)(zod@3.23.8)
+      '@unprice/config':
+        specifier: ^0.1.0
+        version: link:../config
+      '@unprice/error':
+        specifier: ^0.1.0
+        version: link:../error
       base-x:
         specifier: ^4.0.0
         version: 4.0.0
@@ -513,12 +513,12 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@builderai/tsconfig':
-        specifier: ^0.1.0
-        version: link:../../tooling/typescript
       '@types/ws':
         specifier: ^8.5.10
         version: 8.5.11
+      '@unprice/tsconfig':
+        specifier: ^0.1.0
+        version: link:../../tooling/typescript
       dotenv-cli:
         specifier: ^7.3.0
         version: 7.4.2
@@ -565,15 +565,15 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@builderai/tsconfig':
-        specifier: ^0.1.0
-        version: link:../../tooling/typescript
       '@types/node':
         specifier: 20.11.24
         version: 20.11.24
       '@types/react':
         specifier: ^18.3.1
         version: 18.3.3
+      '@unprice/tsconfig':
+        specifier: ^0.1.0
+        version: link:../../tooling/typescript
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -592,7 +592,7 @@ importers:
         version: 20.11.24
       tsup:
         specifier: ^8.0.2
-        version: 8.1.2(tsx@4.16.2)(typescript@5.5.3)
+        version: 8.2.0(tsx@4.16.2)(typescript@5.5.3)
       tsx:
         specifier: ^4.7.2
         version: 4.16.2
@@ -605,7 +605,7 @@ importers:
       '@baselime/edge-logger':
         specifier: ^0.4.2
         version: 0.4.2
-      '@builderai/logs':
+      '@unprice/logs':
         specifier: ^1.0.0
         version: link:../logs
     devDependencies:
@@ -615,19 +615,19 @@ importers:
 
   internal/logs:
     dependencies:
-      '@builderai/metrics':
+      '@unprice/metrics':
         specifier: workspace:^
         version: link:../metrics
       zod:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@builderai/tsconfig':
-        specifier: 0.1.0
-        version: link:../../tooling/typescript
       '@types/node':
         specifier: 20.11.24
         version: 20.11.24
+      '@unprice/tsconfig':
+        specifier: 0.1.0
+        version: link:../../tooling/typescript
       typescript:
         specifier: ^5.3.3
         version: 5.5.3
@@ -638,30 +638,30 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@builderai/tsconfig':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
       '@types/node':
         specifier: 20.11.24
         version: 20.11.24
+      '@unprice/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
       typescript:
         specifier: ^5.3.3
         version: 5.5.3
 
   internal/stripe:
     dependencies:
-      '@builderai/auth':
-        specifier: ^0.1.0
-        version: link:../auth
-      '@builderai/config':
-        specifier: ^0.1.0
-        version: link:../config
-      '@builderai/db':
-        specifier: ^0.1.0
-        version: link:../db
       '@t3-oss/env-nextjs':
         specifier: 0.9.1
         version: 0.9.1(typescript@5.5.3)(zod@3.23.8)
+      '@unprice/auth':
+        specifier: ^0.1.0
+        version: link:../auth
+      '@unprice/config':
+        specifier: ^0.1.0
+        version: link:../config
+      '@unprice/db':
+        specifier: ^0.1.0
+        version: link:../db
       stripe:
         specifier: ^14.19.0
         version: 14.25.0
@@ -669,7 +669,7 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@builderai/tsconfig':
+      '@unprice/tsconfig':
         specifier: 0.1.0
         version: link:../../tooling/typescript
       typescript:
@@ -685,15 +685,15 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@builderai/db':
-        specifier: ^0.1.0
-        version: link:../db
-      '@builderai/tsconfig':
-        specifier: ^0.1.0
-        version: link:../../tooling/typescript
       '@chronark/zod-bird':
         specifier: ^0.3.9
         version: 0.3.9
+      '@unprice/db':
+        specifier: ^0.1.0
+        version: link:../db
+      '@unprice/tsconfig':
+        specifier: ^0.1.0
+        version: link:../../tooling/typescript
       typescript:
         specifier: ^5.3.3
         version: 5.5.3
@@ -777,7 +777,7 @@ importers:
         version: 0.2.1(next@14.2.5)(react-dom@18.3.1)(react@18.3.1)
       react-resizable-panels:
         specifier: ^2.0.12
-        version: 2.0.20(react-dom@18.3.1)(react@18.3.1)
+        version: 2.0.21(react-dom@18.3.1)(react@18.3.1)
       recharts:
         specifier: ^2.12.7
         version: 2.12.7(react-dom@18.3.1)(react@18.3.1)
@@ -794,12 +794,6 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@builderai/tailwind-config':
-        specifier: ^0.1.0
-        version: link:../../tooling/tailwind
-      '@builderai/tsconfig':
-        specifier: 0.1.0
-        version: link:../../tooling/typescript
       '@tanstack/react-table':
         specifier: ^8.17.3
         version: 8.19.3(react-dom@18.3.1)(react@18.3.1)
@@ -809,6 +803,12 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.0
+      '@unprice/tailwind-config':
+        specifier: ^0.1.0
+        version: link:../../tooling/tailwind
+      '@unprice/tsconfig':
+        specifier: 0.1.0
+        version: link:../../tooling/typescript
       date-fns:
         specifier: ^3.3.1
         version: 3.6.0
@@ -836,37 +836,37 @@ importers:
 
   internal/vercel:
     dependencies:
-      '@builderai/error':
+      '@unprice/error':
         specifier: ^0.1.0
         version: link:../error
       zod:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@builderai/tsconfig':
-        specifier: workspace:^
-        version: link:../../tooling/typescript
       '@types/node':
         specifier: 20.11.24
         version: 20.11.24
+      '@unprice/tsconfig':
+        specifier: workspace:^
+        version: link:../../tooling/typescript
       typescript:
         specifier: ^5.3.3
         version: 5.5.3
 
   packages/unprice:
     devDependencies:
-      '@builderai/tsconfig':
-        specifier: ^0.1.0
-        version: link:../../tooling/typescript
       '@types/node':
         specifier: 20.11.24
         version: 20.11.24
+      '@unprice/tsconfig':
+        specifier: ^0.1.0
+        version: link:../../tooling/typescript
       openapi-typescript:
         specifier: 7.0.0-next.7
         version: 7.0.0-next.7(typescript@5.5.3)
       tsup:
         specifier: ^8.0.2
-        version: 8.1.2(tsx@4.16.2)(typescript@5.5.3)
+        version: 8.2.0(tsx@4.16.2)(typescript@5.5.3)
       typescript:
         specifier: ^5.3.3
         version: 5.5.3
@@ -879,12 +879,12 @@ importers:
 
   tooling/migrate:
     dependencies:
-      '@builderai/db':
-        specifier: ^0.1.0
-        version: link:../../internal/db
       '@neondatabase/serverless':
         specifier: ^0.9.0
         version: 0.9.4
+      '@unprice/db':
+        specifier: ^0.1.0
+        version: link:../../internal/db
       drizzle-orm:
         specifier: ^0.31.2
         version: 0.31.4(@neondatabase/serverless@0.9.4)
@@ -892,12 +892,12 @@ importers:
         specifier: ^8.17.1
         version: 8.18.0
     devDependencies:
-      '@builderai/tsconfig':
-        specifier: ^0.1.0
-        version: link:../typescript
       '@types/node':
         specifier: 20.11.24
         version: 20.11.24
+      '@unprice/tsconfig':
+        specifier: ^0.1.0
+        version: link:../typescript
       dotenv-cli:
         specifier: ^7.3.0
         version: 7.4.2
@@ -938,7 +938,7 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.1)
     devDependencies:
-      '@builderai/tsconfig':
+      '@unprice/tsconfig':
         specifier: 0.1.0
         version: link:../typescript
       typescript:
@@ -995,8 +995,8 @@ packages:
       json-schema: 0.4.0
     dev: false
 
-  /@ai-sdk/react@0.0.23(react@18.3.1)(zod@3.23.8):
-    resolution: {integrity: sha512-lkZXUWF/hayHKa2ySs2ATqI+dWMzAtp+0Cvd2OlFUZtijZWVo48oKzy4CCZRcBkMqgVPBO5UjShX4kVRjFhPbw==}
+  /@ai-sdk/react@0.0.24(react@18.3.1)(zod@3.23.8):
+    resolution: {integrity: sha512-Xx6yX8VoFCfWsF/UdCIkK8mMyGbdvJa3yHfil52HP92IPzXJVEEjegczgIZCT3o1yJruOjirnuYmVCc7O7mHHQ==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18 || ^19
@@ -1059,8 +1059,8 @@ packages:
       zod: 3.23.8
     dev: false
 
-  /@ai-sdk/vue@0.0.18(vue@3.4.32)(zod@3.23.8):
-    resolution: {integrity: sha512-WmxUYyXzFpPr5gyjgFqqoc+JwNZYNUpoKf3XtTjubk0nbJsbQv22Xv+2E1DrsoV8ApJnbSUHUYaq6XU2k8Pcxg==}
+  /@ai-sdk/vue@0.0.19(vue@3.4.33)(zod@3.23.8):
+    resolution: {integrity: sha512-pqcNLIn6KsS8jp9Yq7nL+6N8ORRyv58SBqKD3CMsMV+KOTzL154mqrYpOlqoomqAeiZA/lE0kx0uBGBeWoPOLA==}
     engines: {node: '>=18'}
     peerDependencies:
       vue: ^3.3.4
@@ -1070,8 +1070,8 @@ packages:
     dependencies:
       '@ai-sdk/provider-utils': 0.0.14(zod@3.23.8)
       '@ai-sdk/ui-utils': 0.0.15(zod@3.23.8)
-      swrv: 1.0.4(vue@3.4.32)
-      vue: 3.4.32(typescript@5.5.3)
+      swrv: 1.0.4(vue@3.4.33)
+      vue: 3.4.33(typescript@5.5.3)
     transitivePeerDependencies:
       - zod
     dev: false
@@ -1942,7 +1942,7 @@ packages:
     resolution: {integrity: sha512-FxEMIkJKnodyA1OaCUoEvbYRkoZlLZ4d/eXFu9Fh8CbBBgP5EmZxrfTRyN0qpXZ4vOvqnE5YdRdcrmUUXuU+dA==}
     dependencies:
       '@esbuild-kit/core-utils': 3.3.2
-      get-tsconfig: 4.7.5
+      get-tsconfig: 4.7.6
     dev: true
 
   /@esbuild/aix-ppc64@0.19.11:
@@ -7552,14 +7552,14 @@ packages:
       prosemirror-keymap: 1.2.2
       prosemirror-markdown: 1.13.0
       prosemirror-menu: 1.2.4
-      prosemirror-model: 1.22.1
+      prosemirror-model: 1.22.2
       prosemirror-schema-basic: 1.2.3
       prosemirror-schema-list: 1.4.1
       prosemirror-state: 1.4.3
       prosemirror-tables: 1.3.7
-      prosemirror-trailing-node: 2.0.9(prosemirror-model@1.22.1)(prosemirror-state@1.4.3)(prosemirror-view@1.33.8)
+      prosemirror-trailing-node: 2.0.9(prosemirror-model@1.22.2)(prosemirror-state@1.4.3)(prosemirror-view@1.33.9)
       prosemirror-transform: 1.9.0
-      prosemirror-view: 1.33.8
+      prosemirror-view: 1.33.9
     dev: false
 
   /@tiptap/react@2.5.4(@tiptap/core@2.5.4)(@tiptap/pm@2.5.4)(react-dom@18.3.1)(react@18.3.1):
@@ -7710,7 +7710,7 @@ packages:
       '@trpc/server': 11.0.0-rc.436
     dev: false
 
-  /@trpc-limiter/upstash@1.0.0(@trpc/server@11.0.0-rc.436)(@upstash/ratelimit@2.0.0)(@upstash/redis@1.33.0):
+  /@trpc-limiter/upstash@1.0.0(@trpc/server@11.0.0-rc.436)(@upstash/ratelimit@2.0.1)(@upstash/redis@1.33.0):
     resolution: {integrity: sha512-TsMkHd/a6GtXvsuSevBwaRHrTBWIz3IW9D5ggAJg5iYg6Ocew42iNqxX/n7L143z3C9vW1purBDdFaDK0zK/zQ==}
     engines: {node: '>=16'}
     peerDependencies:
@@ -7721,7 +7721,7 @@ packages:
     dependencies:
       '@trpc-limiter/core': 1.0.0(@trpc/server@11.0.0-rc.436)
       '@trpc/server': 11.0.0-rc.436
-      '@upstash/ratelimit': 2.0.0
+      '@upstash/ratelimit': 2.0.1
       '@upstash/redis': 1.33.0
     dev: false
 
@@ -8216,17 +8216,17 @@ packages:
       zod: 3.23.8
     dev: false
 
-  /@upstash/core-analytics@0.0.9:
-    resolution: {integrity: sha512-9NXXxZ5y1/A/zqKLlVT7NsAWSggJfOjB0hG6Ffx29b4jbzHOiQVWB55h5+j2clT9Ib+mNPXn0iB5zN3aWLkICw==}
+  /@upstash/core-analytics@0.0.10:
+    resolution: {integrity: sha512-7qJHGxpQgQr9/vmeS1PktEwvNAF7TI4iJDi8Pu2CFZ9YUGHZH4fOP5TfYlZ4aVxfopnELiE4BS4FBjyK7V1/xQ==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@upstash/redis': 1.33.0
     dev: false
 
-  /@upstash/ratelimit@2.0.0:
-    resolution: {integrity: sha512-UbOdDpC6CFsrQyevfwbpxr92OkDccKr+KpC9+idxOrmr3U6XbIQq/UIunSLIZ7kYwxoY5j3i7Ky5nwHZ3/DTvA==}
+  /@upstash/ratelimit@2.0.1:
+    resolution: {integrity: sha512-J+0hlkvWUjlVrjcBQhWx7gbaUGsvFF59i+GAx7YQk8L0E0MQ93xzCPu02uaXhGDJGkxiar7nRRPqj3hs+CdAJg==}
     dependencies:
-      '@upstash/core-analytics': 0.0.9
+      '@upstash/core-analytics': 0.0.10
     dev: false
 
   /@upstash/redis@1.33.0:
@@ -8302,7 +8302,7 @@ packages:
       '@opentelemetry/sdk-trace-base': 1.25.1(@opentelemetry/api@1.9.0)
     dev: false
 
-  /@vercel/speed-insights@1.0.12(next@14.3.0-canary.54)(react@18.3.1)(svelte@4.2.18)(vue@3.4.32):
+  /@vercel/speed-insights@1.0.12(next@14.3.0-canary.54)(react@18.3.1)(svelte@4.2.18)(vue@3.4.33):
     resolution: {integrity: sha512-ZGQ+a7bcfWJD2VYEp2R1LHvRAMyyaFBYytZXsfnbOMkeOvzGNVxUL7aVUvisIrTZjXTSsxG45DKX7yiw6nq2Jw==}
     requiresBuild: true
     peerDependencies:
@@ -8329,81 +8329,81 @@ packages:
       next: 14.3.0-canary.54(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       react: 18.3.1
       svelte: 4.2.18
-      vue: 3.4.32(typescript@5.5.3)
+      vue: 3.4.33(typescript@5.5.3)
     dev: false
 
-  /@vue/compiler-core@3.4.32:
-    resolution: {integrity: sha512-8tCVWkkLe/QCWIsrIvExUGnhYCAOroUs5dzhSoKL5w4MJS8uIYiou+pOPSVIOALOQ80B0jBs+Ri+kd5+MBnCDw==}
+  /@vue/compiler-core@3.4.33:
+    resolution: {integrity: sha512-MoIREbkdPQlnGfSKDMgzTqzqx5nmEjIc0ydLVYlTACGBsfvOJ4tHSbZXKVF536n6fB+0eZaGEOqsGThPpdvF5A==}
     dependencies:
       '@babel/parser': 7.24.8
-      '@vue/shared': 3.4.32
+      '@vue/shared': 3.4.33
       entities: 4.5.0
       estree-walker: 2.0.2
       source-map-js: 1.2.0
     dev: false
 
-  /@vue/compiler-dom@3.4.32:
-    resolution: {integrity: sha512-PbSgt9KuYo4fyb90dynuPc0XFTfFPs3sCTbPLOLlo+PrUESW1gn/NjSsUvhR+mI2AmmEzexwYMxbHDldxSOr2A==}
+  /@vue/compiler-dom@3.4.33:
+    resolution: {integrity: sha512-GzB8fxEHKw0gGet5BKlpfXEqoBnzSVWwMnT+dc25wE7pFEfrU/QsvjZMP9rD4iVXHBBoemTct8mN0GJEI6ZX5A==}
     dependencies:
-      '@vue/compiler-core': 3.4.32
-      '@vue/shared': 3.4.32
+      '@vue/compiler-core': 3.4.33
+      '@vue/shared': 3.4.33
     dev: false
 
-  /@vue/compiler-sfc@3.4.32:
-    resolution: {integrity: sha512-STy9im/WHfaguJnfKjjVpMHukxHUrOKjm2vVCxiojQJyo3Sb6Os8SMXBr/MI+ekpstEGkDONfqAQoSbZhspLYw==}
+  /@vue/compiler-sfc@3.4.33:
+    resolution: {integrity: sha512-7rk7Vbkn21xMwIUpHQR4hCVejwE6nvhBOiDgoBcR03qvGqRKA7dCBSsHZhwhYUsmjlbJ7OtD5UFIyhP6BY+c8A==}
     dependencies:
       '@babel/parser': 7.24.8
-      '@vue/compiler-core': 3.4.32
-      '@vue/compiler-dom': 3.4.32
-      '@vue/compiler-ssr': 3.4.32
-      '@vue/shared': 3.4.32
+      '@vue/compiler-core': 3.4.33
+      '@vue/compiler-dom': 3.4.33
+      '@vue/compiler-ssr': 3.4.33
+      '@vue/shared': 3.4.33
       estree-walker: 2.0.2
       magic-string: 0.30.10
       postcss: 8.4.39
       source-map-js: 1.2.0
     dev: false
 
-  /@vue/compiler-ssr@3.4.32:
-    resolution: {integrity: sha512-nyu/txTecF6DrxLrpLcI34xutrvZPtHPBj9yRoPxstIquxeeyywXpYZrQMsIeDfBhlw1abJb9CbbyZvDw2kjdg==}
+  /@vue/compiler-ssr@3.4.33:
+    resolution: {integrity: sha512-0WveC9Ai+eT/1b6LCV5IfsufBZ0HP7pSSTdDjcuW302tTEgoBw8rHVHKPbGUtzGReUFCRXbv6zQDDgucnV2WzQ==}
     dependencies:
-      '@vue/compiler-dom': 3.4.32
-      '@vue/shared': 3.4.32
+      '@vue/compiler-dom': 3.4.33
+      '@vue/shared': 3.4.33
     dev: false
 
-  /@vue/reactivity@3.4.32:
-    resolution: {integrity: sha512-1P7QvghAzhSIWmiNmh4MNkLVjr2QTNDcFv2sKmytEWhR6t7BZzNicgm5ENER4uU++wbWxgRh/pSEYgdI3MDcvg==}
+  /@vue/reactivity@3.4.33:
+    resolution: {integrity: sha512-B24QIelahDbyHipBgbUItQblbd4w5HpG3KccL+YkGyo3maXyS253FzcTR3pSz739OTphmzlxP7JxEMWBpewilA==}
     dependencies:
-      '@vue/shared': 3.4.32
+      '@vue/shared': 3.4.33
     dev: false
 
-  /@vue/runtime-core@3.4.32:
-    resolution: {integrity: sha512-FxT2dTHUs1Hki8Ui/B1Hu339mx4H5kRJooqrNM32tGUHBPStJxwMzLIRbeGO/B1NMplU4Pg9fwOqrJtrOzkdfA==}
+  /@vue/runtime-core@3.4.33:
+    resolution: {integrity: sha512-6wavthExzT4iAxpe8q37/rDmf44nyOJGISJPxCi9YsQO+8w9v0gLCFLfH5TzD1V1AYrTAdiF4Y1cgUmP68jP6w==}
     dependencies:
-      '@vue/reactivity': 3.4.32
-      '@vue/shared': 3.4.32
+      '@vue/reactivity': 3.4.33
+      '@vue/shared': 3.4.33
     dev: false
 
-  /@vue/runtime-dom@3.4.32:
-    resolution: {integrity: sha512-Xz9G+ZViRyPFQtRBCPFkhMzKn454ihCPMKUiacNaUhuTIXvyfkAq8l89IZ/kegFVyw/7KkJGRGqYdEZrf27Xsg==}
+  /@vue/runtime-dom@3.4.33:
+    resolution: {integrity: sha512-iHsMCUSFJ+4z432Bn9kZzHX+zOXa6+iw36DaVRmKYZpPt9jW9riF32SxNwB124i61kp9+AZtheQ/mKoJLerAaQ==}
     dependencies:
-      '@vue/reactivity': 3.4.32
-      '@vue/runtime-core': 3.4.32
-      '@vue/shared': 3.4.32
+      '@vue/reactivity': 3.4.33
+      '@vue/runtime-core': 3.4.33
+      '@vue/shared': 3.4.33
       csstype: 3.1.3
     dev: false
 
-  /@vue/server-renderer@3.4.32(vue@3.4.32):
-    resolution: {integrity: sha512-3c4rd0522Ao8hKjzgmUAbcjv2mBnvnw0Ld2f8HOMCuWJZjYie/p8cpIoYJbeP0VV2JYmrJJMwGQDO5RH4iQ30A==}
+  /@vue/server-renderer@3.4.33(vue@3.4.33):
+    resolution: {integrity: sha512-jTH0d6gQcaYideFP/k0WdEu8PpRS9MF8d0b6SfZzNi+ap972pZ0TNIeTaESwdOtdY0XPVj54XEJ6K0wXxir4fw==}
     peerDependencies:
-      vue: 3.4.32
+      vue: 3.4.33
     dependencies:
-      '@vue/compiler-ssr': 3.4.32
-      '@vue/shared': 3.4.32
-      vue: 3.4.32(typescript@5.5.3)
+      '@vue/compiler-ssr': 3.4.33
+      '@vue/shared': 3.4.33
+      vue: 3.4.33(typescript@5.5.3)
     dev: false
 
-  /@vue/shared@3.4.32:
-    resolution: {integrity: sha512-ep4mF1IVnX/pYaNwxwOpJHyBtOMKWoKZMbnUyd+z0udqIxLUh7YCCd/JfDna8aUrmnG9SFORyIq2HzEATRrQsg==}
+  /@vue/shared@3.4.33:
+    resolution: {integrity: sha512-aoRY0jQk3A/cuvdkodTrM4NMfxco8n55eG4H7ML/CRy7OryHfiqvug4xrCBBMbbN+dvXAetDDwZW9DXWWjBntA==}
     dev: false
 
   /@webassemblyjs/ast@1.12.1:
@@ -8603,8 +8603,8 @@ packages:
       indent-string: 4.0.0
     dev: false
 
-  /ai@3.2.28(react@18.3.1)(svelte@4.2.18)(vue@3.4.32)(zod@3.23.8):
-    resolution: {integrity: sha512-LROzqaKnI3yIEoBzUGN3A6/MTG860zjKsvRrhneQtPZXhgmuQEj7L1i4f6657MXJptuVRKbQNgDR/3w9/+lToA==}
+  /ai@3.2.30(react@18.3.1)(svelte@4.2.18)(vue@3.4.33)(zod@3.23.8):
+    resolution: {integrity: sha512-vrnV4cgtNK8heoRUSxpRH3sBnLxdQ9DbvA7jyrK22T/TJQMSbpfbbcQbbO+RleGb6RzrJgFn8OD/jjyXNl1hOg==}
     engines: {node: '>=18'}
     peerDependencies:
       openai: ^4.42.0
@@ -8623,11 +8623,11 @@ packages:
     dependencies:
       '@ai-sdk/provider': 0.0.12
       '@ai-sdk/provider-utils': 1.0.2(zod@3.23.8)
-      '@ai-sdk/react': 0.0.23(react@18.3.1)(zod@3.23.8)
+      '@ai-sdk/react': 0.0.24(react@18.3.1)(zod@3.23.8)
       '@ai-sdk/solid': 0.0.17(zod@3.23.8)
       '@ai-sdk/svelte': 0.0.18(svelte@4.2.18)(zod@3.23.8)
       '@ai-sdk/ui-utils': 0.0.15(zod@3.23.8)
-      '@ai-sdk/vue': 0.0.18(vue@3.4.32)(zod@3.23.8)
+      '@ai-sdk/vue': 0.0.19(vue@3.4.33)(zod@3.23.8)
       '@opentelemetry/api': 1.9.0
       eventsource-parser: 1.1.2
       json-schema: 0.4.0
@@ -8959,7 +8959,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001642
-      electron-to-chromium: 1.4.829
+      electron-to-chromium: 1.4.830
       node-releases: 2.0.17
       update-browserslist-db: 1.1.0(browserslist@4.23.2)
 
@@ -9534,8 +9534,8 @@ packages:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
     dev: false
 
-  /cookie-es@1.1.0:
-    resolution: {integrity: sha512-L2rLOcK0wzWSfSDA33YR+PUHDG10a8px7rUHKWbGLP4YfbsMed2KFUw5fczvDPbT98DDe3LEzviswl810apTEw==}
+  /cookie-es@1.2.1:
+    resolution: {integrity: sha512-ilTPDuxhZX44BSzzRB58gvSY2UevZKQM9fjisn7Z+NJ92CtSU6kO1+22ZN/agbEJANFjK85EiJJbi/gQv18OXA==}
 
   /cookie@0.4.2:
     resolution: {integrity: sha512-aSWTXFzaKWkvHO1Ny/s+ePFpvKsPnjc551iI41v3ny/ow6tBG5Vd+FuqGNhh1LxOmVzOlGUriIlOaokOvhaStA==}
@@ -10263,8 +10263,8 @@ packages:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: true
 
-  /electron-to-chromium@1.4.829:
-    resolution: {integrity: sha512-5qp1N2POAfW0u1qGAxXEtz6P7bO1m6gpZr5hdf5ve6lxpLM7MpiM4jIPz7xcrNlClQMafbyUDDWjlIQZ1Mw0Rw==}
+  /electron-to-chromium@1.4.830:
+    resolution: {integrity: sha512-TrPKKH20HeN0J1LHzsYLs2qwXrp8TF4nHdu4sq61ozGbzMpWhI7iIOPYPPkxeq1azMT9PZ8enPFcftbs/Npcjg==}
 
   /emoji-regex@10.3.0:
     resolution: {integrity: sha512-QpLs9D9v9kArv4lfDEgg1X/gN5XLnf/A6l9cs8SPZLRZR3ZkY9+kwIQTxm+fsSej5UMYGE8fdoaZVIBlqG0XTw==}
@@ -11061,8 +11061,8 @@ packages:
       '@emotion/is-prop-valid': 0.8.8
     dev: false
 
-  /framer-motion@11.3.7(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-wolMesg8ruYgZX8nMELY2a/ZgMMpYhggLNIexx1blaYN0yb2+SdQ78sEkGDKde+3LTCeFy/wCi97i5Br4yT0GQ==}
+  /framer-motion@11.3.8(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-1D+RDTsIp4Rz2dq/oToqSEc9idEQwgBRQyBq4rGpFba+0Z+GCbj9z1s0+ikFbanWe3YJ0SqkNlDe08GcpFGj5A==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0
@@ -11218,8 +11218,8 @@ packages:
     resolution: {integrity: sha512-VaUJspBffn/LMCJVoMvSAdmscJyS1auj5Zulnn5UoYcY531UWmdwhRWkcGKnGU93m5HSXP9LP2usOryrBtQowA==}
     engines: {node: '>=16'}
 
-  /get-tsconfig@4.7.5:
-    resolution: {integrity: sha512-ZCuZCnlqNzjb4QprAzXKdpp/gh6KTxSJuw3IBsPnV/7fV4NxC9ckB+vPTt8w7fJA0TaSD7c55BR47JD6MEDyDw==}
+  /get-tsconfig@4.7.6:
+    resolution: {integrity: sha512-ZAqrLlu18NbDdRaHq+AKXzAmqIUPswPWKUchfytdAjiRFnCe5ojG2bstg6mRiZabkKfCoL/e98pbBELIV/YCeA==}
     dependencies:
       resolve-pkg-maps: 1.0.0
     dev: true
@@ -11454,7 +11454,7 @@ packages:
   /h3@1.12.0:
     resolution: {integrity: sha512-Zi/CcNeWBXDrFNlV0hUBJQR9F7a96RjMeAZweW/ZWkR9fuXrMcvKnSA63f/zZ9l0GgQOZDVHGvXivNN9PWOwhA==}
     dependencies:
-      cookie-es: 1.1.0
+      cookie-es: 1.2.1
       crossws: 0.2.4
       defu: 6.1.4
       destr: 2.0.3
@@ -13789,7 +13789,7 @@ packages:
       chokidar: 3.6.0
       citty: 0.1.6
       consola: 3.2.3
-      cookie-es: 1.1.0
+      cookie-es: 1.2.1
       croner: 8.1.0
       crossws: 0.2.4
       db0: 0.1.4
@@ -14755,7 +14755,7 @@ packages:
   /prosemirror-commands@1.5.2:
     resolution: {integrity: sha512-hgLcPaakxH8tu6YvVAaILV2tXYsW3rAdDR8WNkeKGcgeMVQg3/TMhPdVoh7iAmfgVjZGtcOSjKiQaoeKjzd2mQ==}
     dependencies:
-      prosemirror-model: 1.22.1
+      prosemirror-model: 1.22.2
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.9.0
     dev: false
@@ -14765,16 +14765,16 @@ packages:
     dependencies:
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.9.0
-      prosemirror-view: 1.33.8
+      prosemirror-view: 1.33.9
     dev: false
 
   /prosemirror-gapcursor@1.3.2:
     resolution: {integrity: sha512-wtjswVBd2vaQRrnYZaBCbyDqr232Ed4p2QPtRIUK5FuqHYKGWkEwl08oQM4Tw7DOR0FsasARV5uJFvMZWxdNxQ==}
     dependencies:
       prosemirror-keymap: 1.2.2
-      prosemirror-model: 1.22.1
+      prosemirror-model: 1.22.2
       prosemirror-state: 1.4.3
-      prosemirror-view: 1.33.8
+      prosemirror-view: 1.33.9
     dev: false
 
   /prosemirror-history@1.4.1:
@@ -14782,7 +14782,7 @@ packages:
     dependencies:
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.9.0
-      prosemirror-view: 1.33.8
+      prosemirror-view: 1.33.9
       rope-sequence: 1.3.4
     dev: false
 
@@ -14804,7 +14804,7 @@ packages:
     resolution: {integrity: sha512-UziddX3ZYSYibgx8042hfGKmukq5Aljp2qoBiJRejD/8MH70siQNz5RB1TrdTPheqLMy4aCe4GYNF10/3lQS5g==}
     dependencies:
       markdown-it: 14.1.0
-      prosemirror-model: 1.22.1
+      prosemirror-model: 1.22.2
     dev: false
 
   /prosemirror-menu@1.2.4:
@@ -14816,8 +14816,8 @@ packages:
       prosemirror-state: 1.4.3
     dev: false
 
-  /prosemirror-model@1.22.1:
-    resolution: {integrity: sha512-gMrxal+F3higDFxCkBK5iQXckRVYvIu/3dopERJ6b20xfwZ9cbYvQvuldqaN+v/XytNPGyURYUpUU23kBRxWCQ==}
+  /prosemirror-model@1.22.2:
+    resolution: {integrity: sha512-I4lS7HHIW47D0Xv/gWmi4iUWcQIDYaJKd8Hk4+lcSps+553FlQrhmxtItpEvTr75iAruhzVShVp6WUwsT6Boww==}
     dependencies:
       orderedmap: 2.1.1
     dev: false
@@ -14825,13 +14825,13 @@ packages:
   /prosemirror-schema-basic@1.2.3:
     resolution: {integrity: sha512-h+H0OQwZVqMon1PNn0AG9cTfx513zgIG2DY00eJ00Yvgb3UD+GQ/VlWW5rcaxacpCGT1Yx8nuhwXk4+QbXUfJA==}
     dependencies:
-      prosemirror-model: 1.22.1
+      prosemirror-model: 1.22.2
     dev: false
 
   /prosemirror-schema-list@1.4.1:
     resolution: {integrity: sha512-jbDyaP/6AFfDfu70VzySsD75Om2t3sXTOdl5+31Wlxlg62td1haUpty/ybajSfJ1pkGadlOfwQq9kgW5IMo1Rg==}
     dependencies:
-      prosemirror-model: 1.22.1
+      prosemirror-model: 1.22.2
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.9.0
     dev: false
@@ -14839,22 +14839,22 @@ packages:
   /prosemirror-state@1.4.3:
     resolution: {integrity: sha512-goFKORVbvPuAQaXhpbemJFRKJ2aixr+AZMGiquiqKxaucC6hlpHNZHWgz5R7dS4roHiwq9vDctE//CZ++o0W1Q==}
     dependencies:
-      prosemirror-model: 1.22.1
+      prosemirror-model: 1.22.2
       prosemirror-transform: 1.9.0
-      prosemirror-view: 1.33.8
+      prosemirror-view: 1.33.9
     dev: false
 
   /prosemirror-tables@1.3.7:
     resolution: {integrity: sha512-oEwX1wrziuxMtwFvdDWSFHVUWrFJWt929kVVfHvtTi8yvw+5ppxjXZkMG/fuTdFo+3DXyIPSKfid+Be1npKXDA==}
     dependencies:
       prosemirror-keymap: 1.2.2
-      prosemirror-model: 1.22.1
+      prosemirror-model: 1.22.2
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.9.0
-      prosemirror-view: 1.33.8
+      prosemirror-view: 1.33.9
     dev: false
 
-  /prosemirror-trailing-node@2.0.9(prosemirror-model@1.22.1)(prosemirror-state@1.4.3)(prosemirror-view@1.33.8):
+  /prosemirror-trailing-node@2.0.9(prosemirror-model@1.22.2)(prosemirror-state@1.4.3)(prosemirror-view@1.33.9):
     resolution: {integrity: sha512-YvyIn3/UaLFlFKrlJB6cObvUhmwFNZVhy1Q8OpW/avoTbD/Y7H5EcjK4AZFKhmuS6/N6WkGgt7gWtBWDnmFvHg==}
     peerDependencies:
       prosemirror-model: ^1.22.1
@@ -14863,21 +14863,21 @@ packages:
     dependencies:
       '@remirror/core-constants': 2.0.2
       escape-string-regexp: 4.0.0
-      prosemirror-model: 1.22.1
+      prosemirror-model: 1.22.2
       prosemirror-state: 1.4.3
-      prosemirror-view: 1.33.8
+      prosemirror-view: 1.33.9
     dev: false
 
   /prosemirror-transform@1.9.0:
     resolution: {integrity: sha512-5UXkr1LIRx3jmpXXNKDhv8OyAOeLTGuXNwdVfg8x27uASna/wQkr9p6fD3eupGOi4PLJfbezxTyi/7fSJypXHg==}
     dependencies:
-      prosemirror-model: 1.22.1
+      prosemirror-model: 1.22.2
     dev: false
 
-  /prosemirror-view@1.33.8:
-    resolution: {integrity: sha512-4PhMr/ufz2cdvFgpUAnZfs+0xij3RsFysreeG9V/utpwX7AJtYCDVyuRxzWoMJIEf4C7wVihuBNMPpFLPCiLQw==}
+  /prosemirror-view@1.33.9:
+    resolution: {integrity: sha512-xV1A0Vz9cIcEnwmMhKKFAOkfIp8XmJRnaZoPqNXrPS7EK5n11Ov8V76KhR0RsfQd/SIzmWY+bg+M44A2Lx/Nnw==}
     dependencies:
-      prosemirror-model: 1.22.1
+      prosemirror-model: 1.22.2
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.9.0
     dev: false
@@ -15301,8 +15301,8 @@ packages:
       use-sidecar: 1.1.2(@types/react@18.3.3)(react@18.3.1)
     dev: false
 
-  /react-resizable-panels@2.0.20(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-aMbK3VF8U+VBICG+rwhE0Rr/eFZaRzmNq3akBRL1TrayIpLXz7Rbok0//kYeWj6SQRsjcQ3f4eRplJicM+oL6w==}
+  /react-resizable-panels@2.0.21(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-rFRjZ2sJ+iut0hY+5NtIxoIRlQqTWqZ6rMNahaZeZDpRPQyg8xiKjrlvXMq52WswFwpg47GFJcxn7f9uAFnZsQ==}
     peerDependencies:
       react: ^16.14.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0
@@ -16535,12 +16535,12 @@ packages:
     resolution: {integrity: sha512-LqVcOHSB4cPGgitD1riJ1Hh4vdmITOp+BkmfmXRh4hSF/t7EnS4iD+SOTmq7w5pPm/SiPeto4ADbKS6dHUDWFA==}
     dev: false
 
-  /swrv@1.0.4(vue@3.4.32):
+  /swrv@1.0.4(vue@3.4.33):
     resolution: {integrity: sha512-zjEkcP8Ywmj+xOJW3lIT65ciY/4AL4e/Or7Gj0MzU3zBJNMdJiT8geVZhINavnlHRMMCcJLHhraLTAiDOTmQ9g==}
     peerDependencies:
       vue: '>=3.2.26 < 4'
     dependencies:
-      vue: 3.4.32(typescript@5.5.3)
+      vue: 3.4.33(typescript@5.5.3)
     dev: false
 
   /system-architecture@0.1.0:
@@ -16864,8 +16864,8 @@ packages:
     resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
     dev: false
 
-  /tsup@8.1.2(tsx@4.16.2)(typescript@5.5.3):
-    resolution: {integrity: sha512-Gzw/PXSX/z0aYMNmkcI54bKKFVFJQbLne+EqTJZeQ3lNT3QpumjtMU4rl+ZwTTp8oRF3ahMbEAxT2sZPJLFSrg==}
+  /tsup@8.2.0(tsx@4.16.2)(typescript@5.5.3):
+    resolution: {integrity: sha512-XoarnVlfXxbv8ODHtxUq8D2XPc9luX+pamnp1kHSKLknKCDcX0Rkc21NHdbpugH6hKoNiETXypKKVgVu46vVRg==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
@@ -16912,7 +16912,7 @@ packages:
     hasBin: true
     dependencies:
       esbuild: 0.21.5
-      get-tsconfig: 4.7.5
+      get-tsconfig: 4.7.6
     optionalDependencies:
       fsevents: 2.3.3
     dev: true
@@ -17567,19 +17567,19 @@ packages:
       d3-timer: 3.0.1
     dev: false
 
-  /vue@3.4.32(typescript@5.5.3):
-    resolution: {integrity: sha512-9mCGIAi/CAq7GtaLLLp2J92pEic+HArstG+pq6F+H7+/jB9a0Z7576n4Bh4k79/50L1cKMIhZC3MC0iGpl+1IA==}
+  /vue@3.4.33(typescript@5.5.3):
+    resolution: {integrity: sha512-VdMCWQOummbhctl4QFMcW6eNtXHsFyDlX60O/tsSQuCcuDOnJ1qPOhhVla65Niece7xq/P2zyZReIO5mP+LGTQ==}
     peerDependencies:
       typescript: '*'
     peerDependenciesMeta:
       typescript:
         optional: true
     dependencies:
-      '@vue/compiler-dom': 3.4.32
-      '@vue/compiler-sfc': 3.4.32
-      '@vue/runtime-dom': 3.4.32
-      '@vue/server-renderer': 3.4.32(vue@3.4.32)
-      '@vue/shared': 3.4.32
+      '@vue/compiler-dom': 3.4.33
+      '@vue/compiler-sfc': 3.4.33
+      '@vue/runtime-dom': 3.4.33
+      '@vue/server-renderer': 3.4.33(vue@3.4.33)
+      '@vue/shared': 3.4.33
       typescript: 5.5.3
     dev: false
 

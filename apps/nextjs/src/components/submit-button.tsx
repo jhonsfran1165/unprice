@@ -1,9 +1,9 @@
 "use client"
 
-import type { ButtonProps } from "@builderai/ui/button"
-import { Button } from "@builderai/ui/button"
-import { LoadingAnimation } from "@builderai/ui/loading-animation"
-import { cn } from "@builderai/ui/utils"
+import type { ButtonProps } from "@unprice/ui/button"
+import { Button } from "@unprice/ui/button"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
+import { cn } from "@unprice/ui/utils"
 import { useFormStatus } from "react-dom"
 
 interface SubmitButtonProps extends ButtonProps {

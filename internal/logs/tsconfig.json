@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@builderai/tsconfig/base.json",
+  "extends": "@unprice/tsconfig/base.json",
   "exclude": ["dist"],
   "compilerOptions": {
     "outDir": "dist"

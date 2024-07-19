@@ -1,5 +1,5 @@
 {
-  "name": "@builderai/stripe",
+  "name": "@unprice/stripe",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -20,15 +20,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@builderai/auth": "^0.1.0",
-    "@builderai/config": "^0.1.0",
-    "@builderai/db": "^0.1.0",
+    "@unprice/auth": "^0.1.0",
+    "@unprice/config": "^0.1.0",
+    "@unprice/db": "^0.1.0",
     "@t3-oss/env-nextjs": "0.9.1",
     "stripe": "^14.19.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@builderai/tsconfig": "0.1.0",
+    "@unprice/tsconfig": "0.1.0",
     "typescript": "^5.3.3"
   }
 }

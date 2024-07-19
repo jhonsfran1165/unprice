@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation"
 import { startTransition, useState } from "react"
 import { createPortal } from "react-dom"
 
-import type { PlanVersionFeatureDragDrop } from "@builderai/db/validators"
+import type { PlanVersionFeatureDragDrop } from "@unprice/db/validators"
 
 import { api } from "~/trpc/client"
 import { FeaturePlan } from "./feature-plan"

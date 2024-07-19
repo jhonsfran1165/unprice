@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { eq, sql } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
-import * as utils from "@builderai/db/utils"
+import { eq, sql } from "@unprice/db"
+import * as schema from "@unprice/db/schema"
+import * as utils from "@unprice/db/utils"
 import {
   deleteProjectSchema,
   projectInsertBaseSchema,
@@ -12,7 +12,7 @@ import {
   transferToPersonalProjectSchema,
   transferToWorkspaceSchema,
   workspaceSelectSchema,
-} from "@builderai/db/validators"
+} from "@unprice/db/validators"
 
 import {
   createTRPCRouter,

@@ -2,8 +2,8 @@
 
 import { ChevronDown } from "lucide-react"
 
-import type { RouterOutputs } from "@builderai/api"
-import { Button } from "@builderai/ui/button"
+import type { RouterOutputs } from "@unprice/api"
+import { Button } from "@unprice/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -11,14 +11,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@builderai/ui/dialog"
+} from "@unprice/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
+} from "@unprice/ui/dropdown-menu"
 
 import { PlanForm } from "./plan-form"
 

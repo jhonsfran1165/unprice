@@ -13,7 +13,7 @@ export const prefixes = {
   feature_version: "fv",
   plan: "plan",
   apikey: "api",
-  apikey_key: "builderai_live",
+  apikey_key: "unprice_live",
   page: "page",
   customer: "cus",
   customer_provider: "cusp",

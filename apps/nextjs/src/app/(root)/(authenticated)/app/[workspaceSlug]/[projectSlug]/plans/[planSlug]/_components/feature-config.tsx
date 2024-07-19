@@ -1,6 +1,6 @@
 "use client"
 
-import { Separator } from "@builderai/ui/separator"
+import { Separator } from "@unprice/ui/separator"
 
 import { useActiveFeature, useActivePlanVersion } from "../../_components/use-features"
 import { FeatureConfigForm } from "./feature-config-form"

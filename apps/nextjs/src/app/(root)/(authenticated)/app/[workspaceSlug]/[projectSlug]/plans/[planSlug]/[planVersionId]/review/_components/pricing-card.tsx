@@ -1,11 +1,11 @@
-import type { RouterOutputs } from "@builderai/api"
-import type { BillingPeriod } from "@builderai/db/validators"
-import { calculateFlatPricePlan, calculatePricePerFeature } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@builderai/ui/card"
-import { CheckIcon, HelpCircle } from "@builderai/ui/icons"
-import { Skeleton } from "@builderai/ui/skeleton"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
+import type { RouterOutputs } from "@unprice/api"
+import type { BillingPeriod } from "@unprice/db/validators"
+import { calculateFlatPricePlan, calculatePricePerFeature } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@unprice/ui/card"
+import { CheckIcon, HelpCircle } from "@unprice/ui/icons"
+import { Skeleton } from "@unprice/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 
 export function PricingCard({
   planVersion,

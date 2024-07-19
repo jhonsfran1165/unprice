@@ -4,15 +4,15 @@ import type { Row } from "@tanstack/react-table"
 import { useRouter } from "next/navigation"
 import { startTransition } from "react"
 
-import { selectApiKeySchema } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
+import { selectApiKeySchema } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
-import { Ellipsis } from "@builderai/ui/icons"
+} from "@unprice/ui/dropdown-menu"
+import { Ellipsis } from "@unprice/ui/icons"
 
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"

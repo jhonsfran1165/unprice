@@ -1,7 +1,7 @@
 "use client"
 
-import { PAYMENT_PROVIDERS } from "@builderai/db/utils"
-import type { Customer, PaymentProvider } from "@builderai/db/validators"
+import { PAYMENT_PROVIDERS } from "@unprice/db/utils"
+import type { Customer, PaymentProvider } from "@unprice/db/validators"
 import {
   Card,
   CardContent,
@@ -9,9 +9,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@builderai/ui/card"
-import { Label } from "@builderai/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
+} from "@unprice/ui/card"
+import { Label } from "@unprice/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { useState } from "react"
 
 import { SubmitButton } from "~/components/submit-button"

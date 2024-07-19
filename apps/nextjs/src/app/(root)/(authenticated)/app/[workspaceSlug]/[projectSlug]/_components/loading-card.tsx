@@ -1,5 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
-import { Spinner } from "@builderai/ui/icons"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
+import { Spinner } from "@unprice/ui/icons"
 
 export function LoadingCard(props: {
   title: string

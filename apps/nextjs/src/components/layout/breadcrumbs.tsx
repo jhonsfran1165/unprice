@@ -6,14 +6,14 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@builderai/ui/breadcrumb"
+} from "@unprice/ui/breadcrumb"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
-import { cn, focusRing } from "@builderai/ui/utils"
+} from "@unprice/ui/dropdown-menu"
+import { cn, focusRing } from "@unprice/ui/utils"
 import { Fragment } from "react"
 import { SuperLink } from "~/components/super-link"
 

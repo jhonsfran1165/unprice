@@ -1,4 +1,4 @@
-import { Dashboard } from "@builderai/ui/icons"
+import { Dashboard } from "@unprice/ui/icons"
 import { BarChartIcon, Calculator, Key, Link, Settings, Sticker, Users } from "lucide-react"
 import type { DashboardRoute } from "~/types"
 

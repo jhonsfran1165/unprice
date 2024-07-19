@@ -1,6 +1,6 @@
 "use client"
 
-import { CommandDialog } from "@builderai/ui/command"
+import { CommandDialog } from "@unprice/ui/command"
 import * as React from "react"
 
 import {
@@ -10,9 +10,9 @@ import {
   CommandItem,
   CommandList,
   CommandShortcut,
-} from "@builderai/ui/command"
-import { CreditCard, Settings, User } from "@builderai/ui/icons"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/command"
+import { CreditCard, Settings, User } from "@unprice/ui/icons"
+import { cn } from "@unprice/ui/utils"
 import { useParams, useRouter } from "next/navigation"
 
 export function SearchTool({

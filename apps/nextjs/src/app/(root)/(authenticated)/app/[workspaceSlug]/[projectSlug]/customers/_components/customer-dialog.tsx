@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-import type { InsertCustomer } from "@builderai/db/validators"
+import type { InsertCustomer } from "@unprice/db/validators"
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@builderai/ui/dialog"
+} from "@unprice/ui/dialog"
 
 import { CustomerForm } from "./customer-form"
 

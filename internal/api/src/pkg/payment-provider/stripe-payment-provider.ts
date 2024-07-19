@@ -1,8 +1,8 @@
-import { APP_NAME } from "@builderai/config"
-import type { PlanVersionFeatureExtended } from "@builderai/db/validators"
-import { configFlatSchema, configTierSchema, configUsageSchema } from "@builderai/db/validators"
-import type { Stripe } from "@builderai/stripe"
-import { StripeClient, stripe } from "@builderai/stripe"
+import { APP_NAME } from "@unprice/config"
+import type { PlanVersionFeatureExtended } from "@unprice/db/validators"
+import { configFlatSchema, configTierSchema, configUsageSchema } from "@unprice/db/validators"
+import type { Stripe } from "@unprice/stripe"
+import { StripeClient, stripe } from "@unprice/stripe"
 
 export class StripePaymentProvider {
   public readonly client: Stripe

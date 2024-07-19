@@ -1,5 +1,5 @@
 {
-  "name": "@builderai/tinybird",
+  "name": "@unprice/tinybird",
   "private": true,
   "type": "module",
   "version": "0.1.0",
@@ -21,8 +21,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@builderai/db": "^0.1.0",
-    "@builderai/tsconfig": "^0.1.0",
+    "@unprice/db": "^0.1.0",
+    "@unprice/tsconfig": "^0.1.0",
     "@chronark/zod-bird": "^0.3.9",
     "typescript": "^5.3.3"
   }

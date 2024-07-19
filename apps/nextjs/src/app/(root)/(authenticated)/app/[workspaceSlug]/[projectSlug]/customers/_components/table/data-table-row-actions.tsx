@@ -5,7 +5,7 @@ import { MoreHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import * as React from "react"
 
-import { customerSelectSchema } from "@builderai/db/validators"
+import { customerSelectSchema } from "@unprice/db/validators"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,8 +16,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@builderai/ui/alert-dialog"
-import { Button } from "@builderai/ui/button"
+} from "@unprice/ui/alert-dialog"
+import { Button } from "@unprice/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -25,14 +25,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@builderai/ui/dialog"
+} from "@unprice/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
-import { LoadingAnimation } from "@builderai/ui/loading-animation"
+} from "@unprice/ui/dropdown-menu"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import {
   Select,
   SelectContent,
@@ -41,7 +41,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@builderai/ui/select"
+} from "@unprice/ui/select"
 
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"

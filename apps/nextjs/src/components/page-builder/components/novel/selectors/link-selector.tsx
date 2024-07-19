@@ -1,8 +1,8 @@
-import { Button } from "@builderai/ui/button"
-import { cn } from "@builderai/ui/utils"
+import { Button } from "@unprice/ui/button"
+import { cn } from "@unprice/ui/utils"
 
-import { Input } from "@builderai/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
+import { Input } from "@unprice/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { Check, Trash } from "lucide-react"
 import { useEditor } from "novel"
 import { useEffect, useRef } from "react"

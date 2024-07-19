@@ -1,7 +1,7 @@
 "use client"
 
-import { Logo } from "@builderai/ui/icons"
 import { type UserComponent, useNode } from "@craftjs/core"
+import { Logo } from "@unprice/ui/icons"
 import ThemeToggle from "~/components/layout/theme-toggle"
 import { FooterSettings } from "./settings"
 import type { FooterComponentProps } from "./types"

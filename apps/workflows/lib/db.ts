@@ -1,5 +1,5 @@
-import * as schema from "@builderai/db/schema"
 import { Pool, neonConfig } from "@neondatabase/serverless"
+import * as schema from "@unprice/db/schema"
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
 import ws from "ws"
 import { env } from "./env"
@@ -28,4 +28,4 @@ export const connectDatabase = () =>
     }
   )
 
-export * from "@builderai/db"
+export * from "@unprice/db"

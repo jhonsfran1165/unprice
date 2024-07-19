@@ -3,7 +3,7 @@ import "~/styles/prosemirror.css"
 
 import type { Metadata } from "next"
 
-import { cn } from "@builderai/ui/utils"
+import { cn } from "@unprice/ui/utils"
 
 import { ThemeProvider } from "~/components/layout/theme-provider"
 import { siteConfig } from "~/constants/layout"
@@ -28,7 +28,7 @@ export const metadata = {
     images: [{ url: "https://acme-corp-lib.vercel.app/opengraph-image.png" }],
     creator: "@jhonsfran",
   },
-  metadataBase: new URL("https://builderai.dev"),
+  metadataBase: new URL("https://unprice.dev"),
 } satisfies Metadata
 
 export default function RootLayout(props: { children: React.ReactNode }) {

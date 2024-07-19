@@ -3,7 +3,7 @@
 import { type UserComponent, useEditor, useNode } from "@craftjs/core"
 import ContentEditable from "react-contenteditable"
 
-import { cn } from "@builderai/ui/utils"
+import { cn } from "@unprice/ui/utils"
 import { TextSettings } from "./settings"
 import type { TextComponentProps } from "./types"
 

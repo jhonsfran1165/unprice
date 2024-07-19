@@ -1,5 +1,5 @@
-import { Logo as LogoIcon } from "@builderai/ui/icons"
-import { cn } from "@builderai/ui/utils"
+import { Logo as LogoIcon } from "@unprice/ui/icons"
+import { cn } from "@unprice/ui/utils"
 
 export function Logo({ className = "" }) {
   return (
@@ -8,7 +8,7 @@ export function Logo({ className = "" }) {
       <span
         className={cn("inline-block whitespace-nowrap font-bold text-lg tracking-tight", className)}
       >
-        BuilderAI
+        Unprice
       </span>
     </div>
   )

@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@builderai/ui/dialog"
-import { Add } from "@builderai/ui/icons"
+} from "@unprice/ui/dialog"
+import { Add } from "@unprice/ui/icons"
 import CreateApiKeyForm from "./create-api-key-form"
 
 export default function NewApiKeyDialog() {

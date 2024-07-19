@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import type { Session } from "@builderai/auth/server"
+import type { Session } from "@unprice/auth/server"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,11 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
-import { CreditCard, LogOut, Settings, User } from "@builderai/ui/icons"
+} from "@unprice/ui/dropdown-menu"
+import { CreditCard, LogOut, Settings, User } from "@unprice/ui/icons"
 
+import { AUTH_ROUTES } from "@unprice/config"
 import { ExternalLink } from "lucide-react"
-import { AUTH_ROUTES } from "~/constants"
 import { SuperLink } from "../super-link"
 import { ThemeToggleItems } from "./theme-toggle"
 

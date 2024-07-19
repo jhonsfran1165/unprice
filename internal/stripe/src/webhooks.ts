@@ -1,8 +1,8 @@
 import type Stripe from "stripe"
 
-import { db, eq } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
-import * as utils from "@builderai/db/utils"
+import { db, eq } from "@unprice/db"
+import * as schema from "@unprice/db/schema"
+import * as utils from "@unprice/db/utils"
 
 import { stripe } from "."
 

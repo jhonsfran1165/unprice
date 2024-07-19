@@ -1,6 +1,6 @@
-import { and, eq } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
 import { cronTrigger } from "@trigger.dev/sdk"
+import { and, eq } from "@unprice/db"
+import * as schema from "@unprice/db/schema"
 import { connectDatabase } from "~/lib/db"
 import { client } from "~/trigger"
 import { createInvoiceStripeJob } from "."
@@ -18,7 +18,7 @@ client.defineJob({
   }),
   run: async (_payload, io, _ctx) => {
     // Get the number of subscriptions in the database
-    // TODO: create connection from in lib/db and not importing it from @builderai/db
+    // TODO: create connection from in lib/db and not importing it from @unprice/db
     const db = connectDatabase()
 
     // find all those subscriptions that are active and recurring

@@ -3,12 +3,12 @@ import type { PackageJson, PlopTypes } from "@turbo/gen"
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
   plop.setGenerator("init", {
-    description: "Generate a new package for the BuilderAI Monorepo",
+    description: "Generate a new package for the Unprice Monorepo",
     prompts: [
       {
         type: "input",
         name: "name",
-        message: "What is the name of the package? (You can skip the `@builderai/` prefix)",
+        message: "What is the name of the package? (You can skip the `@unprice/` prefix)",
       },
       {
         type: "input",
@@ -19,8 +19,8 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
     actions: [
       (answers) => {
         if ("name" in answers && typeof answers.name === "string") {
-          if (answers.name.startsWith("@builderai/")) {
-            answers.name = answers.name.replace("@builderai/", "")
+          if (answers.name.startsWith("@unprice/")) {
+            answers.name = answers.name.replace("@unprice/", "")
           }
         }
         return "Config sanitized"

@@ -1,8 +1,8 @@
 import { MoreHorizontal, PlusIcon, Settings } from "lucide-react"
 
-import type { RouterOutputs } from "@builderai/api"
-import { Button } from "@builderai/ui/button"
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
+import type { RouterOutputs } from "@unprice/api"
+import { Button } from "@unprice/ui/button"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@builderai/ui/dialog"
+} from "@unprice/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,12 +18,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/dropdown-menu"
+import { cn } from "@unprice/ui/utils"
 
+import { SITES_BASE_DOMAIN } from "@unprice/config"
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { SuperLink } from "~/components/super-link"
-import { SITES_BASE_DOMAIN } from "~/constants"
 import { PageForm } from "./page-form"
 
 export function PageCard(props: {

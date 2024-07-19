@@ -1,5 +1,5 @@
-import { Button } from "@builderai/ui/button"
 import { useNode } from "@craftjs/core"
+import { Button } from "@unprice/ui/button"
 import { Fragment } from "react"
 import { TEXT_COLORS } from "~/lib/theme"
 import { ToolbarItemDropdown, ToolbarItemSlider, ToolbarSection } from "../../toolbar"

@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@builderai/ui/alert-dialog"
+} from "@unprice/ui/alert-dialog"
 
 // TODO: support close first modal when open second modal
 export function ConfirmAction({

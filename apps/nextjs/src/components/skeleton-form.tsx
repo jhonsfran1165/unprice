@@ -1,4 +1,4 @@
-import { Skeleton } from "@builderai/ui/skeleton"
+import { Skeleton } from "@unprice/ui/skeleton"
 
 export function SkeletonForm() {
   return (

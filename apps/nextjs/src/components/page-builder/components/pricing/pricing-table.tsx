@@ -1,7 +1,7 @@
 "use client"
 
-import { cn } from "@builderai/ui/utils"
 import { type UserComponent, useNode } from "@craftjs/core"
+import { cn } from "@unprice/ui/utils"
 import {
   PricingCard,
   PricingCardSkeleton,
