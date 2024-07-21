@@ -286,6 +286,9 @@ importers:
       '@neondatabase/serverless':
         specifier: ^0.9.0
         version: 0.9.4
+      '@t3-oss/env-nextjs':
+        specifier: 0.9.1
+        version: 0.9.1(typescript@5.5.3)(zod@3.23.8)
       '@trigger.dev/nextjs':
         specifier: ^2.3.19
         version: 2.3.19(@trigger.dev/sdk@2.3.19)(next@14.3.0-canary.54)
