@@ -59,7 +59,7 @@
   }
 
   p {
-    @apply font-secondary text-base font-normal;
+    @apply font-secondary text-xs font-normal;
   }
 
   body {

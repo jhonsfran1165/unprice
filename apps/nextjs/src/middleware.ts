@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { auth } from "@unprice/auth/server"
 
-import { API_HOSTNAMES, APP_HOSTNAMES } from "@unprice/config"
+import { API_HOSTNAMES, APP_HOSTNAMES, BASE_DOMAIN } from "@unprice/config"
 import { getValidSubdomain, parse } from "~/lib/domains"
 import ApiMiddleware from "~/middleware/api"
 import AppMiddleware from "~/middleware/app"
@@ -11,7 +11,7 @@ import SitesMiddleware from "~/middleware/sites"
 export default auth((req) => {
   const { domain } = parse(req)
 
-  // TODO: how to create a new request id?
+  // TODO: how to create a new request id per request?
   // req.headers.get("x-request-id") || req.headers.set("x-request-id", newId("request"))
 
   // 1. we validate api routes
@@ -24,11 +24,16 @@ export default auth((req) => {
     return AppMiddleware(req)
   }
 
-  if (getValidSubdomain(domain)) {
+  // 3. validate subdomains
+  const subdomain = getValidSubdomain(domain)
+  // custom sites are redirected to the sites middleware
+  // domain is not the same as the base domain and subdomain is not www or empty
+  if (domain !== BASE_DOMAIN && subdomain && !["www", ""].includes(subdomain)) {
     // 3. validate site routes
     return SitesMiddleware(req)
   }
 
+  // public routes under the base domain or www subdomain
   return NextResponse.next()
 })
 

@@ -6,6 +6,7 @@ import { defaultAnimateLayoutChanges } from "@dnd-kit/sortable"
 
 import { cn } from "@unprice/ui/utils"
 
+// TODO: migrate this to sortable.tsx ui component
 export const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true })
 

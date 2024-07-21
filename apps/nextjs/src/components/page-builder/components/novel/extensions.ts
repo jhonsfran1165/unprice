@@ -106,7 +106,7 @@ const starterKit = StarterKit.configure({
   gapcursor: false,
   paragraph: {
     HTMLAttributes: {
-      class: cx("leading-6"),
+      class: cx("leading-6 text-base"),
     },
   },
   heading: {

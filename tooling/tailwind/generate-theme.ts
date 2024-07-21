@@ -140,7 +140,7 @@ export const generateTheme = (
       },
       accent: {
         DEFAULT: `var(--${grayscale}-7)`,
-        foreground: `var(--${grayscale}-11)`,
+        foreground: `var(--${grayscale}-12)`,
       },
       popover: {
         DEFAULT: `var(--${grayscale}-2)`,

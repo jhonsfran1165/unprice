@@ -1,7 +1,7 @@
 import "~/styles/globals.css"
 import "~/styles/prosemirror.css"
 
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 
 import { cn } from "@unprice/ui/utils"
 
@@ -30,6 +30,14 @@ export const metadata = {
   },
   metadataBase: new URL("https://unprice.dev"),
 } satisfies Metadata
+
+export const viewport: Viewport = {
+  colorScheme: "dark light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" },
+  ],
+}
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (

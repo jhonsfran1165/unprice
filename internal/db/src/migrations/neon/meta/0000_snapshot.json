@@ -1,11 +1,11 @@
 {
-  "id": "37bf6b47-7fa9-4d35-afb8-ae1ed94fea10",
+  "id": "4b790c36-3117-4ea0-8a66-1f7c7fd3d721",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.builderai_apikeys": {
-      "name": "builderai_apikeys",
+    "public.unprice_apikeys": {
+      "name": "unprice_apikeys",
       "schema": "",
       "columns": {
         "id": {
@@ -83,16 +83,12 @@
         }
       },
       "foreignKeys": {
-        "builderai_apikeys_project_id_builderai_projects_id_fk": {
-          "name": "builderai_apikeys_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_apikeys",
-          "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_apikeys_project_id_unprice_projects_id_fk": {
+          "name": "unprice_apikeys_project_id_unprice_projects_id_fk",
+          "tableFrom": "unprice_apikeys",
+          "tableTo": "unprice_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -100,24 +96,19 @@
       "compositePrimaryKeys": {
         "pk_apikeys": {
           "name": "pk_apikeys",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
         "name_unique": {
           "name": "name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       }
     },
-    "public.builderai_account": {
-      "name": "builderai_account",
+    "public.unprice_account": {
+      "name": "unprice_account",
       "schema": "",
       "columns": {
         "userId": {
@@ -189,33 +180,105 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "builderai_account_userId_builderai_user_id_fk": {
-          "name": "builderai_account_userId_builderai_user_id_fk",
-          "tableFrom": "builderai_account",
-          "tableTo": "builderai_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_account_userId_unprice_user_id_fk": {
+          "name": "unprice_account_userId_unprice_user_id_fk",
+          "tableFrom": "unprice_account",
+          "tableTo": "unprice_user",
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
-        "builderai_account_provider_providerAccountId_pk": {
-          "name": "builderai_account_provider_providerAccountId_pk",
-          "columns": [
-            "provider",
-            "providerAccountId"
-          ]
+        "unprice_account_provider_providerAccountId_pk": {
+          "name": "unprice_account_provider_providerAccountId_pk",
+          "columns": ["provider", "providerAccountId"]
         }
       },
       "uniqueConstraints": {}
     },
-    "public.builderai_session": {
-      "name": "builderai_session",
+    "public.unprice_authenticator": {
+      "name": "unprice_authenticator",
+      "schema": "",
+      "columns": {
+        "credentialID": {
+          "name": "credentialID",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "providerAccountId": {
+          "name": "providerAccountId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "credentialPublicKey": {
+          "name": "credentialPublicKey",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "counter": {
+          "name": "counter",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "credentialDeviceType": {
+          "name": "credentialDeviceType",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "credentialBackedUp": {
+          "name": "credentialBackedUp",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transports": {
+          "name": "transports",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "unprice_authenticator_userId_unprice_user_id_fk": {
+          "name": "unprice_authenticator_userId_unprice_user_id_fk",
+          "tableFrom": "unprice_authenticator",
+          "tableTo": "unprice_user",
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "unprice_authenticator_userId_credentialID_pk": {
+          "name": "unprice_authenticator_userId_credentialID_pk",
+          "columns": ["userId", "credentialID"]
+        }
+      },
+      "uniqueConstraints": {
+        "unprice_authenticator_credentialID_unique": {
+          "name": "unprice_authenticator_credentialID_unique",
+          "nullsNotDistinct": false,
+          "columns": ["credentialID"]
+        }
+      }
+    },
+    "public.unprice_session": {
+      "name": "unprice_session",
       "schema": "",
       "columns": {
         "sessionToken": {
@@ -239,16 +302,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "builderai_session_userId_builderai_user_id_fk": {
-          "name": "builderai_session_userId_builderai_user_id_fk",
-          "tableFrom": "builderai_session",
-          "tableTo": "builderai_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_session_userId_unprice_user_id_fk": {
+          "name": "unprice_session_userId_unprice_user_id_fk",
+          "tableFrom": "unprice_session",
+          "tableTo": "unprice_user",
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -256,8 +315,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.builderai_user": {
-      "name": "builderai_user",
+    "public.unprice_user": {
+      "name": "unprice_user",
       "schema": "",
       "columns": {
         "id": {
@@ -309,8 +368,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.builderai_verificationToken": {
-      "name": "builderai_verificationToken",
+    "public.unprice_verificationToken": {
+      "name": "unprice_verificationToken",
       "schema": "",
       "columns": {
         "identifier": {
@@ -335,18 +394,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "builderai_verificationToken_identifier_token_pk": {
-          "name": "builderai_verificationToken_identifier_token_pk",
-          "columns": [
-            "identifier",
-            "token"
-          ]
+        "unprice_verificationToken_identifier_token_pk": {
+          "name": "unprice_verificationToken_identifier_token_pk",
+          "columns": ["identifier", "token"]
         }
       },
       "uniqueConstraints": {}
     },
-    "public.builderai_customers": {
-      "name": "builderai_customers",
+    "public.unprice_customers": {
+      "name": "unprice_customers",
       "schema": "",
       "columns": {
         "id": {
@@ -417,7 +473,7 @@
           "type": "currency",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "'USD'"
         }
       },
@@ -439,16 +495,12 @@
         }
       },
       "foreignKeys": {
-        "builderai_customers_project_id_builderai_projects_id_fk": {
-          "name": "builderai_customers_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_customers",
-          "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_customers_project_id_unprice_projects_id_fk": {
+          "name": "unprice_customers_project_id_unprice_projects_id_fk",
+          "tableFrom": "unprice_customers",
+          "tableTo": "unprice_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -456,32 +508,24 @@
       "compositePrimaryKeys": {
         "pk_customer": {
           "name": "pk_customer",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
         "stripe_customer_unique": {
           "name": "stripe_customer_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "stripe_customer_id"
-          ]
+          "columns": ["stripe_customer_id"]
         },
         "unique_email_project": {
           "name": "unique_email_project",
           "nullsNotDistinct": false,
-          "columns": [
-            "email",
-            "project_id"
-          ]
+          "columns": ["email", "project_id"]
         }
       }
     },
-    "public.builderai_domains": {
-      "name": "builderai_domains",
+    "public.unprice_domains": {
+      "name": "unprice_domains",
       "schema": "",
       "columns": {
         "id": {
@@ -548,33 +592,27 @@
         }
       },
       "foreignKeys": {
-        "builderai_domains_workspace_id_builderai_workspaces_id_fk": {
-          "name": "builderai_domains_workspace_id_builderai_workspaces_id_fk",
-          "tableFrom": "builderai_domains",
-          "tableTo": "builderai_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_domains_workspace_id_unprice_workspaces_id_fk": {
+          "name": "unprice_domains_workspace_id_unprice_workspaces_id_fk",
+          "tableFrom": "unprice_domains",
+          "tableTo": "unprice_workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "builderai_domains_name_unique": {
-          "name": "builderai_domains_name_unique",
+        "unprice_domains_name_unique": {
+          "name": "unprice_domains_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       }
     },
-    "public.builderai_features": {
-      "name": "builderai_features",
+    "public.unprice_features": {
+      "name": "unprice_features",
       "schema": "",
       "columns": {
         "id": {
@@ -628,18 +666,36 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "slug_feature": {
+          "name": "slug_feature",
+          "columns": [
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
-        "builderai_features_project_id_builderai_projects_id_fk": {
-          "name": "builderai_features_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_features",
-          "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_features_project_id_unprice_projects_id_fk": {
+          "name": "unprice_features_project_id_unprice_projects_id_fk",
+          "tableFrom": "unprice_features",
+          "tableTo": "unprice_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -647,25 +703,13 @@
       "compositePrimaryKeys": {
         "features_pkey": {
           "name": "features_pkey",
-          "columns": [
-            "project_id",
-            "id"
-          ]
+          "columns": ["project_id", "id"]
         }
       },
-      "uniqueConstraints": {
-        "slug_feature": {
-          "name": "slug_feature",
-          "nullsNotDistinct": false,
-          "columns": [
-            "slug",
-            "project_id"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
-    "public.builderai_ingestions": {
-      "name": "builderai_ingestions",
+    "public.unprice_ingestions": {
+      "name": "unprice_ingestions",
       "schema": "",
       "columns": {
         "id": {
@@ -727,31 +771,21 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "builderai_ingestions_project_id_builderai_projects_id_fk": {
-          "name": "builderai_ingestions_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_ingestions",
-          "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_ingestions_project_id_unprice_projects_id_fk": {
+          "name": "unprice_ingestions_project_id_unprice_projects_id_fk",
+          "tableFrom": "unprice_ingestions",
+          "tableTo": "unprice_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "ingestions_apikey_id_fkey": {
           "name": "ingestions_apikey_id_fkey",
-          "tableFrom": "builderai_ingestions",
-          "tableTo": "builderai_apikeys",
-          "columnsFrom": [
-            "apikey_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "tableFrom": "unprice_ingestions",
+          "tableTo": "unprice_apikeys",
+          "columnsFrom": ["apikey_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -759,16 +793,13 @@
       "compositePrimaryKeys": {
         "ingestions_pkey": {
           "name": "ingestions_pkey",
-          "columns": [
-            "project_id",
-            "id"
-          ]
+          "columns": ["project_id", "id"]
         }
       },
       "uniqueConstraints": {}
     },
-    "public.builderai_plan_versions_features": {
-      "name": "builderai_plan_versions_features",
+    "public.unprice_plan_versions_features": {
+      "name": "unprice_plan_versions_features",
       "schema": "",
       "columns": {
         "id": {
@@ -864,46 +895,30 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "builderai_plan_versions_features_project_id_builderai_projects_id_fk": {
-          "name": "builderai_plan_versions_features_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_plan_versions_features",
-          "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_plan_versions_features_project_id_unprice_projects_id_fk": {
+          "name": "unprice_plan_versions_features_project_id_unprice_projects_id_fk",
+          "tableFrom": "unprice_plan_versions_features",
+          "tableTo": "unprice_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "plan_versions_id_fkey": {
           "name": "plan_versions_id_fkey",
-          "tableFrom": "builderai_plan_versions_features",
-          "tableTo": "builderai_plan_versions",
-          "columnsFrom": [
-            "plan_version_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "tableFrom": "unprice_plan_versions_features",
+          "tableTo": "unprice_plan_versions",
+          "columnsFrom": ["plan_version_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "features_id_fkey": {
           "name": "features_id_fkey",
-          "tableFrom": "builderai_plan_versions_features",
-          "tableTo": "builderai_features",
-          "columnsFrom": [
-            "feature_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "tableFrom": "unprice_plan_versions_features",
+          "tableTo": "unprice_features",
+          "columnsFrom": ["feature_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -911,27 +926,19 @@
       "compositePrimaryKeys": {
         "plan_versions_pkey": {
           "name": "plan_versions_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
         "unique_version_feature": {
           "name": "unique_version_feature",
           "nullsNotDistinct": true,
-          "columns": [
-            "plan_version_id",
-            "feature_id",
-            "project_id",
-            "order"
-          ]
+          "columns": ["plan_version_id", "feature_id", "project_id", "order"]
         }
       }
     },
-    "public.builderai_plan_versions": {
-      "name": "builderai_plan_versions",
+    "public.unprice_plan_versions": {
+      "name": "unprice_plan_versions",
       "schema": "",
       "columns": {
         "id": {
@@ -1104,57 +1111,39 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "builderai_plan_versions_project_id_builderai_projects_id_fk": {
-          "name": "builderai_plan_versions_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_plan_versions",
-          "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_plan_versions_project_id_unprice_projects_id_fk": {
+          "name": "unprice_plan_versions_project_id_unprice_projects_id_fk",
+          "tableFrom": "unprice_plan_versions",
+          "tableTo": "unprice_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "builderai_plan_versions_published_by_builderai_user_id_fk": {
-          "name": "builderai_plan_versions_published_by_builderai_user_id_fk",
-          "tableFrom": "builderai_plan_versions",
-          "tableTo": "builderai_user",
-          "columnsFrom": [
-            "published_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_plan_versions_published_by_unprice_user_id_fk": {
+          "name": "unprice_plan_versions_published_by_unprice_user_id_fk",
+          "tableFrom": "unprice_plan_versions",
+          "tableTo": "unprice_user",
+          "columnsFrom": ["published_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "builderai_plan_versions_archived_by_builderai_user_id_fk": {
-          "name": "builderai_plan_versions_archived_by_builderai_user_id_fk",
-          "tableFrom": "builderai_plan_versions",
-          "tableTo": "builderai_user",
-          "columnsFrom": [
-            "archived_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_plan_versions_archived_by_unprice_user_id_fk": {
+          "name": "unprice_plan_versions_archived_by_unprice_user_id_fk",
+          "tableFrom": "unprice_plan_versions",
+          "tableTo": "unprice_user",
+          "columnsFrom": ["archived_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
         "plan_versions_plan_id_pkey": {
           "name": "plan_versions_plan_id_pkey",
-          "tableFrom": "builderai_plan_versions",
-          "tableTo": "builderai_plans",
-          "columnsFrom": [
-            "plan_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "tableFrom": "unprice_plan_versions",
+          "tableTo": "unprice_plans",
+          "columnsFrom": ["plan_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1162,16 +1151,13 @@
       "compositePrimaryKeys": {
         "plan_versions_plan_id_fkey": {
           "name": "plan_versions_plan_id_fkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {}
     },
-    "public.builderai_plans": {
-      "name": "builderai_plans",
+    "public.unprice_plans": {
+      "name": "unprice_plans",
       "schema": "",
       "columns": {
         "id": {
@@ -1233,18 +1219,36 @@
           "default": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "slug_plan": {
+          "name": "slug_plan",
+          "columns": [
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
-        "builderai_plans_project_id_builderai_projects_id_fk": {
-          "name": "builderai_plans_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_plans",
-          "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_plans_project_id_unprice_projects_id_fk": {
+          "name": "unprice_plans_project_id_unprice_projects_id_fk",
+          "tableFrom": "unprice_plans",
+          "tableTo": "unprice_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1252,25 +1256,13 @@
       "compositePrimaryKeys": {
         "plans_pkey": {
           "name": "plans_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
-      "uniqueConstraints": {
-        "slug_plan": {
-          "name": "slug_plan",
-          "nullsNotDistinct": false,
-          "columns": [
-            "slug",
-            "project_id"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
-    "public.builderai_projects": {
-      "name": "builderai_projects",
+    "public.unprice_projects": {
+      "name": "unprice_projects",
       "schema": "",
       "columns": {
         "id": {
@@ -1359,16 +1351,12 @@
         }
       },
       "foreignKeys": {
-        "builderai_projects_workspace_id_builderai_workspaces_id_fk": {
-          "name": "builderai_projects_workspace_id_builderai_workspaces_id_fk",
-          "tableFrom": "builderai_projects",
-          "tableTo": "builderai_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_projects_workspace_id_unprice_workspaces_id_fk": {
+          "name": "unprice_projects_workspace_id_unprice_workspaces_id_fk",
+          "tableFrom": "unprice_projects",
+          "tableTo": "unprice_workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1378,14 +1366,12 @@
         "unique_slug": {
           "name": "unique_slug",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       }
     },
-    "public.builderai_subscription_items": {
-      "name": "builderai_subscription_items",
+    "public.unprice_subscription_items": {
+      "name": "unprice_subscription_items",
       "schema": "",
       "columns": {
         "id": {
@@ -1435,46 +1421,30 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "builderai_subscription_items_project_id_builderai_projects_id_fk": {
-          "name": "builderai_subscription_items_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_subscription_items",
-          "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_subscription_items_project_id_unprice_projects_id_fk": {
+          "name": "unprice_subscription_items_project_id_unprice_projects_id_fk",
+          "tableFrom": "unprice_subscription_items",
+          "tableTo": "unprice_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "subscription_items_subscription_id_fkey": {
           "name": "subscription_items_subscription_id_fkey",
-          "tableFrom": "builderai_subscription_items",
-          "tableTo": "builderai_subscriptions",
-          "columnsFrom": [
-            "subscription_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "tableFrom": "unprice_subscription_items",
+          "tableTo": "unprice_subscriptions",
+          "columnsFrom": ["subscription_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "subscription_items_plan_version_id_fkey": {
           "name": "subscription_items_plan_version_id_fkey",
-          "tableFrom": "builderai_subscription_items",
-          "tableTo": "builderai_plan_versions_features",
-          "columnsFrom": [
-            "feature_plan_version_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "tableFrom": "unprice_subscription_items",
+          "tableTo": "unprice_plan_versions_features",
+          "columnsFrom": ["feature_plan_version_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1482,16 +1452,13 @@
       "compositePrimaryKeys": {
         "subscription_items_pkey": {
           "name": "subscription_items_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {}
     },
-    "public.builderai_subscriptions": {
-      "name": "builderai_subscriptions",
+    "public.unprice_subscriptions": {
+      "name": "unprice_subscriptions",
       "schema": "",
       "columns": {
         "id": {
@@ -1613,6 +1580,24 @@
           "type": "json",
           "primaryKey": false,
           "notNull": false
+        },
+        "next_plan_version_to": {
+          "name": "next_plan_version_to",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plan_changed": {
+          "name": "plan_changed",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "next_subscription_id": {
+          "name": "next_subscription_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -1639,53 +1624,37 @@
             }
           ],
           "isUnique": true,
-          "where": "\"builderai_subscriptions\".\"status\" = $1",
+          "where": "\"unprice_subscriptions\".\"status\" = $1",
           "concurrently": false,
           "method": "btree",
           "with": {}
         }
       },
       "foreignKeys": {
-        "builderai_subscriptions_project_id_builderai_projects_id_fk": {
-          "name": "builderai_subscriptions_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_subscriptions",
-          "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_subscriptions_project_id_unprice_projects_id_fk": {
+          "name": "unprice_subscriptions_project_id_unprice_projects_id_fk",
+          "tableFrom": "unprice_subscriptions",
+          "tableTo": "unprice_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "subscriptions_customer_id_fkey": {
           "name": "subscriptions_customer_id_fkey",
-          "tableFrom": "builderai_subscriptions",
-          "tableTo": "builderai_customers",
-          "columnsFrom": [
-            "customers_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "tableFrom": "unprice_subscriptions",
+          "tableTo": "unprice_customers",
+          "columnsFrom": ["customers_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
         "subscriptions_planversion_id_fkey": {
           "name": "subscriptions_planversion_id_fkey",
-          "tableFrom": "builderai_subscriptions",
-          "tableTo": "builderai_plan_versions",
-          "columnsFrom": [
-            "plan_version_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "tableFrom": "unprice_subscriptions",
+          "tableTo": "unprice_plan_versions",
+          "columnsFrom": ["plan_version_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1693,16 +1662,13 @@
       "compositePrimaryKeys": {
         "subscriptions_pkey": {
           "name": "subscriptions_pkey",
-          "columns": [
-            "id",
-            "project_id"
-          ]
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {}
     },
-    "public.builderai_invites": {
-      "name": "builderai_invites",
+    "public.unprice_invites": {
+      "name": "unprice_invites",
       "schema": "",
       "columns": {
         "created_at": {
@@ -1748,16 +1714,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "builderai_invites_workspace_id_builderai_workspaces_id_fk": {
-          "name": "builderai_invites_workspace_id_builderai_workspaces_id_fk",
-          "tableFrom": "builderai_invites",
-          "tableTo": "builderai_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_invites_workspace_id_unprice_workspaces_id_fk": {
+          "name": "unprice_invites_workspace_id_unprice_workspaces_id_fk",
+          "tableFrom": "unprice_invites",
+          "tableTo": "unprice_workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1765,16 +1727,13 @@
       "compositePrimaryKeys": {
         "invites_pkey": {
           "name": "invites_pkey",
-          "columns": [
-            "email",
-            "workspace_id"
-          ]
+          "columns": ["email", "workspace_id"]
         }
       },
       "uniqueConstraints": {}
     },
-    "public.builderai_members": {
-      "name": "builderai_members",
+    "public.unprice_members": {
+      "name": "unprice_members",
       "schema": "",
       "columns": {
         "created_at": {
@@ -1814,29 +1773,21 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "builderai_members_workspace_id_builderai_workspaces_id_fk": {
-          "name": "builderai_members_workspace_id_builderai_workspaces_id_fk",
-          "tableFrom": "builderai_members",
-          "tableTo": "builderai_workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_members_workspace_id_unprice_workspaces_id_fk": {
+          "name": "unprice_members_workspace_id_unprice_workspaces_id_fk",
+          "tableFrom": "unprice_members",
+          "tableTo": "unprice_workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "members_user_id_fkey": {
           "name": "members_user_id_fkey",
-          "tableFrom": "builderai_members",
-          "tableTo": "builderai_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "tableFrom": "unprice_members",
+          "tableTo": "unprice_user",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1844,16 +1795,13 @@
       "compositePrimaryKeys": {
         "members_pkey": {
           "name": "members_pkey",
-          "columns": [
-            "user_id",
-            "workspace_id"
-          ]
+          "columns": ["user_id", "workspace_id"]
         }
       },
       "uniqueConstraints": {}
     },
-    "public.builderai_workspaces": {
-      "name": "builderai_workspaces",
+    "public.unprice_workspaces": {
+      "name": "unprice_workspaces",
       "schema": "",
       "columns": {
         "id": {
@@ -1938,40 +1886,32 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "builderai_workspaces_created_by_builderai_user_id_fk": {
-          "name": "builderai_workspaces_created_by_builderai_user_id_fk",
-          "tableFrom": "builderai_workspaces",
-          "tableTo": "builderai_user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_workspaces_created_by_unprice_user_id_fk": {
+          "name": "unprice_workspaces_created_by_unprice_user_id_fk",
+          "tableFrom": "unprice_workspaces",
+          "tableTo": "unprice_user",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "builderai_workspaces_slug_unique": {
-          "name": "builderai_workspaces_slug_unique",
+        "unprice_workspaces_slug_unique": {
+          "name": "unprice_workspaces_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         },
         "unprice_customer_id": {
           "name": "unprice_customer_id",
           "nullsNotDistinct": false,
-          "columns": [
-            "unprice_customer_id"
-          ]
+          "columns": ["unprice_customer_id"]
         }
       }
     },
-    "public.builderai_usage": {
-      "name": "builderai_usage",
+    "public.unprice_usage": {
+      "name": "unprice_usage",
       "schema": "",
       "columns": {
         "id": {
@@ -2031,33 +1971,57 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "unique_usage_subitem": {
+          "name": "unique_usage_subitem",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "subscription_item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "month",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "year",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
-        "builderai_usage_project_id_builderai_projects_id_fk": {
-          "name": "builderai_usage_project_id_builderai_projects_id_fk",
-          "tableFrom": "builderai_usage",
-          "tableTo": "builderai_projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+        "unprice_usage_project_id_unprice_projects_id_fk": {
+          "name": "unprice_usage_project_id_unprice_projects_id_fk",
+          "tableFrom": "unprice_usage",
+          "tableTo": "unprice_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "usage_subitem_fkey": {
           "name": "usage_subitem_fkey",
-          "tableFrom": "builderai_usage",
-          "tableTo": "builderai_subscription_items",
-          "columnsFrom": [
-            "subscription_item_id",
-            "project_id"
-          ],
-          "columnsTo": [
-            "id",
-            "project_id"
-          ],
+          "tableFrom": "unprice_usage",
+          "tableTo": "unprice_subscription_items",
+          "columnsFrom": ["subscription_item_id", "project_id"],
+          "columnsTo": ["id", "project_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2065,21 +2029,177 @@
       "compositePrimaryKeys": {
         "usage_pkey": {
           "name": "usage_pkey",
+          "columns": ["id", "project_id"]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.unprice_pages": {
+      "name": "unprice_pages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "custom_domain": {
+          "name": "custom_domain",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subdomain": {
+          "name": "subdomain",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "logo": {
+          "name": "logo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "font": {
+          "name": "font",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "published": {
+          "name": "published",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "slug_page": {
+          "name": "slug_page",
           "columns": [
-            "id",
-            "project_id"
-          ]
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "subdomain_index": {
+          "name": "subdomain_index",
+          "columns": [
+            {
+              "expression": "subdomain",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "custom_domain_index": {
+          "name": "custom_domain_index",
+          "columns": [
+            {
+              "expression": "custom_domain",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "unprice_pages_project_id_unprice_projects_id_fk": {
+          "name": "unprice_pages_project_id_unprice_projects_id_fk",
+          "tableFrom": "unprice_pages",
+          "tableTo": "unprice_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "page_pkey": {
+          "name": "page_pkey",
+          "columns": ["id", "project_id"]
         }
       },
       "uniqueConstraints": {
-        "unique_usage_subitem": {
-          "name": "unique_usage_subitem",
+        "unprice_pages_custom_domain_unique": {
+          "name": "unprice_pages_custom_domain_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "subscription_item_id",
-            "month",
-            "year"
-          ]
+          "columns": ["custom_domain"]
+        },
+        "unprice_pages_subdomain_unique": {
+          "name": "unprice_pages_subdomain_unique",
+          "nullsNotDistinct": false,
+          "columns": ["subdomain"]
         }
       }
     }
@@ -2088,156 +2208,92 @@
     "public.aggregation_method": {
       "name": "aggregation_method",
       "schema": "public",
-      "values": [
-        "sum",
-        "last_during_period",
-        "count",
-        "max"
-      ]
+      "values": ["sum", "last_during_period", "count", "max"]
     },
     "public.collection_method": {
       "name": "collection_method",
       "schema": "public",
-      "values": [
-        "charge_automatically",
-        "send_invoice"
-      ]
+      "values": ["charge_automatically", "send_invoice"]
     },
     "public.currency": {
       "name": "currency",
       "schema": "public",
-      "values": [
-        "USD",
-        "EUR"
-      ]
+      "values": ["USD", "EUR"]
     },
     "public.payment_providers": {
       "name": "payment_providers",
       "schema": "public",
-      "values": [
-        "stripe",
-        "lemonsqueezy"
-      ]
+      "values": ["stripe", "lemonsqueezy"]
     },
     "public.billing_period": {
       "name": "billing_period",
       "schema": "public",
-      "values": [
-        "month",
-        "year"
-      ]
+      "values": ["month", "year"]
     },
     "public.plan_type": {
       "name": "plan_type",
       "schema": "public",
-      "values": [
-        "recurring"
-      ]
+      "values": ["recurring"]
     },
     "public.legacy_plans": {
       "name": "legacy_plans",
       "schema": "public",
-      "values": [
-        "FREE",
-        "PRO",
-        "ENTERPRISE"
-      ]
+      "values": ["FREE", "PRO", "ENTERPRISE"]
     },
     "public.project_tier": {
       "name": "project_tier",
       "schema": "public",
-      "values": [
-        "FREE",
-        "PRO",
-        "ENTERPRISE"
-      ]
+      "values": ["FREE", "PRO", "ENTERPRISE"]
     },
     "public.app_stages": {
       "name": "app_stages",
       "schema": "public",
-      "values": [
-        "prod",
-        "test",
-        "dev"
-      ]
+      "values": ["prod", "test", "dev"]
     },
     "public.plan_version_status": {
       "name": "plan_version_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "published"
-      ]
+      "values": ["draft", "published"]
     },
     "public.subscription_status": {
       "name": "subscription_status",
       "schema": "public",
-      "values": [
-        "canceled",
-        "active",
-        "inactive",
-        "paused"
-      ]
+      "values": ["active", "inactive", "ended", "cancelled"]
     },
     "public.team_roles": {
       "name": "team_roles",
       "schema": "public",
-      "values": [
-        "OWNER",
-        "ADMIN",
-        "MEMBER"
-      ]
+      "values": ["OWNER", "ADMIN", "MEMBER"]
     },
     "public.tier_mode": {
       "name": "tier_mode",
       "schema": "public",
-      "values": [
-        "volume",
-        "graduated"
-      ]
+      "values": ["volume", "graduated"]
     },
     "public.feature_types": {
       "name": "feature_types",
       "schema": "public",
-      "values": [
-        "flat",
-        "tier",
-        "package",
-        "usage"
-      ]
+      "values": ["flat", "tier", "package", "usage"]
     },
     "public.feature_version_types": {
       "name": "feature_version_types",
       "schema": "public",
-      "values": [
-        "feature",
-        "addon"
-      ]
+      "values": ["feature", "addon"]
     },
     "public.subscription_type": {
       "name": "subscription_type",
       "schema": "public",
-      "values": [
-        "plan",
-        "addons"
-      ]
+      "values": ["plan", "addons"]
     },
     "public.usage_mode": {
       "name": "usage_mode",
       "schema": "public",
-      "values": [
-        "tier",
-        "package",
-        "unit"
-      ]
+      "values": ["tier", "package", "unit"]
     },
     "public.when_to_bill": {
       "name": "when_to_bill",
       "schema": "public",
-      "values": [
-        "pay_in_advance",
-        "pay_in_arrear"
-      ]
+      "values": ["pay_in_advance", "pay_in_arrear"]
     }
   },
   "schemas": {},
