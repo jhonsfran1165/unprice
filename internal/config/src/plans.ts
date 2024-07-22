@@ -1,5 +1,3 @@
-import { env } from "./env.mjs"
-
 export const SubscriptionPlanKey = {
   FREE: "FREE",
   STANDARD: "STANDARD",
@@ -23,7 +21,7 @@ export const PLANS: Record<SubscriptionPlan, PlanInfo> = {
     name: "Standard",
     description: "For individuals",
     features: ["Invite up to 1 team member", "Lorem ipsum dolor sit amet"],
-    priceId: env.NEXT_PUBLIC_STRIPE_STD_MONTHLY_PRICE_ID,
+    priceId: "",
   },
   PRO: {
     key: SubscriptionPlanKey.PRO,
@@ -31,7 +29,7 @@ export const PLANS: Record<SubscriptionPlan, PlanInfo> = {
     description: "For teams",
     preFeatures: "Everything in standard, plus",
     features: ["Invite up to 5 team members", "Unlimited projects"],
-    priceId: env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID,
+    priceId: "",
   },
   FREE: {
     key: SubscriptionPlanKey.FREE,
