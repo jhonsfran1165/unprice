@@ -1,12 +1,9 @@
-import { cookies } from "next/headers"
 import Link from "next/link"
 import type { ReactNode } from "react"
-import { Suspense } from "react"
 
+import { APP_DOMAIN } from "@unprice/config"
 import { buttonVariants } from "@unprice/ui/button"
 import { ChevronRight } from "@unprice/ui/icons"
-
-import { APP_DOMAIN, AUTH_ROUTES } from "@unprice/config"
 import Footer from "~/components/layout/footer"
 import { Logo } from "~/components/layout/logo"
 import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
@@ -22,9 +19,10 @@ export default function MarketingLayout(props: { children: ReactNode }) {
 
           {/* <MainNav /> */}
           <div className="ml-auto flex items-center space-x-4">
-            <Suspense>
-              <DashboardLink />
-            </Suspense>
+            <Link href={`${APP_DOMAIN}`} className={buttonVariants({ variant: "primary" })}>
+              Login
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Link>
           </div>
         </MaxWidthWrapper>
       </nav>
@@ -32,30 +30,5 @@ export default function MarketingLayout(props: { children: ReactNode }) {
       <main className="flex-1">{props.children}</main>
       <Footer />
     </div>
-  )
-}
-
-function DashboardLink() {
-  const workspaceSlug = cookies().get("workspaceSlug")?.value
-
-  if (!workspaceSlug) {
-    return (
-      <>
-        <Link
-          href={`${APP_DOMAIN}${AUTH_ROUTES.SIGNIN}`}
-          className={buttonVariants({ variant: "outline" })}
-        >
-          Sign In
-          <ChevronRight className="ml-1 h-4 w-4" />
-        </Link>
-      </>
-    )
-  }
-
-  return (
-    <Link href={`${APP_DOMAIN}${workspaceSlug}`} className={buttonVariants({ variant: "outline" })}>
-      Dashboard
-      <ChevronRight className="ml-1 h-4 w-4" />
-    </Link>
   )
 }

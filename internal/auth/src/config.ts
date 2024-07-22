@@ -25,6 +25,7 @@ export const authConfig = {
       log.warn(message)
     },
   },
+  redirectProxyUrl: process.env.AUTH_REDIRECT_PROXY_URL,
   session: {
     strategy: "jwt",
     updateAge: 24 * 60 * 60, // 24 hours for update session
