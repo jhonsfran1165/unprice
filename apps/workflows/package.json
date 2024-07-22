@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm with-env next build",
+    "build": "next build",
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev": "pnpm with-env next dev --port 3200",
-    "start": "pnpm with-env next start",
+    "start": "next start",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env.local --",
     "triggers": "pnpm dlx @trigger.dev/cli@latest dev --port 3200"
