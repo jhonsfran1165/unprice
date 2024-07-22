@@ -4,25 +4,23 @@ import type { ReactNode } from "react"
 import { Suspense } from "react"
 
 import { buttonVariants } from "@unprice/ui/button"
-import { ChevronRight, Logo } from "@unprice/ui/icons"
+import { ChevronRight } from "@unprice/ui/icons"
 
 import { APP_DOMAIN, AUTH_ROUTES } from "@unprice/config"
 import Footer from "~/components/layout/footer"
-import { MainNav } from "~/components/layout/main-nav"
+import { Logo } from "~/components/layout/logo"
 import MaxWidthWrapper from "~/components/layout/max-width-wrapper"
-import { siteConfig } from "~/constants/layout"
 
 export default function MarketingLayout(props: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <nav className="z-50 flex h-16 items-center border-b bg-background">
         <MaxWidthWrapper className="flex max-w-screen-2xl">
-          <div className="mr-8 hidden items-center md:flex">
-            <Logo className="mr-2 h-6 w-6" />
-            <span className="font-bold text-lg tracking-tight">{siteConfig.name}</span>
+          <div className="flex items-center gap-4 text-primary-text md:flex-row md:gap-2 md:px-0">
+            <Logo />
           </div>
 
-          <MainNav />
+          {/* <MainNav /> */}
           <div className="ml-auto flex items-center space-x-4">
             <Suspense>
               <DashboardLink />
