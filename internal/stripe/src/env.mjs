@@ -4,11 +4,10 @@ import { z } from "zod"
 export const env = createEnv({
   shared: {},
   server: {
-    NEXTJS_URL: z.preprocess(
-      (str) => (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str),
-      process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
-    ),
-
+    // NEXTJS_URL: z.preprocess(
+    //   (str) => (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str),
+    //   process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
+    // ),
     STRIPE_API_KEY: z.string(),
   },
   client: {},

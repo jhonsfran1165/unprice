@@ -6,16 +6,11 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "production"]).default("development"),
     VERCEL_ENV: z.enum(["development", "preview", "production"]).optional(),
   },
-  server: {
-    NEXTJS_URL: z.preprocess(
-      (str) => (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str),
-      process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
-    ),
-  },
+  server: {},
   client: {
     NEXT_PUBLIC_APP_DOMAIN: z.preprocess(
       (str) => (process.env.NEXT_PUBLIC_VERCEL_URL ? process.env.NEXT_PUBLIC_VERCEL_URL : str),
-      z.string().min(1)
+      z.string().optional().default("")
     ),
   },
   // Client side variables gets destructured here due to Next.js static analysis

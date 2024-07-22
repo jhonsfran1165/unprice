@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { auth } from "@unprice/auth/server"
 
-import { API_HOSTNAMES, APP_HOSTNAMES, BASE_DOMAIN } from "@unprice/config"
+import { API_HOSTNAMES, APP_HOSTNAMES } from "@unprice/config"
 import { getValidSubdomain, parse } from "~/lib/domains"
 import ApiMiddleware from "~/middleware/api"
 import AppMiddleware from "~/middleware/app"
@@ -24,17 +24,16 @@ export default auth((req) => {
     return AppMiddleware(req)
   }
 
-  // 3. validate subdomains
-  const subdomain = getValidSubdomain(domain)
-  // custom sites are redirected to the sites middleware
-  // domain is not the same as the base domain and subdomain is not www or empty
-  if (domain !== BASE_DOMAIN && subdomain && !["www", ""].includes(subdomain)) {
-    // 3. validate site routes
-    return SitesMiddleware(req)
+  const subdomain = getValidSubdomain(domain) ?? ""
+
+  // 3. validate subdomains www and empty
+  if (subdomain === "" || subdomain === "www") {
+    // public routes under the base domain or www subdomain
+    return NextResponse.next()
   }
 
-  // public routes under the base domain or www subdomain
-  return NextResponse.next()
+  // rest of the routes are site routes
+  return SitesMiddleware(req)
 })
 
 export const config = {
