@@ -1,5 +1,11 @@
 # @jhonsfran/unprice
 
+## 0.4.1
+
+### Patch Changes
+
+- building again
+
 ## 0.4.0
 
 ### Minor Changes
