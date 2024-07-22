@@ -29,7 +29,7 @@ export function PageDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-h-screen overflow-y-scroll">
         <DialogHeader>
-          <DialogTitle>Plan Form</DialogTitle>
+          <DialogTitle>Page Form</DialogTitle>
 
           <DialogDescription>Modify the plan details below.</DialogDescription>
         </DialogHeader>

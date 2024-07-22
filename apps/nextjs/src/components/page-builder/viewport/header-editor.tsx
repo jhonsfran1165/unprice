@@ -24,7 +24,7 @@ export const HeaderEditor: React.FC<{
   }))
 
   const domain = page.customDomain
-    ? page.customDomain
+    ? `http://${page.customDomain}`
     : `http://${page.subdomain}.${SITES_BASE_DOMAIN}`
 
   const updatePage = api.pages.update.useMutation({
