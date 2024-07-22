@@ -21,5 +21,9 @@ export default async function ReviewPage({
     notFound()
   }
 
-  return <PricingCard planVersion={planVersion} />
+  return (
+    <div className="flex w-full flex-col items-center justify-center space-y-4">
+      <PricingCard planVersion={planVersion} />
+    </div>
+  )
 }

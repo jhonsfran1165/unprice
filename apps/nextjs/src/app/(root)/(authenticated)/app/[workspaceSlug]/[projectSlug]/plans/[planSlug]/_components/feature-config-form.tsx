@@ -179,17 +179,17 @@ export function FeatureConfigForm({
               <div className="rounded-md bg-background-bg p-2 text-center font-semibold shadow-sm">
                 Pricing Model
               </div>
-              <div className="line-clamp-3 space-y-2 break-all px-2 text-justify font-normal text-muted-foreground text-xs leading-snug">
+              <div className="line-clamp-3 space-y-2 break-all text-justify font-normal text-xs leading-snug">
                 All units price based on final tier reached. Needs a record for Stripe to track
                 customer service usage.
               </div>
-              <div className="flex flex-col gap-1 px-2">
+              <div className="flex flex-col gap-1">
                 <FormField
                   control={form.control}
                   name="featureType"
                   render={({ field }) => (
                     <FormItem className="space-y-1">
-                      <FormMessage className="self-start px-2" />
+                      <FormMessage className="self-start" />
                       <Select
                         onValueChange={(value) => {
                           field.onChange(value)
@@ -204,7 +204,7 @@ export function FeatureConfigForm({
                         <SelectContent>
                           {FEATURE_TYPES.map((type) => (
                             <SelectItem value={type} key={type}>
-                              <div className="flex items-start gap-3 text-muted-foreground">
+                              <div className="flex items-start gap-3">
                                 <div className="grid gap-0.5">
                                   <p>{FEATURE_TYPES_MAPS[type].label}</p>
                                   <p className="text-xs" data-description>
@@ -236,7 +236,7 @@ export function FeatureConfigForm({
                           <SelectContent>
                             {USAGE_MODES.map((mode) => (
                               <SelectItem value={mode} key={mode}>
-                                <div className="flex items-start gap-3 text-muted-foreground">
+                                <div className="flex items-start gap-3">
                                   <div className="grid gap-0.5">
                                     <p>{USAGE_MODES_MAP[mode].label}</p>
                                     <p className="text-xs" data-description>
@@ -269,7 +269,7 @@ export function FeatureConfigForm({
                           <SelectContent>
                             {TIER_MODES.map((mode) => (
                               <SelectItem value={mode} key={mode}>
-                                <div className="flex items-start gap-3 text-muted-foreground">
+                                <div className="flex items-start gap-3">
                                   <div className="grid gap-0.5">
                                     <p>{TIER_MODES_MAP[mode].label}</p>
                                     <p className="text-xs" data-description>

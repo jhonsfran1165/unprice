@@ -27,7 +27,7 @@ export function PlanVersionDialog({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-h-screen overflow-y-scroll">
+      <DialogContent className="max-h-screen overflow-y-scroll md:max-w-screen-lg">
         <DialogHeader>
           <DialogTitle>Plan version form</DialogTitle>
 

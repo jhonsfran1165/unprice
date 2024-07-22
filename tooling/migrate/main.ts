@@ -16,7 +16,7 @@ neonConfig.webSocketConstructor = ws
 async function main() {
   const db = drizzleNeon(
     new Pool({
-      connectionString: process.env.DATABASE_URL_MIGRATOR_LOCAL,
+      connectionString: process.env.DATABASE_URL_MIGRATOR,
     }),
     {
       schema: schema,

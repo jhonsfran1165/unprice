@@ -135,11 +135,11 @@ export const generateTheme = (
         foreground: `var(--${theme.destructive}-3)`,
       },
       muted: {
-        DEFAULT: `var(--${grayscale}-5)`,
+        DEFAULT: `var(--${grayscale}-4)`,
         foreground: `var(--${grayscale}-10)`,
       },
       accent: {
-        DEFAULT: `var(--${grayscale}-7)`,
+        DEFAULT: `var(--${grayscale}-5)`,
         foreground: `var(--${grayscale}-12)`,
       },
       popover: {

@@ -115,13 +115,13 @@ export function PlanVersionForm({
   return (
     <Form {...form}>
       <form className="space-y-6">
-        <div className="space-y-8">
+        <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:space-y-4">
           <FormField
             control={form.control}
             disabled={isPublished}
             name="title"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col justify-end">
                 <FormLabel>Plan version Title</FormLabel>
                 <FormDescription>
                   This title will be displayed to your customers. You can use it for handling
@@ -140,7 +140,7 @@ export function PlanVersionForm({
             disabled={isPublished}
             name="currency"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col justify-end">
                 <div className="flex justify-between">
                   <FormLabel>Currency of this version</FormLabel>
                   <Link
@@ -178,7 +178,7 @@ export function PlanVersionForm({
             name="paymentProvider"
             disabled={isPublished}
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="row-start-2 flex flex-col justify-end">
                 <div className="flex justify-between">
                   <FormLabel>Payment provider</FormLabel>
                   {/* // TODO: add link to payment provider configuration */}
@@ -219,7 +219,7 @@ export function PlanVersionForm({
             name="planType"
             disabled={isPublished}
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col justify-end">
                 <FormLabel>Type of the plan</FormLabel>
                 <FormDescription>Only recurring plans are supported at the moment.</FormDescription>
 
@@ -248,10 +248,9 @@ export function PlanVersionForm({
               name="billingPeriod"
               disabled={isPublished}
               render={({ field }) => (
-                <FormItem>
-                  <div className="flex justify-between">
-                    <FormLabel>Billing period</FormLabel>
-                  </div>
+                <FormItem className="col-start-2 flex flex-col justify-end">
+                  <FormLabel>Billing period</FormLabel>
+                  <FormDescription>How often you want to bill customers</FormDescription>
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger>
@@ -277,12 +276,12 @@ export function PlanVersionForm({
             disabled={isPublished}
             name="description"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-start-2 row-start-2 flex flex-col justify-start">
                 <FormLabel>Description</FormLabel>
+                <FormDescription>Enter a short description of the versions.</FormDescription>
                 <FormControl>
                   <Textarea {...field} value={field.value ?? ""} />
                 </FormControl>
-                <FormDescription>Enter a short description of the versions.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

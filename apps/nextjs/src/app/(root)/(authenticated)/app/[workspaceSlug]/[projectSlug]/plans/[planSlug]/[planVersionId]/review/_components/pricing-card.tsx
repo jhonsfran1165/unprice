@@ -17,7 +17,7 @@ export function PricingCard({
   })
 
   return (
-    <Card className="w-[300px]">
+    <Card className="flex w-[300px] flex-col">
       <CardHeader className="space-y-6">
         <h1>{planVersion.title}</h1>
 

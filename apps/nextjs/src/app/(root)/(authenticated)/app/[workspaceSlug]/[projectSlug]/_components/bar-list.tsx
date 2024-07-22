@@ -1,4 +1,5 @@
 "use client"
+
 import { Search } from "lucide-react"
 import { useMemo, useState } from "react"
 import { nFormatter } from "~/lib/nformatter"
