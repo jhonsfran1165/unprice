@@ -1,5 +1,5 @@
-import { Toaster } from "@builderai/ui/sonner"
-import { TooltipProvider } from "@builderai/ui/tooltip"
+import { Toaster } from "@unprice/ui/sonner"
+import { TooltipProvider } from "@unprice/ui/tooltip"
 import { ThemeProvider } from "~/components/layout/theme-provider"
 import { siteConfig } from "~/constants/layout"
 import "~/styles/globals.css"

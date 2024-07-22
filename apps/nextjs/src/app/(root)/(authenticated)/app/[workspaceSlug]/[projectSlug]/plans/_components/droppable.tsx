@@ -4,8 +4,9 @@ import { useDroppable } from "@dnd-kit/core"
 import type { AnimateLayoutChanges } from "@dnd-kit/sortable"
 import { defaultAnimateLayoutChanges } from "@dnd-kit/sortable"
 
-import { cn } from "@builderai/ui/utils"
+import { cn } from "@unprice/ui/utils"
 
+// TODO: migrate this to sortable.tsx ui component
 export const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true })
 

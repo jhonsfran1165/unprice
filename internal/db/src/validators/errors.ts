@@ -1,4 +1,4 @@
-import { BaseError } from "@builderai/error"
+import { BaseError } from "@unprice/error"
 
 export class UnPriceCalculationError extends BaseError {
   public readonly retry = false

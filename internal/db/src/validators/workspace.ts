@@ -1,7 +1,7 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { MEMBERSHIP, PLANS } from "@builderai/config"
+import { MEMBERSHIP, PLANS } from "@unprice/config"
 
 import * as schema from "../schema"
 import { userSelectBase } from "./auth"

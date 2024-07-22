@@ -1,10 +1,10 @@
 import { ListFilter, MoreVertical } from "lucide-react"
 import { notFound } from "next/navigation"
 
-import { APP_DOMAIN } from "@builderai/config"
-import { Badge } from "@builderai/ui/badge"
-import { Button } from "@builderai/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
+import { APP_DOMAIN } from "@unprice/config"
+import { Badge } from "@unprice/ui/badge"
+import { Button } from "@unprice/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -13,11 +13,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
-import { Separator } from "@builderai/ui/separator"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/dropdown-menu"
+import { Separator } from "@unprice/ui/separator"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
+import { cn } from "@unprice/ui/utils"
 
 import {
   Sheet,
@@ -26,7 +26,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@builderai/ui/sheet"
+} from "@unprice/ui/sheet"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { PropagationStopper } from "~/components/prevent-propagation"

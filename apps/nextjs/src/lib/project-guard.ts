@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import type { WorkspacePlan } from "@builderai/db/validators"
+import type { WorkspacePlan } from "@unprice/db/validators"
 
 import { api } from "~/trpc/server"
 

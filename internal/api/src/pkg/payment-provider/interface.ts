@@ -1,5 +1,5 @@
-import type { FetchError, Result } from "@builderai/error"
-import type { Stripe } from "@builderai/stripe"
+import type { FetchError, Result } from "@unprice/error"
+import type { Stripe } from "@unprice/stripe"
 
 export interface PaymentProviderCreateSession {
   success: boolean

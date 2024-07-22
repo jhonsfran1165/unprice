@@ -1,10 +1,5 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@builderai/ui/accordion"
 import { useNode } from "@craftjs/core"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@unprice/ui/accordion"
 import type React from "react"
 
 type Props<T extends Record<string, unknown>> = {

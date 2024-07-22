@@ -2,9 +2,9 @@
 
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
 
-import { createTRPCContext } from "@builderai/api"
-import { edgeRouter } from "@builderai/api/edge"
-import { auth } from "@builderai/auth/server"
+import { createTRPCContext } from "@unprice/api"
+import { edgeRouter } from "@unprice/api/edge"
+import { auth } from "@unprice/auth/server"
 
 import { CorsOptions, setCorsHeaders } from "../../../_enableCors"
 

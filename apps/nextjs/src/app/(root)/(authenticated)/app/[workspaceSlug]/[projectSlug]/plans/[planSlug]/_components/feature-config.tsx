@@ -1,6 +1,6 @@
 "use client"
 
-import { Separator } from "@builderai/ui/separator"
+import { Separator } from "@unprice/ui/separator"
 
 import { useActiveFeature, useActivePlanVersion } from "../../_components/use-features"
 import { FeatureConfigForm } from "./feature-config-form"
@@ -37,7 +37,7 @@ export function FeatureConfig({
           </div>
           <Separator />
 
-          <div className="flex-1 space-y-8 p-4 py-10 text-sm">
+          <div className="flex-1 space-y-8 py-10 text-sm">
             <FeatureConfigForm
               setDialogOpen={setDialogOpen}
               defaultValues={activeFeature}

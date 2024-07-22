@@ -2,7 +2,7 @@ import type { Route } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
-import { getSession } from "@builderai/auth/server-rsc"
+import { getSession } from "@unprice/auth/server-rsc"
 
 import { SignInGithub } from "./github-signin"
 

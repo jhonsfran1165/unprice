@@ -1,7 +1,7 @@
 import { generateOpenApiDocument } from "@potatohd/trpc-openapi"
 import type { OpenAPIV3 } from "openapi-types"
 
-import { appRouter } from "@builderai/api"
+import { appRouter } from "@unprice/api"
 
 export type IExtensionName = `x-${string}`
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>

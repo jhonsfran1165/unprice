@@ -1,8 +1,8 @@
 "use client"
 
-import type { InsertPage } from "@builderai/db/validators"
-import { pageInsertBaseSchema } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
+import type { InsertPage } from "@unprice/db/validators"
+import { pageInsertBaseSchema } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import {
   Form,
   FormControl,
@@ -11,16 +11,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
+} from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
 import { useRouter } from "next/navigation"
 import { startTransition } from "react"
 
-import { Textarea } from "@builderai/ui/text-area"
+import { SITES_BASE_DOMAIN } from "@unprice/config"
+import { Textarea } from "@unprice/ui/text-area"
 import { ConfirmAction } from "~/components/confirm-action"
 import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
-import { SITES_BASE_DOMAIN } from "~/constants"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"

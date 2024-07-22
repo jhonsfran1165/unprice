@@ -1,12 +1,13 @@
 "use client"
+
 import { Search } from "lucide-react"
 import { useMemo, useState } from "react"
 import { nFormatter } from "~/lib/nformatter"
 
-import { Button } from "@builderai/ui/button"
-import { type Bar, BarList } from "@builderai/ui/charts"
-import { Input } from "@builderai/ui/input"
-import { ScrollArea } from "@builderai/ui/scroll-area"
+import { Button } from "@unprice/ui/button"
+import { type Bar, BarList } from "@unprice/ui/charts"
+import { Input } from "@unprice/ui/input"
+import { ScrollArea } from "@unprice/ui/scroll-area"
 import { m } from "framer-motion"
 
 export function BarListAnalytics<T = unknown>({

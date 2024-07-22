@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 import { zfd } from "zod-form-data"
 
-import * as schema from "@builderai/db/schema"
-import * as utils from "@builderai/db/utils"
-import { ingestionSelectSchema } from "@builderai/db/validators"
+import * as schema from "@unprice/db/schema"
+import * as utils from "@unprice/db/utils"
+import { ingestionSelectSchema } from "@unprice/db/validators"
 
 import {
   createTRPCRouter,

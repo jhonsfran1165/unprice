@@ -1,4 +1,4 @@
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 import { Plus } from "lucide-react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"

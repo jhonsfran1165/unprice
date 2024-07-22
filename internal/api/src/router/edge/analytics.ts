@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { monthsSchema, yearsSchema } from "@builderai/db/validators"
+import { monthsSchema, yearsSchema } from "@unprice/db/validators"
 
 import { createTRPCRouter, protectedApiOrActiveProjectProcedure } from "../../trpc"
 

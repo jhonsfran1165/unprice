@@ -1,6 +1,6 @@
 "use client"
 
-import { cn, focusRing } from "@builderai/ui/utils"
+import { cn, focusRing } from "@unprice/ui/utils"
 
 import { usePathname } from "next/navigation"
 import { Ping } from "~/components/ping"

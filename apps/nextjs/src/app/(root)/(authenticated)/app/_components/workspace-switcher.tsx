@@ -2,10 +2,10 @@
 import { useRouter } from "next/navigation"
 import { use, useState } from "react"
 
-import type { RouterOutputs } from "@builderai/api"
-import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
-import { Badge } from "@builderai/ui/badge"
-import { Button } from "@builderai/ui/button"
+import type { RouterOutputs } from "@unprice/api"
+import { Avatar, AvatarFallback, AvatarImage } from "@unprice/ui/avatar"
+import { Badge } from "@unprice/ui/badge"
+import { Button } from "@unprice/ui/button"
 import {
   Command,
   CommandGroup,
@@ -13,11 +13,11 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@builderai/ui/command"
-import { Dialog, DialogTrigger } from "@builderai/ui/dialog"
-import { Check, ChevronsUpDown, PlusCircle } from "@builderai/ui/icons"
-import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/command"
+import { Dialog, DialogTrigger } from "@unprice/ui/dialog"
+import { Check, ChevronsUpDown, PlusCircle } from "@unprice/ui/icons"
+import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
+import { cn } from "@unprice/ui/utils"
 import NewTeamDialog from "./new-workspace"
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 

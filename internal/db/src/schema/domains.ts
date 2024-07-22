@@ -11,7 +11,7 @@ export const domains = pgTableProject(
     ...id,
     ...timestamps,
     ...workspaceID,
-    name: text("name").notNull().unique(), //domain name (e.g. builder.ai or test.builderai.com)
+    name: text("name").notNull().unique(), //domain name (e.g. builder.ai or test.unprice.com)
     apexName: text("apex_name").notNull(), //apex domain name (e.g. builder.ai)
     verified: boolean("verified").default(false),
   },

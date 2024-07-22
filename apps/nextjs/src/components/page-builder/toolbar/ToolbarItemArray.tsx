@@ -1,8 +1,8 @@
 import type React from "react"
 
-import { Button } from "@builderai/ui/button"
-import { Label } from "@builderai/ui/label"
-import { cn } from "@builderai/ui/utils"
+import { Button } from "@unprice/ui/button"
+import { Label } from "@unprice/ui/label"
+import { cn } from "@unprice/ui/utils"
 import { Trash } from "lucide-react"
 import { useEffect, useState } from "react"
 

@@ -1,5 +1,5 @@
-@import "@builderai/tailwind-config/themes/sunset.css";
-/* @import "@builderai/tailwind-config/themes/slate.css"; */
+@import "@unprice/tailwind-config/themes/sunset.css";
+/* @import "@unprice/tailwind-config/themes/slate.css"; */
 
 @tailwind base;
 @tailwind components;
@@ -59,7 +59,7 @@
   }
 
   p {
-    @apply font-secondary text-base font-normal;
+    @apply font-secondary text-xs font-normal;
   }
 
   body {

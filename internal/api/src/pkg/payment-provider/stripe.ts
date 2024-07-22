@@ -1,9 +1,9 @@
-import { API_DOMAIN } from "@builderai/config"
-import type { Result } from "@builderai/error"
-import { Err, FetchError, Ok } from "@builderai/error"
-import { Stripe, stripe } from "@builderai/stripe"
+import { API_DOMAIN } from "@unprice/config"
+import type { Result } from "@unprice/error"
+import { Err, FetchError, Ok } from "@unprice/error"
+import { Stripe, stripe } from "@unprice/stripe"
 
-import type { Logger } from "@builderai/logging"
+import type { Logger } from "@unprice/logging"
 import type { PaymentProviderCreateSession, PaymentProviderInterface } from "./interface"
 
 export class StripePaymentProvider implements PaymentProviderInterface {

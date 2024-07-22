@@ -1,4 +1,4 @@
-import { CommandGroup, CommandItem, CommandSeparator } from "@builderai/ui/command"
+import { CommandGroup, CommandItem, CommandSeparator } from "@unprice/ui/command"
 import { Check, TextQuote, TrashIcon } from "lucide-react"
 import { useEditor } from "novel"
 

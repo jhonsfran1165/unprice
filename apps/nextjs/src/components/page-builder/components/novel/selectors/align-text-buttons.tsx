@@ -1,5 +1,5 @@
-import { Button } from "@builderai/ui/button"
-import { cn } from "@builderai/ui/utils"
+import { Button } from "@unprice/ui/button"
+import { cn } from "@unprice/ui/utils"
 import { AlignCenter, AlignJustify, AlignLeft, AlignRight } from "lucide-react"
 import { EditorBubbleItem, useEditor } from "novel"
 

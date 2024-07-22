@@ -2,7 +2,7 @@ import {
   defaultTheme,
   generateTheme,
   type generateVariantRadixColors,
-} from "@builderai/tailwind-config"
+} from "@unprice/tailwind-config"
 
 const themeData = generateTheme(defaultTheme)
 

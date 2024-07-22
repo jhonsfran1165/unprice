@@ -1,4 +1,4 @@
-import { isSlug } from "@builderai/db/utils"
+import { isSlug } from "@unprice/db/utils"
 import BreadcrumbsApp from "~/components/layout/breadcrumbs"
 
 export default function Page(props: {

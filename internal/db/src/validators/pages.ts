@@ -1,4 +1,4 @@
-import { RESTRICTED_SUBDOMAINS } from "@builderai/config"
+import { RESTRICTED_SUBDOMAINS } from "@unprice/config"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 import { pages } from "../schema/pages"

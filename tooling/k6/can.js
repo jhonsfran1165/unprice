@@ -25,7 +25,7 @@ export default function () {
 
   const res = http.get(`${endpoint}?batch=1&input=${trpcData}`, {
     headers: {
-      "x-builderai-api-key": "builderai_live_2gqw6y4APfPrAoRFRz2EvkW3veHX",
+      Authorization: "Bearer builderai_live_2gqw6y4APfPrAoRFRz2EvkW3veHX",
     },
   })
 

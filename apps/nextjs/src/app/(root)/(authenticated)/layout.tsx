@@ -1,8 +1,8 @@
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
-import { Toaster } from "@builderai/ui/sonner"
-import { TooltipProvider } from "@builderai/ui/tooltip"
+import { Toaster } from "@unprice/ui/sonner"
+import { TooltipProvider } from "@unprice/ui/tooltip"
 
 import { TailwindIndicator } from "~/components/layout/tailwind-indicator"
 import { TRPCReactProvider } from "~/trpc/client"

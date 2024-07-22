@@ -1,5 +1,5 @@
-import { Button } from "@builderai/ui/button"
-import { Skeleton } from "@builderai/ui/skeleton"
+import { Button } from "@unprice/ui/button"
+import { Skeleton } from "@unprice/ui/skeleton"
 
 export function ProjectSwitcherSkeleton() {
   return (

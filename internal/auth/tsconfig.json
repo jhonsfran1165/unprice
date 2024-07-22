@@ -1,5 +1,5 @@
 {
-  "extends": "@builderai/tsconfig/base.json",
+  "extends": "@unprice/tsconfig/base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"

@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation"
 import { startTransition } from "react"
 import { z } from "zod"
 
-import type { InsertPlan } from "@builderai/db/validators"
-import { planInsertBaseSchema } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
+import type { InsertPlan } from "@unprice/db/validators"
+import { planInsertBaseSchema } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import {
   Form,
   FormControl,
@@ -15,10 +15,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
-import { Switch } from "@builderai/ui/switch"
-import { Textarea } from "@builderai/ui/text-area"
+} from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
+import { Switch } from "@unprice/ui/switch"
+import { Textarea } from "@unprice/ui/text-area"
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"

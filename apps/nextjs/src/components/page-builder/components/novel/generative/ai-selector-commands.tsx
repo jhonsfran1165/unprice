@@ -1,4 +1,4 @@
-import { CommandGroup, CommandItem, CommandSeparator } from "@builderai/ui/command"
+import { CommandGroup, CommandItem, CommandSeparator } from "@unprice/ui/command"
 import { ArrowDownWideNarrow, CheckCheck, RefreshCcwDot, StepForward, WrapText } from "lucide-react"
 import { useEditor } from "novel"
 import { getPrevText } from "novel/utils"

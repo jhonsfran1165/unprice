@@ -4,9 +4,9 @@ import { DollarSignIcon, HelpCircle, Plus, XCircle } from "lucide-react"
 import type { UseFormReturn } from "react-hook-form"
 import { useFieldArray } from "react-hook-form"
 
-import { AGGREGATION_METHODS, AGGREGATION_METHODS_MAP } from "@builderai/db/utils"
-import { type Currency, type PlanVersionFeature, currencySymbol } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
+import { AGGREGATION_METHODS, AGGREGATION_METHODS_MAP } from "@unprice/db/utils"
+import { type Currency, type PlanVersionFeature, currencySymbol } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import {
   FormControl,
   FormDescription,
@@ -14,11 +14,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
-import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
+import { cn } from "@unprice/ui/utils"
 
 import { InputWithAddons } from "~/components/input-addons"
 
@@ -42,12 +42,12 @@ export function QuantityFormField({
               If the quantity is not provided, it must be set at the time of the subscription.
             </div>
 
-            <div className="flex flex-col items-center space-y-1 px-2">
+            <div className="flex flex-col items-center space-y-1">
               <FormControl className="w-full">
                 <InputWithAddons {...field} trailing={"units"} value={field.value ?? ""} />
               </FormControl>
 
-              <FormMessage className="self-start px-2" />
+              <FormMessage className="self-start" />
             </div>
           </FormItem>
         )}
@@ -77,12 +77,12 @@ export function LimitFormField({
               the feature will be unlimited.
             </div>
 
-            <div className="flex flex-col items-center space-y-1 px-2">
+            <div className="flex flex-col items-center space-y-1">
               <FormControl className="w-full">
                 <InputWithAddons {...field} trailing={"units"} value={field.value ?? ""} />
               </FormControl>
 
-              <FormMessage className="self-start px-2" />
+              <FormMessage className="self-start" />
             </div>
           </FormItem>
         )}
@@ -113,7 +113,7 @@ export function PriceFormField({
               Prices can be set as decimal values. For example, $1.99.
             </div>
 
-            <div className="flex flex-col items-center space-y-1 px-2">
+            <div className="flex flex-col items-center space-y-1">
               <FormControl className="w-full">
                 <InputWithAddons
                   {...field}
@@ -123,7 +123,7 @@ export function PriceFormField({
                 />
               </FormControl>
 
-              <FormMessage className="self-start px-2" />
+              <FormMessage className="self-start" />
             </div>
           </FormItem>
         )}
@@ -144,7 +144,7 @@ export function UnitsFormField({
         name="config.units"
         render={({ field }) => (
           <FormItem className="">
-            <div className="flex flex-col items-center space-y-1 px-2">
+            <div className="flex flex-col items-center space-y-1">
               <FormControl className="w-full">
                 <InputWithAddons
                   {...field}
@@ -154,7 +154,7 @@ export function UnitsFormField({
                 />
               </FormControl>
 
-              <FormMessage className="self-start px-2" />
+              <FormMessage className="self-start" />
             </div>
           </FormItem>
         )}
@@ -175,37 +175,33 @@ export function AggregationMethodFormField({
         name="aggregationMethod"
         render={({ field }) => (
           <FormItem className="flex flex-col">
-            <div className="">
-              <FormLabel>Aggregation Method</FormLabel>
-              <FormDescription>Charge for metered usage by</FormDescription>
-              <div className="font-normal text-xs leading-snug">
-                Usage based features meters usage over a period of time. Select the aggregation
-                method for the feature.
-              </div>
+            <FormLabel>Aggregation Method</FormLabel>
+            <FormDescription>Charge for metered usage by</FormDescription>
+            <div className="font-normal text-xs leading-snug">
+              Usage based features meters usage over a period of time. Select the aggregation method
+              for the feature.
             </div>
-            <div className="px-2">
-              <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                <FormControl className="truncate">
-                  <SelectTrigger className="items-start [&_[data-description]]:hidden">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {AGGREGATION_METHODS.map((mode) => (
-                    <SelectItem value={mode} key={mode}>
-                      <div className="flex items-start gap-3 text-muted-foreground">
-                        <div className="grid gap-0.5">
-                          <p>{AGGREGATION_METHODS_MAP[mode].label}</p>
-                          <p className="text-xs" data-description>
-                            {AGGREGATION_METHODS_MAP[mode].description}
-                          </p>
-                        </div>
+            <Select onValueChange={field.onChange} value={field.value ?? ""}>
+              <FormControl className="truncate">
+                <SelectTrigger className="items-start [&_[data-description]]:hidden">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {AGGREGATION_METHODS.map((mode) => (
+                  <SelectItem value={mode} key={mode}>
+                    <div className="flex items-start gap-3">
+                      <div className="grid gap-0.5">
+                        <p>{AGGREGATION_METHODS_MAP[mode].label}</p>
+                        <p className="text-xs" data-description>
+                          {AGGREGATION_METHODS_MAP[mode].description}
+                        </p>
                       </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </FormItem>
         )}
       />

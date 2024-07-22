@@ -2,8 +2,8 @@
 
 import type { ColumnDef } from "@tanstack/react-table"
 
-import type { Customer } from "@builderai/db/validators"
-import { Checkbox } from "@builderai/ui/checkbox"
+import type { Customer } from "@unprice/db/validators"
+import { Checkbox } from "@unprice/ui/checkbox"
 
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { SuperLink } from "~/components/super-link"

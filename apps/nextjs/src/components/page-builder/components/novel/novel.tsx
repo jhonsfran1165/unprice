@@ -1,9 +1,9 @@
 "use client"
 
-import { Separator } from "@builderai/ui/separator"
 import { type UserComponent, useEditor as useEditorCraft, useNode } from "@craftjs/core"
 import type { AnyExtension } from "@tiptap/core"
 import type { EditorProps } from "@tiptap/pm/view"
+import { Separator } from "@unprice/ui/separator"
 import {
   EditorCommand,
   EditorCommandEmpty,

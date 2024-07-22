@@ -1,4 +1,4 @@
-import type { Session } from "@builderai/auth/server"
+import type { Session } from "@unprice/auth/server"
 
 export function getWorkspacesUser(session: Session | null): {
   user?: Session["user"]

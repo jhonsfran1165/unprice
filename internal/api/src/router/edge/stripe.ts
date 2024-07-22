@@ -3,13 +3,13 @@ import { TRPCError } from "@trpc/server"
 import { dinero } from "dinero.js"
 import { z } from "zod"
 
-import { APP_DOMAIN, PLANS } from "@builderai/config"
-import { calculatePricePerFeature, purchaseWorkspaceSchema } from "@builderai/db/validators"
-import { stripe } from "@builderai/stripe"
+import { APP_DOMAIN, PLANS } from "@unprice/config"
+import { calculatePricePerFeature, purchaseWorkspaceSchema } from "@unprice/db/validators"
+import { stripe } from "@unprice/stripe"
 
-import { and, eq } from "@builderai/db"
-import { features, planVersionFeatures } from "@builderai/db/schema"
-import { toStripeMoney } from "@builderai/db/utils"
+import { and, eq } from "@unprice/db"
+import { features, planVersionFeatures } from "@unprice/db/schema"
+import { toStripeMoney } from "@unprice/db/utils"
 import {
   createTRPCRouter,
   protectedActiveWorkspaceProcedure,

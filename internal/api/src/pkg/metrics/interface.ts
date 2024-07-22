@@ -1,4 +1,4 @@
-import type { Metric } from "@builderai/metrics"
+import type { Metric } from "@unprice/metrics"
 
 export interface Metrics {
   /**

@@ -1,9 +1,9 @@
 "use client"
 
-import { Button } from "@builderai/ui/button"
-import { Logo as LogoIcon } from "@builderai/ui/icons"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@builderai/ui/tooltip"
 import { Element, useEditor } from "@craftjs/core"
+import { Button } from "@unprice/ui/button"
+import { Logo as LogoIcon } from "@unprice/ui/icons"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import {
   ContainerIcon,
   FilePenLine,

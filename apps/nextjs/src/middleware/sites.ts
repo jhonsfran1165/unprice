@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import type { NextAuthRequest } from "@builderai/auth"
+import type { NextAuthRequest } from "@unprice/auth"
 
 import { getValidSubdomain, parse } from "~/lib/domains"
 

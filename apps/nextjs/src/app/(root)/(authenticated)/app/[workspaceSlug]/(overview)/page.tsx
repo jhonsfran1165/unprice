@@ -1,6 +1,6 @@
 import { Balancer } from "react-wrap-balancer"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 import { Plus } from "lucide-react"
 import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"

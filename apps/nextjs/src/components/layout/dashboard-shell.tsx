@@ -1,6 +1,6 @@
 import type React from "react"
 
-import { cn } from "@builderai/ui/utils"
+import { cn } from "@unprice/ui/utils"
 import MaxWidthWrapper from "./max-width-wrapper"
 
 export function DashboardShell(props: {

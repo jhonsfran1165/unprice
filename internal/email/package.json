@@ -1,5 +1,5 @@
 {
-  "name": "@builderai/email",
+  "name": "@unprice/email",
   "private": true,
   "type": "module",
   "version": "0.1.0",
@@ -28,7 +28,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@builderai/tsconfig": "^0.1.0",
+    "@unprice/tsconfig": "^0.1.0",
     "@types/node": "20.11.24",
     "@types/react": "^18.3.1",
     "react": "18.3.1",

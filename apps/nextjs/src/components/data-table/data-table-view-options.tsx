@@ -3,15 +3,15 @@
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
 import type { Table } from "@tanstack/react-table"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "@builderai/ui/dropdown-menu"
-import { SlidersHorizontal } from "@builderai/ui/icons"
+} from "@unprice/ui/dropdown-menu"
+import { SlidersHorizontal } from "@unprice/ui/icons"
 
 interface DataTableViewOptionsProps<TData> {
   table: Table<TData>

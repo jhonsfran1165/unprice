@@ -2,7 +2,7 @@
 
 import { useTheme } from "next-themes"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +13,8 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
-import { Moon, Sun, System } from "@builderai/ui/icons"
+} from "@unprice/ui/dropdown-menu"
+import { Moon, Sun, System } from "@unprice/ui/icons"
 
 export default function ThemeToggle() {
   const { setTheme } = useTheme()

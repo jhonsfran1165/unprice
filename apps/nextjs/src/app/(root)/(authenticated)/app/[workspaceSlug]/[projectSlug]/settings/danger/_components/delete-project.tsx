@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation"
 
-import { Button } from "@builderai/ui/button"
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
+import { Button } from "@unprice/ui/button"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import {
   Dialog,
   DialogClose,
@@ -13,9 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@builderai/ui/dialog"
-import { Warning } from "@builderai/ui/icons"
-import { LoadingAnimation } from "@builderai/ui/loading-animation"
+} from "@unprice/ui/dialog"
+import { Warning } from "@unprice/ui/icons"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"

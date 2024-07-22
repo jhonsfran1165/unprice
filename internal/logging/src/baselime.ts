@@ -1,5 +1,5 @@
 import { BaselimeLogger } from "@baselime/edge-logger"
-import { Log } from "@builderai/logs"
+import { Log } from "@unprice/logs"
 import type { Fields, Logger } from "./interface"
 
 interface Context {

@@ -1,7 +1,7 @@
 "use client"
 import { useRouter } from "next/navigation"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 import { api } from "~/trpc/client"
 
 export function SubscribeNow(props: { planId: string }) {

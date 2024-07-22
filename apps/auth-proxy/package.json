@@ -1,5 +1,5 @@
 {
-  "name": "@builderai/auth-proxy",
+  "name": "@unprice/auth-proxy",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,7 @@
     "@auth/core": "^0.34.1"
   },
   "devDependencies": {
-    "@builderai/tsconfig": "^0.1.0",
+    "@unprice/tsconfig": "^0.1.0",
     "@types/node": "20.11.24",
     "h3": "^1.11.1",
     "nitropack": "^2.9.1",

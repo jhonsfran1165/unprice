@@ -3,10 +3,10 @@
 import { useRouter } from "next/navigation"
 import { useEffect, useTransition } from "react"
 
-import type { CreateDomain, Domain } from "@builderai/db/validators"
-import { domainCreateBaseSchema } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
+import type { CreateDomain, Domain } from "@unprice/db/validators"
+import { domainCreateBaseSchema } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { InputWithAddons } from "~/components/input-addons"
@@ -120,11 +120,7 @@ export function DomainForm({
               <FormItem>
                 <FormLabel>Domain</FormLabel>
                 <FormControl>
-                  <InputWithAddons
-                    {...field}
-                    placeholder="status.builderai.com"
-                    leading="https://"
-                  />
+                  <InputWithAddons {...field} placeholder="status.unprice.dev" leading="https://" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

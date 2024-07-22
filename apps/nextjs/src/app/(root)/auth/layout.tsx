@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import { Logo } from "@builderai/ui/icons"
+import { Logo } from "@unprice/ui/icons"
 
 import { Fragment } from "react"
 import Footer from "~/components/layout/footer"

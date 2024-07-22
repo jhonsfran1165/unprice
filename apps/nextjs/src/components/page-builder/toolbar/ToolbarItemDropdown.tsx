@@ -1,15 +1,9 @@
-import { Button } from "@builderai/ui/button"
-import {
-  Command,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@builderai/ui/command"
-import { Label } from "@builderai/ui/label"
-import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
-import { ScrollArea } from "@builderai/ui/scroll-area"
-import { cn } from "@builderai/ui/utils"
+import { Button } from "@unprice/ui/button"
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@unprice/ui/command"
+import { Label } from "@unprice/ui/label"
+import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
+import { ScrollArea } from "@unprice/ui/scroll-area"
+import { cn } from "@unprice/ui/utils"
 import { Check } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"

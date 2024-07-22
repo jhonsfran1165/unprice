@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation"
 import type { ElementRef } from "react"
 import { forwardRef, startTransition } from "react"
 
-import { Button } from "@builderai/ui/button"
-import { LoadingAnimation } from "@builderai/ui/loading-animation"
+import { Button } from "@unprice/ui/button"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { toastAction } from "~/lib/toast"

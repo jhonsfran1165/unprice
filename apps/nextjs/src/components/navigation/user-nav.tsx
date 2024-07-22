@@ -1,8 +1,8 @@
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 import UserProfile from "../layout/user-profile"
 
-import { getSession } from "@builderai/auth/server-rsc"
-import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
+import { getSession } from "@unprice/auth/server-rsc"
+import { Avatar, AvatarFallback, AvatarImage } from "@unprice/ui/avatar"
 import { MoreVertical } from "lucide-react"
 import UserNavSkeleton from "../layout/user-nav-skeleton"
 

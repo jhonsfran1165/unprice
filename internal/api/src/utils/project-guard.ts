@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 
-import { projectGuardPrepared } from "@builderai/db/queries"
-import type { ProjectExtended, User, WorkspaceRole } from "@builderai/db/validators"
+import { projectGuardPrepared } from "@unprice/db/queries"
+import type { ProjectExtended, User, WorkspaceRole } from "@unprice/db/validators"
 
 import type { Context } from "../trpc"
 

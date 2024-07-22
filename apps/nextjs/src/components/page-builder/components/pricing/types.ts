@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "@builderai/api"
+import type { RouterOutputs } from "@unprice/api"
 
 export interface PricingComponentProps {
   plans: RouterOutputs["planVersions"]["getById"]["planVersion"][]

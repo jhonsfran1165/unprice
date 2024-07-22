@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-import type { InsertSubscription } from "@builderai/db/validators"
+import type { InsertSubscription } from "@unprice/db/validators"
 import {
   Sheet,
   SheetContent,
@@ -10,7 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@builderai/ui/sheet"
+} from "@unprice/ui/sheet"
 
 import { SubscriptionForm } from "./subscription-form"
 

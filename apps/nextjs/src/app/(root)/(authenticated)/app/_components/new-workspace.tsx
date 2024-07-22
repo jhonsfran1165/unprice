@@ -2,20 +2,20 @@
 import { toDecimal } from "dinero.js"
 import Link from "next/link"
 
-import type { PurchaseOrg } from "@builderai/db/validators"
-import { purchaseWorkspaceSchema } from "@builderai/db/validators"
-import { currencySymbol } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
+import type { PurchaseOrg } from "@unprice/db/validators"
+import { purchaseWorkspaceSchema } from "@unprice/db/validators"
+import { currencySymbol } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import {
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@builderai/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
+} from "@unprice/ui/dialog"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"

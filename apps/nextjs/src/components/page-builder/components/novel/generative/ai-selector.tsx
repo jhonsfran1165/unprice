@@ -1,9 +1,9 @@
 "use client"
 
-import { Command, CommandInput } from "@builderai/ui/command"
+import { Command, CommandInput } from "@unprice/ui/command"
 
-import { Button } from "@builderai/ui/button"
-import { ScrollArea } from "@builderai/ui/scroll-area"
+import { Button } from "@unprice/ui/button"
+import { ScrollArea } from "@unprice/ui/scroll-area"
 import { useCompletion } from "ai/react"
 import { ArrowUp } from "lucide-react"
 import { useEditor } from "novel"

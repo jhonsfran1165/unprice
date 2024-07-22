@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-import type { InsertPlanVersion } from "@builderai/db/validators"
+import type { InsertPlanVersion } from "@unprice/db/validators"
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@builderai/ui/dialog"
+} from "@unprice/ui/dialog"
 
 import { PlanVersionForm } from "./plan-version-form"
 
@@ -27,7 +27,7 @@ export function PlanVersionDialog({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-h-screen overflow-y-scroll">
+      <DialogContent className="max-h-screen overflow-y-scroll md:max-w-screen-lg">
         <DialogHeader>
           <DialogTitle>Plan version form</DialogTitle>
 

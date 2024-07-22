@@ -1,7 +1,7 @@
-import { signOut } from "@builderai/auth/server"
-import { Button } from "@builderai/ui/button"
+import { signOut } from "@unprice/auth/server"
+import { Button } from "@unprice/ui/button"
 
-import { AUTH_ROUTES } from "~/constants"
+import { AUTH_ROUTES } from "@unprice/config"
 
 export default function AuthenticationPage() {
   return (

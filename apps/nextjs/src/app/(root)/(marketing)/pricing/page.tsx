@@ -1,13 +1,13 @@
 import { toDecimal } from "dinero.js"
 import { Balancer } from "react-wrap-balancer"
 
-import type { RouterOutputs } from "@builderai/api"
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
-import { CheckCircle2 } from "@builderai/ui/icons"
+import type { RouterOutputs } from "@unprice/api"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
+import { CheckCircle2 } from "@unprice/ui/icons"
 
-import { currencySymbol } from "@builderai/db/validators"
+import { currencySymbol } from "@unprice/db/validators"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 import { api } from "~/trpc/server"
 
 export default async function PricingPage() {

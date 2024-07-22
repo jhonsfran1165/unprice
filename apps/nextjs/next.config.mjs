@@ -1,6 +1,6 @@
-import "@builderai/api/env"
-import "@builderai/auth/env"
-import "@builderai/stripe/env"
+import "@unprice/api/env"
+import "@unprice/auth/env"
+import "@unprice/stripe/env"
 import "./src/env.mjs"
 
 // import MillionLint from "@million/lint"
@@ -13,13 +13,13 @@ const nextConfig = {
   reactStrictMode: true,
   /** Enables hot reloading for local packages without a build step */
   transpilePackages: [
-    "@builderai/api",
-    "@builderai/db",
-    "@builderai/stripe",
-    "@builderai/ui",
-    "@builderai/auth",
-    "@builderai/config",
-    "@builderai/tailwind-config",
+    "@unprice/api",
+    "@unprice/db",
+    "@unprice/stripe",
+    "@unprice/ui",
+    "@unprice/auth",
+    "@unprice/config",
+    "@unprice/tailwind-config",
   ],
   pageExtensions: ["ts", "tsx", "mdx"],
   images: {
@@ -29,7 +29,7 @@ const nextConfig = {
   experimental: {
     ppr: true,
     mdxRs: true,
-    optimizePackageImports: ["@builderai/ui", "@builderai/api", "@builderai/auth", "@builderai/db"],
+    optimizePackageImports: ["@unprice/ui", "@unprice/api", "@unprice/auth", "@unprice/db"],
     instrumentationHook: true,
   },
   webpack: (config, { isServer }) => {

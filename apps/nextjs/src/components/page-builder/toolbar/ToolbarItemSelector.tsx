@@ -1,6 +1,6 @@
-import { Label } from "@builderai/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@builderai/ui/select"
-import { cn } from "@builderai/ui/utils"
+import { Label } from "@unprice/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+import { cn } from "@unprice/ui/utils"
 import { useEffect, useState } from "react"
 
 interface ToolbarItemSelectorProps {

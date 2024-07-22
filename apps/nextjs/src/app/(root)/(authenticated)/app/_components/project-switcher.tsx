@@ -3,9 +3,9 @@
 import { useParams, useRouter } from "next/navigation"
 import { use, useState } from "react"
 
-import type { RouterOutputs } from "@builderai/api"
-import { Badge } from "@builderai/ui/badge"
-import { Button } from "@builderai/ui/button"
+import type { RouterOutputs } from "@unprice/api"
+import { Badge } from "@unprice/ui/badge"
+import { Button } from "@unprice/ui/button"
 import {
   Command,
   CommandGroup,
@@ -13,10 +13,10 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@builderai/ui/command"
-import { Check, ChevronsUpDown, LayoutGrid } from "@builderai/ui/icons"
-import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/command"
+import { Check, ChevronsUpDown, LayoutGrid } from "@unprice/ui/icons"
+import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
+import { cn } from "@unprice/ui/utils"
 
 export function ProjectSwitcher({
   projectPromise,

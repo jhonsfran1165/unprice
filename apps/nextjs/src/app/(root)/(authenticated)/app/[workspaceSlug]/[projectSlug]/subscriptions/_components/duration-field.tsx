@@ -5,12 +5,12 @@ import { ArrowRight, CalendarIcon } from "lucide-react"
 import { useState } from "react"
 import type { UseFormReturn } from "react-hook-form"
 
-import type { InsertSubscription } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
-import { Calendar } from "@builderai/ui/calendar"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
-import { Popover, PopoverContent, PopoverTrigger } from "@builderai/ui/popover"
-import { cn } from "@builderai/ui/utils"
+import type { InsertSubscription } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
+import { Calendar } from "@unprice/ui/calendar"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
+import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
+import { cn } from "@unprice/ui/utils"
 
 export default function DurationFormField({
   form,

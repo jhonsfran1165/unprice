@@ -1,4 +1,4 @@
-import { Youtube } from "@builderai/ui/icons"
+import { Youtube } from "@unprice/ui/icons"
 import {
   CheckSquare,
   Code,

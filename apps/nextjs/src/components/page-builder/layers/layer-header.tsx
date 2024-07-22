@@ -1,8 +1,8 @@
 import { useEditor } from "@craftjs/core"
 
-import { Button } from "@builderai/ui/button"
-import { cn } from "@builderai/ui/utils"
 import { useLayer } from "@craftjs/layers"
+import { Button } from "@unprice/ui/button"
+import { cn } from "@unprice/ui/utils"
 import { ChevronDown, ChevronUp, EyeIcon, EyeOffIcon, Rotate3DIcon } from "lucide-react"
 import { LayerName } from "./layer-name"
 

@@ -1,8 +1,8 @@
-import type { RouterOutputs } from "@builderai/api"
-import type { ProjectTier } from "@builderai/config"
-import { PROJECT_TIER } from "@builderai/config"
-import { Card, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
-import { cn } from "@builderai/ui/utils"
+import type { RouterOutputs } from "@unprice/api"
+import type { ProjectTier } from "@unprice/config"
+import { PROJECT_TIER } from "@unprice/config"
+import { Card, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
+import { cn } from "@unprice/ui/utils"
 import { SuperLink } from "~/components/super-link"
 
 function ProjectTierIndicator(props: { tier: ProjectTier; isInternal?: boolean }) {

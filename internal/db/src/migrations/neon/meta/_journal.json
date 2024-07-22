@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1719213168164,
-      "tag": "0000_mature_mauler",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1719833450867,
-      "tag": "0001_bored_puff_adder",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1719923862748,
-      "tag": "0002_lonely_wind_dancer",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1719933443145,
-      "tag": "0003_fancy_omega_flight",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1720013075840,
-      "tag": "0004_tough_daredevil",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1720719521247,
-      "tag": "0005_stiff_justin_hammer",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1721136135420,
-      "tag": "0006_vengeful_karen_page",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1721301726439,
-      "tag": "0007_keen_amphibian",
+      "when": 1721557864307,
+      "tag": "0000_modern_jocasta",
       "breakpoints": true
     }
   ]

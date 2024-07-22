@@ -1,5 +1,5 @@
 {
-  "name": "@builderai/api",
+  "name": "@unprice/api",
   "version": "0.1.0",
   "exports": {
     ".": "./src/index.ts",
@@ -21,24 +21,24 @@
   },
   "dependencies": {
     "@baselime/trpc-opentelemetry-middleware": "^0.1.2",
-    "@builderai/auth": "^0.1.0",
-    "@builderai/config": "^0.1.0",
-    "@builderai/db": "^0.1.0",
-    "@builderai/email": "^0.1.0",
-    "@builderai/error": "^0.1.0",
-    "@builderai/logging": "workspace:^",
-    "@builderai/logs": "workspace:^1.0.0",
-    "@builderai/metrics": "workspace:^",
-    "@builderai/stripe": "^0.1.0",
-    "@builderai/tinybird": "^0.1.0",
-    "@builderai/vercel": "workspace:^",
     "@dinero.js/currencies": "2.0.0-alpha.14",
     "@potatohd/trpc-openapi": "^1.2.3",
     "@t3-oss/env-nextjs": "0.9.1",
     "@trpc-limiter/memory": "^1.0.0",
     "@trpc-limiter/upstash": "^1.0.0",
-    "@trpc/server": "11.0.0-rc.436",
+    "@trpc/server": "11.0.0-rc.466",
     "@unkey/cache": "^1.4.0",
+    "@unprice/auth": "^0.1.0",
+    "@unprice/config": "^0.1.0",
+    "@unprice/db": "^0.1.0",
+    "@unprice/email": "^0.1.0",
+    "@unprice/error": "^0.1.0",
+    "@unprice/logging": "workspace:^",
+    "@unprice/logs": "workspace:^1.0.0",
+    "@unprice/metrics": "workspace:^",
+    "@unprice/stripe": "^0.1.0",
+    "@unprice/tinybird": "^0.1.0",
+    "@unprice/vercel": "workspace:^",
     "@upstash/ratelimit": "^2.0.0",
     "@upstash/redis": "^1.33.0",
     "@vercel/functions": "^1.0.2",
@@ -49,7 +49,7 @@
     "zod-form-data": "^2.0.2"
   },
   "devDependencies": {
-    "@builderai/tsconfig": "^0.1.0",
+    "@unprice/tsconfig": "^0.1.0",
     "typescript": "^5.3.3"
   }
 }

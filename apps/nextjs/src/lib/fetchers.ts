@@ -1,6 +1,6 @@
-import { db } from "@builderai/db"
+import { SITES_BASE_DOMAIN } from "@unprice/config"
+import { db } from "@unprice/db"
 import { unstable_cache } from "next/cache"
-import { SITES_BASE_DOMAIN } from "~/constants"
 
 export async function getPageData(domain: string) {
   const subdomain = domain.endsWith(`.${SITES_BASE_DOMAIN}`)

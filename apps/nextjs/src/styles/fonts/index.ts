@@ -1,15 +1,11 @@
 import { Inter } from "next/font/google"
 import localFont from "next/font/local"
 
+// TODO: handle font loading and improve fonts mapper
 const inter = Inter({ subsets: ["latin"], variable: "--font-secondary" })
 
-export const geist = localFont({
-  src: "./GeistVF.woff2",
-  variable: "--font-primary",
-  weight: "300 900",
-  display: "swap",
-  style: "normal",
-})
+import { GeistMono } from "geist/font/mono"
+import { GeistSans } from "geist/font/sans"
 
 import { Crimson_Text, Inconsolata } from "next/font/google"
 
@@ -54,7 +50,8 @@ export const defaultFontMapper = {
 }
 
 export const fontMapper = {
-  "font-primary": geist.variable,
-  "font-secondary": inter.variable,
+  "font-primary": cal.variable,
+  "font-secondary": GeistSans.variable,
+  "font-mono": GeistMono.variable,
   inter: inter.variable,
 }

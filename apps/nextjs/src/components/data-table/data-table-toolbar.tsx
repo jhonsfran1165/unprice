@@ -2,9 +2,9 @@
 
 import type { Table } from "@tanstack/react-table"
 
-import { Button } from "@builderai/ui/button"
-import { XCircle } from "@builderai/ui/icons"
-import { Input } from "@builderai/ui/input"
+import { Button } from "@unprice/ui/button"
+import { XCircle } from "@unprice/ui/icons"
+import { Input } from "@unprice/ui/input"
 
 import type { FilterOptionDataTable } from "./data-table"
 import { DataTableDateRangePicker } from "./data-table-date-ranger-picker"

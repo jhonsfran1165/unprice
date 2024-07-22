@@ -1,7 +1,7 @@
 "use client"
 
-import { cn } from "@builderai/ui/utils"
 import { useEditor } from "@craftjs/core"
+import { cn } from "@unprice/ui/utils"
 import type React from "react"
 import { useEffect } from "react"
 

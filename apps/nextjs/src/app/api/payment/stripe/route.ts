@@ -1,9 +1,9 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
-import { and, db, eq } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
-import { stripe } from "@builderai/stripe"
+import { and, db, eq } from "@unprice/db"
+import * as schema from "@unprice/db/schema"
+import { stripe } from "@unprice/stripe"
 
 export const runtime = "edge"
 export const preferredRegion = ["fra1"]

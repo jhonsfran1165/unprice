@@ -1,6 +1,6 @@
 "use client"
 
-import { COOKIE_NAME_PROJECT, COOKIE_NAME_WORKSPACE } from "@builderai/config"
+import { COOKIES_APP } from "@unprice/config"
 import { useEffect } from "react"
 
 /**
@@ -16,15 +16,15 @@ export function UpdateClientCookie({
   // just to make we sync the cookie with the current project and workspace
   const onFocus = () => {
     if (document) {
-      document.cookie = `${COOKIE_NAME_PROJECT}=${projectSlug}; path=/`
-      document.cookie = `${COOKIE_NAME_WORKSPACE}=${workspaceSlug}; path=/`
+      document.cookie = `${COOKIES_APP.PROJECT}=${projectSlug}; path=/`
+      document.cookie = `${COOKIES_APP.WORKSPACE}=${workspaceSlug}; path=/`
     }
   }
 
   useEffect(() => {
     if (document) {
-      document.cookie = `${COOKIE_NAME_PROJECT}=${projectSlug}; path=/`
-      document.cookie = `${COOKIE_NAME_WORKSPACE}=${workspaceSlug}; path=/`
+      document.cookie = `${COOKIES_APP.PROJECT}=${projectSlug}; path=/`
+      document.cookie = `${COOKIES_APP.WORKSPACE}=${workspaceSlug}; path=/`
     }
 
     window.addEventListener("focus", onFocus)

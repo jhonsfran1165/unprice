@@ -1,5 +1,5 @@
-import { Button } from "@builderai/ui/button"
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
+import { Button } from "@unprice/ui/button"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import { Fragment } from "react"
 
 export default function WorkSpaceSettingsDangerLoading() {

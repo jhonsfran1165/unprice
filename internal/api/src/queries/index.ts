@@ -1,12 +1,9 @@
-import type { Database } from "@builderai/db"
+import type { Database } from "@unprice/db"
 
-import {
-  getCustomerFeatureUsagePrepared,
-  getFeatureItemBySlugPrepared,
-} from "@builderai/db/queries"
-import { usage as usageTable } from "@builderai/db/schema"
-import { newId } from "@builderai/db/utils"
-import type { Logger } from "@builderai/logging"
+import { getCustomerFeatureUsagePrepared, getFeatureItemBySlugPrepared } from "@unprice/db/queries"
+import { usage as usageTable } from "@unprice/db/schema"
+import { newId } from "@unprice/db/utils"
+import type { Logger } from "@unprice/logging"
 import type { CurrentUsageCached, SubscriptionItemCached } from "../pkg/cache/namespaces"
 import type { Metrics } from "../pkg/metrics"
 

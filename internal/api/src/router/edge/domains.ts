@@ -1,17 +1,17 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq } from "@builderai/db"
-import { domains } from "@builderai/db/schema"
-import { newId } from "@builderai/db/utils"
-import type { DomainVerificationStatusProps } from "@builderai/db/validators"
+import { and, eq } from "@unprice/db"
+import { domains } from "@unprice/db/schema"
+import { newId } from "@unprice/db/utils"
+import type { DomainVerificationStatusProps } from "@unprice/db/validators"
 import {
   domainCreateBaseSchema,
   domainSelectBaseSchema,
   domainUpdateBaseSchema,
   domainVerificationStatusSchema,
-} from "@builderai/db/validators"
-import { type Domain, Vercel } from "@builderai/vercel"
+} from "@unprice/db/validators"
+import { type Domain, Vercel } from "@unprice/vercel"
 
 import { env } from "../../env.mjs"
 import { createTRPCRouter, protectedActiveWorkspaceAdminProcedure } from "../../trpc"

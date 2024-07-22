@@ -1,6 +1,6 @@
-import * as schema from "@builderai/db/schema"
-import { newId } from "@builderai/db/utils"
 import { Pool, neonConfig } from "@neondatabase/serverless"
+import * as schema from "@unprice/db/schema"
+import { newId } from "@unprice/db/utils"
 import { eq } from "drizzle-orm"
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless"
 import ws from "ws"
@@ -16,7 +16,7 @@ neonConfig.webSocketConstructor = ws
 async function main() {
   const db = drizzleNeon(
     new Pool({
-      connectionString: process.env.DATABASE_URL_MIGRATOR_LOCAL,
+      connectionString: process.env.DATABASE_URL_MIGRATOR,
     }),
     {
       schema: schema,

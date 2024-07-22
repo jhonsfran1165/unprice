@@ -2,8 +2,8 @@
 
 import type { UseFormReturn } from "react-hook-form"
 
-import type { Currency, PlanVersionFeature } from "@builderai/db/validators"
-import { Separator } from "@builderai/ui/separator"
+import type { Currency, PlanVersionFeature } from "@unprice/db/validators"
+import { Separator } from "@unprice/ui/separator"
 
 import { LimitFormField, QuantityFormField, TierFormField } from "./fields-form"
 

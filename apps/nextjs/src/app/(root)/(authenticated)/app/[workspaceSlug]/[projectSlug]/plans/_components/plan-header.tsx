@@ -1,11 +1,11 @@
 import { BadgeCheck, Plus } from "lucide-react"
 
-import type { RouterOutputs } from "@builderai/api"
-import { Badge } from "@builderai/ui/badge"
-import { Button } from "@builderai/ui/button"
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
-import { Separator } from "@builderai/ui/separator"
-import { cn } from "@builderai/ui/utils"
+import type { RouterOutputs } from "@unprice/api"
+import { Badge } from "@unprice/ui/badge"
+import { Button } from "@unprice/ui/button"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
+import { Separator } from "@unprice/ui/separator"
+import { cn } from "@unprice/ui/utils"
 
 import { PlanVersionDialog } from "../[planSlug]/_components/plan-version-dialog"
 import { PlanActions } from "./plan-actions"

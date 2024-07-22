@@ -1,5 +1,5 @@
-import { Button } from "@builderai/ui/button"
-import { Add, Plus } from "@builderai/ui/icons"
+import { Button } from "@unprice/ui/button"
+import { Add, Plus } from "@unprice/ui/icons"
 
 import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"

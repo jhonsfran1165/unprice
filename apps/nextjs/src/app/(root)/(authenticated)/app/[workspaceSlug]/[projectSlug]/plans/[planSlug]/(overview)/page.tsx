@@ -1,9 +1,9 @@
 import { MoreVertical, Plus } from "lucide-react"
 import { notFound } from "next/navigation"
 
-import { Badge } from "@builderai/ui/badge"
-import { Button } from "@builderai/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
+import { Badge } from "@unprice/ui/badge"
+import { Button } from "@unprice/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@builderai/ui/dialog"
+} from "@unprice/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,11 +19,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
-import { Separator } from "@builderai/ui/separator"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
-import { cn } from "@builderai/ui/utils"
+} from "@unprice/ui/dropdown-menu"
+import { Separator } from "@unprice/ui/separator"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
+import { cn } from "@unprice/ui/utils"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"

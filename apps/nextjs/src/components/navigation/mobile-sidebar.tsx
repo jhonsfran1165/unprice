@@ -1,4 +1,4 @@
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 import {
   Drawer,
   DrawerBody,
@@ -7,7 +7,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@builderai/ui/drawer"
+} from "@unprice/ui/drawer"
 import { MoreVertical } from "lucide-react"
 
 export default function MobileSidebar({

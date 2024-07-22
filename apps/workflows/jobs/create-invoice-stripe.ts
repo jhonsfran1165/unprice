@@ -1,12 +1,12 @@
-import { calculatePricePerFeature } from "@builderai/db/validators"
-import { Analytics } from "@builderai/tinybird"
 import { type IO, eventTrigger } from "@trigger.dev/sdk"
+import { calculatePricePerFeature } from "@unprice/db/validators"
+import { Analytics } from "@unprice/tinybird"
+import { env } from "env.mjs"
 import { z } from "zod"
 import { connectDatabase } from "~/lib/db"
-import { env } from "~/lib/env"
 import { client } from "~/trigger"
 
-import { toStripeMoney } from "@builderai/db/utils"
+import { toStripeMoney } from "@unprice/db/utils"
 import Stripe from "stripe"
 
 export const createInvoiceStripeJob = client.defineJob({
@@ -27,13 +27,13 @@ export const createInvoiceStripeJob = client.defineJob({
     const { customerId, year, month, subscriptionId } = payload
 
     const db = connectDatabase()
-    const stripe = new Stripe(env().STRIPE_API_KEY, {
+    const stripe = new Stripe(env.STRIPE_API_KEY, {
       apiVersion: "2023-10-16",
       typescript: true,
     })
 
     const tinybird = new Analytics({
-      tinybirdToken: env().TINYBIRD_TOKEN,
+      tinybirdToken: env.TINYBIRD_TOKEN,
       emit: true,
     })
 

@@ -1,4 +1,4 @@
-import { Err, FetchError, Ok, type Result } from "@builderai/error"
+import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import { z } from "zod"
 
 type VercelErrorResponse = {

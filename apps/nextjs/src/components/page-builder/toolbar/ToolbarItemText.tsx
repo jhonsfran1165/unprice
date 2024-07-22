@@ -1,6 +1,6 @@
-import { Input } from "@builderai/ui/input"
-import { Label } from "@builderai/ui/label"
-import { cn } from "@builderai/ui/utils"
+import { Input } from "@unprice/ui/input"
+import { Label } from "@unprice/ui/label"
+import { cn } from "@unprice/ui/utils"
 import { useEffect, useState } from "react"
 
 interface ToolbarItemTextProps<T> {

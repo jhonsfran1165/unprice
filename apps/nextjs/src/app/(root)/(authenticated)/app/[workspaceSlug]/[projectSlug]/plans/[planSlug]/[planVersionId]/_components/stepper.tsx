@@ -3,8 +3,8 @@
 import { Combine, Target } from "lucide-react"
 import { usePathname } from "next/navigation"
 
-import { Separator } from "@builderai/ui/separator"
-import { cn, focusRing } from "@builderai/ui/utils"
+import { Separator } from "@unprice/ui/separator"
+import { cn, focusRing } from "@unprice/ui/utils"
 
 import { SuperLink } from "~/components/super-link"
 

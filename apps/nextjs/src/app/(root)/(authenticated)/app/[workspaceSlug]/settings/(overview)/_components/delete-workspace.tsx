@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation"
 import { startTransition } from "react"
 
-import { Button } from "@builderai/ui/button"
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@builderai/ui/card"
+import { Button } from "@unprice/ui/button"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import {
   Dialog,
   DialogClose,
@@ -14,10 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@builderai/ui/dialog"
-import { Warning } from "@builderai/ui/icons"
+} from "@unprice/ui/dialog"
+import { Warning } from "@unprice/ui/icons"
 
-import type { Workspace } from "@builderai/db/validators"
+import type { Workspace } from "@unprice/db/validators"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"

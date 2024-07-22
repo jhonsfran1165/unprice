@@ -3,9 +3,9 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { formatRelative } from "date-fns"
 
-import type { RouterOutputs } from "@builderai/api"
-import { Avatar, AvatarFallback, AvatarImage } from "@builderai/ui/avatar"
-import { Checkbox } from "@builderai/ui/checkbox"
+import type { RouterOutputs } from "@unprice/api"
+import { Avatar, AvatarFallback, AvatarImage } from "@unprice/ui/avatar"
+import { Checkbox } from "@unprice/ui/checkbox"
 
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { DataTableRowActions } from "./data-table-row-actions"

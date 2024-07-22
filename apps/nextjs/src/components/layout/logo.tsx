@@ -1,14 +1,15 @@
-import { Logo as LogoIcon } from "@builderai/ui/icons"
-import { cn } from "@builderai/ui/utils"
+import { Logo as LogoIcon } from "@unprice/ui/icons"
+import { cn } from "@unprice/ui/utils"
+import { siteConfig } from "~/constants/layout"
 
 export function Logo({ className = "" }) {
   return (
-    <div className="flex items-center justify-start space-x-4 text-primary-text">
+    <div className="flex items-center justify-start space-x-2 text-primary-text">
       <LogoIcon className={cn("size-6", className)} />
       <span
-        className={cn("inline-block whitespace-nowrap font-bold text-lg tracking-tight", className)}
+        className={cn("inline-flex whitespace-nowrap font-bold text-2xl tracking-tight", className)}
       >
-        BuilderAI
+        {siteConfig.name}
       </span>
     </div>
   )

@@ -2,7 +2,7 @@
 
 import type { UseFormReturn } from "react-hook-form"
 
-import type { Currency, PlanVersionFeature } from "@builderai/db/validators"
+import type { Currency, PlanVersionFeature } from "@unprice/db/validators"
 
 import { PriceFormField } from "./fields-form"
 

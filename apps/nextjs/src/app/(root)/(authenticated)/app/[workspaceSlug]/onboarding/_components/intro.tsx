@@ -4,7 +4,7 @@ import { LazyMotion, domAnimation, m } from "framer-motion"
 import { useParams, useRouter } from "next/navigation"
 import { Balancer } from "react-wrap-balancer"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 
 import { useDebounce } from "~/hooks/use-debounce"
 

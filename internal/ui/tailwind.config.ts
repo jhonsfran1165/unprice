@@ -5,7 +5,7 @@
 
 import type { Config } from "tailwindcss"
 
-import { unPriceTailwindPreset } from "@builderai/tailwind-config"
+import { unPriceTailwindPreset } from "@unprice/tailwind-config"
 
 const config: Config = {
   content: ["src/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "../../internal/ui/src/**/*.{ts,tsx}"],

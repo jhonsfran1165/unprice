@@ -1,7 +1,7 @@
 "use client"
 
-import type { RenameWorkspace, Workspace } from "@builderai/db/validators"
-import { renameWorkspaceSchema } from "@builderai/db/validators"
+import type { RenameWorkspace, Workspace } from "@unprice/db/validators"
+import { renameWorkspaceSchema } from "@unprice/db/validators"
 import {
   Card,
   CardContent,
@@ -9,9 +9,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@builderai/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
+} from "@unprice/ui/card"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
 import { useRouter } from "next/navigation"
 
 import { SubmitButton } from "~/components/submit-button"

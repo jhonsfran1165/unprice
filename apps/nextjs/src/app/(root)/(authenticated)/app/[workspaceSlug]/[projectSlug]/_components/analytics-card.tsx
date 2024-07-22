@@ -1,9 +1,8 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@builderai/ui/card"
-import type { Bar } from "@builderai/ui/charts"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@builderai/ui/tabs"
-import { cn } from "@builderai/ui/utils"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
+import type { Bar } from "@unprice/ui/charts"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
+import { cn } from "@unprice/ui/utils"
 import type { ReactNode } from "react"
-// import { HydrateClient, trpc } from "~/trpc/server"
 
 export function AnalyticsCard<T extends string>({
   tabs,
@@ -29,13 +28,6 @@ export function AnalyticsCard<T extends string>({
     data: Bar<unknown>[]
   }) => ReactNode
 }) {
-  // TODO: prefetch data when trpc update is released
-  // https://github.com/trpc/trpc/pull/5828
-  // void trpc.analytics.getAllFeatureVerificationsActiveProject.prefetch({
-  //   year: 2024,
-  //   month: 7,
-  // });
-
   return (
     <Card className={cn("flex flex-col", className)}>
       <CardHeader>
@@ -52,13 +44,12 @@ export function AnalyticsCard<T extends string>({
             ))}
           </TabsList>
 
-          {/* <HydrateClient> */}
+          {/* // TODO: add suspense component with prefetch */}
           {tabs.map(({ id, data, limit }) => (
             <TabsContent key={id} value={id}>
               {children({ limit, tab: id, data })}
             </TabsContent>
           ))}
-          {/* </HydrateClient> */}
         </Tabs>
       </CardContent>
     </Card>

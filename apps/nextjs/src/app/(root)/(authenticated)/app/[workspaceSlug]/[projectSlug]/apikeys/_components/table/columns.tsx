@@ -3,11 +3,11 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { useState } from "react"
 
-import type { RouterOutputs } from "@builderai/api"
-import { Button } from "@builderai/ui/button"
-import { Checkbox } from "@builderai/ui/checkbox"
-import { Copy, CopyDone, Eye, EyeOff } from "@builderai/ui/icons"
-import { cn } from "@builderai/ui/utils"
+import type { RouterOutputs } from "@unprice/api"
+import { Button } from "@unprice/ui/button"
+import { Checkbox } from "@unprice/ui/checkbox"
+import { Copy, CopyDone, Eye, EyeOff } from "@unprice/ui/icons"
+import { cn } from "@unprice/ui/utils"
 
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { formatDate } from "~/lib/dates"

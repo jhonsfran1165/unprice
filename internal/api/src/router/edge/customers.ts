@@ -1,6 +1,7 @@
-import { and, eq } from "@builderai/db"
-import * as schema from "@builderai/db/schema"
-import * as utils from "@builderai/db/utils"
+import { TRPCError } from "@trpc/server"
+import { and, eq } from "@unprice/db"
+import * as schema from "@unprice/db/schema"
+import * as utils from "@unprice/db/utils"
 import {
   type FeatureType,
   customerInsertBaseSchema,
@@ -10,8 +11,7 @@ import {
   planVersionSelectBaseSchema,
   searchDataParamsSchema,
   subscriptionSelectSchema,
-} from "@builderai/db/validators"
-import { TRPCError } from "@trpc/server"
+} from "@unprice/db/validators"
 import { z } from "zod"
 
 import { deniedReasonSchema } from "../../pkg/errors"

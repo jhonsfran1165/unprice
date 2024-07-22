@@ -3,13 +3,13 @@
 import { useRouter } from "next/navigation"
 import { use } from "react"
 
-import type { RouterOutputs } from "@builderai/api"
-import type { RenameProject } from "@builderai/db/validators"
-import { renameProjectSchema } from "@builderai/db/validators"
-import { Button } from "@builderai/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@builderai/ui/form"
-import { Input } from "@builderai/ui/input"
-import { LoadingAnimation } from "@builderai/ui/loading-animation"
+import type { RouterOutputs } from "@unprice/api"
+import type { RenameProject } from "@unprice/db/validators"
+import { renameProjectSchema } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
+import { Input } from "@unprice/ui/input"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
 import {
   Card,
@@ -18,7 +18,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@builderai/ui/card"
+} from "@unprice/ui/card"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"

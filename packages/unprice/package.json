@@ -18,11 +18,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "keywords": ["builderai", "client", "api"],
+  "keywords": ["unprice", "client", "api"],
   "bugs": {
-    "url": "https://github.com/jhonsfran1165/builderai/issues"
+    "url": "https://github.com/jhonsfran1165/unprice/issues"
   },
-  "homepage": "https://github.com/jhonsfran1165/builderai#readme",
+  "homepage": "https://github.com/jhonsfran1165/unprice#readme",
   "scripts": {
     "clean": "rm -rf .turbo node_modules dist",
     "typecheck": "tsc --noEmit",
@@ -32,7 +32,7 @@
     "generate:sdk": "speakeasy generate sdk --schema openapi-spec.json --lang typescript --out ./sdk"
   },
   "devDependencies": {
-    "@builderai/tsconfig": "^0.1.0",
+    "@unprice/tsconfig": "^0.1.0",
     "@types/node": "20.11.24",
     "openapi-typescript": "7.0.0-next.7",
     "tsup": "^8.0.2",

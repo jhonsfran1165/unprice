@@ -1,11 +1,11 @@
 import { ExternalLink, Globe } from "lucide-react"
 import { Suspense } from "react"
 
-import type { RouterOutputs } from "@builderai/api"
-import { Badge } from "@builderai/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@builderai/ui/card"
+import type { RouterOutputs } from "@unprice/api"
+import { Badge } from "@unprice/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@unprice/ui/card"
 
-import { Button } from "@builderai/ui/button"
+import { Button } from "@unprice/ui/button"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"

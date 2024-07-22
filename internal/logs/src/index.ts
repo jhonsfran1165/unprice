@@ -1,4 +1,4 @@
-import { metricSchema } from "@builderai/metrics"
+import { metricSchema } from "@unprice/metrics"
 import { z } from "zod"
 
 export const logContext = z.object({

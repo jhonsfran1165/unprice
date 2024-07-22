@@ -7,22 +7,22 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     // Allows customizing built-in components, e.g. to add styling.
     h1: (props) => (
-      <h1 className="mt-10 scroll-m-20 font-primary text-4xl" {...props}>
+      <h1 className="mt-10 scroll-m-20 text-4xl" {...props}>
         {props.children}
       </h1>
     ),
     h2: (props) => (
-      <h2 className="mt-10 scroll-m-20 border-b pb-2 font-primary text-3xl first:mt-0" {...props}>
+      <h2 className="mt-10 scroll-m-20 border-b pb-2 text-3xl first:mt-0" {...props}>
         {props.children}
       </h2>
     ),
     h3: (props) => (
-      <h3 className="mt-8 scroll-m-20 font-primary text-2xl" {...props}>
+      <h3 className="mt-8 scroll-m-20 text-2xl" {...props}>
         {props.children}
       </h3>
     ),
     h4: (props) => (
-      <h4 className="-mb-4 mt-6 scroll-m-20 font-primary text-2xl" {...props}>
+      <h4 className="-mb-4 mt-6 scroll-m-20 text-2xl" {...props}>
         {props.children}
       </h4>
     ),

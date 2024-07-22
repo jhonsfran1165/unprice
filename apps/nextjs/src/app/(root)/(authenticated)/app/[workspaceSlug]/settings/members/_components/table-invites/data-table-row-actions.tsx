@@ -5,7 +5,7 @@ import { MoreHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import * as React from "react"
 
-import { invitesSelectBase } from "@builderai/db/validators"
+import { invitesSelectBase } from "@unprice/db/validators"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,15 +16,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@builderai/ui/alert-dialog"
-import { Button } from "@builderai/ui/button"
+} from "@unprice/ui/alert-dialog"
+import { Button } from "@unprice/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@builderai/ui/dropdown-menu"
-import { LoadingAnimation } from "@builderai/ui/loading-animation"
+} from "@unprice/ui/dropdown-menu"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"

@@ -17,8 +17,8 @@ export const navItems = [
 
 // TODO: put the logo here
 export const siteConfig: SiteConfig = {
-  name: "Builder AI",
-  description: "Build your software as a service with AI tools",
+  name: "Unprice",
+  description: "Build your software as a service with Unprice",
   mainNav: [
     {
       title: "Feedback",
@@ -26,8 +26,8 @@ export const siteConfig: SiteConfig = {
     },
   ],
   links: {
-    twitter: "https://twitter.com/shadcn",
-    github: "https://github.com/shadcn/ui",
+    twitter: "https://github.com/jhonsfran1165/unprice",
+    github: "https://github.com/jhonsfran1165/unprice",
     dashboard: "/",
   },
 }

@@ -1,5 +1,5 @@
-import { Skeleton } from "@builderai/ui/skeleton"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@builderai/ui/table"
+import { Skeleton } from "@unprice/ui/skeleton"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
 
 interface DataTableSkeletonProps {
   /**
