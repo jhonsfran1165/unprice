@@ -56,13 +56,6 @@ export default function NewTeamDialog(props: { closeDialog: () => void; isOpen: 
           })}
           className="space-y-4"
         >
-          <DialogHeader>
-            <DialogTitle>Create new team</DialogTitle>
-            <DialogDescription>
-              Add a new workspace to invite other people to collaborate.
-            </DialogDescription>
-          </DialogHeader>
-
           <FormField
             control={form.control}
             name="name"
