@@ -22,6 +22,7 @@ import { getEntitlements, reportUsageFeature, verifyFeature } from "../../utils/
 export const customersRouter = createTRPCRouter({
   create: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.create",
       openapi: {
         method: "POST",
         path: "/edge/customers.create",
@@ -77,6 +78,7 @@ export const customersRouter = createTRPCRouter({
 
   remove: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.remove",
       openapi: {
         method: "POST",
         path: "/edge/customers.remove",
@@ -129,6 +131,7 @@ export const customersRouter = createTRPCRouter({
     }),
   update: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.update",
       openapi: {
         method: "POST",
         path: "/edge/customers.update",
@@ -204,6 +207,7 @@ export const customersRouter = createTRPCRouter({
 
   listPaymentMethods: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.listPaymentMethods",
       openapi: {
         method: "GET",
         path: "/edge/customers.listPaymentMethods",
@@ -286,6 +290,7 @@ export const customersRouter = createTRPCRouter({
 
   createPaymentMethod: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.createPaymentMethod",
       openapi: {
         method: "POST",
         path: "/edge/customers.createPaymentMethod",
@@ -353,6 +358,7 @@ export const customersRouter = createTRPCRouter({
   // is it a mutation because we need to call it from the client async
   exist: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.exist",
       openapi: {
         method: "POST",
         path: "/edge/customers.exist",
@@ -387,6 +393,7 @@ export const customersRouter = createTRPCRouter({
   // is it a mutation because we need to call it from the client async
   getByEmail: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.getByEmail",
       openapi: {
         method: "GET",
         path: "/edge/customers.getByEmail",
@@ -426,6 +433,7 @@ export const customersRouter = createTRPCRouter({
     }),
   getById: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.getById",
       openapi: {
         method: "GET",
         path: "/edge/customers.getById",
@@ -464,6 +472,7 @@ export const customersRouter = createTRPCRouter({
 
   getSubscriptions: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.getSubscriptions",
       openapi: {
         method: "GET",
         path: "/edge/customers.getSubscriptions",
@@ -556,6 +565,7 @@ export const customersRouter = createTRPCRouter({
   // encodeURIComponent(JSON.stringify({ 0: { json:{ customerId: "cus_2GGH1GE4864s4GrX6ttkjbStDP3k" }}}))
   entitlements: protectedApiOrActiveProjectProcedure
     .meta({
+      span: "customers.entitlements",
       openapi: {
         method: "GET",
         path: "/edge/customers.entitlements",

@@ -1,10 +1,8 @@
 "use client"
-import { toDecimal } from "dinero.js"
 import Link from "next/link"
 
 import type { PurchaseOrg } from "@unprice/db/validators"
 import { purchaseWorkspaceSchema } from "@unprice/db/validators"
-import { currencySymbol } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import {
   DialogContent,
@@ -30,16 +28,12 @@ export default function NewTeamDialog(props: { closeDialog: () => void; isOpen: 
   const form = useZodForm({
     schema: purchaseWorkspaceSchema,
     defaultValues: {
-      planId: plans?.data?.[0]?.priceId,
+      planId: "",
       name: "",
     },
   })
 
-  const stripePurchase = api.stripe.purchaseOrg.useMutation({
-    onSettled: (data) => {
-      if (window && data?.success) window.location.href = data.url
-    },
-  })
+  const stripePurchase = api.stripe.purchaseOrg.useMutation({})
 
   return (
     <DialogContent>
@@ -89,14 +83,10 @@ export default function NewTeamDialog(props: { closeDialog: () => void; isOpen: 
                   </FormControl>
                   <SelectContent>
                     {plans?.data?.map((plan) => (
-                      <SelectItem key={plan.priceId} value={plan.priceId}>
-                        <span className="font-medium">{plan.name}</span> -{" "}
+                      <SelectItem key={plan.planId} value={plan.planId}>
+                        <span className="font-medium">{plan.planName}</span> -{" "}
                         <span className="text-muted-foreground">
-                          {toDecimal(
-                            plan.price,
-                            ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
-                          )}{" "}
-                          per month
+                          {plan.displayAmount} per month
                         </span>
                       </SelectItem>
                     ))}

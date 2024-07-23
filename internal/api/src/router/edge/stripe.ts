@@ -1,10 +1,12 @@
-import * as currencies from "@dinero.js/currencies"
 import { TRPCError } from "@trpc/server"
-import { dinero } from "dinero.js"
 import { z } from "zod"
 
 import { APP_DOMAIN, PLANS } from "@unprice/config"
-import { calculatePricePerFeature, purchaseWorkspaceSchema } from "@unprice/db/validators"
+import {
+  calculateFlatPricePlan,
+  calculatePricePerFeature,
+  purchaseWorkspaceSchema,
+} from "@unprice/db/validators"
 import { stripe } from "@unprice/stripe"
 
 import { and, eq } from "@unprice/db"
@@ -109,28 +111,54 @@ export const stripeRouter = createTRPCRouter({
       return { success: true as const, url: session.url }
     }),
 
-  // TODO: add output
-  plans: rateLimiterProcedure.input(z.void()).query(async () => {
-    // TODO: fix priceId
-    const proPrice = await stripe.prices.retrieve(PLANS.PRO?.priceId ?? "")
-    const stdPrice = await stripe.prices.retrieve(PLANS.STANDARD?.priceId ?? "")
+  // TODO: add output and migrate to plans endpoint
+  plans: rateLimiterProcedure.input(z.void()).query(async (opts) => {
+    // TODO: fix get only the prices with latest version
+    const plans = await opts.ctx.db.query.plans.findMany({
+      with: {
+        versions: {
+          where: (fields, operators) =>
+            operators.and(
+              operators.eq(fields.status, "published")
+              // operators.eq(fields.latest, true)
+            ),
+          with: {
+            planFeatures: {
+              with: {
+                feature: true,
+              },
+            },
+          },
+        },
+      },
+    })
 
-    return [
-      {
-        ...PLANS.STANDARD,
-        price: dinero({
-          amount: stdPrice.unit_amount!,
-          currency: currencies[stdPrice.currency as keyof typeof currencies] ?? currencies.USD,
-        }),
-      },
-      {
-        ...PLANS.PRO,
-        price: dinero({
-          amount: proPrice.unit_amount!,
-          currency: currencies[proPrice.currency as keyof typeof currencies] ?? currencies.USD,
-        }),
-      },
-    ]
+    const dataPricing = plans
+      .map((plan) => {
+        const planVersion = plan.versions?.at(0)
+
+        if (!planVersion) return null
+
+        const calculatePrice = calculateFlatPricePlan({
+          planVersion: {
+            plan: {
+              slug: plan.slug,
+            },
+            ...planVersion,
+          },
+        })
+
+        if (calculatePrice.err) return null
+
+        return {
+          ...calculatePrice.val,
+          planId: planVersion.id,
+          planName: plan.slug,
+        }
+      })
+      .filter((price) => price !== null)
+
+    return dataPricing
   }),
 
   // TODO: delete this just for testing
@@ -201,45 +229,10 @@ export const stripeRouter = createTRPCRouter({
 
   purchaseOrg: protectedActiveWorkspaceProcedure
     .input(purchaseWorkspaceSchema)
-    .output(z.object({ success: z.boolean(), url: z.string() }))
-    .mutation(async (opts) => {
-      const { name: workspaceName, planId } = opts.input
-      const user = opts.ctx.session.user
-
-      // TODO: fix returnUrl
-      const returnUrl = `${APP_DOMAIN}/`
-
-      if (!returnUrl) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "returnUrl is not defined",
-        })
-      }
-
-      if (!user?.email) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "User email is not defined",
-        })
-      }
-
-      const session = await stripe.checkout.sessions.create({
-        mode: "subscription",
-        customer_email: user?.email,
-        payment_method_types: ["card"],
-        client_reference_id: user?.id,
-        subscription_data: {
-          metadata: {
-            userId: user?.id,
-            workspaceName: workspaceName,
-          },
-        },
-        success_url: returnUrl,
-        cancel_url: returnUrl,
-        line_items: [{ price: planId, quantity: 1 }],
+    .mutation(async () => {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "You can't purchase a workspace for now",
       })
-
-      if (!session.url) return { success: false as const, url: "" }
-      return { success: true as const, url: session.url }
     }),
 })

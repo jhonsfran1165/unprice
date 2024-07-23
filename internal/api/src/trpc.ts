@@ -352,7 +352,7 @@ export const protectedApiOrActiveProjectProcedure = publicProcedure.use(async ({
 
   // if no api key is present, check if the user is logged in
   if (!ctx.session?.user?.id) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "User not found" })
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "User or API key not found" })
   }
 
   const data = await projectGuard({

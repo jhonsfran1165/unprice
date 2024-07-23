@@ -1,7 +1,7 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
-import { MEMBERSHIP, PLANS } from "@unprice/config"
+import { MEMBERSHIP } from "@unprice/config"
 
 import * as schema from "../schema"
 import { userSelectBase } from "./auth"
@@ -61,13 +61,7 @@ export const purchaseWorkspaceSchema = workspaceInsertBase
     name: true,
   })
   .extend({
-    planId: z.string().refine(
-      (str) =>
-        Object.values(PLANS)
-          .map((p) => p.priceId ?? "")
-          .includes(str),
-      "Invalid planId"
-    ),
+    planId: z.string(),
   })
 
 export const workspaceSelectSchema = createSelectSchema(schema.workspaces)
