@@ -171,7 +171,7 @@ export const createInvoiceStripeJob = client.defineJob({
           `get usage for ${item.featurePlanVersion.feature.slug}`,
           async () => {
             const usage = await tinybird
-              .getUsageFeature({
+              .getTotalUsagePerFeature({
                 featureSlug: item.featurePlanVersion.feature.slug,
                 projectId: subscription.projectId,
                 customerId: customerId,

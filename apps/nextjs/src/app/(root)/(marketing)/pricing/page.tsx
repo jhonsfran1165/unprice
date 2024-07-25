@@ -1,11 +1,8 @@
-import { toDecimal } from "dinero.js"
 import { Balancer } from "react-wrap-balancer"
 
 import type { RouterOutputs } from "@unprice/api"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import { CheckCircle2 } from "@unprice/ui/icons"
-
-import { currencySymbol } from "@unprice/db/validators"
 
 import { Button } from "@unprice/ui/button"
 import { api } from "~/trpc/server"
@@ -23,7 +20,7 @@ export default async function PricingPage() {
 
         <div className="my-8 grid grid-cols-1 gap-8 md:grid-cols-2">
           {plans.map((plan) => (
-            <PricingCard key={plan.priceId} plan={plan} />
+            <PricingCard key={plan.planId} plan={plan} />
           ))}
         </div>
       </div>
@@ -37,25 +34,19 @@ function PricingCard(props: {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{props.plan.name}</CardTitle>
+        <CardTitle>{props.plan.planName}</CardTitle>
         <div className="font-bold text-2xl">
-          {toDecimal(
-            props.plan.price,
-            ({ value, currency }) => `${currencySymbol(currency.code)}${value}`
-          )}
+          {props.plan.displayAmount}
           <span className="font-normal text-base"> / month</span>
         </div>{" "}
-        <CardDescription>{props.plan.description}</CardDescription>
+        <CardDescription>{props.plan.planName}</CardDescription>
       </CardHeader>
 
       <ul className="flex flex-col px-6 pb-6">
-        {props.plan.preFeatures && (
-          <li className="flex items-center pb-1">{props.plan.preFeatures}</li>
-        )}
         {props.plan.features.map((feature) => (
-          <li key={feature} className="flex items-center">
+          <li key={feature.id} className="flex items-center">
             <CheckCircle2 className="mr-2 h-6 w-6 fill-primary text-primary-foreground" />
-            {feature}
+            {feature.feature.title}
           </li>
         ))}
       </ul>

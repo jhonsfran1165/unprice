@@ -154,6 +154,7 @@ export const stripeRouter = createTRPCRouter({
           ...calculatePrice.val,
           planId: planVersion.id,
           planName: plan.slug,
+          features: planVersion.planFeatures,
         }
       })
       .filter((price) => price !== null)
@@ -174,7 +175,7 @@ export const stripeRouter = createTRPCRouter({
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
     const usageTiny = await opts.ctx.analytics
-      .getUsageFeature({
+      .getTotalUsagePerFeature({
         projectId: "prj_2GGH1GE4864s4GrX6ttkjbStDP3k",
         featureSlug: "verifications",
         customerId: "cus_2GGH1GE4864s4GrX6ttkjbStDP3k",

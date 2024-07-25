@@ -1,7 +1,8 @@
 import { formatRelative } from "date-fns"
-import { Suspense } from "react"
 
 import type { RouterOutputs } from "@unprice/api"
+import type { Interval } from "@unprice/tinybird"
+import { DEFAULT_INTERVAL, INTERVAL_KEYS, prepareInterval } from "@unprice/tinybird"
 import { Button } from "@unprice/ui/button"
 import {
   Card,
@@ -13,20 +14,34 @@ import {
 } from "@unprice/ui/card"
 import { Activity, ChevronRight, CreditCard, DollarSign, Users } from "@unprice/ui/icons"
 import { cn } from "@unprice/ui/utils"
+import { parseAsStringEnum } from "nuqs/server"
+import { Suspense } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/server"
 import { AnalyticsCard } from "../_components/analytics-card"
 import { BarListAnalytics } from "../_components/bar-list"
 import { LoadingCard } from "../_components/loading-card"
+import { VerificationsChart } from "../_components/verifications-chart"
+
+// Make sure to update data dynamically
+export const runtime = "edge"
+export const dynamic = "force-dynamic"
+
+const intervalParser = parseAsStringEnum(INTERVAL_KEYS).withDefault(DEFAULT_INTERVAL)
 
 export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
+  searchParams: { interval?: Interval }
 }) {
   const { projectSlug, workspaceSlug } = props.params
+  const interval = intervalParser.parseServerSide(props.searchParams.interval)
+
+  const { start, end } = prepareInterval(interval)
+
   const { verifications } = await api.analytics.getAllFeatureVerificationsActiveProject({
-    year: 2024,
-    month: 7,
+    start,
+    end,
   })
 
   const dataVerifications = verifications.map((v) => ({
@@ -34,14 +49,14 @@ export default async function DashboardPage(props: {
     value: v.total,
   }))
 
-  const { usage } = await api.analytics.getUsageAllFeatureActiveProject({
-    year: 2024,
-    month: 7,
+  const { usage } = await api.analytics.getTotalUsagePerFeatureActiveProject({
+    start,
+    end,
   })
 
   const dataUsage = usage.map((v) => ({
     name: v.featureSlug,
-    value: v.max,
+    value: v.sum,
   }))
 
   return (
@@ -89,18 +104,36 @@ export default async function DashboardPage(props: {
         </Card>
       </div>
       <div className="mt-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
+        {/* // TODO: pass the promises instead of the data and add suspense */}
         <AnalyticsCard
-          className="w-full md:w-2/3"
+          promiseKeys={[
+            "getAllFeatureVerificationsActiveProject",
+            "getTotalUsagePerFeatureActiveProject",
+          ]}
+          interval={interval}
+          className="w-full"
           title="Feature Verifications & Usage"
           description="Feature verifications and usage recorded for this month."
           tabs={[
-            { id: "verifications", label: "Verifications", data: dataVerifications, limit: 5 },
-            { id: "usage", label: "Usage", data: dataUsage, limit: 2 },
+            {
+              id: "verifications",
+              label: "Verifications",
+              data: dataVerifications,
+              limit: 5,
+              chart: () => <VerificationsChart />,
+            },
+            {
+              id: "usage",
+              label: "Usage",
+              data: dataUsage,
+              limit: 2,
+              chart: ({ limit, tab, data }) => (
+                <BarListAnalytics tab={tab} data={data} limit={limit} />
+              ),
+            },
           ]}
           defaultTab="verifications"
-        >
-          {({ limit, tab, data }) => <BarListAnalytics tab={tab} data={data} limit={limit} />}
-        </AnalyticsCard>
+        />
 
         <Suspense
           fallback={

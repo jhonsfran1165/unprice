@@ -1,5 +1,3 @@
-import aspectRatio from "@tailwindcss/aspect-ratio"
-import containerQueries from "@tailwindcss/container-queries"
 import forms from "@tailwindcss/forms"
 import typography from "@tailwindcss/typography"
 import type { Config } from "tailwindcss"
@@ -156,14 +154,5 @@ export const unPriceTailwindPreset: Config = {
       },
     },
   },
-  plugins: [
-    animate,
-    typography,
-    forms,
-    aspectRatio,
-    {
-      config: containerQueries.config ?? {},
-      handler: containerQueries.handler,
-    },
-  ],
+  plugins: [animate, typography, forms],
 }

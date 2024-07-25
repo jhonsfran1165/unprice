@@ -5,7 +5,7 @@ import { useMemo, useState } from "react"
 import { nFormatter } from "~/lib/nformatter"
 
 import { Button } from "@unprice/ui/button"
-import { type Bar, BarList } from "@unprice/ui/charts"
+import { type Bar, BarList } from "@unprice/ui/charts-2"
 import { Input } from "@unprice/ui/input"
 import { ScrollArea } from "@unprice/ui/scroll-area"
 import { m } from "framer-motion"

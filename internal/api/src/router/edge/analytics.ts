@@ -1,28 +1,23 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { monthsSchema, yearsSchema } from "@unprice/db/validators"
-
 import { createTRPCRouter, protectedApiOrActiveProjectProcedure } from "../../trpc"
 
 export const analyticsRouter = createTRPCRouter({
   // encodeURIComponent(JSON.stringify({ 0: { json:{ year: 2024, month: 6}}}))
-  getUsageAllFeatureActiveProject: protectedApiOrActiveProjectProcedure
+  getTotalUsagePerFeatureActiveProject: protectedApiOrActiveProjectProcedure
     .input(
       z.object({
-        year: yearsSchema,
-        month: monthsSchema,
+        start: z.number(),
+        end: z.number(),
       })
     )
     .query(async (opts) => {
       const project = opts.ctx.project
-      const { year, month } = opts.input
-
-      const start = new Date(year, month - 1, 1).getTime()
-      const end = new Date(year, month).getTime()
+      const { start, end } = opts.input
 
       const usage = await opts.ctx.analytics
-        .getUsageAllFeaturesProject({
+        .getTotalUsagePerProject({
           projectId: project.id,
           start: start,
           end: end,
@@ -46,16 +41,13 @@ export const analyticsRouter = createTRPCRouter({
   getAllFeatureVerificationsActiveProject: protectedApiOrActiveProjectProcedure
     .input(
       z.object({
-        year: yearsSchema,
-        month: monthsSchema,
+        start: z.number(),
+        end: z.number(),
       })
     )
     .query(async (opts) => {
       const project = opts.ctx.project
-      const { year, month } = opts.input
-
-      const start = new Date(year, month - 1, 1).getTime()
-      const end = new Date(year, month).getTime()
+      const { start, end } = opts.input
 
       const verifications = await opts.ctx.analytics
         .getFeaturesVerifications({

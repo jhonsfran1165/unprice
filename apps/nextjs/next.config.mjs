@@ -30,7 +30,7 @@ const nextConfig = {
     ppr: true,
     mdxRs: true,
     optimizePackageImports: ["@unprice/ui", "@unprice/api", "@unprice/auth", "@unprice/db"],
-    instrumentationHook: true,
+    instrumentationHook: process.env.NODE_ENV === "production",
   },
   webpack: (config, { isServer }) => {
     if (isServer) {

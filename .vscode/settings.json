@@ -1,4 +1,7 @@
 {
+  "tinybird.dataProjectSubdir": "internal/tinybird",
+  "tinybird.venvActivat": "",
+  "tinybird.venv": "",
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
   },

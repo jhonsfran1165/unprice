@@ -89,7 +89,7 @@ export class UnpriceCustomer {
       if (!feature) {
         return Err(
           new UnPriceCustomerError({
-            code: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+            code: "FEATURE_OR_CUSTOMER_NOT_FOUND",
             customerId: opts.customerId,
           })
         )
@@ -118,7 +118,7 @@ export class UnpriceCustomer {
       `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
       async () => {
         const usageData = await this.analytics
-          .getUsageFeature({
+          .getTotalUsagePerFeature({
             customerId: opts.customerId,
             featureSlug: opts.featureSlug,
             projectId: opts.projectId,
@@ -171,7 +171,7 @@ export class UnpriceCustomer {
     // cache miss, get from db
     if (!res.val) {
       const usageData = await this.analytics
-        .getUsageFeature({
+        .getTotalUsagePerFeature({
           customerId: opts.customerId,
           featureSlug: opts.featureSlug,
           projectId: opts.projectId,
