@@ -12,6 +12,8 @@ export const dateToUnixMilli = z
   .string()
   .transform((t) => new Date(t.split(" ").at(0) ?? t).getTime())
 
+export const datetimeToUnixMilli = z.string().transform((t) => new Date(t).getTime())
+
 export const featureVerificationSchemaV1 = z.object({
   projectId: z.string(),
   planVersionFeatureId: z.string(),

@@ -86,12 +86,15 @@ export class Analytics {
         featureSlug: z.string(),
         total: z.number(),
       }),
+      opts: {
+        cache: "no-store",
+      },
     })
   }
 
-  public get getUsageFeature() {
+  public get getTotalUsagePerFeature() {
     return this.readClient.buildPipe({
-      pipe: "total_usage_per_feature__v1",
+      pipe: "get_total_usage_per_feature__v1",
       parameters: z.object({
         featureSlug: z.string(),
         customerId: z.string(),
@@ -105,12 +108,15 @@ export class Analytics {
         count: z.number(),
         last_during_period: z.number(),
       }),
+      opts: {
+        cache: "no-store",
+      },
     })
   }
 
-  public get getUsageAllFeaturesProject() {
+  public get getTotalUsagePerProject() {
     return this.readClient.buildPipe({
-      pipe: "total_usage_per_all_feature__v1",
+      pipe: "get_total_usage_per_project__v1",
       parameters: z.object({
         projectId: z.string(),
         start: z.number(),
