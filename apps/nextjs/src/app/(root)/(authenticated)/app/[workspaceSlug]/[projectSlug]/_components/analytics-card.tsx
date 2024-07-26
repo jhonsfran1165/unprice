@@ -1,9 +1,11 @@
 import { type Interval, prepareInterval } from "@unprice/tinybird"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
-import type { Bar } from "@unprice/ui/charts-2"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
+import { ScrollArea } from "@unprice/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
+import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
-import type { ReactNode } from "react"
+import { type ReactNode, Suspense } from "react"
 import { HydrateClient, trpc } from "~/trpc/server"
 import { Filter } from "./filter"
 
@@ -24,12 +26,9 @@ export function AnalyticsCard<T extends string>({
   tabs: {
     id: T
     label: string
-    data: Bar<unknown>[]
-    limit?: number
+    description: string
     chart: (props: {
-      limit?: number
       tab: T
-      data: Bar<unknown>[]
     }) => ReactNode
   }[]
   defaultTab: T
@@ -65,12 +64,27 @@ export function AnalyticsCard<T extends string>({
 
             <Filter />
           </div>
-          {/* // TODO: add suspense component with prefetch */}
 
           <HydrateClient>
-            {tabs.map(({ id, data, limit, chart }) => (
+            {tabs.map(({ id, chart, label, description }) => (
               <TabsContent key={id} value={id}>
-                {chart({ limit, tab: id, data })}
+                <div className="flex flex-col px-1 py-4">
+                  <Typography variant="h6">{label}</Typography>
+                  <Typography variant="p" affects="removePaddingMargin">
+                    {description}
+                  </Typography>
+                </div>
+                <ScrollArea className="h-[500px] p-4">
+                  <Suspense
+                    fallback={
+                      <div className="flex h-[460px] items-center justify-center">
+                        <LoadingAnimation className="size-8" />
+                      </div>
+                    }
+                  >
+                    <div className="h-[460px]">{chart({ tab: id })}</div>
+                  </Suspense>
+                </ScrollArea>
               </TabsContent>
             ))}
           </HydrateClient>

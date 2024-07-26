@@ -32,8 +32,12 @@ export default function Page(props: {
   if (isSlug(projectSlug) || isSlug(all.at(1))) {
     baseUrl += `/${projectSlug ?? all.at(1)}`
     // delete project slug from segments
-    all.shift()
+    // all.shift()
   }
 
-  return <BreadcrumbsApp breadcrumbs={all} baseUrl={baseUrl} />
+  return (
+    <div className="px-4 md:px-6">
+      <BreadcrumbsApp breadcrumbs={all} baseUrl={baseUrl} />
+    </div>
+  )
 }

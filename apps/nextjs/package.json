@@ -63,6 +63,7 @@
     "next": "14.3.0-canary.44",
     "next-mdx-remote": "^5.0.0",
     "next-themes": "^0.2.1",
+    "next-view-transitions": "^0.2.0",
     "novel": "^0.4.3",
     "nuqs": "^1.17.5",
     "re-resizable": "^6.9.17",

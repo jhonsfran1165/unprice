@@ -56,13 +56,12 @@ export const analyticsRouter = createTRPCRouter({
           end: end,
         })
         .then((res) => res.data)
-
-      if (!verifications) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "You are not subscribed to this workspace",
+        .catch(() => {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Ups something went wrong getting analytics, contact support",
+          })
         })
-      }
 
       // // get all features configured for the project
       // const featuresPlanVersion =

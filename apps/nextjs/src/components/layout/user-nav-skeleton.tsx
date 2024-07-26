@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 
 import { Avatar, AvatarFallback } from "@unprice/ui/avatar"
 import { Button } from "@unprice/ui/button"

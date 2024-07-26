@@ -1,5 +1,5 @@
 "use client"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 
 import type { PurchaseOrg } from "@unprice/db/validators"
 import { purchaseWorkspaceSchema } from "@unprice/db/validators"

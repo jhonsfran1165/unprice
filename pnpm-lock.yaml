@@ -201,6 +201,9 @@ importers:
       next-themes:
         specifier: ^0.2.1
         version: 0.2.1(next@14.3.0-canary.44)(react-dom@18.3.1)(react@18.3.1)
+      next-view-transitions:
+        specifier: ^0.2.0
+        version: 0.2.0(next@14.3.0-canary.44)(react-dom@18.3.1)(react@18.3.1)
       novel:
         specifier: ^0.4.3
         version: 0.4.3(@tiptap/extension-code-block@2.5.5)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
@@ -13644,6 +13647,18 @@ packages:
       next: '*'
       react: '*'
       react-dom: '*'
+    dependencies:
+      next: 14.3.0-canary.44(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+    dev: false
+
+  /next-view-transitions@0.2.0(next@14.3.0-canary.44)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-dFxevMIJy8irIstytJivLEtgYT4IJ7Gy7fnDCKHJtNZAsuQgmewYcdA/o/mRkMd1zwxTfyGALiOlZYxvtsn5jg==}
+    peerDependencies:
+      next: ^14.0.0
+      react: ^18.2.0
+      react-dom: ^18.2.0
     dependencies:
       next: 14.3.0-canary.44(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       react: 18.3.1

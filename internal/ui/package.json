@@ -74,6 +74,7 @@
     ".": "./src/index.ts",
     "./charts-2": "./src/charts/index.ts",
     "./loading-animation": "./src/loading-animation.tsx",
+    "./typography": "./src/typography.tsx",
     "./bar-chart": "./src/bar-chart.tsx",
     "./spark-chart": "./src/spark-chart.tsx",
     "./slider": "./src/slider.tsx",

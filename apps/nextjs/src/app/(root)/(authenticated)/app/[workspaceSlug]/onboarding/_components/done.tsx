@@ -1,7 +1,7 @@
 "use client"
 
 import { LazyMotion, domAnimation, m } from "framer-motion"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useTransition } from "react"
 

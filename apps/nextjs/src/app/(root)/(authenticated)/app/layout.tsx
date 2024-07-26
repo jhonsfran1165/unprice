@@ -12,12 +12,12 @@ export default async function RootLayout({
   header: ReactNode
 }) {
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
+    <div className="flex h-screen flex-col lg:flex-row">
       {sidebar}
-      <main className="flex w-full flex-1 flex-col">
+      <main className="flex w-full flex-1 flex-col overflow-hidden">
         {header}
-        <div className="px-4 md:px-6">{breadcrumbs}</div>
-        <div className="flex-grow">{children}</div>
+        {breadcrumbs}
+        <div className="flex-grow overflow-y-auto">{children}</div>
       </main>
     </div>
   )

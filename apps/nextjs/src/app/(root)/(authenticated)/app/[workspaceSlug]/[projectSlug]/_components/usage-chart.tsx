@@ -17,24 +17,24 @@ import { nFormatter } from "~/lib/nformatter"
 import { api } from "~/trpc/client"
 
 const chartConfig = {
-  verifications: {
-    label: "Verfications",
+  usage: {
+    label: "Usage",
   },
 } satisfies ChartConfig
 
-export function VerificationsChart() {
+export function UsageChart() {
   const [{ interval }] = useFilter() // read-only
   const { start, end } = prepareInterval(interval)
 
   // this is prefetched from the server
-  const [data] = api.analytics.getAllFeatureVerificationsActiveProject.useSuspenseQuery({
+  const [data] = api.analytics.getTotalUsagePerFeatureActiveProject.useSuspenseQuery({
     start,
     end,
   })
 
-  const chartData = data.verifications.map((v) => ({
+  const chartData = data.usage.map((v) => ({
     feature: v.featureSlug,
-    verifications: v.total,
+    usage: v.sum,
   }))
 
   if (chartData.length === 0) {
@@ -46,10 +46,10 @@ export function VerificationsChart() {
           </EmptyPlaceholder.Icon>
           <EmptyPlaceholder.Title>No data available</EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
-            There is no data available for the selected interval.
+            There is no usage available for the selected interval.
           </EmptyPlaceholder.Description>
           <EmptyPlaceholder.Action>
-            <Button size={"sm"}>Start verifying data</Button>
+            <Button size={"sm"}>Start usage</Button>
           </EmptyPlaceholder.Action>
         </EmptyPlaceholder>
       </div>
@@ -79,10 +79,10 @@ export function VerificationsChart() {
           axisLine={false}
           tickFormatter={(value) => `${value?.substring(0, 10)}...`}
         />
-        <XAxis dataKey="verifications" type="number" hide />
+        <XAxis dataKey="usage" type="number" hide />
         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
         <Bar
-          dataKey="verifications"
+          dataKey="usage"
           layout="vertical"
           radius={5}
           fill="hsl(var(--chart-1))"
@@ -94,7 +94,7 @@ export function VerificationsChart() {
           // onClick={(data) => console.info(data)}
         >
           <LabelList
-            dataKey="verifications"
+            dataKey="usage"
             position="right"
             offset={8}
             className="fill-foreground"

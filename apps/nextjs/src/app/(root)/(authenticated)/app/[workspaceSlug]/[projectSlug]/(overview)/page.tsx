@@ -2,7 +2,7 @@ import { formatRelative } from "date-fns"
 
 import type { RouterOutputs } from "@unprice/api"
 import type { Interval } from "@unprice/tinybird"
-import { DEFAULT_INTERVAL, INTERVAL_KEYS, prepareInterval } from "@unprice/tinybird"
+import { DEFAULT_INTERVAL, INTERVAL_KEYS } from "@unprice/tinybird"
 import { Button } from "@unprice/ui/button"
 import {
   Card,
@@ -20,13 +20,14 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/server"
 import { AnalyticsCard } from "../_components/analytics-card"
-import { BarListAnalytics } from "../_components/bar-list"
 import { LoadingCard } from "../_components/loading-card"
+import { UsageChart } from "../_components/usage-chart"
 import { VerificationsChart } from "../_components/verifications-chart"
 
-// Make sure to update data dynamically
+// Run this on edge analytics don't query the database
 export const runtime = "edge"
-export const dynamic = "force-dynamic"
+// Only needed if we want dynamic data but we moved this to AnalyticsCard to prefetch data
+// export const dynamic = "force-dynamic"
 
 const intervalParser = parseAsStringEnum(INTERVAL_KEYS).withDefault(DEFAULT_INTERVAL)
 
@@ -36,28 +37,6 @@ export default async function DashboardPage(props: {
 }) {
   const { projectSlug, workspaceSlug } = props.params
   const interval = intervalParser.parseServerSide(props.searchParams.interval)
-
-  const { start, end } = prepareInterval(interval)
-
-  const { verifications } = await api.analytics.getAllFeatureVerificationsActiveProject({
-    start,
-    end,
-  })
-
-  const dataVerifications = verifications.map((v) => ({
-    name: v.featureSlug,
-    value: v.total,
-  }))
-
-  const { usage } = await api.analytics.getTotalUsagePerFeatureActiveProject({
-    start,
-    end,
-  })
-
-  const dataUsage = usage.map((v) => ({
-    name: v.featureSlug,
-    value: v.sum,
-  }))
 
   return (
     <DashboardShell>
@@ -104,7 +83,6 @@ export default async function DashboardPage(props: {
         </Card>
       </div>
       <div className="mt-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-        {/* // TODO: pass the promises instead of the data and add suspense */}
         <AnalyticsCard
           promiseKeys={[
             "getAllFeatureVerificationsActiveProject",
@@ -114,25 +92,21 @@ export default async function DashboardPage(props: {
           className="w-full"
           title="Feature Verifications & Usage"
           description="Feature verifications and usage recorded for this month."
+          defaultTab="verifications"
           tabs={[
             {
               id: "verifications",
               label: "Verifications",
-              data: dataVerifications,
-              limit: 5,
+              description: "Feature verifications recorded for the selected interval.",
               chart: () => <VerificationsChart />,
             },
             {
               id: "usage",
               label: "Usage",
-              data: dataUsage,
-              limit: 2,
-              chart: ({ limit, tab, data }) => (
-                <BarListAnalytics tab={tab} data={data} limit={limit} />
-              ),
+              description: "Feature usage recorded for the selected interval.",
+              chart: () => <UsageChart />,
             },
           ]}
-          defaultTab="verifications"
         />
 
         <Suspense

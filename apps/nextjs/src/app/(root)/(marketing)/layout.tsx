@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import type { ReactNode } from "react"
 
 import { APP_DOMAIN } from "@unprice/config"

@@ -1,5 +1,5 @@
+import { Link } from "next-view-transitions"
 import dynamic from "next/dynamic"
-import Link from "next/link"
 
 import { Button } from "@unprice/ui/button"
 import { GitHub, Twitter } from "@unprice/ui/icons"
