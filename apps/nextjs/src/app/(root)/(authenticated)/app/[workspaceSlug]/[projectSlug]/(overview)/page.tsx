@@ -25,7 +25,7 @@ import { UsageChart } from "../_components/usage-chart"
 import { VerificationsChart } from "../_components/verifications-chart"
 
 // Run this on edge analytics don't query the database
-// This is hittinh the limits of the free tier in vercel :/
+// This is hitting the limits of the free tier in vercel :/
 // export const runtime = "edge"
 // Only needed if we want dynamic data but we moved this to AnalyticsCard to prefetch data
 // export const dynamic = "force-dynamic"
@@ -130,6 +130,7 @@ export default async function DashboardPage(props: {
   )
 }
 
+// #region IngestionCard
 function IngestionCard(props: {
   projectSlug: string
   workspaceSlug: string
@@ -176,6 +177,7 @@ function IngestionCard(props: {
   )
 }
 
+// #region RecentIngestions
 async function RecentIngestions(props: {
   projectSlug: string
   workspaceSlug: string

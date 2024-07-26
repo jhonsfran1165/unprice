@@ -1,3 +1,4 @@
+VERSION 1
 NODE daily_usage
 SQL >
 
@@ -5,6 +6,7 @@ SQL >
         customerId,
         featureSlug,
         projectId,
+        time,
         toDate(fromUnixTimestamp64Milli(time)) AS date,
         finalizeAggregation(sumState(usage)) AS usage_sum,
         finalizeAggregation(maxState(usage)) AS usage_max,
@@ -15,9 +17,8 @@ SQL >
         customerId,
         featureSlug,
         projectId,
-        date
-
-TYPE materialized
-DATASOURCE daily_usage_mv
+        date,
+        time
+     ORDER BY date
 
 

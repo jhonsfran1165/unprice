@@ -40,7 +40,7 @@ export function VerificationsChart() {
   if (chartData.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
-        <EmptyPlaceholder className="min-h-[400px]">
+        <EmptyPlaceholder className="min-h-[300px]">
           <EmptyPlaceholder.Icon>
             <BarChart4 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
@@ -57,13 +57,17 @@ export function VerificationsChart() {
   }
 
   return (
-    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+    <ChartContainer
+      config={chartConfig}
+      height={chartData.length * 50}
+      className="min-h-[200px] w-full"
+    >
       <BarChart
         accessibilityLayer
         data={chartData}
         layout="vertical"
         margin={{
-          left: 20,
+          left: 40,
           right: 30,
           top: 10,
           bottom: 10,
@@ -77,7 +81,7 @@ export function VerificationsChart() {
           tickLine={false}
           tickMargin={10}
           axisLine={false}
-          tickFormatter={(value) => `${value?.substring(0, 10)}...`}
+          tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
         />
         <XAxis dataKey="verifications" type="number" hide />
         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
@@ -86,7 +90,7 @@ export function VerificationsChart() {
           layout="vertical"
           radius={5}
           fill="hsl(var(--chart-1))"
-          maxBarSize={30}
+          maxBarSize={25}
           activeBar={{
             opacity: 0.5,
           }}

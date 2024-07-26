@@ -1,8 +1,0 @@
-NODE features_usage_pipe_6946_0
-SQL >
-
-    SELECT toDateTime(fromUnixTimestamp64Milli(time), 'Europe/Berlin'), usage
-    FROM features_usage
-    order by time desc
-
-

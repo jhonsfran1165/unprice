@@ -74,15 +74,15 @@ export function AnalyticsCard<T extends string>({
                     {description}
                   </Typography>
                 </div>
-                <ScrollArea className="h-[500px] p-4">
+                <ScrollArea className="h-[400px] p-4">
                   <Suspense
                     fallback={
-                      <div className="flex h-[460px] items-center justify-center">
+                      <div className="flex h-[360px] items-center justify-center">
                         <LoadingAnimation className="size-8" />
                       </div>
                     }
                   >
-                    <div className="h-[460px]">{chart({ tab: id })}</div>
+                    <div className="h-[360px]">{chart({ tab: id })}</div>
                   </Suspense>
                 </ScrollArea>
               </TabsContent>

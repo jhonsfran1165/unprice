@@ -40,7 +40,7 @@ export function UsageChart() {
   if (chartData.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
-        <EmptyPlaceholder className="min-h-[400px]">
+        <EmptyPlaceholder className="min-h-[300px]">
           <EmptyPlaceholder.Icon>
             <BarChart4 className="h-8 w-8" />
           </EmptyPlaceholder.Icon>
@@ -56,8 +56,11 @@ export function UsageChart() {
     )
   }
 
+  const maxHeight = 400
+  const height = Math.min(chartData.length * 60, maxHeight)
+
   return (
-    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+    <ChartContainer config={chartConfig} height={height} className="min-h-[200px] w-full">
       <BarChart
         accessibilityLayer
         data={chartData}
@@ -77,7 +80,7 @@ export function UsageChart() {
           tickLine={false}
           tickMargin={10}
           axisLine={false}
-          tickFormatter={(value) => `${value?.substring(0, 10)}...`}
+          tickFormatter={(value) => (value?.length > 15 ? `${value.slice(0, 15)}...` : value)}
         />
         <XAxis dataKey="usage" type="number" hide />
         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
