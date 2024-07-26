@@ -25,7 +25,8 @@ import { UsageChart } from "../_components/usage-chart"
 import { VerificationsChart } from "../_components/verifications-chart"
 
 // Run this on edge analytics don't query the database
-export const runtime = "edge"
+// This is hittinh the limits of the free tier in vercel :/
+// export const runtime = "edge"
 // Only needed if we want dynamic data but we moved this to AnalyticsCard to prefetch data
 // export const dynamic = "force-dynamic"
 
