@@ -9,7 +9,7 @@ import AppMiddleware from "~/middleware/app"
 import SitesMiddleware from "~/middleware/sites"
 
 export default auth((req) => {
-  const { domain } = parse(req)
+  const { domain, path } = parse(req)
 
   // TODO: how to create a new request id per request?
   // req.headers.get("x-request-id") || req.headers.set("x-request-id", newId("request"))
@@ -28,6 +28,13 @@ export default auth((req) => {
 
   // 3. validate subdomains www and empty
   if (subdomain === "" || subdomain === "www") {
+    // protect the app routes from being accessed under the base domain or www subdomain
+    if (path.startsWith("/dashboard")) {
+      const url = new URL(req.nextUrl.origin)
+      url.pathname = "/"
+      return NextResponse.redirect(url)
+    }
+
     // public routes under the base domain or www subdomain
     return NextResponse.next()
   }

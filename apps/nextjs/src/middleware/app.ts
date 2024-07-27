@@ -68,7 +68,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
   // if the route is not a workspace route
   if (isNonWorkspaceRoute) {
-    return NextResponse.rewrite(new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url))
+    return NextResponse.rewrite(new URL(`/dashboard${fullPath === "/" ? "" : fullPath}`, req.url))
   }
 
   // if not workspace in path check cookies or jwt
@@ -90,7 +90,9 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
   // check jwt claim for the workspace
   const isUserMemberWorkspace = userBelongsToWorkspace(currentWorkspaceSlug)
-  const response = NextResponse.rewrite(new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url))
+  const response = NextResponse.rewrite(
+    new URL(`/dashboard${fullPath === "/" ? "" : fullPath}`, req.url)
+  )
 
   // if the user is not a member of the workspace redirect to root path to be handled by the middleware again
   if (!isUserMemberWorkspace) {

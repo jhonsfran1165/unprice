@@ -1,5 +1,7 @@
 "use client"
 
+import { Typography } from "@unprice/ui/typography"
+
 export default function GlobalError({
   reset,
 }: {
@@ -9,7 +11,7 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <h2>Something went wrong!</h2>
+        <Typography variant="h2">Something went wrong!</Typography>
         <button type="button" onClick={() => reset()}>
           Try again
         </button>

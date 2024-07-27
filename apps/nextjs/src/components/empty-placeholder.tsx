@@ -1,5 +1,6 @@
 import type * as React from "react"
 
+import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 
 export function EmptyPlaceholder({
@@ -34,9 +35,14 @@ type EmptyPlaceholderTitleProps = React.HTMLAttributes<HTMLHeadingElement>
 
 EmptyPlaceholder.Title = function EmptyPlaceholderTitle({
   className,
+  children,
   ...props
 }: EmptyPlaceholderTitleProps) {
-  return <h2 className={cn("mt-4 font-semibold text-lg", className)} {...props} />
+  return (
+    <Typography variant="h4" className={cn("mt-4", className)} {...props}>
+      {children}
+    </Typography>
+  )
 }
 
 EmptyPlaceholder.Action = function EmptyPlaceHolderAction({
@@ -51,7 +57,12 @@ type EmptyPlaceholderDescriptionProps = React.HTMLAttributes<HTMLParagraphElemen
 
 EmptyPlaceholder.Description = function EmptyPlaceholderDescription({
   className,
+  children,
   ...props
 }: EmptyPlaceholderDescriptionProps) {
-  return <p className={cn("mt-2 mb-4 text-muted-foreground text-sm", className)} {...props} />
+  return (
+    <Typography variant="p" className={cn("mt-2 mb-4", className)} {...props}>
+      {children}
+    </Typography>
+  )
 }

@@ -5,7 +5,7 @@ import { cn } from "@unprice/ui/utils"
 import {
   PricingCard,
   PricingCardSkeleton,
-} from "~/app/(root)/(authenticated)/app/[workspaceSlug]/[projectSlug]/plans/[planSlug]/[planVersionId]/review/_components/pricing-card"
+} from "~/app/(root)/dashboard/[workspaceSlug]/[projectSlug]/plans/[planSlug]/[planVersionId]/review/_components/pricing-card"
 import { PricingTableSettings } from "./settings"
 import type { PricingComponentProps } from "./types"
 

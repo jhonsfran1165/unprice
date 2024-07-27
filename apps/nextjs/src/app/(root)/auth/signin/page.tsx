@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 
 import { getSession } from "@unprice/auth/server-rsc"
 
+import { Typography } from "@unprice/ui/typography"
 import { SignInGithub } from "./github-signin"
 
 export default async function AuthenticationPage() {
@@ -16,13 +17,13 @@ export default async function AuthenticationPage() {
   return (
     <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
       <div className="flex flex-col space-y-2 text-center">
-        <h1 className="font-semibold text-2xl tracking-tight">Create an account</h1>
+        <Typography variant="h2">Create an account</Typography>
       </div>
       <div className="grid gap-6">
         <SignInGithub />
       </div>
 
-      <p className="px-8 text-center text-muted-foreground text-sm">
+      <Typography variant="p" className="px-8 text-center">
         By clicking continue, you agree to our{" "}
         <Link href={"/terms" as Route} className="underline underline-offset-4 hover:text-primary">
           Terms of Service
@@ -35,7 +36,7 @@ export default async function AuthenticationPage() {
           Privacy Policy
         </Link>
         .
-      </p>
+      </Typography>
     </div>
   )
 }

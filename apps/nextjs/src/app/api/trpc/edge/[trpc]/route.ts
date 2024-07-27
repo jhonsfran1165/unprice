@@ -9,7 +9,7 @@ import { auth } from "@unprice/auth/server"
 import { CorsOptions, setCorsHeaders } from "../../../_enableCors"
 
 // TODO: vercel is having trouble with the runtime edge so for now we are using nodejs
-export const runtime = "nodejs"
+export const runtime = "edge"
 export const preferredRegion = ["fra1"]
 
 const handler = auth(async (req) => {

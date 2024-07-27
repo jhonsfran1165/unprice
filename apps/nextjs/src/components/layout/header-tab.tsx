@@ -1,4 +1,5 @@
 import { Badge } from "@unprice/ui/badge"
+import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 
 export default function HeaderTab({
@@ -18,7 +19,7 @@ export default function HeaderTab({
     <div className={cn("flex w-full items-center justify-between px-0", className)}>
       <div className="space-y-2">
         <div className="flex items-center space-x-2">
-          <h1 className="font-semibold text-xl leading-none tracking-tight">{title}</h1>
+          <Typography variant="h3">{title}</Typography>
           {label && (
             <Badge className={"info ml-2"}>
               <span className="flex h-2 w-2 rounded-full bg-info-solid" />
@@ -26,7 +27,7 @@ export default function HeaderTab({
             </Badge>
           )}
         </div>
-        {description && <h4 className="text-muted-foreground text-sm">{description}</h4>}
+        {description && <Typography variant="normal">{description}</Typography>}
       </div>
       <div>{action}</div>
     </div>

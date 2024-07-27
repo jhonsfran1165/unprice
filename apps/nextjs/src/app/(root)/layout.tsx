@@ -1,9 +1,10 @@
 import "~/styles/globals.css"
 import "~/styles/prosemirror.css"
+import { cn } from "@unprice/ui/utils"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import type { Metadata, Viewport } from "next"
 import { ViewTransitions } from "next-view-transitions"
-
-import { cn } from "@unprice/ui/utils"
 
 import { ThemeProvider } from "~/components/layout/theme-provider"
 import { siteConfig } from "~/constants/layout"
@@ -60,6 +61,8 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             {props.children}
           </ThemeProvider>
           {/* <Analytics /> */}
+          <Analytics />
+          <SpeedInsights />
         </body>
       </html>
     </ViewTransitions>
