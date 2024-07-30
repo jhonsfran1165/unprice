@@ -1,29 +1,26 @@
-import { searchDataParamsSchema } from "@unprice/db/validators"
-
+import type { SearchParams } from "nuqs/server"
+import React from "react"
 import { DataTable } from "~/components/data-table/data-table"
+import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
+import { filtersDataTableCache } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
 import NewApiKeyDialog from "./_components/new-api-key-dialog"
 import { columns } from "./_components/table/columns"
 
+export const dynamic = "force-dynamic"
+
 export default async function ApiKeysPage(props: {
   params: { projectSlug: string; workspaceSlug: string }
-  searchParams: Record<string, string | string[] | undefined>
+  searchParams: SearchParams
 }) {
-  const parsed = searchDataParamsSchema.safeParse(props.searchParams)
-
-  const filter = {
-    fromDate: undefined as number | undefined,
-    toDate: undefined as number | undefined,
-  }
-
-  if (parsed?.success) {
-    filter.fromDate = parsed.data.fromDate
-    filter.toDate = parsed.data.toDate
-  }
-
-  const { apikeys } = await api.apikeys.listByActiveProject(filter)
+  const filters = filtersDataTableCache.parse(props.searchParams)
+  const { apikeys, pageCount } = await api.apikeys.listByActiveProject({
+    ...filters,
+    to: filters.to?.getTime() ?? null,
+    from: filters.from?.getTime() ?? null,
+  })
 
   return (
     <DashboardShell
@@ -35,15 +32,29 @@ export default async function ApiKeysPage(props: {
         />
       }
     >
-      <DataTable
-        columns={columns}
-        data={apikeys}
-        filterOptions={{
-          filterBy: "name",
-          filterColumns: true,
-          filterDateRange: true,
-        }}
-      />
+      <React.Suspense
+        fallback={
+          <DataTableSkeleton
+            columnCount={5}
+            searchableColumnCount={1}
+            filterableColumnCount={2}
+            cellWidths={["10rem", "40rem", "12rem", "12rem", "8rem"]}
+            shrinkZero
+          />
+        }
+      >
+        <DataTable
+          pageCount={pageCount}
+          columns={columns}
+          data={apikeys}
+          filterOptions={{
+            filterBy: "name",
+            filterColumns: true,
+            filterDateRange: true,
+            filterServerSide: false,
+          }}
+        />
+      </React.Suspense>
     </DashboardShell>
   )
 }

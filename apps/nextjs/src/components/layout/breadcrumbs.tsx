@@ -54,7 +54,7 @@ export default function BreadcrumbsApp(props: {
 
                       return (
                         <Fragment key={href}>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem asChild>
                             <SuperLink
                               className="text-background-solid text-xs transition-colors"
                               href={href}

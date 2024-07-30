@@ -1,49 +1,83 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { eq, sql } from "@unprice/db"
+import { type SQL, and, asc, count, eq, getTableColumns, gte, ilike, lte, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
-import { createApiKeySchema, selectApiKeySchema } from "@unprice/db/validators"
+import {
+  type ApiKey,
+  createApiKeySchema,
+  searchParamsSchemaDataTable,
+  selectApiKeySchema,
+} from "@unprice/db/validators"
 
+import { withPagination } from "@unprice/db/utils"
 import { createTRPCRouter, protectedActiveProjectProcedure } from "../../trpc"
+import type { DrizzleWhere } from "../../utils"
 
 export const apiKeyRouter = createTRPCRouter({
   listByActiveProject: protectedActiveProjectProcedure
-    .input(
-      z.object({
-        fromDate: z.number().optional(),
-        toDate: z.number().optional(),
-      })
-    )
+    .input(searchParamsSchemaDataTable)
     .output(
       z.object({
         apikeys: z.array(selectApiKeySchema),
+        pageCount: z.number(),
       })
     )
     .query(async (opts) => {
-      const { fromDate, toDate } = opts.input
+      const { page, page_size, search, from, to } = opts.input
       const project = opts.ctx.project
+      const columns = getTableColumns(schema.apikeys)
+      const filter = `%${search}%`
 
-      const apikeys = await opts.ctx.db.query.apikeys.findMany({
-        where: (apikey, { eq, and, between, gte, lte }) =>
-          and(
-            eq(apikey.projectId, project.id),
-            fromDate && toDate
-              ? between(apikey.createdAt, new Date(fromDate), new Date(toDate))
-              : undefined,
-            fromDate ? gte(apikey.createdAt, new Date(fromDate)) : undefined,
-            toDate ? lte(apikey.createdAt, new Date(toDate)) : undefined
-          ),
-        orderBy: (apikey, { desc }) => [
-          desc(apikey.revokedAt),
-          desc(apikey.lastUsed),
-          desc(apikey.expiresAt),
-          desc(apikey.createdAt),
-        ],
-      })
+      try {
+        // Convert the date strings to date objects
+        const fromDay = from ? sql`to_timestamp(${from})` : undefined
+        const toDay = to ? sql`to_timestamp(${to})` : undefined
 
-      return { apikeys }
+        const expressions: (SQL<unknown> | undefined)[] = [
+          // Filter by name
+          search ? ilike(columns.name, filter) : undefined,
+          // Filter by createdAt
+          fromDay && toDay
+            ? and(gte(columns.createdAt, fromDay), lte(columns.createdAt, toDay))
+            : undefined,
+          project.id ? eq(columns.projectId, project.id) : undefined,
+        ]
+        const where: DrizzleWhere<ApiKey> = and(...expressions)
+
+        // Transaction is used to ensure both queries are executed in a single transaction
+        const { data, total } = await opts.ctx.db.transaction(async (tx) => {
+          const query = tx.select().from(schema.apikeys).where(where) // query that you want to execute with pagination
+
+          const data = await withPagination(
+            query.$dynamic(),
+            asc(schema.apikeys.createdAt),
+            page,
+            page_size
+          )
+
+          const total = await tx
+            .select({
+              count: count(),
+            })
+            .from(schema.apikeys)
+            .where(where)
+            .execute()
+            .then((res) => res[0]?.count ?? 0)
+
+          return {
+            data,
+            total,
+          }
+        })
+
+        const pageCount = Math.ceil(total / page_size)
+        return { apikeys: data, pageCount }
+      } catch (err: unknown) {
+        console.error(err)
+        return { apikeys: [], pageCount: 0 }
+      }
     }),
 
   create: protectedActiveProjectProcedure

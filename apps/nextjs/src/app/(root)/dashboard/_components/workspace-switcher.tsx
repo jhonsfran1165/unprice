@@ -66,8 +66,8 @@ export function WorkspaceSwitcher({
             </Avatar>
             <span className="truncate font-semibold">
               {activeWorkspace.name}
-              <Badge className={"ml-2"}>
-                {activeWorkspace.isInternal ? "pro - internal" : "pro"}
+              <Badge className="ml-2 font-normal" variant={"outline"}>
+                {activeWorkspace.isInternal ? "PRO - INTERNAL" : "PRO"}
               </Badge>
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

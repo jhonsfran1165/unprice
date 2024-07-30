@@ -46,7 +46,9 @@ export function ProjectSwitcher() {
         >
           <span className="truncate font-semibold">
             {activeProject.name}
-            <Badge className={"ml-2"}>{activeProject.isInternal ? "pro - internal" : "pro"}</Badge>
+            <Badge className="ml-2 font-normal" variant={"outline"}>
+              {activeProject.isInternal ? "PRO - INTERNAL" : "PRO"}
+            </Badge>
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>

@@ -3,6 +3,7 @@ import { type Dinero, multiply, toSnapshot, transformScale, up } from "dinero.js
 export * from "./utils/_table"
 export * from "./utils/constants"
 export * from "./utils/id"
+export * from "./utils/pagination"
 
 import { generateSlug } from "random-word-slugs"
 

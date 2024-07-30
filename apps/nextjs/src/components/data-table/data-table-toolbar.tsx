@@ -6,8 +6,9 @@ import { Button } from "@unprice/ui/button"
 import { XCircle } from "@unprice/ui/icons"
 import { Input } from "@unprice/ui/input"
 
+import { useFilterDataTable } from "~/hooks/use-filter-datatable"
+import { DateRangePicker } from "../analytics/date-range-picker"
 import type { FilterOptionDataTable } from "./data-table"
-import { DataTableDateRangePicker } from "./data-table-date-ranger-picker"
 import { DataTableFacetedFilter } from "./data-table-faceted-filter"
 import { DataTableViewOptions } from "./data-table-view-options"
 
@@ -40,6 +41,7 @@ interface DataTableToolbarProps<TData> {
 }
 
 export function DataTableToolbar<TData>({ table, filterOptions }: DataTableToolbarProps<TData>) {
+  const [filters, setFilters] = useFilterDataTable()
   const isFiltered = table.getState().columnFilters.length > 0
   const filterBy = filterOptions?.filterBy ?? ""
   const status = table.getAllColumns().find((column) => column.id === "status")
@@ -50,8 +52,14 @@ export function DataTableToolbar<TData>({ table, filterOptions }: DataTableToolb
         {table.getColumn(filterBy) && (
           <Input
             placeholder={`filter by ${filterBy}...`}
-            value={(table.getColumn(filterBy)?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn(filterBy)?.setFilterValue(event.target.value)}
+            value={(table.getColumn(filterBy)?.getFilterValue() as string) ?? filters.search ?? ""}
+            onChange={(event) => {
+              if (filterOptions?.filterServerSide) {
+                setFilters({ search: event.target.value })
+              } else {
+                table.getColumn(filterBy)?.setFilterValue(event.target.value)
+              }
+            }}
             className="h-8 w-[150px] bg-background lg:w-[250px]"
           />
         )}
@@ -75,7 +83,9 @@ export function DataTableToolbar<TData>({ table, filterOptions }: DataTableToolb
         )}
       </div>
       <div className="flex gap-2">
-        {filterOptions?.filterDateRange && <DataTableDateRangePicker />}
+        {filterOptions?.filterDateRange && (
+          <DateRangePicker triggerSize="sm" triggerClassName="ml-auto w-56 sm:w-60" align="end" />
+        )}
         {filterOptions?.filterColumns && <DataTableViewOptions table={table} />}
       </div>
     </div>

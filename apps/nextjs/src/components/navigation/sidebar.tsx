@@ -29,6 +29,7 @@ export function Sidebar({
                     baseUrl={baseUrl}
                     disabled={item.disabled}
                     isNew={item.isNew}
+                    hasSubmenu={!!item.sidebar}
                   >
                     <item.icon className="size-4 shrink-0" aria-hidden="true" />
                     {item.name}
@@ -38,7 +39,7 @@ export function Sidebar({
                     <ul className="space-y-0.5 py-1 pl-7">
                       {item.sidebar.map((subItem) => (
                         <li key={subItem.name}>
-                          <Tab href={subItem.href} baseUrl={baseUrl} isSubmenu>
+                          <Tab href={subItem.href} baseUrl={baseUrl}>
                             {subItem.icon && (
                               <subItem.icon className="size-3 shrink-0" aria-hidden="true" />
                             )}
@@ -88,6 +89,7 @@ export function Sidebar({
                       baseUrl={baseUrl}
                       disabled={item.disabled}
                       isNew={item.isNew}
+                      hasSubmenu={!!item.sidebar}
                     >
                       <item.icon className="size-4 shrink-0" aria-hidden="true" />
                       {item.name}
@@ -97,7 +99,7 @@ export function Sidebar({
                       <ul className="space-y-0.5 pl-7">
                         {item.sidebar.map((subItem) => (
                           <li key={subItem.name}>
-                            <Tab href={subItem.href} baseUrl={baseUrl} isSubmenu>
+                            <Tab href={subItem.href} baseUrl={baseUrl}>
                               {subItem.icon && (
                                 <subItem.icon className="size-3 shrink-0" aria-hidden="true" />
                               )}

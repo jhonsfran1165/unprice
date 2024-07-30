@@ -208,8 +208,8 @@ importers:
         specifier: ^0.4.3
         version: 0.4.3(@tiptap/extension-code-block@2.5.5)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
       nuqs:
-        specifier: ^1.17.5
-        version: 1.17.5(next@14.3.0-canary.44)
+        specifier: ^1.17.6
+        version: 1.17.6(next@14.3.0-canary.44)
       re-resizable:
         specifier: ^6.9.17
         version: 6.9.17(react-dom@18.3.1)(react@18.3.1)
@@ -14056,8 +14056,8 @@ packages:
       set-blocking: 2.0.0
     dev: true
 
-  /nuqs@1.17.5(next@14.3.0-canary.44):
-    resolution: {integrity: sha512-F9bsK/Eyp6kqIvATDVsak7qqexmiuUY79l+jBiDCDitwPAvbRkqPbiCeUmx8pZIpK0mY1evp01RLR2i0W7edBA==}
+  /nuqs@1.17.6(next@14.3.0-canary.44):
+    resolution: {integrity: sha512-mbQKLo+4h9ZsCg9u4WcitBqVhP2XG2PrPc0sUN0IEHL3nUKjxHT2h3tqd1Wo1gkkGxan5uVpnJ9NP51y2j7vgg==}
     peerDependencies:
       next: '>=13.4 <14.0.2 || ^14.0.3'
     dependencies:

@@ -8,6 +8,9 @@ import { migrate } from "drizzle-orm/neon-serverless/migrator"
 async function main() {
   await migrate(db, { migrationsFolder: "src/migrations/neon" })
 
+  const start = Date.now()
+  console.info("⏳ Running migrations...")
+
   // process.exit(0)
 
   const defaultProjectId = "proj_uhV7tetPJwCZAMox3L7Po4H5dgc"
@@ -172,6 +175,9 @@ async function main() {
   // })
 
   // print all relevant data and save it to unfisical
+  const end = Date.now()
+
+  console.info(`✅ Migrations completed in ${end - start}ms`)
 
   console.info("Project Id: ", project.id)
   console.info("Workspace Id: ", workspace.id)

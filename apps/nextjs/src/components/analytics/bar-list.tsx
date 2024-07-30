@@ -5,10 +5,16 @@ import { useMemo, useState } from "react"
 import { nFormatter } from "~/lib/nformatter"
 
 import { Button } from "@unprice/ui/button"
-import { type Bar, BarList } from "@unprice/ui/charts-2"
 import { Input } from "@unprice/ui/input"
 import { ScrollArea } from "@unprice/ui/scroll-area"
 import { m } from "framer-motion"
+
+export interface Bar<T = unknown> {
+  name: string
+  value: number
+  date: string
+  data?: T
+}
 
 export function BarListAnalytics<T = unknown>({
   tab,
@@ -38,13 +44,24 @@ export function BarListAnalytics<T = unknown>({
     filteredData.length === 0 ? (
       <div className="py-4 text-center text-muted-foreground">No data available</div>
     ) : (
-      <BarList
-        key={tab}
-        data={filteredData}
-        onValueChange={(value) => console.info(value)}
-        valueFormatter={(value) => nFormatter(value)}
-        showAnimation
-      />
+      <div className="grid gap-2">
+        {filteredData.map((d, i) => (
+          <div
+            key={i.toString()}
+            className="flex items-center justify-between rounded-md bg-background/95 px-4 py-2 shadow-sm"
+          >
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded-full bg-accent" />
+                <div className="font-medium text-sm">{d.name}</div>
+              </div>
+              <div className="text-muted-foreground">{nFormatter(d.value)}</div>
+            </div>
+            <div className="text-muted-foreground text-xs">{d.date}</div>
+          </div>
+        ))}
+        \
+      </div>
     )
 
   if (!limit) {

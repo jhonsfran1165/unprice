@@ -10,7 +10,7 @@ export default function Header({ children }: { children?: React.ReactNode }) {
 
         <div className="flex flex-1 items-center justify-end space-x-2">
           <MainNav />
-          <SearchTool className="hidden lg:block" />
+          <SearchTool className="hidden" />
           <ThemeToggle />
         </div>
       </div>

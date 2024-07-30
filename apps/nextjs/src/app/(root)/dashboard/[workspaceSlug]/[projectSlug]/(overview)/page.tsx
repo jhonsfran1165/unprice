@@ -16,13 +16,13 @@ import { Activity, ChevronRight, CreditCard, DollarSign, Users } from "@unprice/
 import { cn } from "@unprice/ui/utils"
 import { parseAsStringEnum } from "nuqs/server"
 import { Suspense } from "react"
+import { AnalyticsCard } from "~/components/analytics/analytics-card"
+import { UsageChart } from "~/components/analytics/usage-chart"
+import { VerificationsChart } from "~/components/analytics/verifications-chart"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/server"
-import { AnalyticsCard } from "../_components/analytics-card"
 import { LoadingCard } from "../_components/loading-card"
-import { UsageChart } from "../_components/usage-chart"
-import { VerificationsChart } from "../_components/verifications-chart"
 
 // Run this on edge analytics don't query the database
 // This is hitting the limits of the free tier in vercel :/

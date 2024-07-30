@@ -14,7 +14,13 @@ export default function Loading() {
         />
       }
     >
-      <DataTableSkeleton />
+      <DataTableSkeleton
+        columnCount={5}
+        searchableColumnCount={1}
+        filterableColumnCount={2}
+        cellWidths={["10rem", "40rem", "12rem", "12rem", "8rem"]}
+        shrinkZero
+      />
     </DashboardShell>
   )
 }

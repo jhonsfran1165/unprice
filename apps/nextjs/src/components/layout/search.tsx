@@ -12,6 +12,7 @@ import {
   CommandShortcut,
 } from "@unprice/ui/command"
 import { CreditCard, Settings, User } from "@unprice/ui/icons"
+import { Kbd } from "@unprice/ui/kbd"
 import { cn } from "@unprice/ui/utils"
 import { useParams, useRouter } from "next/navigation"
 
@@ -46,9 +47,9 @@ export function SearchTool({
 
   return (
     <div className={cn(className)}>
-      <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border px-1.5 font-medium font-mono text-[10px] opacity-100 sm:flex">
-        <span className="text-xs">⌘</span>K
-      </kbd>
+      <Kbd abbrTitle="K" variant="outline">
+        <span className="mr-1 text-xs">⌘</span>K
+      </Kbd>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>

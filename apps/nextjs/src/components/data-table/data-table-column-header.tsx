@@ -22,7 +22,7 @@ export function DataTableColumnHeader<TData, TValue>({
   title,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
-  if (!column.getCanSort()) {
+  if (!column.getCanSort() && !column.getCanHide()) {
     return <div className={cn(className)}>{title}</div>
   }
 
@@ -30,7 +30,18 @@ export function DataTableColumnHeader<TData, TValue>({
     <div className={cn("flex items-center space-x-2", className)}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="-ml-3 h-8 data-[state=open]:bg-accent">
+          <Button
+            aria-label={
+              column.getIsSorted() === "desc"
+                ? "Sorted descending. Click to sort ascending."
+                : column.getIsSorted() === "asc"
+                  ? "Sorted ascending. Click to sort descending."
+                  : "Not sorted. Click to sort ascending."
+            }
+            variant="ghost"
+            size="sm"
+            className="-ml-3 h-8 data-[state=open]:bg-accent"
+          >
             <span>{title}</span>
             {column.getIsSorted() === "desc" ? (
               <SortDesc className="ml-2 h-4 w-4" />

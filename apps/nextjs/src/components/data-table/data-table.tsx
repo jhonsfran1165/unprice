@@ -3,6 +3,7 @@
 import type {
   ColumnDef,
   ColumnFiltersState,
+  PaginationState,
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
@@ -21,6 +22,7 @@ import * as React from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
 import { cn } from "@unprice/ui/utils"
 
+import { useFilterDataTable } from "~/hooks/use-filter-datatable"
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
 
@@ -28,6 +30,7 @@ export interface FilterOptionDataTable {
   filterBy?: string
   filterDateRange?: boolean
   filterColumns?: boolean
+  filterServerSide?: boolean
 }
 
 interface DataTableProps<TData, TValue> {
@@ -35,6 +38,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   filterOptions?: FilterOptionDataTable
   className?: string
+  pageCount: number
 }
 
 export function DataTable<TData, TValue>({
@@ -42,17 +46,34 @@ export function DataTable<TData, TValue>({
   data,
   filterOptions,
   className,
+  pageCount,
 }: DataTableProps<TData, TValue>) {
+  const [filters] = useFilterDataTable()
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
+  // Handle server-side pagination
+  const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
+    pageIndex: filters.page - 1,
+    pageSize: filters.page_size ?? 10,
+  })
+
+  const pagination = React.useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+    }),
+    [pageIndex, pageSize]
+  )
 
   const table = useReactTable({
     data,
     columns,
+    pageCount: pageCount ?? -1,
     state: {
       sorting,
+      pagination,
       columnVisibility,
       rowSelection,
       columnFilters,
@@ -68,6 +89,8 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    onPaginationChange: setPagination,
+    manualPagination: true,
   })
 
   return (

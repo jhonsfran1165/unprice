@@ -5,7 +5,7 @@ export const WORKSPACE_NAV: DashboardRoute[] = [
   {
     icon: AppWindow,
     name: "Projects",
-    href: "",
+    href: "/",
   },
   {
     icon: Globe,
