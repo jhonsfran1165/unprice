@@ -22,6 +22,7 @@ export const apikeys = pgTableProject(
       columns: [table.id, table.projectId],
       name: "pk_apikeys",
     }),
+    // TODO: add indexes to foreign keys - all tables
     key: index("key").on(table.key),
     name: unique("name_unique").on(table.name),
   })

@@ -127,8 +127,8 @@ export function DateRangePicker({
             selected={date}
             onSelect={(selected) => {
               setFilters({
-                from: selected?.from ?? null,
-                to: selected?.to ?? null,
+                from: selected?.from?.getTime() ?? null,
+                to: selected?.to?.getTime() ?? null,
               })
               setDate(selected)
             }}

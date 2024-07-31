@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { type SQL, and, asc, count, eq, getTableColumns, gte, ilike, lte, sql } from "@unprice/db"
+import { type SQL, and, count, eq, getTableColumns, ilike, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
@@ -11,7 +11,7 @@ import {
   selectApiKeySchema,
 } from "@unprice/db/validators"
 
-import { withPagination } from "@unprice/db/utils"
+import { withDateFilters, withPagination } from "@unprice/db/utils"
 import { createTRPCRouter, protectedActiveProjectProcedure } from "../../trpc"
 import type { DrizzleWhere } from "../../utils"
 
@@ -31,28 +31,26 @@ export const apiKeyRouter = createTRPCRouter({
       const filter = `%${search}%`
 
       try {
-        // Convert the date strings to date objects
-        const fromDay = from ? sql`to_timestamp(${from})` : undefined
-        const toDay = to ? sql`to_timestamp(${to})` : undefined
-
         const expressions: (SQL<unknown> | undefined)[] = [
           // Filter by name
           search ? ilike(columns.name, filter) : undefined,
-          // Filter by createdAt
-          fromDay && toDay
-            ? and(gte(columns.createdAt, fromDay), lte(columns.createdAt, toDay))
-            : undefined,
           project.id ? eq(columns.projectId, project.id) : undefined,
         ]
         const where: DrizzleWhere<ApiKey> = and(...expressions)
 
         // Transaction is used to ensure both queries are executed in a single transaction
         const { data, total } = await opts.ctx.db.transaction(async (tx) => {
-          const query = tx.select().from(schema.apikeys).where(where) // query that you want to execute with pagination
+          let query = tx.select().from(schema.apikeys).where(where).$dynamic()
+          query = withDateFilters(query, columns.createdAt, from, to)
 
           const data = await withPagination(
-            query.$dynamic(),
-            asc(schema.apikeys.createdAt),
+            query,
+            [
+              {
+                column: columns.createdAt,
+                order: "desc",
+              },
+            ],
             page,
             page_size
           )

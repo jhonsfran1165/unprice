@@ -16,11 +16,7 @@ export default async function ApiKeysPage(props: {
   searchParams: SearchParams
 }) {
   const filters = filtersDataTableCache.parse(props.searchParams)
-  const { apikeys, pageCount } = await api.apikeys.listByActiveProject({
-    ...filters,
-    to: filters.to?.getTime() ?? null,
-    from: filters.from?.getTime() ?? null,
-  })
+  const { apikeys, pageCount } = await api.apikeys.listByActiveProject(filters)
 
   return (
     <DashboardShell

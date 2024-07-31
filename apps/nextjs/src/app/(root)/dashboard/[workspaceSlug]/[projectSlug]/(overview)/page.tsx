@@ -1,8 +1,6 @@
 import { formatRelative } from "date-fns"
 
 import type { RouterOutputs } from "@unprice/api"
-import type { Interval } from "@unprice/tinybird"
-import { DEFAULT_INTERVAL, INTERVAL_KEYS } from "@unprice/tinybird"
 import { Button } from "@unprice/ui/button"
 import {
   Card,
@@ -14,13 +12,14 @@ import {
 } from "@unprice/ui/card"
 import { Activity, ChevronRight, CreditCard, DollarSign, Users } from "@unprice/ui/icons"
 import { cn } from "@unprice/ui/utils"
-import { parseAsStringEnum } from "nuqs/server"
+import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
 import { AnalyticsCard } from "~/components/analytics/analytics-card"
 import { UsageChart } from "~/components/analytics/usage-chart"
 import { VerificationsChart } from "~/components/analytics/verifications-chart"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { SuperLink } from "~/components/super-link"
+import { intervalParserCache } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
 
@@ -30,14 +29,12 @@ import { LoadingCard } from "../_components/loading-card"
 // Only needed if we want dynamic data but we moved this to AnalyticsCard to prefetch data
 // export const dynamic = "force-dynamic"
 
-const intervalParser = parseAsStringEnum(INTERVAL_KEYS).withDefault(DEFAULT_INTERVAL)
-
 export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
-  searchParams: { interval?: Interval }
+  searchParams: SearchParams
 }) {
   const { projectSlug, workspaceSlug } = props.params
-  const interval = intervalParser.parseServerSide(props.searchParams.interval)
+  const filter = intervalParserCache.parse(props.searchParams)
 
   return (
     <DashboardShell>
@@ -89,7 +86,7 @@ export default async function DashboardPage(props: {
             "getAllFeatureVerificationsActiveProject",
             "getTotalUsagePerFeatureActiveProject",
           ]}
-          interval={interval}
+          interval={filter.interval}
           className="w-full"
           title="Feature Verifications & Usage"
           description="Feature verifications and usage recorded for this month."
