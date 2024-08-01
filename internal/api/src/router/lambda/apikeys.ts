@@ -11,9 +11,8 @@ import {
   selectApiKeySchema,
 } from "@unprice/db/validators"
 
-import { withDateFilters, withPagination } from "@unprice/db/utils"
+import { type DrizzleWhere, withDateFilters, withPagination } from "@unprice/db/utils"
 import { createTRPCRouter, protectedActiveProjectProcedure } from "../../trpc"
-import type { DrizzleWhere } from "../../utils"
 
 export const apiKeyRouter = createTRPCRouter({
   listByActiveProject: protectedActiveProjectProcedure

@@ -1,4 +1,5 @@
 import { type Dinero, multiply, toSnapshot, transformScale, up } from "dinero.js"
+import type { SQL } from "drizzle-orm"
 
 export * from "./utils/_table"
 export * from "./utils/constants"
@@ -14,6 +15,8 @@ export const createSlug = () => {
     },
   })
 }
+
+export type DrizzleWhere<T> = SQL<unknown> | ((aliases: T) => SQL<T> | undefined) | undefined
 
 export const isSlug = (str?: string) => {
   return /^[a-z0-9-]+-[a-z0-9-]+$/.test(str ?? "")

@@ -18,6 +18,7 @@ export type ApiKey = RouterOutputs["apikeys"]["listByActiveProject"]["apikeys"][
 export const columns: ColumnDef<ApiKey>[] = [
   {
     id: "select",
+    size: 40,
     header: ({ table }) => (
       <Checkbox
         checked={
@@ -29,7 +30,7 @@ export const columns: ColumnDef<ApiKey>[] = [
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
-        className="translate-y-[2px]"
+        className="translate-y-0.5"
       />
     ),
     cell: ({ row }) => (
@@ -37,7 +38,7 @@ export const columns: ColumnDef<ApiKey>[] = [
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
-        className="translate-y-[2px]"
+        className="translate-y-0.5"
       />
     ),
     enableSorting: false,
@@ -47,11 +48,13 @@ export const columns: ColumnDef<ApiKey>[] = [
     accessorKey: "name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
     cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
-    enableSorting: false,
+    enableSorting: true,
     enableHiding: false,
+    enableResizing: true,
   },
   {
     accessorKey: "key",
+    enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Key" />,
     cell: ({ row }) => {
       const [show, setShow] = useState(false)
@@ -155,6 +158,9 @@ export const columns: ColumnDef<ApiKey>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    cell: function Cell({ row }) {
+      return <DataTableRowActions row={row} />
+    },
+    size: 40,
   },
 ]

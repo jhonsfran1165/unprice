@@ -1,19 +1,21 @@
 import { TRPCError } from "@trpc/server"
-import { and, eq } from "@unprice/db"
+import { type SQL, and, count, eq, getTableColumns, ilike, or } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
+  type Customer,
   type FeatureType,
   customerInsertBaseSchema,
   customerSelectSchema,
   paymentProviderSchema,
   planSelectBaseSchema,
   planVersionSelectBaseSchema,
-  searchDataParamsSchema,
+  searchParamsSchemaDataTable,
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
 
+import { type DrizzleWhere, withDateFilters, withPagination } from "@unprice/db/utils"
 import { deniedReasonSchema } from "../../pkg/errors"
 import { StripePaymentProvider } from "../../pkg/payment-provider/stripe"
 import { createTRPCRouter, protectedApiOrActiveProjectProcedure } from "../../trpc"
@@ -532,11 +534,13 @@ export const customersRouter = createTRPCRouter({
       }
     }),
   listByActiveProject: protectedApiOrActiveProjectProcedure
-    .input(searchDataParamsSchema)
-    .output(z.object({ customers: z.array(customerSelectSchema) }))
+    .input(searchParamsSchemaDataTable)
+    .output(z.object({ customers: z.array(customerSelectSchema), pageCount: z.number() }))
     .query(async (opts) => {
-      const { fromDate, toDate } = opts.input
+      const { page, page_size, search, from, to } = opts.input
       const { project } = opts.ctx
+      const columns = getTableColumns(schema.customers)
+      const filter = `%${search}%`
 
       // we just need to validate the entitlements
       // await entitlementGuard({
@@ -545,20 +549,51 @@ export const customersRouter = createTRPCRouter({
       //   ctx,
       // })
 
-      const customers = await opts.ctx.db.query.customers.findMany({
-        where: (customer, { eq, and, between, gte, lte }) =>
-          and(
-            eq(customer.projectId, project.id),
-            fromDate && toDate
-              ? between(customer.createdAt, new Date(fromDate), new Date(toDate))
-              : undefined,
-            fromDate ? gte(customer.createdAt, new Date(fromDate)) : undefined,
-            toDate ? lte(customer.createdAt, new Date(toDate)) : undefined
-          ),
-      })
+      try {
+        const expressions: (SQL<unknown> | undefined)[] = [
+          // Filter by name
+          search ? or(ilike(columns.name, filter), ilike(columns.email, filter)) : undefined,
+          project.id ? eq(columns.projectId, project.id) : undefined,
+        ]
+        const where: DrizzleWhere<Customer> = and(...expressions)
 
-      return {
-        customers: customers,
+        // Transaction is used to ensure both queries are executed in a single transaction
+        const { data, total } = await opts.ctx.db.transaction(async (tx) => {
+          let query = tx.select().from(schema.customers).where(where).$dynamic()
+          query = withDateFilters(query, columns.createdAt, from, to)
+
+          const data = await withPagination(
+            query,
+            [
+              {
+                column: columns.createdAt,
+                order: "desc",
+              },
+            ],
+            page,
+            page_size
+          )
+
+          const total = await tx
+            .select({
+              count: count(),
+            })
+            .from(schema.customers)
+            .where(where)
+            .execute()
+            .then((res) => res[0]?.count ?? 0)
+
+          return {
+            data,
+            total,
+          }
+        })
+
+        const pageCount = Math.ceil(total / page_size)
+        return { customers: data, pageCount }
+      } catch (err: unknown) {
+        console.error(err)
+        return { customers: [], pageCount: 0 }
       }
     }),
 

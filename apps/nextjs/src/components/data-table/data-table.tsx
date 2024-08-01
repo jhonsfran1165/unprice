@@ -77,6 +77,7 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      columnPinning: { right: ["actions"] },
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
@@ -94,16 +95,26 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("w-full space-y-4 overflow-auto", className)}>
       <DataTableToolbar table={table} filterOptions={filterOptions} />
-      <div className="rounded-md border bg-background">
+      <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const isPinned = header.column.getIsPinned()
+
                   return (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      className={cn("relative", {
+                        "sticky z-10 bg-background-bgSubtle": isPinned,
+                        "left-0 border-r": isPinned === "left",
+                        "right-0 border-l": isPinned === "right",
+                      })}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
@@ -117,16 +128,27 @@ export function DataTable<TData, TValue>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const isPinned = cell.column.getIsPinned()
+
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        className={cn("relative", {
+                          "sticky z-10 bg-background-bgSubtle": isPinned,
+                          "left-0 border-r": isPinned === "left",
+                          "right-0 border-l": isPinned === "right",
+                        })}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    )
+                  })}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>

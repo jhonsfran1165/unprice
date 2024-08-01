@@ -13,6 +13,7 @@ import { DataTableRowActions } from "./data-table-row-actions"
 export const columns: ColumnDef<Customer>[] = [
   {
     id: "select",
+    size: 40,
     header: ({ table }) => (
       <Checkbox
         checked={
@@ -42,13 +43,15 @@ export const columns: ColumnDef<Customer>[] = [
         <div className="lowercase">{row.getValue("name")}</div>
       </SuperLink>
     ),
+    enableResizing: true,
   },
   {
     accessorKey: "email",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
-    cell: ({ row }) => <div className="w-[80px]">{row.getValue("email")}</div>,
+    cell: ({ row }) => <div className="">{row.getValue("email")}</div>,
     enableSorting: false,
     enableHiding: false,
+    enableResizing: true,
   },
   {
     accessorKey: "createdAt",
@@ -60,5 +63,6 @@ export const columns: ColumnDef<Customer>[] = [
   {
     id: "actions",
     cell: ({ row }) => <DataTableRowActions row={row} />,
+    size: 40,
   },
 ]

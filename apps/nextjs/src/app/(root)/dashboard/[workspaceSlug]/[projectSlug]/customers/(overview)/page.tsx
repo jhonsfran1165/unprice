@@ -1,32 +1,20 @@
-import { searchDataParamsSchema } from "@unprice/db/validators"
-
 import { Button } from "@unprice/ui/button"
 import { Plus } from "lucide-react"
+import type { SearchParams } from "nuqs/server"
 import { columns } from "~/app/(root)/dashboard/[workspaceSlug]/[projectSlug]/customers/_components/table/columns"
 import { DataTable } from "~/components/data-table/data-table"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
+import { filtersDataTableCache } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
 import { CustomerDialog } from "../_components/customer-dialog"
 
 export default async function ProjectUsersPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
-  searchParams: Record<string, string | string[] | undefined>
+  searchParams: SearchParams
 }) {
-  const parsed = searchDataParamsSchema.safeParse(props.searchParams)
-
-  const filter = {
-    projectSlug: props.params.projectSlug,
-    fromDate: undefined as number | undefined,
-    toDate: undefined as number | undefined,
-  }
-
-  if (parsed?.success) {
-    filter.fromDate = parsed.data.fromDate
-    filter.toDate = parsed.data.toDate
-  }
-
-  const { customers } = await api.customers.listByActiveProject(filter)
+  const filters = filtersDataTableCache.parse(props.searchParams)
+  const { customers, pageCount } = await api.customers.listByActiveProject(filters)
 
   return (
     <DashboardShell
@@ -46,12 +34,14 @@ export default async function ProjectUsersPage(props: {
       }
     >
       <DataTable
+        pageCount={pageCount}
         columns={columns}
         data={customers}
         filterOptions={{
           filterBy: "email",
           filterColumns: true,
           filterDateRange: true,
+          filterServerSide: false,
         }}
       />
     </DashboardShell>
