@@ -183,6 +183,24 @@ export function PlanForm({
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="enterprisePlan"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Enterprise plan?</FormLabel>
+                  <FormDescription>
+                    Enterprises plans are rendered differently in the frontend.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
         </div>
 
         <div className="mt-8 flex justify-end space-x-4">

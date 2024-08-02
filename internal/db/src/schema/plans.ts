@@ -27,6 +27,8 @@ export const plans = pgTableProject(
     // this is useful for the free plan
     // all users will fall back to this plan if they don't have a subscription or they downgrade their plan
     defaultPlan: boolean("default_plan").default(false),
+    // whether this is an enterprise plan or not, enterprise plans are rendered differently in the frontend
+    enterprisePlan: boolean("enterprise_plan").default(false),
   },
   (table) => ({
     primary: primaryKey({

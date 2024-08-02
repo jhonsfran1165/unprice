@@ -26,7 +26,7 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { slug, description, defaultPlan } = opts.input
+      const { slug, description, defaultPlan, enterprisePlan } = opts.input
       const project = opts.ctx.project
 
       const planId = utils.newId("plan")
@@ -45,6 +45,21 @@ export const planRouter = createTRPCRouter({
         }
       }
 
+      if (enterprisePlan) {
+        const enterprisePlanData = await opts.ctx.db.query.plans.findFirst({
+          where: (plan, { eq, and }) =>
+            and(eq(plan.projectId, project.id), eq(plan.enterprisePlan, true)),
+        })
+
+        if (enterprisePlanData?.id) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message:
+              "There is already an enterprise plan for this project, create a new version instead",
+          })
+        }
+      }
+
       const planData = await opts.ctx.db
         .insert(schema.plans)
         .values({
@@ -54,6 +69,7 @@ export const planRouter = createTRPCRouter({
           description,
           active: true,
           defaultPlan: defaultPlan ?? false,
+          enterprisePlan: enterprisePlan ?? false,
         })
         .returning()
         .then((planData) => {
@@ -117,7 +133,7 @@ export const planRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { id, description, active, defaultPlan } = opts.input
+      const { id, description, active, defaultPlan, enterprisePlan } = opts.input
       const project = opts.ctx.project
 
       const planData = await opts.ctx.db.query.plans.findFirst({
@@ -151,6 +167,22 @@ export const planRouter = createTRPCRouter({
           })
         }
       }
+
+      if (enterprisePlan) {
+        const enterprisePlanData = await opts.ctx.db.query.plans.findFirst({
+          where: (plan, { eq, and }) =>
+            and(eq(plan.projectId, project.id), eq(plan.enterprisePlan, true)),
+        })
+
+        if (enterprisePlanData && enterprisePlanData.id !== id) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message:
+              "There is already an enterprise plan for this project, create a new version instead",
+          })
+        }
+      }
+
       // TODO: is it a good idea to let the user update the plan?
       // maybe we should think what happen if the user update the plan and there are versions
       // that are not compatible with the new plan. This is also a good reason to have a version as a snapshot
@@ -162,6 +194,7 @@ export const planRouter = createTRPCRouter({
           description,
           active,
           defaultPlan: defaultPlan ?? false,
+          enterprisePlan: enterprisePlan ?? false,
           updatedAt: new Date(),
         })
         .where(and(eq(schema.plans.id, id), eq(schema.plans.projectId, project.id)))

@@ -4,7 +4,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
 import { Typography } from "@unprice/ui/typography"
 import { Plus } from "lucide-react"
 import { notFound } from "next/navigation"
+import { Suspense } from "react"
 import { DataTable } from "~/components/data-table/data-table"
+import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { api } from "~/trpc/server"
@@ -83,26 +85,38 @@ export default async function PlanPage({
                 All versions of this plan
               </Typography>
             </div>
-            <DataTable
-              columns={columns}
-              data={plan.versions}
-              filterOptions={{
-                filterBy: "title",
-                filterColumns: false,
-                filterDateRange: false,
-                filterServerSide: false,
-                filterSelectors: {
-                  status: [
-                    { value: "published", label: "Published" },
-                    { value: "draft", label: "Draft" },
-                  ],
-                  currency: [
-                    { value: "USD", label: "USD" },
-                    { value: "EUR", label: "EUR" },
-                  ],
-                },
-              }}
-            />
+            <Suspense
+              fallback={
+                <DataTableSkeleton
+                  columnCount={7}
+                  searchableColumnCount={1}
+                  filterableColumnCount={2}
+                  cellWidths={["10rem", "40rem", "12rem", "12rem", "12rem", "12rem", "8rem"]}
+                  shrinkZero
+                />
+              }
+            >
+              <DataTable
+                columns={columns}
+                data={plan.versions}
+                filterOptions={{
+                  filterBy: "title",
+                  filterColumns: false,
+                  filterDateRange: false,
+                  filterServerSide: false,
+                  filterSelectors: {
+                    status: [
+                      { value: "published", label: "Published" },
+                      { value: "draft", label: "Draft" },
+                    ],
+                    currency: [
+                      { value: "USD", label: "USD" },
+                      { value: "EUR", label: "EUR" },
+                    ],
+                  },
+                }}
+              />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="customers" className="mt-4">

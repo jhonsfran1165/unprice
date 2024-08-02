@@ -68,6 +68,23 @@ export const columns: ColumnDef<PlanVersion>[] = [
     enableSorting: true,
     enableHiding: false,
     enableResizing: true,
+    filterFn: (row, _, filterValue) => {
+      // search by title and description
+      const searchValue = filterValue.toLowerCase()
+      const title = row.original.title.toLowerCase()
+      const version = row.original.version.toString().toLowerCase()
+      const description = row.original.description?.toLowerCase() ?? ""
+
+      if (
+        title.includes(searchValue) ||
+        version.includes(searchValue) ||
+        description.includes(searchValue)
+      ) {
+        return true
+      }
+
+      return false
+    },
   },
   {
     accessorKey: "currency",

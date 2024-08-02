@@ -18,6 +18,7 @@ interface DataTableToolbarProps<TData> {
 }
 
 export function DataTableToolbar<TData>({ table, filterOptions }: DataTableToolbarProps<TData>) {
+  // Controls ss pagination
   const [filters, setFilters] = useFilterDataTable()
   const isFiltered = table.getState().columnFilters.length > 0
   const filterBy = filterOptions?.filterBy ?? ""

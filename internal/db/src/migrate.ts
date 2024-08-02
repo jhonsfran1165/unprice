@@ -6,7 +6,7 @@ import { newId } from "./utils"
 import { migrate } from "drizzle-orm/neon-serverless/migrator"
 
 async function main() {
-  await migrate(db, { migrationsFolder: "src/migrations/neon" })
+  await migrate(db, { migrationsFolder: "src/migrations/local" })
 
   const start = Date.now()
   console.info("⏳ Running migrations...")

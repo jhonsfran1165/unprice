@@ -54,6 +54,12 @@ export function PlanCard(props: {
                     <span className="ml-1">{"default"}</span>
                   </div>
                 )}
+                {plan.enterprisePlan && (
+                  <div className="inline-flex items-center font-secondary font-semibold text-info text-xs">
+                    <span className="flex h-2 w-2 rounded-full bg-info" />
+                    <span className="ml-1">{"enterprise"}</span>
+                  </div>
+                )}
               </div>
             </CardTitle>
             <CardDescription className="line-clamp-2 h-10">{plan.description}</CardDescription>
