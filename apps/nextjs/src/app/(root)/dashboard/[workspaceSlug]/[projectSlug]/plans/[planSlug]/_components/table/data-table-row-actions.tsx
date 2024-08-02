@@ -64,7 +64,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <DialogContent className="max-h-screen overflow-y-scroll md:max-w-screen-lg">
+      <DialogContent className="max-h-screen overflow-y-scroll md:max-w-screen-md">
         <DialogHeader>
           <DialogTitle>Plan Version Form</DialogTitle>
           <DialogDescription>Modify the plan version details below.</DialogDescription>

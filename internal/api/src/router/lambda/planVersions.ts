@@ -66,23 +66,8 @@ export const planVersionRouter = createTRPCRouter({
       // this should happen in a transaction because we need to change the status of the previous version
       const planVersionData = await opts.ctx.db.transaction(async (tx) => {
         try {
-          // set the latest version to false if there is a latest version
-          await tx
-            .update(schema.versions)
-            .set({
-              latest: false,
-            })
-            .where(
-              and(
-                eq(schema.versions.projectId, project.id),
-                eq(schema.versions.latest, true),
-                eq(schema.versions.planId, planId)
-              )
-            )
-            .returning()
-            .then((re) => re[0])
-
-          const countVersionsPlan = await opts.ctx.db
+          // get the count of versions for this plan
+          const countVersionsPlan = await tx
             .select({ count: sql<number>`count(*)` })
             .from(schema.versions)
             .where(
@@ -102,15 +87,13 @@ export const planVersionRouter = createTRPCRouter({
               status: status ?? "draft",
               paymentProvider,
               planType,
-              // TODO: is latest really necessary?
-              latest: true,
               currency,
               billingPeriod: billingPeriod ?? "month",
               startCycle: startCycle ?? null,
               gracePeriod: gracePeriod ?? 0,
               whenToBill: whenToBill ?? "pay_in_advance",
               metadata,
-              version: countVersionsPlan + 1,
+              version: Number(countVersionsPlan) + 1,
             })
             .returning()
             .catch((err) => {
@@ -489,21 +472,19 @@ export const planVersionRouter = createTRPCRouter({
       // this should happen in a transaction because we need to create every feature version
       const duplicatedVersion = await opts.ctx.db.transaction(async (tx) => {
         try {
-          // set the latest version to false if there is a latest version
-          const latestVersion = await tx
-            .update(schema.versions)
-            .set({
-              latest: false,
-            })
+          // get the count of versions for this plan
+          const countVersionsPlan = await tx
+            .select({ count: sql<number>`count(*)` })
+            .from(schema.versions)
             .where(
               and(
                 eq(schema.versions.projectId, project.id),
-                eq(schema.versions.latest, true),
                 eq(schema.versions.planId, planVersionData.planId)
               )
             )
-            .returning()
-            .then((re) => re[0])
+            .then((res) => res[0]?.count ?? 0)
+
+          console.log("countVersionsPlan", countVersionsPlan)
 
           // duplicate the plan version
           const planVersionDataDuplicated = await tx
@@ -516,7 +497,7 @@ export const planVersionRouter = createTRPCRouter({
               status: "draft",
               createdAt: new Date(),
               updatedAt: new Date(),
-              version: latestVersion?.version ? latestVersion.version + 1 : 1,
+              version: Number(countVersionsPlan) + 1,
             })
             .returning()
             .catch((err) => {
@@ -683,13 +664,30 @@ export const planVersionRouter = createTRPCRouter({
               })
           }
 
-          const versionUpdated = await opts.ctx.db
+          // set the latest version to false if there is a latest version
+          await tx
+            .update(schema.versions)
+            .set({
+              latest: false,
+            })
+            .where(
+              and(
+                eq(schema.versions.projectId, project.id),
+                eq(schema.versions.latest, true),
+                eq(schema.versions.id, planVersionData.id)
+              )
+            )
+            .returning()
+            .then((re) => re[0])
+
+          const versionUpdated = await tx
             .update(schema.versions)
             .set({
               status: "published",
               updatedAt: new Date(),
               publishedAt: new Date(),
               publishedBy: opts.ctx.userId,
+              latest: true,
             })
             .where(and(eq(schema.versions.id, planVersionData.id)))
             .returning()
