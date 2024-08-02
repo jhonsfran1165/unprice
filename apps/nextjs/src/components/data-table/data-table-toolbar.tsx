@@ -12,29 +12,6 @@ import type { FilterOptionDataTable } from "./data-table"
 import { DataTableFacetedFilter } from "./data-table-faceted-filter"
 import { DataTableViewOptions } from "./data-table-view-options"
 
-export const statuses = [
-  {
-    value: "backlog",
-    label: "Backlog",
-  },
-  {
-    value: "todo",
-    label: "Todo",
-  },
-  {
-    value: "in progress",
-    label: "In Progress",
-  },
-  {
-    value: "done",
-    label: "Done",
-  },
-  {
-    value: "canceled",
-    label: "Canceled",
-  },
-]
-
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
   filterOptions?: FilterOptionDataTable
@@ -44,7 +21,25 @@ export function DataTableToolbar<TData>({ table, filterOptions }: DataTableToolb
   const [filters, setFilters] = useFilterDataTable()
   const isFiltered = table.getState().columnFilters.length > 0
   const filterBy = filterOptions?.filterBy ?? ""
-  const status = table.getAllColumns().find((column) => column.id === "status")
+
+  const filterBySelectors = filterOptions?.filterSelectors ?? {}
+  const filterSelectors = Object.keys(filterBySelectors).map((key) => {
+    const filter = table.getColumn(key)
+    const options = filterBySelectors[key] ?? []
+
+    if (filter && options.length > 0) {
+      return (
+        <DataTableFacetedFilter
+          key={key}
+          column={filter}
+          title={key.charAt(0).toUpperCase() + key.slice(1)}
+          options={options}
+        />
+      )
+    }
+
+    return null
+  })
 
   return (
     <div className="flex items-center justify-between">
@@ -63,13 +58,7 @@ export function DataTableToolbar<TData>({ table, filterOptions }: DataTableToolb
             className="h-8 w-[150px] bg-background lg:w-[250px]"
           />
         )}
-        {status && (
-          <DataTableFacetedFilter
-            column={table.getColumn("status")}
-            title="Status"
-            options={statuses}
-          />
-        )}
+        {filterSelectors}
         {isFiltered && (
           <Button
             variant="ghost"

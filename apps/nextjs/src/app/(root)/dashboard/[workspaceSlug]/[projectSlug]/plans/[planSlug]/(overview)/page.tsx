@@ -1,38 +1,16 @@
-import { MoreVertical, Plus } from "lucide-react"
-import { notFound } from "next/navigation"
-
-import { Badge } from "@unprice/ui/badge"
 import { Button } from "@unprice/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@unprice/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@unprice/ui/dropdown-menu"
 import { Separator } from "@unprice/ui/separator"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
-import { cn } from "@unprice/ui/utils"
+import { Typography } from "@unprice/ui/typography"
+import { Plus } from "lucide-react"
+import { notFound } from "next/navigation"
+import { DataTable } from "~/components/data-table/data-table"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
-import { SuperLink } from "~/components/super-link"
-import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import { PlanActions } from "../../_components/plan-actions"
-import { PlanVersionDuplicate } from "../../_components/plan-version-actions"
 import { PlanVersionDialog } from "../_components/plan-version-dialog"
-import { PlanVersionForm } from "../_components/plan-version-form"
+import { columns } from "../_components/table/columns"
 
 export default async function PlanPage({
   params,
@@ -44,7 +22,7 @@ export default async function PlanPage({
     planVersionId: string
   }
 }) {
-  const { planSlug, workspaceSlug, projectSlug } = params
+  const { planSlug } = params
 
   const { plan } = await api.plans.getBySlug({
     slug: planSlug,
@@ -93,124 +71,45 @@ export default async function PlanPage({
       <div className="flex flex-col">
         <Tabs defaultValue="versions">
           <div className="flex items-center">
-            <TabsList>
+            <TabsList variant="line">
               <TabsTrigger value="versions">Versions</TabsTrigger>
+              <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+              <TabsTrigger value="customers">Customers</TabsTrigger>
             </TabsList>
           </div>
-          <TabsContent value="versions">
-            <Card>
-              <CardHeader className="px-7">
-                <CardTitle>Plan Versions</CardTitle>
-                <CardDescription>All versions of this plan</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="table-cell text-left">Title</TableHead>
-                      <TableHead className="table-cell text-center">Currency</TableHead>
-                      <TableHead className="hidden text-center sm:table-cell">Type</TableHead>
-                      <TableHead className="table-cell text-center">Status</TableHead>
-                      <TableHead className="table-cell text-center">Date</TableHead>
-                      <TableHead className="table-cell text-left">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {plan.versions.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center">
-                          No versions found
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {plan.versions.map((version) => (
-                      <TableRow key={version.id}>
-                        <TableCell className="table-cell">
-                          <SuperLink
-                            href={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${version.id}`}
-                            prefetch={false}
-                          >
-                            <div className="font-bold">
-                              {version.title} - v{version.version}
-                            </div>
-                            {version.description && (
-                              <div className="hidden text-muted-foreground text-xs md:inline">
-                                {`${version.description.slice(0, 20)}...`}
-                              </div>
-                            )}
-                          </SuperLink>
-                        </TableCell>
-                        <TableCell className="table-cell text-center">
-                          <Badge className="text-xs" variant="secondary">
-                            {version.currency}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden text-center md:table-cell">
-                          <Badge className="text-xs">{version.planType}</Badge>
-                        </TableCell>
-                        <TableCell className="table-cell text-center">
-                          <Badge
-                            className={cn({
-                              success: version.status === "published",
-                            })}
-                          >
-                            {version.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden text-center md:table-cell">
-                          <span className="text-xs">{formatDate(version.updatedAt)}</span>
-                        </TableCell>
-                        <TableCell className="table-cell justify-start">
-                          <div className="flex flex-row space-x-1">
-                            <Dialog>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button aria-haspopup="true" size="icon" variant="ghost">
-                                    <MoreVertical className="h-4 w-4" />
-                                    <span className="sr-only">Toggle menu</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DialogTrigger asChild>
-                                    <DropdownMenuItem>Edit version</DropdownMenuItem>
-                                  </DialogTrigger>
-                                  <DropdownMenuItem asChild>
-                                    <PlanVersionDuplicate
-                                      classNames="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-background-bgHover"
-                                      planVersionId={version.id}
-                                    />
-                                  </DropdownMenuItem>
+          <TabsContent value="versions" className="mt-4">
+            <div className="flex flex-col px-1 py-4">
+              <Typography variant="p" affects="removePaddingMargin">
+                All versions of this plan
+              </Typography>
+            </div>
+            <DataTable
+              columns={columns}
+              data={plan.versions}
+              filterOptions={{
+                filterBy: "title",
+                filterColumns: false,
+                filterDateRange: false,
+                filterServerSide: false,
+                filterSelectors: {
+                  status: [
+                    { value: "published", label: "Published" },
+                    { value: "draft", label: "Draft" },
+                  ],
+                  currency: [
+                    { value: "USD", label: "USD" },
+                    { value: "EUR", label: "EUR" },
+                  ],
+                },
+              }}
+            />
+          </TabsContent>
 
-                                  <DropdownMenuItem>
-                                    <SuperLink
-                                      href={`/${workspaceSlug}/${projectSlug}/plans/${planSlug}/${version.id}`}
-                                    >
-                                      Configure features
-                                    </SuperLink>
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Plan Version Form</DialogTitle>
-                                  <DialogDescription>
-                                    Modify the plan version details below.
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <PlanVersionForm defaultValues={version} />
-                              </DialogContent>
-                            </Dialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="customers" className="mt-4">
+            dasd
+          </TabsContent>
+          <TabsContent value="subscriptions" className="mt-4">
+            dsd
           </TabsContent>
         </Tabs>
       </div>

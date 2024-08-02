@@ -31,6 +31,15 @@ export interface FilterOptionDataTable {
   filterDateRange?: boolean
   filterColumns?: boolean
   filterServerSide?: boolean
+  // when you define filterSelectors, you need filterfn in the column definition
+  filterSelectors?: Record<
+    string,
+    {
+      label: string
+      value: string | number
+      icon?: React.ComponentType<{ className?: string }>
+    }[]
+  >
 }
 
 interface DataTableProps<TData, TValue> {
@@ -38,7 +47,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   filterOptions?: FilterOptionDataTable
   className?: string
-  pageCount: number
+  pageCount?: number
 }
 
 export function DataTable<TData, TValue>({
@@ -53,27 +62,32 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
+
+  // if pageCount is provided, we assume server-side pagination
+  // otherwise, we assume client-side pagination done by the library
+  const isServerSidePagination = !!pageCount
+
   // Handle server-side pagination
-  const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
+  const [page, setPagination] = React.useState<PaginationState>({
     pageIndex: filters.page - 1,
     pageSize: filters.page_size ?? 10,
   })
 
   const pagination = React.useMemo(
     () => ({
-      pageIndex,
-      pageSize,
+      pageIndex: page.pageIndex,
+      pageSize: page.pageSize,
     }),
-    [pageIndex, pageSize]
+    [page.pageIndex, page.pageSize]
   )
 
   const table = useReactTable({
     data,
     columns,
-    pageCount: pageCount ?? -1,
+    ...(isServerSidePagination && { pageCount }),
     state: {
       sorting,
-      pagination,
+      ...(isServerSidePagination && { pagination }),
       columnVisibility,
       rowSelection,
       columnFilters,
@@ -90,8 +104,10 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    onPaginationChange: setPagination,
-    manualPagination: true,
+    ...(isServerSidePagination && {
+      manualPagination: true,
+      onPaginationChange: setPagination,
+    }),
   })
 
   return (
@@ -109,10 +125,13 @@ export function DataTable<TData, TValue>({
                     <TableHead
                       key={header.id}
                       colSpan={header.colSpan}
+                      style={{
+                        minWidth: header.getSize() ? header.getSize() : 0,
+                      }}
                       className={cn("relative", {
                         "sticky z-10 bg-background-bgSubtle": isPinned,
-                        "left-0 border-r": isPinned === "left",
-                        "right-0 border-l": isPinned === "right",
+                        "-left-1 border-r": isPinned === "left",
+                        "-right-1 border-l": isPinned === "right",
                       })}
                     >
                       {header.isPlaceholder
@@ -136,8 +155,8 @@ export function DataTable<TData, TValue>({
                         key={cell.id}
                         className={cn("relative", {
                           "sticky z-10 bg-background-bgSubtle": isPinned,
-                          "left-0 border-r": isPinned === "left",
-                          "right-0 border-l": isPinned === "right",
+                          "-left-1 border-r": isPinned === "left",
+                          "-right-1 border-l": isPinned === "right",
                         })}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -156,7 +175,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination table={table} serverSidePagination={isServerSidePagination} />
     </div>
   )
 }

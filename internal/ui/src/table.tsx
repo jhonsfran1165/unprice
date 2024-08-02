@@ -1,11 +1,29 @@
 import * as React from "react"
 
+import { type VariantProps, cva } from "class-variance-authority"
 import { cn } from "./utils"
 
-const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
-  ({ className, ...props }, ref) => (
+const tableVariants = cva(cn("w-full caption-bottom text-sm"), {
+  variants: {
+    variant: {
+      classic:
+        "[&_td]:border [&_td]:px-4 [&_td]:py-2 [&_td]:text-left [&_td]:[&[align=center]]:text-center [&_td]:[&[align=right]]:text-right [&_th]:border [&_th]:px-4 [&_th]:py-2 [&_th]:text-left [&_th]:font-bold [&_th]:[&[align=center]]:text-center [&_th]:[&[align=right]]:text-right [&_tr]:m-0 [&_tr]:border-t [&_tr]:p-0 even:[&_tr]:bg-background-bg",
+      default: "",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+})
+
+export interface TableProps
+  extends React.HTMLAttributes<HTMLTableElement>,
+    VariantProps<typeof tableVariants> {}
+
+const Table = React.forwardRef<HTMLTableElement, TableProps>(
+  ({ className, variant, ...props }, ref) => (
     <div className="relative w-full overflow-auto">
-      <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
+      <table ref={ref} className={cn(tableVariants({ variant }), className)} {...props} />
     </div>
   )
 )
@@ -62,7 +80,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-12 px-2 text-left align-middle font-medium text-muted-foreground [&>[role=checkbox]]:translate-y-[2px] [&:has([role=checkbox])]:pr-0",
+      "h-12 px-2 text-left align-middle font-medium text-muted-foreground [&>[role=checkbox]]:translate-y-[2px] [&:has([role=checkbox])]:text-center",
       className
     )}
     {...props}
@@ -77,7 +95,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "h-12 p-2 align-middle [&>[role=checkbox]]:translate-y-[2px] [&:has([role=checkbox])]:pr-0",
+      "h-12 p-2 align-middle [&>[role=checkbox]]:translate-y-[2px] [&:has([role=checkbox])]:text-center",
       className
     )}
     {...props}

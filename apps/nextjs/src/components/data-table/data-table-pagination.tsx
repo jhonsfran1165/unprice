@@ -8,11 +8,13 @@ import { useFilterDataTable } from "~/hooks/use-filter-datatable"
 interface DataTablePaginationProps<TData> {
   table: Table<TData>
   pageSizeOptions?: number[]
+  serverSidePagination?: boolean
 }
 
 export function DataTablePagination<TData>({
   table,
   pageSizeOptions = [1, 10, 20, 30, 40, 50],
+  serverSidePagination,
 }: DataTablePaginationProps<TData>) {
   const [filters, setFilters] = useFilterDataTable()
   return (
@@ -27,10 +29,11 @@ export function DataTablePagination<TData>({
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
-              setFilters({
-                page_size: Number(value),
-                page: 1,
-              })
+              serverSidePagination &&
+                setFilters({
+                  page_size: Number(value),
+                  page: 1,
+                })
               table.setPageSize(Number(value))
             }}
           >
@@ -57,9 +60,10 @@ export function DataTablePagination<TData>({
             onClick={() => {
               table.setPageIndex(0)
 
-              setFilters({
-                page: 1,
-              })
+              serverSidePagination &&
+                setFilters({
+                  page: 1,
+                })
             }}
             disabled={!table.getCanPreviousPage()}
           >
@@ -73,9 +77,10 @@ export function DataTablePagination<TData>({
             onClick={() => {
               table.previousPage()
 
-              setFilters({
-                page: filters.page - 1,
-              })
+              serverSidePagination &&
+                setFilters({
+                  page: filters.page - 1,
+                })
             }}
             disabled={!table.getCanPreviousPage()}
           >
@@ -89,9 +94,10 @@ export function DataTablePagination<TData>({
             onClick={() => {
               table.nextPage()
 
-              setFilters({
-                page: filters.page + 1,
-              })
+              serverSidePagination &&
+                setFilters({
+                  page: filters.page + 1,
+                })
             }}
             disabled={!table.getCanNextPage()}
           >
@@ -105,9 +111,10 @@ export function DataTablePagination<TData>({
             onClick={() => {
               table.setPageIndex(table.getPageCount() - 1)
 
-              setFilters({
-                page: table.getPageCount() - 1,
-              })
+              serverSidePagination &&
+                setFilters({
+                  page: table.getPageCount() - 1,
+                })
             }}
             disabled={!table.getCanNextPage()}
           >

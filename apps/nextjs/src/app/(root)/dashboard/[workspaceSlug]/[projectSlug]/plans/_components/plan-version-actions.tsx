@@ -6,8 +6,10 @@ import { forwardRef, startTransition } from "react"
 
 import { Button } from "@unprice/ui/button"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
+import { toast } from "sonner"
 
 import { ConfirmAction } from "~/components/confirm-action"
+import { getErrorMessage } from "~/lib/handle-error"
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 import { usePlanFeaturesList } from "./use-features"
@@ -58,37 +60,44 @@ const PlanVersionPublish: React.FC<{ planVersionId: string }> = ({ planVersionId
 export interface PlanVersionDuplicateProps extends React.ComponentPropsWithoutRef<"button"> {
   planVersionId: string
   classNames?: string
+  onConfirmAction?: () => void
 }
 
 const PlanVersionDuplicate = forwardRef<ElementRef<"button">, PlanVersionDuplicateProps>(
   (props, ref) => {
-    const { planVersionId, classNames } = props
+    const { planVersionId, classNames, onConfirmAction } = props
 
     const router = useRouter()
 
     const duplicateVersion = api.planVersions.duplicate.useMutation({
       onSuccess: () => {
-        toastAction("saved")
         router.refresh()
       },
     })
 
     function onDuplicateVersion() {
       startTransition(() => {
-        void duplicateVersion.mutateAsync({
-          id: planVersionId,
-        })
+        toast.promise(
+          duplicateVersion.mutateAsync({
+            id: planVersionId,
+          }),
+          {
+            loading: "Duplicating...",
+            success: "Version duplicated",
+            error: (err) => getErrorMessage(err),
+          }
+        )
       })
     }
 
     return (
       <ConfirmAction
-        message="Once you publish this version, it will be available to your customers. You won't be able to edit it anymore. Are you sure you want to publish this version?"
+        message="Are you sure you want to duplicate this version?"
         confirmAction={() => {
+          onConfirmAction?.()
           onDuplicateVersion()
         }}
       >
-        {/* // TODO: create a confetti animation or something in the first version published? */}
         <Button
           ref={ref}
           className={classNames}
