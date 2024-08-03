@@ -79,6 +79,7 @@ export function SubscriptionForm({
 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery({
     published: true,
+    enterprisePlan: true,
   })
 
   const subscriptionPlanId = form.watch("planVersionId")
@@ -194,7 +195,7 @@ export function SubscriptionForm({
                         >
                           {data?.planVersions.map((version) => (
                             <CommandItem
-                              value={`${version.title} - v${version.version} - ${version.billingPeriod}`}
+                              value={version.id}
                               key={version.id}
                               onSelect={() => {
                                 field.onChange(version.id)
@@ -208,7 +209,7 @@ export function SubscriptionForm({
                                   version.id === field.value ? "opacity-100" : "opacity-0"
                                 )}
                               />
-                              {`${version.title} - v${version.version} - ${version.billingPeriod}`}
+                              {`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
                             </CommandItem>
                           ))}
                         </ScrollArea>

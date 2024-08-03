@@ -20,19 +20,24 @@ export function PricingCard({
   return (
     <Card className="flex w-[300px] flex-col">
       <CardHeader className="space-y-6">
-        <Typography variant="h2">{planVersion.title}</Typography>
+        <Typography variant="h2">{planVersion.plan.slug}</Typography>
 
-        <div className="mt-8 flex items-baseline space-x-2">
-          <span className="font-extrabold text-4xl">
-            {err ? "Error" : totalPricePlan.displayAmount}
-          </span>
-          <span className="text-sm">{planVersion.billingPeriod} + usage</span>
-        </div>
+        {/* // only show the price if it's not an enterprise plan */}
+        {!planVersion.plan.enterprisePlan && (
+          <div className="mt-8 flex items-baseline space-x-2">
+            <span className="font-extrabold text-4xl">
+              {err ? "Error" : totalPricePlan.displayAmount}
+            </span>
+            <span className="text-sm">{planVersion.billingPeriod} + usage</span>
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
         <CardDescription>{planVersion.description}</CardDescription>
-        <Button className="w-full">Get Started</Button>
+        <Button className="w-full">
+          {planVersion.plan.enterprisePlan ? "Contact Us" : "Get Started"}
+        </Button>
       </CardContent>
 
       <CardFooter className="border-t px-6 py-6">

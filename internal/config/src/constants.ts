@@ -1,7 +1,6 @@
 import { env } from "./env.mjs"
 
 export const STAGES = ["prod", "test", "dev"] as const
-export const STATUS_SUBSCRIPTION = ["active", "inactive"] as const
 
 const MAIN_DOMAIN = "unprice.dev"
 const SITES_DOMAIN = "builderai.sh"

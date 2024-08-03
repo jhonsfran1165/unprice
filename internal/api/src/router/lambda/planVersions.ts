@@ -777,6 +777,7 @@ export const planVersionRouter = createTRPCRouter({
     .input(
       z.object({
         published: z.boolean().optional(),
+        enterprisePlan: z.boolean().optional(),
       })
     )
     .output(
@@ -794,7 +795,7 @@ export const planVersionRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const { published } = opts.input
+      const { published, enterprisePlan } = opts.input
       const project = opts.ctx.project
 
       const planVersionData = await opts.ctx.db.query.versions.findMany({
@@ -823,8 +824,11 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
+      // TODO: improve this query so I can filter enterprises plans
       return {
-        planVersions: planVersionData,
+        planVersions: enterprisePlan
+          ? planVersionData
+          : planVersionData.filter((version) => !version.plan.enterprisePlan),
       }
     }),
 })

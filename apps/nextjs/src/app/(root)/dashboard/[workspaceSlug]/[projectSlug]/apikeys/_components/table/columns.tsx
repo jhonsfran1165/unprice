@@ -151,7 +151,7 @@ export const columns: ColumnDef<ApiKey>[] = [
       if (lastUsed === null) {
         return "Never used"
       }
-      return formatDate(lastUsed)
+      return <div>{formatDate(lastUsed)}</div>
     },
     enableSorting: true,
     enableHiding: true,

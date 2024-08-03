@@ -35,7 +35,7 @@ export const SubmitButton = ({
       onClick={onClick}
       {...props}
     >
-      {label}
+      <span className="line-clamp-1">{label}</span>
       {isPending && <LoadingAnimation className={cn("ml-2", className)} />}
     </Button>
   )

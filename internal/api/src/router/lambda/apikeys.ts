@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { type SQL, and, count, eq, getTableColumns, ilike, sql } from "@unprice/db"
+import { type SQL, count, eq, getTableColumns, ilike, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
@@ -11,7 +11,7 @@ import {
   selectApiKeySchema,
 } from "@unprice/db/validators"
 
-import { type DrizzleWhere, withDateFilters, withPagination } from "@unprice/db/utils"
+import { withDateFilters, withPagination } from "@unprice/db/utils"
 import { createTRPCRouter, protectedActiveProjectProcedure } from "../../trpc"
 
 export const apiKeyRouter = createTRPCRouter({
@@ -35,15 +35,15 @@ export const apiKeyRouter = createTRPCRouter({
           search ? ilike(columns.name, filter) : undefined,
           project.id ? eq(columns.projectId, project.id) : undefined,
         ]
-        const where: DrizzleWhere<ApiKey> = and(...expressions)
 
         // Transaction is used to ensure both queries are executed in a single transaction
         const { data, total } = await opts.ctx.db.transaction(async (tx) => {
-          let query = tx.select().from(schema.apikeys).where(where).$dynamic()
-          query = withDateFilters(query, columns.createdAt, from, to)
+          const query = tx.select().from(schema.apikeys).$dynamic()
+          const whereQuery = withDateFilters<ApiKey>(expressions, columns.createdAt, from, to)
 
           const data = await withPagination(
             query,
+            whereQuery,
             [
               {
                 column: columns.createdAt,
@@ -59,7 +59,7 @@ export const apiKeyRouter = createTRPCRouter({
               count: count(),
             })
             .from(schema.apikeys)
-            .where(where)
+            .where(whereQuery)
             .execute()
             .then((res) => res[0]?.count ?? 0)
 

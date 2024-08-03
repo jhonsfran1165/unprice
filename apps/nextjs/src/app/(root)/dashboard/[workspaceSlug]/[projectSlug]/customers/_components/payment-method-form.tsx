@@ -2,18 +2,12 @@
 
 import { PAYMENT_PROVIDERS } from "@unprice/db/utils"
 import type { Customer, PaymentProvider } from "@unprice/db/validators"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@unprice/ui/card"
+import { Card, CardContent, CardFooter } from "@unprice/ui/card"
 import { Label } from "@unprice/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { useState } from "react"
 
+import { Typography } from "@unprice/ui/typography"
 import { SubmitButton } from "~/components/submit-button"
 import { api } from "~/trpc/client"
 import { UserPaymentMethod } from "./payment-method"
@@ -44,12 +38,14 @@ export function PaymentMethodForm({
   const defaultPaymentMethod = data?.paymentMethods.at(0)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Default Payment Method</CardTitle>
-        <CardDescription>Default payment method for this customer</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-12">
+    <Card variant="ghost" className="py-4">
+      <div className="flex flex-col px-1 py-4">
+        <Typography variant="p" affects="removePaddingMargin">
+          Default payment method for this customer. This payment method will be used for all future
+          invoices.
+        </Typography>
+      </div>
+      <CardContent className="flex flex-col space-y-14 px-0 py-10">
         <UserPaymentMethod paymentMethod={defaultPaymentMethod} />
         <div className="mx-auto flex w-1/2 flex-col gap-2">
           <Label htmlFor="provider">Payment Provider</Label>
@@ -75,7 +71,7 @@ export function PaymentMethodForm({
       <CardFooter className="flex flex-col justify-center">
         <SubmitButton
           variant="default"
-          className="mx-auto w-56"
+          className="w-56"
           onClick={() => {
             createSession.mutate({
               paymentProvider: provider,

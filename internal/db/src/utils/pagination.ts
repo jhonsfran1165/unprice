@@ -1,10 +1,11 @@
-import { and, asc, between, desc, eq, gt, gte, lt, lte, or } from "drizzle-orm"
+import { type SQL, and, asc, between, desc, eq, gt, gte, lt, lte, or } from "drizzle-orm"
 import type { PgColumn, PgSelectQueryBuilder } from "drizzle-orm/pg-core"
 
 // this is a simple way to paginate a query, be aware that this is not the most efficient way to do it
 // if you have a large dataset you should use a cursor based pagination
-export function withPagination<T extends PgSelectQueryBuilder>(
+export function withPagination<S extends {}, T extends PgSelectQueryBuilder>(
   qb: T,
+  where: SQL<S>,
   orderByColumns: {
     column: PgColumn
     order: "asc" | "desc"
@@ -13,6 +14,7 @@ export function withPagination<T extends PgSelectQueryBuilder>(
   pageSize = 10
 ) {
   return qb
+    .where(where as SQL<S>)
     .orderBy(() =>
       orderByColumns.map(({ column, order }) => (order === "asc" ? asc(column) : desc(column)))
     )
@@ -79,8 +81,8 @@ export function withCursorPagination<T extends PgSelectQueryBuilder>(
 }
 
 // keep in mind that you have to create the indexes for the columns you are filtering by
-export function withDateFilters<T extends PgSelectQueryBuilder>(
-  qb: T,
+export function withDateFilters<T extends object>(
+  expressions: (SQL<unknown> | undefined)[],
   filterByColum: PgColumn,
   from: number | null,
   to: number | null
@@ -89,11 +91,12 @@ export function withDateFilters<T extends PgSelectQueryBuilder>(
   const fromDate = from ? new Date(from) : undefined
   const toDate = to ? new Date(to) : undefined
 
-  return qb.where(
-    and(
-      fromDate && toDate ? between(filterByColum, new Date(fromDate), new Date(toDate)) : undefined,
-      fromDate ? gte(filterByColum, new Date(fromDate)) : undefined,
-      toDate ? lte(filterByColum, new Date(toDate)) : undefined
-    )
+  const where = and(
+    and(...expressions),
+    fromDate && toDate ? between(filterByColum, new Date(fromDate), new Date(toDate)) : undefined,
+    fromDate ? gte(filterByColum, new Date(fromDate)) : undefined,
+    toDate ? lte(filterByColum, new Date(toDate)) : undefined
   )
+
+  return where as SQL<T>
 }

@@ -1,3 +1,4 @@
+import { CURRENCIES, STATUS_PLAN } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import { Separator } from "@unprice/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
@@ -70,63 +71,61 @@ export default async function PlanPage({
         />
       }
     >
-      <div className="flex flex-col">
-        <Tabs defaultValue="versions">
-          <div className="flex items-center">
-            <TabsList variant="line">
-              <TabsTrigger value="versions">Versions</TabsTrigger>
-              <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
-              <TabsTrigger value="customers">Customers</TabsTrigger>
-            </TabsList>
+      <Tabs defaultValue="versions">
+        <div className="flex items-center">
+          <TabsList variant="line">
+            <TabsTrigger value="versions">Versions</TabsTrigger>
+            <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+            <TabsTrigger value="customers">Customers</TabsTrigger>
+          </TabsList>
+        </div>
+        <TabsContent value="versions" className="mt-4">
+          <div className="flex flex-col px-1 py-4">
+            <Typography variant="p" affects="removePaddingMargin">
+              All versions of this plan
+            </Typography>
           </div>
-          <TabsContent value="versions" className="mt-4">
-            <div className="flex flex-col px-1 py-4">
-              <Typography variant="p" affects="removePaddingMargin">
-                All versions of this plan
-              </Typography>
-            </div>
-            <Suspense
-              fallback={
-                <DataTableSkeleton
-                  columnCount={7}
-                  searchableColumnCount={1}
-                  filterableColumnCount={2}
-                  cellWidths={["10rem", "40rem", "12rem", "12rem", "12rem", "12rem", "8rem"]}
-                  shrinkZero
-                />
-              }
-            >
-              <DataTable
-                columns={columns}
-                data={plan.versions}
-                filterOptions={{
-                  filterBy: "title",
-                  filterColumns: false,
-                  filterDateRange: false,
-                  filterServerSide: false,
-                  filterSelectors: {
-                    status: [
-                      { value: "published", label: "Published" },
-                      { value: "draft", label: "Draft" },
-                    ],
-                    currency: [
-                      { value: "USD", label: "USD" },
-                      { value: "EUR", label: "EUR" },
-                    ],
-                  },
-                }}
+          <Suspense
+            fallback={
+              <DataTableSkeleton
+                columnCount={7}
+                searchableColumnCount={1}
+                filterableColumnCount={2}
+                cellWidths={["10rem", "40rem", "12rem", "12rem", "12rem", "12rem", "8rem"]}
+                shrinkZero
               />
-            </Suspense>
-          </TabsContent>
+            }
+          >
+            <DataTable
+              columns={columns}
+              data={plan.versions}
+              filterOptions={{
+                filterBy: "title",
+                filterColumns: false,
+                filterDateRange: false,
+                filterServerSide: false,
+                filterSelectors: {
+                  status: STATUS_PLAN.map((value) => ({
+                    value: value,
+                    label: value,
+                  })),
+                  currency: CURRENCIES.map((value) => ({
+                    value: value,
+                    label: value,
+                  })),
+                },
+              }}
+            />
+          </Suspense>
+        </TabsContent>
 
-          <TabsContent value="customers" className="mt-4">
-            dasd
-          </TabsContent>
-          <TabsContent value="subscriptions" className="mt-4">
-            dsd
-          </TabsContent>
-        </Tabs>
-      </div>
+        <TabsContent value="customers" className="mt-4">
+          dasd
+        </TabsContent>
+        <TabsContent value="subscriptions" className="mt-4">
+          dsd
+        </TabsContent>
+      </Tabs>
     </DashboardShell>
   )
 }

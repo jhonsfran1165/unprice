@@ -10,8 +10,8 @@ export function DashboardShell(props: {
   aside?: React.ReactNode
 }) {
   return (
-    <MaxWidthWrapper>
-      <div className={cn("flex flex-col gap-8 md:flex-row", props.className)}>
+    <MaxWidthWrapper className="overflow-x-hidden">
+      <div className={cn("flex flex-col gap-8", props.className)}>
         <div className="flex flex-1 flex-col space-y-6 px-0 md:space-y-8 md:py-4">
           {props.header && props.header}
 

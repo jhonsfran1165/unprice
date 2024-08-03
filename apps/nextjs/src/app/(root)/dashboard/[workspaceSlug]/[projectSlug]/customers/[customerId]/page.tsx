@@ -1,41 +1,21 @@
-import { ListFilter, MoreVertical } from "lucide-react"
 import { notFound } from "next/navigation"
 
 import { APP_DOMAIN } from "@unprice/config"
-import { Badge } from "@unprice/ui/badge"
+import { CURRENCIES, STATUS_SUBSCRIPTION } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@unprice/ui/dropdown-menu"
 import { Separator } from "@unprice/ui/separator"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
-import { cn } from "@unprice/ui/utils"
-
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@unprice/ui/sheet"
+import { Typography } from "@unprice/ui/typography"
+import { Suspense } from "react"
+import { DataTable } from "~/components/data-table/data-table"
+import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
-import { PropagationStopper } from "~/components/prevent-propagation"
-import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
-import { SubscriptionForm } from "../../subscriptions/_components/subscription-form"
 import { SubscriptionSheet } from "../../subscriptions/_components/subscription-sheet"
 import { CustomerActions } from "../_components/customer-actions"
 import { PaymentMethodForm } from "../_components/payment-method-form"
+import { columns } from "./_components/table/columns"
 
 export default async function PlanPage({
   params,
@@ -93,136 +73,50 @@ export default async function PlanPage({
     >
       <Tabs defaultValue="subscriptions">
         <div className="flex items-center">
-          <TabsList>
+          <TabsList variant="line">
             <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
             <TabsTrigger value="paymentMethods">Payment Methods</TabsTrigger>
-            <TabsTrigger value="invoices">Invoices</TabsTrigger>
+            <TabsTrigger value="Invoices">Invoices</TabsTrigger>
           </TabsList>
-          <div className="ml-auto flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-7 gap-1 text-sm">
-                  <ListFilter className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only">Filter</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuCheckboxItem checked>Currency</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Status</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Active</DropdownMenuCheckboxItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
-        <TabsContent value="subscriptions">
-          <Card>
-            <CardHeader className="px-7">
-              <CardTitle>Subscriptions</CardTitle>
-              <CardDescription>All subscriptions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-cell text-left">Plan Version</TableHead>
-                    <TableHead className="table-cell text-center">Currency</TableHead>
-                    <TableHead className="hidden text-center sm:table-cell">Type</TableHead>
-                    <TableHead className="table-cell text-center">Status</TableHead>
-                    <TableHead className="table-cell text-center">Start Date</TableHead>
-                    <TableHead className="table-cell text-center">End Date</TableHead>
-                    <TableHead className="table-cell text-left">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {customer.subscriptions.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center">
-                        No subscriptions found
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {customer.subscriptions.map((sub) => (
-                    <TableRow key={sub.id}>
-                      <TableCell className="table-cell">
-                        <div className="font-bold">
-                          {sub.planVersion.plan.slug} - v{sub.planVersion.version}
-                        </div>
-                      </TableCell>
-                      <TableCell className="table-cell text-center">
-                        <Badge className="text-xs" variant="secondary">
-                          {sub.planVersion.currency}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="hidden text-center md:table-cell">
-                        <Badge className="text-xs">{sub.type}</Badge>
-                      </TableCell>
-                      <TableCell className="table-cell text-center">
-                        <Badge
-                          className={cn({
-                            success: sub.status === "active",
-                          })}
-                        >
-                          {sub.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="hidden text-center md:table-cell">
-                        <span className="text-xs">{formatDate(sub.startDate)}</span>
-                      </TableCell>
-                      <TableCell className="hidden text-center md:table-cell">
-                        <span className="text-xs">
-                          {(sub.endDate && formatDate(sub.endDate)) ?? "Forever"}
-                        </span>
-                      </TableCell>
-                      <TableCell className="table-cell justify-start">
-                        <div className="flex flex-row space-x-1">
-                          <PropagationStopper>
-                            <Sheet>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button aria-haspopup="true" size="icon" variant="ghost">
-                                    <MoreVertical className="h-4 w-4" />
-                                    <span className="sr-only">Toggle menu</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem>Downgrade/Upgrade</DropdownMenuItem>
-                                  <SheetTrigger asChild>
-                                    <DropdownMenuItem>End Subscription</DropdownMenuItem>
-                                  </SheetTrigger>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-
-                              <SheetContent className="flex max-h-screen w-full flex-col space-y-4 overflow-y-scroll lg:w-[700px] md:w-1/2">
-                                <SheetHeader>
-                                  <SheetTitle className="text-2xl">
-                                    Subscription End Form
-                                  </SheetTitle>
-                                  <SheetDescription>
-                                    End the current subscription for this customer
-                                  </SheetDescription>
-                                </SheetHeader>
-
-                                <SubscriptionForm
-                                  defaultValues={{
-                                    ...sub,
-                                  }}
-                                  isEndSubscription
-                                />
-                              </SheetContent>
-                            </Sheet>
-                          </PropagationStopper>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+        <TabsContent value="subscriptions" className="mt-4">
+          <div className="flex flex-col px-1 py-4">
+            <Typography variant="p" affects="removePaddingMargin">
+              All subscriptions of this customer
+            </Typography>
+          </div>
+          <Suspense
+            fallback={
+              <DataTableSkeleton
+                columnCount={7}
+                searchableColumnCount={1}
+                filterableColumnCount={2}
+                cellWidths={["10rem", "40rem", "12rem", "12rem", "12rem", "12rem", "8rem"]}
+                shrinkZero
+              />
+            }
+          >
+            <DataTable
+              columns={columns}
+              data={customer.subscriptions}
+              filterOptions={{
+                filterBy: "version",
+                filterColumns: true,
+                filterDateRange: false,
+                filterServerSide: false,
+                filterSelectors: {
+                  status: STATUS_SUBSCRIPTION.map((value) => ({
+                    value: value,
+                    label: value,
+                  })),
+                  currency: CURRENCIES.map((value) => ({
+                    value: value,
+                    label: value,
+                  })),
+                },
+              }}
+            />
+          </Suspense>
         </TabsContent>
         <TabsContent value="paymentMethods">
           <PaymentMethodForm
@@ -231,6 +125,7 @@ export default async function PlanPage({
             cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
           />
         </TabsContent>
+        <TabsContent value="invoices">s</TabsContent>
       </Tabs>
     </DashboardShell>
   )

@@ -15,7 +15,7 @@ import {
 } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { type DrizzleWhere, withDateFilters, withPagination } from "@unprice/db/utils"
+import { withDateFilters, withPagination } from "@unprice/db/utils"
 import { deniedReasonSchema } from "../../pkg/errors"
 import { StripePaymentProvider } from "../../pkg/payment-provider/stripe"
 import { createTRPCRouter, protectedApiOrActiveProjectProcedure } from "../../trpc"
@@ -506,6 +506,8 @@ export const customersRouter = createTRPCRouter({
       //   ctx,
       // })
 
+      console.log(id, project.id)
+
       const customerData = await opts.ctx.db.query.customers.findFirst({
         with: {
           subscriptions: {
@@ -521,6 +523,8 @@ export const customersRouter = createTRPCRouter({
         where: (customer, { eq, and }) =>
           and(eq(customer.projectId, project.id), eq(customer.id, id)),
       })
+
+      console.log(customerData)
 
       if (!customerData) {
         throw new TRPCError({
@@ -553,17 +557,17 @@ export const customersRouter = createTRPCRouter({
         const expressions: (SQL<unknown> | undefined)[] = [
           // Filter by name
           search ? or(ilike(columns.name, filter), ilike(columns.email, filter)) : undefined,
-          project.id ? eq(columns.projectId, project.id) : undefined,
+          eq(columns.projectId, project.id),
         ]
-        const where: DrizzleWhere<Customer> = and(...expressions)
 
         // Transaction is used to ensure both queries are executed in a single transaction
         const { data, total } = await opts.ctx.db.transaction(async (tx) => {
-          let query = tx.select().from(schema.customers).where(where).$dynamic()
-          query = withDateFilters(query, columns.createdAt, from, to)
+          const query = tx.select().from(schema.customers).$dynamic()
+          const whereQuery = withDateFilters<Customer>(expressions, columns.createdAt, from, to)
 
-          const data = await withPagination(
+          const data = await withPagination<Customer, typeof query>(
             query,
+            whereQuery,
             [
               {
                 column: columns.createdAt,
@@ -579,7 +583,7 @@ export const customersRouter = createTRPCRouter({
               count: count(),
             })
             .from(schema.customers)
-            .where(where)
+            .where(whereQuery)
             .execute()
             .then((res) => res[0]?.count ?? 0)
 

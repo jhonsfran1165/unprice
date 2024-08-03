@@ -188,9 +188,9 @@ async function RecentIngestions(props: {
   return (
     <Card className={cn("flex flex-col", props.className)}>
       <CardHeader>
-        <CardTitle>Recent Ingestions</CardTitle>
+        <CardTitle>Recent Events</CardTitle>
         <CardDescription>
-          {ingestions.length} ingestion{ingestions.length > 1 ? "s" : null} recorded this period.
+          {ingestions.length} event{ingestions.length > 1 ? "s" : null} recorded this period.
         </CardDescription>
       </CardHeader>
       <CardContent>
