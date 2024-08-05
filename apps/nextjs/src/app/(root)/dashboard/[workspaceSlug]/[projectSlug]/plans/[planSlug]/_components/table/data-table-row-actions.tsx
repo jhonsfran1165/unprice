@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@unprice/ui/dropdown-menu"
 import { MoreVertical } from "lucide-react"
+import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { SuperLink } from "~/components/super-link"
 import { PlanVersionDuplicate } from "../../../_components/plan-version-actions"
@@ -32,6 +33,7 @@ interface DataTableRowActionsProps<TData> {
 }
 
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
+  const pathname = usePathname()
   const version = planVersionSelectBaseSchema.parse(row.original)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -59,7 +61,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
           </DropdownMenuItem>
 
           <DropdownMenuItem>
-            <SuperLink href={`${version.id}`}>Configure features</SuperLink>
+            <SuperLink href={`${pathname}/${version.id}`}>Configure features</SuperLink>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

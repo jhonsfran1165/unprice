@@ -47,7 +47,6 @@ export interface FeaturePlanProps
   disabled?: boolean
 }
 
-// TODO: there is a bug with the sheet component that allow to drag the feature card
 const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref) => {
   const { mode, variant, className, planFeatureVersion, ...rest } = props
   const [isDelete, setConfirmDelete] = useState<boolean>(false)
@@ -102,7 +101,11 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
           </FeatureDialog>
 
           <span className={cn("line-clamp-1 w-full font-medium text-sm")}>
-            {`${feature.title.substring(0, 10)}...`}
+            {`${
+              feature.title.length > 10
+                ? `${feature.title.substring(0, 10)}...`
+                : feature.title.substring(0, 10)
+            }`}
           </span>
         </div>
       ) : mode === "FeaturePlan" ? (

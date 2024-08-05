@@ -1,5 +1,4 @@
 import { type Database, eq } from "@unprice/db"
-
 import { apiKeyPrepared } from "@unprice/db/queries"
 import * as schema from "@unprice/db/schema"
 import { hashStringSHA256 } from "@unprice/db/utils"

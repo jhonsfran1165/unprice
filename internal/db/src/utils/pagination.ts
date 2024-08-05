@@ -3,7 +3,7 @@ import type { PgColumn, PgSelectQueryBuilder } from "drizzle-orm/pg-core"
 
 // this is a simple way to paginate a query, be aware that this is not the most efficient way to do it
 // if you have a large dataset you should use a cursor based pagination
-export function withPagination<S extends {}, T extends PgSelectQueryBuilder>(
+export function withPagination<T extends PgSelectQueryBuilder, S>(
   qb: T,
   where: SQL<S>,
   orderByColumns: {
@@ -14,7 +14,7 @@ export function withPagination<S extends {}, T extends PgSelectQueryBuilder>(
   pageSize = 10
 ) {
   return qb
-    .where(where as SQL<S>)
+    .where(where)
     .orderBy(() =>
       orderByColumns.map(({ column, order }) => (order === "asc" ? asc(column) : desc(column)))
     )

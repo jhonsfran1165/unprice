@@ -24,7 +24,7 @@ export function PaymentMethodForm({
   // TODO: set with the default payment provider for the project
   const [provider, setProvider] = useState<PaymentProvider>("stripe")
 
-  const { data } = api.customers.listPaymentMethods.useQuery({
+  const { data, isLoading } = api.customers.listPaymentMethods.useQuery({
     customerId: customer.id,
     provider: provider,
   })
@@ -46,7 +46,7 @@ export function PaymentMethodForm({
         </Typography>
       </div>
       <CardContent className="flex flex-col space-y-14 px-0 py-10">
-        <UserPaymentMethod paymentMethod={defaultPaymentMethod} />
+        <UserPaymentMethod paymentMethod={defaultPaymentMethod} isLoading={isLoading} />
         <div className="mx-auto flex w-1/2 flex-col gap-2">
           <Label htmlFor="provider">Payment Provider</Label>
           <Select

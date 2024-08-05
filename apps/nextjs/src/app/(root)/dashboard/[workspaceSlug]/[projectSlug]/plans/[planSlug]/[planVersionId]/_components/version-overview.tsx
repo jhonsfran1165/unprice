@@ -7,6 +7,7 @@ import { Separator } from "@unprice/ui/separator"
 import { cn } from "@unprice/ui/utils"
 
 import { Typography } from "@unprice/ui/typography"
+import { CopyButton } from "~/components/copy-button"
 import { PlanVersionDialog } from "../../_components/plan-version-dialog"
 import { BannerPublishedVersion } from "./banner"
 
@@ -95,7 +96,12 @@ export default function VersionOverview({
           </div>
         </CardContent>
         <CardFooter className="flex flex-row items-center border-t px-0 py-4">
-          <div className="text-muted-foreground text-xs">{planVersion.id}</div>
+          <div className="flex items-center text-muted-foreground text-xs">
+            <Typography variant="p" affects="small" className="mr-2">
+              {planVersion.id}
+            </Typography>
+            <CopyButton value={planVersion.id} className="size-6" />
+          </div>
         </CardFooter>
       </Card>
       {planVersion.status === "published" && <BannerPublishedVersion />}

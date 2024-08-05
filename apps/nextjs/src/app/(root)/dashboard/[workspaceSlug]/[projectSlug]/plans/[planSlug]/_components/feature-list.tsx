@@ -9,6 +9,7 @@ import { Button } from "@unprice/ui/button"
 import { Input } from "@unprice/ui/input"
 import { ScrollArea } from "@unprice/ui/scroll-area"
 
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useDebounce } from "~/hooks/use-debounce"
 import { api } from "~/trpc/client"
@@ -64,7 +65,7 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
         <div className="flex h-[730px] flex-col gap-2 px-4 pt-1">
           {isFetching && (
             <div className="flex h-full items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-primary border-t-2 border-b-2" />
+              <LoadingAnimation className="size-6" />
             </div>
           )}
           {!isFetching && searchableFeatures.length === 0 ? (

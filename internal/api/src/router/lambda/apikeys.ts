@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { type SQL, count, eq, getTableColumns, ilike, sql } from "@unprice/db"
+import { count, eq, getTableColumns, ilike, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
@@ -30,7 +30,7 @@ export const apiKeyRouter = createTRPCRouter({
       const filter = `%${search}%`
 
       try {
-        const expressions: (SQL<unknown> | undefined)[] = [
+        const expressions = [
           // Filter by name
           search ? ilike(columns.name, filter) : undefined,
           project.id ? eq(columns.projectId, project.id) : undefined,

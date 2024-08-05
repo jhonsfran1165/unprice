@@ -45,7 +45,6 @@ export default async function OverviewVersionPage({
         <DragDrop>
           <ResizablePanelConfig
             defaultLayout={defaultLayout}
-            // TODO: add suspense component
             featureList={
               <Fragment>
                 <div className={cn("flex h-[70px] items-center justify-between space-x-1 px-4")}>

@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import { type SQL, and, count, eq, getTableColumns, ilike, or } from "@unprice/db"
+import { and, count, eq, getTableColumns, ilike, or } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
@@ -554,9 +554,10 @@ export const customersRouter = createTRPCRouter({
       // })
 
       try {
-        const expressions: (SQL<unknown> | undefined)[] = [
-          // Filter by name
+        const expressions = [
+          // Filter by name or email if search is provided
           search ? or(ilike(columns.name, filter), ilike(columns.email, filter)) : undefined,
+          // Filter by project
           eq(columns.projectId, project.id),
         ]
 
@@ -565,7 +566,7 @@ export const customersRouter = createTRPCRouter({
           const query = tx.select().from(schema.customers).$dynamic()
           const whereQuery = withDateFilters<Customer>(expressions, columns.createdAt, from, to)
 
-          const data = await withPagination<Customer, typeof query>(
+          const data = await withPagination(
             query,
             whereQuery,
             [

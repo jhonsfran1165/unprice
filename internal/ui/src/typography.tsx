@@ -44,7 +44,7 @@ const typographyVariants = cva("", {
     },
     affects: {
       lead: "text-xl text-muted-foreground",
-      small: "text-sm font-medium leading-none",
+      small: "text-xs leading-none",
       muted: "text-sm text-muted-foreground",
       contrast: "text-background-textContrast",
       removePaddingMargin: "[&:not(:first-child)]:mt-0",

@@ -6,9 +6,10 @@ import { useState } from "react"
 import type { RouterOutputs } from "@unprice/api"
 import { Button } from "@unprice/ui/button"
 import { Checkbox } from "@unprice/ui/checkbox"
-import { Copy, CopyDone, Eye, EyeOff } from "@unprice/ui/icons"
+import { Eye, EyeOff } from "@unprice/ui/icons"
 import { cn } from "@unprice/ui/utils"
 
+import { CopyButton } from "~/components/copy-button"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { formatDate } from "~/lib/dates"
 import { DataTableRowActions } from "./data-table-row-actions"
@@ -58,14 +59,13 @@ export const columns: ColumnDef<ApiKey>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Key" />,
     cell: ({ row }) => {
       const [show, setShow] = useState(false)
-      const [copied, setCopied] = useState(false)
 
       const key = row.original.key
 
       const displayText = show ? key : "sk_live_****************"
 
       return (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between space-x-2">
           <span className={cn("font-mono", row.original.revokedAt !== null && "line-through")}>
             {displayText}
           </span>
@@ -78,27 +78,14 @@ export const columns: ColumnDef<ApiKey>[] = [
                 setShow(true)
                 setTimeout(() => {
                   setShow(false)
-                }, 1500)
+                }, 2000)
               }}
             >
               <span className="sr-only">Toggle key visibility</span>
               {show ? <EyeOff /> : <Eye />}
             </Button>
-            <Button
-              variant="ghost"
-              className="h-4 w-4 p-0 opacity-50"
-              onClick={async () => {
-                setCopied(true)
-                await Promise.all([
-                  navigator.clipboard.writeText(key),
-                  new Promise((resolve) => setTimeout(resolve, 1500)),
-                ])
-                setCopied(false)
-              }}
-            >
-              <span className="sr-only">Copy key</span>
-              {copied ? <CopyDone /> : <Copy />}
-            </Button>
+
+            <CopyButton value={key} className="size-5 opacity-50" />
           </div>
         </div>
       )
