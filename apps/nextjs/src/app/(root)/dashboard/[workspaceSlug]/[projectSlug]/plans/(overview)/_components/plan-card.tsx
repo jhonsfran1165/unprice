@@ -27,7 +27,6 @@ import {
   DropdownMenuTrigger,
 } from "@unprice/ui/dropdown-menu"
 import { cn } from "@unprice/ui/utils"
-
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { SuperLink } from "~/components/super-link"
 import { PlanForm } from "../../_components/plan-form"
@@ -128,7 +127,7 @@ export function PlanCard(props: {
         <CardFooter className="flex flex-row justify-between space-x-4 text-muted-foreground text-sm">
           <div className="flex items-center text-muted-foreground text-xs">
             <GalleryHorizontalEnd className="mr-2 h-3 w-3" />
-            {versions.length === 0 ? "no" : versions.length} versions
+            {versions.length === 0 ? "no" : versions.length} versions published
           </div>
         </CardFooter>
       </Card>

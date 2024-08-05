@@ -1,6 +1,6 @@
 import * as currencies from "@dinero.js/currencies"
 import type { Dinero } from "dinero.js"
-import { add, dinero, isZero, multiply, toDecimal } from "dinero.js"
+import { add, dinero, isZero, multiply, toDecimal, trimScale } from "dinero.js"
 import { z } from "zod"
 
 import type { Result } from "@unprice/error"
@@ -22,6 +22,7 @@ import { currencySymbol } from "./../shared"
 const calculatePriceSchema = z.object({
   dinero: z.custom<Dinero<number>>(),
   displayAmount: priceSchema,
+  hasUsage: z.boolean().optional(),
 })
 
 const unitsSchema = z.coerce.number().int().min(0)
@@ -48,12 +49,17 @@ export const calculateFlatPricePlan = ({
 }): Result<z.infer<typeof calculatePriceSchema>, UnPriceCalculationError> => {
   const defaultDineroCurrency = currencies[planVersion.currency]
   let total = dinero({ amount: 0, currency: defaultDineroCurrency })
+  let hasUsage = false
 
   planVersion.planFeatures.forEach((feature) => {
     // TODO: what happen with tiers and usage?
     if (["flat", "package"].includes(feature.featureType)) {
       const { price } = configFlatSchema.parse(feature.config)
       total = add(total, dinero(price.dinero))
+    }
+
+    if (["usage"].includes(feature.featureType)) {
+      hasUsage = true
     }
   })
 
@@ -66,6 +72,7 @@ export const calculateFlatPricePlan = ({
   return Ok({
     dinero: total,
     displayAmount: displayAmount,
+    hasUsage,
   })
 }
 
@@ -124,13 +131,13 @@ export const calculateTierPrice = ({
 
     // flat price needs to be prorated as well
     const dineroFlatPrice = prorate
-      ? calculatePercentage(dinero(tier.flatPrice.dinero), prorate)
-      : dinero(tier.flatPrice.dinero)
+      ? trimScale(calculatePercentage(dinero(tier.flatPrice.dinero), prorate))
+      : trimScale(dinero(tier.flatPrice.dinero))
     const dineroUnitPrice = dinero(tier.unitPrice.dinero)
 
     const dineroTotalPrice = !isZero(dineroFlatPrice)
-      ? add(multiply(dinero(tier.unitPrice.dinero), quantity), dineroFlatPrice)
-      : multiply(dinero(tier.unitPrice.dinero), quantity)
+      ? trimScale(add(multiply(dinero(tier.unitPrice.dinero), quantity), dineroFlatPrice))
+      : trimScale(multiply(dinero(tier.unitPrice.dinero), quantity))
 
     return Ok({
       unitPrice: {
@@ -195,8 +202,8 @@ export const calculateTierPrice = ({
     if (tier?.flatPrice) {
       // flat price needs to be prorated as well
       const dineroFlatPrice = prorate
-        ? calculatePercentage(dinero(tier.flatPrice.dinero), prorate)
-        : dinero(tier.flatPrice.dinero)
+        ? trimScale(calculatePercentage(dinero(tier.flatPrice.dinero), prorate))
+        : trimScale(dinero(tier.flatPrice.dinero))
       total = add(total, dineroFlatPrice)
     }
 
@@ -269,8 +276,8 @@ export const calculatePackagePrice = ({
   const packageCount = Math.ceil(quantity / units)
   const dineroPrice = dinero(price.dinero)
   const total = prorate
-    ? calculatePercentage(multiply(dineroPrice, packageCount), prorate)
-    : multiply(dineroPrice, packageCount)
+    ? trimScale(calculatePercentage(multiply(dineroPrice, packageCount), prorate))
+    : trimScale(multiply(dineroPrice, packageCount))
 
   return Ok({
     unitPrice: {
@@ -307,8 +314,8 @@ export const calculateUnitPrice = ({
 }): Result<CalculatedPrice, UnPriceCalculationError> => {
   const dineroPrice = dinero(price.dinero)
   const total = prorate
-    ? calculatePercentage(multiply(dineroPrice, quantity), prorate)
-    : multiply(dineroPrice, quantity)
+    ? trimScale(calculatePercentage(multiply(dineroPrice, quantity), prorate))
+    : trimScale(multiply(dineroPrice, quantity))
 
   return Ok({
     unitPrice: {

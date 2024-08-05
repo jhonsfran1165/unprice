@@ -85,7 +85,7 @@ export const columns: ColumnDef<ApiKey>[] = [
               {show ? <EyeOff /> : <Eye />}
             </Button>
 
-            <CopyButton value={key} className="size-5 opacity-50" />
+            <CopyButton value={key} className="size-4 opacity-50" />
           </div>
         </div>
       )

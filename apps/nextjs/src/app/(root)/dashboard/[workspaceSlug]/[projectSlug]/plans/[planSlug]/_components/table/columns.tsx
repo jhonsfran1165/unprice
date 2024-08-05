@@ -58,7 +58,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
             {row.original.title} - v{row.original.version}
           </div>
           {row.original.description && (
-            <div className="hidden text-muted-foreground text-xs md:inline">
+            <div className="line-clamp-1 hidden text-muted-foreground text-xs md:inline">
               {`${row.original.description.slice(0, 40)}...`}
             </div>
           )}
@@ -126,6 +126,13 @@ export const columns: ColumnDef<PlanVersion>[] = [
     accessorKey: "createdAt",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
     cell: ({ row }) => <div>{formatDate(row.getValue("createdAt"))}</div>,
+    enableSorting: true,
+    enableHiding: true,
+  },
+  {
+    accessorKey: "updatedAt",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Updated At" />,
+    cell: ({ row }) => <div>{formatDate(row.getValue("updatedAt"))}</div>,
     enableSorting: true,
     enableHiding: true,
   },

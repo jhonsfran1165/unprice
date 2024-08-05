@@ -2,6 +2,7 @@
 
 import { Separator } from "@unprice/ui/separator"
 
+import { CopyButton } from "~/components/copy-button"
 import { useActiveFeature, useActivePlanVersion } from "../../_components/use-features"
 import { FeatureConfigForm } from "./feature-config-form"
 
@@ -18,22 +19,20 @@ export function FeatureConfig({
       {activeFeature ? (
         <div className="flex flex-col">
           <Separator />
-          <div className="flex items-start py-4">
-            <div className="flex items-start gap-4 text-sm">
-              <div className="grid gap-1">
-                <div className="line-clamp-1 font-semibold text-lg">
-                  {activeFeature.feature.title}
-                </div>
-                <div className="line-clamp-1 text-xs">
-                  <b>slug:</b> {activeFeature.feature.slug}
-                </div>
-                <div className="text-xs">
-                  <b>description: </b>
-                  {activeFeature.feature.description ?? "No description"}
-                </div>
+          <div className="flex items-start py-4 text-sm">
+            <div className="grid gap-1">
+              <div className="line-clamp-1 pb-2 font-semibold text-lg">
+                {activeFeature.feature.title}{" "}
+                <CopyButton value={activeFeature.id} className="size-4" />
+              </div>
+              <div className="line-clamp-1 text-xs">
+                <b>slug:</b> {activeFeature.feature.slug}
+              </div>
+              <div className="text-xs">
+                <b>description: </b>
+                {activeFeature.feature.description ?? "No description"}
               </div>
             </div>
-            <div className="ml-auto text-muted-foreground text-xs">{activeFeature.id}</div>
           </div>
           <Separator />
 

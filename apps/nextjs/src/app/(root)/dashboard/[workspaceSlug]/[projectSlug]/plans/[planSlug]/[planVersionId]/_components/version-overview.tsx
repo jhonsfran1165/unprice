@@ -100,7 +100,7 @@ export default function VersionOverview({
             <Typography variant="p" affects="small" className="mr-2">
               {planVersion.id}
             </Typography>
-            <CopyButton value={planVersion.id} className="size-6" />
+            <CopyButton value={planVersion.id} className="size-4" />
           </div>
         </CardFooter>
       </Card>

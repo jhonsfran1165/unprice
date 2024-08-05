@@ -1,6 +1,7 @@
 import { Badge } from "@unprice/ui/badge"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
+import { CopyButton } from "~/components/copy-button"
 
 export default function HeaderTab({
   title,
@@ -8,12 +9,14 @@ export default function HeaderTab({
   action,
   className,
   label,
+  id,
 }: {
   title?: string
   description?: string | null
   action?: React.ReactNode
   className?: string
   label?: string
+  id?: string
 }) {
   return (
     <div className={cn("flex w-full items-center justify-between px-0", className)}>
@@ -26,6 +29,7 @@ export default function HeaderTab({
               <span className="ml-1">{label}</span>
             </Badge>
           )}
+          {id && <CopyButton value={id} />}
         </div>
         {description && <Typography variant="normal">{description}</Typography>}
       </div>

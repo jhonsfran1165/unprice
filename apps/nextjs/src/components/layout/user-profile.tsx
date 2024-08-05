@@ -41,7 +41,6 @@ export default async function UserProfile({
       <DropdownMenuContent
         className="max-h-[--radix-dropdown-menu-content-available-height] w-[--radix-dropdown-menu-content-width]"
         align={align}
-        side="right"
       >
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">

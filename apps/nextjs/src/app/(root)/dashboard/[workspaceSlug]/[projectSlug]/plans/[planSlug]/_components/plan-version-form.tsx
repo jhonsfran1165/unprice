@@ -175,47 +175,6 @@ export function PlanVersionForm({
 
           <FormField
             control={form.control}
-            name="paymentProvider"
-            disabled={isPublished}
-            render={({ field }) => (
-              <FormItem className="row-start-2 flex flex-col justify-end">
-                <div className="flex justify-between">
-                  <FormLabel>Payment provider</FormLabel>
-                  {/* // TODO: add link to payment provider configuration */}
-                  <Link
-                    href="#"
-                    className="ml-auto inline-block text-info text-xs underline opacity-70"
-                  >
-                    Configure payment provider
-                  </Link>
-                </div>
-
-                <FormDescription>
-                  In oder to use a payment provider, you need to configure it first for your
-                  organization.
-                </FormDescription>
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a provider" />
-                    </SelectTrigger>
-                  </FormControl>
-                  {/* // TODO: use the default payment provider from the organization */}
-                  <SelectContent>
-                    {PAYMENT_PROVIDERS.map((provider) => (
-                      <SelectItem key={provider} value={provider}>
-                        {provider}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="planType"
             disabled={isPublished}
             render={({ field }) => (
@@ -273,10 +232,51 @@ export function PlanVersionForm({
 
           <FormField
             control={form.control}
+            name="paymentProvider"
+            disabled={isPublished}
+            render={({ field }) => (
+              <FormItem className="flex flex-col justify-end">
+                <div className="flex justify-between">
+                  <FormLabel>Payment provider</FormLabel>
+                  {/* // TODO: add link to payment provider configuration */}
+                  <Link
+                    href="#"
+                    className="ml-auto inline-block text-info text-xs underline opacity-70"
+                  >
+                    Configure payment provider
+                  </Link>
+                </div>
+
+                <FormDescription>
+                  In oder to use a payment provider, you need to configure it first for your
+                  organization.
+                </FormDescription>
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a provider" />
+                    </SelectTrigger>
+                  </FormControl>
+                  {/* // TODO: use the default payment provider from the organization */}
+                  <SelectContent>
+                    {PAYMENT_PROVIDERS.map((provider) => (
+                      <SelectItem key={provider} value={provider}>
+                        {provider}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             disabled={isPublished}
             name="description"
             render={({ field }) => (
-              <FormItem className="col-start-2 row-start-2 flex flex-col justify-start">
+              <FormItem className="flex flex-col justify-start">
                 <FormLabel>Description</FormLabel>
                 <FormDescription>Enter a short description of the versions.</FormDescription>
                 <FormControl>

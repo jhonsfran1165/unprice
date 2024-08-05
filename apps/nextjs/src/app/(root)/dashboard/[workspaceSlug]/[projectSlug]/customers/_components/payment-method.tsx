@@ -1,3 +1,4 @@
+import { BorderBeam } from "@unprice/ui/border-beam"
 import { cn } from "@unprice/ui/utils"
 
 interface UserPaymentMethod {
@@ -20,7 +21,16 @@ export function UserPaymentMethod(data: UserPaymentMethod) {
 
 const CreditCard: React.FC<UserPaymentMethod> = ({ paymentMethod }) => (
   <div className="flex flex-col items-center justify-center">
-    <div className="aspect-[86/54] w-full max-w-[350px] rounded-xl bg-gradient-to-r from-primary to-secondary p-[1px]">
+    <div className="relative aspect-[87/55] w-full max-w-[350px] rounded-xl p-[1px]">
+      <BorderBeam
+        size={100}
+        duration={5}
+        delay={5}
+        className="bg-background-borderHover"
+        colorFrom=""
+        colorTo=""
+      />
+
       <div className="relative m-auto aspect-[86/54] space-y-4 rounded-xl bg-gradient-to-r from-background-bgSubtle to-background-line p-8 text-background-text shadow-lg transition-transform sm:hover:scale-110 sm:hover:border">
         <div>
           <div className="font-light text-xs">Name</div>
@@ -52,32 +62,42 @@ const MissingPaymentMethod: React.FC<{
   isLoading?: boolean
 }> = ({ isLoading }) => (
   <div className="flex flex-col items-center justify-center">
-    <div className="aspect-[86/54] w-full max-w-[350px] rounded-xl">
+    <div className="relative aspect-[87/55] w-full max-w-[350px] rounded-xl p-[1px]">
+      <BorderBeam
+        size={100}
+        duration={5}
+        delay={5}
+        className="bg-background-borderHover"
+        colorFrom=""
+        colorTo=""
+      />
       <div className="relative m-auto aspect-[86/54] space-y-4 rounded-xl border bg-gradient-to-r from-background-bgSubtle to-background-line p-8 text-background-text shadow-lg transition-transform">
         <div>
           <div className="font-light text-xs">Name</div>
           <div
             className={cn("font-medium text-base tracking-wide", {
-              "animate-pulse bg-accent": isLoading,
-              "blur-sm": !isLoading,
+              "animate-pulse": isLoading,
             })}
           >
-            {"Anonymous"}
+            {isLoading ? "Loading..." : "Anonymous"}
           </div>
         </div>
         <div>
           <div className="font-light text-xs">Card Number</div>
           <div
             className={cn("line-clamp-1 font-medium text-base tracking-widest", {
-              "animate-pulse bg-accent": isLoading,
-              "blur-sm": !isLoading,
+              "animate-pulse": isLoading,
             })}
           >
             •••• •••• •••• ••••
           </div>
         </div>
         <div>
-          <div className="font-medium text-base tracking-wide">
+          <div
+            className={cn("font-medium text-base tracking-wide", {
+              "animate-pulse": isLoading,
+            })}
+          >
             {isLoading ? "Loading..." : "No payment method configured"}
           </div>
         </div>

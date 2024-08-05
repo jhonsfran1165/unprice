@@ -43,6 +43,7 @@ export default async function PlanPage({
           title={customer.email}
           description={customer.description}
           label={customer.active ? "active" : "inactive"}
+          id={customer.id}
           action={
             <div className="button-primary flex items-center space-x-1 rounded-md">
               <div className="sm:col-span-full">

@@ -40,6 +40,7 @@ export default async function PlanPage({
       header={
         <HeaderTab
           title={plan.slug}
+          id={plan.id}
           description={plan.description}
           label={plan.active ? "active" : "inactive"}
           action={
@@ -88,10 +89,10 @@ export default async function PlanPage({
           <Suspense
             fallback={
               <DataTableSkeleton
-                columnCount={7}
+                columnCount={89}
                 searchableColumnCount={1}
                 filterableColumnCount={2}
-                cellWidths={["10rem", "40rem", "12rem", "12rem", "12rem", "12rem", "8rem"]}
+                cellWidths={["10rem", "40rem", "12rem", "12rem", "12rem", "12rem", "12rem", "8rem"]}
                 shrinkZero
               />
             }

@@ -1,12 +1,10 @@
 import type { RouterOutputs } from "@unprice/api"
-import type { BillingPeriod } from "@unprice/db/validators"
-import { calculateFlatPricePlan, calculatePricePerFeature } from "@unprice/db/validators"
+import { calculateFlatPricePlan } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@unprice/ui/card"
-import { CheckIcon, HelpCircle } from "@unprice/ui/icons"
 import { Skeleton } from "@unprice/ui/skeleton"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
+import { ItemPriceCard } from "./pricing-item"
 
 export function PricingCard({
   planVersion,
@@ -26,32 +24,41 @@ export function PricingCard({
         {!planVersion.plan.enterprisePlan && (
           <div className="mt-8 flex items-baseline space-x-2">
             <span className="font-extrabold text-4xl">
-              {err ? "Error" : totalPricePlan.displayAmount}
+              {err
+                ? "Error"
+                : totalPricePlan?.hasUsage
+                  ? `+${totalPricePlan.displayAmount}`
+                  : totalPricePlan.displayAmount}
             </span>
-            <span className="text-sm">{planVersion.billingPeriod} + usage</span>
+            <span className="text-sm">{planVersion.billingPeriod}</span>
           </div>
         )}
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
         <CardDescription>{planVersion.description}</CardDescription>
+        <Typography variant="p" affects="removePaddingMargin" className="text-end italic">
+          {totalPricePlan?.hasUsage ? "+ usage in the period" : ""}
+        </Typography>
         <Button className="w-full">
           {planVersion.plan.enterprisePlan ? "Contact Us" : "Get Started"}
         </Button>
       </CardContent>
 
-      <CardFooter className="border-t px-6 py-6">
-        <div className="space-y-6">
-          <div className="space-y-2">
+      <CardFooter className="flex w-full flex-col border-t px-6 py-6">
+        <div className="w-full space-y-6">
+          <div className="w-full space-y-2">
             <Typography variant="h4">Features Included</Typography>
-            <ul className="space-y-6 px-2">
-              {planVersion.planFeatures.map((feature) => {
-                return (
-                  <li key={feature.id} className="flex items-center">
-                    <ItemPriceCard feature={feature} billingPeriod={planVersion.billingPeriod} />
-                  </li>
-                )
-              })}
+            <ul className="flex w-full flex-col space-y-4 py-4">
+              {planVersion.planFeatures
+                .filter((f) => !f.hidden)
+                .map((feature) => {
+                  return (
+                    <li key={feature.id} className="flex w-full flex-col justify-start">
+                      <ItemPriceCard feature={feature} withCalculator />
+                    </li>
+                  )
+                })}
             </ul>
           </div>
         </div>
@@ -94,56 +101,5 @@ export function PricingCardSkeleton() {
         </div>
       </CardFooter>
     </Card>
-  )
-}
-
-function ItemPriceCard({
-  billingPeriod,
-  feature,
-}: {
-  feature: RouterOutputs["planVersions"]["getById"]["planVersion"]["planFeatures"][number]
-  billingPeriod: BillingPeriod | null
-}) {
-  const { err, val: pricePerFeature } = calculatePricePerFeature({
-    feature: feature,
-    quantity: feature.defaultQuantity ?? 1,
-  })
-
-  if (err) {
-    return <div className="inline text-muted-foreground text-xs italic">error calculation</div>
-  }
-
-  return (
-    <div className="flex flex-row items-center justify-between gap-1">
-      <div className="flex justify-start">
-        <CheckIcon className="mr-2 h-5 w-5 text-success" />
-      </div>
-      <div className="flex flex-col items-center gap-1">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2 font-medium">
-            <span className="text-sm">
-              {feature.limit
-                ? `Up to ${feature.limit} ${feature.feature.slug}`
-                : feature.defaultQuantity
-                  ? `${feature.defaultQuantity} ${feature.feature.slug}`
-                  : `${feature.feature.slug}`}{" "}
-              - {feature.featureType} rate
-            </span>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <HelpCircle className="h-4 w-4 font-light" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="max-w-[200px] text-sm">{feature.feature.description}</div>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <div className="text-xs">
-            {pricePerFeature.unitPrice.displayAmount}/{billingPeriod}
-          </div>
-        </div>
-      </div>
-    </div>
   )
 }
