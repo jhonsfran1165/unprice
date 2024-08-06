@@ -298,7 +298,7 @@ export const configPackageSchema = z.object({
   price: dineroSchema,
   usageMode: usageModeSchema.optional(),
   tierMode: tierModeSchema.optional(),
-  units: unitSchema,
+  units: unitSchema.describe("Units for the package"),
 })
 
 export const configFeatureSchema = z.union([
@@ -338,7 +338,7 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(planVersion
   config: configFeatureSchema.optional(),
   metadata: planVersionFeatureMetadataSchema.optional(),
   aggregationMethod: aggregationMethodSchema.default("count"),
-  defaultQuantity: z.coerce.number().int().optional().default(1),
+  defaultQuantity: z.coerce.number().int(),
   limit: z.coerce.number().int().optional(),
 })
   .omit({

@@ -76,6 +76,60 @@ export const calculateFlatPricePlan = ({
   })
 }
 
+export const calculateFreeUnits = ({
+  feature,
+}: {
+  feature: z.infer<typeof planVersionFeatureInsertBaseSchema>
+}): number | undefined => {
+  switch (feature.featureType) {
+    case "flat":
+      return undefined
+    case "tier": {
+      const { tiers, tierMode } = configTierSchema.parse(feature.config)
+      let total = 0
+      for (const tier of tiers) {
+        // if limit is infinity, we can't calculate the free units and also means
+        // we are in the last tier so return undefined
+        const limit = tier.lastUnit ?? tier.firstUnit
+
+        const { val: totalPrice } = calculateTierPrice({
+          tiers,
+          quantity: limit,
+          tierMode,
+          isUsageBased: false,
+        })
+
+        if (totalPrice?.totalPrice.dinero && isZero(totalPrice.totalPrice.dinero)) {
+          // with the last tier still 0 means is free no matter what is the amount
+          total = !tier.lastUnit ? Number.POSITIVE_INFINITY : limit
+        }
+      }
+      return total
+    }
+    case "usage":
+      return 0
+    case "package": {
+      const { units, price } = configPackageSchema.parse(feature.config)
+
+      const { val: priceTotal } = calculatePackagePrice({
+        price,
+        // calculate a price for the whole package
+        quantity: units,
+        units,
+        isUsageBased: false,
+      })
+
+      if (priceTotal?.totalPrice.dinero && isZero(priceTotal.totalPrice.dinero)) {
+        return Number.POSITIVE_INFINITY
+      }
+
+      return 0
+    }
+    default:
+      return undefined
+  }
+}
+
 export const calculateTierPrice = ({
   tiers,
   quantity,

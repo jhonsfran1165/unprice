@@ -2,7 +2,11 @@
 
 import type { RouterOutputs } from "@unprice/api"
 import { FEATURE_TYPES_MAPS, TIER_MODES_MAP, USAGE_MODES_MAP } from "@unprice/db/utils"
-import { calculatePricePerFeature } from "@unprice/db/validators"
+import {
+  calculateFreeUnits,
+  calculatePricePerFeature,
+  configUsageSchema,
+} from "@unprice/db/validators"
 import { CheckIcon, HelpCircle } from "@unprice/ui/icons"
 import { Slider } from "@unprice/ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
@@ -29,8 +33,67 @@ export function ItemPriceCard({
         feature: feature,
         quantity: quantityDebounce,
       }),
-    [quantityDebounce]
+    [quantityDebounce, feature.id]
   )
+
+  if (err) {
+    return (
+      <div className="inline text-muted-foreground text-xs italic">error calculating price</div>
+    )
+  }
+
+  let displayFeature = ""
+
+  switch (feature.featureType) {
+    case "flat": {
+      displayFeature = `${feature.feature.slug}`
+      break
+    }
+
+    case "tier": {
+      const freeUnits = calculateFreeUnits({ feature })
+      const freeUnitsText =
+        freeUnits === Number.POSITIVE_INFINITY
+          ? "Unlimited"
+          : freeUnits === 0
+            ? ""
+            : nFormatter(freeUnits)
+
+      displayFeature = `${freeUnitsText} ${feature.feature.slug}`
+      break
+    }
+
+    case "usage": {
+      const { tiers, usageMode, units, price, tierMode } = configUsageSchema.parse(feature.config)
+
+      if (usageMode === "tier" && tierMode && tiers && tiers.length > 0) {
+        displayFeature = `${nFormatter(quantity)} ${feature.feature.slug}`
+      }
+
+      if (usageMode === "unit" && price) {
+        displayFeature = `${nFormatter(quantity)} ${feature.feature.slug}`
+      }
+
+      if (usageMode === "package" && units && price) {
+        displayFeature = `${nFormatter(quantity)} ${feature.feature.slug}`
+      }
+
+      break
+    }
+
+    case "package": {
+      const freeUnits = calculateFreeUnits({ feature })
+      const freeUnitsText =
+        freeUnits === Number.POSITIVE_INFINITY
+          ? "Unlimited"
+          : freeUnits === 0
+            ? ""
+            : nFormatter(freeUnits)
+
+      displayFeature = `${freeUnitsText} ${feature.feature.slug}`
+      break
+    }
+  }
 
   if (err) {
     return (
@@ -46,9 +109,7 @@ export function ItemPriceCard({
       <div className="flex w-full flex-col items-center gap-1">
         <div className="flex w-full flex-col justify-start">
           <div className="flex items-center gap-2 font-medium">
-            <span className="text-sm">
-              {nFormatter(defaultQuantity)} {feature.feature.slug}
-            </span>
+            <span className="text-sm">{displayFeature}</span>
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -86,7 +147,7 @@ export function ItemPriceCard({
                     </span>
                   )}
 
-                  {withCalculator && ["usage", "tier"].includes(feature.featureType) && (
+                  {withCalculator && ["usage", "tier", "package"].includes(feature.featureType) && (
                     <>
                       <div className="text-xs">
                         Price Calculator: Total price per {nFormatter(quantity)}{" "}
