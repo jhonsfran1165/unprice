@@ -8,13 +8,14 @@ import { Button } from "@unprice/ui/button"
 import { SuperLink } from "~/components/super-link"
 import { PlanVersionPublish } from "../../../_components/plan-version-actions"
 
-// TODO: if the version is already published, publish button should be disabled
 export default function StepperButton({
   baseUrl,
   planVersionId,
+  isPublished,
 }: {
   baseUrl: string
   planVersionId: string
+  isPublished?: boolean
 }) {
   const step = usePathname().split("/").pop()
 
@@ -27,6 +28,10 @@ export default function StepperButton({
         </Button>
       </SuperLink>
     )
+  }
+
+  if (isPublished) {
+    return null
   }
 
   return <PlanVersionPublish planVersionId={planVersionId} />

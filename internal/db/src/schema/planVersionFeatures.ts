@@ -41,7 +41,7 @@ export const planVersionFeatures = pgTableProject(
     aggregationMethod: aggregationMethodEnum("aggregation_method").default("sum").notNull(),
     order: doublePrecision("order").notNull(),
     // if nulls the feature quantity must be provided at subscription time
-    defaultQuantity: integer("default_quantity"),
+    defaultQuantity: integer("default_quantity").default(1),
     // the limit of the feature, if nulls there is no limit, normally used for usage features to limit the usage
     // for the rest of the features types it can be used to limit the quantity of the feature
     limit: integer("limit"),

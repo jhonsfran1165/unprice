@@ -130,6 +130,66 @@ export const planVersionRouter = createTRPCRouter({
       }
     }),
 
+  deactivate: protectedActiveProjectAdminProcedure
+    .input(
+      planVersionSelectBaseSchema
+        .pick({
+          id: true,
+        })
+        .required({ id: true })
+    )
+    .output(z.object({ planVersion: planVersionSelectBaseSchema }))
+    .mutation(async (opts) => {
+      const { id } = opts.input
+      const project = opts.ctx.project
+
+      const planVersionData = await opts.ctx.db.query.versions.findFirst({
+        where: (version, { and, eq }) => and(eq(version.id, id), eq(version.projectId, project.id)),
+      })
+
+      if (!planVersionData?.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "version not found",
+        })
+      }
+
+      if (planVersionData?.status !== "published") {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "You can only deactivate a published version",
+        })
+      }
+
+      if (!planVersionData.active) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Version is already deactivated",
+        })
+      }
+
+      const deactivatedVersion = await opts.ctx.db
+        .update(schema.versions)
+        .set({
+          active: false,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(schema.versions.id, planVersionData.id)))
+        .returning()
+        .then((re) => re[0])
+
+      if (!deactivatedVersion?.id) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error deactivating version",
+        })
+      }
+
+      return {
+        planVersion: deactivatedVersion,
+      }
+    }),
+
   remove: protectedActiveProjectAdminProcedure
     .input(
       planVersionSelectBaseSchema
@@ -173,7 +233,7 @@ export const planVersionRouter = createTRPCRouter({
       if (!deletedPlanVersion?.id) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Error deleting feature",
+          message: "Error deleting version",
         })
       }
 
@@ -223,12 +283,29 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
-      // TODO: actually a user can update some fields of the version
       if (planVersionData.status === "published") {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cannot update a published version, read only",
-        })
+        // only allow to update the status && description
+        const data = await opts.ctx.db
+          .update(schema.versions)
+          .set({
+            ...(description && { description }),
+            ...(status && { status }),
+            updatedAt: new Date(),
+          })
+          .where(and(eq(schema.versions.id, planVersionData.id)))
+          .returning()
+          .then((re) => re[0])
+
+        if (!data) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error updating version",
+          })
+        }
+
+        return {
+          planVersion: data,
+        }
       }
 
       // Very costly operation -- this only happens when the currency is updated and the plan is not published
@@ -484,8 +561,6 @@ export const planVersionRouter = createTRPCRouter({
             )
             .then((res) => res[0]?.count ?? 0)
 
-          console.log("countVersionsPlan", countVersionsPlan)
-
           // duplicate the plan version
           const planVersionDataDuplicated = await tx
             .insert(schema.versions)
@@ -601,7 +676,6 @@ export const planVersionRouter = createTRPCRouter({
         })
       }
 
-      // TODO: actually a user can update some fields of the version
       if (planVersionData.status === "published") {
         throw new TRPCError({
           code: "BAD_REQUEST",

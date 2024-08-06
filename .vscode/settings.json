@@ -28,6 +28,7 @@
     "craftjs",
     "datasource",
     "dinero",
+    "extralight",
     "hget",
     "hgetall",
     "hincrby",

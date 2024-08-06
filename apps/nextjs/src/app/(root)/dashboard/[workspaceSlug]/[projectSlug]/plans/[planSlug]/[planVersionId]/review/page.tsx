@@ -22,7 +22,7 @@ export default async function ReviewPage({
   }
 
   return (
-    <div className="flex w-full flex-col items-center justify-center space-y-4">
+    <div className="flex w-full flex-col items-center justify-center py-12">
       <PricingCard planVersion={planVersion} />
     </div>
   )

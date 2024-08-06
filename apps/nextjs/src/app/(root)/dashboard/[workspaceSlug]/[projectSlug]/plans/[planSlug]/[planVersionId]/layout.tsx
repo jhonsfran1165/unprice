@@ -33,24 +33,21 @@ export default async function PlanVersionLayout(props: {
           description="Configure features, addons and pricing for this plan version."
           action={
             <StepperButton
+              isPublished={planVersion.status === "published"}
               planVersionId={props.params.planVersionId}
               baseUrl={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}/${props.params.planVersionId}`}
             />
           }
         />
       }
+      aside={<VersionOverview planVersion={planVersion} />}
     >
       <Stepper
         planVersionId={props.params.planVersionId}
         className="flex flex-col py-4"
         baseUrl={`/${props.params.workspaceSlug}/${props.params.projectSlug}/plans/${props.params.planSlug}/${props.params.planVersionId}`}
       />
-      <div className="flex flex-col items-start gap-8 lg:flex-row sm:py-0">
-        <div className="flex w-full flex-col justify-center lg:w-3/4">{props.children}</div>
-        <div className="flex w-full flex-col lg:w-1/4">
-          <VersionOverview planVersion={planVersion} />
-        </div>
-      </div>
+      <div className="flex w-full flex-col justify-center">{props.children}</div>
     </DashboardShell>
   )
 }

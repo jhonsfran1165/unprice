@@ -9,12 +9,14 @@ import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { toast } from "sonner"
 
 import { ConfirmAction } from "~/components/confirm-action"
-import { getErrorMessage } from "~/lib/handle-error"
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 import { usePlanFeaturesList } from "./use-features"
 
-const PlanVersionPublish: React.FC<{ planVersionId: string }> = ({ planVersionId }) => {
+const PlanVersionPublish: React.FC<{
+  planVersionId: string
+  onConfirmAction?: () => void
+}> = ({ planVersionId, onConfirmAction }) => {
   const router = useRouter()
   const [planFeatures] = usePlanFeaturesList()
 
@@ -23,7 +25,6 @@ const PlanVersionPublish: React.FC<{ planVersionId: string }> = ({ planVersionId
 
   const publishVersion = api.planVersions.publish.useMutation({
     onSuccess: () => {
-      toastAction("updated")
       router.refresh()
     },
   })
@@ -35,9 +36,15 @@ const PlanVersionPublish: React.FC<{ planVersionId: string }> = ({ planVersionId
         return
       }
 
-      void publishVersion.mutateAsync({
-        id: planVersionId,
-      })
+      toast.promise(
+        publishVersion.mutateAsync({
+          id: planVersionId,
+        }),
+        {
+          loading: "Publishing...",
+          success: "Version published",
+        }
+      )
     })
   }
 
@@ -45,6 +52,7 @@ const PlanVersionPublish: React.FC<{ planVersionId: string }> = ({ planVersionId
     <ConfirmAction
       message="Once you publish this version, it will be available to your customers. You won't be able to edit it anymore. Are you sure you want to publish this version?"
       confirmAction={() => {
+        onConfirmAction?.()
         onPublishVersion()
       }}
     >
@@ -84,7 +92,6 @@ const PlanVersionDuplicate = forwardRef<ElementRef<"button">, PlanVersionDuplica
           {
             loading: "Duplicating...",
             success: "Version duplicated",
-            error: (err) => getErrorMessage(err),
           }
         )
       })
@@ -114,4 +121,54 @@ const PlanVersionDuplicate = forwardRef<ElementRef<"button">, PlanVersionDuplica
 
 PlanVersionDuplicate.displayName = "PlanVersionDuplicate"
 
-export { PlanVersionDuplicate, PlanVersionPublish }
+const PlanVersionDeactivate = forwardRef<ElementRef<"button">, PlanVersionDuplicateProps>(
+  (props, ref) => {
+    const { planVersionId, classNames, onConfirmAction } = props
+
+    const router = useRouter()
+
+    const duplicateVersion = api.planVersions.deactivate.useMutation({
+      onSuccess: () => {
+        router.refresh()
+      },
+    })
+
+    function onDeactivateVersion() {
+      startTransition(() => {
+        toast.promise(
+          duplicateVersion.mutateAsync({
+            id: planVersionId,
+          }),
+          {
+            loading: "Deactivating...",
+            success: "Version deactivated",
+          }
+        )
+      })
+    }
+
+    return (
+      <ConfirmAction
+        message="Are you sure you want to deactivate this version? This version will no longer be available to your customers."
+        confirmAction={() => {
+          onConfirmAction?.()
+          onDeactivateVersion()
+        }}
+      >
+        <Button
+          ref={ref}
+          className={classNames}
+          variant={"custom"}
+          disabled={duplicateVersion.isPending}
+        >
+          Deactivate version
+          {duplicateVersion.isPending && <LoadingAnimation className={"ml-2"} />}
+        </Button>
+      </ConfirmAction>
+    )
+  }
+)
+
+PlanVersionDeactivate.displayName = "PlanVersionDeactivate"
+
+export { PlanVersionDuplicate, PlanVersionPublish, PlanVersionDeactivate }

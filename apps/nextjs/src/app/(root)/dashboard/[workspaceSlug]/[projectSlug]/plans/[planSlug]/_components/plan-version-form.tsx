@@ -6,7 +6,7 @@ import { startTransition } from "react"
 
 import { CURRENCIES, PAYMENT_PROVIDERS, PLAN_BILLING_PERIODS, PLAN_TYPES } from "@unprice/db/utils"
 import type { InsertPlanVersion } from "@unprice/db/validators"
-import { versionInsertBaseSchema } from "@unprice/db/validators"
+import { planVersionSelectBaseSchema, versionInsertBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import {
   Form,
@@ -21,11 +21,18 @@ import { Input } from "@unprice/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Textarea } from "@unprice/ui/text-area"
 
+import type { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
+import { BannerPublishedVersion } from "../[planVersionId]/_components/banner"
+
+const isPublishedSchema = planVersionSelectBaseSchema.partial().required({
+  id: true,
+  projectId: true,
+})
 
 export function PlanVersionForm({
   setDialogOpen,
@@ -40,7 +47,7 @@ export function PlanVersionForm({
   const isPublished = defaultValues.status === "published"
 
   const form = useZodForm({
-    schema: versionInsertBaseSchema,
+    schema: isPublished ? isPublishedSchema : versionInsertBaseSchema,
     defaultValues,
   })
 
@@ -86,9 +93,9 @@ export function PlanVersionForm({
     },
   })
 
-  const onSubmitForm = async (data: InsertPlanVersion) => {
-    if (!defaultValues.id) {
-      await createPlanVersion.mutateAsync(data)
+  const onSubmitForm = async (data: InsertPlanVersion | z.infer<typeof isPublishedSchema>) => {
+    if (!defaultValues.id && !isPublished) {
+      await createPlanVersion.mutateAsync(data as InsertPlanVersion)
     }
 
     if (defaultValues.id && defaultValues.projectId) {
@@ -115,6 +122,8 @@ export function PlanVersionForm({
   return (
     <Form {...form}>
       <form className="space-y-6">
+        {isPublished && <BannerPublishedVersion />}
+
         <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:space-y-4">
           <FormField
             control={form.control}
@@ -154,7 +163,11 @@ export function PlanVersionForm({
                 <FormDescription>
                   You can set a different currency for each version of your plan.
                 </FormDescription>
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                  disabled={isPublished}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a currency" />
@@ -176,13 +189,16 @@ export function PlanVersionForm({
           <FormField
             control={form.control}
             name="planType"
-            disabled={isPublished}
             render={({ field }) => (
               <FormItem className="flex flex-col justify-end">
                 <FormLabel>Type of the plan</FormLabel>
                 <FormDescription>Only recurring plans are supported at the moment.</FormDescription>
 
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                  disabled={isPublished}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a plan type" />
@@ -210,7 +226,11 @@ export function PlanVersionForm({
                 <FormItem className="col-start-2 flex flex-col justify-end">
                   <FormLabel>Billing period</FormLabel>
                   <FormDescription>How often you want to bill customers</FormDescription>
-                  <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? ""}
+                    disabled={isPublished}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a billing period" />
@@ -251,7 +271,11 @@ export function PlanVersionForm({
                   In oder to use a payment provider, you need to configure it first for your
                   organization.
                 </FormDescription>
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                  disabled={isPublished}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a provider" />
@@ -273,7 +297,6 @@ export function PlanVersionForm({
 
           <FormField
             control={form.control}
-            disabled={isPublished}
             name="description"
             render={({ field }) => (
               <FormItem className="flex flex-col justify-start">

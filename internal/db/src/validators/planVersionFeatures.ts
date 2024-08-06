@@ -312,7 +312,7 @@ export const configFeatureSchema = z.union([
 export const planVersionFeatureSelectBaseSchema = createSelectSchema(planVersionFeatures, {
   config: configFeatureSchema,
   metadata: planVersionFeatureMetadataSchema,
-  defaultQuantity: z.coerce.number().int().optional(),
+  defaultQuantity: z.coerce.number().int().optional().default(1),
   aggregationMethod: aggregationMethodSchema,
   limit: z.coerce.number().int().optional(),
   featureType: typeFeatureSchema,
@@ -338,7 +338,7 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(planVersion
   config: configFeatureSchema.optional(),
   metadata: planVersionFeatureMetadataSchema.optional(),
   aggregationMethod: aggregationMethodSchema.default("count"),
-  defaultQuantity: z.coerce.number().int().optional(),
+  defaultQuantity: z.coerce.number().int().optional().default(1),
   limit: z.coerce.number().int().optional(),
 })
   .omit({

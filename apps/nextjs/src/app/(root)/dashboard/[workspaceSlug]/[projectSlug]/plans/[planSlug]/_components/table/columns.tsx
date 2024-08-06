@@ -54,9 +54,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
 
       return (
         <SuperLink href={`${pathname}/${row.original.id}`} prefetch={false}>
-          <div className="font-bold">
-            {row.original.title} - v{row.original.version}
-          </div>
+          <div className="font-bold">{row.original.title}</div>
           {row.original.description && (
             <div className="line-clamp-1 hidden text-muted-foreground text-xs md:inline">
               {`${row.original.description.slice(0, 40)}...`}
@@ -87,23 +85,31 @@ export const columns: ColumnDef<PlanVersion>[] = [
     },
   },
   {
-    accessorKey: "currency",
+    accessorKey: "version",
     enableResizing: true,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Currency" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Version" />,
     cell: ({ row }) => (
       <Badge className="text-xs" variant="secondary">
-        {row.original.currency}
+        V{row.original.version}
       </Badge>
     ),
-    filterFn: (row, id, value) => {
-      return Array.isArray(value) && value.includes(row.getValue(id))
-    },
+    size: 20,
   },
   {
-    accessorKey: "planType",
+    accessorKey: "active",
     enableResizing: true,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
-    cell: ({ row }) => <Badge className="text-xs">{row.original.planType}</Badge>,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Active" />,
+    cell: ({ row }) => (
+      <Badge
+        className={cn({
+          info: row.original.active,
+          danger: !row.original.active,
+        })}
+      >
+        {row.original.active ? "Active" : "Inactive"}
+      </Badge>
+    ),
+    size: 20,
   },
   {
     accessorKey: "status",
@@ -121,6 +127,28 @@ export const columns: ColumnDef<PlanVersion>[] = [
     filterFn: (row, id, value) => {
       return Array.isArray(value) && value.includes(row.getValue(id))
     },
+    size: 40,
+  },
+  {
+    accessorKey: "currency",
+    enableResizing: true,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Currency" />,
+    cell: ({ row }) => (
+      <Badge className="text-xs" variant="secondary">
+        {row.original.currency}
+      </Badge>
+    ),
+    filterFn: (row, id, value) => {
+      return Array.isArray(value) && value.includes(row.getValue(id))
+    },
+    size: 40,
+  },
+  {
+    accessorKey: "planType",
+    enableResizing: true,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
+    cell: ({ row }) => <Badge className="text-xs">{row.original.planType}</Badge>,
+    size: 40,
   },
   {
     accessorKey: "createdAt",
@@ -128,6 +156,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
     cell: ({ row }) => <div>{formatDate(row.getValue("createdAt"))}</div>,
     enableSorting: true,
     enableHiding: true,
+    size: 40,
   },
   {
     accessorKey: "updatedAt",
@@ -135,6 +164,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
     cell: ({ row }) => <div>{formatDate(row.getValue("updatedAt"))}</div>,
     enableSorting: true,
     enableHiding: true,
+    size: 40,
   },
   {
     id: "actions",

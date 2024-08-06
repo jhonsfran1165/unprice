@@ -25,7 +25,10 @@ import { MoreVertical } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { SuperLink } from "~/components/super-link"
-import { PlanVersionDuplicate } from "../../../_components/plan-version-actions"
+import {
+  PlanVersionDeactivate,
+  PlanVersionDuplicate,
+} from "../../../_components/plan-version-actions"
 import { PlanVersionForm } from "../plan-version-form"
 
 interface DataTableRowActionsProps<TData> {
@@ -54,6 +57,13 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
           </DialogTrigger>
           <DropdownMenuItem asChild>
             <PlanVersionDuplicate
+              onConfirmAction={() => setIsOpen(false)}
+              classNames="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-background-bgHover"
+              planVersionId={version.id}
+            />
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <PlanVersionDeactivate
               onConfirmAction={() => setIsOpen(false)}
               classNames="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-background-bgHover"
               planVersionId={version.id}

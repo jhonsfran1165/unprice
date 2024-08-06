@@ -1,11 +1,4 @@
-import {
-  GalleryHorizontalEnd,
-  LayoutDashboard,
-  MoreHorizontal,
-  PlusIcon,
-  Settings,
-  User2,
-} from "lucide-react"
+import { GalleryHorizontalEnd, MoreHorizontal, Settings } from "lucide-react"
 
 import type { RouterOutputs } from "@unprice/api"
 import { Button } from "@unprice/ui/button"
@@ -75,38 +68,11 @@ export function PlanCard(props: {
                   <DropdownMenuContent align="start" className="w-[200px]" forceMount>
                     <DropdownMenuLabel>Plan Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <SuperLink
-                        href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}/create-version`}
-                        className="flex items-center"
-                      >
-                        <PlusIcon className="mr-2 h-4 w-4" />
-                        Create version
-                      </SuperLink>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <SuperLink
-                        href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}
-                        className="flex items-center"
-                      >
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Dashboard
-                      </SuperLink>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <SuperLink
-                        href={`/${props.workspaceSlug}/${props.projectSlug}/plans/${plan.slug}`}
-                        className="flex items-center"
-                      >
-                        <User2 className="mr-2 h-4 w-4" />
-                        Customer
-                      </SuperLink>
-                    </DropdownMenuItem>
 
                     <DialogTrigger asChild>
                       <DropdownMenuItem>
                         <Settings className="mr-2 h-4 w-4" />
-                        Settings
+                        Edit plan
                       </DropdownMenuItem>
                     </DialogTrigger>
                   </DropdownMenuContent>

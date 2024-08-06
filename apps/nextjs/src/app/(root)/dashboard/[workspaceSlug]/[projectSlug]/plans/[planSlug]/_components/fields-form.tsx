@@ -40,7 +40,9 @@ export function QuantityFormField({
               Default quantity of the feature when the subscription is created.
             </FormDescription>
             <div className="font-normal text-xs leading-snug">
-              If the quantity is not provided, it must be set at the time of the subscription.
+              If the quantity is not provided, it must be set at the time of the subscription. If
+              you want to set a default quantity to see the price, you can set it here. Useful for
+              pricing table.
             </div>
 
             <div className="flex flex-col items-center space-y-1">

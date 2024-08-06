@@ -9,7 +9,7 @@ import { cn } from "@unprice/ui/utils"
 import { Typography } from "@unprice/ui/typography"
 import { CopyButton } from "~/components/copy-button"
 import { PlanVersionDialog } from "../../_components/plan-version-dialog"
-import { BannerPublishedVersion } from "./banner"
+import { BannerInactiveVersion, BannerPublishedVersion } from "./banner"
 
 export default function VersionOverview({
   planVersion,
@@ -23,7 +23,7 @@ export default function VersionOverview({
           <div className="flex h-[70px] shrink-0 items-center justify-between space-x-1 px-0 py-2">
             <div className="flex items-center space-x-2">
               <Typography variant="h3" className="truncate">
-                {planVersion.plan.slug} - v{planVersion.version}
+                {planVersion.plan.slug}
               </Typography>
 
               <div
@@ -61,6 +61,10 @@ export default function VersionOverview({
               <div className="flex items-center justify-between">
                 <dt className="flex items-center gap-1 text-muted-foreground">Title</dt>
                 <dd>{planVersion.title}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="flex items-center gap-1 text-muted-foreground">Version</dt>
+                <dd>v{planVersion.version}</dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="flex items-center gap-1 text-muted-foreground">Currency</dt>
@@ -104,6 +108,7 @@ export default function VersionOverview({
           </div>
         </CardFooter>
       </Card>
+      {!planVersion.active && <BannerInactiveVersion />}
       {planVersion.status === "published" && <BannerPublishedVersion />}
     </div>
   )

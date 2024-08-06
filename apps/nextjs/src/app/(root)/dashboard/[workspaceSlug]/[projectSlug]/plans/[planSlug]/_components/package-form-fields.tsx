@@ -4,7 +4,8 @@ import type { UseFormReturn } from "react-hook-form"
 
 import type { Currency, PlanVersionFeature } from "@unprice/db/validators"
 
-import { PriceFormField, UnitsFormField } from "./fields-form"
+import { Separator } from "@unprice/ui/separator"
+import { PriceFormField, QuantityFormField, UnitsFormField } from "./fields-form"
 
 export function PackageFormFields({
   form,
@@ -14,9 +15,17 @@ export function PackageFormFields({
   currency: Currency
 }) {
   return (
-    <div className="flex w-full flex-col gap-1">
-      <PriceFormField form={form} currency={currency} />
-      <UnitsFormField form={form} />
+    <div className="flex flex-col space-y-6">
+      <div className="flex w-full flex-col gap-1">
+        <PriceFormField form={form} currency={currency} />
+        <UnitsFormField form={form} />
+      </div>
+
+      <Separator />
+
+      <div className="flex w-full justify-between">
+        <QuantityFormField form={form} />
+      </div>
     </div>
   )
 }

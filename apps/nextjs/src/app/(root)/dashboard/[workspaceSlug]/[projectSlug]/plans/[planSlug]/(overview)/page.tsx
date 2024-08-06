@@ -89,10 +89,21 @@ export default async function PlanPage({
           <Suspense
             fallback={
               <DataTableSkeleton
-                columnCount={89}
+                columnCount={10}
                 searchableColumnCount={1}
                 filterableColumnCount={2}
-                cellWidths={["10rem", "40rem", "12rem", "12rem", "12rem", "12rem", "12rem", "8rem"]}
+                cellWidths={[
+                  "10rem",
+                  "40rem",
+                  "12rem",
+                  "12rem",
+                  "12rem",
+                  "12rem",
+                  "12rem",
+                  "12rem",
+                  "12rem",
+                  "8rem",
+                ]}
                 shrinkZero
               />
             }
@@ -102,7 +113,7 @@ export default async function PlanPage({
               data={plan.versions}
               filterOptions={{
                 filterBy: "title",
-                filterColumns: false,
+                filterColumns: true,
                 filterDateRange: false,
                 filterServerSide: false,
                 filterSelectors: {
