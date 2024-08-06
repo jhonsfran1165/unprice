@@ -7,6 +7,7 @@ import { Checkbox } from "@unprice/ui/checkbox"
 import { cn } from "@unprice/ui/utils"
 
 import { Badge } from "@unprice/ui/badge"
+import { Typography } from "@unprice/ui/typography"
 import { usePathname } from "next/navigation"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { SuperLink } from "~/components/super-link"
@@ -54,7 +55,19 @@ export const columns: ColumnDef<PlanVersion>[] = [
 
       return (
         <SuperLink href={`${pathname}/${row.original.id}`} prefetch={false}>
-          <div className="font-bold">{row.original.title}</div>
+          <div className="flex items-center space-x-2">
+            <Typography variant="h6" className="truncate">
+              {row.original.title}
+            </Typography>
+
+            {row.original.latest && (
+              <div className={"inline-flex items-center font-medium text-info text-xs"}>
+                <span className={"flex h-2 w-2 rounded-full bg-info"} />
+                <span className="ml-1">latest</span>
+              </div>
+            )}
+          </div>
+
           {row.original.description && (
             <div className="line-clamp-1 hidden text-muted-foreground text-xs md:inline">
               {`${row.original.description.slice(0, 40)}...`}
@@ -106,7 +119,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
           danger: !row.original.active,
         })}
       >
-        {row.original.active ? "Active" : "Inactive"}
+        {row.original.active ? "active" : "inactive"}
       </Badge>
     ),
     size: 20,

@@ -39,9 +39,10 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const pathname = usePathname()
   const version = planVersionSelectBaseSchema.parse(row.original)
   const [isOpen, setIsOpen] = useState(false)
+  const [isOpenDialog, setIsOpenDialog] = useState(false)
 
   return (
-    <Dialog>
+    <Dialog onOpenChange={setIsOpenDialog} open={isOpenDialog}>
       <DropdownMenu onOpenChange={setIsOpen} open={isOpen}>
         <DropdownMenuTrigger asChild>
           <Button aria-haspopup="true" size="icon" variant="ghost">
@@ -81,7 +82,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
           <DialogTitle>Plan Version Form</DialogTitle>
           <DialogDescription>Modify the plan version details below.</DialogDescription>
         </DialogHeader>
-        <PlanVersionForm defaultValues={version} />
+        <PlanVersionForm defaultValues={version} setDialogOpen={setIsOpenDialog} />
       </DialogContent>
     </Dialog>
   )
