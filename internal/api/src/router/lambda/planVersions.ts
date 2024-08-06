@@ -171,6 +171,43 @@ export const planVersionRouter = createTRPCRouter({
       // if the current version is the latest, we need to deactivate it and set the latest to the previous version
       const deactivatedVersion = await opts.ctx.db.transaction(async (tx) => {
         try {
+          let promise = undefined
+
+          if (planVersionData.latest) {
+            // get the previous latest published version
+            const previousVersion = await tx.query.versions
+              .findMany({
+                where: (version, { and, eq }) =>
+                  and(
+                    eq(version.projectId, project.id),
+                    eq(version.planId, planVersionData.planId),
+                    eq(version.status, "published"),
+                    eq(version.latest, false),
+                    eq(version.active, true)
+                  ),
+                orderBy(fields, operators) {
+                  return operators.desc(fields.version)
+                },
+              })
+              .then((data) => data[0])
+
+            if (previousVersion?.id) {
+              promise = tx
+                .update(schema.versions)
+                .set({
+                  latest: true,
+                })
+                .where(
+                  and(
+                    eq(schema.versions.projectId, project.id),
+                    eq(schema.versions.id, previousVersion.id)
+                  )
+                )
+            }
+          }
+
+          // deactivate the current version, change the latest to false and update the updatedAt
+          // if the current version is the latest, we need to deactivate it and set the latest to the previous version
           const [planVersionDataDuplicated] = await Promise.all([
             tx
               .update(schema.versions)
@@ -183,20 +220,7 @@ export const planVersionRouter = createTRPCRouter({
               .returning()
               .then((data) => data[0]),
             // update the previous version to be the latest only if the current version is the latest
-            planVersionData.latest &&
-              tx
-                .update(schema.versions)
-                .set({
-                  latest: true,
-                })
-                .where(
-                  and(
-                    eq(schema.versions.projectId, project.id),
-                    eq(schema.versions.planId, planVersionData.planId),
-                    eq(schema.versions.status, "published"),
-                    eq(schema.versions.version, planVersionData.version - 1)
-                  )
-                ),
+            promise,
           ])
 
           return planVersionDataDuplicated
