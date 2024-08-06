@@ -186,7 +186,8 @@ export const planVersionRouter = createTRPCRouter({
                     eq(version.active, true)
                   ),
                 orderBy(fields, operators) {
-                  return operators.desc(fields.version)
+                  // get the latest published version
+                  return operators.desc(fields.publishedAt)
                 },
               })
               .then((data) => data[0])
