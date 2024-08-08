@@ -5,7 +5,7 @@ import { FEATURE_TYPES_MAPS, TIER_MODES_MAP, USAGE_MODES_MAP } from "@unprice/db
 import {
   calculateFreeUnits,
   calculatePricePerFeature,
-  configUsageSchema,
+  currencySymbol,
 } from "@unprice/db/validators"
 import { CheckIcon, HelpCircle } from "@unprice/ui/icons"
 import { Slider } from "@unprice/ui/slider"
@@ -43,6 +43,22 @@ export function ItemPriceCard({
   }
 
   let displayFeature = ""
+  const calculatorParams = {
+    max: 100,
+    min: 1,
+    step: 1,
+    value: quantityDebounce,
+    onValueChange: (value: number) => setQuantity(value),
+  }
+  const freeUnits = calculateFreeUnits({ feature })
+  const freeUnitsText =
+    freeUnits === Number.POSITIVE_INFINITY
+      ? feature.limit
+        ? `Up to ${nFormatter(feature.limit)}`
+        : "Unlimited"
+      : freeUnits === 0
+        ? ""
+        : nFormatter(freeUnits)
 
   switch (feature.featureType) {
     case "flat": {
@@ -51,54 +67,29 @@ export function ItemPriceCard({
     }
 
     case "tier": {
-      const freeUnits = calculateFreeUnits({ feature })
-      const freeUnitsText =
-        freeUnits === Number.POSITIVE_INFINITY
-          ? "Unlimited"
-          : freeUnits === 0
-            ? ""
-            : nFormatter(freeUnits)
-
+      const lastTier = feature.config?.tiers![feature.config.tiers!.length - 1]
       displayFeature = `${freeUnitsText} ${feature.feature.slug}`
+      calculatorParams.max = feature.limit ?? lastTier?.lastUnit ?? 100000
       break
     }
 
     case "usage": {
-      const { tiers, usageMode, units, price, tierMode } = configUsageSchema.parse(feature.config)
+      displayFeature = `${freeUnitsText} ${feature.feature.slug}`
+      calculatorParams.max = feature.limit ?? 100000
 
-      if (usageMode === "tier" && tierMode && tiers && tiers.length > 0) {
-        displayFeature = `${nFormatter(quantity)} ${feature.feature.slug}`
-      }
-
-      if (usageMode === "unit" && price) {
-        displayFeature = `${nFormatter(quantity)} ${feature.feature.slug}`
-      }
-
-      if (usageMode === "package" && units && price) {
-        displayFeature = `${nFormatter(quantity)} ${feature.feature.slug}`
+      if (feature.config?.usageMode === "tier") {
+        const lastTier = feature.config?.tiers![feature.config.tiers!.length - 1]
+        calculatorParams.max = feature.limit ?? lastTier?.lastUnit ?? 100000
       }
 
       break
     }
 
     case "package": {
-      const freeUnits = calculateFreeUnits({ feature })
-      const freeUnitsText =
-        freeUnits === Number.POSITIVE_INFINITY
-          ? "Unlimited"
-          : freeUnits === 0
-            ? ""
-            : nFormatter(freeUnits)
-
       displayFeature = `${freeUnitsText} ${feature.feature.slug}`
+      calculatorParams.max = feature.config?.units! * 10
       break
     }
-  }
-
-  if (err) {
-    return (
-      <div className="inline text-muted-foreground text-xs italic">error calculating price</div>
-    )
   }
 
   return (
@@ -118,10 +109,14 @@ export function ItemPriceCard({
               <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
                 <div className="flex w-[300px] flex-col gap-2 p-2">
                   <Typography variant="h6">
-                    Feature type {feature.featureType} {feature.config?.usageMode} *
+                    Feature type {feature.featureType} {feature.config?.usageMode}
                   </Typography>
 
-                  <Typography variant="p" affects="removePaddingMargin">
+                  <Typography
+                    variant="p"
+                    affects="removePaddingMargin"
+                    className="text-background-solidHover"
+                  >
                     {feature.feature.description}
                   </Typography>
 
@@ -141,28 +136,74 @@ export function ItemPriceCard({
                     {feature.config?.usageMode && <br />}
                   </Typography>
 
-                  {feature.limit && (
-                    <span className="text-sm">
-                      {`Up to ${nFormatter(feature.limit)} ${feature.feature.slug}`}
-                    </span>
+                  {(feature.featureType === "tier" || feature.config?.usageMode === "tier") && (
+                    <div className="mt-2 mb-2">
+                      <Typography
+                        variant="p"
+                        affects="removePaddingMargin"
+                        className="mb-1 font-medium text-xs"
+                      >
+                        Tier Pricing:
+                      </Typography>
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="py-1 text-left">Units</th>
+                            <th className="py-1 text-right">Flat Price</th>
+                            <th className="py-1 text-right">Unit Price</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {feature.config?.tiers?.map((tier, index) => (
+                            <tr key={index.toString()} className="border-b last:border-b-0">
+                              <td className="py-1">
+                                {tier.firstUnit} - {tier.lastUnit ?? feature.limit ?? "∞"}
+                              </td>
+                              <td className="py-1 text-right">
+                                {currencySymbol(tier.flatPrice.dinero.currency.code)}
+                                {tier.flatPrice.displayAmount}
+                              </td>
+                              <td className="py-1 text-right">
+                                {currencySymbol(tier.unitPrice.dinero.currency.code)}
+                                {tier.unitPrice.displayAmount}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {feature.featureType !== "tier" && feature.config?.usageMode !== "tier" && (
+                    <div className="mt-2 mb-2">
+                      <Typography
+                        variant="p"
+                        affects="removePaddingMargin"
+                        className="mb-1 font-medium text-xs"
+                      >
+                        Pricing:
+                      </Typography>
+                      <span className="text-xs">{pricePerFeature.unitPrice.displayAmount}</span>
+                    </div>
                   )}
 
                   {withCalculator && ["usage", "tier", "package"].includes(feature.featureType) && (
-                    <>
-                      <div className="text-xs">
-                        Price Calculator: Total price per {nFormatter(quantity)}{" "}
-                        {feature.feature.slug} is {pricePerFeature.totalPrice.displayAmount}
-                      </div>
-                      <Slider
-                        max={feature.limit ?? defaultQuantity * 10 ?? 1000}
-                        min={1}
-                        step={1}
-                        size="sm"
-                        className="my-2"
-                        defaultValue={[quantityDebounce]}
-                        onValueChange={([sliderValue]) => setQuantity(sliderValue ?? 1)}
-                      />
-                    </>
+                    <div className="mb-2">
+                      <Typography
+                        variant="p"
+                        affects="removePaddingMargin"
+                        className="mb-1 font-medium text-xs"
+                      >
+                        Tier Calculator:
+                      </Typography>
+
+                      <span className="text-xs">
+                        Total price per {nFormatter(quantity)} {feature.feature.slug} is{" "}
+                        {pricePerFeature.totalPrice.displayAmount}
+                      </span>
+
+                      <PriceCalculator {...calculatorParams} />
+                    </div>
                   )}
                 </div>
               </TooltipContent>
@@ -174,6 +215,35 @@ export function ItemPriceCard({
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+const PriceCalculator = ({
+  max,
+  min,
+  step,
+  value,
+  onValueChange,
+}: {
+  max: number
+  min: number
+  step: number
+  value: number
+  onValueChange: (value: number) => void
+}) => {
+  return (
+    <div className="my-2 flex items-center">
+      <Slider
+        max={max}
+        min={min}
+        step={step}
+        size="sm"
+        className="my-2"
+        defaultValue={[value]}
+        onValueChange={([sliderValue]) => onValueChange(sliderValue ?? 1)}
+      />
+      <span className="ml-4 w-[15%] font-bold text-sm">{nFormatter(value)}</span>
     </div>
   )
 }

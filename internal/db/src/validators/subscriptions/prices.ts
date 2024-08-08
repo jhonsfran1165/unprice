@@ -76,14 +76,31 @@ export const calculateFlatPricePlan = ({
   })
 }
 
+// calculate the number of free units for a feature
+// useful for table pricing and displaying plans
+// returns 0 if the feature is paid, Number.POSITIVE_INFINITY if the feature is free
 export const calculateFreeUnits = ({
   feature,
 }: {
   feature: z.infer<typeof planVersionFeatureInsertBaseSchema>
-}): number | undefined => {
+}): number => {
   switch (feature.featureType) {
-    case "flat":
-      return undefined
+    case "flat": {
+      // flat features are free or paid
+      const { price } = configFlatSchema.parse(feature.config)
+
+      const { val: priceTotal } = calculateUnitPrice({
+        price,
+        quantity: 1,
+        isUsageBased: false,
+      })
+
+      if (priceTotal?.totalPrice.dinero && isZero(priceTotal.totalPrice.dinero)) {
+        return Number.POSITIVE_INFINITY
+      }
+
+      return 0
+    }
     case "tier": {
       const { tiers, tierMode } = configTierSchema.parse(feature.config)
       let total = 0
@@ -106,8 +123,63 @@ export const calculateFreeUnits = ({
       }
       return total
     }
-    case "usage":
+    case "usage": {
+      const { tiers, usageMode, units, price, tierMode } = configUsageSchema.parse(feature.config)
+
+      if (usageMode === "tier" && tierMode && tiers && tiers.length > 0) {
+        let total = 0
+        for (const tier of tiers) {
+          // if limit is infinity, we can't calculate the free units and also means
+          // we are in the last tier so return undefined
+          const limit = tier.lastUnit ?? tier.firstUnit
+
+          const { val: totalPrice } = calculateTierPrice({
+            tiers,
+            quantity: limit,
+            tierMode,
+            isUsageBased: false,
+          })
+
+          if (totalPrice?.totalPrice.dinero && isZero(totalPrice.totalPrice.dinero)) {
+            // with the last tier still 0 means is free no matter what is the amount
+            total = !tier.lastUnit ? Number.POSITIVE_INFINITY : limit
+          }
+        }
+        return total
+      }
+
+      if (usageMode === "unit" && price) {
+        const { val: priceTotal } = calculateUnitPrice({
+          price,
+          quantity: 1,
+          isUsageBased: false,
+        })
+
+        if (priceTotal?.totalPrice.dinero && isZero(priceTotal.totalPrice.dinero)) {
+          return Number.POSITIVE_INFINITY
+        }
+
+        return 0
+      }
+
+      if (usageMode === "package" && units && price) {
+        const { val: priceTotal } = calculatePackagePrice({
+          price,
+          // calculate a price for the whole package
+          quantity: units,
+          units,
+          isUsageBased: false,
+        })
+
+        if (priceTotal?.totalPrice.dinero && isZero(priceTotal.totalPrice.dinero)) {
+          return Number.POSITIVE_INFINITY
+        }
+
+        return 0
+      }
+
       return 0
+    }
     case "package": {
       const { units, price } = configPackageSchema.parse(feature.config)
 
@@ -126,7 +198,7 @@ export const calculateFreeUnits = ({
       return 0
     }
     default:
-      return undefined
+      return 0
   }
 }
 
@@ -312,9 +384,11 @@ export const calculatePackagePrice = ({
         dinero: total,
         displayAmount: toDecimal(total, ({ value, currency }) => {
           if (isUsageBased) {
-            return `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
+            return `starts at ${currencySymbol(
+              currency.code as Currency
+            )}${value} per ${units} units`
           }
-          return `${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `${currencySymbol(currency.code as Currency)}${value} per ${units} units`
         }),
       },
       totalPrice: {
@@ -338,9 +412,9 @@ export const calculatePackagePrice = ({
       dinero: dineroPrice,
       displayAmount: toDecimal(dineroPrice, ({ value, currency }) => {
         if (isUsageBased) {
-          return `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `starts at ${currencySymbol(currency.code as Currency)}${value} per ${units} units`
         }
-        return `${currencySymbol(currency.code as Currency)}${value} per ${units} unit`
+        return `${currencySymbol(currency.code as Currency)}${value} per ${units} units`
       }),
     },
     totalPrice: {
