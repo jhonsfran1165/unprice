@@ -9,6 +9,7 @@ import { Card } from "@unprice/ui/card"
 import { Separator } from "@unprice/ui/separator"
 import { cn } from "@unprice/ui/utils"
 
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { Typography } from "@unprice/ui/typography"
 import { api } from "~/trpc/server"
 import DragDrop from "../../../_components/drag-drop"
@@ -58,7 +59,13 @@ export default async function OverviewVersionPage({
 
                 <Separator />
 
-                <Suspense fallback={<div>loading</div>}>
+                <Suspense
+                  fallback={
+                    <div className="flex h-full items-center justify-center">
+                      <LoadingAnimation className="size-6" />
+                    </div>
+                  }
+                >
                   <FeatureList
                     planVersion={planVersion}
                     featuresPromise={api.features.listByActiveProject()}

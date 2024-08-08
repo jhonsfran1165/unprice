@@ -25,6 +25,7 @@ import {
 import { planVersionFeatures } from "./planVersionFeatures"
 import { plans } from "./plans"
 import { projects } from "./projects"
+import { subscriptions } from "./subscriptions"
 
 // plan_versions are the different versions of the plan
 // each version can have different features and configurations
@@ -115,4 +116,5 @@ export const versionRelations = relations(versions, ({ one, many }) => ({
     references: [plans.id],
   }),
   planFeatures: many(planVersionFeatures),
+  subscriptions: many(subscriptions),
 }))

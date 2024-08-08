@@ -16,7 +16,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@unprice/ui/dropdown-menu"
 
@@ -40,9 +39,6 @@ export function PlanActions({
           <DialogTrigger asChild>
             <DropdownMenuItem>Edit plan</DropdownMenuItem>
           </DialogTrigger>
-
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive">Another action</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <DialogContent>

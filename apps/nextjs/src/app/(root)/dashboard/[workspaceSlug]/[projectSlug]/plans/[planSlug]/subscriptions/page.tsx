@@ -1,4 +1,4 @@
-import { CURRENCIES, STATUS_PLAN } from "@unprice/db/utils"
+import { STATUS_SUBSCRIPTION } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import { Separator } from "@unprice/ui/separator"
 import { TabNavigation, TabNavigationLink } from "@unprice/ui/tabs-navigation"
@@ -14,9 +14,9 @@ import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/server"
 import { PlanActions } from "../../_components/plan-actions"
 import { PlanVersionDialog } from "../_components/plan-version-dialog"
-import { columns } from "../_components/table-versions/columns"
+import { columns } from "../_components/table-subscriptions/columns"
 
-export default async function PlanPage({
+export default async function PlanSubscriptionsPage({
   params,
 }: {
   params: {
@@ -28,7 +28,7 @@ export default async function PlanPage({
   const { planSlug, workspaceSlug, projectSlug } = params
   const baseUrl = `/${workspaceSlug}/${projectSlug}/plans/${planSlug}`
 
-  const { plan } = await api.plans.getVersionsBySlug({
+  const { plan, subscriptions } = await api.plans.getSubscriptionsBySlug({
     slug: planSlug,
   })
 
@@ -75,10 +75,10 @@ export default async function PlanPage({
     >
       <TabNavigation>
         <div className="flex items-center">
-          <TabNavigationLink active asChild>
+          <TabNavigationLink asChild>
             <SuperLink href={`${baseUrl}`}>Versions</SuperLink>
           </TabNavigationLink>
-          <TabNavigationLink asChild>
+          <TabNavigationLink asChild active>
             <SuperLink href={`${baseUrl}/subscriptions`}>Subscriptions</SuperLink>
           </TabNavigationLink>
         </div>
@@ -86,7 +86,7 @@ export default async function PlanPage({
       <div className="mt-4">
         <div className="flex flex-col px-1 py-4">
           <Typography variant="p" affects="removePaddingMargin">
-            All versions of this plan
+            All subscriptions of this plan
           </Typography>
         </div>
         <Suspense
@@ -114,20 +114,20 @@ export default async function PlanPage({
         >
           <DataTable
             columns={columns}
-            data={plan.versions}
+            data={subscriptions}
             filterOptions={{
-              filterBy: "title",
+              filterBy: "planVersion",
               filterColumns: true,
               filterDateRange: false,
               filterServerSide: false,
               filterSelectors: {
-                status: STATUS_PLAN.map((value) => ({
+                status: STATUS_SUBSCRIPTION.map((value) => ({
                   value: value,
                   label: value,
                 })),
-                currency: CURRENCIES.map((value) => ({
-                  value: value,
-                  label: value,
+                version: subscriptions.map((sub) => ({
+                  value: sub.version.id,
+                  label: `${sub.version.title} - v${sub.version.version}`,
                 })),
               },
             }}

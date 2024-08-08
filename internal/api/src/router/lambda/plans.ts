@@ -1,14 +1,16 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq, sql } from "@unprice/db"
+import { and, eq, getTableColumns, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
+  customerSelectSchema,
   planInsertBaseSchema,
   planSelectBaseSchema,
   planVersionSelectBaseSchema,
   projectSelectBaseSchema,
+  subscriptionSelectSchema,
 } from "@unprice/db/validators"
 
 import {
@@ -242,10 +244,7 @@ export const planRouter = createTRPCRouter({
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
-        plan: planSelectBaseSchema.extend({
-          versions: z.array(planVersionSelectBaseSchema),
-          project: projectSelectBaseSchema,
-        }),
+        plan: planSelectBaseSchema,
       })
     )
     .query(async (opts) => {
@@ -253,12 +252,6 @@ export const planRouter = createTRPCRouter({
       const project = opts.ctx.project
 
       const plan = await opts.ctx.db.query.plans.findFirst({
-        with: {
-          versions: {
-            orderBy: (version, { desc }) => [desc(version.createdAt)],
-          },
-          project: true,
-        },
         where: (plan, { eq, and }) => and(eq(plan.slug, slug), eq(plan.projectId, project.id)),
       })
 
@@ -273,7 +266,143 @@ export const planRouter = createTRPCRouter({
         plan: plan,
       }
     }),
+  getVersionsBySlug: protectedActiveProjectProcedure
+    .input(z.object({ slug: z.string() }))
+    .output(
+      z.object({
+        plan: planSelectBaseSchema.extend({
+          versions: z.array(
+            planVersionSelectBaseSchema.extend({
+              subscriptions: z.number(),
+            })
+          ),
+        }),
+      })
+    )
+    .query(async (opts) => {
+      const { slug } = opts.input
+      const project = opts.ctx.project
 
+      // TODO: better rewrite this query to use joins instead of subqueries
+      const planWithVersions = await opts.ctx.db.query.plans
+        .findFirst({
+          with: {
+            versions: {
+              orderBy: (version, { desc }) => [desc(version.createdAt)],
+              with: {
+                subscriptions: {
+                  columns: {
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
+          where: (plan, { eq, and }) => and(eq(plan.slug, slug), eq(plan.projectId, project.id)),
+        })
+        .then((plans) => {
+          return (
+            plans && {
+              ...plans,
+              versions: plans.versions.map((version) => ({
+                ...version,
+                subscriptions: version.subscriptions.length ?? 0,
+              })),
+            }
+          )
+        })
+
+      if (!planWithVersions) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan not found",
+        })
+      }
+
+      return {
+        plan: planWithVersions,
+      }
+    }),
+  getSubscriptionsBySlug: protectedActiveProjectProcedure
+    .input(z.object({ slug: z.string() }))
+    .output(
+      z.object({
+        plan: planSelectBaseSchema,
+        subscriptions: z.array(
+          subscriptionSelectSchema.extend({
+            customer: customerSelectSchema,
+            version: planVersionSelectBaseSchema,
+          })
+        ),
+      })
+    )
+    .query(async (opts) => {
+      const { slug } = opts.input
+      const project = opts.ctx.project
+      const customerColumns = getTableColumns(schema.customers)
+      const versionColumns = getTableColumns(schema.versions)
+
+      const planWithSubscriptions = await opts.ctx.db
+        .select({
+          plan: schema.plans,
+          subscriptions: schema.subscriptions,
+          customer: customerColumns,
+          version: versionColumns,
+        })
+        .from(schema.subscriptions)
+        .innerJoin(
+          schema.customers,
+          and(
+            eq(schema.subscriptions.customerId, schema.customers.id),
+            eq(schema.customers.projectId, schema.subscriptions.projectId)
+          )
+        )
+        .innerJoin(
+          schema.versions,
+          and(
+            eq(schema.subscriptions.planVersionId, schema.versions.id),
+            eq(schema.customers.projectId, schema.versions.projectId),
+            eq(schema.versions.projectId, project.id)
+          )
+        )
+        .innerJoin(
+          schema.plans,
+          and(
+            eq(schema.versions.planId, schema.plans.id),
+            eq(schema.plans.projectId, schema.versions.projectId)
+          )
+        )
+        .where(and(eq(schema.plans.slug, slug), eq(schema.plans.projectId, project.id)))
+
+      if (!planWithSubscriptions || !planWithSubscriptions.length) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan not found",
+        })
+      }
+
+      // plan should be the same so filter data to get plan and subscriptions[]
+      const plan = planWithSubscriptions.at(0)?.plan
+      const subscriptions = planWithSubscriptions.map((data) => {
+        return {
+          ...data.subscriptions,
+          customer: data.customer,
+          version: data.version,
+        }
+      })
+
+      if (!plan) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan not found",
+        })
+      }
+
+      return {
+        plan: plan,
+        subscriptions: subscriptions,
+      }
+    }),
   getById: protectedActiveProjectProcedure
     .input(z.object({ id: z.string() }))
     .output(
