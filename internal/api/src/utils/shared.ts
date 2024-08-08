@@ -235,6 +235,13 @@ export const createSubscription = async ({
     })
   }
 
+  if (versionData.active !== true) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "Plan version is not active, only active versions can be subscribed to",
+    })
+  }
+
   if (!versionData.planFeatures || versionData.planFeatures.length === 0) {
     throw new TRPCError({
       code: "NOT_FOUND",
