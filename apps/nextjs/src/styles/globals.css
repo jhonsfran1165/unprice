@@ -151,14 +151,29 @@
   .button-secondary {
     @apply secondary hover:border-secondary-borderHover hover:bg-secondary-solid hover:text-secondary-foreground active:bg-secondary-bgActive;
   }
+}
 
-  .hide-scrollbar {
-    -ms-overflow-style: none; /* Internet Explorer 10+ */
-    scrollbar-width: none; /* Firefox */
+@layer utilities {
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome, Safari and Opera */
   }
 
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none; /* Safari and Chrome */
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* Hide scrollbar for Internet Explorer and Edge */
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    --scrollbar-size: 0px;
+  }
+
+  .hide-scrollbar [data-radix-scroll-area-viewport] > div {
+    padding-right: 0 !important;
+  }
+
+  .hide-scrollbar [data-radix-scroll-area-viewport]::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar [data-radix-scroll-area-viewport] {
+    scrollbar-width: none;
   }
 }
 

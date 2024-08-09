@@ -17,6 +17,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
   CommandLoading,
 } from "@unprice/ui/command"
 import {
@@ -29,12 +30,12 @@ import {
   FormMessage,
 } from "@unprice/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
-import { ScrollArea } from "@unprice/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Separator } from "@unprice/ui/separator"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { cn } from "@unprice/ui/utils"
 import { add, format } from "date-fns"
+import { FilterScroll } from "~/components/filter-scroll"
 import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -50,15 +51,15 @@ export function SubscriptionForm({
   setDialogOpen,
   defaultValues,
   isEndSubscription,
+  readOnly,
 }: {
   setDialogOpen?: (open: boolean) => void
   defaultValues: InsertSubscription | Subscription
   isEndSubscription?: boolean
+  readOnly?: boolean
 }) {
   const router = useRouter()
-
   const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersionResponse>()
-
   const [switcherPlanOpen, setSwitcherPlanOpen] = useState(false)
 
   const formSchema = isEndSubscription
@@ -78,16 +79,25 @@ export function SubscriptionForm({
   })
 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery({
-    published: true,
     enterprisePlan: true,
+    published: true,
+    active: !readOnly, // read only should show inactive plans
   })
 
   const subscriptionPlanId = form.watch("planVersionId")
 
   useMemo(() => {
-    if (selectedPlanVersion && subscriptionPlanId) {
+    let planVersion = selectedPlanVersion
+
+    // if the plan version id comes from default values, we need to find it in the data
+    if (!planVersion && subscriptionPlanId) {
+      planVersion = data?.planVersions.find((version) => version.id === subscriptionPlanId)
+      setSelectedPlanVersion(planVersion)
+    }
+
+    if (planVersion && subscriptionPlanId) {
       const { err, val: itemsConfig } = createDefaultSubscriptionConfig({
-        planVersion: selectedPlanVersion,
+        planVersion: planVersion,
       })
 
       if (err) {
@@ -159,7 +169,7 @@ export function SubscriptionForm({
                 <div className="font-normal text-xs leading-snug">
                   All the items will be configured based on the plan version
                 </div>
-                <Popover open={switcherPlanOpen} onOpenChange={setSwitcherPlanOpen}>
+                <Popover open={switcherPlanOpen} onOpenChange={setSwitcherPlanOpen} modal={true}>
                   <PopoverTrigger asChild>
                     <div className="">
                       <FormControl>
@@ -172,9 +182,8 @@ export function SubscriptionForm({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value
-                            ? data?.planVersions.find((version) => version.id === field.value)
-                                ?.title
+                          {selectedPlanVersion
+                            ? `${selectedPlanVersion.plan.slug} v${selectedPlanVersion.version} - ${selectedPlanVersion.title} - ${selectedPlanVersion.billingPeriod}`
                             : "Select plan"}
                           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -184,36 +193,35 @@ export function SubscriptionForm({
                   <PopoverContent className="max-h-[--radix-popover-content-available-height] w-[--radix-popover-trigger-width] p-0">
                     <Command>
                       <CommandInput placeholder="Search a plan..." />
-                      <CommandEmpty>No plan found.</CommandEmpty>
-                      <CommandGroup>
-                        {isLoading && <CommandLoading>Loading...</CommandLoading>}
-                        <ScrollArea
-                          className={cn({
-                            "max-h-24":
-                              data?.planVersions?.length && data?.planVersions?.length > 5,
-                          })}
-                        >
-                          {data?.planVersions.map((version) => (
-                            <CommandItem
-                              value={version.id}
-                              key={version.id}
-                              onSelect={() => {
-                                field.onChange(version.id)
-                                setSelectedPlanVersion(version)
-                                setSwitcherPlanOpen(false)
-                              }}
-                            >
-                              <CheckIcon
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  version.id === field.value ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              {`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
-                            </CommandItem>
-                          ))}
-                        </ScrollArea>
-                      </CommandGroup>
+                      <CommandList>
+                        <CommandEmpty>No plan found.</CommandEmpty>
+                        <FilterScroll>
+                          <CommandGroup>
+                            {isLoading && <CommandLoading>Loading...</CommandLoading>}
+                            <div className="flex flex-col gap-2 pt-1">
+                              {data?.planVersions.map((version) => (
+                                <CommandItem
+                                  value={`${version.plan.slug} v${version.version} - ${version.title}`}
+                                  key={version.id}
+                                  onSelect={() => {
+                                    field.onChange(version.id)
+                                    setSelectedPlanVersion(version)
+                                    setSwitcherPlanOpen(false)
+                                  }}
+                                >
+                                  <CheckIcon
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      version.id === field.value ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
+                                </CommandItem>
+                              ))}
+                            </div>
+                          </CommandGroup>
+                        </FilterScroll>
+                      </CommandList>
                     </Command>
                   </PopoverContent>
                 </Popover>
@@ -407,15 +415,17 @@ export function SubscriptionForm({
           />
         </div>
 
-        <div className="mt-8 flex justify-end space-x-4">
-          <SubmitButton
-            form="subscription-form"
-            onClick={() => form.handleSubmit(onSubmitForm)()}
-            isSubmitting={form.formState.isSubmitting}
-            isDisabled={form.formState.isSubmitting}
-            label={isEndSubscription ? "End Subscription" : "Create Subscription"}
-          />
-        </div>
+        {!readOnly && (
+          <div className="mt-8 flex justify-end space-x-4">
+            <SubmitButton
+              form="subscription-form"
+              onClick={() => form.handleSubmit(onSubmitForm)()}
+              isSubmitting={form.formState.isSubmitting}
+              isDisabled={form.formState.isSubmitting}
+              label={isEndSubscription ? "End Subscription" : "Create Subscription"}
+            />
+          </div>
+        )}
       </form>
     </Form>
   )

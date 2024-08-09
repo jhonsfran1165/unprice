@@ -931,6 +931,9 @@ export const planVersionRouter = createTRPCRouter({
       const { published, enterprisePlan, active } = opts.input
       const project = opts.ctx.project
 
+      const needsPublished = published === undefined || published
+      const needsActive = active === undefined || active
+
       const planVersionData = await opts.ctx.db.query.versions.findMany({
         with: {
           plan: true,
@@ -946,9 +949,10 @@ export const planVersionRouter = createTRPCRouter({
         where: (version, { and, eq }) =>
           and(
             eq(version.projectId, project.id),
-            published ? eq(version.status, "published") : undefined,
+            // get published versions by default, only get unpublished versions if the user wants it
+            needsPublished ? eq(version.status, "published") : undefined,
             // get active versions by default, only get inactive versions if the user wants it
-            active ? undefined : eq(version.active, true)
+            needsActive ? eq(version.active, true) : undefined
           ),
       })
 

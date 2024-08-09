@@ -506,8 +506,6 @@ export const customersRouter = createTRPCRouter({
       //   ctx,
       // })
 
-      console.log(id, project.id)
-
       const customerData = await opts.ctx.db.query.customers.findFirst({
         with: {
           subscriptions: {
@@ -523,8 +521,6 @@ export const customersRouter = createTRPCRouter({
         where: (customer, { eq, and }) =>
           and(eq(customer.projectId, project.id), eq(customer.id, id)),
       })
-
-      console.log(customerData)
 
       if (!customerData) {
         throw new TRPCError({

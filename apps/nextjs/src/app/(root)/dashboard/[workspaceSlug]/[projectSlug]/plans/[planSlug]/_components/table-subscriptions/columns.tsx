@@ -49,20 +49,12 @@ export const columns: ColumnDef<PlanVersion>[] = [
     accessorKey: "planVersion",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Plan Version" />,
     cell: ({ row }) => {
-      console.log(row.original.trialDays)
       return (
         <div>
           <div className="flex items-center space-x-2">
             <Typography variant="h6" className="truncate">
               {row.original.version.title}
             </Typography>
-
-            {row.original.version.latest && (
-              <div className={"inline-flex items-center font-medium text-info text-xs"}>
-                <span className={"flex h-2 w-2 rounded-full bg-info"} />
-                <span className="ml-1">latest</span>
-              </div>
-            )}
 
             {row.original.isNew && (
               <div className={"inline-flex items-center font-medium text-success text-xs"}>
@@ -155,11 +147,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
     accessorKey: "type",
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
-    cell: ({ row }) => (
-      <Badge className="text-xs" variant="secondary">
-        {row.original.type}
-      </Badge>
-    ),
+    cell: ({ row }) => <Badge className="text-xs">{row.original.type}</Badge>,
     filterFn: (row, id, value) => {
       return Array.isArray(value) && value.includes(row.getValue(id))
     },
@@ -169,7 +157,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
     accessorKey: "collectionMethod",
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Collection Method" />,
-    cell: ({ row }) => row.original.collectionMethod,
+    cell: ({ row }) => <Badge className="text-xs">{row.original.collectionMethod}</Badge>,
     size: 40,
   },
   {
