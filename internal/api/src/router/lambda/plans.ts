@@ -328,12 +328,12 @@ export const planRouter = createTRPCRouter({
     .output(
       z.object({
         plan: planSelectBaseSchema,
-        subscriptions: z.array(
-          subscriptionSelectSchema.extend({
+        subscriptions: subscriptionSelectSchema
+          .extend({
             customer: customerSelectSchema,
             version: planVersionSelectBaseSchema,
           })
-        ),
+          .array(),
       })
     )
     .query(async (opts) => {
@@ -342,9 +342,19 @@ export const planRouter = createTRPCRouter({
       const customerColumns = getTableColumns(schema.customers)
       const versionColumns = getTableColumns(schema.versions)
 
+      const plan = await opts.ctx.db.query.plans.findFirst({
+        where: (plan, { eq, and }) => and(eq(plan.slug, slug), eq(plan.projectId, project.id)),
+      })
+
+      if (!plan) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan not found",
+        })
+      }
+
       const planWithSubscriptions = await opts.ctx.db
         .select({
-          plan: schema.plans,
           subscriptions: schema.subscriptions,
           customer: customerColumns,
           version: versionColumns,
@@ -375,14 +385,12 @@ export const planRouter = createTRPCRouter({
         .where(and(eq(schema.plans.slug, slug), eq(schema.plans.projectId, project.id)))
 
       if (!planWithSubscriptions || !planWithSubscriptions.length) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Plan not found",
-        })
+        return {
+          plan: plan,
+          subscriptions: [],
+        }
       }
 
-      // plan should be the same so filter data to get plan and subscriptions[]
-      const plan = planWithSubscriptions.at(0)?.plan
       const subscriptions = planWithSubscriptions.map((data) => {
         return {
           ...data.subscriptions,
@@ -390,13 +398,6 @@ export const planRouter = createTRPCRouter({
           version: data.version,
         }
       })
-
-      if (!plan) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Plan not found",
-        })
-      }
 
       return {
         plan: plan,

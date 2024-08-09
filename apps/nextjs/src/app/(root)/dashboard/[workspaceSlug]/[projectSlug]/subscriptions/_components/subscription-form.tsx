@@ -107,7 +107,7 @@ export function SubscriptionForm({
 
       items.replace(itemsConfig)
     }
-  }, [subscriptionPlanId])
+  }, [subscriptionPlanId, isLoading])
 
   const { data: paymentMethods } = api.customers.listPaymentMethods.useQuery(
     {
@@ -195,13 +195,13 @@ export function SubscriptionForm({
                       <CommandInput placeholder="Search a plan..." />
                       <CommandList>
                         <CommandEmpty>No plan found.</CommandEmpty>
-                        <FilterScroll>
+                        <FilterScroll className="h-[200px]">
                           <CommandGroup>
                             {isLoading && <CommandLoading>Loading...</CommandLoading>}
                             <div className="flex flex-col gap-2 pt-1">
                               {data?.planVersions.map((version) => (
                                 <CommandItem
-                                  value={`${version.plan.slug} v${version.version} - ${version.title}`}
+                                  value={`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
                                   key={version.id}
                                   onSelect={() => {
                                     field.onChange(version.id)

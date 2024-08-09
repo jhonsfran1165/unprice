@@ -9,8 +9,7 @@ import { useScrollProgress } from "~/hooks/use-scroll-progress"
 export const FilterScroll = ({
   children,
   className,
-  maxHeight = 200,
-}: { children: React.ReactNode; className?: string; maxHeight?: number }) => {
+}: { children: React.ReactNode; className?: string }) => {
   const scrollAreaRef = useRef(null)
 
   const { scrollProgress, updateScrollProgress } = useScrollProgress(
@@ -19,17 +18,12 @@ export const FilterScroll = ({
   )
 
   return (
-    <div className="relative" style={{ maxHeight: `${maxHeight}px` }}>
+    <div className="relative">
       <ScrollArea
-        hideScrollBar={true}
         ref={scrollAreaRef}
+        hideScrollBar={true}
         onScrollCapture={updateScrollProgress}
-        className={cn(
-          "hide-scrollbar",
-          // hack for not having to set height on scroll area
-          `[&>[data-radix-scroll-area-viewport]]:max-h-[${maxHeight}px]`,
-          className
-        )}
+        className={cn("hide-scrollbar h-[200px]", className)}
       >
         {children}
         <motion.div
