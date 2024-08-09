@@ -18,12 +18,17 @@ export const FilterScroll = ({
   )
 
   return (
-    <div className="relative">
+    <div className="relative" style={{ maxHeight: "200px" }}>
       <ScrollArea
         ref={scrollAreaRef}
         hideScrollBar={true}
         onScrollCapture={updateScrollProgress}
-        className={cn("hide-scrollbar h-[200px]", className)}
+        className={cn(
+          "hide-scrollbar",
+          // hack for not having to set height on scroll area
+          "[&>[data-radix-scroll-area-viewport]]:max-h-[200px]",
+          className
+        )}
       >
         {children}
         <motion.div

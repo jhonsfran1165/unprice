@@ -195,7 +195,7 @@ export function SubscriptionForm({
                       <CommandInput placeholder="Search a plan..." />
                       <CommandList>
                         <CommandEmpty>No plan found.</CommandEmpty>
-                        <FilterScroll className="h-[200px]">
+                        <FilterScroll>
                           <CommandGroup>
                             {isLoading && <CommandLoading>Loading...</CommandLoading>}
                             <div className="flex flex-col gap-2 pt-1">
