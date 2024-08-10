@@ -47,6 +47,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
   },
   {
     accessorKey: "planVersion",
+    size: 200,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Plan Version" />,
     cell: ({ row }) => {
       return (
@@ -66,7 +67,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
             {row.original.trialDays !== null && row.original.trialDays > 0 && (
               <div className="hidden items-center font-medium text-info text-xs lg:inline-flex">
                 <span className="flex h-2 w-2 rounded-full bg-info" />
-                <span className="ml-1">{row.original.trialDays} trial days left</span>
+                <span className="ml-1">{row.original.trialDays} trial days</span>
               </div>
             )}
           </div>

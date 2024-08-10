@@ -70,7 +70,6 @@ export {
 } from "lucide-react"
 
 // TODO: ???
-// import { DotsHorizontalIcon } from "@radix-ui/react-icons"
 export type { LucideIcon } from "lucide-react"
 
 export type Icon = (props: LucideProps) => JSX.Element

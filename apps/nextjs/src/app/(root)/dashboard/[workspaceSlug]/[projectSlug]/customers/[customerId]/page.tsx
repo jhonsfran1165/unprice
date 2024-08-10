@@ -6,6 +6,7 @@ import { Button } from "@unprice/ui/button"
 import { Separator } from "@unprice/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
 import { Typography } from "@unprice/ui/typography"
+import { Plus } from "lucide-react"
 import { Suspense } from "react"
 import { DataTable } from "~/components/data-table/data-table"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
@@ -60,7 +61,10 @@ export default async function PlanPage({
                     startDate: new Date(),
                   }}
                 >
-                  <Button variant={"custom"}>Add Subscription</Button>
+                  <Button variant={"custom"}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Subscription
+                  </Button>
                 </SubscriptionSheet>
               </div>
 

@@ -1,13 +1,17 @@
 import type * as React from "react"
 
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 
 export function EmptyPlaceholder({
   className,
   children,
+  isLoading = false,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement> & {
+  isLoading?: boolean
+}) {
   return (
     <div
       className={cn(
@@ -16,9 +20,13 @@ export function EmptyPlaceholder({
       )}
       {...props}
     >
-      <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-        {children}
-      </div>
+      {isLoading ? (
+        <LoadingAnimation className="size-6" />
+      ) : (
+        <div className="mx-auto flex flex-col items-center justify-center text-center">
+          {children}
+        </div>
+      )}
     </div>
   )
 }
@@ -61,7 +69,7 @@ EmptyPlaceholder.Description = function EmptyPlaceholderDescription({
   ...props
 }: EmptyPlaceholderDescriptionProps) {
   return (
-    <Typography variant="p" className={cn("mt-2 mb-4", className)} {...props}>
+    <Typography variant="p" className={cn("my-2", className)} {...props}>
       {children}
     </Typography>
   )

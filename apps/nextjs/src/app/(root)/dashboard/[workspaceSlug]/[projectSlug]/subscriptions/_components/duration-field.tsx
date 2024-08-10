@@ -1,6 +1,6 @@
 "use client"
 
-import { add, addDays, formatDate, startOfMonth } from "date-fns"
+import { add, addDays, formatDate, startOfMonth, subDays } from "date-fns"
 import { ArrowRight, CalendarIcon } from "lucide-react"
 import { useState } from "react"
 import type { UseFormReturn } from "react-hook-form"
@@ -14,11 +14,13 @@ import { cn } from "@unprice/ui/utils"
 
 export default function DurationFormField({
   form,
+  isDisabled,
 }: {
   form: UseFormReturn<InsertSubscription>
+  isDisabled?: boolean
 }) {
   const [start, setStart] = useState<Date | undefined>(form.getValues("startDate"))
-  const [end, setEnd] = useState<Date | null | undefined>(form.getValues("endDate"))
+  const [end, setEnd] = useState<Date | undefined>(form.getValues("endDate") ?? undefined)
 
   const { errors } = form.formState
 
@@ -39,7 +41,7 @@ export default function DurationFormField({
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <Popover>
-                <PopoverTrigger asChild>
+                <PopoverTrigger asChild disabled={isDisabled}>
                   <FormControl>
                     <Button
                       variant={"custom"}
@@ -47,6 +49,7 @@ export default function DurationFormField({
                         "h-9 rounded-e-none pl-3 text-left font-normal hover:bg-muted hover:text-background-textContrast focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1",
                         !start && "text-muted-foreground"
                       )}
+                      disabled={isDisabled}
                     >
                       {start ? formatDate(start, "MMM dd, yyyy") : <span>Start Date</span>}
                       <ArrowRight className="ml-auto h-4 w-4 opacity-50" />
@@ -64,6 +67,14 @@ export default function DurationFormField({
                       }}
                       month={start}
                       initialFocus
+                      disabled={(date) => {
+                        const yesterday = subDays(new Date(), 1)
+                        // disable dates before today
+                        if (date < yesterday) return true
+                        // if disabled, disable all dates
+                        if (isDisabled) return true
+                        return false
+                      }}
                     />
                   </div>
                   <div className="flex flex-col gap-2 px-2 py-4">
@@ -125,7 +136,7 @@ export default function DurationFormField({
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <Popover>
-                <PopoverTrigger asChild>
+                <PopoverTrigger asChild disabled={isDisabled}>
                   <FormControl>
                     <Button
                       variant={"custom"}
@@ -133,6 +144,7 @@ export default function DurationFormField({
                         "rounded-s-none pl-3 text-left font-normal hover:bg-muted hover:text-background-textContrast focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1",
                         !end && "text-muted-foreground"
                       )}
+                      disabled={isDisabled}
                     >
                       {end ? formatDate(end, "MMM dd, yyyy") : <span>Forever</span>}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -143,13 +155,13 @@ export default function DurationFormField({
                   <div className="border-r">
                     <Calendar
                       mode="single"
-                      selected={end!}
-                      month={end!}
+                      selected={end}
+                      month={end}
                       onSelect={(date) => {
                         setEnd(date)
                         field.onChange(date)
                       }}
-                      disabled={(date) => !start || date <= start}
+                      disabled={(date) => !start || date <= start || !!isDisabled}
                     />
                   </div>
                   <div className="flex flex-col gap-2 px-2 py-4">

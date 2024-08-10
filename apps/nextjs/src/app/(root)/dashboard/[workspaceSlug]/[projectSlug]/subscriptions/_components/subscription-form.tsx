@@ -29,6 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@unprice/ui/form"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Separator } from "@unprice/ui/separator"
@@ -109,15 +110,11 @@ export function SubscriptionForm({
     }
   }, [subscriptionPlanId, isLoading])
 
-  const { data: paymentMethods } = api.customers.listPaymentMethods.useQuery(
-    {
+  const { data: paymentMethods, isLoading: isPaymentMethodsLoading } =
+    api.customers.listPaymentMethods.useQuery({
       customerId: defaultValues.customerId,
       provider: selectedPlanVersion?.paymentProvider ?? "stripe",
-    },
-    {
-      enabled: !!selectedPlanVersion?.paymentProvider,
-    }
-  )
+    })
 
   const createSubscription = api.subscriptions.create.useMutation({
     onSuccess: ({ subscription }) => {
@@ -169,7 +166,16 @@ export function SubscriptionForm({
                 <div className="font-normal text-xs leading-snug">
                   All the items will be configured based on the plan version
                 </div>
-                <Popover open={switcherPlanOpen} onOpenChange={setSwitcherPlanOpen} modal={true}>
+                <Popover
+                  open={switcherPlanOpen}
+                  onOpenChange={() => {
+                    if (isLoading || isEndSubscription || readOnly) {
+                      return
+                    }
+                    setSwitcherPlanOpen(true)
+                  }}
+                  modal={true}
+                >
                   <PopoverTrigger asChild>
                     <div className="">
                       <FormControl>
@@ -177,14 +183,19 @@ export function SubscriptionForm({
                           type="button"
                           variant="outline"
                           role="combobox"
+                          disabled={isLoading || isEndSubscription || readOnly}
                           className={cn(
                             "w-full justify-between",
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {selectedPlanVersion
-                            ? `${selectedPlanVersion.plan.slug} v${selectedPlanVersion.version} - ${selectedPlanVersion.title} - ${selectedPlanVersion.billingPeriod}`
-                            : "Select plan"}
+                          {isLoading ? (
+                            <LoadingAnimation className="h-4 w-4" variant="dots" />
+                          ) : selectedPlanVersion ? (
+                            `${selectedPlanVersion.plan.slug} v${selectedPlanVersion.version} - ${selectedPlanVersion.title} - ${selectedPlanVersion.billingPeriod}`
+                          ) : (
+                            "Select plan"
+                          )}
                           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
@@ -261,7 +272,7 @@ export function SubscriptionForm({
                   </div>
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger disabled={readOnly}>
                         <SelectValue placeholder="Select a type" />
                       </SelectTrigger>
                     </FormControl>
@@ -308,7 +319,7 @@ export function SubscriptionForm({
                   </div>
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger disabled={readOnly}>
                         <SelectValue placeholder="Select a currency" />
                       </SelectTrigger>
                     </FormControl>
@@ -329,7 +340,7 @@ export function SubscriptionForm({
           {!isEndSubscription && (
             <Fragment>
               <Separator />
-              <DurationFormField form={form} />
+              <DurationFormField form={form} isDisabled={readOnly} />
               <FormField
                 control={form.control}
                 name="trialDays"
@@ -338,7 +349,12 @@ export function SubscriptionForm({
                     <FormLabel>Trial Days</FormLabel>
                     <div className="flex w-full flex-col lg:w-1/2">
                       <FormControl className="w-full">
-                        <InputWithAddons {...field} trailing={"days"} value={field.value ?? ""} />
+                        <InputWithAddons
+                          {...field}
+                          trailing={"days"}
+                          value={field.value ?? ""}
+                          disabled={readOnly}
+                        />
                       </FormControl>
 
                       <FormMessage className="self-start pt-1" />
@@ -404,11 +420,14 @@ export function SubscriptionForm({
           <PaymentMethodsFormField
             form={form}
             paymentMethods={paymentMethods?.paymentMethods ?? []}
+            isDisabled={readOnly}
+            isLoading={isPaymentMethodsLoading}
           />
 
           <Separator />
 
           <ConfigItemsFormField
+            isLoading={isLoading}
             form={form}
             items={items}
             selectedPlanVersion={selectedPlanVersion}

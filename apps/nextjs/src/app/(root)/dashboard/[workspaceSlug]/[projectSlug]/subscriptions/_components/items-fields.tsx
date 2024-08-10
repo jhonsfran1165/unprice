@@ -20,9 +20,8 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unpri
 import { Input } from "@unprice/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
-import { cn } from "@unprice/ui/utils"
-
 import { Typography } from "@unprice/ui/typography"
+import { cn } from "@unprice/ui/utils"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { FeatureConfigForm } from "../../plans/[planSlug]/_components/feature-config-form"
@@ -36,10 +35,12 @@ export default function ConfigItemsFormField({
   form,
   selectedPlanVersion,
   items,
+  isLoading,
 }: {
   form: UseFormReturn<InsertSubscription>
   selectedPlanVersion?: PlanVersionResponse
   items: UseFieldArrayReturn<InsertSubscription, "config", "id">
+  isLoading?: boolean
 }) {
   const versionFeatures = new Map<string, PlanVersionFeaturesResponse>()
   const versionAddons = new Map<string, PlanVersionFeaturesResponse>()
@@ -250,7 +251,7 @@ export default function ConfigItemsFormField({
           </Table>
         ) : (
           <div className="flex w-full items-center justify-center px-2 py-4">
-            <EmptyPlaceholder>
+            <EmptyPlaceholder isLoading={isLoading}>
               <EmptyPlaceholder.Icon>
                 <LayoutGrid className="h-8 w-8" />
               </EmptyPlaceholder.Icon>
