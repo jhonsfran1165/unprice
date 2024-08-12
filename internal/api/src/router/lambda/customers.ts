@@ -252,9 +252,6 @@ export const customersRouter = createTRPCRouter({
         })
       }
 
-      // simulate a slow response
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
       // there is not information about the payment methods in our database
       // we have to query the payment provider api to get up-to-date information
 

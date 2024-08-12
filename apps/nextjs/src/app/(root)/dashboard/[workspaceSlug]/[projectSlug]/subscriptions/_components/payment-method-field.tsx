@@ -3,12 +3,16 @@
 import type { UseFormReturn } from "react-hook-form"
 
 import type { RouterOutputs } from "@unprice/api"
+import { APP_DOMAIN } from "@unprice/config"
 import type { InsertSubscription } from "@unprice/db/validators"
+import { Button } from "@unprice/ui/button"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { RadioGroup, RadioGroupItem } from "@unprice/ui/radio-group"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
+import { useParams } from "next/navigation"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
+import { PaymentMethodDialog } from "../../customers/_components/payment-method-dialog"
 
 type PaymentMethodProviderData =
   RouterOutputs["customers"]["listPaymentMethods"]["paymentMethods"][number]
@@ -24,15 +28,18 @@ export default function PaymentMethodsFormField({
   isDisabled?: boolean
   isLoading?: boolean
 }) {
+  const workspaceSlug = useParams().workspaceSlug as string
+  const projectSlug = useParams().projectSlug as string
+  const customerId = form.getValues("customerId")
   const hasPaymentMethods = paymentMethods.length > 0
+  const successUrl = `${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`
+  const cancelUrl = `${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`
 
   const { errors } = form.formState
 
-  console.log(hasPaymentMethods)
-
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="mb-4 flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         <FormLabel
           className={cn({
             "text-destructive": errors.defaultPaymentMethodId,
@@ -100,8 +107,21 @@ export default function PaymentMethodsFormField({
         />
       )}
       {!hasPaymentMethods && (
-        <EmptyPlaceholder isLoading={isLoading} className="min-h-[80px]">
-          <EmptyPlaceholder.Description>No payment methods found.</EmptyPlaceholder.Description>
+        <EmptyPlaceholder isLoading={isLoading} className="min-h-[100px]">
+          <EmptyPlaceholder.Description className="mt-0">
+            No payment methods found.
+          </EmptyPlaceholder.Description>
+          <EmptyPlaceholder.Action>
+            <PaymentMethodDialog
+              customerId={customerId}
+              successUrl={successUrl}
+              cancelUrl={cancelUrl}
+            >
+              <Button variant="default" size="sm">
+                Add payment method
+              </Button>
+            </PaymentMethodDialog>
+          </EmptyPlaceholder.Action>
         </EmptyPlaceholder>
       )}
     </div>

@@ -18,6 +18,7 @@ import { Analytics } from "@unprice/tinybird"
 import { Ratelimit } from "@upstash/ratelimit"
 import { waitUntil } from "@vercel/functions"
 import { ZodError } from "zod"
+import { fromZodError } from "zod-validation-error"
 import { env } from "./env.mjs"
 import { initCache } from "./pkg/cache"
 import type { CacheNamespaces } from "./pkg/cache/namespaces"
@@ -180,6 +181,8 @@ export const t = initTRPC
               ? error.cause.flatten()
               : null,
         },
+        message:
+          error.cause instanceof ZodError ? fromZodError(error.cause).toString() : error.message,
       }
 
       if (error.code === "INTERNAL_SERVER_ERROR") {

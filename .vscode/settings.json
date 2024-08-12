@@ -49,6 +49,7 @@
     "pkey",
     "pxat",
     "Ratelimit",
+    "refetched",
     "satoshi",
     "sidemodule",
     "SIGNIN",

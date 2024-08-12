@@ -1,7 +1,7 @@
 "use client"
 
 import { PAYMENT_PROVIDERS } from "@unprice/db/utils"
-import type { Customer, PaymentProvider } from "@unprice/db/validators"
+import type { PaymentProvider } from "@unprice/db/validators"
 import { Card, CardContent, CardFooter } from "@unprice/ui/card"
 import { Label } from "@unprice/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
@@ -13,11 +13,11 @@ import { api } from "~/trpc/client"
 import { UserPaymentMethod } from "./payment-method"
 
 export function PaymentMethodForm({
-  customer,
+  customerId,
   successUrl,
   cancelUrl,
 }: {
-  customer: Customer
+  customerId: string
   successUrl: string
   cancelUrl: string
 }) {
@@ -25,7 +25,7 @@ export function PaymentMethodForm({
   const [provider, setProvider] = useState<PaymentProvider>("stripe")
 
   const { data, isLoading } = api.customers.listPaymentMethods.useQuery({
-    customerId: customer.id,
+    customerId,
     provider: provider,
   })
 
@@ -75,7 +75,7 @@ export function PaymentMethodForm({
           onClick={() => {
             createSession.mutate({
               paymentProvider: provider,
-              customerId: customer.id,
+              customerId,
               successUrl,
               cancelUrl,
             })

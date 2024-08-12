@@ -258,6 +258,9 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.23.8
+      zod-validation-error:
+        specifier: ^3.3.1
+        version: 3.3.1(zod@3.23.8)
     devDependencies:
       '@tanstack/react-query-devtools':
         specifier: ^5.49.2
@@ -437,6 +440,9 @@ importers:
       zod-form-data:
         specifier: ^2.0.2
         version: 2.0.2(zod@3.23.8)
+      zod-validation-error:
+        specifier: ^3.3.1
+        version: 3.3.1(zod@3.23.8)
     devDependencies:
       '@unprice/tsconfig':
         specifier: ^0.1.0
@@ -12357,7 +12363,7 @@ packages:
       summary: 2.1.0
       typescript: 5.5.4
       zod: 3.23.8
-      zod-validation-error: 3.3.0(zod@3.23.8)
+      zod-validation-error: 3.3.1(zod@3.23.8)
     dev: false
 
   /knitwork@1.1.0:
@@ -17910,8 +17916,8 @@ packages:
       zod: 3.23.8
     dev: false
 
-  /zod-validation-error@3.3.0(zod@3.23.8):
-    resolution: {integrity: sha512-Syib9oumw1NTqEv4LT0e6U83Td9aVRk9iTXPUQr1otyV1PuXQKOvOwhMNqZIq5hluzHP2pMgnOmHEo7kPdI2mw==}
+  /zod-validation-error@3.3.1(zod@3.23.8):
+    resolution: {integrity: sha512-uFzCZz7FQis256dqw4AhPQgD6f3pzNca/Zh62RNELavlumQB3nDIUFbF5JQfFLcMbO1s02Q7Xg/gpcOBlEnYZA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       zod: ^3.18.0

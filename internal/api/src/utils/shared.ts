@@ -5,8 +5,7 @@ import {
   type ProjectExtended,
   type SubscriptionItemConfig,
   createDefaultSubscriptionConfig,
-  subscriptionInsertSchema,
-  subscriptionItemsConfigSchema,
+  type subscriptionInsertSchema,
 } from "@unprice/db/validators"
 import type { z } from "zod"
 import { UnpriceCustomer } from "../pkg/customer"
@@ -179,16 +178,12 @@ export const reportUsageFeature = async ({
   return val
 }
 
-const input = subscriptionInsertSchema.extend({
-  config: subscriptionItemsConfigSchema.optional(),
-})
-
 export const createSubscription = async ({
   subscription,
   ctx,
   project,
 }: {
-  subscription: z.infer<typeof input>
+  subscription: z.infer<typeof subscriptionInsertSchema>
   project: ProjectExtended
   ctx: Context
 }) => {
@@ -228,6 +223,14 @@ export const createSubscription = async ({
     })
   }
 
+  // check if payment method is required for the plan version
+  if (versionData?.metadata?.paymentMethodRequired && !defaultPaymentMethodId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Payment method is required for this plan version",
+    })
+  }
+
   if (versionData.status !== "published") {
     throw new TRPCError({
       code: "CONFLICT",
@@ -263,6 +266,7 @@ export const createSubscription = async ({
             },
           },
         },
+        // get active subscriptions of the customer
         where: (sub, { eq }) => eq(sub.status, "active"),
       },
     },
@@ -281,7 +285,7 @@ export const createSubscription = async ({
   }
 
   // check the active subscriptions of the customer.
-  // The plan version the customer is attempting to subscript can't have any feature that the customer already has
+  // The plan version the customer is attempting to subscribe to can't have any feature that the customer already has
   const newFeatures = versionData.planFeatures.map((f) => f.feature.slug)
   const subscriptionFeatureSlugs = customerData.subscriptions.flatMap((sub) =>
     sub.items.map((f) => f.featurePlanVersion.feature.slug)
@@ -354,8 +358,9 @@ export const createSubscription = async ({
       })
     }
 
-    // add features to the subscription
+    // add items to the subscription
     await Promise.all(
+      // this is important because every item has the configuration of the quantity of a feature in the subscription
       configItemsSubscription.map((item) =>
         trx.insert(subscriptionItems).values({
           id: newId("subscription_item"),

@@ -76,7 +76,7 @@ export default async function PlanPage({
         />
       }
     >
-      <Tabs defaultValue="subscriptions">
+      <Tabs defaultValue={"subscriptions"}>
         <div className="flex items-center">
           <TabsList variant="line">
             <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
@@ -125,7 +125,7 @@ export default async function PlanPage({
         </TabsContent>
         <TabsContent value="paymentMethods">
           <PaymentMethodForm
-            customer={customer}
+            customerId={customer.id}
             successUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
             cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}
           />

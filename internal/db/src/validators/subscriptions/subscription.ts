@@ -31,7 +31,6 @@ const subscriptionItemConfigSchema = z.object({
 
 export const subscriptionMetadataSchema = z.object({
   externalId: z.string().optional(),
-  defaultPaymentMethodId: z.string().optional(),
 })
 
 export const subscriptionItemsSelectSchema = createSelectSchema(subscriptionItems, {
@@ -55,7 +54,6 @@ export const subscriptionItemsConfigSchema = z
   .array(subscriptionItemConfigSchema)
   .superRefine((items, ctx) => {
     if (items.length > 50) {
-      // TODO: add a better message and map to the correct path
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Total items for the subscription should be less than 50",
@@ -105,6 +103,7 @@ export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   metadata: subscriptionMetadataSchema,
   type: subscriptionTypeSchema,
   collectionMethod: collectionMethodSchema,
+  defaultPaymentMethodId: z.string().optional(),
 })
 
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
@@ -114,9 +113,10 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   metadata: subscriptionMetadataSchema,
   type: subscriptionTypeSchema,
   collectionMethod: collectionMethodSchema,
+  defaultPaymentMethodId: z.string().optional(),
 })
   .extend({
-    config: subscriptionItemsConfigSchema,
+    config: subscriptionItemsConfigSchema.optional(),
   })
   .omit({
     createdAt: true,

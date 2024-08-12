@@ -4,7 +4,6 @@ import * as schema from "@unprice/db/schema"
 import {
   type PlanVersion,
   subscriptionInsertSchema,
-  subscriptionItemsConfigSchema,
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
@@ -18,11 +17,7 @@ import { createSubscription } from "../../utils/shared"
 
 export const subscriptionRouter = createTRPCRouter({
   create: protectedActiveProjectAdminProcedure
-    .input(
-      subscriptionInsertSchema.extend({
-        config: subscriptionItemsConfigSchema.optional(),
-      })
-    )
+    .input(subscriptionInsertSchema)
     .output(
       z.object({
         subscription: subscriptionSelectSchema,
@@ -76,13 +71,9 @@ export const subscriptionRouter = createTRPCRouter({
     }),
   end: protectedActiveProjectAdminProcedure
     .input(
-      subscriptionInsertSchema
-        .extend({
-          config: subscriptionItemsConfigSchema.optional(),
-        })
-        .required({
-          id: true,
-        })
+      subscriptionInsertSchema.required({
+        id: true,
+      })
     )
     .output(z.object({ result: z.boolean(), message: z.string() }))
     .mutation(async (opts) => {

@@ -2,6 +2,7 @@ import { QueryClient, defaultShouldDehydrateQuery } from "@tanstack/react-query"
 import { TRPCClientError } from "@trpc/client"
 import { transformer } from "@unprice/api/transformer"
 import type { SuperJSONResult } from "superjson"
+import { getErrorMessage } from "~/lib/handle-error"
 import { toastAction } from "~/lib/toast"
 
 export const getBaseUrl = () => {
@@ -46,10 +47,12 @@ export const createQueryClient = () =>
             }
           : {
               onError: (err) => {
+                const error = getErrorMessage(err)
+
                 if (err instanceof TRPCClientError) {
                   toastAction("error", err.message)
                 } else {
-                  toastAction("error-contact")
+                  toastAction("error-contact", error)
                 }
               },
             },

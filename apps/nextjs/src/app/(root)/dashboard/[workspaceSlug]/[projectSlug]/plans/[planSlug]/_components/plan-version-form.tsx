@@ -1,6 +1,4 @@
 "use client"
-
-import { Link } from "next-view-transitions"
 import { usePathname, useRouter } from "next/navigation"
 import { startTransition } from "react"
 
@@ -21,9 +19,11 @@ import { Input } from "@unprice/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Textarea } from "@unprice/ui/text-area"
 
+import { Switch } from "@unprice/ui/switch"
 import type { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"
+import { SuperLink } from "~/components/super-link"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -124,6 +124,29 @@ export function PlanVersionForm({
       <form className="space-y-6">
         {isPublished && <BannerPublishedVersion />}
 
+        <FormField
+          control={form.control}
+          name="metadata.paymentMethodRequired"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Payment method required</FormLabel>
+                <FormDescription>
+                  If this plan version requires a payment method, customers will be redirected to
+                  the payment provider to enter their payment method.
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value ?? false}
+                  onCheckedChange={field.onChange}
+                  disabled={isPublished}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
         <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:space-y-4">
           <FormField
             control={form.control}
@@ -152,12 +175,13 @@ export function PlanVersionForm({
               <FormItem className="flex flex-col justify-end">
                 <div className="flex justify-between">
                   <FormLabel>Currency of this version</FormLabel>
-                  <Link
+                  {/* // TODO: add link to currency configuration */}
+                  <SuperLink
                     href="#"
                     className="ml-auto inline-block text-info text-xs underline opacity-70"
                   >
                     Set default currency for this organization
-                  </Link>
+                  </SuperLink>
                 </div>
 
                 <FormDescription>
@@ -259,12 +283,12 @@ export function PlanVersionForm({
                 <div className="flex justify-between">
                   <FormLabel>Payment provider</FormLabel>
                   {/* // TODO: add link to payment provider configuration */}
-                  <Link
+                  <SuperLink
                     href="#"
                     className="ml-auto inline-block text-info text-xs underline opacity-70"
                   >
                     Configure payment provider
-                  </Link>
+                  </SuperLink>
                 </div>
 
                 <FormDescription>

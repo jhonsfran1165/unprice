@@ -7,6 +7,7 @@ import { currencySchema } from "./shared"
 
 export const planVersionMetadataSchema = z.object({
   externalId: z.string().optional(),
+  paymentMethodRequired: z.boolean().optional(),
 })
 
 export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)

@@ -36,6 +36,7 @@ import { Separator } from "@unprice/ui/separator"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { cn } from "@unprice/ui/utils"
 import { add, format } from "date-fns"
+import { z } from "zod"
 import { FilterScroll } from "~/components/filter-scroll"
 import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
@@ -67,7 +68,20 @@ export function SubscriptionForm({
     ? subscriptionInsertSchema.required({
         id: true,
       })
-    : subscriptionInsertSchema
+    : subscriptionInsertSchema.superRefine((data, ctx) => {
+        // payment method is validated against the plan version
+        // to check if payment method is required for the plan
+        const paymentMethodRequired = selectedPlanVersion?.metadata?.paymentMethodRequired
+
+        if (paymentMethodRequired && !data.defaultPaymentMethodId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Default payment method is required for this plan",
+            path: ["defaultPaymentMethodId"],
+            fatal: true,
+          })
+        }
+      })
 
   const form = useZodForm({
     schema: formSchema,
