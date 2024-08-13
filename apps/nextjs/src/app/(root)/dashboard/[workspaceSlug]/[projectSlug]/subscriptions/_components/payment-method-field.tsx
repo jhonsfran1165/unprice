@@ -64,7 +64,9 @@ export default function PaymentMethodsFormField({
           render={({ field }) => (
             <FormItem className="w-full space-y-1">
               <RadioGroup
-                onValueChange={field.onChange}
+                onValueChange={(value) => {
+                  field.onChange(value)
+                }}
                 defaultValue={field.value ?? ""}
                 className="flex flex-col gap-4 pt-2"
                 disabled={isDisabled}
@@ -72,16 +74,27 @@ export default function PaymentMethodsFormField({
                 {/* // TODO: add payment method link */}
                 {paymentMethods.map((method) => (
                   <FormItem key={method.id}>
-                    <FormLabel className="[&:has([data-state=checked])>div]:border-primary-border [&:has([data-state=checked])>div]:shadow-sm">
+                    <FormLabel
+                      htmlFor={`radio-${method.id}`}
+                      className="[&:has([data-state=checked])>div]:border-primary-border [&:has([data-state=checked])>div]:shadow-sm"
+                    >
                       <FormControl>
                         <RadioGroupItem
+                          id={`radio-${method.id}`}
                           value={method.id}
                           className="sr-only"
                           disabled={isDisabled}
                           checked={field.value === method.id}
                         />
                       </FormControl>
-                      <div className="cursor-pointer items-center rounded-md border-2 border-muted p-6 hover:border-background-bgActive">
+                      {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+                      <div
+                        onClick={() => {
+                          if (isDisabled) return
+                          field.onChange(method.id)
+                        }}
+                        className="cursor-pointer items-center rounded-md border-2 border-muted p-6 hover:border-background-bgActive"
+                      >
                         <div className="flex flex-row items-center justify-between">
                           <div className="inline-flex gap-2">
                             <span>{method?.brand}</span>

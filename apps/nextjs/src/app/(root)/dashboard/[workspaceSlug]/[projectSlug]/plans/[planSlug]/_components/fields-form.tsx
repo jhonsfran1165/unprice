@@ -5,7 +5,9 @@ import type { UseFormReturn } from "react-hook-form"
 import { useFieldArray } from "react-hook-form"
 
 import { AGGREGATION_METHODS, AGGREGATION_METHODS_MAP } from "@unprice/db/utils"
-import { type Currency, type PlanVersionFeature, currencySymbol } from "@unprice/db/validators"
+import type { Currency, PlanVersionFeature } from "@unprice/db/validators"
+
+import { currencySymbol } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import {
   FormControl,

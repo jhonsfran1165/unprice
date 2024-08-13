@@ -12,7 +12,13 @@ import {
   planVersionExtendedSchema,
   planVersionFeatureInsertBaseSchema,
 } from "./../planVersionFeatures"
-import { collectionMethodSchema, subscriptionTypeSchema, typeFeatureSchema } from "./../shared"
+import {
+  collectionMethodSchema,
+  startCycleSchema,
+  subscriptionTypeSchema,
+  typeFeatureSchema,
+  whenToBillSchema,
+} from "./../shared"
 
 const subscriptionItemConfigSchema = z.object({
   featurePlanId: z.string(),
@@ -104,16 +110,23 @@ export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   type: subscriptionTypeSchema,
   collectionMethod: collectionMethodSchema,
   defaultPaymentMethodId: z.string().optional(),
+  trialEndsAt: z.coerce.date().optional(),
+  startCycle: startCycleSchema.optional(),
+  whenToBill: whenToBillSchema.optional(),
 })
 
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
   startDate: z.coerce.date({ message: "Start date is required" }),
+  endDate: z.coerce.date({ message: "End date is required" }).optional(),
   trialDays: z.coerce.number().int().min(0).max(30).default(0),
   metadata: subscriptionMetadataSchema,
   type: subscriptionTypeSchema,
   collectionMethod: collectionMethodSchema,
   defaultPaymentMethodId: z.string().optional(),
+  trialEndsAt: z.coerce.date().optional(),
+  startCycle: startCycleSchema.optional(),
+  whenToBill: whenToBillSchema.optional(),
 })
   .extend({
     config: subscriptionItemsConfigSchema.optional(),

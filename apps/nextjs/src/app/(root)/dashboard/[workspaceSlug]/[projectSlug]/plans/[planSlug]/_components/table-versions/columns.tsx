@@ -98,10 +98,17 @@ export const columns: ColumnDef<PlanVersion>[] = [
     },
   },
   {
-    accessorKey: "subscriptions",
+    accessorKey: "subs",
     enableResizing: true,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Subscriptions" />,
-    cell: ({ row }) => <div>{row.original.subscriptions}</div>,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="subs" />,
+    cell: ({ row }) => <Badge>{row.original.subscriptions}</Badge>,
+    size: 20,
+  },
+  {
+    accessorKey: "period",
+    enableResizing: true,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="period" />,
+    cell: ({ row }) => <Badge>{row.original.billingPeriod}</Badge>,
     size: 20,
   },
   {

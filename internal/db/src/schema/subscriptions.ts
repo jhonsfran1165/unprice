@@ -13,9 +13,15 @@ import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
+import type { StartCycleType } from "../validators/shared"
 import type { subscriptionMetadataSchema } from "../validators/subscriptions"
 import { customers } from "./customers"
-import { collectionMethodEnum, subscriptionStatusEnum, typeSubscriptionEnum } from "./enums"
+import {
+  collectionMethodEnum,
+  subscriptionStatusEnum,
+  typeSubscriptionEnum,
+  whenToBillEnum,
+} from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
@@ -50,11 +56,22 @@ export const subscriptions = pgTableProject(
     // prorate the subscription when the subscription is created in the middle of the billing period
     prorated: boolean("prorated").default(true),
 
+    // ************ billing data defaults ************
+    // this data normally comes from the plan version but we can override it when creating the subscription
+    // whenToBill: pay_in_advance - pay_in_arrear
+    whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance"),
+    // when to start each cycle for this subscription -
+    // TODO: instead of using enums I could do this? so no migrations needed for adding new values?
+    startCycle: text("start_cycle").$type<StartCycleType>().default("first_day_of_month"), // null means the first day of the month
+    // used for generating invoices -
+    gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
+    // ************ billing data defaults ************
+
     // subscription trial period
     // TODO: I can configure this from the plan version
     // TODO: we could override this when creating the subscription, otherwise use planVersion data
     trialDays: integer("trial_days").default(0),
-    trialEnds: timestamp("trial_ends", {
+    trialEndsAt: timestamp("trial_ends", {
       mode: "date",
     }),
     startDate: timestamp("start_date", {
@@ -89,8 +106,8 @@ export const subscriptions = pgTableProject(
      */
     nextPlanVersionTo: text("next_plan_version_to"),
 
-    // when the plan was changed
-    planChanged: timestamp("plan_changed", {
+    // when the plan was changed - it's used to prevent the customer from changing the plan in the last 30 days
+    planChangedAt: timestamp("plan_changed", {
       mode: "date",
     }),
 

@@ -21,6 +21,8 @@ export default function DurationFormField({
 }) {
   const [start, setStart] = useState<Date | undefined>(form.getValues("startDate"))
   const [end, setEnd] = useState<Date | undefined>(form.getValues("endDate") ?? undefined)
+  const [isOpenPopOverStart, setIsOpenPopOverStart] = useState(false)
+  const [isOpenPopOverEnd, setIsOpenPopOverEnd] = useState(false)
 
   const { errors } = form.formState
 
@@ -40,7 +42,7 @@ export default function DurationFormField({
           name="startDate"
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
-              <Popover>
+              <Popover open={isOpenPopOverStart} onOpenChange={setIsOpenPopOverStart}>
                 <PopoverTrigger asChild disabled={isDisabled}>
                   <FormControl>
                     <Button
@@ -64,6 +66,7 @@ export default function DurationFormField({
                       onSelect={(date) => {
                         setStart(date)
                         field.onChange(date)
+                        setIsOpenPopOverStart(false)
                       }}
                       month={start}
                       initialFocus
@@ -86,6 +89,7 @@ export default function DurationFormField({
                         onClick={() => {
                           setStart(new Date())
                           field.onChange(new Date())
+                          setIsOpenPopOverStart(false)
                         }}
                       >
                         Today
@@ -97,6 +101,7 @@ export default function DurationFormField({
                           const tomorrow = addDays(new Date(), 1)
                           setStart(tomorrow)
                           field.onChange(tomorrow)
+                          setIsOpenPopOverStart(false)
                         }}
                       >
                         Tomorrow
@@ -108,6 +113,7 @@ export default function DurationFormField({
                           const data = addDays(new Date(), 7)
                           setStart(data)
                           field.onChange(data)
+                          setIsOpenPopOverStart(false)
                         }}
                       >
                         Next week
@@ -119,6 +125,7 @@ export default function DurationFormField({
                           const nextMonth = startOfMonth(add(new Date(), { months: 1 }))
                           setStart(nextMonth)
                           field.onChange(nextMonth)
+                          setIsOpenPopOverStart(false)
                         }}
                       >
                         Next month
@@ -135,7 +142,7 @@ export default function DurationFormField({
           name="endDate"
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
-              <Popover>
+              <Popover open={isOpenPopOverEnd} onOpenChange={setIsOpenPopOverEnd}>
                 <PopoverTrigger asChild disabled={isDisabled}>
                   <FormControl>
                     <Button
@@ -160,6 +167,7 @@ export default function DurationFormField({
                       onSelect={(date) => {
                         setEnd(date)
                         field.onChange(date)
+                        setIsOpenPopOverEnd(false)
                       }}
                       disabled={(date) => !start || date <= start || !!isDisabled}
                     />
@@ -173,6 +181,7 @@ export default function DurationFormField({
                         onClick={() => {
                           setEnd(undefined)
                           field.onChange(undefined)
+                          setIsOpenPopOverEnd(false)
                         }}
                       >
                         Forever
@@ -187,6 +196,7 @@ export default function DurationFormField({
 
                           setEnd(date)
                           field.onChange(date)
+                          setIsOpenPopOverEnd(false)
                         }}
                       >
                         1 Month
@@ -200,6 +210,7 @@ export default function DurationFormField({
 
                           setEnd(date)
                           field.onChange(date)
+                          setIsOpenPopOverEnd(false)
                         }}
                       >
                         2 Months
@@ -213,6 +224,7 @@ export default function DurationFormField({
 
                           setEnd(date)
                           field.onChange(date)
+                          setIsOpenPopOverEnd(false)
                         }}
                       >
                         3 Months
@@ -226,6 +238,7 @@ export default function DurationFormField({
 
                           setEnd(date)
                           field.onChange(date)
+                          setIsOpenPopOverEnd(false)
                         }}
                       >
                         6 Months

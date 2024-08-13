@@ -28,6 +28,7 @@ import { SuperLink } from "~/components/super-link"
 import {
   PlanVersionDeactivate,
   PlanVersionDuplicate,
+  PlanVersionPublish,
 } from "../../../_components/plan-version-actions"
 import { PlanVersionForm } from "../plan-version-form"
 
@@ -59,14 +60,22 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
           <DropdownMenuItem asChild>
             <PlanVersionDuplicate
               onConfirmAction={() => setIsOpen(false)}
-              classNames="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-background-bgHover"
+              classNames="w-full relative flex cursor-pointer justify-start select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-background-bgHover hover:text-background-textContrast font-normal"
+              planVersionId={version.id}
+            />
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <PlanVersionPublish
+              variant="custom"
+              onConfirmAction={() => setIsOpen(false)}
+              classNames="w-full relative flex cursor-pointer justify-start select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-background-bgHover hover:text-background-textContrast font-normal"
               planVersionId={version.id}
             />
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <PlanVersionDeactivate
               onConfirmAction={() => setIsOpen(false)}
-              classNames="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-background-bgHover"
+              classNames="w-full relative flex cursor-pointer justify-start select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-background-bgHover hover:text-background-textContrast font-normal"
               planVersionId={version.id}
             />
           </DropdownMenuItem>

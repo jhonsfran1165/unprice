@@ -16,7 +16,9 @@ import { usePlanFeaturesList } from "./use-features"
 const PlanVersionPublish: React.FC<{
   planVersionId: string
   onConfirmAction?: () => void
-}> = ({ planVersionId, onConfirmAction }) => {
+  classNames?: string
+  variant?: "primary" | "custom"
+}> = ({ planVersionId, onConfirmAction, classNames, variant = "primary" }) => {
   const router = useRouter()
   const [planFeatures] = usePlanFeaturesList()
 
@@ -57,8 +59,8 @@ const PlanVersionPublish: React.FC<{
       }}
     >
       {/* // TODO: create a confetti animation or something in the first version published? */}
-      <Button variant={"primary"} disabled={publishVersion.isPending}>
-        Published
+      <Button variant={variant} disabled={publishVersion.isPending} className={classNames}>
+        Publish version
         {publishVersion.isPending && <LoadingAnimation className={"ml-2"} />}
       </Button>
     </ConfirmAction>

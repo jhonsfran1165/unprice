@@ -15,6 +15,13 @@ export const createSlug = () => {
   })
 }
 
+export const currencySymbol = (curr: string) =>
+  ({
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+  })[curr] ?? curr
+
 export const isSlug = (str?: string) => {
   return /^[a-z0-9-]+-[a-z0-9-]+$/.test(str ?? "")
 }

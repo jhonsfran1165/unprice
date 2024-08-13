@@ -92,12 +92,13 @@ export default async function PlanPage({
         <Suspense
           fallback={
             <DataTableSkeleton
-              columnCount={11}
+              columnCount={12}
               searchableColumnCount={1}
               filterableColumnCount={2}
               cellWidths={[
                 "10rem",
                 "40rem",
+                "12rem",
                 "12rem",
                 "12rem",
                 "12rem",

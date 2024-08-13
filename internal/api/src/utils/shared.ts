@@ -7,6 +7,7 @@ import {
   createDefaultSubscriptionConfig,
   type subscriptionInsertSchema,
 } from "@unprice/db/validators"
+import { addDays } from "date-fns"
 import type { z } from "zod"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
@@ -197,6 +198,11 @@ export const createSubscription = async ({
     collectionMethod,
     defaultPaymentMethodId,
     metadata,
+    whenToBill,
+    startCycle,
+    gracePeriod,
+    planChangedAt,
+    type,
   } = subscription
 
   const versionData = await ctx.db.query.versions.findFirst({
@@ -338,11 +344,17 @@ export const createSubscription = async ({
         endDate: endDate,
         autoRenew: true,
         trialDays: trialDays,
+        trialEndsAt: trialDays ? addDays(new Date(), trialDays) : undefined,
         isNew: true,
         collectionMethod: collectionMethod,
         status: "active",
         metadata: metadata,
         defaultPaymentMethodId: defaultPaymentMethodId,
+        whenToBill: whenToBill,
+        startCycle: startCycle,
+        gracePeriod: gracePeriod,
+        planChangedAt: planChangedAt,
+        type: type,
       })
       .returning()
       .then((re) => re[0])

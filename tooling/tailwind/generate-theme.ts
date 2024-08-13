@@ -49,8 +49,8 @@ const foregroundPairs = {
 export const themeNames = {
   sunset: {
     success: "green",
-    destructive: "red",
-    warning: "yellow",
+    destructive: "tomato",
+    warning: "orange",
     info: "blue",
     primary: "amber",
     secondary: "bronze",

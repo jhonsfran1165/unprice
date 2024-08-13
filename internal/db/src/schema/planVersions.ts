@@ -12,7 +12,8 @@ import {
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
-import type { PlanVersionMetadata, StartCycleType } from "../validators/planVersions"
+import type { PlanVersionMetadata } from "../validators/planVersions"
+import type { StartCycleType } from "../validators/shared"
 import { users } from "./auth"
 import {
   currencyEnum,
@@ -76,17 +77,19 @@ export const versions = pgTableProject(
     // TODO: add more types for now only support recurring
     planType: planTypeEnum("plan_type").default("recurring").notNull(),
 
-    // handle billing data
     // currency of the plan
     currency: currencyEnum("currency").notNull(),
-    // whenToBill: pay_in_advance - pay_in_arrear
-    whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance"),
     // billingPeriod: billing_period - billing_cycle, only used for recurring plans, only used for recurring plans
     billingPeriod: planBillingPeriodEnum("billing_period"),
-    // when to start each cycle for this subscription - not used for now, only used for recurring plans
+
+    // ************ billing data defaults ************
+    // whenToBill: pay_in_advance - pay_in_arrear
+    whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance"),
+    // when to start each cycle for this subscription -
     startCycle: text("start_cycle").$type<StartCycleType>().default(null), // null means the first day of the month
-    // used for generating invoices - not used for now, only used for recurring plans
+    // used for generating invoices -
     gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
+    // ************ billing data defaults ************
 
     // metadata probably will be useful to save external data, etc.
     metadata: json("metadata").$type<PlanVersionMetadata>(),

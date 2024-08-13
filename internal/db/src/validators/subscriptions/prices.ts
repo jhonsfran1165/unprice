@@ -6,6 +6,7 @@ import { z } from "zod"
 import type { Result } from "@unprice/error"
 import { Err, Ok, type SchemaError } from "@unprice/error"
 import { calculatePercentage } from "../../utils"
+import { currencySymbol } from "./../../utils"
 import { UnPriceCalculationError } from "./../errors"
 import type { PlanVersionExtended, dineroSchema, tiersSchema } from "./../planVersionFeatures"
 import {
@@ -17,7 +18,6 @@ import {
   priceSchema,
 } from "./../planVersionFeatures"
 import type { Currency } from "./../shared"
-import { currencySymbol } from "./../shared"
 
 const calculatePriceSchema = z.object({
   dinero: z.custom<Dinero<number>>(),

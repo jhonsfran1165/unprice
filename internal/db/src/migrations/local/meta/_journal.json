@@ -15,6 +15,13 @@
       "when": 1722623252448,
       "tag": "0001_peaceful_magus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1723487784638,
+      "tag": "0002_lovely_molten_man",
+      "breakpoints": true
     }
   ]
 }

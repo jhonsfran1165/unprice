@@ -76,3 +76,4 @@ export const db =
 export * from "drizzle-orm"
 export { pgTableProject as tableCreator } from "./utils"
 export type Database = typeof db
+export type TransactionDatabase = Parameters<Parameters<Database["transaction"]>[0]>[0]

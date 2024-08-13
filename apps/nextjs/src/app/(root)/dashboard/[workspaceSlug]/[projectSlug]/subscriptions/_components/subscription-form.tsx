@@ -1,91 +1,124 @@
 "use client"
 
-import { CalendarIcon, CheckIcon, ChevronDown, HelpCircle } from "lucide-react"
+import { HelpCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Fragment, useMemo, useState } from "react"
 import { useFieldArray } from "react-hook-form"
 
 import type { RouterOutputs } from "@unprice/api"
-import { COLLECTION_METHODS, SUBSCRIPTION_TYPES } from "@unprice/db/utils"
+import {
+  COLLECTION_METHODS,
+  START_CYCLE,
+  START_CYCLE_MAP,
+  SUBSCRIPTION_TYPES,
+  WHEN_TO_BILLING,
+} from "@unprice/db/utils"
 import type { InsertSubscription, Subscription } from "@unprice/db/validators"
 import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@unprice/db/validators"
-import { Button } from "@unprice/ui/button"
-import { Calendar } from "@unprice/ui/calendar"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandLoading,
-} from "@unprice/ui/command"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@unprice/ui/form"
-import { LoadingAnimation } from "@unprice/ui/loading-animation"
-import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Separator } from "@unprice/ui/separator"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
-import { cn } from "@unprice/ui/utils"
-import { add, format } from "date-fns"
 import { z } from "zod"
-import { FilterScroll } from "~/components/filter-scroll"
+import { ConfirmAction } from "~/components/confirm-action"
 import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 import DurationFormField from "./duration-field"
+import EndDateFormField from "./enddate-field"
 import ConfigItemsFormField from "./items-fields"
 import PaymentMethodsFormField from "./payment-method-field"
+import PlanNewVersionFormField from "./plan-new-version-field"
+import PlanVersionFormField from "./plan-version-field"
 
 type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 
 export function SubscriptionForm({
   setDialogOpen,
   defaultValues,
-  isEndSubscription,
+  isChangePlanSubscription,
   readOnly,
 }: {
   setDialogOpen?: (open: boolean) => void
   defaultValues: InsertSubscription | Subscription
-  isEndSubscription?: boolean
+  isChangePlanSubscription?: boolean
   readOnly?: boolean
 }) {
   const router = useRouter()
   const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersionResponse>()
-  const [switcherPlanOpen, setSwitcherPlanOpen] = useState(false)
+  const [selectedNewPlanVersion, setSelectedNewPlanVersion] = useState<PlanVersionResponse>()
 
-  const formSchema = isEndSubscription
-    ? subscriptionInsertSchema.required({
-        id: true,
-      })
-    : subscriptionInsertSchema.superRefine((data, ctx) => {
-        // payment method is validated against the plan version
-        // to check if payment method is required for the plan
-        const paymentMethodRequired = selectedPlanVersion?.metadata?.paymentMethodRequired
+  const defaultValuesData = useMemo(() => {
+    if (isChangePlanSubscription) {
+      // we have to delete endDate and other fields that are not the same when the user is trying to change the plan
+      delete defaultValues.endDate
+      delete defaultValues.nextPlanVersionTo
+    }
+    return defaultValues
+  }, [defaultValues.id])
 
-        if (paymentMethodRequired && !data.defaultPaymentMethodId) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Default payment method is required for this plan",
-            path: ["defaultPaymentMethodId"],
-            fatal: true,
-          })
-        }
-      })
+  // this schema is a bit complex because we need to validate the payment method depending on the plan version
+  const generateFormSchema = () => {
+    if (isChangePlanSubscription) {
+      return subscriptionInsertSchema
+        .extend({
+          endDate: z.coerce.date(),
+          nextPlanVersionTo: z.string().min(1),
+        })
+        .required({
+          id: true,
+          customerId: true,
+          nextPlanVersionTo: true,
+        })
+        .superRefine((data, ctx) => {
+          // validate that the new plan version is not the same as the current plan version
+          if (data.nextPlanVersionTo === data.planVersionId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "New plan version cannot be the same as the current plan version",
+              path: ["nextPlanVersionTo"],
+              fatal: true,
+            })
+          }
+
+          // payment method is validated against the plan version
+          // to check if payment method is required for the plan
+          const paymentMethodRequired = selectedNewPlanVersion?.metadata?.paymentMethodRequired
+
+          if (paymentMethodRequired && !data.defaultPaymentMethodId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Default payment method is required for this plan",
+              path: ["defaultPaymentMethodId"],
+              fatal: true,
+            })
+          }
+        })
+    }
+
+    return subscriptionInsertSchema.superRefine((data, ctx) => {
+      // payment method is validated against the plan version
+      // to check if payment method is required for the plan
+      const paymentMethodRequired = selectedPlanVersion?.metadata?.paymentMethodRequired
+
+      if (paymentMethodRequired && !data.defaultPaymentMethodId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Default payment method is required for this plan",
+          path: ["defaultPaymentMethodId"],
+          fatal: true,
+        })
+      }
+    })
+  }
+
+  const formSchema = useMemo(() => generateFormSchema(), [isChangePlanSubscription])
 
   const form = useZodForm({
     schema: formSchema,
-    defaultValues: defaultValues,
+    defaultValues: defaultValuesData,
   })
 
   const items = useFieldArray({
@@ -96,13 +129,17 @@ export function SubscriptionForm({
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery({
     enterprisePlan: true,
     published: true,
-    active: !readOnly, // read only should show inactive plans
+    // we want to query inactive plans as well because it might be the case that the user is still subscribed to a legacy plan
+    active: !isChangePlanSubscription && !readOnly,
   })
 
   const subscriptionPlanId = form.watch("planVersionId")
+  const subscriptionNewPlanId = form.watch("nextPlanVersionTo")
 
+  // set the proper plan version on loading the form
   useMemo(() => {
     let planVersion = selectedPlanVersion
+    let newPlanVersion = selectedNewPlanVersion
 
     // if the plan version id comes from default values, we need to find it in the data
     if (!planVersion && subscriptionPlanId) {
@@ -110,7 +147,15 @@ export function SubscriptionForm({
       setSelectedPlanVersion(planVersion)
     }
 
-    if (planVersion && subscriptionPlanId) {
+    // if the new plan version id comes from default values, we need to find it in the data
+    if (!newPlanVersion && subscriptionNewPlanId) {
+      newPlanVersion = data?.planVersions.find((version) => version.id === subscriptionNewPlanId)
+      setSelectedNewPlanVersion(newPlanVersion)
+    }
+
+    // depending on which type of action we are doing, we need to set the items config
+    // for the create subscription action
+    if (planVersion && subscriptionPlanId && !isChangePlanSubscription) {
       const { err, val: itemsConfig } = createDefaultSubscriptionConfig({
         planVersion: planVersion,
       })
@@ -122,12 +167,28 @@ export function SubscriptionForm({
 
       items.replace(itemsConfig)
     }
-  }, [subscriptionPlanId, isLoading])
+
+    // for the change plan action
+    if (newPlanVersion && subscriptionNewPlanId && isChangePlanSubscription) {
+      const { err, val: itemsConfig } = createDefaultSubscriptionConfig({
+        planVersion: newPlanVersion,
+      })
+
+      if (err) {
+        console.error(err)
+        return
+      }
+
+      items.replace(itemsConfig)
+    }
+  }, [subscriptionPlanId, subscriptionNewPlanId, isLoading])
 
   const { data: paymentMethods, isLoading: isPaymentMethodsLoading } =
     api.customers.listPaymentMethods.useQuery({
       customerId: defaultValues.customerId,
-      provider: selectedPlanVersion?.paymentProvider ?? "stripe",
+      provider: isChangePlanSubscription
+        ? selectedNewPlanVersion?.paymentProvider ?? "stripe"
+        : selectedPlanVersion?.paymentProvider ?? "stripe",
     })
 
   const createSubscription = api.subscriptions.create.useMutation({
@@ -139,7 +200,7 @@ export function SubscriptionForm({
     },
   })
 
-  const endSubscription = api.subscriptions.end.useMutation({
+  const changeSubscriptionPlan = api.subscriptions.changePlan.useMutation({
     onSuccess: ({ message }) => {
       form.reset()
       toastAction("success", message)
@@ -148,14 +209,21 @@ export function SubscriptionForm({
     },
   })
 
-  const onSubmitForm = async (data: InsertSubscription | Subscription) => {
-    if (!defaultValues.id && !isEndSubscription) {
+  const onSubmitForm = async (data: z.infer<typeof formSchema>) => {
+    if (!defaultValues.id && !isChangePlanSubscription) {
       await createSubscription.mutateAsync(data as InsertSubscription)
     }
 
-    if (defaultValues.id && isEndSubscription) {
-      await endSubscription.mutateAsync(data as Subscription)
+    if (defaultValues.id && isChangePlanSubscription && data.endDate && data.nextPlanVersionTo) {
+      await changeSubscriptionPlan.mutateAsync({
+        ...data,
+        endDate: data.endDate,
+        nextPlanVersionTo: data.nextPlanVersionTo,
+        id: defaultValues.id,
+      })
     }
+
+    setDialogOpen?.(false)
   }
 
   return (
@@ -166,94 +234,30 @@ export function SubscriptionForm({
         className="space-y-6"
       >
         <div className="space-y-8">
-          <FormField
-            control={form.control}
-            name="planVersionId"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Plan Version</FormLabel>
-                <FormDescription>
-                  {isEndSubscription
-                    ? "Select the plan the customer will fall back to after the subscription ends. If no plan provided the customer will be downgraded to the default plan."
-                    : "Select the plan version to create the subscription"}
-                </FormDescription>
-                <div className="font-normal text-xs leading-snug">
-                  All the items will be configured based on the plan version
-                </div>
-                <Popover
-                  open={switcherPlanOpen}
-                  onOpenChange={() => {
-                    if (isLoading || isEndSubscription || readOnly) {
-                      return
-                    }
-                    setSwitcherPlanOpen(true)
-                  }}
-                  modal={true}
-                >
-                  <PopoverTrigger asChild>
-                    <div className="">
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          role="combobox"
-                          disabled={isLoading || isEndSubscription || readOnly}
-                          className={cn(
-                            "w-full justify-between",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {isLoading ? (
-                            <LoadingAnimation className="h-4 w-4" variant="dots" />
-                          ) : selectedPlanVersion ? (
-                            `${selectedPlanVersion.plan.slug} v${selectedPlanVersion.version} - ${selectedPlanVersion.title} - ${selectedPlanVersion.billingPeriod}`
-                          ) : (
-                            "Select plan"
-                          )}
-                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="max-h-[--radix-popover-content-available-height] w-[--radix-popover-trigger-width] p-0">
-                    <Command>
-                      <CommandInput placeholder="Search a plan..." />
-                      <CommandList>
-                        <CommandEmpty>No plan found.</CommandEmpty>
-                        <FilterScroll>
-                          <CommandGroup>
-                            {isLoading && <CommandLoading>Loading...</CommandLoading>}
-                            <div className="flex flex-col gap-2 pt-1">
-                              {data?.planVersions.map((version) => (
-                                <CommandItem
-                                  value={`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
-                                  key={version.id}
-                                  onSelect={() => {
-                                    field.onChange(version.id)
-                                    setSelectedPlanVersion(version)
-                                    setSwitcherPlanOpen(false)
-                                  }}
-                                >
-                                  <CheckIcon
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      version.id === field.value ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                  {`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
-                                </CommandItem>
-                              ))}
-                            </div>
-                          </CommandGroup>
-                        </FilterScroll>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
+          <PlanVersionFormField
+            form={form}
+            planVersions={data?.planVersions ?? []}
+            selectedPlanVersion={selectedPlanVersion}
+            setSelectedPlanVersion={setSelectedPlanVersion}
+            isDisabled={readOnly || isLoading || isChangePlanSubscription}
+            isLoading={isLoading}
+            isChangePlanSubscription={isChangePlanSubscription}
           />
+
+          {isChangePlanSubscription && (
+            <PlanNewVersionFormField
+              form={form}
+              // here we filter only active plans and status is published
+              planVersions={
+                data?.planVersions.filter((plan) => plan.active && plan.status === "published") ??
+                []
+              }
+              selectedPlanVersion={selectedNewPlanVersion}
+              setSelectedPlanVersion={setSelectedNewPlanVersion}
+              isDisabled={readOnly || isLoading}
+              isLoading={isLoading}
+            />
+          )}
 
           <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
             <FormField
@@ -278,7 +282,7 @@ export function SubscriptionForm({
                           align="center"
                           side="right"
                         >
-                          First unit for the tier range. For the first tier, this should be 0.
+                          Whether the subscription is for a plan or an addon.
                           <TooltipArrow className="fill-background-bg" />
                         </TooltipContent>
                       </Tooltip>
@@ -351,7 +355,111 @@ export function SubscriptionForm({
             />
           </div>
 
-          {!isEndSubscription && (
+          <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
+            <FormField
+              control={form.control}
+              name="startCycle"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <div className="flex justify-between">
+                    <FormLabel>
+                      <Tooltip>
+                        <div className="flex items-center gap-2">
+                          Start Cycle
+                          <span>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="h-4 w-4 font-light" />
+                            </TooltipTrigger>
+                          </span>
+                        </div>
+
+                        <TooltipContent
+                          className="w-32 bg-background-bg font-normal text-xs"
+                          align="center"
+                          side="right"
+                        >
+                          The day the customer will be billed. Which means receiving an invoice.
+                          <TooltipArrow className="fill-background-bg" />
+                        </TooltipContent>
+                      </Tooltip>
+                    </FormLabel>
+                  </div>
+                  <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                    <FormControl>
+                      <SelectTrigger disabled={readOnly}>
+                        <SelectValue placeholder="Select a start of billing cycle" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {/* // TODO: use this for complex selectors values */}
+                      {START_CYCLE.map((cycle) => (
+                        <SelectItem
+                          value={cycle}
+                          key={cycle}
+                          description={START_CYCLE_MAP[cycle].label}
+                        >
+                          {cycle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="whenToBill"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <div className="flex justify-between">
+                    <FormLabel>
+                      <Tooltip>
+                        <div className="flex items-center gap-2">
+                          When to bill Subscription
+                          <span>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="h-4 w-4 font-light" />
+                            </TooltipTrigger>
+                          </span>
+                        </div>
+
+                        <TooltipContent
+                          className="w-32 bg-background-bg font-normal text-xs"
+                          align="center"
+                          side="right"
+                        >
+                          <ul className="list-inside list-disc">
+                            <li>At the start of the billing period</li>
+                            <li>At the end of the billing period</li>
+                          </ul>
+                          <TooltipArrow className="fill-background-bg" />
+                        </TooltipContent>
+                      </Tooltip>
+                    </FormLabel>
+                  </div>
+                  <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                    <FormControl>
+                      <SelectTrigger disabled={readOnly}>
+                        <SelectValue placeholder="Select when to bill" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {WHEN_TO_BILLING.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {!isChangePlanSubscription && (
             <Fragment>
               <Separator />
               <DurationFormField form={form} isDisabled={readOnly} />
@@ -379,53 +487,10 @@ export function SubscriptionForm({
             </Fragment>
           )}
 
-          {isEndSubscription && (
+          {isChangePlanSubscription && (
             <Fragment>
               <Separator />
-
-              <FormField
-                control={form.control}
-                name="endDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>End date</FormLabel>
-
-                    <FormDescription>
-                      Set the end date for the subscription. If not set, the subscription will end
-                      immediately.
-                    </FormDescription>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button variant={"outline"} className="pl-3 text-left font-normal">
-                            {field.value ? (
-                              format(field.value, "MMM dd, yyyy")
-                            ) : (
-                              <span className="text-muted-foreground">End date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value ?? undefined}
-                          onSelect={(date) => {
-                            field.onChange(date)
-                          }}
-                          disabled={(date) =>
-                            // future dates up to 1 year only
-                            date < new Date() || date > add(new Date(), { years: 1 })
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <EndDateFormField form={form} isDisabled={readOnly} />
             </Fragment>
           )}
 
@@ -440,22 +505,52 @@ export function SubscriptionForm({
 
           <Separator />
 
-          <ConfigItemsFormField
-            isLoading={isLoading}
-            form={form}
-            items={items}
-            selectedPlanVersion={selectedPlanVersion}
-          />
+          {isChangePlanSubscription && (
+            <ConfigItemsFormField
+              isLoading={isLoading}
+              form={form}
+              items={items}
+              selectedPlanVersion={selectedNewPlanVersion}
+            />
+          )}
+
+          {!isChangePlanSubscription && (
+            <ConfigItemsFormField
+              isLoading={isLoading}
+              form={form}
+              items={items}
+              selectedPlanVersion={selectedPlanVersion}
+            />
+          )}
         </div>
 
-        {!readOnly && (
+        {isChangePlanSubscription && (
+          <div className="mt-8 flex justify-end space-x-4">
+            <ConfirmAction
+              message="When you change the plan, the current subscription will be cancelled and a new one will be created. Are you sure you want to change the plan?"
+              confirmAction={() => {
+                setDialogOpen?.(false)
+                form.handleSubmit(onSubmitForm)()
+              }}
+            >
+              <SubmitButton
+                form="subscription-form"
+                isSubmitting={form.formState.isSubmitting}
+                isDisabled={form.formState.isSubmitting || isPaymentMethodsLoading || isLoading}
+                label={"Change Plan Subscription"}
+              />
+            </ConfirmAction>
+          </div>
+        )}
+
+        {!readOnly && !isChangePlanSubscription && (
           <div className="mt-8 flex justify-end space-x-4">
             <SubmitButton
               form="subscription-form"
               onClick={() => form.handleSubmit(onSubmitForm)()}
               isSubmitting={form.formState.isSubmitting}
-              isDisabled={form.formState.isSubmitting}
-              label={isEndSubscription ? "End Subscription" : "Create Subscription"}
+              isDisabled={form.formState.isSubmitting || isPaymentMethodsLoading || isLoading}
+              label={"Create Subscription"}
             />
           </div>
         )}

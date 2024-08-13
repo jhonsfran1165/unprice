@@ -1,13 +1,10 @@
 import { TRPCError } from "@trpc/server"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
-import {
-  type PlanVersion,
-  subscriptionInsertSchema,
-  subscriptionSelectSchema,
-} from "@unprice/db/validators"
+import { subscriptionInsertSchema, subscriptionSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
+import { addDays, format } from "date-fns"
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
@@ -69,11 +66,19 @@ export const subscriptionRouter = createTRPCRouter({
         subscriptions: subscriptionData,
       }
     }),
-  end: protectedActiveProjectAdminProcedure
+  changePlan: protectedActiveProjectAdminProcedure
     .input(
-      subscriptionInsertSchema.required({
-        id: true,
-      })
+      subscriptionInsertSchema
+        .extend({
+          endDate: z.coerce.date(),
+          nextPlanVersionTo: z.string(),
+        })
+        .required({
+          id: true,
+          endDate: true,
+          customerId: true,
+          nextPlanVersionTo: true,
+        })
     )
     .output(z.object({ result: z.boolean(), message: z.string() }))
     .mutation(async (opts) => {
@@ -81,16 +86,23 @@ export const subscriptionRouter = createTRPCRouter({
         id: subscriptionId,
         customerId,
         endDate,
-        planVersionId,
+        nextPlanVersionTo,
         collectionMethod,
         type,
         defaultPaymentMethodId,
+        autoRenew,
+        trialDays,
       } = opts.input
       const project = opts.ctx.project
 
       const subscriptionData = await opts.ctx.db.query.subscriptions.findFirst({
         with: {
           customer: true,
+          planVersion: {
+            with: {
+              plan: true,
+            },
+          },
         },
         where: (subscription, { eq, and }) =>
           and(
@@ -114,188 +126,141 @@ export const subscriptionRouter = createTRPCRouter({
         })
       }
 
-      if (subscriptionData.planVersionId === planVersionId) {
+      if (subscriptionData.status === "ended") {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "You cannot end the subscription with the same planVersionId",
+          message: "Subscription is already ended",
         })
       }
 
-      // if the customer has trials left we should not end the subscription until the trial ends
-      if (subscriptionData?.trialEnds && subscriptionData.trialEnds > new Date()) {
+      if (subscriptionData.planVersion.id === nextPlanVersionTo) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: `The customer has a trial until ${subscriptionData.trialEnds}. Please set the endDate after the trial ends`,
+          message: "You cannot change the subscription for the same plan version.",
+        })
+      }
+
+      // if the customer has trials left we should not let the customer change the subscription until the trial ends
+      if (subscriptionData?.trialEndsAt && subscriptionData.trialEndsAt > new Date()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `The customer has a trial until ${format(
+            subscriptionData.trialEndsAt,
+            "yyyy-MM-dd"
+          )}. Please set the endDate after the trial ends`,
+        })
+      }
+
+      // if the subscription was changed in the last 30 days, we should not allow the customer to change the plan
+      if (
+        subscriptionData.planChangedAt &&
+        subscriptionData.planChangedAt > addDays(new Date(), -30)
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "You cannot change the plan version, this subscription was changed in the last 30 days.",
         })
       }
 
       // if there is no planVersionId provided, we downgrade the customer to the default plan
-      let defaultPlanVersion: PlanVersion
-
-      if (!planVersionId) {
-        // find the default plan to downgrade the customer
-        // by default we downgrade to the latest published plan version
-        const plan = await opts.ctx.db.query.plans
-          .findFirst({
-            with: {
-              versions: {
-                where: (version, { eq, and }) =>
-                  and(
-                    eq(version.projectId, project.id),
-                    eq(version.status, "published"),
-                    eq(version.currency, subscriptionData.customer.defaultCurrency)
-                  ),
-                orderBy: (version, { desc }) => [desc(version.publishedAt)],
-              },
-            },
-            where: (plan, { eq, and }) =>
-              and(eq(plan.projectId, project.id), eq(plan.defaultPlan, true)),
-          })
-          .then((re) => re?.versions[0] ?? null)
-
-        if (!plan) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message:
-              "Default plan version not found or there is no published plan version with the currency of the customer",
-          })
-        }
-
-        defaultPlanVersion = plan
-      } else {
-        const version = await opts.ctx.db.query.versions.findFirst({
-          where: (version, { eq, and }) =>
-            and(
-              eq(version.id, planVersionId),
-              eq(version.projectId, project.id),
-              eq(version.status, "published"),
-              eq(version.currency, subscriptionData.customer.defaultCurrency)
-            ),
-        })
-
-        if (!version) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message:
-              "Provided plan version not found or there is no published plan version with the currency of the customer",
-          })
-        }
-
-        defaultPlanVersion = version
-      }
-
-      // if the endDate is provided, we set the endDate and the nextPlanVersionTo
-      // there is a cron job that will downgrade the customer to the default plan version
-      const updatedSubscription = await opts.ctx.db
-        .update(schema.subscriptions)
-        .set({
-          endDate: endDate,
-          nextPlanVersionTo: defaultPlanVersion.id,
-          planChanged: new Date(),
-          status: "ended",
-        })
-        .where(
+      const newPlanVersion = await opts.ctx.db.query.versions.findFirst({
+        where: (version, { eq, and }) =>
           and(
-            eq(schema.subscriptions.id, subscriptionId),
-            eq(schema.subscriptions.projectId, project.id),
-            eq(schema.subscriptions.customerId, customerId)
-          )
-        )
-        .returning()
-        .then((re) => re[0])
+            eq(version.id, nextPlanVersionTo),
+            eq(version.projectId, project.id),
+            eq(version.status, "published"),
+            eq(version.currency, subscriptionData.customer.defaultCurrency)
+          ),
+      })
 
-      if (!updatedSubscription) {
+      if (!newPlanVersion) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error ending subscription",
+          code: "NOT_FOUND",
+          message: "New plan version not found",
         })
       }
 
-      // TODO: we should have a way to execute a trigger to downgrade the customer
-      // If the endDate is not provided, we downgrade the customer to the default plan immediately
-      if (!endDate) {
-        // 1. update the subscription to inactive
-        // 2. set the planVersionDowngradeTo, endDate and planChanged and nextSubscriptionId
-        // 3. create a new subscription with the default plan version
-        // 4. set the new subscription as the nextSubscriptionId
+      // 1. update the subscription to inactive
+      // 2. set the planVersionDowngradeTo, endDate and planChanged and nextSubscriptionId
+      // 3. create a new subscription with the default plan version
+      // 4. set the new subscription as the nextSubscriptionId
 
-        const newSubscription = await opts.ctx.db.transaction(async (trx) => {
-          // end the current subscription
-          const subscription = await trx
-            .update(schema.subscriptions)
-            .set({
-              status: "inactive",
-              endDate: new Date(),
-            })
-            .where(
-              and(
-                eq(schema.subscriptions.id, subscriptionId),
-                eq(schema.subscriptions.projectId, project.id),
-                eq(schema.subscriptions.customerId, customerId)
-              )
-            )
-            .returning()
-            .then((re) => re[0])
-
-          if (!subscription) {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Error ending subscription",
-            })
-          }
-
-          // create a new subscription
-          const { subscription: newSubscription } = await createSubscription({
-            subscription: {
-              customerId: customerId,
-              planVersionId: defaultPlanVersion.id,
-              projectId: project.id,
-              collectionMethod: collectionMethod ?? subscriptionData.collectionMethod,
-              startDate: new Date(),
-              autoRenew: subscriptionData.autoRenew,
-              isNew: true,
-              defaultPaymentMethodId:
-                defaultPaymentMethodId ?? subscriptionData.defaultPaymentMethodId,
-              trialDays: 0,
-              type: type ?? subscriptionData.type,
-            },
-            project: opts.ctx.project,
-            ctx: opts.ctx,
+      const newSubscription = await opts.ctx.db.transaction(async (trx) => {
+        // end the current subscription
+        const subscription = await trx
+          .update(schema.subscriptions)
+          .set({
+            status: "ended",
+            endDate: endDate,
+            nextPlanVersionTo: newPlanVersion.id,
+            planChangedAt: new Date(),
           })
-
-          // set the new subscription as the nextSubscriptionId
-          await trx
-            .update(schema.subscriptions)
-            .set({
-              nextSubscriptionId: newSubscription.id,
-            })
-            .where(
-              and(
-                eq(schema.subscriptions.id, subscriptionId),
-                eq(schema.subscriptions.projectId, project.id),
-                eq(schema.subscriptions.customerId, customerId)
-              )
+          .where(
+            and(
+              eq(schema.subscriptions.id, subscriptionId),
+              eq(schema.subscriptions.projectId, project.id),
+              eq(schema.subscriptions.customerId, customerId)
             )
+          )
+          .returning()
+          .then((re) => re[0])
 
-          return newSubscription
-        })
-
-        if (!newSubscription) {
+        if (!subscription) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Error ending subscription",
           })
         }
 
-        return {
-          result: true,
-          message: "Subscription ended successfully",
-        }
+        // create a new subscription
+        const { subscription: newSubscription } = await createSubscription({
+          subscription: {
+            customerId: customerId,
+            planVersionId: newPlanVersion.id,
+            projectId: project.id,
+            collectionMethod: collectionMethod ?? subscriptionData.collectionMethod,
+            startDate: addDays(endDate, 1),
+            endDate: undefined,
+            autoRenew: autoRenew ?? subscriptionData.autoRenew,
+            isNew: true,
+            defaultPaymentMethodId:
+              defaultPaymentMethodId ?? subscriptionData.defaultPaymentMethodId,
+            trialDays: trialDays ?? 0,
+            type: type ?? subscriptionData.type,
+            planChangedAt: new Date(),
+          },
+          project: opts.ctx.project,
+          ctx: opts.ctx,
+        })
+
+        // set the new subscription as the nextSubscriptionId
+        await trx
+          .update(schema.subscriptions)
+          .set({
+            nextSubscriptionId: newSubscription.id,
+          })
+          .where(
+            and(
+              eq(schema.subscriptions.id, subscriptionId),
+              eq(schema.subscriptions.projectId, project.id),
+              eq(schema.subscriptions.customerId, customerId)
+            )
+          )
+
+        return newSubscription
+      })
+
+      if (!newSubscription) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error changing plan",
+        })
       }
 
       return {
         result: true,
-        message: "Subscription will end on the provided endDate",
+        message: "Subscription changed successfully",
       }
     }),
 })

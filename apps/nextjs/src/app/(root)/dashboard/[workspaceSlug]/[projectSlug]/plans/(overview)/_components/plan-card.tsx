@@ -1,4 +1,4 @@
-import { GalleryHorizontalEnd, MoreHorizontal, Settings } from "lucide-react"
+import { GalleryHorizontalEnd, MoreVertical, Settings } from "lucide-react"
 
 import type { RouterOutputs } from "@unprice/api"
 import { Button } from "@unprice/ui/button"
@@ -61,8 +61,8 @@ export function PlanCard(props: {
               <Dialog>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant={"ghost"}>
-                      <MoreHorizontal className="h-4 w-4" />
+                    <Button variant={"link"} className="h-5 p-0">
+                      <MoreVertical className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-[200px]" forceMount>

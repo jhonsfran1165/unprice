@@ -1,1 +1,0 @@
-ALTER TABLE "unprice_plans" ADD COLUMN "enterprise_plan" boolean DEFAULT false;

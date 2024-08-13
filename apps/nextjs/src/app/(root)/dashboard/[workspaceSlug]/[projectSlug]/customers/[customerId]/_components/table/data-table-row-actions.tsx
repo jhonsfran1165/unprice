@@ -21,6 +21,7 @@ import {
   SheetTrigger,
 } from "@unprice/ui/sheet"
 import { MoreVertical } from "lucide-react"
+import { useState } from "react"
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { SubscriptionForm } from "../../../../subscriptions/_components/subscription-form"
 
@@ -30,10 +31,11 @@ interface DataTableRowActionsProps<TData> {
 
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
   const subscription = subscriptionSelectSchema.parse(row.original)
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <PropagationStopper>
-      <Sheet>
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button aria-haspopup="true" size="icon" variant="ghost">
@@ -57,7 +59,11 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
             <SheetDescription>End the current subscription for this customer</SheetDescription>
           </SheetHeader>
 
-          <SubscriptionForm defaultValues={subscription} isEndSubscription />
+          <SubscriptionForm
+            defaultValues={subscription}
+            isChangePlanSubscription
+            setDialogOpen={setIsOpen}
+          />
         </SheetContent>
       </Sheet>
     </PropagationStopper>
