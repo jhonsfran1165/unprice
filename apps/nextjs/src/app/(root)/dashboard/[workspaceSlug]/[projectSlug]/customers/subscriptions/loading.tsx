@@ -15,13 +15,13 @@ export default function Loading() {
     <DashboardShell
       header={
         <HeaderTab
-          title="Customers"
-          description="Manage your customers, add new customers, update plans and more."
+          title="Subscriptions"
+          description="Manage your subscriptions, add new subscriptions, update plans and more."
           action={
             <CustomerDialog>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Customer
+                Subscription
               </Button>
             </CustomerDialog>
           }
@@ -30,10 +30,10 @@ export default function Loading() {
     >
       <TabNavigation>
         <div className="flex items-center">
-          <TabNavigationLink active asChild>
+          <TabNavigationLink asChild>
             <SuperLink href={"#"}>Customers</SuperLink>
           </TabNavigationLink>
-          <TabNavigationLink asChild>
+          <TabNavigationLink asChild active>
             <SuperLink href={"#"}>Subscriptions</SuperLink>
           </TabNavigationLink>
         </div>
@@ -41,7 +41,7 @@ export default function Loading() {
       <div className="mt-4">
         <div className="flex flex-col px-1 py-4">
           <Typography variant="p" affects="removePaddingMargin">
-            All customers from this app
+            All subscriptions from this app
           </Typography>
         </div>
         <DataTableSkeleton

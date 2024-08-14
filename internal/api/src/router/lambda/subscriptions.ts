@@ -1,9 +1,17 @@
 import { TRPCError } from "@trpc/server"
-import { and, eq } from "@unprice/db"
+import { and, count, eq, getTableColumns } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
-import { subscriptionInsertSchema, subscriptionSelectSchema } from "@unprice/db/validators"
+import {
+  type Subscription,
+  customerSelectSchema,
+  planVersionSelectBaseSchema,
+  searchParamsSchemaDataTable,
+  subscriptionInsertSchema,
+  subscriptionSelectSchema,
+} from "@unprice/db/validators"
 import { z } from "zod"
 
+import { withDateFilters, withPagination } from "@unprice/db/utils"
 import { addDays, format } from "date-fns"
 import {
   createTRPCRouter,
@@ -32,6 +40,103 @@ export const subscriptionRouter = createTRPCRouter({
       }
     }),
 
+  listByActiveProject: protectedActiveProjectProcedure
+    .input(searchParamsSchemaDataTable)
+    .output(
+      z.object({
+        subscriptions: subscriptionSelectSchema
+          .extend({
+            customer: customerSelectSchema,
+            version: planVersionSelectBaseSchema,
+          })
+          .array(),
+        pageCount: z.number(),
+      })
+    )
+    .query(async (opts) => {
+      const { page, page_size, from, to } = opts.input
+      const project = opts.ctx.project
+      const columns = getTableColumns(schema.subscriptions)
+      const customerColumns = getTableColumns(schema.customers)
+      const versionColumns = getTableColumns(schema.versions)
+
+      try {
+        const expressions = [
+          // Filter by project
+          eq(columns.projectId, project.id),
+        ]
+
+        // Transaction is used to ensure both queries are executed in a single transaction
+        const { data, total } = await opts.ctx.db.transaction(async (tx) => {
+          const query = tx
+            .select({
+              subscriptions: schema.subscriptions,
+              customer: customerColumns,
+              version: versionColumns,
+            })
+            .from(schema.subscriptions)
+            .innerJoin(
+              schema.customers,
+              and(
+                eq(schema.subscriptions.customerId, schema.customers.id),
+                eq(schema.customers.projectId, schema.subscriptions.projectId)
+              )
+            )
+            .innerJoin(
+              schema.versions,
+              and(
+                eq(schema.subscriptions.planVersionId, schema.versions.id),
+                eq(schema.customers.projectId, schema.versions.projectId),
+                eq(schema.versions.projectId, project.id)
+              )
+            )
+            .$dynamic()
+
+          const whereQuery = withDateFilters<Subscription>(expressions, columns.createdAt, from, to)
+
+          const data = await withPagination(
+            query,
+            whereQuery,
+            [
+              {
+                column: columns.createdAt,
+                order: "desc",
+              },
+            ],
+            page,
+            page_size
+          )
+
+          const total = await tx
+            .select({
+              count: count(),
+            })
+            .from(schema.subscriptions)
+            .where(whereQuery)
+            .execute()
+            .then((res) => res[0]?.count ?? 0)
+
+          const subscriptions = data.map((data) => {
+            return {
+              ...data.subscriptions,
+              customer: data.customer,
+              version: data.version,
+            }
+          })
+
+          return {
+            data: subscriptions,
+            total,
+          }
+        })
+
+        const pageCount = Math.ceil(total / page_size)
+        return { subscriptions: data, pageCount }
+      } catch (err: unknown) {
+        console.error(err)
+        return { subscriptions: [], pageCount: 0 }
+      }
+    }),
   listByPlanVersion: protectedActiveProjectProcedure
     .input(
       subscriptionSelectSchema.pick({
@@ -160,6 +265,14 @@ export const subscriptionRouter = createTRPCRouter({
           code: "BAD_REQUEST",
           message:
             "You cannot change the plan version, this subscription was changed in the last 30 days.",
+        })
+      }
+
+      // end date must be after the start date
+      if (endDate < subscriptionData.startDate) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "End date must be after start date",
         })
       }
 

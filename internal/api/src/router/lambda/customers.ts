@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import { and, count, eq, getTableColumns, ilike, or } from "@unprice/db"
+import { and, count, desc, eq, getTableColumns, ilike, or } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
@@ -8,7 +8,6 @@ import {
   customerInsertBaseSchema,
   customerSelectSchema,
   paymentProviderSchema,
-  planSelectBaseSchema,
   planVersionSelectBaseSchema,
   searchParamsSchemaDataTable,
   subscriptionSelectSchema,
@@ -487,9 +486,8 @@ export const customersRouter = createTRPCRouter({
         customer: customerSelectSchema.extend({
           subscriptions: subscriptionSelectSchema
             .extend({
-              planVersion: planVersionSelectBaseSchema.extend({
-                plan: planSelectBaseSchema,
-              }),
+              customer: customerSelectSchema,
+              version: planVersionSelectBaseSchema,
             })
             .array(),
         }),
@@ -498,6 +496,7 @@ export const customersRouter = createTRPCRouter({
     .query(async (opts) => {
       const { id } = opts.input
       const { project } = opts.ctx
+      const versionColumns = getTableColumns(schema.versions)
 
       // we just need to validate the entitlements
       // await entitlementGuard({
@@ -507,17 +506,6 @@ export const customersRouter = createTRPCRouter({
       // })
 
       const customerData = await opts.ctx.db.query.customers.findFirst({
-        with: {
-          subscriptions: {
-            with: {
-              planVersion: {
-                with: {
-                  plan: true,
-                },
-              },
-            },
-          },
-        },
         where: (customer, { eq, and }) =>
           and(eq(customer.projectId, project.id), eq(customer.id, id)),
       })
@@ -529,8 +517,52 @@ export const customersRouter = createTRPCRouter({
         })
       }
 
+      const customerWithSubscriptions = await opts.ctx.db
+        .select({
+          subscriptions: schema.subscriptions,
+          version: versionColumns,
+        })
+        .from(schema.subscriptions)
+        .innerJoin(
+          schema.customers,
+          and(
+            eq(schema.subscriptions.customerId, schema.customers.id),
+            eq(schema.customers.projectId, schema.subscriptions.projectId)
+          )
+        )
+        .innerJoin(
+          schema.versions,
+          and(
+            eq(schema.subscriptions.planVersionId, schema.versions.id),
+            eq(schema.customers.projectId, schema.versions.projectId),
+            eq(schema.versions.projectId, project.id)
+          )
+        )
+        .where(and(eq(schema.customers.id, id), eq(schema.customers.projectId, project.id)))
+        .orderBy(() => [desc(schema.subscriptions.createdAt)])
+
+      if (!customerWithSubscriptions || !customerWithSubscriptions.length) {
+        return {
+          customer: {
+            ...customerData,
+            subscriptions: [],
+          },
+        }
+      }
+
+      const subscriptions = customerWithSubscriptions.map((data) => {
+        return {
+          ...data.subscriptions,
+          version: data.version,
+          customer: customerData,
+        }
+      })
+
       return {
-        customer: customerData,
+        customer: {
+          ...customerData,
+          subscriptions: subscriptions,
+        },
       }
     }),
   listByActiveProject: protectedApiOrActiveProjectProcedure

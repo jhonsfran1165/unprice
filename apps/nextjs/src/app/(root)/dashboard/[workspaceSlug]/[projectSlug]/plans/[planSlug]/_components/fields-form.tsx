@@ -27,8 +27,10 @@ import { InputWithAddons } from "~/components/input-addons"
 
 export function QuantityFormField({
   form,
+  isDisabled,
 }: {
   form: UseFormReturn<PlanVersionFeature>
+  isDisabled?: boolean
 }) {
   return (
     <div className="w-full">
@@ -47,7 +49,12 @@ export function QuantityFormField({
 
             <div className="flex flex-col items-center space-y-1">
               <FormControl className="w-full">
-                <InputWithAddons {...field} trailing={"units"} value={field.value ?? ""} />
+                <InputWithAddons
+                  {...field}
+                  trailing={"units"}
+                  value={field.value ?? ""}
+                  disabled={isDisabled}
+                />
               </FormControl>
 
               <FormMessage className="self-start" />
@@ -61,8 +68,10 @@ export function QuantityFormField({
 
 export function LimitFormField({
   form,
+  isDisabled,
 }: {
   form: UseFormReturn<PlanVersionFeature>
+  isDisabled?: boolean
 }) {
   return (
     <div className="w-full">
@@ -82,7 +91,12 @@ export function LimitFormField({
 
             <div className="flex flex-col items-center space-y-1">
               <FormControl className="w-full">
-                <InputWithAddons {...field} trailing={"units"} value={field.value ?? ""} />
+                <InputWithAddons
+                  {...field}
+                  trailing={"units"}
+                  value={field.value ?? ""}
+                  disabled={isDisabled}
+                />
               </FormControl>
 
               <FormMessage className="self-start" />
@@ -97,9 +111,11 @@ export function LimitFormField({
 export function PriceFormField({
   form,
   currency,
+  isDisabled,
 }: {
   form: UseFormReturn<PlanVersionFeature>
   currency: Currency
+  isDisabled?: boolean
 }) {
   return (
     <div className="w-full">
@@ -123,6 +139,7 @@ export function PriceFormField({
                   leading={currencySymbol(currency)}
                   trailing={currency}
                   value={field.value ?? ""}
+                  disabled={isDisabled}
                 />
               </FormControl>
 
@@ -137,8 +154,10 @@ export function PriceFormField({
 
 export function UnitsFormField({
   form,
+  isDisabled,
 }: {
   form: UseFormReturn<PlanVersionFeature>
+  isDisabled?: boolean
 }) {
   return (
     <div className="w-full">
@@ -154,6 +173,7 @@ export function UnitsFormField({
                   leading={"per"}
                   trailing={"units"}
                   value={field.value ?? ""}
+                  disabled={isDisabled}
                 />
               </FormControl>
 
@@ -168,8 +188,10 @@ export function UnitsFormField({
 
 export function AggregationMethodFormField({
   form,
+  isDisabled,
 }: {
   form: UseFormReturn<PlanVersionFeature>
+  isDisabled?: boolean
 }) {
   return (
     <div className="w-full">
@@ -184,9 +206,12 @@ export function AggregationMethodFormField({
               Usage based features meters usage over a period of time. Select the aggregation method
               for the feature.
             </div>
-            <Select onValueChange={field.onChange} value={field.value ?? ""}>
+            <Select onValueChange={field.onChange} value={field.value ?? ""} disabled={isDisabled}>
               <FormControl className="truncate">
-                <SelectTrigger className="items-start [&_[data-description]]:hidden">
+                <SelectTrigger
+                  className="items-start [&_[data-description]]:hidden"
+                  disabled={isDisabled}
+                >
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
               </FormControl>
@@ -215,9 +240,11 @@ export function AggregationMethodFormField({
 export function TierFormField({
   form,
   currency,
+  isDisabled,
 }: {
   form: UseFormReturn<PlanVersionFeature>
   currency: Currency
+  isDisabled?: boolean
 }) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -275,7 +302,7 @@ export function TierFormField({
 
                       <FormMessage className="font-light text-xs" />
                       <FormControl>
-                        <Input {...field} className="h-8" disabled={index === 0} />
+                        <Input {...field} className="h-8" disabled={index === 0 || isDisabled} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -320,7 +347,9 @@ export function TierFormField({
                           className="h-8"
                           value={field.value ?? "∞"}
                           disabled={
-                            (index !== 0 && index === fields.length - 1) || fields.length === 1
+                            (index !== 0 && index === fields.length - 1) ||
+                            fields.length === 1 ||
+                            isDisabled
                           }
                         />
                       </FormControl>
@@ -430,6 +459,7 @@ export function TierFormField({
                   variant="link"
                   size={"icon"}
                   className="h-8 w-8 rounded-full"
+                  disabled={isDisabled}
                   onClick={(e) => {
                     e.stopPropagation()
                     e.preventDefault()
@@ -458,6 +488,8 @@ export function TierFormField({
                 onClick={(e) => {
                   e.stopPropagation()
                   e.preventDefault()
+
+                  if (isDisabled) return
 
                   const firstUnitValue = Number(
                     form.getValues(`config.tiers.${fields.length - 1}.firstUnit`)

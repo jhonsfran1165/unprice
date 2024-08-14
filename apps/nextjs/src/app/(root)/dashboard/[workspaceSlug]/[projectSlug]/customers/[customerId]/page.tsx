@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 
 import { APP_DOMAIN } from "@unprice/config"
-import { CURRENCIES, STATUS_SUBSCRIPTION } from "@unprice/db/utils"
+import { STATUS_SUBSCRIPTION } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import { Separator } from "@unprice/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
@@ -13,10 +13,10 @@ import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { api } from "~/trpc/server"
-import { SubscriptionSheet } from "../../subscriptions/_components/subscription-sheet"
-import { CustomerActions } from "../_components/customer-actions"
-import { PaymentMethodForm } from "../_components/payment-method-form"
-import { columns } from "./_components/table/columns"
+import { CustomerActions } from "../_components/customers/customer-actions"
+import { PaymentMethodForm } from "../_components/customers/payment-method-form"
+import { SubscriptionSheet } from "../_components/subscriptions/subscription-sheet"
+import { columns } from "../_components/subscriptions/table-subscriptions/columns"
 
 export default async function PlanPage({
   params,
@@ -93,10 +93,22 @@ export default async function PlanPage({
           <Suspense
             fallback={
               <DataTableSkeleton
-                columnCount={7}
+                columnCount={11}
                 searchableColumnCount={1}
                 filterableColumnCount={2}
-                cellWidths={["10rem", "40rem", "12rem", "12rem", "12rem", "12rem", "8rem"]}
+                cellWidths={[
+                  "10rem",
+                  "40rem",
+                  "12rem",
+                  "12rem",
+                  "12rem",
+                  "12rem",
+                  "12rem",
+                  "12rem",
+                  "12rem",
+                  "12rem",
+                  "8rem",
+                ]}
                 shrinkZero
               />
             }
@@ -105,18 +117,18 @@ export default async function PlanPage({
               columns={columns}
               data={customer.subscriptions}
               filterOptions={{
-                filterBy: "version",
+                filterBy: "planVersion",
                 filterColumns: true,
-                filterDateRange: false,
-                filterServerSide: false,
+                filterDateRange: true,
+                filterServerSide: true,
                 filterSelectors: {
                   status: STATUS_SUBSCRIPTION.map((value) => ({
                     value: value,
                     label: value,
                   })),
-                  currency: CURRENCIES.map((value) => ({
-                    value: value,
-                    label: value,
+                  version: customer.subscriptions.map((sub) => ({
+                    value: sub.version.id,
+                    label: `${sub.version.title} - v${sub.version.version}`,
                   })),
                 },
               }}

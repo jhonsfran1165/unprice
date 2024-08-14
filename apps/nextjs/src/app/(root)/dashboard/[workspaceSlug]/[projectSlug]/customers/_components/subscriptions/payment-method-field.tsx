@@ -12,7 +12,7 @@ import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { useParams } from "next/navigation"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import { PaymentMethodDialog } from "../../customers/_components/payment-method-dialog"
+import { PaymentMethodDialog } from "../customers/payment-method-dialog"
 
 type PaymentMethodProviderData =
   RouterOutputs["customers"]["listPaymentMethods"]["paymentMethods"][number]

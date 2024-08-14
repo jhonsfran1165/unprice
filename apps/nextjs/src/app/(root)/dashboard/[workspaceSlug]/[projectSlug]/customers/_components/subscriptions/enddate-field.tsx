@@ -59,7 +59,7 @@ export default function EndDateFormField({
                 <Calendar
                   mode="single"
                   selected={endDate ?? undefined}
-                  month={endDate ?? undefined}
+                  defaultMonth={endDate ?? undefined}
                   onSelect={(date) => {
                     setEndDate(date)
                     field.onChange(date)

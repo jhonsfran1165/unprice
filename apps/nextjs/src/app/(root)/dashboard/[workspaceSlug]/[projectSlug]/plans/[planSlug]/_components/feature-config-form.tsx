@@ -54,6 +54,7 @@ export function FeatureConfigForm({
   const [_planFeatureList, setPlanFeatureList] = usePlanFeaturesList()
 
   const editMode = !!defaultValues.id
+  const isPublished = planVersion?.status === "published"
 
   // we set all possible values for the form so react-hook-form don't complain
   const controlledDefaultValues = {
@@ -148,7 +149,7 @@ export function FeatureConfigForm({
     <Form {...form}>
       <form
         id={"feature-config-form"}
-        className={cn("space-y-6", className)}
+        className={cn("space-y-4", className)}
         onSubmit={form.handleSubmit(onSubmitForm)}
       >
         {planVersion.status === "published" && <BannerPublishedVersion />}
@@ -165,7 +166,11 @@ export function FeatureConfigForm({
                 </FormDescription>
               </div>
               <FormControl>
-                <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
+                <Switch
+                  checked={field.value ?? false}
+                  onCheckedChange={field.onChange}
+                  disabled={isPublished}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -197,7 +202,10 @@ export function FeatureConfigForm({
                         value={field.value ?? ""}
                       >
                         <FormControl className="truncate">
-                          <SelectTrigger className="items-start [&_[data-description]]:hidden">
+                          <SelectTrigger
+                            className="items-start [&_[data-description]]:hidden"
+                            disabled={isPublished}
+                          >
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                         </FormControl>
@@ -229,7 +237,10 @@ export function FeatureConfigForm({
                         <FormMessage className="self-start px-2" />
                         <Select onValueChange={field.onChange} value={field.value ?? ""}>
                           <FormControl className="truncate">
-                            <SelectTrigger className="items-start [&_[data-description]]:hidden">
+                            <SelectTrigger
+                              className="items-start [&_[data-description]]:hidden"
+                              disabled={isPublished}
+                            >
                               <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                           </FormControl>
@@ -262,7 +273,10 @@ export function FeatureConfigForm({
                         <FormMessage className="self-start px-2" />
                         <Select onValueChange={field.onChange} value={field.value ?? ""}>
                           <FormControl className="truncate">
-                            <SelectTrigger className="items-start [&_[data-description]]:hidden">
+                            <SelectTrigger
+                              className="items-start [&_[data-description]]:hidden"
+                              disabled={isPublished}
+                            >
                               <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                           </FormControl>
@@ -292,15 +306,21 @@ export function FeatureConfigForm({
 
         <Separator />
 
-        {featureType === "flat" && <FlatFormFields form={form} currency={planVersion.currency} />}
-
-        {featureType === "package" && (
-          <PackageFormFields form={form} currency={planVersion.currency} />
+        {featureType === "flat" && (
+          <FlatFormFields form={form} currency={planVersion.currency} isDisabled={isPublished} />
         )}
 
-        {featureType === "usage" && <UsageFormFields form={form} currency={planVersion.currency} />}
+        {featureType === "package" && (
+          <PackageFormFields form={form} currency={planVersion.currency} isDisabled={isPublished} />
+        )}
 
-        {featureType === "tier" && <TierFormFields form={form} currency={planVersion.currency} />}
+        {featureType === "usage" && (
+          <UsageFormFields form={form} currency={planVersion.currency} isDisabled={isPublished} />
+        )}
+
+        {featureType === "tier" && (
+          <TierFormFields form={form} currency={planVersion.currency} isDisabled={isPublished} />
+        )}
 
         {planVersion.status !== "published" && (
           <div className="mt-8 flex justify-end space-x-4">

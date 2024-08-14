@@ -68,7 +68,7 @@ export default function DurationFormField({
                         field.onChange(date)
                         setIsOpenPopOverStart(false)
                       }}
-                      month={start}
+                      defaultMonth={start}
                       initialFocus
                       disabled={(date) => {
                         const yesterday = subDays(new Date(), 1)
@@ -163,7 +163,7 @@ export default function DurationFormField({
                     <Calendar
                       mode="single"
                       selected={end}
-                      month={end}
+                      defaultMonth={end}
                       onSelect={(date) => {
                         setEnd(date)
                         field.onChange(date)

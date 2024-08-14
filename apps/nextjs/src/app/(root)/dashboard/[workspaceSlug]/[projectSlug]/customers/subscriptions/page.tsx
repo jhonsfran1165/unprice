@@ -1,73 +1,65 @@
 import { STATUS_SUBSCRIPTION } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
-import { Separator } from "@unprice/ui/separator"
 import { TabNavigation, TabNavigationLink } from "@unprice/ui/tabs-navigation"
 import { Typography } from "@unprice/ui/typography"
 import { Plus } from "lucide-react"
-import { notFound } from "next/navigation"
+import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
 import { DataTable } from "~/components/data-table/data-table"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
+import { filtersDataTableCache } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
-import { columns } from "../../../customers/_components/subscriptions/table-subscriptions/columns"
-import { PlanActions } from "../../_components/plan-actions"
-import { PlanVersionDialog } from "../_components/plan-version-dialog"
+import { SubscriptionSheet } from "../_components/subscriptions/subscription-sheet"
+import { columns } from "../_components/subscriptions/table-subscriptions/columns"
 
 export default async function PlanSubscriptionsPage({
   params,
+  searchParams,
 }: {
   params: {
     workspaceSlug: string
     projectSlug: string
-    planSlug: string
+    customerId: string
   }
+  searchParams: SearchParams
 }) {
-  const { planSlug, workspaceSlug, projectSlug } = params
-  const baseUrl = `/${workspaceSlug}/${projectSlug}/plans/${planSlug}`
+  const { workspaceSlug, projectSlug } = params
+  const baseUrl = `/${workspaceSlug}/${projectSlug}/customers`
+  const filters = filtersDataTableCache.parse(searchParams)
 
-  const { plan, subscriptions } = await api.plans.getSubscriptionsBySlug({
-    slug: planSlug,
-  })
-
-  if (!plan) {
-    notFound()
-  }
+  const { subscriptions } = await api.subscriptions.listByActiveProject(filters)
 
   return (
     <DashboardShell
       header={
         <HeaderTab
-          title={plan.slug}
-          id={plan.id}
-          description={plan.description}
-          label={plan.active ? "active" : "inactive"}
+          title="Subscriptions"
+          description="Manage your subscriptions, add new subscriptions, update plans and more."
           action={
             <div className="button-primary flex items-center space-x-1 rounded-md">
               <div className="sm:col-span-full">
-                <PlanVersionDialog
+                <SubscriptionSheet
                   defaultValues={{
-                    planId: plan.id,
-                    description: plan.description,
-                    title: plan.slug,
-                    projectId: plan.projectId,
-                    // TODO: use default currency from org settings
-                    currency: "USD",
-                    planType: "recurring",
-                    paymentProvider: "stripe",
+                    customerId: "",
+                    projectId: "",
+                    planVersionId: "",
+                    type: "plan",
+                    collectionMethod: "charge_automatically",
+                    autoRenew: true,
+                    config: [],
+                    defaultPaymentMethodId: "",
+                    startDate: new Date(),
                   }}
                 >
-                  <Button variant={"custom"}>
-                    <Plus className="mr-2 h-4 w-4" /> Version
+                  <Button variant={"primary"}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Subscription
                   </Button>
-                </PlanVersionDialog>
+                </SubscriptionSheet>
               </div>
-
-              <Separator orientation="vertical" className="h-[20px] p-0" />
-
-              <PlanActions plan={plan} />
             </div>
           }
         />
@@ -76,7 +68,7 @@ export default async function PlanSubscriptionsPage({
       <TabNavigation>
         <div className="flex items-center">
           <TabNavigationLink asChild>
-            <SuperLink href={`${baseUrl}`}>Versions</SuperLink>
+            <SuperLink href={`${baseUrl}`}>Customers</SuperLink>
           </TabNavigationLink>
           <TabNavigationLink asChild active>
             <SuperLink href={`${baseUrl}/subscriptions`}>Subscriptions</SuperLink>
@@ -118,8 +110,8 @@ export default async function PlanSubscriptionsPage({
             filterOptions={{
               filterBy: "planVersion",
               filterColumns: true,
-              filterDateRange: false,
-              filterServerSide: false,
+              filterDateRange: true,
+              filterServerSide: true,
               filterSelectors: {
                 status: STATUS_SUBSCRIPTION.map((value) => ({
                   value: value,

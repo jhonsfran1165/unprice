@@ -6,7 +6,7 @@ import type { UseFieldArrayReturn, UseFormReturn } from "react-hook-form"
 
 import type { RouterOutputs } from "@unprice/api"
 import type { InsertSubscription } from "@unprice/db/validators"
-import { calculatePricePerFeature } from "@unprice/db/validators"
+import { calculateFreeUnits, calculatePricePerFeature } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import {
   Dialog,
@@ -22,9 +22,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
+import { isZero } from "dinero.js"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"
-import { FeatureConfigForm } from "../../plans/[planSlug]/_components/feature-config-form"
+import { nFormatter } from "~/lib/nformatter"
+import { FeatureConfigForm } from "../../../plans/[planSlug]/_components/feature-config-form"
 
 type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 
@@ -69,7 +71,7 @@ export default function ConfigItemsFormField({
           })}
         >
           <Typography variant="h4" className="my-auto block">
-            Feature configuration
+            Features configuration
           </Typography>
         </FormLabel>
 
@@ -104,6 +106,16 @@ export default function ConfigItemsFormField({
                   versionFeatures.get(item.featurePlanId) ?? versionAddons.get(item.featurePlanId)!
 
                 const units = form.watch(`config.${index}.units`)
+
+                const freeUnits = calculateFreeUnits({ feature })
+                const freeUnitsText =
+                  freeUnits === Number.POSITIVE_INFINITY
+                    ? feature.limit
+                      ? `Up to ${nFormatter(feature.limit)}`
+                      : "Unlimited"
+                    : freeUnits === 0
+                      ? ""
+                      : nFormatter(freeUnits)
 
                 return (
                   <TableRow key={item.id} className="border-b hover:bg-transparent">
@@ -155,8 +167,8 @@ export default function ConfigItemsFormField({
                     </TableCell>
                     <TableCell className="table-cell">
                       {feature.featureType === "usage" ? (
-                        <div className="text-center">Varies</div>
-                      ) : ["flat", "package"].includes(feature.featureType) ? (
+                        <div className="text-center">{freeUnitsText}</div>
+                      ) : feature.featureType === "flat" ? (
                         <div className="text-center">{item.units}</div>
                       ) : (
                         <FormField
@@ -301,10 +313,15 @@ function ConfigItemPrice({
     )
   }
 
+  // if the price is 0, don't show the price
   return (
-    <div className="inline text-muted-foreground text-xs italic">
-      {pricePerFeature?.unitPrice.displayAmount &&
-        `${pricePerFeature.unitPrice.displayAmount}/ ${selectedPlanVersion?.billingPeriod}`}
-    </div>
+    <>
+      {!isZero(pricePerFeature.unitPrice.dinero) && (
+        <div className="inline text-muted-foreground text-xs italic">
+          {pricePerFeature.unitPrice.displayAmount &&
+            `${pricePerFeature.unitPrice.displayAmount}/ ${selectedPlanVersion?.billingPeriod}`}
+        </div>
+      )}
+    </>
   )
 }

@@ -15,6 +15,13 @@
       "when": 1722623240188,
       "tag": "0001_eminent_bucky",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1723567716981,
+      "tag": "0002_windy_thanos",
+      "breakpoints": true
     }
   ]
 }

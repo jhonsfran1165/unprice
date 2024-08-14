@@ -26,6 +26,7 @@ import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
+import CustomerFormField from "./customer-field"
 import DurationFormField from "./duration-field"
 import EndDateFormField from "./enddate-field"
 import ConfigItemsFormField from "./items-fields"
@@ -34,6 +35,7 @@ import PlanNewVersionFormField from "./plan-new-version-field"
 import PlanVersionFormField from "./plan-version-field"
 
 type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
+type Customer = RouterOutputs["customers"]["listByActiveProject"]["customers"][0]
 
 export function SubscriptionForm({
   setDialogOpen,
@@ -49,12 +51,13 @@ export function SubscriptionForm({
   const router = useRouter()
   const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersionResponse>()
   const [selectedNewPlanVersion, setSelectedNewPlanVersion] = useState<PlanVersionResponse>()
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer>()
 
   const defaultValuesData = useMemo(() => {
     if (isChangePlanSubscription) {
       // we have to delete endDate and other fields that are not the same when the user is trying to change the plan
-      delete defaultValues.endDate
-      delete defaultValues.nextPlanVersionTo
+      defaultValues.endDate = undefined
+      defaultValues.nextPlanVersionTo = undefined
     }
     return defaultValues
   }, [defaultValues.id])
@@ -64,7 +67,7 @@ export function SubscriptionForm({
     if (isChangePlanSubscription) {
       return subscriptionInsertSchema
         .extend({
-          endDate: z.coerce.date(),
+          endDate: z.coerce.date({ message: "End date is required" }),
           nextPlanVersionTo: z.string().min(1),
         })
         .required({
@@ -73,6 +76,16 @@ export function SubscriptionForm({
           nextPlanVersionTo: true,
         })
         .superRefine((data, ctx) => {
+          // validate that the end date is after the start date
+          if (data.endDate && data.startDate && data.endDate < data.startDate) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "End date must be after start date",
+              path: ["endDate"],
+              fatal: true,
+            })
+          }
+
           // validate that the new plan version is not the same as the current plan version
           if (data.nextPlanVersionTo === data.planVersionId) {
             ctx.addIssue({
@@ -114,7 +127,10 @@ export function SubscriptionForm({
     })
   }
 
-  const formSchema = useMemo(() => generateFormSchema(), [isChangePlanSubscription])
+  const formSchema = useMemo(
+    () => generateFormSchema(),
+    [isChangePlanSubscription, selectedPlanVersion?.id, selectedNewPlanVersion?.id]
+  )
 
   const form = useZodForm({
     schema: formSchema,
@@ -135,6 +151,22 @@ export function SubscriptionForm({
 
   const subscriptionPlanId = form.watch("planVersionId")
   const subscriptionNewPlanId = form.watch("nextPlanVersionTo")
+  const subscriptionCustomerId = form.watch("customerId")
+
+  // customer lists
+  const { data: customers, isLoading: isCustomersLoading } =
+    api.customers.listByActiveProject.useQuery(
+      {
+        search: null,
+        from: null,
+        to: null,
+        page: 1,
+        page_size: 100,
+      },
+      {
+        enabled: defaultValues.customerId === "",
+      }
+    )
 
   // set the proper plan version on loading the form
   useMemo(() => {
@@ -184,12 +216,17 @@ export function SubscriptionForm({
   }, [subscriptionPlanId, subscriptionNewPlanId, isLoading])
 
   const { data: paymentMethods, isLoading: isPaymentMethodsLoading } =
-    api.customers.listPaymentMethods.useQuery({
-      customerId: defaultValues.customerId,
-      provider: isChangePlanSubscription
-        ? selectedNewPlanVersion?.paymentProvider ?? "stripe"
-        : selectedPlanVersion?.paymentProvider ?? "stripe",
-    })
+    api.customers.listPaymentMethods.useQuery(
+      {
+        customerId: subscriptionCustomerId,
+        provider: isChangePlanSubscription
+          ? selectedNewPlanVersion?.paymentProvider ?? "stripe"
+          : selectedPlanVersion?.paymentProvider ?? "stripe",
+      },
+      {
+        enabled: subscriptionCustomerId !== "",
+      }
+    )
 
   const createSubscription = api.subscriptions.create.useMutation({
     onSuccess: ({ subscription }) => {
@@ -234,6 +271,17 @@ export function SubscriptionForm({
         className="space-y-6"
       >
         <div className="space-y-8">
+          {defaultValues.customerId === "" && (
+            <CustomerFormField
+              form={form}
+              customers={customers?.customers ?? []}
+              selectedCustomer={selectedCustomer}
+              setSelectedCustomer={setSelectedCustomer}
+              isDisabled={readOnly || isCustomersLoading}
+              isLoading={isCustomersLoading}
+            />
+          )}
+
           <PlanVersionFormField
             form={form}
             planVersions={data?.planVersions ?? []}
@@ -529,7 +577,6 @@ export function SubscriptionForm({
             <ConfirmAction
               message="When you change the plan, the current subscription will be cancelled and a new one will be created. Are you sure you want to change the plan?"
               confirmAction={() => {
-                setDialogOpen?.(false)
                 form.handleSubmit(onSubmitForm)()
               }}
             >

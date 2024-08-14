@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq, getTableColumns, sql } from "@unprice/db"
+import { and, desc, eq, getTableColumns, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
@@ -383,6 +383,7 @@ export const planRouter = createTRPCRouter({
           )
         )
         .where(and(eq(schema.plans.slug, slug), eq(schema.plans.projectId, project.id)))
+        .orderBy(() => [desc(schema.subscriptions.createdAt)])
 
       if (!planWithSubscriptions || !planWithSubscriptions.length) {
         return {

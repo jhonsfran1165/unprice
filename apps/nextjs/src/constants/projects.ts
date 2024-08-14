@@ -32,7 +32,7 @@ export const PROJECT_NAV: DashboardRoute[] = [
     icon: Key,
   },
   {
-    name: "Customers",
+    name: "Customers & Subs",
     href: "/customers",
     icon: Users,
   },

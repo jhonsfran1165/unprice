@@ -17,7 +17,7 @@ import { MoreVertical } from "lucide-react"
 import { useState } from "react"
 import { z } from "zod"
 import { PropagationStopper } from "~/components/prevent-propagation"
-import { SubscriptionForm } from "../../../../subscriptions/_components/subscription-form"
+import { SubscriptionForm } from "../subscription-form"
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
 }
