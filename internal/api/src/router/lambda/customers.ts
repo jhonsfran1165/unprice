@@ -33,13 +33,16 @@ export const customersRouter = createTRPCRouter({
     .input(customerInsertBaseSchema)
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
-      const { description, name, email, metadata } = opts.input
+      const { description, name, email, metadata, defaultCurrency, stripeCustomerId, active } =
+        opts.input
       const { project } = opts.ctx
 
       // const unpriceCustomerId = project.workspace.unPriceCustomerId
       // const workspaceId = project.workspaceId
 
       const customerId = utils.newId("customer")
+
+      // TODO: check what happens when the currency changes?
 
       const customerData = await opts.ctx.db
         .insert(schema.customers)
@@ -50,6 +53,9 @@ export const customersRouter = createTRPCRouter({
           projectId: project.id,
           description,
           ...(metadata && { metadata }),
+          ...(defaultCurrency && { defaultCurrency }),
+          ...(stripeCustomerId && { stripeCustomerId }),
+          ...(active && { active }),
         })
         .returning()
         .then((data) => data[0])

@@ -16,10 +16,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@unprice/ui/dropdown-menu"
-
 import { CustomerForm } from "./customer-form"
 
 export function CustomerActions({
@@ -37,12 +37,11 @@ export function CustomerActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
           <DialogTrigger asChild>
             <DropdownMenuItem>Edit customer</DropdownMenuItem>
           </DialogTrigger>
-
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive">Another action</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <DialogContent>

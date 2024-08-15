@@ -38,6 +38,13 @@ interface DataTableSkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   showViewOptions?: boolean
 
   /**
+   * Flag to show the date filter options.
+   * @default undefined
+   * @type boolean | undefined
+   */
+  showDateFilterOptions?: boolean
+
+  /**
    * The width of each cell in the table.
    * The length of the array should be equal to the columnCount.
    * Any valid CSS width value is accepted.
@@ -67,7 +74,8 @@ export function DataTableSkeleton(props: DataTableSkeletonProps) {
     rowCount = 10,
     searchableColumnCount = 0,
     filterableColumnCount = 0,
-    showViewOptions = true,
+    showViewOptions = false,
+    showDateFilterOptions = false,
     cellWidths = ["auto"],
     withPagination = true,
     shrinkZero = false,
@@ -90,6 +98,9 @@ export function DataTableSkeleton(props: DataTableSkeletonProps) {
               ))
             : null}
         </div>
+        {showDateFilterOptions ? (
+          <Skeleton className="ml-auto hidden h-7 w-[240px] lg:flex" />
+        ) : null}
         {showViewOptions ? <Skeleton className="ml-auto hidden h-7 w-[4.5rem] lg:flex" /> : null}
       </div>
       <div className="rounded-md border">

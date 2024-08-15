@@ -30,7 +30,6 @@ export function CustomerDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Customer Form</DialogTitle>
-
           <DialogDescription>Modify the customer details below.</DialogDescription>
         </DialogHeader>
 

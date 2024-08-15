@@ -19,9 +19,12 @@ import {
 import { Input } from "@unprice/ui/input"
 import { Textarea } from "@unprice/ui/text-area"
 
+import { CURRENCIES } from "@unprice/db/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+import { Switch } from "@unprice/ui/switch"
 import { ConfirmAction } from "~/components/confirm-action"
 import { SubmitButton } from "~/components/submit-button"
-import { toastAction } from "~/lib/toast"
+import { toast, toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -88,7 +91,6 @@ export function CustomerForm({
 
   const deleteCustomer = api.customers.remove.useMutation({
     onSuccess: () => {
-      toastAction("deleted")
       form.reset()
       router.refresh()
     },
@@ -114,9 +116,12 @@ export function CustomerForm({
         return
       }
 
-      void deleteCustomer.mutateAsync({
-        id: defaultValues.id,
+      toast.promise(deleteCustomer.mutateAsync({ id: defaultValues.id }), {
+        loading: "Removing...",
+        success: "Customer removed",
       })
+
+      setDialogOpen?.(false)
     })
   }
 
@@ -126,10 +131,27 @@ export function CustomerForm({
         <div className="space-y-8">
           <FormField
             control={form.control}
+            name="active"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Active</FormLabel>
+                  <FormDescription>Is this customer active?</FormDescription>
+                </div>
+                <FormControl>
+                  <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>name</FormLabel>
+                <FormDescription>Name of the customer.</FormDescription>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -144,6 +166,7 @@ export function CustomerForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>email</FormLabel>
+                <FormDescription>Main email address of the customer.</FormDescription>
                 <FormControl>
                   <Input {...field} placeholder="email" />
                 </FormControl>
@@ -151,16 +174,46 @@ export function CustomerForm({
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="defaultCurrency"
+            render={({ field }) => (
+              <FormItem className="flex flex-col justify-end">
+                <FormLabel>Currency</FormLabel>
+
+                <FormDescription>
+                  This customer will use this currency for all its invoices.
+                </FormDescription>
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a currency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {CURRENCIES.map((currency) => (
+                      <SelectItem key={currency} value={currency}>
+                        {currency}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Description</FormLabel>
+                <FormDescription>Description of the customer.</FormDescription>
                 <FormControl>
                   <Textarea {...field} value={field.value ?? ""} />
                 </FormControl>
-                <FormDescription>Enter a short description of the feature.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

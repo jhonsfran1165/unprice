@@ -60,10 +60,11 @@ export default async function ProjectUsersPage(props: {
         <Suspense
           fallback={
             <DataTableSkeleton
-              columnCount={5}
+              columnCount={7}
+              showDateFilterOptions={true}
+              showViewOptions={true}
               searchableColumnCount={1}
-              filterableColumnCount={2}
-              cellWidths={["10rem", "40rem", "40rem", "12rem", "8rem"]}
+              cellWidths={["10rem", "30rem", "20rem", "20rem", "20rem", "12rem", "8rem"]}
               shrinkZero
             />
           }

@@ -16,9 +16,9 @@ export default function Loading() {
     >
       <DataTableSkeleton
         columnCount={5}
-        searchableColumnCount={1}
-        filterableColumnCount={2}
         cellWidths={["10rem", "40rem", "12rem", "12rem", "8rem"]}
+        showDateFilterOptions
+        showViewOptions
         shrinkZero
       />
     </DashboardShell>

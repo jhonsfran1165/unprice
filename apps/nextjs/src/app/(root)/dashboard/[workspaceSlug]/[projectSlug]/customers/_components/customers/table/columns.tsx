@@ -5,6 +5,8 @@ import type { ColumnDef } from "@tanstack/react-table"
 import type { Customer } from "@unprice/db/validators"
 import { Checkbox } from "@unprice/ui/checkbox"
 
+import { Badge } from "@unprice/ui/badge"
+import { cn } from "@unprice/ui/utils"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { SuperLink } from "~/components/super-link"
 import { formatDate } from "~/lib/dates"
@@ -40,7 +42,7 @@ export const columns: ColumnDef<Customer>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
     cell: ({ row }) => (
       <SuperLink href={`./customers/${row.original.id}`} scroll={false}>
-        <div className="lowercase">{row.getValue("name")}</div>
+        <div className="lowercase">{row.original.name}</div>
       </SuperLink>
     ),
     enableResizing: true,
@@ -48,10 +50,40 @@ export const columns: ColumnDef<Customer>[] = [
   {
     accessorKey: "email",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
-    cell: ({ row }) => <div className="">{row.getValue("email")}</div>,
+    cell: ({ row }) => (
+      <SuperLink href={`./customers/${row.original.id}`} scroll={false}>
+        <div className="lowercase">{row.original.email}</div>
+      </SuperLink>
+    ),
     enableSorting: false,
     enableHiding: false,
     enableResizing: true,
+  },
+  {
+    accessorKey: "defaultCurrency",
+    enableResizing: true,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Currency" />,
+    cell: ({ row }) => <Badge className="text-xs">{row.original.defaultCurrency}</Badge>,
+    filterFn: (row, id, value) => {
+      return Array.isArray(value) && value.includes(row.getValue(id))
+    },
+    size: 20,
+  },
+  {
+    accessorKey: "active",
+    enableResizing: true,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Active" />,
+    cell: ({ row }) => (
+      <Badge
+        className={cn({
+          info: row.original.active,
+          danger: !row.original.active,
+        })}
+      >
+        {row.original.active ? "active" : "inactive"}
+      </Badge>
+    ),
+    size: 20,
   },
   {
     accessorKey: "createdAt",
