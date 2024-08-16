@@ -31,6 +31,30 @@ export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
 export const whenToBillSchema = z.enum(WHEN_TO_BILLING)
 export const startCycleSchema = z.enum(START_CYCLES)
 
+export const convertDateToUTC = (date: Date) => {
+  // Extract date components
+  const year = date.getFullYear()
+  const month = date.getMonth()
+  const day = date.getDate()
+  const hours = date.getHours()
+  const minutes = date.getMinutes()
+  const seconds = date.getSeconds()
+  const milliseconds = date.getMilliseconds()
+
+  // Create a new UTC date with the same components, including milliseconds
+  const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds, milliseconds))
+
+  return utcDate
+}
+
+export const utcDateSchema = z.coerce
+  .date({
+    message: "Date is required",
+  })
+  .transform((val) => {
+    return convertDateToUTC(val)
+  })
+
 export type Currency = z.infer<typeof currencySchema>
 export type PaymentProvider = z.infer<typeof paymentProviderSchema>
 export type FeatureType = z.infer<typeof typeFeatureSchema>

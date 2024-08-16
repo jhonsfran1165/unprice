@@ -18,6 +18,7 @@ export const customerInsertBaseSchema = createInsertSchema(schema.customers, {
   metadata: customerMetadataSchema,
   email: z.string().min(3).email(),
   name: z.string().min(3),
+  timezone: z.string().min(1),
 })
   .omit({
     createdAt: true,

@@ -197,6 +197,9 @@ export const subscriptionRouter = createTRPCRouter({
         defaultPaymentMethodId,
         autoRenew,
         trialDays,
+        timezone,
+        whenToBill,
+        startCycle,
       } = opts.input
       const project = opts.ctx.project
 
@@ -334,6 +337,9 @@ export const subscriptionRouter = createTRPCRouter({
             projectId: project.id,
             collectionMethod: collectionMethod ?? subscriptionData.collectionMethod,
             startDate: addDays(endDate, 1),
+            timezone: timezone,
+            whenToBill: whenToBill,
+            startCycle: startCycle,
             endDate: undefined,
             autoRenew: autoRenew ?? subscriptionData.autoRenew,
             isNew: true,

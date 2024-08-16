@@ -3,11 +3,15 @@
 import type { ColumnDef } from "@tanstack/react-table"
 
 import type { RouterOutputs } from "@unprice/api"
-import { Checkbox } from "@unprice/ui/checkbox"
-import { cn } from "@unprice/ui/utils"
-
 import { Badge } from "@unprice/ui/badge"
+import { Checkbox } from "@unprice/ui/checkbox"
+import { Separator } from "@unprice/ui/separator"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
+import { cn } from "@unprice/ui/utils"
+import { format } from "date-fns"
+import { toZonedTime } from "date-fns-tz"
+import { AlertCircle } from "lucide-react"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { formatDate } from "~/lib/dates"
 import { DataTableRowActions } from "./data-table-row-actions"
@@ -123,7 +127,9 @@ export const columns: ColumnDef<PlanVersion>[] = [
     accessorKey: "customer",
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
-    cell: ({ row }) => row.original.customer.email,
+    cell: ({ row }) => (
+      <div className="whitespace-nowrap text-sm">{row.original.customer.email}</div>
+    ),
     size: 40,
   },
   {
@@ -157,6 +163,13 @@ export const columns: ColumnDef<PlanVersion>[] = [
     size: 20,
   },
   {
+    accessorKey: "timezone",
+    enableResizing: true,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Timezone" />,
+    cell: ({ row }) => <Badge>{row.original.timezone}</Badge>,
+    size: 20,
+  },
+  {
     accessorKey: "collectionMethod",
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Collection Method" />,
@@ -166,7 +179,35 @@ export const columns: ColumnDef<PlanVersion>[] = [
   {
     accessorKey: "startDate",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Start Date" />,
-    cell: ({ row }) => <div>{formatDate(row.getValue("startDate"))}</div>,
+    cell: ({ row }) => (
+      <div className="flex items-center space-x-1">
+        <div className="whitespace-nowrap text-sm">
+          {formatDate(row.original.startDate, row.original.timezone)}
+        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <AlertCircle className="h-4 w-4 font-light" />
+          </TooltipTrigger>
+          <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
+            <div className="flex flex-col gap-1">
+              <Typography variant="p" affects="removePaddingMargin" className="font-semibold">
+                Timezone: {row.original.timezone}
+              </Typography>
+              <Separator className="my-1" />
+              <Typography variant="p" affects="removePaddingMargin">
+                Local time:{" "}
+                {format(toZonedTime(row.original.startDate, row.original.timezone), "PPpp")}
+              </Typography>
+
+              <Typography variant="p" affects="removePaddingMargin">
+                Customer time:{" "}
+                {format(new Date(row.original.startDate.toISOString().slice(0, -1)), "PPpp")}
+              </Typography>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    ),
     enableSorting: true,
     enableHiding: true,
     size: 40,
@@ -175,13 +216,39 @@ export const columns: ColumnDef<PlanVersion>[] = [
     accessorKey: "endDate",
     header: ({ column }) => <DataTableColumnHeader column={column} title="End Date" />,
     cell: ({ row }) => {
-      const endDate = row.getValue("endDate")
+      const endDate = row.original.endDate
 
-      if (endDate === null) {
-        return <div>Forever</div>
+      if (endDate === null || endDate === undefined) {
+        return <div className="whitespace-nowrap text-sm">Forever</div>
       }
 
-      return <div>{formatDate(row.getValue("endDate"))}</div>
+      return (
+        <div className="flex items-center space-x-1">
+          <div className="whitespace-nowrap text-sm">
+            {formatDate(endDate, row.original.timezone)}
+          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <AlertCircle className="h-4 w-4 font-light" />
+            </TooltipTrigger>
+            <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
+              <div className="flex flex-col gap-1">
+                <Typography variant="p" affects="removePaddingMargin" className="font-semibold">
+                  Timezone: {row.original.timezone}
+                </Typography>
+                <Separator className="my-1" />
+                <Typography variant="p" affects="removePaddingMargin">
+                  Local time: {format(toZonedTime(endDate, row.original.timezone), "PPpp")}
+                </Typography>
+
+                <Typography variant="p" affects="removePaddingMargin">
+                  Customer time: {format(new Date(endDate.toISOString().slice(0, -1)), "PPpp")}
+                </Typography>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )
     },
     enableSorting: true,
     enableHiding: true,

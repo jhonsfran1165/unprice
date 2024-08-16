@@ -14,25 +14,19 @@ import {
   WHEN_TO_BILLING,
 } from "@unprice/db/utils"
 import type { InsertSubscription, Subscription } from "@unprice/db/validators"
-import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@unprice/db/validators"
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@unprice/ui/form"
+  createDefaultSubscriptionConfig,
+  subscriptionInsertSchema,
+  utcDateSchema,
+} from "@unprice/db/validators"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Separator } from "@unprice/ui/separator"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
-import { FilterScroll } from "~/components/filter-scroll"
 import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
-import { TIMEZONES } from "~/lib/timezones"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -43,6 +37,7 @@ import ConfigItemsFormField from "./items-fields"
 import PaymentMethodsFormField from "./payment-method-field"
 import PlanNewVersionFormField from "./plan-new-version-field"
 import PlanVersionFormField from "./plan-version-field"
+import TimeZoneCustomerSubscriptionFormField from "./timezone-field"
 
 type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 type Customer = RouterOutputs["customers"]["listByActiveProject"]["customers"][0]
@@ -77,7 +72,7 @@ export function SubscriptionForm({
     if (isChangePlanSubscription) {
       return subscriptionInsertSchema
         .extend({
-          endDate: z.coerce.date({ message: "End date is required" }),
+          endDate: utcDateSchema,
           nextPlanVersionTo: z.string().min(1),
         })
         .required({
@@ -456,8 +451,11 @@ export function SubscriptionForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {/* // TODO: use this for complex selectors values */}
-                      {START_CYCLES.map((cycle) => (
+                      {START_CYCLES.filter(
+                        (cycle) =>
+                          START_CYCLE_MAP[cycle].billingPeriod ===
+                          selectedPlanVersion?.billingPeriod
+                      ).map((cycle) => (
                         <SelectItem
                           value={cycle}
                           key={cycle}
@@ -528,36 +526,7 @@ export function SubscriptionForm({
             <Fragment>
               <Separator />
 
-              <FormField
-                control={form.control}
-                name="timezone"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col justify-end">
-                    <FormLabel>Timezone</FormLabel>
-
-                    <FormDescription>
-                      Default timezone for the customer. It can be overridden for this subscription.
-                    </FormDescription>
-                    <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a timezone" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <FilterScroll>
-                          {TIMEZONES.map((timezone) => (
-                            <SelectItem key={timezone.tzCode} value={timezone.tzCode}>
-                              {timezone.label}
-                            </SelectItem>
-                          ))}
-                        </FilterScroll>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <TimeZoneCustomerSubscriptionFormField form={form} isDisabled={readOnly} />
             </Fragment>
           )}
 

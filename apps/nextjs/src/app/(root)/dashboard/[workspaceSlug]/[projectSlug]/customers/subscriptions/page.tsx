@@ -2,6 +2,7 @@ import { STATUS_SUBSCRIPTION } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import { TabNavigation, TabNavigationLink } from "@unprice/ui/tabs-navigation"
 import { Typography } from "@unprice/ui/typography"
+import { startOfDay } from "date-fns"
 import { Plus } from "lucide-react"
 import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
@@ -51,7 +52,10 @@ export default async function PlanSubscriptionsPage({
                     autoRenew: true,
                     config: [],
                     defaultPaymentMethodId: "",
-                    startDate: new Date(),
+                    startDate: startOfDay(new Date()),
+                    timezone: "UTC",
+                    startCycle: "first_day_of_month",
+                    whenToBill: "pay_in_arrear",
                   }}
                 >
                   <Button variant={"primary"}>
@@ -84,12 +88,13 @@ export default async function PlanSubscriptionsPage({
         <Suspense
           fallback={
             <DataTableSkeleton
-              columnCount={11}
+              columnCount={12}
               searchableColumnCount={1}
               filterableColumnCount={2}
               cellWidths={[
                 "10rem",
                 "40rem",
+                "12rem",
                 "12rem",
                 "12rem",
                 "12rem",

@@ -57,9 +57,17 @@ export const timestamps = {
     .$onUpdateFn(() => {
       // convert to utc
       const date = new Date()
-      date.setUTCDate(date.getDate())
-      date.setUTCMonth(date.getMonth())
-      date.setUTCFullYear(date.getFullYear())
-      return date
+      // Extract date components
+      const year = date.getFullYear()
+      const month = date.getMonth()
+      const day = date.getDate()
+      const hours = date.getHours()
+      const minutes = date.getMinutes()
+      const seconds = date.getSeconds()
+      const milliseconds = date.getMilliseconds()
+
+      // Create a new UTC date with the same components, including milliseconds
+      const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds, milliseconds))
+      return utcDate
     }),
 }

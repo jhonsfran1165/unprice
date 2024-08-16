@@ -340,8 +340,12 @@ export const createSubscription = async ({
 
   // set the end date and start date given the timezone
   const timezoneToUse = timezone ?? customerData.timezone
-  const startDateUTC = toZonedTime(startDate, timezoneToUse)
-  const endDateUTC = endDate ? toZonedTime(endDate, timezoneToUse) : undefined
+
+  // Everything is save in UTC
+  const startDateUTC = toZonedTime(startDate, "UTC")
+  const endDateUTC = endDate ? toZonedTime(endDate, "UTC") : undefined
+  const trialEndsAt = trialDays ? addDays(startDateUTC, trialDays) : undefined
+  const planChangedAtUTC = planChangedAt ? toZonedTime(planChangedAt, "UTC") : undefined
 
   // execute this in a transaction
   const subscriptionData = await ctx.db.transaction(async (trx) => {
@@ -359,7 +363,7 @@ export const createSubscription = async ({
         endDate: endDateUTC,
         autoRenew: true,
         trialDays: trialDays,
-        trialEndsAt: trialDays ? addDays(new Date(), trialDays) : undefined,
+        trialEndsAt: trialEndsAt,
         isNew: true,
         collectionMethod: collectionMethod,
         status: "active",
@@ -368,7 +372,7 @@ export const createSubscription = async ({
         whenToBill: whenToBill,
         startCycle: startCycle,
         gracePeriod: gracePeriod,
-        planChangedAt: planChangedAt,
+        planChangedAt: planChangedAtUTC,
         type: type,
         timezone: timezoneToUse,
       })

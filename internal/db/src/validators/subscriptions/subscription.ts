@@ -17,6 +17,7 @@ import {
   startCycleSchema,
   subscriptionTypeSchema,
   typeFeatureSchema,
+  utcDateSchema,
   whenToBillSchema,
 } from "./../shared"
 
@@ -111,22 +112,24 @@ export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   collectionMethod: collectionMethodSchema,
   defaultPaymentMethodId: z.string().optional(),
   trialEndsAt: z.coerce.date().optional(),
-  startCycle: startCycleSchema.optional(),
-  whenToBill: whenToBillSchema.optional(),
+  startCycle: startCycleSchema,
+  whenToBill: whenToBillSchema,
+  timezone: z.string().min(1),
 })
 
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
-  startDate: z.coerce.date({ message: "Start date is required" }),
-  endDate: z.coerce.date({ message: "End date is required" }).optional(),
+  startDate: utcDateSchema,
+  endDate: utcDateSchema.optional(),
   trialDays: z.coerce.number().int().min(0).max(30).default(0),
   metadata: subscriptionMetadataSchema,
   type: subscriptionTypeSchema,
   collectionMethod: collectionMethodSchema,
   defaultPaymentMethodId: z.string().optional(),
-  trialEndsAt: z.coerce.date().optional(),
-  startCycle: startCycleSchema.optional(),
-  whenToBill: whenToBillSchema.optional(),
+  trialEndsAt: utcDateSchema.optional(),
+  startCycle: startCycleSchema,
+  whenToBill: whenToBillSchema,
+  timezone: z.string().min(1),
 })
   .extend({
     config: subscriptionItemsConfigSchema.optional(),

@@ -23,12 +23,11 @@ import { CURRENCIES } from "@unprice/db/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Switch } from "@unprice/ui/switch"
 import { ConfirmAction } from "~/components/confirm-action"
-import { FilterScroll } from "~/components/filter-scroll"
 import { SubmitButton } from "~/components/submit-button"
-import { TIMEZONES } from "~/lib/timezones"
 import { toast, toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
+import TimeZoneCustomerFormField from "./timezone-field"
 
 export function CustomerForm({
   setDialogOpen,
@@ -130,8 +129,6 @@ export function CustomerForm({
     })
   }
 
-  console.log(form.getValues())
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6">
@@ -213,36 +210,7 @@ export function CustomerForm({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="timezone"
-            render={({ field }) => (
-              <FormItem className="flex flex-col justify-end">
-                <FormLabel>Timezone</FormLabel>
-
-                <FormDescription>
-                  This customer will use this timezone for all its invoices.
-                </FormDescription>
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a timezone" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <FilterScroll>
-                      {TIMEZONES.map((timezone) => (
-                        <SelectItem key={timezone.tzCode} value={timezone.tzCode}>
-                          {timezone.label}
-                        </SelectItem>
-                      ))}
-                    </FilterScroll>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <TimeZoneCustomerFormField form={form} />
 
           <FormField
             control={form.control}

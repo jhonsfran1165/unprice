@@ -1,2 +1,0 @@
-ALTER TABLE "unprice_customers" ALTER COLUMN "created_at" SET DATA TYPE timestamptz;--> statement-breakpoint
-ALTER TABLE "unprice_customers" ALTER COLUMN "created_at" SET DEFAULT 2024-08-15T16:44:33.006272994+00:00[UTC];

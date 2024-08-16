@@ -154,15 +154,17 @@ export const customersRouter = createTRPCRouter({
           description: true,
           email: true,
           metadata: true,
+          timezone: true,
         })
         .partial({
           description: true,
           metadata: true,
+          timezone: true,
         })
     )
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
-      const { email, id, description, metadata, name } = opts.input
+      const { email, id, description, metadata, name, timezone } = opts.input
       const { project } = opts.ctx
 
       // we just need to validate the entitlements
@@ -195,6 +197,7 @@ export const customersRouter = createTRPCRouter({
               ...metadata,
             },
           }),
+          ...(timezone && { timezone }),
           updatedAt: new Date(),
         })
         .where(and(eq(schema.customers.id, id), eq(schema.customers.projectId, project.id)))

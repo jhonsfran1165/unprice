@@ -73,18 +73,22 @@ export const START_CYCLE_MAP = {
   first_day_of_month: {
     label: "First day of month",
     description: "The first day of the month",
+    billingPeriod: "month",
   },
   first_day_of_year: {
     label: "First day of year",
     description: "The first day of the year",
+    billingPeriod: "year",
   },
   last_day_of_month: {
     label: "Last day of month",
     description: "The last day of the month",
+    billingPeriod: "month",
   },
   last_day_of_year: {
     label: "Last day of year",
     description: "The last day of the year",
+    billingPeriod: "year",
   },
 } as const
 

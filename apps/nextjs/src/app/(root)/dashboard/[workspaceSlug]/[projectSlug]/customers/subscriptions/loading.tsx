@@ -45,10 +45,23 @@ export default function Loading() {
           </Typography>
         </div>
         <DataTableSkeleton
-          columnCount={5}
+          columnCount={12}
           searchableColumnCount={1}
           filterableColumnCount={2}
-          cellWidths={["10rem", "40rem", "12rem", "12rem", "8rem"]}
+          cellWidths={[
+            "10rem",
+            "40rem",
+            "12rem",
+            "12rem",
+            "12rem",
+            "12rem",
+            "12rem",
+            "12rem",
+            "12rem",
+            "12rem",
+            "12rem",
+            "8rem",
+          ]}
           shrinkZero
         />
       </div>

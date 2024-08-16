@@ -1,6 +1,6 @@
 "use client"
 
-import { add, addDays, formatDate, startOfMonth, subDays } from "date-fns"
+import { add, addDays, endOfDay, formatDate, startOfDay, startOfMonth, subDays } from "date-fns"
 import { ArrowRight, CalendarIcon } from "lucide-react"
 import { useState } from "react"
 import type { UseFormReturn } from "react-hook-form"
@@ -64,8 +64,11 @@ export default function DurationFormField({
                       mode="single"
                       selected={start}
                       onSelect={(date) => {
-                        setStart(date)
-                        field.onChange(date)
+                        if (!date) return
+                        // midnight
+                        const midnight = startOfDay(date)
+                        setStart(midnight)
+                        field.onChange(midnight)
                         setIsOpenPopOverStart(false)
                       }}
                       defaultMonth={start}
@@ -87,8 +90,9 @@ export default function DurationFormField({
                         variant="ghost"
                         className="justify-start font-normal"
                         onClick={() => {
-                          setStart(new Date())
-                          field.onChange(new Date())
+                          const midnight = startOfDay(new Date())
+                          setStart(midnight)
+                          field.onChange(midnight)
                           setIsOpenPopOverStart(false)
                         }}
                       >
@@ -99,8 +103,9 @@ export default function DurationFormField({
                         className="justify-start font-normal"
                         onClick={() => {
                           const tomorrow = addDays(new Date(), 1)
-                          setStart(tomorrow)
-                          field.onChange(tomorrow)
+                          const midnight = startOfDay(tomorrow)
+                          setStart(midnight)
+                          field.onChange(midnight)
                           setIsOpenPopOverStart(false)
                         }}
                       >
@@ -111,8 +116,9 @@ export default function DurationFormField({
                         className="justify-start font-normal"
                         onClick={() => {
                           const data = addDays(new Date(), 7)
-                          setStart(data)
-                          field.onChange(data)
+                          const midnight = startOfDay(data)
+                          setStart(midnight)
+                          field.onChange(midnight)
                           setIsOpenPopOverStart(false)
                         }}
                       >
@@ -123,8 +129,9 @@ export default function DurationFormField({
                         className="justify-start font-normal"
                         onClick={() => {
                           const nextMonth = startOfMonth(add(new Date(), { months: 1 }))
-                          setStart(nextMonth)
-                          field.onChange(nextMonth)
+                          const midnight = startOfDay(nextMonth)
+                          setStart(midnight)
+                          field.onChange(midnight)
                           setIsOpenPopOverStart(false)
                         }}
                       >
@@ -165,11 +172,15 @@ export default function DurationFormField({
                       selected={end}
                       defaultMonth={end}
                       onSelect={(date) => {
-                        setEnd(date)
-                        field.onChange(date)
+                        if (!date) return
+                        // end of day
+                        const endOfDayDate = endOfDay(date)
+                        setEnd(endOfDayDate)
+                        field.onChange(endOfDayDate)
                         setIsOpenPopOverEnd(false)
                       }}
                       disabled={(date) => !start || date <= start || !!isDisabled}
+                      initialFocus
                     />
                   </div>
                   <div className="flex flex-col gap-2 px-2 py-4">
@@ -191,11 +202,12 @@ export default function DurationFormField({
                         className="justify-start font-normal"
                         onClick={() => {
                           if (!start) return
-
+                          // end of day
                           const date = add(start, { months: 1 })
+                          const endOfDayDate = endOfDay(date)
 
-                          setEnd(date)
-                          field.onChange(date)
+                          setEnd(endOfDayDate)
+                          field.onChange(endOfDayDate)
                           setIsOpenPopOverEnd(false)
                         }}
                       >
@@ -207,9 +219,10 @@ export default function DurationFormField({
                         onClick={() => {
                           if (!start) return
                           const date = add(start, { months: 2 })
+                          const endOfDayDate = endOfDay(date)
 
-                          setEnd(date)
-                          field.onChange(date)
+                          setEnd(endOfDayDate)
+                          field.onChange(endOfDayDate)
                           setIsOpenPopOverEnd(false)
                         }}
                       >
@@ -221,9 +234,10 @@ export default function DurationFormField({
                         onClick={() => {
                           if (!start) return
                           const date = add(start, { months: 3 })
+                          const endOfDayDate = endOfDay(date)
 
-                          setEnd(date)
-                          field.onChange(date)
+                          setEnd(endOfDayDate)
+                          field.onChange(endOfDayDate)
                           setIsOpenPopOverEnd(false)
                         }}
                       >
@@ -235,9 +249,10 @@ export default function DurationFormField({
                         onClick={() => {
                           if (!start) return
                           const date = add(start, { months: 6 })
+                          const endOfDayDate = endOfDay(date)
 
-                          setEnd(date)
-                          field.onChange(date)
+                          setEnd(endOfDayDate)
+                          field.onChange(endOfDayDate)
                           setIsOpenPopOverEnd(false)
                         }}
                       >
@@ -249,9 +264,11 @@ export default function DurationFormField({
                         onClick={() => {
                           if (!start) return
                           const date = add(start, { months: 12 })
+                          const endOfDayDate = endOfDay(date)
 
-                          setEnd(date)
-                          field.onChange(date)
+                          setEnd(endOfDayDate)
+                          field.onChange(endOfDayDate)
+                          setIsOpenPopOverEnd(false)
                         }}
                       >
                         12 Months

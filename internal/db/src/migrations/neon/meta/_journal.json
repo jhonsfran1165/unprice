@@ -19,15 +19,8 @@
     {
       "idx": 2,
       "version": "7",
-      "when": 1723567716981,
-      "tag": "0002_windy_thanos",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1723740273057,
-      "tag": "0003_useful_boomer",
+      "when": 1723811752631,
+      "tag": "0002_empty_alex_power",
       "breakpoints": true
     }
   ]

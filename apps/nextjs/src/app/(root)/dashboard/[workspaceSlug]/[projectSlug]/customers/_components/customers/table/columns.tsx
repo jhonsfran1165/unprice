@@ -42,7 +42,7 @@ export const columns: ColumnDef<Customer>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
     cell: ({ row }) => (
       <SuperLink href={`./customers/${row.original.id}`} scroll={false}>
-        <div className="lowercase">{row.original.name}</div>
+        <div className="whitespace-nowrap text-sm">{row.original.name}</div>
       </SuperLink>
     ),
     enableResizing: true,
@@ -52,7 +52,7 @@ export const columns: ColumnDef<Customer>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
     cell: ({ row }) => (
       <SuperLink href={`./customers/${row.original.id}`} scroll={false}>
-        <div className="lowercase">{row.original.email}</div>
+        <div className="whitespace-nowrap text-sm">{row.original.email}</div>
       </SuperLink>
     ),
     enableSorting: false,
@@ -63,7 +63,7 @@ export const columns: ColumnDef<Customer>[] = [
     accessorKey: "defaultCurrency",
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Currency" />,
-    cell: ({ row }) => <Badge className="text-xs">{row.original.defaultCurrency}</Badge>,
+    cell: ({ row }) => <Badge className="text-sm">{row.original.defaultCurrency}</Badge>,
     filterFn: (row, id, value) => {
       return Array.isArray(value) && value.includes(row.getValue(id))
     },
@@ -95,7 +95,11 @@ export const columns: ColumnDef<Customer>[] = [
   {
     accessorKey: "createdAt",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Creation Date" />,
-    cell: ({ row }) => <div>{formatDate(row.getValue("createdAt"))}</div>,
+    cell: ({ row }) => (
+      <div className="whitespace-nowrap text-sm">
+        {formatDate(row.getValue("createdAt"), row.original.timezone)}
+      </div>
+    ),
     enableSorting: true,
     enableHiding: true,
   },

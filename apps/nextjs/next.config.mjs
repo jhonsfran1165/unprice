@@ -32,12 +32,6 @@ const nextConfig = {
     optimizePackageImports: ["@unprice/ui", "@unprice/api", "@unprice/auth", "@unprice/db"],
     instrumentationHook: process.env.NODE_ENV === "production",
   },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.ignoreWarnings = [{ module: /opentelemetry/ }]
-    }
-    return config
-  },
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },

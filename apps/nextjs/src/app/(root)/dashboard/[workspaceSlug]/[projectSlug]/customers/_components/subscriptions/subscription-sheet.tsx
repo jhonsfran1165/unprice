@@ -12,6 +12,7 @@ import {
   SheetTrigger,
 } from "@unprice/ui/sheet"
 
+import { startOfDay } from "date-fns"
 import { SubscriptionForm } from "./subscription-form"
 
 export function SubscriptionSheet({
@@ -35,12 +36,15 @@ export function SubscriptionSheet({
           setDialogOpen={setIsOpen}
           defaultValues={
             defaultValues ?? {
-              startDate: new Date(),
+              startDate: startOfDay(new Date()),
               customerId: "",
               planVersionId: "",
               type: "plan",
               config: [],
               defaultPaymentMethodId: "",
+              timezone: "UTC",
+              startCycle: "first_day_of_month",
+              whenToBill: "pay_in_arrear",
             }
           }
         />

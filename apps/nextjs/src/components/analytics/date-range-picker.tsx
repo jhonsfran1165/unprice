@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { cn } from "@unprice/ui/utils"
 import { CalendarDays } from "lucide-react"
 import { useFilterDataTable } from "~/hooks/use-filter-datatable"
+import { manipulateDate } from "~/lib/dates"
 
 interface DateRangePickerProps extends React.ComponentPropsWithoutRef<typeof PopoverContent> {
   /**
@@ -126,10 +127,9 @@ export function DateRangePicker({
             defaultMonth={date?.from}
             selected={date}
             onSelect={(selected) => {
-              setFilters({
-                from: selected?.from?.getTime() ?? null,
-                to: selected?.to?.getTime() ?? null,
-              })
+              const dates = manipulateDate(selected)
+
+              setFilters(dates)
               setDate(selected)
             }}
             numberOfMonths={2}
