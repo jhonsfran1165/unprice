@@ -86,6 +86,13 @@ export const columns: ColumnDef<Customer>[] = [
     size: 20,
   },
   {
+    accessorKey: "timezone",
+    enableResizing: true,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Timezone" />,
+    cell: ({ row }) => <Badge>{row.original.timezone}</Badge>,
+    size: 20,
+  },
+  {
     accessorKey: "createdAt",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Creation Date" />,
     cell: ({ row }) => <div>{formatDate(row.getValue("createdAt"))}</div>,

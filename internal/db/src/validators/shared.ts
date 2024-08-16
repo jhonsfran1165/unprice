@@ -8,7 +8,7 @@ import {
   FEATURE_VERSION_TYPES,
   PAYMENT_PROVIDERS,
   PLAN_BILLING_PERIODS,
-  START_CYCLE,
+  START_CYCLES,
   SUBSCRIPTION_TYPES,
   TIER_MODES,
   USAGE_MODES,
@@ -29,7 +29,7 @@ export const monthsSchema = z.coerce.number().int().min(1).max(12)
 export const yearsSchema = z.coerce.number().int().min(2000).max(2100)
 export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
 export const whenToBillSchema = z.enum(WHEN_TO_BILLING)
-export const startCycleSchema = z.enum(START_CYCLE)
+export const startCycleSchema = z.enum(START_CYCLES)
 
 export type Currency = z.infer<typeof currencySchema>
 export type PaymentProvider = z.infer<typeof paymentProviderSchema>

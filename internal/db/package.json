@@ -19,11 +19,13 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "generate:local": "pnpm with-env drizzle-kit generate --config=local.config.ts",
+    "drop:local": "pnpm with-env drizzle-kit drop --config=local.config.ts",
     "migrate:local": "pnpm with-env drizzle-kit migrate --config=local.config.ts",
     "migrate:custom": "pnpm with-env tsx src/migrate.ts",
     "migrate:neon": "pnpm with-env drizzle-kit migrate --config=neon.config.ts",
     "introspect:local": "pnpm with-env drizzle-kit introspect --config=local.config.ts",
     "generate:neon": "pnpm with-env drizzle-kit generate --config=neon.config.ts",
+    "drop:neon": "pnpm with-env drizzle-kit drop --config=neon.config.ts",
     "generate:custom": "pnpm with-env drizzle-kit generate --custom --config=custom.config.ts",
     "push:local": "pnpm with-env drizzle-kit push --config=local.config.ts",
     "push:neon": "pnpm with-env drizzle-kit push --config=neon.config.ts",
@@ -36,10 +38,10 @@
     "with-env": "dotenv -e ../../.env.local --"
   },
   "dependencies": {
-    "@unprice/config": "^0.1.0",
-    "@unprice/error": "^0.1.0",
     "@neondatabase/serverless": "^0.9.0",
     "@t3-oss/env-nextjs": "0.9.1",
+    "@unprice/config": "^0.1.0",
+    "@unprice/error": "^0.1.0",
     "base-x": "^4.0.0",
     "dinero.js": "2.0.0-alpha.14",
     "drizzle-orm": "^0.31.2",
@@ -48,8 +50,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@unprice/tsconfig": "^0.1.0",
     "@types/ws": "^8.5.10",
+    "@unprice/tsconfig": "^0.1.0",
     "dotenv-cli": "^7.3.0",
     "drizzle-kit": "^0.22.7",
     "tsx": "^4.7.2",

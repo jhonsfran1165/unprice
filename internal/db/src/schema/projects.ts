@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { boolean, index, text, unique } from "drizzle-orm/pg-core"
+import { boolean, index, text, unique, varchar } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { id, timestamps, workspaceID } from "../utils/sql"
@@ -19,6 +19,7 @@ export const projects = pgTableProject(
     enabled: boolean("enabled").default(true).notNull(),
     isInternal: boolean("is_internal").default(false).notNull(),
     defaultCurrency: currencyEnum("default_currency").default("USD").notNull(),
+    timezone: varchar("timezone", { length: 32 }).default("UTC"),
   },
   (table) => ({
     slug: index("slug_index").on(table.slug),

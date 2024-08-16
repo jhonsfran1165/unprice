@@ -33,7 +33,7 @@ export const customersRouter = createTRPCRouter({
     .input(customerInsertBaseSchema)
     .output(z.object({ customer: customerSelectSchema }))
     .mutation(async (opts) => {
-      const { description, name, email, metadata, defaultCurrency, stripeCustomerId, active } =
+      const { description, name, email, metadata, defaultCurrency, stripeCustomerId, timezone } =
         opts.input
       const { project } = opts.ctx
 
@@ -52,10 +52,11 @@ export const customersRouter = createTRPCRouter({
           email,
           projectId: project.id,
           description,
+          timezone: timezone || "UTC",
+          active: true,
           ...(metadata && { metadata }),
           ...(defaultCurrency && { defaultCurrency }),
           ...(stripeCustomerId && { stripeCustomerId }),
-          ...(active && { active }),
         })
         .returning()
         .then((data) => data[0])

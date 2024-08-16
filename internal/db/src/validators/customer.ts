@@ -11,6 +11,7 @@ export const customerMetadataSchema = z.object({
 
 export const customerSelectSchema = createSelectSchema(schema.customers, {
   metadata: customerMetadataSchema,
+  timezone: z.string().min(1),
 })
 
 export const customerInsertBaseSchema = createInsertSchema(schema.customers, {

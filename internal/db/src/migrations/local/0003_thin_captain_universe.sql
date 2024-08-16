@@ -1,0 +1,2 @@
+ALTER TABLE "unprice_subscriptions" ALTER COLUMN "start_cycle" SET DEFAULT 'first_day_of_month';--> statement-breakpoint
+ALTER TABLE "unprice_customers" ADD COLUMN "created_at_temporal" timestamp DEFAULT now() NOT NULL;

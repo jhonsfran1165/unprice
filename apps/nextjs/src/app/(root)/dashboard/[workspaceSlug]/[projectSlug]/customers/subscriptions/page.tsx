@@ -39,7 +39,7 @@ export default async function PlanSubscriptionsPage({
           title="Subscriptions"
           description="Manage your subscriptions, add new subscriptions, update plans and more."
           action={
-            <div className="button-primary flex items-center space-x-1 rounded-md">
+            <div className="flex items-center space-x-1 rounded-md">
               <div className="sm:col-span-full">
                 <SubscriptionSheet
                   defaultValues={{
@@ -117,10 +117,13 @@ export default async function PlanSubscriptionsPage({
                   value: value,
                   label: value,
                 })),
-                version: subscriptions.map((sub) => ({
-                  value: sub.version.id,
-                  label: `${sub.version.title} - v${sub.version.version}`,
-                })),
+                // get versions without duplicates
+                version: [...new Map(subscriptions.map((item) => [item.version.id, item]))].map(
+                  ([id, item]) => ({
+                    value: id,
+                    label: `${item.version.title} - v${item.version.version}`,
+                  })
+                ),
               },
             }}
           />

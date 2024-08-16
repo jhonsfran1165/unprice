@@ -125,10 +125,13 @@ export default async function PlanSubscriptionsPage({
                   value: value,
                   label: value,
                 })),
-                version: subscriptions.map((sub) => ({
-                  value: sub.version.id,
-                  label: `${sub.version.title} - v${sub.version.version}`,
-                })),
+                // get versions without duplicates
+                version: [...new Map(subscriptions.map((item) => [item.version.id, item]))].map(
+                  ([id, item]) => ({
+                    value: id,
+                    label: `${item.version.title} - v${item.version.version}`,
+                  })
+                ),
               },
             }}
           />

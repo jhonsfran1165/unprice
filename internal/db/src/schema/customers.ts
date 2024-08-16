@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { boolean, index, json, primaryKey, text, unique } from "drizzle-orm/pg-core"
+import { boolean, index, json, primaryKey, text, unique, varchar } from "drizzle-orm/pg-core"
 import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
@@ -22,6 +22,7 @@ export const customers = pgTableProject(
     active: boolean("active").default(true),
     // all customers will have a default currency - normally the currency of the project
     defaultCurrency: currencyEnum("default_currency").default("USD").notNull(),
+    timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
     // beta features
   },
   (table) => ({

@@ -8,6 +8,7 @@ import {
   type subscriptionInsertSchema,
 } from "@unprice/db/validators"
 import { addDays } from "date-fns"
+import { toZonedTime } from "date-fns-tz"
 import type { z } from "zod"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
@@ -203,6 +204,7 @@ export const createSubscription = async ({
     gracePeriod,
     planChangedAt,
     type,
+    timezone,
   } = subscription
 
   const versionData = await ctx.db.query.versions.findFirst({
@@ -290,6 +292,14 @@ export const createSubscription = async ({
     })
   }
 
+  // if customer is not active, throw an error
+  if (!customerData.active) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "Customer is not active, please contact support",
+    })
+  }
+
   // check the active subscriptions of the customer.
   // The plan version the customer is attempting to subscribe to can't have any feature that the customer already has
   const newFeatures = versionData.planFeatures.map((f) => f.feature.slug)
@@ -328,6 +338,11 @@ export const createSubscription = async ({
     configItemsSubscription = config
   }
 
+  // set the end date and start date given the timezone
+  const timezoneToUse = timezone ?? customerData.timezone
+  const startDateUTC = toZonedTime(startDate, timezoneToUse)
+  const endDateUTC = endDate ? toZonedTime(endDate, timezoneToUse) : undefined
+
   // execute this in a transaction
   const subscriptionData = await ctx.db.transaction(async (trx) => {
     // create the subscription
@@ -340,8 +355,8 @@ export const createSubscription = async ({
         projectId: project.id,
         planVersionId: versionData.id,
         customerId: customerData.id,
-        startDate: startDate,
-        endDate: endDate,
+        startDate: startDateUTC,
+        endDate: endDateUTC,
         autoRenew: true,
         trialDays: trialDays,
         trialEndsAt: trialDays ? addDays(new Date(), trialDays) : undefined,
@@ -355,6 +370,7 @@ export const createSubscription = async ({
         gracePeriod: gracePeriod,
         planChangedAt: planChangedAt,
         type: type,
+        timezone: timezoneToUse,
       })
       .returning()
       .then((re) => re[0])

@@ -95,7 +95,7 @@ export type FeatureType = keyof typeof FEATURE_TYPES_MAPS
 export type StartCycle = keyof typeof START_CYCLE_MAP
 
 export const PAYMENT_PROVIDERS = ["stripe", "lemonsqueezy"] as const
-export const START_CYCLE = Object.keys(START_CYCLE_MAP) as unknown as readonly [
+export const START_CYCLES = Object.keys(START_CYCLE_MAP) as unknown as readonly [
   StartCycle,
   ...StartCycle[],
 ]

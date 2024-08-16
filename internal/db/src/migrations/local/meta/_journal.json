@@ -22,6 +22,20 @@
       "when": 1723487784638,
       "tag": "0002_lovely_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1723741119499,
+      "tag": "0003_thin_captain_universe",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1723805616371,
+      "tag": "0004_mute_albert_cleary",
+      "breakpoints": true
     }
   ]
 }

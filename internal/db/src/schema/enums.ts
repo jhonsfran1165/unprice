@@ -13,6 +13,7 @@ import {
   PROJECT_TIERS_APP,
   ROLES_APP,
   STAGES,
+  START_CYCLES,
   STATUS_PLAN,
   STATUS_SUBSCRIPTION,
   SUBSCRIPTION_TYPES,
@@ -40,3 +41,4 @@ export const planTypeEnum = pgEnum("plan_type", PLAN_TYPES)
 export const whenToBillEnum = pgEnum("when_to_bill", WHEN_TO_BILLING)
 export const collectionMethodEnum = pgEnum("collection_method", COLLECTION_METHODS)
 export const typeSubscriptionEnum = pgEnum("subscription_type", SUBSCRIPTION_TYPES)
+export const startCycleEnum = pgEnum("start_cycle", START_CYCLES)

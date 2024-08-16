@@ -2,27 +2,37 @@
 
 import { HelpCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { Fragment, useMemo, useState } from "react"
+import { Fragment, useEffect, useMemo, useState } from "react"
 import { useFieldArray } from "react-hook-form"
 
 import type { RouterOutputs } from "@unprice/api"
 import {
   COLLECTION_METHODS,
-  START_CYCLE,
+  START_CYCLES,
   START_CYCLE_MAP,
   SUBSCRIPTION_TYPES,
   WHEN_TO_BILLING,
 } from "@unprice/db/utils"
 import type { InsertSubscription, Subscription } from "@unprice/db/validators"
 import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@unprice/db/validators"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@unprice/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Separator } from "@unprice/ui/separator"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
+import { FilterScroll } from "~/components/filter-scroll"
 import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
+import { TIMEZONES } from "~/lib/timezones"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -227,6 +237,13 @@ export function SubscriptionForm({
         enabled: subscriptionCustomerId !== "",
       }
     )
+
+  // keep in sync with the customer timezone
+  useEffect(() => {
+    if (selectedCustomer?.timezone) {
+      form.setValue("timezone", selectedCustomer.timezone)
+    }
+  }, [selectedCustomer?.id])
 
   const createSubscription = api.subscriptions.create.useMutation({
     onSuccess: ({ subscription }) => {
@@ -440,7 +457,7 @@ export function SubscriptionForm({
                     </FormControl>
                     <SelectContent>
                       {/* // TODO: use this for complex selectors values */}
-                      {START_CYCLE.map((cycle) => (
+                      {START_CYCLES.map((cycle) => (
                         <SelectItem
                           value={cycle}
                           key={cycle}
@@ -506,6 +523,43 @@ export function SubscriptionForm({
               )}
             />
           </div>
+
+          {!isChangePlanSubscription && (
+            <Fragment>
+              <Separator />
+
+              <FormField
+                control={form.control}
+                name="timezone"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col justify-end">
+                    <FormLabel>Timezone</FormLabel>
+
+                    <FormDescription>
+                      Default timezone for the customer. It can be overridden for this subscription.
+                    </FormDescription>
+                    <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a timezone" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <FilterScroll>
+                          {TIMEZONES.map((timezone) => (
+                            <SelectItem key={timezone.tzCode} value={timezone.tzCode}>
+                              {timezone.label}
+                            </SelectItem>
+                          ))}
+                        </FilterScroll>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </Fragment>
+          )}
 
           {!isChangePlanSubscription && (
             <Fragment>

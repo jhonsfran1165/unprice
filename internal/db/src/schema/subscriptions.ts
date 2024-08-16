@@ -8,16 +8,17 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  varchar,
 } from "drizzle-orm/pg-core"
 import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, projectID, timestamps } from "../utils/sql"
-import type { StartCycleType } from "../validators/shared"
 import type { subscriptionMetadataSchema } from "../validators/subscriptions"
 import { customers } from "./customers"
 import {
   collectionMethodEnum,
+  startCycleEnum,
   subscriptionStatusEnum,
   typeSubscriptionEnum,
   whenToBillEnum,
@@ -61,11 +62,12 @@ export const subscriptions = pgTableProject(
     // whenToBill: pay_in_advance - pay_in_arrear
     whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance"),
     // when to start each cycle for this subscription -
-    // TODO: instead of using enums I could do this? so no migrations needed for adding new values?
-    startCycle: text("start_cycle").$type<StartCycleType>().default("first_day_of_month"), // null means the first day of the month
+    startCycle: startCycleEnum("start_cycle").default("first_day_of_month"), // null means the first day of the month
     // used for generating invoices -
     gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
     // ************ billing data defaults ************
+
+    timezone: varchar("timezone", { length: 32 }).default("UTC"),
 
     // subscription trial period
     // TODO: I can configure this from the plan version
@@ -73,12 +75,20 @@ export const subscriptions = pgTableProject(
     trialDays: integer("trial_days").default(0),
     trialEndsAt: timestamp("trial_ends", {
       mode: "date",
+      withTimezone: true,
+      precision: 3,
     }),
+
     startDate: timestamp("start_date", {
       mode: "date",
+      withTimezone: true,
+      precision: 3,
     }).notNull(),
+
     endDate: timestamp("end_date", {
       mode: "date",
+      withTimezone: true,
+      precision: 3,
     }),
 
     // auto renew the subscription every billing period
@@ -109,6 +119,8 @@ export const subscriptions = pgTableProject(
     // when the plan was changed - it's used to prevent the customer from changing the plan in the last 30 days
     planChangedAt: timestamp("plan_changed", {
       mode: "date",
+      withTimezone: true,
+      precision: 3,
     }),
 
     // next subscription id is the id of the subscription that will be created when the user changes the plan

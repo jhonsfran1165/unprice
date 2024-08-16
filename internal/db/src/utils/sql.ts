@@ -1,9 +1,9 @@
-import { text, timestamp } from "drizzle-orm/pg-core"
-
+import { sql } from "drizzle-orm"
+import { timestamp, varchar } from "drizzle-orm/pg-core"
 import { projects, workspaces } from "../schema"
 
 // easier to migrate to another db
-export const cuid = (d: string) => text(d)
+export const cuid = (d: string) => varchar(d, { length: 64 })
 
 // for workspace
 export const id = {
@@ -29,22 +29,37 @@ export const projectID = {
   },
 }
 
-// INFO: if you want update time on update, you can use this
-// https://aviyadav231.medium.com/automatically-updating-a-timestamp-column-in-postgresql-using-triggers-98766e3b47a0
 // common timestamps for all tables
+// all dates are in UTC
 export const timestamps = {
-  // TODO: is this a good idea?
-  // createdAt: integer("timestamp")
-  //   .notNull()
-  //   .default(sql`extract(epoch from now())`),
+  // createdAt: bigint("created_at_m", { mode: "number" })
+  // .notNull()
+  // .default(0)
+  // .$defaultFn(() => Date.now()),
+  // updatedAt: bigint("updated_at_m", { mode: "number" }).$onUpdateFn(() => Date.now()),
+
   createdAt: timestamp("created_at", {
     mode: "date",
+    withTimezone: true,
+    precision: 3,
   })
     .notNull()
+    .default(sql`CURRENT_TIMESTAMP AT TIME ZONE 'UTC'`)
     .defaultNow(),
   updatedAt: timestamp("updated_at", {
     mode: "date",
+    withTimezone: true,
+    precision: 3,
   })
     .notNull()
-    .defaultNow(),
+    .default(sql`CURRENT_TIMESTAMP AT TIME ZONE 'UTC'`)
+    .defaultNow()
+    .$onUpdateFn(() => {
+      // convert to utc
+      const date = new Date()
+      date.setUTCDate(date.getDate())
+      date.setUTCMonth(date.getMonth())
+      date.setUTCFullYear(date.getFullYear())
+      return date
+    }),
 }
