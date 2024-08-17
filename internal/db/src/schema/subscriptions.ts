@@ -1,12 +1,12 @@
 import { eq, relations } from "drizzle-orm"
 import {
+  bigint,
   boolean,
   foreignKey,
   integer,
   json,
   primaryKey,
   text,
-  timestamp,
   uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core"
@@ -67,29 +67,15 @@ export const subscriptions = pgTableProject(
     gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
     // ************ billing data defaults ************
 
+    // ************ subscription important times ************
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
-
-    // subscription trial period
-    // TODO: I can configure this from the plan version
-    // TODO: we could override this when creating the subscription, otherwise use planVersion data
     trialDays: integer("trial_days").default(0),
-    trialEndsAt: timestamp("trial_ends", {
-      mode: "date",
-      withTimezone: true,
-      precision: 3,
-    }),
-
-    startDate: timestamp("start_date", {
-      mode: "date",
-      withTimezone: true,
-      precision: 3,
-    }).notNull(),
-
-    endDate: timestamp("end_date", {
-      mode: "date",
-      withTimezone: true,
-      precision: 3,
-    }),
+    trialEndsAt: bigint("trial_ends_at_m", { mode: "number" }),
+    startDateAt: bigint("start_date_at_m", { mode: "number" }).default(0).notNull(),
+    endDateAt: bigint("end_date_at_m", { mode: "number" }),
+    // when the plan was changed - it's used to prevent the customer from changing the plan in the last 30 days
+    planChangedAt: bigint("plan_changed_at_m", { mode: "number" }),
+    // ************ subscription important times ************
 
     // auto renew the subscription every billing period
     autoRenew: boolean("auto_renew").default(true),
@@ -115,13 +101,6 @@ export const subscriptions = pgTableProject(
      * billing happened.
      */
     nextPlanVersionTo: text("next_plan_version_to"),
-
-    // when the plan was changed - it's used to prevent the customer from changing the plan in the last 30 days
-    planChangedAt: timestamp("plan_changed", {
-      mode: "date",
-      withTimezone: true,
-      precision: 3,
-    }),
 
     // next subscription id is the id of the subscription that will be created when the user changes the plan
     nextSubscriptionId: cuid("next_subscription_id"),

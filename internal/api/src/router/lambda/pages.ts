@@ -80,7 +80,7 @@ export const pageRouter = createTRPCRouter({
           description,
           title,
           content,
-          updatedAt: new Date(),
+          updatedAtM: new Date(),
         })
         .where(and(eq(schema.pages.id, id), eq(schema.pages.projectId, project.id)))
         .returning()
@@ -229,10 +229,10 @@ export const pageRouter = createTRPCRouter({
           and(
             eq(page.projectId, project.id),
             fromDate && toDate
-              ? between(page.createdAt, new Date(fromDate), new Date(toDate))
+              ? between(page.createdAtM, new Date(fromDate), new Date(toDate))
               : undefined,
-            fromDate ? gte(page.createdAt, new Date(fromDate)) : undefined,
-            toDate ? lte(page.createdAt, new Date(toDate)) : undefined
+            fromDate ? gte(page.createdAtM, new Date(fromDate)) : undefined,
+            toDate ? lte(page.createdAtM, new Date(toDate)) : undefined
           ),
       })
 

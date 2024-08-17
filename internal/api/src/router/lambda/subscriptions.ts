@@ -92,14 +92,19 @@ export const subscriptionRouter = createTRPCRouter({
             )
             .$dynamic()
 
-          const whereQuery = withDateFilters<Subscription>(expressions, columns.createdAt, from, to)
+          const whereQuery = withDateFilters<Subscription>(
+            expressions,
+            columns.createdAtM,
+            from,
+            to
+          )
 
           const data = await withPagination(
             query,
             whereQuery,
             [
               {
-                column: columns.createdAt,
+                column: columns.createdAtM,
                 order: "desc",
               },
             ],
@@ -175,12 +180,12 @@ export const subscriptionRouter = createTRPCRouter({
     .input(
       subscriptionInsertSchema
         .extend({
-          endDate: z.coerce.date(),
+          endDateAt: z.coerce.number(),
           nextPlanVersionTo: z.string(),
         })
         .required({
           id: true,
-          endDate: true,
+          endDateAt: true,
           customerId: true,
           nextPlanVersionTo: true,
         })
@@ -190,7 +195,7 @@ export const subscriptionRouter = createTRPCRouter({
       const {
         id: subscriptionId,
         customerId,
-        endDate,
+        endDateAt,
         nextPlanVersionTo,
         collectionMethod,
         type,
@@ -249,7 +254,7 @@ export const subscriptionRouter = createTRPCRouter({
       }
 
       // if the customer has trials left we should not let the customer change the subscription until the trial ends
-      if (subscriptionData?.trialEndsAt && subscriptionData.trialEndsAt > new Date()) {
+      if (subscriptionData?.trialEndsAt && subscriptionData.trialEndsAt > Date.now()) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: `The customer has a trial until ${format(
@@ -262,7 +267,7 @@ export const subscriptionRouter = createTRPCRouter({
       // if the subscription was changed in the last 30 days, we should not allow the customer to change the plan
       if (
         subscriptionData.planChangedAt &&
-        subscriptionData.planChangedAt > addDays(new Date(), -30)
+        subscriptionData.planChangedAt > addDays(new Date(Date.now()), -30).getTime()
       ) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -272,7 +277,7 @@ export const subscriptionRouter = createTRPCRouter({
       }
 
       // end date must be after the start date
-      if (endDate < subscriptionData.startDate) {
+      if (endDateAt < subscriptionData.startDateAt) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "End date must be after start date",
@@ -308,9 +313,9 @@ export const subscriptionRouter = createTRPCRouter({
           .update(schema.subscriptions)
           .set({
             status: "ended",
-            endDate: endDate,
+            endDateAt: endDateAt,
             nextPlanVersionTo: newPlanVersion.id,
-            planChangedAt: new Date(),
+            planChangedAt: Date.now(),
           })
           .where(
             and(
@@ -336,18 +341,18 @@ export const subscriptionRouter = createTRPCRouter({
             planVersionId: newPlanVersion.id,
             projectId: project.id,
             collectionMethod: collectionMethod ?? subscriptionData.collectionMethod,
-            startDate: addDays(endDate, 1),
+            startDateAt: addDays(new Date(endDateAt), 1).getTime(),
             timezone: timezone,
             whenToBill: whenToBill,
             startCycle: startCycle,
-            endDate: undefined,
+            endDateAt: undefined,
             autoRenew: autoRenew ?? subscriptionData.autoRenew,
             isNew: true,
             defaultPaymentMethodId:
               defaultPaymentMethodId ?? subscriptionData.defaultPaymentMethodId,
             trialDays: trialDays ?? 0,
             type: type ?? subscriptionData.type,
-            planChangedAt: new Date(),
+            planChangedAt: Date.now(),
           },
           project: opts.ctx.project,
           ctx: opts.ctx,

@@ -53,6 +53,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ CREATE TYPE "public"."start_cycle" AS ENUM('first_day_of_month', 'first_day_of_year', 'last_day_of_month', 'last_day_of_year');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  CREATE TYPE "public"."plan_version_status" AS ENUM('draft', 'published');
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -107,13 +113,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_apikeys" (
-	"id" text NOT NULL,
-	"project_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"expires_at" timestamp,
-	"last_used" timestamp,
-	"revoked_at" timestamp,
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
+	"expires_at_m" bigint,
+	"last_used_m" bigint,
+	"revoked_at_m" bigint,
 	"name" text NOT NULL,
 	"key" text NOT NULL,
 	CONSTRAINT "pk_apikeys" PRIMARY KEY("id","project_id"),
@@ -121,7 +127,7 @@ CREATE TABLE IF NOT EXISTS "unprice_apikeys" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_account" (
-	"userId" text NOT NULL,
+	"userId" varchar(64) NOT NULL,
 	"type" text NOT NULL,
 	"provider" text NOT NULL,
 	"providerAccountId" text NOT NULL,
@@ -137,7 +143,7 @@ CREATE TABLE IF NOT EXISTS "unprice_account" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_authenticator" (
 	"credentialID" text NOT NULL,
-	"userId" text NOT NULL,
+	"userId" varchar(64) NOT NULL,
 	"providerAccountId" text NOT NULL,
 	"credentialPublicKey" text NOT NULL,
 	"counter" integer NOT NULL,
@@ -149,13 +155,13 @@ CREATE TABLE IF NOT EXISTS "unprice_authenticator" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_session" (
-	"sessionToken" text PRIMARY KEY NOT NULL,
-	"userId" text NOT NULL,
+	"sessionToken" varchar(64) PRIMARY KEY NOT NULL,
+	"userId" varchar(64) NOT NULL,
 	"expires" timestamp NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_user" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" varchar(64) PRIMARY KEY NOT NULL,
 	"name" text,
 	"email" text NOT NULL,
 	"emailVerified" timestamp,
@@ -165,17 +171,17 @@ CREATE TABLE IF NOT EXISTS "unprice_user" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_verificationToken" (
-	"identifier" text NOT NULL,
-	"token" text NOT NULL,
+	"identifier" varchar(64) NOT NULL,
+	"token" varchar(64) NOT NULL,
 	"expires" timestamp NOT NULL,
 	CONSTRAINT "unprice_verificationToken_identifier_token_pk" PRIMARY KEY("identifier","token")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_customers" (
-	"id" text NOT NULL,
-	"project_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"email" text NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
@@ -183,16 +189,17 @@ CREATE TABLE IF NOT EXISTS "unprice_customers" (
 	"stripe_customer_id" text,
 	"active" boolean DEFAULT true,
 	"default_currency" "currency" DEFAULT 'USD' NOT NULL,
+	"timezone" varchar(32) DEFAULT 'UTC' NOT NULL,
 	CONSTRAINT "pk_customer" PRIMARY KEY("id","project_id"),
 	CONSTRAINT "stripe_customer_unique" UNIQUE("stripe_customer_id"),
 	CONSTRAINT "unique_email_project" UNIQUE("email","project_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_domains" (
-	"id" text PRIMARY KEY NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"workspace_id" text NOT NULL,
+	"id" varchar(64) PRIMARY KEY NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
+	"workspace_id" varchar(64) NOT NULL,
 	"name" text NOT NULL,
 	"apex_name" text NOT NULL,
 	"verified" boolean DEFAULT false,
@@ -200,10 +207,10 @@ CREATE TABLE IF NOT EXISTS "unprice_domains" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_features" (
-	"id" text NOT NULL,
-	"project_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"slug" text NOT NULL,
 	"code" serial NOT NULL,
 	"title" varchar(50) NOT NULL,
@@ -212,31 +219,31 @@ CREATE TABLE IF NOT EXISTS "unprice_features" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_ingestions" (
-	"id" text NOT NULL,
-	"project_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"schema" text NOT NULL,
 	"hash" text NOT NULL,
 	"parent" text,
 	"origin" text NOT NULL,
-	"apikey_id" text NOT NULL,
+	"apikey_id" varchar(64) NOT NULL,
 	CONSTRAINT "ingestions_pkey" PRIMARY KEY("project_id","id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_plan_versions_features" (
-	"id" text NOT NULL,
-	"project_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"plan_version_id" text NOT NULL,
-	"feature_id" text NOT NULL,
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
+	"plan_version_id" varchar(64) NOT NULL,
+	"feature_id" varchar(64) NOT NULL,
 	"feature_type" "feature_types" NOT NULL,
 	"features_config" json,
 	"metadata" json,
 	"aggregation_method" "aggregation_method" DEFAULT 'sum' NOT NULL,
 	"order" double precision NOT NULL,
-	"default_quantity" integer,
+	"default_quantity" integer DEFAULT 1,
 	"limit" integer,
 	"hidden" boolean DEFAULT false NOT NULL,
 	CONSTRAINT "plan_versions_pkey" PRIMARY KEY("id","project_id"),
@@ -244,28 +251,28 @@ CREATE TABLE IF NOT EXISTS "unprice_plan_versions_features" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_plan_versions" (
-	"id" text NOT NULL,
-	"project_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"plan_id" text NOT NULL,
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
+	"plan_id" varchar(64) NOT NULL,
 	"description" text,
 	"latest" boolean DEFAULT false,
 	"title" varchar(50) NOT NULL,
 	"tags" json,
 	"active" boolean DEFAULT true,
 	"plan_version_status" "plan_version_status" DEFAULT 'draft',
-	"published_at" timestamp,
-	"published_by" text,
+	"published_at_m" bigint,
+	"published_by" varchar(64),
 	"archived" boolean DEFAULT false,
-	"archived_at" timestamp,
-	"archived_by" text,
+	"archived_at_m" bigint,
+	"archived_by" varchar(64),
 	"payment_providers" "payment_providers" NOT NULL,
 	"plan_type" "plan_type" DEFAULT 'recurring' NOT NULL,
 	"currency" "currency" NOT NULL,
-	"when_to_bill" "when_to_bill" DEFAULT 'pay_in_advance',
 	"billing_period" "billing_period",
-	"start_cycle" text DEFAULT null,
+	"when_to_bill" "when_to_bill" DEFAULT 'pay_in_advance',
+	"start_cycle" "start_cycle" DEFAULT 'first_day_of_month',
 	"grace_period" integer DEFAULT 0,
 	"metadata" json,
 	"version" integer DEFAULT 1 NOT NULL,
@@ -273,96 +280,102 @@ CREATE TABLE IF NOT EXISTS "unprice_plan_versions" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_plans" (
-	"id" text NOT NULL,
-	"project_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"slug" text NOT NULL,
 	"active" boolean DEFAULT true,
 	"description" text,
 	"metadata" json,
 	"default_plan" boolean DEFAULT false,
+	"enterprise_plan" boolean DEFAULT false,
 	CONSTRAINT "plans_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_projects" (
-	"id" text PRIMARY KEY NOT NULL,
-	"workspace_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"id" varchar(64) PRIMARY KEY NOT NULL,
+	"workspace_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"slug" text NOT NULL,
 	"name" text NOT NULL,
 	"url" text DEFAULT '' NOT NULL,
 	"enabled" boolean DEFAULT true NOT NULL,
 	"is_internal" boolean DEFAULT false NOT NULL,
 	"default_currency" "currency" DEFAULT 'USD' NOT NULL,
+	"timezone" varchar(32) DEFAULT 'UTC',
 	CONSTRAINT "unique_slug" UNIQUE("slug")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_subscription_items" (
-	"id" text NOT NULL,
-	"project_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"units" integer,
-	"subscription_id" text NOT NULL,
-	"feature_plan_version_id" text NOT NULL,
+	"subscription_id" varchar(64) NOT NULL,
+	"feature_plan_version_id" varchar(64) NOT NULL,
 	CONSTRAINT "subscription_items_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_subscriptions" (
-	"id" text NOT NULL,
-	"project_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"customers_id" text NOT NULL,
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
+	"customers_id" varchar(64) NOT NULL,
 	"default_payment_method_id" text,
-	"plan_version_id" text NOT NULL,
+	"plan_version_id" varchar(64) NOT NULL,
 	"type" "subscription_type" DEFAULT 'plan' NOT NULL,
 	"prorated" boolean DEFAULT true,
+	"when_to_bill" "when_to_bill" DEFAULT 'pay_in_advance' NOT NULL,
+	"start_cycle" "start_cycle" DEFAULT 'first_day_of_month' NOT NULL,
+	"grace_period" integer DEFAULT 0,
+	"timezone" varchar(32) DEFAULT 'UTC' NOT NULL,
 	"trial_days" integer DEFAULT 0,
-	"trial_ends" timestamp,
-	"start_date" timestamp NOT NULL,
-	"end_date" timestamp,
+	"trial_ends_at_m" bigint,
+	"start_date_at_m" bigint DEFAULT 0 NOT NULL,
+	"end_date_at_m" bigint,
+	"plan_changed_at_m" bigint,
 	"auto_renew" boolean DEFAULT true,
 	"collection_method" "collection_method" DEFAULT 'charge_automatically' NOT NULL,
 	"is_new" boolean DEFAULT true,
 	"status" "subscription_status" DEFAULT 'active',
 	"metadata" json,
 	"next_plan_version_to" text,
-	"plan_changed" timestamp,
-	"next_subscription_id" text,
+	"next_subscription_id" varchar(64),
 	CONSTRAINT "subscriptions_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_invites" (
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"workspace_id" text NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
+	"workspace_id" varchar(64) NOT NULL,
 	"email" text NOT NULL,
 	"role" "team_roles" DEFAULT 'MEMBER' NOT NULL,
-	"accepted_at" timestamp,
+	"accepted_at_m" bigint,
 	CONSTRAINT "invites_pkey" PRIMARY KEY("email","workspace_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_members" (
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"workspace_id" text NOT NULL,
-	"user_id" text NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
+	"workspace_id" varchar(64) NOT NULL,
+	"user_id" varchar(64) NOT NULL,
 	"role" "team_roles" DEFAULT 'MEMBER' NOT NULL,
 	CONSTRAINT "members_pkey" PRIMARY KEY("user_id","workspace_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_workspaces" (
-	"id" text PRIMARY KEY NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"id" varchar(64) PRIMARY KEY NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"slug" text NOT NULL,
 	"name" text NOT NULL,
 	"is_personal" boolean DEFAULT false,
 	"is_internal" boolean DEFAULT false,
-	"created_by" text NOT NULL,
+	"created_by" varchar(64) NOT NULL,
 	"image_url" text,
 	"unprice_customer_id" text NOT NULL,
 	"legacy_plans" "legacy_plans" DEFAULT 'FREE' NOT NULL,
@@ -372,10 +385,10 @@ CREATE TABLE IF NOT EXISTS "unprice_workspaces" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_usage" (
-	"id" text NOT NULL,
-	"project_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"subscription_item_id" text NOT NULL,
 	"month" integer NOT NULL,
 	"year" integer NOT NULL,
@@ -385,10 +398,10 @@ CREATE TABLE IF NOT EXISTS "unprice_usage" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_pages" (
-	"id" text NOT NULL,
-	"project_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"content" text,
 	"title" text NOT NULL,
 	"custom_domain" text,

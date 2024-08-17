@@ -17,7 +17,6 @@ import {
   startCycleSchema,
   subscriptionTypeSchema,
   typeFeatureSchema,
-  utcDateSchema,
   whenToBillSchema,
 } from "./../shared"
 
@@ -51,8 +50,8 @@ export const subscriptionItemsInsertSchema = createInsertSchema(subscriptionItem
 }).partial({
   id: true,
   subscriptionId: true,
-  createdAt: true,
-  updatedAt: true,
+  createdAtM: true,
+  updatedAtM: true,
   projectId: true,
 })
 
@@ -111,7 +110,6 @@ export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   type: subscriptionTypeSchema,
   collectionMethod: collectionMethodSchema,
   defaultPaymentMethodId: z.string().optional(),
-  trialEndsAt: z.coerce.date().optional(),
   startCycle: startCycleSchema,
   whenToBill: whenToBillSchema,
   timezone: z.string().min(1),
@@ -119,14 +117,11 @@ export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
 
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
-  startDate: utcDateSchema,
-  endDate: utcDateSchema.optional(),
   trialDays: z.coerce.number().int().min(0).max(30).default(0),
   metadata: subscriptionMetadataSchema,
   type: subscriptionTypeSchema,
   collectionMethod: collectionMethodSchema,
   defaultPaymentMethodId: z.string().optional(),
-  trialEndsAt: utcDateSchema.optional(),
   startCycle: startCycleSchema,
   whenToBill: whenToBillSchema,
   timezone: z.string().min(1),
@@ -135,8 +130,8 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
     config: subscriptionItemsConfigSchema.optional(),
   })
   .omit({
-    createdAt: true,
-    updatedAt: true,
+    createdAtM: true,
+    updatedAtM: true,
   })
   .partial({
     id: true,
@@ -146,7 +141,7 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
     customerId: true,
     planVersionId: true,
     type: true,
-    startDate: true,
+    startDateAt: true,
   })
 
 export const subscriptionExtendedSchema = subscriptionSelectSchema
@@ -164,8 +159,8 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
 
 export const subscriptionItemCacheSchema = subscriptionItemsSelectSchema
   .omit({
-    createdAt: true,
-    updatedAt: true,
+    createdAtM: true,
+    updatedAtM: true,
     id: true,
   })
   .extend({

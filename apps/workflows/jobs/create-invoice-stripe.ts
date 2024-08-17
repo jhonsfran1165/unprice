@@ -132,7 +132,7 @@ export const createInvoiceStripeJob = client.defineJob({
       year,
       month,
       startDate: new Date(subscription.startDate),
-      createdAt: new Date(subscription.createdAt),
+      createdAtM: new Date(subscription.createdAtM),
     })
 
     // calculate the proration for the invoice

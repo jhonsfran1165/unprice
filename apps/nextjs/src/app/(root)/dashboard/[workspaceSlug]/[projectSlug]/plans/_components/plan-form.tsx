@@ -190,7 +190,7 @@ export function PlanForm({
             render={({ field }) => (
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                  <FormLabel className="text-base">Enterprise plan?</FormLabel>
+                  <FormLabel className="text-base">Enterprise plan</FormLabel>
                   <FormDescription>
                     Enterprises plans are rendered differently in the frontend.
                   </FormDescription>

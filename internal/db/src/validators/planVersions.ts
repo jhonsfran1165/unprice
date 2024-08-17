@@ -26,8 +26,8 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
   currency: currencySchema,
 })
   .omit({
-    createdAt: true,
-    updatedAt: true,
+    createdAtM: true,
+    updatedAtM: true,
   })
   .partial({
     projectId: true,

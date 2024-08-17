@@ -93,11 +93,11 @@ export const columns: ColumnDef<Customer>[] = [
     size: 20,
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "createdAtM",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Creation Date" />,
     cell: ({ row }) => (
       <div className="whitespace-nowrap text-sm">
-        {formatDate(row.getValue("createdAt"), row.original.timezone)}
+        {formatDate(row.getValue("createdAtM"), row.original.timezone)}
       </div>
     ),
     enableSorting: true,

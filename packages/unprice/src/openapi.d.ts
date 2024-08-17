@@ -264,9 +264,9 @@ export interface operations {
               id: string
               projectId: string
               /** Format: date-time */
-              createdAt: string
+              createdAtM: string
               /** Format: date-time */
-              updatedAt: string
+              updatedAtM: string
               email: string
               name: string
               description: string | null
@@ -312,9 +312,9 @@ export interface operations {
               id: string
               projectId: string
               /** Format: date-time */
-              createdAt: string
+              createdAtM: string
               /** Format: date-time */
-              updatedAt: string
+              updatedAtM: string
               email: string
               name: string
               description: string | null
@@ -368,9 +368,9 @@ export interface operations {
               id: string
               projectId: string
               /** Format: date-time */
-              createdAt: string
+              createdAtM: string
               /** Format: date-time */
-              updatedAt: string
+              updatedAtM: string
               email: string
               name: string
               description: string | null
@@ -510,9 +510,9 @@ export interface operations {
               id: string
               projectId: string
               /** Format: date-time */
-              createdAt: string
+              createdAtM: string
               /** Format: date-time */
-              updatedAt: string
+              updatedAtM: string
               email: string
               name: string
               description: string | null
@@ -554,9 +554,9 @@ export interface operations {
               id: string
               projectId: string
               /** Format: date-time */
-              createdAt: string
+              createdAtM: string
               /** Format: date-time */
-              updatedAt: string
+              updatedAtM: string
               email: string
               name: string
               description: string | null
@@ -598,9 +598,9 @@ export interface operations {
               id: string
               projectId: string
               /** Format: date-time */
-              createdAt: string
+              createdAtM: string
               /** Format: date-time */
-              updatedAt: string
+              updatedAtM: string
               email: string
               name: string
               description: string | null
@@ -617,9 +617,9 @@ export interface operations {
                 id: string
                 projectId: string
                 /** Format: date-time */
-                createdAt: string
+                createdAtM: string
                 /** Format: date-time */
-                updatedAt: string
+                updatedAtM: string
                 customerId: string
                 defaultPaymentMethodId: string | null
                 planVersionId: string
@@ -651,9 +651,9 @@ export interface operations {
                   id: string
                   projectId: string
                   /** Format: date-time */
-                  createdAt: string
+                  createdAtM: string
                   /** Format: date-time */
-                  updatedAt: string
+                  updatedAtM: string
                   planId: string
                   description: string | null
                   latest: boolean | null
@@ -689,9 +689,9 @@ export interface operations {
                     id: string
                     projectId: string
                     /** Format: date-time */
-                    createdAt: string
+                    createdAtM: string
                     /** Format: date-time */
-                    updatedAt: string
+                    updatedAtM: string
                     slug: string
                     active: boolean | null
                     description: string | null

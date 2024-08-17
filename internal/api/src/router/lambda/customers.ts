@@ -198,7 +198,7 @@ export const customersRouter = createTRPCRouter({
             },
           }),
           ...(timezone && { timezone }),
-          updatedAt: new Date(),
+          updatedAtM: Date.now(),
         })
         .where(and(eq(schema.customers.id, id), eq(schema.customers.projectId, project.id)))
         .returning()
@@ -549,7 +549,7 @@ export const customersRouter = createTRPCRouter({
           )
         )
         .where(and(eq(schema.customers.id, id), eq(schema.customers.projectId, project.id)))
-        .orderBy(() => [desc(schema.subscriptions.createdAt)])
+        .orderBy(() => [desc(schema.subscriptions.createdAtM)])
 
       if (!customerWithSubscriptions || !customerWithSubscriptions.length) {
         return {
@@ -602,14 +602,14 @@ export const customersRouter = createTRPCRouter({
         // Transaction is used to ensure both queries are executed in a single transaction
         const { data, total } = await opts.ctx.db.transaction(async (tx) => {
           const query = tx.select().from(schema.customers).$dynamic()
-          const whereQuery = withDateFilters<Customer>(expressions, columns.createdAt, from, to)
+          const whereQuery = withDateFilters<Customer>(expressions, columns.createdAtM, from, to)
 
           const data = await withPagination(
             query,
             whereQuery,
             [
               {
-                column: columns.createdAt,
+                column: columns.createdAtM,
                 order: "desc",
               },
             ],

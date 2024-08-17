@@ -92,9 +92,9 @@ export const columns: ColumnDef<ApiKey>[] = [
     },
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "createdAtM",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
-    cell: ({ row }) => <div>{formatDate(row.getValue("createdAt"))}</div>,
+    cell: ({ row }) => <div>{formatDate(row.getValue("createdAtM"))}</div>,
     enableSorting: true,
     enableHiding: true,
   },

@@ -21,8 +21,8 @@ export const customerInsertBaseSchema = createInsertSchema(schema.customers, {
   timezone: z.string().min(1),
 })
   .omit({
-    createdAt: true,
-    updatedAt: true,
+    createdAtM: true,
+    updatedAtM: true,
   })
   .partial({
     id: true,

@@ -325,7 +325,7 @@ export const projectRouter = createTRPCRouter({
       const workspaceProjects = await opts.ctx.db.query.workspaces.findFirst({
         with: {
           projects: {
-            orderBy: (project, { desc }) => [desc(project.createdAt)],
+            orderBy: (project, { desc }) => [desc(project.createdAtM)],
           },
         },
         where: (workspace, { eq }) => eq(workspace.id, activeWorkspaceId),
@@ -381,7 +381,7 @@ export const projectRouter = createTRPCRouter({
       const workspaceProjects = await opts.ctx.db.query.workspaces.findFirst({
         with: {
           projects: {
-            orderBy: (project, { desc }) => [desc(project.createdAt)],
+            orderBy: (project, { desc }) => [desc(project.createdAtM)],
           },
         },
         where: (workspace, { eq }) => eq(workspace.id, workspaceData.id),

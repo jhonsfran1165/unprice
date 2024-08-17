@@ -53,9 +53,9 @@ export const columns: ColumnDef<Member>[] = [
     ),
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "createdAtM",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Joined at" />,
-    cell: ({ row }) => <div>{formatRelative(row.getValue("createdAt"), new Date())}</div>,
+    cell: ({ row }) => <div>{formatRelative(row.getValue("createdAtM"), new Date())}</div>,
     enableSorting: true,
     enableHiding: true,
   },

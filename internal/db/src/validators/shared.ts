@@ -47,12 +47,20 @@ export const convertDateToUTC = (date: Date) => {
   return utcDate
 }
 
-export const utcDateSchema = z.coerce
+export const dateToUnixMilli = z
+  .string()
+  .transform((t) => new Date(t.split(" ").at(0) ?? t).getTime())
+
+export const datetimeToUnixMilli = z.string().transform((t) => new Date(t).getTime())
+
+// transforms the date to unix timestamp
+// allow dates or numbers and transforms them to numbers
+export const datetimeToUnix = z.coerce
   .date({
     message: "Date is required",
   })
   .transform((val) => {
-    return convertDateToUTC(val)
+    return val.getTime()
   })
 
 export type Currency = z.infer<typeof currencySchema>

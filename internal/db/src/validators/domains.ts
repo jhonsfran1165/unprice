@@ -17,8 +17,8 @@ export const domainCreateBaseSchema = createInsertSchema(domains, {
 }).partial({
   id: true,
   workspaceId: true,
-  createdAt: true,
-  updatedAt: true,
+  createdAtM: true,
+  updatedAtM: true,
   apexName: true,
 })
 
@@ -59,8 +59,8 @@ export const domainResponseSchema = z
       .optional()
       .nullable(),
     gitBranch: z.string().optional().nullable(),
-    updatedAt: z.number().optional(),
-    createdAt: z.number().optional(),
+    updatedAtM: z.number().optional(),
+    createdAtM: z.number().optional(),
     verified: z.boolean().optional(),
     configVerifiedAt: z.number().optional().nullable(),
     verification: z

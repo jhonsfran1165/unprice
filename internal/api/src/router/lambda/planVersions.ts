@@ -207,7 +207,7 @@ export const planVersionRouter = createTRPCRouter({
             }
           }
 
-          // deactivate the current version, change the latest to false and update the updatedAt
+          // deactivate the current version, change the latest to false and update the updatedAtM
           // if the current version is the latest, we need to deactivate it and set the latest to the previous version
           const [planVersionDataDuplicated] = await Promise.all([
             tx
@@ -215,7 +215,7 @@ export const planVersionRouter = createTRPCRouter({
               .set({
                 active: false,
                 latest: false,
-                updatedAt: new Date(),
+                updatedAtM: Date.now(),
               })
               .where(and(eq(schema.versions.id, planVersionData.id)))
               .returning()
@@ -347,7 +347,7 @@ export const planVersionRouter = createTRPCRouter({
           .set({
             ...(description && { description }),
             ...(status && { status }),
-            updatedAt: new Date(),
+            updatedAtM: Date.now(),
           })
           .where(and(eq(schema.versions.id, planVersionData.id)))
           .returning()
@@ -552,7 +552,7 @@ export const planVersionRouter = createTRPCRouter({
             ...(status && { status }),
             ...(metadata && { metadata }),
             ...(paymentProvider && { paymentProvider }),
-            updatedAt: new Date(),
+            updatedAtM: Date.now(),
           })
           .where(and(eq(schema.versions.id, planVersionData.id)))
           .returning()
@@ -628,8 +628,8 @@ export const planVersionRouter = createTRPCRouter({
               latest: false,
               active: true,
               status: "draft",
-              createdAt: new Date(),
-              updatedAt: new Date(),
+              createdAtM: Date.now(),
+              updatedAtM: Date.now(),
               version: Number(countVersionsPlan) + 1,
             })
             .returning()
@@ -660,8 +660,8 @@ export const planVersionRouter = createTRPCRouter({
                     id: planVersionFeatureId,
                     planVersionId: planVersionId,
                     metadata: {},
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
+                    createdAtM: Date.now(),
+                    updatedAtM: Date.now(),
                   })
                   .returning()
               } catch (err) {
@@ -816,8 +816,8 @@ export const planVersionRouter = createTRPCRouter({
             .update(schema.versions)
             .set({
               status: "published",
-              updatedAt: new Date(),
-              publishedAt: new Date(),
+              updatedAtM: Date.now(),
+              publishedAt: Date.now(),
               publishedBy: opts.ctx.userId,
               latest: true,
             })

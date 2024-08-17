@@ -92,7 +92,7 @@ export const authConfig = {
         await db
           .update(schema.invites)
           .set({
-            acceptedAt: new Date(),
+            acceptedAt: Date.now(),
           })
           .where(
             and(
@@ -174,6 +174,7 @@ export const authConfig = {
     GitHub({
       clientId: process.env.AUTH_GITHUB_CLIENT_ID,
       clientSecret: process.env.AUTH_GITHUB_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   callbacks: {

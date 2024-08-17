@@ -39,14 +39,14 @@ export const apiKeyRouter = createTRPCRouter({
         // Transaction is used to ensure both queries are executed in a single transaction
         const { data, total } = await opts.ctx.db.transaction(async (tx) => {
           const query = tx.select().from(schema.apikeys).$dynamic()
-          const whereQuery = withDateFilters<ApiKey>(expressions, columns.createdAt, from, to)
+          const whereQuery = withDateFilters<ApiKey>(expressions, columns.createdAtM, from, to)
 
           const data = await withPagination(
             query,
             whereQuery,
             [
               {
-                column: columns.createdAt,
+                column: columns.createdAtM,
                 order: "desc",
               },
             ],
@@ -124,7 +124,7 @@ export const apiKeyRouter = createTRPCRouter({
 
       const result = await opts.ctx.db
         .update(schema.apikeys)
-        .set({ revokedAt: new Date(), updatedAt: new Date() })
+        .set({ revokedAt: new Date(), updatedAtM: new Date() })
         .where(
           sql`${schema.apikeys.id} in ${ids} AND ${schema.apikeys.projectId} = ${project.id} AND ${schema.apikeys.revokedAt} is NULL`
         )
@@ -176,7 +176,7 @@ export const apiKeyRouter = createTRPCRouter({
 
       const newApiKey = await opts.ctx.db
         .update(schema.apikeys)
-        .set({ key: newKey, updatedAt: new Date() })
+        .set({ key: newKey, updatedAtM: new Date() })
         .where(eq(schema.apikeys.id, opts.input.id))
         .returning()
         .then((res) => res[0])

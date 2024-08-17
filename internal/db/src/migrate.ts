@@ -170,8 +170,8 @@ async function main() {
   //   customerId: customer.id,
   //   planId: "free",
   //   status: "ACTIVE",
-  //   createdAt: new Date(),
-  //   updatedAt: new Date(),
+  //   createdAtM: new Date(),
+  //   updatedAtM: new Date(),
   // })
 
   // print all relevant data and save it to unfisical

@@ -135,7 +135,7 @@ export class UnpriceCustomer {
           limit: opts.subItem.units,
           month: opts.month,
           year: opts.year,
-          updatedAt: Date.now(),
+          updatedAtM: Date.now(),
         }
 
         await reportUsageQuery({
@@ -188,7 +188,7 @@ export class UnpriceCustomer {
         limit: opts.subItem.units,
         month: opts.month,
         year: opts.year,
-        updatedAt: Date.now(),
+        updatedAtM: Date.now(),
       }
 
       if (!usage) {

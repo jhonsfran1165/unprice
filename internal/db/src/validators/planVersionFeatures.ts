@@ -342,8 +342,8 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(planVersion
   limit: z.coerce.number().int().optional(),
 })
   .omit({
-    createdAt: true,
-    updatedAt: true,
+    createdAtM: true,
+    updatedAtM: true,
   })
   .partial({
     projectId: true,

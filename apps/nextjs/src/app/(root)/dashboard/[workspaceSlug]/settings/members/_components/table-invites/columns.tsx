@@ -41,9 +41,9 @@ export const columns: ColumnDef<Member>[] = [
     cell: ({ row }) => <div className="text-muted-foreground text-sm">{row.original.email}</div>,
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "createdAtM",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
-    cell: ({ row }) => <div>{formatRelative(row.getValue("createdAt"), new Date())}</div>,
+    cell: ({ row }) => <div>{formatRelative(row.getValue("createdAtM"), new Date())}</div>,
     enableSorting: true,
     enableHiding: true,
   },

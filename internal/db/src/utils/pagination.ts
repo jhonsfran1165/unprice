@@ -88,14 +88,14 @@ export function withDateFilters<T extends object>(
   to: number | null
 ) {
   // Convert the date strings to date objects
-  const fromDate = from ? new Date(from) : undefined
-  const toDate = to ? new Date(to) : undefined
+  const fromDate = from ? from : undefined
+  const toDate = to ? to : undefined
 
   const where = and(
     and(...expressions),
-    fromDate && toDate ? between(filterByColum, new Date(fromDate), new Date(toDate)) : undefined,
-    fromDate ? gte(filterByColum, new Date(fromDate)) : undefined,
-    toDate ? lte(filterByColum, new Date(toDate)) : undefined
+    fromDate && toDate ? between(filterByColum, fromDate, toDate) : undefined,
+    fromDate ? gte(filterByColum, fromDate) : undefined,
+    toDate ? lte(filterByColum, toDate) : undefined
   )
 
   return where as SQL<T>

@@ -12,10 +12,10 @@ export type CurrentUsageCached = {
   limit: number | null
   month: Month
   year: Year
-  updatedAt: number
+  updatedAtM: number
 }
 
-export type SubscriptionItemCached = Omit<SubscriptionItem, "createdAt" | "updatedAt"> & {
+export type SubscriptionItemCached = Omit<SubscriptionItem, "createdAtM" | "updatedAtM"> & {
   featureType: FeatureType
   aggregationMethod: AggregationMethod
 }

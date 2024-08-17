@@ -31,7 +31,7 @@ export default async function IngestionPage(props: {
           <TableBody>
             <TableRow>
               <TableCell>{ingestion.id}</TableCell>
-              <TableCell>{format(ingestion.createdAt, "yyyy-MM-dd HH:mm:ss")}</TableCell>
+              <TableCell>{format(ingestion.createdAtM, "yyyy-MM-dd HH:mm:ss")}</TableCell>
               <TableCell>{ingestion.hash}</TableCell>
               <TableCell>{ingestion.origin}</TableCell>
               <TableCell>{ingestion.parent}</TableCell>

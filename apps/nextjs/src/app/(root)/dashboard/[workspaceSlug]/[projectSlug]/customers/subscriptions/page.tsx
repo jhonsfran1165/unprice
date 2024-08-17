@@ -52,7 +52,7 @@ export default async function PlanSubscriptionsPage({
                     autoRenew: true,
                     config: [],
                     defaultPaymentMethodId: "",
-                    startDate: startOfDay(new Date()),
+                    startDateAt: startOfDay(new Date()).getTime(),
                     timezone: "UTC",
                     startCycle: "first_day_of_month",
                     whenToBill: "pay_in_arrear",

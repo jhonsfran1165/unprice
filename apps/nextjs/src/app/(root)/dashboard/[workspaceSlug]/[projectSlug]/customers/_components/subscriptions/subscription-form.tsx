@@ -14,11 +14,7 @@ import {
   WHEN_TO_BILLING,
 } from "@unprice/db/utils"
 import type { InsertSubscription, Subscription } from "@unprice/db/validators"
-import {
-  createDefaultSubscriptionConfig,
-  subscriptionInsertSchema,
-  utcDateSchema,
-} from "@unprice/db/validators"
+import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@unprice/db/validators"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Separator } from "@unprice/ui/separator"
@@ -61,7 +57,7 @@ export function SubscriptionForm({
   const defaultValuesData = useMemo(() => {
     if (isChangePlanSubscription) {
       // we have to delete endDate and other fields that are not the same when the user is trying to change the plan
-      defaultValues.endDate = undefined
+      defaultValues.endDateAt = undefined
       defaultValues.nextPlanVersionTo = undefined
     }
     return defaultValues
@@ -72,7 +68,7 @@ export function SubscriptionForm({
     if (isChangePlanSubscription) {
       return subscriptionInsertSchema
         .extend({
-          endDate: utcDateSchema,
+          endDate: z.number(),
           nextPlanVersionTo: z.string().min(1),
         })
         .required({
@@ -82,7 +78,7 @@ export function SubscriptionForm({
         })
         .superRefine((data, ctx) => {
           // validate that the end date is after the start date
-          if (data.endDate && data.startDate && data.endDate < data.startDate) {
+          if (data.endDateAt && data.startDateAt && data.endDateAt < data.startDateAt) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: "End date must be after start date",
@@ -263,10 +259,10 @@ export function SubscriptionForm({
       await createSubscription.mutateAsync(data as InsertSubscription)
     }
 
-    if (defaultValues.id && isChangePlanSubscription && data.endDate && data.nextPlanVersionTo) {
+    if (defaultValues.id && isChangePlanSubscription && data.endDateAt && data.nextPlanVersionTo) {
       await changeSubscriptionPlan.mutateAsync({
         ...data,
-        endDate: data.endDate,
+        endDateAt: data.endDateAt,
         nextPlanVersionTo: data.nextPlanVersionTo,
         id: defaultValues.id,
       })

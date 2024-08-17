@@ -147,7 +147,7 @@ function IngestionCard(props: {
         <div className="space-y-1">
           <p className="font-medium text-sm leading-none">{truncatedHash}</p>
           <p className="text-muted-foreground text-sm">
-            {formatRelative(new Date(ingestion.createdAt), new Date())}
+            {formatRelative(new Date(ingestion.createdAtM), new Date())}
           </p>
         </div>
         <div className="ml-auto flex flex-col items-center text-sm">

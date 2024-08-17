@@ -1,12 +1,12 @@
 import { relations } from "drizzle-orm"
 import {
+  bigint,
   boolean,
   foreignKey,
   integer,
   json,
   primaryKey,
   text,
-  timestamp,
   varchar,
 } from "drizzle-orm/pg-core"
 
@@ -61,12 +61,12 @@ export const versions = pgTableProject(
     // status of the plan version - draft, published
     status: statusPlanEnum("plan_version_status").default("draft"),
     // date when the plan version was published
-    publishedAt: timestamp("published_at", { mode: "date" }),
+    publishedAt: bigint("published_at_m", { mode: "number" }),
     // user that published the plan version
     publishedBy: cuid("published_by").references(() => users.id),
     // the customers have been migrated to a new version
     archived: boolean("archived").default(false),
-    archivedAt: timestamp("archived_at", { mode: "date" }),
+    archivedAt: bigint("archived_at_m", { mode: "number" }),
     archivedBy: cuid("archived_by").references(() => users.id),
 
     // payment provider for the plan - stripe, paypal, lemonsquezee etc.

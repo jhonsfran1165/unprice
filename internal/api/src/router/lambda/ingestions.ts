@@ -73,7 +73,7 @@ export const ingestionRouter = createTRPCRouter({
       const ingestions = await opts.ctx.db.query.ingestions.findMany({
         where: (ingestion, { eq }) => eq(ingestion.projectId, project.id),
         limit: opts.input.limit,
-        orderBy: (ingestion, { desc }) => [desc(ingestion.createdAt)],
+        orderBy: (ingestion, { desc }) => [desc(ingestion.createdAtM)],
       })
 
       return ingestions.map((ingestion) => ({

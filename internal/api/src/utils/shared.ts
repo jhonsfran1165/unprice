@@ -8,7 +8,6 @@ import {
   type subscriptionInsertSchema,
 } from "@unprice/db/validators"
 import { addDays } from "date-fns"
-import { toZonedTime } from "date-fns-tz"
 import type { z } from "zod"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
@@ -194,8 +193,8 @@ export const createSubscription = async ({
     customerId,
     config,
     trialDays,
-    startDate,
-    endDate,
+    startDateAt,
+    endDateAt,
     collectionMethod,
     defaultPaymentMethodId,
     metadata,
@@ -341,11 +340,8 @@ export const createSubscription = async ({
   // set the end date and start date given the timezone
   const timezoneToUse = timezone ?? customerData.timezone
 
-  // Everything is save in UTC
-  const startDateUTC = toZonedTime(startDate, "UTC")
-  const endDateUTC = endDate ? toZonedTime(endDate, "UTC") : undefined
-  const trialEndsAt = trialDays ? addDays(startDateUTC, trialDays) : undefined
-  const planChangedAtUTC = planChangedAt ? toZonedTime(planChangedAt, "UTC") : undefined
+  //calculate the trialEndsAt
+  const trialEndsAt = trialDays ? addDays(new Date(startDateAt), trialDays).getTime() : undefined
 
   // execute this in a transaction
   const subscriptionData = await ctx.db.transaction(async (trx) => {
@@ -359,8 +355,8 @@ export const createSubscription = async ({
         projectId: project.id,
         planVersionId: versionData.id,
         customerId: customerData.id,
-        startDate: startDateUTC,
-        endDate: endDateUTC,
+        startDateAt: startDateAt,
+        endDateAt: endDateAt,
         autoRenew: true,
         trialDays: trialDays,
         trialEndsAt: trialEndsAt,
@@ -372,7 +368,7 @@ export const createSubscription = async ({
         whenToBill: whenToBill,
         startCycle: startCycle,
         gracePeriod: gracePeriod,
-        planChangedAt: planChangedAtUTC,
+        planChangedAt: planChangedAt,
         type: type,
         timezone: timezoneToUse,
       })

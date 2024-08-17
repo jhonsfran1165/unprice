@@ -33,6 +33,13 @@ export const planRouter = createTRPCRouter({
 
       const planId = utils.newId("plan")
 
+      if (defaultPlan && enterprisePlan) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "A plan cannot be both a default and enterprise plan",
+        })
+      }
+
       if (defaultPlan) {
         const defaultPlanData = await opts.ctx.db.query.plans.findFirst({
           where: (plan, { eq, and }) =>
@@ -138,6 +145,13 @@ export const planRouter = createTRPCRouter({
       const { id, description, active, defaultPlan, enterprisePlan } = opts.input
       const project = opts.ctx.project
 
+      if (defaultPlan && enterprisePlan) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "A plan cannot be both a default and enterprise plan",
+        })
+      }
+
       const planData = await opts.ctx.db.query.plans.findFirst({
         with: {
           project: {
@@ -197,7 +211,7 @@ export const planRouter = createTRPCRouter({
           active,
           defaultPlan: defaultPlan ?? false,
           enterprisePlan: enterprisePlan ?? false,
-          updatedAt: new Date(),
+          updatedAtM: Date.now(),
         })
         .where(and(eq(schema.plans.id, id), eq(schema.plans.projectId, project.id)))
         .returning()
@@ -288,7 +302,7 @@ export const planRouter = createTRPCRouter({
         .findFirst({
           with: {
             versions: {
-              orderBy: (version, { desc }) => [desc(version.createdAt)],
+              orderBy: (version, { desc }) => [desc(version.createdAtM)],
               with: {
                 subscriptions: {
                   columns: {
@@ -383,7 +397,7 @@ export const planRouter = createTRPCRouter({
           )
         )
         .where(and(eq(schema.plans.slug, slug), eq(schema.plans.projectId, project.id)))
-        .orderBy(() => [desc(schema.subscriptions.createdAt)])
+        .orderBy(() => [desc(schema.subscriptions.createdAtM)])
 
       if (!planWithSubscriptions || !planWithSubscriptions.length) {
         return {
@@ -422,7 +436,7 @@ export const planRouter = createTRPCRouter({
       const plan = await opts.ctx.db.query.plans.findFirst({
         with: {
           versions: {
-            orderBy: (version, { desc }) => [desc(version.createdAt)],
+            orderBy: (version, { desc }) => [desc(version.createdAtM)],
           },
           project: true,
         },
@@ -473,7 +487,7 @@ export const planRouter = createTRPCRouter({
         with: {
           versions: {
             where: (version, { eq }) => eq(version.status, "published"),
-            orderBy: (version, { desc }) => [desc(version.createdAt)],
+            orderBy: (version, { desc }) => [desc(version.createdAtM)],
             columns: {
               status: true,
               id: true,
@@ -486,11 +500,9 @@ export const planRouter = createTRPCRouter({
         where: (plan, { eq, and, between, gte, lte }) =>
           and(
             eq(plan.projectId, project.id),
-            fromDate && toDate
-              ? between(plan.createdAt, new Date(fromDate), new Date(toDate))
-              : undefined,
-            fromDate ? gte(plan.createdAt, new Date(fromDate)) : undefined,
-            toDate ? lte(plan.createdAt, new Date(toDate)) : undefined
+            fromDate && toDate ? between(plan.createdAtM, fromDate, toDate) : undefined,
+            fromDate ? gte(plan.createdAtM, fromDate) : undefined,
+            toDate ? lte(plan.createdAtM, toDate) : undefined
           ),
       })
 

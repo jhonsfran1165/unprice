@@ -15,8 +15,8 @@ export const featureInsertBaseSchema = createInsertSchema(schema.features, {
     }),
 })
   .omit({
-    createdAt: true,
-    updatedAt: true,
+    createdAtM: true,
+    updatedAtM: true,
   })
   .partial({
     id: true,

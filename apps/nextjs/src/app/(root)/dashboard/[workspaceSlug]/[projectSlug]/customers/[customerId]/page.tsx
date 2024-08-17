@@ -6,7 +6,6 @@ import { Button } from "@unprice/ui/button"
 import { Separator } from "@unprice/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
 import { Typography } from "@unprice/ui/typography"
-import { startOfDay } from "date-fns"
 import { Plus } from "lucide-react"
 import { Suspense } from "react"
 import { DataTable } from "~/components/data-table/data-table"
@@ -62,7 +61,7 @@ export default async function PlanPage({
                     autoRenew: true,
                     config: [],
                     defaultPaymentMethodId: "",
-                    startDate: startOfDay(new Date()),
+                    startDateAt: Date.now(),
                   }}
                 >
                   <Button variant={"custom"}>

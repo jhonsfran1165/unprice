@@ -101,7 +101,7 @@ export const getCustomerFeatureUsageQuery = async ({
             usage: data.usage.usage,
             month: data.usage.month,
             year: data.usage.year,
-            updatedAt: data.usage.updatedAt.getTime(),
+            updatedAtM: data.usage.updatedAtM,
           }
         : null
 
@@ -155,7 +155,7 @@ export const reportUsageQuery = async ({
       subscriptionItemId: subscriptionItemId,
       usage: usage.usage,
       limit: usage.limit,
-      updatedAt: new Date(usage.updatedAt),
+      updatedAtM: usage.updatedAtM,
       year: usage.year,
       month: usage.month,
     })
@@ -169,7 +169,7 @@ export const reportUsageQuery = async ({
       set: {
         usage: usage.usage,
         limit: usage.limit,
-        updatedAt: new Date(usage.updatedAt),
+        updatedAtM: usage.updatedAtM,
       },
     })
     .returning()
@@ -180,7 +180,7 @@ export const reportUsageQuery = async ({
             limit: res[0].limit,
             month: res[0].month,
             year: res[0].year,
-            updatedAt: res[0].updatedAt.getTime(),
+            updatedAtM: res[0].updatedAtM,
           }
         : null
     })
@@ -230,7 +230,7 @@ export const getEntitlementsQuery = async ({
           },
           where: (sub, { eq }) => eq(sub.status, "active"),
           orderBy(fields, operators) {
-            return [operators.desc(fields.startDate)]
+            return [operators.desc(fields.startDateAt)]
           },
           with: {
             planVersion: {

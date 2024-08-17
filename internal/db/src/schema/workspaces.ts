@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { boolean, foreignKey, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
+import { bigint, boolean, foreignKey, primaryKey, text } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, id, timestamps, workspaceID } from "../utils/sql"
@@ -66,7 +66,7 @@ export const invites = pgTableProject(
     ...workspaceID,
     email: text("email").notNull(),
     role: teamRolesEnum("role").default("MEMBER").notNull(),
-    acceptedAt: timestamp("accepted_at", { mode: "date" }),
+    acceptedAt: bigint("accepted_at_m", { mode: "number" }),
   },
   (table) => ({
     compoundKey: primaryKey({

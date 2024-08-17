@@ -71,7 +71,7 @@ export const authRouter = createTRPCRouter({
         },
       },
       where: (members, operators) => operators.eq(members.userId, userId),
-      orderBy: (members) => members.createdAt,
+      orderBy: (members) => members.createdAtM,
     })
 
     return memberships.map((members) => ({

@@ -182,7 +182,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
     cell: ({ row }) => (
       <div className="flex items-center space-x-1">
         <div className="whitespace-nowrap text-sm">
-          {formatDate(row.original.startDate, row.original.timezone)}
+          {formatDate(row.original.startDateAt, row.original.timezone)}
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -194,14 +194,14 @@ export const columns: ColumnDef<PlanVersion>[] = [
                 Timezone: {row.original.timezone}
               </Typography>
               <Separator className="my-1" />
-              <Typography variant="p" affects="removePaddingMargin">
-                Local time:{" "}
-                {format(toZonedTime(row.original.startDate, row.original.timezone), "PPpp")}
+              <Typography variant="p" affects="removePaddingMargin" className="font-mono">
+                <span className="font-semibold">Local time: </span>
+                {format(toZonedTime(row.original.startDateAt, row.original.timezone), "PPpp")}
               </Typography>
 
-              <Typography variant="p" affects="removePaddingMargin">
-                Customer time:{" "}
-                {format(new Date(row.original.startDate.toISOString().slice(0, -1)), "PPpp")}
+              <Typography variant="p" affects="removePaddingMargin" className="font-mono">
+                <span className="font-semibold">Customer time: </span>
+                {format(new Date(row.original.startDateAt), "PPpp")}
               </Typography>
             </div>
           </TooltipContent>
@@ -216,7 +216,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
     accessorKey: "endDate",
     header: ({ column }) => <DataTableColumnHeader column={column} title="End Date" />,
     cell: ({ row }) => {
-      const endDate = row.original.endDate
+      const endDate = row.original.endDateAt
 
       if (endDate === null || endDate === undefined) {
         return <div className="whitespace-nowrap text-sm">Forever</div>
@@ -237,12 +237,14 @@ export const columns: ColumnDef<PlanVersion>[] = [
                   Timezone: {row.original.timezone}
                 </Typography>
                 <Separator className="my-1" />
-                <Typography variant="p" affects="removePaddingMargin">
-                  Local time: {format(toZonedTime(endDate, row.original.timezone), "PPpp")}
+                <Typography variant="p" affects="removePaddingMargin" className="font-mono">
+                  <span className="font-semibold">Local time: </span>
+                  {format(toZonedTime(endDate, row.original.timezone), "PPpp")}
                 </Typography>
 
-                <Typography variant="p" affects="removePaddingMargin">
-                  Customer time: {format(new Date(endDate.toISOString().slice(0, -1)), "PPpp")}
+                <Typography variant="p" affects="removePaddingMargin" className="font-mono">
+                  <span className="font-semibold">Customer time: </span>
+                  {format(new Date(endDate), "PPpp")}
                 </Typography>
               </div>
             </TooltipContent>

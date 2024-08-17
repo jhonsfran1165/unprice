@@ -11,8 +11,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@unprice/ui/sheet"
-
-import { startOfDay } from "date-fns"
 import { SubscriptionForm } from "./subscription-form"
 
 export function SubscriptionSheet({
@@ -36,7 +34,7 @@ export function SubscriptionSheet({
           setDialogOpen={setIsOpen}
           defaultValues={
             defaultValues ?? {
-              startDate: startOfDay(new Date()),
+              startDateAt: Date.now(),
               customerId: "",
               planVersionId: "",
               type: "plan",

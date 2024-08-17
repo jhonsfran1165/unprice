@@ -1,7 +1,7 @@
 import { addDays, format } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 
-export function formatDate(date: Date, timezone?: string) {
+export function formatDate(date: number, timezone?: string) {
   const userTimezone = timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone
   return format(toZonedTime(date, userTimezone), "yyyy-MM-dd")
 }

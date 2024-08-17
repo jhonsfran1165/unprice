@@ -51,6 +51,7 @@ const TabNavigationLink = React.forwardRef<
       aria-disabled={disabled}
       className={cn(
         "group relative flex shrink-0 select-none items-center justify-center",
+        focusRing,
         disabled ? "pointer-events-none" : ""
       )}
       ref={forwardedRef}

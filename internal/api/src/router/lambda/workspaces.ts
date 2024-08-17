@@ -118,12 +118,12 @@ export const workspaceRouter = createTRPCRouter({
           and(
             eq(member.workspaceId, workspace.id),
             fromDate && toDate
-              ? between(member.createdAt, new Date(fromDate), new Date(toDate))
+              ? between(member.createdAtM, new Date(fromDate), new Date(toDate))
               : undefined,
-            fromDate ? gte(member.createdAt, new Date(fromDate)) : undefined,
-            toDate ? lte(member.createdAt, new Date(toDate)) : undefined
+            fromDate ? gte(member.createdAtM, new Date(fromDate)) : undefined,
+            toDate ? lte(member.createdAtM, new Date(toDate)) : undefined
           ),
-        orderBy: (members) => members.createdAt,
+        orderBy: (members) => members.createdAtM,
       })
 
       return {
@@ -221,7 +221,7 @@ export const workspaceRouter = createTRPCRouter({
           workspace: true,
         },
         where: (member, operators) => operators.eq(member.userId, userId),
-        orderBy: (member) => member.createdAt,
+        orderBy: (member) => member.createdAtM,
       })
 
       const workspaces = memberships.map((member) => ({

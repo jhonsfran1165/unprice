@@ -240,7 +240,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
           ...(limit !== undefined && { limit: limit === 0 ? null : limit }),
           ...(hidden !== undefined && { hidden }),
           ...(aggregationMethod && { aggregationMethod }),
-          updatedAt: new Date(),
+          updatedAtM: new Date(),
         })
         .where(
           and(
