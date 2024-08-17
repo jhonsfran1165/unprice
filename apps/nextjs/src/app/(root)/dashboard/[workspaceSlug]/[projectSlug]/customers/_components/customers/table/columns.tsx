@@ -97,7 +97,7 @@ export const columns: ColumnDef<Customer>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Creation Date" />,
     cell: ({ row }) => (
       <div className="whitespace-nowrap text-sm">
-        {formatDate(row.getValue("createdAtM"), row.original.timezone)}
+        {formatDate(row.original.createdAtM, row.original.timezone)}
       </div>
     ),
     enableSorting: true,

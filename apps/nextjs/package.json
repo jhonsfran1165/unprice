@@ -15,7 +15,7 @@
     "dev": "pnpm with-env next dev",
     "fmt": "pnpm biome format . --write && pnpm biome check . --apply",
     "start": "pnpm with-env next start",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc",
     "with-env": "dotenv -e ../../.env.local --"
   },
   "dependencies": {

@@ -93,7 +93,7 @@ export const featureRouter = createTRPCRouter({
         .set({
           title,
           description: description ?? "",
-          updatedAtM: new Date(),
+          updatedAtM: Date.now(),
         })
         .where(and(eq(schema.features.id, id), eq(schema.features.projectId, project.id)))
         .returning()

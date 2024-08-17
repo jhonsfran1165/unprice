@@ -107,7 +107,7 @@ export class UnpriceApiKey {
         )
       }
 
-      if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
+      if (apiKey.expiresAt && apiKey.expiresAt < Date.now()) {
         return Err(
           new UnPriceApiKeyError({
             code: "EXPIRED",
@@ -137,7 +137,7 @@ export class UnpriceApiKey {
           this.db
             .update(schema.apikeys)
             .set({
-              lastUsed: new Date(),
+              lastUsed: Date.now(),
             })
             .where(eq(schema.apikeys.id, apiKey.id))
             .execute(),

@@ -1,6 +1,6 @@
 "use client"
 
-import { add, format } from "date-fns"
+import { add, endOfDay, format } from "date-fns"
 import { useState } from "react"
 
 import type { CreateApiKey } from "@unprice/db/validators"
@@ -39,7 +39,7 @@ export default function CreateApiKeyForm(props: {
     defaultValues: props.defaultValues,
   })
 
-  const createApkiKey = api.apikeys.create.useMutation({
+  const create = api.apikeys.create.useMutation({
     onSettled: async () => {
       router.refresh()
     },
@@ -54,9 +54,7 @@ export default function CreateApiKeyForm(props: {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(
-          async (data: CreateApiKey) => await createApkiKey.mutateAsync(data)
-        )}
+        onSubmit={form.handleSubmit(async (data: CreateApiKey) => await create.mutateAsync(data))}
         className="space-y-6"
       >
         <div className="space-y-8">
@@ -99,9 +97,15 @@ export default function CreateApiKeyForm(props: {
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value ?? undefined}
+                      selected={field.value ? new Date(field.value) : undefined}
                       onSelect={(date) => {
-                        field.onChange(date)
+                        if (!date) {
+                          field.onChange(undefined)
+                          setDatePickerOpen(false)
+                          return
+                        }
+                        const midnight = endOfDay(date)
+                        field.onChange(midnight.getTime())
                         setDatePickerOpen(false)
                       }}
                       disabled={(date) =>

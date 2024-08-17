@@ -1,6 +1,6 @@
 "use client"
 
-import { add, format } from "date-fns"
+import { add, endOfDay, format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { useState } from "react"
 import type { UseFormReturn } from "react-hook-form"
@@ -25,14 +25,17 @@ export default function EndDateFormField({
   form: UseFormReturn<InsertSubscription>
   isDisabled?: boolean
 }) {
+  const endDateField = form.getValues("endDateAt")
   const [isOpenPopOverEnd, setIsOpenPopOverEnd] = useState(false)
-  const [endDate, setEndDate] = useState<Date | undefined>(form.getValues("endDate") ?? undefined)
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    endDateField ? new Date(endDateField) : undefined
+  )
   const today = new Date()
 
   return (
     <FormField
       control={form.control}
-      name="endDate"
+      name="endDateAt"
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>End date Current Plan</FormLabel>
@@ -62,8 +65,16 @@ export default function EndDateFormField({
                   defaultMonth={endDate ?? undefined}
                   onSelect={(date) => {
                     setEndDate(date)
-                    field.onChange(date)
                     setIsOpenPopOverEnd(false)
+
+                    if (!date) {
+                      field.onChange(undefined)
+                      setIsOpenPopOverEnd(false)
+                      return
+                    }
+
+                    const endday = endOfDay(date)
+                    field.onChange(endday.getTime())
                   }}
                   disabled={(date) => {
                     if (isDisabled) return true
@@ -80,8 +91,9 @@ export default function EndDateFormField({
                     variant="ghost"
                     className="justify-start font-normal"
                     onClick={() => {
-                      field.onChange(today)
-                      setEndDate(today)
+                      const endday = endOfDay(today)
+                      field.onChange(endday.getTime())
+                      setEndDate(endday)
                       setIsOpenPopOverEnd(false)
                     }}
                   >
@@ -94,7 +106,7 @@ export default function EndDateFormField({
                       const date = add(today, { days: 1 })
 
                       setEndDate(date)
-                      field.onChange(date)
+                      field.onChange(endOfDay(date).getTime())
                       setIsOpenPopOverEnd(false)
                     }}
                   >
@@ -107,7 +119,7 @@ export default function EndDateFormField({
                       const date = add(today, { months: 1 })
 
                       setEndDate(date)
-                      field.onChange(date)
+                      field.onChange(endOfDay(date).getTime())
                       setIsOpenPopOverEnd(false)
                     }}
                   >
@@ -120,7 +132,7 @@ export default function EndDateFormField({
                       const date = add(today, { months: 6 })
 
                       setEndDate(date)
-                      field.onChange(date)
+                      field.onChange(endOfDay(date).getTime())
                       setIsOpenPopOverEnd(false)
                     }}
                   >
@@ -132,7 +144,7 @@ export default function EndDateFormField({
                     onClick={() => {
                       const date = add(today, { months: 12 })
 
-                      field.onChange(date)
+                      field.onChange(endOfDay(date).getTime())
                       setEndDate(date)
                       setIsOpenPopOverEnd(false)
                     }}

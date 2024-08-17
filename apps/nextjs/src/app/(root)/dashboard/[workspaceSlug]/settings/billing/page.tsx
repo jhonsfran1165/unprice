@@ -10,7 +10,10 @@ export default function BillingPage() {
   return (
     <DashboardShell
       header={
-        <HeaderTab title="Billing Settings" description="Manage your payments for this workspace" />
+        <HeaderTab
+          title="Billing Settings"
+          description="Manage your payments for this workspace."
+        />
       }
     >
       <Fragment>
@@ -35,9 +38,9 @@ async function SubscriptionCard() {
         {subscription ? (
           <div>
             You are currently on the <strong>{subscription.planVersion.title}</strong> plan.
-            {subscription.startDate && (
+            {subscription.startDateAt && (
               <strong>
-                Your subscription will renew on {formatDate(subscription.startDate)}.{" "}
+                Your subscription will renew on {formatDate(subscription.startDateAt)}.{" "}
               </strong>
             )}
           </div>

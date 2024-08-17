@@ -117,11 +117,9 @@ export const workspaceRouter = createTRPCRouter({
         where: (member, { eq, and, between, gte, lte }) =>
           and(
             eq(member.workspaceId, workspace.id),
-            fromDate && toDate
-              ? between(member.createdAtM, new Date(fromDate), new Date(toDate))
-              : undefined,
-            fromDate ? gte(member.createdAtM, new Date(fromDate)) : undefined,
-            toDate ? lte(member.createdAtM, new Date(toDate)) : undefined
+            fromDate && toDate ? between(member.createdAtM, fromDate, toDate) : undefined,
+            fromDate ? gte(member.createdAtM, fromDate) : undefined,
+            toDate ? lte(member.createdAtM, toDate) : undefined
           ),
         orderBy: (members) => members.createdAtM,
       })

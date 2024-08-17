@@ -5,7 +5,6 @@ import * as schema from "../schema"
 import { projectExtendedSelectSchema } from "./project"
 
 export const insertApiKeySchema = createInsertSchema(schema.apikeys, {
-  expiresAt: z.coerce.date().optional(),
   name: z.string().min(1),
   key: z.string().min(1),
 })

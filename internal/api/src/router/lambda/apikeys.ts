@@ -124,7 +124,7 @@ export const apiKeyRouter = createTRPCRouter({
 
       const result = await opts.ctx.db
         .update(schema.apikeys)
-        .set({ revokedAt: new Date(), updatedAtM: new Date() })
+        .set({ revokedAt: Date.now(), updatedAtM: Date.now() })
         .where(
           sql`${schema.apikeys.id} in ${ids} AND ${schema.apikeys.projectId} = ${project.id} AND ${schema.apikeys.revokedAt} is NULL`
         )
@@ -176,7 +176,7 @@ export const apiKeyRouter = createTRPCRouter({
 
       const newApiKey = await opts.ctx.db
         .update(schema.apikeys)
-        .set({ key: newKey, updatedAtM: new Date() })
+        .set({ key: newKey, updatedAtM: Date.now() })
         .where(eq(schema.apikeys.id, opts.input.id))
         .returning()
         .then((res) => res[0])

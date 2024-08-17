@@ -117,7 +117,7 @@ export const columns: ColumnDef<ApiKey>[] = [
         return "Never expires"
       }
 
-      if (expiresAt < new Date()) {
+      if (expiresAt < Date.now()) {
         return (
           <div className="flex flex-col text-destructive">
             <span>Expired</span>
