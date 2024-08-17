@@ -488,58 +488,59 @@ export class UnpriceCustomer {
       this.waitUntil(
         Promise.all([
           // just for notifying the customer if the usage is exceeding the limit
-          this._getCustomerUsageFeature({
-            subItem,
-            customerId,
-            projectId,
-            featureSlug,
-            year: year,
-            month: month,
-          }).then((currentUsage) => {
-            if (currentUsage.err) {
-              this.logger.warn("Usage error", {
-                customerId: customerId,
-                featureSlug: featureSlug,
-                projectId: projectId,
-                usage: usage,
-                error: JSON.stringify(currentUsage.err),
-              })
+          // TODO: find a a better way to do this
+          // this._getCustomerUsageFeature({
+          //   subItem,
+          //   customerId,
+          //   projectId,
+          //   featureSlug,
+          //   year: year,
+          //   month: month,
+          // }).then((currentUsage) => {
+          //   if (currentUsage.err) {
+          //     this.logger.warn("Usage error", {
+          //       customerId: customerId,
+          //       featureSlug: featureSlug,
+          //       projectId: projectId,
+          //       usage: usage,
+          //       error: JSON.stringify(currentUsage.err),
+          //     })
 
-              return
-            }
+          //     return
+          //   }
 
-            if (!currentUsage.val) {
-              this.logger.warn("Usage val is null", {
-                customerId: customerId,
-                featureSlug: featureSlug,
-                projectId: projectId,
-                currentUsage: JSON.stringify(currentUsage),
-              })
-              return
-            }
+          //   if (!currentUsage.val) {
+          //     this.logger.warn("Usage val is null", {
+          //       customerId: customerId,
+          //       featureSlug: featureSlug,
+          //       projectId: projectId,
+          //       currentUsage: JSON.stringify(currentUsage),
+          //     })
+          //     return
+          //   }
 
-            const limit = currentUsage.val.limit
+          //   const limit = currentUsage.val.limit
 
-            if (limit && usage >= limit) {
-              this.logger.warn("Usage exceeded", {
-                customerId: customerId,
-                featureSlug: featureSlug,
-                projectId: projectId,
-                usage: usage,
-                limit: limit,
-              })
-            }
+          //   if (limit && usage >= limit) {
+          //     this.logger.warn("Usage exceeded", {
+          //       customerId: customerId,
+          //       featureSlug: featureSlug,
+          //       projectId: projectId,
+          //       usage: usage,
+          //       limit: limit,
+          //     })
+          //   }
 
-            // notify also if the usage is negative
-            if (usage < 0) {
-              this.logger.warn("Negative usage", {
-                customerId: customerId,
-                featureSlug: featureSlug,
-                projectId: projectId,
-                usage: usage,
-              })
-            }
-          }),
+          //   // notify also if the usage is negative
+          //   if (usage < 0) {
+          //     this.logger.warn("Negative usage", {
+          //       customerId: customerId,
+          //       featureSlug: featureSlug,
+          //       projectId: projectId,
+          //       usage: usage,
+          //     })
+          //   }
+          // }),
 
           // report the usage to analytics db
           this.analytics

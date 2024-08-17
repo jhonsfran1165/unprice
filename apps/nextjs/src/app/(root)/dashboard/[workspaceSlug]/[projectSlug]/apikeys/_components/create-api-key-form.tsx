@@ -20,7 +20,8 @@ import { Calendar as CalendarIcon } from "@unprice/ui/icons"
 import { Input } from "@unprice/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 
-import { useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
+import { revalidateAppPath } from "~/actions/revalidate"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
@@ -31,7 +32,9 @@ export default function CreateApiKeyForm(props: {
   onSuccess?: (key: string) => void
   defaultValues?: CreateApiKey
 }) {
-  const router = useRouter()
+  const params = useParams()
+  const workspaceSlug = params.workspaceSlug as string
+  const projectSlug = params.projectSlug as string
   const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   const form = useZodForm({
@@ -40,14 +43,12 @@ export default function CreateApiKeyForm(props: {
   })
 
   const create = api.apikeys.create.useMutation({
-    onSettled: async () => {
-      router.refresh()
-    },
     onSuccess: () => {
       toastAction("success")
       form.reset()
       props.setDialogOpen?.(false)
       props.onSuccess?.("")
+      revalidateAppPath(`/${workspaceSlug}/${projectSlug}/apikeys`, "page")
     },
   })
 

@@ -186,7 +186,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
-            <AlertCircle className="h-4 w-4 font-light" />
+            <AlertCircle className="size-4 font-light" />
           </TooltipTrigger>
           <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
             <div className="flex flex-col gap-1">
@@ -194,12 +194,12 @@ export const columns: ColumnDef<PlanVersion>[] = [
                 Timezone: {row.original.timezone}
               </Typography>
               <Separator className="my-1" />
-              <Typography variant="p" affects="removePaddingMargin" className="font-mono">
+              <Typography variant="p" affects="removePaddingMargin" className="text-xs">
                 <span className="font-semibold">Local time: </span>
                 {format(toZonedTime(row.original.startDateAt, row.original.timezone), "PPpp")}
               </Typography>
 
-              <Typography variant="p" affects="removePaddingMargin" className="font-mono">
+              <Typography variant="p" affects="removePaddingMargin" className="text-xs">
                 <span className="font-semibold">Customer time: </span>
                 {format(new Date(row.original.startDateAt), "PPpp")}
               </Typography>
@@ -229,7 +229,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
-              <AlertCircle className="h-4 w-4 font-light" />
+              <AlertCircle className="size-4 font-light" />
             </TooltipTrigger>
             <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
               <div className="flex flex-col gap-1">
@@ -237,12 +237,12 @@ export const columns: ColumnDef<PlanVersion>[] = [
                   Timezone: {row.original.timezone}
                 </Typography>
                 <Separator className="my-1" />
-                <Typography variant="p" affects="removePaddingMargin" className="font-mono">
+                <Typography variant="p" affects="removePaddingMargin" className="text-xs">
                   <span className="font-semibold">Local time: </span>
                   {format(toZonedTime(endDate, row.original.timezone), "PPpp")}
                 </Typography>
 
-                <Typography variant="p" affects="removePaddingMargin" className="font-mono">
+                <Typography variant="p" affects="removePaddingMargin" className="text-xs">
                   <span className="font-semibold">Customer time: </span>
                   {format(new Date(endDate), "PPpp")}
                 </Typography>
