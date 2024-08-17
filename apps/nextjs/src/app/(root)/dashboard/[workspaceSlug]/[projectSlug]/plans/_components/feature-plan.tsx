@@ -3,7 +3,7 @@
 import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
 import { dinero, toDecimal } from "dinero.js"
-import { EyeOff, Settings, Trash2, X } from "lucide-react"
+import { EyeOff, Settings, Trash2, X, Zap } from "lucide-react"
 import type React from "react"
 import type { ElementRef } from "react"
 import { forwardRef, useState } from "react"
@@ -129,6 +129,12 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
                   {planFeatureVersion.hidden && (
                     <div className="flex items-center gap-1">
                       <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  )}
+
+                  {planFeatureVersion.metadata?.realtime && (
+                    <div className="flex items-center gap-1">
+                      <Zap className="h-4 w-4 text-warning" />
                     </div>
                   )}
                 </div>

@@ -38,11 +38,13 @@ export default function ConfigItemsFormField({
   selectedPlanVersion,
   items,
   isLoading,
+  isDisabled,
 }: {
   form: UseFormReturn<InsertSubscription>
   selectedPlanVersion?: PlanVersionResponse
   items: UseFieldArrayReturn<InsertSubscription, "config", "id">
   isLoading?: boolean
+  isDisabled?: boolean
 }) {
   const versionFeatures = new Map<string, PlanVersionFeaturesResponse>()
   const versionAddons = new Map<string, PlanVersionFeaturesResponse>()
@@ -185,7 +187,8 @@ export default function ConfigItemsFormField({
                                     className="mx-auto h-8 w-20"
                                     disabled={
                                       feature.featureType === "flat" ||
-                                      feature.featureType === "usage"
+                                      feature.featureType === "usage" ||
+                                      isDisabled
                                     }
                                     value={field.value ?? ""}
                                   />

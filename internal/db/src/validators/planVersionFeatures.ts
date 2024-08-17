@@ -76,6 +76,7 @@ export const dineroSchema = z
 
 export const planVersionFeatureMetadataSchema = z.object({
   stripeProductId: z.string().optional(),
+  realtime: z.boolean().optional(),
 })
 
 export const tiersSchema = z.object({

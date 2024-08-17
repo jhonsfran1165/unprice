@@ -5,14 +5,10 @@ import { FetchError, type Result } from "@unprice/error"
 import { Err, Ok } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
-import { getCustomerFeatureQuery, getEntitlementsQuery, reportUsageQuery } from "../queries"
+import { getCustomerFeatureQuery, getEntitlementsQuery } from "../queries"
 import type { Context } from "../trpc"
 import type { Cache } from "./cache"
-import type {
-  CacheNamespaces,
-  CurrentUsageCached,
-  SubscriptionItemCached,
-} from "./cache/namespaces"
+import type { CacheNamespaces, SubscriptionItemCached } from "./cache/namespaces"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
 import type { Metrics } from "./metrics"
@@ -45,9 +41,11 @@ export class UnpriceCustomer {
     customerId: string
     projectId: string
     featureSlug: string
+    month: number
+    year: number
   }): Promise<Result<SubscriptionItemCached, UnPriceCustomerError | FetchError>> {
     const res = await this.cache.featureByCustomerId.swr(
-      `${opts.customerId}:${opts.featureSlug}`,
+      `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
       async () => {
         return await getCustomerFeatureQuery({
           projectId: opts.projectId,
@@ -55,6 +53,9 @@ export class UnpriceCustomer {
           customerId: opts.customerId,
           metrics: this.metrics,
           logger: this.logger,
+          analytics: this.analytics,
+          month: opts.month,
+          year: opts.year,
         })
       }
     )
@@ -84,6 +85,9 @@ export class UnpriceCustomer {
         customerId: opts.customerId,
         metrics: this.metrics,
         logger: this.logger,
+        analytics: this.analytics,
+        month: opts.month,
+        year: opts.year,
       })
 
       if (!feature) {
@@ -97,128 +101,13 @@ export class UnpriceCustomer {
 
       // save the data in the cache
       this.waitUntil(
-        this.cache.featureByCustomerId.set(`${opts.customerId}:${opts.featureSlug}`, feature)
+        this.cache.featureByCustomerId.set(
+          `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
+          feature
+        )
       )
 
       return Ok(feature)
-    }
-
-    return Ok(res.val)
-  }
-
-  private async _getCustomerUsageFeature(opts: {
-    subItem: SubscriptionItemCached
-    customerId: string
-    projectId: string
-    featureSlug: string
-    year: number
-    month: number
-  }): Promise<Result<CurrentUsageCached, UnPriceCustomerError | FetchError>> {
-    const res = await this.cache.customerFeatureCurrentUsage.swr(
-      `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
-      async () => {
-        const usageData = await this.analytics
-          .getTotalUsagePerFeature({
-            customerId: opts.customerId,
-            featureSlug: opts.featureSlug,
-            projectId: opts.projectId,
-            start: new Date(opts.year, opts.month, 1).getTime(),
-            end: new Date(opts.year, opts.month + 1).getTime(),
-          })
-          .then((usage) => usage.data[0])
-
-        // this will be the usage of the feature for the period
-        const data = usageData ? usageData[opts.subItem.aggregationMethod] || 0 : 0
-
-        const usage = {
-          usage: data,
-          limit: opts.subItem.units,
-          month: opts.month,
-          year: opts.year,
-          updatedAtM: Date.now(),
-        }
-
-        await reportUsageQuery({
-          projectId: opts.projectId,
-          subscriptionItemId: opts.subItem.id,
-          db: this.db,
-          metrics: this.metrics,
-          logger: this.logger,
-          usage: usage,
-        })
-
-        return usage
-      }
-    )
-
-    if (res.err) {
-      this.logger.error(`Error in _getCustomerUsageFeature: ${res.err.message}`, {
-        error: JSON.stringify(res.err),
-        customerId: opts.customerId,
-        featureSlug: opts.featureSlug,
-        projectId: opts.projectId,
-      })
-
-      return Err(
-        new FetchError({
-          message: "unable to fetch required data",
-          retry: true,
-          cause: res.err,
-        })
-      )
-    }
-
-    // cache miss, get from db
-    if (!res.val) {
-      const usageData = await this.analytics
-        .getTotalUsagePerFeature({
-          customerId: opts.customerId,
-          featureSlug: opts.featureSlug,
-          projectId: opts.projectId,
-          start: new Date(opts.year, opts.month, 1).getTime(),
-          end: new Date(opts.year, opts.month + 1).getTime(),
-        })
-        .then((usage) => usage.data[0])
-
-      // this will be the usage of the feature for the period
-      const data = usageData ? usageData[opts.subItem.aggregationMethod] || 0 : 0
-
-      const usage = {
-        usage: data,
-        limit: opts.subItem.units,
-        month: opts.month,
-        year: opts.year,
-        updatedAtM: Date.now(),
-      }
-
-      if (!usage) {
-        return Err(
-          new UnPriceCustomerError({
-            code: "FEATURE_HAS_NO_USAGE_RECORD",
-            customerId: opts.customerId,
-          })
-        )
-      }
-
-      // save the data in the cache & report the usage to db
-      this.waitUntil(
-        Promise.all([
-          this.cache.customerFeatureCurrentUsage.set(
-            `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
-            usage
-          ),
-          reportUsageQuery({
-            projectId: opts.projectId,
-            subscriptionItemId: opts.subItem.id,
-            db: this.db,
-            metrics: this.metrics,
-            logger: this.logger,
-            usage: usage,
-          }),
-        ])
-      )
-
-      return Ok(usage)
     }
 
     return Ok(res.val)
@@ -303,6 +192,8 @@ export class UnpriceCustomer {
         customerId,
         projectId,
         featureSlug,
+        month,
+        year,
       })
 
       if (res.err) {
@@ -361,35 +252,15 @@ export class UnpriceCustomer {
         case "usage":
         case "tier":
         case "package": {
-          // get the current usage
-          const result = await this._getCustomerUsageFeature({
-            subItem,
-            customerId,
-            projectId,
-            featureSlug,
-            year: year,
-            month: month,
-          })
+          const currentUsage = subItem.currentUsage
+          const limit = subItem.limit
+          const units = subItem.units
+          // remaining usage given the units the user bought
+          const remainingUsage = units ? units - currentUsage : undefined
+          const remainingToLimit = limit ? limit - currentUsage : undefined
 
-          if (result.err) {
-            this.logger.error("Error getting usage", {
-              error: JSON.stringify(result.err),
-              customerId: opts.customerId,
-              featureSlug: opts.featureSlug,
-              projectId: opts.projectId,
-            })
-
-            return Ok({
-              access: false,
-              deniedReason: "FEATURE_HAS_NO_USAGE_RECORD",
-            })
-          }
-
-          const currentUsage = result.val
-          const limit = currentUsage.limit
-          const usage = currentUsage.usage
-
-          if (limit && usage >= limit) {
+          // check usage
+          if (remainingUsage && remainingUsage <= 0) {
             this.waitUntil(
               this.analytics.ingestFeaturesVerification({
                 ...analyticsPayload,
@@ -399,12 +270,32 @@ export class UnpriceCustomer {
             )
 
             return Ok({
-              currentUsage: usage,
-              limit: limit,
+              currentUsage: currentUsage,
+              limit: limit ?? undefined,
               featureType: subItem.featureType,
               access: false,
               deniedReason: "USAGE_EXCEEDED",
-              remaining: limit - usage,
+              remaining: remainingUsage,
+            })
+          }
+
+          // check limits
+          if (remainingToLimit && remainingToLimit <= 0) {
+            this.waitUntil(
+              this.analytics.ingestFeaturesVerification({
+                ...analyticsPayload,
+                latency: performance.now() - start,
+                deniedReason: "LIMIT_EXCEEDED",
+              })
+            )
+
+            return Ok({
+              currentUsage: currentUsage,
+              limit: limit ?? undefined,
+              featureType: subItem.featureType,
+              access: false,
+              deniedReason: "LIMIT_EXCEEDED",
+              remaining: remainingToLimit,
             })
           }
 
@@ -461,7 +352,7 @@ export class UnpriceCustomer {
     month: number
     year: number
     usage: number
-  }): Promise<Result<{ success: boolean }, UnPriceCustomerError | FetchError>> {
+  }): Promise<Result<{ success: boolean; message?: string }, UnPriceCustomerError | FetchError>> {
     try {
       const { customerId, featureSlug, projectId, usage, month, year } = opts
 
@@ -470,6 +361,8 @@ export class UnpriceCustomer {
         customerId,
         projectId,
         featureSlug,
+        month,
+        year,
       })
 
       if (res.err) {
@@ -477,6 +370,51 @@ export class UnpriceCustomer {
       }
 
       const subItem = res.val
+
+      // TODO: should I report the usage even if the limit was exceeded?
+      // for now let the customer report more usage than the limit but add notifications
+      const threshold = 80 // notify when the usage is 80% or more
+      const currentUsage = subItem.currentUsage
+      const limit = subItem.limit
+      const units = subItem.units
+      let message = ""
+      let notifyUsage = false
+
+      // check usage
+      if (units) {
+        const unitsPercentage = (currentUsage / units) * 100
+
+        if (currentUsage >= units) {
+          message = `Your feature ${featureSlug} has reached or exceeded its usage of ${units}. Current usage: ${unitsPercentage.toFixed(
+            2
+          )}% of its units usage. This is over the units by ${currentUsage - units}`
+          notifyUsage = true
+        } else if (unitsPercentage >= threshold) {
+          message = `Your feature ${featureSlug} is at ${unitsPercentage.toFixed(
+            2
+          )}% of its units usage`
+          notifyUsage = true
+        }
+      }
+
+      // check limit
+      if (limit) {
+        const usagePercentage = (currentUsage / limit) * 100
+
+        if (currentUsage >= limit) {
+          // Usage has reached or exceeded the limit
+          message = `Your feature ${featureSlug} has reached or exceeded its usage limit of ${limit}. Current usage: ${usagePercentage.toFixed(
+            2
+          )}% of its usage limit. This is over the limit by ${currentUsage - limit}`
+          notifyUsage = true
+        } else if (usagePercentage >= threshold) {
+          // Usage is at or above the threshold
+          message = `Your feature ${featureSlug} is at ${usagePercentage.toFixed(
+            2
+          )}% of its usage limit`
+          notifyUsage = true
+        }
+      }
 
       // flat features don't have usage
       if (subItem.featureType === "flat") {
@@ -487,61 +425,9 @@ export class UnpriceCustomer {
 
       this.waitUntil(
         Promise.all([
-          // just for notifying the customer if the usage is exceeding the limit
-          // TODO: find a a better way to do this
-          // this._getCustomerUsageFeature({
-          //   subItem,
-          //   customerId,
-          //   projectId,
-          //   featureSlug,
-          //   year: year,
-          //   month: month,
-          // }).then((currentUsage) => {
-          //   if (currentUsage.err) {
-          //     this.logger.warn("Usage error", {
-          //       customerId: customerId,
-          //       featureSlug: featureSlug,
-          //       projectId: projectId,
-          //       usage: usage,
-          //       error: JSON.stringify(currentUsage.err),
-          //     })
-
-          //     return
-          //   }
-
-          //   if (!currentUsage.val) {
-          //     this.logger.warn("Usage val is null", {
-          //       customerId: customerId,
-          //       featureSlug: featureSlug,
-          //       projectId: projectId,
-          //       currentUsage: JSON.stringify(currentUsage),
-          //     })
-          //     return
-          //   }
-
-          //   const limit = currentUsage.val.limit
-
-          //   if (limit && usage >= limit) {
-          //     this.logger.warn("Usage exceeded", {
-          //       customerId: customerId,
-          //       featureSlug: featureSlug,
-          //       projectId: projectId,
-          //       usage: usage,
-          //       limit: limit,
-          //     })
-          //   }
-
-          //   // notify also if the usage is negative
-          //   if (usage < 0) {
-          //     this.logger.warn("Negative usage", {
-          //       customerId: customerId,
-          //       featureSlug: featureSlug,
-          //       projectId: projectId,
-          //       usage: usage,
-          //     })
-          //   }
-          // }),
-
+          // notify usage
+          // TODO: add notification to email, slack?
+          notifyUsage && Promise.resolve(),
           // report the usage to analytics db
           this.analytics
             .ingestFeaturesUsage({
@@ -556,6 +442,21 @@ export class UnpriceCustomer {
               featureSlug: featureSlug,
               customerId: customerId,
             })
+            .then(() => {
+              // TODO: Only available in pro plus plan
+              // TODO: usage is not always sum to the current usage, could be counter, etc
+              // also if there are many request per second, we could debounce the update somehow
+              if (subItem.realtime) {
+                this.cache.featureByCustomerId.set(
+                  `${customerId}:${featureSlug}:${year}:${month}`,
+                  {
+                    ...subItem,
+                    currentUsage: subItem.currentUsage + usage,
+                    lastUpdatedAt: Date.now(),
+                  }
+                )
+              }
+            })
             .catch((error) => {
               this.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
                 error: JSON.stringify(error),
@@ -568,6 +469,7 @@ export class UnpriceCustomer {
 
       return Ok({
         success: true,
+        message,
       })
     } catch (e) {
       const error = e as Error

@@ -5,18 +5,15 @@ import type { Result } from "@unprice/error"
 import { Err, Ok } from "@unprice/error"
 
 import { subscriptionItems, subscriptions } from "../../schema/subscriptions"
+import { customerSelectSchema } from "../customer"
+import { planVersionSelectBaseSchema } from "../planVersions"
 import { UnPriceCalculationError } from "./../errors"
 import type { PlanVersionExtended } from "./../planVersionFeatures"
-import {
-  configPackageSchema,
-  planVersionExtendedSchema,
-  planVersionFeatureInsertBaseSchema,
-} from "./../planVersionFeatures"
+import { configPackageSchema, planVersionExtendedSchema } from "./../planVersionFeatures"
 import {
   collectionMethodSchema,
   startCycleSchema,
   subscriptionTypeSchema,
-  typeFeatureSchema,
   whenToBillSchema,
 } from "./../shared"
 
@@ -39,10 +36,7 @@ export const subscriptionMetadataSchema = z.object({
   externalId: z.string().optional(),
 })
 
-export const subscriptionItemsSelectSchema = createSelectSchema(subscriptionItems, {
-  // units for the item, for flat features it's always 1, usage features it's the current usage
-  units: z.coerce.number().min(0),
-})
+export const subscriptionItemsSelectSchema = createSelectSchema(subscriptionItems)
 
 export const subscriptionItemsInsertSchema = createInsertSchema(subscriptionItems, {
   // units for the item, for flat features it's always 1, usage features it's the current usage
@@ -157,32 +151,25 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
     features: subscriptionItemsSelectSchema.array(),
   })
 
-export const subscriptionItemCacheSchema = subscriptionItemsSelectSchema
-  .omit({
-    createdAtM: true,
-    updatedAtM: true,
-    id: true,
-  })
-  .extend({
-    featureType: typeFeatureSchema,
-  })
-
-export const subscriptionItemExtendedSchema = subscriptionItemsSelectSchema.extend({
-  featurePlan: planVersionFeatureInsertBaseSchema,
+export const subscriptionExtendedWithItemsSchema = subscriptionSelectSchema.extend({
+  customer: customerSelectSchema,
+  version: planVersionSelectBaseSchema,
+  items: subscriptionItemsSelectSchema.array(),
 })
 
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>
 export type SubscriptionItem = z.infer<typeof subscriptionItemsSelectSchema>
-export type SubscriptionItemExtended = z.infer<typeof subscriptionItemExtendedSchema>
 export type InsertSubscriptionItem = z.infer<typeof subscriptionItemsInsertSchema>
 export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
 export type SubscriptionItemConfig = z.infer<typeof subscriptionItemConfigSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,
+  items,
 }: {
   planVersion: PlanVersionExtended
+  items?: SubscriptionItem[]
 }): Result<SubscriptionItemConfig[], UnPriceCalculationError> => {
   if (!planVersion.planFeatures || planVersion.planFeatures.length === 0) {
     return Err(
@@ -195,6 +182,7 @@ export const createDefaultSubscriptionConfig = ({
   const itemsConfig = planVersion.planFeatures.map((planFeature) => {
     switch (planFeature.featureType) {
       case "flat":
+        // flat features are always 1
         return {
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
@@ -206,7 +194,10 @@ export const createDefaultSubscriptionConfig = ({
         return {
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
-          units: planFeature.defaultQuantity ?? 1,
+          units:
+            items?.find((item) => item.featurePlanVersionId === planFeature.id)?.units ??
+            planFeature.defaultQuantity ??
+            1,
           min: 1,
           limit: planFeature.limit,
         }
@@ -223,7 +214,9 @@ export const createDefaultSubscriptionConfig = ({
         return {
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
-          units: config.units,
+          units:
+            items?.find((item) => item.featurePlanVersionId === planFeature.id)?.units ??
+            config.units,
           limit: planFeature.limit,
           min: 1,
         }

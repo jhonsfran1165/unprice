@@ -384,7 +384,7 @@ importers:
         specifier: 11.0.0-rc.466
         version: 11.0.0-rc.466
       '@unkey/cache':
-        specifier: ^1.4.0
+        specifier: ^1.5.0
         version: 1.5.0
       '@unprice/auth':
         specifier: ^0.1.0
@@ -537,11 +537,11 @@ importers:
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
       drizzle-orm:
-        specifier: ^0.31.2
-        version: 0.31.4(@neondatabase/serverless@0.9.4)
+        specifier: ^0.33.0
+        version: 0.33.0(@neondatabase/serverless@0.9.4)
       drizzle-zod:
         specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.31.4)(zod@3.23.8)
+        version: 0.5.1(drizzle-orm@0.33.0)(zod@3.23.8)
       random-word-slugs:
         specifier: ^0.1.7
         version: 0.1.7
@@ -559,8 +559,8 @@ importers:
         specifier: ^7.3.0
         version: 7.4.2
       drizzle-kit:
-        specifier: ^0.22.7
-        version: 0.22.8
+        specifier: ^0.24.0
+        version: 0.24.0
       tsx:
         specifier: ^4.7.2
         version: 4.17.0
@@ -1901,6 +1901,10 @@ packages:
       react: 18.3.1
       tslib: 2.6.3
     dev: false
+
+  /@drizzle-team/brocli@0.8.2:
+    resolution: {integrity: sha512-zTrFENsqGvOkBOuHDC1pXCkDXNd2UhP4lI3gYGhQ1R1SPeAAfqzPsV1dcpMy4uNU6kB5VpU5NGhvwxVNETR02A==}
+    dev: true
 
   /@egjs/agent@2.4.3:
     resolution: {integrity: sha512-XvksSENe8wPeFlEVouvrOhKdx8HMniJ3by7sro2uPF3M6QqWwjzVcmvwoPtdjiX8O1lfRoLhQMp1a7NGlVTdIA==}
@@ -9931,10 +9935,11 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /drizzle-kit@0.22.8:
-    resolution: {integrity: sha512-VjI4wsJjk3hSqHSa3TwBf+uvH6M6pRHyxyoVbt935GUzP9tUR/BRZ+MhEJNgryqbzN2Za1KP0eJMTgKEPsalYQ==}
+  /drizzle-kit@0.24.0:
+    resolution: {integrity: sha512-rUl5Rf5HLOVkAwHEVEi8xgulIRWzoys0q77RHGCxv5e9v8AI3JGFg7Ug5K1kn513RwNZbuNJMUKOXo0j8kPRgg==}
     hasBin: true
     dependencies:
+      '@drizzle-team/brocli': 0.8.2
       '@esbuild-kit/esm-loader': 2.6.5
       esbuild: 0.19.12
       esbuild-register: 3.6.0(esbuild@0.19.12)
@@ -10034,13 +10039,105 @@ packages:
       '@neondatabase/serverless': 0.9.4
     dev: false
 
-  /drizzle-zod@0.5.1(drizzle-orm@0.31.4)(zod@3.23.8):
+  /drizzle-orm@0.33.0(@neondatabase/serverless@0.9.4):
+    resolution: {integrity: sha512-SHy72R2Rdkz0LEq0PSG/IdvnT3nGiWuRk+2tXZQ90GVq/XQhpCzu/EFT3V2rox+w8MlkBQxifF8pCStNYnERfA==}
+    peerDependencies:
+      '@aws-sdk/client-rds-data': '>=3'
+      '@cloudflare/workers-types': '>=3'
+      '@electric-sql/pglite': '>=0.1.1'
+      '@libsql/client': '*'
+      '@neondatabase/serverless': '>=0.1'
+      '@op-engineering/op-sqlite': '>=2'
+      '@opentelemetry/api': ^1.4.1
+      '@planetscale/database': '>=1'
+      '@prisma/client': '*'
+      '@tidbcloud/serverless': '*'
+      '@types/better-sqlite3': '*'
+      '@types/pg': '*'
+      '@types/react': '>=18'
+      '@types/sql.js': '*'
+      '@vercel/postgres': '>=0.8.0'
+      '@xata.io/client': '*'
+      better-sqlite3: '>=7'
+      bun-types: '*'
+      expo-sqlite: '>=13.2.0'
+      knex: '*'
+      kysely: '*'
+      mysql2: '>=2'
+      pg: '>=8'
+      postgres: '>=3'
+      prisma: '*'
+      react: '>=18'
+      sql.js: '>=1'
+      sqlite3: '>=5'
+    peerDependenciesMeta:
+      '@aws-sdk/client-rds-data':
+        optional: true
+      '@cloudflare/workers-types':
+        optional: true
+      '@electric-sql/pglite':
+        optional: true
+      '@libsql/client':
+        optional: true
+      '@neondatabase/serverless':
+        optional: true
+      '@op-engineering/op-sqlite':
+        optional: true
+      '@opentelemetry/api':
+        optional: true
+      '@planetscale/database':
+        optional: true
+      '@prisma/client':
+        optional: true
+      '@tidbcloud/serverless':
+        optional: true
+      '@types/better-sqlite3':
+        optional: true
+      '@types/pg':
+        optional: true
+      '@types/react':
+        optional: true
+      '@types/sql.js':
+        optional: true
+      '@vercel/postgres':
+        optional: true
+      '@xata.io/client':
+        optional: true
+      better-sqlite3:
+        optional: true
+      bun-types:
+        optional: true
+      expo-sqlite:
+        optional: true
+      knex:
+        optional: true
+      kysely:
+        optional: true
+      mysql2:
+        optional: true
+      pg:
+        optional: true
+      postgres:
+        optional: true
+      prisma:
+        optional: true
+      react:
+        optional: true
+      sql.js:
+        optional: true
+      sqlite3:
+        optional: true
+    dependencies:
+      '@neondatabase/serverless': 0.9.4
+    dev: false
+
+  /drizzle-zod@0.5.1(drizzle-orm@0.33.0)(zod@3.23.8):
     resolution: {integrity: sha512-C/8bvzUH/zSnVfwdSibOgFjLhtDtbKYmkbPbUCq46QZyZCH6kODIMSOgZ8R7rVjoI+tCj3k06MRJMDqsIeoS4A==}
     peerDependencies:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.31.4(@neondatabase/serverless@0.9.4)
+      drizzle-orm: 0.33.0(@neondatabase/serverless@0.9.4)
       zod: 3.23.8
     dev: false
 

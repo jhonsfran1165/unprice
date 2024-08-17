@@ -26,7 +26,6 @@ import {
 import { planVersionFeatures } from "./planVersionFeatures"
 import { versions } from "./planVersions"
 import { projects } from "./projects"
-import { usage } from "./usage"
 
 // subscriptions contains the information about the subscriptions of the customers to different items
 // like plans, addons, etc.
@@ -155,7 +154,7 @@ export const subscriptionItems = pgTableProject(
   })
 )
 
-export const subscriptionItemRelations = relations(subscriptionItems, ({ one, many }) => ({
+export const subscriptionItemRelations = relations(subscriptionItems, ({ one }) => ({
   subscription: one(subscriptions, {
     fields: [subscriptionItems.subscriptionId, subscriptionItems.projectId],
     references: [subscriptions.id, subscriptions.projectId],
@@ -164,7 +163,6 @@ export const subscriptionItemRelations = relations(subscriptionItems, ({ one, ma
     fields: [subscriptionItems.featurePlanVersionId, subscriptionItems.projectId],
     references: [planVersionFeatures.id, planVersionFeatures.projectId],
   }),
-  usages: many(usage),
 }))
 
 export const subscriptionRelations = relations(subscriptions, ({ one, many }) => ({

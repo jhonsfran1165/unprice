@@ -3,9 +3,8 @@ import { and, count, eq, getTableColumns } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import {
   type Subscription,
-  customerSelectSchema,
-  planVersionSelectBaseSchema,
   searchParamsSchemaDataTable,
+  subscriptionExtendedWithItemsSchema,
   subscriptionInsertSchema,
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
@@ -13,6 +12,7 @@ import { z } from "zod"
 
 import { withDateFilters, withPagination } from "@unprice/db/utils"
 import { addDays, format } from "date-fns"
+import { buildItemsBySubscriptionIdQuery } from "../../queries/subscriptions"
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
@@ -44,12 +44,7 @@ export const subscriptionRouter = createTRPCRouter({
     .input(searchParamsSchemaDataTable)
     .output(
       z.object({
-        subscriptions: subscriptionSelectSchema
-          .extend({
-            customer: customerSelectSchema,
-            version: planVersionSelectBaseSchema,
-          })
-          .array(),
+        subscriptions: subscriptionExtendedWithItemsSchema.array(),
         pageCount: z.number(),
       })
     )
@@ -66,15 +61,28 @@ export const subscriptionRouter = createTRPCRouter({
           eq(columns.projectId, project.id),
         ]
 
+        const items = await buildItemsBySubscriptionIdQuery({
+          db: opts.ctx.db,
+        })
+
         // Transaction is used to ensure both queries are executed in a single transaction
         const { data, total } = await opts.ctx.db.transaction(async (tx) => {
           const query = tx
+            .with(items)
             .select({
               subscriptions: schema.subscriptions,
               customer: customerColumns,
               version: versionColumns,
+              items: items.items,
             })
             .from(schema.subscriptions)
+            .leftJoin(
+              items,
+              and(
+                eq(items.subscriptionId, schema.subscriptions.id),
+                eq(items.projectId, schema.subscriptions.projectId)
+              )
+            )
             .innerJoin(
               schema.customers,
               and(
@@ -126,6 +134,7 @@ export const subscriptionRouter = createTRPCRouter({
               ...data.subscriptions,
               customer: data.customer,
               version: data.version,
+              items: data.items,
             }
           })
 

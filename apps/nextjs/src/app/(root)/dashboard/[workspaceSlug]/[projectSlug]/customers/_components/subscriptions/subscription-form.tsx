@@ -13,7 +13,7 @@ import {
   SUBSCRIPTION_TYPES,
   WHEN_TO_BILLING,
 } from "@unprice/db/utils"
-import type { InsertSubscription, Subscription } from "@unprice/db/validators"
+import type { InsertSubscription, Subscription, SubscriptionItem } from "@unprice/db/validators"
 import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@unprice/db/validators"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
@@ -45,7 +45,9 @@ export function SubscriptionForm({
   readOnly,
 }: {
   setDialogOpen?: (open: boolean) => void
-  defaultValues: InsertSubscription | Subscription
+  defaultValues:
+    | (InsertSubscription & { items?: SubscriptionItem[] })
+    | (Subscription & { items?: SubscriptionItem[] })
   isChangePlanSubscription?: boolean
   readOnly?: boolean
 }) {
@@ -191,6 +193,7 @@ export function SubscriptionForm({
     if (planVersion && subscriptionPlanId && !isChangePlanSubscription) {
       const { err, val: itemsConfig } = createDefaultSubscriptionConfig({
         planVersion: planVersion,
+        items: defaultValues.items,
       })
 
       if (err) {
@@ -205,6 +208,7 @@ export function SubscriptionForm({
     if (newPlanVersion && subscriptionNewPlanId && isChangePlanSubscription) {
       const { err, val: itemsConfig } = createDefaultSubscriptionConfig({
         planVersion: newPlanVersion,
+        items: defaultValues.items,
       })
 
       if (err) {
@@ -578,6 +582,7 @@ export function SubscriptionForm({
               form={form}
               items={items}
               selectedPlanVersion={selectedNewPlanVersion}
+              isDisabled={readOnly}
             />
           )}
 
@@ -587,6 +592,7 @@ export function SubscriptionForm({
               form={form}
               items={items}
               selectedPlanVersion={selectedPlanVersion}
+              isDisabled={readOnly}
             />
           )}
         </div>

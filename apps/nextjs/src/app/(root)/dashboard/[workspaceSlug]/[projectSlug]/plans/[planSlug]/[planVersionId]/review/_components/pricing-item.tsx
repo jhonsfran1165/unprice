@@ -52,13 +52,16 @@ export function ItemPriceCard({
     onValueChange: (value: number) => setQuantity(value),
   }
   const freeUnits = calculateFreeUnits({ feature })
+
   const freeUnitsText =
     freeUnits === Number.POSITIVE_INFINITY
       ? feature.limit
         ? `Up to ${nFormatter(feature.limit)}`
         : "Unlimited"
       : freeUnits === 0
-        ? ""
+        ? feature.limit
+          ? `Up to ${nFormatter(feature.limit)}`
+          : ""
         : nFormatter(freeUnits)
 
   switch (feature.featureType) {

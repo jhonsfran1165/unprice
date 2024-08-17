@@ -8,6 +8,13 @@
       "when": 1723905415252,
       "tag": "0000_mushy_gideon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1724058489093,
+      "tag": "0001_wild_winter_soldier",
+      "breakpoints": true
     }
   ]
 }

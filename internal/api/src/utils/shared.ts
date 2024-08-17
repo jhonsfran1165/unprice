@@ -7,7 +7,7 @@ import {
   createDefaultSubscriptionConfig,
   type subscriptionInsertSchema,
 } from "@unprice/db/validators"
-import { addDays } from "date-fns"
+import { addDays, getMonth, getYear } from "date-fns"
 import type { z } from "zod"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
@@ -38,17 +38,15 @@ export const verifyFeature = async ({
   })
 
   // current year and month - we only support current month and year for now
-  const t = new Date()
-  t.setUTCMonth(t.getUTCMonth() - 1)
-  const year = t.getUTCFullYear()
-  const month = t.getUTCMonth() + 1 // months are 0 indexed
+  const currentMonth = getMonth(Date.now()) + 1
+  const currentYear = getYear(Date.now())
 
   const { err, val } = await customer.verifyFeature({
     customerId,
     featureSlug,
     projectId,
-    year,
-    month,
+    year: currentYear,
+    month: currentMonth,
     ctx,
   })
 
@@ -147,18 +145,16 @@ export const reportUsageFeature = async ({
   })
 
   // current year and month - we only support current month and year for now
-  const t = new Date()
-  t.setUTCMonth(t.getUTCMonth() - 1)
-  const year = t.getUTCFullYear()
-  const month = t.getUTCMonth() + 1 // months are 0 indexed
+  const currentMonth = getMonth(Date.now()) + 1
+  const currentYear = getYear(Date.now())
 
   const { err, val } = await customer.reportUsage({
     customerId,
     featureSlug,
     projectId,
     usage,
-    year,
-    month,
+    year: currentYear,
+    month: currentMonth,
   })
 
   if (err) {
@@ -447,6 +443,8 @@ export const createSubscription = async ({
         )
 
         const customerSubscriptions = subscriptions.map((sub) => sub.id)
+        const currentMonth = getMonth(Date.now()) + 1
+        const currentYear = getYear(Date.now())
 
         return Promise.all([
           // save the customer entitlements
@@ -457,7 +455,7 @@ export const createSubscription = async ({
           subscriptions.flatMap((sub) =>
             sub.items.map((f) =>
               ctx.cache.featureByCustomerId.set(
-                `${sub.customerId}:${f.featurePlanVersion.feature.slug}`,
+                `${sub.customerId}:${f.featurePlanVersion.feature.slug}:${currentYear}:${currentMonth}`,
                 {
                   id: f.id,
                   projectId: f.projectId,
@@ -466,6 +464,10 @@ export const createSubscription = async ({
                   units: f.units,
                   featureType: f.featurePlanVersion.featureType,
                   aggregationMethod: f.featurePlanVersion.aggregationMethod,
+                  limit: f.featurePlanVersion.limit,
+                  currentUsage: 0,
+                  lastUpdatedAt: 0,
+                  realtime: !!f.featurePlanVersion.metadata?.realtime,
                 }
               )
             )

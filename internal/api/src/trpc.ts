@@ -26,7 +26,7 @@ import { type Metrics, NoopMetrics } from "./pkg/metrics"
 import { LogdrainMetrics } from "./pkg/metrics/logdrain"
 import { transformer } from "./transformer"
 import { projectGuard } from "./utils"
-import { apikeyGuard } from "./utils/apaikey-guard"
+import { apikeyGuard } from "./utils/apikey-guard"
 import { RATE_LIMIT_WINDOW, redis } from "./utils/upstash"
 import { workspaceGuard } from "./utils/workspace-guard"
 

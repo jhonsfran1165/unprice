@@ -75,7 +75,7 @@ export class UnpriceApiKey {
       }
 
       // save the data in the cache
-      this.waitUntil(this.cache.apiKeyByHash.set(`${apiKeyHash}`, apikey))
+      this.waitUntil(this.cache.apiKeyByHash.set(`${apikey.hash}`, apikey))
 
       return Ok(apikey)
     }

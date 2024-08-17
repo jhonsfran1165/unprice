@@ -63,7 +63,11 @@ export const columns: ColumnDef<Customer>[] = [
     accessorKey: "defaultCurrency",
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Currency" />,
-    cell: ({ row }) => <Badge className="text-sm">{row.original.defaultCurrency}</Badge>,
+    cell: ({ row }) => (
+      <Badge className="text-xs" variant="secondary">
+        {row.original.defaultCurrency}
+      </Badge>
+    ),
     filterFn: (row, id, value) => {
       return Array.isArray(value) && value.includes(row.getValue(id))
     },

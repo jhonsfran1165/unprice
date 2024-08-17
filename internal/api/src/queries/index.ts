@@ -1,24 +1,29 @@
 import type { Database } from "@unprice/db"
 
-import { getCustomerFeatureUsagePrepared, getFeatureItemBySlugPrepared } from "@unprice/db/queries"
-import { usage as usageTable } from "@unprice/db/schema"
-import { newId } from "@unprice/db/utils"
+import { getFeatureItemBySlugPrepared } from "@unprice/db/queries"
 import type { Logger } from "@unprice/logging"
-import type { CurrentUsageCached, SubscriptionItemCached } from "../pkg/cache/namespaces"
+import type { Analytics } from "@unprice/tinybird"
+import type { SubscriptionItemCached } from "../pkg/cache/namespaces"
 import type { Metrics } from "../pkg/metrics"
 
 export const getCustomerFeatureQuery = async ({
   projectId,
   featureSlug,
   customerId,
+  month,
+  year,
   metrics,
   logger,
+  analytics,
 }: {
   projectId: string
   featureSlug: string
   customerId: string
+  month: number
+  year: number
   metrics: Metrics
   logger: Logger
+  analytics: Analytics
 }): Promise<SubscriptionItemCached | null> => {
   const start = performance.now()
 
@@ -28,19 +33,41 @@ export const getCustomerFeatureQuery = async ({
       customerId,
       featureSlug,
     })
-    .then((res) => {
+    .then(async (res) => {
       const data = res?.[0]
-      const response = data
-        ? {
-            id: data.subscriptionItem.id,
-            projectId: data.subscriptionItem.projectId,
-            subscriptionId: data.subscriptionItem.subscriptionId,
-            featurePlanVersionId: data.subscriptionItem.featurePlanVersionId,
-            units: data.subscriptionItem.units,
-            featureType: data.featurePlanVersion.featureType,
-            aggregationMethod: data.featurePlanVersion.aggregationMethod,
-          }
-        : null
+
+      if (!data) {
+        return null
+      }
+
+      // get the current usage
+      const usageData = await analytics
+        .getTotalUsagePerFeature({
+          customerId,
+          featureSlug,
+          projectId,
+          // TODO: better to query by month and year instead? so customers can report usage for previous months??
+          start: new Date(year, month - 1, 1).getTime(),
+          end: new Date(year, month).getTime(),
+        })
+        .then((usage) => usage.data[0])
+
+      // this will be the usage of the feature for the period
+      const usage = usageData ? usageData[data.featurePlanVersion.aggregationMethod] || 0 : 0
+
+      const response = {
+        id: data.subscriptionItem.id,
+        projectId: data.subscriptionItem.projectId,
+        subscriptionId: data.subscriptionItem.subscriptionId,
+        featurePlanVersionId: data.subscriptionItem.featurePlanVersionId,
+        units: data.subscriptionItem.units,
+        featureType: data.featurePlanVersion.featureType,
+        aggregationMethod: data.featurePlanVersion.aggregationMethod,
+        limit: data.featurePlanVersion.limit,
+        currentUsage: usage,
+        realtime: !!data.featurePlanVersion.metadata?.realtime,
+        lastUpdatedAt: Date.now(),
+      }
 
       return response
     })
@@ -64,146 +91,6 @@ export const getCustomerFeatureQuery = async ({
   })
 
   return feature
-}
-
-export const getCustomerFeatureUsageQuery = async ({
-  projectId,
-  featureSlug,
-  customerId,
-  metrics,
-  logger,
-  month,
-  year,
-}: {
-  projectId: string
-  featureSlug: string
-  customerId: string
-  year: number
-  month: number
-  metrics: Metrics
-  logger: Logger
-}): Promise<CurrentUsageCached | null> => {
-  const start = performance.now()
-
-  const usage = await getCustomerFeatureUsagePrepared
-    .execute({
-      projectId,
-      customerId,
-      featureSlug,
-      month,
-      year,
-    })
-    .then((res) => {
-      const data = res?.[0]
-      const response = data?.usage
-        ? {
-            limit: data.usage.limit,
-            usage: data.usage.usage,
-            month: data.usage.month,
-            year: data.usage.year,
-            updatedAtM: data.usage.updatedAtM,
-          }
-        : null
-
-      return response
-    })
-    .catch((error) => {
-      logger.error("Error in getCustomerFeatureUsageQuery", {
-        error: JSON.stringify(error),
-        projectId,
-        featureSlug,
-      })
-
-      return null
-    })
-
-  const end = performance.now()
-
-  metrics.emit({
-    metric: "metric.db.read",
-    query: "customerFeatureUsage",
-    duration: end - start,
-    service: "customer",
-  })
-
-  return usage
-}
-
-export const reportUsageQuery = async ({
-  projectId,
-  subscriptionItemId,
-  db,
-  metrics,
-  logger,
-  usage,
-}: {
-  projectId: string
-  subscriptionItemId: string
-  db: Database
-  metrics: Metrics
-  logger: Logger
-  usage: CurrentUsageCached
-}): Promise<CurrentUsageCached | null> => {
-  const start = performance.now()
-
-  // update the usage in database
-  const usageData = await db
-    .insert(usageTable)
-    .values({
-      id: newId("usage"),
-      projectId: projectId,
-      subscriptionItemId: subscriptionItemId,
-      usage: usage.usage,
-      limit: usage.limit,
-      updatedAtM: usage.updatedAtM,
-      year: usage.year,
-      month: usage.month,
-    })
-    .onConflictDoUpdate({
-      target: [
-        usageTable.projectId,
-        usageTable.subscriptionItemId,
-        usageTable.month,
-        usageTable.year,
-      ],
-      set: {
-        usage: usage.usage,
-        limit: usage.limit,
-        updatedAtM: usage.updatedAtM,
-      },
-    })
-    .returning()
-    .then((res) => {
-      return res?.[0]
-        ? {
-            usage: res[0].usage,
-            limit: res[0].limit,
-            month: res[0].month,
-            year: res[0].year,
-            updatedAtM: res[0].updatedAtM,
-          }
-        : null
-    })
-    .catch((error) => {
-      logger.error("Error reporting usage to the database reportUsageQuery", {
-        error: JSON.stringify(error),
-        projectId,
-        subscriptionItemId,
-        usage,
-      })
-      return null
-    })
-
-  const end = performance.now()
-
-  metrics.emit({
-    metric: "metric.db.write",
-    query: "reportUsageFeature",
-    duration: end - start,
-    service: "customer",
-  })
-
-  return usageData
 }
 
 export const getEntitlementsQuery = async ({

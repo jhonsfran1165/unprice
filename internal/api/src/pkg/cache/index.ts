@@ -14,6 +14,10 @@ export async function initCache(c: Context, metrics: Metrics): Promise<C<CacheNa
   // in memory cache
   const memory = new MemoryStore<CacheNamespace, CacheNamespaces[CacheNamespace]>({
     persistentMap,
+    unstableEvictOnSet: {
+      frequency: 0.1,
+      maxItems: 5000,
+    },
   })
 
   // redis cache
@@ -46,10 +50,7 @@ export async function initCache(c: Context, metrics: Metrics): Promise<C<CacheNa
         memoryStoreWithMetrics,
       ],
     }),
-    featureByCustomerId: new Namespace<CacheNamespaces["featureByCustomerId"]>(c, {
-      ...defaultOpts,
-      fresh: 60 * 1000 * 10, // 10 minutes
-    }),
+    featureByCustomerId: new Namespace<CacheNamespaces["featureByCustomerId"]>(c, defaultOpts),
     entitlementsByCustomerId: new Namespace<CacheNamespaces["entitlementsByCustomerId"]>(
       c,
       defaultOpts
@@ -58,17 +59,13 @@ export async function initCache(c: Context, metrics: Metrics): Promise<C<CacheNa
       c,
       {
         ...defaultOpts,
-        stale: 60 * 1000, // 1 minute
+        stale: 60 * 1000, // 1 minute short live hash idempotent request usage
       }
     ),
     subscriptionsByCustomerId: new Namespace<CacheNamespaces["subscriptionsByCustomerId"]>(
       c,
       defaultOpts
     ),
-    customerFeatureCurrentUsage: new Namespace<CacheNamespaces["customerFeatureCurrentUsage"]>(c, {
-      ...defaultOpts,
-      fresh: 60 * 1000 * 5, // refresh usage every 5 minutes
-    }),
   })
 }
 

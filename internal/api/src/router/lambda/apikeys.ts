@@ -11,7 +11,7 @@ import {
   selectApiKeySchema,
 } from "@unprice/db/validators"
 
-import { withDateFilters, withPagination } from "@unprice/db/utils"
+import { hashStringSHA256, withDateFilters, withPagination } from "@unprice/db/utils"
 import { createTRPCRouter, protectedActiveProjectProcedure } from "../../trpc"
 
 export const apiKeyRouter = createTRPCRouter({
@@ -92,6 +92,8 @@ export const apiKeyRouter = createTRPCRouter({
 
       // Generate the key
       const apiKey = utils.newId("apikey_key")
+      // generate hash of the key
+      const apiKeyHash = await hashStringSHA256(apiKey)
 
       const newApiKey = await opts.ctx.db
         .insert(schema.apikeys)
@@ -99,6 +101,7 @@ export const apiKeyRouter = createTRPCRouter({
           id: apiKeyId,
           name: name,
           key: apiKey,
+          hash: apiKeyHash,
           expiresAt: expiresAt,
           projectId: project.id,
         })
@@ -139,11 +142,7 @@ export const apiKeyRouter = createTRPCRouter({
 
       // remove from cache
       opts.ctx.waitUntil(
-        Promise.all(
-          result.map(async (apikey) =>
-            opts.ctx.cache.apiKeyByHash.remove(await utils.hashStringSHA256(apikey.key))
-          )
-        )
+        Promise.all(result.map(async (apikey) => opts.ctx.cache.apiKeyByHash.remove(apikey.hash)))
       )
 
       return { success: true, numRevoked: result.length }
@@ -173,10 +172,12 @@ export const apiKeyRouter = createTRPCRouter({
 
       // Generate a new key
       const newKey = utils.newId("apikey_key")
+      // generate hash of the key
+      const apiKeyHash = await hashStringSHA256(newKey)
 
       const newApiKey = await opts.ctx.db
         .update(schema.apikeys)
-        .set({ key: newKey, updatedAtM: Date.now() })
+        .set({ key: newKey, updatedAtM: Date.now(), hash: apiKeyHash })
         .where(eq(schema.apikeys.id, opts.input.id))
         .returning()
         .then((res) => res[0])
@@ -187,6 +188,9 @@ export const apiKeyRouter = createTRPCRouter({
           message: "Failed to roll API key",
         })
       }
+
+      // remove from cache
+      opts.ctx.waitUntil(opts.ctx.cache.apiKeyByHash.remove(apiKey.hash))
 
       return { apikey: newApiKey }
     }),

@@ -18,7 +18,6 @@ export const apikeyGuard = async ({
     })
   }
 
-  // TODO: save the hash on creating and work with it
   const ApiKey = new UnpriceApiKey({
     cache: ctx.cache,
     db: ctx.db,

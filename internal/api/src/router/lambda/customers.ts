@@ -8,15 +8,15 @@ import {
   customerInsertBaseSchema,
   customerSelectSchema,
   paymentProviderSchema,
-  planVersionSelectBaseSchema,
   searchParamsSchemaDataTable,
-  subscriptionSelectSchema,
+  subscriptionExtendedWithItemsSchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
 
 import { withDateFilters, withPagination } from "@unprice/db/utils"
 import { deniedReasonSchema } from "../../pkg/errors"
 import { StripePaymentProvider } from "../../pkg/payment-provider/stripe"
+import { buildItemsBySubscriptionIdQuery } from "../../queries/subscriptions"
 import { createTRPCRouter, protectedApiOrActiveProjectProcedure } from "../../trpc"
 import { getEntitlements, reportUsageFeature, verifyFeature } from "../../utils/shared"
 
@@ -494,12 +494,7 @@ export const customersRouter = createTRPCRouter({
     .output(
       z.object({
         customer: customerSelectSchema.extend({
-          subscriptions: subscriptionSelectSchema
-            .extend({
-              customer: customerSelectSchema,
-              version: planVersionSelectBaseSchema,
-            })
-            .array(),
+          subscriptions: subscriptionExtendedWithItemsSchema.array(),
         }),
       })
     )
@@ -527,12 +522,25 @@ export const customersRouter = createTRPCRouter({
         })
       }
 
+      const items = await buildItemsBySubscriptionIdQuery({
+        db: opts.ctx.db,
+      })
+
       const customerWithSubscriptions = await opts.ctx.db
+        .with(items)
         .select({
           subscriptions: schema.subscriptions,
           version: versionColumns,
+          items: items.items,
         })
         .from(schema.subscriptions)
+        .leftJoin(
+          items,
+          and(
+            eq(items.subscriptionId, schema.subscriptions.id),
+            eq(items.projectId, schema.subscriptions.projectId)
+          )
+        )
         .innerJoin(
           schema.customers,
           and(
@@ -565,6 +573,7 @@ export const customersRouter = createTRPCRouter({
           ...data.subscriptions,
           version: data.version,
           customer: customerData,
+          items: data.items,
         }
       })
 
@@ -733,6 +742,8 @@ export const customersRouter = createTRPCRouter({
     .output(
       z.object({
         success: z.boolean(),
+        message: z.string().optional(),
+        cacheHit: z.boolean().optional(),
       })
     )
     .query(async (opts) => {
@@ -747,7 +758,9 @@ export const customersRouter = createTRPCRouter({
 
       if (result.val) {
         return {
-          success: result.val,
+          success: result.val.access,
+          message: result.val.message,
+          cacheHit: true,
         }
       }
 
@@ -765,10 +778,16 @@ export const customersRouter = createTRPCRouter({
         ctx,
       })
 
-      ctx.waitUntil(opts.ctx.cache.idempotentRequestUsageByHash.set(hashKey, response.success))
+      // cache the result
+      ctx.waitUntil(
+        opts.ctx.cache.idempotentRequestUsageByHash.set(hashKey, {
+          access: response.success,
+          message: response.message,
+        })
+      )
 
       return {
-        success: response.success,
+        ...response,
       }
     }),
 })

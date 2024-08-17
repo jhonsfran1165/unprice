@@ -17,7 +17,7 @@
     "knip": "knip --include files,dependencies",
     "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply",
     "fmt": "pnpm biome format . && pnpm biome check .",
-    "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt",
+    "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:fix",
     "manypkg:fix": "pnpm manypkg fix",
     "commit": "cz",
     "bump-versions": "pnpm changeset version && pnpm install",

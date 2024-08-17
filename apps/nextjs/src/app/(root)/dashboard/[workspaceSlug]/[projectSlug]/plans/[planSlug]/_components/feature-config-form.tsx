@@ -176,6 +176,29 @@ export function FeatureConfigForm({
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="metadata.realtime"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="font-semibold text-sm">Report usage in realtime</FormLabel>
+                <FormDescription className="font-normal text-sm">
+                  When enabled, the usage is synced immediately to the analytics. By default usage
+                  is update every 5 minutes. Use this if you need to ensure limits are not exceeded.
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value ?? false}
+                  onCheckedChange={field.onChange}
+                  disabled={isPublished}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
         <Separator />
 
         <div className="flex flex-col gap-2">

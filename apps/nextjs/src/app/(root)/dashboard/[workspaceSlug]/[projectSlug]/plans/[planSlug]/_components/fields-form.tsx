@@ -292,7 +292,6 @@ export function TierFormField({
                           <TooltipContent
                             className="w-32 bg-background-bg font-normal text-xs"
                             align="center"
-                            side="right"
                           >
                             First unit for the tier range. For the first tier, this should be 0.
                             <TooltipArrow className="fill-background-bg" />
@@ -330,7 +329,6 @@ export function TierFormField({
                           <TooltipContent
                             className="w-48 bg-background-bg font-normal text-xs"
                             align="center"
-                            side="right"
                           >
                             If the usage is less than the tier up to value, then the flat price is
                             charged. For infinite usage, use 9999999.
@@ -378,7 +376,6 @@ export function TierFormField({
                           <TooltipContent
                             className="w-32 bg-background-bg font-normal text-xs"
                             align="center"
-                            side="right"
                           >
                             Flat price of the tier, it will be sum to usage price.
                             <TooltipArrow className="fill-background-bg" />
@@ -394,6 +391,7 @@ export function TierFormField({
                           <Input
                             {...field}
                             value={field.value ?? ""}
+                            disabled={isDisabled}
                             onChange={(e) => {
                               field.onChange(e.target.value)
 
@@ -434,7 +432,6 @@ export function TierFormField({
                           <TooltipContent
                             className="w-32 bg-background-bg font-normal text-xs"
                             align="center"
-                            side="right"
                           >
                             Price per unit
                             <TooltipArrow className="fill-background-bg" />
@@ -447,7 +444,7 @@ export function TierFormField({
                       <FormControl>
                         <div className="relative">
                           <DollarSignIcon className="absolute top-2 left-2 h-4 w-4 text-muted-foreground" />
-                          <Input {...field} className="h-8 pl-8" />
+                          <Input {...field} className="h-8 pl-8" disabled={isDisabled} />
                         </div>
                       </FormControl>
                     </FormItem>

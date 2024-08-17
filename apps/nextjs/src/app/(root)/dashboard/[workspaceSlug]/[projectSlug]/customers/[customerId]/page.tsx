@@ -52,10 +52,10 @@ export default async function PlanPage({
                   defaultValues={{
                     customerId: customer.id,
                     projectId: customer.projectId,
+                    timezone: customer.timezone,
                     planVersionId: "",
                     type: "plan",
                     collectionMethod: "charge_automatically",
-                    timezone: "UTC",
                     startCycle: "first_day_of_month",
                     whenToBill: "pay_in_arrear",
                     autoRenew: true,
