@@ -45,7 +45,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const deleteInvite = api.workspaces.deleteInvite.useMutation({
     onSettled: async () => {
       setAlertOpen(false)
-      await apiUtils.workspaces.listInvites.invalidate()
+      await apiUtils.workspaces.listInvitesByActiveWorkspace.invalidate()
       router.refresh()
     },
     onSuccess: () => {

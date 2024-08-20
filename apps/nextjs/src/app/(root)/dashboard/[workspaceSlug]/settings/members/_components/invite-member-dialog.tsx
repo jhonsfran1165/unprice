@@ -12,11 +12,7 @@ import {
 
 import { InviteMemberForm } from "./invite-member-form"
 
-export const InviteMemberDialog = ({
-  workspaceSlug,
-}: {
-  workspaceSlug: string
-}) => {
+export const InviteMemberDialog = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -27,7 +23,7 @@ export const InviteMemberDialog = ({
           <DialogTitle>Invite to workspace</DialogTitle>
           <DialogDescription>Invite a member to this workspace</DialogDescription>
         </DialogHeader>
-        <InviteMemberForm workspaceSlug={workspaceSlug} />
+        <InviteMemberForm />
       </DialogContent>
     </Dialog>
   )

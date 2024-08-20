@@ -41,7 +41,7 @@ export default function Page(props: {
   }
 
   // prefetch data for the workspace and project
-  void trpc.workspaces.listWorkspaces.prefetch(undefined, {
+  void trpc.workspaces.listWorkspacesByActiveUser.prefetch(undefined, {
     staleTime: 1000 * 60 * 60, // 1 hour
   })
 

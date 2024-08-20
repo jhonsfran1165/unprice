@@ -1,4 +1,3 @@
-import { searchDataParamsSchema } from "@unprice/db/validators"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
 
 import { DataTable } from "~/components/data-table/data-table"
@@ -9,25 +8,9 @@ import { InviteMemberDialog } from "./_components/invite-member-dialog"
 import { columns as columnsInvites } from "./_components/table-invites/columns"
 import { columns as columnsMembers } from "./_components/table-members/columns"
 
-export default async function WorkspaceMembersPage(props: {
-  params: { workspaceSlug: string }
-  searchParams: Record<string, string | string[] | undefined>
-}) {
-  const parsed = searchDataParamsSchema.safeParse(props.searchParams)
-
-  const filter = {
-    workspaceSlug: props.params.workspaceSlug,
-    fromDate: undefined as number | undefined,
-    toDate: undefined as number | undefined,
-  }
-
-  if (parsed?.success) {
-    filter.fromDate = parsed.data.fromDate
-    filter.toDate = parsed.data.toDate
-  }
-
-  const { members } = await api.workspaces.listMembers(filter)
-  const { invites } = await api.workspaces.listInvites(filter)
+export default async function WorkspaceMembersPage() {
+  const { members } = await api.workspaces.listMembersByActiveWorkspace()
+  const { invites } = await api.workspaces.listInvitesByActiveWorkspace()
 
   return (
     <DashboardShell
@@ -35,7 +18,7 @@ export default async function WorkspaceMembersPage(props: {
         <HeaderTab
           title="Members Settings"
           description="Manage your users for this workspace"
-          action={<InviteMemberDialog workspaceSlug={""} />}
+          action={<InviteMemberDialog />}
         />
       }
     >

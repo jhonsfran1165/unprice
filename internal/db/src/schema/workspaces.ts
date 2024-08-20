@@ -4,7 +4,7 @@ import { bigint, boolean, foreignKey, primaryKey, text } from "drizzle-orm/pg-co
 import { pgTableProject } from "../utils/_table"
 import { cuid, id, timestamps, workspaceID } from "../utils/sql"
 import { users } from "./auth"
-import { plansEnum, teamRolesEnum } from "./enums"
+import { teamRolesEnum } from "./enums"
 import { projects } from "./projects"
 
 export const workspaces = pgTableProject(
@@ -26,9 +26,6 @@ export const workspaces = pgTableProject(
     // unprice id
     // in Postgres 15.0+ NULLS NOT DISTINCT is available
     unPriceCustomerId: text("unprice_customer_id").notNull().unique("unprice_customer_id"),
-
-    // TODO: remove this
-    plan: plansEnum("legacy_plans").default("FREE").notNull(),
 
     /**
      * if the workspace is disabled, all API requests will be rejected

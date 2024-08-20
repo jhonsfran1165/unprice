@@ -33,7 +33,7 @@ export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
 
   const deleteWorkspace = api.workspaces.delete.useMutation({
     onSettled: async () => {
-      await apiUtils.projects.listByWorkspace.invalidate()
+      await apiUtils.projects.listByActiveWorkspace.invalidate()
       router.refresh()
     },
     onSuccess: () => {
@@ -45,7 +45,7 @@ export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
   function handleDelete() {
     startTransition(() => {
       deleteWorkspace.mutate({
-        slug: workspace.slug,
+        id: workspace.id,
       })
     })
   }

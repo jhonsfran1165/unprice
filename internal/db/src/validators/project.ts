@@ -34,7 +34,6 @@ export const projectExtendedSelectSchema = projectSelectBaseSchema
     workspace: workspaceSelectBase.pick({
       unPriceCustomerId: true,
       enabled: true,
-      plan: true,
       isPersonal: true,
     }),
   })

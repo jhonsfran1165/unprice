@@ -22,18 +22,13 @@ import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export const InviteMemberForm = ({
-  workspaceSlug,
-}: {
-  workspaceSlug: string
-}) => {
+export const InviteMemberForm = () => {
   const router = useRouter()
 
   const form = useZodForm({
     schema: inviteMembersSchema,
     defaultValues: {
       email: "",
-      workspaceSlug,
       role: utils.ROLES_APP[0],
     },
   })

@@ -10,7 +10,7 @@ import { Checkbox } from "@unprice/ui/checkbox"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { DataTableRowActions } from "./data-table-row-actions"
 
-export type Member = RouterOutputs["workspaces"]["listMembers"]["members"][number]
+export type Member = RouterOutputs["workspaces"]["listMembersByActiveWorkspace"]["members"][number]
 
 export const columns: ColumnDef<Member>[] = [
   {

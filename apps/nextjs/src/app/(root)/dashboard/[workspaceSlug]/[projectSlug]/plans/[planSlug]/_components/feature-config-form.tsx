@@ -346,8 +346,8 @@ export function FeatureConfigForm({
         )}
 
         {planVersion.status !== "published" && (
-          <div className="mt-8 flex justify-end space-x-4">
-            <div className="flex flex-col p-4">
+          <div className="flex justify-end space-x-4">
+            <div className="mt-8 flex flex-col">
               <div className="flex justify-end gap-4">
                 <Button
                   variant={"link"}

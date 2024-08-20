@@ -63,7 +63,7 @@ export const authConfig = {
           ...data,
           // use our own id generator
           id: utils.newId("user"),
-          emailVerified: new Date(),
+          emailVerified: new Date(), // TODO: this is not true, we need to verify the email
         })
         .returning()
         .then((user) => user[0] ?? null)
@@ -226,7 +226,6 @@ export const authConfig = {
           slug: member.workspace.slug,
           role: member.role,
           isPersonal: member.workspace.isPersonal,
-          plan: member.workspace.plan,
           enabled: member.workspace.enabled,
           unPriceCustomerId: member.workspace.unPriceCustomerId,
         }))

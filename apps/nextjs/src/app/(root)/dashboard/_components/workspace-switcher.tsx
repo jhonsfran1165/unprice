@@ -29,7 +29,7 @@ export function WorkspaceSwitcher({
   const [switcherOpen, setSwitcherOpen] = useState(false)
   const [newOrgDialogOpen, setNewOrgDialogOpen] = useState(false)
 
-  const [data] = api.workspaces.listWorkspaces.useSuspenseQuery(undefined, {
+  const [data] = api.workspaces.listWorkspacesByActiveUser.useSuspenseQuery(undefined, {
     staleTime: 1000 * 60 * 60, // 1 hour // TODO: invalidate on create from newOrgDialog
   })
 

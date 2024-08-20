@@ -12,7 +12,7 @@ export default function WorkSpaceSettingsMembersLoading() {
         <HeaderTab
           title="Members Settings"
           description="Manage your users for this workspace"
-          action={<InviteMemberDialog workspaceSlug={""} />}
+          action={<InviteMemberDialog />}
         />
       }
     >

@@ -25,6 +25,8 @@ import {
   usePlanVersionFeatureOpen,
 } from "./use-features"
 
+import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
+
 const featureVariants = cva(
   "flex gap-2 rounded-lg border text-left text-sm transition-all bg-background-bgSubtle hover:bg-background-bgHover",
   {
@@ -127,15 +129,43 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
                     </div>
                   )}
                   {planFeatureVersion.hidden && (
-                    <div className="flex items-center gap-1">
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    </div>
+                    <Tooltip>
+                      <div className="flex items-center justify-center gap-2 font-normal text-xs">
+                        <span>
+                          <TooltipTrigger asChild>
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                        </span>
+                      </div>
+
+                      <TooltipContent
+                        className="bg-background-bg font-normal text-xs"
+                        align="center"
+                      >
+                        This feature is hidden in the pricing card.
+                        <TooltipArrow className="fill-background-bg" />
+                      </TooltipContent>
+                    </Tooltip>
                   )}
 
                   {planFeatureVersion.metadata?.realtime && (
-                    <div className="flex items-center gap-1">
-                      <Zap className="h-4 w-4 text-warning" />
-                    </div>
+                    <Tooltip>
+                      <div className="flex items-center justify-center gap-2 font-normal text-xs">
+                        <span>
+                          <TooltipTrigger asChild>
+                            <Zap className="h-4 w-4 text-warning" />
+                          </TooltipTrigger>
+                        </span>
+                      </div>
+
+                      <TooltipContent
+                        className="bg-background-bg font-normal text-xs"
+                        align="center"
+                      >
+                        This feature is reporting usage in realtime.
+                        <TooltipArrow className="fill-background-bg" />
+                      </TooltipContent>
+                    </Tooltip>
                   )}
                 </div>
                 <div className="flex items-center gap-1 text-xs">

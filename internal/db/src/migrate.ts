@@ -51,7 +51,6 @@ async function main() {
         isPersonal: false,
         imageUrl: "",
         unPriceCustomerId: "",
-        plan: "PRO",
         enabled: true,
         isInternal: true,
         createdBy: user.id,
@@ -63,7 +62,6 @@ async function main() {
     workspace = await db
       .update(schema.workspaces)
       .set({
-        plan: "PRO",
         isPersonal: false,
         isInternal: true,
         enabled: true,

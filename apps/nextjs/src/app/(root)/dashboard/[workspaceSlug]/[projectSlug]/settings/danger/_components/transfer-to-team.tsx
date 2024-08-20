@@ -33,7 +33,7 @@ export function TransferProjectToTeam({
 }: {
   projectSlug: string
   workspaceSlug: string
-  workspacesPromise: Promise<RouterOutputs["workspaces"]["listWorkspaces"]>
+  workspacesPromise: Promise<RouterOutputs["workspaces"]["listWorkspacesByActiveUser"]>
 }) {
   const { workspaces } = use(workspacesPromise)
   const router = useRouter()

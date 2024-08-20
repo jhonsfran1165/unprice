@@ -180,6 +180,7 @@ export class UnpriceCustomer {
         deniedReason?: DenyReason
         remaining?: number
         featureType?: FeatureType
+        units?: number
       },
       UnPriceCustomerError | FetchError
     >
@@ -259,6 +260,27 @@ export class UnpriceCustomer {
           const remainingUsage = units ? units - currentUsage : undefined
           const remainingToLimit = limit ? limit - currentUsage : undefined
 
+          // check limits first
+          if (remainingToLimit && remainingToLimit <= 0) {
+            this.waitUntil(
+              this.analytics.ingestFeaturesVerification({
+                ...analyticsPayload,
+                latency: performance.now() - start,
+                deniedReason: "LIMIT_EXCEEDED",
+              })
+            )
+
+            return Ok({
+              currentUsage: currentUsage,
+              limit: limit ?? undefined,
+              units: units ?? undefined,
+              featureType: subItem.featureType,
+              access: false,
+              deniedReason: "LIMIT_EXCEEDED",
+              remaining: remainingToLimit,
+            })
+          }
+
           // check usage
           if (remainingUsage && remainingUsage <= 0) {
             this.waitUntil(
@@ -273,29 +295,10 @@ export class UnpriceCustomer {
               currentUsage: currentUsage,
               limit: limit ?? undefined,
               featureType: subItem.featureType,
+              units: units ?? undefined,
               access: false,
               deniedReason: "USAGE_EXCEEDED",
               remaining: remainingUsage,
-            })
-          }
-
-          // check limits
-          if (remainingToLimit && remainingToLimit <= 0) {
-            this.waitUntil(
-              this.analytics.ingestFeaturesVerification({
-                ...analyticsPayload,
-                latency: performance.now() - start,
-                deniedReason: "LIMIT_EXCEEDED",
-              })
-            )
-
-            return Ok({
-              currentUsage: currentUsage,
-              limit: limit ?? undefined,
-              featureType: subItem.featureType,
-              access: false,
-              deniedReason: "LIMIT_EXCEEDED",
-              remaining: remainingToLimit,
             })
           }
 

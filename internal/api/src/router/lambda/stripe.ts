@@ -1,21 +1,10 @@
 import { TRPCError } from "@trpc/server"
-import { z } from "zod"
-
-import { APP_DOMAIN, PLANS } from "@unprice/config"
 import { and, eq } from "@unprice/db"
 import { features, planVersionFeatures } from "@unprice/db/schema"
 import { toStripeMoney } from "@unprice/db/utils"
-import {
-  calculateFlatPricePlan,
-  calculatePricePerFeature,
-  purchaseWorkspaceSchema,
-} from "@unprice/db/validators"
-import { stripe } from "@unprice/stripe"
-import {
-  createTRPCRouter,
-  protectedActiveWorkspaceProcedure,
-  rateLimiterProcedure,
-} from "../../trpc"
+import { calculateFlatPricePlan, calculatePricePerFeature } from "@unprice/db/validators"
+import { z } from "zod"
+import { createTRPCRouter, rateLimiterProcedure } from "../../trpc"
 
 export const stripeRouter = createTRPCRouter({
   // createLinkAccount: protectedActiveProjectProcedure
@@ -66,50 +55,6 @@ export const stripeRouter = createTRPCRouter({
   //     if (!accountLink.url) return { success: false as const, url: "" }
   //     return { success: true as const, url: accountLink.url }
   //   }),
-  createSession: protectedActiveWorkspaceProcedure
-    .input(z.object({ planId: z.string() }))
-    .output(z.object({ success: z.boolean(), url: z.string() }))
-    .mutation(async (opts) => {
-      const workspace = opts.ctx.workspace
-      const user = opts.ctx.session.user
-      // TODO: fix returnUrl
-      const returnUrl = `${APP_DOMAIN}/`
-
-      if (!user?.email) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "User email is not defined",
-        })
-      }
-
-      if (workspace && workspace.plan !== "FREE" && workspace.unPriceCustomerId) {
-        /**
-         * User is subscribed, create a billing portal session
-         */
-        const session = await stripe.billingPortal.sessions.create({
-          customer: workspace.unPriceCustomerId ?? "",
-          return_url: returnUrl,
-        })
-        return { success: true as const, url: session.url }
-      }
-
-      const session = await stripe.checkout.sessions.create({
-        mode: "subscription",
-        payment_method_types: ["card"],
-        customer_email: user.email,
-        client_reference_id: user.id,
-        subscription_data: {
-          metadata: { userId: user.id },
-        },
-        cancel_url: returnUrl,
-        success_url: returnUrl,
-        line_items: [{ price: PLANS.PRO?.priceId, quantity: 1 }],
-      })
-
-      if (!session.url) return { success: false as const, url: "" }
-      return { success: true as const, url: session.url }
-    }),
-
   // TODO: add output and migrate to plans endpoint
   plans: rateLimiterProcedure.input(z.void()).query(async (opts) => {
     // TODO: fix get only the prices with latest version
@@ -226,13 +171,4 @@ export const stripeRouter = createTRPCRouter({
       },
     ]
   }),
-
-  purchaseOrg: protectedActiveWorkspaceProcedure
-    .input(purchaseWorkspaceSchema)
-    .mutation(async () => {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "You can't purchase a workspace for now",
-      })
-    }),
 })

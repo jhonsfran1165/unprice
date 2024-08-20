@@ -471,6 +471,8 @@ export const planRouter = createTRPCRouter({
       z.object({
         fromDate: z.number().optional(),
         toDate: z.number().optional(),
+        published: z.boolean().optional(),
+        active: z.boolean().optional(),
       })
     )
     .output(
@@ -491,13 +493,18 @@ export const planRouter = createTRPCRouter({
       })
     )
     .query(async (opts) => {
-      const { fromDate, toDate } = opts.input
+      const { fromDate, toDate, published, active } = opts.input
       const project = opts.ctx.project
+
+      const needsPublished = published === undefined || published
+      const needsActive = active === undefined || active
 
       const plans = await opts.ctx.db.query.plans.findMany({
         with: {
           versions: {
-            where: (version, { eq }) => eq(version.status, "published"),
+            where: (version, { eq }) =>
+              // get published versions by default, only get unpublished versions if the user wants it
+              needsPublished ? eq(version.status, "published") : undefined,
             orderBy: (version, { desc }) => [desc(version.createdAtM)],
             columns: {
               status: true,
@@ -513,7 +520,9 @@ export const planRouter = createTRPCRouter({
             eq(plan.projectId, project.id),
             fromDate && toDate ? between(plan.createdAtM, fromDate, toDate) : undefined,
             fromDate ? gte(plan.createdAtM, fromDate) : undefined,
-            toDate ? lte(plan.createdAtM, toDate) : undefined
+            toDate ? lte(plan.createdAtM, toDate) : undefined,
+            // get active versions by default, only get inactive versions if the user wants it
+            needsActive ? eq(plan.active, true) : undefined
           ),
       })
 

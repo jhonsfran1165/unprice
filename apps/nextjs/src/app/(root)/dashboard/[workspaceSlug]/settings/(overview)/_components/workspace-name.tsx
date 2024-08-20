@@ -1,7 +1,6 @@
 "use client"
 
-import type { RenameWorkspace, Workspace } from "@unprice/db/validators"
-import { renameWorkspaceSchema } from "@unprice/db/validators"
+import type { Workspace } from "@unprice/db/validators"
 import {
   Card,
   CardContent,
@@ -13,6 +12,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
 import { useRouter } from "next/navigation"
+import { z } from "zod"
 
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -26,16 +26,17 @@ export function WorkspaceName(props: {
   const apiUtils = api.useUtils()
 
   const form = useZodForm({
-    schema: renameWorkspaceSchema,
+    schema: z.object({
+      name: z.string().min(3, "Name must be at least 3 characters"),
+    }),
     defaultValues: {
       name: props.workspace.name,
-      slug: props.workspace.slug,
     },
   })
 
-  const renamedWorkspace = api.workspaces.renameWorkspace.useMutation({
+  const renamedWorkspace = api.workspaces.rename.useMutation({
     onSettled: async () => {
-      await apiUtils.workspaces.listWorkspaces.invalidate()
+      await apiUtils.workspaces.listWorkspacesByActiveUser.invalidate()
       router.refresh()
     },
     onSuccess: () => {
@@ -43,7 +44,7 @@ export function WorkspaceName(props: {
     },
   })
 
-  async function onSubmit(data: RenameWorkspace) {
+  async function onSubmit(data: { name: string }) {
     await renamedWorkspace.mutateAsync(data)
   }
 

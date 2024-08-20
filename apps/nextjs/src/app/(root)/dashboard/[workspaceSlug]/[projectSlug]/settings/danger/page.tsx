@@ -15,7 +15,7 @@ export default async function DangerZonePage(props: {
       />
 
       <TransferProjectToTeam
-        workspacesPromise={api.workspaces.listWorkspaces()}
+        workspacesPromise={api.workspaces.listWorkspacesByActiveUser()}
         workspaceSlug={props.params.workspaceSlug}
         projectSlug={props.params.projectSlug}
       />

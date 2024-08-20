@@ -21,7 +21,7 @@ export const selectApiKeyHeaderSchema = selectApiKeySchema.pick({
   key: true,
 })
 
-export const ApiKeyExtended = selectApiKeySchema
+export const apiKeyExtendedSelectSchema = selectApiKeySchema
   .pick({
     id: true,
     projectId: true,
@@ -35,4 +35,4 @@ export const ApiKeyExtended = selectApiKeySchema
 
 export type CreateApiKey = z.infer<typeof createApiKeySchema>
 export type ApiKey = z.infer<typeof selectApiKeySchema>
-export type ApiKeyExtended = z.infer<typeof ApiKeyExtended>
+export type ApiKeyExtended = z.infer<typeof apiKeyExtendedSelectSchema>

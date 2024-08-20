@@ -16,7 +16,7 @@ export async function handleEvent(event: Stripe.Event) {
 
       const subscription = await stripe.subscriptions.retrieve(session.subscription)
 
-      const stripeId =
+      const _stripeId =
         typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id
       const { userId } = subscription.metadata
 
@@ -25,12 +25,6 @@ export async function handleEvent(event: Stripe.Event) {
       }
 
       // stripeId is unique so we can rely on that to filter the right workspace and user
-      const workspaceData = await db.query.workspaces.findFirst({
-        columns: {
-          id: true,
-        },
-        where: (workspace, { eq, and }) => and(eq(workspace.unPriceCustomerId, stripeId)),
-      })
 
       // const subscriptionPlan = stripePriceToSubscriptionPlan(
       //   subscription.items.data[0]?.price.id
@@ -40,15 +34,6 @@ export async function handleEvent(event: Stripe.Event) {
       /**
        * User is already subscribed, update their info
        */
-      if (workspaceData) {
-        return await db
-          .update(schema.workspaces)
-          .set({
-            // billingPeriodEnd: new Date(subscription.current_period_end * 1000),
-            plan: "PRO", // TODO: fix this
-          })
-          .where(eq(schema.workspaces.id, workspaceData.id))
-      }
 
       /**
        * User is not subscribed, create a new customer and workspace
@@ -72,18 +57,6 @@ export async function handleEvent(event: Stripe.Event) {
       if (typeof invoice.subscription !== "string") {
         throw new Error("Missing or invalid subscription id")
       }
-      const subscription = await stripe.subscriptions.retrieve(invoice.subscription)
-
-      // const subscriptionPlan = stripePriceToSubscriptionPlan(
-      //   subscription.items.data[0]?.price.id
-      // )
-
-      await db
-        .update(schema.workspaces)
-        .set({
-          plan: "PRO", // TODO: fix this
-        })
-        .where(eq(schema.workspaces.unPriceCustomerId, subscription.id))
 
       break
     }
@@ -99,7 +72,6 @@ export async function handleEvent(event: Stripe.Event) {
       await db
         .update(schema.workspaces)
         .set({
-          plan: "FREE",
           isPersonal: true,
         })
         .where(eq(schema.workspaces.unPriceCustomerId, stripeId))
@@ -107,21 +79,9 @@ export async function handleEvent(event: Stripe.Event) {
       break
     }
     case "customer.subscription.updated": {
-      const subscription = event.data.object
-      const stripeId =
-        typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id
-
       // const subscriptionPlan = stripePriceToSubscriptionPlan(
       //   subscription.items.data[0]?.price.id
       // )
-
-      await db
-        .update(schema.workspaces)
-        .set({
-          plan: "PRO", // TODO: fix this
-          // billingPeriodEnd
-        })
-        .where(eq(schema.workspaces.unPriceCustomerId, stripeId))
 
       break
     }

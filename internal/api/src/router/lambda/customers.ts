@@ -707,6 +707,7 @@ export const customersRouter = createTRPCRouter({
         currentUsage: z.number().optional(),
         limit: z.number().optional(),
         featureType: z.custom<FeatureType>().optional(),
+        units: z.number().optional(),
       })
     )
     .query(async (opts) => {

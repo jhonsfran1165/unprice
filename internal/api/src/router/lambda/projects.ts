@@ -11,7 +11,7 @@ import {
   renameProjectSchema,
   transferToPersonalProjectSchema,
   transferToWorkspaceSchema,
-  workspaceSelectSchema,
+  workspaceSelectBase,
 } from "@unprice/db/validators"
 
 import {
@@ -135,36 +135,6 @@ export const projectRouter = createTRPCRouter({
         project: deletedProject,
       }
     }),
-
-  // TODO: improve this
-  canAccessProject: protectedProcedure
-    .input(z.object({ slug: z.string(), needsToBeInTier: z.array(z.string()) }))
-    .output(z.object({ haveAccess: z.boolean(), isInTier: z.boolean() }))
-    .query(async (opts) => {
-      const { slug: projectSlug, needsToBeInTier: tier } = opts.input
-
-      try {
-        const { project: projectData } = await projectGuard({
-          projectSlug,
-          ctx: opts.ctx,
-        })
-
-        if (tier.includes(projectData.workspace.plan)) {
-          return {
-            haveAccess: true,
-            isInTier: true,
-          }
-        }
-
-        return {
-          haveAccess: projectData.slug === projectSlug,
-          isInTier: tier.includes(projectData.workspace.plan),
-        }
-      } catch (_error) {
-        return { haveAccess: false, isInTier: false }
-      }
-    }),
-
   transferToPersonal: protectedActiveWorkspaceAdminProcedure
     .input(transferToPersonalProjectSchema)
     .output(
@@ -310,7 +280,7 @@ export const projectRouter = createTRPCRouter({
             styles: z.object({
               backgroundImage: z.string(),
             }),
-            workspace: workspaceSelectSchema.pick({
+            workspace: workspaceSelectBase.pick({
               slug: true,
             }),
           })
@@ -361,7 +331,7 @@ export const projectRouter = createTRPCRouter({
             styles: z.object({
               backgroundImage: z.string(),
             }),
-            workspace: workspaceSelectSchema.pick({
+            workspace: workspaceSelectBase.pick({
               slug: true,
             }),
           })
@@ -413,7 +383,7 @@ export const projectRouter = createTRPCRouter({
     .output(
       z.object({
         project: projectSelectBaseSchema.extend({
-          workspace: workspaceSelectSchema,
+          workspace: workspaceSelectBase,
         }),
       })
     )
@@ -444,7 +414,7 @@ export const projectRouter = createTRPCRouter({
     .output(
       z.object({
         project: projectSelectBaseSchema.extend({
-          workspace: workspaceSelectSchema,
+          workspace: workspaceSelectBase,
         }),
       })
     )

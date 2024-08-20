@@ -56,7 +56,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
 
   const deleteMember = api.workspaces.deleteMember.useMutation({
     onSettled: async () => {
-      await apiUtils.workspaces.listMembers.invalidate()
+      await apiUtils.workspaces.listMembersByActiveWorkspace.invalidate()
       router.refresh()
     },
     onSuccess: () => {
@@ -66,7 +66,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
 
   const changeRoleMember = api.workspaces.changeRoleMember.useMutation({
     onSettled: async () => {
-      await apiUtils.workspaces.listMembers.invalidate()
+      await apiUtils.workspaces.listMembersByActiveWorkspace.invalidate()
       router.refresh()
     },
     onSuccess: () => {
@@ -80,7 +80,6 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
 
       await changeRoleMember.mutateAsync({
         userId: member.userId,
-        workspaceId: member.workspaceId,
         role: selectedRole,
       })
     })
