@@ -1,5 +1,4 @@
 "use client"
-import type { InsertSubscription } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import {
   Command,
@@ -10,6 +9,11 @@ import {
   CommandList,
   CommandLoading,
 } from "@unprice/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
+import { cn } from "@unprice/ui/utils"
+import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form"
+
+import type { RouterOutputs } from "@unprice/api"
 import {
   FormControl,
   FormDescription,
@@ -18,35 +22,48 @@ import {
   FormLabel,
   FormMessage,
 } from "@unprice/ui/form"
-import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
-import { cn } from "@unprice/ui/utils"
+import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { CheckIcon, ChevronDown } from "lucide-react"
 import { useState } from "react"
-import type { UseFormReturn } from "react-hook-form"
 import { FilterScroll } from "~/components/filter-scroll"
-import { TIMEZONES } from "~/lib/timezones"
+import { api } from "~/trpc/client"
 
-export default function TimeZoneCustomerSubscriptionFormField({
+type PlanVersion = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
+
+interface FormValues extends FieldValues {
+  planVersionId: string
+}
+
+export default function SelectPlanFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
-  isLoading,
 }: {
-  form: UseFormReturn<InsertSubscription>
+  form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
-  isLoading?: boolean
 }) {
   const [switcherCustomerOpen, setSwitcherCustomerOpen] = useState(false)
+  const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersion>()
+
+  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
+    {
+      published: true,
+      active: true,
+      enterprisePlan: true,
+    },
+    {
+      refetchOnWindowFocus: false,
+      enabled: isDisabled, // only fetch plans when dialog is open
+    }
+  )
 
   return (
     <FormField
       control={form.control}
-      name="timezone"
+      name={"planVersionId" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>Timezone</FormLabel>
-          <FormDescription>
-            This subscription will use this timezone for all its invoices.
-          </FormDescription>
+          <FormLabel>Select plan</FormLabel>
+          <FormDescription>Select the plan to create the subscription</FormDescription>
           <Popover
             modal={true}
             open={switcherCustomerOpen}
@@ -65,7 +82,13 @@ export default function TimeZoneCustomerSubscriptionFormField({
                     disabled={isDisabled}
                     className={cn("w-full justify-between")}
                   >
-                    {field.value}
+                    {isLoading ? (
+                      <LoadingAnimation className="h-4 w-4" variant="dots" />
+                    ) : selectedPlanVersion ? (
+                      `${selectedPlanVersion.plan.slug} v${selectedPlanVersion.version} - ${selectedPlanVersion.title} - ${selectedPlanVersion.billingPeriod}`
+                    ) : (
+                      "Select plan"
+                    )}
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </FormControl>
@@ -73,31 +96,37 @@ export default function TimeZoneCustomerSubscriptionFormField({
             </PopoverTrigger>
             <PopoverContent className="max-h-[--radix-popover-content-available-height] w-[--radix-popover-trigger-width] p-0">
               <Command>
-                <CommandInput placeholder="Search a timezone..." />
+                <CommandInput placeholder="Search a plan..." />
                 <CommandList>
-                  <CommandEmpty>No timezone found.</CommandEmpty>
+                  <CommandEmpty>No plan found.</CommandEmpty>
                   <FilterScroll>
                     <CommandGroup>
                       {isLoading && <CommandLoading>Loading...</CommandLoading>}
                       <div className="flex flex-col gap-2 pt-1">
-                        {TIMEZONES.map((timezone) => (
+                        {data?.planVersions.map((version) => (
                           <CommandItem
-                            value={timezone.tzCode}
-                            key={timezone.tzCode}
+                            value={`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
+                            key={version.id}
                             onSelect={() => {
-                              field.onChange(timezone.tzCode)
+                              field.onChange(version.id)
                               setSwitcherCustomerOpen(false)
+                              setSelectedPlanVersion(version)
                             }}
                           >
                             <CheckIcon
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                timezone.tzCode === field.value ? "opacity-100" : "opacity-0"
+                                version.id === field.value ? "opacity-100" : "opacity-0"
                               )}
                             />
-                            {`${timezone.label}`}
+                            {`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
                           </CommandItem>
                         ))}
+                        {data?.planVersions.length === 0 && (
+                          <CommandItem disabled className="w-full justify-center">
+                            No data provided
+                          </CommandItem>
+                        )}
                       </div>
                     </CommandGroup>
                   </FilterScroll>

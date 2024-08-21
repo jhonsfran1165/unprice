@@ -1,7 +1,4 @@
 "use client"
-import type { UseFormReturn } from "react-hook-form"
-
-import type { InsertCustomer } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import {
   Command,
@@ -24,15 +21,20 @@ import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { cn } from "@unprice/ui/utils"
 import { CheckIcon, ChevronDown } from "lucide-react"
 import { useState } from "react"
+import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form"
 import { FilterScroll } from "~/components/filter-scroll"
 import { TIMEZONES } from "~/lib/timezones"
 
-export default function TimeZoneCustomerFormField({
+interface FormValues extends FieldValues {
+  timezone?: string
+}
+
+export default function TimeZoneFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
   isLoading,
 }: {
-  form: UseFormReturn<InsertCustomer>
+  form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
   isLoading?: boolean
 }) {
@@ -41,12 +43,12 @@ export default function TimeZoneCustomerFormField({
   return (
     <FormField
       control={form.control}
-      name="timezone"
+      name={"timezone" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>Timezone</FormLabel>
           <FormDescription>
-            This customer will use this timezone for all its invoices.
+            This subscription will use this timezone for all its invoices.
           </FormDescription>
           <Popover
             modal={true}

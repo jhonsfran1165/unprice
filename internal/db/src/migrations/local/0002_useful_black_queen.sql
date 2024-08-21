@@ -1,0 +1,2 @@
+ALTER TABLE "unprice_plan_versions" ADD COLUMN "collection_method" "collection_method" DEFAULT 'charge_automatically' NOT NULL;--> statement-breakpoint
+ALTER TABLE "unprice_workspaces" DROP COLUMN IF EXISTS "legacy_plans";

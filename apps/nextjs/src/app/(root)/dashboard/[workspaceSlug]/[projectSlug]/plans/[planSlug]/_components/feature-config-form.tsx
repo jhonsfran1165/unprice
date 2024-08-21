@@ -94,6 +94,9 @@ export function FeatureConfigForm({
       usageMode: defaultValues.config?.usageMode ?? "tier",
       tierMode: defaultValues.config?.tierMode ?? "volume",
       units: defaultValues.config?.units ?? 1,
+      metadata: {
+        realtime: defaultValues?.metadata?.realtime ?? false,
+      },
     },
   }
 

@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@unprice/ui/dialog"
 import { useState } from "react"
-import { PaymentMethodForm } from "./payment-method-form"
+import { PaymentMethodForm } from "~/components/forms/payment-method-form"
 
 interface PaymentMethodDialogProps {
   customerId: string

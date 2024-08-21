@@ -1,41 +1,63 @@
 "use client"
 
-import type { UseFormReturn } from "react-hook-form"
-
-import type { RouterOutputs } from "@unprice/api"
 import { APP_DOMAIN } from "@unprice/config"
-import type { InsertSubscription } from "@unprice/db/validators"
+import type { PaymentProvider } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { RadioGroup, RadioGroupItem } from "@unprice/ui/radio-group"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { useParams } from "next/navigation"
+import type { FieldErrors, FieldPath, FieldValues, UseFormReturn } from "react-hook-form"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import { PaymentMethodDialog } from "../customers/payment-method-dialog"
+import { PaymentMethodDialog } from "~/components/forms/payment-method-dialog"
+import { api } from "~/trpc/client"
 
-type PaymentMethodProviderData =
-  RouterOutputs["customers"]["listPaymentMethods"]["paymentMethods"][number]
+interface FormValues extends FieldValues {
+  customerId: string
+  defaultPaymentMethodId?: string | null
+  subscriptionCustomerId?: string | null
+}
 
-export default function PaymentMethodsFormField({
+export default function PaymentMethodsFormField<TFieldValues extends FormValues>({
   form,
-  paymentMethods,
   isDisabled,
-  isLoading,
+  paymentProvider,
 }: {
-  form: UseFormReturn<InsertSubscription>
-  paymentMethods: PaymentMethodProviderData[]
+  form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
-  isLoading?: boolean
+  paymentProvider: PaymentProvider
 }) {
   const workspaceSlug = useParams().workspaceSlug as string
   const projectSlug = useParams().projectSlug as string
-  const customerId = form.getValues("customerId")
-  const hasPaymentMethods = paymentMethods.length > 0
+  const customerId = form.getValues("customerId" as FieldPath<TFieldValues>)
   const successUrl = `${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`
   const cancelUrl = `${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`
 
   const { errors } = form.formState
+
+  const { data, isLoading } = api.customers.listPaymentMethods.useQuery(
+    {
+      customerId: customerId,
+      provider: paymentProvider,
+    },
+    {
+      enabled: customerId !== "",
+    }
+  )
+
+  const hasPaymentMethods = (data?.paymentMethods.length ?? 0) > 0
+
+  // Helper function to safely get the error message
+  const getErrorMessage = (
+    errors: FieldErrors<TFieldValues>,
+    field: string
+  ): string | undefined => {
+    const error = errors[field as keyof typeof errors]
+    return error && typeof error === "object" && "message" in error
+      ? (error.message as string)
+      : undefined
+  }
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -53,14 +75,15 @@ export default function PaymentMethodsFormField({
         <div className="font-normal text-xs leading-snug">
           {"Select the payment method you want to use for this subscription."}
         </div>
+
         {errors.defaultPaymentMethodId && (
-          <FormMessage>{errors.defaultPaymentMethodId.message}</FormMessage>
+          <FormMessage>{getErrorMessage(errors, "defaultPaymentMethodId")}</FormMessage>
         )}
       </div>
       {hasPaymentMethods && (
         <FormField
           control={form.control}
-          name="defaultPaymentMethodId"
+          name={"defaultPaymentMethodId" as FieldPath<TFieldValues>}
           render={({ field }) => (
             <FormItem className="w-full space-y-1">
               <RadioGroup
@@ -72,7 +95,7 @@ export default function PaymentMethodsFormField({
                 disabled={isDisabled}
               >
                 {/* // TODO: add payment method link */}
-                {paymentMethods.map((method) => (
+                {data?.paymentMethods.map((method) => (
                   <FormItem key={method.id}>
                     <FormLabel
                       htmlFor={`radio-${method.id}`}

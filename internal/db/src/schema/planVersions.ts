@@ -15,6 +15,7 @@ import { cuid, projectID, timestamps } from "../utils/sql"
 import type { PlanVersionMetadata } from "../validators/planVersions"
 import { users } from "./auth"
 import {
+  collectionMethodEnum,
   currencyEnum,
   paymentProviderEnum,
   planBillingPeriodEnum,
@@ -89,6 +90,12 @@ export const versions = pgTableProject(
     startCycle: startCycleEnum("start_cycle").default("first_day_of_month"), // null means the first day of the month
     // used for generating invoices -
     gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
+    // collection method for the subscription - charge_automatically or send_invoice
+    collectionMethod: collectionMethodEnum("collection_method")
+      .notNull()
+      .default("charge_automatically"),
+    // TODO: add trialDays
+    // trialDays: integer("trial_days").default(0),
     // ************ billing data defaults ************
 
     // metadata probably will be useful to save external data, etc.

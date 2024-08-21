@@ -57,6 +57,10 @@ export default async function PlanPage({
                     currency: "USD",
                     planType: "recurring",
                     paymentProvider: "stripe",
+                    startCycle: "first_day_of_month",
+                    billingPeriod: "month",
+                    collectionMethod: "charge_automatically",
+                    whenToBill: "pay_in_arrear",
                   }}
                 >
                   <Button variant={"custom"}>

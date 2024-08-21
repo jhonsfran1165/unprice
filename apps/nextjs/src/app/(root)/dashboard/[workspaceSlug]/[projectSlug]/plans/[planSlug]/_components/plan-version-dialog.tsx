@@ -43,6 +43,11 @@ export function PlanVersionDialog({
               currency: "USD",
               planType: "recurring",
               paymentProvider: "stripe",
+              description: "",
+              startCycle: "first_day_of_month",
+              billingPeriod: "month",
+              collectionMethod: "charge_automatically",
+              whenToBill: "pay_in_arrear",
             }
           }
           setDialogOpen={setDialogOpen}

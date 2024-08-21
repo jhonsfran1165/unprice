@@ -5,6 +5,7 @@ import { and, eq, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
+  calculateFlatPricePlan,
   configFlatSchema,
   configPackageSchema,
   configTierSchema,
@@ -23,6 +24,7 @@ import {
 } from "../../trpc"
 
 import { APP_NAME } from "@unprice/config"
+import { isZero } from "dinero.js"
 
 export const planVersionRouter = createTRPCRouter({
   create: protectedActiveProjectAdminProcedure
@@ -624,7 +626,10 @@ export const planVersionRouter = createTRPCRouter({
             .values({
               ...planVersionData,
               id: planVersionId,
-              metadata: {},
+              metadata: {
+                // external Id shouldn't be duplicated
+                paymentMethodRequired: planVersionData.metadata?.paymentMethodRequired,
+              },
               latest: false,
               active: true,
               status: "draft",
@@ -796,6 +801,21 @@ export const planVersionRouter = createTRPCRouter({
               })
           }
 
+          // verify if the payment method is required
+          const { err, val: totalPricePlan } = calculateFlatPricePlan({
+            planVersion: planVersionData,
+          })
+
+          if (err) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Error calculating price plan",
+            })
+          }
+
+          // if the flat price is not zero, then the payment method is required
+          const paymentMethodRequired = !isZero(totalPricePlan.dinero)
+
           // set the latest version to false if there is a latest version for this plan
           await tx
             .update(schema.versions)
@@ -820,6 +840,12 @@ export const planVersionRouter = createTRPCRouter({
               publishedAt: Date.now(),
               publishedBy: opts.ctx.userId,
               latest: true,
+              ...(paymentMethodRequired && {
+                metadata: {
+                  ...planVersionData.metadata,
+                  paymentMethodRequired,
+                },
+              }),
             })
             .where(and(eq(schema.versions.id, planVersionData.id)))
             .returning()

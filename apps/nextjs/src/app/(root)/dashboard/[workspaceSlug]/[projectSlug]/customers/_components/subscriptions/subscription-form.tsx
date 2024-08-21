@@ -21,6 +21,8 @@ import { Separator } from "@unprice/ui/separator"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
+import PaymentMethodsFormField from "~/components/forms/payment-method-field"
+import TimeZoneFormField from "~/components/forms/timezone-field"
 import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -30,10 +32,8 @@ import CustomerFormField from "./customer-field"
 import DurationFormField from "./duration-field"
 import EndDateFormField from "./enddate-field"
 import ConfigItemsFormField from "./items-fields"
-import PaymentMethodsFormField from "./payment-method-field"
 import PlanNewVersionFormField from "./plan-new-version-field"
 import PlanVersionFormField from "./plan-version-field"
-import TimeZoneCustomerSubscriptionFormField from "./timezone-field"
 
 type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 type Customer = RouterOutputs["customers"]["listByActiveProject"]["customers"][0]
@@ -154,7 +154,6 @@ export function SubscriptionForm({
 
   const subscriptionPlanId = form.watch("planVersionId")
   const subscriptionNewPlanId = form.watch("nextPlanVersionTo")
-  const subscriptionCustomerId = form.watch("customerId")
 
   // customer lists
   const { data: customers, isLoading: isCustomersLoading } =
@@ -219,19 +218,6 @@ export function SubscriptionForm({
       items.replace(itemsConfig)
     }
   }, [subscriptionPlanId, subscriptionNewPlanId, isLoading])
-
-  const { data: paymentMethods, isLoading: isPaymentMethodsLoading } =
-    api.customers.listPaymentMethods.useQuery(
-      {
-        customerId: subscriptionCustomerId,
-        provider: isChangePlanSubscription
-          ? selectedNewPlanVersion?.paymentProvider ?? "stripe"
-          : selectedPlanVersion?.paymentProvider ?? "stripe",
-      },
-      {
-        enabled: subscriptionCustomerId !== "",
-      }
-    )
 
   // keep in sync with the customer timezone
   useEffect(() => {
@@ -398,7 +384,7 @@ export function SubscriptionForm({
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger disabled={readOnly}>
-                        <SelectValue placeholder="Select a currency" />
+                        <SelectValue placeholder="Select a collection method" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -526,7 +512,7 @@ export function SubscriptionForm({
             <Fragment>
               <Separator />
 
-              <TimeZoneCustomerSubscriptionFormField form={form} isDisabled={readOnly} />
+              <TimeZoneFormField form={form} isDisabled={readOnly} />
             </Fragment>
           )}
 
@@ -565,14 +551,16 @@ export function SubscriptionForm({
             </Fragment>
           )}
 
-          <Separator />
-
-          <PaymentMethodsFormField
-            form={form}
-            paymentMethods={paymentMethods?.paymentMethods ?? []}
-            isDisabled={readOnly}
-            isLoading={isPaymentMethodsLoading}
-          />
+          {selectedPlanVersion?.metadata?.paymentMethodRequired && (
+            <Fragment>
+              <Separator />
+              <PaymentMethodsFormField
+                form={form}
+                paymentProvider={selectedPlanVersion?.paymentProvider ?? "stripe"}
+                isDisabled={readOnly}
+              />
+            </Fragment>
+          )}
 
           <Separator />
 
@@ -608,7 +596,7 @@ export function SubscriptionForm({
               <SubmitButton
                 form="subscription-form"
                 isSubmitting={form.formState.isSubmitting}
-                isDisabled={form.formState.isSubmitting || isPaymentMethodsLoading || isLoading}
+                isDisabled={form.formState.isSubmitting || isLoading}
                 label={"Change Plan Subscription"}
               />
             </ConfirmAction>
@@ -621,7 +609,7 @@ export function SubscriptionForm({
               form="subscription-form"
               onClick={() => form.handleSubmit(onSubmitForm)()}
               isSubmitting={form.formState.isSubmitting}
-              isDisabled={form.formState.isSubmitting || isPaymentMethodsLoading || isLoading}
+              isDisabled={form.formState.isSubmitting || isLoading}
               label={"Create Subscription"}
             />
           </div>

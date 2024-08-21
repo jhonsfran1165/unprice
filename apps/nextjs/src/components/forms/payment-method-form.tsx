@@ -8,9 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react"
 
 import { Typography } from "@unprice/ui/typography"
+import { UserPaymentMethod } from "~/components/forms/payment-method"
 import { SubmitButton } from "~/components/submit-button"
 import { api } from "~/trpc/client"
-import { UserPaymentMethod } from "./payment-method"
 
 export function PaymentMethodForm({
   customerId,

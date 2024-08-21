@@ -23,11 +23,11 @@ import { CURRENCIES } from "@unprice/db/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Switch } from "@unprice/ui/switch"
 import { ConfirmAction } from "~/components/confirm-action"
+import TimeZoneFormField from "~/components/forms/timezone-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toast, toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
-import TimeZoneCustomerFormField from "./timezone-field"
 
 export function CustomerForm({
   setDialogOpen,
@@ -210,7 +210,7 @@ export function CustomerForm({
             )}
           />
 
-          <TimeZoneCustomerFormField form={form} />
+          <TimeZoneFormField form={form} />
 
           <FormField
             control={form.control}

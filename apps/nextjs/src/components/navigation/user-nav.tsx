@@ -17,15 +17,18 @@ export const UserProfileDesktop = async () => {
 
   return (
     <UserProfile session={session} align="center">
-      <Button variant="ghost" className="flex justify-between">
+      <Button variant="ghost" className="flex w-full justify-between">
         <span className="flex items-center space-x-1">
           <Avatar className="h-6 w-6">
-            <AvatarImage src={user.image ?? "/placeholder-avatar.svg"} alt={user.name ?? ""} />
-            <AvatarFallback>{user.name?.substring(2)}</AvatarFallback>
+            <AvatarImage
+              src={user.image || "/placeholder-avatar.svg"}
+              alt={user.name || "user-img"}
+            />
+            <AvatarFallback>{user.name?.substring(0, 2)}</AvatarFallback>
           </Avatar>
           <span className="line-clamp-1">{user.name}</span>
         </span>
-        <MoreVertical className="ml-2 size-5" aria-hidden="true" />
+        <MoreVertical className="ml-2 size-4" aria-hidden="true" />
       </Button>
     </UserProfile>
   )
@@ -41,10 +44,13 @@ export const UserProfileMobile = async () => {
   const user = session.user
   return (
     <UserProfile session={session} align="end">
-      <Button variant="ghost" className="h-8 w-8 rounded-full">
-        <Avatar className="h-6 w-6">
-          <AvatarImage src={user.image ?? "/placeholder-avatar.svg"} alt={user.name ?? ""} />
-          <AvatarFallback>{user.name?.substring(2)}</AvatarFallback>
+      <Button variant="ghost" className="h-8 w-8 rounded-full border">
+        <Avatar className="size-8">
+          <AvatarImage
+            src={user.image || "/placeholder-avatar.svg"}
+            alt={user.name || "user-img"}
+          />
+          <AvatarFallback>{user.name?.substring(0, 2)}</AvatarFallback>
         </Avatar>
       </Button>
     </UserProfile>

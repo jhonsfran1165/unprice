@@ -10,14 +10,22 @@ import {
   CommandList,
   CommandSeparator,
 } from "@unprice/ui/command"
-import { Dialog, DialogTrigger } from "@unprice/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@unprice/ui/dialog"
 import { Check, ChevronsUpDown, PlusCircle } from "@unprice/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { cn } from "@unprice/ui/utils"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { PropagationStopper } from "~/components/prevent-propagation"
 import { api } from "~/trpc/client"
-import NewTeamDialog from "./new-workspace"
+import NewWorkspaceForm from "./new-workspace-form"
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 
 export function WorkspaceSwitcher({
@@ -173,7 +181,26 @@ export function WorkspaceSwitcher({
         </PopoverContent>
       </Popover>
 
-      <NewTeamDialog closeDialog={() => setNewOrgDialogOpen(false)} isOpen={newOrgDialogOpen} />
+      <PropagationStopper>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Workspace Form</DialogTitle>
+            <DialogDescription>Modify the workspace details below.</DialogDescription>
+          </DialogHeader>
+
+          <NewWorkspaceForm
+            defaultValues={{
+              name: "",
+              planVersionId: "",
+              config: [],
+              defaultPaymentMethodId: "",
+              // by default pass the customerId of the active workspace
+              customerId: activeWorkspace.unPriceCustomerId,
+            }}
+            setDialogOpen={setNewOrgDialogOpen}
+          />
+        </DialogContent>
+      </PropagationStopper>
     </Dialog>
   )
 }

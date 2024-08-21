@@ -64,6 +64,10 @@ export const subscriptions = pgTableProject(
     startCycle: startCycleEnum("start_cycle").default("first_day_of_month").notNull(), // null means the first day of the month
     // used for generating invoices -
     gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
+    // collection method for the subscription - charge_automatically or send_invoice
+    collectionMethod: collectionMethodEnum("collection_method")
+      .notNull()
+      .default("charge_automatically"),
     // ************ billing data defaults ************
 
     // ************ subscription important times ************
@@ -78,10 +82,6 @@ export const subscriptions = pgTableProject(
 
     // auto renew the subscription every billing period
     autoRenew: boolean("auto_renew").default(true),
-
-    collectionMethod: collectionMethodEnum("collection_method")
-      .notNull()
-      .default("charge_automatically"),
     // whether the subscription is new or not. New means that the subscription was created in the current billing period
     isNew: boolean("is_new").default(true),
 

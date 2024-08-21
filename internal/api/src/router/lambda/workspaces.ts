@@ -8,8 +8,8 @@ import {
   invitesSelectBase,
   listMembersSchema,
   membersSelectBase,
-  workspaceInsertBase,
   workspaceSelectBase,
+  workspaceSignupSchema,
 } from "@unprice/db/validators"
 import { WelcomeEmail, sendEmail } from "@unprice/email"
 
@@ -22,23 +22,41 @@ import {
 
 export const workspaceRouter = createTRPCRouter({
   create: protectedActiveWorkspaceOwnerProcedure
-    .input(workspaceInsertBase)
+    .input(workspaceSignupSchema)
     .output(
       z.object({
         workspace: workspaceSelectBase,
       })
     )
     .mutation(async (opts) => {
+      const { name, planVersionId } = opts.input
       const _workspace = opts.ctx.workspace
       const user = opts.ctx.session?.user
 
-      // verify how many projects the workspace has
+      const planVersion = await opts.ctx.db.query.versions.findFirst({
+        where: (version, { eq }) =>
+          and(
+            eq(version.id, planVersionId),
+            eq(version.active, true),
+            eq(version.status, "published")
+          ),
+      })
+
+      if (!planVersion) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Plan version not found",
+        })
+      }
+
+      // TODO: verify how many projects the workspace has
 
       const newWorkspace = await opts.ctx.db.transaction(async (tx) => {
+        // TODO: how to handle the case when the user need a payment method before creating the workspace?
+
         // TODO: should be able to retry if the slug already exists
         const slug = utils.createSlug()
         const workspaceId = utils.newId("workspace")
-        const workspaceName = user.name ?? slug
 
         // get default project for unprice. This project is seeded in the database as the internal project
         const defaultProjectId = "proj_uhV7tetPJwCZAMox3L7Po4H5dgc"
@@ -50,9 +68,10 @@ export const workspaceRouter = createTRPCRouter({
           .insert(schema.customers)
           .values({
             id: customerId,
-            name: workspaceName,
+            name: name,
             projectId: defaultProjectId,
-            // TODO: query user email
+            // TODO: query user email - if there user already has an workspace
+            // this email will be duplicated in the customers table
             email: user.email ?? "",
             active: true,
             timezone: "UTC",
@@ -74,7 +93,7 @@ export const workspaceRouter = createTRPCRouter({
           .values({
             id: workspaceId,
             slug: slug,
-            name: workspaceName,
+            name: name,
             imageUrl: user.image,
             isPersonal: true,
             createdBy: user.id,

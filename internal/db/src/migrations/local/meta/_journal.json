@@ -15,6 +15,13 @@
       "when": 1724058489093,
       "tag": "0001_wild_winter_soldier",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1724164429834,
+      "tag": "0002_useful_black_queen",
+      "breakpoints": true
     }
   ]
 }

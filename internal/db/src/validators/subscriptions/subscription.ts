@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { Result } from "@unprice/error"
 import { Err, Ok } from "@unprice/error"
 
-import { subscriptionItems, subscriptions } from "../../schema/subscriptions"
+import { subscriptions } from "../../schema/subscriptions"
 import { customerSelectSchema } from "../customer"
 import { planVersionSelectBaseSchema } from "../planVersions"
 import { UnPriceCalculationError } from "./../errors"
@@ -16,88 +16,16 @@ import {
   subscriptionTypeSchema,
   whenToBillSchema,
 } from "./../shared"
-
-const subscriptionItemConfigSchema = z.object({
-  featurePlanId: z.string(),
-  featureSlug: z.string(),
-  units: z.coerce
-    .number()
-    .min(1)
-    .optional()
-    .describe("units of the feature the user is subscribed to"),
-  min: z.coerce
-    .number()
-    .optional()
-    .describe("minimum units of the feature the user is subscribed to"),
-  limit: z.coerce.number().optional().describe("limit of the feature the user is subscribed to"),
-})
+import {
+  type SubscriptionItem,
+  type SubscriptionItemConfig,
+  subscriptionItemsConfigSchema,
+  subscriptionItemsSelectSchema,
+} from "./items"
 
 export const subscriptionMetadataSchema = z.object({
   externalId: z.string().optional(),
 })
-
-export const subscriptionItemsSelectSchema = createSelectSchema(subscriptionItems)
-
-export const subscriptionItemsInsertSchema = createInsertSchema(subscriptionItems, {
-  // units for the item, for flat features it's always 1, usage features it's the current usage
-  units: z.coerce.number().min(1),
-}).partial({
-  id: true,
-  subscriptionId: true,
-  createdAtM: true,
-  updatedAtM: true,
-  projectId: true,
-})
-
-// stripe won't allow more than 250 items in a single invoice
-export const subscriptionItemsConfigSchema = z
-  .array(subscriptionItemConfigSchema)
-  .superRefine((items, ctx) => {
-    if (items.length > 50) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Total items for the subscription should be less than 50",
-        path: ["."],
-        fatal: true,
-      })
-
-      return false
-    }
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i]
-
-      if (item?.units && item.limit && item.units > item.limit) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `limit is ${item.limit}`,
-          path: [i, "units"],
-          fatal: true,
-        })
-
-        return false
-      }
-
-      if (item?.units && item.min && item.units < item.min) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `min is ${item.min}`,
-          path: [i, "units"],
-          fatal: true,
-        })
-
-        return false
-      }
-    }
-
-    return true
-  })
-  .refine((items) => {
-    if (items.length > 250) {
-      return false
-    }
-    return true
-  }, "Total items for the subscription should be less than 250")
 
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   metadata: subscriptionMetadataSchema,
@@ -159,10 +87,7 @@ export const subscriptionExtendedWithItemsSchema = subscriptionSelectSchema.exte
 
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>
-export type SubscriptionItem = z.infer<typeof subscriptionItemsSelectSchema>
-export type InsertSubscriptionItem = z.infer<typeof subscriptionItemsInsertSchema>
 export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
-export type SubscriptionItemConfig = z.infer<typeof subscriptionItemConfigSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,
