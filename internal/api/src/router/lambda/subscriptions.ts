@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import { and, count, eq, getTableColumns } from "@unprice/db"
+import { type Database, and, count, eq, getTableColumns } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import {
   type Subscription,
@@ -17,6 +17,7 @@ import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
   protectedActiveProjectProcedure,
+  rateLimiterProcedure,
 } from "../../trpc"
 import { createSubscription } from "../../utils/shared"
 
@@ -31,7 +32,7 @@ export const subscriptionRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { subscription } = await createSubscription({
         subscription: opts.input,
-        project: opts.ctx.project,
+        projectId: opts.ctx.project.id,
         ctx: opts.ctx,
       })
 
@@ -40,6 +41,39 @@ export const subscriptionRouter = createTRPCRouter({
       }
     }),
 
+  signUp: rateLimiterProcedure
+    .input(
+      subscriptionInsertSchema.required({
+        projectId: true,
+      })
+    )
+    .output(
+      z.object({
+        subscription: subscriptionSelectSchema,
+      })
+    )
+    .mutation(async (opts) => {
+      const project = await opts.ctx.db.query.projects.findFirst({
+        where: (project, { eq }) => eq(project.id, opts.input.projectId),
+      })
+
+      if (!project) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found",
+        })
+      }
+
+      const { subscription } = await createSubscription({
+        subscription: opts.input,
+        projectId: opts.input.projectId,
+        ctx: opts.ctx,
+      })
+
+      return {
+        subscription: subscription,
+      }
+    }),
   listByActiveProject: protectedActiveProjectProcedure
     .input(searchParamsSchemaDataTable)
     .output(
@@ -62,7 +96,7 @@ export const subscriptionRouter = createTRPCRouter({
         ]
 
         const items = await buildItemsBySubscriptionIdQuery({
-          db: opts.ctx.db,
+          db: opts.ctx.db as Database,
         })
 
         // Transaction is used to ensure both queries are executed in a single transaction
@@ -363,7 +397,7 @@ export const subscriptionRouter = createTRPCRouter({
             type: type ?? subscriptionData.type,
             planChangedAt: Date.now(),
           },
-          project: opts.ctx.project,
+          projectId: project.id,
           ctx: opts.ctx,
         })
 

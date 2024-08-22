@@ -1,114 +1,109 @@
 import { TRPCError } from "@trpc/server"
-import { z } from "zod"
-
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
+import { createSlug, newId } from "@unprice/db/utils"
 import {
   inviteMembersSchema,
   invitesSelectBase,
   listMembersSchema,
   membersSelectBase,
+  workspaceInsertBase,
   workspaceSelectBase,
   workspaceSignupSchema,
 } from "@unprice/db/validators"
 import { WelcomeEmail, sendEmail } from "@unprice/email"
-
-import * as utils from "@unprice/db/utils"
+import { z } from "zod"
 import {
   createTRPCRouter,
   protectedActiveWorkspaceOwnerProcedure,
   protectedActiveWorkspaceProcedure,
 } from "../../trpc"
+import { signUpCustomer } from "../../utils/shared"
 
 export const workspaceRouter = createTRPCRouter({
   create: protectedActiveWorkspaceOwnerProcedure
-    .input(workspaceSignupSchema)
+    .input(
+      workspaceInsertBase.partial().required({
+        name: true,
+        unPriceCustomerId: true,
+      })
+    )
     .output(
       z.object({
         workspace: workspaceSelectBase,
       })
     )
     .mutation(async (opts) => {
-      const { name, planVersionId } = opts.input
-      const _workspace = opts.ctx.workspace
+      const { name, unPriceCustomerId } = opts.input
       const user = opts.ctx.session?.user
 
-      const planVersion = await opts.ctx.db.query.versions.findFirst({
-        where: (version, { eq }) =>
-          and(
-            eq(version.id, planVersionId),
-            eq(version.active, true),
-            eq(version.status, "published")
-          ),
-      })
-
-      if (!planVersion) {
+      if (!user?.email) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Plan version not found",
+          message: "User email not found",
         })
       }
 
-      // TODO: verify how many projects the workspace has
-
       const newWorkspace = await opts.ctx.db.transaction(async (tx) => {
-        // TODO: how to handle the case when the user need a payment method before creating the workspace?
-
         // TODO: should be able to retry if the slug already exists
-        const slug = utils.createSlug()
-        const workspaceId = utils.newId("workspace")
+        const slug = createSlug()
 
-        // get default project for unprice. This project is seeded in the database as the internal project
-        const defaultProjectId = "proj_uhV7tetPJwCZAMox3L7Po4H5dgc"
-        const customerId = utils.newId("customer")
+        // look if the workspace already has a customer
+        const workspaceExists = await opts.ctx.db.query.workspaces.findFirst({
+          where: (workspace, { eq }) => eq(workspace.unPriceCustomerId, unPriceCustomerId),
+        })
+        let workspaceId = ""
+        let workspace = undefined
 
-        // every workspace is a customer for unprice
-        // TODO: create a new customer in the default project
-        const customer = await tx
-          .insert(schema.customers)
-          .values({
-            id: customerId,
-            name: name,
-            projectId: defaultProjectId,
-            // TODO: query user email - if there user already has an workspace
-            // this email will be duplicated in the customers table
-            email: user.email ?? "",
-            active: true,
-            timezone: "UTC",
-            defaultCurrency: "USD",
-            stripeCustomerId: "cus_PXj5555555555555555555555",
-          })
-          .returning()
-          .then((project) => project[0] ?? null)
+        if (!workspaceExists?.id) {
+          // create the workspace
+          workspace = await tx
+            .insert(schema.workspaces)
+            .values({
+              id: newId("workspace"),
+              slug: slug,
+              name: name,
+              imageUrl: user.image,
+              isPersonal: false,
+              createdBy: user.id,
+              enabled: true,
+              unPriceCustomerId: unPriceCustomerId,
+            })
+            .returning()
+            .then((workspace) => {
+              return workspace[0] ?? undefined
+            })
+            .catch((err) => {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: err.message,
+              })
+            })
 
-        if (!customer) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error creating customer",
-          })
+          if (!workspace?.id) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Error creating workspace",
+            })
+          }
+
+          workspaceId = workspace.id
+        } else {
+          workspaceId = workspaceExists.id
+          workspace = workspaceExists
         }
 
-        const workspace = await tx
-          .insert(schema.workspaces)
-          .values({
-            id: workspaceId,
-            slug: slug,
-            name: name,
-            imageUrl: user.image,
-            isPersonal: true,
-            createdBy: user.id,
-            enabled: true,
-            unPriceCustomerId: customer.id,
-          })
-          .onConflictDoNothing()
-          .returning()
-          .then((workspace) => workspace[0] ?? null)
+        // verify if the user is already a member of the workspace
+        const member = await tx.query.members.findFirst({
+          where: and(
+            eq(schema.members.userId, user.id),
+            eq(schema.members.workspaceId, workspaceId)
+          ),
+        })
 
-        if (!workspace?.id) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error creating workspace",
-          })
+        // if so don't create a new member
+        if (member) {
+          return workspace
         }
 
         const memberShip = await tx
@@ -118,9 +113,14 @@ export const workspaceRouter = createTRPCRouter({
             workspaceId: workspaceId,
             role: "OWNER",
           })
-          .onConflictDoNothing()
           .returning()
           .then((members) => members[0] ?? null)
+          .catch((err) => {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: err.message,
+            })
+          })
 
         if (!memberShip?.userId) {
           throw new TRPCError({
@@ -134,6 +134,40 @@ export const workspaceRouter = createTRPCRouter({
 
       return {
         workspace: newWorkspace,
+      }
+    }),
+  signUp: protectedActiveWorkspaceOwnerProcedure
+    .input(workspaceSignupSchema)
+    .output(z.object({ success: z.boolean(), url: z.string(), error: z.string().optional() }))
+    .mutation(async (opts) => {
+      const { name, planVersionId, config, successUrl, cancelUrl } = opts.input
+      const user = opts.ctx.session?.user
+
+      if (!user?.email) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User email not found",
+        })
+      }
+
+      const { success, url, error } = await signUpCustomer({
+        input: {
+          email: user.email,
+          name: name,
+          planVersionId,
+          config,
+          successUrl,
+          cancelUrl,
+        },
+        ctx: opts.ctx,
+        // default project ID - unprice admin
+        projectId: "proj_uhV7tetPJwCZAMox3L7Po4H5dgc",
+      })
+
+      return {
+        url,
+        success,
+        error,
       }
     }),
   deleteMember: protectedActiveWorkspaceOwnerProcedure

@@ -3,11 +3,14 @@ import { NextResponse } from "next/server"
 
 import { and, db, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
-import { stripe } from "@unprice/stripe"
+import { type Stripe, stripe } from "@unprice/stripe"
 
 export const runtime = "edge"
 export const preferredRegion = ["fra1"]
 
+// this route is called by stripe after the customer creates a payment method
+// it is used to update the customer in the database and redirect the user to the success URL
+// usually used for the first time a customer creates a payment method
 export async function GET(req: NextRequest) {
   // TODO: add rate limiting
   const sessionId = req.nextUrl.searchParams.get("session_id")
@@ -37,11 +40,11 @@ export async function GET(req: NextRequest) {
   }
 
   const [customer, paymentMethods] = await Promise.all([
-    stripe.customers.retrieve(session.customer as string),
+    stripe.customers.retrieve(session.customer as string) as Promise<Stripe.Customer>,
     stripe.customers.listPaymentMethods(session.customer as string),
   ])
 
-  if (!customer) {
+  if (!customer.id) {
     return NextResponse.json({ error: "Customer not found in stripe" }, { status: 404 })
   }
 
@@ -55,13 +58,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Customer not found in database" }, { status: 404 })
   }
 
-  // TODO: could defer this to waitUntil?
   await db
     .update(schema.customers)
     .set({
       stripeCustomerId: session.customer as string,
       metadata: {
-        ...customerData.metadata,
+        ...customerData?.metadata,
         stripeSubscriptionId: (session.subscription as string) ?? "",
         stripeDefaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
       },

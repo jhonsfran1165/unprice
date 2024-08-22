@@ -24,9 +24,9 @@ export const workspaceSignupSchema = workspaceInsertBase
   })
   .extend({
     planVersionId: z.string().min(1, "Plan version is required"),
-    defaultPaymentMethodId: z.string().min(1, "Payment method is required"),
-    customerId: z.string().min(1, "Customer is required"),
     config: subscriptionItemsConfigSchema.optional(),
+    successUrl: z.string().url(),
+    cancelUrl: z.string().url(),
   })
 
 export const listMembersSchema = membersSelectBase.extend({

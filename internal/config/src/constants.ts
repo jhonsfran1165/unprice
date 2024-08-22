@@ -62,7 +62,7 @@ export const APP_AUTH_ROUTES = new Set(Object.values(AUTH_ROUTES))
 export const API_AUTH_ROUTE_PREFIX = "/api/auth"
 export const API_TRPC_ROUTE_PREFIX = "/api/trpc"
 export const DEFAULT_LOGIN_REDIRECT = "/"
-export const APP_NON_WORKSPACE_ROUTES = new Set(["/error"])
+export const APP_NON_WORKSPACE_ROUTES = new Set(["/error", "/new"])
 export const APP_NAME = "unprice"
 
 export const COOKIES_APP = {

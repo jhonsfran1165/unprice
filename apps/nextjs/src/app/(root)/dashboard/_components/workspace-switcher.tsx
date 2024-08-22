@@ -23,6 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { cn } from "@unprice/ui/utils"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { FilterScroll } from "~/components/filter-scroll"
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { api } from "~/trpc/client"
 import NewWorkspaceForm from "./new-workspace-form"
@@ -122,42 +123,44 @@ export function WorkspaceSwitcher({
               )}
 
               {teams.length !== 0 && (
-                <CommandGroup heading="Teams">
-                  {teams?.map((workspace) => (
-                    <CommandItem
-                      key={workspace.name}
-                      onSelect={() => {
-                        setSwitcherOpen(false)
-                        router.push(`/${workspace.slug}`)
-                      }}
-                      className={cn(
-                        "cursor-pointer font-semibold text-sm",
-                        activeWorkspace?.id === workspace.id
-                          ? "bg-background-bgActive"
-                          : "bg-transparent"
-                      )}
-                    >
-                      <Avatar className="mr-2 h-5 w-5">
-                        <AvatarImage
-                          src={
-                            workspace.imageUrl && workspace.imageUrl !== ""
-                              ? workspace.imageUrl
-                              : `https://avatar.vercel.sh/${workspace.id}`
-                          }
-                          alt={`user-${workspace.name}`}
-                        />
-                        <AvatarFallback>{workspace.name.substring(0, 2)}</AvatarFallback>
-                      </Avatar>
-                      <span className="z-10 truncate font-semibold">{workspace.name}</span>
-                      <Check
+                <FilterScroll>
+                  <CommandGroup heading="Teams">
+                    {teams?.map((workspace) => (
+                      <CommandItem
+                        key={workspace.name}
+                        onSelect={() => {
+                          setSwitcherOpen(false)
+                          router.push(`/${workspace.slug}`)
+                        }}
                         className={cn(
-                          "ml-auto h-4 w-4",
-                          activeWorkspace?.id === workspace.id ? "opacity-100" : "opacity-0"
+                          "cursor-pointer font-semibold text-sm",
+                          activeWorkspace?.id === workspace.id
+                            ? "bg-background-bgActive"
+                            : "bg-transparent"
                         )}
-                      />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                      >
+                        <Avatar className="mr-2 h-5 w-5">
+                          <AvatarImage
+                            src={
+                              workspace.imageUrl && workspace.imageUrl !== ""
+                                ? workspace.imageUrl
+                                : `https://avatar.vercel.sh/${workspace.id}`
+                            }
+                            alt={`user-${workspace.name}`}
+                          />
+                          <AvatarFallback>{workspace.name.substring(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <span className="z-10 truncate font-semibold">{workspace.name}</span>
+                        <Check
+                          className={cn(
+                            "ml-auto h-4 w-4",
+                            activeWorkspace?.id === workspace.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </FilterScroll>
               )}
             </CommandList>
             <CommandSeparator />
@@ -193,9 +196,8 @@ export function WorkspaceSwitcher({
               name: "",
               planVersionId: "",
               config: [],
-              defaultPaymentMethodId: "",
-              // by default pass the customerId of the active workspace
-              customerId: activeWorkspace.unPriceCustomerId,
+              successUrl: "",
+              cancelUrl: "",
             }}
             setDialogOpen={setNewOrgDialogOpen}
           />

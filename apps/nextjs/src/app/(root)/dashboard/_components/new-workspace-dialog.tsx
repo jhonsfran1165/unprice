@@ -37,8 +37,8 @@ export function NewWorkspaceDialog({
               name: "",
               planVersionId: "",
               config: [],
-              defaultPaymentMethodId: "",
-              customerId: "",
+              successUrl: "",
+              cancelUrl: "",
             }
           }
           setDialogOpen={setDialogOpen}

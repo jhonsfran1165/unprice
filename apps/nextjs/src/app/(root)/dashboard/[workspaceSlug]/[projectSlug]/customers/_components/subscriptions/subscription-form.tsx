@@ -551,16 +551,12 @@ export function SubscriptionForm({
             </Fragment>
           )}
 
-          {selectedPlanVersion?.metadata?.paymentMethodRequired && (
-            <Fragment>
-              <Separator />
-              <PaymentMethodsFormField
-                form={form}
-                paymentProvider={selectedPlanVersion?.paymentProvider ?? "stripe"}
-                isDisabled={readOnly}
-              />
-            </Fragment>
-          )}
+          <Separator />
+          <PaymentMethodsFormField
+            form={form}
+            isChangePlanSubscription={isChangePlanSubscription}
+            isDisabled={readOnly}
+          />
 
           <Separator />
 

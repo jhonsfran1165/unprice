@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { boolean, index, json, primaryKey, text, unique, varchar } from "drizzle-orm/pg-core"
+import { boolean, index, json, primaryKey, text, varchar } from "drizzle-orm/pg-core"
 import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
@@ -27,7 +27,6 @@ export const customers = pgTableProject(
   },
   (table) => ({
     email: index("email").on(table.email),
-    unique: unique("unique_email_project").on(table.email, table.projectId),
     primary: primaryKey({
       columns: [table.id, table.projectId],
       name: "pk_customer",

@@ -85,11 +85,11 @@ export const versions = pgTableProject(
 
     // ************ billing data defaults ************
     // whenToBill: pay_in_advance - pay_in_arrear
-    whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance"),
+    whenToBill: whenToBillEnum("when_to_bill").notNull().default("pay_in_advance"),
     // when to start each cycle for this subscription -
-    startCycle: startCycleEnum("start_cycle").default("first_day_of_month"), // null means the first day of the month
+    startCycle: startCycleEnum("start_cycle").notNull().default("first_day_of_month"), // null means the first day of the month
     // used for generating invoices -
-    gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
+    gracePeriod: integer("grace_period").notNull().default(0), // 0 means no grace period to pay the invoice
     // collection method for the subscription - charge_automatically or send_invoice
     collectionMethod: collectionMethodEnum("collection_method")
       .notNull()

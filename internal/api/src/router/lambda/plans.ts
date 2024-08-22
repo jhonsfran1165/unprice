@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, desc, eq, getTableColumns, sql } from "@unprice/db"
+import { type Database, and, desc, eq, getTableColumns, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
@@ -364,7 +364,7 @@ export const planRouter = createTRPCRouter({
       }
 
       const items = await buildItemsBySubscriptionIdQuery({
-        db: opts.ctx.db,
+        db: opts.ctx.db as Database,
       })
 
       const planWithSubscriptions = await opts.ctx.db

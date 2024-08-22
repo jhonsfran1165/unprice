@@ -22,6 +22,13 @@
       "when": 1724164429834,
       "tag": "0002_useful_black_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1724320077775,
+      "tag": "0003_robust_darkhawk",
+      "breakpoints": true
     }
   ]
 }

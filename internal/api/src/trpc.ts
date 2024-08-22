@@ -11,7 +11,7 @@ import type { Cache as C } from "@unkey/cache"
 import type { NextAuthRequest } from "@unprice/auth"
 import { auth } from "@unprice/auth/server"
 import { COOKIES_APP } from "@unprice/config"
-import { db } from "@unprice/db"
+import { type Database, type TransactionDatabase, db } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
 import { BaseLimeLogger, ConsoleLogger, type Logger } from "@unprice/logging"
 import { Analytics } from "@unprice/tinybird"
@@ -59,7 +59,12 @@ export interface CreateContextOptions {
  * This helper generates the "internals" for a tRPC context. If you need to use
  * it, you can export it from here
  */
-export const createInnerTRPCContext = (opts: CreateContextOptions) => {
+export const createInnerTRPCContext = (
+  opts: CreateContextOptions
+): CreateContextOptions & {
+  db: Database | TransactionDatabase
+  analytics: Analytics
+} => {
   return {
     ...opts,
     db: db,
@@ -336,6 +341,9 @@ export const protectedActiveWorkspaceOwnerProcedure = protectedActiveWorkspacePr
 export const protectedApiOrActiveProjectProcedure = publicProcedure.use(async ({ ctx, next }) => {
   const activeProjectSlug = ctx.activeProjectSlug
   const apikey = ctx.apikey
+
+  console.log("apikey", apikey)
+  console.log("activeProjectSlug", activeProjectSlug)
 
   // Check db for API key if apiKey is present
   if (apikey) {

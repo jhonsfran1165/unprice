@@ -90,6 +90,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
   // check jwt claim for the workspace
   const isUserMemberWorkspace = userBelongsToWorkspace(currentWorkspaceSlug)
+
   const response = NextResponse.rewrite(
     new URL(`/dashboard${fullPath === "/" ? "" : fullPath}`, req.url)
   )

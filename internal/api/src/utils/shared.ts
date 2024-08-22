@@ -1,8 +1,9 @@
 import { TRPCError } from "@trpc/server"
-import { subscriptionItems, subscriptions } from "@unprice/db/schema"
+import type { Database } from "@unprice/db"
+import { customers, subscriptionItems, subscriptions } from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import {
-  type ProjectExtended,
+  type CustomerSignUp,
   type SubscriptionItemConfig,
   createDefaultSubscriptionConfig,
   type subscriptionInsertSchema,
@@ -11,6 +12,7 @@ import { addDays, getMonth, getYear } from "date-fns"
 import type { z } from "zod"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
+import { StripePaymentProvider } from "../pkg/payment-provider/stripe"
 import type { Context } from "../trpc"
 
 // shared logic for some procedures
@@ -30,7 +32,7 @@ export const verifyFeature = async ({
   const now = performance.now()
   const customer = new UnpriceCustomer({
     cache: ctx.cache,
-    db: ctx.db,
+    db: ctx.db as Database,
     analytics: ctx.analytics,
     logger: ctx.logger,
     metrics: ctx.metrics,
@@ -91,7 +93,7 @@ export const getEntitlements = async ({
 }) => {
   const customer = new UnpriceCustomer({
     cache: ctx.cache,
-    db: ctx.db,
+    db: ctx.db as Database,
     analytics: ctx.analytics,
     logger: ctx.logger,
     metrics: ctx.metrics,
@@ -137,7 +139,7 @@ export const reportUsageFeature = async ({
 }) => {
   const customer = new UnpriceCustomer({
     cache: ctx.cache,
-    db: ctx.db,
+    db: ctx.db as Database,
     analytics: ctx.analytics,
     logger: ctx.logger,
     metrics: ctx.metrics,
@@ -178,10 +180,10 @@ export const reportUsageFeature = async ({
 export const createSubscription = async ({
   subscription,
   ctx,
-  project,
+  projectId,
 }: {
   subscription: z.infer<typeof subscriptionInsertSchema>
-  project: ProjectExtended
+  projectId: string
   ctx: Context
 }) => {
   const {
@@ -214,7 +216,7 @@ export const createSubscription = async ({
     where(fields, operators) {
       return operators.and(
         operators.eq(fields.id, planVersionId),
-        operators.eq(fields.projectId, project.id)
+        operators.eq(fields.projectId, projectId)
       )
     },
   })
@@ -276,7 +278,7 @@ export const createSubscription = async ({
     where: (customer, operators) =>
       operators.and(
         operators.eq(customer.id, customerId),
-        operators.eq(customer.projectId, project.id)
+        operators.eq(customer.projectId, projectId)
       ),
   })
 
@@ -348,7 +350,7 @@ export const createSubscription = async ({
       .insert(subscriptions)
       .values({
         id: subscriptionId,
-        projectId: project.id,
+        projectId: projectId,
         planVersionId: versionData.id,
         customerId: customerData.id,
         startDateAt: startDateAt,
@@ -372,10 +374,6 @@ export const createSubscription = async ({
       .then((re) => re[0])
 
     if (!newSubscription) {
-      ctx.logger.error("Error while creating subscription", {
-        subscription: subscription,
-      })
-      trx.rollback()
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Error while creating subscription",
@@ -395,12 +393,10 @@ export const createSubscription = async ({
         })
       )
     ).catch((e) => {
-      ctx.logger.error("Error while creating subscription features", {
-        error: e,
-        configItemsSubscription,
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: e.message,
       })
-
-      trx.rollback()
     })
 
     return newSubscription
@@ -478,5 +474,163 @@ export const createSubscription = async ({
 
   return {
     subscription: subscriptionData,
+  }
+}
+
+export const signUpCustomer = async ({
+  input,
+  ctx,
+  projectId,
+}: {
+  input: CustomerSignUp
+  ctx: Context
+  projectId: string
+}): Promise<{ success: boolean; url: string; error?: string }> => {
+  const { planVersionId, config, successUrl, cancelUrl, email, name, timezone, defaultCurrency } =
+    input
+
+  const planVersion = await ctx.db.query.versions.findFirst({
+    where: (version, { eq, and }) => and(eq(version.id, planVersionId)),
+  })
+
+  if (!planVersion) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Plan version not found",
+    })
+  }
+
+  if (planVersion.status !== "published") {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Plan version is not published",
+    })
+  }
+
+  if (planVersion.active === false) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Plan version is not active",
+    })
+  }
+
+  const paymentProvider = planVersion.paymentProvider
+  const paymentRequired = planVersion.metadata?.paymentMethodRequired ?? false
+  const customerId = newId("customer")
+  const customerSuccessUrl = successUrl.replace("{CUSTOMER_ID}", customerId)
+
+  // if payment is required, we need to go through payment provider flow first
+  if (paymentRequired) {
+    switch (paymentProvider) {
+      case "stripe": {
+        const stripePaymentProvider = new StripePaymentProvider({
+          logger: ctx.logger,
+        })
+
+        const { err, val } = await stripePaymentProvider.signUp({
+          successUrl: customerSuccessUrl,
+          cancelUrl: cancelUrl,
+          customer: {
+            id: customerId,
+            name: name,
+            email: email,
+            currency: defaultCurrency ?? "USD",
+            timezone: timezone || "UTC",
+            projectId: projectId,
+          },
+          planVersion: {
+            id: planVersion.id,
+            projectId: planVersion.projectId,
+            config: config,
+          },
+        })
+
+        if (err ?? !val) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: err.message,
+          })
+        }
+
+        return val
+      }
+      default:
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Payment provider not supported yet",
+        })
+    }
+  }
+
+  // if payment is not required, we can create the customer directly with its subscription
+  try {
+    await ctx.db.transaction(async (trx) => {
+      const newCustomer = await trx
+        .insert(customers)
+        .values({
+          id: customerId,
+          name: name ?? email,
+          email: email,
+          projectId: projectId,
+          defaultCurrency: defaultCurrency ?? "USD",
+          timezone: timezone || "UTC",
+          active: true,
+        })
+        .returning()
+        .then((data) => data[0])
+
+      if (!newCustomer?.id) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error creating customer",
+        })
+      }
+
+      // create the subscription
+      const newSubscription = await createSubscription({
+        subscription: {
+          customerId: newCustomer.id,
+          projectId: projectId,
+          type: "plan",
+          planVersionId: planVersion.id,
+          startDateAt: Date.now(),
+          status: "active",
+          config: config,
+          defaultPaymentMethodId: "",
+          timezone: timezone,
+          collectionMethod: planVersion.collectionMethod,
+          whenToBill: planVersion.whenToBill,
+          startCycle: planVersion.startCycle,
+          gracePeriod: planVersion.gracePeriod,
+        },
+        projectId: projectId,
+        ctx: {
+          ...ctx,
+          db: trx,
+        },
+      })
+
+      if (!newSubscription.subscription.id) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error creating subscription",
+        })
+      }
+
+      return { newCustomer, newSubscription }
+    })
+
+    return {
+      success: true,
+      url: customerSuccessUrl,
+    }
+  } catch (error) {
+    const e = error as TRPCError
+
+    return {
+      success: false,
+      url: cancelUrl,
+      error: e.message,
+    }
   }
 }

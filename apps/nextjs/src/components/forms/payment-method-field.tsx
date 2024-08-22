@@ -1,10 +1,10 @@
 "use client"
 
 import { APP_DOMAIN } from "@unprice/config"
-import type { PaymentProvider } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { RadioGroup, RadioGroupItem } from "@unprice/ui/radio-group"
+import { Separator } from "@unprice/ui/separator"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { useParams } from "next/navigation"
@@ -17,32 +17,54 @@ interface FormValues extends FieldValues {
   customerId: string
   defaultPaymentMethodId?: string | null
   subscriptionCustomerId?: string | null
+  planVersionId?: string | null
+  nextPlanVersionId?: string | null
 }
 
 export default function PaymentMethodsFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
-  paymentProvider,
+  isChangePlanSubscription,
+  withSeparator,
 }: {
   form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
-  paymentProvider: PaymentProvider
+  isChangePlanSubscription?: boolean
+  withSeparator?: boolean
 }) {
   const workspaceSlug = useParams().workspaceSlug as string
   const projectSlug = useParams().projectSlug as string
-  const customerId = form.getValues("customerId" as FieldPath<TFieldValues>)
+  const customerId = form.watch("customerId" as FieldPath<TFieldValues>)
+  const planVersionId = isChangePlanSubscription
+    ? form.watch("nextPlanVersionId" as FieldPath<TFieldValues>)
+    : form.watch("planVersionId" as FieldPath<TFieldValues>)
   const successUrl = `${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`
   const cancelUrl = `${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`
 
   const { errors } = form.formState
 
+  // get the selected plan version
+  const { data: selectedPlanVersion } = api.planVersions.listByActiveProject.useQuery(
+    {
+      enterprisePlan: true,
+      published: true,
+      active: !isChangePlanSubscription,
+    },
+    {
+      select: (data) => {
+        return data.planVersions.find((version) => version.id === planVersionId) || null
+      },
+      enabled: !!planVersionId,
+    }
+  )
+
   const { data, isLoading } = api.customers.listPaymentMethods.useQuery(
     {
       customerId: customerId,
-      provider: paymentProvider,
+      provider: selectedPlanVersion?.paymentProvider ?? "stripe",
     },
     {
-      enabled: customerId !== "",
+      enabled: !!customerId && !!planVersionId,
     }
   )
 
@@ -59,8 +81,14 @@ export default function PaymentMethodsFormField<TFieldValues extends FormValues>
       : undefined
   }
 
+  // if payment method is not required, hide the field
+  if (!selectedPlanVersion?.metadata?.paymentMethodRequired) {
+    return null
+  }
+
   return (
     <div className="flex w-full flex-col gap-4">
+      {withSeparator && <Separator className="my-2" />}
       <div className="flex flex-col gap-2">
         <FormLabel
           className={cn({

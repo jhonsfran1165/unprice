@@ -31,7 +31,7 @@ import { api } from "~/trpc/client"
 type PlanVersion = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 
 interface FormValues extends FieldValues {
-  planVersionId: string
+  planVersionId?: string
 }
 
 export default function SelectPlanFormField<TFieldValues extends FormValues>({

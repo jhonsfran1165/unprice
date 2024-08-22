@@ -32,6 +32,7 @@ import {
 } from "@unprice/ui/dialog"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
+import { Separator } from "@unprice/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
@@ -50,7 +51,7 @@ type PlanVersionFeaturesResponse =
 
 interface FormValues extends FieldValues {
   config?: SubscriptionItemConfig[]
-  planVersionId: string
+  planVersionId?: string
   nextPlanVersionId?: string
   items?: SubscriptionItemConfig[]
 }
@@ -59,10 +60,14 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
   isChangePlanSubscription,
+  withSeparator,
+  withFeatureDetails,
 }: {
   form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
   isChangePlanSubscription?: boolean
+  withSeparator?: boolean
+  withFeatureDetails?: boolean
 }) {
   const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersionResponse | undefined>()
   const [selectedNewPlanVersion, setSelectedNewPlanVersion] = useState<
@@ -76,11 +81,21 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
   // TODO: use later for addons support
   const isSubscriptionTypeAddons = false
 
-  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery({
-    enterprisePlan: true,
-    published: true,
-    active: !isDisabled && !isChangePlanSubscription,
-  })
+  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
+    {
+      enterprisePlan: true,
+      published: true,
+      active: !isDisabled && !isChangePlanSubscription,
+    },
+    {
+      enabled: !!planVersionId || !!nextPlanVersionId,
+      select: (data) => {
+        const planVersion = data.planVersions.find((version) => version.id === planVersionId)
+        const newPlanVersion = data.planVersions.find((version) => version.id === nextPlanVersionId)
+        return { planVersion, newPlanVersion }
+      },
+    }
+  )
 
   const items = useFieldArray({
     control: form.control,
@@ -97,13 +112,11 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
 
   useEffect(() => {
     if (planVersionId) {
-      const planVersion = data?.planVersions.find((version) => version.id === planVersionId)
-      setSelectedPlanVersion(planVersion)
+      setSelectedPlanVersion(data?.planVersion)
     }
 
     if (nextPlanVersionId) {
-      const newPlanVersion = data?.planVersions.find((version) => version.id === nextPlanVersionId)
-      setSelectedNewPlanVersion(newPlanVersion)
+      setSelectedNewPlanVersion(data?.newPlanVersion)
     }
   }, [isLoading, planVersionId, nextPlanVersionId])
 
@@ -166,7 +179,8 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
   }
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex w-full flex-col gap-4">
+      {withSeparator && <Separator className="my-2" />}
       <div className="mb-4 flex flex-col gap-2">
         <FormLabel
           className={cn({
@@ -186,7 +200,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
         {errors.config && <FormMessage>{getErrorMessage(errors, "config")}</FormMessage>}
       </div>
 
-      <div className="flex items-center justify-center px-2 py-2">
+      <div className="flex items-center justify-center px-1 py-2">
         {fields.length > 0 ? (
           <Table>
             <TableHeader className="border-t border-b">
@@ -232,34 +246,36 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                     <TableCell className="pl-1">
                       <div className="flex items-center gap-1">
                         <span className="font-semibold">{itemConfig.featureSlug}</span>
-                        <PropagationStopper>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button className="h-4 w-4" variant="link" size="icon">
-                                {feature.hidden ? (
-                                  <EyeOff className="h-3 w-3" />
-                                ) : (
-                                  <EyeIcon className="h-3 w-3" />
-                                )}
-                                <span className="sr-only">View feature</span>
-                              </Button>
-                            </DialogTrigger>
+                        {withFeatureDetails && (
+                          <PropagationStopper>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button className="h-4 w-4" variant="link" size="icon">
+                                  {feature.hidden ? (
+                                    <EyeOff className="h-3 w-3" />
+                                  ) : (
+                                    <EyeIcon className="h-3 w-3" />
+                                  )}
+                                  <span className="sr-only">View feature</span>
+                                </Button>
+                              </DialogTrigger>
 
-                            <DialogContent className="flex max-h-[800px] w-full flex-col justify-between overflow-y-scroll lg:w-[600px] md:w-1/2">
-                              <DialogHeader>
-                                <DialogTitle>Feature: {feature.feature.title}</DialogTitle>
-                              </DialogHeader>
-                              <DialogDescription>
-                                {feature.feature.description ?? ""}
-                              </DialogDescription>
-                              <FeatureConfigForm
-                                defaultValues={feature}
-                                planVersion={selectedPlanVersion!}
-                                className="my-6"
-                              />
-                            </DialogContent>
-                          </Dialog>
-                        </PropagationStopper>
+                              <DialogContent className="flex max-h-[800px] w-full flex-col justify-between overflow-y-scroll lg:w-[600px] md:w-1/2">
+                                <DialogHeader>
+                                  <DialogTitle>Feature: {feature.feature.title}</DialogTitle>
+                                </DialogHeader>
+                                <DialogDescription>
+                                  {feature.feature.description ?? ""}
+                                </DialogDescription>
+                                <FeatureConfigForm
+                                  defaultValues={feature}
+                                  planVersion={selectedPlanVersion!}
+                                  className="my-6"
+                                />
+                              </DialogContent>
+                            </Dialog>
+                          </PropagationStopper>
+                        )}
                       </div>
 
                       <div className="hidden text-muted-foreground text-xs md:block">
@@ -371,7 +387,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
             </TableBody>
           </Table>
         ) : (
-          <div className="flex w-full items-center justify-center px-2 py-2">
+          <div className="flex w-full items-center justify-center px-1 py-2">
             <EmptyPlaceholder isLoading={isLoading} className="min-h-[200px]">
               <EmptyPlaceholder.Icon>
                 <LayoutGrid className="h-8 w-8" />

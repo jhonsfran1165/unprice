@@ -91,7 +91,7 @@ export const planVersionRouter = createTRPCRouter({
               planType,
               currency,
               billingPeriod: billingPeriod ?? "month",
-              startCycle: startCycle ?? null,
+              startCycle: startCycle ?? "first_day_of_month",
               gracePeriod: gracePeriod ?? 0,
               whenToBill: whenToBill ?? "pay_in_advance",
               metadata,

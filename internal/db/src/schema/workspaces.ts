@@ -1,10 +1,10 @@
 import { relations } from "drizzle-orm"
-import { bigint, boolean, foreignKey, primaryKey, text } from "drizzle-orm/pg-core"
+import { bigint, boolean, foreignKey, primaryKey, text, varchar } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
 import { cuid, id, timestamps, workspaceID } from "../utils/sql"
 import { users } from "./auth"
-import { teamRolesEnum } from "./enums"
+import { currencyEnum, teamRolesEnum } from "./enums"
 import { projects } from "./projects"
 
 export const workspaces = pgTableProject(
@@ -31,6 +31,10 @@ export const workspaces = pgTableProject(
      * if the workspace is disabled, all API requests will be rejected
      */
     enabled: boolean("enabled").notNull().default(true),
+
+    // all customers will have a default currency - normally the currency of the project
+    defaultCurrency: currencyEnum("default_currency").default("USD").notNull(),
+    timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
   },
   (_table) => ({})
 )

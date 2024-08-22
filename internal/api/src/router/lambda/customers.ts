@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import { and, count, desc, eq, getTableColumns, ilike, or } from "@unprice/db"
+import { type Database, and, count, desc, eq, getTableColumns, ilike, or } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
@@ -7,6 +7,7 @@ import {
   type FeatureType,
   customerInsertBaseSchema,
   customerSelectSchema,
+  customerSignUpSchema,
   paymentProviderSchema,
   searchParamsSchemaDataTable,
   subscriptionExtendedWithItemsSchema,
@@ -17,8 +18,17 @@ import { withDateFilters, withPagination } from "@unprice/db/utils"
 import { deniedReasonSchema } from "../../pkg/errors"
 import { StripePaymentProvider } from "../../pkg/payment-provider/stripe"
 import { buildItemsBySubscriptionIdQuery } from "../../queries/subscriptions"
-import { createTRPCRouter, protectedApiOrActiveProjectProcedure } from "../../trpc"
-import { getEntitlements, reportUsageFeature, verifyFeature } from "../../utils/shared"
+import {
+  createTRPCRouter,
+  protectedApiOrActiveProjectProcedure,
+  protectedProcedure,
+} from "../../trpc"
+import {
+  getEntitlements,
+  reportUsageFeature,
+  signUpCustomer,
+  verifyFeature,
+} from "../../utils/shared"
 
 export const customersRouter = createTRPCRouter({
   create: protectedApiOrActiveProjectProcedure
@@ -263,7 +273,6 @@ export const customersRouter = createTRPCRouter({
 
       // there is not information about the payment methods in our database
       // we have to query the payment provider api to get up-to-date information
-
       switch (provider) {
         case "stripe": {
           if (!customerData.stripeCustomerId) {
@@ -299,6 +308,26 @@ export const customersRouter = createTRPCRouter({
       }
     }),
 
+  signUp: protectedApiOrActiveProjectProcedure
+    .meta({
+      span: "customers.signUp",
+      openapi: {
+        method: "POST",
+        path: "/edge/customers.signUp",
+        protect: true,
+      },
+    })
+    .input(customerSignUpSchema)
+    .output(z.object({ success: z.boolean(), url: z.string() }))
+    .mutation(async (opts) => {
+      const project = opts.ctx.project
+
+      return await signUpCustomer({
+        input: opts.input,
+        ctx: opts.ctx,
+        projectId: project.id,
+      })
+    }),
   createPaymentMethod: protectedApiOrActiveProjectProcedure
     .meta({
       span: "customers.createPaymentMethod",
@@ -344,15 +373,15 @@ export const customersRouter = createTRPCRouter({
             customerId: customerId,
             projectId: project.id,
             email: customerData.email,
+            currency: customerData.defaultCurrency,
             successUrl: successUrl,
             cancelUrl: cancelUrl,
-            currency: project.defaultCurrency,
           })
 
           if (err ?? !val) {
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
-              message: "Error creating session",
+              message: err.message,
             })
           }
 
@@ -442,12 +471,42 @@ export const customersRouter = createTRPCRouter({
         customer: customerData,
       }
     }),
-  getById: protectedApiOrActiveProjectProcedure
+
+  getById: protectedProcedure
+    .input(customerSelectSchema.pick({ id: true }))
+    .output(z.object({ customer: customerSelectSchema }))
+    .query(async (opts) => {
+      const { id } = opts.input
+
+      // we just need to validate the entitlements
+      // await entitlementGuard({
+      //   project,
+      //   featureSlug: "customers",
+      //   ctx,
+      // })
+
+      const customerData = await opts.ctx.db.query.customers.findFirst({
+        where: (customer, { eq }) => eq(customer.id, id),
+      })
+
+      if (!customerData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
+        })
+      }
+
+      return {
+        customer: customerData,
+      }
+    }),
+
+  getByIdActiveProject: protectedApiOrActiveProjectProcedure
     .meta({
-      span: "customers.getById",
+      span: "customers.getByIdActiveProject",
       openapi: {
         method: "GET",
-        path: "/edge/customers.getById",
+        path: "/edge/customers.getByIdActiveProject",
         protect: true,
       },
     })
@@ -523,7 +582,7 @@ export const customersRouter = createTRPCRouter({
       }
 
       const items = await buildItemsBySubscriptionIdQuery({
-        db: opts.ctx.db,
+        db: opts.ctx.db as Database,
       })
 
       const customerWithSubscriptions = await opts.ctx.db

@@ -35,7 +35,6 @@ export const subscriptionItemConfigSchema = z.object({
 export const subscriptionItemsConfigSchema = z
   .array(subscriptionItemConfigSchema)
   .superRefine((items, ctx) => {
-    console.log(items)
     if (items.length > 50) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
