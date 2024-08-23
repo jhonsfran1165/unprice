@@ -20,7 +20,7 @@ import {
   protectedActiveWorkspaceProcedure,
   protectedProcedure,
 } from "../../trpc"
-import { projectGuard } from "../../utils"
+import { projectWorkspaceGuard } from "../../utils"
 import { getRandomPatternStyle } from "../../utils/generate-pattern"
 import { workspaceGuard } from "../../utils/workspace-guard"
 
@@ -91,7 +91,7 @@ export const projectRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { name, slug } = opts.input
 
-      const { project } = await projectGuard({
+      const { project } = await projectWorkspaceGuard({
         projectSlug: slug,
         ctx: opts.ctx,
       })
@@ -120,7 +120,7 @@ export const projectRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { slug: projectSlug } = opts.input
 
-      const { project } = await projectGuard({
+      const { project } = await projectWorkspaceGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -147,7 +147,7 @@ export const projectRouter = createTRPCRouter({
       const { slug: projectSlug } = opts.input
       const userId = opts.ctx.userId
 
-      const { project: projectData } = await projectGuard({
+      const { project: projectData } = await projectWorkspaceGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -218,7 +218,7 @@ export const projectRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { targetWorkspaceId, projectSlug } = opts.input
 
-      const { project: projectData } = await projectGuard({
+      const { project: projectData } = await projectWorkspaceGuard({
         projectSlug,
         ctx: opts.ctx,
       })

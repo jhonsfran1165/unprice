@@ -25,8 +25,9 @@ import type { CacheNamespaces } from "./pkg/cache/namespaces"
 import { type Metrics, NoopMetrics } from "./pkg/metrics"
 import { LogdrainMetrics } from "./pkg/metrics/logdrain"
 import { transformer } from "./transformer"
-import { projectGuard } from "./utils"
+import { projectWorkspaceGuard } from "./utils"
 import { apikeyGuard } from "./utils/apikey-guard"
+import { projectGuard } from "./utils/project-guard"
 import { RATE_LIMIT_WINDOW, redis } from "./utils/upstash"
 import { workspaceGuard } from "./utils/workspace-guard"
 
@@ -269,6 +270,10 @@ export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED" })
   }
 
+  if (!ctx.session?.user?.email) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "User email not found" })
+  }
+
   return next({
     ctx: {
       userId: ctx.session?.user.id,
@@ -342,9 +347,6 @@ export const protectedApiOrActiveProjectProcedure = publicProcedure.use(async ({
   const activeProjectSlug = ctx.activeProjectSlug
   const apikey = ctx.apikey
 
-  console.log("apikey", apikey)
-  console.log("activeProjectSlug", activeProjectSlug)
-
   // Check db for API key if apiKey is present
   if (apikey) {
     const { apiKey } = await apikeyGuard({
@@ -366,7 +368,7 @@ export const protectedApiOrActiveProjectProcedure = publicProcedure.use(async ({
     throw new TRPCError({ code: "UNAUTHORIZED", message: "User or API key not found" })
   }
 
-  const data = await projectGuard({
+  const data = await projectWorkspaceGuard({
     projectSlug: activeProjectSlug,
     ctx,
   })
@@ -382,25 +384,50 @@ export const protectedApiOrActiveProjectProcedure = publicProcedure.use(async ({
   })
 })
 
-export const protectedActiveProjectProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const activeProjectSlug = ctx.activeProjectSlug
+export const protectedActiveProjectWorkspaceProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    const activeProjectSlug = ctx.activeProjectSlug
 
-  const data = await projectGuard({
-    projectSlug: activeProjectSlug,
-    ctx,
-  })
+    const data = await projectWorkspaceGuard({
+      projectSlug: activeProjectSlug,
+      ctx,
+    })
 
-  return next({
-    ctx: {
-      ...data,
-      session: {
-        ...ctx.session,
+    return next({
+      ctx: {
+        ...data,
+        session: {
+          ...ctx.session,
+        },
       },
-    },
-  })
-})
+    })
+  }
+)
 
-export const protectedActiveProjectAdminProcedure = protectedActiveProjectProcedure.use(
+export const protectedProjectProcedure = protectedProcedure.use(
+  async ({ ctx, next, getRawInput }) => {
+    const input = await getRawInput()
+    const { projectId } = input as { projectId: string }
+    const activeProjectSlug = ctx.activeProjectSlug
+
+    // if projectId is present, use it if not use the active project slug
+    const project = await projectGuard({
+      ...(projectId ? { projectId: projectId } : { projectSlug: activeProjectSlug }),
+      ctx,
+    })
+
+    return next({
+      ctx: {
+        project,
+        session: {
+          ...ctx.session,
+        },
+      },
+    })
+  }
+)
+
+export const protectedActiveProjectAdminProcedure = protectedActiveProjectWorkspaceProcedure.use(
   ({ ctx, next }) => {
     ctx.verifyRole(["OWNER", "ADMIN"])
 

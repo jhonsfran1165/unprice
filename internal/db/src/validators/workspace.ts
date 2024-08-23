@@ -15,6 +15,12 @@ export const membersSelectBase = createSelectSchema(schema.members)
 export const workspaceSelectBase = createSelectSchema(schema.workspaces)
 export const workspaceInsertBase = createInsertSchema(schema.workspaces, {
   name: z.string().min(3, "Name must be at least 3 characters"),
+}).partial({
+  id: true,
+  createdAtM: true,
+  updatedAtM: true,
+  createdBy: true,
+  slug: true,
 })
 
 export const workspaceSignupSchema = workspaceInsertBase
@@ -27,6 +33,7 @@ export const workspaceSignupSchema = workspaceInsertBase
     config: subscriptionItemsConfigSchema.optional(),
     successUrl: z.string().url(),
     cancelUrl: z.string().url(),
+    projectId: z.string().min(1, "Project slug is required"),
   })
 
 export const listMembersSchema = membersSelectBase.extend({

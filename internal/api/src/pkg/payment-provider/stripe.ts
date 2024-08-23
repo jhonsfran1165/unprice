@@ -118,7 +118,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
           return_url: opts.cancelUrl,
         })
 
-        return Ok({ success: true as const, url: session.url })
+        return Ok({ success: true as const, url: session.url, customerId: opts.customer.id })
       }
 
       // do not use `new URL(...).searchParams` here, because it will escape the curly braces and stripe will not replace them with the session id
@@ -146,9 +146,9 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         currency: opts.customer.currency ?? "USD",
       })
 
-      if (!session.url) return Ok({ success: false as const, url: "" })
+      if (!session.url) return Ok({ success: false as const, url: "", customerId: "" })
 
-      return Ok({ success: true as const, url: session.url })
+      return Ok({ success: true as const, url: session.url, customerId: opts.customer.id })
     } catch (error) {
       const e = error as Stripe.errors.StripeError
 
@@ -185,7 +185,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
           return_url: opts.cancelUrl,
         })
 
-        return Ok({ success: true as const, url: session.url })
+        return Ok({ success: true as const, url: session.url, customerId: opts.customerId })
       }
 
       // do not use `new URL(...).searchParams` here, because it will escape the curly braces and stripe will not replace them with the session id
@@ -213,9 +213,9 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         currency: opts.currency,
       })
 
-      if (!session.url) return Ok({ success: false as const, url: "" })
+      if (!session.url) return Ok({ success: false as const, url: "", customerId: "" })
 
-      return Ok({ success: true as const, url: session.url })
+      return Ok({ success: true as const, url: session.url, customerId: opts.customerId })
     } catch (error) {
       const e = error as Stripe.errors.StripeError
 

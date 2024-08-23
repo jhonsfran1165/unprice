@@ -5,6 +5,7 @@ import type { Stripe } from "@unprice/stripe"
 export interface PaymentProviderCreateSession {
   success: boolean
   url: string
+  customerId: string
 }
 
 // Cache interface so you can swap out the cache implementation

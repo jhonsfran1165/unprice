@@ -89,7 +89,7 @@ export default function CustomerFormField({
             <PopoverContent className="max-h-[--radix-popover-content-available-height] w-[--radix-popover-trigger-width] p-0">
               <Command>
                 <CommandInput placeholder="Search a plan..." />
-                <CommandList>
+                <CommandList className="overflow-hidden">
                   <CommandEmpty>No customer found.</CommandEmpty>
                   <FilterScroll>
                     <CommandGroup>

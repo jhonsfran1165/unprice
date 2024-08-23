@@ -73,8 +73,8 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
   // if not workspace in path check cookies or jwt
   if (!currentWorkspaceSlug) {
-    const redirectWorkspaceSlug =
-      req.cookies.get(COOKIES_APP.WORKSPACE)?.value ?? user.workspaces[0]?.slug
+    // get the first workspace
+    const redirectWorkspaceSlug = user.workspaces[0]?.slug
 
     // there is a cookie/jwt claim for the workspace redirect
     if (redirectWorkspaceSlug && redirectWorkspaceSlug !== "") {
@@ -98,6 +98,11 @@ export default function AppMiddleware(req: NextAuthRequest) {
   // if the user is not a member of the workspace redirect to root path to be handled by the middleware again
   if (!isUserMemberWorkspace) {
     url.pathname = "/"
+
+    // clear the cookies
+    response.cookies.set(COOKIES_APP.PROJECT, "")
+    response.cookies.set(COOKIES_APP.WORKSPACE, "")
+
     return NextResponse.redirect(url)
   }
 

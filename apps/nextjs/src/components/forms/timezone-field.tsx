@@ -77,7 +77,7 @@ export default function TimeZoneFormField<TFieldValues extends FormValues>({
             <PopoverContent className="max-h-[--radix-popover-content-available-height] w-[--radix-popover-trigger-width] p-0">
               <Command>
                 <CommandInput placeholder="Search a timezone..." />
-                <CommandList>
+                <CommandList className="overflow-hidden">
                   <CommandEmpty>No timezone found.</CommandEmpty>
                   <FilterScroll>
                     <CommandGroup>

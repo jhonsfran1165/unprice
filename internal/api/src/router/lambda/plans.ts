@@ -15,13 +15,13 @@ import {
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
-  protectedActiveProjectProcedure,
+  protectedActiveProjectWorkspaceProcedure,
 } from "../../trpc"
 
 import { buildItemsBySubscriptionIdQuery } from "../../queries/subscriptions"
 
 export const planRouter = createTRPCRouter({
-  create: protectedActiveProjectProcedure
+  create: protectedActiveProjectWorkspaceProcedure
     .input(planInsertBaseSchema)
     .output(
       z.object({
@@ -98,7 +98,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
 
-  remove: protectedActiveProjectProcedure
+  remove: protectedActiveProjectWorkspaceProcedure
     .input(planSelectBaseSchema.pick({ id: true }))
     .output(z.object({ plan: planSelectBaseSchema }))
     .mutation(async (opts) => {
@@ -230,7 +230,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
 
-  exist: protectedActiveProjectProcedure
+  exist: protectedActiveProjectWorkspaceProcedure
     .input(z.object({ slug: z.string(), id: z.string().optional() }))
     .output(
       z.object({
@@ -255,7 +255,7 @@ export const planRouter = createTRPCRouter({
         exist: !!plan,
       }
     }),
-  getBySlug: protectedActiveProjectProcedure
+  getBySlug: protectedActiveProjectWorkspaceProcedure
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
@@ -281,7 +281,7 @@ export const planRouter = createTRPCRouter({
         plan: plan,
       }
     }),
-  getVersionsBySlug: protectedActiveProjectProcedure
+  getVersionsBySlug: protectedActiveProjectWorkspaceProcedure
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
@@ -338,7 +338,7 @@ export const planRouter = createTRPCRouter({
         plan: planWithVersions,
       }
     }),
-  getSubscriptionsBySlug: protectedActiveProjectProcedure
+  getSubscriptionsBySlug: protectedActiveProjectWorkspaceProcedure
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
@@ -430,7 +430,7 @@ export const planRouter = createTRPCRouter({
         subscriptions: subscriptions,
       }
     }),
-  getById: protectedActiveProjectProcedure
+  getById: protectedActiveProjectWorkspaceProcedure
     .input(z.object({ id: z.string() }))
     .output(
       z.object({
@@ -466,7 +466,7 @@ export const planRouter = createTRPCRouter({
       }
     }),
 
-  listByActiveProject: protectedActiveProjectProcedure
+  listByActiveProject: protectedActiveProjectWorkspaceProcedure
     .input(
       z.object({
         fromDate: z.number().optional(),

@@ -6,10 +6,14 @@ import { pageInsertBaseSchema, pageSelectBaseSchema } from "@unprice/db/validato
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
-import { createTRPCRouter, protectedActiveProjectProcedure, rateLimiterProcedure } from "../../trpc"
+import {
+  createTRPCRouter,
+  protectedActiveProjectWorkspaceProcedure,
+  rateLimiterProcedure,
+} from "../../trpc"
 
 export const pageRouter = createTRPCRouter({
-  create: protectedActiveProjectProcedure
+  create: protectedActiveProjectWorkspaceProcedure
     .input(pageInsertBaseSchema)
     .output(
       z.object({
@@ -50,7 +54,7 @@ export const pageRouter = createTRPCRouter({
         page: pageData,
       }
     }),
-  update: protectedActiveProjectProcedure
+  update: protectedActiveProjectWorkspaceProcedure
     .input(pageInsertBaseSchema.partial().required({ id: true }))
     .output(
       z.object({
@@ -98,7 +102,7 @@ export const pageRouter = createTRPCRouter({
       }
     }),
 
-  getById: protectedActiveProjectProcedure
+  getById: protectedActiveProjectWorkspaceProcedure
     .input(
       z.object({
         id: z.string(),
@@ -183,7 +187,7 @@ export const pageRouter = createTRPCRouter({
         // planVersions: planVersions,
       }
     }),
-  remove: protectedActiveProjectProcedure
+  remove: protectedActiveProjectWorkspaceProcedure
     .input(pageSelectBaseSchema.pick({ id: true }))
     .output(z.object({ page: pageSelectBaseSchema }))
     .mutation(async (opts) => {
@@ -208,7 +212,7 @@ export const pageRouter = createTRPCRouter({
       }
     }),
 
-  listByActiveProject: protectedActiveProjectProcedure
+  listByActiveProject: protectedActiveProjectWorkspaceProcedure
     .input(
       z.object({
         fromDate: z.number().optional(),

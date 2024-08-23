@@ -32,6 +32,7 @@ type PlanVersion = RouterOutputs["planVersions"]["listByActiveProject"]["planVer
 
 interface FormValues extends FieldValues {
   planVersionId?: string
+  projectId?: string
 }
 
 export default function SelectPlanFormField<TFieldValues extends FormValues>({
@@ -43,18 +44,22 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
 }) {
   const [switcherCustomerOpen, setSwitcherCustomerOpen] = useState(false)
   const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersion>()
+  const projectId = form.getValues("projectId" as FieldPath<TFieldValues>)
 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
     {
       published: true,
       active: true,
       enterprisePlan: true,
+      projectId,
     },
     {
       refetchOnWindowFocus: false,
       enabled: isDisabled, // only fetch plans when dialog is open
     }
   )
+
+  const noData = data?.planVersions.length === 0 || data?.planVersions.length === undefined
 
   return (
     <FormField
@@ -97,7 +102,7 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
             <PopoverContent className="max-h-[--radix-popover-content-available-height] w-[--radix-popover-trigger-width] p-0">
               <Command>
                 <CommandInput placeholder="Search a plan..." />
-                <CommandList>
+                <CommandList className="overflow-hidden">
                   <CommandEmpty>No plan found.</CommandEmpty>
                   <FilterScroll>
                     <CommandGroup>
@@ -122,7 +127,7 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
                             {`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
                           </CommandItem>
                         ))}
-                        {data?.planVersions.length === 0 && (
+                        {noData && !isLoading && (
                           <CommandItem disabled className="w-full justify-center">
                             No data provided
                           </CommandItem>

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { startTransition } from "react"
 
+import type { Workspace } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import {
@@ -16,8 +17,7 @@ import {
   DialogTrigger,
 } from "@unprice/ui/dialog"
 import { Warning } from "@unprice/ui/icons"
-
-import type { Workspace } from "@unprice/db/validators"
+import { updateSession } from "~/actions/update-session"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
@@ -32,12 +32,16 @@ export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
   const description = "This will delete the workspace and all of its data."
 
   const deleteWorkspace = api.workspaces.delete.useMutation({
-    onSettled: async () => {
-      await apiUtils.projects.listByActiveWorkspace.invalidate()
-      router.refresh()
-    },
-    onSuccess: () => {
+    onSuccess: async () => {
       toastAction("deleted")
+
+      // invalidate the workspaces list to refresh the workspaces
+      await apiUtils.workspaces.listWorkspacesByActiveUser.invalidate()
+
+      // trigger the session update
+      await updateSession()
+
+      // redirect to the home page
       router.push("/")
     },
   })

@@ -15,7 +15,7 @@ import {
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
-  protectedActiveProjectProcedure,
+  protectedActiveProjectWorkspaceProcedure,
 } from "../../trpc"
 
 export const planVersionFeatureRouter = createTRPCRouter({
@@ -282,7 +282,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
       }
     }),
 
-  getById: protectedActiveProjectProcedure
+  getById: protectedActiveProjectWorkspaceProcedure
     .input(
       z.object({
         id: z.string(),
@@ -321,7 +321,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
       }
     }),
 
-  getByPlanVersionId: protectedActiveProjectProcedure
+  getByPlanVersionId: protectedActiveProjectWorkspaceProcedure
     .input(
       z.object({
         planVersionId: z.string(),

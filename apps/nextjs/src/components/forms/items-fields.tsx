@@ -203,7 +203,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
       <div className="flex items-center justify-center px-1 py-2">
         {fields.length > 0 ? (
           <Table>
-            <TableHeader className="border-t border-b">
+            <TableHeader className="border-t border-b bg-transparent">
               <TableRow className="pointer-events-none">
                 <TableHead className="h-10 pl-1">Features</TableHead>
                 <TableHead className="h-10 px-0 text-center">Quantity Units</TableHead>
@@ -242,7 +242,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                       : nFormatter(freeUnits)
 
                 return (
-                  <TableRow key={item.id} className="border-b hover:bg-transparent">
+                  <TableRow key={item.id} className="border-b bg-transparent">
                     <TableCell className="pl-1">
                       <div className="flex items-center gap-1">
                         <span className="font-semibold">{itemConfig.featureSlug}</span>

@@ -9,8 +9,6 @@ import { workspacesByUserPrepared } from "@unprice/db/queries"
 const handler = auth(async (req) => {
   const session = req.auth
 
-  console.log("session", session)
-
   if (!session?.user) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
   }

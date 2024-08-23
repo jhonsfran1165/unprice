@@ -12,10 +12,10 @@ import {
 } from "@unprice/db/validators"
 
 import { hashStringSHA256, withDateFilters, withPagination } from "@unprice/db/utils"
-import { createTRPCRouter, protectedActiveProjectProcedure } from "../../trpc"
+import { createTRPCRouter, protectedActiveProjectWorkspaceProcedure } from "../../trpc"
 
 export const apiKeyRouter = createTRPCRouter({
-  listByActiveProject: protectedActiveProjectProcedure
+  listByActiveProject: protectedActiveProjectWorkspaceProcedure
     .input(searchParamsSchemaDataTable)
     .output(
       z.object({
@@ -77,7 +77,7 @@ export const apiKeyRouter = createTRPCRouter({
       }
     }),
 
-  create: protectedActiveProjectProcedure
+  create: protectedActiveProjectWorkspaceProcedure
     .input(createApiKeySchema)
     .output(
       z.object({
@@ -118,7 +118,7 @@ export const apiKeyRouter = createTRPCRouter({
       return { apikey: newApiKey }
     }),
 
-  revoke: protectedActiveProjectProcedure
+  revoke: protectedActiveProjectWorkspaceProcedure
     .input(z.object({ ids: z.string().array() }))
     .output(z.object({ success: z.boolean(), numRevoked: z.number() }))
     .mutation(async (opts) => {
@@ -148,7 +148,7 @@ export const apiKeyRouter = createTRPCRouter({
       return { success: true, numRevoked: result.length }
     }),
 
-  roll: protectedActiveProjectProcedure
+  roll: protectedActiveProjectWorkspaceProcedure
     .input(z.object({ id: z.string() }))
     .output(
       z.object({

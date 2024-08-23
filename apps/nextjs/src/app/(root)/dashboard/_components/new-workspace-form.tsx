@@ -12,10 +12,11 @@ import {
   FormMessage,
 } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
+import { useRouter } from "next/navigation"
+import { updateSession } from "~/actions/update-session"
 import ConfigItemsFormField from "~/components/forms/items-fields"
 import SelectPlanFormField from "~/components/forms/select-plan-field"
 import { SubmitButton } from "~/components/submit-button"
-import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -26,28 +27,32 @@ export default function NewWorkspaceForm({
   defaultValues: WorkspaceSignup
   setDialogOpen?: (open: boolean) => void
 }) {
+  const router = useRouter()
+  const apiUtils = api.useUtils()
+
   const form = useZodForm({
     schema: workspaceSignupSchema,
     defaultValues: {
       ...defaultValues,
       successUrl: `${APP_DOMAIN}/new?customer_id={CUSTOMER_ID}`,
       cancelUrl: `${APP_DOMAIN}`,
+      isPersonal: false,
+      isInternal: false,
     },
   })
 
   const createWorkspace = api.workspaces.signUp.useMutation({
-    onSuccess: ({ url, success, error }) => {
-      form.reset()
+    onSuccess: async ({ workspace }) => {
       setDialogOpen?.(false)
 
-      if (!success) {
-        toastAction("error", error ?? "Failed to create workspace")
-        return
-      }
+      // invalidate the workspaces list to refresh the workspaces
+      await apiUtils.workspaces.listWorkspacesByActiveUser.invalidate()
 
-      console.log("url", url)
+      // trigger the session update
+      await updateSession()
 
-      window.location.href = url
+      // redirect to the new workspace
+      router.push(`/${workspace.slug}`)
     },
   })
 

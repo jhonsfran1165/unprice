@@ -43,7 +43,7 @@ export const columns: ColumnDef<Member>[] = [
       <div className="flex items-center gap-2">
         <Avatar>
           <AvatarImage src={row.original.user.image ?? ""} alt={row.original.user.name ?? ""} />
-          <AvatarFallback>{row.original.user.name?.substring(3)}</AvatarFallback>
+          <AvatarFallback>{row.original.user.name?.substring(0, 2)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
           <span>{row.original.user.name}</span>

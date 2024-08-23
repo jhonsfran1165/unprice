@@ -1,15 +1,9 @@
 import { TRPCError } from "@trpc/server"
 
 import { projectGuardPrepared } from "@unprice/db/queries"
-import type { ProjectExtended, User, WorkspaceRole } from "@unprice/db/validators"
+import type { Project } from "@unprice/db/validators"
 
 import type { Context } from "../trpc"
-
-interface ProjectGuardType {
-  project: ProjectExtended
-  member: User & { role: WorkspaceRole }
-  verifyRole: (roles: WorkspaceRole[]) => void
-}
 
 export const projectGuard = async ({
   projectSlug,
@@ -19,18 +13,8 @@ export const projectGuard = async ({
   projectId?: string
   projectSlug?: string
   ctx: Context
-}): Promise<ProjectGuardType> => {
-  const activeWorkspaceSlug = ctx.activeWorkspaceSlug
+}): Promise<Project> => {
   const userId = ctx.session?.user.id
-  const workspaces = ctx.session?.user?.workspaces
-  const activeWorkspace = workspaces?.find((workspace) => workspace.slug === activeWorkspaceSlug)
-
-  if (!activeWorkspace?.id) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "No active workspace in the session",
-    })
-  }
 
   if (!userId) {
     throw new TRPCError({
@@ -53,16 +37,12 @@ export const projectGuard = async ({
     .execute({
       projectId: projectId,
       projectSlug: projectSlug,
-      workspaceId: activeWorkspace.id,
-      userId,
     })
     .then((response) => response[0] ?? null)
 
   const project = data?.project
-  const workspace = data?.workspace
-  const member = data?.member as User & { role: WorkspaceRole }
 
-  if (!member || !project || !workspace) {
+  if (!project) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "Project not found or you don't have access to the project",
@@ -76,31 +56,5 @@ export const projectGuard = async ({
     })
   }
 
-  if (!workspace.enabled) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Workspace is disabled, please contact support",
-    })
-  }
-
-  const verifyRole = (roles: WorkspaceRole[]) => {
-    if (roles && !roles.includes(member.role)) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: `You must be a member with roles (${roles.join(
-          "/"
-        )}) of this workspace to perform this action`,
-      })
-    }
-  }
-
-  // TODO: fix the query so we can we ProjectExtended without this
-  return {
-    project: {
-      ...project,
-      workspace,
-    } as ProjectExtended,
-    member: member,
-    verifyRole,
-  }
+  return project
 }

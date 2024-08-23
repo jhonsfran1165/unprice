@@ -40,5 +40,10 @@ export default function DashboardNavigationDesktopSlot(props: {
     baseUrl += `/${projectSlug ?? all.at(1)}`
   }
 
+  // if the baseUrl is "/", it means the user is on the root of the dashboard
+  if (baseUrl === "/") {
+    return null
+  }
+
   return <Sidebar routes={routes} shortcuts={shortcuts} baseUrl={baseUrl} />
 }

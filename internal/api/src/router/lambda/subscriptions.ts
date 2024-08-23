@@ -16,7 +16,7 @@ import { buildItemsBySubscriptionIdQuery } from "../../queries/subscriptions"
 import {
   createTRPCRouter,
   protectedActiveProjectAdminProcedure,
-  protectedActiveProjectProcedure,
+  protectedActiveProjectWorkspaceProcedure,
   rateLimiterProcedure,
 } from "../../trpc"
 import { createSubscription } from "../../utils/shared"
@@ -74,7 +74,7 @@ export const subscriptionRouter = createTRPCRouter({
         subscription: subscription,
       }
     }),
-  listByActiveProject: protectedActiveProjectProcedure
+  listByActiveProject: protectedActiveProjectWorkspaceProcedure
     .input(searchParamsSchemaDataTable)
     .output(
       z.object({
@@ -185,7 +185,7 @@ export const subscriptionRouter = createTRPCRouter({
         return { subscriptions: [], pageCount: 0 }
       }
     }),
-  listByPlanVersion: protectedActiveProjectProcedure
+  listByPlanVersion: protectedActiveProjectWorkspaceProcedure
     .input(
       subscriptionSelectSchema.pick({
         planVersionId: true,

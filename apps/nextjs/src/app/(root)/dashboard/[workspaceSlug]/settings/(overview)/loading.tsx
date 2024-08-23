@@ -1,5 +1,13 @@
 import { Button } from "@unprice/ui/button"
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@unprice/ui/card"
+import { Skeleton } from "@unprice/ui/skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 
@@ -13,10 +21,12 @@ export default function WorkSpaceSettingsDangerLoading() {
           <CardTitle>Workspace Name</CardTitle>
           <CardDescription>Change the name of your workspace</CardDescription>
         </CardHeader>
+        <CardContent>
+          Name
+          <Skeleton className="h-10 w-full" />
+        </CardContent>
         <CardFooter className="flex justify-between">
-          <Button variant="destructive" className="text-transparent">
-            Delete
-          </Button>
+          <Button className="text-transparent">Save</Button>
         </CardFooter>
       </Card>
       <Card className="animate-pulse bg-muted">

@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { cn } from "@unprice/ui/utils"
 import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
+import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/client"
 
 export function ProjectSwitcher() {
@@ -85,16 +86,12 @@ export function ProjectSwitcher() {
           <CommandSeparator />
           <CommandList>
             <CommandGroup>
-              <CommandItem
-                onSelect={() => {
-                  router.push(`/${workspaceSlug}`)
-                  setSwitcherOpen(false)
-                }}
-                className="cursor-pointer"
-              >
-                <LayoutGrid className="mr-2 h-5 w-5" />
-                Browse projects
-              </CommandItem>
+              <SuperLink href={`/${workspaceSlug}`}>
+                <CommandItem className="cursor-pointer">
+                  <LayoutGrid className="mr-2 size-4" />
+                  Browse projects
+                </CommandItem>
+              </SuperLink>
             </CommandGroup>
           </CommandList>
         </Command>

@@ -1,10 +1,17 @@
 import { TRPCError } from "@trpc/server"
 import type { Database } from "@unprice/db"
-import { customers, subscriptionItems, subscriptions } from "@unprice/db/schema"
-import { newId } from "@unprice/db/utils"
+import {
+  customers,
+  members,
+  subscriptionItems,
+  subscriptions,
+  workspaces,
+} from "@unprice/db/schema"
+import { createSlug, newId } from "@unprice/db/utils"
 import {
   type CustomerSignUp,
   type SubscriptionItemConfig,
+  type WorkspaceInsert,
   createDefaultSubscriptionConfig,
   type subscriptionInsertSchema,
 } from "@unprice/db/validators"
@@ -485,7 +492,7 @@ export const signUpCustomer = async ({
   input: CustomerSignUp
   ctx: Context
   projectId: string
-}): Promise<{ success: boolean; url: string; error?: string }> => {
+}): Promise<{ success: boolean; url: string; error?: string; customerId: string }> => {
   const { planVersionId, config, successUrl, cancelUrl, email, name, timezone, defaultCurrency } =
     input
 
@@ -623,6 +630,7 @@ export const signUpCustomer = async ({
     return {
       success: true,
       url: customerSuccessUrl,
+      customerId: customerId,
     }
   } catch (error) {
     const e = error as TRPCError
@@ -631,6 +639,117 @@ export const signUpCustomer = async ({
       success: false,
       url: cancelUrl,
       error: e.message,
+      customerId: "",
     }
   }
+}
+
+export const createWorkspace = async ({
+  input,
+  ctx,
+}: {
+  input: WorkspaceInsert & {
+    unPriceCustomerId: string
+    name: string
+  }
+  ctx: Context
+}) => {
+  const { name, unPriceCustomerId, isPersonal, isInternal } = input
+  const user = ctx.session?.user
+
+  if (!user) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "User not found",
+    })
+  }
+
+  const newWorkspace = await ctx.db.transaction(async (tx) => {
+    // TODO: should be able to retry if the slug already exists
+    const slug = createSlug()
+
+    // look if the workspace already has a customer
+    const workspaceExists = await ctx.db.query.workspaces.findFirst({
+      where: (workspace, { eq }) => eq(workspace.unPriceCustomerId, unPriceCustomerId),
+    })
+
+    let workspaceId = ""
+    let workspace = undefined
+
+    if (!workspaceExists?.id) {
+      // create the workspace
+      workspace = await tx
+        .insert(workspaces)
+        .values({
+          id: newId("workspace"),
+          slug: slug,
+          name: name,
+          imageUrl: user.image,
+          isPersonal: isPersonal ?? false,
+          isInternal: isInternal ?? false,
+          createdBy: user.id,
+          unPriceCustomerId: unPriceCustomerId,
+        })
+        .returning()
+        .then((workspace) => {
+          return workspace[0] ?? undefined
+        })
+        .catch((err) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: err.message,
+          })
+        })
+
+      if (!workspace?.id) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error creating workspace",
+        })
+      }
+
+      workspaceId = workspace.id
+    } else {
+      workspaceId = workspaceExists.id
+      workspace = workspaceExists
+    }
+
+    // verify if the user is already a member of the workspace
+    const member = await tx.query.members.findFirst({
+      where: (member, { eq, and }) =>
+        and(eq(member.workspaceId, workspaceId), eq(member.userId, user.id)),
+    })
+
+    // if so don't create a new member
+    if (member) {
+      return workspace
+    }
+
+    const memberShip = await tx
+      .insert(members)
+      .values({
+        userId: user.id,
+        workspaceId: workspaceId,
+        role: "OWNER",
+      })
+      .returning()
+      .then((members) => members[0] ?? null)
+      .catch((err) => {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err.message,
+        })
+      })
+
+    if (!memberShip?.userId) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Error creating member",
+      })
+    }
+
+    return workspace
+  })
+
+  return newWorkspace
 }

@@ -11,7 +11,7 @@ import {
   protectedActiveWorkspaceProcedure,
   protectedApiFormDataProcedure,
 } from "../../trpc"
-import { projectGuard } from "../../utils"
+import { projectWorkspaceGuard } from "../../utils"
 
 const myFileValidator = z.preprocess(
   // @ts-expect-error - this is a hack. not sure why it's needed since it should already be a File
@@ -34,7 +34,7 @@ export const ingestionRouter = createTRPCRouter({
     .query(async (opts) => {
       const projectSlug = opts.input.projectSlug
 
-      const { project } = await projectGuard({
+      const { project } = await projectWorkspaceGuard({
         projectSlug,
         ctx: opts.ctx,
       })
@@ -65,7 +65,7 @@ export const ingestionRouter = createTRPCRouter({
     .query(async (opts) => {
       const projectSlug = opts.input.projectSlug
 
-      const { project } = await projectGuard({
+      const { project } = await projectWorkspaceGuard({
         projectSlug,
         ctx: opts.ctx,
       })

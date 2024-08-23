@@ -194,6 +194,7 @@ export const authConfig = {
     },
     jwt: async (opts) => {
       const token = opts.token
+      const trigger = opts.trigger
       const userId = token.sub
 
       if (!userId) return token
@@ -212,8 +213,9 @@ export const authConfig = {
       try {
         const tokenDate = new Date(token.refreshWorkspacesAt as number)
 
-        // refresh the workspaces if the time is greater than the refreshWorkspacesAt
-        if (token.workspaces && tokenDate > new Date()) {
+        // return if the token is still valid
+        // we need to refresh the workspaces if the trigger is update
+        if (token.workspaces && tokenDate > new Date() && trigger !== "update") {
           return token
         }
 

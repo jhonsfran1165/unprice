@@ -6,6 +6,22 @@ import * as schema from "./schema"
 const projectGuardPrepared = db
   .select({
     project: getTableColumns(schema.projects),
+  })
+  .from(schema.projects)
+  .limit(1)
+  .where(
+    and(
+      or(
+        eq(schema.projects.id, sql.placeholder("projectId")),
+        eq(schema.projects.slug, sql.placeholder("projectSlug"))
+      )
+    )
+  )
+  .prepare("project_ws_guard_prepared")
+
+const projectWorkspaceGuardPrepared = db
+  .select({
+    project: getTableColumns(schema.projects),
     member: {
       ...getTableColumns(schema.users),
       role: schema.members.role,
@@ -27,7 +43,7 @@ const projectGuardPrepared = db
   .innerJoin(schema.workspaces, eq(schema.projects.workspaceId, schema.workspaces.id))
   .innerJoin(schema.members, eq(schema.members.workspaceId, schema.workspaces.id))
   .innerJoin(schema.users, eq(schema.members.userId, schema.users.id))
-  .prepare("project_guard_prepared")
+  .prepare("project_ws_guard_prepared")
 
 const workspaceGuardPrepared = db
   .select({
@@ -152,6 +168,7 @@ const getFeatureItemBySlugPrepared = db
 export {
   workspacesByUserPrepared,
   projectGuardPrepared,
+  projectWorkspaceGuardPrepared,
   getFeatureItemBySlugPrepared,
   workspaceGuardPrepared,
   apiKeyPrepared,

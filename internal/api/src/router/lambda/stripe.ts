@@ -7,7 +7,7 @@ import { z } from "zod"
 import { createTRPCRouter, rateLimiterProcedure } from "../../trpc"
 
 export const stripeRouter = createTRPCRouter({
-  // createLinkAccount: protectedActiveProjectProcedure
+  // createLinkAccount: protectedActiveProjectWorkspaceProcedure
   //   .input(z.void())
   //   .output(
   //     z.object({
