@@ -1,8 +1,18 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
+import { Suspense } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import NewWorkspaceForm from "../_components/new-workspace-form"
+import Loading from "./loading"
 
-export default async function PageSuccess() {
+export default function PageSuccess() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <Content />
+    </Suspense>
+  )
+}
+
+function Content() {
   return (
     <DashboardShell>
       <div className="flex flex-col items-center justify-center">

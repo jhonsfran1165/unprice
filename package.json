@@ -21,7 +21,7 @@
     "manypkg:fix": "pnpm manypkg fix",
     "commit": "cz",
     "bump-versions": "pnpm changeset version && pnpm install",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "dependencies": {
     "@biomejs/biome": "1.7.3",
