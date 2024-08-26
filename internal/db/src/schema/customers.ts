@@ -3,8 +3,15 @@ import { boolean, index, json, primaryKey, text, varchar } from "drizzle-orm/pg-
 import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
-import { projectID, timestamps } from "../utils/sql"
-import type { customerMetadataSchema } from "../validators"
+import { projectID } from "../utils/sql"
+
+import { id, timestamps } from "../utils/fields.sql"
+import type {
+  customerMetadataSchema,
+  stripePlanVersionSchema,
+  stripeSetupSchema,
+} from "../validators/customer"
+
 import { currencyEnum } from "./enums"
 import { projects } from "./projects"
 import { subscriptions } from "./subscriptions"
@@ -33,6 +40,17 @@ export const customers = pgTableProject(
     }),
   })
 )
+
+// when customer are created, we need to perform a session flow to add a payment method
+// this table allows us to keep track of the params we need to perform the flow
+// after the payment method is added in the payment provider
+export const customerSessions = pgTableProject("customer_sessions", {
+  ...id,
+  ...timestamps,
+  active: boolean("active").default(false),
+  customer: json("customer").notNull().$type<z.infer<typeof stripeSetupSchema>>(),
+  planVersion: json("plan_version").notNull().$type<z.infer<typeof stripePlanVersionSchema>>(),
+})
 
 // TODO: add provider method here
 // TODO: add type to see if it's card or bank account

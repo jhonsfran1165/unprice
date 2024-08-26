@@ -3,7 +3,7 @@ import type { Result } from "@unprice/error"
 import { Err, FetchError, Ok } from "@unprice/error"
 import { Stripe, stripe } from "@unprice/stripe"
 
-import type { StripePlanVersion, StripeSetup } from "@unprice/db/validators"
+import type { StripeSetup } from "@unprice/db/validators"
 import type { Logger } from "@unprice/logging"
 import type { PaymentProviderCreateSession, PaymentProviderInterface } from "./interface"
 
@@ -103,7 +103,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
   public async signUp(opts: {
     customer: StripeSetup
-    planVersion: StripePlanVersion
+    customerSessionId: string
     successUrl: string
     cancelUrl: string
   }): Promise<Result<PaymentProviderCreateSession, FetchError>> {
@@ -123,7 +123,9 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
       // do not use `new URL(...).searchParams` here, because it will escape the curly braces and stripe will not replace them with the session id
       // we pass urls as metadata and the call one of our endpoints to handle the session validation and then redirect the user to the success or cancel url
-      const apiCallbackUrl = `${API_DOMAIN}/providers/stripe/signup?session_id={CHECKOUT_SESSION_ID}`
+      const apiCallbackUrl = `${API_DOMAIN}providers/stripe/signup?session_id={CHECKOUT_SESSION_ID}`
+
+      console.log("apiCallbackUrl", apiCallbackUrl)
 
       // create a new session for registering a payment method
       const session = await this.client.checkout.sessions.create({
@@ -137,8 +139,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         metadata: {
           successUrl: opts.successUrl,
           cancelUrl: opts.cancelUrl,
-          customer: JSON.stringify(opts.customer),
-          planVersion: JSON.stringify(opts.planVersion),
+          customerSessionId: opts.customerSessionId,
         },
         success_url: apiCallbackUrl,
         cancel_url: opts.cancelUrl,
@@ -146,11 +147,15 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         currency: opts.customer.currency ?? "USD",
       })
 
+      console.log("session", session)
+
       if (!session.url) return Ok({ success: false as const, url: "", customerId: "" })
 
       return Ok({ success: true as const, url: session.url, customerId: opts.customer.id })
     } catch (error) {
       const e = error as Stripe.errors.StripeError
+
+      console.log("error", e)
 
       this.logger.error("Error creating session", {
         error: e.message,
@@ -190,7 +195,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
       // do not use `new URL(...).searchParams` here, because it will escape the curly braces and stripe will not replace them with the session id
       // we pass urls as metadata and the call one of our endpoints to handle the session validation and then redirect the user to the success or cancel url
-      const apiCallbackUrl = `${API_DOMAIN}/providers/stripe/payment-method?session_id={CHECKOUT_SESSION_ID}`
+      const apiCallbackUrl = `${API_DOMAIN}providers/stripe/payment-method?session_id={CHECKOUT_SESSION_ID}`
 
       // create a new session for registering a payment method
       const session = await this.client.checkout.sessions.create({

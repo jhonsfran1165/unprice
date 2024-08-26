@@ -1,3 +1,9 @@
 {
-  "recommendations": ["bradlc.vscode-tailwindcss", "expo.vscode-expo-tools"]
+  "recommendations": [
+    "bradlc.vscode-tailwindcss",
+    "biomejs.biome",
+    "WallabyJs.console-ninja",
+    "jgclark.vscode-todo-highlight",
+    "yoavbls.pretty-ts-errors"
+  ]
 }

@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
+import { newId } from "@unprice/db/utils"
 import {
   inviteMembersSchema,
   invitesSelectBase,
@@ -21,7 +22,7 @@ import {
 import { createWorkspace, signUpCustomer } from "../../utils/shared"
 
 export const workspaceRouter = createTRPCRouter({
-  create: protectedActiveWorkspaceOwnerProcedure
+  create: protectedProcedure
     .input(
       workspaceInsertBase.required({
         name: true,
@@ -47,15 +48,18 @@ export const workspaceRouter = createTRPCRouter({
     .input(workspaceSignupSchema)
     .output(
       z.object({
-        workspace: workspaceSelectBase,
+        url: z.string(),
       })
     )
     .mutation(async (opts) => {
       const { name, planVersionId, config, successUrl, cancelUrl } = opts.input
       const user = opts.ctx.session?.user
+      const workspaceId = newId("workspace")
+
+      // TODO: all this happens in a transaction?
 
       // first sign up the customer
-      const { success, error, customerId } = await signUpCustomer({
+      const { success, error, url } = await signUpCustomer({
         input: {
           email: user.email,
           name: name,
@@ -63,6 +67,7 @@ export const workspaceRouter = createTRPCRouter({
           config,
           successUrl,
           cancelUrl,
+          externalId: workspaceId,
         },
         ctx: opts.ctx,
         // default project ID - unprice admin
@@ -76,26 +81,8 @@ export const workspaceRouter = createTRPCRouter({
         })
       }
 
-      const newWorkspace = await createWorkspace({
-        input: {
-          name: name,
-          unPriceCustomerId: customerId,
-          isPersonal: false,
-          isInternal: false,
-          createdBy: user.id,
-        },
-        ctx: opts.ctx,
-      })
-
-      if (!newWorkspace) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create workspace",
-        })
-      }
-
       return {
-        workspace: newWorkspace,
+        url,
       }
     }),
   deleteMember: protectedActiveWorkspaceOwnerProcedure

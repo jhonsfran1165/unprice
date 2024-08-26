@@ -14,7 +14,15 @@
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "quickfix.biome": "explicit",
+    "source.fixAll.eslint": "explicit",
     "source.organizeImports.biome": "explicit"
+  },
+  "[javascript]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll": "explicit"
+    },
+    "editor.formatOnSave": true
   },
   "cSpell.words": [
     "apikey",

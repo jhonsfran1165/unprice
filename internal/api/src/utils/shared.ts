@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import type { Database } from "@unprice/db"
 import {
+  customerSessions,
   customers,
   members,
   subscriptionItems,
@@ -493,8 +494,17 @@ export const signUpCustomer = async ({
   ctx: Context
   projectId: string
 }): Promise<{ success: boolean; url: string; error?: string; customerId: string }> => {
-  const { planVersionId, config, successUrl, cancelUrl, email, name, timezone, defaultCurrency } =
-    input
+  const {
+    planVersionId,
+    config,
+    successUrl,
+    cancelUrl,
+    email,
+    name,
+    timezone,
+    defaultCurrency,
+    externalId,
+  } = input
 
   const planVersion = await ctx.db.query.versions.findFirst({
     where: (version, { eq, and }) => and(eq(version.id, planVersionId)),
@@ -534,9 +544,43 @@ export const signUpCustomer = async ({
           logger: ctx.logger,
         })
 
+        // create a session with the data of the customer, the plan version and the success and cancel urls
+        // pass the session id to stripe metadata and then once the customer adds a payment method, we call our api to create the subscription
+        const sessionId = newId("customer_session")
+        const customerSession = await ctx.db
+          .insert(customerSessions)
+          .values({
+            id: sessionId,
+            active: true,
+            customer: {
+              id: customerId,
+              name: name,
+              email: email,
+              currency: defaultCurrency ?? "USD",
+              timezone: timezone || "UTC",
+              projectId: projectId,
+              externalId: externalId,
+            },
+            planVersion: {
+              id: planVersion.id,
+              projectId: planVersion.projectId,
+              config: config,
+            },
+          })
+          .returning()
+          .then((data) => data[0])
+
+        if (!customerSession) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error creating customer session",
+          })
+        }
+
         const { err, val } = await stripePaymentProvider.signUp({
           successUrl: customerSuccessUrl,
           cancelUrl: cancelUrl,
+          customerSessionId: customerSession.id,
           customer: {
             id: customerId,
             name: name,
@@ -544,11 +588,6 @@ export const signUpCustomer = async ({
             currency: defaultCurrency ?? "USD",
             timezone: timezone || "UTC",
             projectId: projectId,
-          },
-          planVersion: {
-            id: planVersion.id,
-            projectId: planVersion.projectId,
-            config: config,
           },
         })
 
@@ -654,7 +693,7 @@ export const createWorkspace = async ({
   }
   ctx: Context
 }) => {
-  const { name, unPriceCustomerId, isPersonal, isInternal } = input
+  const { name, unPriceCustomerId, isPersonal, isInternal, id } = input
   const user = ctx.session?.user
 
   if (!user) {
@@ -681,7 +720,7 @@ export const createWorkspace = async ({
       workspace = await tx
         .insert(workspaces)
         .values({
-          id: newId("workspace"),
+          id: id ?? newId("workspace"),
           slug: slug,
           name: name,
           imageUrl: user.image,

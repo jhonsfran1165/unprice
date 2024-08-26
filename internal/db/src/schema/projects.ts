@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm"
-import { boolean, index, text, unique, varchar } from "drizzle-orm/pg-core"
+import { boolean, foreignKey, index, text, unique, varchar } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { id, timestamps, workspaceID } from "../utils/sql"
+import { id, timestamps, workspaceID } from "../utils/fields.sql"
 import { currencyEnum } from "./enums"
 import { workspaces } from "./workspaces"
 
@@ -24,6 +24,11 @@ export const projects = pgTableProject(
   (table) => ({
     slug: index("slug_index").on(table.slug),
     unique: unique("unique_slug").on(table.slug),
+    workspace: foreignKey({
+      columns: [table.workspaceId],
+      foreignColumns: [workspaces.id],
+      name: "fk_project_workspace",
+    }),
   })
 )
 

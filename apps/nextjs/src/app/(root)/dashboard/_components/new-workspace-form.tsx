@@ -12,8 +12,6 @@ import {
   FormMessage,
 } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
-import { useRouter } from "next/navigation"
-import { updateSession } from "~/actions/update-session"
 import ConfigItemsFormField from "~/components/forms/items-fields"
 import SelectPlanFormField from "~/components/forms/select-plan-field"
 import { SubmitButton } from "~/components/submit-button"
@@ -27,14 +25,11 @@ export default function NewWorkspaceForm({
   defaultValues: WorkspaceSignup
   setDialogOpen?: (open: boolean) => void
 }) {
-  const router = useRouter()
-  const apiUtils = api.useUtils()
-
   const form = useZodForm({
     schema: workspaceSignupSchema,
     defaultValues: {
       ...defaultValues,
-      successUrl: `${APP_DOMAIN}/new?customer_id={CUSTOMER_ID}`,
+      successUrl: `${APP_DOMAIN}new?customer_id={CUSTOMER_ID}`,
       cancelUrl: `${APP_DOMAIN}`,
       isPersonal: false,
       isInternal: false,
@@ -42,17 +37,11 @@ export default function NewWorkspaceForm({
   })
 
   const createWorkspace = api.workspaces.signUp.useMutation({
-    onSuccess: async ({ workspace }) => {
+    onSuccess: async ({ url }) => {
       setDialogOpen?.(false)
 
-      // invalidate the workspaces list to refresh the workspaces
-      await apiUtils.workspaces.listWorkspacesByActiveUser.invalidate()
-
-      // trigger the session update
-      await updateSession()
-
-      // redirect to the new workspace
-      router.push(`/${workspace.slug}`)
+      // redirect url
+      window.location.href = url
     },
   })
 

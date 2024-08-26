@@ -2,7 +2,8 @@ import { relations } from "drizzle-orm"
 import { bigint, primaryKey, text, unique, uniqueIndex } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { projectID, timestamps } from "../utils/sql"
+import { timestamps } from "../utils/fields.sql"
+import { projectID } from "../utils/sql"
 import { projects } from "./projects"
 
 export const apikeys = pgTableProject(

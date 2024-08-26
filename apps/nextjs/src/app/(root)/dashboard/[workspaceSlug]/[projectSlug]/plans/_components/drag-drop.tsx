@@ -19,9 +19,10 @@ import { createPortal } from "react-dom"
 
 import type { PlanVersionFeatureDragDrop } from "@unprice/db/validators"
 
+import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 import { FeaturePlan } from "./feature-plan"
-import { useActiveFeature, usePlanFeaturesList } from "./use-features"
+import { useActiveFeature, useActivePlanVersion, usePlanFeaturesList } from "./use-features"
 
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -39,6 +40,8 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
 
   const [activeFeature, setActiveFeature] = useActiveFeature()
   const [planFeaturesList, setPlanFeaturesList] = usePlanFeaturesList()
+  const [activePlanVersion] = useActivePlanVersion()
+  const isPublished = activePlanVersion?.status === "published"
 
   const updatePlanVersionFeatures = api.planVersionFeatures.update.useMutation({
     onSuccess: () => {
@@ -137,6 +140,10 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
     const { active } = event
     const activeData = active.data.current
 
+    if (isPublished) {
+      return
+    }
+
     if (!activeData) return
 
     const planFeatureVersion = activeData.planFeatureVersion as PlanVersionFeatureDragDrop
@@ -156,6 +163,14 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
   }
 
   const onDragStart = (event: DragStartEvent) => {
+    if (isPublished) {
+      toastAction(
+        "error",
+        "You cannot add features to a published plan version. Please create a new version."
+      )
+      return
+    }
+
     // just copy the features in case the user cancels the drag
     setClonedFeatures(planFeaturesList)
 
@@ -168,6 +183,10 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
 
   const onDragOver = (event: DragOverEvent) => {
     const { active, over } = event
+
+    if (isPublished) {
+      return
+    }
 
     // only process if there is an over item
     if (!over) return

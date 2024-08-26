@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm"
 import { bigint, boolean, foreignKey, primaryKey, text, varchar } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { cuid, id, timestamps, workspaceID } from "../utils/sql"
+import { cuid, id, timestamps, workspaceID } from "../utils/fields.sql"
 import { users } from "./auth"
 import { currencyEnum, teamRolesEnum } from "./enums"
 import { projects } from "./projects"
@@ -53,6 +53,11 @@ export const members = pgTableProject(
       foreignColumns: [users.id],
       name: "members_user_id_fkey",
     }),
+    workspaceFk: foreignKey({
+      columns: [table.workspaceId],
+      foreignColumns: [workspaces.id],
+      name: "members_workspace_id_fkey",
+    }),
     compoundKey: primaryKey({
       columns: [table.userId, table.workspaceId],
       name: "members_pkey",
@@ -73,6 +78,11 @@ export const invites = pgTableProject(
     compoundKey: primaryKey({
       columns: [table.email, table.workspaceId],
       name: "invites_pkey",
+    }),
+    workspaceFk: foreignKey({
+      columns: [table.workspaceId],
+      foreignColumns: [workspaces.id],
+      name: "invites_workspace_id_fkey",
     }),
   })
 )

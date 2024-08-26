@@ -25,8 +25,9 @@ const nextConfig = {
   images: {
     domains: ["images.unsplash.com"],
   },
-  // swcMinify: true,
+  swcMinify: true,
   experimental: {
+    turbo: {},
     ppr: true,
     mdxRs: true,
     optimizePackageImports: ["@unprice/ui", "@unprice/api", "@unprice/auth", "@unprice/db"],

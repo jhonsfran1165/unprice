@@ -3,7 +3,6 @@ import * as z from "zod"
 
 import { versions } from "../schema/planVersions"
 import { billingPeriodSchema, currencySchema, startCycleSchema } from "./shared"
-import { subscriptionItemsConfigSchema } from "./subscriptions/items"
 
 export const planVersionMetadataSchema = z.object({
   externalId: z.string().optional(),
@@ -55,13 +54,6 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
     return true
   })
 
-export const stripePlanVersionSchema = z.object({
-  id: z.string().min(1, "Plan version id is required"),
-  projectId: z.string().min(1, "Project id is required"),
-  config: subscriptionItemsConfigSchema.optional(),
-})
-
-export type StripePlanVersion = z.infer<typeof stripePlanVersionSchema>
 export type PlanVersionMetadata = z.infer<typeof planVersionMetadataSchema>
 export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>
 export type PlanVersion = z.infer<typeof planVersionSelectBaseSchema>

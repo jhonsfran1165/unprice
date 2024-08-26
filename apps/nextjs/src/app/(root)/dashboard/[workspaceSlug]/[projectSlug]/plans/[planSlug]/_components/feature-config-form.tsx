@@ -94,9 +94,9 @@ export function FeatureConfigForm({
       usageMode: defaultValues.config?.usageMode ?? "tier",
       tierMode: defaultValues.config?.tierMode ?? "volume",
       units: defaultValues.config?.units ?? 1,
-      metadata: {
-        realtime: defaultValues?.metadata?.realtime ?? false,
-      },
+    },
+    metadata: {
+      realtime: defaultValues?.metadata?.realtime ?? false,
     },
   }
 
@@ -104,6 +104,8 @@ export function FeatureConfigForm({
     schema: planVersionFeatureInsertBaseSchema,
     defaultValues: controlledDefaultValues,
   })
+
+  console.log(form.formState)
 
   const updatePlanVersionFeatures = api.planVersionFeatures.update.useMutation({
     onSuccess: ({ planVersionFeature }) => {

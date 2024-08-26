@@ -3,7 +3,8 @@ import { relations } from "drizzle-orm"
 import { boolean, integer, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { cuid } from "../utils/sql"
+
+import { cuid } from "../utils/fields.sql"
 import { members } from "./workspaces"
 
 export const users = pgTableProject("user", {

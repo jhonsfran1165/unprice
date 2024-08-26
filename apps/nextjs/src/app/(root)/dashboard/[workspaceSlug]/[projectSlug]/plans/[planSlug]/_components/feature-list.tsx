@@ -15,7 +15,7 @@ import { useDebounce } from "~/hooks/use-debounce"
 import { api } from "~/trpc/client"
 import { FeatureDialog } from "../../_components/feature-dialog"
 import { SortableFeature } from "../../_components/sortable-feature"
-import { useActivePlanVersion, usePlanFeaturesList } from "../../_components/use-features"
+import { usePlanFeaturesList } from "../../_components/use-features"
 
 interface FeatureListProps {
   featuresPromise: Promise<RouterOutputs["features"]["searchBy"]>
@@ -28,7 +28,6 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
   const filterDebounce = useDebounce(filter, 500)
 
   const [planVersionFeatureList] = usePlanFeaturesList()
-  const [activePlanVersion] = useActivePlanVersion()
 
   const { data, isFetching } = api.features.searchBy.useQuery(
     {
@@ -117,7 +116,6 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
 
               return (
                 <SortableFeature
-                  disabled={activePlanVersion?.status === "published"}
                   key={Math.random()}
                   mode={"Feature"}
                   planFeatureVersion={planFeatureVersion}

@@ -2,7 +2,8 @@ import { relations } from "drizzle-orm"
 import { primaryKey, serial, text, uniqueIndex, varchar } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { projectID, timestamps } from "../utils/sql"
+import { timestamps } from "../utils/fields.sql"
+import { projectID } from "../utils/sql"
 import { projects } from "./projects"
 
 // features are the way we model our features in the system, after adding a feature to a plan we

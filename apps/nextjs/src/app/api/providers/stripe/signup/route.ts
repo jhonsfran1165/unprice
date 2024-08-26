@@ -3,7 +3,6 @@ import { NextResponse } from "next/server"
 
 import { and, db, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
-import { stripePlanVersionSchema, stripeSetupSchema } from "@unprice/db/validators"
 import { type Stripe, stripe } from "@unprice/stripe"
 import { api } from "~/trpc/server"
 
@@ -33,13 +32,21 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Session metadata is required" }, { status: 400 })
   }
 
-  const customerMetadata = JSON.parse(session.metadata?.customer as string)
-  const planVersionMetadata = JSON.parse(session.metadata?.planVersion as string)
-  const successUrl = session.metadata?.successUrl
-  const cancelUrl = session.metadata?.cancelUrl
+  const customerSessionId = session.metadata?.customerSessionId as string
+  const successUrl = session.metadata?.successUrl as string
+  const cancelUrl = session.metadata?.cancelUrl as string
 
-  if (!customerMetadata || !successUrl || !cancelUrl) {
+  if (!customerSessionId || !successUrl || !cancelUrl) {
     return NextResponse.json({ error: "Metadata is incomplete" }, { status: 400 })
+  }
+
+  // get the customer session
+  const customerSession = await db.query.customerSessions.findFirst({
+    where: eq(schema.customerSessions.id, customerSessionId),
+  })
+
+  if (!customerSession) {
+    return NextResponse.json({ error: "Customer session not found" }, { status: 404 })
   }
 
   const [customer, paymentMethods] = await Promise.all([
@@ -51,24 +58,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Customer not found in stripe" }, { status: 404 })
   }
 
-  const { success, data: stripeSetupCustomer } = stripeSetupSchema.safeParse(customerMetadata)
-  const { success: planVersionSuccess, data: planVersion } =
-    stripePlanVersionSchema.safeParse(planVersionMetadata)
-
-  if (!success || !stripeSetupCustomer) {
-    return NextResponse.json({ error: "Customer metadata is invalid" }, { status: 400 })
-  }
-
-  if (!planVersionSuccess || !planVersion) {
-    return NextResponse.json({ error: "Plan version metadata is invalid" }, { status: 400 })
-  }
-
   // check if the customer exists in the database
   const customerUnprice = await db.query.customers.findFirst({
     where: (customer, { and, eq }) =>
       and(
-        eq(customer.id, stripeSetupCustomer.id),
-        eq(customer.projectId, stripeSetupCustomer.projectId)
+        eq(customer.id, customerSession.customer.id),
+        eq(customer.projectId, customerSession.customer.projectId)
       ),
   })
 
@@ -77,14 +72,14 @@ export async function GET(req: NextRequest) {
     await db
       .insert(schema.customers)
       .values({
-        id: stripeSetupCustomer.id,
-        projectId: stripeSetupCustomer.projectId,
+        id: customerSession.customer.id,
+        projectId: customerSession.customer.projectId,
         stripeCustomerId: customer.id,
-        name: stripeSetupCustomer.name ?? customer.name ?? "",
-        email: stripeSetupCustomer.email ?? customer.email ?? "",
-        defaultCurrency: stripeSetupCustomer.currency,
+        name: customerSession.customer.name ?? customer.name ?? "",
+        email: customerSession.customer.email ?? customer.email ?? "",
+        defaultCurrency: customerSession.customer.currency,
         active: true,
-        timezone: stripeSetupCustomer.timezone,
+        timezone: customerSession.customer.timezone,
         metadata: {
           stripeSubscriptionId: (session.subscription as string) ?? "",
           stripeDefaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
@@ -113,13 +108,13 @@ export async function GET(req: NextRequest) {
 
   // create the subscription
   await api.subscriptions.signUp({
-    customerId: stripeSetupCustomer.id,
-    projectId: stripeSetupCustomer.projectId,
+    customerId: customerSession.customer.id,
+    projectId: customerSession.customer.projectId,
     type: "plan",
-    planVersionId: planVersion.id,
+    planVersionId: customerSession.planVersion.id,
     startDateAt: Date.now(),
     status: "active",
-    config: planVersion.config,
+    config: customerSession.planVersion.config,
     defaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
     // trialDays: planVersion.trialDays,
   })

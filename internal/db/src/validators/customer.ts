@@ -39,6 +39,7 @@ export const customerSignUpSchema = customerInsertBaseSchema
   .extend({
     planVersionId: z.string().min(1, "Plan version is required"),
     config: subscriptionItemsConfigSchema.optional(),
+    externalId: z.string().optional(),
     successUrl: z.string().url(),
     cancelUrl: z.string().url(),
   })
@@ -50,8 +51,16 @@ export const stripeSetupSchema = z.object({
   currency: currencySchema,
   timezone: z.string().min(1, "Timezone is required"),
   projectId: z.string().min(1, "Project id is required"),
+  externalId: z.string().optional(),
 })
 
+export const stripePlanVersionSchema = z.object({
+  id: z.string().min(1, "Plan version id is required"),
+  projectId: z.string().min(1, "Project id is required"),
+  config: subscriptionItemsConfigSchema.optional(),
+})
+
+export type StripePlanVersion = z.infer<typeof stripePlanVersionSchema>
 export type Customer = z.infer<typeof customerSelectSchema>
 export type InsertCustomer = z.infer<typeof customerInsertBaseSchema>
 export type StripeSetup = z.infer<typeof stripeSetupSchema>
