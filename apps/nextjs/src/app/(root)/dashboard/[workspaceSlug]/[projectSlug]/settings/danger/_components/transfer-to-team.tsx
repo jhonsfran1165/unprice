@@ -30,10 +30,12 @@ export function TransferProjectToTeam({
   workspacesPromise,
   projectSlug,
   workspaceSlug,
+  isMain,
 }: {
   projectSlug: string
   workspaceSlug: string
   workspacesPromise: Promise<RouterOutputs["workspaces"]["listWorkspacesByActiveUser"]>
+  isMain: boolean
 }) {
   const { workspaces } = use(workspacesPromise)
   const router = useRouter()
@@ -47,12 +49,9 @@ export function TransferProjectToTeam({
   })
 
   const transferToWorkspace = api.projects.transferToWorkspace.useMutation({
-    onSettled: async () => {
-      await apiUtils.projects.listByWorkspace.refetch()
-      router.refresh()
-    },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toastAction("success")
+      await apiUtils.projects.listByActiveWorkspace.refetch()
       // redirect to the new workspace
       router.push(`/${data?.workspaceSlug}`)
     },
@@ -71,11 +70,18 @@ export function TransferProjectToTeam({
         <CardTitle>{title}</CardTitle>
         <CardDescription className="flex items-center">{description}</CardDescription>
       </CardHeader>
-      <CardFooter className="border-t px-6 py-4">
+      <CardFooter className="border-t border-t-destructive px-6 py-4">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="destructive">{title}</Button>
+            <Button variant="destructive" disabled={isMain}>
+              {title}
+            </Button>
           </DialogTrigger>
+          {!!isMain && (
+            <span className="mr-auto px-2 text-muted-foreground text-xs">
+              You can not transfer the main project.
+            </span>
+          )}
           <DialogContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

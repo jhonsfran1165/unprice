@@ -21,19 +21,18 @@ import { api } from "~/trpc/client"
 // TODO: could use server actions
 export function TransferProjectToPersonal({
   projectSlug,
+  isMain,
 }: {
   projectSlug: string
+  isMain: boolean
 }) {
   const apiUtils = api.useUtils()
   const router = useRouter()
 
   const transferProjectToPersonal = api.projects.transferToPersonal.useMutation({
-    onSettled: async () => {
-      await apiUtils.projects.getBySlug.invalidate({ slug: projectSlug })
-      router.refresh()
-    },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toastAction("success")
+      await apiUtils.projects.listByActiveWorkspace.refetch()
       router.push(`/${data?.workspaceSlug}`)
     },
   })
@@ -48,11 +47,19 @@ export function TransferProjectToPersonal({
         <CardDescription className="flex items-center">{description}</CardDescription>
       </CardHeader>
 
-      <CardFooter className="border-t px-6 py-4">
+      <CardFooter className="border-t border-t-destructive px-6 py-4">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="destructive">{title}</Button>
+            <Button variant="destructive" disabled={isMain}>
+              {title}
+            </Button>
           </DialogTrigger>
+
+          {!!isMain && (
+            <span className="mr-auto px-2 text-muted-foreground text-xs">
+              You can not transfer the main project.
+            </span>
+          )}
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{title}</DialogTitle>

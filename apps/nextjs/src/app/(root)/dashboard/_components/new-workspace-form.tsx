@@ -34,7 +34,7 @@ export default function NewWorkspaceForm({
     },
   })
 
-  const createWorkspace = api.workspaces.signUp.useMutation({
+  const signUpWorkspace = api.workspaces.signUp.useMutation({
     onSuccess: async ({ url }) => {
       setDialogOpen?.(false)
 
@@ -44,7 +44,7 @@ export default function NewWorkspaceForm({
   })
 
   const onSubmitForm = async (data: WorkspaceSignup) => {
-    await createWorkspace.mutateAsync(data)
+    await signUpWorkspace.mutateAsync(data)
   }
 
   return (

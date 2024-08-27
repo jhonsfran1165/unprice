@@ -23,20 +23,19 @@ import { api } from "~/trpc/client"
 export function DeleteProject({
   workspaceSlug,
   projectSlug,
+  isMain,
 }: {
   workspaceSlug: string
   projectSlug: string
+  isMain: boolean
 }) {
   const apiUtils = api.useUtils()
   const router = useRouter()
 
   const deleteProject = api.projects.delete.useMutation({
-    onSettled: async () => {
-      await apiUtils.projects.getBySlug.invalidate({ slug: projectSlug })
-      router.refresh()
-    },
-    onSuccess: () => {
+    onSuccess: async () => {
       toastAction("success")
+      await apiUtils.projects.listByActiveWorkspace.refetch()
       router.push(`/${workspaceSlug}`)
     },
   })
@@ -50,11 +49,18 @@ export function DeleteProject({
         <CardTitle>{title}</CardTitle>
         <CardDescription className="flex items-center">{description}</CardDescription>
       </CardHeader>
-      <CardFooter className="border-t px-6 py-4">
+      <CardFooter className="border-t border-t-destructive px-6 py-4">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="destructive">{title}</Button>
+            <Button variant="destructive" disabled={isMain}>
+              {title}
+            </Button>
           </DialogTrigger>
+          {!!isMain && (
+            <span className="mr-auto px-2 text-muted-foreground text-xs">
+              You can not delete the main project.
+            </span>
+          )}
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{title}</DialogTitle>
@@ -72,7 +78,9 @@ export function DeleteProject({
                 className="button-danger"
                 variant="destructive"
                 onClick={() => {
-                  deleteProject.mutate({})
+                  deleteProject.mutate({
+                    projectSlug: projectSlug,
+                  })
                 }}
               >
                 {`I'm sure. Delete this project`}

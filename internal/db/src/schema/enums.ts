@@ -7,10 +7,8 @@ import {
   FEATURE_TYPES,
   FEATURE_VERSION_TYPES,
   PAYMENT_PROVIDERS,
-  PLANS_APP,
   PLAN_BILLING_PERIODS,
   PLAN_TYPES,
-  PROJECT_TIERS_APP,
   ROLES_APP,
   STAGES,
   START_CYCLES,
@@ -22,10 +20,7 @@ import {
   WHEN_TO_BILLING,
 } from "../utils"
 
-// TODO: replace when we have our price engine
-export const plansEnum = pgEnum("legacy_plans", PLANS_APP)
 export const subscriptionStatusEnum = pgEnum("subscription_status", STATUS_SUBSCRIPTION)
-export const projectTierEnum = pgEnum("project_tier", PROJECT_TIERS_APP)
 export const statusPlanEnum = pgEnum("plan_version_status", STATUS_PLAN)
 export const typeFeatureEnum = pgEnum("feature_types", FEATURE_TYPES)
 export const typeFeatureVersionEnum = pgEnum("feature_version_types", FEATURE_VERSION_TYPES)

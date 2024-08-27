@@ -29,11 +29,19 @@ export function ProjectSwitcher() {
     staleTime: 1000 * 60 * 60, // 1 hour
   })
 
+  const [dataWorkspaces] = api.workspaces.listWorkspacesByActiveUser.useSuspenseQuery(undefined, {
+    staleTime: 1000 * 60 * 60, // 1 hour
+  })
+
+  const activeWorkspace = dataWorkspaces.workspaces.find(
+    (workspace) => workspace.slug === workspaceSlug
+  )
+
   const [switcherOpen, setSwitcherOpen] = useState(false)
 
   const activeProject = data.projects.find((p) => p.slug === projectSlug)
 
-  if (!projectSlug || !activeProject) return null
+  if (!projectSlug || !activeProject || !activeWorkspace) return null
 
   return (
     <Popover open={switcherOpen} onOpenChange={setSwitcherOpen}>
@@ -47,8 +55,15 @@ export function ProjectSwitcher() {
         >
           <span className="truncate font-semibold">
             {activeProject.name}
-            <Badge className="ml-2 font-normal" variant={"outline"}>
-              {activeProject.isInternal ? "PRO - INTERNAL" : "PRO"}
+            <Badge
+              className={cn("ml-2 font-normal", {
+                "border-destructive": activeProject.isMain,
+              })}
+              variant={activeProject.isInternal ? "destructive" : "outline"}
+            >
+              {activeProject.isInternal
+                ? `${activeWorkspace.plan} - INTERNAL`
+                : activeWorkspace.plan}
             </Badge>
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

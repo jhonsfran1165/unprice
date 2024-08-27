@@ -720,6 +720,37 @@ export const createWorkspace = async ({
     isPersonal = false
   }
 
+  // verify if the customer exists
+  const customer = await ctx.db.query.customers.findFirst({
+    where: (customer, { eq }) => eq(customer.id, unPriceCustomerId),
+  })
+
+  if (!customer) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Customer unrpice not found",
+    })
+  }
+
+  // get the subscription of the customer
+  const subscription = await ctx.db.query.subscriptions.findFirst({
+    with: {
+      planVersion: {
+        with: {
+          plan: true,
+        },
+      },
+    },
+    where: (subscription, { eq }) => eq(subscription.customerId, unPriceCustomerId),
+  })
+
+  if (!subscription) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Subscription not found",
+    })
+  }
+
   const newWorkspace = await ctx.db.transaction(async (tx) => {
     const slug = createSlug()
 
@@ -744,6 +775,7 @@ export const createWorkspace = async ({
           isInternal: isInternal ?? false,
           createdBy: user.id,
           unPriceCustomerId: unPriceCustomerId,
+          plan: subscription.planVersion.plan.slug,
         })
         .returning()
         .then((workspace) => {

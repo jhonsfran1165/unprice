@@ -346,6 +346,7 @@ export const projectRouter = createTRPCRouter({
             }),
             workspace: workspaceSelectBase.pick({
               slug: true,
+              plan: true,
             }),
           })
         ),

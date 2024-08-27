@@ -107,9 +107,6 @@ export const CURRENCIES = ["USD", "EUR"] as const
 export const STAGES = ["prod", "test", "dev"] as const
 export const STATUS_PLAN = ["draft", "published"] as const
 export const STATUS_SUBSCRIPTION = ["active", "inactive", "ended", "cancelled"] as const
-// TODO: delete this
-export const PLANS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
-export const PROJECT_TIERS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
 export const PLAN_TYPES = ["recurring"] as const
 export const PLAN_BILLING_PERIODS = ["month", "year"] as const
 export const TIER_MODES = Object.keys(TIER_MODES_MAP) as unknown as readonly [
