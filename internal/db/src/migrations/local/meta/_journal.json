@@ -50,6 +50,20 @@
       "when": 1724675948048,
       "tag": "0006_misty_anita_blake",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1724759637354,
+      "tag": "0007_shocking_micromacro",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1724763144795,
+      "tag": "0008_orange_ink",
+      "breakpoints": true
     }
   ]
 }

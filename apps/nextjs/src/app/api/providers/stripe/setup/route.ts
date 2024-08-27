@@ -4,6 +4,7 @@ import { NextResponse } from "next/server"
 import { and, db, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { type Stripe, stripe } from "@unprice/stripe"
+import { ratelimitOrThrow } from "~/lib/ratelimit"
 
 export const runtime = "edge"
 export const preferredRegion = ["fra1"]
@@ -12,65 +13,73 @@ export const preferredRegion = ["fra1"]
 // it is used to update the customer in the database and redirect the user to the success URL
 // usually used for the first time a customer creates a payment method
 export async function GET(req: NextRequest) {
-  // TODO: add rate limiting
-  const sessionId = req.nextUrl.searchParams.get("session_id")
+  try {
+    await ratelimitOrThrow(req, "stripe-setup")
 
-  if (!sessionId) {
-    return NextResponse.json({ error: "Session ID is required" }, { status: 400 })
-  }
+    const sessionId = req.nextUrl.searchParams.get("session_id")
 
-  // TODO: add logs and notifications if errors occur
-  const session = await stripe.checkout.sessions.retrieve(sessionId)
+    if (!sessionId) {
+      return NextResponse.json({ error: "Session ID is required" }, { status: 400 })
+    }
 
-  if (!session) {
-    return NextResponse.json({ error: "Session not found" }, { status: 404 })
-  }
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
 
-  if (!session.metadata) {
-    return NextResponse.json({ error: "Session metadata is required" }, { status: 400 })
-  }
+    if (!session) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 })
+    }
 
-  const customerId = session?.metadata?.customerId
-  const projectId = session?.metadata?.projectId
-  const successUrl = session?.metadata?.successUrl
-  const cancelUrl = session?.metadata?.cancelUrl
+    if (!session.metadata) {
+      return NextResponse.json({ error: "Session metadata is required" }, { status: 400 })
+    }
 
-  if (!customerId || !projectId || !successUrl || !cancelUrl) {
-    return NextResponse.json({ error: "Metadata is incomplete" }, { status: 400 })
-  }
+    const customerId = session?.metadata?.customerId
+    const projectId = session?.metadata?.projectId
+    const successUrl = session?.metadata?.successUrl
+    const cancelUrl = session?.metadata?.cancelUrl
 
-  const [customer, paymentMethods] = await Promise.all([
-    stripe.customers.retrieve(session.customer as string) as Promise<Stripe.Customer>,
-    stripe.customers.listPaymentMethods(session.customer as string),
-  ])
+    if (!customerId || !projectId || !successUrl || !cancelUrl) {
+      return NextResponse.json({ error: "Metadata is incomplete" }, { status: 400 })
+    }
 
-  if (!customer.id) {
-    return NextResponse.json({ error: "Customer not found in stripe" }, { status: 404 })
-  }
+    const [customer, paymentMethods] = await Promise.all([
+      stripe.customers.retrieve(session.customer as string) as Promise<Stripe.Customer>,
+      stripe.customers.listPaymentMethods(session.customer as string),
+    ])
 
-  // check if the customer exists in the database
-  const customerData = await db.query.customers.findFirst({
-    where: (customer, { and, eq }) =>
-      and(eq(customer.id, customerId), eq(customer.projectId, projectId)),
-  })
+    if (!customer.id) {
+      return NextResponse.json({ error: "Customer not found in stripe" }, { status: 404 })
+    }
 
-  if (!customerData) {
-    return NextResponse.json({ error: "Customer not found in database" }, { status: 404 })
-  }
-
-  await db
-    .update(schema.customers)
-    .set({
-      stripeCustomerId: session.customer as string,
-      metadata: {
-        ...customerData?.metadata,
-        stripeSubscriptionId: (session.subscription as string) ?? "",
-        stripeDefaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
-      },
+    // check if the customer exists in the database
+    const customerData = await db.query.customers.findFirst({
+      where: (customer, { and, eq }) =>
+        and(eq(customer.id, customerId), eq(customer.projectId, projectId)),
     })
-    .where(and(eq(schema.customers.id, customerData.id), eq(schema.customers.projectId, projectId)))
-    .execute()
 
-  // redirect the user to the success URL
-  return NextResponse.redirect(successUrl)
+    if (!customerData) {
+      return NextResponse.json({ error: "Customer not found in database" }, { status: 404 })
+    }
+
+    await db
+      .update(schema.customers)
+      .set({
+        stripeCustomerId: session.customer as string,
+        metadata: {
+          ...customerData?.metadata,
+          stripeSubscriptionId: (session.subscription as string) ?? "",
+          stripeDefaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
+        },
+      })
+      .where(
+        and(eq(schema.customers.id, customerData.id), eq(schema.customers.projectId, projectId))
+      )
+      .execute()
+
+    // redirect the user to the success URL
+    return NextResponse.redirect(successUrl)
+  } catch (error) {
+    // TODO: add logs and notifications if errors occur
+    const e = error as Error
+    return NextResponse.json({ error: e.message }, { status: 500 })
+  }
 }

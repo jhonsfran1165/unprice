@@ -9,9 +9,8 @@ import * as utils from "@unprice/db/utils"
 import type { WorkspacesJWTPayload } from "@unprice/db/validators"
 
 const useSecureCookies = process.env.VERCEL_ENV === "production"
-const log = console // createLogger('auth')
+const log = console // TODO: create a logger for this
 
-// TODO: check this out https://github.com/calcom/platform-starter-kit/blob/main/src/auth/config.edge.ts
 export const authConfig = {
   trustHost: Boolean(process.env.VERCEL) || process.env.NODE_ENV === "development",
   logger: {
@@ -51,8 +50,6 @@ export const authConfig = {
       accountsTable: schema.accounts,
       sessionsTable: schema.sessions,
       verificationTokensTable: schema.verificationTokens,
-      // TODO: add the authenticators support for passkey
-      // authenticatorsTable: schema.authenticators,
     }),
 
     // override the default create user
@@ -63,13 +60,14 @@ export const authConfig = {
           ...data,
           // use our own id generator
           id: utils.newId("user"),
-          emailVerified: new Date(), // TODO: this is not true, we need to verify the email
+          // only true if we use auth providers like github, google, etc
+          emailVerified: new Date(),
         })
         .returning()
         .then((user) => user[0] ?? null)
 
       if (!user) {
-        throw "Error creating user"
+        throw `Error creating user for ${data.email}`
       }
 
       const inviteUser = await db.query.invites.findFirst({
@@ -102,71 +100,6 @@ export const authConfig = {
           )
       }
 
-      // create the workspace for the user and then add it as a member
-      await db.transaction(async (db) => {
-        // TODO: should be able to retry if the slug already exists
-        const slug = utils.createSlug()
-        const workspaceId = utils.newId("workspace")
-        const workspaceName = user.name ?? slug
-
-        // get default project for unprice. This project is seeded in the database as the internal project
-        const defaultProjectId = "proj_uhV7tetPJwCZAMox3L7Po4H5dgc"
-
-        // every workspace is a customer for unprice
-        // TODO: create a new customer in the default project
-        const customer = await db
-          .insert(schema.customers)
-          .values({
-            id: utils.newId("customer"),
-            name: workspaceName,
-            projectId: defaultProjectId,
-            email: user.email,
-          })
-          .returning()
-          .then((project) => project[0] ?? null)
-
-        if (!customer) {
-          throw "Error creating customer"
-        }
-
-        const workspace = await db
-          .insert(schema.workspaces)
-          .values({
-            id: workspaceId,
-            slug: slug,
-            name: workspaceName,
-            imageUrl: user.image,
-            isPersonal: true,
-            createdBy: user.id,
-            enabled: true,
-            unPriceCustomerId: customer.id,
-          })
-          .onConflictDoNothing()
-          .returning()
-          .then((workspace) => workspace[0] ?? null)
-
-        if (!workspace?.id) {
-          db.rollback()
-          throw "Error creating workspace"
-        }
-
-        const memberShip = await db
-          .insert(schema.members)
-          .values({
-            userId: user.id,
-            workspaceId: workspaceId,
-            role: "OWNER",
-          })
-          .onConflictDoNothing()
-          .returning()
-          .then((members) => members[0] ?? null)
-
-        if (!memberShip?.userId) {
-          db.rollback()
-          throw "Error creating member"
-        }
-      })
-
       return user
     },
   },
@@ -185,8 +118,11 @@ export const authConfig = {
       const token = opts.token
       const session = opts.session
 
-      if (token.sub && session.user) {
+      if (token.sub) {
         session.user.id = token.sub
+      }
+
+      if (session.user) {
         session.user.workspaces = token.workspaces as WorkspacesJWTPayload[]
       }
 
@@ -234,13 +170,11 @@ export const authConfig = {
 
         token.workspaces = workspaces ? workspaces : []
 
-        // if we want to invalidate the token we can set the refreshWorkspacesAt to 0 from the server
-        token.refreshWorkspacesAt = Date.now() + 3600000 // 1 hour
+        token.refreshWorkspacesAt = Date.now() + 3600000 // revalidate the token in 1 hour
       } catch (error) {
-        console.error(error)
         token.refreshWorkspacesAt = 0 // invalidate the token if there is an error
         token.workspaces = [] // invalidate the token if there is an error
-        log.error("Error getting workspaces for user")
+        log.error("Error getting workspaces for user", { error })
         throw "Error getting workspaces for user"
       }
 

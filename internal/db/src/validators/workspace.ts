@@ -33,7 +33,6 @@ export const workspaceSignupSchema = workspaceInsertBase
     config: subscriptionItemsConfigSchema.optional(),
     successUrl: z.string().url(),
     cancelUrl: z.string().url(),
-    projectId: z.string().min(1, "Project slug is required"),
   })
 
 export const listMembersSchema = membersSelectBase.extend({

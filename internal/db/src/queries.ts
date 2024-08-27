@@ -2,23 +2,6 @@ import { and, eq, getTableColumns, or, sql } from "drizzle-orm"
 import { db } from "."
 import * as schema from "./schema"
 
-// TODO: do we need all data from the tables?
-const projectGuardPrepared = db
-  .select({
-    project: getTableColumns(schema.projects),
-  })
-  .from(schema.projects)
-  .limit(1)
-  .where(
-    and(
-      or(
-        eq(schema.projects.id, sql.placeholder("projectId")),
-        eq(schema.projects.slug, sql.placeholder("projectSlug"))
-      )
-    )
-  )
-  .prepare("project_ws_guard_prepared")
-
 const projectWorkspaceGuardPrepared = db
   .select({
     project: getTableColumns(schema.projects),
@@ -32,7 +15,6 @@ const projectWorkspaceGuardPrepared = db
   .limit(1)
   .where(
     and(
-      eq(schema.projects.workspaceId, sql.placeholder("workspaceId")),
       eq(schema.users.id, sql.placeholder("userId")),
       or(
         eq(schema.projects.id, sql.placeholder("projectId")),
@@ -167,7 +149,6 @@ const getFeatureItemBySlugPrepared = db
 
 export {
   workspacesByUserPrepared,
-  projectGuardPrepared,
   projectWorkspaceGuardPrepared,
   getFeatureItemBySlugPrepared,
   workspaceGuardPrepared,

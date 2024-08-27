@@ -3,15 +3,11 @@ import { z } from "zod"
 
 import { planVersionSelectBaseSchema, subscriptionSelectSchema } from "@unprice/db/validators"
 
-import {
-  createTRPCRouter,
-  protectedActiveWorkspaceOwnerProcedure,
-  protectedProcedure,
-} from "../../trpc"
+import { createTRPCRouter, protectedProcedure, protectedWorkspaceProcedure } from "../../trpc"
 
 export const authRouter = createTRPCRouter({
   // TODO: this should query the user's active subscriptions
-  mySubscriptions: protectedActiveWorkspaceOwnerProcedure
+  mySubscriptions: protectedWorkspaceProcedure
     .input(z.void())
     .output(
       z.object({

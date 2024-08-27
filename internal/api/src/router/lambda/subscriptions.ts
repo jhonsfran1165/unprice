@@ -15,14 +15,14 @@ import { addDays, format } from "date-fns"
 import { buildItemsBySubscriptionIdQuery } from "../../queries/subscriptions"
 import {
   createTRPCRouter,
-  protectedActiveProjectAdminProcedure,
-  protectedActiveProjectWorkspaceProcedure,
+  protectedProcedure,
+  protectedProjectProcedure,
   rateLimiterProcedure,
 } from "../../trpc"
 import { createSubscription } from "../../utils/shared"
 
 export const subscriptionRouter = createTRPCRouter({
-  create: protectedActiveProjectAdminProcedure
+  create: protectedProjectProcedure
     .input(subscriptionInsertSchema)
     .output(
       z.object({
@@ -30,6 +30,9 @@ export const subscriptionRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
+      // only owner and admin can create a subscription
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
       const { subscription } = await createSubscription({
         subscription: opts.input,
         projectId: opts.ctx.project.id,
@@ -74,7 +77,7 @@ export const subscriptionRouter = createTRPCRouter({
         subscription: subscription,
       }
     }),
-  listByActiveProject: protectedActiveProjectWorkspaceProcedure
+  listByActiveProject: protectedProjectProcedure
     .input(searchParamsSchemaDataTable)
     .output(
       z.object({
@@ -185,7 +188,7 @@ export const subscriptionRouter = createTRPCRouter({
         return { subscriptions: [], pageCount: 0 }
       }
     }),
-  listByPlanVersion: protectedActiveProjectWorkspaceProcedure
+  listByPlanVersion: protectedProjectProcedure
     .input(
       subscriptionSelectSchema.pick({
         planVersionId: true,
@@ -219,7 +222,7 @@ export const subscriptionRouter = createTRPCRouter({
         subscriptions: subscriptionData,
       }
     }),
-  changePlan: protectedActiveProjectAdminProcedure
+  changePlan: protectedProjectProcedure
     .input(
       subscriptionInsertSchema
         .extend({
@@ -250,6 +253,9 @@ export const subscriptionRouter = createTRPCRouter({
         startCycle,
       } = opts.input
       const project = opts.ctx.project
+
+      // only owner and admin can change the plan of a subscription
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
       const subscriptionData = await opts.ctx.db.query.subscriptions.findFirst({
         with: {
@@ -428,6 +434,38 @@ export const subscriptionRouter = createTRPCRouter({
       return {
         result: true,
         message: "Subscription changed successfully",
+      }
+    }),
+
+  cancel: protectedProcedure
+    .input(subscriptionSelectSchema.pick({ id: true, projectId: true }))
+    .output(z.object({ result: z.boolean(), message: z.string() }))
+    .mutation(async (opts) => {
+      const { id, projectId } = opts.input
+
+      // end the current subscription
+      const subscription = await opts.ctx.db
+        .update(schema.subscriptions)
+        .set({
+          status: "ended",
+          endDateAt: Date.now(),
+          nextPlanVersionTo: undefined,
+          planChangedAt: Date.now(),
+        })
+        .where(and(eq(schema.subscriptions.id, id), eq(schema.subscriptions.projectId, projectId)))
+        .returning()
+        .then((re) => re[0])
+
+      if (!subscription) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error ending subscription",
+        })
+      }
+
+      return {
+        result: true,
+        message: "Subscription canceled successfully",
       }
     }),
 })

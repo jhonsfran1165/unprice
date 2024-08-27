@@ -1,5 +1,5 @@
 "use client"
-
+import * as currencies from "@dinero.js/currencies"
 import { EyeIcon, EyeOff, LayoutGrid, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
@@ -15,7 +15,8 @@ import {
 } from "react-hook-form"
 
 import type { RouterOutputs } from "@unprice/api"
-import type { SubscriptionItemConfig } from "@unprice/db/validators"
+import { currencySymbol } from "@unprice/db/utils"
+import type { Currency, SubscriptionItemConfig } from "@unprice/db/validators"
 import {
   calculateFreeUnits,
   calculatePricePerFeature,
@@ -37,7 +38,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
-import { isZero } from "dinero.js"
+import { type Dinero, add, dinero, isZero, toDecimal } from "dinero.js"
 import { FeatureConfigForm } from "~/app/(root)/dashboard/[workspaceSlug]/[projectSlug]/plans/[planSlug]/_components/feature-config-form"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"
@@ -178,6 +179,50 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
       : undefined
   }
 
+  const configValues = form.watch("config" as FieldPath<TFieldValues>)
+
+  // calculate the total price for the plan
+  const displayTotalPrice = useMemo(() => {
+    const initialTotal = dinero({
+      amount: 0,
+      currency: currencies[selectedPlanVersion?.currency ?? "USD"],
+    })
+
+    let hasUsage = false
+
+    const totalPrice = configValues.reduce(
+      (total: Dinero<number>, field: SubscriptionItemConfig) => {
+        const feature = versionFeatures.get(field.featurePlanId)
+
+        if (!feature) return total
+
+        if (feature.featureType === "usage") {
+          hasUsage = true
+        }
+
+        const { val: price, err } = calculatePricePerFeature({
+          feature: feature,
+          quantity: field.units ?? 0,
+        })
+
+        if (err) return total
+
+        return add(total, price.totalPrice.dinero)
+      },
+      initialTotal
+    )
+
+    return toDecimal(totalPrice, ({ value, currency }) => {
+      if (hasUsage) {
+        return `${currencySymbol(currency.code as Currency)}${Number.parseFloat(value).toFixed(
+          2
+        )} + usage`
+      }
+
+      return `${currencySymbol(currency.code as Currency)}${Number.parseFloat(value).toFixed(2)}`
+    })
+  }, [JSON.stringify(configValues)])
+
   return (
     <div className="flex w-full flex-col gap-4">
       {withSeparator && <Separator className="my-2" />}
@@ -232,13 +277,16 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                   form.watch(`config.${index}.units` as FieldPath<TFieldValues>) || itemConfig.min
 
                 const freeUnits = calculateFreeUnits({ feature })
+
                 const freeUnitsText =
                   freeUnits === Number.POSITIVE_INFINITY
                     ? feature.limit
                       ? `Up to ${nFormatter(feature.limit)}`
                       : "Unlimited"
                     : freeUnits === 0
-                      ? ""
+                      ? feature.limit
+                        ? `Up to ${nFormatter(feature.limit)}`
+                        : ""
                       : nFormatter(freeUnits)
 
                 return (
@@ -384,6 +432,15 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                   </TableRow>
                 )
               })}
+
+              <TableRow className="text-muted-foreground">
+                <TableCell colSpan={2} className="h-10 text-right font-semibold">
+                  Total per {selectedPlanVersion?.billingPeriod}
+                </TableCell>
+                <TableCell colSpan={1} className="h-10 text-right text-xs">
+                  {displayTotalPrice}
+                </TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         ) : (

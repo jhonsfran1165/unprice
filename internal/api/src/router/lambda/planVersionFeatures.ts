@@ -12,14 +12,10 @@ import {
   planVersionSelectBaseSchema,
 } from "@unprice/db/validators"
 
-import {
-  createTRPCRouter,
-  protectedActiveProjectAdminProcedure,
-  protectedActiveProjectWorkspaceProcedure,
-} from "../../trpc"
+import { createTRPCRouter, protectedProjectProcedure } from "../../trpc"
 
 export const planVersionFeatureRouter = createTRPCRouter({
-  create: protectedActiveProjectAdminProcedure
+  create: protectedProjectProcedure
     .input(planVersionFeatureInsertBaseSchema)
     .output(
       z.object({
@@ -39,6 +35,9 @@ export const planVersionFeatureRouter = createTRPCRouter({
         hidden,
       } = opts.input
       const project = opts.ctx.project
+
+      // only owner and admin can create a feature
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
         where: (version, { eq, and }) =>
@@ -123,7 +122,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
       }
     }),
 
-  remove: protectedActiveProjectAdminProcedure
+  remove: protectedProjectProcedure
     .input(
       planVersionFeatureSelectBaseSchema
         .pick({
@@ -135,6 +134,8 @@ export const planVersionFeatureRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { id } = opts.input
       const project = opts.ctx.project
+      // only owner and admin can delete a feature
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
       const planVersionFeatureData = await opts.ctx.db.query.planVersionFeatures.findFirst({
         with: {
@@ -180,7 +181,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
         plan: deletedPlanVersion,
       }
     }),
-  update: protectedActiveProjectAdminProcedure
+  update: protectedProjectProcedure
     .input(planVersionFeatureSelectBaseSchema.partial().required({ id: true, planVersionId: true }))
     .output(
       z.object({
@@ -206,6 +207,10 @@ export const planVersionFeatureRouter = createTRPCRouter({
       // those should be update from another method because they are related to the plan version
 
       const project = opts.ctx.project
+
+      // only owner and admin can update a feature
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
       const planVersionData = await opts.ctx.db.query.versions.findFirst({
         where: (version, { and, eq }) =>
           and(eq(version.id, planVersionId), eq(version.projectId, project.id)),
@@ -282,7 +287,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
       }
     }),
 
-  getById: protectedActiveProjectWorkspaceProcedure
+  getById: protectedProjectProcedure
     .input(
       z.object({
         id: z.string(),
@@ -321,7 +326,7 @@ export const planVersionFeatureRouter = createTRPCRouter({
       }
     }),
 
-  getByPlanVersionId: protectedActiveProjectWorkspaceProcedure
+  getByPlanVersionId: protectedProjectProcedure
     .input(
       z.object({
         planVersionId: z.string(),

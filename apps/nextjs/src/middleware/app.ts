@@ -74,6 +74,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
     return NextResponse.rewrite(new URL(`/dashboard${fullPath === "/" ? "" : fullPath}`, req.url))
   }
 
+  // if the next param is set, redirect to the next url
   if (next) {
     return NextResponse.redirect(new URL(next, req.url))
   }
@@ -89,8 +90,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
       return NextResponse.redirect(url)
     }
 
-    // this should never happen because every user should have at least one workspace that is created on signup
-    // if the user has no active workspace redirect to onboarding
+    // if not workspace in path and no workspace in cookies or jwt, redirect to onboarding
     return NextResponse.redirect(new URL("/new", req.url))
   }
 
@@ -108,6 +108,9 @@ export default function AppMiddleware(req: NextAuthRequest) {
     // clear the cookies
     response.cookies.set(COOKIES_APP.PROJECT, "")
     response.cookies.set(COOKIES_APP.WORKSPACE, "")
+
+    // Apply those cookies to the request
+    applySetCookie(req, response)
 
     return NextResponse.redirect(url)
   }

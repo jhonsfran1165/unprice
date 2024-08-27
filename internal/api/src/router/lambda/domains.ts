@@ -14,11 +14,11 @@ import {
 import { type Domain, Vercel } from "@unprice/vercel"
 
 import { env } from "../../env.mjs"
-import { createTRPCRouter, protectedActiveWorkspaceAdminProcedure } from "../../trpc"
+import { createTRPCRouter, protectedWorkspaceProcedure } from "../../trpc"
 
 export const domainRouter = createTRPCRouter({
   // INFO: defined as a mutation so we can call it asynchronously
-  exists: protectedActiveWorkspaceAdminProcedure
+  exists: protectedWorkspaceProcedure
     .input(z.object({ domain: z.string() }))
     .output(z.object({ exist: z.boolean() }))
     .mutation(async (opts) => {
@@ -30,13 +30,16 @@ export const domainRouter = createTRPCRouter({
         exist: !!domain,
       }
     }),
-  create: protectedActiveWorkspaceAdminProcedure
+  create: protectedWorkspaceProcedure
     .input(domainCreateBaseSchema.pick({ name: true }))
     .output(z.object({ domain: domainSelectBaseSchema }))
     .mutation(async (opts) => {
       // validate the domain
       const workspace = opts.ctx.workspace
       const domain = opts.input.name
+
+      // only owner and admin can add a domain
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
       // TODO: validate domain
 
@@ -99,7 +102,7 @@ export const domainRouter = createTRPCRouter({
       return { domain: domainData }
     }),
 
-  remove: protectedActiveWorkspaceAdminProcedure
+  remove: protectedWorkspaceProcedure
     .input(z.object({ id: z.string() }))
     .output(
       z.object({
@@ -108,6 +111,10 @@ export const domainRouter = createTRPCRouter({
     )
     .mutation(async (opts) => {
       const workspace = opts.ctx.workspace
+
+      // only owner and admin can remove a domain
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
       const domain = await opts.ctx.db.query.domains.findFirst({
         where: (d, { eq, and }) => and(eq(d.id, opts.input.id), eq(d.workspaceId, workspace.id)),
       })
@@ -148,12 +155,15 @@ export const domainRouter = createTRPCRouter({
         domain: deletedDomain,
       }
     }),
-  update: protectedActiveWorkspaceAdminProcedure
+  update: protectedWorkspaceProcedure
     .input(domainUpdateBaseSchema)
     .output(z.object({ domain: domainSelectBaseSchema }))
     .mutation(async (opts) => {
       const workspace = opts.ctx.workspace
       const { id, name: domain } = opts.input
+
+      // only owner and admin can update a domain
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
       const oldDomain = await opts.ctx.db.query.domains.findFirst({
         where: (d, { eq, and }) => and(eq(d.id, id), eq(d.workspaceId, workspace.id)),
@@ -225,7 +235,7 @@ export const domainRouter = createTRPCRouter({
 
       return { domain: updateDomain }
     }),
-  getAllByActiveWorkspace: protectedActiveWorkspaceAdminProcedure
+  getAllByActiveWorkspace: protectedWorkspaceProcedure
     .input(z.void())
     .output(z.array(domainSelectBaseSchema))
     .query(async (opts) => {
@@ -238,7 +248,7 @@ export const domainRouter = createTRPCRouter({
       return domains
     }),
 
-  verify: protectedActiveWorkspaceAdminProcedure
+  verify: protectedWorkspaceProcedure
     .input(z.object({ domain: z.string() }))
     .output(
       z.object({

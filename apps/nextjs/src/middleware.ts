@@ -10,9 +10,7 @@ import SitesMiddleware from "~/middleware/sites"
 
 export default auth((req) => {
   const { domain, path } = parse(req)
-
-  // TODO: how to create a new request id per request?
-  // req.headers.get("x-request-id") || req.headers.set("x-request-id", newId("request"))
+  const subdomain = getValidSubdomain(domain) ?? ""
 
   // 1. we validate api routes
   if (API_HOSTNAMES.has(domain)) {
@@ -23,8 +21,6 @@ export default auth((req) => {
   if (APP_HOSTNAMES.has(domain)) {
     return AppMiddleware(req)
   }
-
-  const subdomain = getValidSubdomain(domain) ?? ""
 
   // 3. validate subdomains www and empty
   if (subdomain === "" || subdomain === "www") {
@@ -44,18 +40,6 @@ export default auth((req) => {
 })
 
 export const config = {
-  // matcher: [
-  //   /*
-  //    * Match all request paths except for the ones starting with:
-  //    * - _vercel (Vercel internals)
-  //    * - _next (next internals)
-  //    * - some-file.extension (static files)
-  //    * - api (api routes)
-  //    */
-  //   "/((?!.+\\.[\\w]+$|_next|api).*)",
-  // ],
-
-  // matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
   // TODO: ignore public routes from here
   matcher: [
     /*

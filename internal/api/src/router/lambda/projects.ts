@@ -5,7 +5,6 @@ import { eq, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import {
-  deleteProjectSchema,
   projectInsertBaseSchema,
   projectSelectBaseSchema,
   renameProjectSchema,
@@ -16,9 +15,9 @@ import {
 
 import {
   createTRPCRouter,
-  protectedActiveWorkspaceAdminProcedure,
-  protectedActiveWorkspaceProcedure,
   protectedProcedure,
+  protectedProjectProcedure,
+  protectedWorkspaceProcedure,
 } from "../../trpc"
 import { projectWorkspaceGuard } from "../../utils"
 import { getRandomPatternStyle } from "../../utils/generate-pattern"
@@ -31,7 +30,7 @@ const PROJECT_LIMITS = {
 } as const
 
 export const projectRouter = createTRPCRouter({
-  create: protectedActiveWorkspaceProcedure
+  create: protectedWorkspaceProcedure
     .input(projectInsertBaseSchema)
     .output(
       z.object({
@@ -65,6 +64,11 @@ export const projectRouter = createTRPCRouter({
           name,
           slug: projectSlug,
           url,
+          // TODO: pass this from the client
+          defaultCurrency: "USD",
+          timezone: "UTC",
+          isMain: false,
+          isInternal: false,
         })
         .returning()
         .then((res) => res[0] ?? null)
@@ -81,7 +85,7 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 
-  rename: protectedActiveWorkspaceAdminProcedure
+  rename: protectedProjectProcedure
     .input(renameProjectSchema)
     .output(
       z.object({
@@ -89,12 +93,11 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { name, slug } = opts.input
+      const { name } = opts.input
+      const project = opts.ctx.project
 
-      const { project } = await projectWorkspaceGuard({
-        projectSlug: slug,
-        ctx: opts.ctx,
-      })
+      // only owner and admin can rename a project
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
       const projectRenamed = await opts.ctx.db
         .update(schema.projects)
@@ -110,20 +113,23 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 
-  delete: protectedActiveWorkspaceAdminProcedure
-    .input(deleteProjectSchema)
+  delete: protectedProjectProcedure
+    .input(
+      z.object({
+        projectId: z.string().optional(),
+        projectSlug: z.string().optional(),
+      })
+    )
     .output(
       z.object({
-        project: projectSelectBaseSchema.optional(),
+        project: projectSelectBaseSchema,
       })
     )
     .mutation(async (opts) => {
-      const { slug: projectSlug } = opts.input
+      const project = opts.ctx.project
 
-      const { project } = await projectWorkspaceGuard({
-        projectSlug,
-        ctx: opts.ctx,
-      })
+      // only owner and admin can delete a project
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
       const deletedProject = await opts.ctx.db
         .delete(schema.projects)
@@ -131,11 +137,18 @@ export const projectRouter = createTRPCRouter({
         .returning()
         .then((res) => res[0] ?? undefined)
 
+      if (!deletedProject?.id) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error deleting project",
+        })
+      }
+
       return {
         project: deletedProject,
       }
     }),
-  transferToPersonal: protectedActiveWorkspaceAdminProcedure
+  transferToPersonal: protectedWorkspaceProcedure
     .input(transferToPersonalProjectSchema)
     .output(
       z.object({
@@ -207,7 +220,7 @@ export const projectRouter = createTRPCRouter({
     }),
 
   // TODO: all this again
-  transferToWorkspace: protectedActiveWorkspaceAdminProcedure
+  transferToWorkspace: protectedWorkspaceProcedure
     .input(transferToWorkspaceSchema)
     .output(
       z.object({
@@ -271,7 +284,7 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 
-  listByActiveWorkspace: protectedActiveWorkspaceProcedure
+  listByActiveWorkspace: protectedWorkspaceProcedure
     .input(z.void())
     .output(
       z.object({
@@ -378,7 +391,7 @@ export const projectRouter = createTRPCRouter({
         limitReached: projects.length >= PROJECT_LIMITS.PRO,
       }
     }),
-  getBySlug: protectedActiveWorkspaceProcedure
+  getBySlug: protectedWorkspaceProcedure
     .input(z.object({ slug: z.string() }))
     .output(
       z.object({
@@ -409,7 +422,7 @@ export const projectRouter = createTRPCRouter({
         project: projectData,
       }
     }),
-  getById: protectedActiveWorkspaceProcedure
+  getById: protectedWorkspaceProcedure
     .input(z.object({ id: z.string() }))
     .output(
       z.object({

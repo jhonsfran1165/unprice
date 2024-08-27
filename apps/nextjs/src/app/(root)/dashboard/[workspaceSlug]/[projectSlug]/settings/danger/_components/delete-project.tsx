@@ -72,9 +72,7 @@ export function DeleteProject({
                 className="button-danger"
                 variant="destructive"
                 onClick={() => {
-                  deleteProject.mutate({
-                    slug: projectSlug,
-                  })
+                  deleteProject.mutate({})
                 }}
               >
                 {`I'm sure. Delete this project`}

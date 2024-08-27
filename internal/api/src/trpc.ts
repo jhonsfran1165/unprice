@@ -27,7 +27,6 @@ import { LogdrainMetrics } from "./pkg/metrics/logdrain"
 import { transformer } from "./transformer"
 import { projectWorkspaceGuard } from "./utils"
 import { apikeyGuard } from "./utils/apikey-guard"
-import { projectGuard } from "./utils/project-guard"
 import { RATE_LIMIT_WINDOW, redis } from "./utils/upstash"
 import { workspaceGuard } from "./utils/workspace-guard"
 
@@ -98,6 +97,7 @@ export const createTRPCContext = async (opts: {
   const requestId = opts.headers.get("x-request-id") || newId("request")
   const region = opts.headers.get("x-vercel-id") || "unknown"
   const country = opts.headers.get("x-vercel-ip-country") || "unknown"
+  const userAgent = opts.headers.get("user-agent") || "unknown"
 
   const ip =
     opts.headers.get("x-real-ip") ||
@@ -109,7 +109,7 @@ export const createTRPCContext = async (opts: {
     ? new BaseLimeLogger({
         apiKey: env.BASELIME_APIKEY,
         requestId,
-        defaultFields: { userId, region, country, source, ip, pathname },
+        defaultFields: { userId, region, country, source, ip, pathname, userAgent },
         namespace: "unprice-api",
         dataset: "unprice-api",
         service: "api", // default service name
@@ -165,7 +165,6 @@ export const createTRPCContext = async (opts: {
  * This is where the trpc api is initialized, connecting the context and
  * transformer
  */
-// TODO: support Authorization header https://www.npmjs.com/package/@potatohd/trpc-openapi#authorization
 export const t = initTRPC
   .context<typeof createTRPCContext>()
   .meta<OpenApiMeta>()
@@ -191,6 +190,7 @@ export const t = initTRPC
           error.cause instanceof ZodError ? fromZodError(error.cause).toString() : error.message,
       }
 
+      // log the error if it's an internal server error
       if (error.code === "INTERNAL_SERVER_ERROR") {
         ctx?.logger.error("Error 500 in trpc api", {
           error: JSON.stringify(errorResponse),
@@ -287,109 +287,14 @@ export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
 // this is a procedure that requires a user to be logged in and have an active workspace
 // it also sets the active workspace in the context
 // the active workspace is passed in the headers or cookies of the request
-export const protectedActiveWorkspaceProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const activeWorkspaceSlug = ctx.activeWorkspaceSlug
+// if the workspaceSlug is in the input, use it, otherwise use the active workspace slug in the cookie
+export const protectedWorkspaceProcedure = protectedProcedure.use(
+  async ({ ctx, next, getRawInput }) => {
+    const input = (await getRawInput()) as { workspaceSlug?: string }
+    const activeWorkspaceSlug = input?.workspaceSlug ?? ctx.activeWorkspaceSlug
 
-  if (!activeWorkspaceSlug) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "No active workspace in the session",
-    })
-  }
-
-  const workspaces = ctx.session?.user?.workspaces
-  const activeWorkspace = workspaces?.find((workspace) => workspace.slug === activeWorkspaceSlug)
-
-  if (!activeWorkspace) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Workspace not found or you don't have access to the workspace",
-    })
-  }
-
-  const data = await workspaceGuard({
-    workspaceId: activeWorkspace?.id,
-    ctx,
-  })
-
-  return next({
-    ctx: {
-      ...data,
-      session: {
-        ...ctx.session,
-      },
-    },
-  })
-})
-
-export const protectedActiveWorkspaceAdminProcedure = protectedActiveWorkspaceProcedure.use(
-  ({ ctx, next }) => {
-    ctx.verifyRole(["OWNER", "ADMIN"])
-
-    return next({
-      ctx,
-    })
-  }
-)
-
-export const protectedActiveWorkspaceOwnerProcedure = protectedActiveWorkspaceProcedure.use(
-  ({ ctx, next }) => {
-    ctx.verifyRole(["OWNER"])
-
-    return next({
-      ctx,
-    })
-  }
-)
-
-// for those endpoint that are used inside the app but they also can be used with an api key
-export const protectedApiOrActiveProjectProcedure = publicProcedure.use(async ({ ctx, next }) => {
-  const activeProjectSlug = ctx.activeProjectSlug
-  const apikey = ctx.apikey
-
-  // Check db for API key if apiKey is present
-  if (apikey) {
-    const { apiKey } = await apikeyGuard({
-      apikey,
-      ctx,
-    })
-
-    return next({
-      ctx: {
-        // pass the project data to the context to ensure all changes are applied to the correct project
-        project: apiKey.project,
-        apiKey: apiKey,
-      },
-    })
-  }
-
-  // if no api key is present, check if the user is logged in
-  if (!ctx.session?.user?.id) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "User or API key not found" })
-  }
-
-  const data = await projectWorkspaceGuard({
-    projectSlug: activeProjectSlug,
-    ctx,
-  })
-
-  return next({
-    ctx: {
-      userId: ctx.session?.user.id,
-      ...data,
-      session: {
-        ...ctx.session,
-      },
-    },
-  })
-})
-
-export const protectedActiveProjectWorkspaceProcedure = protectedProcedure.use(
-  async ({ ctx, next }) => {
-    const activeProjectSlug = ctx.activeProjectSlug
-
-    const data = await projectWorkspaceGuard({
-      projectSlug: activeProjectSlug,
+    const data = await workspaceGuard({
+      workspaceSlug: activeWorkspaceSlug,
       ctx,
     })
 
@@ -404,21 +309,44 @@ export const protectedActiveProjectWorkspaceProcedure = protectedProcedure.use(
   }
 )
 
-export const protectedProjectProcedure = protectedProcedure.use(
+// for those endpoint that are used inside the app but they also can be used with an api key
+export const protectedApiOrActiveProjectProcedure = publicProcedure.use(
   async ({ ctx, next, getRawInput }) => {
-    const input = await getRawInput()
-    const { projectId } = input as { projectId: string }
-    const activeProjectSlug = ctx.activeProjectSlug
+    const apikey = ctx.apikey
 
-    // if projectId is present, use it if not use the active project slug
-    const project = await projectGuard({
-      ...(projectId ? { projectId: projectId } : { projectSlug: activeProjectSlug }),
+    // Check db for API key if apiKey is present
+    if (apikey) {
+      const { apiKey } = await apikeyGuard({
+        apikey,
+        ctx,
+      })
+
+      return next({
+        ctx: {
+          // pass the project data to the context to ensure all changes are applied to the correct project
+          project: apiKey.project,
+          apiKey: apiKey,
+        },
+      })
+    }
+
+    // if no api key is present, check if the user is logged in
+    if (!ctx.session?.user?.id) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "User or API key not found" })
+    }
+
+    const input = (await getRawInput()) as { projectSlug?: string }
+    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug
+
+    const data = await projectWorkspaceGuard({
+      projectSlug: activeProjectSlug,
       ctx,
     })
 
     return next({
       ctx: {
-        project,
+        userId: ctx.session?.user.id,
+        ...data,
         session: {
           ...ctx.session,
         },
@@ -427,12 +355,24 @@ export const protectedProjectProcedure = protectedProcedure.use(
   }
 )
 
-export const protectedActiveProjectAdminProcedure = protectedActiveProjectWorkspaceProcedure.use(
-  ({ ctx, next }) => {
-    ctx.verifyRole(["OWNER", "ADMIN"])
+export const protectedProjectProcedure = protectedProcedure.use(
+  async ({ ctx, next, getRawInput }) => {
+    const input = (await getRawInput()) as { projectSlug?: string }
+    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug
+
+    // if projectSlug is present, use it if not use the active project slug
+    const data = await projectWorkspaceGuard({
+      projectSlug: activeProjectSlug,
+      ctx,
+    })
 
     return next({
-      ctx,
+      ctx: {
+        ...data,
+        session: {
+          ...ctx.session,
+        },
+      },
     })
   }
 )

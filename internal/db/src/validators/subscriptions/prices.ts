@@ -330,7 +330,7 @@ export const calculateTierPrice = ({
       const dineroFlatPrice = prorate
         ? trimScale(calculatePercentage(dinero(tier.flatPrice.dinero), prorate))
         : trimScale(dinero(tier.flatPrice.dinero))
-      total = add(total, dineroFlatPrice)
+      total = trimScale(add(total, dineroFlatPrice))
     }
 
     return Ok({
@@ -440,7 +440,7 @@ export const calculateUnitPrice = ({
   prorate?: number
   isFlat?: boolean
 }): Result<CalculatedPrice, UnPriceCalculationError> => {
-  const dineroPrice = dinero(price.dinero)
+  const dineroPrice = trimScale(dinero(price.dinero))
   const total = prorate
     ? trimScale(calculatePercentage(multiply(dineroPrice, quantity), prorate))
     : trimScale(multiply(dineroPrice, quantity))
@@ -457,10 +457,9 @@ export const calculateUnitPrice = ({
     },
     totalPrice: {
       dinero: total,
-      displayAmount: toDecimal(
-        total,
-        ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
-      ),
+      displayAmount: toDecimal(total, ({ value, currency }) => {
+        return `${currencySymbol(currency.code as Currency)}${value}`
+      }),
     },
   })
 }

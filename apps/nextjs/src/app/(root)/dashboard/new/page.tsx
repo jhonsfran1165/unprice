@@ -44,8 +44,6 @@ async function Content({
                   config: [],
                   successUrl: "",
                   cancelUrl: "",
-                  // TODO: This is the project id for the unprice-admin project
-                  projectId: "proj_uhV7tetPJwCZAMox3L7Po4H5dgc",
                 }}
               />
             </CardContent>

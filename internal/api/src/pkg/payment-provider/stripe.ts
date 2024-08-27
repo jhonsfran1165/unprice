@@ -1,10 +1,8 @@
 import { API_DOMAIN } from "@unprice/config"
 import type { Result } from "@unprice/error"
 import { Err, FetchError, Ok } from "@unprice/error"
-import { Stripe, stripe } from "@unprice/stripe"
-
-import type { StripeSetup } from "@unprice/db/validators"
 import type { Logger } from "@unprice/logging"
+import { Stripe, stripe } from "@unprice/stripe"
 import type { PaymentProviderCreateSession, PaymentProviderInterface } from "./interface"
 
 export class StripePaymentProvider implements PaymentProviderInterface {
@@ -102,7 +100,11 @@ export class StripePaymentProvider implements PaymentProviderInterface {
   }
 
   public async signUp(opts: {
-    customer: StripeSetup
+    customer: {
+      id: string
+      email: string
+      currency: string
+    }
     customerSessionId: string
     successUrl: string
     cancelUrl: string
@@ -125,8 +127,6 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       // we pass urls as metadata and the call one of our endpoints to handle the session validation and then redirect the user to the success or cancel url
       const apiCallbackUrl = `${API_DOMAIN}providers/stripe/signup?session_id={CHECKOUT_SESSION_ID}`
 
-      console.log("apiCallbackUrl", apiCallbackUrl)
-
       // create a new session for registering a payment method
       const session = await this.client.checkout.sessions.create({
         client_reference_id: opts.customer.id,
@@ -144,18 +144,14 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         success_url: apiCallbackUrl,
         cancel_url: opts.cancelUrl,
         customer_creation: "always",
-        currency: opts.customer.currency ?? "USD",
+        currency: opts.customer.currency,
       })
-
-      console.log("session", session)
 
       if (!session.url) return Ok({ success: false as const, url: "", customerId: "" })
 
       return Ok({ success: true as const, url: session.url, customerId: opts.customer.id })
     } catch (error) {
       const e = error as Stripe.errors.StripeError
-
-      console.log("error", e)
 
       this.logger.error("Error creating session", {
         error: e.message,

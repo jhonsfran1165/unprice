@@ -20,17 +20,8 @@ export const projectWorkspaceGuard = async ({
   projectSlug?: string
   ctx: Context
 }): Promise<ProjectGuardType> => {
-  const activeWorkspaceSlug = ctx.activeWorkspaceSlug
   const userId = ctx.session?.user.id
   const workspaces = ctx.session?.user?.workspaces
-  const activeWorkspace = workspaces?.find((workspace) => workspace.slug === activeWorkspaceSlug)
-
-  if (!activeWorkspace?.id) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "No active workspace in the session",
-    })
-  }
 
   if (!userId) {
     throw new TRPCError({
@@ -53,7 +44,6 @@ export const projectWorkspaceGuard = async ({
     .execute({
       projectId: projectId,
       projectSlug: projectSlug,
-      workspaceId: activeWorkspace.id,
       userId,
     })
     .then((response) => response[0] ?? null)
@@ -80,6 +70,15 @@ export const projectWorkspaceGuard = async ({
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "Workspace is disabled, please contact support",
+    })
+  }
+
+  const activeWorkspace = workspaces?.find((workspace) => workspace.id === project.workspaceId)
+
+  if (!activeWorkspace) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are not a member of this workspace",
     })
   }
 

@@ -8,8 +8,8 @@ import { ingestionSelectSchema } from "@unprice/db/validators"
 
 import {
   createTRPCRouter,
-  protectedActiveWorkspaceProcedure,
   protectedApiFormDataProcedure,
+  protectedWorkspaceProcedure,
 } from "../../trpc"
 import { projectWorkspaceGuard } from "../../utils"
 
@@ -28,7 +28,7 @@ const myFileValidator = z.preprocess(
  */
 
 export const ingestionRouter = createTRPCRouter({
-  byId: protectedActiveWorkspaceProcedure
+  byId: protectedWorkspaceProcedure
     .input(z.object({ id: z.string(), projectSlug: z.string() }))
     .output(ingestionSelectSchema)
     .query(async (opts) => {
@@ -54,7 +54,7 @@ export const ingestionRouter = createTRPCRouter({
       return ingestion
     }),
 
-  list: protectedActiveWorkspaceProcedure
+  list: protectedWorkspaceProcedure
     .input(
       z.object({
         projectSlug: z.string(),

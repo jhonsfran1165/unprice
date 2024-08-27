@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import type { Database } from "@unprice/db"
+import { type Database, and, eq, sql } from "@unprice/db"
 import {
   customerSessions,
   customers,
@@ -507,7 +507,12 @@ export const signUpCustomer = async ({
   } = input
 
   const planVersion = await ctx.db.query.versions.findFirst({
-    where: (version, { eq, and }) => and(eq(version.id, planVersionId)),
+    with: {
+      project: true,
+      plan: true,
+    },
+    where: (version, { eq, and }) =>
+      and(eq(version.id, planVersionId), eq(version.projectId, projectId)),
   })
 
   if (!planVersion) {
@@ -531,6 +536,7 @@ export const signUpCustomer = async ({
     })
   }
 
+  const planProject = planVersion.project
   const paymentProvider = planVersion.paymentProvider
   const paymentRequired = planVersion.metadata?.paymentMethodRequired ?? false
   const customerId = newId("customer")
@@ -556,14 +562,14 @@ export const signUpCustomer = async ({
               id: customerId,
               name: name,
               email: email,
-              currency: defaultCurrency ?? "USD",
-              timezone: timezone || "UTC",
+              currency: defaultCurrency || planProject.defaultCurrency,
+              timezone: timezone || planProject.timezone,
               projectId: projectId,
               externalId: externalId,
             },
             planVersion: {
               id: planVersion.id,
-              projectId: planVersion.projectId,
+              projectId: projectId,
               config: config,
             },
           })
@@ -583,11 +589,8 @@ export const signUpCustomer = async ({
           customerSessionId: customerSession.id,
           customer: {
             id: customerId,
-            name: name,
             email: email,
-            currency: defaultCurrency ?? "USD",
-            timezone: timezone || "UTC",
-            projectId: projectId,
+            currency: defaultCurrency || planProject.defaultCurrency,
           },
         })
 
@@ -618,8 +621,8 @@ export const signUpCustomer = async ({
           name: name ?? email,
           email: email,
           projectId: projectId,
-          defaultCurrency: defaultCurrency ?? "USD",
-          timezone: timezone || "UTC",
+          defaultCurrency: defaultCurrency ?? planProject.defaultCurrency,
+          timezone: timezone ?? planProject.timezone,
           active: true,
         })
         .returning()
@@ -643,7 +646,7 @@ export const signUpCustomer = async ({
           status: "active",
           config: config,
           defaultPaymentMethodId: "",
-          timezone: timezone,
+          timezone: timezone ?? planProject.timezone,
           collectionMethod: planVersion.collectionMethod,
           whenToBill: planVersion.whenToBill,
           startCycle: planVersion.startCycle,
@@ -693,7 +696,7 @@ export const createWorkspace = async ({
   }
   ctx: Context
 }) => {
-  const { name, unPriceCustomerId, isPersonal, isInternal, id } = input
+  const { name, unPriceCustomerId, isInternal, id } = input
   const user = ctx.session?.user
 
   if (!user) {
@@ -703,8 +706,21 @@ export const createWorkspace = async ({
     })
   }
 
+  let isPersonal = true
+
+  // verify if the user is a member of any workspace
+  const countMembers = await ctx.db
+    .select({ count: sql<number>`count(*)` })
+    .from(members)
+    .where(and(eq(members.userId, user.id)))
+    .then((res) => res[0]?.count ?? 0)
+
+  // if the user is a member of any workspace, the workspace is not personal
+  if (countMembers > 0) {
+    isPersonal = false
+  }
+
   const newWorkspace = await ctx.db.transaction(async (tx) => {
-    // TODO: should be able to retry if the slug already exists
     const slug = createSlug()
 
     // look if the workspace already has a customer
@@ -733,6 +749,7 @@ export const createWorkspace = async ({
         .then((workspace) => {
           return workspace[0] ?? undefined
         })
+        // TODO: use this method to throw errors in all api endpoints
         .catch((err) => {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -791,4 +808,73 @@ export const createWorkspace = async ({
   })
 
   return newWorkspace
+}
+
+export const signOutCustomer = async ({
+  input,
+  ctx,
+}: {
+  input: { customerId: string; projectId: string }
+  ctx: Context
+}) => {
+  const { customerId, projectId } = input
+
+  // cancel all subscriptions
+  const customerSubs = await ctx.db.query.subscriptions.findMany({
+    where: (subscription, { eq, and }) =>
+      and(eq(subscription.customerId, customerId), eq(subscription.projectId, projectId)),
+  })
+
+  // all this should be in a transaction
+  await ctx.db.transaction(async (tx) => {
+    const cancelSubs = await Promise.all(
+      customerSubs.map(async (sub) => {
+        await tx
+          .update(subscriptions)
+          .set({
+            status: "ended",
+            endDateAt: Date.now(),
+            nextPlanVersionTo: undefined,
+            planChangedAt: Date.now(),
+          })
+          .where(eq(subscriptions.id, sub.id))
+      })
+    )
+      .catch((err) => {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err.message,
+        })
+      })
+      .then(() => true)
+
+    if (!cancelSubs) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Error canceling subscription",
+      })
+    }
+
+    // TODO: trigger payment to collect the last bill
+
+    // TODO: send email to the customer
+
+    // Deactivate the customer
+    await tx
+      .update(customers)
+      .set({
+        active: false,
+      })
+      .where(eq(customers.id, customerId))
+      .catch((err) => {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err.message,
+        })
+      })
+  })
+
+  return {
+    success: true,
+  }
 }

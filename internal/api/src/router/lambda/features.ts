@@ -6,10 +6,10 @@ import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import { featureInsertBaseSchema, featureSelectBaseSchema } from "@unprice/db/validators"
 
-import { createTRPCRouter, protectedActiveProjectWorkspaceProcedure } from "../../trpc"
+import { createTRPCRouter, protectedProjectProcedure } from "../../trpc"
 
 export const featureRouter = createTRPCRouter({
-  create: protectedActiveProjectWorkspaceProcedure
+  create: protectedProjectProcedure
     .input(featureInsertBaseSchema)
     .output(z.object({ feature: featureSelectBaseSchema }))
     .mutation(async (opts) => {
@@ -42,7 +42,7 @@ export const featureRouter = createTRPCRouter({
       }
     }),
 
-  remove: protectedActiveProjectWorkspaceProcedure
+  remove: protectedProjectProcedure
     .input(featureSelectBaseSchema.pick({ id: true }))
     .output(z.object({ feature: featureSelectBaseSchema }))
     .mutation(async (opts) => {
@@ -66,7 +66,7 @@ export const featureRouter = createTRPCRouter({
         feature: deletedFeature,
       }
     }),
-  update: protectedActiveProjectWorkspaceProcedure
+  update: protectedProjectProcedure
     .input(
       featureSelectBaseSchema.pick({ id: true, title: true, description: true }).partial({
         description: true,
@@ -110,7 +110,7 @@ export const featureRouter = createTRPCRouter({
         feature: data,
       }
     }),
-  exist: protectedActiveProjectWorkspaceProcedure
+  exist: protectedProjectProcedure
     .input(z.object({ slug: z.string() }))
     .output(z.object({ exist: z.boolean() }))
     .mutation(async (opts) => {
@@ -129,7 +129,7 @@ export const featureRouter = createTRPCRouter({
         exist: !!feature,
       }
     }),
-  getBySlug: protectedActiveProjectWorkspaceProcedure
+  getBySlug: protectedProjectProcedure
     .input(z.object({ slug: z.string() }))
     .output(z.object({ feature: featureSelectBaseSchema.optional() }))
     .query(async (opts) => {
@@ -152,7 +152,7 @@ export const featureRouter = createTRPCRouter({
         feature: feature,
       }
     }),
-  getById: protectedActiveProjectWorkspaceProcedure
+  getById: protectedProjectProcedure
     .input(z.object({ id: z.string(), projectSlug: z.string() }))
     .output(z.object({ feature: featureSelectBaseSchema.optional() }))
     .query(async (opts) => {
@@ -175,7 +175,7 @@ export const featureRouter = createTRPCRouter({
       }
     }),
 
-  searchBy: protectedActiveProjectWorkspaceProcedure
+  searchBy: protectedProjectProcedure
     .input(
       z.object({
         search: z.string().optional(),
@@ -202,7 +202,7 @@ export const featureRouter = createTRPCRouter({
       }
     }),
 
-  listByActiveProject: protectedActiveProjectWorkspaceProcedure
+  listByActiveProject: protectedProjectProcedure
     .input(z.void())
     .output(z.object({ features: z.array(featureSelectBaseSchema) }))
     .query(async (opts) => {

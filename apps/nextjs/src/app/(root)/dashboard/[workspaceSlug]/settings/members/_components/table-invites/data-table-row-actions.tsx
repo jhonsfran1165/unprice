@@ -57,7 +57,6 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
     startTransition(async () => {
       await deleteInvite.mutateAsync({
         email: invite.email,
-        workspaceId: invite.workspaceId,
       })
     })
   }

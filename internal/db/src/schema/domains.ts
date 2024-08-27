@@ -21,7 +21,7 @@ export const domains = pgTableProject(
       columns: [table.workspaceId],
       foreignColumns: [workspaces.id],
       name: "fk_domain_workspace",
-    }),
+    }).onDelete("cascade"),
   })
 )
 

@@ -105,8 +105,6 @@ export function FeatureConfigForm({
     defaultValues: controlledDefaultValues,
   })
 
-  console.log(form.formState)
-
   const updatePlanVersionFeatures = api.planVersionFeatures.update.useMutation({
     onSuccess: ({ planVersionFeature }) => {
       // update the feature list

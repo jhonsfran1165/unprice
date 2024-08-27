@@ -11,27 +11,33 @@ async function main() {
   const start = Date.now()
   console.info("⏳ Running migrations...")
 
-  // process.exit(0)
-
-  const defaultProjectId = "proj_uhV7tetPJwCZAMox3L7Po4H5dgc"
-
-  // create user
-  const user = await db
-    .insert(schema.users)
-    .values({
-      id: newId("user"),
-      email: "jhonsfran@gmail.com",
-      name: "sebastian franco",
-      emailVerified: new Date(),
-      image: "",
-      theme: "dark",
-      defaultWorkspaceSlug: "unprice",
+  let userExists = await db.query.users
+    .findFirst({
+      where: (fields, operators) => operators.eq(fields.email, "jhonsfran@gmail.com"),
     })
-    .onConflictDoNothing()
-    .returning()
-    .then((user) => user[0] ?? null)
+    .then((user) => user ?? null)
 
-  if (!user) throw "Error creating user"
+  if (!userExists) {
+    // create user
+    const user = await db
+      .insert(schema.users)
+      .values({
+        id: newId("user"),
+        email: "jhonsfran@gmail.com",
+        name: "sebastian franco",
+        emailVerified: new Date(),
+        image: "https://avatars.githubusercontent.com/u/28306808?v=4",
+        theme: "dark",
+        defaultWorkspaceSlug: "unprice-admin",
+      })
+      .onConflictDoNothing()
+      .returning()
+      .then((user) => user[0] ?? null)
+
+    userExists = user
+  }
+
+  if (!userExists) throw "Error creating user"
 
   const unpriceWorkspace = await db.query.workspaces.findFirst({
     where: (fields, operators) => operators.eq(fields.slug, "unprice-admin"),
@@ -49,11 +55,12 @@ async function main() {
         slug: "unprice-admin",
         name: "unprice",
         isPersonal: false,
-        imageUrl: "",
+        imageUrl: "https://avatars.githubusercontent.com/u/28306808?v=4",
         unPriceCustomerId: "",
         enabled: true,
         isInternal: true,
-        createdBy: user.id,
+        isMain: true,
+        createdBy: userExists.id,
       })
       .returning()
       .then((workspace) => workspace[0] ?? null)
@@ -62,9 +69,11 @@ async function main() {
     workspace = await db
       .update(schema.workspaces)
       .set({
+        imageUrl: "https://avatars.githubusercontent.com/u/28306808?v=4",
         isPersonal: false,
         isInternal: true,
         enabled: true,
+        isMain: true,
       })
       .where(eq(schema.workspaces.id, workspaceId))
       .returning()
@@ -76,7 +85,7 @@ async function main() {
   const member = await db.query.members.findFirst({
     where: (fields, operators) =>
       operators.and(
-        operators.eq(fields.userId, user.id),
+        operators.eq(fields.userId, userExists.id),
         operators.eq(fields.workspaceId, workspace.id)
       ),
   })
@@ -86,7 +95,7 @@ async function main() {
     await db
       .insert(schema.members)
       .values({
-        userId: user.id,
+        userId: userExists.id,
         workspaceId: workspace.id,
         role: "OWNER",
       })
@@ -97,7 +106,7 @@ async function main() {
     where: (fields, operators) => operators.eq(fields.slug, "unprice-admin"),
   })
 
-  const unpriceProjectId = unpriceProject?.id ?? defaultProjectId
+  const unpriceProjectId = unpriceProject?.id ?? newId("project")
   let project: typeof schema.projects.$inferSelect | null = null
 
   if (!unpriceProject?.id) {
@@ -109,10 +118,12 @@ async function main() {
         name: "unprice",
         slug: "unprice-admin",
         workspaceId: workspaceId,
-        url: "",
+        url: "https://unprice.dev",
         enabled: true,
         isInternal: true,
+        isMain: true,
         defaultCurrency: "USD",
+        timezone: "UTC",
       })
       .returning()
       .then((project) => project[0] ?? null)
@@ -121,9 +132,11 @@ async function main() {
     project = await db
       .update(schema.projects)
       .set({
+        isMain: true,
         enabled: true,
         isInternal: true,
         defaultCurrency: "USD",
+        timezone: "UTC",
       })
       .where(eq(schema.projects.id, unpriceProjectId))
       .returning()
@@ -141,10 +154,10 @@ async function main() {
     unpriceOwner = await db
       .insert(schema.customers)
       .values({
-        id: "cus_2GGH1GE4864s4GrX6ttkjbStDP3k",
+        id: newId("customer"),
         name: "unprice",
         projectId: project.id,
-        email: user.email,
+        email: userExists.email,
         stripeCustomerId: "cus_QCzIbAwmpxZeEA",
       })
       .returning()
@@ -158,19 +171,6 @@ async function main() {
     .update(schema.workspaces)
     .set({ unPriceCustomerId: unpriceOwner.id })
     .where(eq(schema.workspaces.id, workspace.id))
-
-  // create features
-
-  // create a plan
-
-  // subscribe to the free plan
-  // await db.insert(subscriptions).values({
-  //   customerId: customer.id,
-  //   planId: "free",
-  //   status: "ACTIVE",
-  //   createdAtM: new Date(),
-  //   updatedAtM: new Date(),
-  // })
 
   // print all relevant data and save it to unfisical
   const end = Date.now()

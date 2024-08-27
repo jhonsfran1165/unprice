@@ -5,6 +5,7 @@ import { appRouter } from "./root"
 import { createCallerFactory, createInnerTRPCContext, createTRPCContext } from "./trpc"
 
 export { t } from "./trpc"
+export { ratelimit } from "./utils/upstash"
 
 export type { AppRouter } from "./root"
 

@@ -38,10 +38,6 @@ export const projectExtendedSelectSchema = projectSelectBaseSchema
     }),
   })
 
-export const deleteProjectSchema = z.object({
-  slug: z.string(),
-})
-
 export const transferToPersonalProjectSchema = z.object({
   slug: z.string(),
 })

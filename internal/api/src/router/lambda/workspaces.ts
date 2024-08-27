@@ -13,13 +13,8 @@ import {
 } from "@unprice/db/validators"
 import { WelcomeEmail, sendEmail } from "@unprice/email"
 import { z } from "zod"
-import {
-  createTRPCRouter,
-  protectedActiveWorkspaceOwnerProcedure,
-  protectedActiveWorkspaceProcedure,
-  protectedProcedure,
-} from "../../trpc"
-import { createWorkspace, signUpCustomer } from "../../utils/shared"
+import { createTRPCRouter, protectedProcedure, protectedWorkspaceProcedure } from "../../trpc"
+import { createWorkspace, signOutCustomer, signUpCustomer } from "../../utils/shared"
 
 export const workspaceRouter = createTRPCRouter({
   create: protectedProcedure
@@ -56,7 +51,16 @@ export const workspaceRouter = createTRPCRouter({
       const user = opts.ctx.session?.user
       const workspaceId = newId("workspace")
 
-      // TODO: all this happens in a transaction?
+      const mainProject = await opts.ctx.db.query.projects.findFirst({
+        where: eq(schema.projects.isMain, true),
+      })
+
+      if (!mainProject) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Main project not found",
+        })
+      }
 
       // first sign up the customer
       const { success, error, url } = await signUpCustomer({
@@ -68,10 +72,12 @@ export const workspaceRouter = createTRPCRouter({
           successUrl,
           cancelUrl,
           externalId: workspaceId,
+          timezone: mainProject.timezone,
+          defaultCurrency: mainProject.defaultCurrency,
         },
         ctx: opts.ctx,
         // default project ID - unprice admin
-        projectId: "proj_uhV7tetPJwCZAMox3L7Po4H5dgc",
+        projectId: mainProject.id,
       })
 
       if (!success) {
@@ -85,7 +91,7 @@ export const workspaceRouter = createTRPCRouter({
         url,
       }
     }),
-  deleteMember: protectedActiveWorkspaceOwnerProcedure
+  deleteMember: protectedWorkspaceProcedure
     .input(
       z.object({
         userId: z.string(),
@@ -100,6 +106,9 @@ export const workspaceRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { userId, workspaceId } = opts.input
       const workspace = opts.ctx.workspace
+
+      // only the owner can delete a member
+      opts.ctx.verifyRole(["OWNER"])
 
       if (workspace.id !== workspaceId) {
         throw new TRPCError({
@@ -161,7 +170,7 @@ export const workspaceRouter = createTRPCRouter({
         member: deletedMember,
       }
     }),
-  listMembersByActiveWorkspace: protectedActiveWorkspaceProcedure
+  listMembersByActiveWorkspace: protectedWorkspaceProcedure
     .input(z.void())
     .output(
       z.object({
@@ -184,7 +193,7 @@ export const workspaceRouter = createTRPCRouter({
         members: members,
       }
     }),
-  getBySlug: protectedActiveWorkspaceProcedure
+  getBySlug: protectedWorkspaceProcedure
     .input(workspaceSelectBase.pick({ slug: true }))
     .output(
       z.object({
@@ -210,7 +219,7 @@ export const workspaceRouter = createTRPCRouter({
       }
     }),
 
-  delete: protectedActiveWorkspaceProcedure
+  delete: protectedWorkspaceProcedure
     .input(workspaceSelectBase.pick({ id: true }))
     .output(z.object({ workspace: workspaceSelectBase.optional() }))
     .mutation(async (opts) => {
@@ -231,6 +240,27 @@ export const workspaceRouter = createTRPCRouter({
         })
       }
 
+      const mainProject = await opts.ctx.db.query.projects.findFirst({
+        where: eq(schema.projects.isMain, true),
+      })
+
+      if (!mainProject) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Main project not found",
+        })
+      }
+
+      // sign out the customer
+      await signOutCustomer({
+        input: {
+          customerId: workspace.unPriceCustomerId,
+          projectId: mainProject.id,
+        },
+        ctx: opts.ctx,
+      })
+
+      // delete the workspace
       const deletedWorkspace = await opts.ctx.db
         .delete(schema.workspaces)
         .where(eq(schema.workspaces.id, workspace.id))
@@ -281,12 +311,15 @@ export const workspaceRouter = createTRPCRouter({
         workspaces: workspaces,
       }
     }),
-  rename: protectedActiveWorkspaceOwnerProcedure
+  rename: protectedWorkspaceProcedure
     .input(workspaceSelectBase.pick({ name: true }))
     .output(workspaceSelectBase)
     .mutation(async (opts) => {
       const { name } = opts.input
       const workspace = opts.ctx.workspace
+
+      // only owner and admin can rename the workspace
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
       const workspaceRenamed = await opts.ctx.db
         .update(schema.workspaces)
@@ -305,12 +338,15 @@ export const workspaceRouter = createTRPCRouter({
       return workspaceRenamed
     }),
 
-  changeRoleMember: protectedActiveWorkspaceOwnerProcedure
+  changeRoleMember: protectedWorkspaceProcedure
     .input(membersSelectBase.pick({ userId: true, role: true }))
     .output(z.object({ member: membersSelectBase.optional() }))
     .mutation(async (opts) => {
       const { userId, role } = opts.input
       const workspace = opts.ctx.workspace
+
+      // only owner and admin can rename the workspace
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
       const member = await opts.ctx.db
         .update(schema.members)
@@ -330,7 +366,7 @@ export const workspaceRouter = createTRPCRouter({
         member: member,
       }
     }),
-  listInvitesByActiveWorkspace: protectedActiveWorkspaceProcedure
+  listInvitesByActiveWorkspace: protectedWorkspaceProcedure
     .input(z.void())
     .output(
       z.object({
@@ -348,11 +384,10 @@ export const workspaceRouter = createTRPCRouter({
         invites: invites,
       }
     }),
-  deleteInvite: protectedActiveWorkspaceOwnerProcedure
+  deleteInvite: protectedWorkspaceProcedure
     .input(
       z.object({
         email: z.string().email(),
-        workspaceId: z.string(),
       })
     )
     .output(
@@ -361,11 +396,11 @@ export const workspaceRouter = createTRPCRouter({
       })
     )
     .mutation(async (opts) => {
-      const { email, workspaceId } = opts.input
+      const { email } = opts.input
+      const workspace = opts.ctx.workspace
 
-      const workspace = await opts.ctx.db.query.workspaces.findFirst({
-        where: eq(schema.workspaces.id, workspaceId),
-      })
+      // only owner and admin can delete an invite
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
       if (!workspace) {
         throw new TRPCError({
@@ -391,7 +426,7 @@ export const workspaceRouter = createTRPCRouter({
         invite: deletedInvite,
       }
     }),
-  inviteMember: protectedActiveWorkspaceOwnerProcedure
+  inviteMember: protectedWorkspaceProcedure
     .input(inviteMembersSchema)
     .output(
       z.object({
@@ -401,6 +436,9 @@ export const workspaceRouter = createTRPCRouter({
     .mutation(async (opts) => {
       const { email, role } = opts.input
       const workspace = opts.ctx.workspace
+
+      // only owner and admin can invite a member
+      opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
       // check if the user has an account
       const userByEmail = await opts.ctx.db.query.users.findFirst({

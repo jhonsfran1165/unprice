@@ -13,7 +13,7 @@ import {
 } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
 import ConfigItemsFormField from "~/components/forms/items-fields"
-import SelectPlanFormField from "~/components/forms/select-plan-field"
+import SelectGlobalPlanFormField from "~/components/forms/select-global-plan-field"
 import { SubmitButton } from "~/components/submit-button"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -31,8 +31,6 @@ export default function NewWorkspaceForm({
       ...defaultValues,
       successUrl: `${APP_DOMAIN}new?customer_id={CUSTOMER_ID}`,
       cancelUrl: `${APP_DOMAIN}`,
-      isPersonal: false,
-      isInternal: false,
     },
   })
 
@@ -69,7 +67,7 @@ export default function NewWorkspaceForm({
           )}
         />
 
-        <SelectPlanFormField form={form} />
+        <SelectGlobalPlanFormField form={form} />
 
         <ConfigItemsFormField form={form} withSeparator />
 

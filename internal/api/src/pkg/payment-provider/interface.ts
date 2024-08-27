@@ -1,4 +1,3 @@
-import type { StripeSetup } from "@unprice/db/validators"
 import type { FetchError, Result } from "@unprice/error"
 import type { Stripe } from "@unprice/stripe"
 
@@ -20,7 +19,11 @@ export interface PaymentProviderInterface {
   }) => Promise<Result<PaymentProviderCreateSession, FetchError>>
 
   signUp: (opts: {
-    customer: StripeSetup
+    customer: {
+      id: string
+      email: string
+      currency: string
+    }
     customerSessionId: string
     successUrl: string
     cancelUrl: string
