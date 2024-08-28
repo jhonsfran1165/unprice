@@ -64,13 +64,13 @@ export default function CreateApiKeyForm(props: {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name *</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="api-key-prod" />
-                </FormControl>
+                <FormLabel>Name</FormLabel>
                 <FormDescription>
                   Enter a unique name for your token to differentiate it from other tokens.
                 </FormDescription>
+                <FormControl>
+                  <Input {...field} placeholder="api-key-prod" />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -127,7 +127,7 @@ export default function CreateApiKeyForm(props: {
           />
         </div>
 
-        <div className="mt-8 flex justify-end space-x-4">
+        <div className="flex justify-end space-x-4 pt-8">
           <SubmitButton
             type="submit"
             isSubmitting={form.formState.isSubmitting}

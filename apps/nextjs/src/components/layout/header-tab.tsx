@@ -24,8 +24,18 @@ export default function HeaderTab({
         <div className="flex items-center space-x-2">
           <Typography variant="h3">{title}</Typography>
           {label && (
-            <Badge className={"info ml-2"}>
-              <span className="flex h-2 w-2 rounded-full bg-info-solid" />
+            <Badge
+              className={cn("ml-2", {
+                info: label === "active",
+                danger: label === "inactive",
+              })}
+            >
+              <span
+                className={cn("flex h-2 w-2 rounded-full", {
+                  "bg-info-solid": label === "active",
+                  "bg-danger-solid": label === "inactive",
+                })}
+              />
               <span className="ml-1">{label}</span>
             </Badge>
           )}

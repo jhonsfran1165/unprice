@@ -35,7 +35,7 @@ export function DeleteProject({
   const deleteProject = api.projects.delete.useMutation({
     onSuccess: async () => {
       toastAction("success")
-      await apiUtils.projects.listByActiveWorkspace.refetch()
+      await apiUtils.projects.listByActiveWorkspace.invalidate()
       router.push(`/${workspaceSlug}`)
     },
   })

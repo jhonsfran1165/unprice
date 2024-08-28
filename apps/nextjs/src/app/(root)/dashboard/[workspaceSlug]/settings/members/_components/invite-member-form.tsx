@@ -55,14 +55,13 @@ export const InviteMemberForm = () => {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email *</FormLabel>
+                <FormLabel>Email</FormLabel>
+                <FormDescription>
+                  The email address of the person you want to invite.
+                </FormDescription>
                 <FormControl>
                   <Input {...field} placeholder="john@doe.com" />
                 </FormControl>
-                <FormDescription>
-                  The email address of the person you want to invite. They must have an account on
-                  this app.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -73,7 +72,8 @@ export const InviteMemberForm = () => {
             name="role"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Role *</FormLabel>
+                <FormLabel>Role</FormLabel>
+                <FormDescription>The role of the person you want to invite.</FormDescription>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>

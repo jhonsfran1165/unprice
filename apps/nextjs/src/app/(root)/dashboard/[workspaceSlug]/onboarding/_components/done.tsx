@@ -18,7 +18,7 @@ export default function Done(props: { workspaceSlug: string }) {
     if (step === "done") {
       setTimeout(() => {
         startTransition(() => {
-          router.push(`${props.workspaceSlug}/${projectSlug}`)
+          router.push(`/${props.workspaceSlug}/${projectSlug}`)
           router.refresh()
         })
       }, 2000)
@@ -28,7 +28,7 @@ export default function Done(props: { workspaceSlug: string }) {
   return (
     <LazyMotion features={domAnimation}>
       <m.div
-        className="flex h-full w-full flex-col items-center justify-center bg-opacity-60 p-8 shadow-xl"
+        className="flex h-full w-full flex-col items-center justify-center p-8"
         exit={{ opacity: 0, scale: 0.95 }}
         initial={{ background: "transparent" }}
         animate={{ background: "var(--background)" }}

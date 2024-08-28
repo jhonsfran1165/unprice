@@ -1,7 +1,6 @@
 "use client"
 
 import { useParams, useRouter } from "next/navigation"
-import { useTransition } from "react"
 
 import { type Project, type ProjectInsert, projectInsertBaseSchema } from "@unprice/db/validators"
 import {
@@ -15,6 +14,9 @@ import {
 } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
 
+import { CURRENCIES } from "@unprice/db/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+import TimeZoneFormField from "~/components/forms/timezone-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
@@ -22,12 +24,11 @@ import { api } from "~/trpc/client"
 
 const CreateProjectForm = (props: {
   onSuccess?: (project: Project) => void
-  defaultValues?: Project
+  defaultValues?: ProjectInsert
 }) => {
   const router = useRouter()
   const workspaceSlug = useParams().workspaceSlug as string
-
-  const [_isPending, startTransition] = useTransition()
+  const apiUtils = api.useUtils()
 
   const form = useZodForm({
     schema: projectInsertBaseSchema,
@@ -35,36 +36,29 @@ const CreateProjectForm = (props: {
   })
 
   const createProject = api.projects.create.useMutation({
-    onSettled: async () => {
-      router.refresh()
-    },
     onSuccess: (data) => {
       const { project: newProject } = data
+
+      toastAction("success")
+
+      // invalidate the projects query
+      apiUtils.projects.listByActiveWorkspace.invalidate()
+
       if (props.onSuccess) {
         props.onSuccess(newProject)
       } else {
         router.push(`/${workspaceSlug}/${newProject?.slug}`)
       }
-
-      toastAction("success")
     },
   })
 
-  const onSubmit = (data: ProjectInsert) => {
-    startTransition(() => {
-      createProject.mutate(data)
-    })
+  const onSubmit = async (data: ProjectInsert) => {
+    await createProject.mutateAsync(data)
   }
 
   return (
     <Form {...form}>
-      <form
-        id="add-org-form"
-        onSubmit={async (e) => {
-          await form.handleSubmit(onSubmit)(e)
-        }}
-        className="space-y-6"
-      >
+      <form className="space-y-6">
         <div className="space-y-8">
           <FormField
             control={form.control}
@@ -95,10 +89,42 @@ const CreateProjectForm = (props: {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="defaultCurrency"
+            render={({ field }) => (
+              <FormItem className="flex flex-col justify-end">
+                <FormLabel>Currency</FormLabel>
+
+                <FormDescription>
+                  This customer will use this currency for all its invoices.
+                </FormDescription>
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a currency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {CURRENCIES.map((currency) => (
+                      <SelectItem key={currency} value={currency}>
+                        {currency}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <TimeZoneFormField form={form} />
         </div>
 
-        <div className="mt-8 flex justify-end space-x-4">
+        <div className="flex justify-end space-x-4 pt-8">
           <SubmitButton
+            onClick={() => form.handleSubmit(onSubmit)()}
             isDisabled={form.formState.isSubmitting}
             isSubmitting={form.formState.isSubmitting}
             label="Create Project"

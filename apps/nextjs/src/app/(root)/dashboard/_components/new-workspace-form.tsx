@@ -69,7 +69,7 @@ export default function NewWorkspaceForm({
 
         <SelectGlobalPlanFormField form={form} />
 
-        <ConfigItemsFormField form={form} withSeparator />
+        <ConfigItemsFormField form={form} withSeparator projectSlug="unprice-admin" />
 
         <div className="mt-8 flex justify-end space-x-4">
           <SubmitButton

@@ -32,7 +32,6 @@ type PlanVersion = RouterOutputs["planVersions"]["listByActiveProject"]["planVer
 
 interface FormValues extends FieldValues {
   planVersionId?: string
-  projectId?: string
 }
 
 export default function SelectPlanFormField<TFieldValues extends FormValues>({
@@ -44,14 +43,12 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
 }) {
   const [switcherCustomerOpen, setSwitcherCustomerOpen] = useState(false)
   const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersion>()
-  const projectId = form.getValues("projectId" as FieldPath<TFieldValues>)
 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
     {
       published: true,
       active: true,
       enterprisePlan: true,
-      projectId,
     },
     {
       refetchOnWindowFocus: false,

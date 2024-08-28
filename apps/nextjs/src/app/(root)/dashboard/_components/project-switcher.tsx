@@ -77,6 +77,7 @@ export function ProjectSwitcher() {
               {data.projects.map((project) => (
                 <CommandItem
                   key={project.id}
+                  value={project.slug}
                   onSelect={() => {
                     setSwitcherOpen(false)
                     router.push(`/${project.workspace.slug}/${project.slug}`)

@@ -16,10 +16,12 @@ export function PaymentMethodForm({
   customerId,
   successUrl,
   cancelUrl,
+  projectSlug,
 }: {
   customerId: string
   successUrl: string
   cancelUrl: string
+  projectSlug?: string
 }) {
   // TODO: set with the default payment provider for the project
   const [provider, setProvider] = useState<PaymentProvider>("stripe")
@@ -27,6 +29,7 @@ export function PaymentMethodForm({
   const { data, isLoading } = api.customers.listPaymentMethods.useQuery({
     customerId,
     provider: provider,
+    projectSlug,
   })
 
   const createSession = api.customers.createPaymentMethod.useMutation({

@@ -58,6 +58,12 @@ export default function CreateProject() {
                 searchParams.set("projectSlug", slug)
                 router.push(`/${workspaceSlug}/onboarding?${searchParams.toString()}`)
               }}
+              defaultValues={{
+                defaultCurrency: "USD",
+                timezone: "UTC",
+                name: "My Project",
+                url: "https://project.com",
+              }}
             />
           </m.div>
         </m.div>

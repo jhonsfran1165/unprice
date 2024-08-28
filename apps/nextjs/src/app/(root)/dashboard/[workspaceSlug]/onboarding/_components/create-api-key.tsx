@@ -1,12 +1,13 @@
 import { LazyMotion, domAnimation, m } from "framer-motion"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Balancer } from "react-wrap-balancer"
 import CreateApiKeyForm from "../../[projectSlug]/apikeys/_components/create-api-key-form"
 
 export default function CreateApiKey() {
   const router = useRouter()
-  const workspaceSlug = useSearchParams().get("workspaceSlug")
+  const params = useParams()
+  const workspaceSlug = params.workspaceSlug as string
 
   useEffect(() => {
     if (!workspaceSlug) {
@@ -57,11 +58,14 @@ export default function CreateApiKey() {
             }}
           >
             <CreateApiKeyForm
-              onSuccess={(key: string) => {
+              onSuccess={() => {
                 const searchParams = new URLSearchParams(window.location.search)
                 searchParams.set("step", "done")
-                searchParams.set("apiKey", key)
-                router.push(`/onboarding?${searchParams.toString()}`)
+                router.push(`/${workspaceSlug}/onboarding?${searchParams.toString()}`)
+              }}
+              defaultValues={{
+                name: "api-key-prod",
+                expiresAt: null,
               }}
             />
           </m.div>

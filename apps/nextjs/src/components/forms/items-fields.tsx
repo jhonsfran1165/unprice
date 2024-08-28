@@ -63,12 +63,14 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
   isChangePlanSubscription,
   withSeparator,
   withFeatureDetails,
+  projectSlug,
 }: {
   form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
   isChangePlanSubscription?: boolean
   withSeparator?: boolean
   withFeatureDetails?: boolean
+  projectSlug?: string
 }) {
   const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersionResponse | undefined>()
   const [selectedNewPlanVersion, setSelectedNewPlanVersion] = useState<
@@ -87,6 +89,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
       enterprisePlan: true,
       published: true,
       active: !isDisabled && !isChangePlanSubscription,
+      projectSlug,
     },
     {
       enabled: !!planVersionId || !!nextPlanVersionId,

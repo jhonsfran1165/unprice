@@ -25,6 +25,7 @@ import { api } from "~/trpc/client"
 export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
   const router = useRouter()
   const isPersonal = workspace.isPersonal
+  const isMain = workspace.isMain
 
   const apiUtils = api.useUtils()
 
@@ -63,7 +64,7 @@ export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
       <CardFooter className="border-t border-t-destructive px-6 py-4">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="destructive" disabled={!!isPersonal}>
+            <Button variant="destructive" disabled={!!isPersonal || !!isMain}>
               {title}
             </Button>
           </DialogTrigger>
@@ -71,6 +72,11 @@ export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
             <span className="mr-auto px-2 text-muted-foreground text-xs">
               You can not delete your personal workspace. Contact support if you want to delete your
               account.
+            </span>
+          )}
+          {isMain && (
+            <span className="mr-auto px-2 text-muted-foreground text-xs">
+              You can not delete your main workspace.
             </span>
           )}
           <DialogContent>

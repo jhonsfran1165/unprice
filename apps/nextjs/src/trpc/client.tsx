@@ -37,6 +37,8 @@ export const endingLinkClient = (opts?: {
 
     return (ctx) => {
       const path = ctx.op.path.split(".") as [string, ...string[]]
+
+      console.log(path)
       const endpoint = lambdas.includes(path[0]) ? "lambda" : "edge"
 
       const newCtx = {

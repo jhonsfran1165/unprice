@@ -85,6 +85,8 @@ const apiKeyPrepared = db.query.apikeys
           enabled: true,
           slug: true,
           defaultCurrency: true,
+          isMain: true,
+          isInternal: true,
         },
         with: {
           workspace: {
@@ -92,6 +94,8 @@ const apiKeyPrepared = db.query.apikeys
               enabled: true,
               unPriceCustomerId: true,
               isPersonal: true,
+              isInternal: true,
+              isMain: true,
             },
           },
         },

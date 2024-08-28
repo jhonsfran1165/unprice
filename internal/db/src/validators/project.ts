@@ -2,19 +2,25 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import * as schema from "../schema"
+import { currencySchema } from "./shared"
 import { workspaceSelectBase } from "./workspace"
-
-export const projectInsertBaseSchema = createInsertSchema(schema.projects, {
-  slug: z.string().min(1),
-  name: z.string().min(1),
-  url: z.string().url().optional(),
-}).pick({
-  name: true,
-  url: true,
-})
 
 export const projectSelectBaseSchema = createSelectSchema(schema.projects, {
   name: z.string().min(4, "Name must be at least 5 characters"),
+})
+
+export const projectInsertBaseSchema = createInsertSchema(schema.projects, {
+  name: z.string().min(1, "Name is required"),
+  url: z.string().url().optional(),
+  defaultCurrency: currencySchema,
+  timezone: z.string().min(1, "Timezone is required"),
+}).omit({
+  id: true,
+  enabled: true,
+  workspaceId: true,
+  slug: true,
+  isMain: true,
+  isInternal: true,
 })
 
 export const renameProjectSchema = projectSelectBaseSchema.pick({
@@ -29,12 +35,16 @@ export const projectExtendedSelectSchema = projectSelectBaseSchema
     workspaceId: true,
     slug: true,
     defaultCurrency: true,
+    isMain: true,
+    isInternal: true,
   })
   .extend({
     workspace: workspaceSelectBase.pick({
       unPriceCustomerId: true,
       enabled: true,
       isPersonal: true,
+      isMain: true,
+      isInternal: true,
     }),
   })
 
