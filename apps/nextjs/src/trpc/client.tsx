@@ -11,12 +11,13 @@ import { useState } from "react"
 
 import type { AppRouter } from "@unprice/api"
 import { transformer } from "@unprice/api/transformer"
-import { createQueryClient, getBaseUrl, lambdas } from "./shared"
+import { createQueryClient, getBaseUrl } from "./shared"
 
 export const api = createTRPCReact<AppRouter>()
 
 export const endingLinkClient = (opts?: {
   headers?: HTTPHeaders | (() => HTTPHeaders)
+  lambdaEndProcedures: string[]
 }) =>
   ((runtime) => {
     const sharedOpts: Partial<HTTPBatchStreamLinkOptions<AnyRootTypes>> = {
@@ -37,9 +38,8 @@ export const endingLinkClient = (opts?: {
 
     return (ctx) => {
       const path = ctx.op.path.split(".") as [string, ...string[]]
-
-      console.log(path)
-      const endpoint = lambdas.includes(path[0]) ? "lambda" : "edge"
+      // TODO: improve this
+      const endpoint = opts?.lambdaEndProcedures.includes(ctx.op.path) ? "lambda" : "edge"
 
       const newCtx = {
         ...ctx,
@@ -62,7 +62,10 @@ const getQueryClient = () => {
   return clientQueryClientSingleton
 }
 
-export function TRPCReactProvider(props: { children: React.ReactNode }) {
+export function TRPCReactProvider(props: {
+  children: React.ReactNode
+  lambdaEndProcedures: string[]
+}) {
   const queryClient = getQueryClient()
 
   const [trpcClient] = useState(() =>
@@ -75,6 +78,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
         }),
         endingLinkClient({
           headers: { "x-trpc-source": "react-query" },
+          lambdaEndProcedures: props.lambdaEndProcedures,
         }),
       ],
     })

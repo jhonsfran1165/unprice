@@ -1,5 +1,7 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server"
 
+import { edgeRouter } from "./edge"
+import { lambdaRouter } from "./lambda"
 import type { AppRouter } from "./root"
 import { appRouter } from "./root"
 import { createCallerFactory, createInnerTRPCContext, createTRPCContext } from "./trpc"
@@ -8,6 +10,9 @@ export { t } from "./trpc"
 export { ratelimit } from "./utils/upstash"
 
 export type { AppRouter } from "./root"
+
+export const lambdaEndProcedures = Object.keys(lambdaRouter._def.procedures).map((key) => key)
+export const edgeEndProcedures = Object.keys(edgeRouter._def.procedures).map((key) => key)
 
 /**
  * Create a server-side caller for the tRPC API

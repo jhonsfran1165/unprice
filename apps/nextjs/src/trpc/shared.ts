@@ -12,24 +12,6 @@ export const getBaseUrl = () => {
   return "http://localhost:3000"
 }
 
-// lambdas keys must match the first part of the path
-export const lambdas = [
-  "ingestion",
-  "workspaces",
-  "projects",
-  "plans",
-  "planVersions",
-  "planVersionFeatures",
-  "auth",
-  "apikeys",
-  "features",
-  "subscriptions",
-  "domains",
-  "stripe",
-  "customers",
-  "pages",
-]
-
 export const createQueryClient = () =>
   new QueryClient({
     defaultOptions: {
