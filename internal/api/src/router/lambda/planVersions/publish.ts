@@ -2,8 +2,7 @@ import { TRPCError } from "@trpc/server"
 import { APP_NAME } from "@unprice/config"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
-import { planVersionSelectBaseSchema } from "@unprice/db/validators"
-import { calculateFlatPricePlan } from "@unprice/db/validators"
+import { calculateFlatPricePlan, planVersionSelectBaseSchema } from "@unprice/db/validators"
 import { isZero } from "dinero.js"
 import { z } from "zod"
 import { StripePaymentProvider } from "../../../pkg/payment-provider/stripe"
@@ -71,6 +70,7 @@ export const publish = protectedProjectProcedure
             const stripePaymentProvider = new StripePaymentProvider({
               logger: opts.ctx.logger,
             })
+
             // create the products
             await Promise.all(
               planVersionData.planFeatures.map(async (planFeature) => {
@@ -116,6 +116,11 @@ export const publish = protectedProjectProcedure
         })
 
         if (err) {
+          opts.ctx.logger.error("Error calculating price plan", {
+            error: err,
+            planVersionId: planVersionData.id,
+          })
+
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Error calculating price plan",

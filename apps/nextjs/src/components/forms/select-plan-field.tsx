@@ -37,9 +37,11 @@ interface FormValues extends FieldValues {
 export default function SelectPlanFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
+  isChangePlanSubscription,
 }: {
   form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
+  isChangePlanSubscription?: boolean
 }) {
   const [switcherCustomerOpen, setSwitcherCustomerOpen] = useState(false)
   const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersion>()
@@ -64,13 +66,22 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
       name={"planVersionId" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>Select plan</FormLabel>
-          <FormDescription>Select the plan to create the subscription</FormDescription>
+          <FormLabel>{isChangePlanSubscription ? "Current Plan" : "Plan Version"}</FormLabel>
+          <FormDescription>
+            {isChangePlanSubscription
+              ? "Current plan version this customer is subscribed to"
+              : "Select the plan version to create the subscription"}
+          </FormDescription>
+          {!isChangePlanSubscription ? (
+            <div className="font-normal text-xs leading-snug">
+              All the items will be configured based on the plan version selected.
+            </div>
+          ) : null}
           <Popover
             modal={true}
             open={switcherCustomerOpen}
             onOpenChange={() => {
-              if (isDisabled) return
+              if (isDisabled || isChangePlanSubscription) return
               setSwitcherCustomerOpen(!switcherCustomerOpen)
             }}
           >

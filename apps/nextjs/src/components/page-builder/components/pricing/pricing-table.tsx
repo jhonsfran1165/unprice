@@ -2,10 +2,7 @@
 
 import { type UserComponent, useNode } from "@craftjs/core"
 import { cn } from "@unprice/ui/utils"
-import {
-  PricingCard,
-  PricingCardSkeleton,
-} from "~/app/(root)/dashboard/[workspaceSlug]/[projectSlug]/plans/[planSlug]/[planVersionId]/review/_components/pricing-card"
+import { PricingCard, PricingCardSkeleton } from "~/components/forms/pricing-card"
 import { PricingTableSettings } from "./settings"
 import type { PricingComponentProps } from "./types"
 

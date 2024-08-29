@@ -4,7 +4,7 @@ import { Button } from "@unprice/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@unprice/ui/card"
 import { Skeleton } from "@unprice/ui/skeleton"
 import { Typography } from "@unprice/ui/typography"
-import { ItemPriceCard } from "./pricing-item"
+import { PricingItem } from "~/components/forms/pricing-item"
 
 export function PricingCard({
   planVersion,
@@ -55,7 +55,7 @@ export function PricingCard({
                 .map((feature) => {
                   return (
                     <li key={feature.id} className="flex w-full flex-col justify-start">
-                      <ItemPriceCard feature={feature} withCalculator />
+                      <PricingItem feature={feature} withCalculator />
                     </li>
                   )
                 })}

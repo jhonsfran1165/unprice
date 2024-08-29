@@ -66,6 +66,7 @@ export async function hashStringSHA256(str: string) {
   return hashHex
 }
 
+// return the price to stripe money format cents
 export function toStripeMoney(price: Dinero<number>) {
   const { currency } = toSnapshot(price)
 
@@ -89,4 +90,12 @@ export function calculatePercentage(price: Dinero<number>, percentage: number) {
   const result = multiply(price, { amount: Math.round(rest), scale: scale })
 
   return result
+}
+
+export function formatMoney(amount: string, currencyCode = "USD") {
+  const userLocale = currencyCode === "USD" ? "en-US" : "es-ES"
+  return new Intl.NumberFormat(userLocale, {
+    style: "currency",
+    currency: currencyCode,
+  }).format(Number.parseFloat(amount))
 }

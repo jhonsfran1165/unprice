@@ -31,7 +31,7 @@ async function Content({
     return (
       <DashboardShell>
         <div className="flex flex-col items-center justify-center">
-          <Card className="max-w-lg" variant="ghost">
+          <Card className="max-w-xl" variant="ghost">
             <CardHeader>
               <CardTitle>Create Workspace</CardTitle>
               <CardDescription>Create a new workspace to get started.</CardDescription>

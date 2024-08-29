@@ -5,8 +5,7 @@ import { z } from "zod"
 
 import type { Result } from "@unprice/error"
 import { Err, Ok, type SchemaError } from "@unprice/error"
-import { calculatePercentage } from "../../utils"
-import { currencySymbol } from "./../../utils"
+import { calculatePercentage, formatMoney } from "../../utils"
 import { UnPriceCalculationError } from "./../errors"
 import type { PlanVersionExtended, dineroSchema, tiersSchema } from "./../planVersionFeatures"
 import {
@@ -17,7 +16,6 @@ import {
   planVersionFeatureInsertBaseSchema,
   priceSchema,
 } from "./../planVersionFeatures"
-import type { Currency } from "./../shared"
 
 const calculatePriceSchema = z.object({
   dinero: z.custom<Dinero<number>>(),
@@ -65,8 +63,7 @@ export const calculateFlatPricePlan = ({
 
   const displayAmount = toDecimal(
     total,
-    ({ value, currency }) =>
-      `${currencySymbol(currency.code as Currency)}${Number.parseFloat(value).toFixed(2)}`
+    ({ value, currency }) => `${formatMoney(value, currency.code)}`
   )
 
   return Ok({
@@ -232,16 +229,16 @@ export const calculateTierPrice = ({
         dinero: total,
         displayAmount: toDecimal(total, ({ value, currency }) => {
           if (isUsageBased) {
-            return `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
+            return `starts at ${formatMoney(value, currency.code)} per unit`
           }
-          return `${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `${formatMoney(value, currency.code)} per unit`
         }),
       },
       totalPrice: {
         dinero: total,
         displayAmount: toDecimal(
           total,
-          ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
+          ({ value, currency }) => `${formatMoney(value, currency.code)}`
         ),
       },
     })
@@ -271,19 +268,20 @@ export const calculateTierPrice = ({
         displayAmount: toDecimal(dineroUnitPrice, ({ value, currency }) => {
           const prefix = isUsageBased ? "starts at " : ""
           if (isZero(dineroFlatPrice)) {
-            return `${prefix} ${currencySymbol(currency.code as Currency)}${value} per unit`
+            return `${prefix} ${formatMoney(value, currency.code)} per unit`
           }
 
-          return `${prefix} ${currencySymbol(currency.code as Currency)}${toDecimal(
-            dineroFlatPrice
-          )} + ${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `${prefix} ${formatMoney(
+            toDecimal(dineroFlatPrice),
+            currency.code
+          )} + ${formatMoney(value, currency.code)} per unit`
         }),
       },
       totalPrice: {
         dinero: dineroTotalPrice,
         displayAmount: toDecimal(
           dineroTotalPrice,
-          ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
+          ({ value, currency }) => `${formatMoney(value, currency.code)}`
         ),
       },
     })
@@ -338,17 +336,17 @@ export const calculateTierPrice = ({
         dinero: dinero(tier.unitPrice.dinero),
         displayAmount: toDecimal(dinero(tier.unitPrice.dinero), ({ value, currency }) => {
           if (isUsageBased) {
-            return `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
+            return `starts at ${formatMoney(value, currency.code)} per unit`
           }
 
-          return `${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `${formatMoney(value, currency.code)} per unit`
         }),
       },
       totalPrice: {
         dinero: total,
         displayAmount: toDecimal(
           total,
-          ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
+          ({ value, currency }) => `${formatMoney(value, currency.code)}`
         ),
       },
     })
@@ -384,18 +382,16 @@ export const calculatePackagePrice = ({
         dinero: total,
         displayAmount: toDecimal(total, ({ value, currency }) => {
           if (isUsageBased) {
-            return `starts at ${currencySymbol(
-              currency.code as Currency
-            )}${value} per ${units} units`
+            return `starts at ${formatMoney(value, currency.code)} per ${units} units`
           }
-          return `${currencySymbol(currency.code as Currency)}${value} per ${units} units`
+          return `${formatMoney(value, currency.code)} per ${units} units`
         }),
       },
       totalPrice: {
         dinero: total,
         displayAmount: toDecimal(
           total,
-          ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
+          ({ value, currency }) => `${formatMoney(value, currency.code)}`
         ),
       },
     })
@@ -412,16 +408,16 @@ export const calculatePackagePrice = ({
       dinero: dineroPrice,
       displayAmount: toDecimal(dineroPrice, ({ value, currency }) => {
         if (isUsageBased) {
-          return `starts at ${currencySymbol(currency.code as Currency)}${value} per ${units} units`
+          return `starts at ${formatMoney(value, currency.code)} per ${units} units`
         }
-        return `${currencySymbol(currency.code as Currency)}${value} per ${units} units`
+        return `${formatMoney(value, currency.code)} per ${units} units`
       }),
     },
     totalPrice: {
       dinero: total,
       displayAmount: toDecimal(
         total,
-        ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
+        ({ value, currency }) => `${formatMoney(value, currency.code)}`
       ),
     },
   })
@@ -450,15 +446,15 @@ export const calculateUnitPrice = ({
       dinero: dineroPrice,
       displayAmount: toDecimal(dineroPrice, ({ value, currency }) => {
         if (isUsageBased) {
-          return `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `starts at ${formatMoney(value, currency.code)} per unit`
         }
-        return `${currencySymbol(currency.code as Currency)}${value} ${isFlat ? "" : "per unit"}`
+        return `${formatMoney(value, currency.code)} ${isFlat ? "" : "per unit"}`
       }),
     },
     totalPrice: {
       dinero: total,
       displayAmount: toDecimal(total, ({ value, currency }) => {
-        return `${currencySymbol(currency.code as Currency)}${value}`
+        return `${formatMoney(value, currency.code)}`
       }),
     },
   })
@@ -470,7 +466,7 @@ export const calculatePricePerFeature = (
   // set default units to 0 if it's not provided
   // proration only applies to fix costs per billing period
   const { feature, quantity, prorate } = data
-  const defaultQuantity = quantity ?? 0
+  const defaultQuantity = quantity || 0
 
   switch (feature.featureType) {
     case "flat": {

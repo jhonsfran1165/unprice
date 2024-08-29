@@ -1,7 +1,7 @@
 "use client"
 import * as currencies from "@dinero.js/currencies"
 import { EyeIcon, EyeOff, LayoutGrid, Trash2, X } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   type ArrayPath,
   type FieldArray,
@@ -38,9 +38,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
-import { type Dinero, add, dinero, isZero, toDecimal } from "dinero.js"
+import { type Dinero, add, dinero, toDecimal } from "dinero.js"
 import { FeatureConfigForm } from "~/app/(root)/dashboard/[workspaceSlug]/[projectSlug]/plans/[planSlug]/_components/feature-config-form"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
+import { PriceFeature } from "~/components/forms/price-feature"
+import { PricingItem } from "~/components/forms/pricing-item"
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { nFormatter } from "~/lib/nformatter"
 import { api } from "~/trpc/client"
@@ -274,7 +276,9 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
 
                 // if the units are not set, use the minimum units
                 const units =
-                  form.watch(`config.${index}.units` as FieldPath<TFieldValues>) || itemConfig.min
+                  form.watch(`config.${index}.units` as FieldPath<TFieldValues>) ||
+                  itemConfig.min ||
+                  0
 
                 const freeUnits = calculateFreeUnits({ feature })
 
@@ -291,18 +295,17 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
 
                 return (
                   <TableRow key={item.id} className="border-b bg-transparent">
-                    <TableCell className="pl-1">
-                      <div className="flex items-center gap-1">
-                        <span className="font-semibold">{itemConfig.featureSlug}</span>
+                    <TableCell className="table-cell h-24 flex-row items-center gap-1 pl-1">
+                      <div className="flex items-center justify-start gap-1">
                         {withFeatureDetails && (
-                          <PropagationStopper>
+                          <PropagationStopper className="flex items-center justify-start">
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button className="h-4 w-4" variant="link" size="icon">
+                                <Button className="mr-1 size-4" variant="link" size="icon">
                                   {feature.hidden ? (
-                                    <EyeOff className="h-3 w-3" />
+                                    <EyeOff className="size-4" />
                                   ) : (
-                                    <EyeIcon className="h-3 w-3" />
+                                    <EyeIcon className="size-4" />
                                   )}
                                   <span className="sr-only">View feature</span>
                                 </Button>
@@ -324,20 +327,8 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                             </Dialog>
                           </PropagationStopper>
                         )}
+                        <PricingItem feature={feature} withCalculator noCheckIcon />
                       </div>
-
-                      <div className="hidden text-muted-foreground text-xs md:block">
-                        {feature.config?.usageMode
-                          ? `${feature.featureType} rate per
-                      ${feature.config.usageMode}`
-                          : `${feature.featureType} rate`}
-                      </div>
-                      <ConfigItemPrice
-                        selectedPlanVersion={selectedPlanVersion!}
-                        quantity={units ?? 0}
-                        feature={feature}
-                        type="unit"
-                      />
                     </TableCell>
                     <TableCell className="table-cell">
                       {feature.featureType === "usage" ? (
@@ -355,7 +346,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                                 <div className="flex flex-col">
                                   <Input
                                     {...field}
-                                    className="mx-auto h-8 w-20"
+                                    className="mx-auto h-8 w-20 text-center"
                                     disabled={
                                       feature.featureType === "flat" ||
                                       feature.featureType === "usage" ||
@@ -371,9 +362,9 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                       )}
                     </TableCell>
                     <TableCell className="flex h-24 items-center justify-end gap-1 pr-1">
-                      <ConfigItemPrice
+                      <PriceFeature
                         selectedPlanVersion={selectedPlanVersion!}
-                        quantity={units ?? 0}
+                        quantity={units || 0}
                         feature={feature}
                         type="total"
                       />
@@ -458,52 +449,5 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
         )}
       </div>
     </div>
-  )
-}
-
-function ConfigItemPrice({
-  selectedPlanVersion,
-  quantity,
-  feature,
-  type,
-}: {
-  selectedPlanVersion: PlanVersionResponse
-  feature: PlanVersionFeaturesResponse
-  quantity: number
-  type: "total" | "unit"
-}) {
-  // useCallback to prevent re-rendering calculatePricePerFeature
-  const calculatePrice = useCallback(() => {
-    return calculatePricePerFeature({
-      feature: feature,
-      quantity: quantity,
-    })
-  }, [feature, quantity])
-
-  const { err, val: pricePerFeature } = calculatePrice()
-
-  if (err) {
-    return <div className="inline text-muted-foreground text-xs italic">provide quantity</div>
-  }
-
-  if (type === "total") {
-    return (
-      <div className="inline text-end text-xs">
-        {pricePerFeature?.totalPrice.displayAmount &&
-          `${pricePerFeature.totalPrice.displayAmount}/ ${selectedPlanVersion.billingPeriod}`}
-      </div>
-    )
-  }
-
-  // if the price is 0, don't show the price
-  return (
-    <>
-      {!isZero(pricePerFeature.unitPrice.dinero) && (
-        <div className="inline text-muted-foreground text-xs italic">
-          {pricePerFeature.unitPrice.displayAmount &&
-            `${pricePerFeature.unitPrice.displayAmount}/ ${selectedPlanVersion?.billingPeriod}`}
-        </div>
-      )}
-    </>
   )
 }

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 
+import { PricingCard } from "~/components/forms/pricing-card"
 import { api } from "~/trpc/server"
-import { PricingCard } from "./_components/pricing-card"
 
 export default async function ReviewPage({
   params,

@@ -1,5 +1,5 @@
 import type { UserComponent } from "@craftjs/core"
-import { PricingCard } from "~/app/(root)/dashboard/[workspaceSlug]/[projectSlug]/plans/[planSlug]/[planVersionId]/review/_components/pricing-card"
+import { PricingCard } from "~/components/forms/pricing-card"
 import type { PricingComponentProps } from "./types"
 
 export const PricingTablePreview: UserComponent<PricingComponentProps> = (props) => {

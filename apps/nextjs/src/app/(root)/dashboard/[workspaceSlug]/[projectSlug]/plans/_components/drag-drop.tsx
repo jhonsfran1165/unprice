@@ -166,7 +166,7 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
     if (isPublished) {
       toastAction(
         "error",
-        "You cannot add features to a published plan version. Please create a new version."
+        "You cannot add features to a published plan version. Please create a new version or duplicate the current one."
       )
       return
     }

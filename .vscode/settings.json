@@ -24,6 +24,20 @@
     },
     "editor.formatOnSave": true
   },
+  "[typescript]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll": "explicit"
+    },
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll": "explicit"
+    },
+    "editor.formatOnSave": true
+  },
   "cSpell.words": [
     "apikey",
     "apikeys",

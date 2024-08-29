@@ -31,9 +31,10 @@ import { api } from "~/trpc/client"
 import CustomerFormField from "./customer-field"
 import DurationFormField from "./duration-field"
 import EndDateFormField from "./enddate-field"
-import ConfigItemsFormField from "./items-fields"
+
+import ConfigItemsFormField from "~/components/forms/items-fields"
+import SelectPlanFormField from "~/components/forms/select-plan-field"
 import PlanNewVersionFormField from "./plan-new-version-field"
-import PlanVersionFormField from "./plan-version-field"
 
 type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 type Customer = RouterOutputs["customers"]["listByActiveProject"]["customers"][0]
@@ -280,13 +281,9 @@ export function SubscriptionForm({
             />
           )}
 
-          <PlanVersionFormField
+          <SelectPlanFormField
             form={form}
-            planVersions={data?.planVersions ?? []}
-            selectedPlanVersion={selectedPlanVersion}
-            setSelectedPlanVersion={setSelectedPlanVersion}
             isDisabled={readOnly || isLoading || isChangePlanSubscription}
-            isLoading={isLoading}
             isChangePlanSubscription={isChangePlanSubscription}
           />
 
@@ -558,27 +555,12 @@ export function SubscriptionForm({
             isDisabled={readOnly}
           />
 
-          <Separator />
-
-          {isChangePlanSubscription && (
-            <ConfigItemsFormField
-              isLoading={isLoading}
-              form={form}
-              items={items}
-              selectedPlanVersion={selectedNewPlanVersion}
-              isDisabled={readOnly}
-            />
-          )}
-
-          {!isChangePlanSubscription && (
-            <ConfigItemsFormField
-              isLoading={isLoading}
-              form={form}
-              items={items}
-              selectedPlanVersion={selectedPlanVersion}
-              isDisabled={readOnly}
-            />
-          )}
+          <ConfigItemsFormField
+            form={form}
+            isDisabled={readOnly}
+            isChangePlanSubscription={isChangePlanSubscription}
+            withSeparator
+          />
         </div>
 
         {isChangePlanSubscription && (

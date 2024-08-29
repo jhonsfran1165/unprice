@@ -73,7 +73,8 @@ export const listByUnpriceProject = protectedProcedure
           needsPublished ? eq(version.status, "published") : undefined,
           // get active versions by default, only get inactive versions if the user wants it
           needsActive ? eq(version.active, true) : undefined,
-          needsLatest ? undefined : eq(version.latest, true)
+          // latest versions by default, only get non latest versions if the user wants it
+          !needsLatest ? undefined : eq(version.latest, true)
         ),
     })
 

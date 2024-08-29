@@ -52,6 +52,7 @@ export default function SelectUnpricePlanFormField<TFieldValues extends FormValu
       active: true,
       enterprisePlan: true,
       projectId,
+      latest: true,
     },
     {
       refetchOnWindowFocus: false,
