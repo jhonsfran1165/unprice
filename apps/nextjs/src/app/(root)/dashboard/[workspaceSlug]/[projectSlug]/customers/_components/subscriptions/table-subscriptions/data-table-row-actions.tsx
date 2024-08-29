@@ -80,7 +80,14 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
             <SheetDescription>Details for this subscription</SheetDescription>
           </SheetHeader>
 
-          <SubscriptionForm defaultValues={subscription} {...propsForm} setDialogOpen={setIsOpen} />
+          <SubscriptionForm
+            defaultValues={{
+              ...subscription,
+              config: [],
+            }}
+            {...propsForm}
+            setDialogOpen={setIsOpen}
+          />
         </SheetContent>
       </Sheet>
     </PropagationStopper>

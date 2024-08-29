@@ -1,7 +1,8 @@
 import { APP_DOMAIN } from "@unprice/config"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
-import { addMonths } from "date-fns"
+import { addMonths, endOfMonth, startOfMonth } from "date-fns"
 import { Fragment } from "react"
+import { ProgressDemo } from "~/components/analytics/progress"
 import { PaymentMethodForm } from "~/components/forms/payment-method-form"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
@@ -74,13 +75,21 @@ async function SubscriptionCard({ workspaceSlug }: { workspaceSlug: string }) {
   )
 }
 
-function UsageCard() {
+async function UsageCard() {
+  const { usage } = await api.analytics.getTotalUsagePerFeatureActiveProject({
+    start: startOfMonth(new Date()).getTime(),
+    end: endOfMonth(new Date()).getTime(),
+  })
+
+  console.info(usage)
   return (
     <Card className="mt-4">
       <CardHeader>
         <CardTitle>Usage</CardTitle>
       </CardHeader>
-      <CardContent>TODO</CardContent>
+      <CardContent>
+        <ProgressDemo />
+      </CardContent>
     </Card>
   )
 }
