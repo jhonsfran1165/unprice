@@ -91,7 +91,7 @@ export default function SelectUnpricePlanFormField<TFieldValues extends FormValu
                     {isLoading ? (
                       <LoadingAnimation className="h-4 w-4" variant="dots" />
                     ) : selectedPlanVersion ? (
-                      `${selectedPlanVersion.plan.slug} v${selectedPlanVersion.version} - ${selectedPlanVersion.title} - ${selectedPlanVersion.billingPeriod}`
+                      `${selectedPlanVersion.title} - ${selectedPlanVersion.billingPeriod}`
                     ) : (
                       "Select plan"
                     )}
@@ -111,7 +111,7 @@ export default function SelectUnpricePlanFormField<TFieldValues extends FormValu
                       <div className="flex flex-col gap-2 pt-1">
                         {data?.planVersions.map((version) => (
                           <CommandItem
-                            value={`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
+                            value={`${version.title} - ${version.billingPeriod}`}
                             key={version.id}
                             onSelect={() => {
                               field.onChange(version.id)
@@ -125,7 +125,7 @@ export default function SelectUnpricePlanFormField<TFieldValues extends FormValu
                                 version.id === field.value ? "opacity-100" : "opacity-0"
                               )}
                             />
-                            {`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
+                            {`${version.title} - ${version.billingPeriod}`}
                           </CommandItem>
                         ))}
                         {noData && !isLoading && (
