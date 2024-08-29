@@ -35,7 +35,7 @@ interface FormValues extends FieldValues {
   projectId?: string
 }
 
-export default function SelectGlobalPlanFormField<TFieldValues extends FormValues>({
+export default function SelectUnpricePlanFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
 }: {

@@ -1,5 +1,9 @@
 import { TRPCError } from "@trpc/server"
-import { planSelectBaseSchema, planVersionSelectBaseSchema } from "@unprice/db/validators"
+import {
+  planSelectBaseSchema,
+  planVersionSelectBaseSchema,
+  projectExtendedSelectSchema,
+} from "@unprice/db/validators"
 import { z } from "zod"
 
 import { protectedProjectProcedure } from "../../../trpc"
@@ -15,6 +19,7 @@ export const getVersionsBySlug = protectedProjectProcedure
           })
         ),
       }),
+      project: projectExtendedSelectSchema,
     })
   )
   .query(async (opts) => {
@@ -59,5 +64,6 @@ export const getVersionsBySlug = protectedProjectProcedure
 
     return {
       plan: planWithVersions,
+      project: project,
     }
   })

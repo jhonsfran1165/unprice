@@ -3,7 +3,11 @@ import { z } from "zod"
 
 import { type Database, and, desc, eq, getTableColumns } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
-import { planSelectBaseSchema, subscriptionExtendedWithItemsSchema } from "@unprice/db/validators"
+import {
+  planSelectBaseSchema,
+  projectExtendedSelectSchema,
+  subscriptionExtendedWithItemsSchema,
+} from "@unprice/db/validators"
 
 import { protectedProjectProcedure } from "../../../trpc"
 
@@ -15,6 +19,7 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
     z.object({
       plan: planSelectBaseSchema,
       subscriptions: subscriptionExtendedWithItemsSchema.array(),
+      project: projectExtendedSelectSchema,
     })
   )
   .query(async (opts) => {
@@ -82,6 +87,7 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
     if (!planWithSubscriptions || !planWithSubscriptions.length) {
       return {
         plan: plan,
+        project: project,
         subscriptions: [],
       }
     }
@@ -98,6 +104,7 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
 
     return {
       plan: plan,
+      project: project,
       subscriptions: subscriptions,
     }
   })

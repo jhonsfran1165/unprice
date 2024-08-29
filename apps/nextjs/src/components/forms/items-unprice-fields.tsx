@@ -45,10 +45,10 @@ import { PropagationStopper } from "~/components/prevent-propagation"
 import { nFormatter } from "~/lib/nformatter"
 import { api } from "~/trpc/client"
 
-type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
+type PlanVersionResponse = RouterOutputs["planVersions"]["listByUnpriceProject"]["planVersions"][0]
 
 type PlanVersionFeaturesResponse =
-  RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]["planFeatures"][0]
+  RouterOutputs["planVersions"]["listByUnpriceProject"]["planVersions"][0]["planFeatures"][0]
 
 interface FormValues extends FieldValues {
   config?: SubscriptionItemConfig[]
@@ -57,7 +57,7 @@ interface FormValues extends FieldValues {
   items?: SubscriptionItemConfig[]
 }
 
-export default function ConfigItemsFormField<TFieldValues extends FormValues>({
+export default function ConfigUnpriceItemsFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
   isChangePlanSubscription,
@@ -82,7 +82,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
   // TODO: use later for addons support
   const isSubscriptionTypeAddons = false
 
-  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
+  const { data, isLoading } = api.planVersions.listByUnpriceProject.useQuery(
     {
       enterprisePlan: true,
       published: true,

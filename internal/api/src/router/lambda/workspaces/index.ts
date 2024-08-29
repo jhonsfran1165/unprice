@@ -13,16 +13,16 @@ import { rename } from "./rename"
 import { signUp } from "./signUp"
 
 export const workspaceRouter = createTRPCRouter({
-  create,
-  signUp,
-  deleteMember,
-  listMembersByActiveWorkspace,
-  getBySlug,
+  create: create,
+  signUp: signUp,
+  deleteMember: deleteMember,
+  listMembersByActiveWorkspace: listMembersByActiveWorkspace,
+  getBySlug: getBySlug,
   delete: deleteWorkspace,
-  listWorkspacesByActiveUser,
-  rename,
-  changeRoleMember,
-  listInvitesByActiveWorkspace,
-  deleteInvite,
-  inviteMember,
+  listWorkspacesByActiveUser: listWorkspacesByActiveUser,
+  rename: rename,
+  changeRoleMember: changeRoleMember,
+  listInvitesByActiveWorkspace: listInvitesByActiveWorkspace,
+  deleteInvite: deleteInvite,
+  inviteMember: inviteMember,
 })

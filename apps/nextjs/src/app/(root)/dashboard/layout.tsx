@@ -1,7 +1,7 @@
 import { Toaster } from "@unprice/ui/sonner"
 import { TooltipProvider } from "@unprice/ui/tooltip"
 
-import { lambdaEndProcedures } from "@unprice/api"
+import { allEndpointsProcedures } from "@unprice/api/routes"
 import { Fragment, type ReactNode } from "react"
 import { TailwindIndicator } from "~/components/layout/tailwind-indicator"
 import { TRPCReactProvider } from "~/trpc/client"
@@ -19,7 +19,7 @@ export default async function RootLayout({
 }) {
   return (
     <Fragment>
-      <TRPCReactProvider lambdaEndProcedures={lambdaEndProcedures}>
+      <TRPCReactProvider allEndpointsProcedures={allEndpointsProcedures}>
         <TooltipProvider delayDuration={300}>
           <div className="flex h-screen flex-col lg:flex-row">
             {sidebar}

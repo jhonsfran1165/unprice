@@ -12,8 +12,8 @@ import {
   FormMessage,
 } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
-import ConfigItemsFormField from "~/components/forms/items-fields"
-import SelectGlobalPlanFormField from "~/components/forms/select-global-plan-field"
+import ConfigUnpriceItemsFormField from "~/components/forms/items-unprice-fields"
+import SelectUnpricePlanFormField from "~/components/forms/select-unprice-plan-field"
 import { SubmitButton } from "~/components/submit-button"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -67,9 +67,9 @@ export default function NewWorkspaceForm({
           )}
         />
 
-        <SelectGlobalPlanFormField form={form} />
+        <SelectUnpricePlanFormField form={form} />
 
-        <ConfigItemsFormField form={form} withSeparator projectSlug="unprice-admin" />
+        <ConfigUnpriceItemsFormField form={form} withSeparator />
 
         <div className="mt-8 flex justify-end space-x-4">
           <SubmitButton

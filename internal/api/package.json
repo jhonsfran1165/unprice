@@ -4,9 +4,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./env": "./src/env.mjs",
-    "./edge": "./src/edge.ts",
-    "./root": "./src/root.ts",
-    "./lambda": "./src/lambda.ts",
+    "./routes": "./src/routes.ts",
     "./transformer": "./src/transformer.ts"
   },
   "typesVersions": {

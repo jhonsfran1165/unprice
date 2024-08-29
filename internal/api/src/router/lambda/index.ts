@@ -1,4 +1,3 @@
-import { createTRPCRouter } from "../../trpc"
 import { apiKeyRouter } from "./apikeys"
 import { authRouter } from "./auth"
 import { customersRouter } from "./customers"
@@ -18,7 +17,7 @@ import { workspaceRouter } from "./workspaces"
 // for some reason edge engine is not working for some endpoints
 // everything is edge ready but only this endpoints works properly in vercel.
 // I'll migrate to cloudflare workers in the future
-export const appRouter = createTRPCRouter({
+export const lambdaEndpoints = {
   planVersionFeatures: planVersionFeatureRouter,
   ingestions: ingestionRouter,
   workspaces: workspaceRouter,
@@ -33,4 +32,4 @@ export const appRouter = createTRPCRouter({
   stripe: stripeRouter,
   customers: customersRouter,
   pages: pageRouter,
-})
+}

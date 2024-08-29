@@ -28,7 +28,7 @@ export default async function PlanPage({
   const { planSlug, workspaceSlug, projectSlug } = params
   const baseUrl = `/${workspaceSlug}/${projectSlug}/plans/${planSlug}`
 
-  const { plan } = await api.plans.getVersionsBySlug({
+  const { plan, project } = await api.plans.getVersionsBySlug({
     slug: planSlug,
   })
 
@@ -53,8 +53,7 @@ export default async function PlanPage({
                     description: plan.description,
                     title: plan.slug,
                     projectId: plan.projectId,
-                    // TODO: use default currency from org settings
-                    currency: "USD",
+                    currency: project.defaultCurrency,
                     planType: "recurring",
                     paymentProvider: "stripe",
                     startCycle: "first_day_of_month",
