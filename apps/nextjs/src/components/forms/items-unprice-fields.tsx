@@ -347,6 +347,7 @@ export default function ConfigUnpriceItemsFormField<TFieldValues extends FormVal
                                   <Input
                                     {...field}
                                     className="mx-auto h-8 w-20 text-center"
+                                    type="number"
                                     disabled={
                                       feature.featureType === "flat" ||
                                       feature.featureType === "usage" ||
@@ -424,7 +425,7 @@ export default function ConfigUnpriceItemsFormField<TFieldValues extends FormVal
                 )
               })}
 
-              <TableRow className="text-muted-foreground">
+              <TableRow className="border-t border-b text-muted-foreground">
                 <TableCell colSpan={2} className="h-10 text-right font-semibold">
                   Total per {selectedPlanVersion?.billingPeriod}
                 </TableCell>

@@ -100,7 +100,7 @@ export const subscriptions = pgTableProject(
      * If a user requests to downgrade, we mark the workspace and downgrade it after the next
      * billing happened.
      */
-    nextPlanVersionTo: text("next_plan_version_to"),
+    nextPlanVersionId: cuid("next_plan_version_id"),
 
     // next subscription id is the id of the subscription that will be created when the user changes the plan
     nextSubscriptionId: cuid("next_subscription_id"),

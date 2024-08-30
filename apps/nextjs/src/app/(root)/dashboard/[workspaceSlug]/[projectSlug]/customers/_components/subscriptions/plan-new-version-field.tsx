@@ -12,10 +12,6 @@ import {
   CommandList,
   CommandLoading,
 } from "@unprice/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
-import { cn } from "@unprice/ui/utils"
-
-import type { RouterOutputs } from "@unprice/api"
 import {
   FormControl,
   FormDescription,
@@ -25,33 +21,40 @@ import {
   FormMessage,
 } from "@unprice/ui/form"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
+import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
+import { cn } from "@unprice/ui/utils"
 import { CheckIcon, ChevronDown } from "lucide-react"
 import { useState } from "react"
 import { FilterScroll } from "~/components/filter-scroll"
-
-type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
+import { api } from "~/trpc/client"
 
 export default function PlanNewVersionFormField({
   form,
   isDisabled,
-  isLoading,
-  planVersions,
-  selectedPlanVersion,
-  setSelectedPlanVersion,
+  isChangePlanSubscription,
 }: {
   form: UseFormReturn<InsertSubscription>
   isDisabled?: boolean
-  isLoading?: boolean
-  planVersions: PlanVersionResponse[]
-  selectedPlanVersion?: PlanVersionResponse
-  setSelectedPlanVersion: (planVersion: PlanVersionResponse) => void
+  isChangePlanSubscription?: boolean
 }) {
   const [switcherPlanOpen, setSwitcherPlanOpen] = useState(false)
+  const selectedNextPlanVersionId = form.watch("nextPlanVersionId")
+
+  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery({
+    enterprisePlan: true,
+    published: true,
+    // we want to query inactive plans as well because it might be the case that the user is still subscribed to a legacy plan
+    active: !isChangePlanSubscription && !isDisabled,
+  })
+
+  const selectedNextPlanVersion = data?.planVersions.find(
+    (version) => version.id === selectedNextPlanVersionId
+  )
 
   return (
     <FormField
       control={form.control}
-      name="nextPlanVersionTo"
+      name="nextPlanVersionId"
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>New Plan Version</FormLabel>
@@ -79,8 +82,8 @@ export default function PlanNewVersionFormField({
                   >
                     {isLoading ? (
                       <LoadingAnimation className="h-4 w-4" variant="dots" />
-                    ) : selectedPlanVersion ? (
-                      `${selectedPlanVersion.plan.slug} v${selectedPlanVersion.version} - ${selectedPlanVersion.title} - ${selectedPlanVersion.billingPeriod}`
+                    ) : selectedNextPlanVersion ? (
+                      `${selectedNextPlanVersion.plan.slug} v${selectedNextPlanVersion.version} - ${selectedNextPlanVersion.title} - ${selectedNextPlanVersion.billingPeriod}`
                     ) : (
                       "Select plan"
                     )}
@@ -98,14 +101,13 @@ export default function PlanNewVersionFormField({
                     <CommandGroup>
                       {isLoading && <CommandLoading>Loading...</CommandLoading>}
                       <div className="flex flex-col gap-2 pt-1">
-                        {planVersions.map((version) => (
+                        {data?.planVersions.map((version) => (
                           <CommandItem
                             value={`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
                             key={version.id}
                             onSelect={() => {
                               field.onChange(version.id)
                               setSwitcherPlanOpen(false)
-                              setSelectedPlanVersion(version)
                             }}
                           >
                             <CheckIcon

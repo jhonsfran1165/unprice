@@ -9,11 +9,6 @@ import {
   CommandList,
   CommandLoading,
 } from "@unprice/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
-import { cn } from "@unprice/ui/utils"
-import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form"
-
-import type { RouterOutputs } from "@unprice/api"
 import {
   FormControl,
   FormDescription,
@@ -23,12 +18,13 @@ import {
   FormMessage,
 } from "@unprice/ui/form"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
+import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
+import { cn } from "@unprice/ui/utils"
 import { CheckIcon, ChevronDown } from "lucide-react"
 import { useState } from "react"
+import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form"
 import { FilterScroll } from "~/components/filter-scroll"
 import { api } from "~/trpc/client"
-
-type PlanVersion = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
 
 interface FormValues extends FieldValues {
   planVersionId?: string
@@ -44,18 +40,22 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
   isChangePlanSubscription?: boolean
 }) {
   const [switcherCustomerOpen, setSwitcherCustomerOpen] = useState(false)
-  const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersion>()
+  const selectedPlanVersionId = form.watch("planVersionId" as FieldPath<TFieldValues>)
 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
     {
       published: true,
-      active: true,
+      active: !isDisabled,
       enterprisePlan: true,
     },
     {
       refetchOnWindowFocus: false,
       enabled: isDisabled, // only fetch plans when dialog is open
     }
+  )
+
+  const selectedPlanVersion = data?.planVersions.find(
+    (version) => version.id === selectedPlanVersionId
   )
 
   const noData = data?.planVersions.length === 0 || data?.planVersions.length === undefined
@@ -123,7 +123,6 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
                             onSelect={() => {
                               field.onChange(version.id)
                               setSwitcherCustomerOpen(false)
-                              setSelectedPlanVersion(version)
                             }}
                           >
                             <CheckIcon

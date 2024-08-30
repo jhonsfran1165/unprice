@@ -866,7 +866,7 @@ export const signOutCustomer = async ({
           .set({
             status: "ended",
             endDateAt: Date.now(),
-            nextPlanVersionTo: undefined,
+            nextPlanVersionId: undefined,
             planChangedAt: Date.now(),
           })
           .where(eq(subscriptions.id, sub.id))

@@ -615,7 +615,7 @@
                                 "additionalProperties": false,
                                 "nullable": true
                               },
-                              "nextPlanVersionTo": { "type": "string", "nullable": true },
+                              "nextPlanVersionId": { "type": "string", "nullable": true },
                               "planChanged": {
                                 "type": "string",
                                 "format": "date-time",
@@ -771,7 +771,7 @@
                               "isNew",
                               "status",
                               "metadata",
-                              "nextPlanVersionTo",
+                              "nextPlanVersionId",
                               "planChanged",
                               "nextSubscriptionId",
                               "planVersion"

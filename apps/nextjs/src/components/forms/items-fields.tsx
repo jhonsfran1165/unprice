@@ -1,6 +1,6 @@
 "use client"
 import * as currencies from "@dinero.js/currencies"
-import { EyeIcon, EyeOff, LayoutGrid, Trash2, X } from "lucide-react"
+import { LayoutGrid, Settings, Trash2, X } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import {
   type ArrayPath,
@@ -47,15 +47,13 @@ import { PropagationStopper } from "~/components/prevent-propagation"
 import { nFormatter } from "~/lib/nformatter"
 import { api } from "~/trpc/client"
 
-type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
-
 type PlanVersionFeaturesResponse =
   RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]["planFeatures"][0]
 
 interface FormValues extends FieldValues {
   config?: SubscriptionItemConfig[]
-  planVersionId?: string
-  nextPlanVersionId?: string
+  planVersionId: string
+  nextPlanVersionId?: string | null
   items?: SubscriptionItemConfig[]
 }
 
@@ -72,11 +70,6 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
   withSeparator?: boolean
   withFeatureDetails?: boolean
 }) {
-  const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersionResponse | undefined>()
-  const [selectedNewPlanVersion, setSelectedNewPlanVersion] = useState<
-    PlanVersionResponse | undefined
-  >()
-
   const planVersionId = form.watch("planVersionId" as FieldPath<TFieldValues>)
   const nextPlanVersionId = form.watch("nextPlanVersionId" as FieldPath<TFieldValues>)
   const itemsSubs = form.watch("items" as FieldPath<TFieldValues>)
@@ -100,6 +93,9 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
     }
   )
 
+  const selectedPlanVersion = data?.planVersion
+  const selectedNewPlanVersion = data?.newPlanVersion
+
   const items = useFieldArray({
     control: form.control,
     name: "config" as FieldArrayPath<TFieldValues>,
@@ -112,16 +108,6 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
     ConfigFieldName<TFieldValues>,
     "id"
   >[]
-
-  useEffect(() => {
-    if (planVersionId) {
-      setSelectedPlanVersion(data?.planVersion)
-    }
-
-    if (nextPlanVersionId) {
-      setSelectedNewPlanVersion(data?.newPlanVersion)
-    }
-  }, [isLoading, planVersionId, nextPlanVersionId])
 
   useEffect(() => {
     if (!isChangePlanSubscription && selectedPlanVersion) {
@@ -157,13 +143,20 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
     const features = new Map<string, PlanVersionFeaturesResponse>()
     const addons = new Map<string, PlanVersionFeaturesResponse>()
 
-    selectedPlanVersion?.planFeatures.forEach((feature) => {
-      features.set(feature.id, feature)
-      addons.set(feature.id, feature)
-    })
+    if (isChangePlanSubscription) {
+      selectedNewPlanVersion?.planFeatures.forEach((feature) => {
+        features.set(feature.id, feature)
+        addons.set(feature.id, feature)
+      })
+    } else {
+      selectedPlanVersion?.planFeatures.forEach((feature) => {
+        features.set(feature.id, feature)
+        addons.set(feature.id, feature)
+      })
+    }
 
     return { versionFeatures: features, versionAddons: addons }
-  }, [selectedPlanVersion])
+  }, [selectedPlanVersion?.id, selectedNewPlanVersion?.id])
 
   const [isDelete, setConfirmDelete] = useState<Map<string, boolean>>(
     new Map<string, boolean>(fields.map((item) => [item.id, false] as [string, boolean]))
@@ -185,10 +178,17 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
 
   // calculate the total price for the plan
   const displayTotalPrice = useMemo(() => {
-    const initialTotal = dinero({
+    let initialTotal = dinero({
       amount: 0,
       currency: currencies[selectedPlanVersion?.currency ?? "USD"],
     })
+
+    if (isChangePlanSubscription) {
+      initialTotal = dinero({
+        amount: 0,
+        currency: currencies[selectedNewPlanVersion?.currency ?? "USD"],
+      })
+    }
 
     let hasUsage = false
 
@@ -302,11 +302,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                             <Dialog>
                               <DialogTrigger asChild>
                                 <Button className="mr-1 size-4" variant="link" size="icon">
-                                  {feature.hidden ? (
-                                    <EyeOff className="size-4" />
-                                  ) : (
-                                    <EyeIcon className="size-4" />
-                                  )}
+                                  <Settings className="size-4" />
                                   <span className="sr-only">View feature</span>
                                 </Button>
                               </DialogTrigger>
@@ -346,6 +342,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                                 <div className="flex flex-col">
                                   <Input
                                     {...field}
+                                    type="number"
                                     className="mx-auto h-8 w-20 text-center"
                                     disabled={
                                       feature.featureType === "flat" ||
@@ -424,7 +421,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                 )
               })}
 
-              <TableRow className="text-muted-foreground">
+              <TableRow className="border-t border-b text-muted-foreground">
                 <TableCell colSpan={2} className="h-10 text-right font-semibold">
                   Total per {selectedPlanVersion?.billingPeriod}
                 </TableCell>

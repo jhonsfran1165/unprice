@@ -12,13 +12,13 @@ export const changePlan = protectedProjectProcedure
     subscriptionInsertSchema
       .extend({
         endDateAt: z.coerce.number(),
-        nextPlanVersionTo: z.string(),
+        nextPlanVersionId: z.string(),
       })
       .required({
         id: true,
         endDateAt: true,
         customerId: true,
-        nextPlanVersionTo: true,
+        nextPlanVersionId: true,
       })
   )
   .output(z.object({ result: z.boolean(), message: z.string() }))
@@ -27,7 +27,7 @@ export const changePlan = protectedProjectProcedure
       id: subscriptionId,
       customerId,
       endDateAt,
-      nextPlanVersionTo,
+      nextPlanVersionId,
       collectionMethod,
       type,
       defaultPaymentMethodId,
@@ -80,7 +80,7 @@ export const changePlan = protectedProjectProcedure
       })
     }
 
-    if (subscriptionData.planVersion.id === nextPlanVersionTo) {
+    if (subscriptionData.planVersion.id === nextPlanVersionId) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "You cannot change the subscription for the same plan version.",
@@ -122,7 +122,7 @@ export const changePlan = protectedProjectProcedure
     const newPlanVersion = await opts.ctx.db.query.versions.findFirst({
       where: (version, { eq, and }) =>
         and(
-          eq(version.id, nextPlanVersionTo),
+          eq(version.id, nextPlanVersionId),
           eq(version.projectId, project.id),
           eq(version.status, "published"),
           eq(version.currency, subscriptionData.customer.defaultCurrency)
@@ -148,7 +148,7 @@ export const changePlan = protectedProjectProcedure
         .set({
           status: "ended",
           endDateAt: endDateAt,
-          nextPlanVersionTo: newPlanVersion.id,
+          nextPlanVersionId: newPlanVersion.id,
           planChangedAt: Date.now(),
         })
         .where(

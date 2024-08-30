@@ -643,7 +643,7 @@ export interface operations {
                   externalId?: string
                   defaultPaymentMethodId?: string
                 } | null
-                nextPlanVersionTo: string | null
+                nextPlanVersionId: string | null
                 /** Format: date-time */
                 planChanged: string | null
                 nextSubscriptionId: string | null

@@ -12,10 +12,6 @@ import {
   CommandList,
   CommandLoading,
 } from "@unprice/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
-import { cn } from "@unprice/ui/utils"
-
-import type { RouterOutputs } from "@unprice/api"
 import {
   FormControl,
   FormDescription,
@@ -25,28 +21,38 @@ import {
   FormMessage,
 } from "@unprice/ui/form"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
+import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
+import { cn } from "@unprice/ui/utils"
 import { CheckIcon, ChevronDown } from "lucide-react"
 import { useState } from "react"
 import { FilterScroll } from "~/components/filter-scroll"
-
-type Customer = RouterOutputs["customers"]["listByActiveProject"]["customers"][0]
+import { api } from "~/trpc/client"
 
 export default function CustomerFormField({
   form,
   isDisabled,
-  isLoading,
-  customers,
-  selectedCustomer,
-  setSelectedCustomer,
 }: {
   form: UseFormReturn<InsertSubscription>
   isDisabled?: boolean
-  isLoading?: boolean
-  customers: Customer[]
-  selectedCustomer?: Customer
-  setSelectedCustomer: (customer: Customer) => void
 }) {
   const [switcherCustomerOpen, setSwitcherCustomerOpen] = useState(false)
+  const customerId = form.watch("customerId")
+
+  // customer lists
+  const { data: customers, isLoading } = api.customers.listByActiveProject.useQuery(
+    {
+      search: null,
+      from: null,
+      to: null,
+      page: 1,
+      page_size: 100,
+    },
+    {
+      enabled: customerId === "",
+    }
+  )
+
+  const selectedCustomer = customers?.customers.find((customer) => customer.id === customerId)
 
   return (
     <FormField
@@ -95,14 +101,13 @@ export default function CustomerFormField({
                     <CommandGroup>
                       {isLoading && <CommandLoading>Loading...</CommandLoading>}
                       <div className="flex flex-col gap-2 pt-1">
-                        {customers.map((customer) => (
+                        {customers?.customers.map((customer) => (
                           <CommandItem
-                            value={`${customer.email}`}
+                            value={`${customer.id}`}
                             key={customer.id}
                             onSelect={() => {
                               field.onChange(customer.id)
                               setSwitcherCustomerOpen(false)
-                              setSelectedCustomer(customer)
                             }}
                           >
                             <CheckIcon

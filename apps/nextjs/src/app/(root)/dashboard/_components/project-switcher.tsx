@@ -51,7 +51,7 @@ export function ProjectSwitcher() {
           role="combobox"
           aria-expanded={switcherOpen}
           aria-label="Select a project"
-          className="w-24 sm:w-full"
+          className="w-36 sm:w-full"
         >
           <span className="truncate font-semibold">
             {activeProject.name}

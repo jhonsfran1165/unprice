@@ -1,11 +1,5 @@
 "use client"
 
-import { HelpCircle } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { Fragment, useEffect, useMemo, useState } from "react"
-import { useFieldArray } from "react-hook-form"
-
-import type { RouterOutputs } from "@unprice/api"
 import {
   COLLECTION_METHODS,
   START_CYCLES,
@@ -14,11 +8,14 @@ import {
   WHEN_TO_BILLING,
 } from "@unprice/db/utils"
 import type { InsertSubscription, Subscription, SubscriptionItem } from "@unprice/db/validators"
-import { createDefaultSubscriptionConfig, subscriptionInsertSchema } from "@unprice/db/validators"
+import { subscriptionInsertSchema } from "@unprice/db/validators"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Separator } from "@unprice/ui/separator"
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
+import { HelpCircle } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Fragment, useEffect, useMemo } from "react"
 import { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
 import PaymentMethodsFormField from "~/components/forms/payment-method-field"
@@ -36,9 +33,6 @@ import ConfigItemsFormField from "~/components/forms/items-fields"
 import SelectPlanFormField from "~/components/forms/select-plan-field"
 import PlanNewVersionFormField from "./plan-new-version-field"
 
-type PlanVersionResponse = RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]
-type Customer = RouterOutputs["customers"]["listByActiveProject"]["customers"][0]
-
 export function SubscriptionForm({
   setDialogOpen,
   defaultValues,
@@ -53,179 +47,6 @@ export function SubscriptionForm({
   readOnly?: boolean
 }) {
   const router = useRouter()
-  const [selectedPlanVersion, setSelectedPlanVersion] = useState<PlanVersionResponse>()
-  const [selectedNewPlanVersion, setSelectedNewPlanVersion] = useState<PlanVersionResponse>()
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer>()
-
-  const defaultValuesData = useMemo(() => {
-    if (isChangePlanSubscription) {
-      // we have to delete endDate and other fields that are not the same when the user is trying to change the plan
-      defaultValues.endDateAt = undefined
-      defaultValues.nextPlanVersionTo = undefined
-    }
-    return defaultValues
-  }, [defaultValues.id])
-
-  // this schema is a bit complex because we need to validate the payment method depending on the plan version
-  const generateFormSchema = () => {
-    if (isChangePlanSubscription) {
-      return subscriptionInsertSchema
-        .extend({
-          endDate: z.number(),
-          nextPlanVersionTo: z.string().min(1),
-        })
-        .required({
-          id: true,
-          customerId: true,
-          nextPlanVersionTo: true,
-        })
-        .superRefine((data, ctx) => {
-          // validate that the end date is after the start date
-          if (data.endDateAt && data.startDateAt && data.endDateAt < data.startDateAt) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "End date must be after start date",
-              path: ["endDate"],
-              fatal: true,
-            })
-          }
-
-          // validate that the new plan version is not the same as the current plan version
-          if (data.nextPlanVersionTo === data.planVersionId) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "New plan version cannot be the same as the current plan version",
-              path: ["nextPlanVersionTo"],
-              fatal: true,
-            })
-          }
-
-          // payment method is validated against the plan version
-          // to check if payment method is required for the plan
-          const paymentMethodRequired = selectedNewPlanVersion?.metadata?.paymentMethodRequired
-
-          if (paymentMethodRequired && !data.defaultPaymentMethodId) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Default payment method is required for this plan",
-              path: ["defaultPaymentMethodId"],
-              fatal: true,
-            })
-          }
-        })
-    }
-
-    return subscriptionInsertSchema.superRefine((data, ctx) => {
-      // payment method is validated against the plan version
-      // to check if payment method is required for the plan
-      const paymentMethodRequired = selectedPlanVersion?.metadata?.paymentMethodRequired
-
-      if (paymentMethodRequired && !data.defaultPaymentMethodId) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Default payment method is required for this plan",
-          path: ["defaultPaymentMethodId"],
-          fatal: true,
-        })
-      }
-    })
-  }
-
-  const formSchema = useMemo(
-    () => generateFormSchema(),
-    [isChangePlanSubscription, selectedPlanVersion?.id, selectedNewPlanVersion?.id]
-  )
-
-  const form = useZodForm({
-    schema: formSchema,
-    defaultValues: defaultValuesData,
-  })
-
-  const items = useFieldArray({
-    control: form.control,
-    name: "config",
-  })
-
-  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery({
-    enterprisePlan: true,
-    published: true,
-    // we want to query inactive plans as well because it might be the case that the user is still subscribed to a legacy plan
-    active: !isChangePlanSubscription && !readOnly,
-  })
-
-  const subscriptionPlanId = form.watch("planVersionId")
-  const subscriptionNewPlanId = form.watch("nextPlanVersionTo")
-
-  // customer lists
-  const { data: customers, isLoading: isCustomersLoading } =
-    api.customers.listByActiveProject.useQuery(
-      {
-        search: null,
-        from: null,
-        to: null,
-        page: 1,
-        page_size: 100,
-      },
-      {
-        enabled: defaultValues.customerId === "",
-      }
-    )
-
-  // set the proper plan version on loading the form
-  useMemo(() => {
-    let planVersion = selectedPlanVersion
-    let newPlanVersion = selectedNewPlanVersion
-
-    // if the plan version id comes from default values, we need to find it in the data
-    if (!planVersion && subscriptionPlanId) {
-      planVersion = data?.planVersions.find((version) => version.id === subscriptionPlanId)
-      setSelectedPlanVersion(planVersion)
-    }
-
-    // if the new plan version id comes from default values, we need to find it in the data
-    if (!newPlanVersion && subscriptionNewPlanId) {
-      newPlanVersion = data?.planVersions.find((version) => version.id === subscriptionNewPlanId)
-      setSelectedNewPlanVersion(newPlanVersion)
-    }
-
-    // depending on which type of action we are doing, we need to set the items config
-    // for the create subscription action
-    if (planVersion && subscriptionPlanId && !isChangePlanSubscription) {
-      const { err, val: itemsConfig } = createDefaultSubscriptionConfig({
-        planVersion: planVersion,
-        items: defaultValues.items,
-      })
-
-      if (err) {
-        console.error(err)
-        return
-      }
-
-      items.replace(itemsConfig)
-    }
-
-    // for the change plan action
-    if (newPlanVersion && subscriptionNewPlanId && isChangePlanSubscription) {
-      const { err, val: itemsConfig } = createDefaultSubscriptionConfig({
-        planVersion: newPlanVersion,
-        items: defaultValues.items,
-      })
-
-      if (err) {
-        console.error(err)
-        return
-      }
-
-      items.replace(itemsConfig)
-    }
-  }, [subscriptionPlanId, subscriptionNewPlanId, isLoading])
-
-  // keep in sync with the customer timezone
-  useEffect(() => {
-    if (selectedCustomer?.timezone) {
-      form.setValue("timezone", selectedCustomer.timezone)
-    }
-  }, [selectedCustomer?.id])
 
   const createSubscription = api.subscriptions.create.useMutation({
     onSuccess: ({ subscription }) => {
@@ -245,16 +66,142 @@ export function SubscriptionForm({
     },
   })
 
+  const defaultValuesData = useMemo(() => {
+    if (isChangePlanSubscription) {
+      // we have to delete endDate and other fields that are not the same when the user is trying to change the plan
+      defaultValues.endDateAt = undefined
+      defaultValues.nextPlanVersionId = undefined
+    }
+    return defaultValues
+  }, [defaultValues.id])
+
+  // all this querues are deduplicated inside each form field
+  const { data: planVersions, isLoading } = api.planVersions.listByActiveProject.useQuery({
+    enterprisePlan: true,
+    published: true,
+    // we want to query inactive plans as well because it might be the case that the user is still subscribed to a legacy plan
+    active: !isChangePlanSubscription && !readOnly,
+  })
+
+  // customer lists
+  const { data: customers } = api.customers.listByActiveProject.useQuery(
+    {
+      search: null,
+      from: null,
+      to: null,
+      page: 1,
+      page_size: 100,
+    },
+    {
+      enabled: defaultValues.customerId === "",
+    }
+  )
+
+  // this schema is a bit complex because we need to validate the payment method depending on the plan version
+  const generateFormSchema = () => {
+    if (isChangePlanSubscription) {
+      return subscriptionInsertSchema
+        .extend({
+          endDate: z.number(),
+          nextPlanVersionId: z.string().min(1),
+        })
+        .required({
+          id: true,
+          customerId: true,
+          nextPlanVersionId: true,
+        })
+        .superRefine((data, ctx) => {
+          // validate that the end date is after the start date
+          if (data.endDateAt && data.startDateAt && data.endDateAt < data.startDateAt) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "End date must be after start date",
+              path: ["endDate"],
+              fatal: true,
+            })
+          }
+
+          // validate that the new plan version is not the same as the current plan version
+          if (data.nextPlanVersionId === data.planVersionId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "New plan version cannot be the same as the current plan version",
+              path: ["nextPlanVersionId"],
+              fatal: true,
+            })
+          }
+
+          const selectedNewPlanVersion = planVersions?.planVersions.find(
+            (version) => version.id === data.nextPlanVersionId
+          )
+          // payment method is validated against the plan version
+          // to check if payment method is required for the plan
+          const paymentMethodRequired = selectedNewPlanVersion?.metadata?.paymentMethodRequired
+
+          if (paymentMethodRequired && !data.defaultPaymentMethodId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Default payment method is required for this plan",
+              path: ["defaultPaymentMethodId"],
+              fatal: true,
+            })
+          }
+        })
+    }
+
+    return subscriptionInsertSchema.superRefine((data, ctx) => {
+      const selectedPlanVersion = planVersions?.planVersions.find(
+        (version) => version.id === data.planVersionId
+      )
+
+      // payment method is validated against the plan version
+      // to check if payment method is required for the plan
+      const paymentMethodRequired = selectedPlanVersion?.metadata?.paymentMethodRequired
+
+      if (paymentMethodRequired && !data.defaultPaymentMethodId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Default payment method is required for this plan",
+          path: ["defaultPaymentMethodId"],
+          fatal: true,
+        })
+      }
+    })
+  }
+
+  const formSchema = useMemo(() => generateFormSchema(), [isChangePlanSubscription])
+
+  const form = useZodForm({
+    schema: formSchema,
+    defaultValues: defaultValuesData,
+  })
+
+  const subscriptionPlanId = form.watch("planVersionId")
+  const customerId = form.watch("customerId")
+
+  const selectedPlanVersion = planVersions?.planVersions.find(
+    (version) => version.id === subscriptionPlanId
+  )
+
+  const selectedCustomer = customers?.customers.find((customer) => customer.id === customerId)
+
+  // keep in sync with the customer timezone
+  useEffect(() => {
+    if (selectedCustomer?.timezone) {
+      form.setValue("timezone", selectedCustomer.timezone)
+    }
+  }, [selectedCustomer?.id])
+
   const onSubmitForm = async (data: z.infer<typeof formSchema>) => {
     if (!defaultValues.id && !isChangePlanSubscription) {
       await createSubscription.mutateAsync(data as InsertSubscription)
     }
 
-    if (defaultValues.id && isChangePlanSubscription && data.endDateAt && data.nextPlanVersionTo) {
+    if (defaultValues.id && isChangePlanSubscription && data.endDateAt && data.nextPlanVersionId) {
       await changeSubscriptionPlan.mutateAsync({
         ...data,
         endDateAt: data.endDateAt,
-        nextPlanVersionTo: data.nextPlanVersionTo,
+        nextPlanVersionId: data.nextPlanVersionId,
         id: defaultValues.id,
       })
     }
@@ -270,16 +217,10 @@ export function SubscriptionForm({
         className="space-y-6"
       >
         <div className="space-y-8">
-          {defaultValues.customerId === "" && (
-            <CustomerFormField
-              form={form}
-              customers={customers?.customers ?? []}
-              selectedCustomer={selectedCustomer}
-              setSelectedCustomer={setSelectedCustomer}
-              isDisabled={readOnly || isCustomersLoading}
-              isLoading={isCustomersLoading}
-            />
-          )}
+          <CustomerFormField
+            form={form}
+            isDisabled={readOnly || isLoading || isChangePlanSubscription}
+          />
 
           <SelectPlanFormField
             form={form}
@@ -290,15 +231,8 @@ export function SubscriptionForm({
           {isChangePlanSubscription && (
             <PlanNewVersionFormField
               form={form}
-              // here we filter only active plans and status is published
-              planVersions={
-                data?.planVersions.filter((plan) => plan.active && plan.status === "published") ??
-                []
-              }
-              selectedPlanVersion={selectedNewPlanVersion}
-              setSelectedPlanVersion={setSelectedNewPlanVersion}
-              isDisabled={readOnly || isLoading}
-              isLoading={isLoading}
+              isChangePlanSubscription={isChangePlanSubscription}
+              isDisabled={readOnly}
             />
           )}
 
@@ -548,11 +482,11 @@ export function SubscriptionForm({
             </Fragment>
           )}
 
-          <Separator />
           <PaymentMethodsFormField
             form={form}
             isChangePlanSubscription={isChangePlanSubscription}
             isDisabled={readOnly}
+            withSeparator
           />
 
           <ConfigItemsFormField
@@ -560,6 +494,7 @@ export function SubscriptionForm({
             isDisabled={readOnly}
             isChangePlanSubscription={isChangePlanSubscription}
             withSeparator
+            withFeatureDetails
           />
         </div>
 

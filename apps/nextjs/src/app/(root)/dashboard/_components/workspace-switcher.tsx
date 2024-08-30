@@ -50,7 +50,7 @@ export function WorkspaceSwitcher({
           role="combobox"
           aria-expanded={switcherOpen}
           aria-label="Select a workspace"
-          className="w-24 sm:w-full"
+          className="w-36 sm:w-full"
         >
           <Avatar className="mr-2 h-5 w-5">
             <AvatarImage

@@ -17,7 +17,7 @@ export const cancel = protectedProcedure
       .set({
         status: "ended",
         endDateAt: Date.now(),
-        nextPlanVersionTo: undefined,
+        nextPlanVersionId: undefined,
         planChangedAt: Date.now(),
       })
       .where(and(eq(schema.subscriptions.id, id), eq(schema.subscriptions.projectId, projectId)))
