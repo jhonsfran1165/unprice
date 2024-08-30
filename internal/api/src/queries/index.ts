@@ -3,7 +3,7 @@ import type { Database } from "@unprice/db"
 import { getFeatureItemBySlugPrepared } from "@unprice/db/queries"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
-import type { SubscriptionItemCached } from "../pkg/cache/namespaces"
+import type { EntitlementCached, SubscriptionItemCached } from "../pkg/cache/namespaces"
 import type { Metrics } from "../pkg/metrics"
 
 export const getCustomerFeatureQuery = async ({
@@ -105,7 +105,7 @@ export const getEntitlementsQuery = async ({
   db: Database
   metrics: Metrics
   logger: Logger
-}): Promise<Array<string>> => {
+}): Promise<Array<EntitlementCached>> => {
   const start = performance.now()
 
   const customer = await db.query.customers
@@ -120,6 +120,13 @@ export const getEntitlementsQuery = async ({
             return [operators.desc(fields.startDateAt)]
           },
           with: {
+            items: {
+              columns: {
+                id: true,
+                units: true,
+                featurePlanVersionId: true,
+              },
+            },
             planVersion: {
               columns: {
                 id: true,
@@ -128,6 +135,9 @@ export const getEntitlementsQuery = async ({
                 planFeatures: {
                   columns: {
                     id: true,
+                    featureType: true,
+                    aggregationMethod: true,
+                    limit: true,
                   },
                   with: {
                     feature: {
@@ -172,12 +182,15 @@ export const getEntitlementsQuery = async ({
   }
 
   // get entitlements for every subscriptions, entitlements won't be repeated
-  const entitlements = Array.from(
-    new Set(
-      customer.subscriptions.flatMap((sub) =>
-        sub.planVersion.planFeatures.map((pf) => pf.feature.slug)
-      )
-    )
+  const entitlements = customer.subscriptions.flatMap((sub) =>
+    sub.planVersion.planFeatures.map((pf) => ({
+      featureId: pf.id,
+      featureSlug: pf.feature.slug,
+      featureType: pf.featureType,
+      aggregationMethod: pf.aggregationMethod,
+      limit: pf.limit,
+      units: sub.items.find((item) => item.featurePlanVersionId === pf.id)?.units || null,
+    }))
   )
 
   return entitlements

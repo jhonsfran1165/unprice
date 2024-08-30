@@ -23,6 +23,7 @@ import { CURRENCIES } from "@unprice/db/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Switch } from "@unprice/ui/switch"
 import { ConfirmAction } from "~/components/confirm-action"
+import { CopyButton } from "~/components/copy-button"
 import TimeZoneFormField from "~/components/forms/timezone-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toast, toastAction } from "~/lib/toast"
@@ -146,9 +147,20 @@ export function CustomerForm({
                   <FormControl>
                     <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
+          )}
+
+          {editMode && (
+            <div className="flex items-center justify-between">
+              <div>
+                <FormLabel>Customer ID</FormLabel>
+                <FormDescription>{defaultValues.id}</FormDescription>
+              </div>
+              <CopyButton value={defaultValues.id ?? ""} className="size-4" />
+            </div>
           )}
 
           <FormField

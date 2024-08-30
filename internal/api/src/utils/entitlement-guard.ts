@@ -16,21 +16,13 @@ export const entitlementGuard = async ({
 }) => {
   const unpriceCustomerId = project.workspace.unPriceCustomerId
 
-  // TODO: check this later
-  if (!unpriceCustomerId) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "This feature is not available for free plans",
-    })
-  }
-
   const entitlements = await getEntitlements({
     customerId: unpriceCustomerId,
     projectId: project.id,
     ctx: ctx,
   })
 
-  const access = entitlements.includes(featureSlug)
+  const access = entitlements.some((e) => e.featureSlug === featureSlug)
 
   if (!access) {
     throw new TRPCError({

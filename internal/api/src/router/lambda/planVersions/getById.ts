@@ -30,7 +30,6 @@ export const getById = protectedProjectProcedure
     const { id } = opts.input
     const project = opts.ctx.project
 
-    // TODO: improve this query
     const planVersionData = await opts.ctx.db.query.versions.findFirst({
       with: {
         plan: true,

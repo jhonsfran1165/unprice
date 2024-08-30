@@ -443,7 +443,19 @@ export const createSubscription = async ({
         }
 
         const customerEntitlements = subscriptions.flatMap((sub) =>
-          sub.items.map((f) => f.featurePlanVersion.feature.slug)
+          sub.items.map((f) => {
+            return {
+              featureId: f.featurePlanVersion.id,
+              featureSlug: f.featurePlanVersion.feature.slug,
+              featureType: f.featurePlanVersion.featureType,
+              aggregationMethod: f.featurePlanVersion.aggregationMethod,
+              limit: f.featurePlanVersion.limit,
+              units:
+                configItemsSubscription.find(
+                  (item) => item.featurePlanId === f.featurePlanVersionId
+                )?.units || null,
+            }
+          })
         )
 
         const customerSubscriptions = subscriptions.map((sub) => sub.id)

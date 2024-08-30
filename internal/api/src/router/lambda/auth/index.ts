@@ -3,6 +3,6 @@ import { listOrganizations } from "./listOrganizations"
 import { mySubscriptions } from "./mySubscriptions"
 
 export const authRouter = createTRPCRouter({
-  mySubscriptions,
-  listOrganizations,
+  mySubscriptions: mySubscriptions,
+  listOrganizations: listOrganizations,
 })

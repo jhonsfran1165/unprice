@@ -1,14 +1,17 @@
 "use client"
 import { Progress } from "@unprice/ui/progress"
-import React from "react"
+import { cn } from "@unprice/ui/utils"
 
-export function ProgressDemo() {
-  const [progress, setProgress] = React.useState(13)
+export function ProgressBar({
+  value,
+  max,
+  className,
+}: {
+  value: number
+  max: number
+  className?: string
+}) {
+  const progress = (value / max) * 100
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => setProgress(66), 500)
-    return () => clearTimeout(timer)
-  }, [])
-
-  return <Progress value={progress} className="my-4 h-2 w-full" />
+  return <Progress value={progress} className={cn("h-2 w-full", className)} />
 }

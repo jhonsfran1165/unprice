@@ -32,7 +32,7 @@ export function PriceFeature({
   const { err, val: pricePerFeature } = calculatePrice()
 
   if (err) {
-    return <div className="inline text-muted-foreground text-xs italic">provide quantity</div>
+    return <div className="inline text-danger text-xs italic">provide quantity</div>
   }
 
   if (type === "total") {

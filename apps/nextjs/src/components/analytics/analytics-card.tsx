@@ -9,7 +9,9 @@ import { type ReactNode, Suspense } from "react"
 import { HydrateClient, trpc } from "~/trpc/server"
 import { Filter } from "./filter"
 
-type AnalyticPromiseKey = keyof typeof trpc.analytics
+type AnalyticPromiseKey =
+  | "getTotalUsagePerFeatureActiveProject"
+  | "getAllFeatureVerificationsActiveProject"
 
 export function AnalyticsCard<T extends string>({
   tabs,

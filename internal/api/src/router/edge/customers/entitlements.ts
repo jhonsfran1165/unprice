@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type { EntitlementCached } from "../../../pkg/cache/namespaces"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
 import { getEntitlements } from "../../../utils/shared"
 
@@ -18,7 +19,7 @@ export const entitlements = protectedApiOrActiveProjectProcedure
   )
   .output(
     z.object({
-      entitlements: z.string().array(),
+      entitlements: z.custom<EntitlementCached[]>(),
     })
   )
   .query(async (opts) => {

@@ -97,5 +97,7 @@ export function formatMoney(amount: string, currencyCode = "USD") {
   return new Intl.NumberFormat(userLocale, {
     style: "currency",
     currency: currencyCode,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(Number.parseFloat(amount))
 }
