@@ -49,11 +49,21 @@ export const calculateFlatPricePlan = ({
   let total = dinero({ amount: 0, currency: defaultDineroCurrency })
   let hasUsage = false
 
+  // here we are getting the price of flat features because that determines the plan price
+  // the rest of the features depends on quantity and are calculated later
   planVersion.planFeatures.forEach((feature) => {
-    // TODO: what happen with tiers and usage?
-    if (["flat", "package"].includes(feature.featureType)) {
-      const { price } = configFlatSchema.parse(feature.config)
-      total = add(total, dinero(price.dinero))
+    // flat features are always quantity 1
+    if (["flat"].includes(feature.featureType)) {
+      const { val: price, err } = calculatePricePerFeature({
+        feature: feature,
+        quantity: 1,
+      })
+
+      if (err) {
+        return Err(err)
+      }
+
+      total = add(total, price.totalPrice.dinero)
     }
 
     if (["usage"].includes(feature.featureType)) {
@@ -70,6 +80,69 @@ export const calculateFlatPricePlan = ({
     dinero: total,
     displayAmount: displayAmount,
     hasUsage,
+  })
+}
+
+export const calculateTotalPricePlan = ({
+  planVersion,
+  quantities,
+}: {
+  planVersion: PlanVersionExtended
+  quantities: Record<string, number>
+}): Result<z.infer<typeof calculatePriceSchema>, UnPriceCalculationError> => {
+  const defaultDineroCurrency = currencies[planVersion.currency]
+  let total = dinero({ amount: 0, currency: defaultDineroCurrency })
+
+  planVersion.planFeatures.forEach((feature) => {
+    // flat features are always quantity 1
+    if (["flat"].includes(feature.featureType)) {
+      const { val: price, err } = calculatePricePerFeature({
+        feature: feature,
+        quantity: 1,
+      })
+
+      if (err) {
+        return Err(err)
+      }
+
+      total = add(total, price.totalPrice.dinero)
+    }
+
+    if (["tier", "package"].includes(feature.featureType)) {
+      const { val: price, err } = calculatePricePerFeature({
+        feature: feature,
+        quantity: quantities[feature.id] ?? 0,
+      })
+
+      if (err) {
+        return Err(err)
+      }
+
+      total = add(total, price.totalPrice.dinero)
+    }
+
+    if (["usage"].includes(feature.featureType)) {
+      const { val: price, err } = calculatePricePerFeature({
+        feature: feature,
+        quantity: quantities[feature.id] ?? 0,
+      })
+
+      if (err) {
+        return Err(err)
+      }
+
+      total = add(total, price.totalPrice.dinero)
+    }
+  })
+
+  const displayAmount = toDecimal(
+    total,
+    ({ value, currency }) => `${formatMoney(value, currency.code)}`
+  )
+
+  return Ok({
+    dinero: total,
+    displayAmount: displayAmount,
   })
 }
 

@@ -57,6 +57,7 @@ export function PricingItem({
       onQuantityChange?.(value)
     },
   }
+
   const freeUnits = calculateFreeUnits({ feature })
 
   const freeUnitsText =

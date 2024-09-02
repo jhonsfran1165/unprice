@@ -6,9 +6,9 @@ import { remove } from "./remove"
 import { update } from "./update"
 
 export const planVersionFeatureRouter = createTRPCRouter({
-  create,
-  remove,
-  update,
-  getById,
-  getByPlanVersionId,
+  create: create,
+  remove: remove,
+  update: update,
+  getById: getById,
+  getByPlanVersionId: getByPlanVersionId,
 })

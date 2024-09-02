@@ -114,6 +114,28 @@ export class Analytics {
     })
   }
 
+  public get getTotalUsagePerCustomer() {
+    return this.readClient.buildPipe({
+      pipe: "get_total_usage_customer__v1",
+      parameters: z.object({
+        customerId: z.string(),
+        projectId: z.string(),
+        start: z.number(),
+        end: z.number(),
+      }),
+      data: z.object({
+        featureSlug: z.string(),
+        sum: z.number(),
+        max: z.number(),
+        count: z.number(),
+        last_during_period: z.number(),
+      }),
+      opts: {
+        cache: "no-store",
+      },
+    })
+  }
+
   public get getTotalUsagePerProject() {
     return this.readClient.buildPipe({
       pipe: "get_total_usage_per_project__v1",

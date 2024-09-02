@@ -480,23 +480,12 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema
       slug: true,
     }),
     planFeatures: z.array(
-      planVersionFeatureSelectBaseSchema
-        .pick({
+      planVersionFeatureSelectBaseSchema.extend({
+        feature: featureSelectBaseSchema.pick({
           id: true,
-          featureId: true,
-          featureType: true,
-          planVersionId: true,
-          config: true,
-          metadata: true,
-          limit: true,
-          defaultQuantity: true,
-        })
-        .extend({
-          feature: featureSelectBaseSchema.pick({
-            id: true,
-            slug: true,
-          }),
-        })
+          slug: true,
+        }),
+      })
     ),
   })
 

@@ -286,7 +286,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                   freeUnits === Number.POSITIVE_INFINITY
                     ? feature.limit
                       ? `Up to ${nFormatter(feature.limit)}`
-                      : "Unlimited"
+                      : "∞"
                     : freeUnits === 0
                       ? feature.limit
                         ? `Up to ${nFormatter(feature.limit)}`

@@ -52,7 +52,7 @@ export default function Page(props: {
 
   if (!workspace && !project) {
     return (
-      <Header>
+      <Header className="px-4">
         <UpdateClientCookie workspaceSlug={workspace} projectSlug={project} />
         <Logo className="size-6 text-lg" />
       </Header>

@@ -39,18 +39,13 @@ export default function CustomerFormField({
   const customerId = form.watch("customerId")
 
   // customer lists
-  const { data: customers, isLoading } = api.customers.listByActiveProject.useQuery(
-    {
-      search: null,
-      from: null,
-      to: null,
-      page: 1,
-      page_size: 100,
-    },
-    {
-      enabled: customerId === "",
-    }
-  )
+  const { data: customers, isLoading } = api.customers.listByActiveProject.useQuery({
+    search: null,
+    from: null,
+    to: null,
+    page: 1,
+    page_size: 100,
+  })
 
   const selectedCustomer = customers?.customers.find((customer) => customer.id === customerId)
 

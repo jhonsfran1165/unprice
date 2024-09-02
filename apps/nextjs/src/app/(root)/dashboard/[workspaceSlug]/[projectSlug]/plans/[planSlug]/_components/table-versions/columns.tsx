@@ -180,7 +180,9 @@ export const columns: ColumnDef<PlanVersion>[] = [
   {
     accessorKey: "createdAtM",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
-    cell: ({ row }) => <div>{formatDate(row.original.createdAtM)}</div>,
+    cell: ({ row }) => (
+      <div className="whitespace-nowrap text-sm">{formatDate(row.original.createdAtM)}</div>
+    ),
     enableSorting: true,
     enableHiding: true,
     size: 40,
@@ -188,7 +190,9 @@ export const columns: ColumnDef<PlanVersion>[] = [
   {
     accessorKey: "updatedAtM",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Updated At" />,
-    cell: ({ row }) => <div>{formatDate(row.original.updatedAtM)}</div>,
+    cell: ({ row }) => (
+      <div className="whitespace-nowrap text-sm">{formatDate(row.original.updatedAtM)}</div>
+    ),
     enableSorting: true,
     enableHiding: true,
     size: 40,

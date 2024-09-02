@@ -9,6 +9,7 @@ import { useFormStatus } from "react-dom"
 interface SubmitButtonProps extends ButtonProps {
   isSubmitting?: boolean
   isDisabled?: boolean
+  isLoading?: boolean
   label: string
   component?: "default" | "spinner"
 }
@@ -20,6 +21,7 @@ export const SubmitButton = ({
   label,
   onClick,
   className,
+  isLoading,
   ...props
 }: SubmitButtonProps) => {
   const { pending } = useFormStatus()
@@ -36,7 +38,7 @@ export const SubmitButton = ({
       {...props}
     >
       <span className="line-clamp-1">{label}</span>
-      {isPending && <LoadingAnimation className={cn("ml-2", className)} />}
+      {isPending || (isLoading && <LoadingAnimation className={cn("ml-2", className)} />)}
     </Button>
   )
 }
