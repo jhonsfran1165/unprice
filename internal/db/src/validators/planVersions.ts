@@ -40,6 +40,31 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
     paymentProvider: true,
   })
   .superRefine((data, ctx) => {
+    if (data.billingPeriod === "month") {
+      if (
+        data.startCycle !== "last_day_of_month" &&
+        !data.startCycle?.match(/^(0?[1-9]|[12][0-9]|3[01])$/)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Start cycle cannot be last day of month for monthly billing period",
+          path: ["startCycle"],
+          fatal: true,
+        })
+      }
+    }
+
+    if (data.billingPeriod === "year") {
+      if (!data.startCycle?.match(/^(0?[1-9]|1[0-2])$/)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Start cycle cannot be last day of year for yearly billing period",
+          path: ["startCycle"],
+          fatal: true,
+        })
+      }
+    }
+
     if (data.planType === "recurring" && !data.billingPeriod) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

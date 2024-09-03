@@ -1,6 +1,6 @@
 import { APP_DOMAIN } from "@unprice/config"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
-import { addMonths, endOfMonth, startOfMonth } from "date-fns"
+import { addMonths, addYears, endOfMonth, startOfMonth } from "date-fns"
 import { Fragment } from "react"
 import { PaymentMethodForm } from "~/components/forms/payment-method-form"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -41,6 +41,11 @@ async function SubscriptionCard({ workspaceSlug }: { workspaceSlug: string }) {
 
   // TODO: handle the case when the subscription comes from the main workspace
 
+  const nextBillingDate =
+    subscription.planVersion.billingPeriod === "month"
+      ? addMonths(new Date(subscription.startDateAt), 1).getTime()
+      : addYears(new Date(subscription.startDateAt), 1).getTime()
+
   return (
     <Card>
       <CardHeader>
@@ -51,13 +56,7 @@ async function SubscriptionCard({ workspaceSlug }: { workspaceSlug: string }) {
           <div>
             You are currently on the <strong>{subscription.planVersion.plan.slug}</strong> plan.
             {subscription.startDateAt && (
-              <strong>
-                Your subscription will renew on{" "}
-                {/* TODO: improve this because subscription can be monthly or yearly
-                  and we should display the correct date in the correct format
-                */}
-                {addMonths(new Date(formatDate(subscription.startDateAt)), 1).toLocaleDateString()}
-              </strong>
+              <strong>Your subscription will renew on {formatDate(nextBillingDate)}</strong>
             )}
           </div>
         ) : (

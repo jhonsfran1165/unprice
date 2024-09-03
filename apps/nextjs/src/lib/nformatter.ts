@@ -4,6 +4,7 @@ export function nFormatter(
     digits: 1,
   }
 ) {
+  if (num === Number.POSITIVE_INFINITY) return "∞"
   if (!num) return "0"
   if (opts.full) {
     return Intl.NumberFormat("en-US").format(num)

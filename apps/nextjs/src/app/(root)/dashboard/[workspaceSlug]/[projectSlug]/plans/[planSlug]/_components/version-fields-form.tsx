@@ -12,19 +12,9 @@ import { Input } from "@unprice/ui/input"
 import { Switch } from "@unprice/ui/switch"
 import type { UseFormReturn } from "react-hook-form"
 
-import {
-  COLLECTION_METHODS,
-  CURRENCIES,
-  PAYMENT_PROVIDERS,
-  START_CYCLES,
-  START_CYCLE_MAP,
-  WHEN_TO_BILLING,
-} from "@unprice/db/utils"
-import { PLAN_BILLING_PERIODS, PLAN_TYPES } from "@unprice/db/utils"
-import { HelpCircle } from "@unprice/ui/icons"
+import { CURRENCIES, PAYMENT_PROVIDERS, PLAN_BILLING_PERIODS, PLAN_TYPES } from "@unprice/db/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Textarea } from "@unprice/ui/text-area"
-import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { SuperLink } from "~/components/super-link"
 import type { PublishedPlanVersion } from "./plan-version-form"
 
@@ -212,180 +202,6 @@ export function BillingPeriodFormField({
   )
 }
 
-export function CollectionMethodFormField({
-  form,
-  isDisabled,
-}: {
-  form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
-  isDisabled?: boolean
-}) {
-  return (
-    <FormField
-      control={form.control}
-      name="collectionMethod"
-      render={({ field }) => (
-        <FormItem className="flex flex-col justify-end">
-          <div className="flex justify-between">
-            <FormLabel>
-              <Tooltip>
-                <div className="flex items-center gap-2">
-                  Collection Method
-                  <span>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-4 w-4 font-light" />
-                    </TooltipTrigger>
-                  </span>
-                </div>
-                <TooltipContent
-                  className="w-32 bg-background-bg font-normal text-xs"
-                  align="center"
-                  side="right"
-                >
-                  Method used to collect payments from customers.
-                  <TooltipArrow className="fill-background-bg" />
-                </TooltipContent>
-              </Tooltip>
-            </FormLabel>
-          </div>
-          <Select onValueChange={field.onChange} value={field.value ?? ""} disabled={isDisabled}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a collection method" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {COLLECTION_METHODS.map((method) => (
-                <SelectItem key={method} value={method}>
-                  {method}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  )
-}
-
-export function StartCycleFormField({
-  form,
-  isDisabled,
-}: {
-  form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
-  isDisabled?: boolean
-}) {
-  const billingPeriod = form.getValues("billingPeriod")
-  return (
-    <FormField
-      control={form.control}
-      name="startCycle"
-      render={({ field }) => (
-        <FormItem className="flex flex-col justify-end">
-          <div className="flex justify-between">
-            <FormLabel>
-              <Tooltip>
-                <div className="flex items-center gap-2">
-                  Start Cycle
-                  <span>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-4 w-4 font-light" />
-                    </TooltipTrigger>
-                  </span>
-                </div>
-                <TooltipContent
-                  className="w-32 bg-background-bg font-normal text-xs"
-                  align="center"
-                  side="right"
-                >
-                  The day the customer will be billed. Which means receiving an invoice.
-                  <TooltipArrow className="fill-background-bg" />
-                </TooltipContent>
-              </Tooltip>
-            </FormLabel>
-          </div>
-          <Select onValueChange={field.onChange} value={field.value ?? ""} disabled={isDisabled}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a start of billing cycle" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {START_CYCLES.filter(
-                (cycle) => START_CYCLE_MAP[cycle].billingPeriod === billingPeriod
-              ).map((cycle) => (
-                <SelectItem value={cycle} key={cycle} description={START_CYCLE_MAP[cycle].label}>
-                  {cycle}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  )
-}
-
-export function WhenToBillFormField({
-  form,
-  isDisabled,
-}: {
-  form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
-  isDisabled?: boolean
-}) {
-  return (
-    <FormField
-      control={form.control}
-      name="whenToBill"
-      render={({ field }) => (
-        <FormItem className="flex flex-col justify-end">
-          <div className="flex justify-between">
-            <FormLabel>
-              <Tooltip>
-                <div className="flex items-center gap-2">
-                  When to bill Subscription
-                  <span>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-4 w-4 font-light" />
-                    </TooltipTrigger>
-                  </span>
-                </div>
-                <TooltipContent
-                  className="w-32 bg-background-bg font-normal text-xs"
-                  align="center"
-                  side="right"
-                >
-                  <ul className="list-inside list-disc">
-                    <li>At the start of the billing period</li>
-                    <li>At the end of the billing period</li>
-                  </ul>
-                  <TooltipArrow className="fill-background-bg" />
-                </TooltipContent>
-              </Tooltip>
-            </FormLabel>
-          </div>
-          <Select onValueChange={field.onChange} value={field.value ?? ""} disabled={isDisabled}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select when to bill" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {WHEN_TO_BILLING.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  )
-}
-
 export function PaymentProviderFormField({
   form,
   isDisabled,
@@ -454,7 +270,7 @@ export function DescriptionFormField({
             <Textarea
               {...field}
               value={field.value ?? ""}
-              className="md:min-h-[150px]"
+              className="md:min-h-[180px]"
               disabled={isDisabled}
             />
           </FormControl>

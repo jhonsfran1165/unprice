@@ -1,5 +1,5 @@
 import { createEnv } from "@t3-oss/env-nextjs"
-import { z } from "zod"
+import * as z from "zod"
 
 export const env = createEnv({
   shared: {
@@ -7,10 +7,7 @@ export const env = createEnv({
     VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
   },
   server: {
-    DATABASE_READ1_URL: z.string().min(1).url(),
     TRIGGER_SECRET_KEY: z.string(),
-    TINYBIRD_TOKEN: z.string(),
-    STRIPE_API_KEY: z.string(),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis

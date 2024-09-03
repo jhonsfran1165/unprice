@@ -40,6 +40,7 @@ const calculatePricePerFeatureSchema = z.object({
   prorate: z.number().min(0).max(1).optional(),
 })
 
+// calculate flat price of the plan based on the features in the plan
 export const calculateFlatPricePlan = ({
   planVersion,
 }: {
@@ -83,6 +84,7 @@ export const calculateFlatPricePlan = ({
   })
 }
 
+// calculate the total price of the plan based on the quantities of the features
 export const calculateTotalPricePlan = ({
   planVersion,
   quantities,
@@ -108,20 +110,7 @@ export const calculateTotalPricePlan = ({
       total = add(total, price.totalPrice.dinero)
     }
 
-    if (["tier", "package"].includes(feature.featureType)) {
-      const { val: price, err } = calculatePricePerFeature({
-        feature: feature,
-        quantity: quantities[feature.id] ?? 0,
-      })
-
-      if (err) {
-        return Err(err)
-      }
-
-      total = add(total, price.totalPrice.dinero)
-    }
-
-    if (["usage"].includes(feature.featureType)) {
+    if (["tier", "package", "usage"].includes(feature.featureType)) {
       const { val: price, err } = calculatePricePerFeature({
         feature: feature,
         quantity: quantities[feature.id] ?? 0,

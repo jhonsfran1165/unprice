@@ -12,6 +12,7 @@ import { CheckIcon, HelpCircle } from "@unprice/ui/icons"
 import { Slider } from "@unprice/ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
+import { cn } from "@unprice/ui/utils"
 import { useMemo, useState } from "react"
 import { useDebounce } from "~/hooks/use-debounce"
 import { nFormatter } from "~/lib/nformatter"
@@ -21,11 +22,13 @@ export function PricingItem({
   withCalculator,
   onQuantityChange,
   noCheckIcon = false,
+  className,
 }: {
   feature: RouterOutputs["planVersions"]["getById"]["planVersion"]["planFeatures"][number]
   withCalculator?: boolean
   onQuantityChange?: (quantity: number) => void
   noCheckIcon?: boolean
+  className?: string
 }) {
   const defaultQuantity = feature.defaultQuantity ?? 1
   const [quantity, setQuantity] = useState<number>(defaultQuantity)
@@ -73,19 +76,19 @@ export function PricingItem({
 
   switch (feature.featureType) {
     case "flat": {
-      displayFeature = `${feature.feature.slug}`
+      displayFeature = `${feature.feature.title}`
       break
     }
 
     case "tier": {
       const lastTier = feature.config?.tiers![feature.config.tiers!.length - 1]
-      displayFeature = `${freeUnitsText} ${feature.feature.slug}`
+      displayFeature = `${freeUnitsText} ${feature.feature.title}`
       calculatorParams.max = feature.limit ?? lastTier?.lastUnit ?? 100000
       break
     }
 
     case "usage": {
-      displayFeature = `${freeUnitsText} ${feature.feature.slug}`
+      displayFeature = `${freeUnitsText} ${feature.feature.title}`
       calculatorParams.max = feature.limit ?? 100000
 
       if (feature.config?.usageMode === "tier") {
@@ -97,7 +100,7 @@ export function PricingItem({
     }
 
     case "package": {
-      displayFeature = `${freeUnitsText} ${feature.feature.slug}`
+      displayFeature = `${freeUnitsText} ${feature.feature.title}`
       calculatorParams.max = feature.config?.units! * 10
       break
     }
@@ -111,11 +114,11 @@ export function PricingItem({
         </div>
       )}
       <div className="flex w-full items-center gap-1">
-        <span className="font-medium text-sm">{displayFeature}</span>
+        <span className={cn("font-medium text-sm capitalize", className)}>{displayFeature}</span>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <HelpCircle className="h-4 w-4 font-light" />
+            <HelpCircle className="size-4 font-light" />
           </TooltipTrigger>
           <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
             <div className="flex w-[300px] flex-col gap-2 p-2">
@@ -210,7 +213,7 @@ export function PricingItem({
                   </Typography>
 
                   <span className="text-xs">
-                    Total price per {nFormatter(quantity)} {feature.feature.slug} is{" "}
+                    Total price per {nFormatter(quantity)} {feature.feature.title} is{" "}
                     {pricePerFeature.totalPrice.displayAmount}
                   </span>
 

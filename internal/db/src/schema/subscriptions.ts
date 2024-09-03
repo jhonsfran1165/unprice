@@ -15,11 +15,11 @@ import type { z } from "zod"
 import { pgTableProject } from "../utils/_table"
 import { cuid, timestamps } from "../utils/fields.sql"
 import { projectID } from "../utils/sql"
+import type { StartCycle } from "../validators/shared"
 import type { subscriptionMetadataSchema } from "../validators/subscriptions"
 import { customers } from "./customers"
 import {
   collectionMethodEnum,
-  startCycleEnum,
   subscriptionStatusEnum,
   typeSubscriptionEnum,
   whenToBillEnum,
@@ -62,7 +62,7 @@ export const subscriptions = pgTableProject(
     // whenToBill: pay_in_advance - pay_in_arrear
     whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance").notNull(),
     // when to start each cycle for this subscription -
-    startCycle: startCycleEnum("start_cycle").default("first_day_of_month").notNull(), // null means the first day of the month
+    startCycle: text("start_cycle").default("1").$type<StartCycle>(), // null means the first day of the month
     // used for generating invoices -
     gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
     // collection method for the subscription - charge_automatically or send_invoice
@@ -104,6 +104,11 @@ export const subscriptions = pgTableProject(
 
     // next subscription id is the id of the subscription that will be created when the user changes the plan
     nextSubscriptionId: cuid("next_subscription_id"),
+
+    // last billed at is the last time the subscription was billed
+    lastBilledAt: bigint("last_billed_at_m", { mode: "number" }),
+    // next billing at is the next time the subscription will be billed
+    nextBillingAt: bigint("next_billing_at_m", { mode: "number" }),
   },
   (table) => ({
     primary: primaryKey({

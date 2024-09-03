@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server"
 import {
   featureSelectBaseSchema,
   planSelectBaseSchema,
@@ -60,10 +59,9 @@ export const listByProjectId = protectedProcedure
     })
 
     if (planVersionData.length === 0) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Plan version not found",
-      })
+      return {
+        planVersions: [],
+      }
     }
 
     // TODO: improve this query so I can filter enterprises plans

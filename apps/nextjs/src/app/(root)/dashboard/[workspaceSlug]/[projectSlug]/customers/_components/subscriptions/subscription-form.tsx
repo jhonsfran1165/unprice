@@ -1,19 +1,19 @@
 "use client"
 
-import {
-  COLLECTION_METHODS,
-  START_CYCLES,
-  START_CYCLE_MAP,
-  SUBSCRIPTION_TYPES,
-  WHEN_TO_BILLING,
-} from "@unprice/db/utils"
+import { SUBSCRIPTION_TYPES } from "@unprice/db/utils"
 import type { InsertSubscription, Subscription, SubscriptionItem } from "@unprice/db/validators"
 import { subscriptionInsertSchema } from "@unprice/db/validators"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@unprice/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Separator } from "@unprice/ui/separator"
-import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
-import { HelpCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Fragment, useEffect, useMemo } from "react"
 import { z } from "zod"
@@ -29,8 +29,11 @@ import CustomerFormField from "./customer-field"
 import DurationFormField from "./duration-field"
 import EndDateFormField from "./enddate-field"
 
+import CollectionMethodFormField from "~/components/forms/collection-method-field"
 import ConfigItemsFormField from "~/components/forms/items-fields"
 import SelectPlanFormField from "~/components/forms/select-plan-field"
+import StartCycleFormField from "~/components/forms/start-cycle-field"
+import WhenToBillFormField from "~/components/forms/when-to-bill-field"
 import PlanNewVersionFormField from "./plan-new-version-field"
 
 export function SubscriptionForm({
@@ -111,6 +114,51 @@ export function SubscriptionForm({
           nextPlanVersionId: true,
         })
         .superRefine((data, ctx) => {
+          const selectedNewPlanVersion = planVersions?.planVersions.find(
+            (version) => version.id === data.nextPlanVersionId
+          )
+          // payment method is validated against the plan version
+          // to check if payment method is required for the plan
+          const paymentMethodRequired = selectedNewPlanVersion?.metadata?.paymentMethodRequired
+
+          if (paymentMethodRequired && !data.defaultPaymentMethodId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Default payment method is required for this plan",
+              path: ["defaultPaymentMethodId"],
+              fatal: true,
+            })
+          }
+
+          // TODO: improve this validation
+          if (selectedNewPlanVersion?.billingPeriod === "month") {
+            if (
+              data.startCycle !== "last_day_of_month" &&
+              !data.startCycle?.match(/^(0?[1-9]|[12][0-9]|3[01])$/)
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Start cycle cannot be last day of month for monthly billing period",
+                path: ["startCycle"],
+                fatal: true,
+              })
+            }
+          }
+
+          if (selectedNewPlanVersion?.billingPeriod === "year") {
+            if (
+              data.startCycle !== "last_day_of_year" &&
+              !data.startCycle?.match(/^(0?[1-9]|1[0-2])$/)
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Start cycle cannot be last day of year for yearly billing period",
+                path: ["startCycle"],
+                fatal: true,
+              })
+            }
+          }
+
           // validate that the end date is after the start date
           if (data.endDateAt && data.startDateAt && data.endDateAt < data.startDateAt) {
             ctx.addIssue({
@@ -127,22 +175,6 @@ export function SubscriptionForm({
               code: z.ZodIssueCode.custom,
               message: "New plan version cannot be the same as the current plan version",
               path: ["nextPlanVersionId"],
-              fatal: true,
-            })
-          }
-
-          const selectedNewPlanVersion = planVersions?.planVersions.find(
-            (version) => version.id === data.nextPlanVersionId
-          )
-          // payment method is validated against the plan version
-          // to check if payment method is required for the plan
-          const paymentMethodRequired = selectedNewPlanVersion?.metadata?.paymentMethodRequired
-
-          if (paymentMethodRequired && !data.defaultPaymentMethodId) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Default payment method is required for this plan",
-              path: ["defaultPaymentMethodId"],
               fatal: true,
             })
           }
@@ -241,30 +273,11 @@ export function SubscriptionForm({
               control={form.control}
               name="type"
               render={({ field }) => (
-                <FormItem className="w-full">
-                  <div className="flex justify-between">
-                    <FormLabel>
-                      <Tooltip>
-                        <div className="flex items-center gap-2">
-                          Type of subscription
-                          <span>
-                            <TooltipTrigger asChild>
-                              <HelpCircle className="h-4 w-4 font-light" />
-                            </TooltipTrigger>
-                          </span>
-                        </div>
-
-                        <TooltipContent
-                          className="w-32 bg-background-bg font-normal text-xs"
-                          align="center"
-                          side="right"
-                        >
-                          Whether the subscription is for a plan or an addon.
-                          <TooltipArrow className="fill-background-bg" />
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                  </div>
+                <FormItem className="flex w-full flex-col">
+                  <FormLabel>Type of subscription</FormLabel>
+                  <FormDescription>
+                    Whether the subscription is for a plan or an addon.
+                  </FormDescription>
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger disabled={readOnly}>
@@ -284,159 +297,17 @@ export function SubscriptionForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="collectionMethod"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <div className="flex justify-between">
-                    <FormLabel>
-                      <Tooltip>
-                        <div className="flex items-center gap-2">
-                          Collection Method
-                          <span>
-                            <TooltipTrigger asChild>
-                              <HelpCircle className="h-4 w-4 font-light" />
-                            </TooltipTrigger>
-                          </span>
-                        </div>
-
-                        <TooltipContent
-                          className="w-32 bg-background-bg font-normal text-xs"
-                          align="center"
-                          side="right"
-                        >
-                          First unit for the tier range. For the first tier, this should be 0.
-                          <TooltipArrow className="fill-background-bg" />
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                  </div>
-                  <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                    <FormControl>
-                      <SelectTrigger disabled={readOnly}>
-                        <SelectValue placeholder="Select a collection method" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {COLLECTION_METHODS.map((method) => (
-                        <SelectItem key={method} value={method}>
-                          {method}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <CollectionMethodFormField form={form} isDisabled={readOnly} />
           </div>
 
           <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
-            <FormField
-              control={form.control}
-              name="startCycle"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <div className="flex justify-between">
-                    <FormLabel>
-                      <Tooltip>
-                        <div className="flex items-center gap-2">
-                          Start Cycle
-                          <span>
-                            <TooltipTrigger asChild>
-                              <HelpCircle className="h-4 w-4 font-light" />
-                            </TooltipTrigger>
-                          </span>
-                        </div>
-
-                        <TooltipContent
-                          className="w-32 bg-background-bg font-normal text-xs"
-                          align="center"
-                          side="right"
-                        >
-                          The day the customer will be billed. Which means receiving an invoice.
-                          <TooltipArrow className="fill-background-bg" />
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                  </div>
-                  <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                    <FormControl>
-                      <SelectTrigger disabled={readOnly}>
-                        <SelectValue placeholder="Select a start of billing cycle" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {START_CYCLES.filter(
-                        (cycle) =>
-                          START_CYCLE_MAP[cycle].billingPeriod ===
-                          selectedPlanVersion?.billingPeriod
-                      ).map((cycle) => (
-                        <SelectItem
-                          value={cycle}
-                          key={cycle}
-                          description={START_CYCLE_MAP[cycle].label}
-                        >
-                          {cycle}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <StartCycleFormField
+              form={form}
+              isDisabled={readOnly}
+              billingPeriod={selectedPlanVersion?.billingPeriod}
             />
 
-            <FormField
-              control={form.control}
-              name="whenToBill"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <div className="flex justify-between">
-                    <FormLabel>
-                      <Tooltip>
-                        <div className="flex items-center gap-2">
-                          When to bill Subscription
-                          <span>
-                            <TooltipTrigger asChild>
-                              <HelpCircle className="h-4 w-4 font-light" />
-                            </TooltipTrigger>
-                          </span>
-                        </div>
-
-                        <TooltipContent
-                          className="w-32 bg-background-bg font-normal text-xs"
-                          align="center"
-                          side="right"
-                        >
-                          <ul className="list-inside list-disc">
-                            <li>At the start of the billing period</li>
-                            <li>At the end of the billing period</li>
-                          </ul>
-                          <TooltipArrow className="fill-background-bg" />
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                  </div>
-                  <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                    <FormControl>
-                      <SelectTrigger disabled={readOnly}>
-                        <SelectValue placeholder="Select when to bill" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {WHEN_TO_BILLING.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <WhenToBillFormField form={form} isDisabled={readOnly} />
           </div>
 
           {!isChangePlanSubscription && (
@@ -450,14 +321,14 @@ export function SubscriptionForm({
           {!isChangePlanSubscription && (
             <Fragment>
               <Separator />
-              <DurationFormField form={form} isDisabled={readOnly} />
-              <FormField
-                control={form.control}
-                name="trialDays"
-                render={({ field }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel>Trial Days</FormLabel>
-                    <div className="flex w-full flex-col lg:w-1/2">
+              <div className="flex flex-col items-center justify-between gap-8 lg:flex-row">
+                <DurationFormField form={form} isDisabled={readOnly} />
+                <FormField
+                  control={form.control}
+                  name="trialDays"
+                  render={({ field }) => (
+                    <FormItem className="flex w-full flex-col lg:w-1/2">
+                      <FormLabel>Trial Days</FormLabel>
                       <FormControl className="w-full">
                         <InputWithAddons
                           {...field}
@@ -468,10 +339,10 @@ export function SubscriptionForm({
                       </FormControl>
 
                       <FormMessage className="self-start pt-1" />
-                    </div>
-                  </FormItem>
-                )}
-              />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </Fragment>
           )}
 

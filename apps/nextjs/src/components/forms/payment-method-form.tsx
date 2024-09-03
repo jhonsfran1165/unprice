@@ -46,8 +46,7 @@ export function PaymentMethodForm({
     <Card variant="ghost" className="py-4">
       <div className="flex flex-col px-1 py-4">
         <Typography variant="p" affects="removePaddingMargin">
-          Default payment method for this customer. This payment method will be used for all future
-          invoices.
+          Default payment method. This payment method will be used for all future invoices.
         </Typography>
       </div>
       <CardContent className="flex flex-col space-y-14 px-0 py-10">

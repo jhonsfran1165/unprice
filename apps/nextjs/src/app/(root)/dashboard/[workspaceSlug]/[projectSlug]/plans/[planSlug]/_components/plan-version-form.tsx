@@ -7,6 +7,9 @@ import { usePathname, useRouter } from "next/navigation"
 import { startTransition } from "react"
 import type { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
+import CollectionMethodFormField from "~/components/forms/collection-method-field"
+import StartCycleFormField from "~/components/forms/start-cycle-field"
+import WhenToBillFormField from "~/components/forms/when-to-bill-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
@@ -14,15 +17,12 @@ import { api } from "~/trpc/client"
 import { BannerPublishedVersion } from "../[planVersionId]/_components/banner"
 import {
   BillingPeriodFormField,
-  CollectionMethodFormField,
   CurrencyFormField,
   DescriptionFormField,
   PaymentMethodRequiredFormField,
   PaymentProviderFormField,
   PlanTypeFormField,
-  StartCycleFormField,
   TitleFormField,
-  WhenToBillFormField,
 } from "./version-fields-form"
 
 const isPublishedSchema = planVersionSelectBaseSchema.partial().required({

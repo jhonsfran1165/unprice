@@ -10,6 +10,8 @@ import {
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
 import { cn } from "@unprice/ui/utils"
 import { ProgressBar } from "~/components/analytics/progress"
+import { PricingItem } from "~/components/forms/pricing-item"
+import { nFormatter } from "~/lib/nformatter"
 
 export function BillingCard({
   subscriptions,
@@ -61,7 +63,7 @@ export function BillingCard({
 
   if (err || totalPricePlanErr || totalPricePlanErrForecast) {
     return (
-      <div className="text-red-500">
+      <div className="text-danger">
         {err?.message || totalPricePlanErr?.message || totalPricePlanErrForecast?.message}
       </div>
     )
@@ -70,7 +72,7 @@ export function BillingCard({
   return (
     <Card className="mt-4">
       <CardHeader>
-        <CardTitle>Usage for the month</CardTitle>
+        <CardTitle>Subscription usage</CardTitle>
         <div className="flex items-center justify-between py-6 text-content-subtle">
           <div className={cn("flex w-4/5 flex-col gap-2")}>Plan {planVersion.plan.slug}</div>
           <div className={cn("w-1/5 text-end font-semibold text-md tabular-nums")}>
@@ -95,8 +97,10 @@ export function BillingCard({
           </span>
         </div>
         <div className="flex w-full items-center justify-between">
-          <span className="text-content-subtle text-xs">Estimated by end of month</span>
-          <span className="text-content-subtle text-xs tabular-nums">
+          <span className="text-content-subtle text-muted-foreground text-xs">
+            Estimated by end of month
+          </span>
+          <span className="text-content-subtle text-muted-foreground text-xs tabular-nums">
             {totalPricePlanForecast.displayAmount}
           </span>
         </div>
@@ -110,42 +114,50 @@ const LineItem: React.FC<{
 }> = (props) => {
   const { usage, ...feature } = props.featureWithUsage
 
+  // separate logic for tiers and packages and usage features
   const max = ["tier", "package"].includes(feature.featureType)
     ? usage.units ?? 0
     : usage.limit ?? Number.POSITIVE_INFINITY
-  const used = ["tier", "package"].includes(feature.featureType)
-    ? usage.units ?? 0
-    : usage.usage ?? 0
+  const used = usage.usage ?? 0
 
   const { val: price, err } = calculatePricePerFeature({
     feature: feature,
-    quantity: used,
+    // tier and package features are calculated based on units which are the units the customer has purchased
+    // usage features are calculated based on usage which is the usage of the feature
+    quantity: ["tier", "package"].includes(feature.featureType)
+      ? usage.units ?? 0
+      : usage.usage ?? 0,
   })
 
   if (err) {
-    return <div className="text-red-500">{err.message}</div>
+    return <div className="text-danger">{err.message}</div>
   }
 
   const freeUnits = calculateFreeUnits({ feature: feature })
   const forecast = forecastUsage(used)
-  const included = freeUnits === Number.POSITIVE_INFINITY ? feature.limit : freeUnits
+  const included =
+    freeUnits === Number.POSITIVE_INFINITY ? feature.limit ?? Number.POSITIVE_INFINITY : freeUnits
 
   return (
     <div className="flex items-center justify-between">
       <div className={cn("flex w-4/5 flex-col gap-2")}>
         <div className="flex items-center justify-between">
-          <span className="font-semibold text-content capitalize">{feature.feature.title}</span>
+          <PricingItem
+            feature={feature}
+            className="font-semibold text-content text-md capitalize"
+            noCheckIcon
+          />
           <span className="text-right text-content-subtle text-muted-foreground text-xs">
-            {Intl.NumberFormat("en-US", { notation: "compact" }).format(included ?? 0)} included
+            {nFormatter(included)} included
           </span>
         </div>
         <ProgressBar value={used} max={max} />
         <div className="flex items-center justify-between">
           <span className="text-content-subtle text-muted-foreground text-xs">
-            Used {Intl.NumberFormat("en-US", { notation: "compact" }).format(used)}
+            Used {nFormatter(used)}
           </span>
           <span className="text-content-subtle text-muted-foreground text-xs">
-            {Intl.NumberFormat("en-US", { notation: "compact" }).format(forecast)} forecasted
+            {nFormatter(forecast)} forecasted
           </span>
         </div>
       </div>

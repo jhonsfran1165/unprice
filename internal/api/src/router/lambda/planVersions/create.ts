@@ -70,8 +70,9 @@ export const create = protectedProjectProcedure
             paymentProvider,
             planType,
             currency,
+            // TODO: check if this is ok
             billingPeriod: billingPeriod ?? "month",
-            startCycle: startCycle ?? "first_day_of_month",
+            startCycle: startCycle,
             gracePeriod: gracePeriod ?? 0,
             whenToBill: whenToBill ?? "pay_in_advance",
             metadata,
@@ -79,11 +80,13 @@ export const create = protectedProjectProcedure
           })
           .returning()
           .catch((err) => {
-            console.error(err)
-            tx.rollback()
+            opts.ctx.logger.error("There was an issue creating the plan version", {
+              error: err.message,
+              planVersionId,
+            })
             throw err
           })
-          .then((re) => re[0])
+          .then((re) => re?.[0])
 
         if (!planVersionData?.id) {
           throw new TRPCError({
@@ -94,6 +97,8 @@ export const create = protectedProjectProcedure
 
         return planVersionData
       } catch (error) {
+        tx.rollback()
+
         if (error instanceof Error) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",

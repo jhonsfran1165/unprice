@@ -41,7 +41,7 @@ export function SubscriptionSheet({
               config: [],
               defaultPaymentMethodId: "",
               timezone: "UTC",
-              startCycle: "first_day_of_month",
+              startCycle: "1",
               whenToBill: "pay_in_arrear",
             }
           }

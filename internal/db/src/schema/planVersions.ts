@@ -14,6 +14,7 @@ import { pgTableProject } from "../utils/_table"
 import { cuid, timestamps } from "../utils/fields.sql"
 import { projectID } from "../utils/sql"
 import type { PlanVersionMetadata } from "../validators/planVersions"
+import type { StartCycle } from "../validators/shared"
 import { users } from "./auth"
 import {
   collectionMethodEnum,
@@ -21,7 +22,6 @@ import {
   paymentProviderEnum,
   planBillingPeriodEnum,
   planTypeEnum,
-  startCycleEnum,
   statusPlanEnum,
   whenToBillEnum,
 } from "./enums"
@@ -88,9 +88,9 @@ export const versions = pgTableProject(
     // whenToBill: pay_in_advance - pay_in_arrear
     whenToBill: whenToBillEnum("when_to_bill").notNull().default("pay_in_advance"),
     // when to start each cycle for this subscription -
-    startCycle: startCycleEnum("start_cycle").notNull().default("first_day_of_month"), // null means the first day of the month
+    startCycle: text("start_cycle").default("1").$type<StartCycle>(), // null means the first day of the month
     // used for generating invoices -
-    gracePeriod: integer("grace_period").notNull().default(0), // 0 means no grace period to pay the invoice
+    gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
     // collection method for the subscription - charge_automatically or send_invoice
     collectionMethod: collectionMethodEnum("collection_method")
       .notNull()

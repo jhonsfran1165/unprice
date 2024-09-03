@@ -38,7 +38,7 @@ export const SubmitButton = ({
       {...props}
     >
       <span className="line-clamp-1">{label}</span>
-      {isPending || (isLoading && <LoadingAnimation className={cn("ml-2", className)} />)}
+      {(isPending || isLoading) && <LoadingAnimation className={cn("ml-2", className)} />}
     </Button>
   )
 }

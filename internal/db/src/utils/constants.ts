@@ -69,40 +69,12 @@ export const AGGREGATION_METHODS_MAP = {
   },
 } as const
 
-export const START_CYCLE_MAP = {
-  first_day_of_month: {
-    label: "First day of month",
-    description: "The first day of the month",
-    billingPeriod: "month",
-  },
-  first_day_of_year: {
-    label: "First day of year",
-    description: "The first day of the year",
-    billingPeriod: "year",
-  },
-  last_day_of_month: {
-    label: "Last day of month",
-    description: "The last day of the month",
-    billingPeriod: "month",
-  },
-  last_day_of_year: {
-    label: "Last day of year",
-    description: "The last day of the year",
-    billingPeriod: "year",
-  },
-} as const
-
 type AggregationMethod = keyof typeof AGGREGATION_METHODS_MAP
 export type TierMode = keyof typeof TIER_MODES_MAP
 export type UsageMode = keyof typeof USAGE_MODES_MAP
 export type FeatureType = keyof typeof FEATURE_TYPES_MAPS
-export type StartCycle = keyof typeof START_CYCLE_MAP
 
 export const PAYMENT_PROVIDERS = ["stripe", "lemonsqueezy"] as const
-export const START_CYCLES = Object.keys(START_CYCLE_MAP) as unknown as readonly [
-  StartCycle,
-  ...StartCycle[],
-]
 export const CURRENCIES = ["USD", "EUR"] as const
 export const STAGES = ["prod", "test", "dev"] as const
 export const STATUS_PLAN = ["draft", "published"] as const
