@@ -119,7 +119,7 @@ export function SubscriptionForm({
           )
           // payment method is validated against the plan version
           // to check if payment method is required for the plan
-          const paymentMethodRequired = selectedNewPlanVersion?.metadata?.paymentMethodRequired
+          const paymentMethodRequired = selectedNewPlanVersion?.paymentMethodRequired
 
           if (paymentMethodRequired && !data.defaultPaymentMethodId) {
             ctx.addIssue({
@@ -128,35 +128,6 @@ export function SubscriptionForm({
               path: ["defaultPaymentMethodId"],
               fatal: true,
             })
-          }
-
-          // TODO: improve this validation
-          if (selectedNewPlanVersion?.billingPeriod === "month") {
-            if (
-              data.startCycle !== "last_day_of_month" &&
-              !data.startCycle?.match(/^(0?[1-9]|[12][0-9]|3[01])$/)
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Start cycle cannot be last day of month for monthly billing period",
-                path: ["startCycle"],
-                fatal: true,
-              })
-            }
-          }
-
-          if (selectedNewPlanVersion?.billingPeriod === "year") {
-            if (
-              data.startCycle !== "last_day_of_year" &&
-              !data.startCycle?.match(/^(0?[1-9]|1[0-2])$/)
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Start cycle cannot be last day of year for yearly billing period",
-                path: ["startCycle"],
-                fatal: true,
-              })
-            }
           }
 
           // validate that the end date is after the start date
@@ -188,7 +159,7 @@ export function SubscriptionForm({
 
       // payment method is validated against the plan version
       // to check if payment method is required for the plan
-      const paymentMethodRequired = selectedPlanVersion?.metadata?.paymentMethodRequired
+      const paymentMethodRequired = selectedPlanVersion?.paymentMethodRequired
 
       if (paymentMethodRequired && !data.defaultPaymentMethodId) {
         ctx.addIssue({

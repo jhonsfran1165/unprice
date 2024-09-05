@@ -18,6 +18,18 @@ interface FormValues extends FieldValues {
   billingPeriod?: BillingPeriod | null
 }
 
+const getStartCycleOptions = (billingPeriod?: BillingPeriod | null) => {
+  if (billingPeriod === "month") {
+    return [...Array.from({ length: 31 }, (_, i) => i + 1)]
+  }
+
+  if (billingPeriod === "year") {
+    return [...Array.from({ length: 12 }, (_, i) => i + 1)]
+  }
+
+  return []
+}
+
 export default function StartCycleFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
@@ -30,19 +42,7 @@ export default function StartCycleFormField<TFieldValues extends FormValues>({
   const providedBillingPeriod =
     billingPeriod ?? form.getValues("billingPeriod" as FieldPath<TFieldValues>)
 
-  const validaStartCyclePerBillingPerido = (billingPeriod?: BillingPeriod | null) => {
-    if (billingPeriod === "month") {
-      return [...Array.from({ length: 31 }, (_, i) => (i + 1).toString()), "last_day_of_month"]
-    }
-
-    if (billingPeriod === "year") {
-      return [...Array.from({ length: 12 }, (_, i) => (i + 1).toString())]
-    }
-
-    return []
-  }
-
-  const startCycles = validaStartCyclePerBillingPerido(providedBillingPeriod)
+  const startCycles = getStartCycleOptions(providedBillingPeriod)
 
   return (
     <FormField
@@ -52,9 +52,13 @@ export default function StartCycleFormField<TFieldValues extends FormValues>({
         <FormItem className="flex w-full flex-col">
           <FormLabel>Pricing Cycle Start Date</FormLabel>
           <FormDescription>
-            The day the customer will be billed. Which means receiving an invoice.
+            The day the subscription will be billed and start a new cycle.
           </FormDescription>
-          <Select onValueChange={field.onChange} value={field.value ?? ""} disabled={isDisabled}>
+          <Select
+            onValueChange={field.onChange}
+            value={field.value?.toString() ?? ""}
+            disabled={isDisabled}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select a start of billing cycle" />
@@ -63,7 +67,7 @@ export default function StartCycleFormField<TFieldValues extends FormValues>({
             <SelectContent>
               <FilterScroll>
                 {startCycles.map((cycle) => (
-                  <SelectItem value={cycle} key={cycle}>
+                  <SelectItem value={cycle.toString()} key={cycle}>
                     {cycle}
                   </SelectItem>
                 ))}

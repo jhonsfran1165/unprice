@@ -56,7 +56,7 @@ export default async function PlanPage({
                     currency: project.defaultCurrency,
                     planType: "recurring",
                     paymentProvider: "stripe",
-                    startCycle: "1",
+                    startCycle: 1,
                     billingPeriod: "month",
                     collectionMethod: "charge_automatically",
                     whenToBill: "pay_in_arrear",

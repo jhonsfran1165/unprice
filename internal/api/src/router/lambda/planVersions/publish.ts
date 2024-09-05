@@ -154,12 +154,7 @@ export const publish = protectedProjectProcedure
             publishedAt: Date.now(),
             publishedBy: opts.ctx.userId,
             latest: true,
-            ...(paymentMethodRequired && {
-              metadata: {
-                ...planVersionData.metadata,
-                paymentMethodRequired,
-              },
-            }),
+            paymentMethodRequired,
           })
           .where(and(eq(schema.versions.id, planVersionData.id)))
           .returning()

@@ -56,7 +56,7 @@ export default async function PlanPage({
                     planVersionId: "",
                     type: "plan",
                     collectionMethod: "charge_automatically",
-                    startCycle: "1",
+                    startCycle: 1,
                     whenToBill: "pay_in_arrear",
                     autoRenew: true,
                     config: [],

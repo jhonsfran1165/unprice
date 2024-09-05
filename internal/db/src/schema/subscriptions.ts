@@ -62,36 +62,41 @@ export const subscriptions = pgTableProject(
     // whenToBill: pay_in_advance - pay_in_arrear
     whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance").notNull(),
     // when to start each cycle for this subscription -
-    startCycle: text("start_cycle").default("1").$type<StartCycle>(), // null means the first day of the month
+    startCycle: integer("start_cycle").default(1).$type<StartCycle>(), // null means the first day of the month
     // used for generating invoices -
-    gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
+    gracePeriod: integer("grace_period").notNull().default(0), // 0 means no grace period to pay the invoice
     // collection method for the subscription - charge_automatically or send_invoice
     collectionMethod: collectionMethodEnum("collection_method")
       .notNull()
       .default("charge_automatically"),
     // ************ billing data defaults ************
 
-    // ************ subscription important times ************
+    // ************ subscription important dates ************
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
-    trialDays: integer("trial_days").default(0),
+    trialDays: integer("trial_days").notNull().default(0),
     trialEndsAt: bigint("trial_ends_at_m", { mode: "number" }),
     startDateAt: bigint("start_date_at_m", { mode: "number" }).default(0).notNull(),
     endDateAt: bigint("end_date_at_m", { mode: "number" }),
     // when the plan was changed - it's used to prevent the customer from changing the plan in the last 30 days
     planChangedAt: bigint("plan_changed_at_m", { mode: "number" }),
-    // ************ subscription important times ************
+
+    // last billed at is the last time the subscription was billed
+    lastBilledAt: bigint("last_billed_at_m", { mode: "number" }),
+    // next billing at is the next time the subscription will be billed
+    nextBillingAt: bigint("next_billing_at_m", { mode: "number" }),
+    // ************ subscription important dates ************
 
     // auto renew the subscription every billing period
-    autoRenew: boolean("auto_renew").default(true),
+    autoRenew: boolean("auto_renew").notNull().default(true),
     // whether the subscription is new or not. New means that the subscription was created in the current billing period
-    isNew: boolean("is_new").default(true),
+    isNew: boolean("is_new").notNull().default(true),
 
     // TODO: support plan changes
     // plan change means that the customer has changed the plan in the current billing period. This is used to calculate the proration, entitlements, etc from billing period to billing period
     // planChanged: boolean("plan_changed").default(false),
 
     // status of the subscription - active, inactive, canceled, paused, etc.
-    status: subscriptionStatusEnum("status").default("active"),
+    status: subscriptionStatusEnum("status").notNull().default("active"),
 
     // metadata for the subscription
     metadata: json("metadata").$type<z.infer<typeof subscriptionMetadataSchema>>(),
@@ -104,11 +109,6 @@ export const subscriptions = pgTableProject(
 
     // next subscription id is the id of the subscription that will be created when the user changes the plan
     nextSubscriptionId: cuid("next_subscription_id"),
-
-    // last billed at is the last time the subscription was billed
-    lastBilledAt: bigint("last_billed_at_m", { mode: "number" }),
-    // next billing at is the next time the subscription will be billed
-    nextBillingAt: bigint("next_billing_at_m", { mode: "number" }),
   },
   (table) => ({
     primary: primaryKey({

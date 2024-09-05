@@ -47,7 +47,6 @@ export const customers = pgTableProject(
 export const customerSessions = pgTableProject("customer_sessions", {
   ...id,
   ...timestamps,
-  active: boolean("active").default(false),
   customer: json("customer").notNull().$type<z.infer<typeof stripeSetupSchema>>(),
   planVersion: json("plan_version").notNull().$type<z.infer<typeof stripePlanVersionSchema>>(),
 })

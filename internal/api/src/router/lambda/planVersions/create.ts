@@ -22,6 +22,7 @@ export const create = protectedProjectProcedure
       billingPeriod,
       startCycle,
       gracePeriod,
+      paymentMethodRequired,
       title,
       tags,
       whenToBill,
@@ -70,6 +71,7 @@ export const create = protectedProjectProcedure
             paymentProvider,
             planType,
             currency,
+            paymentMethodRequired,
             // TODO: check if this is ok
             billingPeriod: billingPeriod ?? "month",
             startCycle: startCycle,

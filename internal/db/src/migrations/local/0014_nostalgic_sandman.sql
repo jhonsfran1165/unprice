@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_plan_versions" ADD COLUMN "payment_method_required" boolean DEFAULT false;

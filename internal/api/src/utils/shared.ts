@@ -13,10 +13,11 @@ import {
   type CustomerSignUp,
   type SubscriptionItemConfig,
   type WorkspaceInsert,
+  calculateBillingCycle,
   createDefaultSubscriptionConfig,
   type subscriptionInsertSchema,
 } from "@unprice/db/validators"
-import { addDays, getMonth, getYear } from "date-fns"
+import { addDays, endOfDay, getMonth, getYear, startOfDay } from "date-fns"
 import type { z } from "zod"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
@@ -210,6 +211,7 @@ export const createSubscription = async ({
     planChangedAt,
     type,
     timezone,
+    autoRenew,
   } = subscription
 
   const versionData = await ctx.db.query.versions.findFirst({
@@ -237,7 +239,7 @@ export const createSubscription = async ({
   }
 
   // check if payment method is required for the plan version
-  if (versionData?.metadata?.paymentMethodRequired && !defaultPaymentMethodId) {
+  if (versionData.paymentMethodRequired && !defaultPaymentMethodId) {
     throw new TRPCError({
       code: "BAD_REQUEST",
       message: "Payment method is required for this plan version",
@@ -344,10 +346,53 @@ export const createSubscription = async ({
   }
 
   // set the end date and start date given the timezone
+  // only used for ui purposes all date are saved in utc
   const timezoneToUse = timezone ?? customerData.timezone
+  const trialDaysToUse = trialDays ?? 0
 
-  //calculate the trialEndsAt
-  const trialEndsAt = trialDays ? addDays(new Date(startDateAt), trialDays).getTime() : undefined
+  // for calculation the trialEndsAt we use end of day alignment
+  const trialEndsAt =
+    trialDaysToUse > 0
+      ? endOfDay(addDays(new Date(startDateAt), trialDaysToUse)).getTime()
+      : undefined
+
+  // if there is a trial day, we need to calculate the next billing cycle with the end of the trial
+  // because the subscription really starts when there is no trial
+  const startDateSubscription = trialEndsAt
+    ? startOfDay(addDays(new Date(startDateAt), trialDaysToUse + 1))
+    : new Date(startDateAt)
+
+  let endDateAtToUse = endDateAt
+  let prorated = false
+
+  const billingPeriod = versionData.billingPeriod
+
+  // get the billing cycle for the subscription given the start date
+  const calculatedBillingCycle = calculateBillingCycle(
+    startDateSubscription,
+    startCycle ?? 1,
+    billingPeriod ?? "month"
+  )
+
+  // the end of the cycle is the day we have to bill the customer
+  const cycleEnd = calculatedBillingCycle.cycleEnd
+  const cycleStart = calculatedBillingCycle.cycleStart
+
+  // if the subscription is not auto renewing, we need to set the end date to the end of the billing period
+  if (!autoRenew) {
+    // add trial days to the end of the billing period
+    const billingEndDate = addDays(calculatedBillingCycle.cycleEnd, trialDaysToUse)
+    endDateAtToUse = billingEndDate.getTime()
+  }
+
+  // handle proration
+  // if the start date is in the middle of the billing period, we need to prorate the subscription
+  if (startDateAt > cycleStart.getTime()) {
+    prorated = true
+  }
+
+  // calculate the next billing date
+  const nextBillingAtToUse = addDays(cycleEnd, trialDaysToUse).getTime()
 
   // execute this in a transaction
   const subscriptionData = await ctx.db.transaction(async (trx) => {
@@ -362,9 +407,9 @@ export const createSubscription = async ({
         planVersionId: versionData.id,
         customerId: customerData.id,
         startDateAt: startDateAt,
-        endDateAt: endDateAt,
-        autoRenew: true,
-        trialDays: trialDays,
+        endDateAt: endDateAtToUse,
+        autoRenew: autoRenew ?? true,
+        trialDays: trialDaysToUse,
         trialEndsAt: trialEndsAt,
         isNew: true,
         collectionMethod: collectionMethod,
@@ -377,6 +422,8 @@ export const createSubscription = async ({
         planChangedAt: planChangedAt,
         type: type,
         timezone: timezoneToUse,
+        prorated: prorated,
+        nextBillingAt: nextBillingAtToUse,
       })
       .returning()
       .then((re) => re[0])
@@ -550,7 +597,7 @@ export const signUpCustomer = async ({
 
   const planProject = planVersion.project
   const paymentProvider = planVersion.paymentProvider
-  const paymentRequired = planVersion.metadata?.paymentMethodRequired ?? false
+  const paymentRequired = planVersion.paymentMethodRequired ?? false
   const customerId = newId("customer")
   const customerSuccessUrl = successUrl.replace("{CUSTOMER_ID}", customerId)
 
@@ -569,7 +616,6 @@ export const signUpCustomer = async ({
           .insert(customerSessions)
           .values({
             id: sessionId,
-            active: true,
             customer: {
               id: customerId,
               name: name,
@@ -662,7 +708,7 @@ export const signUpCustomer = async ({
           collectionMethod: planVersion.collectionMethod,
           whenToBill: planVersion.whenToBill,
           startCycle: planVersion.startCycle,
-          gracePeriod: planVersion.gracePeriod,
+          gracePeriod: planVersion.gracePeriod ?? 0,
         },
         projectId: projectId,
         ctx: {

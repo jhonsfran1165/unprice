@@ -2,6 +2,7 @@
 
 import type { RouterOutputs } from "@unprice/api"
 import {
+  calculateBillingCycle,
   calculateFlatPricePlan,
   calculateFreeUnits,
   calculatePricePerFeature,
@@ -26,6 +27,12 @@ export function BillingCard({
 
   // TODO: handle case where no subscription is found
   if (!subscription || !planVersion) return null
+
+  const calculatedBillingCycle = calculateBillingCycle(
+    new Date(subscription.startDateAt),
+    subscription.startCycle ?? 1,
+    subscription.planVersion.billingPeriod ?? "month"
+  )
 
   const { err, val: flatPricePlan } = calculateFlatPricePlan({
     planVersion: planVersion,
@@ -54,11 +61,13 @@ export function BillingCard({
   const { val: totalPricePlan, err: totalPricePlanErr } = calculateTotalPricePlan({
     planVersion: planVersion,
     quantities: quantities,
+    prorate: calculatedBillingCycle.prorationFactor,
   })
 
   const { val: totalPricePlanForecast, err: totalPricePlanErrForecast } = calculateTotalPricePlan({
     planVersion: planVersion,
     quantities: quantitiesForecast,
+    prorate: calculatedBillingCycle.prorationFactor,
   })
 
   if (err || totalPricePlanErr || totalPricePlanErrForecast) {
@@ -74,7 +83,10 @@ export function BillingCard({
       <CardHeader>
         <CardTitle>Subscription usage</CardTitle>
         <div className="flex items-center justify-between py-6 text-content-subtle">
-          <div className={cn("flex w-4/5 flex-col gap-2")}>Plan {planVersion.plan.slug}</div>
+          <div className={cn("flex w-4/5 flex-col gap-2")}>
+            Plan {planVersion.plan.slug}{" "}
+            {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
+          </div>
           <div className={cn("w-1/5 text-end font-semibold text-md tabular-nums")}>
             {flatPricePlan.displayAmount}
           </div>
@@ -91,14 +103,17 @@ export function BillingCard({
       </CardContent>
       <CardFooter className="flex flex-col gap-4 border-t py-4">
         <div className="flex w-full items-center justify-between">
-          <span className="font-semibold text-content text-sm">Current Total</span>
+          <span className="font-semibold text-content text-sm">
+            Current Total {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
+          </span>
           <span className="font-semibold text-content text-md tabular-nums">
             {totalPricePlan.displayAmount}
           </span>
         </div>
         <div className="flex w-full items-center justify-between">
           <span className="text-content-subtle text-muted-foreground text-xs">
-            Estimated by end of month
+            Estimated by end of month{" "}
+            {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
           </span>
           <span className="text-content-subtle text-muted-foreground text-xs tabular-nums">
             {totalPricePlanForecast.displayAmount}

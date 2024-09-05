@@ -29,12 +29,9 @@ export const yearsSchema = z.coerce.number().int().min(2000).max(2100)
 export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
 export const whenToBillSchema = z.enum(WHEN_TO_BILLING)
 
-export const startCycleMonthSchema = z.union([
-  z.string().regex(/^(0?[1-9]|[12][0-9]|3[01])$/),
-  z.literal("last_day_of_month"),
-])
-export const startCycleYearSchema = z.string().regex(/^(0?[1-9]|1[0-2])$/)
-export const startCycleSchema = z.union([startCycleMonthSchema, startCycleYearSchema]).default("1")
+export const startCycleMonthSchema = z.coerce.number().int().min(1).max(31)
+export const startCycleYearSchema = z.coerce.number().int().min(1).max(12)
+export const startCycleSchema = z.union([startCycleMonthSchema, startCycleYearSchema]).default(1)
 
 export const convertDateToUTC = (date: Date) => {
   // Extract date components

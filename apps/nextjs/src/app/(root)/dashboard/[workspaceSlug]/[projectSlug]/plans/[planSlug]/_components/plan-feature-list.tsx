@@ -68,7 +68,7 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
             strategy={verticalListSortingStrategy}
           >
             {filteredFeatures.length === 0 ? (
-              <EmptyPlaceholder>
+              <EmptyPlaceholder className="h-[725px]">
                 <EmptyPlaceholder.Icon>
                   <FileStack className="h-8 w-8" />
                 </EmptyPlaceholder.Icon>

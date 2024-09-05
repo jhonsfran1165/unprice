@@ -101,7 +101,7 @@ export const versions = pgTableProject(
 
     // metadata probably will be useful to save external data, etc.
     metadata: json("metadata").$type<PlanVersionMetadata>(),
-
+    paymentMethodRequired: boolean("payment_method_required").default(false),
     version: integer("version").default(1).notNull(),
   },
   (table) => ({

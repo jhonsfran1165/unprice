@@ -88,9 +88,11 @@ export const calculateFlatPricePlan = ({
 export const calculateTotalPricePlan = ({
   planVersion,
   quantities,
+  prorate,
 }: {
   planVersion: PlanVersionExtended
   quantities: Record<string, number>
+  prorate?: number
 }): Result<z.infer<typeof calculatePriceSchema>, UnPriceCalculationError> => {
   const defaultDineroCurrency = currencies[planVersion.currency]
   let total = dinero({ amount: 0, currency: defaultDineroCurrency })
@@ -101,6 +103,7 @@ export const calculateTotalPricePlan = ({
       const { val: price, err } = calculatePricePerFeature({
         feature: feature,
         quantity: 1,
+        prorate,
       })
 
       if (err) {
@@ -114,6 +117,7 @@ export const calculateTotalPricePlan = ({
       const { val: price, err } = calculatePricePerFeature({
         feature: feature,
         quantity: quantities[feature.id] ?? 0,
+        prorate,
       })
 
       if (err) {

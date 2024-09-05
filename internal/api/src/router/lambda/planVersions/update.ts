@@ -32,6 +32,7 @@ export const update = protectedProjectProcedure
       tags,
       whenToBill,
       paymentProvider,
+      paymentMethodRequired,
       metadata,
     } = opts.input
 
@@ -267,6 +268,7 @@ export const update = protectedProjectProcedure
           ...(status && { status }),
           ...(metadata && { metadata }),
           ...(paymentProvider && { paymentProvider }),
+          ...(paymentMethodRequired && { paymentMethodRequired }),
           updatedAtM: Date.now(),
         })
         .where(and(eq(schema.versions.id, planVersionData.id)))

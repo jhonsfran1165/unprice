@@ -78,7 +78,7 @@ export default function CustomerFormField({
                     {isLoading ? (
                       <LoadingAnimation className="h-4 w-4" variant="dots" />
                     ) : selectedCustomer ? (
-                      `${selectedCustomer.email}`
+                      `${selectedCustomer.email} - ${selectedCustomer.name}`
                     ) : (
                       "Select customer"
                     )}
@@ -111,7 +111,7 @@ export default function CustomerFormField({
                                 customer.id === field.value ? "opacity-100" : "opacity-0"
                               )}
                             />
-                            {`${customer.email}`}
+                            {`${customer.email} - ${customer.name}`}
                           </CommandItem>
                         ))}
                       </div>

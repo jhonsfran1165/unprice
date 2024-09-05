@@ -54,7 +54,7 @@ export default async function PlanSubscriptionsPage({
                     defaultPaymentMethodId: "",
                     startDateAt: startOfDay(new Date()).getTime(),
                     timezone: "UTC",
-                    startCycle: "1",
+                    startCycle: 1,
                     whenToBill: "pay_in_arrear",
                   }}
                 >

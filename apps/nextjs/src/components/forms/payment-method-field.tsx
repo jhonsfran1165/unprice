@@ -82,7 +82,7 @@ export default function PaymentMethodsFormField<TFieldValues extends FormValues>
   }
 
   // if payment method is not required, hide the field
-  if (!selectedPlanVersion?.metadata?.paymentMethodRequired) {
+  if (!selectedPlanVersion?.paymentMethodRequired) {
     return null
   }
 
