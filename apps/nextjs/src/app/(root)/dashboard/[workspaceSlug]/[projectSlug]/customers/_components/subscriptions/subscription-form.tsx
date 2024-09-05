@@ -20,7 +20,6 @@ import { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
 import PaymentMethodsFormField from "~/components/forms/payment-method-field"
 import TimeZoneFormField from "~/components/forms/timezone-field"
-import { InputWithAddons } from "~/components/input-addons"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
@@ -33,6 +32,7 @@ import CollectionMethodFormField from "~/components/forms/collection-method-fiel
 import ConfigItemsFormField from "~/components/forms/items-fields"
 import SelectPlanFormField from "~/components/forms/select-plan-field"
 import StartCycleFormField from "~/components/forms/start-cycle-field"
+import TrialDaysFormField from "~/components/forms/trial-days-field"
 import WhenToBillFormField from "~/components/forms/when-to-bill-field"
 import PlanNewVersionFormField from "./plan-new-version-field"
 
@@ -294,25 +294,7 @@ export function SubscriptionForm({
               <Separator />
               <div className="flex flex-col items-center justify-between gap-8 lg:flex-row">
                 <DurationFormField form={form} isDisabled={readOnly} />
-                <FormField
-                  control={form.control}
-                  name="trialDays"
-                  render={({ field }) => (
-                    <FormItem className="flex w-full flex-col lg:w-1/2">
-                      <FormLabel>Trial Days</FormLabel>
-                      <FormControl className="w-full">
-                        <InputWithAddons
-                          {...field}
-                          trailing={"days"}
-                          value={field.value ?? ""}
-                          disabled={readOnly}
-                        />
-                      </FormControl>
-
-                      <FormMessage className="self-start pt-1" />
-                    </FormItem>
-                  )}
-                />
+                <TrialDaysFormField form={form} isDisabled={readOnly} className="lg:w-1/2" />
               </div>
             </Fragment>
           )}

@@ -215,7 +215,7 @@ export function PaymentProviderFormField({
       name="paymentProvider"
       disabled={isDisabled}
       render={({ field }) => (
-        <FormItem className="col-start-1 flex flex-col justify-end">
+        <FormItem className="col-start-1 row-start-5 flex flex-col justify-end">
           <div className="flex justify-between">
             <FormLabel>Payment provider</FormLabel>
             {/* // TODO: add link to payment provider configuration */}
@@ -263,7 +263,7 @@ export function DescriptionFormField({
       control={form.control}
       name="description"
       render={({ field }) => (
-        <FormItem className="row-span-2 flex flex-col justify-start">
+        <FormItem className="col-start-2 row-span-2 flex flex-col justify-start">
           <FormLabel>Description</FormLabel>
           <FormDescription>Enter a short description of the versions.</FormDescription>
           <FormControl>

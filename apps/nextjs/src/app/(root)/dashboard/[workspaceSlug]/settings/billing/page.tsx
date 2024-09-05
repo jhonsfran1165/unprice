@@ -8,6 +8,8 @@ import HeaderTab from "~/components/layout/header-tab"
 
 import type { RouterOutputs } from "@unprice/api"
 import { calculateBillingCycle } from "@unprice/db/validators"
+import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
+import { Typography } from "@unprice/ui/typography"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import { BillingCard } from "./_components/billing"
@@ -62,7 +64,6 @@ async function PaymentMethodCard({
           readonly={true}
         />
       </CardContent>
-      <CardFooter />
     </Card>
   )
 }
@@ -86,6 +87,7 @@ async function SubscriptionCard({
 
   const calculatedBillingCycle = calculateBillingCycle(
     new Date(subscription.startDateAt),
+    subscription.trialEndsAt ? new Date(subscription.trialEndsAt) : null,
     subscription.startCycle ?? 1,
     subscription.planVersion.billingPeriod ?? "month"
   )
@@ -104,13 +106,13 @@ async function SubscriptionCard({
       <CardContent>
         {subscription ? (
           <div className="space-y-4">
-            <div className="font-semibold text-lg">
+            <div className="font-semibold text-md">
               {trialDays > 0 ? "Trial" : "Subscription"} Plan:{" "}
               <span className="text-primary">{subscription.planVersion.plan.slug}</span>
             </div>
-            <div className="rounded-lg bg-muted p-4">
-              <h4 className="mb-2 font-medium">Current Billing Cycle</h4>
-              <p>
+            <div className="gap-2 rounded-lg bg-background-bg p-4">
+              <Typography variant="h6">Current Billing Cycle</Typography>
+              <Typography variant="p">
                 {formatDate(
                   calculatedBillingCycle.cycleStart.getTime(),
                   subscription.timezone,
@@ -122,44 +124,60 @@ async function SubscriptionCard({
                   subscription.timezone,
                   "MMM d, yyyy"
                 )}
-              </p>
-              <p>
-                subscription start date:{" "}
-                {formatDate(subscription.startDateAt, subscription.timezone, "MMM d, yyyy")}
-              </p>
-              <p>
-                next billing date:{" "}
-                {formatDate(
-                  subscription.nextBillingAt ?? calculatedBillingCycle.cycleEnd.getTime(),
-                  subscription.timezone,
-                  "MMM d, yyyy"
-                )}
-              </p>
+              </Typography>
+              <div className="flex flex-col py-4">
+                <Typography variant="p" affects="removePaddingMargin">
+                  <span className="font-medium">Subscription started at:</span>{" "}
+                  {formatDate(subscription.startDateAt, subscription.timezone, "MMM d, yyyy")}
+                </Typography>
+                <Typography variant="p" affects="removePaddingMargin">
+                  <span className="font-medium">Next billing date:</span>{" "}
+                  {formatDate(
+                    subscription.nextBillingAt ?? calculatedBillingCycle.cycleEnd.getTime(),
+                    subscription.timezone,
+                    "MMM d, yyyy"
+                  )}
+                </Typography>
+              </div>
             </div>
             {trialEndsAt && (
-              <div className="rounded-lg bg-yellow-100 p-4 text-yellow-800">
-                <h4 className="mb-2 font-medium">Trial Period</h4>
-                <p>
+              <Alert>
+                <AlertTitle>Trial Period</AlertTitle>
+                <AlertDescription>
                   {trialDays} days trial ends on{" "}
                   {formatDate(trialEndsAt, subscription.timezone, "MMM d, yyyy")}
-                </p>
-              </div>
+                </AlertDescription>
+              </Alert>
             )}
             {endDateAt && (
-              <div className="rounded-lg bg-blue-100 p-4 text-blue-800">
-                <h4 className="mb-2 font-medium">Subscription End Date</h4>
-                <p>{formatDate(endDateAt, subscription.timezone, "MMM d, yyyy")}</p>
-              </div>
+              <Alert variant="destructive">
+                <AlertTitle>Subscription End Date</AlertTitle>
+                <AlertDescription>
+                  {formatDate(endDateAt, subscription.timezone, "MMM d, yyyy")}
+                </AlertDescription>
+              </Alert>
             )}
             {autoRenewal && (
-              <div className="rounded-lg bg-green-100 p-4 text-green-800">
-                <p>Your subscription will automatically renew at the end of the billing cycle.</p>
-              </div>
+              <Alert>
+                <AlertTitle>Subscription Will Auto Renew</AlertTitle>
+                <AlertDescription>
+                  Your subscription will automatically renew at{" "}
+                  {formatDate(
+                    subscription.nextBillingAt ?? calculatedBillingCycle.cycleEnd.getTime(),
+                    subscription.timezone,
+                    "MMM d, yyyy"
+                  )}
+                </AlertDescription>
+              </Alert>
             )}
             {isProrated && (
-              <div className="rounded-lg bg-purple-100 p-4 text-purple-800">
-                <p>Your subscription is prorated based on your start date.</p>
-              </div>
+              <Alert>
+                <AlertTitle>Subscription Is Prorated</AlertTitle>
+                <AlertDescription>
+                  Your subscription is prorated because it was created in the middle of the billing
+                  cycle.
+                </AlertDescription>
+              </Alert>
             )}
           </div>
         ) : (

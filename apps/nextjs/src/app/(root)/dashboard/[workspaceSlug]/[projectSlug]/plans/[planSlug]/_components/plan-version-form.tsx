@@ -9,6 +9,7 @@ import type { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
 import CollectionMethodFormField from "~/components/forms/collection-method-field"
 import StartCycleFormField from "~/components/forms/start-cycle-field"
+import TrialDaysFormField from "~/components/forms/trial-days-field"
 import WhenToBillFormField from "~/components/forms/when-to-bill-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -139,6 +140,7 @@ export function PlanVersionForm({
 
           <StartCycleFormField form={form} isDisabled={isPublished} />
 
+          <TrialDaysFormField form={form} isDisabled={isPublished} />
           <WhenToBillFormField form={form} isDisabled={isPublished} />
 
           <DescriptionFormField form={form} isDisabled={isPublished} />

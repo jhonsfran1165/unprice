@@ -29,6 +29,7 @@ export const create = protectedProjectProcedure
       status,
       paymentProvider,
       planType,
+      trialDays,
     } = opts.input
     const project = opts.ctx.project
 
@@ -74,7 +75,8 @@ export const create = protectedProjectProcedure
             paymentMethodRequired,
             // TODO: check if this is ok
             billingPeriod: billingPeriod ?? "month",
-            startCycle: startCycle,
+            trialDays: trialDays ?? 0,
+            startCycle: startCycle ?? 1,
             gracePeriod: gracePeriod ?? 0,
             whenToBill: whenToBill ?? "pay_in_advance",
             metadata,

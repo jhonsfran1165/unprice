@@ -23,6 +23,7 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
   metadata: planVersionMetadataSchema,
   billingPeriod: billingPeriodSchema,
   currency: currencySchema,
+  trialDays: z.coerce.number().int().min(0).max(30).default(0),
 })
   .omit({
     createdAtM: true,

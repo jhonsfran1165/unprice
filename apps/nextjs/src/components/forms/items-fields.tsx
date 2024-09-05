@@ -343,6 +343,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                                   <Input
                                     {...field}
                                     type="number"
+                                    min={1}
                                     className="mx-auto h-8 w-20 text-center"
                                     disabled={
                                       feature.featureType === "flat" ||

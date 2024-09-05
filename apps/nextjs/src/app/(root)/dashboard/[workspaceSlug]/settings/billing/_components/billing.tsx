@@ -9,6 +9,7 @@ import {
   calculateTotalPricePlan,
 } from "@unprice/db/validators"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
+import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { ProgressBar } from "~/components/analytics/progress"
 import { PricingItem } from "~/components/forms/pricing-item"
@@ -30,12 +31,14 @@ export function BillingCard({
 
   const calculatedBillingCycle = calculateBillingCycle(
     new Date(subscription.startDateAt),
+    subscription.trialEndsAt ? new Date(subscription.trialEndsAt) : null,
     subscription.startCycle ?? 1,
     subscription.planVersion.billingPeriod ?? "month"
   )
 
   const { err, val: flatPricePlan } = calculateFlatPricePlan({
     planVersion: planVersion,
+    prorate: calculatedBillingCycle.prorationFactor,
   })
 
   const quantities = featuresWithUsage.reduce(
@@ -70,6 +73,8 @@ export function BillingCard({
     prorate: calculatedBillingCycle.prorationFactor,
   })
 
+  const isTrial = !!subscription.trialEndsAt
+
   if (err || totalPricePlanErr || totalPricePlanErrForecast) {
     return (
       <div className="text-danger">
@@ -78,14 +83,19 @@ export function BillingCard({
     )
   }
 
+  // TODO: improve comunication of prices when trial is active
+
   return (
     <Card className="mt-4">
       <CardHeader>
         <CardTitle>Subscription usage</CardTitle>
         <div className="flex items-center justify-between py-6 text-content-subtle">
-          <div className={cn("flex w-4/5 flex-col gap-2")}>
-            Plan {planVersion.plan.slug}{" "}
-            {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
+          <div className={cn("inline-flex w-4/5 items-center gap-2")}>
+            Plan {isTrial ? "trial" : ""}{" "}
+            <span className="text-primary">{planVersion.plan.slug}</span>
+            <Typography variant="p" affects="removePaddingMargin">
+              {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
+            </Typography>
           </div>
           <div className={cn("w-1/5 text-end font-semibold text-md tabular-nums")}>
             {flatPricePlan.displayAmount}
@@ -103,17 +113,22 @@ export function BillingCard({
       </CardContent>
       <CardFooter className="flex flex-col gap-4 border-t py-4">
         <div className="flex w-full items-center justify-between">
-          <span className="font-semibold text-content text-sm">
-            Current Total {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
+          <span className="inline-flex items-center gap-1 font-semibold text-content text-sm">
+            Current Total
+            <Typography variant="p" affects="removePaddingMargin" className="text-xs">
+              {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
+            </Typography>
           </span>
           <span className="font-semibold text-content text-md tabular-nums">
             {totalPricePlan.displayAmount}
           </span>
         </div>
         <div className="flex w-full items-center justify-between">
-          <span className="text-content-subtle text-muted-foreground text-xs">
+          <span className="inline-flex items-center gap-1 text-content-subtle text-muted-foreground text-xs">
             Estimated by end of month{" "}
-            {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
+            <Typography variant="p" affects="removePaddingMargin" className="text-xs">
+              {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
+            </Typography>
           </span>
           <span className="text-content-subtle text-muted-foreground text-xs tabular-nums">
             {totalPricePlanForecast.displayAmount}

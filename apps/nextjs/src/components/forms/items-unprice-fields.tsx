@@ -348,6 +348,7 @@ export default function ConfigUnpriceItemsFormField<TFieldValues extends FormVal
                                     {...field}
                                     className="mx-auto h-8 w-20 text-center"
                                     type="number"
+                                    min={1}
                                     disabled={
                                       feature.featureType === "flat" ||
                                       feature.featureType === "usage" ||

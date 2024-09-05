@@ -61,6 +61,8 @@ export const duplicate = protectedProjectProcedure
           .values({
             ...planVersionData,
             id: planVersionId,
+            trialDays: planVersionData.trialDays,
+            startCycle: planVersionData.startCycle,
             paymentMethodRequired: planVersionData.paymentMethodRequired,
             metadata: {
               // external Id shouldn't be duplicated

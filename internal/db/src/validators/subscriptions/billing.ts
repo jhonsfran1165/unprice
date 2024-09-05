@@ -3,6 +3,7 @@ import {
   addYears,
   differenceInSeconds,
   endOfDay,
+  max,
   setDate,
   setMonth,
   startOfDay,
@@ -13,14 +14,15 @@ import { type BillingPeriod, convertDateToUTC } from "../shared"
 // TODO: handle errors
 export function calculateBillingCycle(
   startDate: Date,
+  trialDaysEnd: Date | null,
   billingCycleStart: number,
   billingPeriod: BillingPeriod
 ): {
   cycleStart: Date
   cycleEnd: Date
   secondsInCycle: number
-  secondsUsed: number
   prorationFactor: number
+  billableSeconds: number
 } {
   // get utc current date
   const currentDate = convertDateToUTC(new Date())
@@ -32,18 +34,20 @@ export function calculateBillingCycle(
 
   // we want to keep fairness so we calculate the proration to the seconds
   // INFO: if you find some ways we can improve fairness along the whole project please give me a shout
-  const secondsInCycle = differenceInSeconds(cycleEnd, cycleStart) + 1
-  const effectiveStartDate = startDate < cycleStart ? cycleStart : startDate
+  const effectiveStartDate = max([startDate, cycleStart, trialDaysEnd || new Date(0)])
+  const billableStart = startOfDay(effectiveStartDate)
   const effectiveEndDate = currentDate > cycleEnd ? cycleEnd : currentDate
-  const secondsUsed = differenceInSeconds(effectiveEndDate, effectiveStartDate) + 1
-  const prorationFactor = secondsUsed / secondsInCycle
+
+  const secondsInCycle = differenceInSeconds(cycleEnd, cycleStart) + 1
+  const billableSeconds = Math.max(0, differenceInSeconds(effectiveEndDate, billableStart) + 1)
+  const prorationFactor = billableSeconds / secondsInCycle
 
   return {
     cycleStart,
     cycleEnd,
     secondsInCycle,
-    secondsUsed,
     prorationFactor,
+    billableSeconds,
   }
 }
 

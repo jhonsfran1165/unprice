@@ -348,7 +348,7 @@ export const createSubscription = async ({
   // set the end date and start date given the timezone
   // only used for ui purposes all date are saved in utc
   const timezoneToUse = timezone ?? customerData.timezone
-  const trialDaysToUse = trialDays ?? 0
+  const trialDaysToUse = trialDays ?? versionData.trialDays
 
   // for calculation the trialEndsAt we use end of day alignment
   const trialEndsAt =
@@ -366,11 +366,13 @@ export const createSubscription = async ({
   let prorated = false
 
   const billingPeriod = versionData.billingPeriod
+  const startCycleToUse = startCycle ?? versionData.startCycle ?? 1
 
   // get the billing cycle for the subscription given the start date
   const calculatedBillingCycle = calculateBillingCycle(
     startDateSubscription,
-    startCycle ?? 1,
+    trialEndsAt ? new Date(trialEndsAt) : null,
+    startCycleToUse,
     billingPeriod ?? "month"
   )
 
@@ -379,7 +381,7 @@ export const createSubscription = async ({
   const cycleStart = calculatedBillingCycle.cycleStart
 
   // if the subscription is not auto renewing, we need to set the end date to the end of the billing period
-  if (!autoRenew) {
+  if (autoRenew === false) {
     // add trial days to the end of the billing period
     const billingEndDate = addDays(calculatedBillingCycle.cycleEnd, trialDaysToUse)
     endDateAtToUse = billingEndDate.getTime()
@@ -406,7 +408,7 @@ export const createSubscription = async ({
         projectId: projectId,
         planVersionId: versionData.id,
         customerId: customerData.id,
-        startDateAt: startDateAt,
+        startDateAt: startDateSubscription.getTime(),
         endDateAt: endDateAtToUse,
         autoRenew: autoRenew ?? true,
         trialDays: trialDaysToUse,
