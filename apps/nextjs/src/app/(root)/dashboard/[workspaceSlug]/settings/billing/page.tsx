@@ -88,6 +88,7 @@ async function SubscriptionCard({
     : 0
 
   const calculatedBillingCycle = calculateBillingCycle({
+    currentDate: new Date(),
     startDate: new Date(subscription.startDateAt),
     billingCycleStart: subscription.startCycle ?? 1,
     billingPeriod: subscription.planVersion.billingPeriod ?? "month",

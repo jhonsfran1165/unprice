@@ -38,6 +38,7 @@ export function BillingCard({
   if (!subscription || !planVersion) return null
 
   const calculatedBillingCycle = calculateBillingCycle({
+    currentDate: new Date(),
     startDate: new Date(subscription.startDateAt),
     billingCycleStart: subscription.startCycle ?? 1,
     billingPeriod: planVersion.billingPeriod ?? "month",

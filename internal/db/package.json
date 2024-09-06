@@ -17,6 +17,7 @@
   },
   "license": "AGPL-3.0",
   "scripts": {
+    "test": "vitest run",
     "clean": "rm -rf .turbo node_modules",
     "generate:local": "pnpm with-env drizzle-kit generate --config=local.config.ts",
     "drop:local": "pnpm with-env drizzle-kit drop --config=local.config.ts",
@@ -57,6 +58,7 @@
     "drizzle-kit": "^0.24.0",
     "tsx": "^4.7.2",
     "typescript": "^5.3.3",
+    "vitest": "^2.0.5",
     "ws": "^8.17.1"
   }
 }

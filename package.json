@@ -15,6 +15,7 @@
     "typecheck": "turbo typecheck",
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip --include files,dependencies",
+    "test": "turbo run test",
     "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply",
     "fmt": "pnpm biome format . && pnpm biome check .",
     "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:fix",

@@ -10,6 +10,7 @@
   "organizeImports": {
     "enabled": true,
     "ignore": [
+      ".vitest",
       "node_modules",
       ".next",
       "dist",
@@ -56,6 +57,7 @@
       }
     },
     "ignore": [
+      ".vitest",
       "node_modules",
       ".next",
       "dist",
@@ -76,6 +78,7 @@
     "attributePosition": "auto",
     "lineWidth": 100,
     "ignore": [
+      ".vitest",
       "node_modules",
       ".next",
       "dist",

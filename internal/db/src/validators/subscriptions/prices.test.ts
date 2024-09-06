@@ -1,0 +1,104 @@
+import { toDecimal } from "dinero.js"
+import { describe, expect, it } from "vitest"
+import type { PlanVersionExtended } from "../planVersionFeatures"
+import { calculateFlatPricePlan } from "./prices"
+
+describe("calculateFlatPricePlan", () => {
+  it("should calculate flat price for a plan with flat features", () => {
+    const planVersion: PlanVersionExtended = {
+      id: "pv_4Hs8cAjTgxCWUpFSjta8bDFEkqpF",
+      currency: "USD",
+      plan: { slug: "free-plan" },
+      planId: "plan_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
+      active: true,
+      status: "published",
+      paymentProvider: "stripe",
+      billingPeriod: "month",
+      planType: "recurring",
+      planFeatures: [
+        {
+          id: "fv_4HsTVDfaaTtnAkq5sKB1Raj4tgaG",
+          featureType: "flat",
+          config: {
+            price: {
+              dinero: {
+                amount: 3000,
+                currency: {
+                  code: "USD",
+                  base: 10,
+                  exponent: 2,
+                },
+                scale: 2,
+              },
+              displayAmount: "30.00",
+            },
+          },
+          metadata: {
+            realtime: false,
+          },
+          aggregationMethod: "sum",
+          defaultQuantity: 1,
+          limit: null,
+          createdAtM: 0,
+          updatedAtM: 0,
+          projectId: "",
+          planVersionId: "",
+          featureId: "",
+          order: 0,
+          hidden: false,
+          feature: {
+            id: "feature_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
+            slug: "feature-1",
+          },
+        },
+        {
+          id: "fv_4HsTVDfaaTtnAkq5sKB1Raj4tg23G",
+          featureType: "flat",
+          config: {
+            price: {
+              dinero: {
+                amount: 2000,
+                currency: {
+                  code: "USD",
+                  base: 10,
+                  exponent: 2,
+                },
+                scale: 2,
+              },
+              displayAmount: "20.00",
+            },
+          },
+          metadata: {
+            realtime: false,
+          },
+          aggregationMethod: "sum",
+          defaultQuantity: 1,
+          limit: null,
+          createdAtM: 0,
+          updatedAtM: 0,
+          projectId: "",
+          planVersionId: "",
+          featureId: "",
+          order: 0,
+          hidden: false,
+          feature: {
+            id: "feature_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
+            slug: "feature-2",
+          },
+        },
+      ],
+      whenToBill: "pay_in_advance",
+      startCycle: null,
+      gracePeriod: null,
+      metadata: null,
+    }
+
+    const result = calculateFlatPricePlan({ planVersion })
+    expect(result.err).toBe(undefined)
+    if (result.val) {
+      expect(toDecimal(result.val.dinero)).toBe("50.00")
+      expect(result.val.displayAmount).toBe("$50.00")
+      expect(result.val.hasUsage).toBe(false)
+    }
+  })
+})

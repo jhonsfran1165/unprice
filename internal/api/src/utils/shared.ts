@@ -360,6 +360,7 @@ export const createSubscription = async ({
 
   // get the billing cycle for the subscription given the start date
   const calculatedBillingCycle = configureBillingCycleSubscription({
+    currentDate: new Date(),
     startDate: new Date(startDateAt),
     trialDays: trialDaysToUse,
     billingCycleStart: startCycleToUse,
@@ -375,7 +376,9 @@ export const createSubscription = async ({
     : undefined
   const prorationFactor = calculatedBillingCycle.prorationFactor
   const nextBillingAt = calculatedBillingCycle.nextBillingAt.getTime()
-  const trialDaysEndAt = calculatedBillingCycle.trialDaysEndAt.getTime()
+  const trialDaysEndAt = calculatedBillingCycle.trialDaysEndAt
+    ? calculatedBillingCycle.trialDaysEndAt.getTime()
+    : undefined
 
   // handle proration
   // if the start date is in the middle of the billing period, we need to prorate the subscription
