@@ -13,11 +13,11 @@ import {
   type CustomerSignUp,
   type SubscriptionItemConfig,
   type WorkspaceInsert,
-  calculateBillingCycle,
+  configureBillingCycleSubscription,
   createDefaultSubscriptionConfig,
   type subscriptionInsertSchema,
 } from "@unprice/db/validators"
-import { addDays, endOfDay, getMonth, getYear, startOfDay } from "date-fns"
+import { getMonth, getYear } from "date-fns"
 import type { z } from "zod"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
@@ -222,6 +222,7 @@ export const createSubscription = async ({
         },
       },
       plan: true,
+      project: true,
     },
     where(fields, operators) {
       return operators.and(
@@ -345,56 +346,42 @@ export const createSubscription = async ({
     configItemsSubscription = config
   }
 
-  // set the end date and start date given the timezone
+  // override the timezone with the project timezone and other defaults with the plan version data
   // only used for ui purposes all date are saved in utc
-  const timezoneToUse = timezone ?? customerData.timezone
+  const timezoneToUse = timezone ?? versionData.project.timezone
   const trialDaysToUse = trialDays ?? versionData.trialDays
+  const billingPeriod = versionData.billingPeriod ?? "month"
+  const whenToBillToUse = whenToBill ?? versionData.whenToBill
+  const collectionMethodToUse = collectionMethod ?? versionData.collectionMethod
+  const startCycleToUse = startCycle ?? versionData.startCycle ?? 1
+  const autoRenewToUse = autoRenew ?? versionData.autoRenew ?? true
 
-  // for calculation the trialEndsAt we use end of day alignment
-  const trialEndsAt =
-    trialDaysToUse > 0
-      ? endOfDay(addDays(new Date(startDateAt), trialDaysToUse)).getTime()
-      : undefined
-
-  // if there is a trial day, we need to calculate the next billing cycle with the end of the trial
-  // because the subscription really starts when there is no trial
-  const startDateSubscription = trialEndsAt
-    ? startOfDay(addDays(new Date(startDateAt), trialDaysToUse + 1))
-    : new Date(startDateAt)
-
-  let endDateAtToUse = endDateAt
   let prorated = false
 
-  const billingPeriod = versionData.billingPeriod
-  const startCycleToUse = startCycle ?? versionData.startCycle ?? 1
-
   // get the billing cycle for the subscription given the start date
-  const calculatedBillingCycle = calculateBillingCycle(
-    startDateSubscription,
-    trialEndsAt ? new Date(trialEndsAt) : null,
-    startCycleToUse,
-    billingPeriod ?? "month"
-  )
+  const calculatedBillingCycle = configureBillingCycleSubscription({
+    startDate: new Date(startDateAt),
+    trialDays: trialDaysToUse,
+    billingCycleStart: startCycleToUse,
+    billingPeriod,
+    endDate: endDateAt ? new Date(endDateAt) : undefined,
+    autoRenew: autoRenewToUse,
+  })
 
   // the end of the cycle is the day we have to bill the customer
-  const cycleEnd = calculatedBillingCycle.cycleEnd
-  const cycleStart = calculatedBillingCycle.cycleStart
-
-  // if the subscription is not auto renewing, we need to set the end date to the end of the billing period
-  if (autoRenew === false) {
-    // add trial days to the end of the billing period
-    const billingEndDate = addDays(calculatedBillingCycle.cycleEnd, trialDaysToUse)
-    endDateAtToUse = billingEndDate.getTime()
-  }
+  const effectiveStartDate = calculatedBillingCycle.effectiveStartDate.getTime()
+  const effectiveEndDate = calculatedBillingCycle.effectiveEndDate
+    ? calculatedBillingCycle.effectiveEndDate.getTime()
+    : undefined
+  const prorationFactor = calculatedBillingCycle.prorationFactor
+  const nextBillingAt = calculatedBillingCycle.nextBillingAt.getTime()
+  const trialDaysEndAt = calculatedBillingCycle.trialDaysEndAt.getTime()
 
   // handle proration
   // if the start date is in the middle of the billing period, we need to prorate the subscription
-  if (startDateAt > cycleStart.getTime()) {
+  if (prorationFactor < 1) {
     prorated = true
   }
-
-  // calculate the next billing date
-  const nextBillingAtToUse = addDays(cycleEnd, trialDaysToUse).getTime()
 
   // execute this in a transaction
   const subscriptionData = await ctx.db.transaction(async (trx) => {
@@ -408,24 +395,24 @@ export const createSubscription = async ({
         projectId: projectId,
         planVersionId: versionData.id,
         customerId: customerData.id,
-        startDateAt: startDateSubscription.getTime(),
-        endDateAt: endDateAtToUse,
-        autoRenew: autoRenew ?? true,
+        startDateAt: effectiveStartDate,
+        endDateAt: effectiveEndDate,
+        autoRenew: autoRenewToUse,
         trialDays: trialDaysToUse,
-        trialEndsAt: trialEndsAt,
+        trialEndsAt: trialDaysEndAt,
         isNew: true,
-        collectionMethod: collectionMethod,
+        collectionMethod: collectionMethodToUse,
         status: "active",
         metadata: metadata,
         defaultPaymentMethodId: defaultPaymentMethodId,
-        whenToBill: whenToBill,
-        startCycle: startCycle,
+        whenToBill: whenToBillToUse,
+        startCycle: startCycleToUse,
         gracePeriod: gracePeriod,
         planChangedAt: planChangedAt,
         type: type,
         timezone: timezoneToUse,
         prorated: prorated,
-        nextBillingAt: nextBillingAtToUse,
+        nextBillingAt: nextBillingAt,
       })
       .returning()
       .then((re) => re[0])

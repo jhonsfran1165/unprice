@@ -63,6 +63,7 @@ export const duplicate = protectedProjectProcedure
             id: planVersionId,
             trialDays: planVersionData.trialDays,
             startCycle: planVersionData.startCycle,
+            autoRenew: planVersionData.autoRenew,
             paymentMethodRequired: planVersionData.paymentMethodRequired,
             metadata: {
               // external Id shouldn't be duplicated

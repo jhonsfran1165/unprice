@@ -8,7 +8,14 @@ import type { UseFormReturn } from "react-hook-form"
 import type { InsertSubscription } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Calendar } from "@unprice/ui/calendar"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@unprice/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { cn } from "@unprice/ui/utils"
 import { toastAction } from "~/lib/toast"
@@ -31,7 +38,7 @@ export default function DurationFormField({
   const { errors } = form.formState
 
   return (
-    <div className="flex w-full flex-col lg:w-1/2">
+    <div className="flex w-full flex-col gap-2 lg:w-1/2">
       <FormLabel
         className={cn({
           "text-destructive": errors.startDateAt,
@@ -40,7 +47,9 @@ export default function DurationFormField({
         Duration
       </FormLabel>
 
-      <div className="mt-2 flex flex-row rounded-md border bg-background-bg">
+      <FormDescription>The start date and the end date of the subscription.</FormDescription>
+
+      <div className="flex flex-row rounded-md border bg-background-bg">
         <FormField
           control={form.control}
           name="startDateAt"

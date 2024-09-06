@@ -8,11 +8,19 @@ import {
   calculatePricePerFeature,
   calculateTotalPricePlan,
 } from "@unprice/db/validators"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@unprice/ui/card"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { ProgressBar } from "~/components/analytics/progress"
 import { PricingItem } from "~/components/forms/pricing-item"
+import { formatDate } from "~/lib/dates"
 import { nFormatter } from "~/lib/nformatter"
 
 export function BillingCard({
@@ -26,15 +34,14 @@ export function BillingCard({
   const subscription = subscriptions[0]
   const planVersion = subscription?.planVersion
 
-  // TODO: handle case where no subscription is found
+  // all users should have a subscription
   if (!subscription || !planVersion) return null
 
-  const calculatedBillingCycle = calculateBillingCycle(
-    new Date(subscription.startDateAt),
-    subscription.trialEndsAt ? new Date(subscription.trialEndsAt) : null,
-    subscription.startCycle ?? 1,
-    subscription.planVersion.billingPeriod ?? "month"
-  )
+  const calculatedBillingCycle = calculateBillingCycle({
+    startDate: new Date(subscription.startDateAt),
+    billingCycleStart: subscription.startCycle ?? 1,
+    billingPeriod: planVersion.billingPeriod ?? "month",
+  })
 
   const { err, val: flatPricePlan } = calculateFlatPricePlan({
     planVersion: planVersion,
@@ -73,7 +80,7 @@ export function BillingCard({
     prorate: calculatedBillingCycle.prorationFactor,
   })
 
-  const isTrial = !!subscription.trialEndsAt
+  const isTrial = subscription.trialEndsAt ? subscription.trialEndsAt > Date.now() : false
 
   if (err || totalPricePlanErr || totalPricePlanErrForecast) {
     return (
@@ -83,12 +90,26 @@ export function BillingCard({
     )
   }
 
-  // TODO: improve comunication of prices when trial is active
-
   return (
     <Card className="mt-4">
       <CardHeader>
         <CardTitle>Subscription usage</CardTitle>
+        <CardDescription>
+          {isTrial &&
+            subscription.trialEndsAt &&
+            subscription.nextBillingAt &&
+            `You currently are on the trial of the ${
+              planVersion.plan.slug
+            } plan. After the trial ends on ${formatDate(
+              subscription.trialEndsAt,
+              subscription.timezone,
+              "MMM d, yy"
+            )}, you will be billed in the next billing cycle on ${formatDate(
+              subscription.nextBillingAt,
+              subscription.timezone,
+              "MMM d, yy"
+            )} the following price.`}
+        </CardDescription>
         <div className="flex items-center justify-between py-6 text-content-subtle">
           <div className={cn("inline-flex w-4/5 items-center gap-2")}>
             Plan {isTrial ? "trial" : ""}{" "}

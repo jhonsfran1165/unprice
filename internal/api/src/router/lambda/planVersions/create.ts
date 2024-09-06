@@ -30,6 +30,7 @@ export const create = protectedProjectProcedure
       paymentProvider,
       planType,
       trialDays,
+      autoRenew,
     } = opts.input
     const project = opts.ctx.project
 
@@ -73,6 +74,7 @@ export const create = protectedProjectProcedure
             planType,
             currency,
             paymentMethodRequired,
+            autoRenew: autoRenew ?? true,
             // TODO: check if this is ok
             billingPeriod: billingPeriod ?? "month",
             trialDays: trialDays ?? 0,

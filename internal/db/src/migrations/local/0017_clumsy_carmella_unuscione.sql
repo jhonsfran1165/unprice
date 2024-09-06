@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_plan_versions" ADD COLUMN "auto_renew" boolean DEFAULT true NOT NULL;

@@ -1,6 +1,6 @@
 import { APP_DOMAIN } from "@unprice/config"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
-import { endOfMonth, startOfMonth } from "date-fns"
+import { differenceInCalendarDays, endOfMonth, startOfMonth } from "date-fns"
 import { Fragment } from "react"
 import { PaymentMethodForm } from "~/components/forms/payment-method-form"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -80,17 +80,18 @@ async function SubscriptionCard({
   if (!subscription) return null
 
   const autoRenewal = subscription.autoRenew
-  const trialDays = subscription.trialDays
   const trialEndsAt = subscription.trialEndsAt
   const endDateAt = subscription.endDateAt
   const isProrated = subscription.prorated
+  const currentTrialDays = subscription.trialEndsAt
+    ? differenceInCalendarDays(new Date(subscription.trialEndsAt), new Date())
+    : 0
 
-  const calculatedBillingCycle = calculateBillingCycle(
-    new Date(subscription.startDateAt),
-    subscription.trialEndsAt ? new Date(subscription.trialEndsAt) : null,
-    subscription.startCycle ?? 1,
-    subscription.planVersion.billingPeriod ?? "month"
-  )
+  const calculatedBillingCycle = calculateBillingCycle({
+    startDate: new Date(subscription.startDateAt),
+    billingCycleStart: subscription.startCycle ?? 1,
+    billingPeriod: subscription.planVersion.billingPeriod ?? "month",
+  })
 
   /**
    * if the customer is in trial days, we need to show the trial days left and when the trial ends
@@ -107,7 +108,7 @@ async function SubscriptionCard({
         {subscription ? (
           <div className="space-y-4">
             <div className="font-semibold text-md">
-              {trialDays > 0 ? "Trial" : "Subscription"} Plan:{" "}
+              {currentTrialDays > 0 ? "Trial" : "Subscription"} Plan:{" "}
               <span className="text-primary">{subscription.planVersion.plan.slug}</span>
             </div>
             <div className="gap-2 rounded-lg bg-background-bg p-4">
@@ -140,11 +141,11 @@ async function SubscriptionCard({
                 </Typography>
               </div>
             </div>
-            {trialEndsAt && (
+            {currentTrialDays > 0 && trialEndsAt && (
               <Alert>
                 <AlertTitle>Trial Period</AlertTitle>
                 <AlertDescription>
-                  {trialDays} days trial ends on{" "}
+                  {currentTrialDays} days trial ends on{" "}
                   {formatDate(trialEndsAt, subscription.timezone, "MMM d, yyyy")}
                 </AlertDescription>
               </Alert>

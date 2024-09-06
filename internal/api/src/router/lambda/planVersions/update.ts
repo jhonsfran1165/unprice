@@ -34,6 +34,7 @@ export const update = protectedProjectProcedure
       paymentProvider,
       paymentMethodRequired,
       metadata,
+      autoRenew,
       trialDays,
     } = opts.input
 
@@ -266,6 +267,7 @@ export const update = protectedProjectProcedure
           ...(title && { title }),
           ...(tags && { tags }),
           ...(whenToBill && { whenToBill }),
+          ...(autoRenew && { autoRenew }),
           ...(status && { status }),
           ...(metadata && { metadata }),
           ...(paymentProvider && { paymentProvider }),

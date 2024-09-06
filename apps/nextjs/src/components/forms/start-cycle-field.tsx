@@ -40,7 +40,7 @@ export default function StartCycleFormField<TFieldValues extends FormValues>({
   billingPeriod?: BillingPeriod | null
 }) {
   const providedBillingPeriod =
-    billingPeriod ?? form.getValues("billingPeriod" as FieldPath<TFieldValues>)
+    billingPeriod ?? form.watch("billingPeriod" as FieldPath<TFieldValues>)
 
   const startCycles = getStartCycleOptions(providedBillingPeriod)
 

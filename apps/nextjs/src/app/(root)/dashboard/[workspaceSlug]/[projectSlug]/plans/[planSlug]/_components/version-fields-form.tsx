@@ -61,7 +61,6 @@ export function TitleFormField({
   return (
     <FormField
       control={form.control}
-      disabled={isDisabled}
       name="title"
       render={({ field }) => (
         <FormItem className="flex flex-col justify-end">
@@ -71,7 +70,7 @@ export function TitleFormField({
             languages.
           </FormDescription>
           <FormControl>
-            <Input {...field} placeholder="FREE" onChange={field.onChange} />
+            <Input {...field} placeholder="FREE" onChange={field.onChange} disabled={isDisabled} />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -90,7 +89,6 @@ export function CurrencyFormField({
   return (
     <FormField
       control={form.control}
-      disabled={isDisabled}
       name="currency"
       render={({ field }) => (
         <FormItem className="flex flex-col justify-end">
@@ -108,7 +106,7 @@ export function CurrencyFormField({
           <FormDescription>
             You can set a different currency for each version of your plan.
           </FormDescription>
-          <Select onValueChange={field.onChange} value={field.value ?? ""} disabled={isDisabled}>
+          <Select onValueChange={field.onChange} value={field.value} disabled={isDisabled}>
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select a currency" />
@@ -176,12 +174,15 @@ export function BillingPeriodFormField({
     <FormField
       control={form.control}
       name="billingPeriod"
-      disabled={isDisabled}
       render={({ field }) => (
         <FormItem className="col-start-2 flex flex-col justify-end">
           <FormLabel>Billing period</FormLabel>
           <FormDescription>How often you want to bill customers</FormDescription>
-          <Select onValueChange={field.onChange} value={field.value ?? ""} disabled={isDisabled}>
+          <Select
+            onValueChange={field.onChange}
+            value={field.value ?? "month"}
+            disabled={isDisabled}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select a billing period" />
@@ -213,7 +214,6 @@ export function PaymentProviderFormField({
     <FormField
       control={form.control}
       name="paymentProvider"
-      disabled={isDisabled}
       render={({ field }) => (
         <FormItem className="col-start-1 row-start-5 flex flex-col justify-end">
           <div className="flex justify-between">

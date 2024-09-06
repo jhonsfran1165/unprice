@@ -20,14 +20,16 @@ export default function ErrorPage({
   }, [error])
   const router = useRouter()
 
+  // TODO: improve this
   return (
     <div className="mt-20 flex flex-col items-center space-x-4">
       <Typography variant="h1">Something went wrong</Typography>
       <Image
         alt="missing site"
-        src="https://illustrations.popsy.co/amber/app-launch.svg"
+        src="/app-launch.svg"
         width={400}
         height={400}
+        className="invert-0 filter dark:invert"
       />
       <p className="py-5 text-lg text-stone-500">{error.message}</p>
 

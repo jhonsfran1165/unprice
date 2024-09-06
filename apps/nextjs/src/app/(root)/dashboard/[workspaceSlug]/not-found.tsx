@@ -7,9 +7,10 @@ export default function NotFound() {
       <Typography variant="h1">404</Typography>
       <Image
         alt="missing site"
-        src="https://illustrations.popsy.co/gray/falling.svg"
+        src="/app-launch.svg"
         width={400}
         height={400}
+        className="invert-0 filter dark:invert"
       />
       <p className="text-lg text-stone-500">TODO: create this page</p>
     </div>

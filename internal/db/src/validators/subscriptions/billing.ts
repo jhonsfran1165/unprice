@@ -1,4 +1,5 @@
 import {
+  addDays,
   addMonths,
   addYears,
   differenceInSeconds,
@@ -11,13 +12,99 @@ import {
 } from "date-fns"
 import { type BillingPeriod, convertDateToUTC } from "../shared"
 
-// TODO: handle errors
-export function calculateBillingCycle(
-  startDate: Date,
-  trialDaysEnd: Date | null,
-  billingCycleStart: number,
+export function configureBillingCycleSubscription({
+  startDate,
+  trialDays,
+  billingCycleStart,
+  billingPeriod,
+  endDate,
+  autoRenew = true,
+}: {
+  startDate: Date
+  trialDays: number
+  billingCycleStart: number
   billingPeriod: BillingPeriod
-): {
+  endDate?: Date
+  autoRenew?: boolean
+}): {
+  cycleStart: Date
+  cycleEnd: Date
+  secondsInCycle: number
+  prorationFactor: number
+  billableSeconds: number
+  effectiveStartDate: Date
+  effectiveEndDate?: Date
+  nextBillingAt: Date
+  trialDaysEndAt: Date
+} {
+  // get utc current date
+  const currentDate = convertDateToUTC(new Date())
+  // calculate the trials, here we don't need to worry about the end of the day because
+  // we are calculating the proration to the seconds, after the first cycle the billing starts at midnight
+  // and aligns with the start of the day in UTC
+  const trialDaysEndAt = addDays(startDate, trialDays)
+
+  // given the current date, calculate the start and end of the current billing cycle
+  const { cycleStart, cycleEnd } =
+    billingPeriod === "month"
+      ? calculateMonthlyBillingCycle(currentDate, billingCycleStart)
+      : calculateYearlyBillingCycle(currentDate, billingCycleStart)
+
+  // we want to keep fairness so we calculate the proration to the seconds
+  // INFO: if you find some ways we can improve fairness along the whole project please give me a shout
+  const effectiveStartDate = max([startDate, cycleStart, trialDaysEndAt])
+  // if end date is defined calculate the trial days end at
+  let effectiveEndDate = endDate ? max([endDate, trialDaysEndAt]) : undefined
+  let effectiveEndCycle = effectiveEndDate ? effectiveEndDate : cycleEnd
+  let effectiveStartCycle = effectiveStartDate
+
+  // INFO: this is a special case where the trial days are greater than the billing cycle
+  // we need to calculate the next billing date
+  if (trialDaysEndAt > cycleEnd) {
+    // we need to calculate the next billing date with the trial days end at
+    const { cycleEnd, cycleStart } =
+      billingPeriod === "month"
+        ? calculateMonthlyBillingCycle(trialDaysEndAt, billingCycleStart)
+        : calculateYearlyBillingCycle(trialDaysEndAt, billingCycleStart)
+
+    effectiveEndCycle = cycleEnd
+    effectiveStartCycle = cycleStart
+  }
+
+  if (autoRenew === false) {
+    effectiveEndDate = effectiveEndCycle
+  }
+
+  const secondsInCycle = differenceInSeconds(effectiveEndCycle, effectiveStartCycle) + 1
+  const billableSeconds = Math.max(
+    0,
+    differenceInSeconds(effectiveEndCycle, effectiveStartDate) + 1
+  )
+  const prorationFactor = billableSeconds / secondsInCycle
+
+  return {
+    cycleStart: convertDateToUTC(cycleStart),
+    cycleEnd: convertDateToUTC(cycleEnd),
+    secondsInCycle,
+    prorationFactor,
+    billableSeconds,
+    effectiveStartDate: convertDateToUTC(effectiveStartDate),
+    effectiveEndDate: effectiveEndDate ? convertDateToUTC(effectiveEndDate) : undefined,
+    nextBillingAt: convertDateToUTC(effectiveEndCycle),
+    trialDaysEndAt: convertDateToUTC(trialDaysEndAt),
+  }
+}
+
+// TODO: handle errors
+export function calculateBillingCycle({
+  startDate,
+  billingCycleStart,
+  billingPeriod,
+}: {
+  startDate: Date
+  billingCycleStart: number
+  billingPeriod: BillingPeriod
+}): {
   cycleStart: Date
   cycleEnd: Date
   secondsInCycle: number
@@ -34,20 +121,18 @@ export function calculateBillingCycle(
 
   // we want to keep fairness so we calculate the proration to the seconds
   // INFO: if you find some ways we can improve fairness along the whole project please give me a shout
-  const effectiveStartDate = max([startDate, cycleStart, trialDaysEnd || new Date(0)])
-  const billableStart = startOfDay(effectiveStartDate)
-  const effectiveEndDate = currentDate > cycleEnd ? cycleEnd : currentDate
-
   const secondsInCycle = differenceInSeconds(cycleEnd, cycleStart) + 1
-  const billableSeconds = Math.max(0, differenceInSeconds(effectiveEndDate, billableStart) + 1)
+  const effectiveStartDate = startDate < cycleStart ? cycleStart : startDate
+  const effectiveEndDate = cycleEnd
+  const billableSeconds = differenceInSeconds(effectiveEndDate, effectiveStartDate) + 1
   const prorationFactor = billableSeconds / secondsInCycle
 
   return {
-    cycleStart,
-    cycleEnd,
+    cycleStart: convertDateToUTC(cycleStart),
+    cycleEnd: convertDateToUTC(cycleEnd),
     secondsInCycle,
-    prorationFactor,
     billableSeconds,
+    prorationFactor: prorationFactor,
   }
 }
 

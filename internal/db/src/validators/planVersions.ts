@@ -17,6 +17,7 @@ export const planVersionSelectBaseSchema = createSelectSchema(versions, {
 })
 
 export const versionInsertBaseSchema = createInsertSchema(versions, {
+  autoRenew: z.boolean().default(true),
   startCycle: startCycleSchema,
   tags: z.array(z.string()),
   title: z.string().min(3).max(50),

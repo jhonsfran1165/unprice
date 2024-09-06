@@ -2,11 +2,13 @@
 import type { InsertPlanVersion } from "@unprice/db/validators"
 import { planVersionSelectBaseSchema, versionInsertBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
-import { Form } from "@unprice/ui/form"
+import { Form, FormDescription, FormLabel } from "@unprice/ui/form"
 import { usePathname, useRouter } from "next/navigation"
 import { startTransition } from "react"
 import type { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
+import { CopyButton } from "~/components/copy-button"
+import AutoRenewFormField from "~/components/forms/autorenew-field"
 import CollectionMethodFormField from "~/components/forms/collection-method-field"
 import StartCycleFormField from "~/components/forms/start-cycle-field"
 import TrialDaysFormField from "~/components/forms/trial-days-field"
@@ -121,6 +123,16 @@ export function PlanVersionForm({
   return (
     <Form {...form}>
       <form className="space-y-6">
+        {editMode && (
+          <div className="flex items-center justify-between">
+            <div>
+              <FormLabel>Plan Version ID</FormLabel>
+              <FormDescription>{defaultValues.id}</FormDescription>
+            </div>
+            <CopyButton value={defaultValues.id ?? ""} className="size-4" />
+          </div>
+        )}
+
         {isPublished && <BannerPublishedVersion />}
 
         <PaymentMethodRequiredFormField form={form} isDisabled={isPublished} />
@@ -141,9 +153,12 @@ export function PlanVersionForm({
           <StartCycleFormField form={form} isDisabled={isPublished} />
 
           <TrialDaysFormField form={form} isDisabled={isPublished} />
+
           <WhenToBillFormField form={form} isDisabled={isPublished} />
 
           <DescriptionFormField form={form} isDisabled={isPublished} />
+
+          <AutoRenewFormField form={form} isDisabled={isPublished} />
 
           <PaymentProviderFormField form={form} isDisabled={isPublished} />
         </div>

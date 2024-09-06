@@ -69,6 +69,8 @@ export const subscriptions = pgTableProject(
     collectionMethod: collectionMethodEnum("collection_method")
       .notNull()
       .default("charge_automatically"),
+    // auto renew the subscription every billing period
+    autoRenew: boolean("auto_renew").notNull().default(true),
     // ************ billing data defaults ************
 
     // ************ subscription important dates ************
@@ -86,8 +88,6 @@ export const subscriptions = pgTableProject(
     nextBillingAt: bigint("next_billing_at_m", { mode: "number" }),
     // ************ subscription important dates ************
 
-    // auto renew the subscription every billing period
-    autoRenew: boolean("auto_renew").notNull().default(true),
     // whether the subscription is new or not. New means that the subscription was created in the current billing period
     isNew: boolean("is_new").notNull().default(true),
 
