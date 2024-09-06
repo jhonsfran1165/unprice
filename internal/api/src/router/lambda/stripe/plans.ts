@@ -33,6 +33,8 @@ export const plans = rateLimiterProcedure.input(z.void()).query(async (opts) => 
         planVersion: {
           plan: {
             slug: plan.slug,
+            defaultPlan: plan.defaultPlan,
+            enterprisePlan: plan.enterprisePlan,
           },
           ...planVersion,
         },

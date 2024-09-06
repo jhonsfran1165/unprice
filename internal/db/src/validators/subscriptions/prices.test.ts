@@ -8,7 +8,7 @@ describe("calculateFlatPricePlan", () => {
     const planVersion: PlanVersionExtended = {
       id: "pv_4Hs8cAjTgxCWUpFSjta8bDFEkqpF",
       currency: "USD",
-      plan: { slug: "free-plan" },
+      plan: { slug: "free-plan", defaultPlan: true, enterprisePlan: false },
       planId: "plan_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
       active: true,
       status: "published",

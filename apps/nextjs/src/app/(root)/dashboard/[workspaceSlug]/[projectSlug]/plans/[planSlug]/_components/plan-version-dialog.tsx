@@ -48,6 +48,7 @@ export function PlanVersionDialog({
               billingPeriod: "month",
               collectionMethod: "charge_automatically",
               whenToBill: "pay_in_arrear",
+              autoRenew: true,
             }
           }
           setDialogOpen={setDialogOpen}

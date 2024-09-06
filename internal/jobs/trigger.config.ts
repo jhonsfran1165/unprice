@@ -15,6 +15,6 @@ export const config: TriggerConfig = {
     },
   },
   //The paths for your trigger folders
-  triggerDirectories: ["./src/triggers"],
-  dependenciesToBundle: [/^@unprice\//],
+  triggerDirectories: ["./src/trigger"],
+  dependenciesToBundle: [/^@unprice\//, /@t3-oss/, "drizzle-orm", /@neondatabase/],
 }

@@ -208,7 +208,7 @@ export const createSubscription = async ({
     whenToBill,
     startCycle,
     gracePeriod,
-    planChangedAt,
+    nextSubscriptionId,
     type,
     timezone,
     autoRenew,
@@ -236,14 +236,6 @@ export const createSubscription = async ({
     throw new TRPCError({
       code: "NOT_FOUND",
       message: "Version not found. Please check the planVersionId",
-    })
-  }
-
-  // check if payment method is required for the plan version
-  if (versionData.paymentMethodRequired && !defaultPaymentMethodId) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "Payment method is required for this plan version",
     })
   }
 
@@ -305,6 +297,34 @@ export const createSubscription = async ({
     throw new TRPCError({
       code: "CONFLICT",
       message: "Customer is not active, please contact support",
+    })
+  }
+
+  // check if payment method is required for the plan version
+  const paymentMethodRequired = versionData.paymentMethodRequired
+  // if the customer has a default payment method, we use that
+  // TODO: here it could be a problem, if the user sends a wrong payment method id, we will use the customer default payment method
+  // for now just accept the default payment method is equal to the customer default payment method
+  // but probable the best approach would be use the payment method directly from the customer and don't have a default payment method in the subscription
+  // or mayble we can have an array of valid payment providers in the customer, that way we can support multiple payment providers
+  // the issue here would be the sync between the payment provider.
+  const paymentMethodId =
+    defaultPaymentMethodId ?? customerData.metadata?.stripeDefaultPaymentMethodId
+
+  if (
+    defaultPaymentMethodId &&
+    defaultPaymentMethodId !== customerData.metadata?.stripeDefaultPaymentMethodId
+  ) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Payment method is not valid",
+    })
+  }
+
+  if (paymentMethodRequired && !paymentMethodId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Payment method is required for this plan version",
     })
   }
 
@@ -403,7 +423,6 @@ export const createSubscription = async ({
         autoRenew: autoRenewToUse,
         trialDays: trialDaysToUse,
         trialEndsAt: trialDaysEndAt,
-        isNew: true,
         collectionMethod: collectionMethodToUse,
         status: "active",
         metadata: metadata,
@@ -411,11 +430,11 @@ export const createSubscription = async ({
         whenToBill: whenToBillToUse,
         startCycle: startCycleToUse,
         gracePeriod: gracePeriod,
-        planChangedAt: planChangedAt,
         type: type,
         timezone: timezoneToUse,
         prorated: prorated,
         nextBillingAt: nextBillingAt,
+        nextSubscriptionId: nextSubscriptionId,
       })
       .returning()
       .then((re) => re[0])
@@ -909,15 +928,18 @@ export const signOutCustomer = async ({
 
   // all this should be in a transaction
   await ctx.db.transaction(async (tx) => {
+    // check if the subscription is in trials, if so set the endDateAt to the trialEndsAt
     const cancelSubs = await Promise.all(
       customerSubs.map(async (sub) => {
+        const endDateAt = sub.status === "trialing" ? sub.trialEndsAt ?? Date.now() : Date.now()
         await tx
           .update(subscriptions)
           .set({
-            status: "ended",
-            endDateAt: Date.now(),
+            status: "cancelled",
+            endDateAt: endDateAt,
             nextPlanVersionId: undefined,
-            planChangedAt: Date.now(),
+            cancelledAt: Date.now(),
+            nextSubscriptionId: undefined,
           })
           .where(eq(subscriptions.id, sub.id))
       })

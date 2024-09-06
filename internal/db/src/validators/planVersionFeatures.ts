@@ -478,6 +478,8 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema
   .extend({
     plan: planSelectBaseSchema.pick({
       slug: true,
+      defaultPlan: true,
+      enterprisePlan: true,
     }),
     planFeatures: z.array(
       planVersionFeatureSelectBaseSchema.extend({

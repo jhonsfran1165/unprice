@@ -34,6 +34,8 @@ export const publish = protectedProjectProcedure
         plan: {
           columns: {
             slug: true,
+            defaultPlan: true,
+            enterprisePlan: true,
           },
         },
       },

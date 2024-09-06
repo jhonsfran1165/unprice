@@ -88,6 +88,8 @@ export function WorkspaceSwitcher({
               {personalWorkspace && (
                 <CommandGroup heading="Personal workspace">
                   <CommandItem
+                    key={personalWorkspace.id}
+                    value={personalWorkspace.id}
                     onSelect={() => {
                       setSwitcherOpen(false)
                       router.push(`/${personalWorkspace.slug}`)
@@ -125,7 +127,8 @@ export function WorkspaceSwitcher({
                 <CommandGroup heading="Workspaces">
                   {teams?.map((workspace) => (
                     <CommandItem
-                      key={workspace.slug}
+                      key={workspace.id}
+                      value={workspace.id}
                       onSelect={() => {
                         setSwitcherOpen(false)
                         router.push(`/${workspace.slug}`)

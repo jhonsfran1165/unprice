@@ -9,10 +9,12 @@ import HeaderTab from "~/components/layout/header-tab"
 import type { RouterOutputs } from "@unprice/api"
 import { calculateBillingCycle } from "@unprice/db/validators"
 import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
+import { Button } from "@unprice/ui/button"
 import { Typography } from "@unprice/ui/typography"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import { BillingCard } from "./_components/billing"
+import { UpgradeDialog } from "./_components/upgrade-dialog"
 
 export default async function BillingPage({ params }: { params: { workspaceSlug: string } }) {
   const { workspaceSlug } = params
@@ -84,7 +86,7 @@ async function SubscriptionCard({
   const endDateAt = subscription.endDateAt
   const isProrated = subscription.prorated
   const currentTrialDays = subscription.trialEndsAt
-    ? differenceInCalendarDays(new Date(subscription.trialEndsAt), new Date())
+    ? differenceInCalendarDays(subscription.trialEndsAt, Date.now())
     : 0
 
   const calculatedBillingCycle = calculateBillingCycle({
@@ -108,9 +110,45 @@ async function SubscriptionCard({
       <CardContent>
         {subscription ? (
           <div className="space-y-4">
-            <div className="font-semibold text-md">
-              {currentTrialDays > 0 ? "Trial" : "Subscription"} Plan:{" "}
-              <span className="text-primary">{subscription.planVersion.plan.slug}</span>
+            <div className="flex items-center justify-between">
+              <div className="font-semibold text-md">
+                {currentTrialDays > 0 ? "Trial" : "Subscription"} Plan:{" "}
+                <span className="text-primary">{subscription.planVersion.plan.slug}</span>
+              </div>
+
+              {!subscription.planVersion.plan.defaultPlan && (
+                <UpgradeDialog
+                  defaultValues={{
+                    id: subscription.id,
+                    endDateAt: Date.now(),
+                    customerId: subscription.customerId,
+                    nextPlanVersionId: "",
+                    config: [],
+                    projectId: subscription.projectId,
+                  }}
+                >
+                  <Button variant="destructive" size="sm">
+                    Change Plan
+                  </Button>
+                </UpgradeDialog>
+              )}
+
+              {subscription.planVersion.plan.defaultPlan && (
+                <UpgradeDialog
+                  defaultValues={{
+                    id: subscription.id,
+                    endDateAt: Date.now(),
+                    customerId: subscription.customerId,
+                    nextPlanVersionId: "",
+                    config: [],
+                    projectId: subscription.projectId,
+                  }}
+                >
+                  <Button variant="primary" size="sm">
+                    Upgrade Plan
+                  </Button>
+                </UpgradeDialog>
+              )}
             </div>
             <div className="gap-2 rounded-lg bg-background-bg p-4">
               <Typography variant="h6">Current Billing Cycle</Typography>
@@ -129,11 +167,14 @@ async function SubscriptionCard({
               </Typography>
               <div className="flex flex-col py-4">
                 <Typography variant="p" affects="removePaddingMargin">
-                  <span className="font-medium">Subscription started at:</span>{" "}
+                  <span className="font-bold">
+                    Your subscription{" "}
+                    {subscription.startDateAt > Date.now() ? "will start" : "started"} at:
+                  </span>{" "}
                   {formatDate(subscription.startDateAt, subscription.timezone, "MMM d, yyyy")}
                 </Typography>
                 <Typography variant="p" affects="removePaddingMargin">
-                  <span className="font-medium">Next billing date:</span>{" "}
+                  <span className="font-bold">Next billing date:</span>{" "}
                   {formatDate(
                     subscription.nextBillingAt ?? calculatedBillingCycle.cycleEnd.getTime(),
                     subscription.timezone,

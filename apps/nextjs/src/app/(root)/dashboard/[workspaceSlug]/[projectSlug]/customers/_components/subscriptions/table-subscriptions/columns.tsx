@@ -3,13 +3,14 @@
 import type { ColumnDef } from "@tanstack/react-table"
 
 import type { RouterOutputs } from "@unprice/api"
+import { calculateBillingCycle } from "@unprice/db/validators"
 import { Badge } from "@unprice/ui/badge"
 import { Checkbox } from "@unprice/ui/checkbox"
 import { Separator } from "@unprice/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
-import { format } from "date-fns"
+import { differenceInDays, format } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 import { AlertCircle } from "lucide-react"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
@@ -54,6 +55,22 @@ export const columns: ColumnDef<PlanVersion>[] = [
     size: 200,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Plan Version" />,
     cell: ({ row }) => {
+      // is new when the start date is in the current billing period
+      const calculatedBillingCycle = calculateBillingCycle({
+        currentDate: new Date(),
+        startDate: new Date(row.original.startDateAt),
+        billingCycleStart: row.original.startCycle ?? 1,
+        billingPeriod: row.original.version.billingPeriod ?? "month",
+      })
+
+      const isNew =
+        row.original.startDateAt > calculatedBillingCycle.cycleStart.getTime() &&
+        row.original.startDateAt < calculatedBillingCycle.cycleEnd.getTime()
+
+      const trialDays = row.original.trialEndsAt
+        ? differenceInDays(row.original.trialEndsAt, Date.now())
+        : 0
+
       return (
         <div>
           <div className="flex items-center space-x-2">
@@ -61,17 +78,19 @@ export const columns: ColumnDef<PlanVersion>[] = [
               {row.original.version.title}
             </Typography>
 
-            {row.original.isNew && (
+            {isNew && (
               <div className={"inline-flex items-center font-medium text-success text-xs"}>
                 <span className={"flex h-2 w-2 rounded-full bg-success"} />
                 <span className="ml-1">new</span>
               </div>
             )}
 
-            {row.original.trialDays !== null && row.original.trialDays > 0 && (
+            {trialDays > 0 && (
               <div className="hidden items-center font-medium text-info text-xs lg:inline-flex">
                 <span className="flex h-2 w-2 rounded-full bg-info" />
-                <span className="ml-1">{row.original.trialDays} trial days</span>
+                <span className="ml-1">{`${trialDays} trial ${
+                  trialDays === 1 ? "day" : "days"
+                }`}</span>
               </div>
             )}
           </div>
@@ -140,8 +159,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
       <Badge
         className={cn({
           success: row.original.status === "active",
-          danger: row.original.status === "ended",
-          warning: row.original.status === "inactive",
+          danger: row.original.status === "changed" || row.original.status === "cancelled",
         })}
       >
         {row.original.status}

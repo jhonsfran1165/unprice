@@ -206,6 +206,8 @@ export function SubscriptionForm({
         endDateAt: data.endDateAt,
         nextPlanVersionId: data.nextPlanVersionId,
         id: defaultValues.id,
+        // TODO: handle this properly
+        projectId: defaultValues.projectId ?? "",
       })
     }
 

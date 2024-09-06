@@ -1,1 +1,1 @@
-export const name = "jobs"
+export * from "./trigger"

@@ -55,7 +55,7 @@ type PlanVersionFeaturesResponse =
 interface FormValues extends FieldValues {
   config?: SubscriptionItemConfig[]
   planVersionId?: string
-  nextPlanVersionId?: string
+  nextPlanVersionId?: string | null
   items?: SubscriptionItemConfig[]
 }
 
@@ -157,13 +157,22 @@ export default function ConfigUnpriceItemsFormField<TFieldValues extends FormVal
     const features = new Map<string, PlanVersionFeaturesResponse>()
     const addons = new Map<string, PlanVersionFeaturesResponse>()
 
-    selectedPlanVersion?.planFeatures.forEach((feature) => {
-      features.set(feature.id, feature)
-      addons.set(feature.id, feature)
-    })
+    if (!isChangePlanSubscription) {
+      selectedPlanVersion?.planFeatures.forEach((feature) => {
+        features.set(feature.id, feature)
+        addons.set(feature.id, feature)
+      })
+    } else {
+      selectedNewPlanVersion?.planFeatures.forEach((feature) => {
+        features.set(feature.id, feature)
+        addons.set(feature.id, feature)
+      })
+    }
 
     return { versionFeatures: features, versionAddons: addons }
-  }, [selectedPlanVersion])
+  }, [selectedPlanVersion?.id, selectedNewPlanVersion?.id])
+
+  console.log("versionFeatures", versionFeatures)
 
   const [isDelete, setConfirmDelete] = useState<Map<string, boolean>>(
     new Map<string, boolean>(fields.map((item) => [item.id, false] as [string, boolean]))
@@ -189,6 +198,8 @@ export default function ConfigUnpriceItemsFormField<TFieldValues extends FormVal
       amount: 0,
       currency: currencies[selectedPlanVersion?.currency ?? "USD"],
     })
+
+    if (!configValues) return ""
 
     let hasUsage = false
 
@@ -224,6 +235,10 @@ export default function ConfigUnpriceItemsFormField<TFieldValues extends FormVal
       return `${currencySymbol(currency.code as Currency)}${Number.parseFloat(value).toFixed(2)}`
     })
   }, [JSON.stringify(configValues)])
+
+  const billingPeriod = isChangePlanSubscription
+    ? selectedNewPlanVersion?.billingPeriod
+    : selectedPlanVersion?.billingPeriod
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -365,7 +380,9 @@ export default function ConfigUnpriceItemsFormField<TFieldValues extends FormVal
                     </TableCell>
                     <TableCell className="flex h-16 items-center justify-end gap-1 pr-1">
                       <PriceFeature
-                        selectedPlanVersion={selectedPlanVersion!}
+                        selectedPlanVersion={
+                          isChangePlanSubscription ? selectedNewPlanVersion! : selectedPlanVersion!
+                        }
                         quantity={units || 0}
                         feature={feature}
                         type="total"
@@ -428,7 +445,7 @@ export default function ConfigUnpriceItemsFormField<TFieldValues extends FormVal
 
               <TableRow className="border-t border-b text-muted-foreground">
                 <TableCell colSpan={2} className="h-10 text-right font-semibold">
-                  Total per {selectedPlanVersion?.billingPeriod}
+                  Total per {billingPeriod}
                 </TableCell>
                 <TableCell colSpan={1} className="h-10 text-right text-xs">
                   {displayTotalPrice}

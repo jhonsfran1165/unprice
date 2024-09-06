@@ -115,7 +115,9 @@ export const getEntitlementsQuery = async ({
           columns: {
             id: true,
           },
-          where: (sub, { eq }) => eq(sub.status, "active"),
+          // subscriptions that are active, which means endDateAt is in the past or undefined
+          where: (sub, { or, isNull, lte }) =>
+            or(lte(sub.endDateAt, Date.now()), isNull(sub.endDateAt)),
           orderBy(fields, operators) {
             return [operators.desc(fields.startDateAt)]
           },

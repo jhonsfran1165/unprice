@@ -28,19 +28,23 @@ import { api } from "~/trpc/client"
 
 interface FormValues extends FieldValues {
   planVersionId?: string
-  projectId?: string
+  nextPlanVersionId?: string | null
 }
 
 export default function SelectUnpricePlanFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
+  isNextPlanVersionId,
 }: {
   form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
+  isNextPlanVersionId?: boolean
 }) {
   const [switcherCustomerOpen, setSwitcherCustomerOpen] = useState(false)
   const projectId = form.getValues("projectId" as FieldPath<TFieldValues>)
-  const selectedPlanVersionId = form.watch("planVersionId" as FieldPath<TFieldValues>)
+  const selectedPlanVersionId = isNextPlanVersionId
+    ? form.watch("nextPlanVersionId" as FieldPath<TFieldValues>)
+    : form.watch("planVersionId" as FieldPath<TFieldValues>)
 
   const { data, isLoading } = api.planVersions.listByUnpriceProject.useQuery(
     {
@@ -65,11 +69,15 @@ export default function SelectUnpricePlanFormField<TFieldValues extends FormValu
   return (
     <FormField
       control={form.control}
-      name={"planVersionId" as FieldPath<TFieldValues>}
+      name={
+        isNextPlanVersionId
+          ? ("nextPlanVersionId" as FieldPath<TFieldValues>)
+          : ("planVersionId" as FieldPath<TFieldValues>)
+      }
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>Select plan</FormLabel>
-          <FormDescription>Select the plan to create the subscription</FormDescription>
+          <FormDescription>Select the plan to create/change the subscription</FormDescription>
           <Popover
             modal={true}
             open={switcherCustomerOpen}

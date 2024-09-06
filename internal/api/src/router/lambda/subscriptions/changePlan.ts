@@ -1,26 +1,14 @@
 import { TRPCError } from "@trpc/server"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
-import { subscriptionInsertSchema } from "@unprice/db/validators"
-import { addDays, format } from "date-fns"
+import { subscriptionChangePlanSchema } from "@unprice/db/validators"
+import { addDays } from "date-fns"
 import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
 import { createSubscription } from "../../../utils/shared"
 
 export const changePlan = protectedProjectProcedure
-  .input(
-    subscriptionInsertSchema
-      .extend({
-        endDateAt: z.coerce.number(),
-        nextPlanVersionId: z.string(),
-      })
-      .required({
-        id: true,
-        endDateAt: true,
-        customerId: true,
-        nextPlanVersionId: true,
-      })
-  )
+  .input(subscriptionChangePlanSchema)
   .output(z.object({ result: z.boolean(), message: z.string() }))
   .mutation(async (opts) => {
     const {
@@ -29,18 +17,15 @@ export const changePlan = protectedProjectProcedure
       endDateAt,
       nextPlanVersionId,
       collectionMethod,
-      type,
       defaultPaymentMethodId,
       autoRenew,
       trialDays,
       timezone,
       whenToBill,
       startCycle,
+      config,
+      projectId,
     } = opts.input
-    const project = opts.ctx.project
-
-    // only owner and admin can change the plan of a subscription
-    opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
     const subscriptionData = await opts.ctx.db.query.subscriptions.findFirst({
       with: {
@@ -54,7 +39,7 @@ export const changePlan = protectedProjectProcedure
       where: (subscription, { eq, and }) =>
         and(
           eq(subscription.id, subscriptionId),
-          eq(subscription.projectId, project.id),
+          eq(subscription.projectId, projectId),
           eq(subscription.customerId, customerId)
         ),
     })
@@ -66,42 +51,89 @@ export const changePlan = protectedProjectProcedure
       })
     }
 
-    if (subscriptionData.status === "inactive") {
+    if (subscriptionData.status === "changed") {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Subscription is already inactive",
+        message: "Subscription is already changed",
       })
     }
 
-    if (subscriptionData.status === "ended") {
+    if (subscriptionData.status === "cancelled") {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Subscription is already ended",
+        message: "Subscription is cancelled",
       })
     }
 
-    if (subscriptionData.planVersion.id === nextPlanVersionId) {
+    let newPlanVersionId = nextPlanVersionId
+
+    if (!nextPlanVersionId) {
+      // if there is no planVersionId provided, we downgrade the customer to the default plan
+      const plans = await opts.ctx.db.query.plans.findFirst({
+        where(fields, operators) {
+          return operators.and(
+            operators.eq(fields.projectId, projectId),
+            operators.eq(fields.active, true),
+            operators.eq(fields.defaultPlan, true)
+          )
+        },
+        with: {
+          versions: {
+            where(fields, operators) {
+              return operators.and(
+                operators.eq(fields.active, true),
+                operators.eq(fields.status, "published"),
+                operators.eq(fields.latest, true)
+              )
+            },
+          },
+        },
+      })
+
+      if (!plans) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error getting plans",
+        })
+      }
+
+      if (subscriptionData.planVersion.plan.id === plans.id) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You cannot change the subscription for the same plan.",
+        })
+      }
+
+      const defaultPlanVersion = plans?.versions[0]
+
+      if (!defaultPlanVersion) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error getting default plan version",
+        })
+      }
+
+      newPlanVersionId = defaultPlanVersion.id
+    }
+
+    if (!newPlanVersionId) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "You cannot change the subscription for the same plan version.",
+        message: "Plan not found",
       })
     }
 
-    // if the customer has trials left we should not let the customer change the subscription until the trial ends
-    if (subscriptionData?.trialEndsAt && subscriptionData.trialEndsAt > Date.now()) {
+    if (subscriptionData.planVersion.id === newPlanVersionId) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: `The customer has a trial until ${format(
-          subscriptionData.trialEndsAt,
-          "yyyy-MM-dd"
-        )}. Please set the endDate after the trial ends`,
+        message: "You are already subscribed to this plan.",
       })
     }
 
     // if the subscription was changed in the last 30 days, we should not allow the customer to change the plan
     if (
-      subscriptionData.planChangedAt &&
-      subscriptionData.planChangedAt > addDays(new Date(Date.now()), -30).getTime()
+      subscriptionData.metadata?.lastPlanChangeAt &&
+      subscriptionData.metadata.lastPlanChangeAt > addDays(new Date(Date.now()), -30).getTime()
     ) {
       throw new TRPCError({
         code: "BAD_REQUEST",
@@ -111,29 +143,18 @@ export const changePlan = protectedProjectProcedure
     }
 
     // end date must be after the start date
-    if (endDateAt < subscriptionData.startDateAt) {
+    if (endDateAt && endDateAt < subscriptionData.startDateAt) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "End date must be after start date",
       })
     }
 
-    // if there is no planVersionId provided, we downgrade the customer to the default plan
-    const newPlanVersion = await opts.ctx.db.query.versions.findFirst({
-      where: (version, { eq, and }) =>
-        and(
-          eq(version.id, nextPlanVersionId),
-          eq(version.projectId, project.id),
-          eq(version.status, "published"),
-          eq(version.currency, subscriptionData.customer.defaultCurrency)
-        ),
-    })
+    // if the subscription is stil trialing, we need to set the endDateAt to the trialEndsAt
+    let endDateAtToUse = endDateAt ?? Date.now()
 
-    if (!newPlanVersion) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "New plan version not found",
-      })
+    if (subscriptionData.status === "trialing") {
+      endDateAtToUse = endDateAt ?? subscriptionData.trialEndsAt ?? Date.now()
     }
 
     // 1. update the subscription to inactive
@@ -146,15 +167,14 @@ export const changePlan = protectedProjectProcedure
       const subscription = await trx
         .update(schema.subscriptions)
         .set({
-          status: "ended",
-          endDateAt: endDateAt,
-          nextPlanVersionId: newPlanVersion.id,
-          planChangedAt: Date.now(),
+          status: "changed",
+          endDateAt: endDateAtToUse,
+          nextPlanVersionId: newPlanVersionId,
+          changedAt: Date.now(),
         })
         .where(
           and(
             eq(schema.subscriptions.id, subscriptionId),
-            eq(schema.subscriptions.projectId, project.id),
             eq(schema.subscriptions.customerId, customerId)
           )
         )
@@ -172,26 +192,33 @@ export const changePlan = protectedProjectProcedure
       const { subscription: newSubscription } = await createSubscription({
         subscription: {
           customerId: customerId,
-          planVersionId: newPlanVersion.id,
-          projectId: project.id,
+          planVersionId: newPlanVersionId,
+          projectId: projectId,
           collectionMethod: collectionMethod ?? subscriptionData.collectionMethod,
-          startDateAt: addDays(new Date(endDateAt), 1).getTime(),
+          // will set the start date right after the end date of the current subscription
+          startDateAt: endDateAtToUse + 1,
           timezone: timezone,
           whenToBill: whenToBill,
           startCycle: startCycle,
+          config: config,
           endDateAt: undefined,
-          autoRenew: autoRenew ?? subscriptionData.autoRenew,
-          isNew: true,
-          defaultPaymentMethodId: defaultPaymentMethodId ?? subscriptionData.defaultPaymentMethodId,
+          autoRenew: autoRenew,
+          defaultPaymentMethodId: defaultPaymentMethodId,
           trialDays: trialDays ?? 0,
-          type: type ?? subscriptionData.type,
-          planChangedAt: Date.now(),
+          changedAt: subscriptionData.changedAt,
+          type: subscriptionData.type,
+          metadata: {
+            lastPlanChangeAt: Date.now(),
+          },
         },
-        projectId: project.id,
-        ctx: opts.ctx,
+        projectId: projectId,
+        ctx: {
+          ...opts.ctx,
+          db: trx,
+        },
       })
 
-      // set the new subscription as the nextSubscriptionId
+      // set the old subscription with the next subscription id
       await trx
         .update(schema.subscriptions)
         .set({
@@ -200,7 +227,6 @@ export const changePlan = protectedProjectProcedure
         .where(
           and(
             eq(schema.subscriptions.id, subscriptionId),
-            eq(schema.subscriptions.projectId, project.id),
             eq(schema.subscriptions.customerId, customerId)
           )
         )

@@ -25,6 +25,7 @@ import {
 
 export const subscriptionMetadataSchema = z.object({
   externalId: z.string().optional(),
+  lastPlanChangeAt: z.number().optional(),
 })
 
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
@@ -79,6 +80,22 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
     features: subscriptionItemsSelectSchema.array(),
   })
 
+export const subscriptionChangePlanSchema = subscriptionInsertSchema
+  .partial()
+  .required({
+    id: true,
+    customerId: true,
+    projectId: true,
+  })
+  .superRefine((data, ctx) => {
+    if (data.endDateAt && data.startDateAt && data.endDateAt < data.startDateAt) {
+      return ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "End date must be after start date",
+      })
+    }
+  })
+
 export const subscriptionExtendedWithItemsSchema = subscriptionSelectSchema.extend({
   customer: customerSelectSchema,
   version: planVersionSelectBaseSchema,
@@ -88,6 +105,7 @@ export const subscriptionExtendedWithItemsSchema = subscriptionSelectSchema.exte
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>
 export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
+export type SubscriptionChangePlan = z.infer<typeof subscriptionChangePlanSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,
