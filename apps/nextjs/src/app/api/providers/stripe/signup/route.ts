@@ -121,7 +121,7 @@ export async function GET(req: NextRequest) {
       projectId: customerSession.customer.projectId,
       type: "plan",
       planVersionId: customerSession.planVersion.id,
-      startDateAt: Date.now(),
+      startAt: Date.now(),
       status: "active",
       config: customerSession.planVersion.config,
       defaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",

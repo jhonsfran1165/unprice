@@ -99,7 +99,11 @@ export default function SelectUnpricePlanFormField<TFieldValues extends FormValu
                     {isLoading ? (
                       <LoadingAnimation className="h-4 w-4" variant="dots" />
                     ) : selectedPlanVersion ? (
-                      `${selectedPlanVersion.title} - ${selectedPlanVersion.billingPeriod}`
+                      `${selectedPlanVersion.title} - ${selectedPlanVersion.billingPeriod} ${
+                        selectedPlanVersion.trialDays > 0
+                          ? `- ${selectedPlanVersion.trialDays} days trial`
+                          : ""
+                      }`
                     ) : (
                       "Select plan"
                     )}
@@ -132,7 +136,9 @@ export default function SelectUnpricePlanFormField<TFieldValues extends FormValu
                                 version.id === field.value ? "opacity-100" : "opacity-0"
                               )}
                             />
-                            {`${version.title} - ${version.billingPeriod}`}
+                            {`${version.title} - ${version.billingPeriod} ${
+                              version.trialDays > 0 ? `- ${version.trialDays} days trial` : ""
+                            }`}
                           </CommandItem>
                         ))}
                         {noData && !isLoading && (

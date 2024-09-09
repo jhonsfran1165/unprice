@@ -43,6 +43,7 @@ export const subscriptions = pgTableProject(
     customerId: cuid("customers_id").notNull(),
 
     // payment method id of the customer - if not set, the first payment method will be used
+    // TODO: support multiple payment methods - associated with a customer instead of a subscription
     defaultPaymentMethodId: text("default_payment_method_id"),
 
     // data from plan version when the subscription was created
@@ -50,8 +51,7 @@ export const subscriptions = pgTableProject(
     // plan version has the payment provider configured, currency and all the other data needed to create the invoice
     // every item in the subscription is linked to a plan version: features, addons, etc.
     planVersionId: cuid("plan_version_id").notNull(),
-    // TODO: support addons - every addon should have a subscription
-    // addonId: cuid("addon_id"),
+    // TODO: support addons in other table
     type: typeSubscriptionEnum("type").default("plan").notNull(),
 
     // prorate the subscription when the subscription is created in the middle of the billing period
@@ -63,8 +63,9 @@ export const subscriptions = pgTableProject(
     whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance").notNull(),
     // when to start each cycle for this subscription -
     startCycle: integer("start_cycle").default(1).$type<StartCycle>(), // null means the first day of the month
-    // used for generating invoices -
-    gracePeriod: integer("grace_period").notNull().default(0), // 0 means no grace period to pay the invoice
+    // a grace period of 1 day could handle edge cases when the payment is late for a few hours
+    // TODO: change to grace period in days
+    gracePeriod: integer("grace_period").notNull().default(1),
     // collection method for the subscription - charge_automatically or send_invoice
     collectionMethod: collectionMethodEnum("collection_method")
       .notNull()
@@ -73,23 +74,34 @@ export const subscriptions = pgTableProject(
     autoRenew: boolean("auto_renew").notNull().default(true),
     // ************ billing data defaults ************
 
-    // ************ subscription important dates ************
+    // If a user requests to change the plan, we mark the subscription to be changed at the next billing
+    nextPlanVersionId: cuid("next_plan_version_id"),
+    // next subscription id is the id of the subscription that will be created when the user changes the plan
+    nextSubscriptionId: cuid("next_subscription_id"),
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
     trialDays: integer("trial_days").notNull().default(0),
+
+    // ************ subscription important dates ************
     // when the trial ends
     trialEndsAt: bigint("trial_ends_at_m", { mode: "number" }),
     // when the subscription starts
-    startDateAt: bigint("start_date_at_m", { mode: "number" }).default(0).notNull(),
+    startAt: bigint("start_at_m", { mode: "number" }).default(0).notNull(),
     // when the subscription ends
-    endDateAt: bigint("end_date_at_m", { mode: "number" }),
+    endAt: bigint("end_at_m", { mode: "number" }),
     // when the subscription was changed
-    changedAt: bigint("changed_at_m", { mode: "number" }),
+    changeAt: bigint("change_at_m", { mode: "number" }),
     // when the subscription was cancelled
-    cancelledAt: bigint("cancelled_at_m", { mode: "number" }),
+    cancelAt: bigint("cancel_at_m", { mode: "number" }),
     // last billed at is the last time the subscription was billed
     lastBilledAt: bigint("last_billed_at_m", { mode: "number" }),
-    // next billing at is the next time the subscription will be billed
-    nextBillingAt: bigint("next_billing_at_m", { mode: "number" }),
+    // billingCycleStartAt is the start time of the billing cycle
+    billingCycleStartAt: bigint("billing_cycle_start_at_m", { mode: "number" }).notNull(),
+    // billingCycleEndAt is the end time of the billing cycle
+    billingCycleEndAt: bigint("billing_cycle_end_at_m", { mode: "number" }).notNull(),
+    // a subscription can change once per billing cycle
+    lastChangePlanAt: bigint("last_change_plan_at_m", { mode: "number" }),
+    // pastDueAt is the date when the subscription was past due
+    pastDueAt: bigint("past_due_at_m", { mode: "number" }),
     // ************ subscription important dates ************
 
     // status of the subscription - active, inactive, canceled, paused, etc.
@@ -99,15 +111,6 @@ export const subscriptions = pgTableProject(
 
     // metadata for the subscription
     metadata: json("metadata").$type<z.infer<typeof subscriptionMetadataSchema>>(),
-
-    /**
-     * If a user requests to downgrade, we mark the workspace and downgrade it after the next
-     * billing happened.
-     */
-    nextPlanVersionId: cuid("next_plan_version_id"),
-
-    // next subscription id is the id of the subscription that will be created when the user changes the plan
-    nextSubscriptionId: cuid("next_subscription_id"),
   },
   (table) => ({
     primary: primaryKey({

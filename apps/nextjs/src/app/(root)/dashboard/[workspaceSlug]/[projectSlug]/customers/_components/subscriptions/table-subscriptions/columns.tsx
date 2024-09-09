@@ -58,14 +58,14 @@ export const columns: ColumnDef<PlanVersion>[] = [
       // is new when the start date is in the current billing period
       const calculatedBillingCycle = calculateBillingCycle({
         currentDate: new Date(),
-        startDate: new Date(row.original.startDateAt),
+        startDate: new Date(row.original.startAt),
         billingCycleStart: row.original.startCycle ?? 1,
         billingPeriod: row.original.version.billingPeriod ?? "month",
       })
 
       const isNew =
-        row.original.startDateAt > calculatedBillingCycle.cycleStart.getTime() &&
-        row.original.startDateAt < calculatedBillingCycle.cycleEnd.getTime()
+        row.original.startAt > calculatedBillingCycle.cycleStart.getTime() &&
+        row.original.startAt < calculatedBillingCycle.cycleEnd.getTime()
 
       const trialDays = row.original.trialEndsAt
         ? differenceInDays(row.original.trialEndsAt, Date.now())
@@ -200,7 +200,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
     cell: ({ row }) => (
       <div className="flex items-center space-x-1">
         <div className="whitespace-nowrap text-sm">
-          {formatDate(row.original.startDateAt, row.original.timezone)}
+          {formatDate(row.original.startAt, row.original.timezone)}
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -214,12 +214,12 @@ export const columns: ColumnDef<PlanVersion>[] = [
               <Separator className="my-1" />
               <Typography variant="p" affects="removePaddingMargin" className="text-xs">
                 <span className="font-semibold">Local time: </span>
-                {format(toZonedTime(row.original.startDateAt, row.original.timezone), "PPpp")}
+                {format(toZonedTime(row.original.startAt, row.original.timezone), "PPpp")}
               </Typography>
 
               <Typography variant="p" affects="removePaddingMargin" className="text-xs">
                 <span className="font-semibold">Customer time: </span>
-                {format(new Date(row.original.startDateAt), "PPpp")}
+                {format(new Date(row.original.startAt), "PPpp")}
               </Typography>
             </div>
           </TooltipContent>
@@ -234,7 +234,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
     accessorKey: "endDate",
     header: ({ column }) => <DataTableColumnHeader column={column} title="End Date" />,
     cell: ({ row }) => {
-      const endDate = row.original.endDateAt
+      const endDate = row.original.endAt
 
       if (endDate === null || endDate === undefined) {
         return <div className="whitespace-nowrap text-sm">Forever</div>

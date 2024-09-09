@@ -93,12 +93,12 @@ export const cancel = protectedProcedure
         })
       }
 
-      // if the subscription is stil trialing, we need to set the endDateAt to the trialEndsAt
-      let endDateAt = subscriptionData.endDateAt ?? Date.now()
+      // if the subscription is stil trialing, we need to set the endAt to the trialEndsAt
+      let endAt = subscriptionData.endAt ?? Date.now()
 
       if (subscriptionData.status === "trialing") {
-        // if the subscription is stil trialing, we need to set the endDateAt to the trialEndsAt
-        endDateAt = subscriptionData.trialEndsAt ?? Date.now()
+        // if the subscription is stil trialing, we need to set the endAt to the trialEndsAt
+        endAt = subscriptionData.trialEndsAt ?? Date.now()
       }
 
       // cancelled the current subscription
@@ -106,9 +106,9 @@ export const cancel = protectedProcedure
         .update(schema.subscriptions)
         .set({
           status: "cancelled",
-          endDateAt: endDateAt,
+          endAt: endAt,
           nextPlanVersionId: defaultPlanVersion.id,
-          cancelledAt: Date.now(),
+          cancelAt: Date.now(),
         })
         .where(and(eq(schema.subscriptions.id, id), eq(schema.subscriptions.projectId, projectId)))
         .returning()
@@ -126,7 +126,7 @@ export const cancel = protectedProcedure
 
       // reseting the cache for the customer so the next call to get entitlements will get the new subscription
       // if endDate is in the future we dont need to reset the cache just yet
-      if (endDateAt <= Date.now()) {
+      if (endAt <= Date.now()) {
         opts.ctx.waitUntil(
           Promise.all([
             // reset the cache

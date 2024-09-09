@@ -59,12 +59,14 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   .partial({
     id: true,
     projectId: true,
+    billingCycleStartAt: true,
+    billingCycleEndAt: true,
   })
   .required({
     customerId: true,
     planVersionId: true,
     type: true,
-    startDateAt: true,
+    startAt: true,
   })
 
 export const subscriptionExtendedSchema = subscriptionSelectSchema
@@ -88,7 +90,7 @@ export const subscriptionChangePlanSchema = subscriptionInsertSchema
     projectId: true,
   })
   .superRefine((data, ctx) => {
-    if (data.endDateAt && data.startDateAt && data.endDateAt < data.startDateAt) {
+    if (data.endAt && data.startAt && data.endAt < data.startAt) {
       return ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "End date must be after start date",

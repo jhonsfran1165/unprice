@@ -38,7 +38,7 @@ export function UpgradeDialog({
             defaultValues ?? {
               id: "",
               customerId: "",
-              endDateAt: 0,
+              endAt: 0,
               nextPlanVersionId: "",
               config: [],
               projectId: "",

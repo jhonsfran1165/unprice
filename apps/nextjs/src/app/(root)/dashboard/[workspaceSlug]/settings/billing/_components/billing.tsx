@@ -39,7 +39,7 @@ export function BillingCard({
 
   const calculatedBillingCycle = calculateBillingCycle({
     currentDate: new Date(),
-    startDate: new Date(subscription.startDateAt),
+    startDate: new Date(subscription.startAt),
     billingCycleStart: subscription.startCycle ?? 1,
     billingPeriod: planVersion.billingPeriod ?? "month",
   })
@@ -98,7 +98,7 @@ export function BillingCard({
         <CardDescription>
           {isTrial &&
             subscription.trialEndsAt &&
-            subscription.nextBillingAt &&
+            subscription.billingCycleEndAt &&
             `You currently are on the trial of the ${
               planVersion.plan.slug
             } plan. After the trial ends on ${formatDate(
@@ -106,7 +106,7 @@ export function BillingCard({
               subscription.timezone,
               "MMM d, yy"
             )}, you will be billed in the next billing cycle on ${formatDate(
-              subscription.nextBillingAt,
+              subscription.billingCycleEndAt,
               subscription.timezone,
               "MMM d, yy"
             )} the following price.`}

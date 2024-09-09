@@ -43,7 +43,6 @@ export const mySubscriptions = protectedWorkspaceProcedure
             },
           },
           orderBy: (subscription, { desc }) => [desc(subscription.createdAtM)],
-          where: (subscription, { eq }) => eq(subscription.status, "active"),
         },
       },
       where: (customer, { eq }) => eq(customer.id, customerId),

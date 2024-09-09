@@ -7,7 +7,6 @@ import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
 
 import type { RouterOutputs } from "@unprice/api"
-import { calculateBillingCycle } from "@unprice/db/validators"
 import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
 import { Button } from "@unprice/ui/button"
 import { Typography } from "@unprice/ui/typography"
@@ -83,18 +82,11 @@ async function SubscriptionCard({
 
   const autoRenewal = subscription.autoRenew
   const trialEndsAt = subscription.trialEndsAt
-  const endDateAt = subscription.endDateAt
+  const endAt = subscription.endAt
   const isProrated = subscription.prorated
   const currentTrialDays = subscription.trialEndsAt
     ? differenceInCalendarDays(subscription.trialEndsAt, Date.now())
     : 0
-
-  const calculatedBillingCycle = calculateBillingCycle({
-    currentDate: new Date(),
-    startDate: new Date(subscription.startDateAt),
-    billingCycleStart: subscription.startCycle ?? 1,
-    billingPeriod: subscription.planVersion.billingPeriod ?? "month",
-  })
 
   /**
    * if the customer is in trial days, we need to show the trial days left and when the trial ends
@@ -120,7 +112,7 @@ async function SubscriptionCard({
                 <UpgradeDialog
                   defaultValues={{
                     id: subscription.id,
-                    endDateAt: Date.now(),
+                    endAt: Date.now(),
                     customerId: subscription.customerId,
                     nextPlanVersionId: "",
                     config: [],
@@ -137,7 +129,7 @@ async function SubscriptionCard({
                 <UpgradeDialog
                   defaultValues={{
                     id: subscription.id,
-                    endDateAt: Date.now(),
+                    endAt: Date.now(),
                     customerId: subscription.customerId,
                     nextPlanVersionId: "",
                     config: [],
@@ -153,33 +145,20 @@ async function SubscriptionCard({
             <div className="gap-2 rounded-lg bg-background-bg p-4">
               <Typography variant="h6">Current Billing Cycle</Typography>
               <Typography variant="p">
-                {formatDate(
-                  calculatedBillingCycle.cycleStart.getTime(),
-                  subscription.timezone,
-                  "MMM d, yyyy"
-                )}{" "}
-                -{" "}
-                {formatDate(
-                  calculatedBillingCycle.cycleEnd.getTime(),
-                  subscription.timezone,
-                  "MMM d, yyyy"
-                )}
+                {formatDate(subscription.billingCycleStartAt, subscription.timezone, "MMM d, yyyy")}{" "}
+                - {formatDate(subscription.billingCycleEndAt, subscription.timezone, "MMM d, yyyy")}
               </Typography>
               <div className="flex flex-col py-4">
                 <Typography variant="p" affects="removePaddingMargin">
                   <span className="font-bold">
-                    Your subscription{" "}
-                    {subscription.startDateAt > Date.now() ? "will start" : "started"} at:
+                    Your subscription {subscription.startAt > Date.now() ? "will start" : "started"}{" "}
+                    at:
                   </span>{" "}
-                  {formatDate(subscription.startDateAt, subscription.timezone, "MMM d, yyyy")}
+                  {formatDate(subscription.startAt, subscription.timezone, "MMM d, yyyy")}
                 </Typography>
                 <Typography variant="p" affects="removePaddingMargin">
                   <span className="font-bold">Next billing date:</span>{" "}
-                  {formatDate(
-                    subscription.nextBillingAt ?? calculatedBillingCycle.cycleEnd.getTime(),
-                    subscription.timezone,
-                    "MMM d, yyyy"
-                  )}
+                  {formatDate(subscription.billingCycleEndAt, subscription.timezone, "MMM d, yyyy")}
                 </Typography>
               </div>
             </div>
@@ -192,11 +171,11 @@ async function SubscriptionCard({
                 </AlertDescription>
               </Alert>
             )}
-            {endDateAt && (
+            {endAt && (
               <Alert variant="destructive">
                 <AlertTitle>Subscription End Date</AlertTitle>
                 <AlertDescription>
-                  {formatDate(endDateAt, subscription.timezone, "MMM d, yyyy")}
+                  {formatDate(endAt, subscription.timezone, "MMM d, yyyy")}
                 </AlertDescription>
               </Alert>
             )}
@@ -205,11 +184,7 @@ async function SubscriptionCard({
                 <AlertTitle>Subscription Will Auto Renew</AlertTitle>
                 <AlertDescription>
                   Your subscription will automatically renew at{" "}
-                  {formatDate(
-                    subscription.nextBillingAt ?? calculatedBillingCycle.cycleEnd.getTime(),
-                    subscription.timezone,
-                    "MMM d, yyyy"
-                  )}
+                  {formatDate(subscription.billingCycleEndAt, subscription.timezone, "MMM d, yyyy")}
                 </AlertDescription>
               </Alert>
             )}

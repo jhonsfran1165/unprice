@@ -22,8 +22,8 @@ export const billingRecurringSubscriptionsTask = task({
           eq(schema.subscriptions.planVersionId, schema.versions.id),
           eq(schema.subscriptions.projectId, schema.versions.projectId),
           or(
-            isNull(schema.subscriptions.nextBillingAt),
-            gte(schema.subscriptions.nextBillingAt, now)
+            isNull(schema.subscriptions.billingCycleEndAt),
+            gte(schema.subscriptions.billingCycleEndAt, now)
           )
         )
       )

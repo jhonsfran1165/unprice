@@ -200,8 +200,8 @@ export const createSubscription = async ({
     customerId,
     config,
     trialDays,
-    startDateAt,
-    endDateAt,
+    startAt,
+    endAt,
     collectionMethod,
     defaultPaymentMethodId,
     metadata,
@@ -302,6 +302,8 @@ export const createSubscription = async ({
 
   // check if payment method is required for the plan version
   const paymentMethodRequired = versionData.paymentMethodRequired
+  const trialDaysToUse = trialDays ?? versionData.trialDays ?? 0
+
   // if the customer has a default payment method, we use that
   // TODO: here it could be a problem, if the user sends a wrong payment method id, we will use the customer default payment method
   // for now just accept the default payment method is equal to the customer default payment method
@@ -311,21 +313,24 @@ export const createSubscription = async ({
   const paymentMethodId =
     defaultPaymentMethodId ?? customerData.metadata?.stripeDefaultPaymentMethodId
 
-  if (
-    defaultPaymentMethodId &&
-    defaultPaymentMethodId !== customerData.metadata?.stripeDefaultPaymentMethodId
-  ) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "Payment method is not valid",
-    })
-  }
+  // validate payment method if there is no trails
+  if (trialDaysToUse === 0) {
+    if (
+      defaultPaymentMethodId &&
+      defaultPaymentMethodId !== customerData.metadata?.stripeDefaultPaymentMethodId
+    ) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Payment method is not valid",
+      })
+    }
 
-  if (paymentMethodRequired && !paymentMethodId) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "Payment method is required for this plan version",
-    })
+    if (paymentMethodRequired && !paymentMethodId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Payment method is required for this plan version",
+      })
+    }
   }
 
   // check the active subscriptions of the customer.
@@ -369,7 +374,6 @@ export const createSubscription = async ({
   // override the timezone with the project timezone and other defaults with the plan version data
   // only used for ui purposes all date are saved in utc
   const timezoneToUse = timezone ?? versionData.project.timezone
-  const trialDaysToUse = trialDays ?? versionData.trialDays
   const billingPeriod = versionData.billingPeriod ?? "month"
   const whenToBillToUse = whenToBill ?? versionData.whenToBill
   const collectionMethodToUse = collectionMethod ?? versionData.collectionMethod
@@ -380,22 +384,14 @@ export const createSubscription = async ({
 
   // get the billing cycle for the subscription given the start date
   const calculatedBillingCycle = configureBillingCycleSubscription({
-    currentDate: new Date(),
-    startDate: new Date(startDateAt),
+    currentDate: Date.now(),
+    billingCycleStartAt: startAt,
     trialDays: trialDaysToUse,
     billingCycleStart: startCycleToUse,
     billingPeriod,
-    endDate: endDateAt ? new Date(endDateAt) : undefined,
-    autoRenew: autoRenewToUse,
   })
 
-  // the end of the cycle is the day we have to bill the customer
-  const effectiveStartDate = calculatedBillingCycle.effectiveStartDate.getTime()
-  const effectiveEndDate = calculatedBillingCycle.effectiveEndDate
-    ? calculatedBillingCycle.effectiveEndDate.getTime()
-    : undefined
   const prorationFactor = calculatedBillingCycle.prorationFactor
-  const nextBillingAt = calculatedBillingCycle.nextBillingAt.getTime()
   const trialDaysEndAt = calculatedBillingCycle.trialDaysEndAt
     ? calculatedBillingCycle.trialDaysEndAt.getTime()
     : undefined
@@ -418,13 +414,13 @@ export const createSubscription = async ({
         projectId: projectId,
         planVersionId: versionData.id,
         customerId: customerData.id,
-        startDateAt: effectiveStartDate,
-        endDateAt: effectiveEndDate,
+        startAt: startAt,
+        endAt: endAt ?? undefined,
         autoRenew: autoRenewToUse,
         trialDays: trialDaysToUse,
         trialEndsAt: trialDaysEndAt,
         collectionMethod: collectionMethodToUse,
-        status: "active",
+        status: trialDaysToUse > 0 ? "trialing" : "active",
         metadata: metadata,
         defaultPaymentMethodId: defaultPaymentMethodId,
         whenToBill: whenToBillToUse,
@@ -433,7 +429,8 @@ export const createSubscription = async ({
         type: type,
         timezone: timezoneToUse,
         prorated: prorated,
-        nextBillingAt: nextBillingAt,
+        billingCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
+        billingCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
         nextSubscriptionId: nextSubscriptionId,
       })
       .returning()
@@ -609,11 +606,12 @@ export const signUpCustomer = async ({
   const planProject = planVersion.project
   const paymentProvider = planVersion.paymentProvider
   const paymentRequired = planVersion.paymentMethodRequired ?? false
+  const trialDays = planVersion.trialDays ?? 0
   const customerId = newId("customer")
   const customerSuccessUrl = successUrl.replace("{CUSTOMER_ID}", customerId)
 
   // if payment is required, we need to go through payment provider flow first
-  if (paymentRequired) {
+  if (paymentRequired && trialDays === 0) {
     switch (paymentProvider) {
       case "stripe": {
         const stripePaymentProvider = new StripePaymentProvider({
@@ -711,7 +709,7 @@ export const signUpCustomer = async ({
           projectId: projectId,
           type: "plan",
           planVersionId: planVersion.id,
-          startDateAt: Date.now(),
+          startAt: Date.now(),
           status: "active",
           config: config,
           defaultPaymentMethodId: "",
@@ -928,17 +926,15 @@ export const signOutCustomer = async ({
 
   // all this should be in a transaction
   await ctx.db.transaction(async (tx) => {
-    // check if the subscription is in trials, if so set the endDateAt to the trialEndsAt
+    // check if the subscription is in trials, if so set the endAt to the trialEndsAt
     const cancelSubs = await Promise.all(
       customerSubs.map(async (sub) => {
-        const endDateAt = sub.status === "trialing" ? sub.trialEndsAt ?? Date.now() : Date.now()
         await tx
           .update(subscriptions)
           .set({
             status: "cancelled",
-            endDateAt: endDateAt,
             nextPlanVersionId: undefined,
-            cancelledAt: Date.now(),
+            cancelAt: Date.now(),
             nextSubscriptionId: undefined,
           })
           .where(eq(subscriptions.id, sub.id))

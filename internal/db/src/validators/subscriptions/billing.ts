@@ -13,68 +13,82 @@ import {
 } from "date-fns"
 import { type BillingPeriod, convertDateToUTC } from "../shared"
 
+// this function calculate the billing cycle for a subscription
+// when trials are passed the subscription cycle will be the start date + trial days
 export function configureBillingCycleSubscription({
-  currentDate,
-  startDate,
-  trialDays,
+  currentDate = Date.now(),
+  trialDays = 0,
+  billingCycleStartAt,
   billingCycleStart,
   billingPeriod,
-  endDate,
-  autoRenew = true,
+  endAt,
+  changeAt,
+  cancelAt,
 }: {
-  currentDate: Date
-  startDate: Date
-  trialDays: number
+  currentDate?: number
+  trialDays?: number
+  billingCycleStartAt: number
   billingCycleStart: number
   billingPeriod: BillingPeriod
-  endDate?: Date
-  autoRenew?: boolean
+  endAt?: number
+  changeAt?: number
+  cancelAt?: number
 }): {
   cycleStart: Date
   cycleEnd: Date
   secondsInCycle: number
   prorationFactor: number
   billableSeconds: number
-  effectiveStartDate: Date
-  effectiveEndDate?: Date
-  nextBillingAt: Date
   trialDaysEndAt?: Date
 } {
-  // calculate the trials, here we don't need to worry about the end of the day because
-  // we are calculating the proration to the seconds, after the first cycle the billing starts at midnight
-  // and aligns with the start of the day in UTC
-  const trialDaysEndAt = trialDays > 0 ? addDays(startDate, trialDays) : undefined
+  // calculate the min date different than 0
+  const minDateEnd = [endAt, cancelAt, changeAt]
+    .filter((date) => date && date > 0)
+    .reduce((min, date) => (date && (!min || date < min) ? date : min), 0)
+
+  if (trialDays > 0) {
+    // calculate the trials, here we don't need to worry about the end of the day because
+    // we are calculating the proration to the seconds, after the first cycle the billing will align with the start of the day
+    const trialDaysEndAt = addDays(billingCycleStartAt, trialDays)
+    // if there  are trial days, our first cycle would be when the trails starts and ends at the end of the trial days
+    // in this part proration is zero
+
+    // if the end date is less than the trial days end date, we need to use the end date
+    const effectiveEndCycle =
+      minDateEnd && minDateEnd > 0
+        ? Math.min(trialDaysEndAt.getTime(), minDateEnd)
+        : trialDaysEndAt.getTime()
+
+    const secondsInCycle = differenceInSeconds(
+      new Date(effectiveEndCycle),
+      new Date(billingCycleStartAt)
+    )
+
+    return {
+      cycleStart: new Date(billingCycleStartAt),
+      cycleEnd: new Date(effectiveEndCycle),
+      secondsInCycle,
+      prorationFactor: 0,
+      billableSeconds: 0,
+      trialDaysEndAt: new Date(trialDaysEndAt),
+    }
+  }
 
   // given the current date, calculate the start and end of the current billing cycle
   const { cycleStart, cycleEnd } =
     billingPeriod === "month"
-      ? calculateMonthlyBillingCycle(currentDate, billingCycleStart)
-      : calculateYearlyBillingCycle(currentDate, billingCycleStart)
+      ? calculateMonthlyBillingCycle(new Date(currentDate), billingCycleStart)
+      : calculateYearlyBillingCycle(new Date(currentDate), billingCycleStart)
 
   // we want to keep fairness so we calculate the proration to the seconds
   // INFO: if you find some ways we can improve fairness along the whole project please give me a shout
-  const effectiveStartDate = max([startDate, cycleStart, trialDaysEndAt ?? new Date(0)])
-  // if end date is defined calculate the trial days end at
-  let effectiveEndDate = endDate ? max([endDate, trialDaysEndAt ?? new Date(0)]) : undefined
-  let effectiveEndCycle = effectiveEndDate ? effectiveEndDate : cycleEnd
-  let effectiveStartCycle = cycleStart
+  const effectiveStartDate = max([billingCycleStartAt, cycleStart]).getTime()
+  // if end date is defined define the effective end date
+  const effectiveEndDate = minDateEnd && minDateEnd > 0 ? minDateEnd : cycleEnd.getTime()
 
-  // INFO: this is a special case where the trial days are greater than the billing cycle
-  // we need to calculate the next billing date
-  if (trialDaysEndAt && trialDaysEndAt > cycleEnd) {
-    // we need to calculate the next billing date with the trial days end at
-    const { cycleEnd, cycleStart } =
-      billingPeriod === "month"
-        ? calculateMonthlyBillingCycle(trialDaysEndAt, billingCycleStart)
-        : calculateYearlyBillingCycle(trialDaysEndAt, billingCycleStart)
-
-    effectiveEndCycle = cycleEnd
-    effectiveStartCycle = cycleStart
-  }
-
-  if (autoRenew === false) {
-    effectiveEndDate = effectiveEndCycle
-  }
+  // depending on the end date, we calculate the effective end cycle
+  const effectiveEndCycle = effectiveEndDate ? effectiveEndDate : cycleEnd.getTime()
+  const effectiveStartCycle = cycleStart.getTime()
 
   // The + 1 is added to include both the start and end dates in the calculation.
   // This ensures that a full day is counted even if the difference is calculated to the same time on consecutive days.
@@ -96,10 +110,6 @@ export function configureBillingCycleSubscription({
     secondsInCycle,
     prorationFactor,
     billableSeconds,
-    effectiveStartDate,
-    effectiveEndDate,
-    nextBillingAt: effectiveEndCycle,
-    trialDaysEndAt,
   }
 }
 

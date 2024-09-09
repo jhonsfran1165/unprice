@@ -14,7 +14,7 @@ export const changePlan = protectedProjectProcedure
     const {
       id: subscriptionId,
       customerId,
-      endDateAt,
+      endAt,
       nextPlanVersionId,
       collectionMethod,
       defaultPaymentMethodId,
@@ -143,18 +143,18 @@ export const changePlan = protectedProjectProcedure
     }
 
     // end date must be after the start date
-    if (endDateAt && endDateAt < subscriptionData.startDateAt) {
+    if (endAt && endAt < subscriptionData.startAt) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "End date must be after start date",
       })
     }
 
-    // if the subscription is stil trialing, we need to set the endDateAt to the trialEndsAt
-    let endDateAtToUse = endDateAt ?? Date.now()
+    // if the subscription is stil trialing, we need to set the endAt to the trialEndsAt
+    let endDateAtToUse = endAt ?? Date.now()
 
     if (subscriptionData.status === "trialing") {
-      endDateAtToUse = endDateAt ?? subscriptionData.trialEndsAt ?? Date.now()
+      endDateAtToUse = endAt ?? subscriptionData.trialEndsAt ?? Date.now()
     }
 
     // 1. update the subscription to inactive
@@ -168,9 +168,9 @@ export const changePlan = protectedProjectProcedure
         .update(schema.subscriptions)
         .set({
           status: "changed",
-          endDateAt: endDateAtToUse,
+          endAt: endDateAtToUse,
           nextPlanVersionId: newPlanVersionId,
-          changedAt: Date.now(),
+          changeAt: Date.now(),
         })
         .where(
           and(
@@ -196,16 +196,16 @@ export const changePlan = protectedProjectProcedure
           projectId: projectId,
           collectionMethod: collectionMethod ?? subscriptionData.collectionMethod,
           // will set the start date right after the end date of the current subscription
-          startDateAt: endDateAtToUse + 1,
+          startAt: endDateAtToUse + 1,
           timezone: timezone,
           whenToBill: whenToBill,
           startCycle: startCycle,
           config: config,
-          endDateAt: undefined,
+          endAt: undefined,
           autoRenew: autoRenew,
           defaultPaymentMethodId: defaultPaymentMethodId,
           trialDays: trialDays ?? 0,
-          changedAt: subscriptionData.changedAt,
+          changeAt: subscriptionData.changeAt,
           type: subscriptionData.type,
           metadata: {
             lastPlanChangeAt: Date.now(),

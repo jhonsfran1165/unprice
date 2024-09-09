@@ -20,6 +20,7 @@ export const endTrialsTask = schedules.task({
       .select({
         subscription: schema.subscriptions,
         planVersion: schema.versions,
+        customer: schema.customers,
       })
       .from(schema.subscriptions)
       .innerJoin(schema.projects, and(eq(schema.subscriptions.projectId, schema.projects.id)))
@@ -30,15 +31,44 @@ export const endTrialsTask = schedules.task({
           eq(schema.subscriptions.projectId, schema.versions.projectId)
         )
       )
+      .innerJoin(schema.customers, eq(schema.subscriptions.customerId, schema.customers.id))
       .where(
         and(
           eq(schema.versions.planType, "recurring"),
+          eq(schema.subscriptions.status, "trialing"),
           or(
             isNotNull(schema.subscriptions.trialEndsAt),
             gte(schema.subscriptions.trialEndsAt, now)
           )
         )
       )
+
+    for (const subscription of subscriptions) {
+      const sub = subscription.subscription
+      const planVersion = subscription.planVersion
+
+      const requiredPaymentMethod = planVersion.paymentMethodRequired
+      const hasPaymentMethod = sub.defaultPaymentMethodId
+
+      if (requiredPaymentMethod && !hasPaymentMethod) {
+        // change the status of the subscription to past_due
+        await db
+          .update(schema.subscriptions)
+          .set({ status: "past_due" })
+          .where(eq(schema.subscriptions.id, sub.id))
+      }
+    }
+
+    // for subscription ending trials we need to:
+    // - verify if the customer has a valid payment method
+    // - if not change the status of the subscription to past_due
+    // - if so we validate if the subscription is bill at the start of the billing cycle
+    // if so we create an invoice and bill the customer or charge the customer automatically
+    // if not we change the status of the subscription to past_due and wait until the past due date expires
+    // after that we cancel the subscription and create a new one with the next plan to the default plan
+    // if the customer has a valid payment method and the subscription is not bill at the start of the billing cycle
+    // we change the status of the subscription to active and bill the customer at the end of the billing cycle
+    // if past due we send a reminder email to the customer and the invoice.
 
     logger.info(`Found ${subscriptions.length} subscriptions`)
 

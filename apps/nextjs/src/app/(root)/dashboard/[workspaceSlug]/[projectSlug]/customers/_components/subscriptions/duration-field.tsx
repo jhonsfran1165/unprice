@@ -27,11 +27,11 @@ export default function DurationFormField({
   form: UseFormReturn<InsertSubscription>
   isDisabled?: boolean
 }) {
-  const startDateAt = form.getValues("startDateAt")
-  const endDateAt = form.getValues("endDateAt")
+  const startAt = form.getValues("startAt")
+  const endAt = form.getValues("endAt")
 
-  const [start, setStart] = useState<Date | undefined>(new Date(startDateAt))
-  const [end, setEnd] = useState<Date | undefined>(endDateAt ? new Date(endDateAt) : undefined)
+  const [start, setStart] = useState<Date | undefined>(new Date(startAt))
+  const [end, setEnd] = useState<Date | undefined>(endAt ? new Date(endAt) : undefined)
   const [isOpenPopOverStart, setIsOpenPopOverStart] = useState(false)
   const [isOpenPopOverEnd, setIsOpenPopOverEnd] = useState(false)
 
@@ -41,7 +41,7 @@ export default function DurationFormField({
     <div className="flex w-full flex-col gap-2 lg:w-1/2">
       <FormLabel
         className={cn({
-          "text-destructive": errors.startDateAt,
+          "text-destructive": errors.startAt,
         })}
       >
         Duration
@@ -52,7 +52,7 @@ export default function DurationFormField({
       <div className="flex flex-row rounded-md border bg-background-bg">
         <FormField
           control={form.control}
-          name="startDateAt"
+          name="startAt"
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <Popover open={isOpenPopOverStart} onOpenChange={setIsOpenPopOverStart}>
@@ -161,7 +161,7 @@ export default function DurationFormField({
         />
         <FormField
           control={form.control}
-          name="endDateAt"
+          name="endAt"
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <Popover open={isOpenPopOverEnd} onOpenChange={setIsOpenPopOverEnd}>
@@ -316,7 +316,7 @@ export default function DurationFormField({
           )}
         />
       </div>
-      {errors.startDateAt && <FormMessage>{errors.startDateAt.message}</FormMessage>}
+      {errors.startAt && <FormMessage>{errors.startAt.message}</FormMessage>}
     </div>
   )
 }

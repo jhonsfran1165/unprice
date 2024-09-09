@@ -72,7 +72,7 @@ export function SubscriptionForm({
   const defaultValuesData = useMemo(() => {
     if (isChangePlanSubscription) {
       // we have to delete endDate and other fields that are not the same when the user is trying to change the plan
-      defaultValues.endDateAt = undefined
+      defaultValues.endAt = undefined
       defaultValues.nextPlanVersionId = undefined
     }
     return defaultValues
@@ -131,7 +131,7 @@ export function SubscriptionForm({
           }
 
           // validate that the end date is after the start date
-          if (data.endDateAt && data.startDateAt && data.endDateAt < data.startDateAt) {
+          if (data.endAt && data.startAt && data.endAt < data.startAt) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: "End date must be after start date",
@@ -200,10 +200,10 @@ export function SubscriptionForm({
       await createSubscription.mutateAsync(data as InsertSubscription)
     }
 
-    if (defaultValues.id && isChangePlanSubscription && data.endDateAt && data.nextPlanVersionId) {
+    if (defaultValues.id && isChangePlanSubscription && data.endAt && data.nextPlanVersionId) {
       await changeSubscriptionPlan.mutateAsync({
         ...data,
-        endDateAt: data.endDateAt,
+        endAt: data.endAt,
         nextPlanVersionId: data.nextPlanVersionId,
         id: defaultValues.id,
         // TODO: handle this properly

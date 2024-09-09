@@ -25,7 +25,7 @@ export default function EndDateFormField({
   form: UseFormReturn<InsertSubscription>
   isDisabled?: boolean
 }) {
-  const endDateField = form.getValues("endDateAt")
+  const endDateField = form.getValues("endAt")
   const [isOpenPopOverEnd, setIsOpenPopOverEnd] = useState(false)
   const [endDate, setEndDate] = useState<Date | undefined>(
     endDateField ? new Date(endDateField) : undefined
@@ -35,7 +35,7 @@ export default function EndDateFormField({
   return (
     <FormField
       control={form.control}
-      name="endDateAt"
+      name="endAt"
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>End date Current Plan</FormLabel>

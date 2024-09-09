@@ -61,7 +61,7 @@ export default async function PlanPage({
                     autoRenew: true,
                     config: [],
                     defaultPaymentMethodId: "",
-                    startDateAt: Date.now(),
+                    startAt: Date.now(),
                   }}
                 >
                   <Button variant={"custom"}>

@@ -131,7 +131,7 @@ export const createInvoiceStripeJob = client.defineJob({
     io.logger.info("dates", {
       year,
       month,
-      startDate: new Date(subscription.startDateAt),
+      startDate: new Date(subscription.startAt),
       createdAtM: new Date(subscription.createdAtM),
     })
 
@@ -139,14 +139,14 @@ export const createInvoiceStripeJob = client.defineJob({
     // TODO: support plan changes
     let monthProrate: number | undefined = undefined
     if (
-      subscription.startDateAt &&
-      new Date(subscription.startDateAt).getUTCFullYear() === year &&
-      new Date(subscription.startDateAt).getUTCMonth() === month
+      subscription.startAt &&
+      new Date(subscription.startAt).getUTCFullYear() === year &&
+      new Date(subscription.startAt).getUTCMonth() === month
     ) {
       const start = new Date(year, month, 1)
       const end = new Date(year, month + 1)
       monthProrate =
-        (end.getTime() - new Date(subscription.startDateAt).getTime()) /
+        (end.getTime() - new Date(subscription.startAt).getTime()) /
         (end.getTime() - start.getTime())
 
       io.logger.info("prorating", { start, end, monthProrate })
