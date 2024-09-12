@@ -132,8 +132,8 @@ export const changePlan = protectedProjectProcedure
 
     // if the subscription was changed in the last 30 days, we should not allow the customer to change the plan
     if (
-      subscriptionData.metadata?.lastPlanChangeAt &&
-      subscriptionData.metadata.lastPlanChangeAt > addDays(new Date(Date.now()), -30).getTime()
+      subscriptionData.metadata?.lastChangePlanAt &&
+      subscriptionData.metadata.lastChangePlanAt > addDays(new Date(Date.now()), -30).getTime()
     ) {
       throw new TRPCError({
         code: "BAD_REQUEST",
@@ -170,7 +170,6 @@ export const changePlan = protectedProjectProcedure
           status: "changed",
           endAt: endDateAtToUse,
           nextPlanVersionId: newPlanVersionId,
-          changeAt: Date.now(),
         })
         .where(
           and(
@@ -205,10 +204,9 @@ export const changePlan = protectedProjectProcedure
           autoRenew: autoRenew,
           defaultPaymentMethodId: defaultPaymentMethodId,
           trialDays: trialDays ?? 0,
-          changeAt: subscriptionData.changeAt,
           type: subscriptionData.type,
           metadata: {
-            lastPlanChangeAt: Date.now(),
+            lastChangePlanAt: Date.now(),
           },
         },
         projectId: projectId,

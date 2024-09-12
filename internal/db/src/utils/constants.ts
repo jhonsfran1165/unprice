@@ -79,11 +79,12 @@ export const CURRENCIES = ["USD", "EUR"] as const
 export const STAGES = ["prod", "test", "dev"] as const
 export const STATUS_PLAN = ["draft", "published"] as const
 export const STATUS_SUBSCRIPTION = [
-  "active",
-  "trialing",
-  "changed",
-  "cancelled",
-  "past_due",
+  "active", // the subscription is active
+  "trialing", // the subscription is trialing
+  "changed", // the subscription has changed
+  "cancelled", // the subscription is cancelled
+  "expired", // the subscription has expired - no auto-renew
+  "past_due", // the subscription is past due - payment pending
 ] as const
 export const PLAN_TYPES = ["recurring"] as const
 export const PLAN_BILLING_PERIODS = ["month", "year"] as const

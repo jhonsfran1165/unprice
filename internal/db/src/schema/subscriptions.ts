@@ -62,7 +62,7 @@ export const subscriptions = pgTableProject(
     // whenToBill: pay_in_advance - pay_in_arrear
     whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance").notNull(),
     // when to start each cycle for this subscription -
-    startCycle: integer("start_cycle").default(1).$type<StartCycle>(), // null means the first day of the month
+    startCycle: integer("start_cycle").notNull().default(1).$type<StartCycle>(), // null means the first day of the month
     // a grace period of 1 day could handle edge cases when the payment is late for a few hours
     // TODO: change to grace period in days
     gracePeriod: integer("grace_period").notNull().default(1),
@@ -88,26 +88,25 @@ export const subscriptions = pgTableProject(
     startAt: bigint("start_at_m", { mode: "number" }).default(0).notNull(),
     // when the subscription ends
     endAt: bigint("end_at_m", { mode: "number" }),
-    // when the subscription was changed
-    changeAt: bigint("change_at_m", { mode: "number" }),
-    // when the subscription was cancelled
-    cancelAt: bigint("cancel_at_m", { mode: "number" }),
-    // last billed at is the last time the subscription was billed
-    lastBilledAt: bigint("last_billed_at_m", { mode: "number" }),
     // billingCycleStartAt is the start time of the billing cycle
     billingCycleStartAt: bigint("billing_cycle_start_at_m", { mode: "number" }).notNull(),
     // billingCycleEndAt is the end time of the billing cycle
     billingCycleEndAt: bigint("billing_cycle_end_at_m", { mode: "number" }).notNull(),
-    // a subscription can change once per billing cycle
-    lastChangePlanAt: bigint("last_change_plan_at_m", { mode: "number" }),
-    // pastDueAt is the date when the subscription was past due
+    // when the subscription is going to be billed next
+    nextBillingAt: bigint("next_billing_at_m", { mode: "number" }),
+    // lastBilledAt is the last time the subscription was billed
+    lastBilledAt: bigint("last_billed_at_m", { mode: "number" }),
+    // when the subscription was past due
     pastDueAt: bigint("past_due_at_m", { mode: "number" }),
     // ************ subscription important dates ************
 
     // status of the subscription - active, inactive, canceled, paused, etc.
-    // TODO: if I have the dates when things happened, I can calculate the status of the subscription
-    // so no need for this field??
     status: subscriptionStatusEnum("status").notNull().default("active"),
+
+    // whether the subscription is active or not
+    // normally is active if the status is active, trialing or past_due
+    // this simplifies the queries when we need to get the active subscriptions
+    active: boolean("active").notNull().default(true),
 
     // metadata for the subscription
     metadata: json("metadata").$type<z.infer<typeof subscriptionMetadataSchema>>(),

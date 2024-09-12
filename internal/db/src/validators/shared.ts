@@ -34,19 +34,31 @@ export const startCycleYearSchema = z.coerce.number().int().min(1).max(12)
 export const startCycleSchema = z.union([startCycleMonthSchema, startCycleYearSchema]).default(1)
 
 export const convertDateToUTC = (date: Date) => {
-  // Extract date components
-  const year = date.getFullYear()
-  const month = date.getMonth()
-  const day = date.getDate()
-  const hours = date.getHours()
-  const minutes = date.getMinutes()
-  const seconds = date.getSeconds()
-  const milliseconds = date.getMilliseconds()
+  // Check if the date is already in UTC
+  if (
+    date.getUTCFullYear() === date.getFullYear() &&
+    date.getUTCMonth() === date.getMonth() &&
+    date.getUTCDate() === date.getDate() &&
+    date.getUTCHours() === date.getHours() &&
+    date.getUTCMinutes() === date.getMinutes() &&
+    date.getUTCSeconds() === date.getSeconds()
+  ) {
+    // The date is already in UTC, return it as is
+    return date
+  }
 
-  // Create a new UTC date with the same components, including milliseconds
-  const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds, milliseconds))
-
-  return utcDate
+  // Create a new Date object with UTC values
+  return new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      date.getSeconds(),
+      date.getMilliseconds()
+    )
+  )
 }
 
 export const dateToUnixMilli = z

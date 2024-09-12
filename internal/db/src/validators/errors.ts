@@ -10,3 +10,14 @@ export class UnPriceCalculationError extends BaseError {
     })
   }
 }
+
+export class UnPriceSubscriptionError extends BaseError {
+  public readonly retry = false
+  public readonly name = UnPriceSubscriptionError.name
+
+  constructor({ message }: { message: string }) {
+    super({
+      message: `Failed to create subscription: ${message}`,
+    })
+  }
+}
