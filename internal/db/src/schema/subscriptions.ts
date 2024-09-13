@@ -20,6 +20,10 @@ import type { subscriptionMetadataSchema } from "../validators/subscriptions"
 import { customers } from "./customers"
 import {
   collectionMethodEnum,
+  currencyEnum,
+  invoiceStatusEnum,
+  invoiceTypeEnum,
+  paymentProviderEnum,
   subscriptionStatusEnum,
   typeSubscriptionEnum,
   whenToBillEnum,
@@ -54,6 +58,7 @@ export const subscriptions = pgTableProject(
     // TODO: support addons in other table
     type: typeSubscriptionEnum("type").default("plan").notNull(),
 
+    // TODO: delete uncessesary stuff
     // prorate the subscription when the subscription is created in the middle of the billing period
     prorated: boolean("prorated").default(true),
 
@@ -93,11 +98,16 @@ export const subscriptions = pgTableProject(
     // billingCycleEndAt is the end time of the billing cycle
     billingCycleEndAt: bigint("billing_cycle_end_at_m", { mode: "number" }).notNull(),
     // when the subscription is going to be billed next
-    nextBillingAt: bigint("next_billing_at_m", { mode: "number" }),
+    nextInvoiceAt: bigint("next_invoice_at_m", { mode: "number" }).notNull(),
+    lastChangePlanAt: bigint("last_change_plan_at_m", { mode: "number" }),
     // lastBilledAt is the last time the subscription was billed
-    lastBilledAt: bigint("last_billed_at_m", { mode: "number" }),
+    lastInvoiceAt: bigint("last_invoice_at_m", { mode: "number" }),
     // when the subscription was past due
     pastDueAt: bigint("past_due_at_m", { mode: "number" }),
+    // when the subscription was changed
+    changeAt: bigint("change_at_m", { mode: "number" }),
+    // when the subscription was cancelled
+    cancelAt: bigint("cancel_at_m", { mode: "number" }),
     // ************ subscription important dates ************
 
     // status of the subscription - active, inactive, canceled, paused, etc.
@@ -157,6 +167,50 @@ export const subscriptionItems = pgTableProject(
       columns: [table.featurePlanVersionId, table.projectId],
       foreignColumns: [planVersionFeatures.id, planVersionFeatures.projectId],
       name: "subscription_items_plan_version_id_fkey",
+    }),
+  })
+)
+
+export const billingCycleInvoices = pgTableProject(
+  "billing_cycle_invoices",
+  {
+    ...projectID,
+    ...timestamps,
+    subscriptionId: cuid("subscription_id").notNull(),
+    status: invoiceStatusEnum("status").notNull().default("unpaid"),
+    billingCycleStartAt: bigint("billing_cycle_start_at_m", { mode: "number" }).notNull(),
+    billingCycleEndAt: bigint("billing_cycle_end_at_m", { mode: "number" }).notNull(),
+    // when the invoice was billed
+    billedAt: bigint("billed_at_m", { mode: "number" }),
+    // when the invoice is due
+    dueAt: bigint("due_at_m", { mode: "number" }).notNull(),
+    paidAt: bigint("paid_at_m", { mode: "number" }),
+    type: invoiceTypeEnum("invoice_type").notNull().default("flat"),
+    total: text("total").notNull(),
+    invoiceUrl: text("invoice_url"),
+    collectionMethod: collectionMethodEnum("collection_method")
+      .notNull()
+      .default("charge_automatically"),
+    invoiceId: text("invoice_id"),
+    paymentMethodId: text("payment_method_id"),
+    whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance").notNull(),
+    // payment provider for the plan - stripe, paypal, lemonsquezee etc.
+    paymentProvider: paymentProviderEnum("payment_providers").notNull(),
+    // currency of the plan
+    currency: currencyEnum("currency").notNull(),
+    gracePeriod: integer("grace_period").notNull().default(1),
+    // when the subscription was past due
+    pastDueAt: bigint("past_due_at_m", { mode: "number" }),
+  },
+  (table) => ({
+    primary: primaryKey({
+      columns: [table.id, table.projectId],
+      name: "billing_cycle_invoices_pkey",
+    }),
+    subscriptionfk: foreignKey({
+      columns: [table.subscriptionId, table.projectId],
+      foreignColumns: [subscriptions.id, subscriptions.projectId],
+      name: "billing_cycle_invoices_subscription_id_fkey",
     }),
   })
 )

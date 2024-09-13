@@ -6,7 +6,7 @@ import { configureBillingCycleSubscription } from "@unprice/db/validators"
 import { addDays } from "date-fns"
 
 export const invoiceSubscription = task({
-  id: "billing.invoice.subscription",
+  id: "invoice.subscription",
   run: async ({
     subscriptionId,
     customerId,
@@ -50,13 +50,14 @@ export const invoiceSubscription = task({
       return
     }
 
-    const shouldBeInvoiced = subscription.nextInvoiceAt && subscription.nextInvoiceAt > currentDate
+    const shouldBeInvoiced = subscription.nextInvoiceAt < currentDate
 
     if (!shouldBeInvoiced) {
       logger.info(`Subscription ${subscriptionId} should not be invoiced yet`)
       return
     }
 
+    // TODO: we could fetch the last invoice and check if the next invoice is due
     // find out if the subscription has an invoice for the current billing cycle
     const currentBillingCycleInvoice = await db.query.billingCycleInvoices.findFirst({
       where(fields, operators) {
@@ -147,93 +148,44 @@ export const invoiceSubscription = task({
         total: "0",
         billedAt: currentDate,
         collectionMethod: collectionMethod,
-        pastDueAt: gracePeriodEndsAt,
+
         currency: planVersion.currency,
         paymentProvider: planVersion.paymentProvider,
       })
       .returning()
 
+    // for subscription that are pay in advance, we bill the customer 2 times
+    // the first time at the start of the billing cycle and the second time at the end of the billing cycle
+    // for subscription that are pay in arrear, we bill the customer at the end of the billing cycle
+
     // support usage based billing and proration
 
     // TODO: this should be a separate task for the billing cycle invoice
-    if (
-      whenToBill === "pay_in_advance" &&
-      subscription.nextInvoiceAt &&
-      subscription.nextInvoiceAt > currentDate
-    ) {
-      if (collectionMethod === "charge_automatically") {
-        // TODO: bill the customer automatically
-
-        // update the subscription with the new billing cycle
-        await db
-          .update(schema.subscriptions)
-          .set({
-            status: "active",
-            // update the lastBilledAt to the current date
-            lastInvoiceAt: subscription.billingCycleStartAt,
-            // set the next billing date to the end of the current billing cycle
-            nextInvoiceAt: subscription.billingCycleEndAt,
-          })
-          .where(eq(schema.subscriptions.id, subscription.id))
-      }
-
-      if (collectionMethod === "send_invoice") {
-        // TODO: send an email to the customer with the invoice
-        // TODO: wait until the invoice is paid
-        await db
-          .update(schema.subscriptions)
-          .set({
-            status: "past_due",
-            pastDueAt: gracePeriodEndsAt,
-            metadata: {
-              ...subscription.metadata,
-              reason: "payment_pending",
-              note: "Invoice sent waiting for payment",
-            },
-          })
-          .where(eq(schema.subscriptions.id, subscription.id))
-      }
+    if (whenToBill === "pay_in_advance") {
+      // update the subscription with the new billing cycle
+      await db
+        .update(schema.subscriptions)
+        .set({
+          // update the lastBilledAt to the current date
+          lastInvoiceAt: subscription.billingCycleStartAt,
+          // set the next billing date to the end of the current billing cycle
+          nextInvoiceAt: subscription.billingCycleEndAt,
+        })
+        .where(eq(schema.subscriptions.id, subscription.id))
     }
 
-    if (
-      whenToBill === "pay_in_arrear" &&
-      subscription.nextInvoiceAt &&
-      subscription.nextInvoiceAt > currentDate
-    ) {
-      if (collectionMethod === "charge_automatically") {
-        // update the subscription with the new billing cycle
-        await db
-          .update(schema.subscriptions)
-          .set({
-            status: "active",
-            // if the subscription is not in the current cycle, update to the new billing cycle
-            billingCycleStartAt: calculatedNextBillingCycle.cycleStart.getTime(),
-            billingCycleEndAt: calculatedNextBillingCycle.cycleEnd.getTime(),
-            prorated: calculatedNextBillingCycle.prorationFactor < 1,
-            // update the lastBilledAt to the current date
-            lastInvoiceAt: subscription.billingCycleStartAt,
-          })
-          .where(eq(schema.subscriptions.id, subscription.id))
-      }
-
-      if (collectionMethod === "send_invoice") {
-        // TODO: create an invoice at the end of the billing cycle
-        // TODO: send an email to the customer with the invoice
-        // TODO: wait until the invoice is paid
-        // update the subscription with the new billing cycle
-        await db
-          .update(schema.subscriptions)
-          .set({
-            status: "past_due",
-            pastDueAt: gracePeriodEndsAt,
-            metadata: {
-              ...subscription.metadata,
-              reason: "payment_pending",
-              note: "Invoice sent waiting for payment",
-            },
-          })
-          .where(eq(schema.subscriptions.id, subscription.id))
-      }
+    if (whenToBill === "pay_in_arrear") {
+      await db
+        .update(schema.subscriptions)
+        .set({
+          billingCycleStartAt: calculatedNextBillingCycle.cycleStart.getTime(),
+          billingCycleEndAt: calculatedNextBillingCycle.cycleEnd.getTime(),
+          nextInvoiceAt: calculatedNextBillingCycle.cycleEnd.getTime(),
+          prorated: calculatedNextBillingCycle.prorationFactor < 1,
+          // update the lastBilledAt to the current date
+          lastInvoiceAt: subscription.billingCycleStartAt,
+        })
+        .where(eq(schema.subscriptions.id, subscription.id))
     }
   },
 })

@@ -24,6 +24,7 @@ export const prefixes = {
   plan_version: "pv",
   usage: "usage",
   log: "log",
+  billing_cycle_invoice: "bci",
 } as const
 
 export function newId<TPrefix extends keyof typeof prefixes>(prefix: TPrefix) {

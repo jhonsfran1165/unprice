@@ -34,7 +34,11 @@ export const endTrialsTask = schedules.task({
       )
       .innerJoin(schema.customers, eq(schema.subscriptions.customerId, schema.customers.id))
       .where(
-        and(eq(schema.subscriptions.status, "trialing"), gte(schema.subscriptions.trialEndsAt, now))
+        and(
+          eq(schema.subscriptions.status, "trialing"),
+          gte(schema.subscriptions.trialEndsAt, now),
+          eq(schema.subscriptions.active, true)
+        )
       )
 
     for (const subscription of subscriptions) {
@@ -42,17 +46,46 @@ export const endTrialsTask = schedules.task({
       const planVersion = subscription.planVersion
       const customer = subscription.customer
 
-      const requiredPaymentMethod = planVersion.paymentMethodRequired
-      // TODO: the payment provider could be different than stripe
-      const hasPaymentMethod =
-        sub.defaultPaymentMethodId ?? customer.metadata?.stripeDefaultPaymentMethodId
+      // if the plan is in grace period, we need to wait until the grace period ends
+      const gracePeriodEndsAt = addDays(sub.billingCycleEndAt, sub.gracePeriod).getTime()
 
-      const gracePeriodEndsAt = addDays(Date.now(), sub.gracePeriod).getTime()
+      // if the plan requires a payment method, but at this point the customer does not have one yet
+      // we downgrade the plan to the default plan
+      const requiredPaymentMethod = planVersion.paymentMethodRequired
+      let hasPaymentMethod = ""
+
+      const paymentProvider = planVersion.paymentProvider
+
+      if (paymentProvider === "stripe") {
+        hasPaymentMethod = customer.metadata?.stripeDefaultPaymentMethodId ?? ""
+      }
 
       // if the plan needs a payment method and the customer does not have one yet
       // we need to find the default plan and change the subscription to pending payment method
       // and downgrade the plan to the default plan
-      if (requiredPaymentMethod && !hasPaymentMethod) {
+      if (requiredPaymentMethod && hasPaymentMethod !== "") {
+        // lets wait until the grace period ends
+        if (gracePeriodEndsAt > Date.now()) {
+          logger.info(`Grace period ends at ${gracePeriodEndsAt} for subscription ${sub.id}`)
+
+          // set status to identifying later on
+          // TODO: I could change the status to past_due or something like that
+          // and let the past_due job to handle the downgrading
+          await db
+            .update(schema.subscriptions)
+            .set({
+              status: "past_due",
+              pastDueAt: gracePeriodEndsAt,
+              metadata: {
+                reason: "trials_ended",
+                note: "Waiting for payment method",
+              },
+            })
+            .where(eq(schema.subscriptions.id, sub.id))
+          continue
+        }
+
+        // TODO: past_due job should handle this --->
         // now we query the latest default plan version
         const defaultPlanVersion = await db.query.plans
           .findFirst({
@@ -93,9 +126,8 @@ export const endTrialsTask = schedules.task({
               trialDays: 0,
               startAt: Date.now(),
               metadata: {
-                lastChangePlanAt: Date.now(),
                 reason: "trials_ended",
-                note: "Trials ended, downgrading to default plan because payment method not found",
+                note: "no payment method provided after grace period",
               },
             },
             db: trx,
@@ -112,14 +144,14 @@ export const endTrialsTask = schedules.task({
             .update(schema.subscriptions)
             .set({
               status: "changed",
-              endAt: gracePeriodEndsAt,
+              endAt: Date.now(),
+              changeAt: Date.now(),
               nextSubscriptionId: result.val.id,
               nextPlanVersionId: defaultPlanVersion.id,
+              active: false,
               metadata: {
-                ...sub.metadata,
-                reason: "trials_ended",
-                note: "Trials ended, downgrading to default plan",
-                requestActionAt: Date.now(),
+                reason: "grace_period",
+                note: "Grace period ended, downgrading to default plan",
               },
             })
             .where(eq(schema.subscriptions.id, sub.id))
@@ -128,16 +160,12 @@ export const endTrialsTask = schedules.task({
             subscriptionId: result.val.id,
           }
         })
-
+        // <---
         continue
       }
 
-      if (!planVersion.billingPeriod) {
-        logger.error(`Plan version ${planVersion.id} has no billing period`)
-        continue
-      }
-
-      // here we should be able to bill the subscription
+      // here we should be able to bill the subscription because the customer has a payment method
+      // TODO: execute a billing job from here with the current date
       logger.error(`Plan version ${planVersion.id} has no billing period`)
     }
 

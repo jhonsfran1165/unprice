@@ -34,12 +34,11 @@ const reasonSchema = z.enum([
   "policy_violation",
   "no_auto_renew",
   "pending_payment_method",
+  "grace_period",
 ])
 
 export const subscriptionMetadataSchema = z.object({
   reason: reasonSchema.optional(),
-  requestActionAt: z.number().optional(),
-  lastChangePlanAt: z.number().optional(),
   note: z.string().optional(),
 })
 
@@ -76,6 +75,7 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
     projectId: true,
     billingCycleStartAt: true,
     billingCycleEndAt: true,
+    nextInvoiceAt: true,
   })
   .required({
     customerId: true,
@@ -411,7 +411,7 @@ export const createSubscriptionDB = async ({
   })
 
   // calculate the next billing at given the when to bill
-  const nextBillingAtToUse =
+  const nextInvoiceAtToUse =
     whenToBillToUse === "pay_in_advance"
       ? calculatedBillingCycle.cycleStart.getTime()
       : calculatedBillingCycle.cycleEnd.getTime()
@@ -435,7 +435,7 @@ export const createSubscriptionDB = async ({
       .insert(subscriptions)
       .values({
         id: subscriptionId,
-        projectId: projectId,
+        projectId,
         planVersionId: versionData.id,
         customerId: customerData.id,
         startAt: startAt,
@@ -446,7 +446,7 @@ export const createSubscriptionDB = async ({
         collectionMethod: collectionMethodToUse,
         status: trialDaysToUse > 0 ? "trialing" : "active",
         // if the subscription is in trial, the next billing at is the trial end at
-        nextBillingAt: trialDaysToUse > 0 ? trialDaysEndAt : nextBillingAtToUse,
+        nextInvoiceAt: trialDaysEndAt ?? nextInvoiceAtToUse,
         active: true,
         metadata: metadata,
         defaultPaymentMethodId: defaultPaymentMethodId,
