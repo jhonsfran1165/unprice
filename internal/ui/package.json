@@ -61,7 +61,7 @@
     "@types/react-dom": "^18.3.0",
     "@unprice/tailwind-config": "^0.1.0",
     "@unprice/tsconfig": "0.1.0",
-    "date-fns": "^3.3.1",
+    "date-fns": "^4.1.0",
     "react": "18.3.1",
     "react-day-picker": "^8.10.0",
     "react-dom": "18.3.1",
