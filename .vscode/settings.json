@@ -96,7 +96,8 @@
     "**/node_modules": true,
     "**/bower_components": true,
     "**/**/.next": true,
-    "**/tmp": true
+    "**/tmp": true,
+    "**/.trigger": true
   },
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"

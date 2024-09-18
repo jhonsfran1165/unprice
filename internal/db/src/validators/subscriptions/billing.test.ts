@@ -11,7 +11,7 @@ describe("configureBillingCycleSubscription", () => {
     const startDate = utcDate("2024-01-01")
 
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 0,
       billingCycleStart: 1,
       billingPeriod: "month",
@@ -36,7 +36,7 @@ describe("configureBillingCycleSubscription", () => {
   it("should handle past billing cycles", () => {
     const startDate = utcDate("2024-02-15")
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 0,
       billingCycleStart: 1,
       billingPeriod: "month",
@@ -53,7 +53,7 @@ describe("configureBillingCycleSubscription", () => {
   it("should handle future billing cycles", () => {
     const startDate = utcDate("2024-02-01")
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 0,
       // billing cycle start is 7th
       billingCycleStart: 7,
@@ -71,7 +71,7 @@ describe("configureBillingCycleSubscription", () => {
   it("should handle end of the month billing cycle", () => {
     const startDate = utcDate("2024-02-01", "12:00:00")
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 0,
       // feb 31st doesn't exist, so it should be the last day of the month
       billingCycleStart: 31,
@@ -98,7 +98,7 @@ describe("configureBillingCycleSubscription", () => {
   it("should handle end of the month billing cycle for leap year", () => {
     const startDate = utcDate("2024-03-01", "12:00:00")
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 0,
       // feb 31st doesn't exist, so it should be the last day of the month
       billingCycleStart: 31,
@@ -126,7 +126,7 @@ describe("configureBillingCycleSubscription", () => {
     const startDate = utcDate("2024-01-13", "12:00:00")
 
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       billingCycleStart: 1,
       billingPeriod: "month",
     })
@@ -154,7 +154,7 @@ describe("configureBillingCycleSubscription", () => {
     const endDate = utcDate("2024-01-09", "21:52:00")
 
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 5,
       billingCycleStart: 1,
       billingPeriod: "month",
@@ -180,7 +180,7 @@ describe("configureBillingCycleSubscription", () => {
     const startDate = utcDate("2024-01-01")
 
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 15,
       billingCycleStart: 1,
       billingPeriod: "month",
@@ -198,7 +198,7 @@ describe("configureBillingCycleSubscription", () => {
     const startDate = utcDate("2024-01-01")
 
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 0,
       billingCycleStart: 1, // January
       billingPeriod: "year",
@@ -215,7 +215,7 @@ describe("configureBillingCycleSubscription", () => {
     const startDate = utcDate("2023-02-01")
 
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 0,
       billingCycleStart: 2, // February
       billingPeriod: "year",
@@ -232,7 +232,7 @@ describe("configureBillingCycleSubscription", () => {
     const startDate = utcDate("2023-01-01")
 
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 0,
       billingCycleStart: 2, // February
       billingPeriod: "year",
@@ -249,7 +249,7 @@ describe("configureBillingCycleSubscription", () => {
     const startDate = utcDate("2024-06-01", "12:00:00")
 
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 45,
       billingCycleStart: 1, // January
       billingPeriod: "year",
@@ -270,7 +270,7 @@ describe("configureBillingCycleSubscription", () => {
 
     const endDate = utcDate("2025-03-15")
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 0,
       billingCycleStart: 1,
       billingPeriod: "year",
@@ -291,7 +291,7 @@ describe("configureBillingCycleSubscription", () => {
   it("should handle trial period longer than billing cycle for monthly billing cycle", () => {
     const startDate = utcDate("2024-01-01")
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 45,
       billingCycleStart: 1,
       billingPeriod: "month",
@@ -307,7 +307,7 @@ describe("configureBillingCycleSubscription", () => {
   it("should handle trial period longer than billing cycle for yearly billing cycle", () => {
     const startDate = utcDate("2024-01-01", "12:00:00")
     const result = configureBillingCycleSubscription({
-      billingCycleStartAt: startDate.getTime(),
+      currentCycleStartAt: startDate.getTime(),
       trialDays: 600,
       billingCycleStart: 1,
       billingPeriod: "year",

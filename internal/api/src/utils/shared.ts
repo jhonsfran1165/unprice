@@ -670,13 +670,11 @@ export const signOutCustomer = async ({
         await tx
           .update(subscriptions)
           .set({
-            status: "cancelled",
-            nextPlanVersionId: undefined,
+            status: "canceled",
             metadata: {
               reason: "user_requested",
             },
             endAt: endDate,
-            nextSubscriptionId: undefined,
           })
           .where(eq(subscriptions.id, sub.id))
       })

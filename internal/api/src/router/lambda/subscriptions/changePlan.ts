@@ -15,7 +15,6 @@ export const changePlan = protectedProjectProcedure
       id: subscriptionId,
       customerId,
       endAt,
-      nextPlanVersionId,
       collectionMethod,
       defaultPaymentMethodId,
       autoRenew,
@@ -51,23 +50,23 @@ export const changePlan = protectedProjectProcedure
       })
     }
 
-    if (subscriptionData.status === "changed") {
+    if (subscriptionData.status === "changing") {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Subscription is already changed",
       })
     }
 
-    if (subscriptionData.status === "cancelled") {
+    if (subscriptionData.status === "canceling") {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Subscription is cancelled",
       })
     }
 
-    let newPlanVersionId = nextPlanVersionId
+    let newPlanVersionId = null
 
-    if (!nextPlanVersionId) {
+    if (!newPlanVersionId) {
       // if there is no planVersionId provided, we downgrade the customer to the default plan
       const plans = await opts.ctx.db.query.plans.findFirst({
         where(fields, operators) {
@@ -132,8 +131,8 @@ export const changePlan = protectedProjectProcedure
 
     // if the subscription was changed in the last 30 days, we should not allow the customer to change the plan
     if (
-      subscriptionData.lastChangePlanAt &&
-      subscriptionData.lastChangePlanAt > addDays(new Date(Date.now()), -30).getTime()
+      subscriptionData.changedAt &&
+      subscriptionData.changedAt > addDays(new Date(Date.now()), -30).getTime()
     ) {
       throw new TRPCError({
         code: "BAD_REQUEST",
@@ -167,9 +166,8 @@ export const changePlan = protectedProjectProcedure
       const subscription = await trx
         .update(schema.subscriptions)
         .set({
-          status: "changed",
+          status: "changing",
           endAt: endDateAtToUse,
-          nextPlanVersionId: newPlanVersionId,
         })
         .where(
           and(
@@ -205,7 +203,6 @@ export const changePlan = protectedProjectProcedure
           defaultPaymentMethodId: defaultPaymentMethodId,
           trialDays: trialDays ?? 0,
           type: subscriptionData.type,
-          lastChangePlanAt: Date.now(),
         },
         projectId: projectId,
         ctx: {
@@ -213,19 +210,6 @@ export const changePlan = protectedProjectProcedure
           db: trx,
         },
       })
-
-      // set the old subscription with the next subscription id
-      await trx
-        .update(schema.subscriptions)
-        .set({
-          nextSubscriptionId: newSubscription.id,
-        })
-        .where(
-          and(
-            eq(schema.subscriptions.id, subscriptionId),
-            eq(schema.subscriptions.customerId, customerId)
-          )
-        )
 
       return newSubscription
     })

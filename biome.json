@@ -20,7 +20,8 @@
       ".contentlayer",
       ".nitro",
       ".output",
-      "./internal/db/src/migrations"
+      "./internal/db/src/migrations",
+      "./internal/jobs/.trigger"
     ]
   },
   "linter": {
@@ -67,7 +68,8 @@
       ".contentlayer",
       ".nitro",
       ".output",
-      "./internal/db/src/migrations"
+      "./internal/db/src/migrations",
+      "./internal/jobs/.trigger"
     ]
   },
   "formatter": {
@@ -88,7 +90,8 @@
       ".contentlayer",
       ".nitro",
       ".output",
-      "./internal/db/src/migrations"
+      "./internal/db/src/migrations",
+      "./internal/jobs/.trigger"
     ]
   },
   "javascript": {

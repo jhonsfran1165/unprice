@@ -30,16 +30,18 @@ const reasonSchema = z.enum([
   "admin_requested",
   "payment_failed",
   "payment_pending",
-  "trials_ended",
+  "payment_method_not_found",
   "policy_violation",
   "no_auto_renew",
-  "pending_payment_method",
-  "grace_period",
 ])
 
 export const subscriptionMetadataSchema = z.object({
-  reason: reasonSchema.optional(),
-  note: z.string().optional(),
+  reason: reasonSchema.optional().describe("Reason for the subscription status"),
+  note: z.string().optional().describe("Note about status in the subscription"),
+  dueBehaviour: z
+    .enum(["cancel", "downgrade"])
+    .optional()
+    .describe("What to do when the subscription is past due"),
 })
 
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
@@ -50,6 +52,8 @@ export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   startCycle: startCycleSchema,
   whenToBill: whenToBillSchema,
   timezone: z.string().min(1),
+}).extend({
+  nextPlanVersionId: z.string().optional(),
 })
 
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
@@ -65,6 +69,7 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
 })
   .extend({
     config: subscriptionItemsConfigSchema.optional(),
+    nextPlanVersionId: z.string().optional(),
   })
   .omit({
     createdAtM: true,
@@ -73,8 +78,8 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   .partial({
     id: true,
     projectId: true,
-    billingCycleStartAt: true,
-    billingCycleEndAt: true,
+    currentCycleStartAt: true,
+    currentCycleEndAt: true,
     nextInvoiceAt: true,
   })
   .required({
@@ -218,7 +223,6 @@ export const createSubscriptionDB = async ({
     whenToBill,
     startCycle,
     gracePeriod,
-    nextSubscriptionId,
     type,
     timezone,
     autoRenew,
@@ -404,7 +408,7 @@ export const createSubscriptionDB = async ({
 
   // get the billing cycle for the subscription given the start date
   const calculatedBillingCycle = configureBillingCycleSubscription({
-    billingCycleStartAt: startAt,
+    currentCycleStartAt: startAt,
     trialDays: trialDaysToUse,
     billingCycleStart: startCycleToUse,
     billingPeriod,
@@ -456,9 +460,8 @@ export const createSubscriptionDB = async ({
         type: type,
         timezone: timezoneToUse,
         prorated: prorated,
-        billingCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
-        billingCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
-        nextSubscriptionId: nextSubscriptionId,
+        currentCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
+        currentCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
       })
       .returning()
       .then((re) => re[0])

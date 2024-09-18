@@ -98,7 +98,7 @@ export function BillingCard({
         <CardDescription>
           {isTrial &&
             subscription.trialEndsAt &&
-            subscription.billingCycleEndAt &&
+            subscription.currentCycleEndAt &&
             `You currently are on the trial of the ${
               planVersion.plan.slug
             } plan. After the trial ends on ${formatDate(
@@ -106,7 +106,7 @@ export function BillingCard({
               subscription.timezone,
               "MMM d, yy"
             )}, you will be billed in the next billing cycle on ${formatDate(
-              subscription.billingCycleEndAt,
+              subscription.currentCycleEndAt,
               subscription.timezone,
               "MMM d, yy"
             )} the following price.`}

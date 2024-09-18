@@ -19,11 +19,14 @@ import type { StartCycle } from "../validators/shared"
 import type { subscriptionMetadataSchema } from "../validators/subscriptions"
 import { customers } from "./customers"
 import {
+  changeTypeEnum,
+  changeTypeSubscriptionItemEnum,
   collectionMethodEnum,
   currencyEnum,
   invoiceStatusEnum,
   invoiceTypeEnum,
   paymentProviderEnum,
+  statusSubChangesEnum,
   subscriptionStatusEnum,
   typeSubscriptionEnum,
   whenToBillEnum,
@@ -79,10 +82,6 @@ export const subscriptions = pgTableProject(
     autoRenew: boolean("auto_renew").notNull().default(true),
     // ************ billing data defaults ************
 
-    // If a user requests to change the plan, we mark the subscription to be changed at the next billing
-    nextPlanVersionId: cuid("next_plan_version_id"),
-    // next subscription id is the id of the subscription that will be created when the user changes the plan
-    nextSubscriptionId: cuid("next_subscription_id"),
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
     trialDays: integer("trial_days").notNull().default(0),
 
@@ -91,30 +90,38 @@ export const subscriptions = pgTableProject(
     trialEndsAt: bigint("trial_ends_at_m", { mode: "number" }),
     // when the subscription starts
     startAt: bigint("start_at_m", { mode: "number" }).default(0).notNull(),
-    // when the subscription ends
+    // when the subscription ends if undefined the subscription is active and renewed every cycle depending on auto_renew flag
     endAt: bigint("end_at_m", { mode: "number" }),
-    // billingCycleStartAt is the start time of the billing cycle
-    billingCycleStartAt: bigint("billing_cycle_start_at_m", { mode: "number" }).notNull(),
-    // billingCycleEndAt is the end time of the billing cycle
-    billingCycleEndAt: bigint("billing_cycle_end_at_m", { mode: "number" }).notNull(),
+    // current cycle is updated every time the subscription is billed
+    // currentCycleStartAt is the start time of the billing cycle
+    currentCycleStartAt: bigint("current_cycle_start_at_m", { mode: "number" })
+      .notNull()
+      .default(0),
+    // currentCycleEndAt is the end time of the billing cycle
+    currentCycleEndAt: bigint("current_cycle_end_at_m", { mode: "number" }).notNull().default(0),
     // when the subscription is going to be billed next
-    nextInvoiceAt: bigint("next_invoice_at_m", { mode: "number" }).notNull(),
-    lastChangePlanAt: bigint("last_change_plan_at_m", { mode: "number" }),
+    nextInvoiceAt: bigint("next_invoice_at_m", { mode: "number" }).notNull().default(0),
     // lastBilledAt is the last time the subscription was billed
     lastInvoiceAt: bigint("last_invoice_at_m", { mode: "number" }),
-    // when the subscription was past due
+    // when the subscription is considered past due
     pastDueAt: bigint("past_due_at_m", { mode: "number" }),
-    // when the subscription was changed
-    changeAt: bigint("change_at_m", { mode: "number" }),
-    // when the subscription was cancelled
+    // when the subscription is going to be cancelled
     cancelAt: bigint("cancel_at_m", { mode: "number" }),
+    // when the subscription was cancelled
+    canceledAt: bigint("canceled_at_m", { mode: "number" }),
+    // when the subscription is going to be changed
+    changeAt: bigint("change_at_m", { mode: "number" }),
+    // when the subscription was changed and the change was applied
+    // this is useful for auditing the changes and to lock many changes on the subscription
+    // normally we allow to change the plan every 30 days
+    changedAt: bigint("changed_at_m", { mode: "number" }),
     // ************ subscription important dates ************
 
     // status of the subscription - active, inactive, canceled, paused, etc.
     status: subscriptionStatusEnum("status").notNull().default("active"),
 
     // whether the subscription is active or not
-    // normally is active if the status is active, trialing or past_due
+    // normally is active if the status is active, trialing or past_due or changing
     // this simplifies the queries when we need to get the active subscriptions
     active: boolean("active").notNull().default(true),
 
@@ -130,12 +137,18 @@ export const subscriptions = pgTableProject(
       columns: [table.customerId, table.projectId],
       foreignColumns: [customers.id, customers.projectId],
       name: "subscriptions_customer_id_fkey",
-    }),
+    }).onDelete("cascade"),
     planversionfk: foreignKey({
       columns: [table.planVersionId, table.projectId],
       foreignColumns: [versions.id, versions.projectId],
       name: "subscriptions_planversion_id_fkey",
-    }),
+    }).onDelete("cascade"),
+    // project fk
+    projectfk: foreignKey({
+      columns: [table.projectId],
+      foreignColumns: [projects.id],
+      name: "subscriptions_project_id_fkey",
+    }).onDelete("cascade"),
     uniqueplansub: uniqueIndex("unique_active_planversion_subscription")
       .on(table.customerId, table.planVersionId, table.projectId)
       .where(eq(table.status, "active")),
@@ -167,7 +180,14 @@ export const subscriptionItems = pgTableProject(
       columns: [table.featurePlanVersionId, table.projectId],
       foreignColumns: [planVersionFeatures.id, planVersionFeatures.projectId],
       name: "subscription_items_plan_version_id_fkey",
-    }),
+    }).onDelete("cascade"),
+    // project fk
+    // TODO: review this is used on all tables with delete cascade
+    projectfk: foreignKey({
+      columns: [table.projectId],
+      foreignColumns: [projects.id],
+      name: "subscription_items_project_id_fkey",
+    }).onDelete("cascade"),
   })
 )
 
@@ -178,8 +198,8 @@ export const billingCycleInvoices = pgTableProject(
     ...timestamps,
     subscriptionId: cuid("subscription_id").notNull(),
     status: invoiceStatusEnum("status").notNull().default("unpaid"),
-    billingCycleStartAt: bigint("billing_cycle_start_at_m", { mode: "number" }).notNull(),
-    billingCycleEndAt: bigint("billing_cycle_end_at_m", { mode: "number" }).notNull(),
+    currentCycleStartAt: bigint("billing_cycle_start_at_m", { mode: "number" }).notNull(),
+    currentCycleEndAt: bigint("billing_cycle_end_at_m", { mode: "number" }).notNull(),
     // when the invoice was billed
     billedAt: bigint("billed_at_m", { mode: "number" }),
     // when the invoice is due
@@ -211,7 +231,102 @@ export const billingCycleInvoices = pgTableProject(
       columns: [table.subscriptionId, table.projectId],
       foreignColumns: [subscriptions.id, subscriptions.projectId],
       name: "billing_cycle_invoices_subscription_id_fkey",
+    }).onDelete("cascade"),
+    // project fk
+    projectfk: foreignKey({
+      columns: [table.projectId],
+      foreignColumns: [projects.id],
+      name: "billing_cycle_invoices_project_id_fkey",
+    }).onDelete("cascade"),
+  })
+)
+
+// subscription_changes
+export const subscriptionChanges = pgTableProject(
+  "subscription_changes",
+  {
+    ...projectID,
+    ...timestamps,
+    subscriptionId: cuid("subscription_id").notNull(),
+    previousPlanVersionId: cuid("previous_plan_version_id").notNull(),
+    newPlanVersionId: cuid("new_plan_version_id").notNull(),
+    status: statusSubChangesEnum("status").notNull().default("pending"),
+    changeAt: bigint("change_at_m", { mode: "number" }).notNull(),
+    appliedAt: bigint("applied_at_m", { mode: "number" }),
+    changeType: changeTypeEnum("change_type").notNull(),
+  },
+  (table) => ({
+    primary: primaryKey({
+      columns: [table.id, table.projectId],
+      name: "subscription_changes_pkey",
     }),
+    subscriptionfk: foreignKey({
+      columns: [table.subscriptionId, table.projectId],
+      foreignColumns: [subscriptions.id, subscriptions.projectId],
+      name: "subscription_changes_subscription_id_fkey",
+    }).onDelete("cascade"),
+    // plan version fk
+    previousPlanVersionfk: foreignKey({
+      columns: [table.previousPlanVersionId, table.projectId],
+      foreignColumns: [versions.id, versions.projectId],
+      name: "subscription_changes_previous_plan_version_id_fkey",
+    }).onDelete("cascade"),
+    newPlanVersionfk: foreignKey({
+      columns: [table.newPlanVersionId, table.projectId],
+      foreignColumns: [versions.id, versions.projectId],
+      name: "subscription_changes_new_plan_version_id_fkey",
+    }).onDelete("cascade"),
+    // project fk
+    projectfk: foreignKey({
+      columns: [table.projectId],
+      foreignColumns: [projects.id],
+      name: "subscription_changes_project_id_fkey",
+    }).onDelete("cascade"),
+    // unique index to avoid having multiple changes for the same subscription
+    uniqueSubscriptionChange: uniqueIndex("unique_subscription_change")
+      .on(table.subscriptionId, table.projectId)
+      .where(eq(table.status, "pending")),
+  })
+)
+
+// subscription_item_changes
+export const subscriptionItemChanges = pgTableProject(
+  "subscription_item_changes",
+  {
+    ...projectID,
+    ...timestamps,
+    subscriptionChangeId: cuid("subscription_change_id").notNull(),
+    subscriptionItemId: cuid("subscription_item_id"),
+    previousFeaturePlanVersionId: cuid("previous_feature_plan_version_id"),
+    newFeaturePlanVersionId: cuid("new_feature_plan_version_id").notNull(),
+    changeAt: bigint("change_at_m", { mode: "number" }).notNull(),
+    appliedAt: bigint("applied_at_m", { mode: "number" }),
+    changeType: changeTypeSubscriptionItemEnum("change_type").notNull(),
+    status: statusSubChangesEnum("status").notNull().default("pending"),
+    previousUnits: integer("previous_units"),
+    newUnits: integer("new_units"),
+  },
+  (table) => ({
+    primary: primaryKey({
+      columns: [table.id, table.projectId],
+      name: "subscription_item_changes_pkey",
+    }),
+    subscriptionChangefk: foreignKey({
+      columns: [table.subscriptionChangeId, table.projectId],
+      foreignColumns: [subscriptionChanges.id, subscriptionChanges.projectId],
+      name: "subscription_item_changes_subscription_change_id_fkey",
+    }).onDelete("cascade"),
+    subscriptionItemfk: foreignKey({
+      columns: [table.subscriptionItemId, table.projectId],
+      foreignColumns: [subscriptionItems.id, subscriptionItems.projectId],
+      name: "subscription_item_changes_subscription_item_id_fkey",
+    }).onDelete("cascade"),
+    // project fk
+    projectfk: foreignKey({
+      columns: [table.projectId],
+      foreignColumns: [projects.id],
+      name: "subscription_item_changes_project_id_fkey",
+    }).onDelete("cascade"),
   })
 )
 
@@ -223,6 +338,17 @@ export const subscriptionItemRelations = relations(subscriptionItems, ({ one }) 
   featurePlanVersion: one(planVersionFeatures, {
     fields: [subscriptionItems.featurePlanVersionId, subscriptionItems.projectId],
     references: [planVersionFeatures.id, planVersionFeatures.projectId],
+  }),
+}))
+
+export const billingCycleInvoiceRelations = relations(billingCycleInvoices, ({ one }) => ({
+  subscription: one(subscriptions, {
+    fields: [billingCycleInvoices.subscriptionId, billingCycleInvoices.projectId],
+    references: [subscriptions.id, subscriptions.projectId],
+  }),
+  project: one(projects, {
+    fields: [billingCycleInvoices.projectId],
+    references: [projects.id],
   }),
 }))
 
@@ -240,4 +366,24 @@ export const subscriptionRelations = relations(subscriptions, ({ one, many }) =>
     references: [versions.id, versions.projectId],
   }),
   items: many(subscriptionItems),
+}))
+
+export const subscriptionChangeRelations = relations(subscriptionChanges, ({ one, many }) => ({
+  subscription: one(subscriptions, {
+    fields: [subscriptionChanges.subscriptionId, subscriptionChanges.projectId],
+    references: [subscriptions.id, subscriptions.projectId],
+  }),
+  project: one(projects, {
+    fields: [subscriptionChanges.projectId],
+    references: [projects.id],
+  }),
+  previousPlanVersion: one(versions, {
+    fields: [subscriptionChanges.previousPlanVersionId, subscriptionChanges.projectId],
+    references: [versions.id, versions.projectId],
+  }),
+  newPlanVersion: one(versions, {
+    fields: [subscriptionChanges.newPlanVersionId, subscriptionChanges.projectId],
+    references: [versions.id, versions.projectId],
+  }),
+  itemsChanges: many(subscriptionItemChanges),
 }))

@@ -46,7 +46,7 @@ export const cancel = protectedProcedure
       })
     }
 
-    if (subscriptionData.status === "cancelled" || subscriptionData.status === "changed") {
+    if (subscriptionData.status === "canceled") {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Subscription is already cancelled",
@@ -105,9 +105,8 @@ export const cancel = protectedProcedure
       const subscriptionUpdated = await tx
         .update(schema.subscriptions)
         .set({
-          status: "cancelled",
+          status: "canceled",
           endAt: endAt,
-          nextPlanVersionId: defaultPlanVersion.id,
         })
         .where(and(eq(schema.subscriptions.id, id), eq(schema.subscriptions.projectId, projectId)))
         .returning()

@@ -82,5 +82,6 @@ export const subscriptionItemsConfigSchema = z
   }, "Total items for the subscription should be less than 250")
 
 export type SubscriptionItemConfig = z.infer<typeof subscriptionItemConfigSchema>
+export type SubscriptionItemsConfig = z.infer<typeof subscriptionItemsConfigSchema>
 export type SubscriptionItem = z.infer<typeof subscriptionItemsSelectSchema>
 export type InsertSubscriptionItem = z.infer<typeof subscriptionItemsInsertSchema>

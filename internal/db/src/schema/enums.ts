@@ -2,6 +2,8 @@ import { pgEnum } from "drizzle-orm/pg-core"
 
 import {
   AGGREGATION_METHODS,
+  CHANGE_TYPE,
+  CHANGE_TYPE_SUBSCRIPTION_ITEM,
   COLLECTION_METHODS,
   CURRENCIES,
   FEATURE_TYPES,
@@ -15,6 +17,7 @@ import {
   STAGES,
   STATUS_PLAN,
   STATUS_SUBSCRIPTION,
+  STATUS_SUB_CHANGES,
   SUBSCRIPTION_TYPES,
   TIER_MODES,
   USAGE_MODES,
@@ -31,6 +34,12 @@ export const tierModeEnum = pgEnum("tier_mode", TIER_MODES)
 export const usageModeEnum = pgEnum("usage_mode", USAGE_MODES)
 export const invoiceTypeEnum = pgEnum("invoice_type", INVOICE_TYPES)
 export const paymentProviderEnum = pgEnum("payment_providers", PAYMENT_PROVIDERS)
+export const statusSubChangesEnum = pgEnum("status_sub_changes", STATUS_SUB_CHANGES)
+export const changeTypeEnum = pgEnum("change_type", CHANGE_TYPE)
+export const changeTypeSubscriptionItemEnum = pgEnum(
+  "change_type_subscription_item",
+  CHANGE_TYPE_SUBSCRIPTION_ITEM
+)
 export const currencyEnum = pgEnum("currency", CURRENCIES)
 export const stageEnum = pgEnum("app_stages", STAGES)
 export const teamRolesEnum = pgEnum("team_roles", ROLES_APP)

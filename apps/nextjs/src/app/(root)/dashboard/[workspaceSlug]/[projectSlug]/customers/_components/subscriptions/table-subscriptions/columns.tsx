@@ -159,7 +159,7 @@ export const columns: ColumnDef<PlanVersion>[] = [
       <Badge
         className={cn({
           success: row.original.status === "active",
-          danger: row.original.status === "changed" || row.original.status === "cancelled",
+          danger: row.original.status === "changing" || row.original.status === "canceling",
         })}
       >
         {row.original.status}

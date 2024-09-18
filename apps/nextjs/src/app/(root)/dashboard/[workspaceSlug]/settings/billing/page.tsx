@@ -145,8 +145,8 @@ async function SubscriptionCard({
             <div className="gap-2 rounded-lg bg-background-bg p-4">
               <Typography variant="h6">Current Billing Cycle</Typography>
               <Typography variant="p">
-                {formatDate(subscription.billingCycleStartAt, subscription.timezone, "MMM d, yyyy")}{" "}
-                - {formatDate(subscription.billingCycleEndAt, subscription.timezone, "MMM d, yyyy")}
+                {formatDate(subscription.currentCycleStartAt, subscription.timezone, "MMM d, yyyy")}{" "}
+                - {formatDate(subscription.currentCycleEndAt, subscription.timezone, "MMM d, yyyy")}
               </Typography>
               <div className="flex flex-col py-4">
                 <Typography variant="p" affects="removePaddingMargin">
@@ -158,7 +158,7 @@ async function SubscriptionCard({
                 </Typography>
                 <Typography variant="p" affects="removePaddingMargin">
                   <span className="font-bold">Next billing date:</span>{" "}
-                  {formatDate(subscription.billingCycleEndAt, subscription.timezone, "MMM d, yyyy")}
+                  {formatDate(subscription.currentCycleEndAt, subscription.timezone, "MMM d, yyyy")}
                 </Typography>
               </div>
             </div>
@@ -184,7 +184,7 @@ async function SubscriptionCard({
                 <AlertTitle>Subscription Will Auto Renew</AlertTitle>
                 <AlertDescription>
                   Your subscription will automatically renew at{" "}
-                  {formatDate(subscription.billingCycleEndAt, subscription.timezone, "MMM d, yyyy")}
+                  {formatDate(subscription.currentCycleEndAt, subscription.timezone, "MMM d, yyyy")}
                 </AlertDescription>
               </Alert>
             )}
