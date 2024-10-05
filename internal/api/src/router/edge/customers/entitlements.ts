@@ -1,5 +1,5 @@
+import type { EntitlementCached } from "@unprice/services/cache"
 import { z } from "zod"
-import type { EntitlementCached } from "../../../pkg/cache/namespaces"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
 import { getEntitlements } from "../../../utils/shared"
 

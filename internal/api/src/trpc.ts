@@ -1,6 +1,6 @@
-import "server-only"
 import { tracing } from "@baselime/trpc-opentelemetry-middleware"
 import type { Session } from "@unprice/auth/server"
+import "server-only"
 
 import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import type { MwFn } from "@trpc-limiter/core"
@@ -14,16 +14,15 @@ import { COOKIES_APP } from "@unprice/config"
 import { type Database, type TransactionDatabase, db } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
 import { BaseLimeLogger, ConsoleLogger, type Logger } from "@unprice/logging"
+import type { CacheNamespaces } from "@unprice/services/cache"
+import { CacheService } from "@unprice/services/cache"
+import { LogdrainMetrics, type Metrics, NoopMetrics } from "@unprice/services/metrics"
 import { Analytics } from "@unprice/tinybird"
 import { Ratelimit } from "@upstash/ratelimit"
 import { waitUntil } from "@vercel/functions"
 import { ZodError } from "zod"
 import { fromZodError } from "zod-validation-error"
 import { env } from "./env.mjs"
-import { initCache } from "./pkg/cache"
-import type { CacheNamespaces } from "./pkg/cache/namespaces"
-import { type Metrics, NoopMetrics } from "./pkg/metrics"
-import { LogdrainMetrics } from "./pkg/metrics/logdrain"
 import { transformer } from "./transformer"
 import { projectWorkspaceGuard } from "./utils"
 import { apikeyGuard } from "./utils/apikey-guard"
@@ -127,12 +126,16 @@ export const createTRPCContext = async (opts: {
     ? new LogdrainMetrics({ requestId, logger })
     : new NoopMetrics()
 
-  const cache = await initCache(
+  const cacheService = new CacheService(
     {
       waitUntil,
     },
     metrics
   )
+
+  await cacheService.init()
+
+  const cache = cacheService.getCache()
 
   // this comes from the cookies or headers of the request
   const activeWorkspaceSlug =

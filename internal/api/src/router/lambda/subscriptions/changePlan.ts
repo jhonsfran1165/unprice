@@ -2,10 +2,10 @@ import { TRPCError } from "@trpc/server"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { subscriptionChangePlanSchema } from "@unprice/db/validators"
+import { SubscriptionService } from "@unprice/services/subscriptions"
 import { addDays } from "date-fns"
 import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
-import { createSubscription } from "../../../utils/shared"
 
 export const changePlan = protectedProjectProcedure
   .input(subscriptionChangePlanSchema)
@@ -185,9 +185,17 @@ export const changePlan = protectedProjectProcedure
         })
       }
 
-      // create a new subscription
-      const { subscription: newSubscription } = await createSubscription({
-        subscription: {
+      const subscriptionService = new SubscriptionService({
+        db: trx,
+        cache: opts.ctx.cache,
+        metrics: opts.ctx.metrics,
+        logger: opts.ctx.logger,
+        waitUntil: opts.ctx.waitUntil,
+        analytics: opts.ctx.analytics,
+      })
+
+      const { err, val } = await subscriptionService.createSubscription({
+        input: {
           customerId: customerId,
           planVersionId: newPlanVersionId,
           projectId: projectId,
@@ -204,14 +212,17 @@ export const changePlan = protectedProjectProcedure
           trialDays: trialDays ?? 0,
           type: subscriptionData.type,
         },
-        projectId: projectId,
-        ctx: {
-          ...opts.ctx,
-          db: trx,
-        },
+        projectId: opts.ctx.project.id,
       })
 
-      return newSubscription
+      if (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err.message,
+        })
+      }
+
+      return val
     })
 
     if (!newSubscription) {

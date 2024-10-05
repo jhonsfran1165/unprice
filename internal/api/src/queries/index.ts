@@ -2,9 +2,9 @@ import type { Database } from "@unprice/db"
 
 import { getFeatureItemBySlugPrepared } from "@unprice/db/queries"
 import type { Logger } from "@unprice/logging"
+import type { EntitlementCached, SubscriptionItemCached } from "@unprice/services/cache"
+import type { Metrics } from "@unprice/services/metrics"
 import type { Analytics } from "@unprice/tinybird"
-import type { EntitlementCached, SubscriptionItemCached } from "../pkg/cache/namespaces"
-import type { Metrics } from "../pkg/metrics"
 
 export const getCustomerFeatureQuery = async ({
   projectId,

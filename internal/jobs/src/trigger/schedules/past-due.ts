@@ -1,8 +1,21 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
 import { db } from "@unprice/db"
-import { invoiceSubscriptionTask } from "./tasks"
-import { cancelSubscriptionTask } from "./tasks/cancel-subscription"
-import { createSubscriptionChangeTask } from "./tasks/create-subscription-change"
+import {
+  cancelSubscriptionTask,
+  createSubscriptionChangeTask,
+  invoiceSubscriptionTask,
+} from "../tasks"
+
+// TODO: implement this way
+// const createdSchedule = await schedules.create({
+//   //The id of the scheduled task you want to attach to.
+//   task: firstScheduledTask.id,
+//   //The schedule in cron format.
+//   cron: "0 0 * * *",
+//   //this is required, it prevents you from creating duplicate schedules. It will update the schedule if it already exists.
+//   deduplicationKey: "my-deduplication-key",
+// timezone: "America/New_York"
+// });
 
 export const pastDueTask = schedules.task({
   id: "subscription.past.due",
@@ -81,7 +94,7 @@ export const pastDueTask = schedules.task({
               await createSubscriptionChangeTask.triggerAndWait({
                 subscriptionId: sub.id,
                 date: now,
-                immediate: true,
+                whenToApply: "inmidiate",
                 changeType: "downgrade",
               })
             }

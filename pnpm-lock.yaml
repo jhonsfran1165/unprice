@@ -410,6 +410,9 @@ importers:
       '@unprice/metrics':
         specifier: workspace:^
         version: link:../metrics
+      '@unprice/services':
+        specifier: workspace:^
+        version: link:../services
       '@unprice/stripe':
         specifier: ^0.1.0
         version: link:../stripe
@@ -719,6 +722,49 @@ importers:
         version: 20.11.24
       '@unprice/tsconfig':
         specifier: workspace:*
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: ^5.3.3
+        version: 5.5.4
+
+  internal/services:
+    dependencies:
+      '@unkey/cache':
+        specifier: ^1.5.0
+        version: 1.5.0
+      '@unprice/db':
+        specifier: workspace:^
+        version: link:../db
+      '@unprice/error':
+        specifier: workspace:^0.1.0
+        version: link:../error
+      '@unprice/logging':
+        specifier: workspace:^
+        version: link:../logging
+      '@unprice/logs':
+        specifier: workspace:^
+        version: link:../logs
+      '@unprice/metrics':
+        specifier: workspace:^
+        version: link:../metrics
+      '@unprice/tinybird':
+        specifier: workspace:^
+        version: link:../tinybird
+      '@upstash/ratelimit':
+        specifier: ^2.0.0
+        version: 2.0.1
+      '@upstash/redis':
+        specifier: ^1.33.0
+        version: 1.34.0
+      date-fns:
+        specifier: ^3.3.1
+        version: 3.6.0
+      xstate:
+        specifier: ^5.18.2
+        version: 5.18.2
+    devDependencies:
+      '@unprice/tsconfig':
+        specifier: ^0.1.0
         version: link:../../tooling/typescript
       typescript:
         specifier: ^5.3.3
@@ -19377,6 +19423,10 @@ packages:
   /xmlhttprequest-ssl@2.0.0:
     resolution: {integrity: sha512-QKxVRxiRACQcVuQEYFsI1hhkrMlrXHPegbbd1yn9UHOmRxY+si12nQYzri3vbzt8VdTTRviqcKxcyllFas5z2A==}
     engines: {node: '>=0.4.0'}
+    dev: false
+
+  /xstate@5.18.2:
+    resolution: {integrity: sha512-hab5VOe29D0agy8/7dH1lGw+7kilRQyXwpaChoMu4fe6rDP+nsHYhDYKfS2O4iXE7myA98TW6qMEudj/8NXEkA==}
     dev: false
 
   /y18n@5.0.8:

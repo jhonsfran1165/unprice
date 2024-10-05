@@ -2,14 +2,9 @@ import { TRPCError } from "@trpc/server"
 import { type Database, and, eq, sql } from "@unprice/db"
 import { customerSessions, customers, members, subscriptions, workspaces } from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
-import {
-  type CustomerSignUp,
-  type WorkspaceInsert,
-  createSubscriptionDB,
-  type subscriptionInsertSchema,
-} from "@unprice/db/validators"
+import type { CustomerSignUp, WorkspaceInsert } from "@unprice/db/validators"
+import { SubscriptionService } from "@unprice/services/subscriptions"
 import { getMonth, getYear } from "date-fns"
-import type { z } from "zod"
 import { UnpriceCustomer } from "../pkg/customer"
 import { UnPriceCustomerError } from "../pkg/errors"
 import { StripePaymentProvider } from "../pkg/payment-provider/stripe"
@@ -177,113 +172,6 @@ export const reportUsageFeature = async ({
   return val
 }
 
-export const createSubscription = async ({
-  subscription,
-  ctx,
-  projectId,
-}: {
-  subscription: z.infer<typeof subscriptionInsertSchema>
-  projectId: string
-  ctx: Context
-}) => {
-  const { err, val } = await createSubscriptionDB({
-    subscription,
-    projectId,
-    db: ctx.db,
-  })
-
-  if (err) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: err.message,
-    })
-  }
-
-  const subscriptionData = val
-
-  // every time a subscription is created, we save the subscription in the cache
-  ctx.waitUntil(
-    ctx.db.query.subscriptions
-      .findMany({
-        with: {
-          items: {
-            with: {
-              featurePlanVersion: {
-                with: {
-                  feature: true,
-                },
-              },
-            },
-          },
-        },
-        where: (sub, { eq, and }) =>
-          and(
-            eq(sub.customerId, subscriptionData.customerId),
-            eq(sub.projectId, subscriptionData.projectId)
-          ),
-      })
-      .then(async (subscriptions) => {
-        if (!subscriptions || subscriptions.length === 0) {
-          // TODO: log error
-          console.error("Subscriptions not found")
-          return
-        }
-
-        const customerEntitlements = subscriptions.flatMap((sub) =>
-          sub.items.map((f) => {
-            return {
-              featureId: f.featurePlanVersion.id,
-              featureSlug: f.featurePlanVersion.feature.slug,
-              featureType: f.featurePlanVersion.featureType,
-              aggregationMethod: f.featurePlanVersion.aggregationMethod,
-              limit: f.featurePlanVersion.limit,
-              units: f.units,
-            }
-          })
-        )
-
-        const customerSubscriptions = subscriptions.map((sub) => sub.id)
-        const currentMonth = getMonth(Date.now()) + 1
-        const currentYear = getYear(Date.now())
-
-        return Promise.all([
-          // save the customer entitlements
-          ctx.cache.entitlementsByCustomerId.set(subscriptionData.customerId, customerEntitlements),
-          // save the customer subscriptions
-          ctx.cache.subscriptionsByCustomerId.set(
-            subscriptionData.customerId,
-            customerSubscriptions
-          ),
-          // save features
-          subscriptions.flatMap((sub) =>
-            sub.items.map((f) =>
-              ctx.cache.featureByCustomerId.set(
-                `${sub.customerId}:${f.featurePlanVersion.feature.slug}:${currentYear}:${currentMonth}`,
-                {
-                  id: f.id,
-                  projectId: f.projectId,
-                  featurePlanVersionId: f.featurePlanVersion.id,
-                  subscriptionId: f.subscriptionId,
-                  units: f.units,
-                  featureType: f.featurePlanVersion.featureType,
-                  aggregationMethod: f.featurePlanVersion.aggregationMethod,
-                  limit: f.featurePlanVersion.limit,
-                  currentUsage: 0,
-                  lastUpdatedAt: 0,
-                  realtime: !!f.featurePlanVersion.metadata?.realtime,
-                }
-              )
-            )
-          ),
-        ])
-      })
-  )
-
-  return {
-    subscription: subscriptionData,
-  }
-}
-
 export const signUpCustomer = async ({
   input,
   ctx,
@@ -434,9 +322,17 @@ export const signUpCustomer = async ({
         })
       }
 
-      // create the subscription
-      const newSubscription = await createSubscription({
-        subscription: {
+      const subscriptionService = new SubscriptionService({
+        db: trx,
+        cache: ctx.cache,
+        metrics: ctx.metrics,
+        logger: ctx.logger,
+        waitUntil: ctx.waitUntil,
+        analytics: ctx.analytics,
+      })
+
+      const { err, val: newSubscription } = await subscriptionService.createSubscription({
+        input: {
           customerId: newCustomer.id,
           projectId: projectId,
           type: "plan",
@@ -452,13 +348,16 @@ export const signUpCustomer = async ({
           gracePeriod: planVersion.gracePeriod ?? 0,
         },
         projectId: projectId,
-        ctx: {
-          ...ctx,
-          db: trx,
-        },
       })
 
-      if (!newSubscription.subscription.id) {
+      if (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err.message,
+        })
+      }
+
+      if (!newSubscription.id) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Error creating subscription",

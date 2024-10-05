@@ -1,17 +1,15 @@
 import type { Database } from "@unprice/db"
 
 import type { FeatureType } from "@unprice/db/validators"
-import { FetchError, type Result } from "@unprice/error"
-import { Err, Ok } from "@unprice/error"
+import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
+import type { Cache, CacheNamespaces, SubscriptionItemCached } from "@unprice/services/cache"
+import type { Metrics } from "@unprice/services/metrics"
 import type { Analytics } from "@unprice/tinybird"
 import { getCustomerFeatureQuery, getEntitlementsQuery } from "../queries"
 import type { Context } from "../trpc"
-import type { Cache } from "./cache"
-import type { CacheNamespaces, SubscriptionItemCached } from "./cache/namespaces"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
-import type { Metrics } from "./metrics"
 
 export class UnpriceCustomer {
   private readonly cache: Cache

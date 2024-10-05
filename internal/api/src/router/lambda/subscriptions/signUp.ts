@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server"
 import { subscriptionInsertSchema, subscriptionSelectSchema } from "@unprice/db/validators"
+import { SubscriptionService } from "@unprice/services/subscriptions"
 import { z } from "zod"
 import { rateLimiterProcedure } from "../../../trpc"
-import { createSubscription } from "../../../utils/shared"
 
 export const signUp = rateLimiterProcedure
   .input(
@@ -27,13 +27,28 @@ export const signUp = rateLimiterProcedure
       })
     }
 
-    const { subscription } = await createSubscription({
-      subscription: opts.input,
-      projectId: opts.input.projectId,
-      ctx: opts.ctx,
+    const subscriptionService = new SubscriptionService({
+      db: opts.ctx.db,
+      cache: opts.ctx.cache,
+      metrics: opts.ctx.metrics,
+      logger: opts.ctx.logger,
+      waitUntil: opts.ctx.waitUntil,
+      analytics: opts.ctx.analytics,
     })
 
+    const { err, val } = await subscriptionService.createSubscription({
+      input: opts.input,
+      projectId: project.id,
+    })
+
+    if (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: err.message,
+      })
+    }
+
     return {
-      subscription: subscription,
+      subscription: val,
     }
   })

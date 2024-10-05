@@ -1,6 +1,6 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
 import { db } from "@unprice/db"
-import { invoiceSubscriptionTask } from "./tasks"
+import { invoiceSubscriptionTask } from "../tasks"
 
 export const endTrialsTask = schedules.task({
   id: "subscription.end.trials",

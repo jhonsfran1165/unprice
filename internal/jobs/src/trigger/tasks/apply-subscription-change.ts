@@ -70,7 +70,7 @@ export const applySubscriptionChangeTask = task({
           id: newId("subscription_item"),
           projectId: subscriptionChange.projectId,
           subscriptionId: subscriptionChange.subscriptionId,
-          featurePlanVersionId: itemChange.newFeaturePlanVersionId,
+          featurePlanVersionId: itemChange.newFeaturePlanVersionId ?? "",
           units: itemChange.newUnits,
         })
       } else if (itemChange.changeType === "remove") {
@@ -83,7 +83,7 @@ export const applySubscriptionChangeTask = task({
         await db
           .update(subscriptionItems)
           .set({
-            featurePlanVersionId: itemChange.newFeaturePlanVersionId,
+            featurePlanVersionId: itemChange.newFeaturePlanVersionId ?? "",
             units: itemChange.newUnits,
           })
           .where(eq(subscriptionItems.id, itemChange.subscriptionItemId ?? ""))

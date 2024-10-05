@@ -1,7 +1,7 @@
 import { logger, task } from "@trigger.dev/sdk/v3"
 import { db, eq } from "@unprice/db"
 import { subscriptions } from "@unprice/db/schema"
-import { invoiceSubscriptionTask } from "./invoice-sub"
+import { invoiceSubscriptionTask } from "./invoice-subscription"
 
 export const cancelSubscriptionTask = task({
   id: "cancel.subscription",

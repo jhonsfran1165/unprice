@@ -61,6 +61,9 @@ export const subscriptions = pgTableProject(
     // TODO: support addons in other table
     type: typeSubscriptionEnum("type").default("plan").notNull(),
 
+    // TODO: addplan slug
+    // planSlug: text("plan_slug").notNull(),
+
     // TODO: delete uncessesary stuff
     // prorate the subscription when the subscription is created in the middle of the billing period
     prorated: boolean("prorated").default(true),
@@ -252,6 +255,7 @@ export const subscriptionChanges = pgTableProject(
     newPlanVersionId: cuid("new_plan_version_id").notNull(),
     status: statusSubChangesEnum("status").notNull().default("pending"),
     changeAt: bigint("change_at_m", { mode: "number" }).notNull(),
+    // when the change is applied is important to calculate prorations
     appliedAt: bigint("applied_at_m", { mode: "number" }),
     changeType: changeTypeEnum("change_type").notNull(),
   },
@@ -298,7 +302,7 @@ export const subscriptionItemChanges = pgTableProject(
     subscriptionChangeId: cuid("subscription_change_id").notNull(),
     subscriptionItemId: cuid("subscription_item_id"),
     previousFeaturePlanVersionId: cuid("previous_feature_plan_version_id"),
-    newFeaturePlanVersionId: cuid("new_feature_plan_version_id").notNull(),
+    newFeaturePlanVersionId: cuid("new_feature_plan_version_id"),
     changeAt: bigint("change_at_m", { mode: "number" }).notNull(),
     appliedAt: bigint("applied_at_m", { mode: "number" }),
     changeType: changeTypeSubscriptionItemEnum("change_type").notNull(),

@@ -3,13 +3,12 @@ import { apiKeyPrepared } from "@unprice/db/queries"
 import * as schema from "@unprice/db/schema"
 import { hashStringSHA256 } from "@unprice/db/utils"
 import type { ApiKeyExtended } from "@unprice/db/validators"
-import { FetchError, type Result } from "@unprice/error"
-import { Err, Ok } from "@unprice/error"
+import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
+import type { Cache } from "@unprice/services/cache"
+import type { Metrics } from "@unprice/services/metrics"
 import type { Analytics } from "@unprice/tinybird"
-import type { Cache } from "./cache"
 import { UnPriceApiKeyError } from "./errors"
-import type { Metrics } from "./metrics"
 
 export class UnpriceApiKey {
   private readonly cache: Cache

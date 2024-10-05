@@ -34,6 +34,7 @@
     "@unprice/logging": "workspace:^",
     "@unprice/logs": "workspace:^1.0.0",
     "@unprice/metrics": "workspace:^",
+    "@unprice/services": "workspace:^",
     "@unprice/stripe": "^0.1.0",
     "@unprice/tinybird": "^0.1.0",
     "@unprice/vercel": "workspace:^",
