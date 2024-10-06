@@ -3,11 +3,10 @@ import { type Database, and, eq, sql } from "@unprice/db"
 import { customerSessions, customers, members, subscriptions, workspaces } from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
 import type { CustomerSignUp, WorkspaceInsert } from "@unprice/db/validators"
+import { CustomerService, UnPriceCustomerError } from "@unprice/services/customers"
+import { StripePaymentProvider } from "@unprice/services/payment-provider"
 import { SubscriptionService } from "@unprice/services/subscriptions"
 import { getMonth, getYear } from "date-fns"
-import { UnpriceCustomer } from "../pkg/customer"
-import { UnPriceCustomerError } from "../pkg/errors"
-import { StripePaymentProvider } from "../pkg/payment-provider/stripe"
 import type { Context } from "../trpc"
 
 // shared logic for some procedures
@@ -25,7 +24,7 @@ export const verifyFeature = async ({
   ctx: Context
 }) => {
   const now = performance.now()
-  const customer = new UnpriceCustomer({
+  const customer = new CustomerService({
     cache: ctx.cache,
     db: ctx.db as Database,
     analytics: ctx.analytics,
@@ -44,7 +43,6 @@ export const verifyFeature = async ({
     projectId,
     year: currentYear,
     month: currentMonth,
-    ctx,
   })
 
   const end = performance.now()
@@ -86,7 +84,7 @@ export const getEntitlements = async ({
   projectId: string
   ctx: Context
 }) => {
-  const customer = new UnpriceCustomer({
+  const customer = new CustomerService({
     cache: ctx.cache,
     db: ctx.db as Database,
     analytics: ctx.analytics,
@@ -132,7 +130,7 @@ export const reportUsageFeature = async ({
   usage: number
   ctx: Context
 }) => {
-  const customer = new UnpriceCustomer({
+  const customer = new CustomerService({
     cache: ctx.cache,
     db: ctx.db as Database,
     analytics: ctx.analytics,
@@ -335,17 +333,19 @@ export const signUpCustomer = async ({
         input: {
           customerId: newCustomer.id,
           projectId: projectId,
-          type: "plan",
-          planVersionId: planVersion.id,
-          startAt: Date.now(),
-          status: "active",
-          config: config,
-          defaultPaymentMethodId: "",
           timezone: timezone ?? planProject.timezone,
-          collectionMethod: planVersion.collectionMethod,
-          whenToBill: planVersion.whenToBill,
-          startCycle: planVersion.startCycle ?? 1,
-          gracePeriod: planVersion.gracePeriod ?? 0,
+          phases: [
+            {
+              planVersionId: planVersion.id,
+              status: "active",
+              startAt: Date.now(),
+              config: config,
+              collectionMethod: planVersion.collectionMethod,
+              whenToBill: planVersion.whenToBill,
+              startCycle: planVersion.startCycle ?? 1,
+              gracePeriod: planVersion.gracePeriod ?? 0,
+            },
+          ],
         },
         projectId: projectId,
       })
@@ -432,13 +432,6 @@ export const createWorkspace = async ({
 
   // get the subscription of the customer
   const subscription = await ctx.db.query.subscriptions.findFirst({
-    with: {
-      planVersion: {
-        with: {
-          plan: true,
-        },
-      },
-    },
     where: (subscription, { eq }) => eq(subscription.customerId, unPriceCustomerId),
   })
 
@@ -473,7 +466,7 @@ export const createWorkspace = async ({
           isInternal: isInternal ?? false,
           createdBy: user.id,
           unPriceCustomerId: unPriceCustomerId,
-          plan: subscription.planVersion.plan.slug,
+          plan: subscription.planSlug,
         })
         .returning()
         .then((workspace) => {
@@ -560,9 +553,9 @@ export const signOutCustomer = async ({
     const cancelSubs = await Promise.all(
       customerSubs.map(async (sub) => {
         // check if the subscription is in trials, if so set the endAt to the trialEndsAt
-        const endDate = sub.trialEndsAt
-          ? sub.trialEndsAt > Date.now()
-            ? sub.trialEndsAt
+        const endDate = sub.cancelAt
+          ? sub.cancelAt > Date.now()
+            ? sub.cancelAt
             : Date.now()
           : Date.now()
 
@@ -573,7 +566,7 @@ export const signOutCustomer = async ({
             metadata: {
               reason: "user_requested",
             },
-            endAt: endDate,
+            canceledAt: endDate,
           })
           .where(eq(subscriptions.id, sub.id))
       })

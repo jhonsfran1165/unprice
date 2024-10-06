@@ -6,7 +6,10 @@
   "exports": {
     "./subscriptions": "./src/subscriptions/index.ts",
     "./cache": "./src/cache/index.ts",
-    "./metrics": "./src/metrics/index.ts"
+    "./metrics": "./src/metrics/index.ts",
+    "./customers": "./src/customers/index.ts",
+    "./payment-provider": "./src/payment-provider/index.ts",
+    "./apikeys": "./src/apikeys/index.ts"
   },
   "typesVersions": {
     "*": {
@@ -20,16 +23,17 @@
   },
   "dependencies": {
     "@unkey/cache": "^1.5.0",
+    "@unprice/config": "workspace:^0.1.0",
     "@unprice/db": "workspace:^",
     "@unprice/error": "workspace:^0.1.0",
     "@unprice/logging": "workspace:^",
     "@unprice/logs": "workspace:^",
     "@unprice/metrics": "workspace:^",
+    "@unprice/stripe": "workspace:^",
     "@unprice/tinybird": "workspace:^",
     "@upstash/ratelimit": "^2.0.0",
     "@upstash/redis": "^1.33.0",
-    "date-fns": "^3.3.1",
-    "xstate": "^5.18.2"
+    "date-fns": "^3.3.1"
   },
   "devDependencies": {
     "@unprice/tsconfig": "^0.1.0",

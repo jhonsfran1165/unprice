@@ -1,20 +1,31 @@
 import { relations } from "drizzle-orm"
-import { boolean, index, json, primaryKey, text, varchar } from "drizzle-orm/pg-core"
+import {
+  bigint,
+  boolean,
+  foreignKey,
+  index,
+  integer,
+  json,
+  primaryKey,
+  text,
+  varchar,
+} from "drizzle-orm/pg-core"
 import type { z } from "zod"
 
 import { pgTableProject } from "../utils/_table"
 import { projectID } from "../utils/sql"
 
-import { id, timestamps } from "../utils/fields.sql"
+import { cuid, id, timestamps } from "../utils/fields.sql"
 import type {
   customerMetadataSchema,
   stripePlanVersionSchema,
   stripeSetupSchema,
 } from "../validators/customer"
 
-import { currencyEnum } from "./enums"
+import { aggregationMethodEnum, currencyEnum, typeFeatureEnum } from "./enums"
+import { planVersionFeatures } from "./planVersionFeatures"
 import { projects } from "./projects"
-import { subscriptions } from "./subscriptions"
+import { subscriptionPhases, subscriptions } from "./subscriptions"
 
 export const customers = pgTableProject(
   "customers",
@@ -37,6 +48,75 @@ export const customers = pgTableProject(
     primary: primaryKey({
       columns: [table.id, table.projectId],
       name: "pk_customer",
+    }),
+  })
+)
+
+// entitlements are the actual features that are assigned to a customer
+// normally this would match with subscription items but we need to add a way to
+// add entitlements to a plan version without having to create a subscription item
+// since the subscription item is more of a billing concept and the entitlement is more of a
+// usage concept.
+export const customerEntitlements = pgTableProject(
+  "customer_entitlements",
+  {
+    ...projectID,
+    ...timestamps,
+    customerId: cuid("customer_id").notNull(),
+    // subscriptionPhaseId is the id of the subscription phase that the customer is entitled to
+    subscriptionPhaseId: cuid("subscription_phase_id").notNull(),
+    // featurePlanVersionId is the id of the feature plan version that the customer is entitled to
+    featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
+
+    // ****************** defaults from plan version features ******************
+    // These fields are duplicate but this improves the performance when checking the usage
+    // This table is cached in redis as well. All events usage are sent to tynibird and this table
+    // is restored with events in the subscription.
+    // quantity is the quantity of the feature that the customer is entitled to
+    quantity: integer("quantity"),
+    // limit is the limit of the feature that the customer is entitled to
+    limit: integer("limit"),
+    // usage is the usage of the feature that the customer has used
+    usage: integer("usage"),
+    // featureSlug is the slug of the feature that the customer is entitled to
+    featureSlug: text("feature_slug").notNull(),
+    // featureType is the type of the feature that the customer is entitled to
+    featureType: typeFeatureEnum("feature_type").notNull(),
+    // aggregationMethod is the method to aggregate the feature quantity - use for calculated the current usage of the feature
+    aggregationMethod: aggregationMethodEnum("aggregation_method").default("sum").notNull(),
+    // realtime features are updated in realtime, others are updated periodically
+    realtime: boolean("realtime").notNull().default(false),
+    // type of the feature plan version - feature or addon
+    type: text("type").notNull().default("feature"),
+    // ****************** end defaults from plan version features ******************
+
+    // if it's a custom entitlement, it's not tied to a subscription phase and it's not billed
+    isCustom: boolean("is_custom").notNull().default(false),
+    // entitlements are updated on a regular basis
+    lastUpdatedAt: bigint("last_updated_at", { mode: "number" }).notNull(),
+    metadata: json("metadata").$type<{
+      [key: string]: string | number | boolean | null
+    }>(),
+  },
+  (table) => ({
+    primary: primaryKey({
+      columns: [table.id, table.projectId],
+      name: "pk_customer_entitlement",
+    }),
+    featurePlanVersionfk: foreignKey({
+      columns: [table.featurePlanVersionId, table.projectId],
+      foreignColumns: [planVersionFeatures.id, planVersionFeatures.projectId],
+      name: "feature_plan_version_id_fkey",
+    }),
+    subscriptionPhasefk: foreignKey({
+      columns: [table.subscriptionPhaseId, table.projectId],
+      foreignColumns: [subscriptionPhases.id, subscriptionPhases.projectId],
+      name: "subscription_phase_id_fkey",
+    }),
+    customerfk: foreignKey({
+      columns: [table.customerId, table.projectId],
+      foreignColumns: [customers.id, customers.projectId],
+      name: "customer_id_fkey",
     }),
   })
 )
@@ -88,12 +168,28 @@ export const customerSessions = pgTableProject("customer_sessions", {
 // token
 // name
 
+export const customerEntitlementsRelations = relations(customerEntitlements, ({ one }) => ({
+  subscriptionPhase: one(subscriptionPhases, {
+    fields: [customerEntitlements.subscriptionPhaseId, customerEntitlements.projectId],
+    references: [subscriptionPhases.id, subscriptionPhases.projectId],
+  }),
+  featurePlanVersion: one(planVersionFeatures, {
+    fields: [customerEntitlements.featurePlanVersionId, customerEntitlements.projectId],
+    references: [planVersionFeatures.id, planVersionFeatures.projectId],
+  }),
+  customer: one(customers, {
+    fields: [customerEntitlements.customerId, customerEntitlements.projectId],
+    references: [customers.id, customers.projectId],
+  }),
+}))
+
 export const customersRelations = relations(customers, ({ one, many }) => ({
   project: one(projects, {
     fields: [customers.projectId],
     references: [projects.id],
   }),
   subscriptions: many(subscriptions),
+  entitlements: many(customerEntitlements),
   // paymentMethods: many(customerPaymentMethods),
 }))
 

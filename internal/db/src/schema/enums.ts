@@ -18,7 +18,6 @@ import {
   STATUS_PLAN,
   STATUS_SUBSCRIPTION,
   STATUS_SUB_CHANGES,
-  SUBSCRIPTION_TYPES,
   TIER_MODES,
   USAGE_MODES,
   WHEN_TO_BILLING,
@@ -47,4 +46,3 @@ export const planBillingPeriodEnum = pgEnum("billing_period", PLAN_BILLING_PERIO
 export const planTypeEnum = pgEnum("plan_type", PLAN_TYPES)
 export const whenToBillEnum = pgEnum("when_to_bill", WHEN_TO_BILLING)
 export const collectionMethodEnum = pgEnum("collection_method", COLLECTION_METHODS)
-export const typeSubscriptionEnum = pgEnum("subscription_type", SUBSCRIPTION_TYPES)

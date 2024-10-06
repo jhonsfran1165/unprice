@@ -3,9 +3,9 @@ import { APP_NAME } from "@unprice/config"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { calculateFlatPricePlan, planVersionSelectBaseSchema } from "@unprice/db/validators"
+import { StripePaymentProvider } from "@unprice/services/payment-provider"
 import { isZero } from "dinero.js"
 import { z } from "zod"
-import { StripePaymentProvider } from "../../../pkg/payment-provider/stripe"
 import { protectedProjectProcedure } from "../../../trpc"
 
 export const publish = protectedProjectProcedure

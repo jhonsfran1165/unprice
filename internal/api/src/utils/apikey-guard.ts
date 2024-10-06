@@ -1,8 +1,7 @@
 import { TRPCError } from "@trpc/server"
 
 import type { Database } from "@unprice/db"
-import { UnpriceApiKey } from "../pkg/apikeys"
-import { UnPriceApiKeyError } from "../pkg/errors"
+import { ApiKeysService, UnPriceApiKeyError } from "@unprice/services/apikeys"
 import type { Context } from "../trpc"
 
 export const apikeyGuard = async ({
@@ -19,7 +18,7 @@ export const apikeyGuard = async ({
     })
   }
 
-  const ApiKey = new UnpriceApiKey({
+  const ApiKey = new ApiKeysService({
     cache: ctx.cache,
     db: ctx.db as Database,
     analytics: ctx.analytics,

@@ -1,1 +1,0 @@
-ALTER TABLE "unprice_customer_sessions" DROP COLUMN IF EXISTS "active";

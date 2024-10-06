@@ -28,7 +28,6 @@ export type CacheNamespaces = {
   // TODO: this should containe customer information as well. Speacially for deactivating customers
   apiKeyByHash: ApiKeyExtended | null
   featureByCustomerId: SubscriptionItemCached | null
-  subscriptionsByCustomerId: Array<string>
   entitlementsByCustomerId: Array<EntitlementCached>
   idempotentRequestUsageByHash: {
     access: boolean

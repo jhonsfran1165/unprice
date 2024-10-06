@@ -1,2 +1,0 @@
-ALTER TABLE "unprice_subscriptions" ALTER COLUMN "billing_cycle_start_at_m" SET DEFAULT 0;--> statement-breakpoint
-ALTER TABLE "unprice_subscriptions" ALTER COLUMN "billing_cycle_end_at_m" SET DEFAULT 0;

@@ -1,19 +1,18 @@
-import type { Database } from "@unprice/db"
+import type { Database, TransactionDatabase } from "@unprice/db"
 
 import type { FeatureType } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import type { Cache, CacheNamespaces, SubscriptionItemCached } from "@unprice/services/cache"
-import type { Metrics } from "@unprice/services/metrics"
 import type { Analytics } from "@unprice/tinybird"
-import { getCustomerFeatureQuery, getEntitlementsQuery } from "../queries"
-import type { Context } from "../trpc"
+import type { Cache, CacheNamespaces, SubscriptionItemCached } from "../cache"
+import type { Metrics } from "../metrics"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
+import { getCustomerFeatureQuery, getEntitlementsQuery } from "./queries"
 
-export class UnpriceCustomer {
+export class CustomerService {
   private readonly cache: Cache
-  private readonly db: Database
+  private readonly db: Database | TransactionDatabase
   private readonly metrics: Metrics
   private readonly logger: Logger
   private readonly waitUntil: (p: Promise<unknown>) => void
@@ -97,14 +96,6 @@ export class UnpriceCustomer {
         )
       }
 
-      // save the data in the cache
-      this.waitUntil(
-        this.cache.featureByCustomerId.set(
-          `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
-          feature
-        )
-      )
-
       return Ok(feature)
     }
 
@@ -168,7 +159,6 @@ export class UnpriceCustomer {
     projectId: string
     month: number
     year: number
-    ctx: Context
   }): Promise<
     Result<
       {
@@ -235,7 +225,7 @@ export class UnpriceCustomer {
       const analyticsPayload = {
         projectId: subItem.projectId,
         planVersionFeatureId: subItem.featurePlanVersionId,
-        subscriptionId: subItem.subscriptionId,
+        subscriptionId: subItem.subscriptionPhaseId,
         subItemId: subItem.id,
         featureSlug: featureSlug,
         customerId: customerId,
@@ -433,7 +423,7 @@ export class UnpriceCustomer {
           this.analytics
             .ingestFeaturesUsage({
               planVersionFeatureId: subItem.featurePlanVersionId,
-              subscriptionId: subItem.subscriptionId,
+              subscriptionId: subItem.subscriptionPhaseId,
               projectId: subItem.projectId,
               usage: usage,
               time: Date.now(),

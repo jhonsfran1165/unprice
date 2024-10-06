@@ -5,6 +5,18 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ CREATE TYPE "public"."change_type" AS ENUM('upgrade', 'downgrade');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."change_type_subscription_item" AS ENUM('add', 'remove', 'update');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  CREATE TYPE "public"."collection_method" AS ENUM('charge_automatically', 'send_invoice');
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -12,6 +24,18 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  CREATE TYPE "public"."currency" AS ENUM('USD', 'EUR');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."invoice_status" AS ENUM('unpaid', 'paid', 'void', 'draft');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."invoice_type" AS ENUM('flat', 'usage', 'hybrid');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -35,25 +59,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."legacy_plans" AS ENUM('FREE', 'PRO', 'ENTERPRISE');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."project_tier" AS ENUM('FREE', 'PRO', 'ENTERPRISE');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  CREATE TYPE "public"."app_stages" AS ENUM('prod', 'test', 'dev');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."start_cycle" AS ENUM('first_day_of_month', 'first_day_of_year', 'last_day_of_month', 'last_day_of_year');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -65,7 +71,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."subscription_status" AS ENUM('active', 'inactive', 'ended', 'cancelled');
+ CREATE TYPE "public"."status_sub_changes" AS ENUM('pending', 'applied');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."subscription_status" AS ENUM('pending', 'active', 'trialing', 'canceled', 'expired', 'past_due');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -95,12 +107,6 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."subscription_type" AS ENUM('plan', 'addons');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  CREATE TYPE "public"."usage_mode" AS ENUM('tier', 'package', 'unit');
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -122,6 +128,7 @@ CREATE TABLE IF NOT EXISTS "unprice_apikeys" (
 	"revoked_at_m" bigint,
 	"name" text NOT NULL,
 	"key" text NOT NULL,
+	"hash" text DEFAULT '' NOT NULL,
 	CONSTRAINT "pk_apikeys" PRIMARY KEY("id","project_id"),
 	CONSTRAINT "name_unique" UNIQUE("name")
 );
@@ -177,6 +184,36 @@ CREATE TABLE IF NOT EXISTS "unprice_verificationToken" (
 	CONSTRAINT "unprice_verificationToken_identifier_token_pk" PRIMARY KEY("identifier","token")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "unprice_customer_entitlements" (
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
+	"customer_id" varchar(64) NOT NULL,
+	"subscription_phase_id" varchar(64) NOT NULL,
+	"feature_plan_version_id" varchar(64) NOT NULL,
+	"quantity" integer,
+	"limit" integer,
+	"usage" integer,
+	"feature_slug" text NOT NULL,
+	"feature_type" "feature_types" NOT NULL,
+	"aggregation_method" "aggregation_method" DEFAULT 'sum' NOT NULL,
+	"realtime" boolean DEFAULT false NOT NULL,
+	"type" text DEFAULT 'feature' NOT NULL,
+	"is_custom" boolean DEFAULT false NOT NULL,
+	"last_updated_at" bigint NOT NULL,
+	"metadata" json,
+	CONSTRAINT "pk_customer_entitlement" PRIMARY KEY("id","project_id")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "unprice_customer_sessions" (
+	"id" varchar(64) PRIMARY KEY NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
+	"customer" json NOT NULL,
+	"plan_version" json NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_customers" (
 	"id" varchar(64) NOT NULL,
 	"project_id" varchar(64) NOT NULL,
@@ -191,8 +228,7 @@ CREATE TABLE IF NOT EXISTS "unprice_customers" (
 	"default_currency" "currency" DEFAULT 'USD' NOT NULL,
 	"timezone" varchar(32) DEFAULT 'UTC' NOT NULL,
 	CONSTRAINT "pk_customer" PRIMARY KEY("id","project_id"),
-	CONSTRAINT "stripe_customer_unique" UNIQUE("stripe_customer_id"),
-	CONSTRAINT "unique_email_project" UNIQUE("email","project_id")
+	CONSTRAINT "stripe_customer_unique" UNIQUE("stripe_customer_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_domains" (
@@ -271,10 +307,14 @@ CREATE TABLE IF NOT EXISTS "unprice_plan_versions" (
 	"plan_type" "plan_type" DEFAULT 'recurring' NOT NULL,
 	"currency" "currency" NOT NULL,
 	"billing_period" "billing_period",
-	"when_to_bill" "when_to_bill" DEFAULT 'pay_in_advance',
-	"start_cycle" "start_cycle" DEFAULT 'first_day_of_month',
+	"when_to_bill" "when_to_bill" DEFAULT 'pay_in_advance' NOT NULL,
+	"start_cycle" integer DEFAULT 1,
 	"grace_period" integer DEFAULT 0,
+	"collection_method" "collection_method" DEFAULT 'charge_automatically' NOT NULL,
+	"trial_days" integer DEFAULT 0 NOT NULL,
+	"auto_renew" boolean DEFAULT true NOT NULL,
 	"metadata" json,
+	"payment_method_required" boolean DEFAULT false,
 	"version" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "plan_versions_plan_id_fkey" PRIMARY KEY("id","project_id")
 );
@@ -303,9 +343,37 @@ CREATE TABLE IF NOT EXISTS "unprice_projects" (
 	"url" text DEFAULT '' NOT NULL,
 	"enabled" boolean DEFAULT true NOT NULL,
 	"is_internal" boolean DEFAULT false NOT NULL,
-	"default_currency" "currency" DEFAULT 'USD' NOT NULL,
-	"timezone" varchar(32) DEFAULT 'UTC',
+	"is_main" boolean DEFAULT false,
+	"default_currency" "currency" NOT NULL,
+	"timezone" varchar(32) NOT NULL,
 	CONSTRAINT "unique_slug" UNIQUE("slug")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "unprice_invoices" (
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
+	"subscription_id" varchar(64) NOT NULL,
+	"subscription_phase_id" varchar(64) NOT NULL,
+	"status" "invoice_status" DEFAULT 'unpaid' NOT NULL,
+	"cycle_start_at_m" bigint NOT NULL,
+	"cycle_end_at_m" bigint NOT NULL,
+	"billed_at_m" bigint,
+	"due_at_m" bigint NOT NULL,
+	"paid_at_m" bigint,
+	"invoice_type" "invoice_type" DEFAULT 'flat' NOT NULL,
+	"total" text NOT NULL,
+	"invoice_url" text,
+	"collection_method" "collection_method" DEFAULT 'charge_automatically' NOT NULL,
+	"invoice_id" text,
+	"payment_method_id" text,
+	"when_to_bill" "when_to_bill" DEFAULT 'pay_in_advance' NOT NULL,
+	"payment_providers" "payment_providers" NOT NULL,
+	"currency" "currency" NOT NULL,
+	"grace_period" integer DEFAULT 1 NOT NULL,
+	"past_due_at_m" bigint,
+	CONSTRAINT "invoices_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_subscription_items" (
@@ -314,9 +382,32 @@ CREATE TABLE IF NOT EXISTS "unprice_subscription_items" (
 	"created_at_m" bigint DEFAULT 0 NOT NULL,
 	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"units" integer,
-	"subscription_id" varchar(64) NOT NULL,
+	"is_usage" boolean DEFAULT false NOT NULL,
 	"feature_plan_version_id" varchar(64) NOT NULL,
+	"subscription_phase_id" varchar(64) NOT NULL,
 	CONSTRAINT "subscription_items_pkey" PRIMARY KEY("id","project_id")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "unprice_subscription_phases" (
+	"id" varchar(64) NOT NULL,
+	"project_id" varchar(64) NOT NULL,
+	"created_at_m" bigint DEFAULT 0 NOT NULL,
+	"updated_at_m" bigint DEFAULT 0 NOT NULL,
+	"subscription_id" varchar(64) NOT NULL,
+	"plan_version_id" varchar(64) NOT NULL,
+	"payment_method_id" text,
+	"status" "subscription_status" DEFAULT 'active' NOT NULL,
+	"trial_days" integer DEFAULT 0 NOT NULL,
+	"when_to_bill" "when_to_bill" DEFAULT 'pay_in_advance' NOT NULL,
+	"start_cycle" integer DEFAULT 1 NOT NULL,
+	"grace_period" integer DEFAULT 1 NOT NULL,
+	"collection_method" "collection_method" DEFAULT 'charge_automatically' NOT NULL,
+	"auto_renew" boolean DEFAULT true NOT NULL,
+	"trial_ends_at_m" bigint,
+	"start_at_m" bigint DEFAULT 0 NOT NULL,
+	"end_at_m" bigint,
+	"metadata" json,
+	CONSTRAINT "subscription_phases_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_subscriptions" (
@@ -325,26 +416,20 @@ CREATE TABLE IF NOT EXISTS "unprice_subscriptions" (
 	"created_at_m" bigint DEFAULT 0 NOT NULL,
 	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"customers_id" varchar(64) NOT NULL,
-	"default_payment_method_id" text,
-	"plan_version_id" varchar(64) NOT NULL,
-	"type" "subscription_type" DEFAULT 'plan' NOT NULL,
-	"prorated" boolean DEFAULT true,
-	"when_to_bill" "when_to_bill" DEFAULT 'pay_in_advance' NOT NULL,
-	"start_cycle" "start_cycle" DEFAULT 'first_day_of_month' NOT NULL,
-	"grace_period" integer DEFAULT 0,
+	"status" "subscription_status" DEFAULT 'active' NOT NULL,
+	"active" boolean DEFAULT true NOT NULL,
+	"plan_slug" text DEFAULT 'FREE',
 	"timezone" varchar(32) DEFAULT 'UTC' NOT NULL,
-	"trial_days" integer DEFAULT 0,
-	"trial_ends_at_m" bigint,
-	"start_date_at_m" bigint DEFAULT 0 NOT NULL,
-	"end_date_at_m" bigint,
-	"plan_changed_at_m" bigint,
-	"auto_renew" boolean DEFAULT true,
-	"collection_method" "collection_method" DEFAULT 'charge_automatically' NOT NULL,
-	"is_new" boolean DEFAULT true,
-	"status" "subscription_status" DEFAULT 'active',
+	"current_cycle_start_at_m" bigint NOT NULL,
+	"current_cycle_end_at_m" bigint NOT NULL,
+	"next_invoice_at_m" bigint DEFAULT 0 NOT NULL,
+	"last_invoice_at_m" bigint,
+	"past_due_at_m" bigint,
+	"cancel_at_m" bigint,
+	"canceled_at_m" bigint,
+	"change_at_m" bigint,
+	"changed_at_m" bigint,
 	"metadata" json,
-	"next_plan_version_to" text,
-	"next_subscription_id" varchar(64),
 	CONSTRAINT "subscriptions_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
@@ -375,26 +460,14 @@ CREATE TABLE IF NOT EXISTS "unprice_workspaces" (
 	"name" text NOT NULL,
 	"is_personal" boolean DEFAULT false,
 	"is_internal" boolean DEFAULT false,
+	"is_main" boolean DEFAULT false,
 	"created_by" varchar(64) NOT NULL,
 	"image_url" text,
 	"unprice_customer_id" text NOT NULL,
-	"legacy_plans" "legacy_plans" DEFAULT 'FREE' NOT NULL,
+	"plan" text,
 	"enabled" boolean DEFAULT true NOT NULL,
 	CONSTRAINT "unprice_workspaces_slug_unique" UNIQUE("slug"),
 	CONSTRAINT "unprice_customer_id" UNIQUE("unprice_customer_id")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "unprice_usage" (
-	"id" varchar(64) NOT NULL,
-	"project_id" varchar(64) NOT NULL,
-	"created_at_m" bigint DEFAULT 0 NOT NULL,
-	"updated_at_m" bigint DEFAULT 0 NOT NULL,
-	"subscription_item_id" text NOT NULL,
-	"month" integer NOT NULL,
-	"year" integer NOT NULL,
-	"usage" integer NOT NULL,
-	"limit" integer,
-	CONSTRAINT "usage_pkey" PRIMARY KEY("id","project_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_pages" (
@@ -441,13 +514,37 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "unprice_customer_entitlements_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "feature_plan_version_id_fkey" FOREIGN KEY ("feature_plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions_features"("id","project_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "subscription_phase_id_fkey" FOREIGN KEY ("subscription_phase_id","project_id") REFERENCES "public"."unprice_subscription_phases"("id","project_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_customer_entitlements" ADD CONSTRAINT "customer_id_fkey" FOREIGN KEY ("customer_id","project_id") REFERENCES "public"."unprice_customers"("id","project_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "unprice_customers" ADD CONSTRAINT "unprice_customers_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "unprice_domains" ADD CONSTRAINT "unprice_domains_workspace_id_unprice_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_domains" ADD CONSTRAINT "fk_domain_workspace" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -519,7 +616,31 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "unprice_projects" ADD CONSTRAINT "unprice_projects_workspace_id_unprice_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_projects" ADD CONSTRAINT "fk_project_workspace" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_invoices" ADD CONSTRAINT "unprice_invoices_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_invoices" ADD CONSTRAINT "invoices_subscription_id_fkey" FOREIGN KEY ("subscription_id","project_id") REFERENCES "public"."unprice_subscriptions"("id","project_id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_invoices" ADD CONSTRAINT "invoices_subscription_phase_id_fkey" FOREIGN KEY ("subscription_phase_id","project_id") REFERENCES "public"."unprice_subscription_phases"("id","project_id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_invoices" ADD CONSTRAINT "invoices_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -531,13 +652,43 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "subscription_items_subscription_id_fkey" FOREIGN KEY ("subscription_id","project_id") REFERENCES "public"."unprice_subscriptions"("id","project_id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "subscription_items_plan_version_id_fkey" FOREIGN KEY ("feature_plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions_features"("id","project_id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "subscription_items_plan_version_id_fkey" FOREIGN KEY ("feature_plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions_features"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "subscription_items_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_subscription_items" ADD CONSTRAINT "subscription_items_subscription_phase_id_fkey" FOREIGN KEY ("subscription_phase_id","project_id") REFERENCES "public"."unprice_subscription_phases"("id","project_id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_subscription_phases" ADD CONSTRAINT "unprice_subscription_phases_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_subscription_phases" ADD CONSTRAINT "subscription_phases_plan_version_id_fkey" FOREIGN KEY ("plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions"("id","project_id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_subscription_phases" ADD CONSTRAINT "subscription_phases_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "unprice_subscription_phases" ADD CONSTRAINT "subscription_phases_subscription_id_fkey" FOREIGN KEY ("subscription_id","project_id") REFERENCES "public"."unprice_subscriptions"("id","project_id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -549,31 +700,31 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "unprice_subscriptions" ADD CONSTRAINT "subscriptions_customer_id_fkey" FOREIGN KEY ("customers_id","project_id") REFERENCES "public"."unprice_customers"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_subscriptions" ADD CONSTRAINT "subscriptions_customer_id_fkey" FOREIGN KEY ("customers_id","project_id") REFERENCES "public"."unprice_customers"("id","project_id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "unprice_subscriptions" ADD CONSTRAINT "subscriptions_planversion_id_fkey" FOREIGN KEY ("plan_version_id","project_id") REFERENCES "public"."unprice_plan_versions"("id","project_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_subscriptions" ADD CONSTRAINT "subscriptions_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "unprice_invites" ADD CONSTRAINT "unprice_invites_workspace_id_unprice_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_invites" ADD CONSTRAINT "invites_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "unprice_members" ADD CONSTRAINT "unprice_members_workspace_id_unprice_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "unprice_members" ADD CONSTRAINT "members_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."unprice_user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "unprice_members" ADD CONSTRAINT "members_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."unprice_user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "unprice_members" ADD CONSTRAINT "members_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "public"."unprice_workspaces"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -585,31 +736,20 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "unprice_usage" ADD CONSTRAINT "unprice_usage_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "unprice_usage" ADD CONSTRAINT "usage_subitem_fkey" FOREIGN KEY ("subscription_item_id","project_id") REFERENCES "public"."unprice_subscription_items"("id","project_id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  ALTER TABLE "unprice_pages" ADD CONSTRAINT "unprice_pages_project_id_unprice_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."unprice_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "key" ON "unprice_apikeys" USING btree ("key");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "key" ON "unprice_apikeys" USING btree ("key");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "hash" ON "unprice_apikeys" USING btree ("hash");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "email" ON "unprice_customers" USING btree ("email");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "name" ON "unprice_domains" USING btree ("name");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "slug_feature" ON "unprice_features" USING btree ("slug","project_id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "slug_plan" ON "unprice_plans" USING btree ("slug","project_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "main_project" ON "unprice_projects" USING btree ("is_main") WHERE "unprice_projects"."is_main" = 'true';--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "slug_index" ON "unprice_projects" USING btree ("slug");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "unique_active_planversion_subscription" ON "unprice_subscriptions" USING btree ("customers_id","plan_version_id","project_id") WHERE "unprice_subscriptions"."status" = 'active';--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "unique_usage_subitem" ON "unprice_usage" USING btree ("project_id","subscription_item_id","month","year");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "main_workspace" ON "unprice_workspaces" USING btree ("is_main") WHERE "unprice_workspaces"."is_main" = 'true';--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "slug_page" ON "unprice_pages" USING btree ("slug","project_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "subdomain_index" ON "unprice_pages" USING btree ("subdomain");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "custom_domain_index" ON "unprice_pages" USING btree ("custom_domain");

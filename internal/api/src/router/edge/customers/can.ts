@@ -1,6 +1,6 @@
 import type { FeatureType } from "@unprice/db/validators"
+import { deniedReasonSchema } from "@unprice/services/customers"
 import { z } from "zod"
-import { deniedReasonSchema } from "../../../pkg/errors"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
 import { verifyFeature } from "../../../utils/shared"
 

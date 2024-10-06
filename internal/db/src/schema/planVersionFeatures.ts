@@ -31,6 +31,8 @@ export const planVersionFeatures = pgTableProject(
   {
     ...projectID,
     ...timestamps,
+    // TODO: add type in order to support addons
+    // TODO: add entitlements so a feature can have multiple variations
     planVersionId: cuid("plan_version_id").notNull(),
     featureId: cuid("feature_id").notNull(),
     // type of the feature - flat, tier, usage, etc.

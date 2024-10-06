@@ -79,15 +79,12 @@ export const CURRENCIES = ["USD", "EUR"] as const
 export const STAGES = ["prod", "test", "dev"] as const
 export const STATUS_PLAN = ["draft", "published"] as const
 export const STATUS_SUBSCRIPTION = [
+  "pending", // the subscription is created but there is no phases yet
   "active", // the subscription is active
   "trialing", // the subscription is trialing
   "canceled", // the subscription is cancelled
   "expired", // the subscription has expired - no auto-renew
   "past_due", // the subscription is past due - payment/invoice pending
-  // this statuses are useful for locking possible changes on the subscription
-  // for example if the subscription is changing plan, we don't want to allow to change the plan again or cancel the subscription
-  "changing", // the subscription is changing plan
-  "canceling", // the subscription is plan to be cancelled
 ] as const
 export const STATUS_SUB_CHANGES = ["pending", "applied"] as const
 export const CHANGE_TYPE = ["upgrade", "downgrade"] as const
@@ -99,7 +96,6 @@ export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
 export const INVOICE_TYPES = ["flat", "usage", "hybrid"] as const
 export const INVOICE_STATUS = ["unpaid", "paid", "void", "draft"] as const
 export const FEATURE_VERSION_TYPES = ["feature", "addon"] as const
-export const SUBSCRIPTION_TYPES = ["plan", "addons"] as const
 export const COLLECTION_METHODS = ["charge_automatically", "send_invoice"] as const
 
 export const TIER_MODES = Object.keys(TIER_MODES_MAP) as unknown as readonly [

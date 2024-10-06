@@ -1,1 +1,0 @@
-ALTER TABLE "unprice_workspaces" ADD COLUMN "plan" text;

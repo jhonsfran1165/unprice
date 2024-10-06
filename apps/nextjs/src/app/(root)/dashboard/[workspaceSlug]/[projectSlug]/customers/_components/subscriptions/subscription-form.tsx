@@ -1,18 +1,7 @@
 "use client"
-
-import { SUBSCRIPTION_TYPES } from "@unprice/db/utils"
 import type { InsertSubscription, Subscription, SubscriptionItem } from "@unprice/db/validators"
 import { subscriptionInsertSchema } from "@unprice/db/validators"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@unprice/ui/form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+import { Form } from "@unprice/ui/form"
 import { Separator } from "@unprice/ui/separator"
 import { useRouter } from "next/navigation"
 import { Fragment, useEffect, useMemo } from "react"
@@ -44,8 +33,8 @@ export function SubscriptionForm({
 }: {
   setDialogOpen?: (open: boolean) => void
   defaultValues:
-    | (InsertSubscription & { items?: SubscriptionItem[] })
-    | (Subscription & { items?: SubscriptionItem[] })
+  | (InsertSubscription & { items?: SubscriptionItem[] })
+  | (Subscription & { items?: SubscriptionItem[] })
   isChangePlanSubscription?: boolean
   readOnly?: boolean
 }) {
@@ -242,34 +231,6 @@ export function SubscriptionForm({
           )}
 
           <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem className="flex w-full flex-col">
-                  <FormLabel>Type of subscription</FormLabel>
-                  <FormDescription>
-                    Whether the subscription is for a plan or an addon.
-                  </FormDescription>
-                  <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                    <FormControl>
-                      <SelectTrigger disabled={readOnly}>
-                        <SelectValue placeholder="Select a type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {SUBSCRIPTION_TYPES.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <CollectionMethodFormField form={form} isDisabled={readOnly} />
           </div>
 

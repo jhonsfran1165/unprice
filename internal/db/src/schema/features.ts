@@ -14,6 +14,8 @@ export const features = pgTableProject(
     ...projectID,
     ...timestamps,
     slug: text("slug").notNull(),
+    // TODO: add entitlements here so when the user wants to configure a plan version
+    // we can check if the feature has entitlements and if so, we can add them to the plan version
     // code is the unique code for the feature that is used in redis cache for the entitlements calculation (bitmap)
     code: serial("code").notNull(),
     title: varchar("title", { length: 50 }).notNull(),

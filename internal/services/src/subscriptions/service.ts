@@ -1,20 +1,24 @@
-import type { Database, TransactionDatabase } from "@unprice/db"
-import { subscriptionItems, subscriptions } from "@unprice/db/schema"
+import { type Database, type TransactionDatabase, eq } from "@unprice/db"
+import { subscriptionItems, subscriptionPhases, subscriptions } from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
-import type {
-  InsertSubscription,
-  Subscription,
-  SubscriptionItemConfig,
+import {
+  type InsertSubscription,
+  type InsertSubscriptionPhase,
+  type Subscription,
+  type SubscriptionItemConfig,
+  type SubscriptionItemExtended,
+  type SubscriptionPhase,
+  createDefaultSubscriptionConfig,
+  subscriptionInsertSchema,
+  subscriptionPhaseInsertSchema,
 } from "@unprice/db/validators"
-import { Err, Ok, type Result } from "@unprice/error"
+import { Err, Ok, type Result, SchemaError } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
-import { getMonth, getYear } from "date-fns"
 import type { Cache } from "../cache/service"
 import type { Metrics } from "../metrics"
 import { configureBillingCycleSubscription } from "./billing"
 import { UnPriceSubscriptionError } from "./errors"
-import { createDefaultSubscriptionConfig } from "./utils"
 
 export class SubscriptionService {
   private readonly db: Database | TransactionDatabase
@@ -47,30 +51,103 @@ export class SubscriptionService {
     this.analytics = analytics
   }
 
-  public async _createSubscription({
-    input,
+  // private async _validatePaymentMethod(paymentMethodId: string, customerId: string, projectId: string): Promise<Result<void, UnPriceSubscriptionError>> {
+
+  private async _getActiveItems({
+    subscriptionId,
     projectId,
   }: {
-    input: InsertSubscription
+    subscriptionId: string
     projectId: string
-  }): Promise<Result<Subscription, UnPriceSubscriptionError>> {
+  }): Promise<Result<SubscriptionItemExtended[], UnPriceSubscriptionError>> {
+    // get the subscription
+    const subscription = await this.db.query.subscriptions.findFirst({
+      with: {
+        phases: {
+          // get active phase now
+          where: (phase, { eq, and, gte, lte }) =>
+            and(
+              eq(phase.status, "active"),
+              gte(phase.startAt, Date.now()),
+              lte(phase.endAt, Date.now())
+            ),
+          // phases are don't overlap, so we can use limit 1
+          limit: 1,
+          with: {
+            items: {
+              with: {
+                featurePlanVersion: {
+                  with: {
+                    feature: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      where: (sub, { eq, and }) => and(eq(sub.id, subscriptionId), eq(sub.projectId, projectId)),
+    })
+
+    if (!subscription || subscription.phases.length === 0) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription not found or has no active phases",
+        })
+      )
+    }
+
+    const activePhase = subscription.phases[0]
+
+    if (!activePhase || activePhase.status !== "active") {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription has no active phase",
+        })
+      )
+    }
+
+    return Ok(activePhase.items)
+  }
+
+  // creating a phase is a 2 step process:
+  // 1. validate the input
+  // 2. validate the subscription exists
+  // 3. validate there is no active phase in the same start - end range for the subscription
+  // 4. validate the config items are valid and there is no active subscription item in the same features
+  // 5. create the phase
+  // 6. create the items
+  // 7. update entitlements
+  // 8. update the subscription status if the phase is active
+  private async _createPhase({
+    input,
+    subscriptionId,
+    projectId,
+  }: {
+    input: InsertSubscriptionPhase
+    subscriptionId: string
+    projectId: string
+  }): Promise<Result<SubscriptionPhase, UnPriceSubscriptionError | SchemaError>> {
+    const { success, data, error } = subscriptionPhaseInsertSchema.safeParse(input)
+
+    if (!success) {
+      return Err(SchemaError.fromZod(error, input))
+    }
+
     const {
       planVersionId,
-      customerId,
-      config,
       trialDays,
+      collectionMethod,
+      startCycle,
+      whenToBill,
+      autoRenew,
+      gracePeriod,
+      metadata,
+      config,
+      paymentMethodId,
       startAt,
       endAt,
-      collectionMethod,
-      defaultPaymentMethodId,
-      metadata,
-      whenToBill,
-      startCycle,
-      gracePeriod,
-      type,
-      timezone,
-      autoRenew,
-    } = input
+    } = data
 
     const versionData = await this.db.query.versions.findFirst({
       with: {
@@ -122,23 +199,226 @@ export class SubscriptionService {
       )
     }
 
+    const startAtToUse = startAt ?? Date.now()
+    const endAtToUse = endAt ?? null
+
+    // get subscription with phases from start date
+    const subscription = await this.db.query.subscriptions.findFirst({
+      where: (sub, { eq }) => eq(sub.id, subscriptionId),
+      with: {
+        phases: {
+          where: (phase, { gte }) => gte(phase.startAt, startAtToUse),
+        },
+      },
+    })
+
+    if (!subscription) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription not found",
+        })
+      )
+    }
+
+    // verify phases don't overlap
+    const overlappingPhases = subscription.phases.filter((p) => {
+      const startAtPhase = p.startAt
+      const endAtPhase = p.endAt ?? Number.POSITIVE_INFINITY
+
+      const endAtNewPhase = endAtToUse ?? Number.POSITIVE_INFINITY
+
+      return (
+        (startAtPhase < endAtNewPhase || startAtPhase === endAtNewPhase) &&
+        (endAtPhase > startAtToUse || endAtPhase === startAtToUse)
+      )
+    })
+
+    if (overlappingPhases.length > 0) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Phases overlap, there is already a phase in the same range",
+        })
+      )
+    }
+
+    // if the customer has a default payment method, we use that
+    // TODO: here it could be a problem, if the user sends a wrong payment method id, we will use the customer default payment method
+    // for now just accept the default payment method is equal to the customer default payment method
+    // but probably the best approach would be to use the payment method directly from the customer and don't have a default payment method in the subscription
+
+    // check if payment method is required for the plan version
+    const paymentMethodRequired = versionData.paymentMethodRequired
+    const trialDaysToUse = trialDays ?? versionData.trialDays ?? 0
+
+    // validate payment method if there is no trails
+    if (trialDaysToUse === 0) {
+      if (paymentMethodRequired && !paymentMethodId) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Payment method is required for this plan version",
+          })
+        )
+      }
+    }
+
+    // check the subscription items configuration
+    let configItemsSubscription: SubscriptionItemConfig[] = []
+
+    if (!config) {
+      // if no items are passed, configuration is created from the default quantities of the plan version
+      const { err, val } = createDefaultSubscriptionConfig({
+        planVersion: versionData,
+      })
+
+      if (err) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: err.message,
+          })
+        )
+      }
+
+      configItemsSubscription = val
+    } else {
+      configItemsSubscription = config
+    }
+
+    // override the timezone with the project timezone and other defaults with the plan version data
+    // only used for ui purposes all date are saved in utc
+    const billingPeriod = versionData.billingPeriod ?? "month"
+    const whenToBillToUse = whenToBill ?? versionData.whenToBill
+    const collectionMethodToUse = collectionMethod ?? versionData.collectionMethod
+    const startCycleToUse = startCycle ?? versionData.startCycle ?? 1
+    const autoRenewToUse = autoRenew ?? versionData.autoRenew ?? true
+
+    // get the billing cycle for the subscription given the start date
+    const calculatedBillingCycle = configureBillingCycleSubscription({
+      currentCycleStartAt: startAtToUse,
+      trialDays: trialDaysToUse,
+      billingCycleStart: startCycleToUse,
+      billingPeriod,
+    })
+
+    // calculate the next billing at given the when to bill
+    const nextInvoiceAtToUse =
+      whenToBillToUse === "pay_in_advance"
+        ? calculatedBillingCycle.cycleStart.getTime()
+        : calculatedBillingCycle.cycleEnd.getTime()
+    const trialDaysEndAt = calculatedBillingCycle.trialDaysEndAt
+      ? calculatedBillingCycle.trialDaysEndAt.getTime()
+      : undefined
+
+    // all this is done in a transaction
+
+    const result = await this.db.transaction(async (trx) => {
+      // create the subscription phase
+      const subscriptionPhase = await trx
+        .insert(subscriptionPhases)
+        .values({
+          id: newId("subscription_phase"),
+          projectId,
+          planVersionId,
+          subscriptionId,
+          paymentMethodId,
+          status: trialDaysToUse > 0 ? "trialing" : "active",
+          trialEndsAt: trialDaysEndAt,
+          trialDays: trialDaysToUse,
+          startAt: startAtToUse,
+          endAt: endAtToUse,
+          collectionMethod: collectionMethodToUse,
+          startCycle: startCycleToUse,
+          whenToBill: whenToBillToUse,
+          autoRenew: autoRenewToUse,
+          gracePeriod,
+          metadata,
+        })
+        .returning()
+        .then((re) => re[0])
+
+      if (!subscriptionPhase) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Error while creating subscription phase",
+          })
+        )
+      }
+
+      // add items to the subscription
+      await Promise.all(
+        // this is important because every item has the configuration of the quantity of a feature in the subscription
+        configItemsSubscription.map((item) =>
+          trx.insert(subscriptionItems).values({
+            id: newId("subscription_item"),
+            subscriptionPhaseId: subscriptionPhase.id,
+            projectId: projectId,
+            featurePlanVersionId: item.featurePlanId,
+            units: item.units,
+            isUsage: item.isUsage,
+          })
+        )
+      ).catch((e) => {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: e.message,
+          })
+        )
+      })
+
+      // update the status of the subscription if the phase is active
+      const isActivePhase =
+        subscriptionPhase.startAt <= Date.now() &&
+        (subscriptionPhase.endAt ?? Number.POSITIVE_INFINITY) >= Date.now()
+
+      if (isActivePhase) {
+        await trx
+          .update(subscriptions)
+          .set({
+            status: subscriptionPhase.status,
+            active: true,
+            nextInvoiceAt: nextInvoiceAtToUse,
+            planSlug: versionData.plan.slug,
+            currentCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
+            currentCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
+          })
+          .where(eq(subscriptions.id, subscriptionId))
+      }
+
+      return Ok(subscriptionPhase)
+    })
+
+    return result
+  }
+
+  // creating a subscription is a 4 step process:
+  // 1. validate the input
+  // 2. validate the customer exists
+  // 3. validate payment method if there is no trails
+  // 5. create the subscription
+  // 6. create the phases
+  private async _createSubscription({
+    input,
+    projectId,
+  }: {
+    input: InsertSubscription
+    projectId: string
+  }): Promise<Result<Subscription, UnPriceSubscriptionError>> {
+    const { success, data, error } = subscriptionInsertSchema.safeParse(input)
+
+    // IMPORTANT: for now we only allow one subscription per customer
+
+    if (!success) {
+      return Err(SchemaError.fromZod(error, input))
+    }
+
+    const { customerId, phases, metadata, timezone } = data
+
     const customerData = await this.db.query.customers.findFirst({
       with: {
         subscriptions: {
-          with: {
-            items: {
-              with: {
-                featurePlanVersion: {
-                  with: {
-                    feature: true,
-                  },
-                },
-              },
-            },
-          },
           // get active subscriptions of the customer
           where: (sub, { eq }) => eq(sub.status, "active"),
         },
+        project: true,
       },
       where: (customer, operators) =>
         operators.and(
@@ -164,151 +444,46 @@ export class SubscriptionService {
       )
     }
 
-    // check if payment method is required for the plan version
-    const paymentMethodRequired = versionData.paymentMethodRequired
-    const trialDaysToUse = trialDays ?? versionData.trialDays ?? 0
-
-    // if the customer has a default payment method, we use that
-    // TODO: here it could be a problem, if the user sends a wrong payment method id, we will use the customer default payment method
-    // for now just accept the default payment method is equal to the customer default payment method
-    // but probable the best approach would be use the payment method directly from the customer and don't have a default payment method in the subscription
-    // or mayble we can have an array of valid payment providers in the customer, that way we can support multiple payment providers
-    // the issue here would be the sync between the payment provider.
-    const paymentMethodId =
-      defaultPaymentMethodId ?? customerData.metadata?.stripeDefaultPaymentMethodId
-
-    // validate payment method if there is no trails
-    if (trialDaysToUse === 0) {
-      if (
-        defaultPaymentMethodId &&
-        defaultPaymentMethodId !== customerData.metadata?.stripeDefaultPaymentMethodId
-      ) {
-        return Err(
-          new UnPriceSubscriptionError({
-            message: "Payment method is not valid",
-          })
-        )
-      }
-
-      if (paymentMethodRequired && !paymentMethodId) {
-        return Err(
-          new UnPriceSubscriptionError({
-            message: "Payment method is required for this plan version",
-          })
-        )
-      }
-    }
-
-    // check the active subscriptions of the customer.
-    // The plan version the customer is attempting to subscribe to can't have any feature that the customer already has
-    const newFeatures = versionData.planFeatures.map((f) => f.feature.slug)
-    const subscriptionFeatureSlugs = customerData.subscriptions.flatMap((sub) =>
-      sub.items.map((f) => f.featurePlanVersion.feature.slug)
-    )
-
-    const commonFeatures = subscriptionFeatureSlugs.filter((f) => newFeatures.includes(f))
-
-    if (commonFeatures.length > 0) {
+    // for now we only allow one subscription per customer
+    if (customerData.subscriptions.length > 0) {
       return Err(
         new UnPriceSubscriptionError({
-          message: `The customer is trying to subscribe to features that are already active in another subscription: ${commonFeatures.join(
-            ", "
-          )}`,
+          message:
+            "Customer already has a subscription, add a new phase to the existing subscription or add a new item",
         })
       )
     }
 
-    let configItemsSubscription: SubscriptionItemConfig[] = []
-
-    if (!config) {
-      // if no items are passed, configuration is created from the default quantities of the plan version
-      const { err, val } = createDefaultSubscriptionConfig({
-        planVersion: versionData,
-      })
-
-      if (err) {
-        return Err(
-          new UnPriceSubscriptionError({
-            message: err.message,
-          })
-        )
-      }
-
-      configItemsSubscription = val
-    } else {
-      configItemsSubscription = config
-    }
-
-    // override the timezone with the project timezone and other defaults with the plan version data
-    // only used for ui purposes all date are saved in utc
-    const timezoneToUse = timezone ?? versionData.project.timezone
-    const billingPeriod = versionData.billingPeriod ?? "month"
-    const whenToBillToUse = whenToBill ?? versionData.whenToBill
-    const collectionMethodToUse = collectionMethod ?? versionData.collectionMethod
-    const startCycleToUse = startCycle ?? versionData.startCycle ?? 1
-    const autoRenewToUse = autoRenew ?? versionData.autoRenew ?? true
-
-    let prorated = false
-
-    // get the billing cycle for the subscription given the start date
-    const calculatedBillingCycle = configureBillingCycleSubscription({
-      currentCycleStartAt: startAt,
-      trialDays: trialDaysToUse,
-      billingCycleStart: startCycleToUse,
-      billingPeriod,
-    })
-
-    // calculate the next billing at given the when to bill
-    const nextInvoiceAtToUse =
-      whenToBillToUse === "pay_in_advance"
-        ? calculatedBillingCycle.cycleStart.getTime()
-        : calculatedBillingCycle.cycleEnd.getTime()
-    const prorationFactor = calculatedBillingCycle.prorationFactor
-    const trialDaysEndAt = calculatedBillingCycle.trialDaysEndAt
-      ? calculatedBillingCycle.trialDaysEndAt.getTime()
-      : undefined
-
-    // handle proration
-    // if the start date is in the middle of the billing period, we need to prorate the subscription
-    if (prorationFactor < 1) {
-      prorated = true
-    }
+    // project defaults
+    const timezoneToUse = timezone || customerData.project.timezone
 
     // execute this in a transaction
     const result = await this.db.transaction(async (trx) => {
       // create the subscription
       const subscriptionId = newId("subscription")
 
+      // create the subscription and then phases
       const newSubscription = await trx
         .insert(subscriptions)
         .values({
           id: subscriptionId,
           projectId,
-          planVersionId: versionData.id,
           customerId: customerData.id,
-          startAt: startAt,
-          endAt: endAt ?? undefined,
-          autoRenew: autoRenewToUse,
-          trialDays: trialDaysToUse,
-          trialEndsAt: trialDaysEndAt,
-          collectionMethod: collectionMethodToUse,
-          status: trialDaysToUse > 0 ? "trialing" : "active",
-          // if the subscription is in trial, the next billing at is the trial end at
-          nextInvoiceAt: trialDaysEndAt ?? nextInvoiceAtToUse,
-          active: true,
-          metadata: metadata,
-          defaultPaymentMethodId: defaultPaymentMethodId,
-          whenToBill: whenToBillToUse,
-          startCycle: startCycleToUse,
-          gracePeriod: gracePeriod,
-          type: type,
+          // create as pending, only when the first phase is created the subscription is active
+          active: false,
+          status: "pending",
           timezone: timezoneToUse,
-          prorated: prorated,
-          currentCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
-          currentCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
+          metadata: metadata,
+          nextInvoiceAt: Date.now(),
+          currentCycleStartAt: Date.now(),
+          currentCycleEndAt: Date.now(),
         })
         .returning()
         .then((re) => re[0])
+        .catch((e) => {
+          console.error(e)
+          return null
+        })
 
       if (!newSubscription) {
         return Err(
@@ -318,16 +493,14 @@ export class SubscriptionService {
         )
       }
 
-      // add items to the subscription
+      // create the phases
+      // TODO: test if a single phase fails, the subscription is not created
       await Promise.all(
-        // this is important because every item has the configuration of the quantity of a feature in the subscription
-        configItemsSubscription.map((item) =>
-          trx.insert(subscriptionItems).values({
-            id: newId("subscription_item"),
-            projectId: newSubscription.projectId,
+        phases.map((phase) =>
+          this._createPhase({
+            input: phase,
+            projectId,
             subscriptionId: newSubscription.id,
-            featurePlanVersionId: item.featurePlanId,
-            units: item.units,
           })
         )
       ).catch((e) => {
@@ -341,9 +514,16 @@ export class SubscriptionService {
       return Ok(newSubscription)
     })
 
-    return result
+    if (result.err) {
+      return Err(result.err)
+    }
+
+    const subscription = result.val
+
+    return Ok(subscription)
   }
 
+  // create the subscription and update the cache
   public async createSubscription({
     input,
     projectId,
@@ -351,7 +531,6 @@ export class SubscriptionService {
     input: InsertSubscription
     projectId: string
   }): Promise<Result<Subscription, UnPriceSubscriptionError>> {
-    // TODO: handle input validation
     const { err, val } = await this._createSubscription({
       input,
       projectId,
@@ -363,85 +542,74 @@ export class SubscriptionService {
 
     const subscriptionData = val
 
-    // every time a subscription is created, we update the cache the new subscriptions
+    // every time a subscription is created, we update the cache
     this.waitUntil(
-      this.db.query.subscriptions
-        .findMany({
-          with: {
-            items: {
-              with: {
-                featurePlanVersion: {
-                  with: {
-                    feature: true,
-                  },
-                },
-              },
-            },
-          },
-          where: (sub, { eq, and }) =>
-            and(
-              eq(sub.customerId, subscriptionData.customerId),
-              eq(sub.projectId, subscriptionData.projectId)
-            ),
-        })
-        .then(async (subscriptions) => {
-          if (!subscriptions || subscriptions.length === 0) {
-            // TODO: log error
-            console.error("Subscriptions not found")
-            return
+      this._getActiveItems({
+        subscriptionId: subscriptionData.id,
+        projectId,
+      }).then(async (activeItemsResult) => {
+        if (activeItemsResult.err) {
+          console.error(activeItemsResult.err)
+          return
+        }
+
+        const activeItems = activeItemsResult.val
+
+        if (!activeItems || activeItems.length === 0) {
+          // TODO: log error
+          console.error("Active items not found")
+          return
+        }
+
+        const customerEntitlements = activeItems.map((item) => {
+          return {
+            featureId: item.featurePlanVersionId,
+            featureSlug: item.featurePlanVersion.feature.slug,
+            featureType: item.featurePlanVersion.featureType,
+            aggregationMethod: item.featurePlanVersion.aggregationMethod,
+            limit: item.featurePlanVersion.limit ?? null,
+            units: item.units,
           }
-
-          const customerEntitlements = subscriptions.flatMap((sub) =>
-            sub.items.map((f) => {
-              return {
-                featureId: f.featurePlanVersion.id,
-                featureSlug: f.featurePlanVersion.feature.slug,
-                featureType: f.featurePlanVersion.featureType,
-                aggregationMethod: f.featurePlanVersion.aggregationMethod,
-                limit: f.featurePlanVersion.limit,
-                units: f.units,
-              }
-            })
-          )
-
-          const customerSubscriptions = subscriptions.map((sub) => sub.id)
-          const currentMonth = getMonth(Date.now())
-          const currentYear = getYear(Date.now())
-
-          return Promise.all([
-            // save the customer entitlements
-            this.cache.entitlementsByCustomerId.set(
-              subscriptionData.customerId,
-              customerEntitlements
-            ),
-            // save the customer subscriptions
-            this.cache.subscriptionsByCustomerId.set(
-              subscriptionData.customerId,
-              customerSubscriptions
-            ),
-            // save features
-            subscriptions.flatMap((sub) =>
-              sub.items.map((f) =>
-                this.cache.featureByCustomerId.set(
-                  `${sub.customerId}:${f.featurePlanVersion.feature.slug}:${currentYear}:${currentMonth}`,
-                  {
-                    id: f.id,
-                    projectId: f.projectId,
-                    featurePlanVersionId: f.featurePlanVersion.id,
-                    subscriptionId: f.subscriptionId,
-                    units: f.units,
-                    featureType: f.featurePlanVersion.featureType,
-                    aggregationMethod: f.featurePlanVersion.aggregationMethod,
-                    limit: f.featurePlanVersion.limit,
-                    currentUsage: 0,
-                    lastUpdatedAt: 0,
-                    realtime: !!f.featurePlanVersion.metadata?.realtime,
-                  }
-                )
-              )
-            ),
-          ])
         })
+
+        // get active cycle
+        const startCycle = subscriptionData.currentCycleStartAt
+        const endCycle = subscriptionData.currentCycleEndAt
+
+        return Promise.all([
+          // save the customer entitlements
+          this.cache.entitlementsByCustomerId.set(
+            subscriptionData.customerId,
+            customerEntitlements
+          ),
+          // save features
+
+          // we nned to think about the best way to cache the features
+          activeItems.map((item) => {
+            return this.cache.featureByCustomerId.set(
+              `${subscriptionData.customerId}:${item.featurePlanVersion.feature.slug}:${startCycle}:${endCycle}`,
+              {
+                id: item.id,
+                projectId: item.projectId,
+                featurePlanVersionId: item.featurePlanVersionId,
+                subscriptionPhaseId: item.subscriptionPhaseId,
+                units: item.units,
+                featureType: item.featurePlanVersion.featureType,
+                aggregationMethod: item.featurePlanVersion.aggregationMethod,
+                limit: item.featurePlanVersion.limit ?? null,
+                currentUsage: 0,
+                lastUpdatedAt: 0,
+                realtime: !!item.featurePlanVersion.metadata?.realtime,
+                isUsage: item.isUsage,
+              }
+              // {
+              //   fresh: endCycle,
+              //   stale: endCycle,
+              // }
+            )
+          }),
+        ])
+      })
     )
 
     return Ok(subscriptionData)

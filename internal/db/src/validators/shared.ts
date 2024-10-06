@@ -8,14 +8,13 @@ import {
   FEATURE_VERSION_TYPES,
   PAYMENT_PROVIDERS,
   PLAN_BILLING_PERIODS,
-  SUBSCRIPTION_TYPES,
+  STATUS_SUBSCRIPTION,
   TIER_MODES,
   USAGE_MODES,
   WHEN_TO_BILLING,
 } from "../utils"
 
 export const paymentProviderSchema = z.enum(PAYMENT_PROVIDERS)
-export const subscriptionTypeSchema = z.enum(SUBSCRIPTION_TYPES)
 export const currencySchema = z.enum(CURRENCIES)
 export const typeFeatureSchema = z.enum(FEATURE_TYPES)
 export const usageModeSchema = z.enum(USAGE_MODES)
@@ -28,6 +27,7 @@ export const monthsSchema = z.coerce.number().int().min(1).max(12)
 export const yearsSchema = z.coerce.number().int().min(2000).max(2100)
 export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
 export const whenToBillSchema = z.enum(WHEN_TO_BILLING)
+export const subscriptionStatusSchema = z.enum(STATUS_SUBSCRIPTION)
 
 export const startCycleMonthSchema = z.coerce.number().int().min(1).max(31)
 export const startCycleYearSchema = z.coerce.number().int().min(1).max(12)

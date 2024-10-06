@@ -10,7 +10,7 @@ import type { Metrics } from "@unprice/services/metrics"
 import type { Analytics } from "@unprice/tinybird"
 import { UnPriceApiKeyError } from "./errors"
 
-export class UnpriceApiKey {
+export class ApiKeysService {
   private readonly cache: Cache
   private readonly db: Database
   private readonly metrics: Metrics

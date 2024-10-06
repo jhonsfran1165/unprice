@@ -9,15 +9,16 @@ export const buildItemsBySubscriptionIdQuery = async ({
   const items = db.$primary.$with("items").as(
     db
       .select({
-        subscriptionId: schema.subscriptionItems.subscriptionId,
-        projectId: schema.subscriptionItems.projectId,
+        subscriptionPhaseId: schema.subscriptionPhases.id,
+        projectId: schema.subscriptionPhases.projectId,
         items: sql<
           {
             id: string
             units: number | null
-            subscriptionId: string
             featurePlanVersionId: string
             projectId: string
+            subscriptionPhaseId: string
+            isUsage: boolean
             createdAtM: number
             updatedAtM: number
           }[]
@@ -25,9 +26,10 @@ export const buildItemsBySubscriptionIdQuery = async ({
           jsonb_build_object(
             'id', ${schema.subscriptionItems.id},
             'units', ${schema.subscriptionItems.units},
-            'subscriptionId', ${schema.subscriptionItems.subscriptionId},
+            'subscriptionPhaseId', ${schema.subscriptionPhases.id},
             'featurePlanVersionId', ${schema.subscriptionItems.featurePlanVersionId},
             'projectId', ${schema.subscriptionItems.projectId},
+            'isUsage', ${schema.subscriptionItems.isUsage},
             'createdAtM', ${schema.subscriptionItems.createdAtM},
             'updatedAtM', ${schema.subscriptionItems.updatedAtM}
           )
@@ -40,6 +42,8 @@ export const buildItemsBySubscriptionIdQuery = async ({
                 subscriptionId: string
                 featurePlanVersionId: string
                 projectId: string
+                subscriptionPhaseId: string
+                isUsage: boolean
                 createdAtM: number
                 updatedAtM: number
               }[]
@@ -50,7 +54,7 @@ export const buildItemsBySubscriptionIdQuery = async ({
           .as("items"),
       })
       .from(schema.subscriptionItems)
-      .groupBy(schema.subscriptionItems.subscriptionId, schema.subscriptionItems.projectId)
+      .groupBy(schema.subscriptionPhases.id, schema.subscriptionPhases.projectId)
   )
 
   return items

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { paymentProviderSchema } from "@unprice/db/validators"
+import { StripePaymentProvider } from "@unprice/services/payment-provider"
 import { z } from "zod"
-import { StripePaymentProvider } from "../../../pkg/payment-provider/stripe"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
 
 export const listPaymentMethods = protectedApiOrActiveProjectProcedure

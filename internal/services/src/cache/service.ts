@@ -82,10 +82,6 @@ export class CacheService {
           stale: 60 * 1000, // 1 minute short live hash idempotent request usage
         }
       ),
-      subscriptionsByCustomerId: new Namespace<CacheNamespaces["subscriptionsByCustomerId"]>(
-        this.context,
-        defaultOpts
-      ),
     })
   }
 

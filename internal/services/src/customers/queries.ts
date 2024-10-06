@@ -1,4 +1,4 @@
-import type { Database } from "@unprice/db"
+import type { Database, TransactionDatabase } from "@unprice/db"
 
 import { getFeatureItemBySlugPrepared } from "@unprice/db/queries"
 import type { Logger } from "@unprice/logging"
@@ -58,7 +58,7 @@ export const getCustomerFeatureQuery = async ({
       const response = {
         id: data.subscriptionItem.id,
         projectId: data.subscriptionItem.projectId,
-        subscriptionId: data.subscriptionItem.subscriptionId,
+        subscriptionPhaseId: data.subscriptionItem.subscriptionPhaseId,
         featurePlanVersionId: data.subscriptionItem.featurePlanVersionId,
         units: data.subscriptionItem.units,
         featureType: data.featurePlanVersion.featureType,
@@ -67,6 +67,7 @@ export const getCustomerFeatureQuery = async ({
         currentUsage: usage,
         realtime: !!data.featurePlanVersion.metadata?.realtime,
         lastUpdatedAt: Date.now(),
+        isUsage: data.subscriptionItem.isUsage,
       }
 
       return response
@@ -102,7 +103,7 @@ export const getEntitlementsQuery = async ({
 }: {
   projectId: string
   customerId: string
-  db: Database
+  db: Database | TransactionDatabase
   metrics: Metrics
   logger: Logger
 }): Promise<Array<EntitlementCached>> => {
@@ -116,34 +117,27 @@ export const getEntitlementsQuery = async ({
             id: true,
           },
           // subscriptions that are active, which means endAt is in the past or undefined
-          where: (sub, { or, isNull, lte }) => or(lte(sub.endAt, Date.now()), isNull(sub.endAt)),
+          where: (sub, { eq }) => eq(sub.active, true),
           orderBy(fields, operators) {
-            return [operators.desc(fields.startAt)]
+            return [operators.desc(fields.createdAtM)]
           },
           with: {
-            items: {
-              columns: {
-                id: true,
-                units: true,
-                featurePlanVersionId: true,
-              },
-            },
-            planVersion: {
-              columns: {
-                id: true,
-              },
+            phases: {
+              // get active phase now
+              where: (phase, { eq, and, gte, lte }) =>
+                and(
+                  eq(phase.status, "active"),
+                  gte(phase.startAt, Date.now()),
+                  lte(phase.endAt, Date.now())
+                ),
+              // phases are don't overlap, so we can use limit 1
+              limit: 1,
               with: {
-                planFeatures: {
-                  columns: {
-                    id: true,
-                    featureType: true,
-                    aggregationMethod: true,
-                    limit: true,
-                  },
+                items: {
                   with: {
-                    feature: {
-                      columns: {
-                        slug: true,
+                    featurePlanVersion: {
+                      with: {
+                        feature: true,
                       },
                     },
                   },
@@ -184,14 +178,16 @@ export const getEntitlementsQuery = async ({
 
   // get entitlements for every subscriptions, entitlements won't be repeated
   const entitlements = customer.subscriptions.flatMap((sub) =>
-    sub.planVersion.planFeatures.map((pf) => ({
-      featureId: pf.id,
-      featureSlug: pf.feature.slug,
-      featureType: pf.featureType,
-      aggregationMethod: pf.aggregationMethod,
-      limit: pf.limit,
-      units: sub.items.find((item) => item.featurePlanVersionId === pf.id)?.units || null,
-    }))
+    sub.phases.flatMap((phase) =>
+      phase.items.map((item) => ({
+        featureId: item.featurePlanVersionId,
+        featureSlug: item.featurePlanVersion.feature.slug,
+        featureType: item.featurePlanVersion.featureType,
+        aggregationMethod: item.featurePlanVersion.aggregationMethod,
+        limit: item.featurePlanVersion.limit,
+        units: item.units,
+      }))
+    )
   )
 
   return entitlements

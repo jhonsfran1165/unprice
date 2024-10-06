@@ -23,6 +23,22 @@ export function Err<E extends BaseError>(err: E): ErrResult<E> {
 
 /**
  * wrap catches thrown errors and returns a `Result`
+ *
+ * Example:
+ *
+  class OpenAiError extends BaseError {
+    retry = false;
+    name = OpenAiError.name;
+  }
+
+  const chatCompletion = await wrap(
+    openai.chat.completions.create({ ...requestOptions, stream_options: { include_usage: true } }),
+    (err) => new OpenAiError({ message: err.message }),
+  );
+  if (chatCompletion.err) {
+    return c.text(chatCompletion.err.message, { status: 400 });
+  }
+
  */
 export async function wrap<T, E extends BaseError>(
   p: Promise<T>,

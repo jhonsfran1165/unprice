@@ -128,7 +128,6 @@ export const cancel = protectedProcedure
         opts.ctx.waitUntil(
           Promise.all([
             // reset the cache
-            opts.ctx.cache.subscriptionsByCustomerId.remove(subscriptionData.customerId),
             opts.ctx.cache.entitlementsByCustomerId.remove(subscriptionData.customerId),
             // reset features
             subscriptionData.items.map((item) => {

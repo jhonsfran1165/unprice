@@ -2,15 +2,22 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import { subscriptionItems } from "../../schema/subscriptions"
+import { featureSelectBaseSchema } from "../features"
+import { planVersionFeatureSelectBaseSchema } from "../planVersionFeatures"
 
 export const subscriptionItemsSelectSchema = createSelectSchema(subscriptionItems)
+
+export const subscriptionItemExtendedSchema = createSelectSchema(subscriptionItems).extend({
+  featurePlanVersion: planVersionFeatureSelectBaseSchema.extend({
+    feature: featureSelectBaseSchema,
+  }),
+})
 
 export const subscriptionItemsInsertSchema = createInsertSchema(subscriptionItems, {
   // units for the item, for flat features it's always 1, usage features it's the current usage
   units: z.coerce.number().min(1),
 }).partial({
   id: true,
-  subscriptionId: true,
   createdAtM: true,
   updatedAtM: true,
   projectId: true,
@@ -19,6 +26,7 @@ export const subscriptionItemsInsertSchema = createInsertSchema(subscriptionItem
 export const subscriptionItemConfigSchema = z.object({
   featurePlanId: z.string(),
   featureSlug: z.string(),
+  isUsage: z.boolean().optional().default(false).describe("if the item is a usage item"),
   units: z.coerce
     .number()
     .min(1)
@@ -85,3 +93,4 @@ export type SubscriptionItemConfig = z.infer<typeof subscriptionItemConfigSchema
 export type SubscriptionItemsConfig = z.infer<typeof subscriptionItemsConfigSchema>
 export type SubscriptionItem = z.infer<typeof subscriptionItemsSelectSchema>
 export type InsertSubscriptionItem = z.infer<typeof subscriptionItemsInsertSchema>
+export type SubscriptionItemExtended = z.infer<typeof subscriptionItemExtendedSchema>

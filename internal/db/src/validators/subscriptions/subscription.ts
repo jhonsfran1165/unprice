@@ -3,7 +3,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import type { Result } from "@unprice/error"
-import { subscriptions } from "../../schema/subscriptions"
+import { subscriptionPhases, subscriptions } from "../../schema/subscriptions"
 import { customerSelectSchema } from "../customer"
 import { planVersionSelectBaseSchema } from "../planVersions"
 import { UnPriceCalculationError } from "./../errors"
@@ -12,7 +12,7 @@ import { configPackageSchema, planVersionExtendedSchema } from "./../planVersion
 import {
   collectionMethodSchema,
   startCycleSchema,
-  subscriptionTypeSchema,
+  subscriptionStatusSchema,
   whenToBillSchema,
 } from "./../shared"
 import {
@@ -41,32 +41,90 @@ export const subscriptionMetadataSchema = z.object({
     .describe("What to do when the subscription is past due"),
 })
 
-export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
-  metadata: subscriptionMetadataSchema,
-  type: subscriptionTypeSchema,
-  collectionMethod: collectionMethodSchema,
-  defaultPaymentMethodId: z.string().optional(),
-  startCycle: startCycleSchema,
-  whenToBill: whenToBillSchema,
-  timezone: z.string().min(1),
-}).extend({
-  nextPlanVersionId: z.string().optional(),
+export const subscriptionPhaseMetadataSchema = z.object({
+  reason: reasonSchema.optional().describe("Reason for the status"),
 })
 
-export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
+export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
+  metadata: subscriptionMetadataSchema,
+  timezone: z.string().min(1),
+  status: subscriptionStatusSchema.optional(),
+})
+
+export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhases, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
   trialDays: z.coerce.number().int().min(0).max(30).default(0),
-  metadata: subscriptionMetadataSchema,
-  type: subscriptionTypeSchema,
+  metadata: subscriptionPhaseMetadataSchema,
   collectionMethod: collectionMethodSchema,
-  defaultPaymentMethodId: z.string().optional(),
   startCycle: startCycleSchema,
   whenToBill: whenToBillSchema,
-  timezone: z.string().min(1),
+  status: subscriptionStatusSchema,
+})
+
+export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhases, {
+  planVersionId: z.string().min(1, { message: "Plan version is required" }),
+  trialDays: z.coerce.number().int().min(0).max(30).default(0),
+  metadata: subscriptionPhaseMetadataSchema,
+  collectionMethod: collectionMethodSchema,
+  startCycle: startCycleSchema,
+  whenToBill: whenToBillSchema,
+  status: subscriptionStatusSchema,
 })
   .extend({
     config: subscriptionItemsConfigSchema.optional(),
-    nextPlanVersionId: z.string().optional(),
+  })
+  .omit({
+    createdAtM: true,
+    updatedAtM: true,
+  })
+  .partial({
+    status: true,
+    id: true,
+    projectId: true,
+    subscriptionId: true,
+  })
+  .required({
+    planVersionId: true,
+  })
+
+export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
+  metadata: subscriptionMetadataSchema,
+  timezone: z.string().min(1),
+  status: subscriptionStatusSchema,
+})
+  .extend({
+    phases: subscriptionPhaseInsertSchema.array().superRefine((data, ctx) => {
+      // at least one phase is required
+      if (data.length === 0) {
+        return ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "At least one phase is required",
+        })
+      }
+
+      // start date and end date can overlap
+      for (const phase of data) {
+        if (phase.startAt && phase.endAt && phase.startAt >= phase.endAt) {
+          return ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Start date must be before end date",
+          })
+        }
+      }
+
+      // phases must be consecutive and in order
+      for (let i = 0; i < data.length - 1; i++) {
+        const currentPhase = data[i]
+        const nextPhase = data[i + 1]
+
+        if (currentPhase?.endAt && nextPhase?.startAt && currentPhase.endAt > nextPhase.startAt) {
+          return ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Phases must be consecutive",
+          })
+        }
+      }
+    }),
   })
   .omit({
     createdAtM: true,
@@ -78,18 +136,15 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
     currentCycleStartAt: true,
     currentCycleEndAt: true,
     nextInvoiceAt: true,
+    status: true,
   })
   .required({
     customerId: true,
-    planVersionId: true,
-    type: true,
-    startAt: true,
   })
 
 export const subscriptionExtendedSchema = subscriptionSelectSchema
   .pick({
     id: true,
-    planVersionId: true,
     customerId: true,
     status: true,
     metadata: true,
@@ -99,21 +154,11 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
     features: subscriptionItemsSelectSchema.array(),
   })
 
-export const subscriptionChangePlanSchema = subscriptionInsertSchema
-  .partial()
-  .required({
-    id: true,
-    customerId: true,
-    projectId: true,
-  })
-  .superRefine((data, ctx) => {
-    if (data.endAt && data.startAt && data.endAt < data.startAt) {
-      return ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "End date must be after start date",
-      })
-    }
-  })
+export const subscriptionChangePlanSchema = subscriptionInsertSchema.partial().required({
+  id: true,
+  customerId: true,
+  projectId: true,
+})
 
 export const subscriptionExtendedWithItemsSchema = subscriptionSelectSchema.extend({
   customer: customerSelectSchema,
@@ -125,6 +170,8 @@ export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>
 export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
 export type SubscriptionChangePlan = z.infer<typeof subscriptionChangePlanSchema>
+export type InsertSubscriptionPhase = z.infer<typeof subscriptionPhaseInsertSchema>
+export type SubscriptionPhase = z.infer<typeof subscriptionPhaseSelectSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,
@@ -169,6 +216,7 @@ export const createDefaultSubscriptionConfig = ({
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
           limit: planFeature.limit,
+          isUsage: true,
         }
 
       case "package": {

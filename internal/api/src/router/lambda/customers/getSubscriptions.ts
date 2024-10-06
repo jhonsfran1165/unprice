@@ -55,8 +55,8 @@ export const getSubscriptions = protectedApiOrActiveProjectProcedure
       .leftJoin(
         items,
         and(
-          eq(items.subscriptionId, schema.subscriptions.id),
-          eq(items.projectId, schema.subscriptions.projectId)
+          eq(items.subscriptionPhaseId, schema.subscriptionPhases.id),
+          eq(items.projectId, schema.subscriptionPhases.projectId)
         )
       )
       .innerJoin(
@@ -69,7 +69,7 @@ export const getSubscriptions = protectedApiOrActiveProjectProcedure
       .innerJoin(
         schema.versions,
         and(
-          eq(schema.subscriptions.planVersionId, schema.versions.id),
+          eq(schema.subscriptionPhases.planVersionId, schema.versions.id),
           eq(schema.customers.projectId, schema.versions.projectId),
           eq(schema.versions.projectId, project.id)
         )
