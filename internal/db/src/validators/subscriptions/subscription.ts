@@ -18,6 +18,7 @@ import {
 import {
   type SubscriptionItem,
   type SubscriptionItemConfig,
+  subscriptionItemExtendedSchema,
   subscriptionItemsConfigSchema,
   subscriptionItemsSelectSchema,
 } from "./items"
@@ -59,6 +60,10 @@ export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhas
   startCycle: startCycleSchema,
   whenToBill: whenToBillSchema,
   status: subscriptionStatusSchema,
+})
+
+export const subscriptionPhaseExtendedSchema = subscriptionPhaseSelectSchema.extend({
+  items: subscriptionItemExtendedSchema.array(),
 })
 
 export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhases, {
@@ -163,7 +168,7 @@ export const subscriptionChangePlanSchema = subscriptionInsertSchema.partial().r
 export const subscriptionExtendedWithItemsSchema = subscriptionSelectSchema.extend({
   customer: customerSelectSchema,
   version: planVersionSelectBaseSchema,
-  items: subscriptionItemsSelectSchema.array(),
+  items: subscriptionItemExtendedSchema.array(),
 })
 
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
@@ -172,6 +177,7 @@ export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
 export type SubscriptionChangePlan = z.infer<typeof subscriptionChangePlanSchema>
 export type InsertSubscriptionPhase = z.infer<typeof subscriptionPhaseInsertSchema>
 export type SubscriptionPhase = z.infer<typeof subscriptionPhaseSelectSchema>
+export type SubscriptionPhaseExtended = z.infer<typeof subscriptionPhaseExtendedSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,

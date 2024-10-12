@@ -33,9 +33,10 @@ export const getVersionsBySlug = protectedProjectProcedure
           versions: {
             orderBy: (version, { desc }) => [desc(version.createdAtM)],
             with: {
-              subscriptions: {
+              phases: {
                 columns: {
                   id: true,
+                  subscriptionId: true,
                 },
               },
             },
@@ -49,7 +50,8 @@ export const getVersionsBySlug = protectedProjectProcedure
             ...plans,
             versions: plans.versions.map((version) => ({
               ...version,
-              subscriptions: version.subscriptions.length ?? 0,
+              // TODO: fix this, we should count the number of subscriptions per plan version
+              subscriptions: version.phases.length,
             })),
           }
         )

@@ -1,19 +1,9 @@
 import type {
   AggregationMethod,
   ApiKeyExtended,
+  CustomerEntitlement,
   FeatureType,
-  SubscriptionItem,
 } from "@unprice/db/validators"
-
-export type SubscriptionItemCached = Omit<SubscriptionItem, "createdAtM" | "updatedAtM"> & {
-  featureType: FeatureType
-  aggregationMethod: AggregationMethod
-} & {
-  limit: number | null
-  lastUpdatedAt: number
-  currentUsage: number
-  realtime: boolean
-}
 
 export type EntitlementCached = {
   featureSlug: string
@@ -27,7 +17,7 @@ export type EntitlementCached = {
 export type CacheNamespaces = {
   // TODO: this should containe customer information as well. Speacially for deactivating customers
   apiKeyByHash: ApiKeyExtended | null
-  featureByCustomerId: SubscriptionItemCached | null
+  featureByCustomerId: Omit<CustomerEntitlement, "createdAtM" | "updatedAtM"> | null
   entitlementsByCustomerId: Array<EntitlementCached>
   idempotentRequestUsageByHash: {
     access: boolean

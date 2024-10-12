@@ -18,6 +18,7 @@ export const prefixes = {
   customer: "cus",
   customer_session: "cs",
   customer_provider: "cp",
+  customer_entitlement: "ce",
   subscription: "sub",
   subscription_item: "si",
   domain: "dom",

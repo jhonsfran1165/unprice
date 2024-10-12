@@ -351,13 +351,12 @@ export const signUpCustomer = async ({
       })
 
       if (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: err.message,
-        })
+        console.error(err)
+        trx.rollback()
+        throw err
       }
 
-      if (!newSubscription.id) {
+      if (!newSubscription?.id) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Error creating subscription",
@@ -373,12 +372,12 @@ export const signUpCustomer = async ({
       customerId: customerId,
     }
   } catch (error) {
-    const e = error as TRPCError
+    console.error(error)
 
     return {
       success: false,
       url: cancelUrl,
-      error: e.message,
+      error: "Error while signing up",
       customerId: "",
     }
   }

@@ -13,7 +13,14 @@ export const signUp = protectedApiOrActiveProjectProcedure
     },
   })
   .input(customerSignUpSchema)
-  .output(z.object({ success: z.boolean(), url: z.string() }))
+  .output(
+    z.object({
+      success: z.boolean(),
+      url: z.string(),
+      customerId: z.string(),
+      error: z.string().optional(),
+    })
+  )
   .mutation(async (opts) => {
     const project = opts.ctx.project
 

@@ -119,6 +119,10 @@ export const subscriptionPhases = pgTableProject(
     status: subscriptionStatusEnum("status").notNull().default("active"),
     // trial days of the phase
     trialDays: integer("trial_days").notNull().default(0),
+    // whether the subscription is active or not
+    // normally is active if the status is active, trialing or past_due or changing
+    // this simplifies the queries when we need to get the active subscriptions
+    active: boolean("active").notNull().default(true),
 
     // ************ billing data defaults comes from plan but created here so we can override if needed ************
     // this data normally comes from the plan version but we can override if needed
@@ -177,7 +181,6 @@ export const subscriptionItems = pgTableProject(
     // how many units of the feature the user is subscribed to
     // null means the feature is usage based
     units: integer("units"),
-    isUsage: boolean("is_usage").notNull().default(false),
     featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
     subscriptionPhaseId: cuid("subscription_phase_id").notNull(),
   },

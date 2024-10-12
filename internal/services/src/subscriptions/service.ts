@@ -1,13 +1,28 @@
-import { type Database, type TransactionDatabase, eq } from "@unprice/db"
-import { subscriptionItems, subscriptionPhases, subscriptions } from "@unprice/db/schema"
+import {
+  type Database,
+  type SQL,
+  type TransactionDatabase,
+  and,
+  eq,
+  inArray,
+  sql,
+} from "@unprice/db"
+import {
+  customerEntitlements,
+  subscriptionItems,
+  subscriptionPhases,
+  subscriptions,
+} from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import {
+  type CustomerEntitlement,
   type InsertSubscription,
   type InsertSubscriptionPhase,
   type Subscription,
   type SubscriptionItemConfig,
   type SubscriptionItemExtended,
   type SubscriptionPhase,
+  type SubscriptionPhaseExtended,
   createDefaultSubscriptionConfig,
   subscriptionInsertSchema,
   subscriptionPhaseInsertSchema,
@@ -51,25 +66,240 @@ export class SubscriptionService {
     this.analytics = analytics
   }
 
-  // private async _validatePaymentMethod(paymentMethodId: string, customerId: string, projectId: string): Promise<Result<void, UnPriceSubscriptionError>> {
+  private async _getActiveEntitlements({
+    customerId,
+    projectId,
+    now,
+    includeCustom,
+  }: {
+    customerId: string
+    projectId: string
+    now: number
+    includeCustom: boolean
+  }): Promise<CustomerEntitlement[]> {
+    // get the active entitlements for the customer
+    const activeEntitlements = await this.db.query.customerEntitlements.findMany({
+      where: (ent, { eq, and, gte, lte, isNull, or }) =>
+        and(
+          eq(ent.customerId, customerId),
+          eq(ent.projectId, projectId),
+          lte(ent.startAt, now),
+          or(isNull(ent.endAt), gte(ent.endAt, now)),
+          includeCustom ? undefined : eq(ent.isCustom, false)
+        ),
+    })
 
-  private async _getActiveItems({
+    return activeEntitlements
+  }
+
+  // entitlements are the actual features that are assigned to a customer
+  // sync the entitlements with the subscription items
+  // 1. get the active items for the subscription (paid ones)
+  // 2. get the current entitlements for the customer
+  // 3. compare the active items with the entitlements for the current phase
+  // 4. if there is a difference, create a new entitlement
+  // 5. for custom entitlements we don't do anything, they are already synced
+  private async _syncEntitlements({
     subscriptionId,
     projectId,
+    customerId,
+    now,
   }: {
     subscriptionId: string
     projectId: string
-  }): Promise<Result<SubscriptionItemExtended[], UnPriceSubscriptionError>> {
+    customerId: string
+    now: number
+  }): Promise<Result<void, UnPriceSubscriptionError>> {
+    // get the active phase for the subscription
+    const { err, val: activePhase } = await this._getActivePhase({
+      subscriptionId,
+      projectId,
+      now,
+    })
+
+    if (err) {
+      console.error(err)
+      return Err(err)
+    }
+
+    // get the active entitlements for the customer
+    const activeEntitlements = await this._getActiveEntitlements({
+      customerId,
+      projectId,
+      now,
+      includeCustom: false,
+    })
+
+    const activeSubItems = activePhase.items
+
+    const activeSubItemsMap = new Map<string, SubscriptionItemExtended>()
+    const entitlementsMap = new Map<string, CustomerEntitlement>()
+
+    for (const item of activeSubItems) {
+      activeSubItemsMap.set(item.featurePlanVersionId, item)
+    }
+
+    for (const entitlement of activeEntitlements) {
+      entitlementsMap.set(entitlement.featurePlanVersionId, entitlement)
+    }
+
+    // get the items that are not in the entitlements and create them
+    // get the entitlements that are not in the items and deactivate them
+    // update the lastUpdatedAt of the entitlements
+    const entitiesToCreate: (typeof customerEntitlements.$inferInsert)[] = []
+    const entitiesToDeactivate: Pick<typeof customerEntitlements.$inferInsert, "id" | "endAt">[] =
+      []
+    const entitiesToUpdate: Pick<
+      typeof customerEntitlements.$inferInsert,
+      "id" | "lastUpdatedAt"
+    >[] = []
+
+    const sqlChunks: SQL[] = []
+
+    // Find items to create
+    for (const [featurePlanVersionId, item] of activeSubItemsMap) {
+      if (!entitlementsMap.has(featurePlanVersionId)) {
+        entitiesToCreate.push({
+          id: newId("customer_entitlement"),
+          projectId,
+          customerId,
+          subscriptionItemId: item.id,
+          featurePlanVersionId,
+          units: item.units,
+          limit: item.featurePlanVersion.limit,
+          usage: 0, // Initialize usage to 0
+          featureSlug: item.featurePlanVersion.feature.slug,
+          featureType: item.featurePlanVersion.featureType,
+          aggregationMethod: item.featurePlanVersion.aggregationMethod,
+          realtime: item.featurePlanVersion.metadata?.realtime ?? false,
+          type: "feature",
+          startAt: now,
+          endAt: activePhase.endAt ?? null,
+          isCustom: false,
+        })
+      }
+    }
+
+    // Find entitlements to deactivate or update
+    for (const [featurePlanVersionId, entitlement] of entitlementsMap) {
+      if (!activeSubItemsMap.has(featurePlanVersionId)) {
+        entitiesToDeactivate.push({
+          id: entitlement.id,
+        })
+      } else {
+        sqlChunks.push(
+          sql`when ${customerEntitlements.id} = ${entitlement.id} then ${
+            activeSubItemsMap.get(featurePlanVersionId)?.units ?? null
+          }`
+        )
+        entitiesToUpdate.push({
+          id: entitlement.id,
+        })
+      }
+    }
+
+    sqlChunks.push(sql`end`)
+
+    // Perform database operations
+    await this.db.transaction(async (tx) => {
+      try {
+        if (entitiesToCreate.length > 0) {
+          await tx
+            .insert(customerEntitlements)
+            .values(entitiesToCreate as (typeof customerEntitlements.$inferInsert)[])
+        }
+
+        if (entitiesToDeactivate.length > 0) {
+          await tx
+            .update(customerEntitlements)
+            .set({ endAt: now })
+            .where(
+              and(
+                inArray(
+                  customerEntitlements.id,
+                  entitiesToDeactivate.map((e) => e.id)
+                ),
+                eq(customerEntitlements.projectId, projectId)
+              )
+            )
+        }
+
+        if (entitiesToUpdate.length > 0) {
+          const finalSql: SQL = sql.join(sqlChunks, sql.raw(" "))
+
+          await tx
+            .update(customerEntitlements)
+            .set({ units: finalSql })
+            .where(
+              and(
+                inArray(
+                  customerEntitlements.id,
+                  entitiesToUpdate.map((e) => e.id)
+                ),
+                eq(customerEntitlements.projectId, projectId)
+              )
+            )
+        }
+      } catch (err) {
+        console.error(err)
+        tx.rollback()
+        throw err
+      }
+    })
+
+    // update the cache
+    this.waitUntil(
+      this._getActiveEntitlements({
+        customerId,
+        projectId,
+        now,
+        includeCustom: true,
+      }).then(async (activeEntitlements) => {
+        console.log("activeEntitlements", activeEntitlements)
+        if (activeEntitlements.length === 0) {
+          console.error("Active entitlements not found")
+          return
+        }
+
+        return Promise.all([
+          // save the customer entitlements
+          // this.cache.entitlementsByCustomerId.set(
+          //   subscriptionData.customerId,
+          //   customerEntitlements
+          // ),
+          // save features
+
+          // we nned to think about the best way to cache the features
+          activeEntitlements.map((item) => {
+            return this.cache.featureByCustomerId.set(`${customerId}:${item.featureSlug}`, item)
+          }),
+        ])
+      })
+    )
+
+    return Ok(undefined)
+  }
+
+  private async _getActivePhase({
+    subscriptionId,
+    projectId,
+    now,
+  }: {
+    subscriptionId: string
+    projectId: string
+    now: number
+  }): Promise<Result<SubscriptionPhaseExtended, UnPriceSubscriptionError>> {
     // get the subscription
     const subscription = await this.db.query.subscriptions.findFirst({
       with: {
         phases: {
           // get active phase now
-          where: (phase, { eq, and, gte, lte }) =>
+          where: (phase, { eq, and, gte, lte, isNull, or }) =>
             and(
-              eq(phase.status, "active"),
-              gte(phase.startAt, Date.now()),
-              lte(phase.endAt, Date.now())
+              eq(phase.active, true),
+              lte(phase.startAt, now),
+              or(isNull(phase.endAt), gte(phase.endAt, now)),
+              eq(phase.projectId, projectId)
             ),
           // phases are don't overlap, so we can use limit 1
           limit: 1,
@@ -99,7 +329,7 @@ export class SubscriptionService {
 
     const activePhase = subscription.phases[0]
 
-    if (!activePhase || activePhase.status !== "active") {
+    if (!activePhase) {
       return Err(
         new UnPriceSubscriptionError({
           message: "Subscription has no active phase",
@@ -107,7 +337,7 @@ export class SubscriptionService {
       )
     }
 
-    return Ok(activePhase.items)
+    return Ok(activePhase)
   }
 
   // creating a phase is a 2 step process:
@@ -353,15 +583,12 @@ export class SubscriptionService {
             projectId: projectId,
             featurePlanVersionId: item.featurePlanId,
             units: item.units,
-            isUsage: item.isUsage,
           })
         )
       ).catch((e) => {
-        return Err(
-          new UnPriceSubscriptionError({
-            message: e.message,
-          })
-        )
+        console.error(e)
+        trx.rollback()
+        throw e
       })
 
       // update the status of the subscription if the phase is active
@@ -383,6 +610,20 @@ export class SubscriptionService {
           .where(eq(subscriptions.id, subscriptionId))
       }
 
+      // sync entitlements
+      const syncEntitlementsResult = await this._syncEntitlements({
+        subscriptionId,
+        projectId,
+        customerId: subscription.customerId,
+        now: Date.now(),
+      })
+
+      if (syncEntitlementsResult.err) {
+        console.error(syncEntitlementsResult.err)
+        trx.rollback()
+        throw syncEntitlementsResult.err
+      }
+
       return Ok(subscriptionPhase)
     })
 
@@ -395,7 +636,7 @@ export class SubscriptionService {
   // 3. validate payment method if there is no trails
   // 5. create the subscription
   // 6. create the phases
-  private async _createSubscription({
+  public async createSubscription({
     input,
     projectId,
   }: {
@@ -462,56 +703,60 @@ export class SubscriptionService {
       // create the subscription
       const subscriptionId = newId("subscription")
 
-      // create the subscription and then phases
-      const newSubscription = await trx
-        .insert(subscriptions)
-        .values({
-          id: subscriptionId,
-          projectId,
-          customerId: customerData.id,
-          // create as pending, only when the first phase is created the subscription is active
-          active: false,
-          status: "pending",
-          timezone: timezoneToUse,
-          metadata: metadata,
-          nextInvoiceAt: Date.now(),
-          currentCycleStartAt: Date.now(),
-          currentCycleEndAt: Date.now(),
-        })
-        .returning()
-        .then((re) => re[0])
-        .catch((e) => {
-          console.error(e)
-          return null
-        })
-
-      if (!newSubscription) {
-        return Err(
-          new UnPriceSubscriptionError({
-            message: "Error while creating subscription",
-          })
-        )
-      }
-
-      // create the phases
-      // TODO: test if a single phase fails, the subscription is not created
-      await Promise.all(
-        phases.map((phase) =>
-          this._createPhase({
-            input: phase,
+      try {
+        // create the subscription and then phases
+        const newSubscription = await trx
+          .insert(subscriptions)
+          .values({
+            id: subscriptionId,
             projectId,
-            subscriptionId: newSubscription.id,
+            customerId: customerData.id,
+            // create as pending, only when the first phase is created the subscription is active
+            active: false,
+            status: "pending",
+            timezone: timezoneToUse,
+            metadata: metadata,
+            nextInvoiceAt: Date.now(),
+            currentCycleStartAt: Date.now(),
+            currentCycleEndAt: Date.now(),
           })
-        )
-      ).catch((e) => {
-        return Err(
-          new UnPriceSubscriptionError({
-            message: e.message,
+          .returning()
+          .then((re) => re[0])
+          .catch((e) => {
+            console.error(e)
+            return null
           })
-        )
-      })
 
-      return Ok(newSubscription)
+        if (!newSubscription) {
+          return Err(
+            new UnPriceSubscriptionError({
+              message: "Error while creating subscription",
+            })
+          )
+        }
+
+        // create the phases
+        // TODO: test if a single phase fails, the subscription is not created
+        await Promise.all(
+          phases.map((phase) =>
+            this._createPhase({
+              input: phase,
+              projectId,
+              subscriptionId: newSubscription.id,
+            })
+          )
+        ).catch((e) => {
+          console.error(e)
+          trx.rollback()
+          throw e
+        })
+
+        return Ok(newSubscription)
+      } catch (e) {
+        console.error(e)
+        trx.rollback()
+        throw e
+      }
     })
 
     if (result.err) {
@@ -521,97 +766,5 @@ export class SubscriptionService {
     const subscription = result.val
 
     return Ok(subscription)
-  }
-
-  // create the subscription and update the cache
-  public async createSubscription({
-    input,
-    projectId,
-  }: {
-    input: InsertSubscription
-    projectId: string
-  }): Promise<Result<Subscription, UnPriceSubscriptionError>> {
-    const { err, val } = await this._createSubscription({
-      input,
-      projectId,
-    })
-
-    if (err) {
-      return Err(err)
-    }
-
-    const subscriptionData = val
-
-    // every time a subscription is created, we update the cache
-    this.waitUntil(
-      this._getActiveItems({
-        subscriptionId: subscriptionData.id,
-        projectId,
-      }).then(async (activeItemsResult) => {
-        if (activeItemsResult.err) {
-          console.error(activeItemsResult.err)
-          return
-        }
-
-        const activeItems = activeItemsResult.val
-
-        if (!activeItems || activeItems.length === 0) {
-          // TODO: log error
-          console.error("Active items not found")
-          return
-        }
-
-        const customerEntitlements = activeItems.map((item) => {
-          return {
-            featureId: item.featurePlanVersionId,
-            featureSlug: item.featurePlanVersion.feature.slug,
-            featureType: item.featurePlanVersion.featureType,
-            aggregationMethod: item.featurePlanVersion.aggregationMethod,
-            limit: item.featurePlanVersion.limit ?? null,
-            units: item.units,
-          }
-        })
-
-        // get active cycle
-        const startCycle = subscriptionData.currentCycleStartAt
-        const endCycle = subscriptionData.currentCycleEndAt
-
-        return Promise.all([
-          // save the customer entitlements
-          this.cache.entitlementsByCustomerId.set(
-            subscriptionData.customerId,
-            customerEntitlements
-          ),
-          // save features
-
-          // we nned to think about the best way to cache the features
-          activeItems.map((item) => {
-            return this.cache.featureByCustomerId.set(
-              `${subscriptionData.customerId}:${item.featurePlanVersion.feature.slug}:${startCycle}:${endCycle}`,
-              {
-                id: item.id,
-                projectId: item.projectId,
-                featurePlanVersionId: item.featurePlanVersionId,
-                subscriptionPhaseId: item.subscriptionPhaseId,
-                units: item.units,
-                featureType: item.featurePlanVersion.featureType,
-                aggregationMethod: item.featurePlanVersion.aggregationMethod,
-                limit: item.featurePlanVersion.limit ?? null,
-                currentUsage: 0,
-                lastUpdatedAt: 0,
-                realtime: !!item.featurePlanVersion.metadata?.realtime,
-                isUsage: item.isUsage,
-              }
-              // {
-              //   fresh: endCycle,
-              //   stale: endCycle,
-              // }
-            )
-          }),
-        ])
-      })
-    )
-
-    return Ok(subscriptionData)
   }
 }

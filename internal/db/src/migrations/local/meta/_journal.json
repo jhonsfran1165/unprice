@@ -8,6 +8,27 @@
       "when": 1728226109322,
       "tag": "0000_dapper_maximus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1728732149250,
+      "tag": "0001_lazy_namorita",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1728737698747,
+      "tag": "0002_open_junta",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1728748126900,
+      "tag": "0003_public_firestar",
+      "breakpoints": true
     }
   ]
 }

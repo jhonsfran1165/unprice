@@ -18,7 +18,7 @@ import { CustomerActions } from "../_components/customers/customer-actions"
 import { SubscriptionSheet } from "../_components/subscriptions/subscription-sheet"
 import { columns } from "../_components/subscriptions/table-subscriptions/columns"
 
-export default async function PlanPage({
+export default async function CustomerPage({
   params,
 }: {
   params: {

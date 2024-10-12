@@ -10,13 +10,13 @@ import { remove } from "./remove"
 import { update } from "./update"
 
 export const planRouter = createTRPCRouter({
-  create,
-  remove,
-  update,
-  exist,
-  getBySlug,
-  getVersionsBySlug,
-  getSubscriptionsBySlug,
-  getById,
-  listByActiveProject,
+  create: create,
+  remove: remove,
+  update: update,
+  exist: exist,
+  getBySlug: getBySlug,
+  getVersionsBySlug: getVersionsBySlug,
+  getSubscriptionsBySlug: getSubscriptionsBySlug,
+  getById: getById,
+  listByActiveProject: listByActiveProject,
 })

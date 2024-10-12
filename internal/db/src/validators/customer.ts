@@ -2,7 +2,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import * as schema from "../schema"
-import { currencySchema } from "./shared"
+import { aggregationMethodSchema, currencySchema, typeFeatureSchema } from "./shared"
 import { subscriptionItemsConfigSchema } from "./subscriptions/items"
 
 export const customerMetadataSchema = z.object({
@@ -60,8 +60,23 @@ export const stripePlanVersionSchema = z.object({
   config: subscriptionItemsConfigSchema.optional(),
 })
 
+export const customerEntitlementSchema = createSelectSchema(schema.customerEntitlements, {
+  aggregationMethod: aggregationMethodSchema,
+  featureType: typeFeatureSchema,
+})
+
+export const customerEntitlementInsertSchema = createInsertSchema(schema.customerEntitlements, {
+  aggregationMethod: aggregationMethodSchema,
+  featureType: typeFeatureSchema,
+}).partial({
+  id: true,
+  projectId: true,
+})
+
 export type StripePlanVersion = z.infer<typeof stripePlanVersionSchema>
 export type Customer = z.infer<typeof customerSelectSchema>
 export type InsertCustomer = z.infer<typeof customerInsertBaseSchema>
 export type StripeSetup = z.infer<typeof stripeSetupSchema>
 export type CustomerSignUp = z.infer<typeof customerSignUpSchema>
+export type CustomerEntitlement = z.infer<typeof customerEntitlementSchema>
+export type InsertCustomerEntitlement = z.infer<typeof customerEntitlementInsertSchema>

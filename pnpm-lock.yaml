@@ -1008,6 +1008,28 @@ importers:
         specifier: ^5.3.3
         version: 5.5.4
 
+  tooling/client:
+    dependencies:
+      '@unprice/unprice':
+        specifier: workspace:^
+        version: link:../../packages/unprice
+    devDependencies:
+      '@types/node':
+        specifier: 20.11.24
+        version: 20.11.24
+      '@unprice/tsconfig':
+        specifier: ^0.1.0
+        version: link:../typescript
+      dotenv-cli:
+        specifier: ^7.3.0
+        version: 7.4.2
+      tsx:
+        specifier: ^4.7.2
+        version: 4.17.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.5.4
+
   tooling/k6:
     devDependencies:
       k6:

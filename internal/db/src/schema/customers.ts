@@ -25,7 +25,7 @@ import type {
 import { aggregationMethodEnum, currencyEnum, typeFeatureEnum } from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
 import { projects } from "./projects"
-import { subscriptionPhases, subscriptions } from "./subscriptions"
+import { subscriptionItems, subscriptions } from "./subscriptions"
 
 export const customers = pgTableProject(
   "customers",
@@ -63,8 +63,8 @@ export const customerEntitlements = pgTableProject(
     ...projectID,
     ...timestamps,
     customerId: cuid("customer_id").notNull(),
-    // subscriptionPhaseId is the id of the subscription phase that the customer is entitled to
-    subscriptionPhaseId: cuid("subscription_phase_id").notNull(),
+    // subscriptionItemId is the id of the subscription item that the customer is entitled to
+    subscriptionItemId: cuid("subscription_item_id"),
     // featurePlanVersionId is the id of the feature plan version that the customer is entitled to
     featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
 
@@ -72,8 +72,8 @@ export const customerEntitlements = pgTableProject(
     // These fields are duplicate but this improves the performance when checking the usage
     // This table is cached in redis as well. All events usage are sent to tynibird and this table
     // is restored with events in the subscription.
-    // quantity is the quantity of the feature that the customer is entitled to
-    quantity: integer("quantity"),
+    // amount of units of the feature that the customer is entitled to
+    units: integer("units"),
     // limit is the limit of the feature that the customer is entitled to
     limit: integer("limit"),
     // usage is the usage of the feature that the customer has used
@@ -90,10 +90,18 @@ export const customerEntitlements = pgTableProject(
     type: text("type").notNull().default("feature"),
     // ****************** end defaults from plan version features ******************
 
+    // We need to know when the entitlement start and when it ends
+    startAt: bigint("start_at", { mode: "number" }).notNull(),
+    endAt: bigint("end_at", { mode: "number" }),
+
     // if it's a custom entitlement, it's not tied to a subscription phase and it's not billed
     isCustom: boolean("is_custom").notNull().default(false),
     // entitlements are updated on a regular basis
-    lastUpdatedAt: bigint("last_updated_at", { mode: "number" }).notNull(),
+    lastUpdatedAt: bigint("last_updated_at", { mode: "number" })
+      .notNull()
+      .default(0)
+      .$defaultFn(() => Date.now())
+      .$onUpdateFn(() => Date.now()),
     metadata: json("metadata").$type<{
       [key: string]: string | number | boolean | null
     }>(),
@@ -108,10 +116,10 @@ export const customerEntitlements = pgTableProject(
       foreignColumns: [planVersionFeatures.id, planVersionFeatures.projectId],
       name: "feature_plan_version_id_fkey",
     }),
-    subscriptionPhasefk: foreignKey({
-      columns: [table.subscriptionPhaseId, table.projectId],
-      foreignColumns: [subscriptionPhases.id, subscriptionPhases.projectId],
-      name: "subscription_phase_id_fkey",
+    subscriptionItemfk: foreignKey({
+      columns: [table.subscriptionItemId, table.projectId],
+      foreignColumns: [subscriptionItems.id, subscriptionItems.projectId],
+      name: "subscription_item_id_fkey",
     }),
     customerfk: foreignKey({
       columns: [table.customerId, table.projectId],
@@ -169,9 +177,9 @@ export const customerSessions = pgTableProject("customer_sessions", {
 // name
 
 export const customerEntitlementsRelations = relations(customerEntitlements, ({ one }) => ({
-  subscriptionPhase: one(subscriptionPhases, {
-    fields: [customerEntitlements.subscriptionPhaseId, customerEntitlements.projectId],
-    references: [subscriptionPhases.id, subscriptionPhases.projectId],
+  subscriptionItem: one(subscriptionItems, {
+    fields: [customerEntitlements.subscriptionItemId, customerEntitlements.projectId],
+    references: [subscriptionItems.id, subscriptionItems.projectId],
   }),
   featurePlanVersion: one(planVersionFeatures, {
     fields: [customerEntitlements.featurePlanVersionId, customerEntitlements.projectId],

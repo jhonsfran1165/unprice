@@ -15,7 +15,11 @@ export const getSubscriptions = protectedApiOrActiveProjectProcedure
       protect: true,
     },
   })
-  .input(customerSelectSchema.pick({ id: true }))
+  .input(
+    z.object({
+      customerId: z.string(),
+    })
+  )
   .output(
     z.object({
       customer: customerSelectSchema.extend({
@@ -24,13 +28,13 @@ export const getSubscriptions = protectedApiOrActiveProjectProcedure
     })
   )
   .query(async (opts) => {
-    const { id } = opts.input
+    const { customerId } = opts.input
     const { project } = opts.ctx
     const versionColumns = getTableColumns(schema.versions)
 
     const customerData = await opts.ctx.db.query.customers.findFirst({
       where: (customer, { eq, and }) =>
-        and(eq(customer.projectId, project.id), eq(customer.id, id)),
+        and(eq(customer.projectId, project.id), eq(customer.id, customerId)),
     })
 
     if (!customerData) {
@@ -74,7 +78,7 @@ export const getSubscriptions = protectedApiOrActiveProjectProcedure
           eq(schema.versions.projectId, project.id)
         )
       )
-      .where(and(eq(schema.customers.id, id), eq(schema.customers.projectId, project.id)))
+      .where(and(eq(schema.customers.id, customerId), eq(schema.customers.projectId, project.id)))
       .orderBy(() => [desc(schema.subscriptions.createdAtM)])
 
     if (!customerWithSubscriptions || !customerWithSubscriptions.length) {
