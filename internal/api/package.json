@@ -23,11 +23,11 @@
     "@baselime/trpc-opentelemetry-middleware": "^0.1.2",
     "@dinero.js/currencies": "2.0.0-alpha.14",
     "@potatohd/trpc-openapi": "^1.2.3",
-    "@t3-oss/env-nextjs": "0.9.1",
+    "@t3-oss/env-nextjs": "0.11.1",
     "@trpc-limiter/memory": "^1.0.0",
     "@trpc-limiter/upstash": "^1.0.0",
-    "@trpc/server": "11.0.0-rc.466",
-    "@unkey/cache": "^1.4.0",
+    "@trpc/server": "11.0.0-rc.580",
+    "@unkey/cache": "^1.5.0",
     "@unprice/auth": "^0.1.0",
     "@unprice/config": "^0.1.0",
     "@unprice/db": "^0.1.0",
@@ -39,9 +39,9 @@
     "@unprice/stripe": "^0.1.0",
     "@unprice/tinybird": "^0.1.0",
     "@unprice/vercel": "workspace:^",
-    "@upstash/ratelimit": "^2.0.0",
-    "@upstash/redis": "^1.33.0",
-    "@vercel/functions": "^1.0.2",
+    "@upstash/ratelimit": "^2.0.3",
+    "@upstash/redis": "^1.34.3",
+    "@vercel/functions": "^1.4.2",
     "dinero.js": "2.0.0-alpha.14",
     "server-only": "^0.0.1",
     "superjson": "2.2.1",
@@ -50,6 +50,6 @@
   },
   "devDependencies": {
     "@unprice/tsconfig": "^0.1.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.6.3"
   }
 }
