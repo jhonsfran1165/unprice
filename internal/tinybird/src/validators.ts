@@ -17,24 +17,24 @@ export const datetimeToUnixMilli = z.string().transform((t) => new Date(t).getTi
 export const featureVerificationSchemaV1 = z.object({
   projectId: z.string(),
   planVersionFeatureId: z.string(),
-  subscriptionId: z.string(),
+  subscriptionItemId: z.string().nullable(),
+  entitlementId: z.string(),
   deniedReason: z.string().optional(),
   time: z.number(),
   latency: z.number().optional(),
-  subItemId: z.string(),
   featureSlug: z.string(),
   customerId: z.string(),
 })
 
 export const featureUsageSchemaV1 = z.object({
-  subItemId: z.string(),
+  subscriptionItemId: z.string().nullable(),
+  entitlementId: z.string(),
   featureSlug: z.string(),
   customerId: z.string(),
   month: z.number().int(),
   year: z.number().int(),
   projectId: z.string(),
   planVersionFeatureId: z.string(),
-  subscriptionId: z.string(),
   usage: z.number(),
   time: z.number(),
 })

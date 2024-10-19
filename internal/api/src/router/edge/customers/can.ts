@@ -2,7 +2,7 @@ import type { FeatureType } from "@unprice/db/validators"
 import { deniedReasonSchema } from "@unprice/services/customers"
 import { z } from "zod"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
-import { verifyFeature } from "../../../utils/shared"
+import { verifyEntitlement } from "../../../utils/shared"
 
 export const can = protectedApiOrActiveProjectProcedure
   .meta({
@@ -34,7 +34,7 @@ export const can = protectedApiOrActiveProjectProcedure
     const { apiKey, ...ctx } = opts.ctx
     const projectId = apiKey.projectId
 
-    return await verifyFeature({
+    return await verifyEntitlement({
       customerId,
       featureSlug,
       projectId: projectId,

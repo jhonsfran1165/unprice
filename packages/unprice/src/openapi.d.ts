@@ -575,7 +575,7 @@ export interface operations {
     "customers-getSubscriptions": {
         parameters: {
             query: {
-                id: string;
+                customerId: string;
             };
             header?: never;
             path?: never;

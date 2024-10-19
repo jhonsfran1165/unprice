@@ -40,7 +40,7 @@ export function Err<E extends BaseError>(err: E): ErrResult<E> {
   }
 
  */
-export async function wrap<T, E extends BaseError>(
+export async function wrapResult<T, E extends BaseError>(
   p: Promise<T>,
   errorFactory: (err: Error) => E
 ): Promise<Result<T, E>> {

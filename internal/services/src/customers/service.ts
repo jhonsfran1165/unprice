@@ -1,14 +1,18 @@
-import type { Database, TransactionDatabase } from "@unprice/db"
+import { type Database, type TransactionDatabase, eq } from "@unprice/db"
 
-import type { FeatureType } from "@unprice/db/validators"
+import { customerSessions, customers, subscriptions } from "@unprice/db/schema"
+import { newId } from "@unprice/db/utils"
+import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
-import type { Cache, CacheNamespaces, SubscriptionItemCached } from "../cache"
+import type { Cache, CacheNamespaces } from "../cache"
 import type { Metrics } from "../metrics"
+import { StripePaymentProvider } from "../payment-provider/stripe"
+import { SubscriptionService } from "../subscriptions"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
-import { getCustomerFeatureQuery, getEntitlementsQuery } from "./queries"
+import { getEntitlementsQuery } from "./queries"
 
 export class CustomerService {
   private readonly cache: Cache
@@ -34,31 +38,36 @@ export class CustomerService {
     this.waitUntil = opts.waitUntil
   }
 
-  private async _getCustomerFeature(opts: {
+  private async _getCustomerEntitlement(opts: {
     customerId: string
     projectId: string
     featureSlug: string
     month: number
     year: number
-  }): Promise<Result<SubscriptionItemCached, UnPriceCustomerError | FetchError>> {
+  }): Promise<
+    Result<
+      Omit<CustomerEntitlement, "createdAtM" | "updatedAtM">,
+      UnPriceCustomerError | FetchError
+    >
+  > {
     const res = await this.cache.featureByCustomerId.swr(
-      `${opts.customerId}:${opts.featureSlug}:${opts.year}:${opts.month}`,
+      `${opts.customerId}:${opts.featureSlug}`,
       async () => {
-        return await getCustomerFeatureQuery({
-          projectId: opts.projectId,
-          featureSlug: opts.featureSlug,
-          customerId: opts.customerId,
-          metrics: this.metrics,
-          logger: this.logger,
-          analytics: this.analytics,
-          month: opts.month,
-          year: opts.year,
+        return await this.db.query.customerEntitlements.findFirst({
+          where: (ent, { eq, and, gte, lte, isNull, or }) =>
+            and(
+              eq(ent.customerId, opts.customerId),
+              eq(ent.projectId, opts.projectId),
+              lte(ent.startAt, Date.now()),
+              or(isNull(ent.endAt), gte(ent.endAt, Date.now())),
+              eq(ent.featureSlug, opts.featureSlug)
+            ),
         })
       }
     )
 
     if (res.err) {
-      this.logger.error(`Error in _getCustomerFeature: ${res.err.message}`, {
+      this.logger.error(`Error in _getCustomerEntitlement: ${res.err.message}`, {
         error: JSON.stringify(res.err),
         customerId: opts.customerId,
         featureSlug: opts.featureSlug,
@@ -76,15 +85,15 @@ export class CustomerService {
 
     // cache miss, get from db
     if (!res.val) {
-      const feature = await getCustomerFeatureQuery({
-        projectId: opts.projectId,
-        featureSlug: opts.featureSlug,
-        customerId: opts.customerId,
-        metrics: this.metrics,
-        logger: this.logger,
-        analytics: this.analytics,
-        month: opts.month,
-        year: opts.year,
+      const feature = await this.db.query.customerEntitlements.findFirst({
+        where: (ent, { eq, and, gte, lte, isNull, or }) =>
+          and(
+            eq(ent.customerId, opts.customerId),
+            eq(ent.projectId, opts.projectId),
+            lte(ent.startAt, Date.now()),
+            or(isNull(ent.endAt), gte(ent.endAt, Date.now())),
+            eq(ent.featureSlug, opts.featureSlug)
+          ),
       })
 
       if (!feature) {
@@ -153,7 +162,7 @@ export class CustomerService {
     return Ok(entitlements)
   }
 
-  public async verifyFeature(opts: {
+  public async verifyEntitlement(opts: {
     customerId: string
     featureSlug: string
     projectId: string
@@ -177,7 +186,7 @@ export class CustomerService {
       const { customerId, projectId, featureSlug, month, year } = opts
       const start = performance.now()
 
-      const res = await this._getCustomerFeature({
+      const res = await this._getCustomerEntitlement({
         customerId,
         projectId,
         featureSlug,
@@ -188,7 +197,7 @@ export class CustomerService {
       if (res.err) {
         const error = res.err
 
-        this.logger.error("Error in verifyFeature", {
+        this.logger.error("Error in ve", {
           error: JSON.stringify(error),
           customerId: opts.customerId,
           featureSlug: opts.featureSlug,
@@ -213,9 +222,9 @@ export class CustomerService {
         }
       }
 
-      const subItem = res.val
+      const entitlementId = res.val
 
-      if (!subItem) {
+      if (!entitlementId) {
         return Ok({
           access: false,
           deniedReason: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
@@ -223,16 +232,16 @@ export class CustomerService {
       }
 
       const analyticsPayload = {
-        projectId: subItem.projectId,
-        planVersionFeatureId: subItem.featurePlanVersionId,
-        subscriptionId: subItem.subscriptionPhaseId,
-        subItemId: subItem.id,
+        projectId: entitlementId.projectId,
+        planVersionFeatureId: entitlementId.featurePlanVersionId,
+        subscriptionItemId: entitlementId.subscriptionItemId,
+        entitlementId: entitlementId.id,
         featureSlug: featureSlug,
         customerId: customerId,
         time: Date.now(),
       }
 
-      switch (subItem.featureType) {
+      switch (entitlementId.featureType) {
         case "flat": {
           // flat feature are like feature flags
           break
@@ -241,9 +250,9 @@ export class CustomerService {
         case "usage":
         case "tier":
         case "package": {
-          const currentUsage = subItem.currentUsage
-          const limit = subItem.limit
-          const units = subItem.units
+          const currentUsage = entitlementId.usage ?? 0
+          const limit = entitlementId.limit
+          const units = entitlementId.units
           // remaining usage given the units the user bought
           const remainingUsage = units ? units - currentUsage : undefined
           const remainingToLimit = limit ? limit - currentUsage : undefined
@@ -262,7 +271,7 @@ export class CustomerService {
               currentUsage: currentUsage,
               limit: limit ?? undefined,
               units: units ?? undefined,
-              featureType: subItem.featureType,
+              featureType: entitlementId.featureType,
               access: false,
               deniedReason: "LIMIT_EXCEEDED",
               remaining: remainingToLimit,
@@ -282,7 +291,7 @@ export class CustomerService {
             return Ok({
               currentUsage: currentUsage,
               limit: limit ?? undefined,
-              featureType: subItem.featureType,
+              featureType: entitlementId.featureType,
               units: units ?? undefined,
               access: false,
               deniedReason: "USAGE_EXCEEDED",
@@ -295,7 +304,7 @@ export class CustomerService {
 
         default:
           this.logger.error("Unhandled feature type", {
-            featureType: subItem.featureType,
+            featureType: entitlementId.featureType,
           })
           break
       }
@@ -307,7 +316,7 @@ export class CustomerService {
             latency: performance.now() - start,
           })
           .catch((error) =>
-            this.logger.error("Error reporting usage to analytics verifyFeature", {
+            this.logger.error("Error reporting usage to analytics ve", {
               error: JSON.stringify(error),
               analyticsPayload,
             })
@@ -315,7 +324,7 @@ export class CustomerService {
       )
 
       return Ok({
-        featureType: subItem.featureType,
+        featureType: entitlementId.featureType,
         access: true,
       })
     } catch (e) {
@@ -348,7 +357,7 @@ export class CustomerService {
       const { customerId, featureSlug, projectId, usage, month, year } = opts
 
       // get the item details from the cache or the db
-      const res = await this._getCustomerFeature({
+      const res = await this._getCustomerEntitlement({
         customerId,
         projectId,
         featureSlug,
@@ -360,14 +369,14 @@ export class CustomerService {
         return res
       }
 
-      const subItem = res.val
+      const entitlement = res.val
 
       // TODO: should I report the usage even if the limit was exceeded?
       // for now let the customer report more usage than the limit but add notifications
       const threshold = 80 // notify when the usage is 80% or more
-      const currentUsage = subItem.currentUsage
-      const limit = subItem.limit
-      const units = subItem.units
+      const currentUsage = entitlement.usage ?? 0
+      const limit = entitlement.limit
+      const units = entitlement.units
       let message = ""
       let notifyUsage = false
 
@@ -408,7 +417,7 @@ export class CustomerService {
       }
 
       // flat features don't have usage
-      if (subItem.featureType === "flat") {
+      if (entitlement.featureType === "flat") {
         return Ok({
           success: true,
         })
@@ -422,14 +431,14 @@ export class CustomerService {
           // report the usage to analytics db
           this.analytics
             .ingestFeaturesUsage({
-              planVersionFeatureId: subItem.featurePlanVersionId,
-              subscriptionId: subItem.subscriptionPhaseId,
-              projectId: subItem.projectId,
+              planVersionFeatureId: entitlement.featurePlanVersionId,
+              subscriptionItemId: entitlement.subscriptionItemId,
+              projectId: entitlement.projectId,
               usage: usage,
               time: Date.now(),
               month: month,
               year: year,
-              subItemId: subItem.id,
+              entitlementId: entitlement.id,
               featureSlug: featureSlug,
               customerId: customerId,
             })
@@ -437,12 +446,12 @@ export class CustomerService {
               // TODO: Only available in pro plus plan
               // TODO: usage is not always sum to the current usage, could be counter, etc
               // also if there are many request per second, we could debounce the update somehow
-              if (subItem.realtime) {
+              if (entitlement.realtime) {
                 this.cache.featureByCustomerId.set(
                   `${customerId}:${featureSlug}:${year}:${month}`,
                   {
-                    ...subItem,
-                    currentUsage: subItem.currentUsage + usage,
+                    ...entitlement,
+                    usage: (entitlement.usage ?? 0) + usage,
                     lastUpdatedAt: Date.now(),
                   }
                 )
@@ -451,7 +460,7 @@ export class CustomerService {
             .catch((error) => {
               this.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
                 error: JSON.stringify(error),
-                subItem: subItem,
+                entitlement: entitlement,
                 usage: usage,
               })
             }),
@@ -473,5 +482,320 @@ export class CustomerService {
 
       throw e
     }
+  }
+
+  public async signUp(opts: {
+    input: CustomerSignUp
+    projectId: string
+  }): Promise<
+    Result<
+      { success: boolean; url: string; error?: string; customerId: string },
+      UnPriceCustomerError | FetchError
+    >
+  > {
+    const { input, projectId } = opts
+    const {
+      planVersionId,
+      config,
+      successUrl,
+      cancelUrl,
+      email,
+      name,
+      timezone,
+      defaultCurrency,
+      externalId,
+    } = input
+
+    const planVersion = await this.db.query.versions.findFirst({
+      with: {
+        project: true,
+        plan: true,
+      },
+      where: (version, { eq, and }) =>
+        and(eq(version.id, planVersionId), eq(version.projectId, projectId)),
+    })
+
+    if (!planVersion) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Plan version not found",
+        })
+      )
+    }
+
+    if (planVersion.status !== "published") {
+      return Err(
+        new UnPriceCustomerError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Plan version is not published",
+        })
+      )
+    }
+
+    if (planVersion.active === false) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Plan version is not active",
+        })
+      )
+    }
+
+    const planProject = planVersion.project
+    const paymentProvider = planVersion.paymentProvider
+    const paymentRequired = planVersion.paymentMethodRequired ?? false
+    const trialDays = planVersion.trialDays ?? 0
+    const customerId = newId("customer")
+    const customerSuccessUrl = successUrl.replace("{CUSTOMER_ID}", customerId)
+
+    // if payment is required, we need to go through payment provider flow first
+    if (paymentRequired && trialDays === 0) {
+      switch (paymentProvider) {
+        case "stripe": {
+          const stripePaymentProvider = new StripePaymentProvider({
+            logger: this.logger,
+          })
+
+          // create a session with the data of the customer, the plan version and the success and cancel urls
+          // pass the session id to stripe metadata and then once the customer adds a payment method, we call our api to create the subscription
+          const sessionId = newId("customer_session")
+          const customerSession = await this.db
+            .insert(customerSessions)
+            .values({
+              id: sessionId,
+              customer: {
+                id: customerId,
+                name: name,
+                email: email,
+                currency: defaultCurrency || planProject.defaultCurrency,
+                timezone: timezone || planProject.timezone,
+                projectId: projectId,
+                externalId: externalId,
+              },
+              planVersion: {
+                id: planVersion.id,
+                projectId: projectId,
+                config: config,
+              },
+            })
+            .returning()
+            .then((data) => data[0])
+
+          if (!customerSession) {
+            return Err(
+              new UnPriceCustomerError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Error creating customer session",
+              })
+            )
+          }
+
+          const { err, val } = await stripePaymentProvider.signUp({
+            successUrl: customerSuccessUrl,
+            cancelUrl: cancelUrl,
+            customerSessionId: customerSession.id,
+            customer: {
+              id: customerId,
+              email: email,
+              currency: defaultCurrency || planProject.defaultCurrency,
+            },
+          })
+
+          if (err ?? !val) {
+            return Err(
+              new UnPriceCustomerError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: err.message,
+              })
+            )
+          }
+
+          return Ok({
+            success: true,
+            url: val.url,
+            customerId: val.customerId,
+          })
+        }
+
+        default:
+          return Err(
+            new UnPriceCustomerError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Payment provider not supported yet",
+            })
+          )
+      }
+    }
+
+    // if payment is not required, we can create the customer directly with its subscription
+    try {
+      await this.db.transaction(async (trx) => {
+        const newCustomer = await trx
+          .insert(customers)
+          .values({
+            id: customerId,
+            name: name ?? email,
+            email: email,
+            projectId: projectId,
+            defaultCurrency: defaultCurrency ?? planProject.defaultCurrency,
+            timezone: timezone ?? planProject.timezone,
+            active: true,
+          })
+          .returning()
+          .then((data) => data[0])
+
+        if (!newCustomer?.id) {
+          return Err(
+            new UnPriceCustomerError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Error creating customer",
+            })
+          )
+        }
+
+        const subscriptionService = new SubscriptionService({
+          db: trx,
+          cache: this.cache,
+          metrics: this.metrics,
+          logger: this.logger,
+          waitUntil: this.waitUntil,
+          analytics: this.analytics,
+        })
+
+        const { err, val: newSubscription } = await subscriptionService.createSubscription({
+          input: {
+            customerId: newCustomer.id,
+            projectId: projectId,
+            timezone: timezone ?? planProject.timezone,
+            phases: [
+              {
+                planVersionId: planVersion.id,
+                status: "active",
+                startAt: Date.now(),
+                config: config,
+                collectionMethod: planVersion.collectionMethod,
+                whenToBill: planVersion.whenToBill,
+                startCycle: planVersion.startCycle ?? 1,
+                gracePeriod: planVersion.gracePeriod ?? 0,
+              },
+            ],
+          },
+          projectId: projectId,
+        })
+
+        if (err) {
+          console.error(err)
+          trx.rollback()
+          throw err
+        }
+
+        if (!newSubscription?.id) {
+          return Err(
+            new UnPriceCustomerError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Error creating subscription",
+            })
+          )
+        }
+
+        return { newCustomer, newSubscription }
+      })
+
+      return Ok({
+        success: true,
+        url: customerSuccessUrl,
+        customerId: customerId,
+      })
+    } catch (error) {
+      console.error(error)
+
+      return Ok({
+        success: false,
+        url: cancelUrl,
+        error: "Error while signing up",
+        customerId: "",
+      })
+    }
+  }
+
+  public async signOut(opts: {
+    customerId: string
+    projectId: string
+  }): Promise<Result<{ success: boolean; message?: string }, UnPriceCustomerError | FetchError>> {
+    const { customerId, projectId } = opts
+
+    // cancel all subscriptions
+    const customerSubs = await this.db.query.subscriptions.findMany({
+      where: (subscription, { eq, and }) =>
+        and(eq(subscription.customerId, customerId), eq(subscription.projectId, projectId)),
+    })
+
+    // all this should be in a transaction
+    await this.db.transaction(async (tx) => {
+      const cancelSubs = await Promise.all(
+        customerSubs.map(async (sub) => {
+          // check if the subscription is in trials, if so set the endAt to the trialEndsAt
+          const endDate = sub.cancelAt
+            ? sub.cancelAt > Date.now()
+              ? sub.cancelAt
+              : Date.now()
+            : Date.now()
+
+          await tx
+            .update(subscriptions)
+            .set({
+              status: "canceled",
+              metadata: {
+                reason: "user_requested",
+              },
+              canceledAt: endDate,
+            })
+            .where(eq(subscriptions.id, sub.id))
+        })
+      )
+        .catch((err) => {
+          return Err(
+            new FetchError({
+              message: err.message,
+              retry: false,
+            })
+          )
+        })
+        .then(() => true)
+
+      if (!cancelSubs) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error canceling subscription",
+          })
+        )
+      }
+
+      // TODO: trigger payment to collect the last bill
+
+      // TODO: send email to the customer
+
+      // Deactivate the customer
+      await tx
+        .update(customers)
+        .set({
+          active: false,
+        })
+        .where(eq(customers.id, customerId))
+        .catch((err) => {
+          return Err(
+            new FetchError({
+              message: err.message,
+              retry: false,
+            })
+          )
+        })
+    })
+
+    return Ok({
+      success: true,
+    })
   }
 }

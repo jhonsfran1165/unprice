@@ -14,6 +14,7 @@ export const unpriceCustomerErrorSchema = z.enum([
   "FEATURE_HAS_NO_USAGE_RECORD",
   "FEATURE_NOT_SUPPORT_USAGE",
   "UNHANDLED_ERROR",
+  "INTERNAL_SERVER_ERROR",
 ])
 
 export const deniedReasonSchema = z.enum([
@@ -28,7 +29,7 @@ export const deniedReasonSchema = z.enum([
 export type DenyReason = z.infer<typeof deniedReasonSchema>
 export type UnpriceCustomerError = z.infer<typeof unpriceCustomerErrorSchema>
 
-export class UnPriceCustomerError extends BaseError<{ customerId: string }> {
+export class UnPriceCustomerError extends BaseError<{ customerId?: string }> {
   public readonly retry = false
   public readonly name = UnPriceCustomerError.name
   public readonly code: UnpriceCustomerError
@@ -36,12 +37,14 @@ export class UnPriceCustomerError extends BaseError<{ customerId: string }> {
   constructor({
     code,
     customerId,
+    message,
   }: {
     code: UnpriceCustomerError
-    customerId: string
+    customerId?: string
+    message?: string
   }) {
     super({
-      message: "Customer API error",
+      message: `Customer service error: ${message}`,
       context: {
         customerId,
       },

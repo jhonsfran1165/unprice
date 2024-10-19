@@ -88,3 +88,4 @@ export type BillingPeriod = z.infer<typeof billingPeriodSchema>
 export type WhenToBill = z.infer<typeof whenToBillSchema>
 export type StartCycle = z.infer<typeof startCycleSchema>
 export type CollectionMethod = z.infer<typeof collectionMethodSchema>
+export type SubscriptionStatus = z.infer<typeof subscriptionStatusSchema>

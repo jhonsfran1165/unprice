@@ -17,7 +17,7 @@ export class UnPriceSubscriptionError extends BaseError {
 
   constructor({ message }: { message: string }) {
     super({
-      message: `Subscription error: ${message}`,
+      message: `Subscription service error: ${message}`,
     })
   }
 }

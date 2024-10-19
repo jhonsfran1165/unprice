@@ -1,18 +1,16 @@
 import { TRPCError } from "@trpc/server"
 import { type Database, and, eq, sql } from "@unprice/db"
-import { customerSessions, customers, members, subscriptions, workspaces } from "@unprice/db/schema"
+import { members, workspaces } from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
 import type { CustomerSignUp, WorkspaceInsert } from "@unprice/db/validators"
 import { CustomerService, UnPriceCustomerError } from "@unprice/services/customers"
-import { StripePaymentProvider } from "@unprice/services/payment-provider"
-import { SubscriptionService } from "@unprice/services/subscriptions"
 import { getMonth, getYear } from "date-fns"
 import type { Context } from "../trpc"
 
 // shared logic for some procedures
 // this way I use my product to build my product
 // without setting up unprice sdk
-export const verifyFeature = async ({
+export const verifyEntitlement = async ({
   customerId,
   featureSlug,
   projectId,
@@ -37,7 +35,7 @@ export const verifyFeature = async ({
   const currentMonth = getMonth(Date.now()) + 1
   const currentYear = getYear(Date.now())
 
-  const { err, val } = await customer.verifyFeature({
+  const { err, val } = await customer.verifyEntitlement({
     customerId,
     featureSlug,
     projectId,
@@ -179,208 +177,30 @@ export const signUpCustomer = async ({
   ctx: Context
   projectId: string
 }): Promise<{ success: boolean; url: string; error?: string; customerId: string }> => {
-  const {
-    planVersionId,
-    config,
-    successUrl,
-    cancelUrl,
-    email,
-    name,
-    timezone,
-    defaultCurrency,
-    externalId,
-  } = input
-
-  const planVersion = await ctx.db.query.versions.findFirst({
-    with: {
-      project: true,
-      plan: true,
-    },
-    where: (version, { eq, and }) =>
-      and(eq(version.id, planVersionId), eq(version.projectId, projectId)),
+  const customer = new CustomerService({
+    cache: ctx.cache,
+    db: ctx.db as Database,
+    analytics: ctx.analytics,
+    logger: ctx.logger,
+    metrics: ctx.metrics,
+    waitUntil: ctx.waitUntil,
   })
 
-  if (!planVersion) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "Plan version not found",
-    })
-  }
+  const { err, val } = await customer.signUp({
+    input: input,
+    projectId: projectId,
+  })
 
-  if (planVersion.status !== "published") {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "Plan version is not published",
-    })
-  }
-
-  if (planVersion.active === false) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "Plan version is not active",
-    })
-  }
-
-  const planProject = planVersion.project
-  const paymentProvider = planVersion.paymentProvider
-  const paymentRequired = planVersion.paymentMethodRequired ?? false
-  const trialDays = planVersion.trialDays ?? 0
-  const customerId = newId("customer")
-  const customerSuccessUrl = successUrl.replace("{CUSTOMER_ID}", customerId)
-
-  // if payment is required, we need to go through payment provider flow first
-  if (paymentRequired && trialDays === 0) {
-    switch (paymentProvider) {
-      case "stripe": {
-        const stripePaymentProvider = new StripePaymentProvider({
-          logger: ctx.logger,
-        })
-
-        // create a session with the data of the customer, the plan version and the success and cancel urls
-        // pass the session id to stripe metadata and then once the customer adds a payment method, we call our api to create the subscription
-        const sessionId = newId("customer_session")
-        const customerSession = await ctx.db
-          .insert(customerSessions)
-          .values({
-            id: sessionId,
-            customer: {
-              id: customerId,
-              name: name,
-              email: email,
-              currency: defaultCurrency || planProject.defaultCurrency,
-              timezone: timezone || planProject.timezone,
-              projectId: projectId,
-              externalId: externalId,
-            },
-            planVersion: {
-              id: planVersion.id,
-              projectId: projectId,
-              config: config,
-            },
-          })
-          .returning()
-          .then((data) => data[0])
-
-        if (!customerSession) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error creating customer session",
-          })
-        }
-
-        const { err, val } = await stripePaymentProvider.signUp({
-          successUrl: customerSuccessUrl,
-          cancelUrl: cancelUrl,
-          customerSessionId: customerSession.id,
-          customer: {
-            id: customerId,
-            email: email,
-            currency: defaultCurrency || planProject.defaultCurrency,
-          },
-        })
-
-        if (err ?? !val) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: err.message,
-          })
-        }
-
-        return val
-      }
-      default:
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Payment provider not supported yet",
-        })
-    }
-  }
-
-  // if payment is not required, we can create the customer directly with its subscription
-  try {
-    await ctx.db.transaction(async (trx) => {
-      const newCustomer = await trx
-        .insert(customers)
-        .values({
-          id: customerId,
-          name: name ?? email,
-          email: email,
-          projectId: projectId,
-          defaultCurrency: defaultCurrency ?? planProject.defaultCurrency,
-          timezone: timezone ?? planProject.timezone,
-          active: true,
-        })
-        .returning()
-        .then((data) => data[0])
-
-      if (!newCustomer?.id) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error creating customer",
-        })
-      }
-
-      const subscriptionService = new SubscriptionService({
-        db: trx,
-        cache: ctx.cache,
-        metrics: ctx.metrics,
-        logger: ctx.logger,
-        waitUntil: ctx.waitUntil,
-        analytics: ctx.analytics,
-      })
-
-      const { err, val: newSubscription } = await subscriptionService.createSubscription({
-        input: {
-          customerId: newCustomer.id,
-          projectId: projectId,
-          timezone: timezone ?? planProject.timezone,
-          phases: [
-            {
-              planVersionId: planVersion.id,
-              status: "active",
-              startAt: Date.now(),
-              config: config,
-              collectionMethod: planVersion.collectionMethod,
-              whenToBill: planVersion.whenToBill,
-              startCycle: planVersion.startCycle ?? 1,
-              gracePeriod: planVersion.gracePeriod ?? 0,
-            },
-          ],
-        },
-        projectId: projectId,
-      })
-
-      if (err) {
-        console.error(err)
-        trx.rollback()
-        throw err
-      }
-
-      if (!newSubscription?.id) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error creating subscription",
-        })
-      }
-
-      return { newCustomer, newSubscription }
-    })
-
-    return {
-      success: true,
-      url: customerSuccessUrl,
-      customerId: customerId,
-    }
-  } catch (error) {
-    console.error(error)
-
+  if (err) {
     return {
       success: false,
-      url: cancelUrl,
-      error: "Error while signing up",
+      url: "",
       customerId: "",
+      error: err.message,
     }
   }
+
+  return val
 }
 
 export const createWorkspace = async ({
@@ -541,70 +361,28 @@ export const signOutCustomer = async ({
 }) => {
   const { customerId, projectId } = input
 
-  // cancel all subscriptions
-  const customerSubs = await ctx.db.query.subscriptions.findMany({
-    where: (subscription, { eq, and }) =>
-      and(eq(subscription.customerId, customerId), eq(subscription.projectId, projectId)),
+  const customer = new CustomerService({
+    cache: ctx.cache,
+    db: ctx.db as Database,
+    analytics: ctx.analytics,
+    logger: ctx.logger,
+    metrics: ctx.metrics,
+    waitUntil: ctx.waitUntil,
   })
 
-  // all this should be in a transaction
-  await ctx.db.transaction(async (tx) => {
-    const cancelSubs = await Promise.all(
-      customerSubs.map(async (sub) => {
-        // check if the subscription is in trials, if so set the endAt to the trialEndsAt
-        const endDate = sub.cancelAt
-          ? sub.cancelAt > Date.now()
-            ? sub.cancelAt
-            : Date.now()
-          : Date.now()
+  const { err, val } = await customer.signOut({
+    customerId: customerId,
+    projectId: projectId,
+  })
 
-        await tx
-          .update(subscriptions)
-          .set({
-            status: "canceled",
-            metadata: {
-              reason: "user_requested",
-            },
-            canceledAt: endDate,
-          })
-          .where(eq(subscriptions.id, sub.id))
-      })
-    )
-      .catch((err) => {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: err.message,
-        })
-      })
-      .then(() => true)
-
-    if (!cancelSubs) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Error canceling subscription",
-      })
+  if (err) {
+    return {
+      success: false,
+      url: "",
+      customerId: "",
+      error: err.message,
     }
-
-    // TODO: trigger payment to collect the last bill
-
-    // TODO: send email to the customer
-
-    // Deactivate the customer
-    await tx
-      .update(customers)
-      .set({
-        active: false,
-      })
-      .where(eq(customers.id, customerId))
-      .catch((err) => {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: err.message,
-        })
-      })
-  })
-
-  return {
-    success: true,
   }
+
+  return val
 }

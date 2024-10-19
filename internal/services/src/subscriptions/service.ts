@@ -255,7 +255,6 @@ export class SubscriptionService {
         now,
         includeCustom: true,
       }).then(async (activeEntitlements) => {
-        console.log("activeEntitlements", activeEntitlements)
         if (activeEntitlements.length === 0) {
           console.error("Active entitlements not found")
           return
