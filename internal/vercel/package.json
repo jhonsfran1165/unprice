@@ -21,8 +21,8 @@
   "license": "AGPL-3.0",
   "devDependencies": {
     "@unprice/tsconfig": "workspace:^",
-    "@types/node": "20.11.24",
-    "typescript": "^5.3.3"
+    "@types/node": "20.17.0",
+    "typescript": "^5.6.3"
   },
   "dependencies": {
     "@unprice/error": "^0.1.0",
