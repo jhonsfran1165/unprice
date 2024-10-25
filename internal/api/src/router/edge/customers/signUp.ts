@@ -29,10 +29,11 @@ export const signUp = protectedApiOrActiveProjectProcedure
     const subscription = await opts.ctx.db.query.subscriptions.findFirst({
       where: (subscriptions, { eq, and }) =>
         and(
-          eq(subscriptions.id, "sub_3UcG1KJg8xKVd9GL5zVgvqP12sPX"),
+          eq(subscriptions.id, "sub_3Ub7de1PTST41857QKfcr3g2wp8X"),
           eq(subscriptions.projectId, project.id)
         ),
       with: {
+        customer: true,
         phases: {
           with: {
             items: {
@@ -56,17 +57,16 @@ export const signUp = protectedApiOrActiveProjectProcedure
     const subscriptionStateMachine = new SubscriptionStateMachine({
       db: opts.ctx.db,
       subscription,
+      logger: opts.ctx.logger,
+      analytics: opts.ctx.analytics,
     })
 
-    console.log(subscriptionStateMachine.getCurrentState())
-    console.log(await subscriptionStateMachine.canTransition("INVOICE"))
-    console.log(
-      await subscriptionStateMachine.transition("INVOICE", {
-        invoiceId: "inv_123",
-      })
-    )
+    // TODO: need to abstract this to a funtion that allows to re execute the chain of events if it fails
     console.log(subscriptionStateMachine.getCurrentState())
 
+    const result = await subscriptionStateMachine.endTrial({ now: Date.now() })
+
+    console.log(result)
     return {
       success: true,
       url: "https://google.com",

@@ -25,7 +25,7 @@ const calculatePriceSchema = z.object({
 
 const unitsSchema = z.coerce.number().int().min(0)
 
-interface CalculatedPrice {
+export interface CalculatedPrice {
   unitPrice: z.infer<typeof calculatePriceSchema>
   totalPrice: z.infer<typeof calculatePriceSchema>
 }

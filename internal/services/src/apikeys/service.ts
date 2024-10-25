@@ -3,7 +3,7 @@ import { apiKeyPrepared } from "@unprice/db/queries"
 import * as schema from "@unprice/db/schema"
 import { hashStringSHA256 } from "@unprice/db/utils"
 import type { ApiKeyExtended } from "@unprice/db/validators"
-import { Err, FetchError, Ok, type Result } from "@unprice/error"
+import { Err, type FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Cache } from "@unprice/services/cache"
 import type { Metrics } from "@unprice/services/metrics"
@@ -44,26 +44,19 @@ export class ApiKeysService {
       })
     })
 
-    if (res.err) {
-      this.logger.error(`Error in _getApiKey: ${res.err.message}`, {
-        error: JSON.stringify(res.err),
-        apiKeyHash: apiKeyHash,
-      })
-
-      return Err(
-        new FetchError({
-          message: "unable to fetch required data",
-          retry: true,
-          cause: res.err,
-        })
-      )
-    }
-
     // cache miss, get from db
     if (!res.val) {
-      const apikey = await apiKeyPrepared.execute({
-        apikey: opts.key,
-      })
+      const apikey = await apiKeyPrepared
+        .execute({
+          apikey: opts.key,
+        })
+        .then((r) => r)
+        .catch((e) => {
+          this.logger.error("Error fetching apikey from db", {
+            error: JSON.stringify(e),
+          })
+          return undefined
+        })
 
       if (!apikey) {
         return Err(

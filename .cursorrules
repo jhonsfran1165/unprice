@@ -1,4 +1,4 @@
-You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
+You are an expert in TypeScript, Node.js, Drizzle ORM, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
 
 Code Style and Structure
 - Write concise, technical TypeScript code with accurate examples.
@@ -15,6 +15,10 @@ TypeScript Usage
 - Use TypeScript for all code; prefer interfaces over types.
 - Avoid enums; use maps instead.
 - Use functional components with TypeScript interfaces.
+
+Drizzle ORM Usage
+- Use Drizzle ORM for database queries.
+- Docs: https://orm.drizzle.team/docs/overview
 
 Syntax and Formatting
 - Use the "function" keyword for pure functions.

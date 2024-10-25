@@ -24,6 +24,8 @@ async function main() {
   //   customerId: "cus_3UcG1ATVkrbjfuNZpLvo6aLq7F59",
   // })
 
+  console.log(rest.error)
+
   console.log(rest)
 }
 

@@ -1,8 +1,10 @@
 import { API_DOMAIN } from "@unprice/config"
+import type { Currency } from "@unprice/db/validators"
 import type { Result } from "@unprice/error"
 import { Err, FetchError, Ok } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import { Stripe, stripe } from "@unprice/stripe"
+import { UnPricePaymentProviderError } from "./errors"
 import type { PaymentProviderCreateSession, PaymentProviderInterface } from "./interface"
 
 export class StripePaymentProvider implements PaymentProviderInterface {
@@ -244,9 +246,14 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         expYear?: number
         brand?: string
       }[],
-      FetchError
+      FetchError | UnPricePaymentProviderError
     >
   > {
+    if (!this.paymentCustomerId)
+      return Err(
+        new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
+      )
+
     try {
       const paymentMethods = await this.client.paymentMethods.list({
         customer: this.paymentCustomerId ?? undefined,
@@ -278,5 +285,170 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         })
       )
     }
+  }
+
+  public async createInvoice(opts: {
+    currency: Currency
+    customerName: string
+    email: string
+    startCycle: number
+    endCycle: number
+  }): Promise<Result<{ invoice: Stripe.Invoice }, FetchError | UnPricePaymentProviderError>> {
+    if (!this.paymentCustomerId)
+      return Err(
+        new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
+      )
+
+    const billingPeriod = `${new Date(opts.startCycle).toLocaleString("en-US", {
+      month: "long",
+      year: "numeric",
+    })} - ${new Date(opts.endCycle).toLocaleString("en-US", {
+      month: "long",
+      year: "numeric",
+    })}`
+
+    // create an invoice
+    const result = await this.client.invoices
+      .create({
+        customer: this.paymentCustomerId,
+        currency: opts.currency,
+        auto_advance: false, // configure depending on the plan
+        custom_fields: [
+          {
+            name: "Customer",
+            value: opts.customerName,
+          },
+          {
+            name: "Email",
+            value: opts.email,
+          },
+          {
+            name: "Billing Period",
+            value: billingPeriod,
+          },
+        ],
+      })
+      .then((invoice) => Ok({ invoice }))
+      .catch((error) => {
+        const e = error as Stripe.errors.StripeError
+
+        this.logger.error("Error creating invoice", { error: e.message, ...opts })
+
+        return Err(new FetchError({ message: e.message, retry: false }))
+      })
+
+    return result
+  }
+
+  async addInvoiceItem(opts: {
+    invoiceId: string
+    name: string
+    productId: string
+    isProrated: boolean
+    amount: number
+    quantity: number
+    currency: Currency
+  }): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
+    if (!this.paymentCustomerId)
+      return Err(
+        new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
+      )
+
+    const { invoiceId, name, productId, isProrated, amount, quantity, currency } = opts
+
+    return await this.client.invoiceItems
+      .create({
+        customer: this.paymentCustomerId,
+        invoice: invoiceId,
+        quantity: quantity,
+        price_data: {
+          currency: currency,
+          product: productId,
+          unit_amount: amount,
+        },
+        currency: currency,
+        description: isProrated ? `${name} (prorated)` : name,
+      })
+      .then(() => Ok(undefined))
+      .catch((error) => {
+        const e = error as Stripe.errors.StripeError
+
+        this.logger.error("Error adding invoice item", { error: e.message, ...opts })
+
+        return Err(new FetchError({ message: e.message, retry: false }))
+      })
+  }
+
+  public async collectPayment(opts: {
+    invoiceId: string
+    paymentMethodId: string
+  }): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
+    try {
+      await this.client.invoices.pay(opts.invoiceId, {
+        payment_method: opts.paymentMethodId,
+      })
+
+      return Ok(undefined)
+    } catch (error) {
+      const e = error as Stripe.errors.StripeError
+
+      this.logger.error("Error collecting payment", { error: e.message, ...opts })
+
+      return Err(new FetchError({ message: e.message, retry: false }))
+    }
+  }
+
+  public async sendInvoice(opts: {
+    invoiceId: string
+  }): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
+    try {
+      await this.client.invoices.sendInvoice(opts.invoiceId)
+
+      return Ok(undefined)
+    } catch (error) {
+      const e = error as Stripe.errors.StripeError
+
+      this.logger.error("Error sending invoice", { error: e.message, ...opts })
+
+      return Err(new FetchError({ message: e.message, retry: false }))
+    }
+  }
+
+  public async finalizeInvoice(opts: {
+    invoiceId: string
+  }): Promise<Result<Stripe.Invoice, FetchError | UnPricePaymentProviderError>> {
+    try {
+      const invoice = await this.client.invoices.finalizeInvoice(opts.invoiceId)
+
+      return Ok(invoice)
+    } catch (error) {
+      const e = error as Stripe.errors.StripeError
+
+      this.logger.error("Error finalizing invoice", { error: e.message, ...opts })
+
+      return Err(new FetchError({ message: e.message, retry: false }))
+    }
+  }
+
+  public async getDefaultPaymentMethodId(): Promise<
+    Result<string, FetchError | UnPricePaymentProviderError>
+  > {
+    if (!this.paymentCustomerId)
+      return Err(
+        new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
+      )
+
+    const paymentMethods = await this.client.paymentMethods.list({
+      customer: this.paymentCustomerId,
+      limit: 1,
+    })
+
+    const paymentMethod = paymentMethods.data.at(0)
+
+    if (!paymentMethod) {
+      return Err(new UnPricePaymentProviderError({ message: "No payment methods found" }))
+    }
+
+    return Ok(paymentMethod.id)
   }
 }

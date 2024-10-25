@@ -3,7 +3,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import type { Result } from "@unprice/error"
-import { subscriptionPhases, subscriptions } from "../../schema/subscriptions"
+import { type invoices, subscriptionPhases, subscriptions } from "../../schema/subscriptions"
 import { customerSelectSchema } from "../customer"
 import { planVersionSelectBaseSchema } from "../planVersions"
 import { UnPriceCalculationError } from "./../errors"
@@ -36,14 +36,14 @@ const reasonSchema = z.enum([
 export const subscriptionMetadataSchema = z.object({
   reason: reasonSchema.optional().describe("Reason for the subscription status"),
   note: z.string().optional().describe("Note about status in the subscription"),
-  dueBehaviour: z
-    .enum(["cancel", "downgrade"])
-    .optional()
-    .describe("What to do when the subscription is past due"),
 })
 
 export const subscriptionPhaseMetadataSchema = z.object({
   reason: reasonSchema.optional().describe("Reason for the status"),
+  dueBehaviour: z
+    .enum(["cancel", "downgrade"])
+    .optional()
+    .describe("What to do when the subscription is past due and grace period is over"),
 })
 
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
@@ -64,6 +64,7 @@ export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhas
 
 export const subscriptionPhaseExtendedSchema = subscriptionPhaseSelectSchema.extend({
   items: subscriptionItemExtendedSchema.array(),
+  planVersion: planVersionSelectBaseSchema.optional(),
 })
 
 export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhases, {
@@ -178,6 +179,7 @@ export type SubscriptionChangePlan = z.infer<typeof subscriptionChangePlanSchema
 export type InsertSubscriptionPhase = z.infer<typeof subscriptionPhaseInsertSchema>
 export type SubscriptionPhase = z.infer<typeof subscriptionPhaseSelectSchema>
 export type SubscriptionPhaseExtended = z.infer<typeof subscriptionPhaseExtendedSchema>
+export type SubscriptionInvoice = typeof invoices.$inferSelect
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,

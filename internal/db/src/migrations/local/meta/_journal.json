@@ -29,6 +29,20 @@
       "when": 1728748126900,
       "tag": "0003_public_firestar",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1729850815307,
+      "tag": "0004_powerful_calypso",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1729864545710,
+      "tag": "0005_soft_sentinels",
+      "breakpoints": true
     }
   ]
 }

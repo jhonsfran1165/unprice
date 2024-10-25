@@ -6,6 +6,7 @@ export * from "./utils/id"
 export * from "./utils/pagination"
 
 import { generateSlug } from "random-word-slugs"
+import type { Currency } from "./validators"
 
 export const createSlug = () => {
   return generateSlug(2, {
@@ -75,7 +76,7 @@ export function toStripeMoney(price: Dinero<number>) {
 
   const { amount } = toSnapshot(currencyScaleMoney)
 
-  return { amount, currency: currency.code.toLowerCase() }
+  return { amount, currency: currency.code.toLowerCase() as Currency }
 }
 
 export function calculatePercentage(price: Dinero<number>, percentage: number) {

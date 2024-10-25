@@ -1,5 +1,7 @@
+import type { Currency } from "@unprice/db/validators"
 import type { FetchError, Result } from "@unprice/error"
 import type { Stripe } from "@unprice/stripe"
+import type { UnPricePaymentProviderError } from "./errors"
 
 export interface PaymentProviderCreateSession {
   success: boolean
@@ -45,7 +47,27 @@ export interface PaymentProviderInterface {
         expYear?: number
         brand?: string
       }[],
-      FetchError
+      FetchError | UnPricePaymentProviderError
     >
   >
+
+  createInvoice: (opts: {
+    currency: Currency
+    customerName: string
+    email: string
+    startCycle: number
+    endCycle: number
+  }) => Promise<Result<{ invoice: Stripe.Invoice }, FetchError | UnPricePaymentProviderError>>
+
+  addInvoiceItem: (opts: {
+    invoiceId: string
+    name: string
+    productId: string
+    isProrated: boolean
+    amount: number
+    quantity: number
+    currency: Currency
+  }) => Promise<Result<void, FetchError | UnPricePaymentProviderError>>
+
+  getDefaultPaymentMethodId: () => Promise<Result<string, FetchError | UnPricePaymentProviderError>>
 }

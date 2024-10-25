@@ -42,14 +42,15 @@ export abstract class StateMachine<S extends string, E extends EventMap, A exten
   }
 
   /**
-   * Set the current state of the state machine
+   * Check if a transition is possible from the current state to the target state given an event
    */
-  protected abstract setState(state: S): Promise<void>
-
   public canTransition(event: A): boolean {
     return this.transitions.some((t) => t.event === event && t.from === this.currentState)
   }
 
+  /**
+   * Add a transition to the state machine
+   */
   public addTransition<T extends A>(transition: TransitionDefinition<S, E, T>): void {
     this.transitions.push(transition as unknown as TransitionDefinition<S, E, A>)
   }
@@ -71,16 +72,23 @@ export abstract class StateMachine<S extends string, E extends EventMap, A exten
 
     try {
       const result = await transition.onTransition(payload)
+
       if (result.err) {
         transition.onError?.(result.err)
         return result
       }
 
+      const resultValue = result.val
+
+      if (!resultValue) {
+        const errorMessage = `Invalid result: ${String(action)} from ${String(this.currentState)}`
+        console.error(errorMessage)
+        return Err({ message: errorMessage } as InferError<E, T>)
+      }
+
       // Update the state machine's current state
       this.currentState = transition.to
-      await this.setState(transition.to)
-
-      transition.onSuccess?.(result.val)
+      transition.onSuccess?.(resultValue)
 
       return result
     } catch (error) {

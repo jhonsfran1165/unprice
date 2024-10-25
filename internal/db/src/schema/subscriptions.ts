@@ -130,7 +130,6 @@ export const subscriptionPhases = pgTableProject(
     // when to start each cycle for this subscription -
     startCycle: integer("start_cycle").notNull().default(1).$type<StartCycle>(), // null means the first day of the month
     // a grace period of 1 day could handle edge cases when the payment is late for a few hours
-    // TODO: change to grace period in days
     gracePeriod: integer("grace_period").notNull().default(1),
     // collection method for the subscription - charge_automatically or send_invoice
     collectionMethod: collectionMethodEnum("collection_method")
@@ -215,14 +214,20 @@ export const invoices = pgTableProject(
   {
     ...projectID,
     ...timestamps,
+    // Is it necessary to have the subscription id?
     subscriptionId: cuid("subscription_id").notNull(),
     subscriptionPhaseId: cuid("subscription_phase_id").notNull(),
     status: invoiceStatusEnum("status").notNull().default("unpaid"),
     cycleStartAt: bigint("cycle_start_at_m", { mode: "number" }).notNull(),
     cycleEndAt: bigint("cycle_end_at_m", { mode: "number" }).notNull(),
-    // when the invoice was billed
-    billedAt: bigint("billed_at_m", { mode: "number" }),
-    // when the invoice is due
+    paymentAttempts:
+      json("payment_attempts").$type<
+        {
+          status: string
+          createdAt: number
+        }[]
+      >(),
+    // when the invoice is due and ready to be billed
     dueAt: bigint("due_at_m", { mode: "number" }).notNull(),
     paidAt: bigint("paid_at_m", { mode: "number" }),
     type: invoiceTypeEnum("invoice_type").notNull().default("flat"),
@@ -232,14 +237,11 @@ export const invoices = pgTableProject(
       .notNull()
       .default("charge_automatically"),
     invoiceId: text("invoice_id"),
-    paymentMethodId: text("payment_method_id"),
-    whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance").notNull(),
     // payment provider for the plan - stripe, paypal, lemonsquezee etc.
     paymentProvider: paymentProviderEnum("payment_providers").notNull(),
     // currency of the plan
     currency: currencyEnum("currency").notNull(),
-    gracePeriod: integer("grace_period").notNull().default(1),
-    // when the subscription was past due
+    // when the subscription is considered past due
     pastDueAt: bigint("past_due_at_m", { mode: "number" }),
   },
   (table) => ({

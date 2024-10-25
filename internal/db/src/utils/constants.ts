@@ -84,7 +84,8 @@ export const STATUS_SUBSCRIPTION = [
   "trialing", // the subscription is trialing
   "canceled", // the subscription is cancelled
   "expired", // the subscription has expired - no auto-renew
-  "past_due", // the subscription is past due - payment/invoice pending
+  "invoicing", // the subscription is invoicing - waiting for invoice
+  "past_due", // the subscription is past due - payment pending
 ] as const
 export const STATUS_SUB_CHANGES = ["pending", "applied"] as const
 export const CHANGE_TYPE = ["upgrade", "downgrade"] as const
@@ -94,7 +95,7 @@ export const PLAN_BILLING_PERIODS = ["month", "year"] as const
 export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
 export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
 export const INVOICE_TYPES = ["flat", "usage", "hybrid"] as const
-export const INVOICE_STATUS = ["unpaid", "paid", "void", "draft"] as const
+export const INVOICE_STATUS = ["unpaid", "paid", "waiting", "void", "draft", "failed"] as const
 export const FEATURE_VERSION_TYPES = ["feature", "addon"] as const
 export const COLLECTION_METHODS = ["charge_automatically", "send_invoice"] as const
 
