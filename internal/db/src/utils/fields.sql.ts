@@ -1,7 +1,7 @@
 import { bigint, varchar } from "drizzle-orm/pg-core"
 
 // easier to migrate to another db
-export const cuid = (d: string) => varchar(d, { length: 64 })
+export const cuid = (d: string) => varchar(d, { length: 36 })
 
 // for workspace
 export const id = {

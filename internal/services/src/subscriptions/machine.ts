@@ -32,7 +32,7 @@ export type SubscriptionEventMap<S extends string> = {
     error: UnPriceSubscriptionError
   }
   COLLECT_PAYMENT: {
-    payload: { invoiceId: string }
+    payload: { invoiceId: string; autoFinalize: boolean }
     result: { status: S; paymentStatus: InvoiceStatus; retries: number }
     error: UnPriceSubscriptionError
   }
@@ -203,7 +203,6 @@ export class SubscriptionStateMachine extends StateMachine<
         if (dueAt >= payload.now) {
           const result = await this.finalizeInvoice({
             invoice: invoice.val.invoice,
-            now: payload.now,
           })
 
           if (result.err) {
@@ -269,10 +268,27 @@ export class SubscriptionStateMachine extends StateMachine<
       to: ["active", "past_due"],
       event: "COLLECT_PAYMENT",
       onTransition: async (payload) => {
-        const invoice = await this.getInvoice(payload.invoiceId)
+        let invoice = await this.getInvoice(payload.invoiceId)
 
         if (!invoice) {
           return Err(new UnPriceSubscriptionError({ message: "Invoice not found" }))
+        }
+
+        // automatically finalize the invoice if it's draft
+        if (invoice.status === "draft") {
+          if (payload.autoFinalize) {
+            const result = await this.finalizeInvoice({
+              invoice,
+            })
+
+            if (result.err) {
+              return Err(result.err)
+            }
+
+            invoice = result.val.invoice
+          } else {
+            return Err(new UnPriceSubscriptionError({ message: "Invoice is not finalized" }))
+          }
         }
 
         const result = await this.collectInvoicePayment({
@@ -642,14 +658,20 @@ export class SubscriptionStateMachine extends StateMachine<
 
   private async finalizeInvoice(payload: {
     invoice: SubscriptionInvoice
-    now: number
-  }): Promise<Result<void, UnPriceSubscriptionError>> {
-    const { invoice, now } = payload
+  }): Promise<
+    Result<
+      {
+        invoice: SubscriptionInvoice
+      },
+      UnPriceSubscriptionError
+    >
+  > {
+    const { invoice } = payload
 
     // invoices can be finilize after due date
     // we need to check if the invoice is due and if it is, we need to finalize it
     // if the invoice is not due, we need to return an error
-    if (invoice.dueAt && invoice.dueAt > now) {
+    if (invoice.dueAt && invoice.dueAt > Date.now()) {
       return Err(
         new UnPriceSubscriptionError({ message: "Invoice is not due yet, cannot finalize" })
       )
@@ -657,7 +679,7 @@ export class SubscriptionStateMachine extends StateMachine<
 
     // check if the invoice is already finalized
     if (invoice.status === "unpaid") {
-      return Ok(undefined)
+      return Ok({ invoice })
     }
 
     // TODO: how to handle multiple invoices?
@@ -733,7 +755,7 @@ export class SubscriptionStateMachine extends StateMachine<
     }
 
     // update the invoice with the stripe invoice id
-    await this.db
+    const updatedInvoice = await this.db
       .update(invoices)
       .set({
         invoiceId: paymentProviderInvoice.invoiceId,
@@ -742,176 +764,11 @@ export class SubscriptionStateMachine extends StateMachine<
         status: "unpaid",
       })
       .where(eq(invoices.id, invoice.id))
+      .returning()
+      .then((res) => res[0])
 
-    // for billing an invoice we need to check if the invoice is closed or not
-    // also we need to check the type of the invoice and the payment provider
-    // for now we will only support stripe
-
-    // the invoice could have fixed charges and usage charges
-    // we need to check if the invoice has usage charges and if so we need to calculate the usage
-    // we need to update the invoice with the correct amounts
-
-    // bill the invoice
-    return Ok(undefined)
-  }
-
-  private async billSubscriptionPhase(): Promise<Result<void, UnPriceSubscriptionError>> {
-    const phase = this.getActivePhase()
-
-    if (!phase) {
-      return Err(new UnPriceSubscriptionError({ message: "No active phase with the given id" }))
-    }
-
-    // get all pending invoices for the phase
-    // we combine all invoices for the phase because they are all due at the same time
-    // also this is better experience for the customer because we can send a single invoice instead of sending many
-    const invoicesData = await this.db.query.invoices.findMany({
-      where: (table, { eq, and, inArray }) =>
-        and(
-          eq(table.subscriptionId, this.subscription.id),
-          inArray(table.status, ["unpaid", "draft"])
-        ),
-    })
-
-    if (!invoicesData.length) {
-      return Err(
-        new UnPriceSubscriptionError({ message: "No pending invoices found for the phase" })
-      )
-    }
-
-    // check if the invoices are due
-    if (invoicesData.some((invoice) => invoice.dueAt && invoice.dueAt > Date.now())) {
-      return Err(new UnPriceSubscriptionError({ message: "Invoices are not due yet" }))
-    }
-
-    const invoice = invoicesData[0]
-
-    if (!invoice) {
-      return Err(new UnPriceSubscriptionError({ message: "No invoice found" }))
-    }
-
-    // TODO: how to handle multiple invoices?
-    const { paymentProvider, collectionMethod, currency } = invoice
-
-    switch (paymentProvider) {
-      case "stripe": {
-        const stripe = new StripePaymentProvider({
-          paymentCustomerId: this.customer.stripeCustomerId,
-          logger: this.logger,
-        })
-
-        const defaultPaymentMethodId = await stripe.getDefaultPaymentMethodId()
-
-        if (defaultPaymentMethodId.err) {
-          return Err(
-            new UnPriceSubscriptionError({
-              message: `Error getting default payment method: ${defaultPaymentMethodId.err.message}`,
-            })
-          )
-        }
-
-        const stripeInvoice = await stripe.createInvoice({
-          currency,
-          customerName: this.customer.name,
-          email: this.customer.email,
-          startCycle: invoice.cycleStartAt,
-          endCycle: invoice.cycleEndAt,
-          collectionMethod,
-          description: "Invoice for the cycle from...",
-        })
-
-        if (stripeInvoice.err) {
-          return Err(
-            new UnPriceSubscriptionError({
-              message: `Error creating stripe invoice: ${stripeInvoice.err.message}`,
-            })
-          )
-        }
-
-        const invoiceItemsPrice = await this.calculateSubscriptionPhaseItemsPrice({
-          invoice,
-        })
-
-        if (invoiceItemsPrice.err) {
-          return Err(
-            new UnPriceSubscriptionError({
-              message: `Error calculating invoice items price: ${invoiceItemsPrice.err.message}`,
-            })
-          )
-        }
-
-        let invoiceTotal = 0
-
-        for (const item of invoiceItemsPrice.val.items) {
-          // get total in cents
-          const { amount } = toStripeMoney(item.price.unitPrice.dinero)
-
-          invoiceTotal += amount
-
-          // update the invoice with the items price
-          await stripe.addInvoiceItem({
-            invoiceId: stripeInvoice.val.invoice.id,
-            name: item.productSlug,
-            productId: item.productId,
-            isProrated: item.isProrated,
-            amount,
-            quantity: item.quantity,
-            currency: invoice.currency,
-          })
-        }
-
-        // update the invoice with the stripe invoice id
-        await this.db
-          .update(invoices)
-          .set({
-            invoiceId: stripeInvoice.val.invoice.id,
-            invoiceUrl: stripeInvoice.val.invoice.invoice_pdf,
-            total: invoiceTotal.toString(),
-          })
-          .where(eq(invoices.id, invoice.id))
-
-        // collect the payment
-        if (collectionMethod === "charge_automatically") {
-          const stripePayment = await stripe.collectPayment({
-            invoiceId: stripeInvoice.val.invoice.id,
-            paymentMethodId: defaultPaymentMethodId.val,
-          })
-
-          if (stripePayment.err) {
-            return Err(
-              new UnPriceSubscriptionError({
-                message: `Error collecting payment: ${stripePayment.err.message}`,
-              })
-            )
-          }
-
-          // update the invoice status
-          await this.db
-            .update(invoices)
-            .set({
-              status: "paid",
-              invoiceId: stripeInvoice.val.invoice.id,
-              invoiceUrl: stripeInvoice.val.invoice.invoice_pdf,
-            })
-            .where(eq(invoices.id, invoice.id))
-        } else if (collectionMethod === "send_invoice") {
-          const stripeSendInvoice = await stripe.sendInvoice({
-            invoiceId: stripeInvoice.val.invoice.id,
-          })
-
-          if (stripeSendInvoice.err) {
-            return Err(
-              new UnPriceSubscriptionError({
-                message: `Error sending invoice: ${stripeSendInvoice.err.message}`,
-              })
-            )
-          }
-        }
-
-        break
-      }
-      default:
-        return Err(new UnPriceSubscriptionError({ message: "Unsupported payment provider" }))
+    if (!updatedInvoice) {
+      return Err(new UnPriceSubscriptionError({ message: "Error finalizing invoice" }))
     }
 
     // for billing an invoice we need to check if the invoice is closed or not
@@ -923,7 +780,7 @@ export class SubscriptionStateMachine extends StateMachine<
     // we need to update the invoice with the correct amounts
 
     // bill the invoice
-    return Ok(undefined)
+    return Ok({ invoice: updatedInvoice })
   }
 
   private async collectInvoicePayment(payload: {
@@ -1224,6 +1081,7 @@ export class SubscriptionStateMachine extends StateMachine<
 
       const collectPayment = await this.transition("COLLECT_PAYMENT", {
         invoiceId: invoiceId,
+        autoFinalize: false,
       })
 
       if (collectPayment.err) {
@@ -1247,6 +1105,7 @@ export class SubscriptionStateMachine extends StateMachine<
 
       const collectPayment = await this.transition("COLLECT_PAYMENT", {
         invoiceId: invoiceId,
+        autoFinalize: false,
       })
 
       if (collectPayment.err) {
@@ -1269,6 +1128,7 @@ export class SubscriptionStateMachine extends StateMachine<
 
       const collectPayment = await this.transition("COLLECT_PAYMENT", {
         invoiceId: invoiceId,
+        autoFinalize: false,
       })
 
       if (collectPayment.err) {
@@ -1308,6 +1168,24 @@ export class SubscriptionStateMachine extends StateMachine<
 
     return Ok({
       invoiceId: invoice.val.invoiceId,
+    })
+  }
+
+  public async billing(payload: { invoiceId: string }): Promise<
+    Result<{ status: InvoiceStatus; retries: number }, UnPriceSubscriptionError>
+  > {
+    // set the subscription to active
+    const { invoiceId } = payload
+
+    const billing = await this.transition("COLLECT_PAYMENT", { invoiceId, autoFinalize: true })
+
+    if (billing.err) {
+      return Err(billing.err)
+    }
+
+    return Ok({
+      status: billing.val.paymentStatus,
+      retries: billing.val.retries,
     })
   }
 }

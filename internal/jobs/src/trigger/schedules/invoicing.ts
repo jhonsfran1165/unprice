@@ -2,8 +2,8 @@ import { logger, schedules } from "@trigger.dev/sdk/v3"
 import { db } from "@unprice/db"
 import { invoiceTask } from "../tasks/invoice"
 
-export const billingSchedule = schedules.task({
-  id: "billing.recurring.subscriptions",
+export const invoicingSchedule = schedules.task({
+  id: "subscriptionPhase.invoicing",
   // every 12 hours (UTC timezone)
   cron: "0 */12 * * *",
   run: async (_payload) => {
@@ -42,7 +42,7 @@ export const billingSchedule = schedules.task({
       })
     }
 
-    logger.info(`Found ${subscriptions.length} subscriptions`)
+    logger.info(`Found ${subscriptions.length} subscriptions for invoicing`)
 
     return {
       subscriptionIds: subscriptions.map((s) => s.id),

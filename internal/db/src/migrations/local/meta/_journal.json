@@ -57,6 +57,20 @@
       "when": 1729935944064,
       "tag": "0007_quick_orphan",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1729981426111,
+      "tag": "0008_violet_nextwave",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1729984311191,
+      "tag": "0009_spicy_marvel_boy",
+      "breakpoints": true
     }
   ]
 }
