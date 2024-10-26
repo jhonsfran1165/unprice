@@ -84,7 +84,7 @@ export const STATUS_SUBSCRIPTION = [
   "trialing", // the subscription is trialing
   "canceled", // the subscription is cancelled
   "expired", // the subscription has expired - no auto-renew
-  "invoicing", // the subscription is invoicing - waiting for invoice
+  "pending_invoice", // the subscription is pending invoice - waiting for invoice
   "past_due", // the subscription is past due - payment pending
 ] as const
 export const STATUS_SUB_CHANGES = ["pending", "applied"] as const

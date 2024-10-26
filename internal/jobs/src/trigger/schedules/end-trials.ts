@@ -2,7 +2,7 @@ import { logger, schedules } from "@trigger.dev/sdk/v3"
 import { db } from "@unprice/db"
 import { endTrialTask } from "../tasks/end-trial"
 
-export const endTrialsTask = schedules.task({
+export const endTrialsSchedule = schedules.task({
   id: "subscriptionPhase.endtrials",
   //every two hours (UTC timezone)
   // cron: "0 */2 * * *",

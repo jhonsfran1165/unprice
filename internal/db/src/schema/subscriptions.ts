@@ -246,7 +246,7 @@ export const invoices = pgTableProject(
     // currency of the plan
     currency: currencyEnum("currency").notNull(),
     // when the subscription is considered past due
-    pastDueAt: bigint("past_due_at_m", { mode: "number" }),
+    pastDueAt: bigint("past_due_at_m", { mode: "number" }).notNull(),
   },
   (table) => ({
     primary: primaryKey({

@@ -2,31 +2,34 @@ import { type BaseError, Err, type Result } from "@unprice/error"
 import { UnPriceMachineError } from "./errors"
 
 // Event map to define payload, result and error types per event
-type EventMap = Record<
+type EventMap<S extends string> = Record<
   string,
   {
     payload: unknown
-    result: unknown
+    result: {
+      status: S
+      [key: string]: unknown
+    }
     error: BaseError
   }
 >
 
-type InferPayload<E extends EventMap, A extends keyof E> = E[A]["payload"]
-type InferResult<E extends EventMap, A extends keyof E> = E[A]["result"]
-type InferError<E extends EventMap, A extends keyof E> = E[A]["error"]
+type InferPayload<S extends string, E extends EventMap<S>, A extends keyof E> = E[A]["payload"]
+type InferResult<S extends string, E extends EventMap<S>, A extends keyof E> = E[A]["result"]
+type InferError<S extends string, E extends EventMap<S>, A extends keyof E> = E[A]["error"]
 
-export type TransitionDefinition<S, E extends EventMap, A extends keyof E> = {
-  from: S
-  to: S
+export type TransitionDefinition<S extends string, E extends EventMap<S>, A extends keyof E> = {
+  from: [S, ...S[]]
+  to: [S, ...S[]]
   event: A
   onTransition: (
-    payload: InferPayload<E, A>
-  ) => Promise<Result<InferResult<E, A>, InferError<E, A>>>
-  onSuccess?: (result: InferResult<E, A>) => void
-  onError?: (error: InferError<E, A>) => void
+    payload: InferPayload<S, E, A>
+  ) => Promise<Result<InferResult<S, E, A>, InferError<S, E, A>>>
+  onSuccess?: (result: InferResult<S, E, A>) => Promise<void>
+  onError?: (error: InferError<S, E, A>) => Promise<void>
 }
 
-export abstract class StateMachine<S extends string, E extends EventMap, A extends keyof E> {
+export abstract class StateMachine<S extends string, E extends EventMap<S>, A extends keyof E> {
   private currentState: S
   private transitions: Array<TransitionDefinition<S, E, A>> = []
 
@@ -45,7 +48,7 @@ export abstract class StateMachine<S extends string, E extends EventMap, A exten
    * Check if a transition is possible from the current state to the target state given an event
    */
   public canTransition(event: A): boolean {
-    return this.transitions.some((t) => t.event === event && t.from === this.currentState)
+    return this.transitions.some((t) => t.event === event && t.from.includes(this.currentState))
   }
 
   /**
@@ -57,17 +60,17 @@ export abstract class StateMachine<S extends string, E extends EventMap, A exten
 
   public async transition<T extends A>(
     action: T,
-    payload: InferPayload<E, T>
-  ): Promise<Result<InferResult<E, T>, InferError<E, T>>> {
+    payload: InferPayload<S, E, T>
+  ): Promise<Result<InferResult<S, E, T>, InferError<S, E, T>>> {
     const transition = this.transitions.find(
-      (t) => t.event === action && t.from === this.currentState
+      (t) => t.event === action && t.from.includes(this.currentState)
     ) as TransitionDefinition<S, E, T> | undefined
 
     if (!transition) {
       // More controlled error handling
       const errorMessage = `Invalid transition: ${String(action)} from ${String(this.currentState)}`
       console.error(errorMessage)
-      return Err({ message: errorMessage } as InferError<E, T>)
+      return Err({ message: errorMessage } as InferError<S, E, T>)
     }
 
     try {
@@ -83,16 +86,16 @@ export abstract class StateMachine<S extends string, E extends EventMap, A exten
       if (!resultValue) {
         const errorMessage = `Invalid result: ${String(action)} from ${String(this.currentState)}`
         console.error(errorMessage)
-        return Err({ message: errorMessage } as InferError<E, T>)
+        return Err({ message: errorMessage } as InferError<S, E, T>)
       }
 
       // Update the state machine's current state
-      this.currentState = transition.to
-      transition.onSuccess?.(resultValue)
+      this.currentState = resultValue.status
+      await transition.onSuccess?.(resultValue)
 
       return result
     } catch (error) {
-      transition.onError?.(new UnPriceMachineError({ message: (error as Error).message }))
+      await transition.onError?.(new UnPriceMachineError({ message: (error as Error).message }))
       return Err(new UnPriceMachineError({ message: (error as Error).message }))
     }
   }
