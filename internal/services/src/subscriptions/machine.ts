@@ -1219,6 +1219,7 @@ export class SubscriptionStateMachine extends StateMachine<
     const { now } = payload
     const currentState = this.getCurrentState()
 
+    // every transition is idempotent and will not change the state if it is already in the desired state
     // here we need to ensure retries so if the transition chain fails and the subscription is in a middle state
     // we can continue from where we left off
     // The process is the following:

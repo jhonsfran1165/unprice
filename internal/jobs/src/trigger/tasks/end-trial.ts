@@ -76,6 +76,6 @@ export const endTrialTask = task({
       logger: logger,
     })
 
-    await subscriptionStateMachine.transition("END_TRIAL", { now })
+    return await subscriptionStateMachine.endTrial({ now })
   },
 })
