@@ -656,6 +656,12 @@ importers:
       '@unprice/db':
         specifier: workspace:^0.1.0
         version: link:../db
+      '@unprice/logging':
+        specifier: workspace:^
+        version: link:../logging
+      '@unprice/services':
+        specifier: workspace:^
+        version: link:../services
       '@unprice/stripe':
         specifier: workspace:^0.1.0
         version: link:../stripe

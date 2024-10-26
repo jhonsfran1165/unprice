@@ -29,7 +29,7 @@ export const signUp = protectedApiOrActiveProjectProcedure
     const subscription = await opts.ctx.db.query.subscriptions.findFirst({
       where: (subscriptions, { eq, and }) =>
         and(
-          eq(subscriptions.id, "sub_3Ub7de1PTST41857QKfcr3g2wp8X"),
+          eq(subscriptions.id, "sub_3Ubc58LoPuGGrnbmiS848oNUZ7ih"),
           eq(subscriptions.projectId, project.id)
         ),
       with: {
@@ -60,9 +60,6 @@ export const signUp = protectedApiOrActiveProjectProcedure
       logger: opts.ctx.logger,
       analytics: opts.ctx.analytics,
     })
-
-    // TODO: need to abstract this to a funtion that allows to re execute the chain of events if it fails
-    console.log(subscriptionStateMachine.getCurrentState())
 
     const result = await subscriptionStateMachine.endTrial({ now: Date.now() })
 

@@ -61,39 +61,43 @@ export type SubscriptionEventMap = {
   }
 }
 
-type SubscriptionExtended = Subscription & {
-  phases: SubscriptionPhaseExtended[]
-  customer: Customer
-}
-
 export class SubscriptionStateMachine extends StateMachine<
   SubscriptionStatus,
   SubscriptionEventMap,
   keyof SubscriptionEventMap
 > {
-  private readonly subscription: SubscriptionExtended
+  private readonly subscriptionPhase: SubscriptionPhaseExtended
+  private readonly subscription: Subscription
+  private readonly customer: Customer
   private readonly db: Database | TransactionDatabase
   private readonly logger: Logger
   private readonly analytics: Analytics
 
   constructor({
     db,
+    subscriptionPhase,
     subscription,
+    customer,
     logger,
     analytics,
   }: {
     db: Database | TransactionDatabase
-    subscription: SubscriptionExtended
+    subscriptionPhase: SubscriptionPhaseExtended
+    subscription: Subscription
+    customer: Customer
     logger: Logger
     analytics: Analytics
   }) {
     // initial state
-    if (!subscription.status) {
-      throw new UnPriceSubscriptionError({ message: "Subscription has no status" })
+    if (!subscriptionPhase.status) {
+      throw new UnPriceSubscriptionError({ message: "Subscription phase has no status" })
     }
 
-    super(subscription.status)
+    super(subscriptionPhase.status)
+
+    this.subscriptionPhase = subscriptionPhase
     this.subscription = subscription
+    this.customer = customer
     this.db = db
     this.logger = logger
     this.analytics = analytics
@@ -108,7 +112,7 @@ export class SubscriptionStateMachine extends StateMachine<
       event: "END_TRIAL",
       onTransition: async (payload) => {
         // get the active phase - subscription only has one phase active at a time
-        const activePhase = this.getActivePhase({ date: payload.now })
+        const activePhase = this.getActivePhase()
 
         if (!activePhase) {
           return Err(new UnPriceSubscriptionError({ message: "No active phase found" }))
@@ -170,7 +174,7 @@ export class SubscriptionStateMachine extends StateMachine<
       onTransition: async (payload) => {
         // validate dates
         // get the active phase - subscription only has one phase active at a time
-        const activePhase = this.getActivePhase({ date: payload.now })
+        const activePhase = this.getActivePhase()
         const subscription = this.subscription
 
         if (!activePhase) {
@@ -308,16 +312,13 @@ export class SubscriptionStateMachine extends StateMachine<
       to: "active",
       event: "BILL",
       onTransition: async (payload) => {
-        const activePhase = this.getActivePhase({ date: payload.now })
+        const activePhase = this.getActivePhase()
 
         if (!activePhase) {
           return Err(new UnPriceSubscriptionError({ message: "No active phase found" }))
         }
 
-        const billSubscriptionPhase = await this.billSubscriptionPhase({
-          phaseId: activePhase.id,
-          now: payload.now,
-        })
+        const billSubscriptionPhase = await this.billSubscriptionPhase()
 
         if (billSubscriptionPhase.err) {
           return Err(billSubscriptionPhase.err)
@@ -357,15 +358,16 @@ export class SubscriptionStateMachine extends StateMachine<
       event: "RENEW",
       onTransition: async (payload) => {
         // get active phase
-        const activePhase = this.getActivePhase({ date: payload.now })
+        const activePhase = this.getActivePhase()
         const subscription = this.subscription
+        const currentState = this.getCurrentState()
 
         if (!activePhase) {
           return Err(new UnPriceSubscriptionError({ message: "No active phase found" }))
         }
 
         // check if the phase is active
-        if (activePhase.status !== "active") {
+        if (currentState !== "active") {
           return Err(
             new UnPriceSubscriptionError({
               message: "Phase is not active, cannot renew phases that are not active",
@@ -425,6 +427,9 @@ export class SubscriptionStateMachine extends StateMachine<
           subscriptionDates: {
             currentCycleStartAt: cycleStart.getTime(),
             currentCycleEndAt: cycleEnd.getTime(),
+            cancelAt: undefined,
+            expiresAt: undefined,
+            changeAt: undefined,
           },
         })
 
@@ -438,7 +443,6 @@ export class SubscriptionStateMachine extends StateMachine<
   private async syncState({
     state,
     active = true,
-    phaseId,
     subscriptionDates,
   }: {
     state: SubscriptionStatus
@@ -454,9 +458,11 @@ export class SubscriptionStateMachine extends StateMachine<
       canceledAt: number
       changeAt: number
       changedAt: number
+      expiresAt: number
+      expiredAt: number
     }>
   }): Promise<Result<void, UnPriceSubscriptionError>> {
-    const activePhase = this.subscription.phases.find((phase) => phase.id === phaseId)
+    const activePhase = this.getActivePhase()
 
     if (!activePhase) {
       return Err(new UnPriceSubscriptionError({ message: "No active phase with the given id" }))
@@ -499,23 +505,18 @@ export class SubscriptionStateMachine extends StateMachine<
 
         return Ok(undefined)
       })
-    } catch (_e) {
-      return Err(new UnPriceSubscriptionError({ message: "Error updating subscription status" }))
+    } catch (e) {
+      const error = e as Error
+      return Err(
+        new UnPriceSubscriptionError({
+          message: `Error updating subscription status: ${error.message}`,
+        })
+      )
     }
   }
 
-  private getActivePhase({
-    date,
-  }: {
-    date: number
-  }): SubscriptionPhaseExtended | undefined {
-    // active subscription phase is the phase that is currently active given the date
-    const activePhase = this.subscription.phases.find(
-      (phase) =>
-        phase.active && phase.startAt <= date && (phase.endAt === null || phase.endAt >= date)
-    )
-
-    return activePhase
+  private getActivePhase(): SubscriptionPhaseExtended {
+    return this.subscriptionPhase
   }
 
   private async getInvoice(invoiceId: string): Promise<SubscriptionInvoice | undefined> {
@@ -526,12 +527,8 @@ export class SubscriptionStateMachine extends StateMachine<
     return invoice
   }
 
-  private async getPendingPhaseInvoice({
-    now,
-  }: {
-    now: number
-  }): Promise<SubscriptionInvoice | undefined> {
-    const activePhase = this.getActivePhase({ date: now })
+  private async getPendingPhaseInvoice(): Promise<SubscriptionInvoice | undefined> {
+    const activePhase = this.getActivePhase()
     const subscription = this.subscription
 
     if (!activePhase) {
@@ -552,10 +549,6 @@ export class SubscriptionStateMachine extends StateMachine<
     return pendingInvoice
   }
 
-  private getPhase(phaseId: string): SubscriptionPhaseExtended | undefined {
-    return this.subscription.phases.find((phase) => phase.id === phaseId)
-  }
-
   private async createInvoiceSubscriptionPhase(payload: {
     phaseId: string
     startAt: number
@@ -572,17 +565,18 @@ export class SubscriptionStateMachine extends StateMachine<
     const { phaseId, startAt, endAt, now } = payload
 
     const subscription = this.subscription
-    const phase = this.getPhase(phaseId)
+    const phase = this.getActivePhase()
 
     if (!phase) {
       return Err(new UnPriceSubscriptionError({ message: "No active phase with the given id" }))
     }
 
-    const customer = subscription.customer
+    const customer = this.customer
     const planVersion = phase.planVersion
+    const currentState = this.getCurrentState()
 
     // check if the phase is active and invoicing status
-    if (!phase.active || phase.status !== "invoicing") {
+    if (!phase.active || currentState !== "invoicing") {
       return Err(new UnPriceSubscriptionError({ message: "Phase is not active or not invoicing" }))
     }
 
@@ -592,7 +586,7 @@ export class SubscriptionStateMachine extends StateMachine<
     }
 
     // first of we need to verify there isn't a pending invoice for this phase - if so we need to use it
-    const pendingInvoice = await this.getPendingPhaseInvoice({ now })
+    const pendingInvoice = await this.getPendingPhaseInvoice()
 
     let invoiceId = newId("invoice")
 
@@ -656,23 +650,7 @@ export class SubscriptionStateMachine extends StateMachine<
         collectionMethod,
         currency: planVersion?.currency ?? "USD",
       })
-      .onConflictDoUpdate({
-        target: invoices.id,
-        set: {
-          cycleStartAt: startAt,
-          cycleEndAt: endAt,
-          // pay_in_advance: the invoice is flat, only flat charges, usage charges are combined in the next cycle
-          // pay_in_arrear: the invoice is hybrid (flat + usage)
-          // TODO: we need a way to check if the invoice include usage charges from past cycles
-          type: whenToBill === "pay_in_advance" ? "flat" : "hybrid",
-          dueAt,
-          pastDueAt,
-          paymentProvider: planVersion?.paymentProvider ?? "stripe",
-          projectId: subscription.projectId,
-          collectionMethod,
-          currency: planVersion?.currency ?? "USD",
-        },
-      })
+      .onConflictDoNothing()
       .returning()
       .then((res) => res[0])
 
@@ -716,7 +694,7 @@ export class SubscriptionStateMachine extends StateMachine<
     switch (paymentProvider) {
       case "stripe": {
         const stripe = new StripePaymentProvider({
-          paymentCustomerId: this.subscription.customer.stripeCustomerId,
+          paymentCustomerId: this.customer.stripeCustomerId,
           logger: this.logger,
         })
 
@@ -728,8 +706,8 @@ export class SubscriptionStateMachine extends StateMachine<
 
         const stripeInvoice = await stripe.createInvoice({
           currency,
-          customerName: this.subscription.customer.name,
-          email: this.subscription.customer.email,
+          customerName: this.customer.name,
+          email: this.customer.email,
           startCycle: invoice.cycleStartAt,
           endCycle: invoice.cycleEndAt,
           collectionMethod: invoice.collectionMethod,
@@ -800,13 +778,8 @@ export class SubscriptionStateMachine extends StateMachine<
     return Ok(undefined)
   }
 
-  private async billSubscriptionPhase(payload: {
-    phaseId: string
-    now: number
-  }): Promise<Result<void, UnPriceSubscriptionError>> {
-    const { phaseId, now } = payload
-
-    const phase = this.getPhase(phaseId)
+  private async billSubscriptionPhase(): Promise<Result<void, UnPriceSubscriptionError>> {
+    const phase = this.getActivePhase()
 
     if (!phase) {
       return Err(new UnPriceSubscriptionError({ message: "No active phase with the given id" }))
@@ -819,7 +792,6 @@ export class SubscriptionStateMachine extends StateMachine<
       where: (table, { eq, and, inArray }) =>
         and(
           eq(table.subscriptionId, this.subscription.id),
-          eq(table.subscriptionPhaseId, phaseId),
           inArray(table.status, ["unpaid", "draft"])
         ),
     })
@@ -831,7 +803,7 @@ export class SubscriptionStateMachine extends StateMachine<
     }
 
     // check if the invoices are due
-    if (invoicesData.some((invoice) => invoice.dueAt && invoice.dueAt > now)) {
+    if (invoicesData.some((invoice) => invoice.dueAt && invoice.dueAt > Date.now())) {
       return Err(new UnPriceSubscriptionError({ message: "Invoices are not due yet" }))
     }
 
@@ -847,7 +819,7 @@ export class SubscriptionStateMachine extends StateMachine<
     switch (paymentProvider) {
       case "stripe": {
         const stripe = new StripePaymentProvider({
-          paymentCustomerId: this.subscription.customer.stripeCustomerId,
+          paymentCustomerId: this.customer.stripeCustomerId,
           logger: this.logger,
         })
 
@@ -863,8 +835,8 @@ export class SubscriptionStateMachine extends StateMachine<
 
         const stripeInvoice = await stripe.createInvoice({
           currency,
-          customerName: this.subscription.customer.name,
-          email: this.subscription.customer.email,
+          customerName: this.customer.name,
+          email: this.customer.email,
           startCycle: invoice.cycleStartAt,
           endCycle: invoice.cycleEndAt,
           collectionMethod,
@@ -1024,7 +996,7 @@ export class SubscriptionStateMachine extends StateMachine<
     switch (paymentProvider) {
       case "stripe": {
         const stripe = new StripePaymentProvider({
-          paymentCustomerId: this.subscription.customer.stripeCustomerId,
+          paymentCustomerId: this.customer.stripeCustomerId,
           logger: this.logger,
         })
 
@@ -1134,7 +1106,7 @@ export class SubscriptionStateMachine extends StateMachine<
   > {
     const { invoice } = payload
     const invoiceType = invoice.type
-    const phase = this.getPhase(invoice.subscriptionPhaseId)
+    const phase = this.getActivePhase()
     const subscription = this.subscription
 
     if (!phase) {
@@ -1180,7 +1152,7 @@ export class SubscriptionStateMachine extends StateMachine<
             .getTotalUsagePerFeature({
               featureSlug: item.featurePlanVersion.feature.slug,
               projectId: subscription.projectId,
-              customerId: subscription.customer.id,
+              customerId: this.customer.id,
               start: subscription.currentCycleStartAt,
               end: subscription.currentCycleEndAt,
             })
@@ -1313,7 +1285,7 @@ export class SubscriptionStateMachine extends StateMachine<
         return Err(collectPayment.err)
       }
     } else if (currentState === "past_due") {
-      const pendingInvoice = await this.getPendingPhaseInvoice({ now })
+      const pendingInvoice = await this.getPendingPhaseInvoice()
 
       if (!pendingInvoice?.id) {
         return Err(new UnPriceSubscriptionError({ message: "No pending invoice found" }))

@@ -1,6 +1,6 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
 import { db } from "@unprice/db"
-import { invoiceSubscriptionTask } from "../tasks"
+import { endTrialTask } from "../tasks/end-trial"
 
 export const endTrialsTask = schedules.task({
   id: "subscription.end.trials",
@@ -16,29 +16,27 @@ export const endTrialsTask = schedules.task({
     // and depending on the planConfiguration, we either downgrade the plan or cancel the subscription
 
     // find all those subscriptions that are currently in trial and the trial ends at is in the past
-    const subscriptions = await db.query.subscriptions.findMany({
+    const subscriptionPhases = await db.query.subscriptionPhases.findMany({
       where: (table, { eq, and, lte }) =>
         and(eq(table.status, "trialing"), lte(table.trialEndsAt, now), eq(table.active, true)),
       limit: 1000,
     })
 
-    for (const sub of subscriptions) {
+    for (const sub of subscriptionPhases) {
       // invoice the subscription - this will try to invoice the subscription if the customer has a payment method
       // if not, the subscription will be marked as past_due
       // if everything is ok, the subscription will be marked as active
-      await invoiceSubscriptionTask.triggerAndWait({
-        subscriptionId: sub.id,
-        customerId: sub.customerId,
-        // TODO: we need to get the current date here
-        currentDate: now,
+      await endTrialTask.triggerAndWait({
+        subscriptionPhaseId: sub.id,
+        projectId: sub.projectId,
+        now,
       })
     }
 
-    logger.info(`Found ${subscriptions.length} subscriptions`)
+    logger.info(`Found ${subscriptionPhases.length} subscription phases`)
 
     return {
-      message: "Hello, world!",
-      subscriptionIds: subscriptions.map((s) => s.id),
+      subscriptionPhaseIds: subscriptionPhases.map((s) => s.id),
     }
   },
 })

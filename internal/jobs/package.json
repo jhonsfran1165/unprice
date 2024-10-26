@@ -14,6 +14,8 @@
     "@t3-oss/env-nextjs": "0.9.1",
     "@trigger.dev/sdk": "3.0.0-beta.56",
     "@unprice/db": "workspace:^0.1.0",
+    "@unprice/logging": "workspace:^",
+    "@unprice/services": "workspace:^",
     "@unprice/stripe": "workspace:^0.1.0",
     "@unprice/tinybird": "workspace:^",
     "date-fns": "^3.3.1",
