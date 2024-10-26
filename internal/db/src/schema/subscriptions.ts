@@ -73,6 +73,10 @@ export const subscriptions = pgTableProject(
     cancelAt: bigint("cancel_at_m", { mode: "number" }),
     // when the subscription was cancelled
     canceledAt: bigint("canceled_at_m", { mode: "number" }),
+    // when the subscription is going to be expired
+    expiresAt: bigint("expires_at_m", { mode: "number" }),
+    // when the subscription was expired
+    expiredAt: bigint("expired_at_m", { mode: "number" }),
     // when the subscription is going to be changed
     changeAt: bigint("change_at_m", { mode: "number" }),
     // when the subscription was changed and the change was applied
@@ -217,7 +221,7 @@ export const invoices = pgTableProject(
     // Is it necessary to have the subscription id?
     subscriptionId: cuid("subscription_id").notNull(),
     subscriptionPhaseId: cuid("subscription_phase_id").notNull(),
-    status: invoiceStatusEnum("status").notNull().default("unpaid"),
+    status: invoiceStatusEnum("status").notNull().default("draft"),
     cycleStartAt: bigint("cycle_start_at_m", { mode: "number" }).notNull(),
     cycleEndAt: bigint("cycle_end_at_m", { mode: "number" }).notNull(),
     paymentAttempts:

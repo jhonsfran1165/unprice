@@ -43,6 +43,20 @@
       "when": 1729864545710,
       "tag": "0005_soft_sentinels",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1729872856325,
+      "tag": "0006_bumpy_sentry",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1729935944064,
+      "tag": "0007_quick_orphan",
+      "breakpoints": true
     }
   ]
 }

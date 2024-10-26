@@ -57,6 +57,8 @@ export interface PaymentProviderInterface {
     email: string
     startCycle: number
     endCycle: number
+    description: string
+    collectionMethod: "charge_automatically" | "send_invoice"
   }) => Promise<Result<{ invoice: Stripe.Invoice }, FetchError | UnPricePaymentProviderError>>
 
   addInvoiceItem: (opts: {

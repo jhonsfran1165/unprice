@@ -11,11 +11,11 @@ export class UnPriceCalculationError extends BaseError {
   }
 }
 
-export class UnPriceSubscriptionError extends BaseError<{ context?: object }> {
+export class UnPriceSubscriptionError extends BaseError<{ context?: Record<string, unknown> }> {
   public readonly retry = false
   public readonly name = UnPriceSubscriptionError.name
 
-  constructor({ message, context }: { message: string; context?: object }) {
+  constructor({ message, context }: { message: string; context?: Record<string, unknown> }) {
     super({
       message: `Subscription service error: ${message}`,
       context,

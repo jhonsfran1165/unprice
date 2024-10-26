@@ -38,7 +38,7 @@ export type SubscriptionEventMap = {
   }
   COLLECT_PAYMENT: {
     payload: { invoiceId: string }
-    result: { status: SubscriptionStatus; paymentStatus: "success" | "waiting" }
+    result: { status: SubscriptionStatus; paymentStatus: InvoiceStatus }
     error: UnPriceSubscriptionError
   }
   BILL: {
@@ -97,6 +97,7 @@ export class SubscriptionStateMachine extends StateMachine<
     this.db = db
     this.logger = logger
     this.analytics = analytics
+
     /*
      * END_TRIAL
      * validate dates and change status to past_due which is the state where the subscription is waiting for invoice
@@ -217,6 +218,10 @@ export class SubscriptionStateMachine extends StateMachine<
       },
     })
 
+    /*
+     * FINALIZE_INVOICE
+     * finalize the invoice, set the state of the invoice to unpaid and create it in the payment provider
+     */
     this.addTransition({
       from: "past_due",
       to: "past_due",
@@ -244,6 +249,10 @@ export class SubscriptionStateMachine extends StateMachine<
       },
     })
 
+    /*
+     * COLLECT_PAYMENT
+     * collect the payment for the invoice
+     */
     this.addTransition({
       from: "past_due",
       to: "active",
@@ -290,6 +299,10 @@ export class SubscriptionStateMachine extends StateMachine<
       },
     })
 
+    /*
+     * BILL
+     * bill the subscription phase, set the state to active
+     */
     this.addTransition({
       from: "past_due",
       to: "active",
@@ -334,30 +347,85 @@ export class SubscriptionStateMachine extends StateMachine<
       },
     })
 
-    // renew the phase
+    /*
+     * RENEW
+     * renew the phase, set the new cycle for the subscription
+     */
     this.addTransition({
       from: "active",
       to: "active",
       event: "RENEW",
       onTransition: async (payload) => {
-        // get the active phase - subscription only has one phase active at a time
+        // get active phase
         const activePhase = this.getActivePhase({ date: payload.now })
+        const subscription = this.subscription
 
         if (!activePhase) {
           return Err(new UnPriceSubscriptionError({ message: "No active phase found" }))
         }
 
+        // check if the phase is active
+        if (activePhase.status !== "active") {
+          return Err(
+            new UnPriceSubscriptionError({
+              message: "Phase is not active, cannot renew phases that are not active",
+            })
+          )
+        }
+
+        // check if the subscription is not scheduled to be changed, expired or canceled
+        if (subscription.changeAt && subscription.changeAt > payload.now) {
+          return Err(
+            new UnPriceSubscriptionError({ message: "Subscription is scheduled to be changed" })
+          )
+        }
+
+        if (subscription.cancelAt && subscription.cancelAt > payload.now) {
+          return Err(
+            new UnPriceSubscriptionError({ message: "Subscription is scheduled to be canceled" })
+          )
+        }
+
+        if (subscription.expiresAt && subscription.expiresAt > payload.now) {
+          return Err(
+            new UnPriceSubscriptionError({ message: "Subscription is scheduled to expire" })
+          )
+        }
+
         const autoRenew = activePhase.autoRenew
 
         if (!autoRenew) {
+          return Err(new UnPriceSubscriptionError({ message: "Phase does not auto renew" }))
+        }
+
+        // check if the subscription was already renewed
+        // check the new cycle start and end dates are between now
+        if (
+          payload.now >= subscription.currentCycleStartAt &&
+          payload.now <= subscription.currentCycleEndAt
+        ) {
           return Ok({
             status: "active",
           })
         }
 
-        // renew the phase
-        const renewPhase = await this.renewSubscriptionPhase({
+        // calculate next billing cycle
+        const { cycleStart, cycleEnd } = configureBillingCycleSubscription({
+          currentCycleStartAt: subscription.currentCycleEndAt + 1,
+          billingCycleStart: activePhase.startCycle,
+          billingPeriod: activePhase.planVersion?.billingPeriod ?? "month",
+          endAt: activePhase.endAt ?? undefined,
+        })
+
+        // renewing a phase implies setting the new cycle for the subscription
+        await this.syncState({
+          state: "active",
           phaseId: activePhase.id,
+          active: true,
+          subscriptionDates: {
+            currentCycleStartAt: cycleStart.getTime(),
+            currentCycleEndAt: cycleEnd.getTime(),
+          },
         })
 
         return Ok({
@@ -471,13 +539,13 @@ export class SubscriptionStateMachine extends StateMachine<
     }
 
     const pendingInvoice = await this.db.query.invoices.findFirst({
-      where: (table, { eq, and }) =>
+      where: (table, { eq, and, inArray }) =>
         and(
           eq(table.subscriptionId, subscription.id),
           eq(table.subscriptionPhaseId, activePhase.id),
           eq(table.cycleStartAt, subscription.currentCycleStartAt),
           eq(table.cycleEndAt, subscription.currentCycleEndAt),
-          eq(table.status, "draft")
+          inArray(table.status, ["draft", "unpaid"])
         ),
     })
 
@@ -593,16 +661,12 @@ export class SubscriptionStateMachine extends StateMachine<
         set: {
           cycleStartAt: startAt,
           cycleEndAt: endAt,
-          status: "draft",
           // pay_in_advance: the invoice is flat, only flat charges, usage charges are combined in the next cycle
           // pay_in_arrear: the invoice is hybrid (flat + usage)
           // TODO: we need a way to check if the invoice include usage charges from past cycles
           type: whenToBill === "pay_in_advance" ? "flat" : "hybrid",
           dueAt,
           pastDueAt,
-          total: "0", // this will be updated when the invoice is finalized
-          invoiceUrl: "",
-          invoiceId: "",
           paymentProvider: planVersion?.paymentProvider ?? "stripe",
           projectId: subscription.projectId,
           collectionMethod,
@@ -668,6 +732,8 @@ export class SubscriptionStateMachine extends StateMachine<
           email: this.subscription.customer.email,
           startCycle: invoice.cycleStartAt,
           endCycle: invoice.cycleEndAt,
+          collectionMethod: invoice.collectionMethod,
+          description: "Invoice for the cycle from...",
         })
 
         if (stripeInvoice.err) {
@@ -774,6 +840,7 @@ export class SubscriptionStateMachine extends StateMachine<
     if (!invoice) {
       return Err(new UnPriceSubscriptionError({ message: "No invoice found" }))
     }
+
     // TODO: how to handle multiple invoices?
     const { paymentProvider, collectionMethod, currency } = invoice
 
@@ -800,6 +867,8 @@ export class SubscriptionStateMachine extends StateMachine<
           email: this.subscription.customer.email,
           startCycle: invoice.cycleStartAt,
           endCycle: invoice.cycleEndAt,
+          collectionMethod,
+          description: "Invoice for the cycle from...",
         })
 
         if (stripeInvoice.err) {
@@ -963,7 +1032,9 @@ export class SubscriptionStateMachine extends StateMachine<
 
         if (defaultPaymentMethodId.err) {
           return Err(
-            new UnPriceSubscriptionError({ message: "Error getting default payment method" })
+            new UnPriceSubscriptionError({
+              message: `Error getting default payment method: ${defaultPaymentMethodId.err.message}`,
+            })
           )
         }
 
@@ -986,7 +1057,11 @@ export class SubscriptionStateMachine extends StateMachine<
               })
               .where(eq(invoices.id, invoice.id))
 
-            return Err(new UnPriceSubscriptionError({ message: stripePaymentInvoice.err.message }))
+            return Err(
+              new UnPriceSubscriptionError({
+                message: `Error collecting payment: ${stripePaymentInvoice.err.message}`,
+              })
+            )
           }
 
           // update the invoice status
@@ -1009,7 +1084,11 @@ export class SubscriptionStateMachine extends StateMachine<
           })
 
           if (stripeSendInvoice.err) {
-            return Err(new UnPriceSubscriptionError({ message: "Error sending invoice" }))
+            return Err(
+              new UnPriceSubscriptionError({
+                message: `Error sending invoice: ${stripeSendInvoice.err.message}`,
+              })
+            )
           }
 
           // update the invoice status
@@ -1027,7 +1106,11 @@ export class SubscriptionStateMachine extends StateMachine<
         break
       }
       default:
-        return Err(new UnPriceSubscriptionError({ message: "Unsupported payment provider" }))
+        return Err(
+          new UnPriceSubscriptionError({
+            message: `Unsupported payment provider: ${paymentProvider}`,
+          })
+        )
     }
 
     return Ok(result)
@@ -1157,42 +1240,11 @@ export class SubscriptionStateMachine extends StateMachine<
     }
   }
 
-  private async renewSubscriptionPhase(payload: {
-    phaseId: string
-  }): Promise<Result<void, UnPriceSubscriptionError>> {
-    // get active phase
-    const activePhase = this.getPhase(payload.phaseId)
-
-    if (!activePhase) {
-      return Err(new UnPriceSubscriptionError({ message: "No active phase found" }))
-    }
-
-    const autoRenew = activePhase.autoRenew
-
-    if (!autoRenew) {
-      return Err(new UnPriceSubscriptionError({ message: "Phase does not auto renew" }))
-    }
-
-    // check if the phase is active
-    if (activePhase.status !== "active") {
-      return Err(new UnPriceSubscriptionError({ message: "Phase is not active" }))
-    }
-
-    // check if the phase doesn't have an end date
-    if (activePhase.endAt) {
-      return Err(new UnPriceSubscriptionError({ message: "Phase already has an end date" }))
-    }
-
-    // renewing a phase implies creating new invoices
-
-    return Ok(undefined)
-  }
-
-  public async endTrial(_payload: { now: number }): Promise<
-    Result<void, UnPriceSubscriptionError>
+  public async endTrial(payload: { now: number }): Promise<
+    Result<{ status: string }, UnPriceSubscriptionError>
   > {
     // set the subscription to active
-    const { now } = _payload
+    const { now } = payload
     const currentState = this.getCurrentState()
 
     // here we need to ensure retries so if the transition chain fails and the subscription is in a middle state
@@ -1202,6 +1254,7 @@ export class SubscriptionStateMachine extends StateMachine<
     // 2. Invoice invoicing -> past_due
     // 3. Finalize past_due -> past_due
     // 4. Collect payment past_due -> active
+    // 5. Renew subscription active -> active
 
     if (currentState === "trialing") {
       // continue from end trial
@@ -1284,8 +1337,17 @@ export class SubscriptionStateMachine extends StateMachine<
       if (collectPayment.err) {
         return Err(collectPayment.err)
       }
+    } else if (currentState === "active") {
+      // continue from active
+      const renew = await this.transition("RENEW", { now })
+
+      if (renew.err) {
+        return Err(renew.err)
+      }
     }
 
-    return Ok(undefined)
+    return Ok({
+      status: "active",
+    })
   }
 }

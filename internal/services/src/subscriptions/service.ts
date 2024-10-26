@@ -429,7 +429,7 @@ export class SubscriptionService {
     }
 
     const startAtToUse = startAt ?? Date.now()
-    const endAtToUse = endAt ?? null
+    let endAtToUse = endAt ?? null
 
     // get subscription with phases from start date
     const subscription = await this.db.query.subscriptions.findFirst({
@@ -518,7 +518,6 @@ export class SubscriptionService {
     const whenToBillToUse = whenToBill ?? versionData.whenToBill
     const collectionMethodToUse = collectionMethod ?? versionData.collectionMethod
     const startCycleToUse = startCycle ?? versionData.startCycle ?? 1
-    const autoRenewToUse = autoRenew ?? versionData.autoRenew ?? true
 
     // get the billing cycle for the subscription given the start date
     const calculatedBillingCycle = configureBillingCycleSubscription({
@@ -527,6 +526,13 @@ export class SubscriptionService {
       billingCycleStart: startCycleToUse,
       billingPeriod,
     })
+
+    // if not auto renew we set end at to the end of the phase
+    const autoRenewToUse = autoRenew ?? versionData.autoRenew ?? true
+
+    if (!autoRenewToUse) {
+      endAtToUse = calculatedBillingCycle.cycleEnd.getTime()
+    }
 
     // calculate the next billing at given the when to bill
     const nextInvoiceAtToUse =
@@ -605,6 +611,7 @@ export class SubscriptionService {
             planSlug: versionData.plan.slug,
             currentCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
             currentCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
+            expiresAt: endAtToUse,
           })
           .where(eq(subscriptions.id, subscriptionId))
       }
@@ -641,7 +648,7 @@ export class SubscriptionService {
   }: {
     input: InsertSubscription
     projectId: string
-  }): Promise<Result<Subscription, UnPriceSubscriptionError>> {
+  }): Promise<Result<Subscription, UnPriceSubscriptionError | SchemaError>> {
     const { success, data, error } = subscriptionInsertSchema.safeParse(input)
 
     // IMPORTANT: for now we only allow one subscription per customer

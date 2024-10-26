@@ -293,6 +293,8 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     email: string
     startCycle: number
     endCycle: number
+    collectionMethod: "charge_automatically" | "send_invoice"
+    description: string
   }): Promise<Result<{ invoice: Stripe.Invoice }, FetchError | UnPricePaymentProviderError>> {
     if (!this.paymentCustomerId)
       return Err(
@@ -312,7 +314,9 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       .create({
         customer: this.paymentCustomerId,
         currency: opts.currency,
-        auto_advance: false, // configure depending on the plan
+        auto_advance: false,
+        collection_method: opts.collectionMethod,
+        description: opts.description,
         custom_fields: [
           {
             name: "Customer",
