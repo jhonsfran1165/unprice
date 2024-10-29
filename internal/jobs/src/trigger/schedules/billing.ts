@@ -15,7 +15,7 @@ export const billingSchedule = schedules.task({
     // find all subscriptions phases that are currently in trial and the trial ends at is in the past
     const pendingInvoices = await db.query.invoices.findMany({
       where: (table, { inArray, and, lte }) =>
-        and(inArray(table.status, ["draft", "unpaid"]), lte(table.dueAt, now)),
+        and(inArray(table.status, ["draft", "unpaid", "waiting"]), lte(table.dueAt, now)),
       limit: 1000,
     })
 
@@ -25,6 +25,7 @@ export const billingSchedule = schedules.task({
         subscriptionPhaseId: invoice.subscriptionPhaseId,
         invoiceId: invoice.id,
         projectId: invoice.projectId,
+        now,
       })
     }
 

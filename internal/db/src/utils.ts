@@ -5,6 +5,8 @@ export * from "./utils/constants"
 export * from "./utils/id"
 export * from "./utils/pagination"
 
+export type { Dinero } from "dinero.js"
+
 import { generateSlug } from "random-word-slugs"
 import type { Currency } from "./validators"
 

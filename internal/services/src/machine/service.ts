@@ -5,7 +5,10 @@ import { UnPriceMachineError } from "./errors"
 type EventMap<S extends string> = Record<
   string,
   {
-    payload: unknown
+    payload: {
+      now: number
+      [key: string]: unknown
+    }
     result: {
       status: S
       [key: string]: unknown

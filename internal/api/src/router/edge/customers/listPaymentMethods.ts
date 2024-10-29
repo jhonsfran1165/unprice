@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server"
 import { paymentProviderSchema } from "@unprice/db/validators"
-import { StripePaymentProvider } from "@unprice/services/payment-provider"
+import { PaymentProviderService } from "@unprice/services/payment-provider"
 import { z } from "zod"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
 
@@ -50,37 +50,33 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
       })
     }
 
-    switch (provider) {
-      case "stripe": {
-        if (!customerData.stripeCustomerId) {
-          return {
-            paymentMethods: [],
-          }
-        }
+    const paymentProviderService = new PaymentProviderService({
+      customer: customerData,
+      logger: opts.ctx.logger,
+      paymentProviderId: provider,
+    })
 
-        const stripePaymentProvider = new StripePaymentProvider({
-          paymentCustomerId: customerData.stripeCustomerId,
-          logger: opts.ctx.logger,
-        })
+    const defaultPaymentMethodId = await paymentProviderService.getDefaultPaymentMethodId()
 
-        const { err, val } = await stripePaymentProvider.listPaymentMethods({
-          limit: 5,
-        })
+    if (defaultPaymentMethodId.err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: defaultPaymentMethodId.err.message,
+      })
+    }
 
-        if (err ?? !val) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: err.message,
-          })
-        }
+    const { err, val } = await paymentProviderService.listPaymentMethods({
+      limit: 5,
+    })
 
-        return {
-          paymentMethods: val,
-        }
-      }
-      default:
-        return {
-          paymentMethods: [],
-        }
+    if (err ?? !val) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: err.message,
+      })
+    }
+
+    return {
+      paymentMethods: val,
     }
   })

@@ -78,23 +78,33 @@ export const PAYMENT_PROVIDERS = ["stripe", "lemonsqueezy"] as const
 export const CURRENCIES = ["USD", "EUR"] as const
 export const STAGES = ["prod", "test", "dev"] as const
 export const STATUS_PLAN = ["draft", "published"] as const
+
+// this status represents the status of the subscription, it would be the same for all phases
+// but phases can have different statuses than the subscription is they are not active
+// for instance a phase was changed to new plan, we create a new phase with status as active
+// and we leave the old phase with status changed.
 export const STATUS_SUBSCRIPTION = [
   "pending", // the subscription is created but there is no phases yet
   "active", // the subscription is active
   "trialing", // the subscription is trialing
+  "changed", // the subscription is changed
   "canceled", // the subscription is cancelled
   "expired", // the subscription has expired - no auto-renew
   "pending_invoice", // the subscription is pending invoice - waiting for invoice
   "past_due", // the subscription is past due - payment pending
 ] as const
+
 export const STATUS_SUB_CHANGES = ["pending", "applied"] as const
+
+// TODO: remove this
 export const CHANGE_TYPE = ["upgrade", "downgrade"] as const
 export const CHANGE_TYPE_SUBSCRIPTION_ITEM = ["add", "remove", "update"] as const
+
 export const PLAN_TYPES = ["recurring"] as const
 export const PLAN_BILLING_PERIODS = ["month", "year"] as const
 export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
 export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
-export const INVOICE_TYPES = ["flat", "usage", "hybrid"] as const
+export const DUE_BEHAVIOUR = ["cancel", "downgrade"] as const
 export const INVOICE_STATUS = ["unpaid", "paid", "waiting", "void", "draft", "failed"] as const
 export const FEATURE_VERSION_TYPES = ["feature", "addon"] as const
 export const COLLECTION_METHODS = ["charge_automatically", "send_invoice"] as const

@@ -4,6 +4,7 @@ import {
   AGGREGATION_METHODS,
   COLLECTION_METHODS,
   CURRENCIES,
+  DUE_BEHAVIOUR,
   FEATURE_TYPES,
   FEATURE_VERSION_TYPES,
   INVOICE_STATUS,
@@ -29,6 +30,7 @@ export const yearsSchema = z.coerce.number().int().min(2000).max(2100)
 export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
 export const whenToBillSchema = z.enum(WHEN_TO_BILLING)
 export const subscriptionStatusSchema = z.enum(STATUS_SUBSCRIPTION)
+export const dueBehaviourSchema = z.enum(DUE_BEHAVIOUR)
 export const invoiceStatusSchema = z.enum(INVOICE_STATUS)
 
 export const startCycleMonthSchema = z.coerce.number().int().min(1).max(31)

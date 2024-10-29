@@ -5,18 +5,18 @@ import { SubscriptionStateMachine } from "@unprice/services/subscriptions"
 import { Analytics } from "@unprice/tinybird"
 import { env } from "../../env.mjs"
 
-export const billingTask = task({
-  id: "subscription.phase.billing",
+export const cancelTask = task({
+  id: "subscription.cancel",
   run: async (
     {
-      subscriptionPhaseId,
-      invoiceId,
+      subscriptionId,
+      activePhaseId,
       projectId,
       now,
     }: {
-      subscriptionPhaseId: string
+      subscriptionId: string
+      activePhaseId: string
       projectId: string
-      invoiceId: string
       now: number
     },
     { ctx }
@@ -29,10 +29,9 @@ export const billingTask = task({
     const logger = new ConsoleLogger({
       requestId: ctx.task.id,
       defaultFields: {
-        subscriptionPhaseId,
-        invoiceId,
+        subscriptionId,
         projectId,
-        api: "jobs.subscription.phase.billing",
+        api: "jobs.subscription.cancel",
       },
     })
 
@@ -59,7 +58,7 @@ export const billingTask = task({
         },
       },
       where: (table, { eq, and }) =>
-        and(eq(table.id, subscriptionPhaseId), eq(table.projectId, projectId)),
+        and(eq(table.id, activePhaseId), eq(table.projectId, projectId)),
     })
 
     if (!subscriptionPhase) {
@@ -83,6 +82,6 @@ export const billingTask = task({
       logger: logger,
     })
 
-    return await subscriptionStateMachine.billing({ invoiceId, now })
+    return await subscriptionStateMachine.cancel({ now, cancelAt: now })
   },
 })

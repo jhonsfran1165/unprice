@@ -1,19 +1,27 @@
 import { API_DOMAIN } from "@unprice/config"
-import type { Currency } from "@unprice/db/validators"
 import type { Result } from "@unprice/error"
 import { Err, FetchError, Ok } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import { Stripe, stripe } from "@unprice/stripe"
 import { UnPricePaymentProviderError } from "./errors"
-import type { PaymentProviderCreateSession, PaymentProviderInterface } from "./interface"
+import type {
+  AddInvoiceItemOpts,
+  CreateInvoiceOpts,
+  CreateSessionOpts,
+  GetStatusInvoice,
+  PaymentMethod,
+  PaymentProviderCreateSession,
+  PaymentProviderInterface,
+  SignUpOpts,
+} from "./interface"
 
 export class StripePaymentProvider implements PaymentProviderInterface {
   private readonly client: Stripe
-  private readonly paymentCustomerId?: string | null
+  private readonly providerCustomerId?: string | null
   private readonly logger: Logger
 
-  constructor(opts: { token?: string; paymentCustomerId?: string | null; logger: Logger }) {
-    this.paymentCustomerId = opts?.paymentCustomerId
+  constructor(opts: { token?: string; providerCustomerId?: string | null; logger: Logger }) {
+    this.providerCustomerId = opts?.providerCustomerId
     this.logger = opts?.logger
 
     if (opts?.token) {
@@ -26,63 +34,22 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     }
   }
 
-  public async getProduct(id: string) {
-    const product = await this.client.products.retrieve(id)
-
-    return Ok(product)
-  }
-
-  public async createProduct({
-    id,
-    name,
-    type,
-    description,
-  }: Stripe.ProductCreateParams): Promise<Result<Stripe.Product, FetchError>> {
-    try {
-      const product = await this.client.products.create({
-        id: id,
-        name: name,
-        type: type,
-        description: description,
-      })
-
-      return Ok(product)
-    } catch (error) {
-      const e = error as Error
-
-      this.logger.error("Error creating product", {
-        error: e,
-        id,
-        name,
-        type,
-        description,
-      })
-
-      return Err(
-        new FetchError({
-          message: e.message,
-          retry: true,
-        })
-      )
-    }
-  }
-
   public async upsertProduct(
     props: Stripe.ProductCreateParams & { id: string }
-  ): Promise<Result<Stripe.Product, FetchError>> {
+  ): Promise<Result<{ productId: string }, FetchError>> {
     try {
       const { id, type, ...rest } = props
       const product = await this.client.products.retrieve(id).catch(() => null)
 
       if (product) {
-        return Ok(
-          await stripe.products.update(id, {
-            ...rest,
-          })
-        )
+        const updatedProduct = await stripe.products.update(id, {
+          ...rest,
+        })
+
+        return Ok({ productId: updatedProduct.id })
       }
 
-      return Ok(await stripe.products.create(props))
+      return Ok({ productId: (await stripe.products.create(props)).id })
     } catch (error) {
       const e = error as Error
 
@@ -101,24 +68,15 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     }
   }
 
-  public async signUp(opts: {
-    customer: {
-      id: string
-      email: string
-      currency: string
-    }
-    customerSessionId: string
-    successUrl: string
-    cancelUrl: string
-  }): Promise<Result<PaymentProviderCreateSession, FetchError>> {
+  public async signUp(opts: SignUpOpts): Promise<Result<PaymentProviderCreateSession, FetchError>> {
     try {
       // check if customer has a payment method already
-      if (this.paymentCustomerId) {
+      if (this.providerCustomerId) {
         /**
          * Customer is already configured, create a billing portal session
          */
         const session = await this.client.billingPortal.sessions.create({
-          customer: this.paymentCustomerId,
+          customer: this.providerCustomerId,
           return_url: opts.cancelUrl,
         })
 
@@ -169,22 +127,17 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     }
   }
 
-  public async createSession(opts: {
-    customerId: string
-    projectId: string
-    email: string
-    currency: string
-    successUrl: string
-    cancelUrl: string
-  }): Promise<Result<PaymentProviderCreateSession, FetchError>> {
+  public async createSession(
+    opts: CreateSessionOpts
+  ): Promise<Result<PaymentProviderCreateSession, FetchError>> {
     try {
       // check if customer has a payment method already
-      if (this.paymentCustomerId) {
+      if (this.providerCustomerId) {
         /**
          * Customer is already configured, create a billing portal session
          */
         const session = await this.client.billingPortal.sessions.create({
-          customer: this.paymentCustomerId,
+          customer: this.providerCustomerId,
           return_url: opts.cancelUrl,
         })
 
@@ -237,26 +190,16 @@ export class StripePaymentProvider implements PaymentProviderInterface {
   }
 
   public async listPaymentMethods(opts: { limit?: number }): Promise<
-    Result<
-      {
-        id: string
-        name: string | null
-        last4?: string
-        expMonth?: number
-        expYear?: number
-        brand?: string
-      }[],
-      FetchError | UnPricePaymentProviderError
-    >
+    Result<PaymentMethod[], FetchError | UnPricePaymentProviderError>
   > {
-    if (!this.paymentCustomerId)
+    if (!this.providerCustomerId)
       return Err(
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
 
     try {
       const paymentMethods = await this.client.paymentMethods.list({
-        customer: this.paymentCustomerId ?? undefined,
+        customer: this.providerCustomerId ?? undefined,
         limit: opts.limit,
       })
 
@@ -287,16 +230,12 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     }
   }
 
-  public async createInvoice(opts: {
-    currency: Currency
-    customerName: string
-    email: string
-    startCycle: number
-    endCycle: number
-    collectionMethod: "charge_automatically" | "send_invoice"
-    description: string
-  }): Promise<Result<{ invoice: Stripe.Invoice }, FetchError | UnPricePaymentProviderError>> {
-    if (!this.paymentCustomerId)
+  public async createInvoice(
+    opts: CreateInvoiceOpts
+  ): Promise<
+    Result<{ invoiceId: string; invoiceUrl: string }, FetchError | UnPricePaymentProviderError>
+  > {
+    if (!this.providerCustomerId)
       return Err(
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
@@ -312,7 +251,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     // create an invoice
     const result = await this.client.invoices
       .create({
-        customer: this.paymentCustomerId,
+        customer: this.providerCustomerId,
         currency: opts.currency,
         auto_advance: false,
         collection_method: opts.collectionMethod,
@@ -332,7 +271,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
           },
         ],
       })
-      .then((invoice) => Ok({ invoice }))
+      .then((invoice) => Ok({ invoiceId: invoice.id, invoiceUrl: invoice.invoice_pdf ?? "" }))
       .catch((error) => {
         const e = error as Stripe.errors.StripeError
 
@@ -344,16 +283,10 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     return result
   }
 
-  async addInvoiceItem(opts: {
-    invoiceId: string
-    name: string
-    productId: string
-    isProrated: boolean
-    amount: number
-    quantity: number
-    currency: Currency
-  }): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
-    if (!this.paymentCustomerId)
+  async addInvoiceItem(
+    opts: AddInvoiceItemOpts
+  ): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
+    if (!this.providerCustomerId)
       return Err(
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
@@ -362,7 +295,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
     return await this.client.invoiceItems
       .create({
-        customer: this.paymentCustomerId,
+        customer: this.providerCustomerId,
         invoice: invoiceId,
         quantity: quantity,
         price_data: {
@@ -402,6 +335,61 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     }
   }
 
+  public async getStatusInvoice(opts: {
+    invoiceId: string
+  }): Promise<Result<GetStatusInvoice, FetchError | UnPricePaymentProviderError>> {
+    try {
+      const invoice = await this.client.invoices.retrieve(opts.invoiceId)
+
+      if (!invoice.status) {
+        return Err(new UnPricePaymentProviderError({ message: "Invoice status not found" }))
+      }
+
+      let paidAt: number | undefined
+      let voidedAt: number | undefined
+      let paymentAttempts: {
+        status: string
+        createdAt: number
+      }[] = []
+
+      // Check if the invoice is paid
+      if (invoice.paid) {
+        // The payment_intent object contains details about the payment
+        const paymentIntent = await this.client.paymentIntents.retrieve(
+          invoice.payment_intent as string
+        )
+        paidAt = paymentIntent.created
+
+        paymentAttempts = [
+          {
+            status: paymentIntent.status,
+            createdAt: paymentIntent.created, // Unix timestamp
+          },
+        ]
+      }
+
+      // TODO: fix this
+      if (invoice.status === "void") {
+        voidedAt = invoice.created
+      }
+
+      return Ok({
+        status: invoice.status,
+        invoiceId: invoice.id,
+        paidAt,
+        voidedAt,
+        invoicePdf: invoice.invoice_pdf ?? "",
+        paymentAttempts,
+      })
+    } catch (error) {
+      const e = error as Stripe.errors.StripeError
+
+      this.logger.error("Error getting invoice status", { error: e.message, ...opts })
+
+      return Err(new FetchError({ message: e.message, retry: false }))
+    }
+  }
+
   public async sendInvoice(opts: {
     invoiceId: string
   }): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
@@ -420,11 +408,11 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
   public async finalizeInvoice(opts: {
     invoiceId: string
-  }): Promise<Result<Stripe.Invoice, FetchError | UnPricePaymentProviderError>> {
+  }): Promise<Result<{ invoiceId: string }, FetchError | UnPricePaymentProviderError>> {
     try {
       const invoice = await this.client.invoices.finalizeInvoice(opts.invoiceId)
 
-      return Ok(invoice)
+      return Ok({ invoiceId: invoice.id })
     } catch (error) {
       const e = error as Stripe.errors.StripeError
 
@@ -435,15 +423,15 @@ export class StripePaymentProvider implements PaymentProviderInterface {
   }
 
   public async getDefaultPaymentMethodId(): Promise<
-    Result<string, FetchError | UnPricePaymentProviderError>
+    Result<{ paymentMethodId: string }, FetchError | UnPricePaymentProviderError>
   > {
-    if (!this.paymentCustomerId)
+    if (!this.providerCustomerId)
       return Err(
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
 
     const paymentMethods = await this.client.paymentMethods.list({
-      customer: this.paymentCustomerId,
+      customer: this.providerCustomerId,
       limit: 1,
     })
 
@@ -453,6 +441,6 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       return Err(new UnPricePaymentProviderError({ message: "No payment methods found" }))
     }
 
-    return Ok(paymentMethod.id)
+    return Ok({ paymentMethodId: paymentMethod.id })
   }
 }

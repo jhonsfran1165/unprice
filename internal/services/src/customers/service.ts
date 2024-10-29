@@ -8,7 +8,7 @@ import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import type { Cache, CacheNamespaces } from "../cache"
 import type { Metrics } from "../metrics"
-import { StripePaymentProvider } from "../payment-provider/stripe"
+import { PaymentProviderService } from "../payment-provider"
 import { SubscriptionService } from "../subscriptions"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
@@ -551,81 +551,70 @@ export class CustomerService {
 
     // if payment is required, we need to go through payment provider flow first
     if (paymentRequired && trialDays === 0) {
-      switch (paymentProvider) {
-        case "stripe": {
-          const stripePaymentProvider = new StripePaymentProvider({
-            logger: this.logger,
+      const paymentProviderService = new PaymentProviderService({
+        logger: this.logger,
+        paymentProviderId: paymentProvider,
+      })
+
+      // create a session with the data of the customer, the plan version and the success and cancel urls
+      // pass the session id to stripe metadata and then once the customer adds a payment method, we call our api to create the subscription
+      const sessionId = newId("customer_session")
+      const customerSession = await this.db
+        .insert(customerSessions)
+        .values({
+          id: sessionId,
+          customer: {
+            id: customerId,
+            name: name,
+            email: email,
+            currency: defaultCurrency || planProject.defaultCurrency,
+            timezone: timezone || planProject.timezone,
+            projectId: projectId,
+            externalId: externalId,
+          },
+          planVersion: {
+            id: planVersion.id,
+            projectId: projectId,
+            config: config,
+          },
+        })
+        .returning()
+        .then((data) => data[0])
+
+      if (!customerSession) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error creating customer session",
           })
-
-          // create a session with the data of the customer, the plan version and the success and cancel urls
-          // pass the session id to stripe metadata and then once the customer adds a payment method, we call our api to create the subscription
-          const sessionId = newId("customer_session")
-          const customerSession = await this.db
-            .insert(customerSessions)
-            .values({
-              id: sessionId,
-              customer: {
-                id: customerId,
-                name: name,
-                email: email,
-                currency: defaultCurrency || planProject.defaultCurrency,
-                timezone: timezone || planProject.timezone,
-                projectId: projectId,
-                externalId: externalId,
-              },
-              planVersion: {
-                id: planVersion.id,
-                projectId: projectId,
-                config: config,
-              },
-            })
-            .returning()
-            .then((data) => data[0])
-
-          if (!customerSession) {
-            return Err(
-              new UnPriceCustomerError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Error creating customer session",
-              })
-            )
-          }
-
-          const { err, val } = await stripePaymentProvider.signUp({
-            successUrl: customerSuccessUrl,
-            cancelUrl: cancelUrl,
-            customerSessionId: customerSession.id,
-            customer: {
-              id: customerId,
-              email: email,
-              currency: defaultCurrency || planProject.defaultCurrency,
-            },
-          })
-
-          if (err ?? !val) {
-            return Err(
-              new UnPriceCustomerError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: err.message,
-              })
-            )
-          }
-
-          return Ok({
-            success: true,
-            url: val.url,
-            customerId: val.customerId,
-          })
-        }
-
-        default:
-          return Err(
-            new UnPriceCustomerError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Payment provider not supported yet",
-            })
-          )
+        )
       }
+
+      const { err, val } = await paymentProviderService.signUp({
+        successUrl: customerSuccessUrl,
+        cancelUrl: cancelUrl,
+        customerSessionId: customerSession.id,
+        customer: {
+          id: customerId,
+          email: email,
+          currency: defaultCurrency || planProject.defaultCurrency,
+        },
+      })
+
+      if (err ?? !val) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: err.message,
+          })
+        )
+      }
+
+      return Ok({
+        success: true,
+        url: val.url,
+        customerId: val.customerId,
+      })
     }
 
     // if payment is not required, we can create the customer directly with its subscription

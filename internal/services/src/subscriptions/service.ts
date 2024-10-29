@@ -118,7 +118,7 @@ export class SubscriptionService {
     })
 
     if (err) {
-      console.error(err)
+      this.logger.error(err.message)
       return Err(err)
     }
 
@@ -303,6 +303,7 @@ export class SubscriptionService {
           // phases are don't overlap, so we can use limit 1
           limit: 1,
           with: {
+            planVersion: true,
             items: {
               with: {
                 featurePlanVersion: {
@@ -376,6 +377,7 @@ export class SubscriptionService {
       paymentMethodId,
       startAt,
       endAt,
+      dueBehaviour,
     } = data
 
     const versionData = await this.db.query.versions.findFirst({
@@ -562,6 +564,7 @@ export class SubscriptionService {
           endAt: endAtToUse,
           collectionMethod: collectionMethodToUse,
           startCycle: startCycleToUse,
+          dueBehaviour: dueBehaviour,
           whenToBill: whenToBillToUse,
           autoRenew: autoRenewToUse,
           gracePeriod,
@@ -611,6 +614,7 @@ export class SubscriptionService {
             planSlug: versionData.plan.slug,
             currentCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
             currentCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
+            // if there is an end date, we set the expiration date
             expiresAt: endAtToUse,
           })
           .where(eq(subscriptions.id, subscriptionId))

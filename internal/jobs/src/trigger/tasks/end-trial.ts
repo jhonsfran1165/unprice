@@ -26,7 +26,12 @@ export const endTrialTask = task({
 
     const logger = new ConsoleLogger({
       requestId,
-      defaultFields: {},
+      defaultFields: {
+        subscriptionPhaseId,
+        projectId,
+        now,
+        api: "jobs.subscription.phase.endtrial",
+      },
     })
 
     const subscriptionPhase = await db.query.subscriptionPhases.findFirst({
@@ -69,7 +74,7 @@ export const endTrialTask = task({
 
     const subscriptionStateMachine = new SubscriptionStateMachine({
       db: db,
-      subscriptionPhase: subscriptionPhase,
+      activePhase: subscriptionPhase,
       subscription: subscriptionPhase.subscription,
       customer: subscriptionPhase.subscription.customer,
       analytics: tinybird,

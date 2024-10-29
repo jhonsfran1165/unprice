@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server"
 import { paymentProviderSchema } from "@unprice/db/validators"
-import { StripePaymentProvider } from "@unprice/services/payment-provider"
+import { PaymentProviderService } from "@unprice/services/payment-provider"
 import { z } from "zod"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
 
@@ -38,35 +38,27 @@ export const createPaymentMethod = protectedApiOrActiveProjectProcedure
       })
     }
 
-    switch (opts.input.paymentProvider) {
-      case "stripe": {
-        const stripePaymentProvider = new StripePaymentProvider({
-          paymentCustomerId: customerData.stripeCustomerId,
-          logger: opts.ctx.logger,
-        })
+    const paymentProviderService = new PaymentProviderService({
+      customer: customerData,
+      logger: opts.ctx.logger,
+      paymentProviderId: opts.input.paymentProvider,
+    })
 
-        const { err, val } = await stripePaymentProvider.createSession({
-          customerId: customerId,
-          projectId: project.id,
-          email: customerData.email,
-          currency: customerData.defaultCurrency,
-          successUrl: successUrl,
-          cancelUrl: cancelUrl,
-        })
+    const { err, val } = await paymentProviderService.createSession({
+      customerId: customerId,
+      projectId: project.id,
+      email: customerData.email,
+      currency: customerData.defaultCurrency,
+      successUrl: successUrl,
+      cancelUrl: cancelUrl,
+    })
 
-        if (err ?? !val) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: err.message,
-          })
-        }
-
-        return val
-      }
-      default:
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Payment provider not supported yet",
-        })
+    if (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: err.message,
+      })
     }
+
+    return val
   })

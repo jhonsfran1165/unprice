@@ -32,7 +32,7 @@ export const invoicingSchedule = schedules.task({
       const phase = sub.phases[0]
 
       if (!phase) {
-        throw new Error("Subscription phase not found")
+        throw new Error("Subscription phase not found or there is no active phase")
       }
 
       await invoiceTask.triggerAndWait({

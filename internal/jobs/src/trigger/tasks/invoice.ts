@@ -30,7 +30,7 @@ export const invoiceTask = task({
         subscriptionPhaseId,
         projectId,
         now,
-        api: "subscription.phase.invoice",
+        api: "jobs.subscription.phase.invoice",
       },
     })
 
@@ -74,7 +74,7 @@ export const invoiceTask = task({
 
     const subscriptionStateMachine = new SubscriptionStateMachine({
       db: db,
-      subscriptionPhase: subscriptionPhase,
+      activePhase: subscriptionPhase,
       subscription: subscriptionPhase.subscription,
       customer: subscriptionPhase.subscription.customer,
       analytics: tinybird,

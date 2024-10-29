@@ -3,7 +3,7 @@ import { APP_NAME } from "@unprice/config"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { calculateFlatPricePlan, planVersionSelectBaseSchema } from "@unprice/db/validators"
-import { StripePaymentProvider } from "@unprice/services/payment-provider"
+import { PaymentProviderService } from "@unprice/services/payment-provider"
 import { isZero } from "dinero.js"
 import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
@@ -66,51 +66,36 @@ export const publish = protectedProjectProcedure
     // we need to create each product on the payment provider
     const planVersionDataUpdated = await opts.ctx.db.transaction(async (tx) => {
       try {
-        // depending on the provider we need to create the products
-        switch (planVersionData.paymentProvider) {
-          case "stripe": {
-            const stripePaymentProvider = new StripePaymentProvider({
-              logger: opts.ctx.logger,
+        const paymentProviderService = new PaymentProviderService({
+          logger: opts.ctx.logger,
+          paymentProviderId: planVersionData.paymentProvider,
+        })
+
+        // create the products
+        await Promise.all(
+          planVersionData.planFeatures.map(async (planFeature) => {
+            const productName = `${planVersionData.project.name} - ${planFeature.feature.slug} from ${APP_NAME}`
+
+            const { err } = await paymentProviderService.upsertProduct({
+              id: planFeature.featureId,
+              name: productName,
+              type: "service",
+              // only pass the description if it is not empty
+              ...(planFeature.feature.description
+                ? {
+                    description: planFeature.feature.description,
+                  }
+                : {}),
             })
 
-            // create the products
-            await Promise.all(
-              planVersionData.planFeatures.map(async (planFeature) => {
-                const productName = `${planVersionData.project.name} - ${planFeature.feature.slug} from ${APP_NAME}`
-
-                const { err } = await stripePaymentProvider.upsertProduct({
-                  id: planFeature.featureId,
-                  name: productName,
-                  type: "service",
-                  // only pass the description if it is not empty
-                  ...(planFeature.feature.description
-                    ? {
-                        description: planFeature.feature.description,
-                      }
-                    : {}),
-                })
-
-                if (err) {
-                  throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Error syncs product with stripe",
-                  })
-                }
+            if (err) {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Error syncs product with stripe",
               })
-            )
-
-            break
-          }
-          default:
-            opts.ctx.logger.error("Payment provider not supported", {
-              paymentProvider: planVersionData.paymentProvider,
-            })
-
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Payment provider not supported",
-            })
-        }
+            }
+          })
+        )
 
         // verify if the payment method is required
         const { err, val: totalPricePlan } = calculateFlatPricePlan({

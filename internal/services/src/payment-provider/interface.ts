@@ -1,4 +1,4 @@
-import type { Currency } from "@unprice/db/validators"
+import type { CollectionMethod, Currency } from "@unprice/db/validators"
 import type { FetchError, Result } from "@unprice/error"
 import type { Stripe } from "@unprice/stripe"
 import type { UnPricePaymentProviderError } from "./errors"
@@ -9,67 +9,108 @@ export interface PaymentProviderCreateSession {
   customerId: string
 }
 
+export interface CreateSessionOpts {
+  currency: string
+  customerId: string
+  projectId: string
+  email: string
+  successUrl: string
+  cancelUrl: string
+}
+
+export interface SignUpOpts {
+  customer: { id: string; email: string; currency: string }
+  customerSessionId: string
+  successUrl: string
+  cancelUrl: string
+}
+
+export interface CreateInvoiceOpts {
+  currency: Currency
+  customerName: string
+  email: string
+  startCycle: number
+  endCycle: number
+  collectionMethod: CollectionMethod
+  description: string
+}
+
+export interface AddInvoiceItemOpts {
+  invoiceId: string
+  name: string
+  productId: string
+  isProrated: boolean
+  amount: number
+  quantity: number
+  currency: Currency
+}
+
+export type PaymentMethod = {
+  id: string
+  name: string | null
+  last4?: string
+  expMonth?: number
+  expYear?: number
+  brand?: string
+}
+
+export type GetStatusInvoice = {
+  status: InvoiceProviderStatus
+  invoiceId: string
+  paidAt?: number
+  voidedAt?: number
+  invoicePdf?: string
+  paymentAttempts: {
+    status: string
+    createdAt: number
+  }[]
+}
+
+export type InvoiceProviderStatus = "open" | "paid" | "void" | "draft" | "uncollectible"
+
 // Cache interface so you can swap out the cache implementation
 export interface PaymentProviderInterface {
-  createSession: (opts: {
-    currency: string
-    customerId: string
-    projectId: string
-    email: string
-    successUrl: string
-    cancelUrl: string
-  }) => Promise<Result<PaymentProviderCreateSession, FetchError>>
+  createSession: (
+    opts: CreateSessionOpts
+  ) => Promise<Result<PaymentProviderCreateSession, FetchError>>
 
-  signUp: (opts: {
-    customer: {
-      id: string
-      email: string
-      currency: string
-    }
-    customerSessionId: string
-    successUrl: string
-    cancelUrl: string
-  }) => Promise<Result<PaymentProviderCreateSession, FetchError>>
+  signUp: (opts: SignUpOpts) => Promise<Result<PaymentProviderCreateSession, FetchError>>
 
-  getProduct: (id: string) => Promise<Result<Stripe.Response<Stripe.Product>, FetchError>>
-  createProduct: (opts: Stripe.ProductCreateParams) => Promise<Result<Stripe.Product, FetchError>>
   upsertProduct: (
     props: Stripe.ProductCreateParams & { id: string }
-  ) => Promise<Result<Stripe.Product, FetchError>>
+  ) => Promise<Result<{ productId: string }, FetchError>>
 
   listPaymentMethods: (opts: { limit?: number }) => Promise<
-    Result<
-      {
-        id: string
-        name: string | null
-        last4?: string
-        expMonth?: number
-        expYear?: number
-        brand?: string
-      }[],
-      FetchError | UnPricePaymentProviderError
-    >
+    Result<PaymentMethod[], FetchError | UnPricePaymentProviderError>
   >
 
-  createInvoice: (opts: {
-    currency: Currency
-    customerName: string
-    email: string
-    startCycle: number
-    endCycle: number
-    description: string
-    collectionMethod: "charge_automatically" | "send_invoice"
-  }) => Promise<Result<{ invoice: Stripe.Invoice }, FetchError | UnPricePaymentProviderError>>
+  createInvoice: (
+    opts: CreateInvoiceOpts
+  ) => Promise<
+    Result<{ invoiceId: string; invoiceUrl: string }, FetchError | UnPricePaymentProviderError>
+  >
 
-  addInvoiceItem: (opts: {
-    invoiceId: string
-    name: string
-    productId: string
-    isProrated: boolean
-    amount: number
-    quantity: number
-    currency: Currency
-  }) => Promise<Result<void, FetchError | UnPricePaymentProviderError>>
+  addInvoiceItem: (
+    opts: AddInvoiceItemOpts
+  ) => Promise<Result<void, FetchError | UnPricePaymentProviderError>>
 
-  getDefaultPaymentMethodId: () => Promise<Result<string, FetchError | UnPricePaymentProviderError>>
+  getDefaultPaymentMethodId: () => Promise<
+    Result<{ paymentMethodId: string }, FetchError | UnPricePaymentProviderError>
+  >
+
+  finalizeInvoice: (opts: { invoiceId: string }) => Promise<
+    Result<{ invoiceId: string }, FetchError | UnPricePaymentProviderError>
+  >
+
+  sendInvoice: (opts: { invoiceId: string }) => Promise<
+    Result<void, FetchError | UnPricePaymentProviderError>
+  >
+
+  collectPayment: (opts: { invoiceId: string; paymentMethodId: string }) => Promise<
+    Result<void, FetchError | UnPricePaymentProviderError>
+  >
+
+  getStatusInvoice: (opts: { invoiceId: string }) => Promise<
+    Result<GetStatusInvoice, FetchError | UnPricePaymentProviderError>
+  >
 }

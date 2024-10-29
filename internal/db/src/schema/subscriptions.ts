@@ -17,6 +17,7 @@ import { pgTableProject } from "../utils/_table"
 import { cuid, timestamps } from "../utils/fields.sql"
 import { projectID } from "../utils/sql"
 import type {
+  invoiceMetadataSchema,
   subscriptionMetadataSchema,
   subscriptionPhaseMetadataSchema,
 } from "../validators/subscriptions"
@@ -24,8 +25,8 @@ import { customers } from "./customers"
 import {
   collectionMethodEnum,
   currencyEnum,
+  dueBehaviourEnum,
   invoiceStatusEnum,
-  invoiceTypeEnum,
   paymentProviderEnum,
   subscriptionStatusEnum,
   whenToBillEnum,
@@ -49,7 +50,7 @@ export const subscriptions = pgTableProject(
     customerId: cuid("customers_id").notNull(),
 
     // status of the subscription - active, inactive, canceled, paused, etc.
-    status: subscriptionStatusEnum("status").notNull().default("active"),
+    status: subscriptionStatusEnum("status").notNull().default("pending"),
 
     // whether the subscription is active or not
     // normally is active if the status is active, trialing or past_due or changing
@@ -60,6 +61,9 @@ export const subscriptions = pgTableProject(
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
 
     // ************ subscription important dates ************
+    // previous cycle dates for invoices purposes
+    previousCycleStartAt: bigint("previous_cycle_start_at_m", { mode: "number" }),
+    previousCycleEndAt: bigint("previous_cycle_end_at_m", { mode: "number" }),
     // current cycle dates for invoices purposes
     currentCycleStartAt: bigint("current_cycle_start_at_m", { mode: "number" }).notNull(),
     currentCycleEndAt: bigint("current_cycle_end_at_m", { mode: "number" }).notNull(),
@@ -127,6 +131,8 @@ export const subscriptionPhases = pgTableProject(
     // normally is active if the status is active, trialing or past_due or changing
     // this simplifies the queries when we need to get the active subscriptions
     active: boolean("active").notNull().default(true),
+    // due behaviour for the phase - cancel or downgrade
+    dueBehaviour: dueBehaviourEnum("due_behaviour").notNull().default("cancel"),
 
     // ************ billing data defaults comes from plan but created here so we can override if needed ************
     // this data normally comes from the plan version but we can override if needed
@@ -221,9 +227,16 @@ export const invoices = pgTableProject(
     // Is it necessary to have the subscription id?
     subscriptionId: cuid("subscription_id").notNull(),
     subscriptionPhaseId: cuid("subscription_phase_id").notNull(),
+    requiredPaymentMethod: boolean("required_payment_method").notNull().default(false),
     status: invoiceStatusEnum("status").notNull().default("draft"),
     cycleStartAt: bigint("cycle_start_at_m", { mode: "number" }).notNull(),
     cycleEndAt: bigint("cycle_end_at_m", { mode: "number" }).notNull(),
+    // previous cycle dates for invoices purposes
+    previousCycleStartAt: bigint("previous_cycle_start_at_m", { mode: "number" }),
+    previousCycleEndAt: bigint("previous_cycle_end_at_m", { mode: "number" }),
+    // sent at is the date when the invoice was sent to the customer
+    sentAt: bigint("sent_at_m", { mode: "number" }),
+    whenToBill: whenToBillEnum("when_to_bill").notNull().default("pay_in_advance"),
     paymentAttempts:
       json("payment_attempts").$type<
         {
@@ -234,7 +247,6 @@ export const invoices = pgTableProject(
     // when the invoice is due and ready to be billed
     dueAt: bigint("due_at_m", { mode: "number" }).notNull(),
     paidAt: bigint("paid_at_m", { mode: "number" }),
-    type: invoiceTypeEnum("invoice_type").notNull().default("flat"),
     total: text("total").notNull(),
     invoiceUrl: text("invoice_url"),
     collectionMethod: collectionMethodEnum("collection_method")
@@ -247,6 +259,7 @@ export const invoices = pgTableProject(
     currency: currencyEnum("currency").notNull(),
     // when the subscription is considered past due
     pastDueAt: bigint("past_due_at_m", { mode: "number" }).notNull(),
+    metadata: json("metadata").$type<z.infer<typeof invoiceMetadataSchema>>(),
   },
   (table) => ({
     primary: primaryKey({

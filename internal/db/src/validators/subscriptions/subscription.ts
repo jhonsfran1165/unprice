@@ -11,6 +11,7 @@ import type { PlanVersionExtended } from "./../planVersionFeatures"
 import { configPackageSchema, planVersionExtendedSchema } from "./../planVersionFeatures"
 import {
   collectionMethodSchema,
+  dueBehaviourSchema,
   startCycleSchema,
   subscriptionStatusSchema,
   whenToBillSchema,
@@ -31,7 +32,15 @@ const reasonSchema = z.enum([
   "payment_method_not_found",
   "policy_violation",
   "no_auto_renew",
+  "pending_cancellation",
+  "invoice_failed",
+  "invoice_pending",
+  "payment_received",
 ])
+
+export const invoiceMetadataSchema = z.object({
+  note: z.string().optional().describe("Note about the invoice"),
+})
 
 export const subscriptionMetadataSchema = z.object({
   reason: reasonSchema.optional().describe("Reason for the subscription status"),
@@ -40,10 +49,7 @@ export const subscriptionMetadataSchema = z.object({
 
 export const subscriptionPhaseMetadataSchema = z.object({
   reason: reasonSchema.optional().describe("Reason for the status"),
-  dueBehaviour: z
-    .enum(["cancel", "downgrade"])
-    .optional()
-    .describe("What to do when the subscription is past due and grace period is over"),
+  note: z.string().optional().describe("Note about status in the subscription phase"),
 })
 
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
@@ -60,11 +66,12 @@ export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhas
   startCycle: startCycleSchema,
   whenToBill: whenToBillSchema,
   status: subscriptionStatusSchema,
+  dueBehaviour: dueBehaviourSchema,
 })
 
 export const subscriptionPhaseExtendedSchema = subscriptionPhaseSelectSchema.extend({
   items: subscriptionItemExtendedSchema.array(),
-  planVersion: planVersionSelectBaseSchema.optional(),
+  planVersion: planVersionSelectBaseSchema,
 })
 
 export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhases, {
@@ -180,6 +187,8 @@ export type InsertSubscriptionPhase = z.infer<typeof subscriptionPhaseInsertSche
 export type SubscriptionPhase = z.infer<typeof subscriptionPhaseSelectSchema>
 export type SubscriptionPhaseExtended = z.infer<typeof subscriptionPhaseExtendedSchema>
 export type SubscriptionInvoice = typeof invoices.$inferSelect
+export type SubscriptionMetadata = z.infer<typeof subscriptionMetadataSchema>
+export type SubscriptionPhaseMetadata = z.infer<typeof subscriptionPhaseMetadataSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,
