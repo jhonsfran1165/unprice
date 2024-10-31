@@ -106,6 +106,7 @@ export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
 export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
 export const DUE_BEHAVIOUR = ["cancel", "downgrade"] as const
 export const INVOICE_STATUS = ["unpaid", "paid", "waiting", "void", "draft", "failed"] as const
+export const INVOICE_TYPE = ["flat", "usage", "hybrid"] as const
 export const FEATURE_VERSION_TYPES = ["feature", "addon"] as const
 export const COLLECTION_METHODS = ["charge_automatically", "send_invoice"] as const
 

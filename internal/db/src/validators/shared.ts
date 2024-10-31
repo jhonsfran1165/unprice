@@ -8,6 +8,7 @@ import {
   FEATURE_TYPES,
   FEATURE_VERSION_TYPES,
   INVOICE_STATUS,
+  INVOICE_TYPE,
   PAYMENT_PROVIDERS,
   PLAN_BILLING_PERIODS,
   STATUS_SUBSCRIPTION,
@@ -32,7 +33,7 @@ export const whenToBillSchema = z.enum(WHEN_TO_BILLING)
 export const subscriptionStatusSchema = z.enum(STATUS_SUBSCRIPTION)
 export const dueBehaviourSchema = z.enum(DUE_BEHAVIOUR)
 export const invoiceStatusSchema = z.enum(INVOICE_STATUS)
-
+export const invoiceTypeSchema = z.enum(INVOICE_TYPE)
 export const startCycleMonthSchema = z.coerce.number().int().min(1).max(31)
 export const startCycleYearSchema = z.coerce.number().int().min(1).max(12)
 export const startCycleSchema = z.union([startCycleMonthSchema, startCycleYearSchema]).default(1)
@@ -94,3 +95,4 @@ export type StartCycle = z.infer<typeof startCycleSchema>
 export type CollectionMethod = z.infer<typeof collectionMethodSchema>
 export type SubscriptionStatus = z.infer<typeof subscriptionStatusSchema>
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>
+export type InvoiceType = z.infer<typeof invoiceTypeSchema>

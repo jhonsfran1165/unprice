@@ -7,6 +7,9 @@ import { env } from "../../env.mjs"
 
 export const billingTask = task({
   id: "subscription.phase.billing",
+  retry: {
+    maxAttempts: 1,
+  },
   run: async (
     {
       subscriptionPhaseId,
@@ -83,6 +86,13 @@ export const billingTask = task({
       logger: logger,
     })
 
-    return await subscriptionStateMachine.billing({ invoiceId, now })
+    const result = await subscriptionStateMachine.billing({ invoiceId, now })
+
+    // we have to throw if there is an error so the task fails
+    if (result.err) {
+      throw result.err
+    }
+
+    return result.val
   },
 })

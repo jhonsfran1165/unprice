@@ -33,16 +33,19 @@ export interface CreateInvoiceOpts {
   endCycle: number
   collectionMethod: CollectionMethod
   description: string
+  dueDate?: number
 }
 
 export interface AddInvoiceItemOpts {
   invoiceId: string
   name: string
-  productId: string
+  productId?: string
+  description?: string
   isProrated: boolean
   amount: number
   quantity: number
   currency: Currency
+  metadata?: Record<string, string>
 }
 
 export type PaymentMethod = {
@@ -63,6 +66,15 @@ export type GetStatusInvoice = {
   paymentAttempts: {
     status: string
     createdAt: number
+  }[]
+  items: {
+    id: string
+    amount: number
+    description: string
+    productId: string
+    currency: Currency
+    quantity: number
+    metadata?: Record<string, string>
   }[]
 }
 

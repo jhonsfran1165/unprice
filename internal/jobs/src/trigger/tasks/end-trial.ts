@@ -8,6 +8,9 @@ import { env } from "../../env.mjs"
 
 export const endTrialTask = task({
   id: "subscription.phase.endtrial",
+  retry: {
+    maxAttempts: 1,
+  },
   run: async ({
     subscriptionPhaseId,
     projectId,
@@ -81,6 +84,13 @@ export const endTrialTask = task({
       logger: logger,
     })
 
-    return await subscriptionStateMachine.endTrial({ now })
+    const result = await subscriptionStateMachine.endTrial({ now })
+
+    // we have to throw if there is an error so the task fails
+    if (result.err) {
+      throw result.err
+    }
+
+    return result.val
   },
 })

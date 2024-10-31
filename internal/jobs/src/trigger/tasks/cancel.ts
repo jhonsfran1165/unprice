@@ -7,17 +7,22 @@ import { env } from "../../env.mjs"
 
 export const cancelTask = task({
   id: "subscription.cancel",
+  retry: {
+    maxAttempts: 1,
+  },
   run: async (
     {
       subscriptionId,
       activePhaseId,
       projectId,
       now,
+      cancelAt,
     }: {
       subscriptionId: string
       activePhaseId: string
       projectId: string
       now: number
+      cancelAt?: number
     },
     { ctx }
   ) => {
@@ -82,6 +87,13 @@ export const cancelTask = task({
       logger: logger,
     })
 
-    return await subscriptionStateMachine.cancel({ now, cancelAt: now })
+    const result = await subscriptionStateMachine.cancel({ now, cancelAt })
+
+    // we have to throw if there is an error so the task fails
+    if (result.err) {
+      throw result.err
+    }
+
+    return result.val
   },
 })

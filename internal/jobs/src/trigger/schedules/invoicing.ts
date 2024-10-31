@@ -6,8 +6,8 @@ export const invoicingSchedule = schedules.task({
   id: "subscriptionPhase.invoicing",
   // every 12 hours (UTC timezone)
   cron: "0 */12 * * *",
-  run: async (_payload) => {
-    const now = new Date("2024-11-01T00:00:00.000Z").getTime()
+  run: async (payload) => {
+    const now = payload.timestamp.getTime()
 
     // get the subscription ready for billing
     const subscriptions = await db.query.subscriptions.findMany({
@@ -24,7 +24,7 @@ export const invoicingSchedule = schedules.task({
           limit: 1,
         },
       },
-      where: (sub, { eq, and, gte }) => and(eq(sub.active, true), gte(sub.nextInvoiceAt, now)),
+      where: (sub, { eq, and, lte }) => and(eq(sub.active, true), lte(sub.nextInvoiceAt, now)),
     })
 
     // trigger the end trial task for each subscription phase

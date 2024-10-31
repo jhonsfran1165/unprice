@@ -71,6 +71,20 @@
       "when": 1729984311191,
       "tag": "0009_spicy_marvel_boy",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1730201009782,
+      "tag": "0010_faithful_pixie",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1730404883046,
+      "tag": "0011_peaceful_killer_shrike",
+      "breakpoints": true
     }
   ]
 }

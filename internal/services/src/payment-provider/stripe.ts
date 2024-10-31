@@ -1,4 +1,5 @@
 import { API_DOMAIN } from "@unprice/config"
+import type { Currency } from "@unprice/db/validators"
 import type { Result } from "@unprice/error"
 import { Err, FetchError, Ok } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
@@ -248,6 +249,12 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       year: "numeric",
     })}`
 
+    // const dueDate only if collection method is send_invoice
+    let dueDate: number | undefined
+    if (opts.collectionMethod === "send_invoice") {
+      dueDate = opts.dueDate ? Math.floor(opts.dueDate / 1000) : undefined
+    }
+
     // create an invoice
     const result = await this.client.invoices
       .create({
@@ -256,6 +263,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         auto_advance: false,
         collection_method: opts.collectionMethod,
         description: opts.description,
+        due_date: dueDate,
         custom_fields: [
           {
             name: "Customer",
@@ -291,20 +299,43 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
 
-    const { invoiceId, name, productId, isProrated, amount, quantity, currency } = opts
+    const {
+      invoiceId,
+      name,
+      productId,
+      isProrated,
+      amount,
+      quantity,
+      currency,
+      description,
+      metadata,
+    } = opts
+
+    const descriptionItem = description ?? (isProrated ? `${name} (prorated)` : name)
+
+    // price data for the invoice item
+    // if the product we send price data, otherwise we send the amount
+    const priceData = productId
+      ? {
+          quantity: quantity,
+          price_data: {
+            currency: currency,
+            product: productId,
+            unit_amount: amount,
+          },
+        }
+      : {
+          currency: currency,
+          amount: amount,
+        }
 
     return await this.client.invoiceItems
       .create({
         customer: this.providerCustomerId,
         invoice: invoiceId,
-        quantity: quantity,
-        price_data: {
-          currency: currency,
-          product: productId,
-          unit_amount: amount,
-        },
-        currency: currency,
-        description: isProrated ? `${name} (prorated)` : name,
+        ...priceData,
+        description: descriptionItem,
+        metadata,
       })
       .then(() => Ok(undefined))
       .catch((error) => {
@@ -354,18 +385,21 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
       // Check if the invoice is paid
       if (invoice.paid) {
-        // The payment_intent object contains details about the payment
-        const paymentIntent = await this.client.paymentIntents.retrieve(
-          invoice.payment_intent as string
-        )
-        paidAt = paymentIntent.created
+        if (invoice.payment_intent) {
+          // The payment_intent object contains details about the payment
+          const paymentIntent = await this.client.paymentIntents.retrieve(
+            invoice.payment_intent as string
+          )
 
-        paymentAttempts = [
-          {
-            status: paymentIntent.status,
-            createdAt: paymentIntent.created, // Unix timestamp
-          },
-        ]
+          paidAt = paymentIntent.created
+
+          paymentAttempts = [
+            {
+              status: paymentIntent.status,
+              createdAt: paymentIntent.created, // Unix timestamp
+            },
+          ]
+        }
       }
 
       // TODO: fix this
@@ -380,6 +414,15 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         voidedAt,
         invoicePdf: invoice.invoice_pdf ?? "",
         paymentAttempts,
+        items: invoice.lines.data.map((item) => ({
+          id: item.id,
+          amount: item.amount,
+          description: item.description ?? "",
+          currency: item.currency as Currency,
+          quantity: item.quantity ?? 0,
+          productId: (item.price?.product as string) ?? "",
+          metadata: item.metadata,
+        })),
       })
     } catch (error) {
       const e = error as Stripe.errors.StripeError

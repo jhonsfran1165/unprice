@@ -8,9 +8,8 @@ export const billingSchedule = schedules.task({
   // cron: "0 */2 * * *",
   // every 12 hours (UTC timezone)
   cron: "0 */12 * * *",
-  run: async (_payload) => {
-    // TODO: get the current time - this is just for testing
-    const now = new Date("2024-11-18T00:00:00.000Z").getTime()
+  run: async (payload) => {
+    const now = payload.timestamp.getTime()
 
     // find all subscriptions phases that are currently in trial and the trial ends at is in the past
     const pendingInvoices = await db.query.invoices.findMany({

@@ -15,6 +15,7 @@ export const prefixes = {
   apikey_key: "unprice_live",
   page: "page",
   customer: "cus",
+  customer_credit: "cc",
   customer_session: "cs",
   customer_provider: "cp",
   customer_entitlement: "ce",

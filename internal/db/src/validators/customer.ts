@@ -5,6 +5,16 @@ import * as schema from "../schema"
 import { aggregationMethodSchema, currencySchema, typeFeatureSchema } from "./shared"
 import { subscriptionItemsConfigSchema } from "./subscriptions/items"
 
+export const reasonCreditSchema = z.enum([
+  "downgrade_in_advance",
+  "downgrade_arrear",
+  "invoice_total_overdue",
+])
+export const customerCreditMetadataSchema = z.object({
+  reason: reasonCreditSchema.optional().describe("Reason for the invoice credit"),
+  note: z.string().optional().describe("Note about the invoice credit"),
+})
+
 export const customerMetadataSchema = z.object({
   externalId: z.string().optional(),
   stripeSubscriptionId: z.string().optional(),

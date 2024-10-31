@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm"
+import { eq, relations } from "drizzle-orm"
 import {
   bigint,
   boolean,
@@ -8,6 +8,7 @@ import {
   json,
   primaryKey,
   text,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core"
 import type { z } from "zod"
@@ -17,6 +18,7 @@ import { projectID } from "../utils/sql"
 
 import { cuid, id, timestamps } from "../utils/fields.sql"
 import type {
+  customerCreditMetadataSchema,
   customerMetadataSchema,
   stripePlanVersionSchema,
   stripeSetupSchema,
@@ -139,42 +141,35 @@ export const customerSessions = pgTableProject("customer_sessions", {
   planVersion: json("plan_version").notNull().$type<z.infer<typeof stripePlanVersionSchema>>(),
 })
 
-// TODO: add provider method here
-// TODO: add type to see if it's card or bank account
-// export const customerPaymentMethods = pgTableProject(
-//   "customer_payment_methods",
-//   {
-//     ...projectID,
-//     ...timestamps,
-//     customerId: text("customer_id").notNull(),
-//     paymentProvider: paymentProviderEnum("payment_provider").notNull(),
-//     isDefault: boolean("default").default(false),
-//     paymentMethodId: text("payment_method_id").unique().notNull(),
-//     metadata: json("metadata").$type<z.infer<typeof customerProvidersMetadataSchema>>(),
-//   },
-//   (table) => ({
-//     primary: primaryKey({
-//       columns: [table.id, table.projectId],
-//       name: "pk_customer_payment_method",
-//     }),
-
-//     customerfk: foreignKey({
-//       columns: [table.customerId, table.projectId],
-//       foreignColumns: [customers.id, customers.projectId],
-//       name: "payment_customer_id_fkey",
-//     }),
-
-//     uniquepaymentcustomer: uniqueIndex("unique_payment_provider").on(
-//       table.customerId,
-//       table.paymentProvider
-//     ),
-//   })
-// )
-
-// TODO: create provider payment method table
-// success_url
-// token
-// name
+// when there is an overdue charge, we need to create a credit for the customer
+// this is used to handle the credits for the invoices, normally due to cancel or downgrade mid cycle
+export const customerCredits = pgTableProject(
+  "customer_credits",
+  {
+    ...projectID,
+    ...timestamps,
+    totalAmount: integer("total_amount").notNull(),
+    metadata: json("metadata").$type<z.infer<typeof customerCreditMetadataSchema>>(),
+    customerId: cuid("customer_id").notNull(),
+    amountUsed: integer("amount_used").notNull(),
+    active: boolean("active").notNull().default(true),
+  },
+  (table) => ({
+    primary: primaryKey({
+      columns: [table.id, table.projectId],
+      name: "customer_credits_pkey",
+    }),
+    customerfk: foreignKey({
+      columns: [table.customerId, table.projectId],
+      foreignColumns: [customers.id, customers.projectId],
+      name: "customer_credits_customer_id_fkey",
+    }),
+    // only one active == true credit per customer
+    unique: uniqueIndex("customer_credits_customer_id_active_key")
+      .on(table.customerId, table.active)
+      .where(eq(table.active, true)),
+  })
+)
 
 export const customerEntitlementsRelations = relations(customerEntitlements, ({ one }) => ({
   subscriptionItem: one(subscriptionItems, {
@@ -199,6 +194,13 @@ export const customersRelations = relations(customers, ({ one, many }) => ({
   subscriptions: many(subscriptions),
   entitlements: many(customerEntitlements),
   // paymentMethods: many(customerPaymentMethods),
+}))
+
+export const customerCreditsRelations = relations(customerCredits, ({ one }) => ({
+  customer: one(customers, {
+    fields: [customerCredits.customerId, customerCredits.projectId],
+    references: [customers.id, customers.projectId],
+  }),
 }))
 
 // export const customersMethodsRelations = relations(customerPaymentMethods, ({ one }) => ({

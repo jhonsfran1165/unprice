@@ -21,12 +21,13 @@ import type {
   subscriptionMetadataSchema,
   subscriptionPhaseMetadataSchema,
 } from "../validators/subscriptions"
-import { customers } from "./customers"
+import { customerCredits, customers } from "./customers"
 import {
   collectionMethodEnum,
   currencyEnum,
   dueBehaviourEnum,
   invoiceStatusEnum,
+  invoiceTypeEnum,
   paymentProviderEnum,
   subscriptionStatusEnum,
   whenToBillEnum,
@@ -218,7 +219,6 @@ export const subscriptionItems = pgTableProject(
   })
 )
 
-// TODO: have a look at this
 export const invoices = pgTableProject(
   "invoices",
   {
@@ -229,6 +229,8 @@ export const invoices = pgTableProject(
     subscriptionPhaseId: cuid("subscription_phase_id").notNull(),
     requiredPaymentMethod: boolean("required_payment_method").notNull().default(false),
     status: invoiceStatusEnum("status").notNull().default("draft"),
+    // type of invoice charges (flat, usage, hybrid)
+    type: invoiceTypeEnum("type").notNull().default("hybrid"),
     cycleStartAt: bigint("cycle_start_at_m", { mode: "number" }).notNull(),
     cycleEndAt: bigint("cycle_end_at_m", { mode: "number" }).notNull(),
     // previous cycle dates for invoices purposes
@@ -247,12 +249,23 @@ export const invoices = pgTableProject(
     // when the invoice is due and ready to be billed
     dueAt: bigint("due_at_m", { mode: "number" }).notNull(),
     paidAt: bigint("paid_at_m", { mode: "number" }),
-    total: text("total").notNull(),
-    invoiceUrl: text("invoice_url"),
+    // ----------------- amounts --------------------------------
+    // amount in cents, these are not used for the calculations only to keep track of the amounts
+    // the invoice from the payment provider will have the calculations
+    // invoices can have credits applied to them
+    customerCreditId: cuid("customer_credit_id"),
+    // amount of the credit used to pay the invoice
+    amountCreditUsed: integer("amount_credit_used").default(0),
+    // subtotal of the invoice before the credit is applied
+    subtotal: integer("subtotal").default(0).notNull(),
+    // total amount of the invoice after the credit is applied
+    total: integer("total").default(0).notNull(),
+    // ----------------- amounts --------------------------------
     collectionMethod: collectionMethodEnum("collection_method")
       .notNull()
       .default("charge_automatically"),
     invoiceId: text("invoice_id"),
+    invoiceUrl: text("invoice_url"),
     // payment provider for the plan - stripe, paypal, lemonsquezee etc.
     paymentProvider: paymentProviderEnum("payment_providers").notNull(),
     // currency of the plan
@@ -282,6 +295,11 @@ export const invoices = pgTableProject(
       foreignColumns: [projects.id],
       name: "invoices_project_id_fkey",
     }).onDelete("cascade"),
+    customerCreditfk: foreignKey({
+      columns: [table.customerCreditId, table.projectId],
+      foreignColumns: [customerCredits.id, customerCredits.projectId],
+      name: "invoices_customer_credit_id_fkey",
+    }).onDelete("cascade"),
   })
 )
 
@@ -308,6 +326,10 @@ export const invoiceRelations = relations(invoices, ({ one }) => ({
   subscriptionPhase: one(subscriptionPhases, {
     fields: [invoices.subscriptionPhaseId, invoices.projectId],
     references: [subscriptionPhases.id, subscriptionPhases.projectId],
+  }),
+  customerCredit: one(customerCredits, {
+    fields: [invoices.customerCreditId, invoices.projectId],
+    references: [customerCredits.id, customerCredits.projectId],
   }),
 }))
 
