@@ -12,7 +12,10 @@ import type {
   PaymentMethod,
   PaymentProviderCreateSession,
   PaymentProviderInterface,
+  PaymentProviderInvoice,
   SignUpOpts,
+  UpdateInvoiceItemOpts,
+  UpdateInvoiceOpts,
 } from "./interface"
 import { StripePaymentProvider } from "./stripe"
 
@@ -113,12 +116,23 @@ export class PaymentProviderService implements PaymentProviderInterface {
 
   public async createInvoice(
     opts: CreateInvoiceOpts
-  ): Promise<
-    Result<{ invoiceId: string; invoiceUrl: string }, FetchError | UnPricePaymentProviderError>
-  > {
+  ): Promise<Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>> {
     switch (this.paymentProviderId) {
       case "stripe": {
         return await this.stripe.createInvoice(opts)
+      }
+      default: {
+        return Err(new FetchError({ message: "Payment provider not supported", retry: false }))
+      }
+    }
+  }
+
+  public async updateInvoice(
+    opts: UpdateInvoiceOpts
+  ): Promise<Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>> {
+    switch (this.paymentProviderId) {
+      case "stripe": {
+        return await this.stripe.updateInvoice(opts)
       }
       default: {
         return Err(new FetchError({ message: "Payment provider not supported", retry: false }))
@@ -132,6 +146,19 @@ export class PaymentProviderService implements PaymentProviderInterface {
     switch (this.paymentProviderId) {
       case "stripe": {
         return await this.stripe.addInvoiceItem(opts)
+      }
+      default: {
+        return Err(new FetchError({ message: "Payment provider not supported", retry: false }))
+      }
+    }
+  }
+
+  public async updateInvoiceItem(
+    opts: UpdateInvoiceItemOpts
+  ): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
+    switch (this.paymentProviderId) {
+      case "stripe": {
+        return await this.stripe.updateInvoiceItem(opts)
       }
       default: {
         return Err(new FetchError({ message: "Payment provider not supported", retry: false }))
@@ -198,6 +225,19 @@ export class PaymentProviderService implements PaymentProviderInterface {
     switch (this.paymentProviderId) {
       case "stripe": {
         return await this.stripe.getStatusInvoice(opts)
+      }
+      default: {
+        return Err(new FetchError({ message: "Payment provider not supported", retry: false }))
+      }
+    }
+  }
+
+  public async getInvoice(opts: {
+    invoiceId: string
+  }): Promise<Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>> {
+    switch (this.paymentProviderId) {
+      case "stripe": {
+        return await this.stripe.getInvoice(opts)
       }
       default: {
         return Err(new FetchError({ message: "Payment provider not supported", retry: false }))

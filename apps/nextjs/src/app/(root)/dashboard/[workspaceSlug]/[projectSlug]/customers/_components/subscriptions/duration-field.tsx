@@ -27,10 +27,10 @@ export default function DurationFormField({
   form: UseFormReturn<InsertSubscription>
   isDisabled?: boolean
 }) {
-  const startAt = form.getValues("startAt")
-  const endAt = form.getValues("endAt")
+  const startAt = form.getValues("phases.0.startAt")
+  const endAt = form.getValues("phases.0.endAt")
 
-  const [start, setStart] = useState<Date | undefined>(new Date(startAt))
+  const [start, setStart] = useState<Date | undefined>(startAt ? new Date(startAt) : undefined)
   const [end, setEnd] = useState<Date | undefined>(endAt ? new Date(endAt) : undefined)
   const [isOpenPopOverStart, setIsOpenPopOverStart] = useState(false)
   const [isOpenPopOverEnd, setIsOpenPopOverEnd] = useState(false)
@@ -41,7 +41,7 @@ export default function DurationFormField({
     <div className="flex w-full flex-col gap-2 lg:w-1/2">
       <FormLabel
         className={cn({
-          "text-destructive": errors.startAt,
+          "text-destructive": errors.phases?.[0]?.startAt,
         })}
       >
         Duration
@@ -52,7 +52,7 @@ export default function DurationFormField({
       <div className="flex flex-row rounded-md border bg-background-bg">
         <FormField
           control={form.control}
-          name="startAt"
+          name="phases.0.startAt"
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <Popover open={isOpenPopOverStart} onOpenChange={setIsOpenPopOverStart}>
@@ -161,7 +161,7 @@ export default function DurationFormField({
         />
         <FormField
           control={form.control}
-          name="endAt"
+          name="phases.0.endAt"
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <Popover open={isOpenPopOverEnd} onOpenChange={setIsOpenPopOverEnd}>
@@ -316,7 +316,9 @@ export default function DurationFormField({
           )}
         />
       </div>
-      {errors.startAt && <FormMessage>{errors.startAt.message}</FormMessage>}
+      {errors.phases?.[0]?.startAt && (
+        <FormMessage>{errors.phases?.[0]?.startAt.message}</FormMessage>
+      )}
     </div>
   )
 }

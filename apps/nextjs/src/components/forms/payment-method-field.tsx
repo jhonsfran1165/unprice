@@ -36,8 +36,8 @@ export default function PaymentMethodsFormField<TFieldValues extends FormValues>
   const projectSlug = useParams().projectSlug as string
   const customerId = form.watch("customerId" as FieldPath<TFieldValues>)
   const planVersionId = isChangePlanSubscription
-    ? form.watch("nextPlanVersionId" as FieldPath<TFieldValues>)
-    : form.watch("planVersionId" as FieldPath<TFieldValues>)
+    ? form.watch("phases.0.nextPlanVersionId" as FieldPath<TFieldValues>)
+    : form.watch("phases.0.planVersionId" as FieldPath<TFieldValues>)
   const successUrl = `${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`
   const cancelUrl = `${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`
 
@@ -111,7 +111,7 @@ export default function PaymentMethodsFormField<TFieldValues extends FormValues>
       {hasPaymentMethods && (
         <FormField
           control={form.control}
-          name={"defaultPaymentMethodId" as FieldPath<TFieldValues>}
+          name={"phases.0.defaultPaymentMethodId" as FieldPath<TFieldValues>}
           render={({ field }) => (
             <FormItem className="w-full space-y-1">
               <RadioGroup

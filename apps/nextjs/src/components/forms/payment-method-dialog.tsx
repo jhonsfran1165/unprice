@@ -36,7 +36,11 @@ export function PaymentMethodDialog({
           <DialogDescription>Modify the payment method details below.</DialogDescription>
         </DialogHeader>
 
-        <PaymentMethodForm customerId={customerId} successUrl={successUrl} cancelUrl={cancelUrl} />
+        <PaymentMethodForm
+          customerId={customerId}
+          successUrl={successUrl}
+          cancelUrl={cancelUrl}
+        />
       </DialogContent>
     </Dialog>
   )

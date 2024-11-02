@@ -32,6 +32,8 @@ export const listByActiveProject = protectedApiOrActiveProjectProcedure
         search ? or(ilike(columns.name, filter), ilike(columns.email, filter)) : undefined,
         // Filter by project
         eq(columns.projectId, project.id),
+        // Filter isMain not true
+        eq(columns.isMain, false),
       ]
 
       // Transaction is used to ensure both queries are executed in a single transaction

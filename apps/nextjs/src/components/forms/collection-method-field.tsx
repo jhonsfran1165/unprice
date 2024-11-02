@@ -26,7 +26,7 @@ export default function CollectionMethodFormField<TFieldValues extends FormValue
   return (
     <FormField
       control={form.control}
-      name={"collectionMethod" as FieldPath<TFieldValues>}
+      name={"phases.0.collectionMethod" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="flex w-full flex-col">
           <FormLabel>Collection Method</FormLabel>

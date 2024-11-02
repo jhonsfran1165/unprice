@@ -1,1 +1,0 @@
-ALTER TABLE "unprice_subscription_phases" ADD COLUMN "active" boolean DEFAULT true NOT NULL;

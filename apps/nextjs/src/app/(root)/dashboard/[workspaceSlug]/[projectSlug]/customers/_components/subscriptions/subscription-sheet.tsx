@@ -34,15 +34,9 @@ export function SubscriptionSheet({
           setDialogOpen={setIsOpen}
           defaultValues={
             defaultValues ?? {
-              startAt: Date.now(),
               customerId: "",
-              planVersionId: "",
-              type: "plan",
-              config: [],
-              defaultPaymentMethodId: "",
+              phases: [],
               timezone: "UTC",
-              startCycle: 1,
-              whenToBill: "pay_in_arrear",
             }
           }
         />

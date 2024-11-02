@@ -40,6 +40,7 @@ export const customers = pgTableProject(
     metadata: json("metadata").$type<z.infer<typeof customerMetadataSchema>>(),
     stripeCustomerId: text("stripe_customer_id").unique("stripe_customer_unique"),
     active: boolean("active").default(true),
+    isMain: boolean("is_main").default(false),
     // all customers will have a default currency - normally the currency of the project
     defaultCurrency: currencyEnum("default_currency").default("USD").notNull(),
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
@@ -202,14 +203,3 @@ export const customerCreditsRelations = relations(customerCredits, ({ one }) => 
     references: [customers.id, customers.projectId],
   }),
 }))
-
-// export const customersMethodsRelations = relations(customerPaymentMethods, ({ one }) => ({
-//   project: one(projects, {
-//     fields: [customerPaymentMethods.projectId],
-//     references: [projects.id],
-//   }),
-//   customer: one(customers, {
-//     fields: [customerPaymentMethods.customerId, customerPaymentMethods.projectId],
-//     references: [customers.id, customers.projectId],
-//   }),
-// }))

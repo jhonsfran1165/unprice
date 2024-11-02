@@ -30,7 +30,7 @@ export default async function CustomerPage({
   const { customerId, workspaceSlug, projectSlug } = params
 
   const { customer } = await api.customers.getSubscriptions({
-    id: customerId,
+    customerId,
   })
 
   if (!customer) {
@@ -53,15 +53,7 @@ export default async function CustomerPage({
                     customerId: customer.id,
                     projectId: customer.projectId,
                     timezone: customer.timezone,
-                    planVersionId: "",
-                    type: "plan",
-                    collectionMethod: "charge_automatically",
-                    startCycle: 1,
-                    whenToBill: "pay_in_arrear",
-                    autoRenew: true,
-                    config: [],
-                    defaultPaymentMethodId: "",
-                    startAt: Date.now(),
+                    phases: [],
                   }}
                 >
                   <Button variant={"custom"}>
@@ -120,7 +112,7 @@ export default async function CustomerPage({
               columns={columns}
               data={customer.subscriptions}
               filterOptions={{
-                filterBy: "planVersion",
+                filterBy: "customer",
                 filterColumns: true,
                 filterDateRange: true,
                 filterServerSide: true,
@@ -128,11 +120,7 @@ export default async function CustomerPage({
                   status: STATUS_SUBSCRIPTION.map((value) => ({
                     value: value,
                     label: value,
-                  })),
-                  version: customer.subscriptions.map((sub) => ({
-                    value: sub.version.id,
-                    label: `${sub.version.title} - v${sub.version.version}`,
-                  })),
+                  }))
                 },
               }}
             />

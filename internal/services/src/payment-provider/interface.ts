@@ -36,6 +36,15 @@ export interface CreateInvoiceOpts {
   dueDate?: number
 }
 
+export interface UpdateInvoiceOpts {
+  invoiceId: string
+  startCycle: number
+  endCycle: number
+  collectionMethod: CollectionMethod
+  description: string
+  dueDate?: number
+}
+
 export interface AddInvoiceItemOpts {
   invoiceId: string
   name: string
@@ -46,6 +55,16 @@ export interface AddInvoiceItemOpts {
   quantity: number
   currency: Currency
   metadata?: Record<string, string>
+}
+
+export interface UpdateInvoiceItemOpts {
+  invoiceItemId: string
+  amount: number
+  name: string
+  isProrated: boolean
+  quantity: number
+  metadata?: Record<string, string>
+  description?: string
 }
 
 export type PaymentMethod = {
@@ -62,11 +81,17 @@ export type GetStatusInvoice = {
   invoiceId: string
   paidAt?: number
   voidedAt?: number
-  invoicePdf?: string
+  invoiceUrl: string
   paymentAttempts: {
     status: string
     createdAt: number
   }[]
+}
+
+export type PaymentProviderInvoice = {
+  invoiceUrl: string
+  status: InvoiceProviderStatus | null
+  invoiceId: string
   items: {
     id: string
     amount: number
@@ -98,9 +123,11 @@ export interface PaymentProviderInterface {
 
   createInvoice: (
     opts: CreateInvoiceOpts
-  ) => Promise<
-    Result<{ invoiceId: string; invoiceUrl: string }, FetchError | UnPricePaymentProviderError>
-  >
+  ) => Promise<Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>>
+
+  updateInvoice: (
+    opts: UpdateInvoiceOpts
+  ) => Promise<Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>>
 
   addInvoiceItem: (
     opts: AddInvoiceItemOpts
@@ -125,4 +152,12 @@ export interface PaymentProviderInterface {
   getStatusInvoice: (opts: { invoiceId: string }) => Promise<
     Result<GetStatusInvoice, FetchError | UnPricePaymentProviderError>
   >
+
+  getInvoice: (opts: { invoiceId: string }) => Promise<
+    Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>
+  >
+
+  updateInvoiceItem: (
+    opts: UpdateInvoiceItemOpts
+  ) => Promise<Result<void, FetchError | UnPricePaymentProviderError>>
 }

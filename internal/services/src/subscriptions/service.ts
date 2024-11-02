@@ -349,7 +349,7 @@ export class SubscriptionService {
   // 6. create the items
   // 7. update entitlements
   // 8. update the subscription status if the phase is active
-  private async _createPhase({
+  public async createPhase({
     input,
     subscriptionId,
     projectId,
@@ -749,7 +749,7 @@ export class SubscriptionService {
         // TODO: test if a single phase fails, the subscription is not created
         await Promise.all(
           phases.map((phase) =>
-            this._createPhase({
+            this.createPhase({
               input: phase,
               projectId,
               subscriptionId: newSubscription.id,

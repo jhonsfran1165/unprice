@@ -4,8 +4,8 @@ import { subscriptionInsertSchema } from "@unprice/db/validators"
 import { Form } from "@unprice/ui/form"
 import { Separator } from "@unprice/ui/separator"
 import { useRouter } from "next/navigation"
-import { Fragment, useEffect, useMemo } from "react"
-import { z } from "zod"
+import { Fragment, useEffect } from "react"
+import type { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
 import PaymentMethodsFormField from "~/components/forms/payment-method-field"
 import TimeZoneFormField from "~/components/forms/timezone-field"
@@ -49,23 +49,23 @@ export function SubscriptionForm({
     },
   })
 
-  const changeSubscriptionPlan = api.subscriptions.changePlan.useMutation({
-    onSuccess: ({ message }) => {
-      form.reset()
-      toastAction("success", message)
-      setDialogOpen?.(false)
-      router.refresh()
-    },
-  })
+  // const changeSubscriptionPlan = api.subscriptions.changePlan.useMutation({
+  //   onSuccess: ({ message }) => {
+  //     form.reset()
+  //     toastAction("success", message)
+  //     setDialogOpen?.(false)
+  //     router.refresh()
+  //   },
+  // })
 
-  const defaultValuesData = useMemo(() => {
-    if (isChangePlanSubscription) {
-      // we have to delete endDate and other fields that are not the same when the user is trying to change the plan
-      defaultValues.endAt = undefined
-      defaultValues.nextPlanVersionId = undefined
-    }
-    return defaultValues
-  }, [defaultValues.id])
+  // const defaultValuesData = useMemo(() => {
+  //   if (isChangePlanSubscription) {
+  //     // we have to delete endDate and other fields that are not the same when the user is trying to change the plan
+  //     defaultValues.endDate = undefined
+  //     defaultValues.nextPlanVersionId = undefined
+  //   }
+  //   return defaultValues
+  // }, [defaultValues.id])
 
   // all this querues are deduplicated inside each form field
   const { data: planVersions, isLoading } = api.planVersions.listByActiveProject.useQuery({
@@ -90,85 +90,86 @@ export function SubscriptionForm({
   )
 
   // this schema is a bit complex because we need to validate the payment method depending on the plan version
-  const generateFormSchema = () => {
-    if (isChangePlanSubscription) {
-      return subscriptionInsertSchema
-        .extend({
-          endDate: z.number(),
-          nextPlanVersionId: z.string().min(1),
-        })
-        .required({
-          id: true,
-          customerId: true,
-          nextPlanVersionId: true,
-        })
-        .superRefine((data, ctx) => {
-          const selectedNewPlanVersion = planVersions?.planVersions.find(
-            (version) => version.id === data.nextPlanVersionId
-          )
-          // payment method is validated against the plan version
-          // to check if payment method is required for the plan
-          const paymentMethodRequired = selectedNewPlanVersion?.paymentMethodRequired
+  // const generateFormSchema = () => {
+  //   if (isChangePlanSubscription) {
+  //     return subscriptionInsertSchema
+  //       .extend({
+  //         endDate: z.number(),
+  //         nextPlanVersionId: z.string().min(1),
+  //       })
+  //       .required({
+  //         id: true,
+  //         customerId: true,
+  //         nextPlanVersionId: true,
+  //       })
+  //       .superRefine((data, ctx) => {
+  //         const selectedNewPlanVersion = planVersions?.planVersions.find(
+  //           (version) => version.id === data.nextPlanVersionId
+  //         )
+  //         // payment method is validated against the plan version
+  //         // to check if payment method is required for the plan
+  //         const paymentMethodRequired = selectedNewPlanVersion?.paymentMethodRequired
 
-          if (paymentMethodRequired && !data.defaultPaymentMethodId) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Default payment method is required for this plan",
-              path: ["defaultPaymentMethodId"],
-              fatal: true,
-            })
-          }
+  //         if (paymentMethodRequired && !data.defaultPaymentMethodId) {
+  //           ctx.addIssue({
+  //             code: z.ZodIssueCode.custom,
+  //             message: "Default payment method is required for this plan",
+  //             path: ["defaultPaymentMethodId"],
+  //             fatal: true,
+  //           })
+  //         }
 
-          // validate that the end date is after the start date
-          if (data.endAt && data.startAt && data.endAt < data.startAt) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "End date must be after start date",
-              path: ["endDate"],
-              fatal: true,
-            })
-          }
+  //         // validate that the end date is after the start date
+  //         if (data.endAt && data.startAt && data.endAt < data.startAt) {
+  //           ctx.addIssue({
+  //             code: z.ZodIssueCode.custom,
+  //             message: "End date must be after start date",
+  //             path: ["endDate"],
+  //             fatal: true,
+  //           })
+  //         }
 
-          // validate that the new plan version is not the same as the current plan version
-          if (data.nextPlanVersionId === data.planVersionId) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "New plan version cannot be the same as the current plan version",
-              path: ["nextPlanVersionId"],
-              fatal: true,
-            })
-          }
-        })
-    }
+  //         // validate that the new plan version is not the same as the current plan version
+  //         if (data.nextPlanVersionId === data.planVersionId) {
+  //           ctx.addIssue({
+  //             code: z.ZodIssueCode.custom,
+  //             message: "New plan version cannot be the same as the current plan version",
+  //             path: ["nextPlanVersionId"],
+  //             fatal: true,
+  //           })
+  //         }
+  //       })
+  //   }
 
-    return subscriptionInsertSchema.superRefine((data, ctx) => {
-      const selectedPlanVersion = planVersions?.planVersions.find(
-        (version) => version.id === data.planVersionId
-      )
+  //   return subscriptionInsertSchema.superRefine((data, ctx) => {
+  //     const selectedPlanVersion = planVersions?.planVersions.find(
+  //       (version) => version.id === data.planVersionId
+  //     )
 
-      // payment method is validated against the plan version
-      // to check if payment method is required for the plan
-      const paymentMethodRequired = selectedPlanVersion?.paymentMethodRequired
+  //     // payment method is validated against the plan version
+  //     // to check if payment method is required for the plan
+  //     const paymentMethodRequired = selectedPlanVersion?.paymentMethodRequired
 
-      if (paymentMethodRequired && !data.defaultPaymentMethodId) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Default payment method is required for this plan",
-          path: ["defaultPaymentMethodId"],
-          fatal: true,
-        })
-      }
-    })
-  }
+  //     if (paymentMethodRequired && !data.defaultPaymentMethodId) {
+  //       ctx.addIssue({
+  //         code: z.ZodIssueCode.custom,
+  //         message: "Default payment method is required for this plan",
+  //         path: ["defaultPaymentMethodId"],
+  //         fatal: true,
+  //       })
+  //     }
+  //   })
+  // }
+  // const formSchema = useMemo(() => generateFormSchema(), [isChangePlanSubscription])
 
-  const formSchema = useMemo(() => generateFormSchema(), [isChangePlanSubscription])
+  const formSchema = subscriptionInsertSchema
 
   const form = useZodForm({
     schema: formSchema,
-    defaultValues: defaultValuesData,
+    defaultValues: defaultValues,
   })
 
-  const subscriptionPlanId = form.watch("planVersionId")
+  const subscriptionPlanId = form.watch("phases.0.planVersionId")
   const customerId = form.watch("customerId")
 
   const selectedPlanVersion = planVersions?.planVersions.find(
@@ -189,16 +190,16 @@ export function SubscriptionForm({
       await createSubscription.mutateAsync(data as InsertSubscription)
     }
 
-    if (defaultValues.id && isChangePlanSubscription && data.endAt && data.nextPlanVersionId) {
-      await changeSubscriptionPlan.mutateAsync({
-        ...data,
-        endAt: data.endAt,
-        nextPlanVersionId: data.nextPlanVersionId,
-        id: defaultValues.id,
-        // TODO: handle this properly
-        projectId: defaultValues.projectId ?? "",
-      })
-    }
+    // if (defaultValues.id && isChangePlanSubscription && data.endAt && data.nextPlanVersionId) {
+    //   await changeSubscriptionPlan.mutateAsync({
+    //     ...data,
+    //     endAt: data.endAt,
+    //     nextPlanVersionId: data.nextPlanVersionId,
+    //     id: defaultValues.id,
+    //     // TODO: handle this properly
+    //     projectId: defaultValues.projectId ?? "",
+    //   })
+    // }
 
     setDialogOpen?.(false)
   }

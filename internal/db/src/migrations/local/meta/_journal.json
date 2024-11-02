@@ -5,85 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1728226109322,
-      "tag": "0000_dapper_maximus",
+      "when": 1730479143912,
+      "tag": "0000_tan_bromley",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1728732149250,
-      "tag": "0001_lazy_namorita",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1728737698747,
-      "tag": "0002_open_junta",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1728748126900,
-      "tag": "0003_public_firestar",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1729850815307,
-      "tag": "0004_powerful_calypso",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1729864545710,
-      "tag": "0005_soft_sentinels",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1729872856325,
-      "tag": "0006_bumpy_sentry",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1729935944064,
-      "tag": "0007_quick_orphan",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1729981426111,
-      "tag": "0008_violet_nextwave",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1729984311191,
-      "tag": "0009_spicy_marvel_boy",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1730201009782,
-      "tag": "0010_faithful_pixie",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1730404883046,
-      "tag": "0011_peaceful_killer_shrike",
+      "when": 1730561017988,
+      "tag": "0001_far_bullseye",
       "breakpoints": true
     }
   ]

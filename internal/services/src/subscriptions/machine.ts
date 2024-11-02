@@ -1,9 +1,10 @@
 import { type Database, type TransactionDatabase, and, eq } from "@unprice/db"
 import { customerCredits, invoices, subscriptionPhases, subscriptions } from "@unprice/db/schema"
-import { newId } from "@unprice/db/utils"
+import { type FeatureType, newId } from "@unprice/db/utils"
 import {
   type CalculatedPrice,
   type Customer,
+  type InsertSubscriptionPhase,
   type InvoiceStatus,
   type InvoiceType,
   type Subscription,
@@ -23,6 +24,7 @@ import type { Analytics } from "@unprice/tinybird"
 import { addDays } from "date-fns"
 import { StateMachine } from "../machine/service"
 import { PaymentProviderService } from "../payment-provider"
+import type { PaymentProviderInvoice } from "../payment-provider/interface"
 import { UnPriceSubscriptionError } from "./errors"
 
 // all event operate with the now parameter which is the timestamp of the event
@@ -57,13 +59,16 @@ export type SubscriptionEventMap<S extends string> = {
   CHANGE: {
     payload: {
       now: number
-      planVersionId: string
+      phase: InsertSubscriptionPhase
     }
     result: { status: S }
     error: UnPriceSubscriptionError
   }
 }
 
+// The main idea with this class is try to create transitions and states that handle the complexity of the life cycle of a subscription
+// One thing to keep in mind that is very important is every transition has to be idempotent. Which means can be executed multiple times without affecting the tables.
+// This is important for the retry mechanism to work as expected. Specially because most of the time we call this machine from background jobs.
 export class SubscriptionStateMachine extends StateMachine<
   SubscriptionStatus,
   SubscriptionEventMap<SubscriptionStatus>,
@@ -669,6 +674,8 @@ export class SubscriptionStateMachine extends StateMachine<
             : "Waiting for payment, phase is canceled"
           const reason = isPaid ? "payment_received" : "payment_pending"
 
+          // TODO: actually here I should implement due behaviour
+
           // we cancel the subscription right away and the user will be notified for the unpaid invoice
           // if any. Normally this will be done manually by the admin
           await this.syncState({
@@ -725,9 +732,142 @@ export class SubscriptionStateMachine extends StateMachine<
         })
       },
     })
+
+    /*
+     * CHANGE
+     * TODO: define this
+     * Apply a change to the subscription
+     * In other to change a subscription we need to cancel the current phase and create a new one
+     * when the subscription is canceled is the only way we can ensure that the invoice is created and paid
+     */
+    this.addTransition({
+      from: ["canceled"],
+      to: ["changed", "active"],
+      event: "CHANGE",
+      onTransition: async (payload) => {
+        // get active phase
+        const activePhase = this.getActivePhase()
+        const subscription = this.getSubscription()
+        const currentState = this.getCurrentState()
+
+        const phase = payload.phase
+
+        // if no cancel at is provided, we cancel at the end of the current cycle
+        const changeAt = phase.startAt ? phase.startAt - 1 : subscription.currentCycleEndAt + 1
+
+        if (!activePhase) {
+          return Err(new UnPriceSubscriptionError({ message: "No active phase with the given id" }))
+        }
+
+        // cannot cancel a phase if the subscription is changing
+        if (subscription.cancelAt && subscription.cancelAt > payload.now) {
+          return Err(
+            new UnPriceSubscriptionError({
+              message: "The subscription is changing, cannot change the phase",
+            })
+          )
+        }
+
+        // if cannot cancel a subscription that is expiring
+        if (subscription.expiresAt && subscription.expiresAt > payload.now) {
+          return Err(
+            new UnPriceSubscriptionError({ message: "Subscription is expiring, cannot cancel" })
+          )
+        }
+
+        // if the phase is already canceling don't do anything
+        if (subscription.changeAt && subscription.changeAt > payload.now) {
+          return Ok({
+            status: currentState,
+            phaseId: activePhase.id,
+            subscriptionId: this.subscription.id,
+          })
+        }
+
+        // if the change at is now we applied changes immediately
+        if (changeAt <= payload.now) {
+          // here the phase has to be canceled immediately because the subscription is active and the date is in the past
+          // we set the dates to invoice the phase for the current cycle
+          // we don't set the state until the invoice is created and finalized
+          await this.syncState({
+            phaseId: activePhase.id,
+            subscriptionDates: {
+              changeAt,
+              // the next invoice is the cancel at date
+              nextInvoiceAt: changeAt,
+              currentCycleEndAt: changeAt,
+            },
+            phaseDates: {
+              endAt: changeAt,
+            },
+            metadataSubscription: {
+              note: "Phase is being changed, waiting for invoice and payment",
+              reason: "pending_change",
+            },
+            metadataPhase: {
+              note: "Phase is being changed, waiting for invoice and payment",
+              reason: "pending_change",
+            },
+          })
+
+          // we cancel the subscription right away and the user will be notified for the unpaid invoice
+          // if any. Normally this will be done manually by the admin
+          await this.syncState({
+            state: "changed",
+            phaseId: activePhase.id,
+            active: false,
+            subscriptionDates: {
+              changedAt: Date.now(),
+            },
+            metadataSubscription: {
+              note: "Phase is changed",
+            },
+            metadataPhase: {
+              note: "Phase is being changed",
+            },
+          })
+
+          return Ok({
+            status: "changed",
+            phaseId: activePhase.id,
+            subscriptionId: this.subscription.id,
+          })
+        }
+
+        // if the cancel at is in the future we set the cancel at in the subscription
+        await this.syncState({
+          phaseId: activePhase.id,
+          active: true, // the phase is still active
+          subscriptionDates: {
+            changeAt,
+            // the next invoice is the cancel at date
+            nextInvoiceAt: changeAt,
+            currentCycleEndAt: changeAt,
+          },
+          phaseDates: {
+            endAt: changeAt,
+          },
+          metadataSubscription: {
+            note: "Phase is being changed, waiting for date to be reached",
+            reason: "pending_change",
+          },
+          metadataPhase: {
+            note: "Phase is being changed, waiting for date to be reached",
+            reason: "pending_change",
+          },
+        })
+
+        return Ok({
+          status: currentState,
+          phaseId: activePhase.id,
+          subscriptionId: this.subscription.id,
+        })
+      },
+    })
   }
 
   /**
+   * IMPORTANT: this allow us to keep in sync phase and subscription data when transactions are being executed
    * Updates the active subscription phase by copying all properties from the provided phase
    * into the current activePhase property. This allows updating the phase data without
    * breaking the reference to the original activePhase object.
@@ -742,6 +882,7 @@ export class SubscriptionStateMachine extends StateMachine<
   }
 
   /**
+   * IMPORTANT: this allow us to keep in sync phase and subscription data when transactions are being executed
    * Updates the subscription by copying all properties from the provided subscription
    * into the current subscription property. This allows updating the subscription data without
    * breaking the reference to the original subscription object.
@@ -891,6 +1032,11 @@ export class SubscriptionStateMachine extends StateMachine<
     return pendingInvoice
   }
 
+  // check if the subscription requires a payment method and if the customer has one
+  // This is useful when we are trying to bill a subscription in arrears which means at the end of
+  // the month and we have to check if the customer at this moment have a subscription method configured
+  // and also if the plan version requires a payment method so we can ensure that in the next bill cycle
+  // we can invoice the customer
   private async validateCustomerPaymentMethod(): Promise<
     Result<
       {
@@ -910,7 +1056,6 @@ export class SubscriptionStateMachine extends StateMachine<
       logger: this.logger,
     })
 
-    // check if the subscription requires a payment method and if the customer hasn't one
     const requiredPaymentMethod = planVersion.paymentMethodRequired
     const { err, val: paymentMethodId } = await paymentProviderService.getDefaultPaymentMethodId()
 
@@ -940,8 +1085,11 @@ export class SubscriptionStateMachine extends StateMachine<
     })
   }
 
-  // if previous cycle is passed, we are invoicing a previous usage + current cycle (flat)
-  // if previous cycle is not passed, we are invoicing the current cycle depending on the type
+  // when trying to create an invoice this method is either idempotent which means if it's executed multiple times
+  // it will update and just effect one invoice or it can create a new invoice
+  // The main idea here is just create a invoice that later on will be closed and finalized by other stages in the machine.
+  // There are special cases for instance when the invoice is created in a cancel stage or when the invoice is created in a trial stage
+  // This means we need to create an invoice with those exact cycles
   private async createInvoiceSubscriptionActivePhase(payload: {
     now: number
     isCancel: boolean
@@ -1085,7 +1233,6 @@ export class SubscriptionStateMachine extends StateMachine<
       .returning()
       .then((res) => res[0])
       .catch((e) => {
-        console.error("Error creating invoice:", e)
         this.logger.error("Error creating invoice:", e)
         return undefined
       })
@@ -1100,7 +1247,7 @@ export class SubscriptionStateMachine extends StateMachine<
   }
 
   // given an invoice that is already paid, we need to prorate the flat charges
-  // this is normally done when a phase is canceled and the when to bill is pay in advance
+  // this is normally done when a phase is canceled and the when to invoice is pay in advance
   private async prorateInvoice({
     invoiceId,
     startAt,
@@ -1154,9 +1301,9 @@ export class SubscriptionStateMachine extends StateMachine<
     }
 
     // calculate the prorated flat charges given these dates
-    const invoiceProratedItemsPrice = await this.calculateSubscriptionActivePhaseItemsPrice({
+    const invoiceProratedFlatItemsPrice = await this.calculateSubscriptionActivePhaseItemsPrice({
       cycleStartAt: startAt,
-      cycleEndAt: endAt, // this is the end of the prorated period
+      cycleEndAt: endAt, // IMPORTANT: this is the end of the prorated period
       previousCycleStartAt: invoice.previousCycleStartAt,
       previousCycleEndAt: invoice.previousCycleEndAt,
       whenToBill: invoice.whenToBill,
@@ -1174,7 +1321,16 @@ export class SubscriptionStateMachine extends StateMachine<
       return Err(new UnPriceSubscriptionError({ message: "Invoice has no invoice id" }))
     }
 
-    const paymentProviderInvoice = await paymentProviderService.getStatusInvoice({
+    // check if the invoice is already paid in the payment provider
+    if (invoice.status !== "paid" && invoice.status !== "void") {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: `Invoice ${invoiceId} is not paid, cannot prorate`,
+        })
+      )
+    }
+
+    const paymentProviderInvoice = await paymentProviderService.getInvoice({
       invoiceId: invoice.invoiceId,
     })
 
@@ -1188,18 +1344,35 @@ export class SubscriptionStateMachine extends StateMachine<
 
     let amountRefund = 0
 
+    // calculate the prorated flat charges
+    // There must be a parity between flat items and item invoices.
+    // This means that if we have an item in the prorated flat items price
+    // we should have the same item in the payment provider invoice
     for (const item of paymentProviderInvoice.val?.items ?? []) {
       const { id, amount: amountPaid, productId, currency, metadata } = item
 
-      // find the item in the invoice prorated items price
-      const invoiceItem = invoiceProratedItemsPrice.val?.items.find(
+      // find the item in the invoice prorated flat items price
+      const invoiceFlatItem = invoiceProratedFlatItemsPrice.val?.items.find(
         (i) =>
           i.productId === productId ||
           i.metadata?.subscriptionItemId === metadata?.subscriptionItemId
       )
 
-      if (!invoiceItem) {
-        return Err(new UnPriceSubscriptionError({ message: `Invoice item ${id} not found` }))
+      if (!invoiceFlatItem) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: `Invoice item ${id} not found in the prorated flat items price`,
+          })
+        )
+      }
+
+      // double check we are not prorating items that are not flat
+      if (!["flat", "tier", "package"].includes(invoiceFlatItem.type)) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: `Invoice item ${id} is not a flat charge, cannot prorate`,
+          })
+        )
       }
 
       // should be the same currency as the invoice
@@ -1212,8 +1385,9 @@ export class SubscriptionStateMachine extends StateMachine<
       }
 
       // depending on the payment provider, the amount is in different unit
+      // TODO: is unit amount or total amount?
       const formattedAmount = paymentProviderService.formatAmount(
-        invoiceItem.price.totalPrice.dinero
+        invoiceFlatItem.price.totalPrice.dinero
       )
 
       if (formattedAmount.err) {
@@ -1250,6 +1424,9 @@ export class SubscriptionStateMachine extends StateMachine<
   }
 
   // TODO: add preview invoice so when we create the invoice we are sure it works
+  // Finalizing an invoice only happens when the customer is ready to be invoiced and
+  // this means we are going to create an invoice in the payment provider and right away
+  // we're going to try to collect the payment
   private async finalizeInvoice(payload: {
     invoice: SubscriptionInvoice
     now: number
@@ -1285,6 +1462,7 @@ export class SubscriptionStateMachine extends StateMachine<
       cycleStartAt,
       cycleEndAt,
       projectId,
+      invoiceId,
     } = invoice
 
     // pay_in_advance =  invoice flat charges for the current cycle + usage from the previous cycle if any
@@ -1301,6 +1479,7 @@ export class SubscriptionStateMachine extends StateMachine<
       subtotal: 0,
       amountCreditUsed: 0,
       customerCreditId: "",
+      status: "unpaid" as InvoiceStatus,
     }
 
     const paymentProviderService = new PaymentProviderService({
@@ -1315,25 +1494,74 @@ export class SubscriptionStateMachine extends StateMachine<
       return Err(paymentValidation.err)
     }
 
-    // TODO: support idempotency, this will create a new invoice if the invoice is already created
-    const paymentProviderInvoice = await paymentProviderService.createInvoice({
-      currency,
-      customerName: this.customer.name,
-      email: this.customer.email,
-      startCycle: cycleStartAt,
-      endCycle: cycleEndAt,
-      collectionMethod,
-      description: metadata?.note ?? "",
-      dueDate: invoice.pastDueAt,
-    })
+    let invoiceData: PaymentProviderInvoice
 
-    if (paymentProviderInvoice.err) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message: `Error creating ${paymentProvider} invoice: ${paymentProviderInvoice.err.message}`,
-        })
-      )
+    // if there is an invoice id, we get the invoice from the payment provider
+    if (invoiceId) {
+      const invoiceDataResult = await paymentProviderService.getInvoice({ invoiceId })
+
+      if (invoiceDataResult.err) {
+        return Err(new UnPriceSubscriptionError({ message: "Error getting invoice" }))
+      }
+
+      // this should not happen, but just in case
+      if (invoiceDataResult.val.status === "paid" || invoiceDataResult.val.status === "void") {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Invoice is already paid or void, cannot finalize",
+          })
+        )
+      }
+
+      // update the invoice with the new cycle dates
+      // could be possible the invoice is open and the customer cancel the phase, then we need to update the cycle dates
+      const updatedInvoice = await paymentProviderService.updateInvoice({
+        invoiceId: invoiceDataResult.val.invoiceId,
+        startCycle: cycleStartAt,
+        endCycle: cycleEndAt,
+        collectionMethod,
+        description: metadata?.note ?? "",
+        dueDate: invoice.pastDueAt,
+      })
+
+      if (updatedInvoice.err) {
+        return Err(new UnPriceSubscriptionError({ message: "Error updating invoice" }))
+      }
+
+      invoiceData = updatedInvoice.val
+    } else {
+      // create a new invoice//
+      const paymentProviderInvoice = await paymentProviderService.createInvoice({
+        currency,
+        customerName: this.customer.name,
+        email: this.customer.email,
+        startCycle: cycleStartAt,
+        endCycle: cycleEndAt,
+        collectionMethod,
+        description: metadata?.note ?? "",
+        dueDate: invoice.pastDueAt,
+      })
+
+      if (paymentProviderInvoice.err) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: `Error creating ${paymentProvider} invoice: ${paymentProviderInvoice.err.message}`,
+          })
+        )
+      }
+
+      invoiceData = paymentProviderInvoice.val
     }
+
+    // save the invoice id and url just in case the rest of the process fails
+    // and we need to retry
+    await this.db
+      .update(invoices)
+      .set({
+        invoiceId: invoiceData.invoiceId,
+        invoiceUrl: invoiceData.invoiceUrl,
+      })
+      .where(and(eq(invoices.id, invoice.id), eq(invoices.projectId, projectId)))
 
     // calculate the price of the invoice items
     const invoiceItemsPrice = await this.calculateSubscriptionActivePhaseItemsPrice({
@@ -1342,7 +1570,8 @@ export class SubscriptionStateMachine extends StateMachine<
       previousCycleStartAt: invoice.previousCycleStartAt,
       previousCycleEndAt: invoice.previousCycleEndAt,
       whenToBill: invoice.whenToBill,
-      type: invoice.type,
+      type: invoice.type, // this is important because determines which items are being billed (flat, usage, or all - hybrid)
+      // and only returns those items
     })
 
     if (invoiceItemsPrice.err) {
@@ -1353,9 +1582,10 @@ export class SubscriptionStateMachine extends StateMachine<
       )
     }
 
-    // create the invoice items in the payment provider
+    // upsert the invoice items in the payment provider
     for (const item of invoiceItemsPrice.val.items) {
       // depending on the payment provider, the amount is in different unit
+      // TODO: is unit amount or total amount?
       const formattedAmount = paymentProviderService.formatAmount(item.price.unitPrice.dinero)
 
       if (formattedAmount.err) {
@@ -1370,28 +1600,58 @@ export class SubscriptionStateMachine extends StateMachine<
       paymentProviderInvoiceData.subtotal += formattedAmount.val.amount
 
       // update the invoice with the items price
-      const itemInvoice = await paymentProviderService.addInvoiceItem({
-        invoiceId: paymentProviderInvoice.val.invoiceId,
-        name: item.productSlug,
-        productId: item.productId,
-        isProrated: item.prorate !== 1,
-        amount: formattedAmount.val.amount,
-        quantity: item.quantity,
-        currency: invoice.currency,
-        metadata: item.metadata,
-      })
+      // if it does, we need to update the amount
+      // if not, we need to create the invoice item
+      const invoiceItemExists = invoiceData.items.find(
+        (i) =>
+          i.productId === item.productId ||
+          i.metadata?.subscriptionItemId === item.metadata?.subscriptionItemId
+      )
 
-      if (itemInvoice.err) {
-        return Err(
-          new UnPriceSubscriptionError({
-            message: `Error adding invoice item: ${itemInvoice.err.message}`,
-          })
-        )
+      if (invoiceItemExists) {
+        // update the amount or quantity if it exists
+        // TODO: is unit amount or total amount?
+        const updateItemInvoice = await paymentProviderService.updateInvoiceItem({
+          invoiceItemId: invoiceItemExists.id,
+          amount: formattedAmount.val.amount,
+          quantity: item.quantity,
+          name: item.productSlug,
+          isProrated: item.prorate !== 1,
+          metadata: item.metadata,
+        })
+
+        if (updateItemInvoice.err) {
+          return Err(
+            new UnPriceSubscriptionError({
+              message: `Error updating invoice item: ${updateItemInvoice.err.message}`,
+            })
+          )
+        }
+      } else {
+        // TODO: is unit amount or total amount?
+        const itemInvoice = await paymentProviderService.addInvoiceItem({
+          invoiceId: invoiceData.invoiceId,
+          name: item.productSlug,
+          productId: item.productId,
+          isProrated: item.prorate !== 1,
+          amount: formattedAmount.val.amount,
+          quantity: item.quantity,
+          currency: invoice.currency,
+          metadata: item.metadata,
+        })
+
+        if (itemInvoice.err) {
+          return Err(
+            new UnPriceSubscriptionError({
+              message: `Error adding invoice item: ${itemInvoice.err.message}`,
+            })
+          )
+        }
       }
     }
 
-    paymentProviderInvoiceData.invoiceId = paymentProviderInvoice.val.invoiceId
-    paymentProviderInvoiceData.invoiceUrl = paymentProviderInvoice.val.invoiceUrl
+    paymentProviderInvoiceData.invoiceId = invoiceData.invoiceId
+    paymentProviderInvoiceData.invoiceUrl = invoiceData.invoiceUrl
 
     // get the credits for the customer if any
     // for now we only allow one active credit per customer
@@ -1423,28 +1683,66 @@ export class SubscriptionStateMachine extends StateMachine<
       }
 
       if (amountCreditUsed > 0) {
-        // create a negative charge for the invoice
-        const creditCharge = await paymentProviderService.addInvoiceItem({
-          invoiceId: paymentProviderInvoice.val.invoiceId,
-          name: "Credit applied to the invoice",
-          isProrated: false,
-          amount: -amountCreditUsed,
-          quantity: 1,
-          currency: invoice.currency,
-        })
+        // we need to check if the invoice item already exists
+        // if it does, we update the amount
+        // if not, we create the invoice item with a negative amount
+        const creditChargeExists = invoiceData.items.find(
+          (i) => i.metadata?.creditId === customerCreditId
+        )
 
-        if (creditCharge.err) {
-          return Err(
-            new UnPriceSubscriptionError({
-              message: `Error adding credit charge: ${creditCharge.err.message}`,
-            })
-          )
+        if (creditChargeExists) {
+          const creditCharge = await paymentProviderService.updateInvoiceItem({
+            invoiceItemId: creditChargeExists.id,
+            amount: -amountCreditUsed,
+            name: "Credit",
+            description: "Credit applied to the invoice",
+            isProrated: false,
+            quantity: 1,
+            metadata: {
+              creditId: customerCreditId,
+            },
+          })
+
+          if (creditCharge.err) {
+            return Err(
+              new UnPriceSubscriptionError({
+                message: `Error updating credit charge: ${creditCharge.err.message}`,
+              })
+            )
+          }
+        } else {
+          const creditCharge = await paymentProviderService.addInvoiceItem({
+            invoiceId: invoiceData.invoiceId,
+            name: "Credit",
+            description: "Credit applied to the invoice",
+            isProrated: false,
+            amount: -amountCreditUsed,
+            quantity: 1,
+            currency: invoice.currency,
+            metadata: {
+              creditId: customerCreditId,
+            },
+          })
+
+          if (creditCharge.err) {
+            return Err(
+              new UnPriceSubscriptionError({
+                message: `Error adding credit charge: ${creditCharge.err.message}`,
+              })
+            )
+          }
         }
       }
     }
 
     // total amount of the invoice after the credit is applied
     paymentProviderInvoiceData.total = paymentProviderInvoiceData.subtotal - amountCreditUsed
+
+    // if total is 0, we need to set the invoice status to void
+    if (paymentProviderInvoiceData.total === 0) {
+      paymentProviderInvoiceData.status = "void"
+      // TODO: we need to void the invoice in the payment provider
+    }
 
     // update credit and invoice in a transaction
     const result = await this.db.transaction(async (tx) => {
@@ -1481,7 +1779,7 @@ export class SubscriptionStateMachine extends StateMachine<
             invoiceUrl: paymentProviderInvoiceData.invoiceUrl,
             subtotal: paymentProviderInvoiceData.subtotal,
             total: paymentProviderInvoiceData.total,
-            status: "unpaid",
+            status: paymentProviderInvoiceData.status,
             amountCreditUsed,
             // set the customer credit id if it exists
             ...(paymentProviderInvoiceData.customerCreditId !== "" && {
@@ -1581,7 +1879,7 @@ export class SubscriptionStateMachine extends StateMachine<
           .set({
             status: statusInvoice.val.status,
             paidAt: statusInvoice.val.paidAt,
-            invoiceUrl: statusInvoice.val.invoicePdf,
+            invoiceUrl: statusInvoice.val.invoiceUrl,
             paymentAttempts: [...(paymentAttempts ?? []), ...statusInvoice.val.paymentAttempts],
           })
           .where(eq(invoices.id, invoice.id))
@@ -1717,6 +2015,7 @@ export class SubscriptionStateMachine extends StateMachine<
           quantity: number
           prorate: number
           productSlug: string
+          type: FeatureType
           metadata: {
             subscriptionItemId: string
           }
@@ -1750,11 +2049,15 @@ export class SubscriptionStateMachine extends StateMachine<
 
     const proration = calculatedCurrentBillingCycle.prorationFactor
     const invoiceItems = []
+
     const billableItems =
       type === "hybrid"
         ? phase.items
         : type === "flat"
-          ? phase.items.filter((item) => item.featurePlanVersion.featureType === "flat")
+          ? // flat charges are those when the quantity is defined in the subscription item
+            phase.items.filter((item) =>
+              ["flat", "tier", "package"].includes(item.featurePlanVersion.featureType)
+            )
           : phase.items.filter((item) => item.featurePlanVersion.featureType === "usage")
 
     // we bill the subscriptions items attached to the phase, that way if the customer changes the plan,
@@ -1857,6 +2160,7 @@ export class SubscriptionStateMachine extends StateMachine<
           price: priceCalculation.val,
           productSlug: item.featurePlanVersion.feature.slug,
           prorate: prorate,
+          type: item.featurePlanVersion.featureType,
           metadata: {
             subscriptionItemId: item.id,
           },

@@ -4,7 +4,6 @@ import { z } from "zod"
 
 import type { Result } from "@unprice/error"
 import { type invoices, subscriptionPhases, subscriptions } from "../../schema/subscriptions"
-import { customerSelectSchema } from "../customer"
 import { planVersionSelectBaseSchema } from "../planVersions"
 import { UnPriceCalculationError } from "./../errors"
 import type { PlanVersionExtended } from "./../planVersionFeatures"
@@ -36,6 +35,7 @@ const reasonSchema = z.enum([
   "invoice_failed",
   "invoice_pending",
   "payment_received",
+  "pending_change",
 ])
 
 export const invoiceMetadataSchema = z.object({
@@ -171,12 +171,6 @@ export const subscriptionChangePlanSchema = subscriptionInsertSchema.partial().r
   id: true,
   customerId: true,
   projectId: true,
-})
-
-export const subscriptionExtendedWithItemsSchema = subscriptionSelectSchema.extend({
-  customer: customerSelectSchema,
-  version: planVersionSelectBaseSchema,
-  items: subscriptionItemExtendedSchema.array(),
 })
 
 export type Subscription = z.infer<typeof subscriptionSelectSchema>

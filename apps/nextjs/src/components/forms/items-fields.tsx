@@ -70,9 +70,9 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
   withSeparator?: boolean
   withFeatureDetails?: boolean
 }) {
-  const planVersionId = form.watch("planVersionId" as FieldPath<TFieldValues>)
-  const nextPlanVersionId = form.watch("nextPlanVersionId" as FieldPath<TFieldValues>)
-  const itemsSubs = form.watch("items" as FieldPath<TFieldValues>)
+  const planVersionId = form.watch("phases.0.planVersionId" as FieldPath<TFieldValues>)
+  const nextPlanVersionId = form.watch("phases.0.nextPlanVersionId" as FieldPath<TFieldValues>)
+  const itemsSubs = form.watch("phases.0.items" as FieldPath<TFieldValues>)
 
   // TODO: use later for addons support
   const isSubscriptionTypeAddons = false
@@ -98,10 +98,10 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
 
   const items = useFieldArray({
     control: form.control,
-    name: "config" as FieldArrayPath<TFieldValues>,
+    name: "phases.0.config" as FieldArrayPath<TFieldValues>,
   })
 
-  type ConfigFieldName<T> = "config" extends ArrayPath<T> ? "config" : never
+  type ConfigFieldName<T> = "phases.0.config" extends ArrayPath<T> ? "phases.0.config" : never
 
   const fields = items.fields as FieldArrayWithId<
     TFieldValues,
@@ -334,7 +334,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                       ) : (
                         <FormField
                           control={form.control}
-                          name={`config.${index}.units` as FieldPath<TFieldValues>}
+                          name={`phases.0.config.${index}.units` as FieldPath<TFieldValues>}
                           render={({ field }) => (
                             <FormItem className="justify-center text-center">
                               <FormMessage className="font-light text-xs" />

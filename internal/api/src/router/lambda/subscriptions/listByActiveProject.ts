@@ -1,20 +1,24 @@
-import { type Database, and, count, eq, getTableColumns } from "@unprice/db"
+import { and, count, eq, getTableColumns } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { withDateFilters, withPagination } from "@unprice/db/utils"
 import {
   type Subscription,
+  customerSelectSchema,
   searchParamsSchemaDataTable,
-  subscriptionExtendedWithItemsSchema,
+  subscriptionSelectSchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
-import { buildItemsBySubscriptionIdQuery } from "../../../queries/subscriptions"
 import { protectedProjectProcedure } from "../../../trpc"
 
 export const listByActiveProject = protectedProjectProcedure
   .input(searchParamsSchemaDataTable)
   .output(
     z.object({
-      subscriptions: subscriptionExtendedWithItemsSchema.array(),
+      subscriptions: subscriptionSelectSchema
+        .extend({
+          customer: customerSelectSchema,
+        })
+        .array(),
       pageCount: z.number(),
     })
   )
@@ -23,7 +27,6 @@ export const listByActiveProject = protectedProjectProcedure
     const project = opts.ctx.project
     const columns = getTableColumns(schema.subscriptions)
     const customerColumns = getTableColumns(schema.customers)
-    const versionColumns = getTableColumns(schema.versions)
 
     try {
       const expressions = [
@@ -31,28 +34,14 @@ export const listByActiveProject = protectedProjectProcedure
         eq(columns.projectId, project.id),
       ]
 
-      const items = await buildItemsBySubscriptionIdQuery({
-        db: opts.ctx.db as Database,
-      })
-
       // Transaction is used to ensure both queries are executed in a single transaction
       const { data, total } = await opts.ctx.db.transaction(async (tx) => {
         const query = tx
-          .with(items)
-          .select({
+          .selectDistinct({
             subscriptions: schema.subscriptions,
             customer: customerColumns,
-            version: versionColumns,
-            items: items.items,
           })
           .from(schema.subscriptions)
-          .leftJoin(
-            items,
-            and(
-              eq(items.subscriptionId, schema.subscriptions.id),
-              eq(items.projectId, schema.subscriptions.projectId)
-            )
-          )
           .innerJoin(
             schema.customers,
             and(
@@ -60,10 +49,17 @@ export const listByActiveProject = protectedProjectProcedure
               eq(schema.customers.projectId, schema.subscriptions.projectId)
             )
           )
+          .leftJoin(
+            schema.subscriptionPhases,
+            and(
+              eq(schema.subscriptionPhases.subscriptionId, schema.subscriptions.id),
+              eq(schema.subscriptionPhases.projectId, schema.subscriptions.projectId)
+            )
+          )
           .innerJoin(
             schema.versions,
             and(
-              eq(schema.subscriptions.planVersionId, schema.versions.id),
+              eq(schema.subscriptionPhases.planVersionId, schema.versions.id),
               eq(schema.customers.projectId, schema.versions.projectId),
               eq(schema.versions.projectId, project.id)
             )
@@ -98,8 +94,6 @@ export const listByActiveProject = protectedProjectProcedure
           return {
             ...data.subscriptions,
             customer: data.customer,
-            version: data.version,
-            items: data.items,
           }
         })
 

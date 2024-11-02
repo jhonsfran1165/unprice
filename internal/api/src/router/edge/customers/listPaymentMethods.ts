@@ -50,6 +50,13 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
       })
     }
 
+    // if the customer doesn't have a customer provider id, we return an empty array
+    if (!customerData.stripeCustomerId) {
+      return {
+        paymentMethods: [],
+      }
+    }
+
     const paymentProviderService = new PaymentProviderService({
       customer: customerData,
       logger: opts.ctx.logger,

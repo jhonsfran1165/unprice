@@ -82,7 +82,7 @@ export default async function PlanSubscriptionsPage({
       <div className="mt-4">
         <div className="flex flex-col px-1 py-4">
           <Typography variant="p" affects="removePaddingMargin">
-            All subscriptions of this plan
+            All subscriptions
           </Typography>
         </div>
         <Suspense
@@ -113,7 +113,7 @@ export default async function PlanSubscriptionsPage({
             columns={columns}
             data={subscriptions}
             filterOptions={{
-              filterBy: "planVersion",
+              filterBy: "customer",
               filterColumns: true,
               filterDateRange: true,
               filterServerSide: true,
@@ -122,13 +122,6 @@ export default async function PlanSubscriptionsPage({
                   value: value,
                   label: value,
                 })),
-                // get versions without duplicates
-                version: [...new Map(subscriptions.map((item) => [item.version.id, item]))].map(
-                  ([id, item]) => ({
-                    value: id,
-                    label: `${item.version.title} - v${item.version.version}`,
-                  })
-                ),
               },
             }}
           />

@@ -40,14 +40,14 @@ export default function StartCycleFormField<TFieldValues extends FormValues>({
   billingPeriod?: BillingPeriod | null
 }) {
   const providedBillingPeriod =
-    billingPeriod ?? form.watch("billingPeriod" as FieldPath<TFieldValues>)
+    billingPeriod ?? form.watch("phases.0.billingPeriod" as FieldPath<TFieldValues>)
 
   const startCycles = getStartCycleOptions(providedBillingPeriod)
 
   return (
     <FormField
       control={form.control}
-      name={"startCycle" as FieldPath<TFieldValues>}
+      name={"phases.0.startCycle" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="flex w-full flex-col">
           <FormLabel>Pricing Cycle Start Date</FormLabel>

@@ -13,7 +13,10 @@ import type {
   PaymentMethod,
   PaymentProviderCreateSession,
   PaymentProviderInterface,
+  PaymentProviderInvoice,
   SignUpOpts,
+  UpdateInvoiceItemOpts,
+  UpdateInvoiceOpts,
 } from "./interface"
 
 export class StripePaymentProvider implements PaymentProviderInterface {
@@ -147,7 +150,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
       // do not use `new URL(...).searchParams` here, because it will escape the curly braces and stripe will not replace them with the session id
       // we pass urls as metadata and the call one of our endpoints to handle the session validation and then redirect the user to the success or cancel url
-      const apiCallbackUrl = `${API_DOMAIN}providers/stripe/payment-method?session_id={CHECKOUT_SESSION_ID}`
+      const apiCallbackUrl = `${API_DOMAIN}providers/stripe/setup?session_id={CHECKOUT_SESSION_ID}`
 
       // create a new session for registering a payment method
       const session = await this.client.checkout.sessions.create({
@@ -233,9 +236,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
   public async createInvoice(
     opts: CreateInvoiceOpts
-  ): Promise<
-    Result<{ invoiceId: string; invoiceUrl: string }, FetchError | UnPricePaymentProviderError>
-  > {
+  ): Promise<Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>> {
     if (!this.providerCustomerId)
       return Err(
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
@@ -279,11 +280,81 @@ export class StripePaymentProvider implements PaymentProviderInterface {
           },
         ],
       })
-      .then((invoice) => Ok({ invoiceId: invoice.id, invoiceUrl: invoice.invoice_pdf ?? "" }))
+      .then((invoice) =>
+        Ok({
+          invoiceId: invoice.id,
+          invoiceUrl: invoice.hosted_invoice_url ?? invoice.invoice_pdf ?? "",
+          status: invoice.status,
+          items: [],
+        })
+      )
       .catch((error) => {
         const e = error as Stripe.errors.StripeError
 
         this.logger.error("Error creating invoice", { error: e.message, ...opts })
+
+        return Err(new FetchError({ message: e.message, retry: false }))
+      })
+
+    return result
+  }
+
+  async updateInvoice(
+    opts: UpdateInvoiceOpts
+  ): Promise<Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>> {
+    if (!this.providerCustomerId)
+      return Err(
+        new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
+      )
+
+    const billingPeriod = `${new Date(opts.startCycle).toLocaleString("en-US", {
+      month: "long",
+      year: "numeric",
+    })} - ${new Date(opts.endCycle).toLocaleString("en-US", {
+      month: "long",
+      year: "numeric",
+    })}`
+
+    // const dueDate only if collection method is send_invoice
+    let dueDate: number | undefined
+    if (opts.collectionMethod === "send_invoice") {
+      dueDate = opts.dueDate ? Math.floor(opts.dueDate / 1000) : undefined
+    }
+
+    // create an invoice
+    const result = await this.client.invoices
+      .update(opts.invoiceId, {
+        auto_advance: false,
+        collection_method: opts.collectionMethod,
+        description: opts.description,
+        due_date: dueDate,
+        custom_fields: [
+          {
+            name: "Billing Period",
+            value: billingPeriod,
+          },
+        ],
+      })
+      .then((invoice) =>
+        Ok({
+          invoiceId: invoice.id,
+          invoiceUrl: invoice.hosted_invoice_url ?? invoice.invoice_pdf ?? "",
+          status: invoice.status,
+          items: invoice.lines.data.map((item) => ({
+            id: item.id,
+            amount: item.amount,
+            description: item.description ?? "",
+            currency: item.currency as Currency,
+            quantity: item.quantity ?? 0,
+            productId: (item.price?.product as string) ?? "",
+            metadata: item.metadata,
+          })),
+        })
+      )
+      .catch((error) => {
+        const e = error as Stripe.errors.StripeError
+
+        this.logger.error("Error updating invoice", { error: e.message, ...opts })
 
         return Err(new FetchError({ message: e.message, retry: false }))
       })
@@ -334,6 +405,34 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         customer: this.providerCustomerId,
         invoice: invoiceId,
         ...priceData,
+        description: descriptionItem,
+        metadata,
+      })
+      .then(() => Ok(undefined))
+      .catch((error) => {
+        const e = error as Stripe.errors.StripeError
+
+        this.logger.error("Error adding invoice item", { error: e.message, ...opts })
+
+        return Err(new FetchError({ message: e.message, retry: false }))
+      })
+  }
+
+  public async updateInvoiceItem(
+    opts: UpdateInvoiceItemOpts
+  ): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
+    if (!this.providerCustomerId)
+      return Err(
+        new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
+      )
+
+    const { invoiceItemId, amount, quantity, description, metadata, name, isProrated } = opts
+    const descriptionItem = description ?? (isProrated ? `${name} (prorated)` : name)
+
+    return await this.client.invoiceItems
+      .update(invoiceItemId, {
+        amount,
+        quantity,
         description: descriptionItem,
         metadata,
       })
@@ -412,7 +511,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         invoiceId: invoice.id,
         paidAt,
         voidedAt,
-        invoicePdf: invoice.invoice_pdf ?? "",
+        invoiceUrl: invoice.hosted_invoice_url ?? invoice.invoice_pdf ?? "",
         paymentAttempts,
         items: invoice.lines.data.map((item) => ({
           id: item.id,
@@ -430,6 +529,40 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       this.logger.error("Error getting invoice status", { error: e.message, ...opts })
 
       return Err(new FetchError({ message: e.message, retry: false }))
+    }
+  }
+
+  public async getInvoice(opts: {
+    invoiceId: string
+  }): Promise<Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>> {
+    try {
+      const invoice = await this.client.invoices.retrieve(opts.invoiceId)
+
+      return Ok({
+        invoiceUrl: invoice.hosted_invoice_url ?? invoice.invoice_pdf ?? "",
+        status: invoice.status,
+        invoiceId: invoice.id,
+        items: invoice.lines.data.map((item) => ({
+          id: item.id,
+          amount: item.amount,
+          description: item.description ?? "",
+          currency: item.currency as Currency,
+          quantity: item.quantity ?? 0,
+          productId: (item.price?.product as string) ?? "",
+          metadata: item.metadata,
+        })),
+      })
+    } catch (error) {
+      const e = error as Stripe.errors.StripeError
+
+      this.logger.error("Error getting invoice", { error: e.message, ...opts })
+
+      return Err(
+        new FetchError({
+          message: e.message,
+          retry: false,
+        })
+      )
     }
   }
 

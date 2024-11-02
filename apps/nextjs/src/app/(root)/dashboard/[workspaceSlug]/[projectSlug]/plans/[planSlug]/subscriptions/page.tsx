@@ -115,7 +115,7 @@ export default async function PlanSubscriptionsPage({
             columns={columns}
             data={subscriptions}
             filterOptions={{
-              filterBy: "planVersion",
+              filterBy: "customer",
               filterColumns: true,
               filterDateRange: false,
               filterServerSide: false,
@@ -124,13 +124,6 @@ export default async function PlanSubscriptionsPage({
                   value: value,
                   label: value,
                 })),
-                // get versions without duplicates
-                version: [...new Map(subscriptions.map((item) => [item.version.id, item]))].map(
-                  ([id, item]) => ({
-                    value: id,
-                    label: `${item.version.title} - v${item.version.version}`,
-                  })
-                ),
               },
             }}
           />

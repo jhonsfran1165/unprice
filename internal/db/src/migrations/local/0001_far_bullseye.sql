@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_customers" ADD COLUMN "is_main" boolean DEFAULT false;

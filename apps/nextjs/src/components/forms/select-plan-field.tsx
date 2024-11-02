@@ -40,7 +40,7 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
   isChangePlanSubscription?: boolean
 }) {
   const [switcherCustomerOpen, setSwitcherCustomerOpen] = useState(false)
-  const selectedPlanVersionId = form.watch("planVersionId" as FieldPath<TFieldValues>)
+  const selectedPlanVersionId = form.watch("phases.0.planVersionId" as FieldPath<TFieldValues>)
 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
     {
@@ -63,7 +63,7 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
   return (
     <FormField
       control={form.control}
-      name={"planVersionId" as FieldPath<TFieldValues>}
+      name={"phases.0.planVersionId" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>{isChangePlanSubscription ? "Current Plan" : "Plan Version"}</FormLabel>

@@ -3,23 +3,23 @@
 import type { ColumnDef } from "@tanstack/react-table"
 
 import type { RouterOutputs } from "@unprice/api"
-import { calculateBillingCycle } from "@unprice/db/validators"
 import { Badge } from "@unprice/ui/badge"
 import { Checkbox } from "@unprice/ui/checkbox"
 import { Separator } from "@unprice/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
-import { differenceInDays, format } from "date-fns"
+import { format } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 import { AlertCircle } from "lucide-react"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { formatDate } from "~/lib/dates"
 import { DataTableRowActions } from "./data-table-row-actions"
 
-type PlanVersion = RouterOutputs["plans"]["getSubscriptionsBySlug"]["subscriptions"][number]
+type Subscription =
+  RouterOutputs["customers"]["getSubscriptions"]["customer"]["subscriptions"][number]
 
-export const columns: ColumnDef<PlanVersion>[] = [
+export const columns: ColumnDef<Subscription>[] = [
   {
     id: "select",
     size: 50,
@@ -51,104 +51,10 @@ export const columns: ColumnDef<PlanVersion>[] = [
     enableResizing: false,
   },
   {
-    accessorKey: "planVersion",
-    size: 200,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Plan Version" />,
-    cell: ({ row }) => {
-      // is new when the start date is in the current billing period
-      const calculatedBillingCycle = calculateBillingCycle({
-        currentDate: new Date(),
-        startDate: new Date(row.original.startAt),
-        billingCycleStart: row.original.startCycle ?? 1,
-        billingPeriod: row.original.version.billingPeriod ?? "month",
-      })
-
-      const isNew =
-        row.original.startAt > calculatedBillingCycle.cycleStart.getTime() &&
-        row.original.startAt < calculatedBillingCycle.cycleEnd.getTime()
-
-      const trialDays = row.original.trialEndsAt
-        ? differenceInDays(row.original.trialEndsAt, Date.now())
-        : 0
-
-      return (
-        <div>
-          <div className="flex items-center space-x-2">
-            <Typography variant="h6" className="truncate">
-              {row.original.version.title}
-            </Typography>
-
-            {isNew && (
-              <div className={"inline-flex items-center font-medium text-success text-xs"}>
-                <span className={"flex h-2 w-2 rounded-full bg-success"} />
-                <span className="ml-1">new</span>
-              </div>
-            )}
-
-            {trialDays > 0 && (
-              <div className="hidden items-center font-medium text-info text-xs lg:inline-flex">
-                <span className="flex h-2 w-2 rounded-full bg-info" />
-                <span className="ml-1">{`${trialDays} trial ${
-                  trialDays === 1 ? "day" : "days"
-                }`}</span>
-              </div>
-            )}
-          </div>
-
-          {row.original.version.description && (
-            <div className="line-clamp-1 hidden text-muted-foreground text-xs md:inline">
-              {`${row.original.version.description.slice(0, 40)}...`}
-            </div>
-          )}
-        </div>
-      )
-    },
-    enableSorting: true,
-    enableHiding: false,
-    enableResizing: true,
-    filterFn: (row, _, filterValue) => {
-      // search by title and description
-      const searchValue = filterValue.toLowerCase()
-      const title = row.original.version.title.toLowerCase()
-      const version = row.original.version.toString().toLowerCase()
-      const description = row.original.version.description?.toLowerCase() ?? ""
-
-      if (
-        title.includes(searchValue) ||
-        version.includes(searchValue) ||
-        description.includes(searchValue)
-      ) {
-        return true
-      }
-
-      return false
-    },
-  },
-  {
-    accessorKey: "version",
-    enableResizing: true,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Version" />,
-    cell: ({ row }) => (
-      <Badge className="text-xs" variant="secondary">
-        V{row.original.version.version}
-      </Badge>
-    ),
-    size: 20,
-    filterFn: (row, _, value) => {
-      // filter by version and id
-      const version = row.original.version.version
-      const id = row.original.version.id
-
-      return Array.isArray(value) && (value.includes(version) || value.includes(id))
-    },
-  },
-  {
     accessorKey: "customer",
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
-    cell: ({ row }) => (
-      <div className="whitespace-nowrap text-sm">{row.original.customer.email}</div>
-    ),
+    cell: ({ row }) => <div className="whitespace-nowrap text-sm">{row.original.customer.email}</div>,
     size: 40,
   },
   {
@@ -159,7 +65,8 @@ export const columns: ColumnDef<PlanVersion>[] = [
       <Badge
         className={cn({
           success: row.original.status === "active",
-          danger: row.original.status === "changing" || row.original.status === "canceling",
+          info: row.original.status === "trialing",
+          danger: row.original.status === "past_due",
         })}
       >
         {row.original.status}
@@ -171,13 +78,10 @@ export const columns: ColumnDef<PlanVersion>[] = [
     size: 20,
   },
   {
-    accessorKey: "type",
+    accessorKey: "planSlug",
     enableResizing: true,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
-    cell: ({ row }) => <Badge className="text-xs">{row.original.type}</Badge>,
-    filterFn: (row, id, value) => {
-      return Array.isArray(value) && value.includes(row.getValue(id))
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Plan" />,
+    cell: ({ row }) => <Badge className="text-xs">{row.original.planSlug}</Badge>,
     size: 20,
   },
   {
@@ -188,19 +92,12 @@ export const columns: ColumnDef<PlanVersion>[] = [
     size: 20,
   },
   {
-    accessorKey: "collectionMethod",
-    enableResizing: true,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Collection Method" />,
-    cell: ({ row }) => <Badge className="text-xs">{row.original.collectionMethod}</Badge>,
-    size: 40,
-  },
-  {
-    accessorKey: "startDate",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Start Date" />,
+    accessorKey: "currentCycleStartAt",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Start Cycle" />,
     cell: ({ row }) => (
       <div className="flex items-center space-x-1">
         <div className="whitespace-nowrap text-sm">
-          {formatDate(row.original.startAt, row.original.timezone)}
+          {formatDate(row.original.currentCycleStartAt, row.original.timezone)}
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -214,12 +111,15 @@ export const columns: ColumnDef<PlanVersion>[] = [
               <Separator className="my-1" />
               <Typography variant="p" affects="removePaddingMargin" className="text-xs">
                 <span className="font-semibold">Local time: </span>
-                {format(toZonedTime(row.original.startAt, row.original.timezone), "PPpp")}
+                {format(
+                  toZonedTime(row.original.currentCycleStartAt, row.original.timezone),
+                  "PPpp"
+                )}
               </Typography>
 
               <Typography variant="p" affects="removePaddingMargin" className="text-xs">
                 <span className="font-semibold">Customer time: </span>
-                {format(new Date(row.original.startAt), "PPpp")}
+                {format(new Date(row.original.currentCycleStartAt), "PPpp")}
               </Typography>
             </div>
           </TooltipContent>
@@ -231,10 +131,10 @@ export const columns: ColumnDef<PlanVersion>[] = [
     size: 40,
   },
   {
-    accessorKey: "endDate",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="End Date" />,
+    accessorKey: "currentCycleEndAt",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="End Cycle" />,
     cell: ({ row }) => {
-      const endDate = row.original.endAt
+      const endDate = row.original.currentCycleEndAt
 
       if (endDate === null || endDate === undefined) {
         return <div className="whitespace-nowrap text-sm">Forever</div>

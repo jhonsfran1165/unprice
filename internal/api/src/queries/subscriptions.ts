@@ -1,6 +1,7 @@
 import { type Database, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 
+// TODO: delete this
 export const buildItemsBySubscriptionIdQuery = async ({
   db,
 }: {
@@ -29,7 +30,7 @@ export const buildItemsBySubscriptionIdQuery = async ({
             'subscriptionPhaseId', ${schema.subscriptionPhases.id},
             'featurePlanVersionId', ${schema.subscriptionItems.featurePlanVersionId},
             'projectId', ${schema.subscriptionItems.projectId},
-            'isUsage', ${schema.subscriptionItems.isUsage},
+            'isUsage', ${schema.subscriptionItems.units} > 0,
             'createdAtM', ${schema.subscriptionItems.createdAtM},
             'updatedAtM', ${schema.subscriptionItems.updatedAtM}
           )

@@ -154,7 +154,7 @@ export const subscriptionPhases = pgTableProject(
     // when the trial ends
     trialEndsAt: bigint("trial_ends_at_m", { mode: "number" }),
     // when the subscription starts
-    startAt: bigint("start_at_m", { mode: "number" }).default(0).notNull(),
+    startAt: bigint("start_at_m", { mode: "number" }).notNull().default(0),
     // when the subscription ends if undefined the subscription is active and renewed every cycle depending on auto_renew flag
     endAt: bigint("end_at_m", { mode: "number" }),
     // ************ subscription important dates ************

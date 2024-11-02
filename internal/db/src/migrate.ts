@@ -161,6 +161,9 @@ async function main() {
         projectId: project.id,
         email: userExists.email,
         stripeCustomerId: "cus_QCzIbAwmpxZeEA",
+        timezone: "UTC",
+        defaultCurrency: "USD",
+        isMain: true,
       })
       .returning()
       .then((customer) => customer[0])

@@ -11,14 +11,14 @@ import { remove } from "./remove"
 import { update } from "./update"
 
 export const customersRouter = createTRPCRouter({
-  create,
-  remove,
-  update,
-  createPaymentMethod,
-  exist,
-  getByEmail,
-  getById,
-  getByIdActiveProject,
-  getSubscriptions,
-  listByActiveProject,
+  create: create,
+  remove: remove,
+  update: update,
+  createPaymentMethod: createPaymentMethod,
+  exist: exist,
+  getByEmail: getByEmail,
+  getById: getById,
+  getByIdActiveProject: getByIdActiveProject,
+  getSubscriptions: getSubscriptions,
+  listByActiveProject: listByActiveProject,
 })

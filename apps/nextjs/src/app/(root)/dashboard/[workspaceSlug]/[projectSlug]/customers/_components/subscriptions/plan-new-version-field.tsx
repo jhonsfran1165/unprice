@@ -38,7 +38,7 @@ export default function PlanNewVersionFormField({
   isChangePlanSubscription?: boolean
 }) {
   const [switcherPlanOpen, setSwitcherPlanOpen] = useState(false)
-  const selectedNextPlanVersionId = form.watch("nextPlanVersionId")
+  const selectedNextPlanVersionId = form.watch("phases.0.nextPlanVersionId")
 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery({
     enterprisePlan: true,
@@ -54,7 +54,7 @@ export default function PlanNewVersionFormField({
   return (
     <FormField
       control={form.control}
-      name="nextPlanVersionId"
+      name="phases.0.nextPlanVersionId"
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>New Plan Version</FormLabel>
