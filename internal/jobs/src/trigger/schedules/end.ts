@@ -1,6 +1,8 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
 import { db } from "@unprice/db"
+import { expireTask } from "../.."
 import { cancelTask } from "../tasks/cancel"
+import { changeTask } from "../tasks/change"
 
 export const endSchedule = schedules.task({
   id: "subscription.end",
@@ -52,19 +54,21 @@ export const endSchedule = schedules.task({
           cancelAt,
         })
       } else if (expiresAt && expiresAt <= now) {
-        // await expireTask.triggerAndWait({
-        //   subscriptionId: phase.subscriptionId,
-        //   activePhaseId: phase.id,
-        //   projectId: phase.projectId,
-        //   now,
-        // })
+        await expireTask.triggerAndWait({
+          subscriptionId: phase.subscriptionId,
+          activePhaseId: phase.id,
+          projectId: phase.projectId,
+          now,
+          expiresAt,
+        })
       } else if (changeAt && changeAt <= now) {
-        // await changeTask.triggerAndWait({
-        //   subscriptionId: phase.subscriptionId,
-        //   activePhaseId: phase.id,
-        //   projectId: phase.projectId,
-        //   now,
-        // })
+        await changeTask.triggerAndWait({
+          subscriptionId: phase.subscriptionId,
+          activePhaseId: phase.id,
+          projectId: phase.projectId,
+          now,
+          changeAt: changeAt,
+        })
       }
     }
 

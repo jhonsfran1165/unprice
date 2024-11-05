@@ -36,6 +36,7 @@ const reasonSchema = z.enum([
   "invoice_pending",
   "payment_received",
   "pending_change",
+  "pending_expiration",
 ])
 
 export const invoiceMetadataSchema = z.object({
@@ -55,7 +56,7 @@ export const subscriptionPhaseMetadataSchema = z.object({
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   metadata: subscriptionMetadataSchema,
   timezone: z.string().min(1),
-  status: subscriptionStatusSchema.optional(),
+  status: subscriptionStatusSchema,
 })
 
 export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhases, {

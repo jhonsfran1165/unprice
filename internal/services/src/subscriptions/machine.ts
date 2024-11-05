@@ -4,7 +4,6 @@ import { type FeatureType, newId } from "@unprice/db/utils"
 import {
   type CalculatedPrice,
   type Customer,
-  type InsertSubscriptionPhase,
   type InvoiceStatus,
   type InvoiceType,
   type Subscription,
@@ -16,7 +15,7 @@ import {
   type SubscriptionStatus,
   type WhenToBill,
   calculatePricePerFeature,
-  configureBillingCycleSubscription,
+  configureBillingCycleSubscription
 } from "@unprice/db/validators"
 import { Err, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
@@ -41,6 +40,19 @@ export type SubscriptionEventMap<S extends string> = {
     result: { subscriptionId: string; phaseId: string; status: S }
     error: UnPriceSubscriptionError
   }
+  EXPIRE: {
+    payload: { now: number; expiresAt?: number }
+    result: { subscriptionId: string; phaseId: string; status: S }
+    error: UnPriceSubscriptionError
+  }
+  CHANGE: {
+    payload: {
+      now: number
+      changeAt?: number
+    }
+    result: { status: S }
+    error: UnPriceSubscriptionError
+  }
   INVOICE: {
     payload: { now: number }
     result: { invoiceId: string; status: S }
@@ -53,14 +65,6 @@ export type SubscriptionEventMap<S extends string> = {
   }
   RENEW: {
     payload: { now: number }
-    result: { status: S }
-    error: UnPriceSubscriptionError
-  }
-  CHANGE: {
-    payload: {
-      now: number
-      phase: InsertSubscriptionPhase
-    }
     result: { status: S }
     error: UnPriceSubscriptionError
   }
@@ -549,10 +553,8 @@ export class SubscriptionStateMachine extends StateMachine<
       to: ["canceled", "active"],
       event: "CANCEL",
       onTransition: async (payload) => {
-        // get active phase
-        const activePhase = this.getActivePhase()
         const subscription = this.getSubscription()
-        const currentState = this.getCurrentState()
+        const activePhase = this.getActivePhase()
         // if no cancel at is provided, we cancel at the end of the current cycle
         const cancelAt = payload.cancelAt ?? subscription.currentCycleEndAt
 
@@ -576,110 +578,63 @@ export class SubscriptionStateMachine extends StateMachine<
           )
         }
 
-        // if the phase is already canceling don't do anything
+        // if the subscription is already canceling don't do anything
         if (subscription.cancelAt && subscription.cancelAt > payload.now) {
           return Ok({
-            status: currentState,
+            status: subscription.status,
             phaseId: activePhase.id,
             subscriptionId: this.subscription.id,
           })
         }
 
-        // if the cancel at is now we applied changes immediately
-        if (cancelAt <= payload.now) {
-          // here the phase has to be canceled immediately because the subscription is active and the date is in the past
-          // we set the dates to invoice the phase for the current cycle
-          // we don't set the state until the invoice is created and finalized
-          await this.syncState({
-            phaseId: activePhase.id,
-            subscriptionDates: {
-              cancelAt,
-              // the next invoice is the cancel at date
-              nextInvoiceAt: cancelAt,
-              currentCycleEndAt: cancelAt,
-            },
-            phaseDates: {
-              endAt: cancelAt,
-            },
-            metadataSubscription: {
-              note: "Phase is being canceled, waiting for invoice and payment",
-              reason: "pending_cancellation",
-            },
-            metadataPhase: {
-              note: "Phase is being canceled, waiting for invoice and payment",
-              reason: "pending_cancellation",
-            },
-          })
+        // we set the cancel at in the subscription and the next invoice at the cancel at date
+        // so we can process the invoice and the phase cancellation
+        await this.syncState({
+          phaseId: activePhase.id,
+          subscriptionDates: {
+            cancelAt,
+            // the next invoice is the cancel at date
+            nextInvoiceAt: cancelAt,
+            currentCycleEndAt: cancelAt,
+          },
+          phaseDates: {
+            endAt: cancelAt,
+          },
+          metadataSubscription: {
+            note: "Phase is being canceled, waiting for invoice and payment",
+            reason: "pending_cancellation",
+          },
+          metadataPhase: {
+            note: "Phase is being canceled, waiting for invoice and payment",
+            reason: "pending_cancellation",
+          },
+        })
 
-          // here we have to verify if there is an open invoice for the phase or the invoice is already paid
-          const paidInvoice = await this.getPhaseInvoiceByStatus({
-            phaseId: activePhase.id,
-            startAt: subscription.currentCycleStartAt,
-            status: "paid",
-          })
+        // end the phase
+        const endPhaseResult = await this.endSubscriptionActivePhase({
+          endAt: cancelAt, // end date of the phase is the date
+          now: payload.now,
+          isCancel: true,
+        })
 
-          // if the invoice is already paid, and it's paid in advance, we need to prorate the invoice
-          if (paidInvoice && paidInvoice.whenToBill === "pay_in_advance") {
-            // we need to prorate the flat charges for the current cycle in other word we calculate
-            // how much the customer has already paid for the cycle and we create a credit for the difference
-            const proratedInvoice = await this.prorateInvoice({
-              invoiceId: paidInvoice.id,
-              now: payload.now,
-              startAt: paidInvoice.cycleStartAt,
-              endAt: cancelAt, // this is the date the phase is canceled
-            })
+        if (endPhaseResult.err) {
+          return Err(endPhaseResult.err)
+        }
 
-            if (proratedInvoice.err) {
-              return Err(proratedInvoice.err)
-            }
-          }
-
-          // create an invoice for the canceled phase. If there is an open invoice, we don't create a new one
-          // but we will use the existing one to prorate the charges
-          const invoiceResult = await this.createInvoiceSubscriptionActivePhase({
-            now: payload.now,
-            isCancel: true,
-            isTrial: false,
-          })
-
-          if (invoiceResult.err) {
-            return Err(invoiceResult.err)
-          }
-
-          const invoice = invoiceResult.val.invoice
-
-          // finalize the invoice
-          const result = await this.finalizeInvoice({
-            invoice: invoice,
-            now: payload.now,
-          })
-
-          if (result.err) {
-            return Err(result.err)
-          }
-
-          // collect the payment
-          const payment = await this.collectInvoicePayment({
-            invoice: result.val.invoice,
-            now: payload.now,
-          })
-
-          if (payment.err) {
-            return Err(payment.err)
-          }
-
-          const isPaid = payment.val.status === "paid" || payment.val.status === "void"
+        // if there is an invoice we need to update the subscription state
+        if (endPhaseResult.val.invoiceId) {
+          const isPaid =
+            endPhaseResult.val.invoiceStatus === "paid" ||
+            endPhaseResult.val.invoiceStatus === "void"
           const note = isPaid
             ? "Payment received, phase is canceled"
             : "Waiting for payment, phase is canceled"
           const reason = isPaid ? "payment_received" : "payment_pending"
 
-          // TODO: actually here I should implement due behaviour
-
           // we cancel the subscription right away and the user will be notified for the unpaid invoice
           // if any. Normally this will be done manually by the admin
           await this.syncState({
-            state: "canceled",
+            state: endPhaseResult.val.status,
             phaseId: activePhase.id,
             active: false,
             subscriptionDates: {
@@ -695,38 +650,17 @@ export class SubscriptionStateMachine extends StateMachine<
             },
           })
 
+          // return the status of the invoice
           return Ok({
-            status: "canceled",
+            status: endPhaseResult.val.status,
             phaseId: activePhase.id,
             subscriptionId: this.subscription.id,
           })
         }
 
-        // if the cancel at is in the future we set the cancel at in the subscription
-        await this.syncState({
-          phaseId: activePhase.id,
-          active: true, // the phase is still active
-          subscriptionDates: {
-            cancelAt,
-            // the next invoice is the cancel at date
-            nextInvoiceAt: cancelAt,
-            currentCycleEndAt: cancelAt,
-          },
-          phaseDates: {
-            endAt: cancelAt,
-          },
-          metadataSubscription: {
-            note: "Phase is being canceled, waiting for date to be reached",
-            reason: "pending_cancellation",
-          },
-          metadataPhase: {
-            note: "Phase is being canceled, waiting for date to be reached",
-            reason: "pending_cancellation",
-          },
-        })
-
+        // if there is no invoice we just return the subscription state
         return Ok({
-          status: currentState,
+          status: endPhaseResult.val.status,
           phaseId: activePhase.id,
           subscriptionId: this.subscription.id,
         })
@@ -735,13 +669,11 @@ export class SubscriptionStateMachine extends StateMachine<
 
     /*
      * CHANGE
-     * TODO: define this
      * Apply a change to the subscription
-     * In other to change a subscription we need to cancel the current phase and create a new one
-     * when the subscription is canceled is the only way we can ensure that the invoice is created and paid
+     * In order to change a subscription we need to cancel the current phase and create a new one
      */
     this.addTransition({
-      from: ["canceled"],
+      from: ["active"],
       to: ["changed", "active"],
       event: "CHANGE",
       onTransition: async (payload) => {
@@ -750,20 +682,13 @@ export class SubscriptionStateMachine extends StateMachine<
         const subscription = this.getSubscription()
         const currentState = this.getCurrentState()
 
-        const phase = payload.phase
+        const changeAt = payload.changeAt ?? subscription.currentCycleEndAt + 1
 
-        // if no cancel at is provided, we cancel at the end of the current cycle
-        const changeAt = phase.startAt ? phase.startAt - 1 : subscription.currentCycleEndAt + 1
-
-        if (!activePhase) {
-          return Err(new UnPriceSubscriptionError({ message: "No active phase with the given id" }))
-        }
-
-        // cannot cancel a phase if the subscription is changing
+        // cannot cancel a phase if the subscription is canceling
         if (subscription.cancelAt && subscription.cancelAt > payload.now) {
           return Err(
             new UnPriceSubscriptionError({
-              message: "The subscription is changing, cannot change the phase",
+              message: "The subscription is canceling, cannot change the phase",
             })
           )
         }
@@ -775,7 +700,7 @@ export class SubscriptionStateMachine extends StateMachine<
           )
         }
 
-        // if the phase is already canceling don't do anything
+        // if the subscription is already changing don't do anything
         if (subscription.changeAt && subscription.changeAt > payload.now) {
           return Ok({
             status: currentState,
@@ -784,60 +709,8 @@ export class SubscriptionStateMachine extends StateMachine<
           })
         }
 
-        // if the change at is now we applied changes immediately
-        if (changeAt <= payload.now) {
-          // here the phase has to be canceled immediately because the subscription is active and the date is in the past
-          // we set the dates to invoice the phase for the current cycle
-          // we don't set the state until the invoice is created and finalized
-          await this.syncState({
-            phaseId: activePhase.id,
-            subscriptionDates: {
-              changeAt,
-              // the next invoice is the cancel at date
-              nextInvoiceAt: changeAt,
-              currentCycleEndAt: changeAt,
-            },
-            phaseDates: {
-              endAt: changeAt,
-            },
-            metadataSubscription: {
-              note: "Phase is being changed, waiting for invoice and payment",
-              reason: "pending_change",
-            },
-            metadataPhase: {
-              note: "Phase is being changed, waiting for invoice and payment",
-              reason: "pending_change",
-            },
-          })
-
-          // we cancel the subscription right away and the user will be notified for the unpaid invoice
-          // if any. Normally this will be done manually by the admin
-          await this.syncState({
-            state: "changed",
-            phaseId: activePhase.id,
-            active: false,
-            subscriptionDates: {
-              changedAt: Date.now(),
-            },
-            metadataSubscription: {
-              note: "Phase is changed",
-            },
-            metadataPhase: {
-              note: "Phase is being changed",
-            },
-          })
-
-          return Ok({
-            status: "changed",
-            phaseId: activePhase.id,
-            subscriptionId: this.subscription.id,
-          })
-        }
-
-        // if the cancel at is in the future we set the cancel at in the subscription
         await this.syncState({
           phaseId: activePhase.id,
-          active: true, // the phase is still active
           subscriptionDates: {
             changeAt,
             // the next invoice is the cancel at date
@@ -848,17 +721,185 @@ export class SubscriptionStateMachine extends StateMachine<
             endAt: changeAt,
           },
           metadataSubscription: {
-            note: "Phase is being changed, waiting for date to be reached",
+            note: "Phase is being changed, waiting for invoice and payment",
             reason: "pending_change",
           },
           metadataPhase: {
-            note: "Phase is being changed, waiting for date to be reached",
+            note: "Phase is being changed, waiting for invoice and payment",
             reason: "pending_change",
           },
         })
 
+        // end the phase
+        const endPhaseResult = await this.endSubscriptionActivePhase({
+          endAt: changeAt, // end date of the phase is the date
+          now: payload.now,
+          isChange: true,
+        })
+
+        if (endPhaseResult.err) {
+          return Err(endPhaseResult.err)
+        }
+
+        // if there is an invoice we need to update the subscription state
+        if (endPhaseResult.val.invoiceId) {
+          const isPaid =
+            endPhaseResult.val.invoiceStatus === "paid" ||
+            endPhaseResult.val.invoiceStatus === "void"
+          const note = isPaid
+            ? "Payment received, phase is changed"
+            : "Waiting for payment, phase is changed"
+          const reason = isPaid ? "payment_received" : "payment_pending"
+
+          // we change the subscription right away and the user will be notified for the unpaid invoice
+          // if any. Normally this will be done manually by the admin
+          await this.syncState({
+            state: endPhaseResult.val.status,
+            phaseId: activePhase.id,
+            active: false,
+            subscriptionDates: {
+              changedAt: Date.now(),
+            },
+            metadataSubscription: {
+              note,
+              reason,
+            },
+            metadataPhase: {
+              note,
+              reason,
+            },
+          })
+
+          // return the status of the invoice
+          return Ok({
+            status: endPhaseResult.val.status,
+            phaseId: activePhase.id,
+            subscriptionId: this.subscription.id,
+          })
+        }
+
+        // if there is no invoice we just return the subscription state
         return Ok({
-          status: currentState,
+          status: endPhaseResult.val.status,
+          phaseId: activePhase.id,
+          subscriptionId: this.subscription.id,
+        })
+      },
+    })
+
+    /*
+     * EXPIRE
+     * Apply expiration to the subscription
+     */
+    this.addTransition({
+      from: ["active"],
+      to: ["expired", "active"],
+      event: "EXPIRE",
+      onTransition: async (payload) => {
+        // get active phase
+        const activePhase = this.getActivePhase()
+        const subscription = this.getSubscription()
+        const currentState = this.getCurrentState()
+
+        const expiresAt = payload.expiresAt ?? subscription.currentCycleEndAt + 1
+
+        // cannot cancel a phase if the subscription is canceling
+        if (subscription.cancelAt && subscription.cancelAt > payload.now) {
+          return Err(
+            new UnPriceSubscriptionError({
+              message: "The subscription is canceling, cannot change the phase",
+            })
+          )
+        }
+
+        // if cannot cancel a subscription that is expiring
+        if (subscription.changeAt && subscription.changeAt > payload.now) {
+          return Err(
+            new UnPriceSubscriptionError({ message: "Subscription is changing, cannot expire" })
+          )
+        }
+
+        // if the subscription is already changing don't do anything
+        if (subscription.expiresAt && subscription.expiresAt > payload.now) {
+          return Ok({
+            status: currentState,
+            phaseId: activePhase.id,
+            subscriptionId: this.subscription.id,
+          })
+        }
+
+        await this.syncState({
+          phaseId: activePhase.id,
+          subscriptionDates: {
+            expiresAt,
+            // the next invoice is the cancel at date
+            nextInvoiceAt: expiresAt,
+            currentCycleEndAt: expiresAt,
+          },
+          phaseDates: {
+            endAt: expiresAt,
+          },
+          metadataSubscription: {
+            note: "Phase is being expired, waiting for invoice and payment",
+            reason: "pending_expiration",
+          },
+          metadataPhase: {
+            note: "Phase is being changed, waiting for invoice and payment",
+            reason: "pending_expiration",
+          },
+        })
+
+        // end the phase
+        const endPhaseResult = await this.endSubscriptionActivePhase({
+          endAt: expiresAt, // end date of the phase is the date
+          now: payload.now,
+          isExpire: true,
+        })
+
+        if (endPhaseResult.err) {
+          return Err(endPhaseResult.err)
+        }
+
+        // if there is an invoice we need to update the subscription state
+        if (endPhaseResult.val.invoiceId) {
+          const isPaid =
+            endPhaseResult.val.invoiceStatus === "paid" ||
+            endPhaseResult.val.invoiceStatus === "void"
+          const note = isPaid
+            ? "Payment received, phase is expired"
+            : "Waiting for payment, phase is expired"
+          const reason = isPaid ? "payment_received" : "payment_pending"
+
+          // we change the subscription right away and the user will be notified for the unpaid invoice
+          // if any. Normally this will be done manually by the admin
+          await this.syncState({
+            state: endPhaseResult.val.status,
+            phaseId: activePhase.id,
+            active: false,
+            subscriptionDates: {
+              changedAt: Date.now(),
+            },
+            metadataSubscription: {
+              note,
+              reason,
+            },
+            metadataPhase: {
+              note,
+              reason,
+            },
+          })
+
+          // return the status of the invoice
+          return Ok({
+            status: endPhaseResult.val.status,
+            phaseId: activePhase.id,
+            subscriptionId: this.subscription.id,
+          })
+        }
+
+        // if there is no invoice we just return the subscription state
+        return Ok({
+          status: endPhaseResult.val.status,
           phaseId: activePhase.id,
           subscriptionId: this.subscription.id,
         })
@@ -1030,6 +1071,131 @@ export class SubscriptionStateMachine extends StateMachine<
     })
 
     return pendingInvoice
+  }
+
+  // And a subscription and end date could be expiration date changed date and canceled date
+  // This will apply the changes that are scheduled or it will apply the changes immediately if the above mentioned dates are in the past.
+  private async endSubscriptionActivePhase(payload: {
+    endAt: number
+    now: number
+    isCancel?: boolean
+    isChange?: boolean
+    isExpire?: boolean
+    isTrial?: boolean
+  }): Promise<
+    Result<
+      {
+        status: SubscriptionStatus
+        phaseId: string
+        subscriptionId: string
+        invoiceId?: string
+        invoiceStatus?: InvoiceStatus
+      },
+      UnPriceSubscriptionError
+    >
+  > {
+    const {
+      endAt,
+      now,
+      isCancel = false,
+      isChange = false,
+      isExpire = false,
+      isTrial = false,
+    } = payload
+    // get active phase
+    const activePhase = this.getActivePhase()
+    const subscription = this.getSubscription()
+    const currentState = this.getCurrentState()
+
+    let finalState: SubscriptionStatus
+
+    if (isCancel) {
+      finalState = "canceled"
+    } else if (isChange) {
+      finalState = "changed"
+    } else if (isExpire) {
+      finalState = "expired"
+    } else {
+      finalState = "canceled"
+    }
+
+    // if the end at is now we applied changes immediately
+    if (endAt <= now) {
+      // here we have to verify if there is an open invoice for the phase or the invoice is already paid
+      const paidInvoice = await this.getPhaseInvoiceByStatus({
+        phaseId: activePhase.id,
+        startAt: subscription.currentCycleStartAt,
+        status: "paid",
+      })
+
+      // if the invoice is already paid, and it's paid in advance, we need to prorate the invoice
+      if (paidInvoice && paidInvoice.whenToBill === "pay_in_advance") {
+        // we need to prorate the flat charges for the current cycle, which means we calculate
+        // how much the customer has already paid for the cycle and we create a credit for the difference
+        // we don't worry about usage charges because those are calculated in the invoice part
+        const proratedInvoice = await this.prorateInvoice({
+          invoiceId: paidInvoice.id,
+          now: payload.now,
+          startAt: paidInvoice.cycleStartAt,
+          endAt: endAt, // this is the date the phase is canceled
+        })
+
+        if (proratedInvoice.err) {
+          return Err(proratedInvoice.err)
+        }
+      }
+
+      // create an invoice for the canceled phase. If there is an open invoice, we don't create a new one
+      // but we will use the existing one to apply discount and charge usage if any
+      // the invoice behaviour will change depending on the reason of the end
+      const invoiceResult = await this.createInvoiceSubscriptionActivePhase({
+        now: payload.now,
+        isCancel,
+        isTrial,
+      })
+
+      if (invoiceResult.err) {
+        return Err(invoiceResult.err)
+      }
+
+      const invoice = invoiceResult.val.invoice
+
+      // at this point the invoice can be finalized
+      const result = await this.finalizeInvoice({
+        invoice: invoice,
+        now: payload.now,
+      })
+
+      if (result.err) {
+        return Err(result.err)
+      }
+
+      // collect the payment
+      const payment = await this.collectInvoicePayment({
+        invoice: result.val.invoice,
+        now: payload.now,
+      })
+
+      if (payment.err) {
+        return Err(payment.err)
+      }
+
+      // TODO: actually here I should implement due behaviour
+
+      return Ok({
+        status: finalState,
+        phaseId: activePhase.id,
+        subscriptionId: this.subscription.id,
+        invoiceId: invoice.id,
+        invoiceStatus: invoice.status,
+      })
+    }
+
+    return Ok({
+      status: currentState,
+      phaseId: activePhase.id,
+      subscriptionId: this.subscription.id,
+    })
   }
 
   // check if the subscription requires a payment method and if the customer has one
@@ -2176,28 +2342,18 @@ export class SubscriptionStateMachine extends StateMachine<
     }
   }
 
-  public async renewSubscription(payload: { now: number }): Promise<
+  public async renew(payload: { now: number }): Promise<
     Result<{ status: SubscriptionStatus }, UnPriceSubscriptionError>
   > {
-    const currentState = this.getCurrentState()
     const { now } = payload
-    const shouldAutoRenew = this.getActivePhase().autoRenew
+    const renew = await this.transition("RENEW", { now })
 
-    if (shouldAutoRenew) {
-      const renew = await this.transition("RENEW", { now })
-
-      if (renew.err) {
-        return Err(renew.err)
-      }
-
-      return Ok({
-        status: renew.val.status,
-      })
+    if (renew.err) {
+      return Err(renew.err)
     }
 
-    // TODO: should I auto expired the subscription if not auto renew?
     return Ok({
-      status: currentState,
+      status: renew.val.status,
     })
   }
 
@@ -2287,7 +2443,8 @@ export class SubscriptionStateMachine extends StateMachine<
       }
     }
 
-    await this.renewSubscription({ now })
+    // TODO: re think this
+    await this.renew({ now })
 
     return Ok({
       status: "active",
@@ -2334,7 +2491,7 @@ export class SubscriptionStateMachine extends StateMachine<
     // if the subscription is set to auto renew then we need to renew it, only if the payment is successful
     if (activePhase.autoRenew) {
       // renew the subscription will check if the payment is successful and if so will set the subscription to active
-      const renew = await this.renewSubscription({ now })
+      const renew = await this.renew({ now })
 
       if (renew.err) {
         return Err(renew.err)
@@ -2367,6 +2524,42 @@ export class SubscriptionStateMachine extends StateMachine<
 
     return Ok({
       status: cancel.val.status,
+    })
+  }
+
+  // apply a change to the subscription, the new subscription phase should be created
+  public async change(payload: { changeAt?: number; now: number }): Promise<
+    Result<{ status: SubscriptionStatus }, UnPriceSubscriptionError>
+  > {
+
+    const { changeAt, now } = payload
+
+    const change = await this.transition("CHANGE", { changeAt, now })
+
+    if (change.err) {
+      return Err(change.err)
+    }
+
+    return Ok({
+      status: change.val.status,
+    })
+  }
+
+  // apply a change to the subscription, the new subscription phase should be created
+  public async expire(payload: { expiresAt?: number; now: number }): Promise<
+    Result<{ status: SubscriptionStatus }, UnPriceSubscriptionError>
+  > {
+
+    const { expiresAt, now } = payload
+
+    const expire = await this.transition("EXPIRE", { expiresAt, now })
+
+    if (expire.err) {
+      return Err(expire.err)
+    }
+
+    return Ok({
+      status: expire.val.status,
     })
   }
 }
