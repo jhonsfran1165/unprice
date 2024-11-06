@@ -111,7 +111,7 @@ export class SubscriptionService {
     now: number
   }): Promise<Result<void, UnPriceSubscriptionError>> {
     // get the active phase for the subscription
-    const { err, val: activePhase } = await this._getActivePhase({
+    const { err, val: activePhase } = await this.getActivePhase({
       subscriptionId,
       projectId,
       now,
@@ -279,7 +279,7 @@ export class SubscriptionService {
     return Ok(undefined)
   }
 
-  private async _getActivePhase({
+  public async getActivePhase({
     subscriptionId,
     projectId,
     now,
@@ -379,6 +379,13 @@ export class SubscriptionService {
       endAt,
       dueBehaviour,
     } = data
+
+    // when creating a phase we need to check there is no active phase in the same start - end range for the subscription
+    // if there is we need to return an error
+    const activePhases = await this.db.query.subscriptionPhases.findMany({
+      where: (phase, { eq, and, gte, lte, isNull, or }) =>
+        and(eq(phase.projectId, projectId), isNull(phase.endAt)),
+    })
 
     const versionData = await this.db.query.versions.findFirst({
       with: {

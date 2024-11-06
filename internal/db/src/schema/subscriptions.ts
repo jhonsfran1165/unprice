@@ -74,6 +74,8 @@ export const subscriptions = pgTableProject(
     lastInvoiceAt: bigint("last_invoice_at_m", { mode: "number" }),
     // when the subscription is considered past due
     pastDueAt: bigint("past_due_at_m", { mode: "number" }),
+    // when the subscription was ended because it was past due
+    pastDuedAt: bigint("past_dued_at_m", { mode: "number" }),
     // when the subscription is going to be cancelled
     cancelAt: bigint("cancel_at_m", { mode: "number" }),
     // when the subscription was cancelled

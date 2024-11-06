@@ -90,7 +90,6 @@ export const STATUS_SUBSCRIPTION = [
   "changed", // the subscription is changed
   "canceled", // the subscription is cancelled
   "expired", // the subscription has expired - no auto-renew
-  "pending_invoice", // the subscription is pending invoice - waiting for invoice
   "past_due", // the subscription is past due - payment pending
 ] as const
 

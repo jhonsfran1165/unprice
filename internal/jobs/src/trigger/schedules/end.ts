@@ -27,11 +27,12 @@ export const endSchedule = schedules.task({
       where: (sub, { eq, and, lte, or }) =>
         and(
           eq(sub.active, true),
-          or(lte(sub.cancelAt, now), lte(sub.expiresAt, now), lte(sub.changeAt, now))
+          or(lte(sub.cancelAt, now), lte(sub.expiresAt, now), lte(sub.changeAt, now), lte(sub.pastDueAt, now))
         ),
     })
 
     // trigger the end trial task for each subscription phase
+    // TODO: re check this logic
     for (const sub of subscriptionsToEnd) {
       const phase = sub.phases[0]
 
@@ -44,6 +45,7 @@ export const endSchedule = schedules.task({
       const cancelAt = sub.cancelAt
       const expiresAt = sub.expiresAt
       const changeAt = sub.changeAt
+      const pastDueAt = sub.pastDueAt
 
       if (cancelAt && cancelAt <= now) {
         await cancelTask.triggerAndWait({
@@ -68,6 +70,14 @@ export const endSchedule = schedules.task({
           projectId: phase.projectId,
           now,
           changeAt: changeAt,
+        })
+      } else if (pastDueAt && pastDueAt <= now) {
+        await cancelTask.triggerAndWait({
+          subscriptionId: phase.subscriptionId,
+          activePhaseId: phase.id,
+          projectId: phase.projectId,
+          now,
+          cancelAt: pastDueAt,
         })
       }
     }
