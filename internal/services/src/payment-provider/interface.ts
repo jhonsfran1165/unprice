@@ -103,7 +103,13 @@ export type PaymentProviderInvoice = {
   }[]
 }
 
-export type InvoiceProviderStatus = "open" | "paid" | "void" | "draft" | "uncollectible"
+export type InvoiceProviderStatus =
+  | "open"
+  | "paid"
+  | "void"
+  | "draft"
+  | "uncollectible"
+  | "past_due"
 
 // Cache interface so you can swap out the cache implementation
 export interface PaymentProviderInterface {
@@ -146,7 +152,10 @@ export interface PaymentProviderInterface {
   >
 
   collectPayment: (opts: { invoiceId: string; paymentMethodId: string }) => Promise<
-    Result<void, FetchError | UnPricePaymentProviderError>
+    Result<
+      { invoiceId: string; status: InvoiceProviderStatus },
+      FetchError | UnPricePaymentProviderError
+    >
   >
 
   getStatusInvoice: (opts: { invoiceId: string }) => Promise<

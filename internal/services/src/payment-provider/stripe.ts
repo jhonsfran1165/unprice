@@ -10,6 +10,7 @@ import type {
   CreateInvoiceOpts,
   CreateSessionOpts,
   GetStatusInvoice,
+  InvoiceProviderStatus,
   PaymentMethod,
   PaymentProviderCreateSession,
   PaymentProviderInterface,
@@ -449,13 +450,21 @@ export class StripePaymentProvider implements PaymentProviderInterface {
   public async collectPayment(opts: {
     invoiceId: string
     paymentMethodId: string
-  }): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
+  }): Promise<
+    Result<
+      { invoiceId: string; status: InvoiceProviderStatus },
+      FetchError | UnPricePaymentProviderError
+    >
+  > {
     try {
-      await this.client.invoices.pay(opts.invoiceId, {
+      const invoice = await this.client.invoices.pay(opts.invoiceId, {
         payment_method: opts.paymentMethodId,
       })
 
-      return Ok(undefined)
+      return Ok({
+        invoiceId: invoice.id,
+        status: invoice.status ?? "open",
+      })
     } catch (error) {
       const e = error as Stripe.errors.StripeError
 

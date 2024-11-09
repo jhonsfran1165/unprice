@@ -9,6 +9,7 @@ import type {
   CreateInvoiceOpts,
   CreateSessionOpts,
   GetStatusInvoice,
+  InvoiceProviderStatus,
   PaymentMethod,
   PaymentProviderCreateSession,
   PaymentProviderInterface,
@@ -208,7 +209,12 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async collectPayment(opts: {
     invoiceId: string
     paymentMethodId: string
-  }): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
+  }): Promise<
+    Result<
+      { invoiceId: string; status: InvoiceProviderStatus },
+      FetchError | UnPricePaymentProviderError
+    >
+  > {
     switch (this.paymentProviderId) {
       case "stripe": {
         return await this.stripe.collectPayment(opts)

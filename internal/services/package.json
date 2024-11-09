@@ -18,8 +18,10 @@
   },
   "license": "AGPL-3.0",
   "scripts": {
+    "test": "pnpm with-env vitest run",
     "clean": "rm -rf .turbo node_modules",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env.local --"
   },
   "dependencies": {
     "@unkey/cache": "^1.5.0",
@@ -37,6 +39,7 @@
   },
   "devDependencies": {
     "@unprice/tsconfig": "^0.1.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^2.0.5"
   }
 }
