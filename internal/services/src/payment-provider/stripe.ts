@@ -243,13 +243,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
 
-    const billingPeriod = `${new Date(opts.startCycle).toLocaleString("en-US", {
-      month: "long",
-      year: "numeric",
-    })} - ${new Date(opts.endCycle).toLocaleString("en-US", {
-      month: "long",
-      year: "numeric",
-    })}`
+    const billingPeriod = `${new Date(opts.startCycle).toISOString().split("T")[0]} to ${new Date(opts.endCycle).toISOString().split("T")[0]}`
 
     // const dueDate only if collection method is send_invoice
     let dueDate: number | undefined
@@ -287,6 +281,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
           invoiceUrl: invoice.hosted_invoice_url ?? invoice.invoice_pdf ?? "",
           status: invoice.status,
           items: [],
+          total: invoice.total,
         })
       )
       .catch((error) => {
@@ -308,13 +303,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
 
-    const billingPeriod = `${new Date(opts.startCycle).toLocaleString("en-US", {
-      month: "long",
-      year: "numeric",
-    })} - ${new Date(opts.endCycle).toLocaleString("en-US", {
-      month: "long",
-      year: "numeric",
-    })}`
+    const billingPeriod = `${new Date(opts.startCycle).toISOString().split("T")[0]} to ${new Date(opts.endCycle).toISOString().split("T")[0]}`
 
     // const dueDate only if collection method is send_invoice
     let dueDate: number | undefined
@@ -341,6 +330,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
           invoiceId: invoice.id,
           invoiceUrl: invoice.hosted_invoice_url ?? invoice.invoice_pdf ?? "",
           status: invoice.status,
+          total: invoice.total,
           items: invoice.lines.data.map((item) => ({
             id: item.id,
             amount: item.amount,
@@ -376,7 +366,8 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       name,
       productId,
       isProrated,
-      amount,
+      totalAmount,
+      unitAmount,
       quantity,
       currency,
       description,
@@ -384,6 +375,14 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     } = opts
 
     const descriptionItem = description ?? (isProrated ? `${name} (prorated)` : name)
+
+    if (productId && !unitAmount) {
+      return Err(
+        new UnPricePaymentProviderError({
+          message: "Unit decimal amount is required for product based invoice items",
+        })
+      )
+    }
 
     // price data for the invoice item
     // if the product we send price data, otherwise we send the amount
@@ -393,12 +392,13 @@ export class StripePaymentProvider implements PaymentProviderInterface {
           price_data: {
             currency: currency,
             product: productId,
-            unit_amount: amount,
+            unit_amount: unitAmount,
           },
         }
       : {
+          // for items that are not associated to a product, we send the total amount
           currency: currency,
-          amount: amount,
+          amount: totalAmount,
         }
 
     return await this.client.invoiceItems
@@ -409,7 +409,9 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         description: descriptionItem,
         metadata,
       })
-      .then(() => Ok(undefined))
+      .then(() => {
+        return Ok(undefined)
+      })
       .catch((error) => {
         const e = error as Stripe.errors.StripeError
 
@@ -427,12 +429,12 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
 
-    const { invoiceItemId, amount, quantity, description, metadata, name, isProrated } = opts
+    const { invoiceItemId, totalAmount, quantity, description, metadata, name, isProrated } = opts
     const descriptionItem = description ?? (isProrated ? `${name} (prorated)` : name)
 
     return await this.client.invoiceItems
       .update(invoiceItemId, {
-        amount,
+        amount: totalAmount,
         quantity,
         description: descriptionItem,
         metadata,
@@ -551,6 +553,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         invoiceUrl: invoice.hosted_invoice_url ?? invoice.invoice_pdf ?? "",
         status: invoice.status,
         invoiceId: invoice.id,
+        total: invoice.total,
         items: invoice.lines.data.map((item) => ({
           id: item.id,
           amount: item.amount,

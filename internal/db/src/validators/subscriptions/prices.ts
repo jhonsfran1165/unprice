@@ -326,7 +326,10 @@ export const calculateTierPrice = ({
       prorate !== undefined
         ? trimScale(calculatePercentage(dinero(tier.flatPrice.dinero), prorate))
         : trimScale(dinero(tier.flatPrice.dinero))
-    const dineroUnitPrice = dinero(tier.unitPrice.dinero)
+    const dineroUnitPrice =
+      prorate !== undefined
+        ? trimScale(calculatePercentage(dinero(tier.unitPrice.dinero), prorate))
+        : trimScale(dinero(tier.unitPrice.dinero))
 
     const dineroTotalPrice = !isZero(dineroFlatPrice)
       ? trimScale(add(multiply(dinero(tier.unitPrice.dinero), quantity), dineroFlatPrice))
@@ -475,10 +478,15 @@ export const calculatePackagePrice = ({
       ? trimScale(calculatePercentage(multiply(dineroPrice, packageCount), prorate))
       : trimScale(multiply(dineroPrice, packageCount))
 
+  const unit =
+    prorate !== undefined
+      ? trimScale(calculatePercentage(dineroPrice, prorate))
+      : trimScale(dineroPrice)
+
   return Ok({
     unitPrice: {
-      dinero: dineroPrice,
-      displayAmount: toDecimal(dineroPrice, ({ value, currency }) => {
+      dinero: unit,
+      displayAmount: toDecimal(unit, ({ value, currency }) => {
         if (isUsageBased) {
           return `starts at ${formatMoney(value, currency.code)} per ${units} units`
         }
@@ -514,10 +522,14 @@ export const calculateUnitPrice = ({
       ? trimScale(calculatePercentage(multiply(dineroPrice, quantity), prorate))
       : trimScale(multiply(dineroPrice, quantity))
 
+  const unit = prorate !== undefined
+    ? trimScale(calculatePercentage(dineroPrice, prorate))
+    : dineroPrice
+
   return Ok({
     unitPrice: {
-      dinero: dineroPrice,
-      displayAmount: toDecimal(dineroPrice, ({ value, currency }) => {
+      dinero: unit,
+      displayAmount: toDecimal(unit, ({ value, currency }) => {
         if (isUsageBased) {
           return `starts at ${formatMoney(value, currency.code)} per unit`
         }

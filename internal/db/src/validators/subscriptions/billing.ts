@@ -39,13 +39,13 @@ export function configureBillingCycleSubscription({
     // calculate the trials, here we don't need to worry about the end of the day because
     // we are calculating the proration to the seconds, after the first cycle the billing will align with the start of the day
     const startDate = new Date(currentCycleStartAt)
-    const trialDaysEndAt = startDate.setUTCDate(startDate.getUTCDate() + trialDays)
+    // we subtract one millisecond to avoid overlapping with the next cycle
+    const trialDaysEndAt = startDate.setUTCDate(startDate.getUTCDate() + trialDays) - 1
     // if there  are trial days, our first cycle would be when the trails starts and ends at the end of the trial days
     // in this part proration is zero
 
     // if the end date is less than the trial days end date, we need to use the end date
     const effectiveEndCycle = endAt && endAt > 0 ? Math.min(trialDaysEndAt, endAt) : trialDaysEndAt
-
     const secondsInCycle = differenceInSeconds(effectiveEndCycle, currentCycleStartAt)
 
     return {

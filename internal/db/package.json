@@ -46,7 +46,7 @@
     "base-x": "^4.0.0",
     "date-fns": "^3.3.1",
     "dinero.js": "2.0.0-alpha.14",
-    "drizzle-orm": "^0.33.0",
+    "drizzle-orm": "^0.36.1",
     "drizzle-zod": "^0.5.1",
     "random-word-slugs": "^0.1.7",
     "zod": "^3.23.8"
@@ -55,7 +55,7 @@
     "@types/ws": "^8.5.10",
     "@unprice/tsconfig": "^0.1.0",
     "dotenv-cli": "^7.3.0",
-    "drizzle-kit": "^0.24.0",
+    "drizzle-kit": "^0.28.0",
     "tsx": "^4.7.2",
     "typescript": "^5.3.3",
     "vitest": "^2.0.5",

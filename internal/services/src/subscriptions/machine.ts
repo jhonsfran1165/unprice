@@ -32,7 +32,7 @@ import { UnPriceSubscriptionError } from "./errors"
 export type SubscriptionEventMap<S extends string> = {
   END_TRIAL: {
     payload: { now: number }
-    result: { subscriptionId: string; phaseId: string; status: S }
+    result: { subscriptionId: string; phaseId: string; status: S; invoiceId?: string; total?: number; paymentInvoiceId?: string }
     error: UnPriceSubscriptionError
   }
   CANCEL: {
@@ -84,6 +84,7 @@ export class SubscriptionStateMachine extends StateMachine<
   private readonly db: Database | TransactionDatabase
   private readonly logger: Logger
   private readonly analytics: Analytics
+  private readonly isTest: boolean
 
   constructor({
     db,
@@ -92,6 +93,7 @@ export class SubscriptionStateMachine extends StateMachine<
     customer,
     logger,
     analytics,
+    isTest = false,
   }: {
     db: Database | TransactionDatabase
     activePhase: SubscriptionPhaseExtended
@@ -99,6 +101,7 @@ export class SubscriptionStateMachine extends StateMachine<
     customer: Customer
     logger: Logger
     analytics: Analytics
+    isTest?: boolean
   }) {
     // the initial state of the machine
     super(activePhase.status)
@@ -109,7 +112,7 @@ export class SubscriptionStateMachine extends StateMachine<
     this.db = db
     this.logger = logger
     this.analytics = analytics
-
+    this.isTest = isTest ?? false
     /*
      * END_TRIAL
      * validate end of trial and generate an invoice for the subscription
@@ -172,6 +175,7 @@ export class SubscriptionStateMachine extends StateMachine<
         // for subscription that are billed in advance, we need to invoice the customer, and wait for the payment to be collected
         const invoice = await this.createInvoiceSubscriptionActivePhase({
           now: payload.now,
+          isEndTrial: true,
         })
 
         if (invoice.err) {
@@ -193,6 +197,9 @@ export class SubscriptionStateMachine extends StateMachine<
           status: subscription.status,
           phaseId: activePhase.id,
           subscriptionId: subscription.id,
+          invoiceId: payment.val.invoiceId,
+          paymentInvoiceId: payment.val.paymentInvoiceId,
+          total: payment.val.total,
         })
       },
     })
@@ -527,8 +534,8 @@ export class SubscriptionStateMachine extends StateMachine<
             tx.rollback()
           })
 
-        // update the subscription phase status
-        const phaseUpdated = await tx
+          // update the subscription phase status
+          const phaseUpdated = await tx
           .update(subscriptionPhases)
           .set({
             status: state ?? activePhase.status,
@@ -557,6 +564,19 @@ export class SubscriptionStateMachine extends StateMachine<
         phaseUpdated && this.setActivePhase(phaseUpdated)
         subscriptionUpdated && this.setSubscription(subscriptionUpdated)
 
+        // when testing we mock bd calls so we need to sync this way
+        if (this.isTest) {
+          Object.assign(subscriptionUpdated ?? {}, {
+            ...subscription,
+            ...subscriptionUpdated,
+          })
+
+          Object.assign(phaseUpdated ?? {}, {
+            ...activePhase,
+            ...phaseUpdated,
+          })
+        }
+
         return Ok({
           subscriptionId: subscription.id,
           phaseId: activePhase.id,
@@ -573,11 +593,11 @@ export class SubscriptionStateMachine extends StateMachine<
     }
   }
 
-  private getActivePhase(): SubscriptionPhaseExtended {
+  public getActivePhase(): SubscriptionPhaseExtended {
     return this.activePhase
   }
 
-  private getSubscription(): Subscription {
+  public getSubscription(): Subscription {
     return this.subscription
   }
 
@@ -630,15 +650,16 @@ export class SubscriptionStateMachine extends StateMachine<
       return Err(new UnPriceSubscriptionError({ message: "Subscription is not auto renewing" }))
     }
 
-    // subscription can only be renewed if they are active or trailing
-    if (!["active", "trailing"].includes(subscription.status)) {
+    // subscription can only be renewed if they are active or trialing
+    if (!["active", "trialing"].includes(subscription.status)) {
       return Err(
-        new UnPriceSubscriptionError({ message: "Subscription is not active or trailing" })
+        new UnPriceSubscriptionError({ message: "Subscription is not active or trialing" })
       )
     }
 
     // calculate next billing cycle
-    // here we calculate the next billing cycle, in order to do that we adn a milliseconde to the current cycle end date
+    // here we calculate the next billing cycle, in order to do that we add a millisecond to the current cycle end date example:
+    // if the current cycle end date is 2023-12-31T23:59:59Z we add a millisecond to get 2024-01-01T00:00:00.000Z
     // so we keep continuity with the current cycle
     const { cycleStart, cycleEnd } = configureBillingCycleSubscription({
       currentCycleStartAt: subscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
@@ -673,8 +694,9 @@ export class SubscriptionStateMachine extends StateMachine<
 
     // check if the subscription was already renewed
     // check the new cycle start and end dates are between now
-    if (now >= subscription.currentCycleStartAt && now <= subscription.currentCycleEndAt) {
+    if (now >= subscription.currentCycleStartAt && now < subscription.currentCycleEndAt) {
       return Ok(undefined)
+      // TODO: better return an error?
     }
 
     // renewing a phase implies setting the new cycle for the subscription
@@ -981,7 +1003,7 @@ export class SubscriptionStateMachine extends StateMachine<
     const currentState = this.getCurrentState()
 
     // check if the phase is active
-    if (!phase.active || !["trailing", "active"].includes(currentState)) {
+    if (!phase.active || !["trialing", "active"].includes(currentState)) {
       return Err(new UnPriceSubscriptionError({ message: "Phase is not active or not ready to invoice" }))
     }
 
@@ -1465,10 +1487,14 @@ export class SubscriptionStateMachine extends StateMachine<
         item.price.totalPrice.dinero
       )
 
-      if (formattedTotalAmountItem.err) {
+      const formattedUnitAmountItem = paymentProviderService.formatAmount(item.price.unitPrice.dinero)
+
+      if (formattedTotalAmountItem.err || formattedUnitAmountItem.err) {
         return Err(
           new UnPriceSubscriptionError({
-            message: `Error formatting amount: ${formattedTotalAmountItem.err.message}`,
+            message: `Error formatting amount: ${
+              formattedTotalAmountItem.err?.message ?? formattedUnitAmountItem.err?.message
+            }`,
           })
         )
       }
@@ -1487,7 +1513,7 @@ export class SubscriptionStateMachine extends StateMachine<
       if (invoiceItemExists) {
         const updateItemInvoice = await paymentProviderService.updateInvoiceItem({
           invoiceItemId: invoiceItemExists.id,
-          amount: formattedTotalAmountItem.val.amount,
+          totalAmount: formattedTotalAmountItem.val.amount,
           quantity: item.quantity,
           name: item.productSlug,
           isProrated: item.prorate !== 1,
@@ -1505,9 +1531,15 @@ export class SubscriptionStateMachine extends StateMachine<
         const itemInvoice = await paymentProviderService.addInvoiceItem({
           invoiceId: invoiceData.invoiceId,
           name: item.productSlug,
-          productId: item.productId,
+          // TODO: uncomment when ready
+          // for testing we don't send the product id so we can create the
+          // invoice item without having to create the product in the payment provider
+          // ...(this.isTest ? {} : { productId: item.productId }),
+          productId: item.productId.startsWith("feature-") ? undefined : item.productId,
           isProrated: item.prorate !== 1,
-          amount: formattedTotalAmountItem.val.amount,
+          totalAmount: formattedTotalAmountItem.val.amount,
+          unitAmount: formattedUnitAmountItem.val.amount,
+          description: item.description,
           quantity: item.quantity,
           currency: invoice.currency,
           metadata: item.metadata,
@@ -1567,7 +1599,7 @@ export class SubscriptionStateMachine extends StateMachine<
         if (creditChargeExists) {
           const creditCharge = await paymentProviderService.updateInvoiceItem({
             invoiceItemId: creditChargeExists.id,
-            amount: -amountCreditUsed,
+            totalAmount: -amountCreditUsed,
             name: "Credit",
             description: "Credit applied to the invoice",
             isProrated: false,
@@ -1590,7 +1622,7 @@ export class SubscriptionStateMachine extends StateMachine<
             name: "Credit",
             description: "Credit applied to the invoice",
             isProrated: false,
-            amount: -amountCreditUsed,
+            totalAmount: -amountCreditUsed,
             quantity: 1,
             currency: invoice.currency,
             metadata: {
@@ -1664,8 +1696,17 @@ export class SubscriptionStateMachine extends StateMachine<
           .returning()
           .then((res) => res[0])
 
+
         if (!updatedInvoice) {
           return Err(new UnPriceSubscriptionError({ message: "Error finalizing invoice" }))
+        }
+
+        // if it's a test, we need to assign the invoice id and url from the invoice
+        if (this.isTest) {
+          Object.assign(updatedInvoice, {
+            ...invoice,
+            ...updatedInvoice,
+          })
         }
 
         // update the state of the subscription
@@ -1712,7 +1753,7 @@ export class SubscriptionStateMachine extends StateMachine<
     now: number
   }): Promise<
     Result<
-      { status: InvoiceStatus; retries: number; pastDueAt: number | undefined },
+      { status: InvoiceStatus; retries: number; pastDueAt: number | undefined; total: number; invoiceId: string; paymentInvoiceId?: string },
       UnPriceSubscriptionError
     >
   > {
@@ -1763,7 +1804,7 @@ export class SubscriptionStateMachine extends StateMachine<
 
     // check if the invoice is already paid
     if (["paid", "void"].includes(status)) {
-      return Ok({ status: status, retries: paymentAttempts?.length ?? 0, pastDueAt })
+      return Ok({ status: status, retries: paymentAttempts?.length ?? 0, pastDueAt, total: invoiceData.total, invoiceId: invoice.id, paymentInvoiceId: invoiceData.invoiceId ?? undefined })
     }
 
     // if the invoice is draft, we can't collect the payment
@@ -1787,7 +1828,7 @@ export class SubscriptionStateMachine extends StateMachine<
     // validate if the invoice is failed
     if (status === "failed") {
       // meaning the invoice is past due and we cannot collect the payment with 3 attempts
-      return Ok({ status: "failed", retries: paymentAttempts?.length ?? 0, pastDueAt })
+      return Ok({ status: "failed", retries: paymentAttempts?.length ?? 0, pastDueAt, total: invoiceData.total, invoiceId: invoice.id, paymentInvoiceId: invoiceData.invoiceId ?? undefined })
     }
 
     // if the invoice is waiting, we need to check if the payment is successful
@@ -1837,6 +1878,9 @@ export class SubscriptionStateMachine extends StateMachine<
           status: statusInvoice.val.status,
           retries: updatedInvoice.paymentAttempts?.length ?? 0,
           pastDueAt,
+          total: invoiceData.total,
+          invoiceId: invoice.id,
+          paymentInvoiceId: invoiceData.invoiceId ?? undefined
         })
       }
 
@@ -1864,11 +1908,25 @@ export class SubscriptionStateMachine extends StateMachine<
           })
           .where(eq(invoices.id, invoice.id))
 
-        return Ok({ status: "failed", retries: paymentAttempts?.length ?? 0, pastDueAt })
+        return Ok({
+          status: "failed",
+          retries: paymentAttempts?.length ?? 0,
+          pastDueAt,
+          total: invoiceData.total,
+          invoiceId: invoice.id,
+          paymentInvoiceId: invoiceData.invoiceId ?? undefined
+        })
       }
 
       // if the invoice is not paid yet, we keep waiting for the payment
-      return Ok({ status: "waiting", retries: paymentAttempts?.length ?? 0, pastDueAt })
+      return Ok({
+        status: "waiting",
+        retries: paymentAttempts?.length ?? 0,
+        pastDueAt,
+        total: invoiceData.total,
+        invoiceId: invoice.id,
+        paymentInvoiceId: invoiceData.invoiceId ?? undefined
+      })
     }
 
     // 3 attempts max for the invoice
@@ -2008,7 +2066,14 @@ export class SubscriptionStateMachine extends StateMachine<
       result = "waiting"
     }
 
-    return Ok({ status: result, retries: paymentAttempts?.length ?? 0, pastDueAt })
+    return Ok({
+      status: result,
+      retries: paymentAttempts?.length ?? 0,
+      pastDueAt,
+      total: invoiceData.total,
+      invoiceId: invoiceData.id,
+      paymentInvoiceId: invoiceData.invoiceId ?? undefined
+    })
   }
 
   private async calculateSubscriptionActivePhaseItemsPrice(payload: {
@@ -2028,6 +2093,7 @@ export class SubscriptionStateMachine extends StateMachine<
           prorate: number
           productSlug: string
           type: FeatureType
+          description?: string
           metadata: {
             subscriptionItemId: string
           }
@@ -2050,6 +2116,7 @@ export class SubscriptionStateMachine extends StateMachine<
     // when billing in arrear we calculate usage for the current cycle + flat price current cycle
     const shouldBillInAdvance = whenToBill === "pay_in_advance"
 
+    // TODO: do I need to calculate the cycle here again?
     // calculate proration for the current billing cycle
     // will return the proration factor given the start and end of the cycle
     const calculatedCurrentBillingCycle = configureBillingCycleSubscription({
@@ -2167,16 +2234,42 @@ export class SubscriptionStateMachine extends StateMachine<
           )
         }
 
+        // give good description per item type so the customer can identify the charge
+        // take into account if the charge is prorated or not
+        // add the period of the charge if prorated
+        let description = undefined
+
+        if (item.featurePlanVersion.featureType === "usage") {
+          description = `${item.featurePlanVersion.feature.title} - usage`
+        } else if (item.featurePlanVersion.featureType === "flat") {
+          description = `${item.featurePlanVersion.feature.title} - flat`
+        } else if (item.featurePlanVersion.featureType === "tier") {
+          description = `${item.featurePlanVersion.feature.title} - tier`
+        } else if (item.featurePlanVersion.featureType === "package") {
+          description = `${item.featurePlanVersion.feature.title} - ${item.units} package of ${
+            item.featurePlanVersion.config?.units!
+          } units`
+        }
+
+        if (prorate !== 1) {
+          const startDate = new Date(Number(calculatedCurrentBillingCycle.cycleStart))
+          const endDate = new Date(Number(calculatedCurrentBillingCycle.cycleEnd))
+          const billingPeriod = startDate.getMonth() === endDate.getMonth()
+            ? `${startDate.toISOString().split("T")[0]} to ${endDate.toISOString().split("T")[0]}`
+            : `${startDate.toISOString().split("T")[0]} to ${endDate.toISOString().split("T")[0]}`
+
+          description += ` (prorated from ${billingPeriod})`
+        }
+
         // create an invoice item for each feature
         invoiceItems.push({
           quantity,
           productId: item.featurePlanVersion.feature.id,
-          // price will give you total price for the feature for the quantity and proration
-          // also the unit price of the feature
           price: priceCalculation.val,
           productSlug: item.featurePlanVersion.feature.slug,
           prorate: prorate,
           type: item.featurePlanVersion.featureType,
+          description: description,
           metadata: {
             subscriptionItemId: item.id,
           },
@@ -2208,7 +2301,7 @@ export class SubscriptionStateMachine extends StateMachine<
   }
 
   public async endTrial(payload: { now: number }): Promise<
-    Result<{ status: string }, UnPriceSubscriptionError>
+    Result<{ status: string; invoiceId?: string; total?: number; paymentInvoiceId?: string }, UnPriceSubscriptionError>
   > {
     const { now } = payload
 
@@ -2218,7 +2311,7 @@ export class SubscriptionStateMachine extends StateMachine<
       return Err(endTrial.err)
     }
 
-    return Ok({ status: endTrial.val.status })
+    return Ok({ status: endTrial.val.status, invoiceId: endTrial.val.invoiceId, total: endTrial.val.total, paymentInvoiceId: endTrial.val.paymentInvoiceId })
   }
 
   public async invoice(payload: { now: number }): Promise<

@@ -51,7 +51,8 @@ export interface AddInvoiceItemOpts {
   productId?: string
   description?: string
   isProrated: boolean
-  amount: number
+  totalAmount: number
+  unitAmount?: number
   quantity: number
   currency: Currency
   metadata?: Record<string, string>
@@ -59,7 +60,7 @@ export interface AddInvoiceItemOpts {
 
 export interface UpdateInvoiceItemOpts {
   invoiceItemId: string
-  amount: number
+  totalAmount: number
   name: string
   isProrated: boolean
   quantity: number
@@ -92,6 +93,7 @@ export type PaymentProviderInvoice = {
   invoiceUrl: string
   status: InvoiceProviderStatus | null
   invoiceId: string
+  total: number
   items: {
     id: string
     amount: number

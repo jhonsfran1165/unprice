@@ -548,6 +548,7 @@ export class SubscriptionService {
       whenToBillToUse === "pay_in_advance"
         ? calculatedBillingCycle.cycleStart.getTime()
         : calculatedBillingCycle.cycleEnd.getTime()
+
     const trialDaysEndAt = calculatedBillingCycle.trialDaysEndAt
       ? calculatedBillingCycle.trialDaysEndAt.getTime()
       : undefined
@@ -617,7 +618,8 @@ export class SubscriptionService {
           .set({
             status: subscriptionPhase.status,
             active: true,
-            nextInvoiceAt: nextInvoiceAtToUse,
+            // if there are trial days, we set the next invoice at to the end of the trial
+            nextInvoiceAt: trialDaysToUse > 0 ? calculatedBillingCycle.cycleEnd.getTime() : nextInvoiceAtToUse,
             planSlug: versionData.plan.slug,
             currentCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
             currentCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
