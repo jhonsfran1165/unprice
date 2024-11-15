@@ -54,11 +54,13 @@ export const getUsageCustomer = protectedApiOrActiveProjectProcedure
           })
       })
     ).catch((err) => {
-      console.error(err)
-      // TODO: handle this
+      opts.ctx.logger.error("Error getting usage", {
+        error: JSON.stringify(err),
+      })
+
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to get usage",
+        message: `Failed to get usage: ${err.message}`,
       })
     })
 

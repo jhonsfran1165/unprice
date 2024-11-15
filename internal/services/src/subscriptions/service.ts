@@ -393,11 +393,13 @@ export class SubscriptionService {
     // when creating a phase we need to check there is no active phase in the same start - end range for the subscription
     // if there is we need to return an error
     const activePhases = await (db ?? this.db).query.subscriptionPhases.findMany({
-      where: (phase, { eq, and, gte, lte }) =>
+      where: (phase, { eq, and, gte, lte, isNull, or }) =>
         and(
+          eq(phase.subscriptionId, subscriptionId),
           eq(phase.projectId, projectId),
           gte(phase.startAt, startAt),
-          lte(phase.endAt, endAt ?? Number.POSITIVE_INFINITY)
+          eq(phase.active, true),
+          or(isNull(phase.endAt), endAt ? lte(phase.endAt, endAt) : undefined)
         ),
     })
 
@@ -797,7 +799,10 @@ export class SubscriptionService {
             })
           )
         ).catch((e) => {
-          console.error(e)
+          this.logger.error("Error creating subscription phases", {
+            error: JSON.stringify(e),
+          })
+
           trx.rollback()
           throw e
         })

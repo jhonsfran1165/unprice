@@ -32,7 +32,6 @@ const handler = auth(async (req) => {
       }
 
       console.info("❌  Error in tRPC handler (lambda) on path", path)
-      console.error(error)
     },
   })
 

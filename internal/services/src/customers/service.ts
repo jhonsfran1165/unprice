@@ -674,7 +674,10 @@ export class CustomerService {
         })
 
         if (err) {
-          console.error(err)
+          this.logger.error("Error creating subscription", {
+            error: JSON.stringify(err),
+          })
+
           trx.rollback()
           throw err
         }
@@ -697,12 +700,12 @@ export class CustomerService {
         customerId: customerId,
       })
     } catch (error) {
-      console.error(error)
+      const err = error as Error
 
       return Ok({
         success: false,
         url: cancelUrl,
-        error: "Error while signing up",
+        error: `Error while signing up: ${err.message}`,
         customerId: "",
       })
     }

@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server"
 import { and, count, eq, getTableColumns } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { withDateFilters, withPagination } from "@unprice/db/utils"
@@ -37,7 +38,7 @@ export const listByActiveProject = protectedProjectProcedure
       // Transaction is used to ensure both queries are executed in a single transaction
       const { data, total } = await opts.ctx.db.transaction(async (tx) => {
         const query = tx
-          .selectDistinct({
+          .select({
             subscriptions: schema.subscriptions,
             customer: customerColumns,
           })
@@ -47,21 +48,6 @@ export const listByActiveProject = protectedProjectProcedure
             and(
               eq(schema.subscriptions.customerId, schema.customers.id),
               eq(schema.customers.projectId, schema.subscriptions.projectId)
-            )
-          )
-          .leftJoin(
-            schema.subscriptionPhases,
-            and(
-              eq(schema.subscriptionPhases.subscriptionId, schema.subscriptions.id),
-              eq(schema.subscriptionPhases.projectId, schema.subscriptions.projectId)
-            )
-          )
-          .innerJoin(
-            schema.versions,
-            and(
-              eq(schema.subscriptionPhases.planVersionId, schema.versions.id),
-              eq(schema.customers.projectId, schema.versions.projectId),
-              eq(schema.versions.projectId, project.id)
             )
           )
           .$dynamic()
@@ -106,7 +92,13 @@ export const listByActiveProject = protectedProjectProcedure
       const pageCount = Math.ceil(total / page_size)
       return { subscriptions: data, pageCount }
     } catch (err: unknown) {
-      console.error(err)
-      return { subscriptions: [], pageCount: 0 }
+      opts.ctx.logger.error("Error listing subscriptions", {
+        error: JSON.stringify(err),
+      })
+
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "There was an error listing subscriptions. Contact support.",
+      })
     }
   })

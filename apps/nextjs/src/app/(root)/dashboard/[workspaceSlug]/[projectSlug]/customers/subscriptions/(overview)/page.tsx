@@ -12,7 +12,6 @@ import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
 import { filtersDataTableCache } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
-import { SubscriptionSheet } from "../../_components/subscriptions/subscription-sheet"
 import { columns } from "../../_components/subscriptions/table-subscriptions/columns"
 
 export default async function PlanSubscriptionsPage({
@@ -39,22 +38,12 @@ export default async function PlanSubscriptionsPage({
           title="Subscriptions"
           description="Manage your subscriptions, add new subscriptions, update plans and more."
           action={
-            <div className="flex items-center space-x-1 rounded-md">
-              <div className="sm:col-span-full">
-                <SubscriptionSheet
-                  defaultValues={{
-                    customerId: "",
-                    projectId: "",
-                    phases: [],
-                  }}
-                >
-                  <Button variant={"primary"}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Subscription
-                  </Button>
-                </SubscriptionSheet>
-              </div>
-            </div>
+            <SuperLink href={`${baseUrl}/subscriptions/new`}>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Subscription
+              </Button>
+            </SuperLink>
           }
         />
       }
