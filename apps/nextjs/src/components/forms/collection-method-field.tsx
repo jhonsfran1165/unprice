@@ -26,14 +26,18 @@ export default function CollectionMethodFormField<TFieldValues extends FormValue
   return (
     <FormField
       control={form.control}
-      name={"phases.0.collectionMethod" as FieldPath<TFieldValues>}
+      name={"collectionMethod" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="flex w-full flex-col">
           <FormLabel>Collection Method</FormLabel>
           <FormDescription>
             Whether the subscription will be billed automatically or via invoice.
           </FormDescription>
-          <Select onValueChange={field.onChange} value={field.value ?? ""} disabled={isDisabled}>
+          <Select
+            onValueChange={field.onChange}
+            value={field.value?.toString() ?? ""}
+            disabled={isDisabled}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select collection method" />

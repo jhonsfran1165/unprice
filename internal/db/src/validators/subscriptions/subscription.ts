@@ -86,16 +86,24 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
 })
   .extend({
     config: subscriptionItemsConfigSchema.optional(),
+    customerId: z.string().optional(),
+    paymentMethodRequired: z.boolean().optional(),
+    items: subscriptionItemsSelectSchema.array().optional(),
+  })
+  .partial({
+    id: true,
+    customerId: true,
+    paymentMethodRequired: true,
+    paymentMethodId: true,
+    config: true,
+    items: true,
+    subscriptionId: true,
   })
   .omit({
     createdAtM: true,
     updatedAtM: true,
-  })
-  .partial({
     status: true,
-    id: true,
     projectId: true,
-    subscriptionId: true,
   })
   .required({
     planVersionId: true,
@@ -108,6 +116,19 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
 })
   .extend({
     phases: subscriptionPhaseInsertSchema.array().superRefine((data, ctx) => {
+      // validate payment method if payment method is required
+      data.forEach((phase, index) => {
+        if (phase.paymentMethodRequired) {
+          if (!phase.paymentMethodId) {
+            return ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Payment method is required for this phase",
+              path: [index, "paymentMethodId"],
+            })
+          }
+        }
+      })
+
       // at least one phase is required
       if (data.length === 0) {
         return ctx.addIssue({
@@ -118,7 +139,7 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
 
       // start date and end date can overlap
       for (const phase of data) {
-        if (phase.startAt && phase.endAt && phase.startAt >= phase.endAt) {
+        if (phase.endAt && phase.startAt >= phase.endAt) {
           return ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Start date must be before end date",
@@ -134,7 +155,8 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
         if (currentPhase?.endAt && nextPhase?.startAt && currentPhase.endAt > nextPhase.startAt) {
           return ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "Phases must be consecutive",
+            message: "Phases must be consecutive, set end date of the previous phase",
+            path: [i + 1, "startAt"],
           })
         }
       }
@@ -168,16 +190,9 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
     features: subscriptionItemsSelectSchema.array(),
   })
 
-export const subscriptionChangePlanSchema = subscriptionInsertSchema.partial().required({
-  id: true,
-  customerId: true,
-  projectId: true,
-})
-
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>
 export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
-export type SubscriptionChangePlan = z.infer<typeof subscriptionChangePlanSchema>
 export type InsertSubscriptionPhase = z.infer<typeof subscriptionPhaseInsertSchema>
 export type SubscriptionPhase = z.infer<typeof subscriptionPhaseSelectSchema>
 export type SubscriptionPhaseExtended = z.infer<typeof subscriptionPhaseExtendedSchema>

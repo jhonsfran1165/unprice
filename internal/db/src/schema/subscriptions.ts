@@ -58,6 +58,7 @@ export const subscriptions = pgTableProject(
     // this simplifies the queries when we need to get the active subscriptions
     active: boolean("active").notNull().default(true),
     // slug of the plan only for ui purposes
+    // TODO: is it a good idea to have the plan slug here?
     planSlug: text("plan_slug").default("FREE"),
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
 
@@ -139,9 +140,9 @@ export const subscriptionPhases = pgTableProject(
 
     // ************ billing data defaults comes from plan but created here so we can override if needed ************
     // this data normally comes from the plan version but we can override if needed
-    whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance").notNull(),
+    whenToBill: whenToBillEnum("when_to_bill").notNull().default("pay_in_advance"),
     // when to start each cycle for this subscription -
-    startCycle: integer("start_cycle").notNull().default(1).$type<StartCycle>(), // null means the first day of the month
+    startCycle: integer("start_cycle").notNull().$type<StartCycle>().default(1), // null means the first day of the month
     // a grace period of 1 day could handle edge cases when the payment is late for a few hours
     gracePeriod: integer("grace_period").notNull().default(1),
     // collection method for the subscription - charge_automatically or send_invoice
@@ -156,7 +157,7 @@ export const subscriptionPhases = pgTableProject(
     // when the trial ends
     trialEndsAt: bigint("trial_ends_at_m", { mode: "number" }),
     // when the subscription starts
-    startAt: bigint("start_at_m", { mode: "number" }).notNull().default(0),
+    startAt: bigint("start_at_m", { mode: "number" }).notNull(),
     // when the subscription ends if undefined the subscription is active and renewed every cycle depending on auto_renew flag
     endAt: bigint("end_at_m", { mode: "number" }),
     // ************ subscription important dates ************

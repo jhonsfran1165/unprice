@@ -27,7 +27,7 @@ export default function TrialDaysFormField<TFieldValues extends FormValues>({
   return (
     <FormField
       control={form.control}
-      name={"phases.0.trialDays" as FieldPath<TFieldValues>}
+      name={"trialDays" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className={cn("flex w-full flex-col", className)}>
           <FormLabel>Trial Days</FormLabel>

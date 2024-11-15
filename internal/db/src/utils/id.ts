@@ -21,12 +21,12 @@ export const prefixes = {
   customer_entitlement: "ce",
   subscription: "sub",
   subscription_item: "si",
+  subscription_phase: "sp",
   domain: "dom",
   plan_version: "pv",
   usage: "usage",
   log: "log",
   invoice: "inv",
-  subscription_phase: "sp",
 } as const
 
 // Thread-local counter for monotonicity within the same millisecond

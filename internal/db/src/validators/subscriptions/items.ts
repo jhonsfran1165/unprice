@@ -16,17 +16,20 @@ export const subscriptionItemExtendedSchema = createSelectSchema(subscriptionIte
 export const subscriptionItemsInsertSchema = createInsertSchema(subscriptionItems, {
   // units for the item, for flat features it's always 1, usage features it's the current usage
   units: z.coerce.number().min(1),
-}).partial({
-  id: true,
-  createdAtM: true,
-  updatedAtM: true,
-  projectId: true,
 })
+  .partial({
+    id: true,
+  })
+  .omit({
+    createdAtM: true,
+    updatedAtM: true,
+    projectId: true,
+  })
 
 export const subscriptionItemConfigSchema = z.object({
   featurePlanId: z.string(),
   featureSlug: z.string(),
-  isUsage: z.boolean().optional().default(false).describe("if the item is a usage item"),
+  isUsage: z.boolean().optional().describe("if the item is a usage item"),
   units: z.coerce
     .number()
     .min(1)

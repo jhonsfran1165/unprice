@@ -660,8 +660,8 @@ export class CustomerService {
             phases: [
               {
                 planVersionId: planVersion.id,
-                status: "active",
                 startAt: Date.now(),
+                active: true,
                 config: config,
                 collectionMethod: planVersion.collectionMethod,
                 whenToBill: planVersion.whenToBill,

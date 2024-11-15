@@ -9,20 +9,18 @@ import { revalidateAppPath } from "~/actions/revalidate"
 import { ConfirmAction } from "~/components/confirm-action"
 import { api } from "~/trpc/client"
 
-export const CancelSubscriptionButton = ({
+export const CancelSubscriptionPhaseButton = ({
   onConfirmAction,
-  subscriptionId,
-  projectId,
+  subscriptionPhaseId,
   variant = "destructive",
 }: {
   onConfirmAction?: () => void
-  subscriptionId: string
-  projectId: string
+  subscriptionPhaseId: string
   variant?: "destructive" | "secondary"
 }) => {
   const workspaceSlug = useParams().workspaceSlug as string
 
-  const cancelSubscription = api.subscriptions.cancel.useMutation({
+  const cancelSubscription = api.subscriptions.cancelPhase.useMutation({
     onSuccess: async () => {
       await revalidateAppPath(`/dashboard/${workspaceSlug}/settings/billing`, "page")
     },
@@ -32,8 +30,8 @@ export const CancelSubscriptionButton = ({
     startTransition(() => {
       toast.promise(
         cancelSubscription.mutateAsync({
-          id: subscriptionId,
-          projectId,
+          id: subscriptionPhaseId,
+          endAt: Date.now(),
         }),
         {
           loading: "Cancelling subscription...",

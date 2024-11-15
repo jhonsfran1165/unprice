@@ -40,7 +40,7 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
   isChangePlanSubscription?: boolean
 }) {
   const [switcherCustomerOpen, setSwitcherCustomerOpen] = useState(false)
-  const selectedPlanVersionId = form.watch("phases.0.planVersionId" as FieldPath<TFieldValues>)
+  const selectedPlanVersionId = form.watch("planVersionId" as FieldPath<TFieldValues>)
 
   const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
     {
@@ -50,7 +50,6 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
     },
     {
       refetchOnWindowFocus: false,
-      enabled: isDisabled, // only fetch plans when dialog is open
     }
   )
 
@@ -63,20 +62,13 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
   return (
     <FormField
       control={form.control}
-      name={"phases.0.planVersionId" as FieldPath<TFieldValues>}
+      name={"planVersionId" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>{isChangePlanSubscription ? "Current Plan" : "Plan Version"}</FormLabel>
+          <FormLabel>Plan Version</FormLabel>
           <FormDescription>
-            {isChangePlanSubscription
-              ? "Current plan version this customer is subscribed to"
-              : "Select the plan version to create the subscription"}
+            Select the plan version to create the subscription phase
           </FormDescription>
-          {!isChangePlanSubscription ? (
-            <div className="font-normal text-xs leading-snug">
-              All the items will be configured based on the plan version selected.
-            </div>
-          ) : null}
           <Popover
             modal={true}
             open={switcherCustomerOpen}

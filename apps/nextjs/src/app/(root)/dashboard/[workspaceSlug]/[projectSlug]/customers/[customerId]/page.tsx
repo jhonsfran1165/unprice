@@ -120,7 +120,7 @@ export default async function CustomerPage({
                   status: STATUS_SUBSCRIPTION.map((value) => ({
                     value: value,
                     label: value,
-                  }))
+                  })),
                 },
               }}
             />

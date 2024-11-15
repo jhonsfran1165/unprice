@@ -3,9 +3,8 @@
 import { add, addDays, endOfDay, formatDate, startOfDay, startOfMonth, subDays } from "date-fns"
 import { ArrowRight, CalendarIcon } from "lucide-react"
 import { useState } from "react"
-import type { UseFormReturn } from "react-hook-form"
+import type { FieldErrors, FieldPath, UseFormReturn } from "react-hook-form"
 
-import type { InsertSubscription } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Calendar } from "@unprice/ui/calendar"
 import {
@@ -20,28 +19,46 @@ import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { cn } from "@unprice/ui/utils"
 import { toastAction } from "~/lib/toast"
 
-export default function DurationFormField({
+import type { FieldValues } from "react-hook-form"
+
+interface FormValues extends FieldValues {
+  startAt: number
+  endAt?: number | null
+}
+
+export default function DurationFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
 }: {
-  form: UseFormReturn<InsertSubscription>
+  form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
 }) {
-  const startAt = form.getValues("phases.0.startAt")
-  const endAt = form.getValues("phases.0.endAt")
+  const startAt = form.getValues("startAt" as FieldPath<TFieldValues>)
+  const endAt = form.getValues("endAt" as FieldPath<TFieldValues>)
 
-  const [start, setStart] = useState<Date | undefined>(startAt ? new Date(startAt) : undefined)
+  const [start, setStart] = useState<Date | undefined>(new Date(startAt))
   const [end, setEnd] = useState<Date | undefined>(endAt ? new Date(endAt) : undefined)
   const [isOpenPopOverStart, setIsOpenPopOverStart] = useState(false)
   const [isOpenPopOverEnd, setIsOpenPopOverEnd] = useState(false)
 
   const { errors } = form.formState
 
+  // Helper function to safely get the error message
+  const getErrorMessage = (
+    errors: FieldErrors<TFieldValues>,
+    field: string
+  ): string | undefined => {
+    const error = errors[field as keyof typeof errors]
+    return error && typeof error === "object" && "message" in error
+      ? (error.message as string)
+      : undefined
+  }
+
   return (
     <div className="flex w-full flex-col gap-2 lg:w-1/2">
       <FormLabel
         className={cn({
-          "text-destructive": errors.phases?.[0]?.startAt,
+          "text-destructive": errors.startAt,
         })}
       >
         Duration
@@ -52,7 +69,7 @@ export default function DurationFormField({
       <div className="flex flex-row rounded-md border bg-background-bg">
         <FormField
           control={form.control}
-          name="phases.0.startAt"
+          name={"startAt" as FieldPath<TFieldValues>}
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <Popover open={isOpenPopOverStart} onOpenChange={setIsOpenPopOverStart}>
@@ -161,7 +178,7 @@ export default function DurationFormField({
         />
         <FormField
           control={form.control}
-          name="phases.0.endAt"
+          name={"endAt" as FieldPath<TFieldValues>}
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <Popover open={isOpenPopOverEnd} onOpenChange={setIsOpenPopOverEnd}>
@@ -316,9 +333,7 @@ export default function DurationFormField({
           )}
         />
       </div>
-      {errors.phases?.[0]?.startAt && (
-        <FormMessage>{errors.phases?.[0]?.startAt.message}</FormMessage>
-      )}
+      {errors.startAt && <FormMessage>{getErrorMessage(errors, "startAt")}</FormMessage>}
     </div>
   )
 }

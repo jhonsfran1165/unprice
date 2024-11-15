@@ -39,7 +39,7 @@
     "with-env": "dotenv -e ../../.env.local --"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.9.0",
+    "@neondatabase/serverless": "^0.10.3",
     "@t3-oss/env-nextjs": "0.9.1",
     "@unprice/config": "^0.1.0",
     "@unprice/error": "^0.1.0",

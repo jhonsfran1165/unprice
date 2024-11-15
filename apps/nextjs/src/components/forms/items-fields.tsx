@@ -16,7 +16,12 @@ import {
 
 import type { RouterOutputs } from "@unprice/api"
 import { currencySymbol } from "@unprice/db/utils"
-import type { Currency, SubscriptionItemConfig } from "@unprice/db/validators"
+import type {
+  Currency,
+  SubscriptionItem,
+  SubscriptionItemConfig,
+  SubscriptionItemsConfig,
+} from "@unprice/db/validators"
 import {
   calculateFreeUnits,
   calculatePricePerFeature,
@@ -31,7 +36,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@unprice/ui/dialog"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
 import { Separator } from "@unprice/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@unprice/ui/table"
@@ -45,63 +57,46 @@ import { PriceFeature } from "~/components/forms/price-feature"
 import { PricingItem } from "~/components/forms/pricing-item"
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { nFormatter } from "~/lib/nformatter"
-import { api } from "~/trpc/client"
 
 type PlanVersionFeaturesResponse =
   RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"][0]["planFeatures"][0]
 
 interface FormValues extends FieldValues {
-  config?: SubscriptionItemConfig[]
+  config?: SubscriptionItemsConfig
   planVersionId: string
-  nextPlanVersionId?: string | null
-  items?: SubscriptionItemConfig[]
+  items?: SubscriptionItem[]
 }
 
 export default function ConfigItemsFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
-  isChangePlanSubscription,
   withSeparator,
   withFeatureDetails,
+  planVersions,
+  isLoading,
 }: {
   form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
   isChangePlanSubscription?: boolean
   withSeparator?: boolean
   withFeatureDetails?: boolean
+  planVersions: RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"]
+  isLoading?: boolean
 }) {
-  const planVersionId = form.watch("phases.0.planVersionId" as FieldPath<TFieldValues>)
-  const nextPlanVersionId = form.watch("phases.0.nextPlanVersionId" as FieldPath<TFieldValues>)
-  const itemsSubs = form.watch("phases.0.items" as FieldPath<TFieldValues>)
+  const planVersionId = form.watch("planVersionId" as FieldPath<TFieldValues>)
+  const itemsSubs = form.watch("items" as FieldPath<TFieldValues>)
 
   // TODO: use later for addons support
   const isSubscriptionTypeAddons = false
 
-  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
-    {
-      enterprisePlan: true,
-      published: true,
-      active: !isDisabled && !isChangePlanSubscription,
-    },
-    {
-      enabled: !!planVersionId || !!nextPlanVersionId,
-      select: (data) => {
-        const planVersion = data.planVersions.find((version) => version.id === planVersionId)
-        const newPlanVersion = data.planVersions.find((version) => version.id === nextPlanVersionId)
-        return { planVersion, newPlanVersion }
-      },
-    }
-  )
-
-  const selectedPlanVersion = data?.planVersion
-  const selectedNewPlanVersion = data?.newPlanVersion
+  const selectedPlanVersion = planVersions.find((version) => version.id === planVersionId)
 
   const items = useFieldArray({
     control: form.control,
-    name: "phases.0.config" as FieldArrayPath<TFieldValues>,
+    name: "config" as FieldArrayPath<TFieldValues>,
   })
 
-  type ConfigFieldName<T> = "phases.0.config" extends ArrayPath<T> ? "phases.0.config" : never
+  type ConfigFieldName<T> = "config" extends ArrayPath<T> ? "config" : never
 
   const fields = items.fields as FieldArrayWithId<
     TFieldValues,
@@ -110,7 +105,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
   >[]
 
   useEffect(() => {
-    if (!isChangePlanSubscription && selectedPlanVersion) {
+    if (selectedPlanVersion) {
       const { err, val: itemsConfig } = createDefaultSubscriptionConfig({
         planVersion: selectedPlanVersion,
         items: itemsSubs,
@@ -123,40 +118,19 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
 
       items.replace(itemsConfig as FieldArray<TFieldValues, ArrayPath<TFieldValues>>[])
     }
-
-    if (isChangePlanSubscription && selectedNewPlanVersion) {
-      const { err, val: itemsConfig } = createDefaultSubscriptionConfig({
-        planVersion: selectedNewPlanVersion,
-        items: itemsSubs,
-      })
-
-      if (err) {
-        console.error(err)
-        return
-      }
-
-      items.replace(itemsConfig as FieldArray<TFieldValues, ArrayPath<TFieldValues>>[])
-    }
-  }, [selectedPlanVersion?.id, selectedNewPlanVersion?.id])
+  }, [selectedPlanVersion?.id])
 
   const { versionFeatures, versionAddons } = useMemo(() => {
     const features = new Map<string, PlanVersionFeaturesResponse>()
     const addons = new Map<string, PlanVersionFeaturesResponse>()
 
-    if (isChangePlanSubscription) {
-      selectedNewPlanVersion?.planFeatures.forEach((feature) => {
-        features.set(feature.id, feature)
-        addons.set(feature.id, feature)
-      })
-    } else {
-      selectedPlanVersion?.planFeatures.forEach((feature) => {
-        features.set(feature.id, feature)
-        addons.set(feature.id, feature)
-      })
-    }
+    selectedPlanVersion?.planFeatures.forEach((feature) => {
+      features.set(feature.id, feature)
+      addons.set(feature.id, feature)
+    })
 
     return { versionFeatures: features, versionAddons: addons }
-  }, [selectedPlanVersion?.id, selectedNewPlanVersion?.id])
+  }, [selectedPlanVersion?.id])
 
   const [isDelete, setConfirmDelete] = useState<Map<string, boolean>>(
     new Map<string, boolean>(fields.map((item) => [item.id, false] as [string, boolean]))
@@ -178,17 +152,12 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
 
   // calculate the total price for the plan
   const displayTotalPrice = useMemo(() => {
-    let initialTotal = dinero({
-      amount: 0,
-      currency: currencies[selectedPlanVersion?.currency ?? "USD"],
-    })
+    if (!selectedPlanVersion || !configValues) return ""
 
-    if (isChangePlanSubscription) {
-      initialTotal = dinero({
-        amount: 0,
-        currency: currencies[selectedNewPlanVersion?.currency ?? "USD"],
-      })
-    }
+    const initialTotal = dinero({
+      amount: 0,
+      currency: currencies[selectedPlanVersion.currency],
+    })
 
     let hasUsage = false
 
@@ -234,16 +203,13 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
             "text-destructive": errors.config,
           })}
         >
-          <Typography variant="h4" className="my-auto block">
-            Features configuration
-          </Typography>
+          <Typography variant="h5">Features configuration</Typography>
         </FormLabel>
 
-        <div className="font-normal text-xs leading-snug">
-          {
-            "Configure the quantity for each feature, for usage based feature, the price will be calculated with the reported usage. You can't change the quantity for flat features"
-          }
-        </div>
+        <FormDescription>
+          Configure the quantity for each feature, for usage based feature, the price will be
+          calculated with the reported usage. You can't change the quantity for flat features"
+        </FormDescription>
         {errors.config && <FormMessage>{getErrorMessage(errors, "config")}</FormMessage>}
       </div>
 
@@ -295,7 +261,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
 
                 return (
                   <TableRow key={item.id} className="border-b bg-transparent">
-                    <TableCell className="table-cell h-24 flex-row items-center gap-1 pl-1">
+                    <TableCell className="table-cell h-16 flex-row items-center gap-1 pl-1">
                       <div className="flex items-center justify-start gap-1">
                         {withFeatureDetails && (
                           <PropagationStopper className="flex items-center justify-start">
@@ -334,7 +300,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                       ) : (
                         <FormField
                           control={form.control}
-                          name={`phases.0.config.${index}.units` as FieldPath<TFieldValues>}
+                          name={`config.${index}.units` as FieldPath<TFieldValues>}
                           render={({ field }) => (
                             <FormItem className="justify-center text-center">
                               <FormMessage className="font-light text-xs" />
@@ -359,7 +325,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                         />
                       )}
                     </TableCell>
-                    <TableCell className="flex h-24 items-center justify-end gap-1 pr-1">
+                    <TableCell className="flex h-16 items-center justify-end gap-1 pr-1">
                       <PriceFeature
                         selectedPlanVersion={selectedPlanVersion!}
                         quantity={units || 0}
@@ -423,7 +389,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
               })}
 
               <TableRow className="border-t border-b text-muted-foreground">
-                <TableCell colSpan={2} className="h-10 text-right font-semibold">
+                <TableCell colSpan={2} className="h-10 gap-1 pl-1 text-left font-semibold">
                   Total per {selectedPlanVersion?.billingPeriod}
                 </TableCell>
                 <TableCell colSpan={1} className="h-10 text-right text-xs">

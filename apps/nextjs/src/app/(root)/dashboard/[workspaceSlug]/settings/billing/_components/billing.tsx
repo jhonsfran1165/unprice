@@ -30,17 +30,25 @@ export function BillingCard({
   subscriptions: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"]
   featuresWithUsage: RouterOutputs["analytics"]["getUsageCustomerUnprice"]["featuresWithUsage"]
 }) {
-  // TODO: customer can have multiple subscriptions
+  // TODO: customer can only have one subscription for now
   const subscription = subscriptions[0]
-  const planVersion = subscription?.planVersion
 
-  // all users should have a subscription
-  if (!subscription || !planVersion) return null
+  // TODO: handle case where no subscription is found
+  if (!subscription) return null
+
+  const activePhase = subscription.phases.find((phase) => {
+    const now = Date.now()
+    return phase.startAt <= now && phase.endAt && phase.endAt >= now
+  })
+
+  if (!activePhase) return null
+
+  const planVersion = activePhase.planVersion
 
   const calculatedBillingCycle = calculateBillingCycle({
     currentDate: new Date(),
-    startDate: new Date(subscription.startAt),
-    billingCycleStart: subscription.startCycle ?? 1,
+    startDate: new Date(activePhase.startAt),
+    billingCycleStart: activePhase.startCycle ?? 1,
     billingPeriod: planVersion.billingPeriod ?? "month",
   })
 
@@ -81,7 +89,7 @@ export function BillingCard({
     prorate: calculatedBillingCycle.prorationFactor,
   })
 
-  const isTrial = subscription.trialEndsAt ? subscription.trialEndsAt > Date.now() : false
+  const isTrial = activePhase.trialEndsAt ? activePhase.trialEndsAt > Date.now() : false
 
   if (err || totalPricePlanErr || totalPricePlanErrForecast) {
     return (
@@ -97,12 +105,12 @@ export function BillingCard({
         <CardTitle>Subscription usage</CardTitle>
         <CardDescription>
           {isTrial &&
-            subscription.trialEndsAt &&
+            activePhase.trialEndsAt &&
             subscription.currentCycleEndAt &&
             `You currently are on the trial of the ${
               planVersion.plan.slug
             } plan. After the trial ends on ${formatDate(
-              subscription.trialEndsAt,
+              activePhase.trialEndsAt,
               subscription.timezone,
               "MMM d, yy"
             )}, you will be billed in the next billing cycle on ${formatDate(

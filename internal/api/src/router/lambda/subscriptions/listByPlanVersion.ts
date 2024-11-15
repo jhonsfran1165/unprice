@@ -4,11 +4,7 @@ import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
 
 export const listByPlanVersion = protectedProjectProcedure
-  .input(
-    subscriptionSelectSchema.pick({
-      planVersionId: true,
-    })
-  )
+  .input(z.object({ planVersionId: z.string() }))
   .output(
     z.object({
       subscriptions: z.array(subscriptionSelectSchema),
@@ -19,8 +15,12 @@ export const listByPlanVersion = protectedProjectProcedure
     const project = opts.ctx.project
 
     const subscriptionData = await opts.ctx.db.query.subscriptions.findMany({
-      where: (subscription, { eq, and }) =>
-        and(eq(subscription.projectId, project.id), eq(subscription.planVersionId, planVersionId)),
+      with: {
+        phases: {
+          where: (phase, { eq }) => eq(phase.planVersionId, planVersionId),
+        },
+      },
+      where: (subscription, { eq }) => eq(subscription.projectId, project.id),
     })
 
     if (!subscriptionData || subscriptionData.length === 0) {

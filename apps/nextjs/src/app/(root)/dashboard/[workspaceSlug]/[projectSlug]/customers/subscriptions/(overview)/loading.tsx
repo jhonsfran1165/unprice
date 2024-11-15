@@ -3,7 +3,7 @@ import { Plus } from "lucide-react"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import HeaderTab from "~/components/layout/header-tab"
-import { CustomerDialog } from "../_components/customers/customer-dialog"
+import { CustomerDialog } from "../../_components/customers/customer-dialog"
 
 import { TabNavigation, TabNavigationLink } from "@unprice/ui/tabs-navigation"
 import { Typography } from "@unprice/ui/typography"

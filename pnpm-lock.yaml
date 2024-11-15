@@ -299,67 +299,6 @@ importers:
         specifier: ^5.3.3
         version: 5.5.4
 
-  apps/workflows:
-    dependencies:
-      '@dinero.js/currencies':
-        specifier: 2.0.0-alpha.14
-        version: 2.0.0-alpha.14
-      '@neondatabase/serverless':
-        specifier: ^0.9.0
-        version: 0.9.4
-      '@t3-oss/env-nextjs':
-        specifier: 0.9.1
-        version: 0.9.1(typescript@5.5.4)(zod@3.23.8)
-      '@trigger.dev/nextjs':
-        specifier: ^2.3.19
-        version: 2.3.19(@trigger.dev/sdk@2.3.19)(next@14.3.0-canary.44)
-      '@trigger.dev/react':
-        specifier: ^2.3.19
-        version: 2.3.19(react-dom@18.3.1)(react@18.3.1)
-      '@trigger.dev/sdk':
-        specifier: ^2.3.19
-        version: 2.3.19
-      '@unprice/db':
-        specifier: ^0.1.0
-        version: link:../../internal/db
-      '@unprice/tinybird':
-        specifier: workspace:^0.1.0
-        version: link:../../internal/tinybird
-      next:
-        specifier: 14.3.0-canary.44
-        version: 14.3.0-canary.44(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
-      react:
-        specifier: 18.3.1
-        version: 18.3.1
-      react-dom:
-        specifier: 18.3.1
-        version: 18.3.1(react@18.3.1)
-    devDependencies:
-      '@types/node':
-        specifier: 20.11.24
-        version: 20.11.24
-      '@types/react':
-        specifier: ^18.3.1
-        version: 18.3.3
-      '@types/react-dom':
-        specifier: ^18.3.0
-        version: 18.3.0
-      '@types/ws':
-        specifier: ^8.5.10
-        version: 8.5.12
-      '@unprice/tsconfig':
-        specifier: ^0.1.0
-        version: link:../../tooling/typescript
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.4.2
-      typescript:
-        specifier: ^5.3.3
-        version: 5.5.4
-      ws:
-        specifier: ^8.17.1
-        version: 8.18.0
-
   internal/api:
     dependencies:
       '@baselime/trpc-opentelemetry-middleware':
@@ -522,8 +461,8 @@ importers:
   internal/db:
     dependencies:
       '@neondatabase/serverless':
-        specifier: ^0.9.0
-        version: 0.9.4
+        specifier: ^0.10.3
+        version: 0.10.3
       '@t3-oss/env-nextjs':
         specifier: 0.9.1
         version: 0.9.1(typescript@5.5.4)(zod@3.23.8)
@@ -544,7 +483,7 @@ importers:
         version: 2.0.0-alpha.14
       drizzle-orm:
         specifier: ^0.36.1
-        version: 0.36.1(@neondatabase/serverless@0.9.4)
+        version: 0.36.1(@neondatabase/serverless@0.10.3)
       drizzle-zod:
         specifier: ^0.5.1
         version: 0.5.1(drizzle-orm@0.36.1)(zod@3.23.8)
@@ -3999,6 +3938,12 @@ packages:
       is-node-process: 1.2.0
       outvariant: 1.4.3
       strict-event-emitter: 0.5.1
+    dev: false
+
+  /@neondatabase/serverless@0.10.3:
+    resolution: {integrity: sha512-F4kqSj++GUwLnO3OzPb95Y/xn3qVLkjJA/36YTqT7c3MRgA/IBOIs/Is1+HBZkGfEwfMG3A9tFkxiEg5eBjxDw==}
+    dependencies:
+      '@types/pg': 8.11.6
     dev: false
 
   /@neondatabase/serverless@0.9.4:
@@ -7813,10 +7758,6 @@ packages:
       tailwindcss: 3.4.1
     dev: false
 
-  /@tanstack/query-core@5.0.0-beta.0:
-    resolution: {integrity: sha512-VGq/H3PuRoj0shOcg1S5Flv3YD2qNz2ttk8w5xe5AHQE1I8NO9EHSBUxezIpk4dD6M7bQDtwHBMqqU2EwMwyUw==}
-    dev: false
-
   /@tanstack/query-core@5.51.9:
     resolution: {integrity: sha512-HsAwaY5J19MD18ykZDS3aVVh+bAt0i7m6uQlFC2b77DLV9djo+xEN7MWQAQQTR8IM+7r/zbozTQ7P0xr0bHuew==}
 
@@ -7845,24 +7786,6 @@ packages:
       '@tanstack/react-query': 5.51.11(react@18.3.1)
       next: 14.3.0-canary.44(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
       react: 18.3.1
-    dev: false
-
-  /@tanstack/react-query@5.0.0-beta.2(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-JdK1HRw20tuwg3GfT3QZTkuS7s2KDa9FeozuJ7jZULlwPczZagouqYmM6+PL0ad6jfCnw8NzmLFtZdlBx6cTmA==}
-    peerDependencies:
-      react: ^18.0.0
-      react-dom: ^18.0.0
-      react-native: '*'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-    dependencies:
-      '@tanstack/query-core': 5.0.0-beta.0
-      client-only: 0.0.1
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
     dev: false
 
   /@tanstack/react-query@5.51.11(react@18.3.1):
@@ -8275,25 +8198,11 @@ packages:
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
     dev: false
 
-  /@trigger.dev/core-backend@2.3.19:
-    resolution: {integrity: sha512-TLior4RZSD+MnTeCytS1aG+o9ZQowSb7cMTml0jZVvA65Cy5uvKF7bkpoPmyIxyw+ZAwmrIsefZzAzI4Iu7+aw==}
-    engines: {node: '>=18.0.0'}
-    dev: false
-
   /@trigger.dev/core-backend@3.0.0-beta.56:
     resolution: {integrity: sha512-8GmYTgUmljFIWGUzZy+Mh/uuaxgzs0GCHjZgwnigChG3znmz46InwQH7HW9Gxo+6A3aSss05NZUzVKrnFCY1bQ==}
     engines: {node: '>=18.0.0'}
     dependencies:
       '@opentelemetry/api': 1.9.0
-    dev: false
-
-  /@trigger.dev/core@2.3.19:
-    resolution: {integrity: sha512-ZL5G8pBFOamgmHzg4hgjt+5jYBJlkvizTOYPAjhNlqhzq+wr1Czsp7I5JeynHSo55bc/TMen75uGh7blwBCaNw==}
-    engines: {node: '>=18.0.0'}
-    dependencies:
-      ulidx: 2.4.0
-      zod: 3.22.3
-      zod-error: 1.5.0
     dev: false
 
   /@trigger.dev/core@3.0.0-beta.56:
@@ -8319,61 +8228,6 @@ packages:
       zod: 3.22.3
       zod-error: 1.5.0
       zod-validation-error: 1.5.0(zod@3.22.3)
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-    dev: false
-
-  /@trigger.dev/nextjs@2.3.19(@trigger.dev/sdk@2.3.19)(next@14.3.0-canary.44):
-    resolution: {integrity: sha512-HzNyuasNNvAWwdDTxPrA7ij8b3nKFX4tSDaT+3oPOwvZTkTlPF08ekRX/RWRLo4jVSdj3HOddqZO/B699pFV/Q==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      '@trigger.dev/sdk': ^2.3.19
-      next: '>=12.0.0'
-    dependencies:
-      '@trigger.dev/sdk': 2.3.19
-      debug: 4.3.6(supports-color@9.4.0)
-      next: 14.3.0-canary.44(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
-  /@trigger.dev/react@2.3.19(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-Qn4osRpu+P5yyIMI6e25DjrwPTk8f+j3/MS8oQQuA/ehVIcXBg7nmDcwmDsmXnYDALWP+9EaGtGvdPc5I2NBXw==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18
-    dependencies:
-      '@tanstack/react-query': 5.0.0-beta.2(react-dom@18.3.1)(react@18.3.1)
-      '@trigger.dev/core': 2.3.19
-      debug: 4.3.6(supports-color@9.4.0)
-      react: 18.3.1
-      zod: 3.22.3
-    transitivePeerDependencies:
-      - react-dom
-      - react-native
-      - supports-color
-    dev: false
-
-  /@trigger.dev/sdk@2.3.19:
-    resolution: {integrity: sha512-NjX5vEK3ydx5Bac0rwQbHqOZWJJqT6qQ+/GkTErKDs59v+qD+s1g/fB/TtEGpsAjdZK9FIPm4ooFemYVmpIm/A==}
-    engines: {node: '>=18.0.0'}
-    dependencies:
-      '@trigger.dev/core': 2.3.19
-      '@trigger.dev/core-backend': 2.3.19
-      chalk: 5.3.0
-      cronstrue: 2.50.0
-      debug: 4.3.6(supports-color@9.4.0)
-      evt: 2.5.7
-      get-caller-file: 2.0.5
-      git-remote-origin-url: 4.0.0
-      git-repo-info: 2.1.1
-      slug: 6.1.0
-      terminal-link: 3.0.0
-      ulid: 2.3.0
-      uuid: 9.0.1
-      ws: 8.18.0
-      zod: 3.22.3
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -11132,7 +10986,7 @@ packages:
       '@neondatabase/serverless': 0.9.4
     dev: false
 
-  /drizzle-orm@0.36.1(@neondatabase/serverless@0.9.4):
+  /drizzle-orm@0.36.1(@neondatabase/serverless@0.10.3):
     resolution: {integrity: sha512-F4hbimnMEhyWzDowQB4xEuVJJWXLHZYD7FYwvo8RImY+N7pStGqsbfmT95jDbec1s4qKmQbiuxEDZY90LRrfIw==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -11224,7 +11078,7 @@ packages:
       sqlite3:
         optional: true
     dependencies:
-      '@neondatabase/serverless': 0.9.4
+      '@neondatabase/serverless': 0.10.3
     dev: false
 
   /drizzle-zod@0.5.1(drizzle-orm@0.36.1)(zod@3.23.8):
@@ -11233,7 +11087,7 @@ packages:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.36.1(@neondatabase/serverless@0.9.4)
+      drizzle-orm: 0.36.1(@neondatabase/serverless@0.10.3)
       zod: 3.23.8
     dev: false
 

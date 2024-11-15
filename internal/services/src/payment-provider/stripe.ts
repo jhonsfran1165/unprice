@@ -243,7 +243,9 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
 
-    const billingPeriod = `${new Date(opts.startCycle).toISOString().split("T")[0]} to ${new Date(opts.endCycle).toISOString().split("T")[0]}`
+    const billingPeriod = `${new Date(opts.startCycle).toISOString().split("T")[0]} to ${
+      new Date(opts.endCycle).toISOString().split("T")[0]
+    }`
 
     // const dueDate only if collection method is send_invoice
     let dueDate: number | undefined
@@ -303,7 +305,9 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
 
-    const billingPeriod = `${new Date(opts.startCycle).toISOString().split("T")[0]} to ${new Date(opts.endCycle).toISOString().split("T")[0]}`
+    const billingPeriod = `${new Date(opts.startCycle).toISOString().split("T")[0]} to ${
+      new Date(opts.endCycle).toISOString().split("T")[0]
+    }`
 
     // const dueDate only if collection method is send_invoice
     let dueDate: number | undefined

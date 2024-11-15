@@ -2,7 +2,6 @@ import { STATUS_SUBSCRIPTION } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import { TabNavigation, TabNavigationLink } from "@unprice/ui/tabs-navigation"
 import { Typography } from "@unprice/ui/typography"
-import { startOfDay } from "date-fns"
 import { Plus } from "lucide-react"
 import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
@@ -13,8 +12,8 @@ import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
 import { filtersDataTableCache } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
-import { SubscriptionSheet } from "../_components/subscriptions/subscription-sheet"
-import { columns } from "../_components/subscriptions/table-subscriptions/columns"
+import { SubscriptionSheet } from "../../_components/subscriptions/subscription-sheet"
+import { columns } from "../../_components/subscriptions/table-subscriptions/columns"
 
 export default async function PlanSubscriptionsPage({
   params,
@@ -46,16 +45,7 @@ export default async function PlanSubscriptionsPage({
                   defaultValues={{
                     customerId: "",
                     projectId: "",
-                    planVersionId: "",
-                    type: "plan",
-                    collectionMethod: "charge_automatically",
-                    autoRenew: true,
-                    config: [],
-                    defaultPaymentMethodId: "",
-                    startAt: startOfDay(new Date()).getTime(),
-                    timezone: "UTC",
-                    startCycle: 1,
-                    whenToBill: "pay_in_arrear",
+                    phases: [],
                   }}
                 >
                   <Button variant={"primary"}>

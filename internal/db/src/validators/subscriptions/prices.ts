@@ -522,9 +522,8 @@ export const calculateUnitPrice = ({
       ? trimScale(calculatePercentage(multiply(dineroPrice, quantity), prorate))
       : trimScale(multiply(dineroPrice, quantity))
 
-  const unit = prorate !== undefined
-    ? trimScale(calculatePercentage(dineroPrice, prorate))
-    : dineroPrice
+  const unit =
+    prorate !== undefined ? trimScale(calculatePercentage(dineroPrice, prorate)) : dineroPrice
 
   return Ok({
     unitPrice: {

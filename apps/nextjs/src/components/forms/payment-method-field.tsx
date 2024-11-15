@@ -1,8 +1,16 @@
 "use client"
 
 import { APP_DOMAIN } from "@unprice/config"
+import type { PaymentProvider } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@unprice/ui/form"
 import { RadioGroup, RadioGroupItem } from "@unprice/ui/radio-group"
 import { Separator } from "@unprice/ui/separator"
 import { Typography } from "@unprice/ui/typography"
@@ -14,57 +22,39 @@ import { PaymentMethodDialog } from "~/components/forms/payment-method-dialog"
 import { api } from "~/trpc/client"
 
 interface FormValues extends FieldValues {
-  customerId: string
-  defaultPaymentMethodId?: string | null
-  subscriptionCustomerId?: string | null
-  planVersionId?: string | null
-  nextPlanVersionId?: string | null
+  customerId?: string
+  paymentMethodId?: string | null
 }
 
 export default function PaymentMethodsFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
-  isChangePlanSubscription,
+  paymentProviderRequired,
   withSeparator,
+  paymentProvider,
 }: {
   form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
-  isChangePlanSubscription?: boolean
+  paymentProviderRequired?: boolean
   withSeparator?: boolean
+  paymentProvider?: PaymentProvider
 }) {
   const workspaceSlug = useParams().workspaceSlug as string
   const projectSlug = useParams().projectSlug as string
   const customerId = form.watch("customerId" as FieldPath<TFieldValues>)
-  const planVersionId = isChangePlanSubscription
-    ? form.watch("phases.0.nextPlanVersionId" as FieldPath<TFieldValues>)
-    : form.watch("phases.0.planVersionId" as FieldPath<TFieldValues>)
+
   const successUrl = `${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`
   const cancelUrl = `${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`
 
   const { errors } = form.formState
 
-  // get the selected plan version
-  const { data: selectedPlanVersion } = api.planVersions.listByActiveProject.useQuery(
-    {
-      enterprisePlan: true,
-      published: true,
-      active: !isChangePlanSubscription,
-    },
-    {
-      select: (data) => {
-        return data.planVersions.find((version) => version.id === planVersionId) || null
-      },
-      enabled: !!planVersionId,
-    }
-  )
-
   const { data, isLoading } = api.customers.listPaymentMethods.useQuery(
     {
       customerId: customerId,
-      provider: selectedPlanVersion?.paymentProvider ?? "stripe",
+      provider: paymentProvider ?? "stripe",
     },
     {
-      enabled: !!customerId && !!planVersionId,
+      enabled: !!customerId,
     }
   )
 
@@ -82,7 +72,7 @@ export default function PaymentMethodsFormField<TFieldValues extends FormValues>
   }
 
   // if payment method is not required, hide the field
-  if (!selectedPlanVersion?.paymentMethodRequired) {
+  if (!paymentProviderRequired) {
     return null
   }
 
@@ -92,26 +82,24 @@ export default function PaymentMethodsFormField<TFieldValues extends FormValues>
       <div className="flex flex-col gap-2">
         <FormLabel
           className={cn({
-            "text-destructive": errors.defaultPaymentMethodId,
+            "text-destructive": errors.paymentMethodId,
           })}
         >
-          <Typography variant="h4" className="my-auto block">
-            Payment method
-          </Typography>
+          <Typography variant="h5">Payment method</Typography>
         </FormLabel>
 
-        <div className="font-normal text-xs leading-snug">
-          {"Select the payment method you want to use for this subscription."}
-        </div>
+        <FormDescription>
+          Select the payment method you want to use for this subscription.
+        </FormDescription>
 
-        {errors.defaultPaymentMethodId && (
-          <FormMessage>{getErrorMessage(errors, "defaultPaymentMethodId")}</FormMessage>
+        {errors.paymentMethodId && (
+          <FormMessage>{getErrorMessage(errors, "paymentMethodId")}</FormMessage>
         )}
       </div>
       {hasPaymentMethods && (
         <FormField
           control={form.control}
-          name={"phases.0.defaultPaymentMethodId" as FieldPath<TFieldValues>}
+          name={"paymentMethodId" as FieldPath<TFieldValues>}
           render={({ field }) => (
             <FormItem className="w-full space-y-1">
               <RadioGroup

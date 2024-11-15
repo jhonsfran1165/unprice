@@ -15,6 +15,13 @@
       "when": 1730561017988,
       "tag": "0001_far_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1731424861607,
+      "tag": "0002_hot_warbound",
+      "breakpoints": true
     }
   ]
 }

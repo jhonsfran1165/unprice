@@ -8,12 +8,10 @@ import HeaderTab from "~/components/layout/header-tab"
 
 import type { RouterOutputs } from "@unprice/api"
 import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
-import { Button } from "@unprice/ui/button"
 import { Typography } from "@unprice/ui/typography"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import { BillingCard } from "./_components/billing"
-import { UpgradeDialog } from "./_components/upgrade-dialog"
 
 export default async function BillingPage({ params }: { params: { workspaceSlug: string } }) {
   const { workspaceSlug } = params
@@ -74,18 +72,24 @@ async function SubscriptionCard({
 }: {
   subscriptions: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"]
 }) {
-  // TODO: customer can have multiple subscriptions
+  // TODO: customer can only have one subscription for now
   const subscription = subscriptions[0]
 
   // TODO: handle case where no subscription is found
   if (!subscription) return null
 
-  const autoRenewal = subscription.autoRenew
-  const trialEndsAt = subscription.trialEndsAt
-  const endAt = subscription.endAt
-  const isProrated = subscription.prorated
-  const currentTrialDays = subscription.trialEndsAt
-    ? differenceInCalendarDays(subscription.trialEndsAt, Date.now())
+  const activePhase = subscription.phases.find((phase) => {
+    const now = Date.now()
+    return phase.startAt <= now && phase.endAt && phase.endAt >= now
+  })
+
+  if (!activePhase) return null
+
+  const autoRenewal = activePhase.autoRenew
+  const trialEndsAt = activePhase.trialEndsAt
+  const endAt = subscription.expiresAt
+  const currentTrialDays = activePhase.trialEndsAt
+    ? differenceInCalendarDays(activePhase.trialEndsAt, Date.now())
     : 0
 
   /**
@@ -105,10 +109,10 @@ async function SubscriptionCard({
             <div className="flex items-center justify-between">
               <div className="font-semibold text-md">
                 {currentTrialDays > 0 ? "Trial" : "Subscription"} Plan:{" "}
-                <span className="text-primary">{subscription.planVersion.plan.slug}</span>
+                <span className="text-primary">{subscription.planSlug}</span>
               </div>
 
-              {!subscription.planVersion.plan.defaultPlan && (
+              {/* {!subscription.planVersion.plan.defaultPlan && (
                 <UpgradeDialog
                   defaultValues={{
                     id: subscription.id,
@@ -123,24 +127,7 @@ async function SubscriptionCard({
                     Change Plan
                   </Button>
                 </UpgradeDialog>
-              )}
-
-              {subscription.planVersion.plan.defaultPlan && (
-                <UpgradeDialog
-                  defaultValues={{
-                    id: subscription.id,
-                    endAt: Date.now(),
-                    customerId: subscription.customerId,
-                    nextPlanVersionId: "",
-                    config: [],
-                    projectId: subscription.projectId,
-                  }}
-                >
-                  <Button variant="primary" size="sm">
-                    Upgrade Plan
-                  </Button>
-                </UpgradeDialog>
-              )}
+              )} */}
             </div>
             <div className="gap-2 rounded-lg bg-background-bg p-4">
               <Typography variant="h6">Current Billing Cycle</Typography>
@@ -151,10 +138,10 @@ async function SubscriptionCard({
               <div className="flex flex-col py-4">
                 <Typography variant="p" affects="removePaddingMargin">
                   <span className="font-bold">
-                    Your subscription {subscription.startAt > Date.now() ? "will start" : "started"}{" "}
+                    Your subscription {activePhase.startAt > Date.now() ? "will start" : "started"}{" "}
                     at:
                   </span>{" "}
-                  {formatDate(subscription.startAt, subscription.timezone, "MMM d, yyyy")}
+                  {formatDate(activePhase.startAt, subscription.timezone, "MMM d, yyyy")}
                 </Typography>
                 <Typography variant="p" affects="removePaddingMargin">
                   <span className="font-bold">Next billing date:</span>{" "}
@@ -188,15 +175,6 @@ async function SubscriptionCard({
                 </AlertDescription>
               </Alert>
             )}
-            {isProrated && (
-              <Alert>
-                <AlertTitle>Subscription Is Prorated</AlertTitle>
-                <AlertDescription>
-                  Your subscription is prorated because it was created in the middle of the billing
-                  cycle.
-                </AlertDescription>
-              </Alert>
-            )}
           </div>
         ) : (
           <div className="py-8 text-center">
@@ -217,10 +195,10 @@ async function UsageCard() {
 
   // TODO: customer can have multiple subscriptions
   const subscription = subscriptions[0]
-  const planVersion = subscription?.planVersion
+  const activePhase = subscription?.phases[0]
 
   // TODO: handle case where no subscription is found
-  if (!subscription || !planVersion) return null
+  if (!subscription || !activePhase) return null
 
   const { featuresWithUsage } = await api.analytics.getUsageCustomerUnprice({
     customerId: subscription.customerId,

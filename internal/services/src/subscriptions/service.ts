@@ -71,14 +71,16 @@ export class SubscriptionService {
     projectId,
     now,
     includeCustom,
+    db,
   }: {
     customerId: string
     projectId: string
     now: number
     includeCustom: boolean
+    db?: Database | TransactionDatabase
   }): Promise<CustomerEntitlement[]> {
     // get the active entitlements for the customer
-    const activeEntitlements = await this.db.query.customerEntitlements.findMany({
+    const activeEntitlements = await (db ?? this.db).query.customerEntitlements.findMany({
       where: (ent, { eq, and, gte, lte, isNull, or }) =>
         and(
           eq(ent.customerId, customerId),
@@ -104,17 +106,20 @@ export class SubscriptionService {
     projectId,
     customerId,
     now,
+    db,
   }: {
     subscriptionId: string
     projectId: string
     customerId: string
     now: number
+    db?: Database | TransactionDatabase
   }): Promise<Result<void, UnPriceSubscriptionError>> {
     // get the active phase for the subscription
     const { err, val: activePhase } = await this.getActivePhase({
       subscriptionId,
       projectId,
       now,
+      db,
     })
 
     if (err) {
@@ -128,6 +133,7 @@ export class SubscriptionService {
       projectId,
       now,
       includeCustom: false,
+      db,
     })
 
     const activeSubItems = activePhase.items
@@ -201,7 +207,7 @@ export class SubscriptionService {
     sqlChunks.push(sql`end`)
 
     // Perform database operations
-    await this.db.transaction(async (tx) => {
+    await (db ?? this.db).transaction(async (tx) => {
       try {
         if (entitiesToCreate.length > 0) {
           await tx
@@ -283,13 +289,15 @@ export class SubscriptionService {
     subscriptionId,
     projectId,
     now,
+    db,
   }: {
     subscriptionId: string
     projectId: string
     now: number
+    db?: Database | TransactionDatabase
   }): Promise<Result<SubscriptionPhaseExtended, UnPriceSubscriptionError>> {
     // get the subscription
-    const subscription = await this.db.query.subscriptions.findFirst({
+    const subscription = await (db ?? this.db).query.subscriptions.findFirst({
       with: {
         phases: {
           // get active phase now
@@ -353,10 +361,12 @@ export class SubscriptionService {
     input,
     subscriptionId,
     projectId,
+    db,
   }: {
     input: InsertSubscriptionPhase
     subscriptionId: string
     projectId: string
+    db?: Database | TransactionDatabase
   }): Promise<Result<SubscriptionPhase, UnPriceSubscriptionError | SchemaError>> {
     const { success, data, error } = subscriptionPhaseInsertSchema.safeParse(input)
 
@@ -382,12 +392,24 @@ export class SubscriptionService {
 
     // when creating a phase we need to check there is no active phase in the same start - end range for the subscription
     // if there is we need to return an error
-    const activePhases = await this.db.query.subscriptionPhases.findMany({
-      where: (phase, { eq, and, gte, lte, isNull, or }) =>
-        and(eq(phase.projectId, projectId), isNull(phase.endAt)),
+    const activePhases = await (db ?? this.db).query.subscriptionPhases.findMany({
+      where: (phase, { eq, and, gte, lte }) =>
+        and(
+          eq(phase.projectId, projectId),
+          gte(phase.startAt, startAt),
+          lte(phase.endAt, endAt ?? Number.POSITIVE_INFINITY)
+        ),
     })
 
-    const versionData = await this.db.query.versions.findFirst({
+    if (activePhases.length > 0) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "There is already an active phase in the same date range",
+        })
+      )
+    }
+
+    const versionData = await (db ?? this.db).query.versions.findFirst({
       with: {
         planFeatures: {
           with: {
@@ -441,7 +463,7 @@ export class SubscriptionService {
     let endAtToUse = endAt ?? null
 
     // get subscription with phases from start date
-    const subscription = await this.db.query.subscriptions.findFirst({
+    const subscription = await (db ?? this.db).query.subscriptions.findFirst({
       where: (sub, { eq }) => eq(sub.id, subscriptionId),
       with: {
         phases: {
@@ -555,7 +577,7 @@ export class SubscriptionService {
 
     // all this is done in a transaction
 
-    const result = await this.db.transaction(async (trx) => {
+    const result = await (db ?? this.db).transaction(async (trx) => {
       // create the subscription phase
       const subscriptionPhase = await trx
         .insert(subscriptionPhases)
@@ -619,7 +641,8 @@ export class SubscriptionService {
             status: subscriptionPhase.status,
             active: true,
             // if there are trial days, we set the next invoice at to the end of the trial
-            nextInvoiceAt: trialDaysToUse > 0 ? calculatedBillingCycle.cycleEnd.getTime() : nextInvoiceAtToUse,
+            nextInvoiceAt:
+              trialDaysToUse > 0 ? calculatedBillingCycle.cycleEnd.getTime() : nextInvoiceAtToUse,
             planSlug: versionData.plan.slug,
             currentCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
             currentCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
@@ -635,6 +658,7 @@ export class SubscriptionService {
         projectId,
         customerId: subscription.customerId,
         now: Date.now(),
+        db: trx,
       })
 
       if (syncEntitlementsResult.err) {
@@ -664,8 +688,6 @@ export class SubscriptionService {
   }): Promise<Result<Subscription, UnPriceSubscriptionError | SchemaError>> {
     const { success, data, error } = subscriptionInsertSchema.safeParse(input)
 
-    // IMPORTANT: for now we only allow one subscription per customer
-
     if (!success) {
       return Err(SchemaError.fromZod(error, input))
     }
@@ -676,7 +698,7 @@ export class SubscriptionService {
       with: {
         subscriptions: {
           // get active subscriptions of the customer
-          where: (sub, { eq }) => eq(sub.status, "active"),
+          where: (sub, { eq }) => eq(sub.active, true),
         },
         project: true,
       },
@@ -686,6 +708,16 @@ export class SubscriptionService {
           operators.eq(customer.projectId, projectId)
         ),
     })
+
+    // IMPORTANT: for now we only allow one subscription per customer
+    if (customerData?.subscriptions?.length) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message:
+            "Customer already has a subscription, add a new phase to the existing subscription if ",
+        })
+      )
+    }
 
     if (!customerData?.id) {
       return Err(
@@ -755,13 +787,13 @@ export class SubscriptionService {
         }
 
         // create the phases
-        // TODO: test if a single phase fails, the subscription is not created
-        await Promise.all(
+        const phasesResult = await Promise.all(
           phases.map((phase) =>
             this.createPhase({
               input: phase,
               projectId,
               subscriptionId: newSubscription.id,
+              db: trx,
             })
           )
         ).catch((e) => {
@@ -769,6 +801,17 @@ export class SubscriptionService {
           trx.rollback()
           throw e
         })
+
+        if (phasesResult.some((r) => r.err)) {
+          trx.rollback()
+          return Err(
+            new UnPriceSubscriptionError({
+              message: `Error while creating subscription phases: ${phasesResult
+                .map((r) => r.err?.message)
+                .join(", ")}`,
+            })
+          )
+        }
 
         return Ok(newSubscription)
       } catch (e) {

@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
-import ConfigUnpriceItemsFormField from "~/components/forms/items-unprice-fields"
+import ConfigItemsFormField from "~/components/forms/items-fields"
 import SelectUnpricePlanFormField from "~/components/forms/select-unprice-plan-field"
 import { SubmitButton } from "~/components/submit-button"
 import { useZodForm } from "~/lib/zod-form"
@@ -33,6 +33,17 @@ export default function NewWorkspaceForm({
       cancelUrl: `${APP_DOMAIN}`,
     },
   })
+
+  const { data, isLoading } = api.planVersions.listByUnpriceProject.useQuery(
+    {
+      enterprisePlan: true,
+      published: true,
+      active: true,
+    },
+    {
+      enabled: true,
+    }
+  )
 
   const signUpWorkspace = api.workspaces.signUp.useMutation({
     onSuccess: async ({ url }) => {
@@ -69,7 +80,12 @@ export default function NewWorkspaceForm({
 
         <SelectUnpricePlanFormField form={form} />
 
-        <ConfigUnpriceItemsFormField form={form} withSeparator />
+        <ConfigItemsFormField
+          form={form}
+          withSeparator
+          planVersions={data?.planVersions ?? []}
+          isLoading={isLoading}
+        />
 
         <div className="mt-8 flex justify-end space-x-4">
           <SubmitButton

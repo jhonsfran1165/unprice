@@ -54,7 +54,9 @@ export const columns: ColumnDef<Subscription>[] = [
     accessorKey: "customer",
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
-    cell: ({ row }) => <div className="whitespace-nowrap text-sm">{row.original.customer.email}</div>,
+    cell: ({ row }) => (
+      <div className="whitespace-nowrap text-sm">{row.original.customer.email}</div>
+    ),
     size: 40,
   },
   {

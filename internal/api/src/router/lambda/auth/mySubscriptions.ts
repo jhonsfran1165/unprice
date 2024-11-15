@@ -1,7 +1,11 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { planVersionExtendedSchema, subscriptionSelectSchema } from "@unprice/db/validators"
+import {
+  planVersionExtendedSchema,
+  subscriptionPhaseExtendedSchema,
+  subscriptionSelectSchema,
+} from "@unprice/db/validators"
 
 import { protectedWorkspaceProcedure } from "../../../trpc"
 
@@ -11,7 +15,11 @@ export const mySubscriptions = protectedWorkspaceProcedure
     z.object({
       subscriptions: subscriptionSelectSchema
         .extend({
-          planVersion: planVersionExtendedSchema,
+          phases: subscriptionPhaseExtendedSchema
+            .extend({
+              planVersion: planVersionExtendedSchema,
+            })
+            .array(),
         })
         .array(),
     })
@@ -31,14 +39,27 @@ export const mySubscriptions = protectedWorkspaceProcedure
       with: {
         subscriptions: {
           with: {
-            planVersion: {
+            phases: {
               with: {
-                planFeatures: {
+                planVersion: {
                   with: {
-                    feature: true,
+                    plan: true,
+                    planFeatures: {
+                      with: {
+                        feature: true,
+                      },
+                    },
                   },
                 },
-                plan: true,
+                items: {
+                  with: {
+                    featurePlanVersion: {
+                      with: {
+                        feature: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },

@@ -114,13 +114,15 @@ export function PricingItem({
         </div>
       )}
       <div className="flex w-full items-center gap-1">
-        <span className={cn("font-medium text-sm capitalize", className)}>{displayFeature}</span>
+        <span className={cn("font-light text-muted-foreground text-sm capitalize", className)}>
+          {displayFeature}
+        </span>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <HelpCircle className="size-4 font-light" />
+            <HelpCircle className="size-3.5 font-light text-muted-foreground" />
           </TooltipTrigger>
-          <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
+          <TooltipContent align="end" side="right" sideOffset={10} alignOffset={-5}>
             <div className="flex w-[300px] flex-col gap-2 p-2">
               <Typography variant="h6">
                 Feature type {feature.featureType} {feature.config?.usageMode}

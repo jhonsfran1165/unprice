@@ -26,7 +26,7 @@ type PlanVersion = RouterOutputs["plans"]["getSubscriptionsBySlug"]["subscriptio
 const schemaPlanVersion = z.custom<PlanVersion>()
 
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
-  const { version, customer, ...subscription } = schemaPlanVersion.parse(row.original)
+  const { customer, ...subscription } = schemaPlanVersion.parse(row.original)
   const [isOpen, setIsOpen] = useState(false)
   const [propsForm, setPropsForm] = useState<{
     isChangePlanSubscription: boolean
@@ -74,7 +74,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <SheetContent className="flex max-h-screen w-full flex-col space-y-4 overflow-y-scroll lg:w-[700px] md:w-1/2">
+        <SheetContent className="hide-scrollbar flex max-h-screen w-full flex-col space-y-4 overflow-y-scroll lg:w-[700px] md:w-1/2">
           <SheetHeader>
             <SheetTitle className="text-2xl">Subscription Form</SheetTitle>
             <SheetDescription>Details for this subscription</SheetDescription>
@@ -83,7 +83,6 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
           <SubscriptionForm
             defaultValues={{
               ...subscription,
-              config: [],
             }}
             {...propsForm}
             setDialogOpen={setIsOpen}

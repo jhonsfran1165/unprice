@@ -27,7 +27,12 @@ export const endSchedule = schedules.task({
       where: (sub, { eq, and, lte, or }) =>
         and(
           eq(sub.active, true),
-          or(lte(sub.cancelAt, now), lte(sub.expiresAt, now), lte(sub.changeAt, now), lte(sub.pastDueAt, now))
+          or(
+            lte(sub.cancelAt, now),
+            lte(sub.expiresAt, now),
+            lte(sub.changeAt, now),
+            lte(sub.pastDueAt, now)
+          )
         ),
     })
 
@@ -72,6 +77,7 @@ export const endSchedule = schedules.task({
           changeAt: changeAt,
         })
       } else if (pastDueAt && pastDueAt <= now) {
+        // TODO: implement the past due logic
         await cancelTask.triggerAndWait({
           subscriptionId: phase.subscriptionId,
           activePhaseId: phase.id,

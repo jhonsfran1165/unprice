@@ -119,12 +119,14 @@ export async function GET(req: NextRequest) {
     await api.subscriptions.signUp({
       customerId: customerSession.customer.id,
       projectId: customerSession.customer.projectId,
-      type: "plan",
-      planVersionId: customerSession.planVersion.id,
-      startAt: Date.now(),
-      status: "active",
-      config: customerSession.planVersion.config,
-      defaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
+      phases: [
+        {
+          startAt: Date.now(),
+          planVersionId: customerSession.planVersion.id,
+          config: customerSession.planVersion.config,
+          paymentMethodId: paymentMethods.data.at(0)?.id ?? "",
+        },
+      ],
       // trialDays: planVersion.trialDays,
     })
 

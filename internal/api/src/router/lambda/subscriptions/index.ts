@@ -1,14 +1,16 @@
 import { createTRPCRouter } from "../../../trpc"
-import { changePlan } from "./changePlan"
+import { cancelPhase } from "./cancelPhase"
 import { create } from "./create"
+import { getById } from "./getById"
 import { listByActiveProject } from "./listByActiveProject"
 import { listByPlanVersion } from "./listByPlanVersion"
 import { signUp } from "./signUp"
 
 export const subscriptionRouter = createTRPCRouter({
-  changePlan: changePlan,
   create: create,
   listByActiveProject: listByActiveProject,
   listByPlanVersion: listByPlanVersion,
   signUp: signUp,
+  getById: getById,
+  cancelPhase: cancelPhase,
 })
