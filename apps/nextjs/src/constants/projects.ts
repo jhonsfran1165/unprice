@@ -51,18 +51,18 @@ export const PROJECT_NAV: DashboardRoute[] = [
 
 export const PROJECT_SHORTCUTS = [
   {
-    name: "Add Plan",
-    href: "/",
+    name: "See Plans",
+    href: "plans",
     icon: Link,
   },
   {
-    name: "Subscribe to plan",
-    href: "#",
+    name: "Create Subscription",
+    href: "customers/subscriptions/new",
     icon: Link,
   },
   {
-    name: "Add Customer",
-    href: "#",
+    name: "All Customers",
+    href: "customers",
     icon: Link,
   },
 ]
