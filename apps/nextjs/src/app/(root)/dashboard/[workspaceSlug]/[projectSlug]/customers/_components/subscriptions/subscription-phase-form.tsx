@@ -74,7 +74,12 @@ export function SubscriptionPhaseForm({
   return (
     <Form {...form}>
       <form className="space-y-6">
-        <SelectPlanFormField form={form} isDisabled={editMode} />
+        <SelectPlanFormField
+          form={form}
+          isDisabled={editMode}
+          planVersions={planVersions?.planVersions ?? []}
+          isLoading={isLoading}
+        />
 
         <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
           <CollectionMethodFormField form={form} isDisabled={editMode} />

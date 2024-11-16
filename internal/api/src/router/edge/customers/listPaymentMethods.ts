@@ -57,33 +57,42 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
       }
     }
 
-    const paymentProviderService = new PaymentProviderService({
-      customer: customerData,
-      logger: opts.ctx.logger,
-      paymentProviderId: provider,
-    })
+    try {
+      const paymentProviderService = new PaymentProviderService({
+        customer: customerData,
+        logger: opts.ctx.logger,
+        paymentProviderId: provider,
+      })
 
-    const defaultPaymentMethodId = await paymentProviderService.getDefaultPaymentMethodId()
+      const defaultPaymentMethodId = await paymentProviderService.getDefaultPaymentMethodId()
 
-    if (defaultPaymentMethodId.err) {
+      if (defaultPaymentMethodId.err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: defaultPaymentMethodId.err.message,
+        })
+      }
+
+      const { err, val } = await paymentProviderService.listPaymentMethods({
+        limit: 5,
+      })
+
+      if (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err.message,
+        })
+      }
+
+      return {
+        paymentMethods: val,
+      }
+    } catch (err) {
+      const error = err as Error
+
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: defaultPaymentMethodId.err.message,
+        message: error.message,
       })
-    }
-
-    const { err, val } = await paymentProviderService.listPaymentMethods({
-      limit: 5,
-    })
-
-    if (err ?? !val) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: err.message,
-      })
-    }
-
-    return {
-      paymentMethods: val,
     }
   })

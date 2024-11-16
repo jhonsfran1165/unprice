@@ -544,13 +544,13 @@ export class CustomerService {
 
     const planProject = planVersion.project
     const paymentProvider = planVersion.paymentProvider
-    const paymentRequired = planVersion.paymentMethodRequired ?? false
-    const trialDays = planVersion.trialDays ?? 0
+    const paymentRequired = planVersion.paymentMethodRequired
+
     const customerId = newId("customer")
     const customerSuccessUrl = successUrl.replace("{CUSTOMER_ID}", customerId)
 
     // if payment is required, we need to go through payment provider flow first
-    if (paymentRequired && trialDays === 0) {
+    if (paymentRequired) {
       const paymentProviderService = new PaymentProviderService({
         logger: this.logger,
         paymentProviderId: paymentProvider,

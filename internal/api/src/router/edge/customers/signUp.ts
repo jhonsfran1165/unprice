@@ -1,7 +1,9 @@
+import { TRPCError } from "@trpc/server"
+import type { Database } from "@unprice/db"
 import { customerSignUpSchema } from "@unprice/db/validators"
+import { CustomerService } from "@unprice/services/customers"
 import { z } from "zod"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
-import { signUpCustomer } from "../../../utils/shared"
 
 export const signUp = protectedApiOrActiveProjectProcedure
   .meta({
@@ -24,9 +26,26 @@ export const signUp = protectedApiOrActiveProjectProcedure
   .mutation(async (opts) => {
     const project = opts.ctx.project
 
-    return await signUpCustomer({
+    const customer = new CustomerService({
+      cache: opts.ctx.cache,
+      db: opts.ctx.db as Database,
+      analytics: opts.ctx.analytics,
+      logger: opts.ctx.logger,
+      metrics: opts.ctx.metrics,
+      waitUntil: opts.ctx.waitUntil,
+    })
+
+    const { err, val } = await customer.signUp({
       input: opts.input,
-      ctx: opts.ctx,
       projectId: project.id,
     })
+
+    if (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: err.message,
+      })
+    }
+
+    return val
   })

@@ -127,7 +127,6 @@ export async function GET(req: NextRequest) {
           paymentMethodId: paymentMethods.data.at(0)?.id ?? "",
         },
       ],
-      // trialDays: planVersion.trialDays,
     })
 
     // redirect the user to the success URL

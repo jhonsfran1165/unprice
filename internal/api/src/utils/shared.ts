@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server"
 import { type Database, and, eq, sql } from "@unprice/db"
 import { members, workspaces } from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
-import type { CustomerSignUp, WorkspaceInsert } from "@unprice/db/validators"
+import type { WorkspaceInsert } from "@unprice/db/validators"
 import { CustomerService, UnPriceCustomerError } from "@unprice/services/customers"
 import { getMonth, getYear } from "date-fns"
 import type { Context } from "../trpc"
@@ -162,41 +162,6 @@ export const reportUsageFeature = async ({
           code: "INTERNAL_SERVER_ERROR",
           message: `Error verifying feature: ${err.toString()}`,
         })
-    }
-  }
-
-  return val
-}
-
-export const signUpCustomer = async ({
-  input,
-  ctx,
-  projectId,
-}: {
-  input: CustomerSignUp
-  ctx: Context
-  projectId: string
-}): Promise<{ success: boolean; url: string; error?: string; customerId: string }> => {
-  const customer = new CustomerService({
-    cache: ctx.cache,
-    db: ctx.db as Database,
-    analytics: ctx.analytics,
-    logger: ctx.logger,
-    metrics: ctx.metrics,
-    waitUntil: ctx.waitUntil,
-  })
-
-  const { err, val } = await customer.signUp({
-    input: input,
-    projectId: projectId,
-  })
-
-  if (err) {
-    return {
-      success: false,
-      url: "",
-      customerId: "",
-      error: err.message,
     }
   }
 

@@ -126,7 +126,12 @@ export default async function CustomerPage({
             />
           </Suspense>
         </TabsContent>
-        <TabsContent value="paymentMethods">
+        <TabsContent value="paymentMethods" className="mt-4">
+          <div className="flex flex-col px-1 py-4">
+            <Typography variant="p" affects="removePaddingMargin">
+              Payment Methods of this customer
+            </Typography>
+          </div>
           <PaymentMethodForm
             customerId={customer.id}
             successUrl={`${APP_DOMAIN}/${workspaceSlug}/${projectSlug}/customers/${customerId}`}

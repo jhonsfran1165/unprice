@@ -12,7 +12,9 @@ import { cn } from "@unprice/ui/utils"
 import { format } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 import { AlertCircle } from "lucide-react"
+import { useParams } from "next/navigation"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
+import { SuperLink } from "~/components/super-link"
 import { formatDate } from "~/lib/dates"
 import { DataTableRowActions } from "./data-table-row-actions"
 
@@ -54,9 +56,18 @@ export const columns: ColumnDef<Subscription>[] = [
     accessorKey: "customer",
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
-    cell: ({ row }) => (
-      <div className="whitespace-nowrap text-sm">{row.original.customer.email}</div>
-    ),
+    cell: ({ row }) => {
+      const { workspaceSlug, projectSlug } = useParams()
+
+      return (
+        <SuperLink
+          href={`/${workspaceSlug}/${projectSlug}/customers/subscriptions/${row.original.id}`}
+          prefetch={false}
+        >
+          <div className="whitespace-nowrap text-sm">{row.original.customer.email}</div>
+        </SuperLink>
+      )
+    },
     size: 40,
   },
   {
@@ -95,7 +106,7 @@ export const columns: ColumnDef<Subscription>[] = [
   },
   {
     accessorKey: "currentCycleStartAt",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Start Cycle" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Start current cycle" />,
     cell: ({ row }) => (
       <div className="flex items-center space-x-1">
         <div className="whitespace-nowrap text-sm">
@@ -134,7 +145,7 @@ export const columns: ColumnDef<Subscription>[] = [
   },
   {
     accessorKey: "currentCycleEndAt",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="End Cycle" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="End current cycle" />,
     cell: ({ row }) => {
       const endDate = row.original.currentCycleEndAt
 

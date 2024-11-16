@@ -1,4 +1,5 @@
 "use client"
+import type { RouterOutputs } from "@unprice/api"
 import { Button } from "@unprice/ui/button"
 import {
   Command,
@@ -24,7 +25,6 @@ import { CheckIcon, ChevronDown } from "lucide-react"
 import { useState } from "react"
 import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form"
 import { FilterScroll } from "~/components/filter-scroll"
-import { api } from "~/trpc/client"
 
 interface FormValues extends FieldValues {
   planVersionId?: string
@@ -33,31 +33,20 @@ interface FormValues extends FieldValues {
 export default function SelectPlanFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
-  isChangePlanSubscription,
+  planVersions,
+  isLoading,
 }: {
   form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
-  isChangePlanSubscription?: boolean
+  planVersions: RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"]
+  isLoading?: boolean
 }) {
   const [switcherCustomerOpen, setSwitcherCustomerOpen] = useState(false)
   const selectedPlanVersionId = form.watch("planVersionId" as FieldPath<TFieldValues>)
 
-  const { data, isLoading } = api.planVersions.listByActiveProject.useQuery(
-    {
-      published: true,
-      active: !isDisabled,
-      enterprisePlan: true,
-    },
-    {
-      refetchOnWindowFocus: false,
-    }
-  )
+  const selectedPlanVersion = planVersions.find((version) => version.id === selectedPlanVersionId)
 
-  const selectedPlanVersion = data?.planVersions.find(
-    (version) => version.id === selectedPlanVersionId
-  )
-
-  const noData = data?.planVersions.length === 0 || data?.planVersions.length === undefined
+  const noData = planVersions.length === 0 || planVersions.length === undefined
 
   return (
     <FormField
@@ -73,7 +62,7 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
             modal={true}
             open={switcherCustomerOpen}
             onOpenChange={() => {
-              if (isDisabled || isChangePlanSubscription) return
+              if (isDisabled) return
               setSwitcherCustomerOpen(!switcherCustomerOpen)
             }}
           >
@@ -108,7 +97,7 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
                     <CommandGroup>
                       {isLoading && <CommandLoading>Loading...</CommandLoading>}
                       <div className="flex flex-col gap-2 pt-1">
-                        {data?.planVersions.map((version) => (
+                        {planVersions.map((version) => (
                           <CommandItem
                             value={`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
                             key={version.id}

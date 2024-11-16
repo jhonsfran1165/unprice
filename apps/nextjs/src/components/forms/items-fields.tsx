@@ -77,7 +77,6 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
 }: {
   form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
-  isChangePlanSubscription?: boolean
   withSeparator?: boolean
   withFeatureDetails?: boolean
   planVersions: RouterOutputs["planVersions"]["listByActiveProject"]["planVersions"]

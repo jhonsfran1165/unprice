@@ -13,7 +13,7 @@ import {
 } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
 import ConfigItemsFormField from "~/components/forms/items-fields"
-import SelectUnpricePlanFormField from "~/components/forms/select-unprice-plan-field"
+import SelectPlanFormField from "~/components/forms/select-plan-field"
 import { SubmitButton } from "~/components/submit-button"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -78,7 +78,11 @@ export default function NewWorkspaceForm({
           )}
         />
 
-        <SelectUnpricePlanFormField form={form} />
+        <SelectPlanFormField
+          form={form}
+          planVersions={data?.planVersions ?? []}
+          isLoading={isLoading}
+        />
 
         <ConfigItemsFormField
           form={form}

@@ -6,8 +6,6 @@ import { Card, CardContent, CardFooter } from "@unprice/ui/card"
 import { Label } from "@unprice/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { useState } from "react"
-
-import { Typography } from "@unprice/ui/typography"
 import { UserPaymentMethod } from "~/components/forms/payment-method"
 import { SubmitButton } from "~/components/submit-button"
 import { api } from "~/trpc/client"
@@ -30,7 +28,7 @@ export function PaymentMethodForm({
   // TODO: set with the default payment provider for the project
   const [provider, setProvider] = useState<PaymentProvider>("stripe")
 
-  const { data, isLoading } = api.customers.listPaymentMethods.useQuery(
+  const { data, isLoading, error } = api.customers.listPaymentMethods.useQuery(
     {
       customerId,
       provider: provider,
@@ -38,6 +36,7 @@ export function PaymentMethodForm({
     },
     {
       enabled: !loading,
+      retry: false,
     }
   )
 
@@ -51,14 +50,13 @@ export function PaymentMethodForm({
 
   return (
     <Card variant="ghost" className="pb-4">
-      <Typography variant="p" affects="removePaddingMargin">
-        Default payment method. This payment method will be used for all future invoices.
-      </Typography>
       <CardContent className="flex flex-col space-y-14 px-0 py-10">
         <UserPaymentMethod paymentMethod={defaultPaymentMethod} isLoading={isLoading} />
+
         {!readonly && (
           <div className="mx-auto flex w-1/2 flex-col gap-2">
             <Label htmlFor="provider">Payment Provider</Label>
+            {error && <div className="font-medium text-destructive text-sm">{error.message}</div>}
             <Select
               value={provider}
               onValueChange={(e) => {

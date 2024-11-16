@@ -10,7 +10,7 @@ export function DashboardShell(props: {
   aside?: React.ReactNode
 }) {
   return (
-    <MaxWidthWrapper className="overflow-x-hidden">
+    <MaxWidthWrapper className="hide-scrollbar overflow-x-hidden">
       {!props.aside && (
         <div className={cn("flex flex-col", props.className)}>
           <div className="flex flex-1 flex-col space-y-6 px-0 md:space-y-8 md:py-4">

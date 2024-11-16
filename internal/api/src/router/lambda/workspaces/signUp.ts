@@ -1,11 +1,11 @@
 import { TRPCError } from "@trpc/server"
-import { eq } from "@unprice/db"
+import { type Database, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import { workspaceSignupSchema } from "@unprice/db/validators"
+import { CustomerService } from "@unprice/services/customers"
 import { z } from "zod"
 import { protectedProcedure } from "../../../trpc"
-import { signUpCustomer } from "../../../utils/shared"
 
 export const signUp = protectedProcedure
   .input(workspaceSignupSchema)
@@ -30,7 +30,16 @@ export const signUp = protectedProcedure
       })
     }
 
-    const { success, error, url } = await signUpCustomer({
+    const customer = new CustomerService({
+      cache: opts.ctx.cache,
+      db: opts.ctx.db as Database,
+      analytics: opts.ctx.analytics,
+      logger: opts.ctx.logger,
+      metrics: opts.ctx.metrics,
+      waitUntil: opts.ctx.waitUntil,
+    })
+
+    const { err, val } = await customer.signUp({
       input: {
         email: user.email,
         name: name,
@@ -42,16 +51,15 @@ export const signUp = protectedProcedure
         timezone: mainProject.timezone,
         defaultCurrency: mainProject.defaultCurrency,
       },
-      ctx: opts.ctx,
       projectId: mainProject.id,
     })
 
-    if (!success) {
+    if (err) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: error ?? "Failed to sign up customer",
+        message: err.message,
       })
     }
 
-    return { url }
+    return val
   })
