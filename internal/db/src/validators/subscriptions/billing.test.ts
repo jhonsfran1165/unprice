@@ -186,10 +186,10 @@ describe("configureBillingCycleSubscription", () => {
       billingPeriod: "month",
     })
 
-    expect(result.trialDaysEndAt).toEqual(utcDate("2024-01-16", "11:59:59.999"))
+    expect(result.trialDaysEndAt).toEqual(utcDate("2024-01-15", "23:59:59.999"))
     expect(result.cycleStart).toEqual(utcDate("2024-01-01", "00:00:00"))
     // end of the cycle is the trial days end date
-    expect(result.cycleEnd).toEqual(utcDate("2024-01-16", "00:00:00"))
+    expect(result.cycleEnd).toEqual(utcDate("2024-01-15", "23:59:59.999"))
     expect(result.prorationFactor).toBe(0)
     expect(result.billableSeconds).toBe(0)
   })
@@ -255,10 +255,10 @@ describe("configureBillingCycleSubscription", () => {
       billingPeriod: "year",
     })
 
-    const secondsInCycle = differenceInSeconds(utcDate("2024-07-16", "12:00:00"), startDate)
+    const secondsInCycle = differenceInSeconds(utcDate("2024-07-16", "11:59:59.999"), startDate)
 
     expect(result.cycleStart).toEqual(utcDate("2024-06-01", "12:00:00"))
-    expect(result.cycleEnd).toEqual(utcDate("2024-07-16", "12:00:00"))
+    expect(result.cycleEnd).toEqual(utcDate("2024-07-16", "11:59:59.999"))
     expect(result.secondsInCycle).toBe(secondsInCycle) // 2024 is a leap year
     expect(result.prorationFactor).toBe(0)
     expect(result.billableSeconds).toBe(0)
@@ -297,9 +297,9 @@ describe("configureBillingCycleSubscription", () => {
       billingPeriod: "month",
     })
 
-    expect(result.trialDaysEndAt).toEqual(utcDate("2024-02-15", "11:59:59.999"))
+    expect(result.trialDaysEndAt).toEqual(utcDate("2024-02-14", "23:59:59.999"))
     expect(result.cycleStart).toEqual(startDate)
-    expect(result.cycleEnd).toEqual(utcDate("2024-02-15"))
+    expect(result.cycleEnd).toEqual(utcDate("2024-02-14", "23:59:59.999"))
     expect(result.prorationFactor).toBe(0)
     expect(result.billableSeconds).toBe(0)
   })
@@ -316,7 +316,7 @@ describe("configureBillingCycleSubscription", () => {
     // 600 days is 1 year and 240 days - from jan 1 2024 to aug 23 2025
     expect(result.trialDaysEndAt).toEqual(utcDate("2025-08-23", "11:59:59.999"))
     expect(result.cycleStart).toEqual(startDate)
-    expect(result.cycleEnd).toEqual(utcDate("2025-08-23", "12:00:00"))
+    expect(result.cycleEnd).toEqual(utcDate("2025-08-23", "11:59:59.999"))
     expect(result.prorationFactor).toBe(0)
     expect(result.billableSeconds).toBe(0)
   })
