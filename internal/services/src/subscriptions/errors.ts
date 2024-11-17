@@ -17,7 +17,7 @@ export class UnPriceSubscriptionError extends BaseError<{ context?: Record<strin
 
   constructor({ message, context }: { message: string; context?: Record<string, unknown> }) {
     super({
-      message: `Subscription service error: ${message}`,
+      message: `${message}`,
       context,
     })
   }

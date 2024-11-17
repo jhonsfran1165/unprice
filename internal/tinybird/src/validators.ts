@@ -20,7 +20,7 @@ export const featureVerificationSchemaV1 = z.object({
   subscriptionItemId: z.string().nullable(),
   entitlementId: z.string(),
   deniedReason: z.string().optional(),
-  time: z.number(),
+  date: z.number(),
   latency: z.number().optional(),
   featureSlug: z.string(),
   customerId: z.string(),
@@ -31,12 +31,11 @@ export const featureUsageSchemaV1 = z.object({
   entitlementId: z.string(),
   featureSlug: z.string(),
   customerId: z.string(),
-  month: z.number().int(),
-  year: z.number().int(),
+  date: z.number(),
   projectId: z.string(),
   planVersionFeatureId: z.string(),
   usage: z.number(),
-  time: z.number(),
+  createdAt: z.number(),
 })
 
 export const auditLogSchemaV1 = z.object({

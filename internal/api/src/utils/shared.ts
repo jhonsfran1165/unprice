@@ -4,7 +4,6 @@ import { members, workspaces } from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
 import type { WorkspaceInsert } from "@unprice/db/validators"
 import { CustomerService, UnPriceCustomerError } from "@unprice/services/customers"
-import { getMonth, getYear } from "date-fns"
 import type { Context } from "../trpc"
 
 // shared logic for some procedures
@@ -31,16 +30,14 @@ export const verifyEntitlement = async ({
     waitUntil: ctx.waitUntil,
   })
 
-  // current year and month - we only support current month and year for now
-  const currentMonth = getMonth(Date.now()) + 1
-  const currentYear = getYear(Date.now())
+  // use current date for now
+  const date = Date.now()
 
   const { err, val } = await customer.verifyEntitlement({
     customerId,
     featureSlug,
     projectId,
-    year: currentYear,
-    month: currentMonth,
+    date,
   })
 
   const end = performance.now()
@@ -91,9 +88,13 @@ export const getEntitlements = async ({
     waitUntil: ctx.waitUntil,
   })
 
-  const { err, val } = await customer.getEntitlements({
+  // use current date for now
+  const now = Date.now()
+
+  const { err, val } = await customer.getActiveEntitlements({
     customerId,
     projectId,
+    date: now,
   })
 
   if (err) {
@@ -137,17 +138,15 @@ export const reportUsageFeature = async ({
     waitUntil: ctx.waitUntil,
   })
 
-  // current year and month - we only support current month and year for now
-  const currentMonth = getMonth(Date.now()) + 1
-  const currentYear = getYear(Date.now())
+  // use current date for now
+  const now = Date.now()
 
   const { err, val } = await customer.reportUsage({
     customerId,
     featureSlug,
     projectId,
     usage,
-    year: currentYear,
-    month: currentMonth,
+    date: now,
   })
 
   if (err) {

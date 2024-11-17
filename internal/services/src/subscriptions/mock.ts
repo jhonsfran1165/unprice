@@ -118,7 +118,7 @@ export const createMockPhase = ({
         createdAtM: Date.now(),
         updatedAtM: Date.now(),
         projectId: "proj-1",
-        units: 1,
+        units: 15,
         subscriptionPhaseId: "phase-1",
         featurePlanVersion: {
           id: "feature-plan-version-2",
@@ -322,14 +322,14 @@ export const createMockDatabase = ({
         return {
           set: vi.fn((data) => ({
             where: vi.fn(() => ({
-              returning: vi.fn(() =>
-                Promise.resolve([
+              returning: vi.fn(() => {
+                return Promise.resolve([
                   {
                     ...mockSubscription,
                     ...data,
                   },
                 ])
-              ),
+              }),
             })),
           })),
         }

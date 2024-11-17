@@ -12,7 +12,7 @@ import { PaymentProviderService } from "../payment-provider"
 import { SubscriptionService } from "../subscriptions"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
-import { getEntitlementsQuery } from "./queries"
+import { getActiveEntitlementsQuery } from "./queries"
 
 export class CustomerService {
   private readonly cache: Cache
@@ -42,8 +42,7 @@ export class CustomerService {
     customerId: string
     projectId: string
     featureSlug: string
-    month: number
-    year: number
+    date: number
   }): Promise<
     Result<
       Omit<CustomerEntitlement, "createdAtM" | "updatedAtM">,
@@ -53,13 +52,14 @@ export class CustomerService {
     const res = await this.cache.featureByCustomerId.swr(
       `${opts.customerId}:${opts.featureSlug}`,
       async () => {
+        // TODO: we should be able to update usage in db as well from tinybird
         return await this.db.query.customerEntitlements.findFirst({
           where: (ent, { eq, and, gte, lte, isNull, or }) =>
             and(
               eq(ent.customerId, opts.customerId),
               eq(ent.projectId, opts.projectId),
-              lte(ent.startAt, Date.now()),
-              or(isNull(ent.endAt), gte(ent.endAt, Date.now())),
+              lte(ent.startAt, opts.date),
+              or(isNull(ent.endAt), gte(ent.endAt, opts.date)),
               eq(ent.featureSlug, opts.featureSlug)
             ),
         })
@@ -90,8 +90,8 @@ export class CustomerService {
           and(
             eq(ent.customerId, opts.customerId),
             eq(ent.projectId, opts.projectId),
-            lte(ent.startAt, Date.now()),
-            or(isNull(ent.endAt), gte(ent.endAt, Date.now())),
+            lte(ent.startAt, opts.date),
+            or(isNull(ent.endAt), gte(ent.endAt, opts.date)),
             eq(ent.featureSlug, opts.featureSlug)
           ),
       })
@@ -111,18 +111,20 @@ export class CustomerService {
     return Ok(res.val)
   }
 
-  public async getEntitlements(opts: {
+  public async getActiveEntitlements(opts: {
     customerId: string
     projectId: string
+    date: number
   }): Promise<
     Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
   > {
     const res = await this.cache.entitlementsByCustomerId.swr(opts.customerId, async () => {
-      return await getEntitlementsQuery({
+      return await getActiveEntitlementsQuery({
         customerId: opts.customerId,
         projectId: opts.projectId,
         db: this.db,
         metrics: this.metrics,
+        date: opts.date,
         logger: this.logger,
       })
     })
@@ -143,17 +145,25 @@ export class CustomerService {
       )
     }
 
-    if (res.val) {
-      return Ok(res.val)
+    if (res.val && res.val.length > 0) {
+      // filter out to get only the active entitlements
+      return Ok(
+        res.val.filter((ent) => {
+          // an entitlement is active if it's between startAt and endAt
+          // end date could be null, so it's active until the end of time
+          return ent.startAt <= opts.date && (ent.endAt ? ent.endAt >= opts.date : true)
+        })
+      )
     }
 
     // cache miss, get from db
-    const entitlements = await getEntitlementsQuery({
+    const entitlements = await getActiveEntitlementsQuery({
       customerId: opts.customerId,
       projectId: opts.projectId,
       db: this.db,
       metrics: this.metrics,
       logger: this.logger,
+      date: opts.date,
     })
 
     // cache the active entitlements
@@ -166,8 +176,7 @@ export class CustomerService {
     customerId: string
     featureSlug: string
     projectId: string
-    month: number
-    year: number
+    date: number
   }): Promise<
     Result<
       {
@@ -183,15 +192,14 @@ export class CustomerService {
     >
   > {
     try {
-      const { customerId, projectId, featureSlug, month, year } = opts
+      const { customerId, projectId, featureSlug, date } = opts
       const start = performance.now()
 
       const res = await this._getCustomerEntitlement({
         customerId,
         projectId,
         featureSlug,
-        month,
-        year,
+        date,
       })
 
       if (res.err) {
@@ -222,26 +230,19 @@ export class CustomerService {
         }
       }
 
-      const entitlementId = res.val
-
-      if (!entitlementId) {
-        return Ok({
-          access: false,
-          deniedReason: "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
-        })
-      }
+      const entitlement = res.val
 
       const analyticsPayload = {
-        projectId: entitlementId.projectId,
-        planVersionFeatureId: entitlementId.featurePlanVersionId,
-        subscriptionItemId: entitlementId.subscriptionItemId,
-        entitlementId: entitlementId.id,
+        projectId: entitlement.projectId,
+        planVersionFeatureId: entitlement.featurePlanVersionId,
+        subscriptionItemId: entitlement.subscriptionItemId,
+        entitlementId: entitlement.id,
         featureSlug: featureSlug,
         customerId: customerId,
-        time: Date.now(),
+        date: Date.now(),
       }
 
-      switch (entitlementId.featureType) {
+      switch (entitlement.featureType) {
         case "flat": {
           // flat feature are like feature flags
           break
@@ -250,9 +251,9 @@ export class CustomerService {
         case "usage":
         case "tier":
         case "package": {
-          const currentUsage = entitlementId.usage ?? 0
-          const limit = entitlementId.limit
-          const units = entitlementId.units
+          const currentUsage = entitlement.usage ?? 0
+          const limit = entitlement.limit
+          const units = entitlement.units
           // remaining usage given the units the user bought
           const remainingUsage = units ? units - currentUsage : undefined
           const remainingToLimit = limit ? limit - currentUsage : undefined
@@ -271,7 +272,7 @@ export class CustomerService {
               currentUsage: currentUsage,
               limit: limit ?? undefined,
               units: units ?? undefined,
-              featureType: entitlementId.featureType,
+              featureType: entitlement.featureType,
               access: false,
               deniedReason: "LIMIT_EXCEEDED",
               remaining: remainingToLimit,
@@ -291,7 +292,7 @@ export class CustomerService {
             return Ok({
               currentUsage: currentUsage,
               limit: limit ?? undefined,
-              featureType: entitlementId.featureType,
+              featureType: entitlement.featureType,
               units: units ?? undefined,
               access: false,
               deniedReason: "USAGE_EXCEEDED",
@@ -304,7 +305,7 @@ export class CustomerService {
 
         default:
           this.logger.error("Unhandled feature type", {
-            featureType: entitlementId.featureType,
+            featureType: entitlement.featureType,
           })
           break
       }
@@ -324,7 +325,7 @@ export class CustomerService {
       )
 
       return Ok({
-        featureType: entitlementId.featureType,
+        featureType: entitlement.featureType,
         access: true,
       })
     } catch (e) {
@@ -349,20 +350,18 @@ export class CustomerService {
     customerId: string
     featureSlug: string
     projectId: string
-    month: number
-    year: number
+    date: number
     usage: number
   }): Promise<Result<{ success: boolean; message?: string }, UnPriceCustomerError | FetchError>> {
     try {
-      const { customerId, featureSlug, projectId, usage, month, year } = opts
+      const { customerId, featureSlug, projectId, usage, date } = opts
 
       // get the item details from the cache or the db
       const res = await this._getCustomerEntitlement({
         customerId,
         projectId,
         featureSlug,
-        month,
-        year,
+        date,
       })
 
       if (res.err) {
@@ -435,9 +434,8 @@ export class CustomerService {
               subscriptionItemId: entitlement.subscriptionItemId,
               projectId: entitlement.projectId,
               usage: usage,
-              time: Date.now(),
-              month: month,
-              year: year,
+              date: opts.date,
+              createdAt: Date.now(),
               entitlementId: entitlement.id,
               featureSlug: featureSlug,
               customerId: customerId,
@@ -446,15 +444,13 @@ export class CustomerService {
               // TODO: Only available in pro plus plan
               // TODO: usage is not always sum to the current usage, could be counter, etc
               // also if there are many request per second, we could debounce the update somehow
+              // only update the cache if the feature is realtime
               if (entitlement.realtime) {
-                this.cache.featureByCustomerId.set(
-                  `${customerId}:${featureSlug}:${year}:${month}`,
-                  {
-                    ...entitlement,
-                    usage: (entitlement.usage ?? 0) + usage,
-                    lastUpdatedAt: Date.now(),
-                  }
-                )
+                this.cache.featureByCustomerId.set(`${customerId}:${featureSlug}`, {
+                  ...entitlement,
+                  usage: (entitlement.usage ?? 0) + usage,
+                  lastUpdatedAt: Date.now(),
+                })
               }
             })
             .catch((error) => {

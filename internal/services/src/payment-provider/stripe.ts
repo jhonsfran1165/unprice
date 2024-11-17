@@ -370,7 +370,6 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       name,
       productId,
       isProrated,
-      totalAmount,
       unitAmount,
       quantity,
       currency,
@@ -402,7 +401,8 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       : {
           // for items that are not associated to a product, we send the total amount
           currency: currency,
-          amount: totalAmount,
+          unit_amount: unitAmount,
+          quantity: quantity,
         }
 
     return await this.client.invoiceItems

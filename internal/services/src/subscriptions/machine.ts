@@ -146,7 +146,7 @@ export class SubscriptionStateMachine extends StateMachine<
         }
 
         // check if the trial has ended if not don't do anything
-        if (activePhase.trialEndsAt && activePhase.trialEndsAt > payload.now) {
+        if (activePhase.trialEndsAt && activePhase.trialEndsAt >= payload.now) {
           return Err(new UnPriceSubscriptionError({ message: "Trial has not ended yet" }))
         }
 
@@ -313,6 +313,7 @@ export class SubscriptionStateMachine extends StateMachine<
           return Err(new UnPriceSubscriptionError({ message: "No active phase found" }))
         }
 
+        // TODO: renew should reset the usage
         const renewSubscription = await this.renewSubscription({
           isTrial: false,
           now: payload.now,
@@ -346,6 +347,7 @@ export class SubscriptionStateMachine extends StateMachine<
           return Err(new UnPriceSubscriptionError({ message: "No active phase with the given id" }))
         }
 
+        // TODO: cancel should set end date to the entitlements
         // end the phase
         const endPhaseResult = await this.endSubscriptionActivePhase({
           endAt: cancelAt, // end date of the phase is the date
@@ -567,22 +569,41 @@ export class SubscriptionStateMachine extends StateMachine<
             tx.rollback()
           })
 
-        // sync the active phase and subscription with the new values
-        phaseUpdated && this.setActivePhase(phaseUpdated)
-        subscriptionUpdated && this.setSubscription(subscriptionUpdated)
-
         // when testing we mock bd calls so we need to sync this way
         if (this.isTest) {
           Object.assign(subscriptionUpdated ?? {}, {
             ...subscription,
-            ...subscriptionUpdated,
+            ...{
+              status: state ?? subscription.status,
+              active: active ?? subscription.active,
+              // update the subscription dates
+              ...(subscriptionDates ? subscriptionDates : undefined),
+              ...(metadataSubscription
+                ? {
+                    metadata: metadataSubscription,
+                  }
+                : undefined),
+            },
           })
 
           Object.assign(phaseUpdated ?? {}, {
             ...activePhase,
-            ...phaseUpdated,
+            ...{
+              status: state ?? activePhase.status,
+              active: active ?? activePhase.active,
+              ...(phaseDates ? phaseDates : undefined),
+              ...(metadataPhase
+                ? {
+                    metadata: metadataPhase,
+                  }
+                : undefined),
+            },
           })
         }
+
+        // sync the active phase and subscription with the new values
+        phaseUpdated && this.setActivePhase(phaseUpdated)
+        subscriptionUpdated && this.setSubscription(subscriptionUpdated)
 
         return Ok({
           subscriptionId: subscription.id,
@@ -1481,11 +1502,7 @@ export class SubscriptionStateMachine extends StateMachine<
     })
 
     if (invoiceItemsPrice.err) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message: `Error calculating invoice items price: ${invoiceItemsPrice.err.message}`,
-        })
-      )
+      return Err(invoiceItemsPrice.err)
     }
 
     // upsert the invoice items in the payment provider
@@ -1511,7 +1528,7 @@ export class SubscriptionStateMachine extends StateMachine<
       }
 
       // sum up every item to calculate the subtotal of the invoice
-      paymentProviderInvoiceData.subtotal += formattedTotalAmountItem.val.amount
+      paymentProviderInvoiceData.subtotal += formattedUnitAmountItem.val.amount * item.quantity
 
       // upsert the invoice item in the payment provider
       const invoiceItemExists = invoiceData.items.find(
@@ -1545,8 +1562,8 @@ export class SubscriptionStateMachine extends StateMachine<
           // TODO: uncomment when ready
           // for testing we don't send the product id so we can create the
           // invoice item without having to create the product in the payment provider
-          // ...(this.isTest ? {} : { productId: item.productId }),
-          productId: item.productId.startsWith("feature-") ? undefined : item.productId,
+          ...(this.isTest ? {} : { productId: item.productId }),
+          // productId: item.productId.startsWith("feature-") ? undefined : item.productId,
           isProrated: item.prorate !== 1,
           totalAmount: formattedTotalAmountItem.val.amount,
           unitAmount: formattedUnitAmountItem.val.amount,
@@ -1569,6 +1586,8 @@ export class SubscriptionStateMachine extends StateMachine<
     // update the invoice data
     paymentProviderInvoiceData.invoiceId = invoiceData.invoiceId
     paymentProviderInvoiceData.invoiceUrl = invoiceData.invoiceUrl
+
+    console.log("invoiceData", paymentProviderInvoiceData)
 
     // get the credits for the customer if any
     // for now we only allow one active credit per customer
@@ -2118,6 +2137,7 @@ export class SubscriptionStateMachine extends StateMachine<
     Result<
       {
         items: {
+          featureType: FeatureType
           productId: string
           price: CalculatedPrice
           quantity: number
@@ -2192,13 +2212,12 @@ export class SubscriptionStateMachine extends StateMachine<
         // when billing at the end of the cycle we get the usage for the current cycle + fixed price from current cycle
         if (!shouldBillInAdvance) {
           // get usage only for usage features - the rest are calculated from the subscription items
-          if (item.featurePlanVersion.featureType !== "usage") {
+          if (["flat", "tier", "package"].includes(item.featurePlanVersion.featureType)) {
             quantity = item.units! // all non usage features have a quantity the customer bought in the subscription
           } else {
             const usage = await this.analytics
               .getTotalUsagePerFeature({
                 featureSlug: item.featurePlanVersion.feature.slug,
-                subscriptionPhaseId: phase.id,
                 subscriptionItemId: item.id,
                 projectId: subscription.projectId,
                 customerId: this.customer.id,
@@ -2206,7 +2225,9 @@ export class SubscriptionStateMachine extends StateMachine<
                 start: cycleStartAt,
                 end: cycleEndAt,
               })
-              .then((usage) => usage.data[0])
+              .then((usage) => {
+                return usage.data[0]
+              })
 
             const units = usage ? usage[item.featurePlanVersion.aggregationMethod] || 0 : 0
 
@@ -2215,7 +2236,7 @@ export class SubscriptionStateMachine extends StateMachine<
           }
         } else {
           // get usage only for usage features - the rest are calculated from the subscription items
-          if (item.featurePlanVersion.featureType !== "usage") {
+          if (["flat", "tier", "package"].includes(item.featurePlanVersion.featureType)) {
             quantity = item.units! // all non usage features have a quantity the customer bought in the subscription
           } else {
             // For billing in advance we need to get the usage for the previous cycle if any
@@ -2226,7 +2247,6 @@ export class SubscriptionStateMachine extends StateMachine<
                 .getTotalUsagePerFeature({
                   featureSlug: item.featurePlanVersion.feature.slug,
                   projectId: subscription.projectId,
-                  subscriptionPhaseId: phase.id,
                   subscriptionItemId: item.id,
                   customerId: this.customer.id,
                   start: previousCycleStartAt,
@@ -2271,29 +2291,35 @@ export class SubscriptionStateMachine extends StateMachine<
         let description = undefined
 
         if (item.featurePlanVersion.featureType === "usage") {
-          description = `${item.featurePlanVersion.feature.title} - usage`
+          description = `${item.featurePlanVersion.feature.title.toUpperCase()} - usage`
         } else if (item.featurePlanVersion.featureType === "flat") {
-          description = `${item.featurePlanVersion.feature.title} - flat`
+          description = `${item.featurePlanVersion.feature.title.toUpperCase()} - flat`
         } else if (item.featurePlanVersion.featureType === "tier") {
-          description = `${item.featurePlanVersion.feature.title} - tier`
+          description = `${item.featurePlanVersion.feature.title.toUpperCase()} - tier`
         } else if (item.featurePlanVersion.featureType === "package") {
-          description = `${item.featurePlanVersion.feature.title} - ${item.units} package of ${item
+          // package is a special case, we need to calculate the quantity of packages the customer bought
+          // we do it after the price calculation because we pass the package units to the payment provider
+          const quantityPackages = Math.ceil(quantity / item.featurePlanVersion.config?.units!)
+          quantity = quantityPackages
+          description = `${item.featurePlanVersion.feature.title.toUpperCase()} - ${quantityPackages} package of ${item
             .featurePlanVersion.config?.units!} units`
         }
 
         if (prorate !== 1) {
           const startDate = new Date(Number(calculatedCurrentBillingCycle.cycleStart))
           const endDate = new Date(Number(calculatedCurrentBillingCycle.cycleEnd))
-          const billingPeriod =
-            startDate.getMonth() === endDate.getMonth()
-              ? `${startDate.toISOString().split("T")[0]} to ${endDate.toISOString().split("T")[0]}`
-              : `${startDate.toISOString().split("T")[0]} to ${endDate.toISOString().split("T")[0]}`
+          const billingPeriod = `${startDate.toLocaleString("default", {
+            month: "short",
+          })} ${startDate.getDate()} - ${endDate.toLocaleString("default", {
+            month: "short",
+          })} ${endDate.getDate()}`
 
-          description += ` (prorated from ${billingPeriod})`
+          description += ` prorated (${billingPeriod})`
         }
 
         // create an invoice item for each feature
         invoiceItems.push({
+          featureType: item.featurePlanVersion.featureType,
           quantity,
           productId: item.featurePlanVersion.feature.id,
           price: priceCalculation.val,
@@ -2305,6 +2331,9 @@ export class SubscriptionStateMachine extends StateMachine<
             subscriptionItemId: item.id,
           },
         })
+
+        // order invoice items by feature type
+        invoiceItems.sort((a, b) => a.featureType.localeCompare(b.featureType))
       }
 
       return Ok({
@@ -2312,7 +2341,7 @@ export class SubscriptionStateMachine extends StateMachine<
       })
     } catch (e) {
       const error = e as Error
-      return Err(new UnPriceSubscriptionError({ message: error.message }))
+      return Err(new UnPriceSubscriptionError({ message: `Unhandled error: ${error.message}` }))
     }
   }
 

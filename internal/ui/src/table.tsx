@@ -22,7 +22,7 @@ export interface TableProps
 
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
   ({ className, variant, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
+    <div className="hide-scrollbar relative w-full overflow-auto">
       <table ref={ref} className={cn(tableVariants({ variant }), className)} {...props} />
     </div>
   )

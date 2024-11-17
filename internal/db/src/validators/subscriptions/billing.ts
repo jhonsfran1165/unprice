@@ -48,6 +48,11 @@ export function configureBillingCycleSubscription({
     const effectiveEndCycle = endAt && endAt > 0 ? Math.min(trialDaysEndAt, endAt) : trialDaysEndAt
     const secondsInCycle = differenceInSeconds(effectiveEndCycle, currentCycleStartAt)
 
+    // blow this up if the start date is after the end date
+    if (currentCycleStartAt > effectiveEndCycle) {
+      throw new Error("Start date is after the end date")
+    }
+
     return {
       cycleStart: new Date(currentCycleStartAt),
       cycleEnd: new Date(effectiveEndCycle),
@@ -81,6 +86,11 @@ export function configureBillingCycleSubscription({
 
   // The prorationFactor is calculated using the adjusted billableSeconds and secondsInCycle
   const prorationFactor = billableSeconds / secondsInCycle
+
+  // blow this up if the start date is after the end date
+  if (effectiveStartDate > effectiveEndDate) {
+    throw new Error("Start date is after the end date")
+  }
 
   return {
     cycleStart: new Date(effectiveStartDate),

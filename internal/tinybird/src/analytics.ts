@@ -62,14 +62,14 @@ export class Analytics {
 
   public get ingestFeaturesVerification() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "features_verifications__v1",
+      datasource: "features_verifications__v2",
       event: featureVerificationSchemaV1,
     })
   }
 
   public get ingestFeaturesUsage() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "features_usage__v1",
+      datasource: "features_usage__v2",
       event: featureUsageSchemaV1,
       wait: true,
     })
@@ -97,10 +97,6 @@ export class Analytics {
       pipe: "get_total_usage_per_feature__v1",
       parameters: z.object({
         featureSlug: z.string(),
-        // TODO: add these parameters when we have a way to get the subscription phase or item id
-        // when provided we know these are paid usage records
-        // otherwise these are usage record from custom entitlements outside of the subscription
-        subscriptionPhaseId: z.string().optional(),
         subscriptionItemId: z.string().optional(),
         customerId: z.string(),
         projectId: z.string(),

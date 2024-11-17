@@ -44,11 +44,11 @@ describe("SubscriptionStateMachine", () => {
           last_during_period: 0,
         }
 
-        if (input.parameters.featureSlug === "api-calls") {
-          result.sum = 100
-          result.max = 100
-          result.count = 100
-          result.last_during_period = 100
+        if (input.featureSlug === "api-calls") {
+          result.sum = 567
+          result.max = 343
+          result.count = 123
+          result.last_during_period = 878
         }
 
         return Promise.resolve({ data: [result] })
@@ -89,22 +89,13 @@ describe("SubscriptionStateMachine", () => {
     })
   })
 
+  // TODO: this tests should be unit and not integration
   describe("endTrial", () => {
     it("should not end trial before trial end date", async () => {
       const tooEarly = new Date("2024-01-10T00:00:00Z").getTime()
       const result = await machine.endTrial({ now: tooEarly })
 
-      expect(result.err?.message).toBe("Subscription service error: Trial has not ended yet")
-    })
-
-    it("should validate invoice date", async () => {
-      const result = await machine.endTrial({
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime(),
-      })
-
-      expect(result.err?.message).toBe(
-        "Subscription service error: Subscription is not ready to be invoiced"
-      )
+      expect(result.err?.message).toBe("Trial has not ended yet")
     })
 
     it(
@@ -169,11 +160,11 @@ describe("SubscriptionStateMachine", () => {
       })
 
       const result = await machine.endTrial({
-        now: calculatedBillingCycle.trialDaysEndAt?.getTime() ?? 0,
+        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
       })
 
       expect(result.err?.message).toBe(
-        "Subscription service error: Error getting default payment method: Payment provider error: No payment methods found"
+        "Error getting default payment method: Payment provider error: No payment methods found"
       )
     })
 
@@ -203,7 +194,7 @@ describe("SubscriptionStateMachine", () => {
       })
 
       const result = await machine.endTrial({
-        now: calculatedBillingCycle.trialDaysEndAt?.getTime() ?? 0,
+        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
       })
 
       const alteredSubscription = machine.getSubscription()
@@ -218,29 +209,65 @@ describe("SubscriptionStateMachine", () => {
       expect(alteredPhase.whenToBill).toBe("pay_in_arrear")
     })
 
-    //   it("should handle trial end with pay in arrear billing", async () => {
-    //     // Update phase to pay in arrear
-    //     const mockPhase = {
-    //       ...machine["activePhase"],
-    //       whenToBill: "pay_in_arrear"
-    //     }
-    //     machine["setActivePhase"](mockPhase)
+    it("should handle trial end with pay in arrear billing + invoice", async () => {
+      mockPhase.whenToBill = "pay_in_arrear"
 
-    //     // Mock validateCustomerPaymentMethod success
-    //     vi.spyOn(machine as any, "validateCustomerPaymentMethod")
-    //       .mockResolvedValue(Ok(undefined))
+      mockSubscription = createMockSubscription({
+        mockPhase,
+        calculatedBillingCycle,
+      })
 
-    //     // Mock renewSubscription success
-    //     vi.spyOn(machine as any, "renewSubscription")
-    //       .mockResolvedValue(Ok(undefined))
+      machine = new SubscriptionStateMachine({
+        db: mockDb,
+        activePhase: mockPhase,
+        subscription: mockSubscription,
+        customer: mockCustomer,
+        logger: mockLogger,
+        analytics: mockAnalytics,
+        isTest: true,
+      })
 
-    //     const result = await machine.endTrial({
-    //       now: calculatedBillingCycle.trialDaysEndAt?.getTime() ?? 0
-    //     })
+      const endTrial = mockPhase.trialEndsAt
 
-    //     expect(result.err).toBeUndefined()
-    //     expect(result.val?.status).toBe("active")
-    //   })
+      // new start and end dates for the next cycle
+      const { cycleStart, cycleEnd } = configureBillingCycleSubscription({
+        currentCycleStartAt: mockSubscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
+        billingCycleStart: mockPhase.startCycle, // start day of the billing cycle
+        billingPeriod: mockPhase.planVersion?.billingPeriod ?? "month", // billing period
+        endAt: mockPhase.endAt ?? undefined, // end day of the billing cycle if any
+      })
+
+      // lets finish the trial
+      const result = await machine.endTrial({
+        now: endTrial! + 1,
+      })
+
+      const alteredSubscription = machine.getSubscription()
+      const alteredPhase = machine.getActivePhase()
+
+      expect(result.err).toBeUndefined()
+      expect(result.val?.status).toBe("active")
+      // it shouldn't have invoice data yet
+      expect(result.val?.invoiceId).toBeUndefined()
+      expect(result.val?.paymentInvoiceId).toBeUndefined()
+      expect(alteredSubscription.status).toBe("active")
+      expect(alteredPhase.whenToBill).toBe("pay_in_arrear")
+
+      expect(alteredSubscription.currentCycleStartAt).toEqual(cycleStart.getTime())
+      expect(alteredSubscription.currentCycleEndAt).toEqual(cycleEnd.getTime())
+
+      // lets simulate the end of the billing cycle
+      const result2 = await machine.invoice({
+        now: alteredSubscription.currentCycleEndAt + 1,
+      })
+
+      expect(result2.err).toBeUndefined()
+      expect(result2.val?.invoiceId).toBeDefined()
+      expect(alteredSubscription.status).toBe("past_due")
+      expect(alteredPhase.whenToBill).toBe("pay_in_arrear")
+      // invoice data should be at the end of the cycle
+      expect(alteredSubscription.nextInvoiceAt).toEqual(alteredSubscription.currentCycleEndAt)
+    })
 
     //   it("should fail if payment method validation fails", async () => {
     //     // Mock validateCustomerPaymentMethod failure

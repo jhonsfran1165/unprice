@@ -12,6 +12,9 @@ export type EntitlementCached = {
   aggregationMethod: AggregationMethod
   limit: number | null
   units: number | null
+  startAt: number
+  endAt: number | null
+  usage: number | null
 }
 
 export type CacheNamespaces = {
