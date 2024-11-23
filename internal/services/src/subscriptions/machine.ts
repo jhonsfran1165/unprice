@@ -6,13 +6,13 @@ import {
   type Customer,
   type InvoiceStatus,
   type InvoiceType,
+  type PhaseStatus,
   type Subscription,
   type SubscriptionInvoice,
   type SubscriptionMetadata,
   type SubscriptionPhase,
   type SubscriptionPhaseExtended,
   type SubscriptionPhaseMetadata,
-  type SubscriptionStatus,
   type WhenToBill,
   calculatePricePerFeature,
   configureBillingCycleSubscription,
@@ -81,9 +81,9 @@ export type SubscriptionEventMap<S extends string> = {
 // One thing to keep in mind is every transition has to be idempotent. Which means can be executed multiple times without duplicating data.
 // This is important for the retry mechanism to work as expected. Specially because most of the time we call this machine from background jobs.
 export class SubscriptionStateMachine extends StateMachine<
-  SubscriptionStatus,
-  SubscriptionEventMap<SubscriptionStatus>,
-  keyof SubscriptionEventMap<SubscriptionStatus>
+  PhaseStatus,
+  SubscriptionEventMap<PhaseStatus>,
+  keyof SubscriptionEventMap<PhaseStatus>
 > {
   private readonly activePhase: SubscriptionPhaseExtended
   private readonly subscription: Subscription
@@ -127,7 +127,7 @@ export class SubscriptionStateMachine extends StateMachine<
      */
     this.addTransition({
       from: ["trialing"],
-      to: ["active", "past_due"],
+      to: ["active", "past_dued"],
       event: "END_TRIAL",
       onTransition: async (payload) => {
         // for subscriptions coming from trial, the cycle is the start of the phase to the end of the trial.
@@ -201,7 +201,7 @@ export class SubscriptionStateMachine extends StateMachine<
         }
 
         return Ok({
-          status: subscription.status,
+          status: activePhase.status,
           phaseId: activePhase.id,
           subscriptionId: subscription.id,
           invoiceId: payment.val.invoiceId,
@@ -217,7 +217,7 @@ export class SubscriptionStateMachine extends StateMachine<
      */
     this.addTransition({
       from: ["active"],
-      to: ["past_due", "active"],
+      to: ["past_dued", "active"],
       event: "INVOICE",
       onTransition: async (payload) => {
         // get the active phase - subscription only has one phase active at a time
@@ -254,7 +254,7 @@ export class SubscriptionStateMachine extends StateMachine<
 
         return Ok({
           invoiceId: invoice.val.invoice.id,
-          status: subscription.status,
+          status: activePhase.status,
         })
       },
     })
@@ -264,11 +264,10 @@ export class SubscriptionStateMachine extends StateMachine<
      * collect the payment for the invoice
      */
     this.addTransition({
-      from: ["past_due", "active"],
-      to: ["active", "past_due"],
+      from: ["past_dued", "active"],
+      to: ["active", "past_dued"],
       event: "COLLECT_PAYMENT",
       onTransition: async (payload) => {
-        const subscription = this.getSubscription()
         const invoice = await this.getInvoice(payload.invoiceId)
 
         if (!invoice) {
@@ -286,7 +285,7 @@ export class SubscriptionStateMachine extends StateMachine<
 
         // wait for the payment
         return Ok({
-          status: subscription.status,
+          status: activePhase.status,
           paymentStatus: result.val.status,
           retries: result.val.retries,
           invoiceId: invoice.id,
@@ -324,7 +323,7 @@ export class SubscriptionStateMachine extends StateMachine<
         }
 
         return Ok({
-          status: subscription.status,
+          status: activePhase.status,
         })
       },
     })
@@ -478,7 +477,7 @@ export class SubscriptionStateMachine extends StateMachine<
     phaseDates,
     metadataPhase,
   }: {
-    state?: SubscriptionStatus
+    state?: PhaseStatus
     active?: boolean
     phaseId: string
     subscriptionDates?: Partial<{
@@ -507,7 +506,7 @@ export class SubscriptionStateMachine extends StateMachine<
       {
         subscriptionId: string
         phaseId: string
-        status: SubscriptionStatus
+        status: PhaseStatus
       },
       UnPriceSubscriptionError
     >
@@ -525,7 +524,6 @@ export class SubscriptionStateMachine extends StateMachine<
         const subscriptionUpdated = await tx
           .update(subscriptions)
           .set({
-            status: state ?? subscription.status,
             active: active ?? subscription.active,
             // update the subscription dates
             ...(subscriptionDates ? subscriptionDates : undefined),
@@ -574,7 +572,6 @@ export class SubscriptionStateMachine extends StateMachine<
           Object.assign(subscriptionUpdated ?? {}, {
             ...subscription,
             ...{
-              status: state ?? subscription.status,
               active: active ?? subscription.active,
               // update the subscription dates
               ...(subscriptionDates ? subscriptionDates : undefined),
@@ -608,7 +605,7 @@ export class SubscriptionStateMachine extends StateMachine<
         return Ok({
           subscriptionId: subscription.id,
           phaseId: activePhase.id,
-          status: state ?? subscription.status,
+          status: state ?? activePhase.status,
         })
       })
     } catch (e) {
@@ -679,7 +676,7 @@ export class SubscriptionStateMachine extends StateMachine<
     }
 
     // subscription can only be renewed if they are active or trialing
-    if (!["active", "trialing"].includes(subscription.status)) {
+    if (!["active", "trialing"].includes(activePhase.status)) {
       return Err(
         new UnPriceSubscriptionError({ message: "Subscription is not active or trialing" })
       )
@@ -763,7 +760,7 @@ export class SubscriptionStateMachine extends StateMachine<
   }): Promise<
     Result<
       {
-        status: SubscriptionStatus
+        status: PhaseStatus
         phaseId: string
         subscriptionId: string
       },
@@ -775,9 +772,9 @@ export class SubscriptionStateMachine extends StateMachine<
     const activePhase = this.getActivePhase()
     const subscription = this.getSubscription()
     // if the subscription we skip the invoice part
-    const isTrial = subscription.status === "trialing"
+    const isTrial = activePhase.status === "trialing"
 
-    let finalState: SubscriptionStatus
+    let finalState: PhaseStatus
     let reason: "pending_cancellation" | "pending_change" | "pending_expiration"
     let note: string
 
@@ -1587,8 +1584,6 @@ export class SubscriptionStateMachine extends StateMachine<
     paymentProviderInvoiceData.invoiceId = invoiceData.invoiceId
     paymentProviderInvoiceData.invoiceUrl = invoiceData.invoiceUrl
 
-    console.log("invoiceData", paymentProviderInvoiceData)
-
     // get the credits for the customer if any
     // for now we only allow one active credit per customer
     const credits = await this.db.query.customerCredits
@@ -1742,7 +1737,7 @@ export class SubscriptionStateMachine extends StateMachine<
         await this.syncState({
           phaseId: invoice.subscriptionPhaseId,
           // void means the invoice not need to be paid, so we set the subscription to active
-          state: paymentProviderInvoiceData.status === "void" ? "active" : "past_due",
+          state: paymentProviderInvoiceData.status === "void" ? "active" : "past_dued",
           subscriptionDates: {
             pastDueAt:
               paymentProviderInvoiceData.status === "void" ? undefined : updatedInvoice.pastDueAt,
@@ -1938,7 +1933,7 @@ export class SubscriptionStateMachine extends StateMachine<
       if (pastDueAt > now) {
         await this.syncState({
           phaseId: invoice.subscriptionPhaseId,
-          state: "past_due",
+          state: "past_dued",
           metadataSubscription: {
             note: "Invoice exceeded the payment due date",
             reason: "payment_pending",
@@ -1993,7 +1988,7 @@ export class SubscriptionStateMachine extends StateMachine<
       // update the subscription dates
       await this.syncState({
         phaseId: invoice.subscriptionPhaseId,
-        state: "past_due",
+        state: "past_dued",
         active: true,
         metadataSubscription: {
           note: "Invoice has reached the maximum number of payment attempts",
@@ -2346,7 +2341,7 @@ export class SubscriptionStateMachine extends StateMachine<
   }
 
   public async renew(payload: { now: number }): Promise<
-    Result<{ status: SubscriptionStatus }, UnPriceSubscriptionError>
+    Result<{ status: PhaseStatus }, UnPriceSubscriptionError>
   > {
     const { now } = payload
     const renew = await this.transition("RENEW", { now })
@@ -2400,7 +2395,7 @@ export class SubscriptionStateMachine extends StateMachine<
 
   public async billing(payload: { invoiceId: string; now: number }): Promise<
     Result<
-      { paymentStatus: string; retries: number; status: SubscriptionStatus },
+      { paymentStatus: string; retries: number; status: PhaseStatus },
       UnPriceSubscriptionError
     >
   > {
@@ -2441,7 +2436,7 @@ export class SubscriptionStateMachine extends StateMachine<
   }
 
   public async cancel(payload: { cancelAt?: number; now: number }): Promise<
-    Result<{ status: SubscriptionStatus }, UnPriceSubscriptionError>
+    Result<{ status: PhaseStatus }, UnPriceSubscriptionError>
   > {
     const { cancelAt, now } = payload
 
@@ -2458,7 +2453,7 @@ export class SubscriptionStateMachine extends StateMachine<
 
   // apply a change to the subscription, the new subscription phase should be created
   public async change(payload: { changeAt?: number; now: number }): Promise<
-    Result<{ status: SubscriptionStatus }, UnPriceSubscriptionError>
+    Result<{ status: PhaseStatus }, UnPriceSubscriptionError>
   > {
     const { changeAt, now } = payload
 
@@ -2475,7 +2470,7 @@ export class SubscriptionStateMachine extends StateMachine<
 
   // apply a change to the subscription, the new subscription phase should be created
   public async expire(payload: { expiresAt?: number; now: number }): Promise<
-    Result<{ status: SubscriptionStatus }, UnPriceSubscriptionError>
+    Result<{ status: PhaseStatus }, UnPriceSubscriptionError>
   > {
     const { expiresAt, now } = payload
 

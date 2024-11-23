@@ -74,7 +74,8 @@ export const customerEntitlements = pgTableProject(
     // ****************** defaults from plan version features ******************
     // These fields are duplicate but this improves the performance when checking the usage
     // This table is cached in redis as well. All events usage are sent to tynibird and this table
-    // is restored with events in the subscription.
+    // is restored with events in the subscription. The good thing about this is once a feature version
+    // is created, it never changes, so we don't need to worry about potential data inconsistency
     // amount of units of the feature that the customer is entitled to
     units: integer("units"),
     // limit is the limit of the feature that the customer is entitled to
@@ -100,7 +101,7 @@ export const customerEntitlements = pgTableProject(
     // if it's a custom entitlement, it's not tied to a subscription phase and it's not billed
     isCustom: boolean("is_custom").notNull().default(false),
     // entitlements are updated on a regular basis
-    lastUpdatedAt: bigint("last_updated_at", { mode: "number" })
+    lastUsageUpdateAt: bigint("last_usage_update_at", { mode: "number" })
       .notNull()
       .default(0)
       .$defaultFn(() => Date.now())

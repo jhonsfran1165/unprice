@@ -1,5 +1,9 @@
 import { TRPCError } from "@trpc/server"
-import { featureSelectBaseSchema, planVersionFeatureSelectBaseSchema } from "@unprice/db/validators"
+import {
+  customerEntitlementSchema,
+  featureSelectBaseSchema,
+  planVersionFeatureSelectBaseSchema,
+} from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
 import { getEntitlements } from "../../../utils/shared"
@@ -17,13 +21,9 @@ export const getUsageCustomerUnprice = protectedProjectProcedure
       featuresWithUsage: planVersionFeatureSelectBaseSchema
         .extend({
           feature: featureSelectBaseSchema,
-          usage: z.object({
-            featureSlug: z.string(),
-            usage: z.number(),
-            limit: z.number().nullable(),
-            units: z.number().nullable(),
-            featureId: z.string(),
-            featureType: z.string(),
+          usage: customerEntitlementSchema.omit({
+            createdAtM: true,
+            updatedAtM: true,
           }),
         })
         .array(),
@@ -57,7 +57,7 @@ export const getUsageCustomerUnprice = protectedProjectProcedure
       }
     })
 
-    const featuresIds = res.map((r) => r.featureId)
+    const featuresIds = res.map((r) => r.featurePlanVersionId)
 
     const features = await opts.ctx.db.query.planVersionFeatures.findMany({
       with: {
@@ -71,7 +71,7 @@ export const getUsageCustomerUnprice = protectedProjectProcedure
     })
 
     const featuresWithUsage = usage.map((u) => {
-      const feature = features.find((f) => f.id === u.featureId)
+      const feature = features.find((f) => f.id === u.featurePlanVersionId)
 
       if (!feature) {
         throw new TRPCError({

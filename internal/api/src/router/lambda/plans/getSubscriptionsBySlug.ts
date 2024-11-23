@@ -7,6 +7,7 @@ import {
   customerSelectSchema,
   planSelectBaseSchema,
   projectExtendedSelectSchema,
+  subscriptionPhaseSelectSchema,
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 
@@ -20,6 +21,7 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
       subscriptions: subscriptionSelectSchema
         .extend({
           customer: customerSelectSchema,
+          phases: subscriptionPhaseSelectSchema.array(),
         })
         .array(),
       project: projectExtendedSelectSchema,
@@ -45,6 +47,7 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
       .select({
         subscriptions: schema.subscriptions,
         customer: customerColumns,
+        phases: schema.subscriptionPhases,
       })
       .from(schema.subscriptions)
       .innerJoin(
@@ -75,6 +78,14 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
           eq(schema.plans.projectId, schema.versions.projectId)
         )
       )
+      // TODO: this should be only the active phase
+      .innerJoin(
+        schema.subscriptionPhases,
+        and(
+          eq(schema.subscriptions.id, schema.subscriptionPhases.subscriptionId),
+          eq(schema.subscriptionPhases.projectId, schema.subscriptions.projectId)
+        )
+      )
       .where(and(eq(schema.plans.slug, slug), eq(schema.plans.projectId, project.id)))
       .orderBy(() => [desc(schema.subscriptions.createdAtM)])
 
@@ -90,6 +101,8 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
       return {
         ...data.subscriptions,
         customer: data.customer,
+        // TODO: just to fix the type, fix
+        phases: [data.phases],
       }
     })
 

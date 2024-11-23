@@ -277,7 +277,6 @@ export const createMockSubscription = ({
 
   const mockSubscription: Subscription = {
     id: "sub-1",
-    status: "trialing",
     projectId: "proj-1",
     customerId: "cust-1",
     planSlug: "PRO",

@@ -11,7 +11,7 @@ import {
   INVOICE_TYPE,
   PAYMENT_PROVIDERS,
   PLAN_BILLING_PERIODS,
-  STATUS_SUBSCRIPTION,
+  STATUS_PHASE,
   TIER_MODES,
   USAGE_MODES,
   WHEN_TO_BILLING,
@@ -30,7 +30,7 @@ export const monthsSchema = z.coerce.number().int().min(1).max(12)
 export const yearsSchema = z.coerce.number().int().min(2000).max(2100)
 export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
 export const whenToBillSchema = z.enum(WHEN_TO_BILLING)
-export const subscriptionStatusSchema = z.enum(STATUS_SUBSCRIPTION)
+export const phaseStatusSchema = z.enum(STATUS_PHASE)
 export const dueBehaviourSchema = z.enum(DUE_BEHAVIOUR)
 export const invoiceStatusSchema = z.enum(INVOICE_STATUS)
 export const invoiceTypeSchema = z.enum(INVOICE_TYPE)
@@ -93,6 +93,6 @@ export type BillingPeriod = z.infer<typeof billingPeriodSchema>
 export type WhenToBill = z.infer<typeof whenToBillSchema>
 export type StartCycle = z.infer<typeof startCycleSchema>
 export type CollectionMethod = z.infer<typeof collectionMethodSchema>
-export type SubscriptionStatus = z.infer<typeof subscriptionStatusSchema>
+export type PhaseStatus = z.infer<typeof phaseStatusSchema>
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>
 export type InvoiceType = z.infer<typeof invoiceTypeSchema>

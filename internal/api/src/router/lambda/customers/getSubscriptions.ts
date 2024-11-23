@@ -1,5 +1,9 @@
 import { TRPCError } from "@trpc/server"
-import { customerSelectSchema, subscriptionSelectSchema } from "@unprice/db/validators"
+import {
+  customerSelectSchema,
+  subscriptionPhaseSelectSchema,
+  subscriptionSelectSchema,
+} from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
 
@@ -23,6 +27,7 @@ export const getSubscriptions = protectedApiOrActiveProjectProcedure
         subscriptions: subscriptionSelectSchema
           .extend({
             customer: customerSelectSchema,
+            phases: subscriptionPhaseSelectSchema.array(),
           })
           .array(),
       }),
@@ -37,6 +42,17 @@ export const getSubscriptions = protectedApiOrActiveProjectProcedure
         subscriptions: {
           with: {
             customer: true,
+            phases: {
+              // get the active phase, and the start and end date is between now and the end date
+              where: (table, { and, eq, gte, lte, isNull, or }) =>
+                and(
+                  eq(table.active, true),
+                  lte(table.startAt, Date.now()),
+                  or(isNull(table.endAt), gte(table.endAt, Date.now()))
+                ),
+              orderBy: (table, { desc }) => [desc(table.startAt)],
+              limit: 1,
+            },
           },
         },
       },

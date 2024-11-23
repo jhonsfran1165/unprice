@@ -1,4 +1,4 @@
-import { STATUS_SUBSCRIPTION } from "@unprice/db/utils"
+import { STATUS_PHASE } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import { Separator } from "@unprice/ui/separator"
 import { TabNavigation, TabNavigationLink } from "@unprice/ui/tabs-navigation"
@@ -120,7 +120,7 @@ export default async function PlanSubscriptionsPage({
               filterDateRange: false,
               filterServerSide: false,
               filterSelectors: {
-                status: STATUS_SUBSCRIPTION.map((value) => ({
+                status: STATUS_PHASE.map((value) => ({
                   value: value,
                   label: value,
                 })),

@@ -64,7 +64,7 @@ export abstract class StateMachine<S extends string, E extends EventMap<S>, A ex
   public async transition<T extends A>(
     action: T,
     payload: InferPayload<S, E, T>
-  ): Promise<Result<InferResult<S, E, T>, InferError<S, E, T>>> {
+  ): Promise<Result<InferResult<S, E, T>, InferError<S, E, T> | UnPriceMachineError>> {
     const transition = this.transitions.find(
       (t) => t.event === action && t.from.includes(this.currentState)
     ) as TransitionDefinition<S, E, T> | undefined
@@ -72,15 +72,14 @@ export abstract class StateMachine<S extends string, E extends EventMap<S>, A ex
     if (!transition) {
       // More controlled error handling
       const errorMessage = `Invalid transition: ${String(action)} from ${String(this.currentState)}`
-      console.error(errorMessage)
-      return Err({ message: errorMessage } as InferError<S, E, T>)
+      return Err(new UnPriceMachineError({ message: errorMessage }))
     }
 
     try {
       const result = await transition.onTransition(payload)
 
       if (result.err) {
-        transition.onError?.(result.err)
+        await transition.onError?.(result.err)
         return result
       }
 
@@ -88,12 +87,12 @@ export abstract class StateMachine<S extends string, E extends EventMap<S>, A ex
 
       if (!resultValue) {
         const errorMessage = `Invalid result: ${String(action)} from ${String(this.currentState)}`
-        console.error(errorMessage)
-        return Err({ message: errorMessage } as InferError<S, E, T>)
+        return Err(new UnPriceMachineError({ message: errorMessage }))
       }
 
       // Update the state machine's current state
       this.currentState = resultValue.status
+      // Call the onSuccess callback if it exists
       await transition.onSuccess?.(resultValue)
 
       return result

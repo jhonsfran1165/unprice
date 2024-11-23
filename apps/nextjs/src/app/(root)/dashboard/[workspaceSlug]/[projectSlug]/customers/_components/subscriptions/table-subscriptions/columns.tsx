@@ -31,10 +31,7 @@ export const columns: ColumnDef<Subscription>[] = [
         checked={
           table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")
         }
-        disabled={
-          table.getRowModel().rows.length === 0 ||
-          table.getRowModel().rows.every((row) => row.original.status !== "active")
-        }
+        disabled={table.getRowModel().rows.length === 0}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
         className="translate-y-0.5"
@@ -74,17 +71,25 @@ export const columns: ColumnDef<Subscription>[] = [
     accessorKey: "status",
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
-    cell: ({ row }) => (
-      <Badge
-        className={cn({
-          success: row.original.status === "active",
-          info: row.original.status === "trialing",
-          danger: row.original.status === "past_due",
-        })}
-      >
-        {row.original.status}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const phase = row.original.phases[0]
+
+      if (!phase) {
+        return <Badge>No active phase</Badge>
+      }
+
+      return (
+        <Badge
+          className={cn({
+            success: phase.status === "active",
+            info: phase.status === "trialing",
+            danger: phase.status === "past_dued",
+          })}
+        >
+          {phase.status}
+        </Badge>
+      )
+    },
     filterFn: (row, id, value) => {
       return Array.isArray(value) && value.includes(row.getValue(id))
     },

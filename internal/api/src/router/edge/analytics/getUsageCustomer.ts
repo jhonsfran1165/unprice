@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import { customerEntitlementSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
 import { getEntitlements } from "../../../utils/shared"
@@ -13,16 +14,12 @@ export const getUsageCustomer = protectedApiOrActiveProjectProcedure
   )
   .output(
     z.object({
-      usage: z.array(
-        z.object({
-          featureSlug: z.string(),
-          usage: z.number(),
-          limit: z.number().nullable(),
-          units: z.number().nullable(),
-          featureId: z.string(),
-          featureType: z.string(),
+      usage: customerEntitlementSchema
+        .omit({
+          createdAtM: true,
+          updatedAtM: true,
         })
-      ),
+        .array(),
     })
   )
   .query(async (opts) => {

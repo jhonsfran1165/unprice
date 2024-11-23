@@ -202,7 +202,7 @@ describe("SubscriptionStateMachine", () => {
 
       expect(result.err).toBeUndefined()
       expect(result.val?.status).toBe("active")
-      expect(alteredSubscription.status).toBe("active")
+      expect(alteredPhase.status).toBe("active")
       // invoice data should be at the end of the cycle
       expect(alteredSubscription.nextInvoiceAt).toEqual(alteredSubscription.currentCycleEndAt)
       // should be pay in arrear
@@ -250,7 +250,7 @@ describe("SubscriptionStateMachine", () => {
       // it shouldn't have invoice data yet
       expect(result.val?.invoiceId).toBeUndefined()
       expect(result.val?.paymentInvoiceId).toBeUndefined()
-      expect(alteredSubscription.status).toBe("active")
+      expect(alteredPhase.status).toBe("active")
       expect(alteredPhase.whenToBill).toBe("pay_in_arrear")
 
       expect(alteredSubscription.currentCycleStartAt).toEqual(cycleStart.getTime())
@@ -263,7 +263,7 @@ describe("SubscriptionStateMachine", () => {
 
       expect(result2.err).toBeUndefined()
       expect(result2.val?.invoiceId).toBeDefined()
-      expect(alteredSubscription.status).toBe("past_due")
+      expect(alteredPhase.status).toBe("past_due")
       expect(alteredPhase.whenToBill).toBe("pay_in_arrear")
       // invoice data should be at the end of the cycle
       expect(alteredSubscription.nextInvoiceAt).toEqual(alteredSubscription.currentCycleEndAt)

@@ -3,7 +3,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import type { Result } from "@unprice/error"
-import { type invoices, subscriptionPhases, subscriptions } from "../../schema/subscriptions"
+import { subscriptionPhases, subscriptions } from "../../schema/subscriptions"
 import { planVersionSelectBaseSchema } from "../planVersions"
 import { UnPriceCalculationError } from "./../errors"
 import type { PlanVersionExtended } from "./../planVersionFeatures"
@@ -11,8 +11,8 @@ import { configPackageSchema, planVersionExtendedSchema } from "./../planVersion
 import {
   collectionMethodSchema,
   dueBehaviourSchema,
+  phaseStatusSchema,
   startCycleSchema,
-  subscriptionStatusSchema,
   whenToBillSchema,
 } from "./../shared"
 import {
@@ -24,19 +24,17 @@ import {
 } from "./items"
 
 const reasonSchema = z.enum([
-  "user_requested",
-  "admin_requested",
   "payment_failed",
   "payment_pending",
   "payment_method_not_found",
   "policy_violation",
-  "no_auto_renew",
   "pending_cancellation",
   "invoice_failed",
   "invoice_pending",
   "payment_received",
   "pending_change",
   "pending_expiration",
+  "trial_ended",
 ])
 
 export const invoiceMetadataSchema = z.object({
@@ -56,7 +54,6 @@ export const subscriptionPhaseMetadataSchema = z.object({
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   metadata: subscriptionMetadataSchema,
   timezone: z.string().min(1),
-  status: subscriptionStatusSchema,
 })
 
 export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhases, {
@@ -66,7 +63,7 @@ export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhas
   collectionMethod: collectionMethodSchema,
   startCycle: startCycleSchema,
   whenToBill: whenToBillSchema,
-  status: subscriptionStatusSchema,
+  status: phaseStatusSchema,
   dueBehaviour: dueBehaviourSchema,
 })
 
@@ -82,7 +79,6 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
   collectionMethod: collectionMethodSchema,
   startCycle: startCycleSchema,
   whenToBill: whenToBillSchema,
-  status: subscriptionStatusSchema,
 })
   .extend({
     config: subscriptionItemsConfigSchema.optional(),
@@ -112,7 +108,6 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   metadata: subscriptionMetadataSchema,
   timezone: z.string().min(1),
-  status: subscriptionStatusSchema,
 })
   .extend({
     phases: subscriptionPhaseInsertSchema.array().superRefine((data, ctx) => {
@@ -172,7 +167,6 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
     currentCycleStartAt: true,
     currentCycleEndAt: true,
     nextInvoiceAt: true,
-    status: true,
   })
   .required({
     customerId: true,
@@ -182,7 +176,6 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
   .pick({
     id: true,
     customerId: true,
-    status: true,
     metadata: true,
   })
   .extend({
@@ -196,7 +189,6 @@ export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
 export type InsertSubscriptionPhase = z.infer<typeof subscriptionPhaseInsertSchema>
 export type SubscriptionPhase = z.infer<typeof subscriptionPhaseSelectSchema>
 export type SubscriptionPhaseExtended = z.infer<typeof subscriptionPhaseExtendedSchema>
-export type SubscriptionInvoice = typeof invoices.$inferSelect
 export type SubscriptionMetadata = z.infer<typeof subscriptionMetadataSchema>
 export type SubscriptionPhaseMetadata = z.infer<typeof subscriptionPhaseMetadataSchema>
 

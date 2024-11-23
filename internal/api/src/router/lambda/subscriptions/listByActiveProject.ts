@@ -6,6 +6,7 @@ import {
   type Subscription,
   customerSelectSchema,
   searchParamsSchemaDataTable,
+  subscriptionPhaseSelectSchema,
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
@@ -18,6 +19,7 @@ export const listByActiveProject = protectedProjectProcedure
       subscriptions: subscriptionSelectSchema
         .extend({
           customer: customerSelectSchema,
+          phases: subscriptionPhaseSelectSchema.array(),
         })
         .array(),
       pageCount: z.number(),
@@ -41,6 +43,7 @@ export const listByActiveProject = protectedProjectProcedure
           .select({
             subscriptions: schema.subscriptions,
             customer: customerColumns,
+            phases: schema.subscriptionPhases,
           })
           .from(schema.subscriptions)
           .innerJoin(
@@ -48,6 +51,14 @@ export const listByActiveProject = protectedProjectProcedure
             and(
               eq(schema.subscriptions.customerId, schema.customers.id),
               eq(schema.customers.projectId, schema.subscriptions.projectId)
+            )
+          )
+          // TODO: this should be only the active phase
+          .innerJoin(
+            schema.subscriptionPhases,
+            and(
+              eq(schema.subscriptions.id, schema.subscriptionPhases.subscriptionId),
+              eq(schema.subscriptionPhases.active, true)
             )
           )
           .$dynamic()
@@ -80,6 +91,8 @@ export const listByActiveProject = protectedProjectProcedure
           return {
             ...data.subscriptions,
             customer: data.customer,
+            // TODO: just to fix the type, fix
+            phases: [data.phases],
           }
         })
 

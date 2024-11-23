@@ -29,7 +29,7 @@ import {
   invoiceStatusEnum,
   invoiceTypeEnum,
   paymentProviderEnum,
-  subscriptionStatusEnum,
+  phaseStatusEnum,
   whenToBillEnum,
 } from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
@@ -49,9 +49,6 @@ export const subscriptions = pgTableProject(
     ...timestamps,
     // customer to get the payment info from that customer
     customerId: cuid("customers_id").notNull(),
-
-    // status of the subscription - active, inactive, canceled, paused, etc.
-    status: subscriptionStatusEnum("status").notNull().default("pending"),
 
     // whether the subscription is active or not
     // normally is active if the status is active, trialing or past_due or changing
@@ -128,7 +125,7 @@ export const subscriptionPhases = pgTableProject(
     // payment method is tied to the phase because it's tied to the plan version payment provider
     paymentMethodId: text("payment_method_id"),
     // status of the phase - for history purposes
-    status: subscriptionStatusEnum("status").notNull().default("active"),
+    status: phaseStatusEnum("status").notNull().default("active"),
     // trial days of the phase
     trialDays: integer("trial_days").notNull().default(0),
     // whether the subscription is active or not

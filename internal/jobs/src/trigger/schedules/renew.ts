@@ -20,6 +20,8 @@ export const renewSchedule = schedules.task({
             and(
               eq(phase.active, true),
               lte(phase.startAt, now),
+              // only auto renewing phases are eligible for renewal
+              eq(phase.autoRenew, true),
               or(isNull(phase.endAt), gte(phase.endAt, now))
             ),
           // phases are don't overlap, so we can use limit 1

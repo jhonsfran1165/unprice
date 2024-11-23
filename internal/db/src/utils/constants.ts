@@ -83,21 +83,15 @@ export const STATUS_PLAN = ["draft", "published"] as const
 // but phases can have different statuses than the subscription is they are not active
 // for instance a phase was changed to new plan, we create a new phase with status as active
 // and we leave the old phase with status changed.
-export const STATUS_SUBSCRIPTION = [
-  "pending", // the subscription is created but there is no phases yet
-  "active", // the subscription is active
-  "trialing", // the subscription is trialing
-  "changed", // the subscription is changed
-  "canceled", // the subscription is cancelled
-  "expired", // the subscription has expired - no auto-renew
-  "past_due", // the subscription is past due - payment pending
+export const STATUS_PHASE = [
+  "active", // the phase is active
+  "trialing", // the phase is trialing
+  "changed", // the phase is changed
+  "canceled", // the phase is cancelled
+  "expired", // the phase has expired - no auto-renew
+  "past_dued", // the phase is past due - payment pending
+  "trial_ended", // the phase trial has ended
 ] as const
-
-export const STATUS_SUB_CHANGES = ["pending", "applied"] as const
-
-// TODO: remove this
-export const CHANGE_TYPE = ["upgrade", "downgrade"] as const
-export const CHANGE_TYPE_SUBSCRIPTION_ITEM = ["add", "remove", "update"] as const
 
 export const PLAN_TYPES = ["recurring"] as const
 export const PLAN_BILLING_PERIODS = ["month", "year"] as const

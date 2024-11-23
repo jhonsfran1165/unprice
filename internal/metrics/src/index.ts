@@ -56,7 +56,7 @@ export const metricSchema = z.discriminatedUnion("metric", [
   }),
   z.object({
     metric: z.literal("metric.db.write"),
-    query: z.enum(["reportUsageFeature", "createUsageFeature"]),
+    query: z.enum(["reportUsageFeature", "createUsageFeature", "getEntitlementsByDate"]),
     duration: z.number(),
     service: z.string(),
   }),

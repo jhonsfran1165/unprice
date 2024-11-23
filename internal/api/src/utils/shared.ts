@@ -91,10 +91,11 @@ export const getEntitlements = async ({
   // use current date for now
   const now = Date.now()
 
-  const { err, val } = await customer.getActiveEntitlements({
+  const { err, val } = await customer.getEntitlementsByDate({
     customerId,
     projectId,
-    date: now,
+    now,
+    includeCustom: true,
   })
 
   if (err) {

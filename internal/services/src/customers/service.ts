@@ -1,6 +1,11 @@
 import { type Database, type TransactionDatabase, eq } from "@unprice/db"
 
-import { customerSessions, customers, subscriptions } from "@unprice/db/schema"
+import {
+  customerEntitlements,
+  customerSessions,
+  customers,
+  subscriptions,
+} from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result } from "@unprice/error"
@@ -12,10 +17,10 @@ import { PaymentProviderService } from "../payment-provider"
 import { SubscriptionService } from "../subscriptions"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
-import { getActiveEntitlementsQuery } from "./queries"
+import { getEntitlementsByDateQuery } from "./queries"
 
 export class CustomerService {
-  private readonly cache: Cache
+  private readonly cache: Cache | undefined
   private readonly db: Database | TransactionDatabase
   private readonly metrics: Metrics
   private readonly logger: Logger
@@ -23,9 +28,9 @@ export class CustomerService {
   private readonly analytics: Analytics
 
   constructor(opts: {
-    cache: Cache
+    cache: Cache | undefined
     metrics: Metrics
-    db: Database
+    db: Database | TransactionDatabase
     analytics: Analytics
     logger: Logger
     waitUntil: (p: Promise<unknown>) => void
@@ -38,7 +43,7 @@ export class CustomerService {
     this.waitUntil = opts.waitUntil
   }
 
-  private async _getCustomerEntitlement(opts: {
+  private async _getCustomerEntitlementByDate(opts: {
     customerId: string
     projectId: string
     featureSlug: string
@@ -49,6 +54,31 @@ export class CustomerService {
       UnPriceCustomerError | FetchError
     >
   > {
+    // if not cache then retrive from database
+    if (!this.cache) {
+      const feature = await this.db.query.customerEntitlements.findFirst({
+        where: (ent, { eq, and, gte, lte, isNull, or }) =>
+          and(
+            eq(ent.customerId, opts.customerId),
+            eq(ent.projectId, opts.projectId),
+            lte(ent.startAt, opts.date),
+            or(isNull(ent.endAt), gte(ent.endAt, opts.date)),
+            eq(ent.featureSlug, opts.featureSlug)
+          ),
+      })
+
+      if (!feature) {
+        return Err(
+          new UnPriceCustomerError({
+            code: "FEATURE_OR_CUSTOMER_NOT_FOUND",
+            customerId: opts.customerId,
+          })
+        )
+      }
+
+      return Ok(feature)
+    }
+
     const res = await this.cache.featureByCustomerId.swr(
       `${opts.customerId}:${opts.featureSlug}`,
       async () => {
@@ -67,7 +97,7 @@ export class CustomerService {
     )
 
     if (res.err) {
-      this.logger.error(`Error in _getCustomerEntitlement: ${res.err.message}`, {
+      this.logger.error(`Error in _getCustomerEntitlementByDate: ${res.err.message}`, {
         error: JSON.stringify(res.err),
         customerId: opts.customerId,
         featureSlug: opts.featureSlug,
@@ -111,21 +141,81 @@ export class CustomerService {
     return Ok(res.val)
   }
 
-  public async getActiveEntitlements(opts: {
+  public async updateCacheAllCustomerEntitlementsByDate({
+    customerId,
+    projectId,
+    now,
+  }: {
     customerId: string
     projectId: string
-    date: number
+    now: number
+  }) {
+    if (!this.cache) {
+      return
+    }
+
+    // update the cache
+    await getEntitlementsByDateQuery({
+      customerId,
+      projectId,
+      db: this.db,
+      metrics: this.metrics,
+      now,
+      logger: this.logger,
+      includeCustom: true,
+    }).then(async (activeEntitlements) => {
+      if (activeEntitlements.length === 0) {
+        return
+      }
+
+      return Promise.all([
+        // save the customer entitlements
+        // this.cache.entitlementsByCustomerId.set(
+        //   subscriptionData.customerId,
+        //   customerEntitlements
+        // ),
+        // save features
+
+        // we nned to think about the best way to cache the features
+        activeEntitlements.map((item) => {
+          return this.cache?.featureByCustomerId.set(`${customerId}:${item.featureSlug}`, item)
+        }),
+      ])
+    })
+  }
+
+  public async getEntitlementsByDate(opts: {
+    customerId: string
+    projectId: string
+    now: number
+    includeCustom?: boolean
+    noCache?: boolean
   }): Promise<
     Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
   > {
-    const res = await this.cache.entitlementsByCustomerId.swr(opts.customerId, async () => {
-      return await getActiveEntitlementsQuery({
+    if (opts.noCache || !this.cache) {
+      const entitlements = await getEntitlementsByDateQuery({
         customerId: opts.customerId,
         projectId: opts.projectId,
         db: this.db,
         metrics: this.metrics,
-        date: opts.date,
         logger: this.logger,
+        now: opts.now,
+        includeCustom: opts.includeCustom,
+      })
+
+      return Ok(entitlements)
+    }
+
+    const res = await this.cache.entitlementsByCustomerId.swr(opts.customerId, async () => {
+      return await getEntitlementsByDateQuery({
+        customerId: opts.customerId,
+        projectId: opts.projectId,
+        db: this.db,
+        metrics: this.metrics,
+        now: opts.now,
+        logger: this.logger,
+        includeCustom: opts.includeCustom,
       })
     })
 
@@ -151,19 +241,20 @@ export class CustomerService {
         res.val.filter((ent) => {
           // an entitlement is active if it's between startAt and endAt
           // end date could be null, so it's active until the end of time
-          return ent.startAt <= opts.date && (ent.endAt ? ent.endAt >= opts.date : true)
+          return ent.startAt <= opts.now && (ent.endAt ? ent.endAt >= opts.now : true)
         })
       )
     }
 
     // cache miss, get from db
-    const entitlements = await getActiveEntitlementsQuery({
+    const entitlements = await getEntitlementsByDateQuery({
       customerId: opts.customerId,
       projectId: opts.projectId,
       db: this.db,
       metrics: this.metrics,
       logger: this.logger,
-      date: opts.date,
+      now: opts.now,
+      includeCustom: opts.includeCustom,
     })
 
     // cache the active entitlements
@@ -195,7 +286,7 @@ export class CustomerService {
       const { customerId, projectId, featureSlug, date } = opts
       const start = performance.now()
 
-      const res = await this._getCustomerEntitlement({
+      const res = await this._getCustomerEntitlementByDate({
         customerId,
         projectId,
         featureSlug,
@@ -357,7 +448,7 @@ export class CustomerService {
       const { customerId, featureSlug, projectId, usage, date } = opts
 
       // get the item details from the cache or the db
-      const res = await this._getCustomerEntitlement({
+      const res = await this._getCustomerEntitlementByDate({
         customerId,
         projectId,
         featureSlug,
@@ -445,12 +536,20 @@ export class CustomerService {
               // TODO: usage is not always sum to the current usage, could be counter, etc
               // also if there are many request per second, we could debounce the update somehow
               // only update the cache if the feature is realtime
-              if (entitlement.realtime) {
+              if (entitlement.realtime && this.cache) {
                 this.cache.featureByCustomerId.set(`${customerId}:${featureSlug}`, {
                   ...entitlement,
                   usage: (entitlement.usage ?? 0) + usage,
-                  lastUpdatedAt: Date.now(),
+                  lastUsageUpdateAt: Date.now(),
                 })
+              } else if (entitlement.realtime) {
+                // update the usage in db
+                this.db
+                  .update(customerEntitlements)
+                  .set({
+                    usage: (entitlement.usage ?? 0) + usage,
+                  })
+                  .where(eq(customerEntitlements.id, entitlement.id))
               }
             })
             .catch((error) => {
@@ -733,9 +832,8 @@ export class CustomerService {
           await tx
             .update(subscriptions)
             .set({
-              status: "canceled",
               metadata: {
-                reason: "user_requested",
+                reason: "pending_cancellation",
               },
               canceledAt: endDate,
             })

@@ -379,7 +379,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
     const descriptionItem = description ?? (isProrated ? `${name} (prorated)` : name)
 
-    if (productId && !unitAmount) {
+    if (productId && unitAmount === undefined) {
       return Err(
         new UnPricePaymentProviderError({
           message: "Unit decimal amount is required for product based invoice items",

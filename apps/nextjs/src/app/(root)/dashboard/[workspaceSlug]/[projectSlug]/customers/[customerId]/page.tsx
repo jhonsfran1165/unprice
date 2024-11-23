@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 
 import { APP_DOMAIN } from "@unprice/config"
-import { STATUS_SUBSCRIPTION } from "@unprice/db/utils"
+import { STATUS_PHASE } from "@unprice/db/utils"
 import { Button } from "@unprice/ui/button"
 import { Separator } from "@unprice/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
@@ -117,7 +117,7 @@ export default async function CustomerPage({
                 filterDateRange: true,
                 filterServerSide: true,
                 filterSelectors: {
-                  status: STATUS_SUBSCRIPTION.map((value) => ({
+                  status: STATUS_PHASE.map((value) => ({
                     value: value,
                     label: value,
                   })),

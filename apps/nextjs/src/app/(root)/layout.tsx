@@ -1,10 +1,10 @@
-import "~/styles/globals.css"
-import "~/styles/prosemirror.css"
 import { cn } from "@unprice/ui/utils"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import type { Metadata, Viewport } from "next"
 import { ViewTransitions } from "next-view-transitions"
+import "~/styles/globals.css"
+import "~/styles/prosemirror.css"
 
 import { ThemeProvider } from "~/components/layout/theme-provider"
 import { siteConfig } from "~/constants/layout"
@@ -49,6 +49,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             name="viewport"
             content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
           />
+          {/* <script src="https://unpkg.com/react-scan/dist/auto.global.js" /> */}
         </head>
         <body
           className={cn(
