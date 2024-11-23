@@ -293,9 +293,9 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                     </TableCell>
                     <TableCell className="table-cell">
                       {feature.featureType === "usage" ? (
-                        <div className="text-center">{freeUnitsText}</div>
+                        <div className="text-center text-xs">{freeUnitsText}</div>
                       ) : feature.featureType === "flat" ? (
-                        <div className="text-center">{itemConfig.units}</div>
+                        <div className="text-center text-xs">{itemConfig.units}</div>
                       ) : (
                         <FormField
                           control={form.control}
@@ -309,7 +309,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                                     {...field}
                                     type="number"
                                     min={1}
-                                    className="mx-auto h-8 w-20 text-center"
+                                    className="mx-auto h-8 w-20 text-center text-xs"
                                     disabled={
                                       feature.featureType === "flat" ||
                                       feature.featureType === "usage" ||

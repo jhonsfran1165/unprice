@@ -44,7 +44,7 @@ export function PlanVersionDialog({
               planType: "recurring",
               paymentProvider: "stripe",
               description: "",
-              startCycle: 1,
+              startCycle: 0,
               billingPeriod: "month",
               collectionMethod: "charge_automatically",
               whenToBill: "pay_in_arrear",

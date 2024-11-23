@@ -33,6 +33,7 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
   .partial({
     projectId: true,
     id: true,
+    startCycle: true,
   })
   .required({
     planId: true,

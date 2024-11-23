@@ -6,8 +6,8 @@ import { SubscriptionService } from "@unprice/services/subscriptions"
 import { Analytics } from "@unprice/tinybird"
 import { env } from "../../env.mjs"
 
-export const changeTask = task({
-  id: "subscription.change",
+export const pastDueTask = task({
+  id: "subscription.pastdue",
   retry: {
     maxAttempts: 1,
   },
@@ -16,12 +16,16 @@ export const changeTask = task({
       subscriptionId,
       projectId,
       now,
-      changeAt,
+      pastDueAt,
+      phaseId,
+      invoiceId,
     }: {
       subscriptionId: string
       projectId: string
       now: number
-      changeAt?: number
+      pastDueAt?: number
+      phaseId: string
+      invoiceId: string
     },
     { ctx }
   ) => {
@@ -34,8 +38,10 @@ export const changeTask = task({
       requestId: ctx.task.id,
       defaultFields: {
         subscriptionId,
+        phaseId,
+        invoiceId,
         projectId,
-        api: "jobs.subscription.change",
+        api: "jobs.invoice.pastdue",
       },
     })
 
@@ -59,9 +65,11 @@ export const changeTask = task({
       throw initPhaseMachineResult.err
     }
 
-    const result = await subscriptionService.changeSubscription({
+    const result = await subscriptionService.pastDueSubscription({
       now,
-      changeAt,
+      pastDueAt,
+      phaseId: phaseId,
+      invoiceId: invoiceId,
     })
 
     // we have to throw if there is an error so the task fails

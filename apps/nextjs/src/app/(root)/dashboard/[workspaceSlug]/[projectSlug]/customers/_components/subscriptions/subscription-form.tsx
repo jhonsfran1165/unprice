@@ -1,12 +1,15 @@
 "use client"
 import type { InsertSubscription, Subscription, SubscriptionItem } from "@unprice/db/validators"
 import { subscriptionInsertSchema } from "@unprice/db/validators"
-import { Form } from "@unprice/ui/form"
+import { Form, FormDescription, FormLabel } from "@unprice/ui/form"
+import { Typography } from "@unprice/ui/typography"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect } from "react"
 import type { z } from "zod"
+import { CopyButton } from "~/components/copy-button"
 import TimeZoneFormField from "~/components/forms/timezone-field"
 import { SubmitButton } from "~/components/submit-button"
+import { formatDate } from "~/lib/dates"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
@@ -83,6 +86,25 @@ export function SubscriptionForm({
         onSubmit={form.handleSubmit(onSubmitForm)}
         className="space-y-6"
       >
+        {isEdit && (
+          <>
+            <div className="flex items-start gap-2">
+              <div>
+                <FormLabel>Subscription ID</FormLabel>
+                <FormDescription>{defaultValues.id}</FormDescription>
+              </div>
+              <CopyButton value={defaultValues.id ?? ""} className="size-4" />
+            </div>
+            <div className="flex flex-col items-start gap-2">
+              <Typography variant="h5">Current Billing Cycle</Typography>
+              <Typography variant="p" affects="removePaddingMargin">
+                {formatDate(defaultValues.currentCycleStartAt!, defaultValues.timezone)} to{" "}
+                {formatDate(defaultValues.currentCycleEndAt!, defaultValues.timezone)}
+              </Typography>
+            </div>
+          </>
+        )}
+
         <div className="space-y-8">
           <CustomerFormField form={form} isDisabled={isEdit} />
 

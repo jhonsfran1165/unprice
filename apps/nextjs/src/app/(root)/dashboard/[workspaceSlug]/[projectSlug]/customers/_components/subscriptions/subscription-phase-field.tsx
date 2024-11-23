@@ -135,6 +135,10 @@ export default function SubscriptionPhaseFormField({
                 (version) => version.id === phase.planVersionId
               )
 
+              const now = Date.now()
+              const isActive =
+                phase.startAt < now && (phase.endAt ?? Number.POSITIVE_INFINITY) > now
+
               if (!selectedPlanVersion) return null
 
               return (
@@ -152,13 +156,21 @@ export default function SubscriptionPhaseFormField({
                         <Typography variant="h5">
                           {index + 1}. {selectedPlanVersion.title} v{selectedPlanVersion.version} -{" "}
                           {selectedPlanVersion.billingPeriod}
-                          {phase.trialDays && (
+                          {phase.trialDays && phase.trialDays > 0 ? (
                             <Badge className="ml-2">{phase.trialDays} days trial</Badge>
+                          ) : (
+                            <Badge className="ml-2">no trial</Badge>
+                          )}
+                          {isActive && (
+                            <div className="mx-2 inline-flex items-center font-secondary font-semibold text-info text-xs">
+                              <span className="flex h-2 w-2 rounded-full bg-info" />
+                              <span className="ml-1">{"active phase"}</span>
+                            </div>
                           )}
                         </Typography>
                         <Typography variant="p" affects="removePaddingMargin">
                           from {formatDate(phase.startAt)} to{" "}
-                          {phase.endAt ? formatDate(phase.endAt) : "Forever"}
+                          {phase.endAt ? formatDate(phase.endAt) : "forever"}
                         </Typography>
                       </div>
                       <div className="flex items-center gap-2">
@@ -315,7 +327,10 @@ export default function SubscriptionPhaseFormField({
             </SheetHeader>
 
             <SubscriptionPhaseForm
-              defaultValues={selectedPhase}
+              defaultValues={{
+                ...selectedPhase,
+                customerId: selectedCustomer,
+              }}
               onSubmit={(data) => {
                 if (data.id !== "") {
                   const index = fields.findIndex((phase) => phase.id === data.id)

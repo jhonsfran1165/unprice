@@ -14,7 +14,7 @@ import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form"
 import { FilterScroll } from "~/components/filter-scroll"
 
 interface FormValues extends FieldValues {
-  startCycle?: StartCycle | null
+  startCycle?: StartCycle
   billingPeriod?: BillingPeriod | null
 }
 

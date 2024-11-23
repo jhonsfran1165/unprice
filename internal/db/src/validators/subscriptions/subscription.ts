@@ -81,10 +81,10 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
   whenToBill: whenToBillSchema,
 })
   .extend({
-    config: subscriptionItemsConfigSchema.optional(),
-    customerId: z.string().optional(),
-    paymentMethodRequired: z.boolean().optional(),
-    items: subscriptionItemsSelectSchema.array().optional(),
+    config: subscriptionItemsConfigSchema,
+    customerId: z.string(),
+    paymentMethodRequired: z.boolean(),
+    items: subscriptionItemsSelectSchema.array(),
   })
   .partial({
     id: true,
@@ -94,6 +94,7 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
     config: true,
     items: true,
     subscriptionId: true,
+    trialDays: true,
   })
   .omit({
     createdAtM: true,

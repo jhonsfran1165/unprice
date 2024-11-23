@@ -1,129 +1,21 @@
-DO $$ BEGIN
- CREATE TYPE "public"."aggregation_method" AS ENUM('sum', 'last_during_period', 'count', 'max');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."change_type" AS ENUM('upgrade', 'downgrade');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."change_type_subscription_item" AS ENUM('add', 'remove', 'update');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."collection_method" AS ENUM('charge_automatically', 'send_invoice');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."currency" AS ENUM('USD', 'EUR');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."due_behaviour" AS ENUM('cancel', 'downgrade');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."invoice_status" AS ENUM('unpaid', 'paid', 'waiting', 'void', 'draft', 'failed');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."invoice_type" AS ENUM('flat', 'usage', 'hybrid');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."payment_providers" AS ENUM('stripe', 'lemonsqueezy');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."billing_period" AS ENUM('month', 'year');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."plan_type" AS ENUM('recurring');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."app_stages" AS ENUM('prod', 'test', 'dev');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."plan_version_status" AS ENUM('draft', 'published');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."status_sub_changes" AS ENUM('pending', 'applied');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."subscription_status" AS ENUM('pending', 'active', 'trialing', 'changed', 'canceled', 'expired', 'pending_invoice', 'past_due');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."team_roles" AS ENUM('OWNER', 'ADMIN', 'MEMBER');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."tier_mode" AS ENUM('volume', 'graduated');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."feature_types" AS ENUM('flat', 'tier', 'package', 'usage');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."feature_version_types" AS ENUM('feature', 'addon');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."usage_mode" AS ENUM('tier', 'package', 'unit');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."when_to_bill" AS ENUM('pay_in_advance', 'pay_in_arrear');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
+CREATE TYPE "public"."aggregation_method" AS ENUM('sum', 'last_during_period', 'count', 'max');--> statement-breakpoint
+CREATE TYPE "public"."collection_method" AS ENUM('charge_automatically', 'send_invoice');--> statement-breakpoint
+CREATE TYPE "public"."currency" AS ENUM('USD', 'EUR');--> statement-breakpoint
+CREATE TYPE "public"."due_behaviour" AS ENUM('cancel', 'downgrade');--> statement-breakpoint
+CREATE TYPE "public"."invoice_status" AS ENUM('unpaid', 'paid', 'waiting', 'void', 'draft', 'failed');--> statement-breakpoint
+CREATE TYPE "public"."invoice_type" AS ENUM('flat', 'usage', 'hybrid');--> statement-breakpoint
+CREATE TYPE "public"."payment_providers" AS ENUM('stripe', 'lemonsqueezy');--> statement-breakpoint
+CREATE TYPE "public"."phase_status" AS ENUM('active', 'trialing', 'changed', 'canceled', 'expired', 'past_dued', 'trial_ended');--> statement-breakpoint
+CREATE TYPE "public"."billing_period" AS ENUM('month', 'year');--> statement-breakpoint
+CREATE TYPE "public"."plan_type" AS ENUM('recurring');--> statement-breakpoint
+CREATE TYPE "public"."app_stages" AS ENUM('prod', 'test', 'dev');--> statement-breakpoint
+CREATE TYPE "public"."plan_version_status" AS ENUM('draft', 'published');--> statement-breakpoint
+CREATE TYPE "public"."team_roles" AS ENUM('OWNER', 'ADMIN', 'MEMBER');--> statement-breakpoint
+CREATE TYPE "public"."tier_mode" AS ENUM('volume', 'graduated');--> statement-breakpoint
+CREATE TYPE "public"."feature_types" AS ENUM('flat', 'tier', 'package', 'usage');--> statement-breakpoint
+CREATE TYPE "public"."feature_version_types" AS ENUM('feature', 'addon');--> statement-breakpoint
+CREATE TYPE "public"."usage_mode" AS ENUM('tier', 'package', 'unit');--> statement-breakpoint
+CREATE TYPE "public"."when_to_bill" AS ENUM('pay_in_advance', 'pay_in_arrear');--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "unprice_apikeys" (
 	"id" varchar(36) NOT NULL,
 	"project_id" varchar(36) NOT NULL,
@@ -222,7 +114,7 @@ CREATE TABLE IF NOT EXISTS "unprice_customer_entitlements" (
 	"start_at" bigint NOT NULL,
 	"end_at" bigint,
 	"is_custom" boolean DEFAULT false NOT NULL,
-	"last_updated_at" bigint DEFAULT 0 NOT NULL,
+	"last_usage_update_at" bigint DEFAULT 0 NOT NULL,
 	"metadata" json,
 	CONSTRAINT "pk_customer_entitlement" PRIMARY KEY("id","project_id")
 );
@@ -246,6 +138,7 @@ CREATE TABLE IF NOT EXISTS "unprice_customers" (
 	"metadata" json,
 	"stripe_customer_id" text,
 	"active" boolean DEFAULT true,
+	"is_main" boolean DEFAULT false,
 	"default_currency" "currency" DEFAULT 'USD' NOT NULL,
 	"timezone" varchar(32) DEFAULT 'UTC' NOT NULL,
 	CONSTRAINT "pk_customer" PRIMARY KEY("id","project_id"),
@@ -422,7 +315,7 @@ CREATE TABLE IF NOT EXISTS "unprice_subscription_phases" (
 	"subscription_id" varchar(36) NOT NULL,
 	"plan_version_id" varchar(36) NOT NULL,
 	"payment_method_id" text,
-	"status" "subscription_status" DEFAULT 'active' NOT NULL,
+	"status" "phase_status" DEFAULT 'active' NOT NULL,
 	"trial_days" integer DEFAULT 0 NOT NULL,
 	"active" boolean DEFAULT true NOT NULL,
 	"due_behaviour" "due_behaviour" DEFAULT 'cancel' NOT NULL,
@@ -432,7 +325,7 @@ CREATE TABLE IF NOT EXISTS "unprice_subscription_phases" (
 	"collection_method" "collection_method" DEFAULT 'charge_automatically' NOT NULL,
 	"auto_renew" boolean DEFAULT true NOT NULL,
 	"trial_ends_at_m" bigint,
-	"start_at_m" bigint DEFAULT 0 NOT NULL,
+	"start_at_m" bigint NOT NULL,
 	"end_at_m" bigint,
 	"metadata" json,
 	CONSTRAINT "subscription_phases_pkey" PRIMARY KEY("id","project_id")
@@ -444,7 +337,6 @@ CREATE TABLE IF NOT EXISTS "unprice_subscriptions" (
 	"created_at_m" bigint DEFAULT 0 NOT NULL,
 	"updated_at_m" bigint DEFAULT 0 NOT NULL,
 	"customers_id" varchar(36) NOT NULL,
-	"status" "subscription_status" DEFAULT 'pending' NOT NULL,
 	"active" boolean DEFAULT true NOT NULL,
 	"plan_slug" text DEFAULT 'FREE',
 	"timezone" varchar(32) DEFAULT 'UTC' NOT NULL,
@@ -455,6 +347,7 @@ CREATE TABLE IF NOT EXISTS "unprice_subscriptions" (
 	"next_invoice_at_m" bigint DEFAULT 0 NOT NULL,
 	"last_invoice_at_m" bigint,
 	"past_due_at_m" bigint,
+	"past_dued_at_m" bigint,
 	"cancel_at_m" bigint,
 	"canceled_at_m" bigint,
 	"expires_at_m" bigint,

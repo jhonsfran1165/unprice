@@ -1034,11 +1034,12 @@ export class SubscriptionService {
   // when an invoice is past due we need to mark the subscription as past due
   public async pastDueSubscription(payload: {
     now: number
-    pastDueAt: number
+    pastDueAt?: number
     phaseId: string
+    invoiceId: string
     metadata?: SubscriptionPhaseMetadata
   }): Promise<Result<void, UnPriceSubscriptionError>> {
-    const { now, pastDueAt, phaseId, metadata } = payload
+    const { now, pastDueAt, phaseId, invoiceId, metadata } = payload
 
     // the phase that trigger the past due don't necessarily have to be the active phase
     // for instance if the subscription is past due because of a previous phase we need to mark it as past due
@@ -1050,6 +1051,26 @@ export class SubscriptionService {
       return Err(
         new UnPriceSubscriptionError({
           message: "Phase not found",
+        })
+      )
+    }
+
+    const invoice = await this.db.query.invoices.findFirst({
+      where: (inv, { eq, and }) => and(eq(inv.id, invoiceId), eq(inv.subscriptionPhaseId, phaseId)),
+    })
+
+    if (!invoice) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Invoice not found",
+        })
+      )
+    }
+
+    if (["paid", "void"].includes(invoice.status)) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Invoice is not past due, it has been already paid or voided",
         })
       )
     }
@@ -1089,8 +1110,8 @@ export class SubscriptionService {
   // after that we can create the new phase
   public async changeSubscription(payload: {
     now: number
-    newPhase: InsertSubscriptionPhase
-    changeAt: number
+    newPhase?: InsertSubscriptionPhase
+    changeAt?: number
     metadata?: SubscriptionPhaseMetadata
   }): Promise<
     Result<
@@ -1125,31 +1146,41 @@ export class SubscriptionService {
       return Err(changeErr)
     }
 
-    // if all goes well we create the new phase
-    const { err: createPhaseErr, val: newPhaseResult } = await this.createPhase({
-      input: {
-        ...newPhase,
-        startAt: changeAt + 1, // we need to start the new phase at the next millisecond
-      },
-      projectId: activePhase.projectId,
-      subscriptionId: activePhase.subscriptionId,
-      now,
-      db: this.db,
-    })
+    // if a new phase is provided we need to create it
+    if (newPhase) {
+      // if all goes well we create the new phase
+      const { err: createPhaseErr, val: newPhaseResult } = await this.createPhase({
+        input: {
+          ...newPhase,
+          startAt: change.changedAt, // we need to start the new phase at the next millisecond
+        },
+        projectId: activePhase.projectId,
+        subscriptionId: activePhase.subscriptionId,
+        now,
+        db: this.db,
+      })
 
-    if (createPhaseErr) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message: `Error while creating new phase: ${createPhaseErr.message}`,
-        })
-      )
+      if (createPhaseErr) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: `Error while creating new phase: ${createPhaseErr.message}`,
+          })
+        )
+      }
+
+      return Ok({
+        oldPhaseStatus: change.status,
+        newPhaseStatus: newPhaseResult.status,
+        activePhaseId: activePhase.id,
+        newPhaseId: newPhaseResult.id,
+      })
     }
 
     return Ok({
       oldPhaseStatus: change.status,
-      newPhaseStatus: newPhaseResult.status,
+      newPhaseStatus: change.status,
       activePhaseId: activePhase.id,
-      newPhaseId: newPhaseResult.id,
+      newPhaseId: activePhase.id,
     })
   }
 

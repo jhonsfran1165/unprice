@@ -52,7 +52,6 @@ export class InvoiceStateMachine extends StateMachine<
   InvoiceEventMap<InvoiceStatus>,
   keyof InvoiceEventMap<InvoiceStatus>
 > {
-  // TODO: instead of this change to the phase machine
   private readonly phaseMachine: PhaseMachine
   private readonly db: Database | TransactionDatabase
   private readonly logger: Logger

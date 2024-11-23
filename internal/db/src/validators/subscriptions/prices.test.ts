@@ -88,7 +88,7 @@ describe("calculateFlatPricePlan", () => {
         },
       ],
       whenToBill: "pay_in_advance",
-      startCycle: null,
+      startCycle: 1,
       gracePeriod: null,
       metadata: null,
     }

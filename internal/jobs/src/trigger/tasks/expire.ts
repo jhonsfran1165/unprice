@@ -1,7 +1,8 @@
 import { task } from "@trigger.dev/sdk/v3"
 import { db } from "@unprice/db"
 import { ConsoleLogger } from "@unprice/logging"
-import { SubscriptionStateMachine } from "@unprice/services/subscriptions"
+import { NoopMetrics } from "@unprice/services/metrics"
+import { SubscriptionService } from "@unprice/services/subscriptions"
 import { Analytics } from "@unprice/tinybird"
 import { env } from "../../env.mjs"
 
@@ -13,13 +14,11 @@ export const expireTask = task({
   run: async (
     {
       subscriptionId,
-      activePhaseId,
       projectId,
       now,
       expiresAt,
     }: {
       subscriptionId: string
-      activePhaseId: string
       projectId: string
       now: number
       expiresAt?: number
@@ -36,58 +35,34 @@ export const expireTask = task({
       defaultFields: {
         subscriptionId,
         projectId,
-        api: "jobs.subscription.change",
+        api: "jobs.subscription.expire",
       },
     })
 
-    const subscriptionPhase = await db.query.subscriptionPhases.findFirst({
-      with: {
-        subscription: {
-          with: {
-            customer: true,
-          },
-        },
-        items: {
-          with: {
-            featurePlanVersion: {
-              with: {
-                feature: true,
-              },
-            },
-          },
-        },
-        planVersion: {
-          with: {
-            planFeatures: true,
-          },
-        },
-      },
-      where: (table, { eq, and }) =>
-        and(eq(table.id, activePhaseId), eq(table.projectId, projectId)),
-    })
-
-    if (!subscriptionPhase) {
-      throw new Error("Subscription phase not found")
-    }
-
-    if (!subscriptionPhase.subscription) {
-      throw new Error("Subscription not found")
-    }
-
-    if (!subscriptionPhase.subscription.customer) {
-      throw new Error("Customer not found")
-    }
-
-    const subscriptionStateMachine = new SubscriptionStateMachine({
+    const subscriptionService = new SubscriptionService({
       db: db,
-      activePhase: subscriptionPhase,
-      subscription: subscriptionPhase.subscription,
-      customer: subscriptionPhase.subscription.customer,
-      analytics: tinybird,
+      // all calls made to the database
+      cache: undefined,
+      metrics: new NoopMetrics(),
       logger: logger,
+      waitUntil: () => {},
+      analytics: tinybird,
     })
 
-    const result = await subscriptionStateMachine.expire({ now, expiresAt })
+    // init phase machine
+    const initPhaseMachineResult = await subscriptionService.initPhaseMachines({
+      subscriptionId,
+      projectId,
+    })
+
+    if (initPhaseMachineResult.err) {
+      throw initPhaseMachineResult.err
+    }
+
+    const result = await subscriptionService.expireSubscription({
+      now,
+      expiresAt,
+    })
 
     // we have to throw if there is an error so the task fails
     if (result.err) {

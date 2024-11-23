@@ -59,7 +59,7 @@ export type PhaseEventMap<S extends string> = {
       changeAt?: number
       metadata?: SubscriptionPhaseMetadata
     }
-    result: { status: S }
+    result: { status: S; changedAt: number }
     error: UnPriceSubscriptionError
   }
   INVOICE: {
@@ -251,10 +251,17 @@ export class PhaseMachine extends StateMachine<
         // we don't need the active phase because the invoice can be from any phase
         const phase = this.phase
 
-        // TODO: check the invoice status
-        // const {
-        //   invoiceId,
-        // } = payload
+        const invoice = await this.db.query.invoices.findFirst({
+          where: eq(invoices.id, _payload.invoiceId),
+        })
+
+        if (!invoice) {
+          return Err(new UnPriceSubscriptionError({ message: "Invoice not found" }))
+        }
+
+        if (!["paid", "void"].includes(invoice.status)) {
+          return Err(new UnPriceSubscriptionError({ message: "Invoice is not paid yet" }))
+        }
 
         await this.syncState({
           phaseId: phase.id,
@@ -393,8 +400,7 @@ export class PhaseMachine extends StateMachine<
         // if there is no invoice we just return the subscription state
         return Ok({
           status: activePhase.status,
-          phaseId: activePhase.id,
-          subscriptionId: this.subscription.id,
+          changedAt: changeAt,
         })
       },
     })
@@ -733,27 +739,29 @@ export class PhaseMachine extends StateMachine<
 
     // before renewing the subscription we need to check if the subscription has already been invoiced
     // with this we make sure the cycle is correctly invoiced before renewing
-    if (whenToBill === "pay_in_advance") {
-      if (
-        subscription.lastInvoiceAt &&
-        subscription.lastInvoiceAt < subscription.currentCycleStartAt
-      ) {
-        return Err(
-          new UnPriceSubscriptionError({
-            message: "Subscription has not been invoiced. Invoice the current cycle first",
-          })
-        )
-      }
-    } else if (whenToBill === "pay_in_arrear") {
-      if (
-        subscription.lastInvoiceAt &&
-        subscription.lastInvoiceAt < subscription.currentCycleEndAt
-      ) {
-        return Err(
-          new UnPriceSubscriptionError({
-            message: "Subscription has not been invoiced. Invoice the current cycle first",
-          })
-        )
+    if (activePhase.status !== "trialing") {
+      if (whenToBill === "pay_in_advance") {
+        if (
+          subscription.lastInvoiceAt &&
+          subscription.lastInvoiceAt < subscription.currentCycleStartAt
+        ) {
+          return Err(
+            new UnPriceSubscriptionError({
+              message: "Subscription has not been invoiced. Invoice the current cycle first",
+            })
+          )
+        }
+      } else if (whenToBill === "pay_in_arrear") {
+        if (
+          subscription.lastInvoiceAt &&
+          subscription.lastInvoiceAt < subscription.currentCycleEndAt
+        ) {
+          return Err(
+            new UnPriceSubscriptionError({
+              message: "Subscription has not been invoiced. Invoice the current cycle first",
+            })
+          )
+        }
       }
     }
 
@@ -769,16 +777,23 @@ export class PhaseMachine extends StateMachine<
     })
 
     // Check if the calculated cycle end is after any scheduled change, cancel or expiry dates
-    if (subscription.changeAt || subscription.cancelAt || subscription.expiresAt) {
+    if (
+      subscription.changeAt ||
+      subscription.cancelAt ||
+      subscription.expiresAt ||
+      subscription.pastDueAt
+    ) {
       const changeDate = subscription.changeAt ? new Date(subscription.changeAt) : null
       const cancelDate = subscription.cancelAt ? new Date(subscription.cancelAt) : null
       const expiryDate = subscription.expiresAt ? new Date(subscription.expiresAt) : null
+      const pastDueDate = subscription.pastDueAt ? new Date(subscription.pastDueAt) : null
 
       // Check if the calculated cycle end date is after any of the scheduled dates that exist
       if (
         (changeDate && cycleEnd > changeDate) ||
         (cancelDate && cycleEnd > cancelDate) ||
-        (expiryDate && cycleEnd > expiryDate)
+        (expiryDate && cycleEnd > expiryDate) ||
+        (pastDueDate && cycleEnd > pastDueDate)
       ) {
         // TODO: should I just end the phase here?
         return Err(

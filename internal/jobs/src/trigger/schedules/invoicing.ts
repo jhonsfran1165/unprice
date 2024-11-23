@@ -1,5 +1,6 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
 import { db } from "@unprice/db"
+import { renewTask } from "../tasks"
 import { invoiceTask } from "../tasks/invoice"
 
 export const invoicingSchedule = schedules.task({
@@ -14,9 +15,10 @@ export const invoicingSchedule = schedules.task({
       with: {
         phases: {
           // get active phase now
-          where: (phase, { eq, and, gte, lte, isNull, or }) =>
+          where: (phase, { eq, and, gte, lte, isNull, or, not }) =>
             and(
               eq(phase.active, true),
+              not(eq(phase.status, "trialing")),
               lte(phase.startAt, now),
               or(isNull(phase.endAt), gte(phase.endAt, now))
             ),
@@ -38,6 +40,13 @@ export const invoicingSchedule = schedules.task({
       await invoiceTask.triggerAndWait({
         subscriptionPhaseId: phase.id,
         projectId: sub.projectId,
+        now,
+      })
+
+      // first invoice is free, so we renew the subscription
+      await renewTask.triggerAndWait({
+        subscriptionId: sub.id,
+        projectId: phase.projectId,
         now,
       })
     }
