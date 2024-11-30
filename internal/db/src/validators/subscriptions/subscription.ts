@@ -66,6 +66,14 @@ export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhas
   status: phaseStatusSchema,
   dueBehaviour: dueBehaviourSchema,
 })
+  .extend({
+    items: subscriptionItemsSelectSchema.array().optional(),
+  })
+  .partial({
+    projectId: true,
+    createdAtM: true,
+    updatedAtM: true,
+  })
 
 export const subscriptionPhaseExtendedSchema = subscriptionPhaseSelectSchema.extend({
   items: subscriptionItemExtendedSchema.array(),
@@ -93,7 +101,6 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
     paymentMethodId: true,
     config: true,
     items: true,
-    subscriptionId: true,
     trialDays: true,
   })
   .omit({
@@ -104,6 +111,7 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
   })
   .required({
     planVersionId: true,
+    subscriptionId: true,
   })
 
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {

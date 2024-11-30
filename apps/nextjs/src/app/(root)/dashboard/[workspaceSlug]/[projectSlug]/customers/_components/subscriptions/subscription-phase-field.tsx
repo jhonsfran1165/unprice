@@ -14,7 +14,6 @@ import { type FieldErrors, type UseFormReturn, useFieldArray } from "react-hook-
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { formatDate } from "~/lib/dates"
-import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 import { SubscriptionPhaseForm } from "./subscription-phase-form"
 
@@ -26,6 +25,7 @@ export default function SubscriptionPhaseFormField({
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
     name: "phases",
+    keyName: "_id",
   })
 
   const defaultValuesPhase = {
@@ -98,6 +98,9 @@ export default function SubscriptionPhaseFormField({
   useEffect(() => {
     if (fields.length > 0) {
       const lastPhase = fields[fields.length - 1]
+
+      console.log("lastPhase", lastPhase)
+
       if (lastPhase) {
         setSelectedPhase({
           ...defaultValuesPhase,
@@ -188,7 +191,7 @@ export default function SubscriptionPhaseFormField({
                           <PencilIcon className="size-3.5" />
                         </Button>
 
-                        {fields.length > 1 && isDelete.get(phase.id) && (
+                        {fields.length > 1 && isDelete.get(phase._id) && (
                           <div className="flex flex-row items-center">
                             <Button
                               className="px-0 text-destructive"
@@ -199,7 +202,7 @@ export default function SubscriptionPhaseFormField({
                                 e.preventDefault()
                                 remove(index)
 
-                                setConfirmDelete((prev) => new Map(prev.set(phase.id, false)))
+                                setConfirmDelete((prev) => new Map(prev.set(phase._id, false)))
                               }}
                             >
                               <X className="h-4 w-4" />
@@ -207,7 +210,7 @@ export default function SubscriptionPhaseFormField({
                           </div>
                         )}
 
-                        {fields.length > 1 && !isDelete.get(phase.id) && (
+                        {fields.length > 1 && !isDelete.get(phase._id) && (
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
@@ -217,10 +220,10 @@ export default function SubscriptionPhaseFormField({
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   e.preventDefault()
-                                  setConfirmDelete((prev) => new Map(prev.set(phase.id, true)))
+                                  setConfirmDelete((prev) => new Map(prev.set(phase._id, true)))
 
                                   setTimeout(() => {
-                                    setConfirmDelete((prev) => new Map(prev.set(phase.id, false)))
+                                    setConfirmDelete((prev) => new Map(prev.set(phase._id, false)))
                                   }, 2000)
                                 }}
                               >
@@ -337,7 +340,7 @@ export default function SubscriptionPhaseFormField({
                   if (index !== -1) {
                     update(index, data)
                   } else {
-                    toastAction("error", "Can't find the phase to update")
+                    append(data)
                   }
                 } else {
                   append(data)

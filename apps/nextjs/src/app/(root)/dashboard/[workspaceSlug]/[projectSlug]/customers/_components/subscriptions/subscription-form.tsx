@@ -22,8 +22,8 @@ export function SubscriptionForm({
 }: {
   setDialogOpen?: (open: boolean) => void
   defaultValues:
-    | (InsertSubscription & { items?: SubscriptionItem[] })
-    | (Subscription & { items?: SubscriptionItem[] })
+  | (InsertSubscription & { items?: SubscriptionItem[] })
+  | (Subscription & { items?: SubscriptionItem[] })
 }) {
   const router = useRouter()
   const isEdit = !!defaultValues.id

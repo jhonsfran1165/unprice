@@ -17,10 +17,10 @@ import type { PlanVersionMetadata } from "../validators/planVersions"
 import type { StartCycle } from "../validators/shared"
 import { users } from "./auth"
 import {
+  billingPeriodEnum,
   collectionMethodEnum,
   currencyEnum,
   paymentProviderEnum,
-  planBillingPeriodEnum,
   planTypeEnum,
   statusPlanEnum,
   whenToBillEnum,
@@ -82,7 +82,7 @@ export const versions = pgTableProject(
     // currency of the plan
     currency: currencyEnum("currency").notNull(),
     // billingPeriod: billing_period - billing_cycle, only used for recurring plans, only used for recurring plans
-    billingPeriod: planBillingPeriodEnum("billing_period"),
+    billingPeriod: billingPeriodEnum("billing_period").notNull().default("month"),
 
     // ************ billing data defaults ************
     // whenToBill: pay_in_advance - pay_in_arrear

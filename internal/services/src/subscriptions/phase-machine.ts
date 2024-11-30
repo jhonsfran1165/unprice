@@ -1,5 +1,10 @@
 import { type Database, type TransactionDatabase, and, eq } from "@unprice/db"
-import { invoices, subscriptionPhases, subscriptions } from "@unprice/db/schema"
+import {
+  customerEntitlements,
+  invoices,
+  subscriptionPhases,
+  subscriptions,
+} from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import {
   type Customer,
@@ -327,7 +332,7 @@ export class PhaseMachine extends StateMachine<
      * cancel the phase in the given date, if the date is in the past the phase is canceled immediately
      */
     this.addTransition({
-      from: ["active", "trial_ended"],
+      from: ["active", "trial_ended", "trialing"],
       to: ["canceled"],
       event: "CANCEL",
       onTransition: async (payload) => {
@@ -898,14 +903,20 @@ export class PhaseMachine extends StateMachine<
       finalState = "past_dued"
       reason = "invoice_failed"
       note = "Invoice in past due, waiting for payment"
-    } else if (isTrial) {
-      finalState = "trialing"
-      reason = "pending_cancellation"
-      note = "Canceled after trial period ended, waiting for invoice and payment"
     } else {
       finalState = "canceled"
       reason = "pending_cancellation"
       note = "Phase is being canceled, waiting for invoice and payment"
+    }
+
+    // for cancelations on trailing the cancel date is the end of the trial
+    if (activePhase.status === "trialing" && endAt !== activePhase.trialEndsAt) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message:
+            "This subscription phase is trialig, the cancelation date has to be the same as the end of the trial",
+        })
+      )
     }
 
     // if metadata is passed in, we use it to set the reason and note
@@ -1059,6 +1070,12 @@ export class PhaseMachine extends StateMachine<
       }
     }
 
+    // set end date to the entitlements in the phase
+    await this.setEntitlementsEndDate({
+      endAt,
+      phaseId: activePhase.id,
+    })
+
     // update the subscription dates
     // if something happens in the collection payment it will be handle
     // by the invoice machine
@@ -1071,6 +1088,14 @@ export class PhaseMachine extends StateMachine<
         ...(isChange ? { changedAt: endAt } : {}),
         ...(isExpire ? { expiredAt: endAt } : {}),
       },
+      metadataPhase: {
+        note,
+        reason,
+      },
+      metadataSubscription: {
+        note,
+        reason,
+      },
     })
 
     return Ok({
@@ -1078,6 +1103,27 @@ export class PhaseMachine extends StateMachine<
       phaseId: activePhase.id,
       subscriptionId: this.subscription.id,
     })
+  }
+
+  public async setEntitlementsEndDate({
+    endAt,
+    phaseId,
+  }: {
+    endAt: number
+    phaseId: string
+  }): Promise<void> {
+    // get the items in the phase
+    const items = await this.db.query.subscriptionItems.findMany({
+      where: (e, { eq }) => eq(e.subscriptionPhaseId, phaseId),
+    })
+
+    // set the end date to the entitlements
+    for (const item of items) {
+      await this.db
+        .update(customerEntitlements)
+        .set({ endAt })
+        .where(eq(customerEntitlements.id, item.id))
+    }
   }
 
   // check if the subscription requires a payment method and if the customer has one

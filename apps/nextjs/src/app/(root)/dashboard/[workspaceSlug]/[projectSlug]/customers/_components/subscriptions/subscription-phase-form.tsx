@@ -1,8 +1,12 @@
 "use client"
 
-import { type InsertSubscriptionPhase, subscriptionPhaseInsertSchema } from "@unprice/db/validators"
+import {
+  type InsertSubscriptionPhase,
+  type SubscriptionPhase,
+  subscriptionPhaseInsertSchema,
+  subscriptionPhaseSelectSchema,
+} from "@unprice/db/validators"
 import { Form } from "@unprice/ui/form"
-
 import { Separator } from "@unprice/ui/separator"
 import { useEffect } from "react"
 import { z } from "zod"
@@ -24,14 +28,14 @@ export function SubscriptionPhaseForm({
   onSubmit,
 }: {
   setDialogOpen?: (open: boolean) => void
-  defaultValues: InsertSubscriptionPhase
-  onSubmit: (data: InsertSubscriptionPhase) => void
+  defaultValues: InsertSubscriptionPhase | SubscriptionPhase
+  onSubmit: (data: InsertSubscriptionPhase | SubscriptionPhase) => void
 }) {
-  // TODO: don't support update for now
-  const editMode = !!defaultValues.planVersionId
+  const editMode = defaultValues.id !== "" && defaultValues.id !== undefined
 
-  const form = useZodForm({
-    schema: subscriptionPhaseInsertSchema.superRefine((data, ctx) => {
+  const formSchema = editMode
+    ? subscriptionPhaseSelectSchema
+    : subscriptionPhaseInsertSchema.superRefine((data, ctx) => {
       if (data.paymentMethodRequired) {
         if (!data.paymentMethodId) {
           ctx.addIssue({
@@ -41,13 +45,31 @@ export function SubscriptionPhaseForm({
           })
         }
       }
-    }),
+    })
+
+  const form = useZodForm({
+    schema: formSchema,
     defaultValues,
   })
 
-  const onSubmitForm = async (data: InsertSubscriptionPhase) => {
-    onSubmit(data)
-    setDialogOpen?.(false)
+  const createPhase = api.subscriptions.createPhase.useMutation()
+  const updatePhase = api.subscriptions.updatePhase.useMutation()
+
+  const onSubmitForm = async (data: InsertSubscriptionPhase | SubscriptionPhase) => {
+    if (editMode) {
+      const { phase } = await updatePhase.mutateAsync({
+        ...data,
+        id: defaultValues.id!,
+      } as SubscriptionPhase)
+
+      onSubmit(phase)
+      setDialogOpen?.(false)
+    } else {
+      const { phase } = await createPhase.mutateAsync(data)
+
+      onSubmit(phase)
+      setDialogOpen?.(false)
+    }
   }
 
   // all this querues are deduplicated inside each form field
@@ -70,6 +92,8 @@ export function SubscriptionPhaseForm({
       form.setValue("trialDays", selectedPlanVersion.trialDays)
     }
   }, [selectedPlanVersion?.id])
+
+  console.log(form.getValues())
 
   return (
     <Form {...form}>
@@ -98,7 +122,7 @@ export function SubscriptionPhaseForm({
         <Separator />
 
         <div className="flex flex-col items-center justify-between gap-8 lg:flex-row">
-          <DurationFormField form={form} isDisabled={editMode} />
+          <DurationFormField form={form} startDisabled={editMode} />
         </div>
 
         <PaymentMethodsFormField
@@ -116,16 +140,14 @@ export function SubscriptionPhaseForm({
           isLoading={isLoading}
         />
 
-        {!editMode && (
-          <div className="mt-8 flex justify-end space-x-4">
-            <SubmitButton
-              onClick={() => form.handleSubmit(onSubmitForm)()}
-              isSubmitting={form.formState.isSubmitting}
-              isDisabled={form.formState.isSubmitting}
-              label={"Create"}
-            />
-          </div>
-        )}
+        <div className="mt-8 flex justify-end space-x-4">
+          <SubmitButton
+            onClick={() => form.handleSubmit(onSubmitForm)()}
+            isSubmitting={form.formState.isSubmitting}
+            isDisabled={form.formState.isSubmitting}
+            label={editMode ? "Update" : "Create"}
+          />
+        </div>
       </form>
     </Form>
   )

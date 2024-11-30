@@ -23,6 +23,7 @@ import type {
 } from "../validators/subscriptions"
 import { customerCredits, customers } from "./customers"
 import {
+  billingPeriodEnum,
   collectionMethodEnum,
   currencyEnum,
   dueBehaviourEnum,
@@ -148,6 +149,8 @@ export const subscriptionPhases = pgTableProject(
       .default("charge_automatically"),
     // auto renew the subscription every billing period
     autoRenew: boolean("auto_renew").notNull().default(true),
+    // billingPeriod: billing_period - billing_cycle, only used for recurring plans, only used for recurring plans
+    billingPeriod: billingPeriodEnum("billing_period").notNull().default("month"),
     // ************ billing data defaults *********************************************************
 
     // ************ subscription important dates ************

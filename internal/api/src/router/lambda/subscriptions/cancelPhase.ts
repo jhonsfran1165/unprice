@@ -1,12 +1,12 @@
-import { subscriptionPhaseSelectSchema } from "@unprice/db/validators"
+import { TRPCError } from "@trpc/server"
+import { phaseStatusSchema, subscriptionPhaseSelectSchema } from "@unprice/db/validators"
 import { SubscriptionStateMachine } from "@unprice/services/subscriptions"
 import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
 
-// TODO: review this is a pseudo code
 export const cancelPhase = protectedProjectProcedure
   .input(subscriptionPhaseSelectSchema.pick({ id: true, endAt: true }))
-  .output(z.object({ result: z.boolean(), message: z.string() }))
+  .output(z.object({ status: phaseStatusSchema, message: z.string() }))
   .mutation(async (opts) => {
     const { id: subscriptionPhaseId, endAt } = opts.input
     const projectId = opts.ctx.project.id
@@ -50,13 +50,20 @@ export const cancelPhase = protectedProjectProcedure
       logger: opts.ctx.logger,
     })
 
-    await subscriptionStateMachine.cancel({
+    const { err, val: cancel } = await subscriptionStateMachine.cancel({
       cancelAt: endAt ?? Date.now(),
       now: Date.now(),
     })
 
+    if (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `Error cancelling subscription phase: ${err.message}`,
+      })
+    }
+
     return {
-      result: true,
+      status: cancel.status,
       message: "Subscription changed successfully",
     }
   })

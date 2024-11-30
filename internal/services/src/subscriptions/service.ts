@@ -1,12 +1,4 @@
-import {
-  type Database,
-  type SQL,
-  type TransactionDatabase,
-  and,
-  eq,
-  inArray,
-  sql,
-} from "@unprice/db"
+import { type Database, type TransactionDatabase, eq } from "@unprice/db"
 import {
   customerEntitlements,
   subscriptionItems,
@@ -29,6 +21,7 @@ import {
   createDefaultSubscriptionConfig,
   subscriptionInsertSchema,
   subscriptionPhaseInsertSchema,
+  subscriptionPhaseSelectSchema,
 } from "@unprice/db/validators"
 
 import { Err, Ok, type Result, SchemaError } from "@unprice/error"
@@ -154,6 +147,7 @@ export class SubscriptionService {
   // 3. compare the active items with the entitlements for the current phase
   // 4. if there is a difference, create a new entitlement, deactivate the old ones or update the units
   // 5. for custom entitlements we don't do anything, they are already synced
+  // TODO: FIX THIS!!
   private async syncEntitlementsForSubscription({
     subscriptionId,
     projectId,
@@ -237,36 +231,37 @@ export class SubscriptionService {
     >()
 
     for (const item of activeSubItems) {
-      activeSubItemsMap.set(item.featurePlanVersionId, item)
+      activeSubItemsMap.set(item.id, item)
     }
 
     for (const entitlement of activeEntitlements) {
-      entitlementsMap.set(entitlement.featurePlanVersionId, entitlement)
+      // there is a 1:1 relationship between the items and the entitlements
+      // subItemId is null only for custom entitlements
+      entitlementsMap.set(entitlement.subscriptionItemId!, entitlement)
     }
 
     // get the items that are not in the entitlements and create them
     // get the entitlements that are not in the items and deactivate them
     // update the lastUsageUpdateAt of the entitlements
     const entitiesToCreate: (typeof customerEntitlements.$inferInsert)[] = []
-    const entitiesToDeactivate: Pick<typeof customerEntitlements.$inferInsert, "id" | "endAt">[] =
-      []
     const entitiesToUpdate: Pick<
       typeof customerEntitlements.$inferInsert,
-      "id" | "lastUsageUpdateAt" | "updatedAtM"
+      "id" | "lastUsageUpdateAt" | "updatedAtM" | "endAt" | "units"
     >[] = []
 
-    const sqlChunks: SQL[] = []
+    // if entitlements are not in the items, we create them
+    // if entitlements are in the items, we update them with the end date of the phase
 
     // IMPORTANT: A customer can't have the same feature plan version assigned to multiple entitlements
     // Find items to create
-    for (const [featurePlanVersionId, item] of activeSubItemsMap) {
-      if (!entitlementsMap.has(featurePlanVersionId)) {
+    for (const item of activeSubItemsMap.values()) {
+      if (!entitlementsMap.has(item.id)) {
         entitiesToCreate.push({
           id: newId("customer_entitlement"),
           projectId,
           customerId,
           subscriptionItemId: item.id,
-          featurePlanVersionId,
+          featurePlanVersionId: item.featurePlanVersionId,
           units: item.units,
           limit: item.featurePlanVersion.limit,
           usage: 0, // Initialize usage to 0
@@ -279,71 +274,35 @@ export class SubscriptionService {
           endAt: activePhase?.endAt ?? null,
           isCustom: false,
         })
-      }
-    }
-
-    // Find entitlements to deactivate or update
-    for (const [featurePlanVersionId, entitlement] of entitlementsMap) {
-      if (!activeSubItemsMap.has(featurePlanVersionId)) {
-        entitiesToDeactivate.push({
-          id: entitlement.id,
-        })
       } else {
-        sqlChunks.push(
-          sql`when ${customerEntitlements.id} = ${entitlement.id} then ${
-            activeSubItemsMap.get(featurePlanVersionId)?.units ?? null
-          }`
-        )
+        const entitlement = entitlementsMap.get(item.id)!
+        // if the entitlement is in the items, we update it with the end date of the phase
+        // and the units of the item
         entitiesToUpdate.push({
           id: entitlement.id,
+          endAt: activePhase?.endAt ?? null,
+          units: item.units,
+          lastUsageUpdateAt: now,
+          updatedAtM: now,
         })
       }
     }
-
-    sqlChunks.push(sql`end`)
 
     // Perform database operations
     await (db ?? this.db).transaction(async (tx) => {
       try {
-        if (entitiesToCreate.length > 0) {
-          await tx
-            .insert(customerEntitlements)
-            .values(entitiesToCreate as (typeof customerEntitlements.$inferInsert)[])
+        for (const entity of entitiesToCreate) {
+          await tx.insert(customerEntitlements).values(entity)
         }
 
-        if (entitiesToDeactivate.length > 0) {
+        for (const entity of entitiesToUpdate) {
           await tx
             .update(customerEntitlements)
-            .set({ endAt: now, updatedAtM: now })
-            .where(
-              and(
-                inArray(
-                  customerEntitlements.id,
-                  entitiesToDeactivate.map((e) => e.id)
-                ),
-                eq(customerEntitlements.projectId, projectId)
-              )
-            )
-        }
-
-        if (entitiesToUpdate.length > 0) {
-          const finalSql: SQL = sql.join(sqlChunks, sql.raw(" "))
-
-          await tx
-            .update(customerEntitlements)
-            .set({ units: finalSql, updatedAtM: now })
-            .where(
-              and(
-                inArray(
-                  customerEntitlements.id,
-                  entitiesToUpdate.map((e) => e.id)
-                ),
-                eq(customerEntitlements.projectId, projectId)
-              )
-            )
+            .set(entity)
+            .where(eq(customerEntitlements.id, entity.id))
         }
       } catch (err) {
-        console.error(err)
+        console.error(err, "error syncing entitlements")
         tx.rollback()
         throw err
       }
@@ -448,9 +407,7 @@ export class SubscriptionService {
     const subscriptionWithPhases = await (db ?? this.db).query.subscriptions.findFirst({
       where: (sub, { eq }) => eq(sub.id, subscriptionId),
       with: {
-        phases: {
-          where: (phase, { gte }) => gte(phase.startAt, startAtToUse),
-        },
+        phases: true,
       },
     })
 
@@ -479,19 +436,18 @@ export class SubscriptionService {
     }
 
     // verify phases don't overlap
-    const overlappingPhases = orderedPhases.filter((p) => {
-      const startAtPhase = p.startAt
-      const endAtPhase = p.endAt ?? Number.POSITIVE_INFINITY
-
-      const endAtNewPhase = endAtToUse ?? Number.POSITIVE_INFINITY
-
+    // start date of the new phase is greater than the end date of the phase
+    // end date could be undefined or null which mean the phase is infinite
+    // use reduce to check if there is any overlap
+    const overlappingPhases = orderedPhases.reduce((acc, p) => {
       return (
-        (startAtPhase < endAtNewPhase || startAtPhase === endAtNewPhase) &&
-        (endAtPhase > startAtToUse || endAtPhase === startAtToUse)
+        acc ||
+        startAtToUse > (p.endAt ?? Number.POSITIVE_INFINITY) ||
+        startAtToUse === (p.endAt ?? Number.POSITIVE_INFINITY)
       )
-    })
+    }, false)
 
-    if (overlappingPhases.length > 0) {
+    if (overlappingPhases) {
       return Err(
         new UnPriceSubscriptionError({
           message: "Phases overlap, there is already a phase in the same range",
@@ -500,12 +456,13 @@ export class SubscriptionService {
     }
 
     // phase have to be consecutive with one another starting from the end date of the previous phase
-    const consecutivePhases = orderedPhases.filter((p, index) => {
+    // use reduce to check if the phases are consecutive
+    const consecutivePhases = orderedPhases.reduce((acc, p, index) => {
       const previousPhase = orderedPhases[index - 1]
-      return previousPhase ? previousPhase.endAt === p.startAt : false
-    })
+      return acc || (previousPhase ? previousPhase.endAt === p.startAt : false)
+    }, false)
 
-    if (consecutivePhases.length !== orderedPhases.length) {
+    if (!consecutivePhases) {
       return Err(
         new UnPriceSubscriptionError({
           message: "Phases are not consecutive",
@@ -607,7 +564,7 @@ export class SubscriptionService {
 
     // override the timezone with the project timezone and other defaults with the plan version data
     // only used for ui purposes all date are saved in utc
-    const billingPeriod = versionData.billingPeriod ?? "month"
+    const billingPeriod = versionData.billingPeriod
     const whenToBillToUse = whenToBill ?? versionData.whenToBill
     const collectionMethodToUse = collectionMethod ?? versionData.collectionMethod
     const startCycleToUse = startCycle ?? versionData.startCycle ?? 1
@@ -684,7 +641,7 @@ export class SubscriptionService {
           })
         )
       ).catch((e) => {
-        console.error(e)
+        console.error(e, "error inserting subscription items")
         trx.rollback()
         throw e
       })
@@ -724,7 +681,207 @@ export class SubscriptionService {
       })
 
       if (syncEntitlementsResult.err) {
-        console.error(syncEntitlementsResult.err)
+        console.error(syncEntitlementsResult.err, "error syncing entitlements")
+        trx.rollback()
+        throw syncEntitlementsResult.err
+      }
+
+      return Ok(subscriptionPhase)
+    })
+
+    return result
+  }
+
+  public async updatePhase({
+    input,
+    subscriptionId,
+    projectId,
+    db,
+    now,
+  }: {
+    input: SubscriptionPhase
+    subscriptionId: string
+    projectId: string
+    db?: Database | TransactionDatabase
+    now: number
+  }): Promise<Result<SubscriptionPhase, UnPriceSubscriptionError | SchemaError>> {
+    const { success, data, error } = subscriptionPhaseSelectSchema.safeParse(input)
+
+    if (!success) {
+      return Err(SchemaError.fromZod(error, input))
+    }
+
+    const { startAt, endAt, items } = data
+
+    // get subscription with phases from start date
+    const subscriptionWithPhases = await (db ?? this.db).query.subscriptions.findFirst({
+      where: (sub, { eq }) => eq(sub.id, subscriptionId),
+      with: {
+        phases: {
+          where: (phase, { gte }) => gte(phase.startAt, startAt),
+        },
+      },
+    })
+
+    if (!subscriptionWithPhases) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription not found",
+        })
+      )
+    }
+
+    // order phases by startAt
+    const orderedPhases = subscriptionWithPhases.phases.sort((a, b) => a.startAt - b.startAt)
+
+    const phaseToUpdate = orderedPhases.find((p) => p.id === input.id)
+
+    if (!phaseToUpdate) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Phase not found",
+        })
+      )
+    }
+
+    // if this phase is active customer can't change the start date
+    const isActivePhase =
+      phaseToUpdate.startAt <= now && (phaseToUpdate.endAt ?? Number.POSITIVE_INFINITY) >= now
+
+    if (isActivePhase && startAt !== phaseToUpdate.startAt) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "The phase is active, you can't change the start date",
+        })
+      )
+    }
+
+    // verify phases don't overlap result the phases that overlap
+    const overlappingPhases = orderedPhases.filter((p) => {
+      const startAtPhase = p.startAt
+      const endAtPhase = p.endAt ?? Number.POSITIVE_INFINITY
+
+      return (
+        (startAtPhase < endAt! || startAtPhase === endAt!) &&
+        (endAtPhase > startAt || endAtPhase === startAt)
+      )
+    })
+
+    if (overlappingPhases.length > 0 && overlappingPhases.some((p) => p.id !== phaseToUpdate.id)) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Phases overlap, there is already a phase in the same range",
+        })
+      )
+    }
+
+    // check if the phases are consecutive with one another starting from the end date of the previous phase
+    // the phase that the customer is updating need to be check with the new dates
+    const consecutivePhases = orderedPhases.filter((p, index) => {
+      let phaseToCheck = p
+      if (p.id === phaseToUpdate.id) {
+        phaseToCheck = {
+          ...p,
+          startAt,
+          endAt,
+        }
+      }
+
+      if (index === 0) {
+        return true
+      }
+
+      const previousPhase = orderedPhases[index - 1]
+      return previousPhase ? previousPhase.endAt === phaseToCheck.startAt + 1 : false
+    })
+
+    if (consecutivePhases.length !== orderedPhases.length) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Phases are not consecutive",
+        })
+      )
+    }
+
+    // validate the the end date is not less that the end date of the current billing cycle
+
+    const currentCycleEndAt = subscriptionWithPhases.currentCycleEndAt
+
+    if (endAt && endAt < currentCycleEndAt) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "The end date is less than the current billing cycle end date",
+        })
+      )
+    }
+
+    const result = await (db ?? this.db).transaction(async (trx) => {
+      // create the subscription phase
+      const subscriptionPhase = await trx
+        .update(subscriptionPhases)
+        .set({
+          startAt: startAt,
+          endAt: endAt ?? null,
+        })
+        .where(eq(subscriptionPhases.id, input.id))
+        .returning()
+        .then((re) => re[0])
+
+      if (!subscriptionPhase) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Error while updating subscription phase",
+          })
+        )
+      }
+
+      // add items to the subscription
+      if (items?.length) {
+        await Promise.all(
+          // this is important because every item has the configuration of the quantity of a feature in the subscription
+          items.map((item) =>
+            trx
+              .update(subscriptionItems)
+              .set({
+                units: item.units,
+              })
+              .where(eq(subscriptionItems.id, item.id))
+          )
+        ).catch((e) => {
+          console.error(e, "error inserting subscription items")
+          trx.rollback()
+          throw e
+        })
+      }
+
+      // update the status of the subscription if the phase is active
+      const isActivePhase =
+        subscriptionPhase.startAt <= Date.now() &&
+        (subscriptionPhase.endAt ?? Number.POSITIVE_INFINITY) >= Date.now()
+
+      if (isActivePhase) {
+        await trx
+          .update(subscriptions)
+          .set({
+            expiresAt: endAt,
+          })
+          .where(eq(subscriptions.id, subscriptionId))
+      }
+
+      // every time there is a new phase, we sync entitlements
+      const syncEntitlementsResult = await this.syncEntitlementsForSubscription({
+        projectId,
+        customerId: subscriptionWithPhases.customerId,
+        // we sync entitlements for the start date of the new phase
+        // this will calculate the new entitlements for the phase
+        // and add the end date to the entitlements that are no longer valid
+        now: subscriptionPhase.startAt,
+        db: trx,
+        subscriptionId,
+      })
+
+      if (syncEntitlementsResult.err) {
+        console.error(syncEntitlementsResult.err, "error syncing entitlements")
         trx.rollback()
         throw syncEntitlementsResult.err
       }

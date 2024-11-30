@@ -28,10 +28,12 @@ interface FormValues extends FieldValues {
 
 export default function DurationFormField<TFieldValues extends FormValues>({
   form,
-  isDisabled,
+  startDisabled,
+  endDisabled,
 }: {
   form: UseFormReturn<TFieldValues>
-  isDisabled?: boolean
+  startDisabled?: boolean
+  endDisabled?: boolean
 }) {
   const startAt = form.getValues("startAt" as FieldPath<TFieldValues>)
   const endAt = form.getValues("endAt" as FieldPath<TFieldValues>)
@@ -73,7 +75,7 @@ export default function DurationFormField<TFieldValues extends FormValues>({
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <Popover open={isOpenPopOverStart} onOpenChange={setIsOpenPopOverStart}>
-                <PopoverTrigger asChild disabled={isDisabled}>
+                <PopoverTrigger asChild disabled={startDisabled}>
                   <FormControl>
                     <Button
                       variant={"custom"}
@@ -81,7 +83,7 @@ export default function DurationFormField<TFieldValues extends FormValues>({
                         "h-9 rounded-e-none pl-3 text-left font-normal hover:bg-muted hover:text-background-textContrast focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1",
                         !start && "text-muted-foreground"
                       )}
-                      disabled={isDisabled}
+                      disabled={startDisabled}
                     >
                       {start ? formatDate(start, "MMM dd, yyyy") : <span>Start Date</span>}
                       <ArrowRight className="ml-auto h-4 w-4 opacity-50" />
@@ -113,7 +115,7 @@ export default function DurationFormField<TFieldValues extends FormValues>({
                         // disable dates before today
                         if (date < yesterday) return true
                         // if disabled, disable all dates
-                        if (isDisabled) return true
+                        if (startDisabled) return true
                         return false
                       }}
                     />
@@ -182,7 +184,7 @@ export default function DurationFormField<TFieldValues extends FormValues>({
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <Popover open={isOpenPopOverEnd} onOpenChange={setIsOpenPopOverEnd}>
-                <PopoverTrigger asChild disabled={isDisabled}>
+                <PopoverTrigger asChild disabled={endDisabled}>
                   <FormControl>
                     <Button
                       variant={"custom"}
@@ -190,7 +192,7 @@ export default function DurationFormField<TFieldValues extends FormValues>({
                         "h-9 rounded-s-none pl-3 text-left font-normal hover:bg-muted hover:text-background-textContrast focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1",
                         !end && "text-muted-foreground"
                       )}
-                      disabled={isDisabled}
+                      disabled={endDisabled}
                     >
                       {end ? formatDate(end, "MMM dd, yyyy") : <span>Forever</span>}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -216,7 +218,7 @@ export default function DurationFormField<TFieldValues extends FormValues>({
                         const endday = endOfDay(date)
                         field.onChange(endday.getTime())
                       }}
-                      disabled={(date) => !start || date <= start || !!isDisabled}
+                      disabled={(date) => !start || date <= start || !!endDisabled}
                       initialFocus
                     />
                   </div>
