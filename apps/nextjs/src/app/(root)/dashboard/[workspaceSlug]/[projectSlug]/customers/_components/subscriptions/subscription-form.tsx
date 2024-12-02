@@ -22,8 +22,8 @@ export function SubscriptionForm({
 }: {
   setDialogOpen?: (open: boolean) => void
   defaultValues:
-  | (InsertSubscription & { items?: SubscriptionItem[] })
-  | (Subscription & { items?: SubscriptionItem[] })
+    | (InsertSubscription & { items?: SubscriptionItem[] })
+    | (Subscription & { items?: SubscriptionItem[] })
 }) {
   const router = useRouter()
   const isEdit = !!defaultValues.id
@@ -110,7 +110,12 @@ export function SubscriptionForm({
 
           <TimeZoneFormField form={form} isDisabled={isEdit} />
 
-          <SubscriptionPhaseFormField form={form} />
+          <SubscriptionPhaseFormField
+            form={form}
+            // when creating a subscription, we don't have an id yet
+            // although the empty id is not used in the backend
+            subscriptionId={defaultValues.id ?? ""}
+          />
         </div>
 
         <div className="mt-8 flex justify-end space-x-4">

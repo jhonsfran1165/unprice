@@ -1,6 +1,6 @@
 "use client"
 
-import { add, addDays, endOfDay, formatDate, startOfDay, startOfMonth, subDays } from "date-fns"
+import { add, addDays, endOfDay, startOfDay, startOfMonth, subDays } from "date-fns"
 import { ArrowRight, CalendarIcon } from "lucide-react"
 import { useState } from "react"
 import type { FieldErrors, FieldPath, UseFormReturn } from "react-hook-form"
@@ -19,7 +19,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 import { cn } from "@unprice/ui/utils"
 import { toastAction } from "~/lib/toast"
 
+import { toZonedTime } from "date-fns-tz"
 import type { FieldValues } from "react-hook-form"
+import { formatDate } from "~/lib/dates"
 
 interface FormValues extends FieldValues {
   startAt: number
@@ -37,9 +39,16 @@ export default function DurationFormField<TFieldValues extends FormValues>({
 }) {
   const startAt = form.getValues("startAt" as FieldPath<TFieldValues>)
   const endAt = form.getValues("endAt" as FieldPath<TFieldValues>)
+  const timezone =
+    form.getValues("timezone" as FieldPath<TFieldValues>) ??
+    Intl.DateTimeFormat().resolvedOptions().timeZone
 
-  const [start, setStart] = useState<Date | undefined>(new Date(startAt))
-  const [end, setEnd] = useState<Date | undefined>(endAt ? new Date(endAt) : undefined)
+  const [start, setStart] = useState<Date | undefined>(
+    startAt ? toZonedTime(new Date(startAt), timezone) : undefined
+  )
+  const [end, setEnd] = useState<Date | undefined>(
+    endAt ? toZonedTime(new Date(endAt), timezone) : undefined
+  )
   const [isOpenPopOverStart, setIsOpenPopOverStart] = useState(false)
   const [isOpenPopOverEnd, setIsOpenPopOverEnd] = useState(false)
 
@@ -85,7 +94,11 @@ export default function DurationFormField<TFieldValues extends FormValues>({
                       )}
                       disabled={startDisabled}
                     >
-                      {start ? formatDate(start, "MMM dd, yyyy") : <span>Start Date</span>}
+                      {start ? (
+                        formatDate(start.getTime(), timezone, "MMM dd, yyyy")
+                      ) : (
+                        <span>Start Date</span>
+                      )}
                       <ArrowRight className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
@@ -194,7 +207,11 @@ export default function DurationFormField<TFieldValues extends FormValues>({
                       )}
                       disabled={endDisabled}
                     >
-                      {end ? formatDate(end, "MMM dd, yyyy") : <span>Forever</span>}
+                      {end ? (
+                        formatDate(end.getTime(), timezone, "MMM dd, yyyy")
+                      ) : (
+                        <span>Forever</span>
+                      )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>

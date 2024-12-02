@@ -36,16 +36,16 @@ export function SubscriptionPhaseForm({
   const formSchema = editMode
     ? subscriptionPhaseSelectSchema
     : subscriptionPhaseInsertSchema.superRefine((data, ctx) => {
-      if (data.paymentMethodRequired) {
-        if (!data.paymentMethodId) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Payment method is required for this phase",
-            path: ["paymentMethodId"],
-          })
+        if (data.paymentMethodRequired) {
+          if (!data.paymentMethodId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Payment method is required for this phase",
+              path: ["paymentMethodId"],
+            })
+          }
         }
-      }
-    })
+      })
 
   const form = useZodForm({
     schema: formSchema,
@@ -65,7 +65,7 @@ export function SubscriptionPhaseForm({
       onSubmit(phase)
       setDialogOpen?.(false)
     } else {
-      const { phase } = await createPhase.mutateAsync(data)
+      const { phase } = await createPhase.mutateAsync(data as InsertSubscriptionPhase)
 
       onSubmit(phase)
       setDialogOpen?.(false)
@@ -92,8 +92,6 @@ export function SubscriptionPhaseForm({
       form.setValue("trialDays", selectedPlanVersion.trialDays)
     }
   }, [selectedPlanVersion?.id])
-
-  console.log(form.getValues())
 
   return (
     <Form {...form}>

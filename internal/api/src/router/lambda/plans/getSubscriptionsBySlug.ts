@@ -7,7 +7,6 @@ import {
   customerSelectSchema,
   planSelectBaseSchema,
   projectExtendedSelectSchema,
-  subscriptionPhaseSelectSchema,
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 
@@ -21,7 +20,6 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
       subscriptions: subscriptionSelectSchema
         .extend({
           customer: customerSelectSchema,
-          phases: subscriptionPhaseSelectSchema.array(),
         })
         .array(),
       project: projectExtendedSelectSchema,
@@ -44,50 +42,41 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
     }
 
     const planWithSubscriptions = await opts.ctx.db
-      .select({
+      .selectDistinctOn([schema.subscriptions.id], {
         subscriptions: schema.subscriptions,
         customer: customerColumns,
-        phases: schema.subscriptionPhases,
       })
-      .from(schema.subscriptions)
-      .innerJoin(
-        schema.customers,
-        and(
-          eq(schema.subscriptions.customerId, schema.customers.id),
-          eq(schema.customers.projectId, schema.subscriptions.projectId)
-        )
-      )
-      .innerJoin(
-        schema.subscriptionPhases,
-        and(
-          eq(schema.subscriptionPhases.subscriptionId, schema.subscriptions.id),
-          eq(schema.subscriptionPhases.projectId, schema.subscriptions.projectId)
-        )
-      )
+      .from(schema.plans)
       .innerJoin(
         schema.versions,
         and(
-          eq(schema.subscriptionPhases.planVersionId, schema.versions.id),
-          eq(schema.subscriptionPhases.projectId, schema.versions.projectId)
-        )
-      )
-      .innerJoin(
-        schema.plans,
-        and(
           eq(schema.versions.planId, schema.plans.id),
-          eq(schema.plans.projectId, schema.versions.projectId)
+          eq(schema.versions.projectId, schema.plans.projectId)
         )
       )
-      // TODO: this should be only the active phase
       .innerJoin(
         schema.subscriptionPhases,
         and(
+          eq(schema.versions.id, schema.subscriptionPhases.planVersionId),
+          eq(schema.versions.projectId, schema.subscriptionPhases.projectId)
+        )
+      )
+      .innerJoin(
+        schema.subscriptions,
+        and(
           eq(schema.subscriptions.id, schema.subscriptionPhases.subscriptionId),
-          eq(schema.subscriptionPhases.projectId, schema.subscriptions.projectId)
+          eq(schema.subscriptions.projectId, schema.subscriptionPhases.projectId)
+        )
+      )
+      .innerJoin(
+        schema.customers,
+        and(
+          eq(schema.customers.id, schema.subscriptions.customerId),
+          eq(schema.customers.projectId, schema.subscriptions.projectId)
         )
       )
       .where(and(eq(schema.plans.slug, slug), eq(schema.plans.projectId, project.id)))
-      .orderBy(() => [desc(schema.subscriptions.createdAtM)])
+      .orderBy(() => [desc(schema.subscriptions.id)])
 
     if (!planWithSubscriptions || !planWithSubscriptions.length) {
       return {
@@ -101,8 +90,6 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
       return {
         ...data.subscriptions,
         customer: data.customer,
-        // TODO: just to fix the type, fix
-        phases: [data.phases],
       }
     })
 

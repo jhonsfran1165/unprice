@@ -70,7 +70,6 @@ export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhas
     items: subscriptionItemsSelectSchema.array().optional(),
   })
   .partial({
-    projectId: true,
     createdAtM: true,
     updatedAtM: true,
   })
@@ -111,7 +110,6 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
   })
   .required({
     planVersionId: true,
-    subscriptionId: true,
   })
 
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
@@ -119,52 +117,58 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
   timezone: z.string().min(1),
 })
   .extend({
-    phases: subscriptionPhaseInsertSchema.array().superRefine((data, ctx) => {
-      // validate payment method if payment method is required
-      data.forEach((phase, index) => {
-        if (phase.paymentMethodRequired) {
-          if (!phase.paymentMethodId) {
+    // when creating a subscription, we don't need the subscriptionId
+    phases: subscriptionPhaseInsertSchema
+      .partial({
+        subscriptionId: true,
+      })
+      .array()
+      .superRefine((data, ctx) => {
+        // validate payment method if payment method is required
+        data.forEach((phase, index) => {
+          if (phase.paymentMethodRequired) {
+            if (!phase.paymentMethodId) {
+              return ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Payment method is required for this phase",
+                path: [index, "paymentMethodId"],
+              })
+            }
+          }
+        })
+
+        // at least one phase is required
+        if (data.length === 0) {
+          return ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "At least one phase is required",
+          })
+        }
+
+        // start date and end date can overlap
+        for (const phase of data) {
+          if (phase.endAt && phase.startAt >= phase.endAt) {
             return ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              message: "Payment method is required for this phase",
-              path: [index, "paymentMethodId"],
+              message: "Start date must be before end date",
             })
           }
         }
-      })
 
-      // at least one phase is required
-      if (data.length === 0) {
-        return ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "At least one phase is required",
-        })
-      }
+        // phases must be consecutive and in order
+        for (let i = 0; i < data.length - 1; i++) {
+          const currentPhase = data[i]
+          const nextPhase = data[i + 1]
 
-      // start date and end date can overlap
-      for (const phase of data) {
-        if (phase.endAt && phase.startAt >= phase.endAt) {
-          return ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Start date must be before end date",
-          })
+          if (currentPhase?.endAt && nextPhase?.startAt && currentPhase.endAt > nextPhase.startAt) {
+            return ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Phases must be consecutive, set end date of the previous phase",
+              path: [i + 1, "startAt"],
+            })
+          }
         }
-      }
-
-      // phases must be consecutive and in order
-      for (let i = 0; i < data.length - 1; i++) {
-        const currentPhase = data[i]
-        const nextPhase = data[i + 1]
-
-        if (currentPhase?.endAt && nextPhase?.startAt && currentPhase.endAt > nextPhase.startAt) {
-          return ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Phases must be consecutive, set end date of the previous phase",
-            path: [i + 1, "startAt"],
-          })
-        }
-      }
-    }),
+      }),
   })
   .omit({
     createdAtM: true,

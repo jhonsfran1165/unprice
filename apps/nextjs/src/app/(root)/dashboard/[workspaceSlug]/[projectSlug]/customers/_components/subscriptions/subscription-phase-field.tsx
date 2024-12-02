@@ -19,14 +19,20 @@ import { SubscriptionPhaseForm } from "./subscription-phase-form"
 
 export default function SubscriptionPhaseFormField({
   form,
+  subscriptionId,
 }: {
   form: UseFormReturn<InsertSubscription>
+  subscriptionId: string
 }) {
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
     name: "phases",
     keyName: "_id",
   })
+
+  const [dialogOpen, setDialogOpen] = useState(false)
+
+  const selectedCustomer = form.watch("customerId")
 
   const defaultValuesPhase = {
     customerId: form.getValues("customerId"),
@@ -38,13 +44,10 @@ export default function SubscriptionPhaseFormField({
     whenToBill: "pay_in_advance",
     collectionMethod: "charge_automatically",
     startAt: Date.now(),
-    subscriptionId: form.getValues("id"),
+    subscriptionId,
   } as InsertSubscriptionPhase
 
-  const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedPhase, setSelectedPhase] = useState<InsertSubscriptionPhase>(defaultValuesPhase)
-
-  const selectedCustomer = form.watch("customerId")
 
   const { errors } = form.formState
 
@@ -94,22 +97,6 @@ export default function SubscriptionPhaseFormField({
       form.clearErrors("customerId")
     }
   }, [selectedCustomer])
-
-  useEffect(() => {
-    if (fields.length > 0) {
-      const lastPhase = fields[fields.length - 1]
-
-      console.log("lastPhase", lastPhase)
-
-      if (lastPhase) {
-        setSelectedPhase({
-          ...defaultValuesPhase,
-          // add one day to the end date of the last phase
-          startAt: new Date(lastPhase.endAt ?? Date.now()).getTime() + 24 * 60 * 60 * 1000,
-        })
-      }
-    }
-  }, [fields])
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -184,7 +171,10 @@ export default function SubscriptionPhaseFormField({
                             e.stopPropagation()
                             e.preventDefault()
 
-                            setSelectedPhase(phase)
+                            setSelectedPhase({
+                              ...phase,
+                              subscriptionId,
+                            })
                             setDialogOpen(true)
                           }}
                         >
@@ -278,7 +268,27 @@ export default function SubscriptionPhaseFormField({
                     e.stopPropagation()
                     e.preventDefault()
 
-                    setSelectedPhase(defaultValuesPhase)
+                    if (fields.length > 0) {
+                      const lastPhase = fields[fields.length - 1]
+                      const endAt = lastPhase?.endAt ?? Date.now()
+                      const startAt = new Date(endAt).getTime() + 1
+
+                      if (lastPhase) {
+                        setSelectedPhase({
+                          ...defaultValuesPhase,
+                          // add one day to the end date of the last phase
+                          startAt: startAt,
+                        })
+                      } else {
+                        setSelectedPhase({
+                          ...defaultValuesPhase,
+                          startAt: startAt,
+                        })
+                      }
+                    } else {
+                      setSelectedPhase(defaultValuesPhase)
+                    }
+
                     setDialogOpen(true)
                   }}
                 >

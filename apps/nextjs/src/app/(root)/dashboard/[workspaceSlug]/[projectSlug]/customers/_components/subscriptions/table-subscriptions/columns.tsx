@@ -8,7 +8,6 @@ import { Checkbox } from "@unprice/ui/checkbox"
 import { Separator } from "@unprice/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
-import { cn } from "@unprice/ui/utils"
 import { format } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 import { AlertCircle } from "lucide-react"
@@ -18,8 +17,7 @@ import { SuperLink } from "~/components/super-link"
 import { formatDate } from "~/lib/dates"
 import { DataTableRowActions } from "./data-table-row-actions"
 
-type Subscription =
-  RouterOutputs["customers"]["getSubscriptions"]["customer"]["subscriptions"][number]
+type Subscription = RouterOutputs["subscriptions"]["listByActiveProject"]["subscriptions"][number]
 
 export const columns: ColumnDef<Subscription>[] = [
   {
@@ -61,7 +59,9 @@ export const columns: ColumnDef<Subscription>[] = [
           href={`/${workspaceSlug}/${projectSlug}/customers/subscriptions/${row.original.id}`}
           prefetch={false}
         >
-          <div className="whitespace-nowrap text-sm">{row.original.customer.email}</div>
+          <div className="whitespace-nowrap text-sm">
+            {row.original.customer.email} - {row.original.customer.name}
+          </div>
         </SuperLink>
       )
     },
@@ -72,28 +72,18 @@ export const columns: ColumnDef<Subscription>[] = [
     enableResizing: true,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
-      const phase = row.original.phases[0]
-
-      if (!phase) {
-        return <Badge>No active phase</Badge>
-      }
-
       return (
-        <Badge
-          className={cn({
-            success: phase.status === "active",
-            info: phase.status === "trialing",
-            danger: phase.status === "past_dued",
-          })}
-        >
-          {phase.status}
+        <Badge variant={row.original.active ? "success" : "destructive"}>
+          {row.original.active ? "Active" : "Inactive"}
         </Badge>
       )
     },
-    filterFn: (row, id, value) => {
-      return Array.isArray(value) && value.includes(row.getValue(id))
-    },
     size: 20,
+    filterFn: (row, _id, value) => {
+      const status = row.original.active ? "Active" : "Inactive"
+
+      return Array.isArray(value) && value.includes(status)
+    },
   },
   {
     accessorKey: "planSlug",
@@ -181,6 +171,50 @@ export const columns: ColumnDef<Subscription>[] = [
                 <Typography variant="p" affects="removePaddingMargin" className="text-xs">
                   <span className="font-semibold">Customer time: </span>
                   {format(new Date(endDate), "PPpp")}
+                </Typography>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )
+    },
+    enableSorting: true,
+    enableHiding: true,
+    size: 40,
+  },
+  {
+    accessorKey: "nextInvoiceAt",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Next invoice" />,
+    cell: ({ row }) => {
+      const invoiceDate = row.original.nextInvoiceAt
+
+      if (invoiceDate === null || invoiceDate === undefined) {
+        return <div className="whitespace-nowrap text-sm">No defined yet</div>
+      }
+
+      return (
+        <div className="flex items-center space-x-1">
+          <div className="whitespace-nowrap text-sm">
+            {formatDate(invoiceDate, row.original.timezone)}
+          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <AlertCircle className="size-4 font-light" />
+            </TooltipTrigger>
+            <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
+              <div className="flex flex-col gap-1">
+                <Typography variant="p" affects="removePaddingMargin" className="font-semibold">
+                  Timezone: {row.original.timezone}
+                </Typography>
+                <Separator className="my-1" />
+                <Typography variant="p" affects="removePaddingMargin" className="text-xs">
+                  <span className="font-semibold">Local time: </span>
+                  {format(toZonedTime(invoiceDate, row.original.timezone), "PPpp")}
+                </Typography>
+
+                <Typography variant="p" affects="removePaddingMargin" className="text-xs">
+                  <span className="font-semibold">Customer time: </span>
+                  {format(new Date(invoiceDate), "PPpp")}
                 </Typography>
               </div>
             </TooltipContent>

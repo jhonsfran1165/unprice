@@ -239,7 +239,6 @@ export class SubscriptionService {
       // subItemId is null only for custom entitlements
       entitlementsMap.set(entitlement.subscriptionItemId!, entitlement)
     }
-
     // get the items that are not in the entitlements and create them
     // get the entitlements that are not in the items and deactivate them
     // update the lastUsageUpdateAt of the entitlements
@@ -302,7 +301,10 @@ export class SubscriptionService {
             .where(eq(customerEntitlements.id, entity.id))
         }
       } catch (err) {
-        console.error(err, "error syncing entitlements")
+        this.logger.error("Error syncing entitlements", {
+          error: JSON.stringify(err),
+        })
+
         tx.rollback()
         throw err
       }
@@ -367,13 +369,11 @@ export class SubscriptionService {
   // 7. create entitlements
   public async createPhase({
     input,
-    subscriptionId,
     projectId,
     db,
     now,
   }: {
     input: InsertSubscriptionPhase
-    subscriptionId: string
     projectId: string
     db?: Database | TransactionDatabase
     now: number
@@ -398,6 +398,7 @@ export class SubscriptionService {
       startAt,
       endAt,
       dueBehaviour,
+      subscriptionId,
     } = data
 
     const startAtToUse = startAt ?? Date.now()
@@ -457,10 +458,11 @@ export class SubscriptionService {
 
     // phase have to be consecutive with one another starting from the end date of the previous phase
     // use reduce to check if the phases are consecutive
-    const consecutivePhases = orderedPhases.reduce((acc, p, index) => {
+    const consecutivePhases = orderedPhases.every((p, index) => {
       const previousPhase = orderedPhases[index - 1]
-      return acc || (previousPhase ? previousPhase.endAt === p.startAt : false)
-    }, false)
+
+      return previousPhase ? previousPhase.endAt === p.startAt : true
+    })
 
     if (!consecutivePhases) {
       return Err(
@@ -616,8 +618,15 @@ export class SubscriptionService {
           autoRenew: autoRenewToUse,
           gracePeriod,
           metadata,
+          billingPeriod,
         })
         .returning()
+        .catch((e) => {
+          this.logger.error("Error creating subscription phase", {
+            error: JSON.stringify(e),
+          })
+          throw e
+        })
         .then((re) => re[0])
 
       if (!subscriptionPhase) {
@@ -641,7 +650,9 @@ export class SubscriptionService {
           })
         )
       ).catch((e) => {
-        console.error(e, "error inserting subscription items")
+        this.logger.error("Error inserting subscription items", {
+          error: JSON.stringify(e),
+        })
         trx.rollback()
         throw e
       })
@@ -681,7 +692,9 @@ export class SubscriptionService {
       })
 
       if (syncEntitlementsResult.err) {
-        console.error(syncEntitlementsResult.err, "error syncing entitlements")
+        this.logger.error("Error syncing entitlements", {
+          error: JSON.stringify(syncEntitlementsResult.err),
+        })
         trx.rollback()
         throw syncEntitlementsResult.err
       }
@@ -848,7 +861,9 @@ export class SubscriptionService {
               .where(eq(subscriptionItems.id, item.id))
           )
         ).catch((e) => {
-          console.error(e, "error inserting subscription items")
+          this.logger.error("Error inserting subscription items", {
+            error: JSON.stringify(e),
+          })
           trx.rollback()
           throw e
         })
@@ -881,7 +896,9 @@ export class SubscriptionService {
       })
 
       if (syncEntitlementsResult.err) {
-        console.error(syncEntitlementsResult.err, "error syncing entitlements")
+        this.logger.error("Error syncing entitlements", {
+          error: JSON.stringify(syncEntitlementsResult.err),
+        })
         trx.rollback()
         throw syncEntitlementsResult.err
       }
@@ -959,10 +976,10 @@ export class SubscriptionService {
 
     // execute this in a transaction
     const result = await this.db.transaction(async (trx) => {
-      // create the subscription
-      const subscriptionId = newId("subscription")
-
       try {
+        // create the subscription
+        const subscriptionId = newId("subscription")
+
         // create the subscription and then phases
         const newSubscription = await trx
           .insert(subscriptions)
@@ -982,7 +999,10 @@ export class SubscriptionService {
           .returning()
           .then((re) => re[0])
           .catch((e) => {
-            console.error(e)
+            this.logger.error("Error creating subscription", {
+              error: JSON.stringify(e),
+            })
+            trx.rollback()
             return null
           })
 
@@ -995,12 +1015,14 @@ export class SubscriptionService {
         }
 
         // create the phases
-        const phasesResult = await Promise.all(
+        await Promise.all(
           phases.map((phase) =>
             this.createPhase({
-              input: phase,
+              input: {
+                ...phase,
+                subscriptionId: newSubscription.id,
+              },
               projectId,
-              subscriptionId: newSubscription.id,
               now: Date.now(),
               db: trx,
             })
@@ -1014,20 +1036,12 @@ export class SubscriptionService {
           throw e
         })
 
-        if (phasesResult.some((r) => r.err)) {
-          trx.rollback()
-          return Err(
-            new UnPriceSubscriptionError({
-              message: `Error while creating subscription phases: ${phasesResult
-                .map((r) => r.err?.message)
-                .join(", ")}`,
-            })
-          )
-        }
-
         return Ok(newSubscription)
       } catch (e) {
-        console.error(e)
+        this.logger.error("Error creating subscription", {
+          error: JSON.stringify(e),
+        })
+
         trx.rollback()
         throw e
       }
@@ -1310,9 +1324,9 @@ export class SubscriptionService {
         input: {
           ...newPhase,
           startAt: change.changedAt, // we need to start the new phase at the next millisecond
+          subscriptionId: activePhase.subscriptionId,
         },
         projectId: activePhase.projectId,
-        subscriptionId: activePhase.subscriptionId,
         now,
         db: this.db,
       })

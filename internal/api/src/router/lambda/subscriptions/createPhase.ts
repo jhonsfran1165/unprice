@@ -8,7 +8,7 @@ import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
 
 export const createPhase = protectedProjectProcedure
-  .input(subscriptionPhaseInsertSchema.required({ subscriptionId: true }))
+  .input(subscriptionPhaseInsertSchema)
   .output(z.object({ phase: subscriptionPhaseSelectSchema }))
   .mutation(async (opts) => {
     const projectId = opts.ctx.project.id
@@ -25,7 +25,6 @@ export const createPhase = protectedProjectProcedure
     const { err, val } = await subscriptionService.createPhase({
       input: opts.input,
       projectId,
-      subscriptionId: opts.input.subscriptionId,
       now: Date.now(),
     })
 
