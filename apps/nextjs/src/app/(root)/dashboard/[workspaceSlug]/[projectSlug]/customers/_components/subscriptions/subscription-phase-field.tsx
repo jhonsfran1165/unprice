@@ -11,12 +11,14 @@ import { cn } from "@unprice/ui/utils"
 import { LayoutGrid, PencilIcon, TrashIcon, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { type FieldErrors, type UseFormReturn, useFieldArray } from "react-hook-form"
+import { toast } from "sonner"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/client"
 import { SubscriptionPhaseForm } from "./subscription-phase-form"
 
+import { startTransition } from "react"
 export default function SubscriptionPhaseFormField({
   form,
   subscriptionId,
@@ -56,6 +58,8 @@ export default function SubscriptionPhaseFormField({
     enterprisePlan: true,
     published: true,
   })
+
+  const removePhase = api.subscriptions.removePhase.useMutation()
 
   const [isDelete, setConfirmDelete] = useState<Map<string, boolean>>(
     new Map<string, boolean>(fields.map((item) => [item.id, false] as [string, boolean]))
@@ -97,6 +101,24 @@ export default function SubscriptionPhaseFormField({
       form.clearErrors("customerId")
     }
   }, [selectedCustomer])
+
+  function onRemovePhase(phaseId: string, callback: () => void) {
+    startTransition(() => {
+      toast.promise(
+        removePhase
+          .mutateAsync({
+            id: phaseId,
+          })
+          .then(() => {
+            callback()
+          }),
+        {
+          loading: "Removing phase...",
+          success: "Phase removed",
+        }
+      )
+    })
+  }
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -190,9 +212,15 @@ export default function SubscriptionPhaseFormField({
                               onClick={(e) => {
                                 e.stopPropagation()
                                 e.preventDefault()
-                                remove(index)
 
-                                setConfirmDelete((prev) => new Map(prev.set(phase._id, false)))
+                                const phaseId = phase.id
+
+                                if (!phaseId) return
+
+                                onRemovePhase(phaseId, () => {
+                                  remove(index)
+                                  setConfirmDelete((prev) => new Map(prev.set(phase._id, false)))
+                                })
                               }}
                             >
                               <X className="h-4 w-4" />

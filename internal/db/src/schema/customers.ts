@@ -124,7 +124,7 @@ export const customerEntitlements = pgTableProject(
       columns: [table.subscriptionItemId, table.projectId],
       foreignColumns: [subscriptionItems.id, subscriptionItems.projectId],
       name: "subscription_item_id_fkey",
-    }),
+    }).onDelete("cascade"),
     customerfk: foreignKey({
       columns: [table.customerId, table.projectId],
       foreignColumns: [customers.id, customers.projectId],

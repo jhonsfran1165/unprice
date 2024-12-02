@@ -15,6 +15,13 @@
       "when": 1732970275261,
       "tag": "0001_bouncy_war_machine",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1733170100218,
+      "tag": "0002_giant_sphinx",
+      "breakpoints": true
     }
   ]
 }

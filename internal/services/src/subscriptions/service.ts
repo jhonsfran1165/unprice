@@ -1,4 +1,4 @@
-import { type Database, type TransactionDatabase, eq } from "@unprice/db"
+import { type Database, type TransactionDatabase, and, eq } from "@unprice/db"
 import {
   customerEntitlements,
   subscriptionItems,
@@ -247,6 +247,7 @@ export class SubscriptionService {
       typeof customerEntitlements.$inferInsert,
       "id" | "lastUsageUpdateAt" | "updatedAtM" | "endAt" | "units"
     >[] = []
+    const entitiesToDelete: string[] = []
 
     // if entitlements are not in the items, we create them
     // if entitlements are in the items, we update them with the end date of the phase
@@ -287,6 +288,13 @@ export class SubscriptionService {
       }
     }
 
+    // Find entitlements to delete
+    for (const entitlement of entitlementsMap.values()) {
+      if (!activeSubItemsMap.has(entitlement.subscriptionItemId!)) {
+        entitiesToDelete.push(entitlement.id)
+      }
+    }
+
     // Perform database operations
     await (db ?? this.db).transaction(async (tx) => {
       try {
@@ -299,6 +307,14 @@ export class SubscriptionService {
             .update(customerEntitlements)
             .set(entity)
             .where(eq(customerEntitlements.id, entity.id))
+        }
+
+        for (const id of entitiesToDelete) {
+          await tx
+            .update(customerEntitlements)
+            // if the entitlement is not in the items, end them immediately
+            .set({ endAt: Date.now() })
+            .where(eq(customerEntitlements.id, id))
         }
       } catch (err) {
         this.logger.error("Error syncing entitlements", {
@@ -401,7 +417,7 @@ export class SubscriptionService {
       subscriptionId,
     } = data
 
-    const startAtToUse = startAt ?? Date.now()
+    const startAtToUse = startAt ?? now
     let endAtToUse = endAt ?? null
 
     // get subscription with phases from start date
@@ -425,7 +441,7 @@ export class SubscriptionService {
 
     // active phase is the one where now is between startAt and endAt
     const activePhase = orderedPhases.find((phase) => {
-      return now >= phase.startAt && (phase.endAt ? now <= phase.endAt : true)
+      return startAtToUse >= phase.startAt && (phase.endAt ? startAtToUse <= phase.endAt : true)
     })
 
     if (activePhase) {
@@ -440,13 +456,9 @@ export class SubscriptionService {
     // start date of the new phase is greater than the end date of the phase
     // end date could be undefined or null which mean the phase is infinite
     // use reduce to check if there is any overlap
-    const overlappingPhases = orderedPhases.reduce((acc, p) => {
-      return (
-        acc ||
-        startAtToUse > (p.endAt ?? Number.POSITIVE_INFINITY) ||
-        startAtToUse === (p.endAt ?? Number.POSITIVE_INFINITY)
-      )
-    }, false)
+    const overlappingPhases = orderedPhases.some((p) => {
+      return startAtToUse <= (p.endAt ?? Number.POSITIVE_INFINITY)
+    })
 
     if (overlappingPhases) {
       return Err(
@@ -461,7 +473,13 @@ export class SubscriptionService {
     const consecutivePhases = orderedPhases.every((p, index) => {
       const previousPhase = orderedPhases[index - 1]
 
-      return previousPhase ? previousPhase.endAt === p.startAt : true
+      if (previousPhase) {
+        if (previousPhase.endAt) {
+          return previousPhase.endAt + 1 === p.startAt
+        }
+      }
+
+      return true
     })
 
     if (!consecutivePhases) {
@@ -700,6 +718,62 @@ export class SubscriptionService {
       }
 
       return Ok(subscriptionPhase)
+    })
+
+    return result
+  }
+
+  public async removePhase({
+    phaseId,
+    projectId,
+    now,
+  }: {
+    phaseId: string
+    projectId: string
+    now: number
+  }): Promise<Result<boolean, UnPriceSubscriptionError | SchemaError>> {
+    // only allow that are not active
+    // and are not in the past
+    const phase = await this.db.query.subscriptionPhases.findFirst({
+      where: (phase, { eq, and }) => and(eq(phase.id, phaseId), eq(phase.projectId, projectId)),
+    })
+
+    if (!phase) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Phase not found",
+        })
+      )
+    }
+
+    const isActivePhase = phase.startAt <= now && (phase.endAt ?? Number.POSITIVE_INFINITY) >= now
+    const isInThePast = phase.startAt < now
+
+    if (isActivePhase || isInThePast) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Phase is active or in the past, can't remove",
+        })
+      )
+    }
+
+    const result = await this.db.transaction(async (trx) => {
+      // removing the phase will cascade to the subscription items and entitlements
+      const subscriptionPhase = await trx
+        .delete(subscriptionPhases)
+        .where(and(eq(subscriptionPhases.id, phaseId), eq(subscriptionPhases.projectId, projectId)))
+        .returning()
+        .then((re) => re[0])
+
+      if (!subscriptionPhase) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Error while removing subscription phase",
+          })
+        )
+      }
+
+      return Ok(true)
     })
 
     return result
@@ -1023,8 +1097,8 @@ export class SubscriptionService {
                 subscriptionId: newSubscription.id,
               },
               projectId,
-              now: Date.now(),
               db: trx,
+              now: Date.now(),
             })
           )
         ).catch((e) => {
@@ -1327,8 +1401,8 @@ export class SubscriptionService {
           subscriptionId: activePhase.subscriptionId,
         },
         projectId: activePhase.projectId,
-        now,
         db: this.db,
+        now,
       })
 
       if (createPhaseErr) {
