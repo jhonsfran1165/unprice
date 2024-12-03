@@ -810,6 +810,9 @@ export class PhaseMachine extends StateMachine<
       }
     }
 
+    // TODO: renew usage for the phase
+    // TODO: renew entitlements for the phase
+
     // check if the subscription was already renewed
     // check the new cycle start and end dates are between now
     if (now >= subscription.currentCycleStartAt && now < subscription.currentCycleEndAt) {

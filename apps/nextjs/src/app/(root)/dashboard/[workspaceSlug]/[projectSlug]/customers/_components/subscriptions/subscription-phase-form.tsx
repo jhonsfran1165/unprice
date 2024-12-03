@@ -56,6 +56,13 @@ export function SubscriptionPhaseForm({
   const updatePhase = api.subscriptions.updatePhase.useMutation()
 
   const onSubmitForm = async (data: InsertSubscriptionPhase | SubscriptionPhase) => {
+    // if subscription is not created yet no need to create phase
+    if (!defaultValues.subscriptionId) {
+      onSubmit(data)
+      setDialogOpen?.(false)
+      return
+    }
+
     if (editMode) {
       const { phase } = await updatePhase.mutateAsync({
         ...data,

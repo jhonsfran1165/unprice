@@ -17,7 +17,7 @@ import { PaymentProviderService } from "../payment-provider"
 import { SubscriptionService } from "../subscriptions"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
-import { getEntitlementsByDateQuery } from "./queries"
+import { getEntitlementByDateQuery, getEntitlementsByDateQuery } from "./queries"
 
 export class CustomerService {
   private readonly cache: Cache | undefined
@@ -56,18 +56,17 @@ export class CustomerService {
   > {
     // if not cache then retrive from database
     if (!this.cache) {
-      const feature = await this.db.query.customerEntitlements.findFirst({
-        where: (ent, { eq, and, gte, lte, isNull, or }) =>
-          and(
-            eq(ent.customerId, opts.customerId),
-            eq(ent.projectId, opts.projectId),
-            lte(ent.startAt, opts.date),
-            or(isNull(ent.endAt), gte(ent.endAt, opts.date)),
-            eq(ent.featureSlug, opts.featureSlug)
-          ),
+      const entitlement = await getEntitlementByDateQuery({
+        customerId: opts.customerId,
+        projectId: opts.projectId,
+        db: this.db,
+        metrics: this.metrics,
+        logger: this.logger,
+        date: opts.date,
+        featureSlug: opts.featureSlug,
       })
 
-      if (!feature) {
+      if (!entitlement) {
         return Err(
           new UnPriceCustomerError({
             code: "FEATURE_OR_CUSTOMER_NOT_FOUND",
@@ -76,22 +75,20 @@ export class CustomerService {
         )
       }
 
-      return Ok(feature)
+      return Ok(entitlement)
     }
 
     const res = await this.cache.featureByCustomerId.swr(
       `${opts.customerId}:${opts.featureSlug}`,
       async () => {
-        // TODO: we should be able to update usage in db as well from tinybird
-        return await this.db.query.customerEntitlements.findFirst({
-          where: (ent, { eq, and, gte, lte, isNull, or }) =>
-            and(
-              eq(ent.customerId, opts.customerId),
-              eq(ent.projectId, opts.projectId),
-              lte(ent.startAt, opts.date),
-              or(isNull(ent.endAt), gte(ent.endAt, opts.date)),
-              eq(ent.featureSlug, opts.featureSlug)
-            ),
+        return await getEntitlementByDateQuery({
+          customerId: opts.customerId,
+          projectId: opts.projectId,
+          db: this.db,
+          metrics: this.metrics,
+          logger: this.logger,
+          date: opts.date,
+          featureSlug: opts.featureSlug,
         })
       }
     )
@@ -115,18 +112,17 @@ export class CustomerService {
 
     // cache miss, get from db
     if (!res.val) {
-      const feature = await this.db.query.customerEntitlements.findFirst({
-        where: (ent, { eq, and, gte, lte, isNull, or }) =>
-          and(
-            eq(ent.customerId, opts.customerId),
-            eq(ent.projectId, opts.projectId),
-            lte(ent.startAt, opts.date),
-            or(isNull(ent.endAt), gte(ent.endAt, opts.date)),
-            eq(ent.featureSlug, opts.featureSlug)
-          ),
+      const entitlement = await getEntitlementByDateQuery({
+        customerId: opts.customerId,
+        projectId: opts.projectId,
+        db: this.db,
+        metrics: this.metrics,
+        logger: this.logger,
+        date: opts.date,
+        featureSlug: opts.featureSlug,
       })
 
-      if (!feature) {
+      if (!entitlement) {
         return Err(
           new UnPriceCustomerError({
             code: "FEATURE_OR_CUSTOMER_NOT_FOUND",
@@ -135,7 +131,7 @@ export class CustomerService {
         )
       }
 
-      return Ok(feature)
+      return Ok(entitlement)
     }
 
     return Ok(res.val)
@@ -144,11 +140,11 @@ export class CustomerService {
   public async updateCacheAllCustomerEntitlementsByDate({
     customerId,
     projectId,
-    now,
+    date,
   }: {
     customerId: string
     projectId: string
-    now: number
+    date: number
   }) {
     if (!this.cache) {
       return
@@ -160,7 +156,7 @@ export class CustomerService {
       projectId,
       db: this.db,
       metrics: this.metrics,
-      now,
+      date,
       logger: this.logger,
       includeCustom: true,
     }).then(async (activeEntitlements) => {
@@ -187,7 +183,7 @@ export class CustomerService {
   public async getEntitlementsByDate(opts: {
     customerId: string
     projectId: string
-    now: number
+    date: number
     includeCustom?: boolean
     noCache?: boolean
   }): Promise<
@@ -200,7 +196,7 @@ export class CustomerService {
         db: this.db,
         metrics: this.metrics,
         logger: this.logger,
-        now: opts.now,
+        date: opts.date,
         includeCustom: opts.includeCustom,
       })
 
@@ -213,7 +209,7 @@ export class CustomerService {
         projectId: opts.projectId,
         db: this.db,
         metrics: this.metrics,
-        now: opts.now,
+        date: opts.date,
         logger: this.logger,
         includeCustom: opts.includeCustom,
       })
@@ -241,7 +237,7 @@ export class CustomerService {
         res.val.filter((ent) => {
           // an entitlement is active if it's between startAt and endAt
           // end date could be null, so it's active until the end of time
-          return ent.startAt <= opts.now && (ent.endAt ? ent.endAt >= opts.now : true)
+          return ent.startAt <= opts.date && (ent.endAt ? ent.endAt >= opts.date : true)
         })
       )
     }
@@ -253,7 +249,7 @@ export class CustomerService {
       db: this.db,
       metrics: this.metrics,
       logger: this.logger,
-      now: opts.now,
+      date: opts.date,
       includeCustom: opts.includeCustom,
     })
 
@@ -285,6 +281,9 @@ export class CustomerService {
     try {
       const { customerId, projectId, featureSlug, date } = opts
       const start = performance.now()
+
+      // TODO: should I validate if the subscription is active?
+      // TODO: should I validate if the customer is active?
 
       const res = await this._getCustomerEntitlementByDate({
         customerId,

@@ -31,6 +31,7 @@ export const getById = protectedProcedure
               },
             },
           },
+          orderBy: (phases, { asc }) => asc(phases.startAt),
         },
       },
     })

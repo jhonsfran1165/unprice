@@ -94,7 +94,7 @@ export const getEntitlements = async ({
   const { err, val } = await customer.getEntitlementsByDate({
     customerId,
     projectId,
-    now,
+    date: now,
     includeCustom: true,
   })
 
@@ -116,6 +116,8 @@ export const getEntitlements = async ({
   return val
 }
 
+// abstract the usage reporting to the feature service
+// so we can use the same logic for edge and lambda endpoints
 export const reportUsageFeature = async ({
   customerId,
   featureSlug,
@@ -139,7 +141,7 @@ export const reportUsageFeature = async ({
     waitUntil: ctx.waitUntil,
   })
 
-  // use current date for now
+  // use current date for now but we could support reporting usage for past dates
   const now = Date.now()
 
   const { err, val } = await customer.reportUsage({

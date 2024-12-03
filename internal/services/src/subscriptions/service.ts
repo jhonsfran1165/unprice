@@ -205,7 +205,7 @@ export class SubscriptionService {
       customerId,
       projectId,
       // get the entitlements for the given date
-      now,
+      date: now,
       // we don't want to cache the entitlements here, because we want to get the latest ones
       noCache: true,
       // custom entitlements are not synced with the subscription items
@@ -436,12 +436,21 @@ export class SubscriptionService {
       )
     }
 
+    // don't allow to create phase when the subscription is not active
+    if (!subscriptionWithPhases.active) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription is not active",
+        })
+      )
+    }
+
     // order phases by startAt
     const orderedPhases = subscriptionWithPhases.phases.sort((a, b) => a.startAt - b.startAt)
 
     // active phase is the one where now is between startAt and endAt
     const activePhase = orderedPhases.find((phase) => {
-      return startAtToUse >= phase.startAt && (phase.endAt ? startAtToUse <= phase.endAt : true)
+      return startAtToUse >= phase.startAt && (phase.endAt ? startAtToUse <= phase.endAt : false)
     })
 
     if (activePhase) {
@@ -655,6 +664,14 @@ export class SubscriptionService {
         )
       }
 
+      if (!subscriptionWithPhases.active) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Subscription is not active",
+          })
+        )
+      }
+
       // add items to the subscription
       await Promise.all(
         // this is important because every item has the configuration of the quantity of a feature in the subscription
@@ -814,6 +831,14 @@ export class SubscriptionService {
       return Err(
         new UnPriceSubscriptionError({
           message: "Subscription not found",
+        })
+      )
+    }
+
+    if (!subscriptionWithPhases.active) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription is not active",
         })
       )
     }
@@ -1040,7 +1065,7 @@ export class SubscriptionService {
       return Err(
         new UnPriceSubscriptionError({
           message:
-            "Customer already has a subscription, add a new phase to the existing subscription if you want to change the plan",
+            "Customer already has a subscription, add a new phase to the existing subscription if you want to apply a change",
         })
       )
     }
@@ -1139,7 +1164,7 @@ export class SubscriptionService {
       customerService.updateCacheAllCustomerEntitlementsByDate({
         customerId,
         projectId,
-        now: Date.now(),
+        date: Date.now(),
       })
     )
 
