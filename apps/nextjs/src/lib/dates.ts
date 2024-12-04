@@ -1,7 +1,9 @@
 import { addDays, format } from "date-fns"
+import { toZonedTime } from "date-fns-tz"
 
-export function formatDate(date: Date) {
-  return format(date, "yyyy-MM-dd")
+export function formatDate(date: number, timezone?: string, formatString?: string) {
+  const userTimezone = timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone
+  return format(toZonedTime(date, userTimezone), formatString ?? "yyyy-MM-dd")
 }
 
 /**
@@ -20,7 +22,7 @@ export function manipulateDate(
   const addOneDayToDate = date?.to ? addDays(new Date(date.to), 1).getTime() - 1 : null
 
   return {
-    fromDate: date?.from?.getTime() ?? null,
-    toDate: isToDateMidnight ? addOneDayToDate : date?.to?.getTime() ?? null,
+    from: date?.from?.getTime() ?? undefined,
+    to: isToDateMidnight ? addOneDayToDate : date?.to?.getTime() ?? undefined,
   }
 }

@@ -16,8 +16,8 @@ export const planInsertBaseSchema = createInsertSchema(schema.plans, {
   slug: z.string().min(3, "Slug must be at least 3 characters"),
 })
   .omit({
-    createdAt: true,
-    updatedAt: true,
+    createdAtM: true,
+    updatedAtM: true,
   })
   .partial({
     id: true,

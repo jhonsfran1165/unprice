@@ -21,8 +21,8 @@ export const domainResponseSchema = z.object({
     .optional()
     .nullable(),
   gitBranch: z.string().optional().nullable(),
-  updatedAt: z.number().optional(),
-  createdAt: z.number().optional(),
+  updatedAtM: z.number().optional(),
+  createdAtM: z.number().optional(),
   verified: z.boolean().optional(),
   verification: z
     .array(

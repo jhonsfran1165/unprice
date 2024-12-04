@@ -1,5 +1,5 @@
 {
-  "name": "@jhonsfran/unprice",
+  "name": "@unprice/unprice",
   "private": false,
   "version": "0.4.1",
   "type": "module",
@@ -7,9 +7,9 @@
   "module": "./dist/index.cjs",
   "exports": {
     ".": {
-      "import": "./dist/index.cjs",
       "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.cjs"
     }
   },
   "types": "./dist/index.d.ts",

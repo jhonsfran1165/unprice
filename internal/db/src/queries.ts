@@ -2,8 +2,7 @@ import { and, eq, getTableColumns, or, sql } from "drizzle-orm"
 import { db } from "."
 import * as schema from "./schema"
 
-// TODO: do we need all data from the tables?
-const projectGuardPrepared = db
+const projectWorkspaceGuardPrepared = db
   .select({
     project: getTableColumns(schema.projects),
     member: {
@@ -16,7 +15,6 @@ const projectGuardPrepared = db
   .limit(1)
   .where(
     and(
-      eq(schema.projects.workspaceId, sql.placeholder("workspaceId")),
       eq(schema.users.id, sql.placeholder("userId")),
       or(
         eq(schema.projects.id, sql.placeholder("projectId")),
@@ -27,7 +25,7 @@ const projectGuardPrepared = db
   .innerJoin(schema.workspaces, eq(schema.projects.workspaceId, schema.workspaces.id))
   .innerJoin(schema.members, eq(schema.members.workspaceId, schema.workspaces.id))
   .innerJoin(schema.users, eq(schema.members.userId, schema.users.id))
-  .prepare("project_guard_prepared")
+  .prepare("project_ws_guard_prepared")
 
 const workspaceGuardPrepared = db
   .select({
@@ -66,7 +64,6 @@ const workspacesByUserPrepared = db.query.users
               slug: true,
               isPersonal: true,
               name: true,
-              plan: true,
               enabled: true,
               unPriceCustomerId: true,
             },
@@ -88,6 +85,8 @@ const apiKeyPrepared = db.query.apikeys
           enabled: true,
           slug: true,
           defaultCurrency: true,
+          isMain: true,
+          isInternal: true,
         },
         with: {
           workspace: {
@@ -95,7 +94,8 @@ const apiKeyPrepared = db.query.apikeys
               enabled: true,
               unPriceCustomerId: true,
               isPersonal: true,
-              plan: true,
+              isInternal: true,
+              isMain: true,
             },
           },
         },
@@ -107,99 +107,15 @@ const apiKeyPrepared = db.query.apikeys
       key: true,
       expiresAt: true,
       revokedAt: true,
+      hash: true,
     },
     where: (apikey, { and, eq }) => and(eq(apikey.key, sql.placeholder("apikey"))),
   })
   .prepare("apikey_prepared")
 
-const getFeatureItemBySlugPrepared = db
-  .select({
-    feature: schema.features,
-    featurePlanVersion: schema.planVersionFeatures,
-    subscriptionItem: schema.subscriptionItems,
-  })
-  .from(schema.subscriptions)
-  .innerJoin(
-    schema.subscriptionItems,
-    and(
-      eq(schema.subscriptions.id, schema.subscriptionItems.subscriptionId),
-      eq(schema.subscriptions.projectId, schema.subscriptionItems.projectId)
-    )
-  )
-  .innerJoin(
-    schema.planVersionFeatures,
-    and(
-      eq(schema.subscriptionItems.featurePlanVersionId, schema.planVersionFeatures.id),
-      eq(schema.subscriptionItems.projectId, schema.planVersionFeatures.projectId)
-    )
-  )
-  .innerJoin(
-    schema.features,
-    and(
-      eq(schema.planVersionFeatures.featureId, schema.features.id),
-      eq(schema.planVersionFeatures.projectId, schema.features.projectId),
-      eq(schema.features.slug, sql.placeholder("featureSlug"))
-    )
-  )
-  .where(
-    and(
-      eq(schema.subscriptions.status, "active"),
-      eq(schema.subscriptions.customerId, sql.placeholder("customerId")),
-      eq(schema.subscriptions.projectId, sql.placeholder("projectId"))
-    )
-  )
-  .prepare("get_feature_item_prepared")
-
-const getCustomerFeatureUsagePrepared = db
-  .select({
-    usage: schema.usage,
-  })
-  .from(schema.subscriptions)
-  .innerJoin(
-    schema.subscriptionItems,
-    and(
-      eq(schema.subscriptions.id, schema.subscriptionItems.subscriptionId),
-      eq(schema.subscriptions.projectId, schema.subscriptionItems.projectId)
-    )
-  )
-  .innerJoin(
-    schema.planVersionFeatures,
-    and(
-      eq(schema.subscriptionItems.featurePlanVersionId, schema.planVersionFeatures.id),
-      eq(schema.subscriptionItems.projectId, schema.planVersionFeatures.projectId)
-    )
-  )
-  .innerJoin(
-    schema.features,
-    and(
-      eq(schema.planVersionFeatures.featureId, schema.features.id),
-      eq(schema.planVersionFeatures.projectId, schema.features.projectId),
-      eq(schema.features.slug, sql.placeholder("featureSlug"))
-    )
-  )
-  .where(
-    and(
-      eq(schema.subscriptions.status, "active"),
-      eq(schema.subscriptions.customerId, sql.placeholder("customerId")),
-      eq(schema.subscriptions.projectId, sql.placeholder("projectId"))
-    )
-  )
-  .innerJoin(
-    schema.usage,
-    and(
-      eq(schema.subscriptionItems.id, schema.usage.subscriptionItemId),
-      eq(schema.subscriptionItems.projectId, schema.usage.projectId),
-      eq(schema.usage.month, sql.placeholder("month")),
-      eq(schema.usage.year, sql.placeholder("year"))
-    )
-  )
-  .prepare("get_customer_feature_usage_prepared")
-
 export {
-  workspacesByUserPrepared,
-  projectGuardPrepared,
-  getFeatureItemBySlugPrepared,
-  workspaceGuardPrepared,
   apiKeyPrepared,
-  getCustomerFeatureUsagePrepared,
+  projectWorkspaceGuardPrepared,
+  workspaceGuardPrepared,
+  workspacesByUserPrepared,
 }

@@ -78,12 +78,31 @@ export const PAYMENT_PROVIDERS = ["stripe", "lemonsqueezy"] as const
 export const CURRENCIES = ["USD", "EUR"] as const
 export const STAGES = ["prod", "test", "dev"] as const
 export const STATUS_PLAN = ["draft", "published"] as const
-export const STATUS_SUBSCRIPTION = ["active", "inactive", "ended", "cancelled"] as const
-// TODO: delete this
-export const PLANS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
-export const PROJECT_TIERS_APP = ["FREE", "PRO", "ENTERPRISE"] as const
+
+// this status represents the status of the subscription, it would be the same for all phases
+// but phases can have different statuses than the subscription is they are not active
+// for instance a phase was changed to new plan, we create a new phase with status as active
+// and we leave the old phase with status changed.
+export const STATUS_PHASE = [
+  "active", // the phase is active
+  "trialing", // the phase is trialing
+  "changed", // the phase is changed
+  "canceled", // the phase is cancelled
+  "expired", // the phase has expired - no auto-renew
+  "past_dued", // the phase is past due - payment pending
+  "trial_ended", // the phase trial has ended
+] as const
+
 export const PLAN_TYPES = ["recurring"] as const
-export const PLAN_BILLING_PERIODS = ["month", "year"] as const
+export const PLAN_BILLING_PERIODS = ["month", "year", "custom", "onetime"] as const
+export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
+export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
+export const DUE_BEHAVIOUR = ["cancel", "downgrade"] as const
+export const INVOICE_STATUS = ["unpaid", "paid", "waiting", "void", "draft", "failed"] as const
+export const INVOICE_TYPE = ["flat", "usage", "hybrid"] as const
+export const FEATURE_VERSION_TYPES = ["feature", "addon"] as const
+export const COLLECTION_METHODS = ["charge_automatically", "send_invoice"] as const
+
 export const TIER_MODES = Object.keys(TIER_MODES_MAP) as unknown as readonly [
   TierMode,
   ...TierMode[],
@@ -92,17 +111,10 @@ export const USAGE_MODES = Object.keys(USAGE_MODES_MAP) as unknown as readonly [
   UsageMode,
   ...UsageMode[],
 ]
-
 export const AGGREGATION_METHODS = Object.keys(AGGREGATION_METHODS_MAP) as unknown as readonly [
   AggregationMethod,
   ...AggregationMethod[],
 ]
-
-export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
-export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
-export const FEATURE_VERSION_TYPES = ["feature", "addon"] as const
-export const SUBSCRIPTION_TYPES = ["plan", "addons"] as const
-export const COLLECTION_METHODS = ["charge_automatically", "send_invoice"] as const
 export const FEATURE_TYPES = Object.keys(FEATURE_TYPES_MAPS) as unknown as readonly [
   FeatureType,
   ...FeatureType[],

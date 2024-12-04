@@ -1,2 +1,2 @@
 export * from "./generate-pattern"
-export * from "./project-guard"
+export * from "./project-workspace-guard"

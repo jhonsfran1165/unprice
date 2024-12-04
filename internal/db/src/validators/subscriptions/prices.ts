@@ -1,11 +1,11 @@
 import * as currencies from "@dinero.js/currencies"
 import type { Dinero } from "dinero.js"
-import { add, dinero, isZero, multiply, toDecimal } from "dinero.js"
+import { add, dinero, isZero, multiply, toDecimal, trimScale } from "dinero.js"
 import { z } from "zod"
 
 import type { Result } from "@unprice/error"
 import { Err, Ok, type SchemaError } from "@unprice/error"
-import { calculatePercentage } from "../../utils"
+import { calculatePercentage, formatMoney } from "../../utils"
 import { UnPriceCalculationError } from "./../errors"
 import type { PlanVersionExtended, dineroSchema, tiersSchema } from "./../planVersionFeatures"
 import {
@@ -16,17 +16,16 @@ import {
   planVersionFeatureInsertBaseSchema,
   priceSchema,
 } from "./../planVersionFeatures"
-import type { Currency } from "./../shared"
-import { currencySymbol } from "./../shared"
 
 const calculatePriceSchema = z.object({
   dinero: z.custom<Dinero<number>>(),
   displayAmount: priceSchema,
+  hasUsage: z.boolean().optional(),
 })
 
 const unitsSchema = z.coerce.number().int().min(0)
 
-interface CalculatedPrice {
+export interface CalculatedPrice {
   unitPrice: z.infer<typeof calculatePriceSchema>
   totalPrice: z.infer<typeof calculatePriceSchema>
 }
@@ -41,32 +40,232 @@ const calculatePricePerFeatureSchema = z.object({
   prorate: z.number().min(0).max(1).optional(),
 })
 
+// calculate flat price of the plan based on the features in the plan
 export const calculateFlatPricePlan = ({
   planVersion,
+  prorate,
 }: {
   planVersion: PlanVersionExtended
+  prorate?: number
 }): Result<z.infer<typeof calculatePriceSchema>, UnPriceCalculationError> => {
   const defaultDineroCurrency = currencies[planVersion.currency]
   let total = dinero({ amount: 0, currency: defaultDineroCurrency })
+  let hasUsage = false
 
+  // here we are getting the price of flat features because that determines the plan price
+  // the rest of the features depends on quantity and are calculated later
   planVersion.planFeatures.forEach((feature) => {
-    // TODO: what happen with tiers and usage?
-    if (["flat", "package"].includes(feature.featureType)) {
-      const { price } = configFlatSchema.parse(feature.config)
-      total = add(total, dinero(price.dinero))
+    // flat features are always quantity 1
+    if (["flat"].includes(feature.featureType)) {
+      const { val: price, err } = calculatePricePerFeature({
+        feature: feature,
+        quantity: 1,
+        prorate,
+      })
+
+      if (err) {
+        return Err(err)
+      }
+
+      total = add(total, price.totalPrice.dinero)
+    }
+
+    if (["usage"].includes(feature.featureType)) {
+      hasUsage = true
     }
   })
 
   const displayAmount = toDecimal(
     total,
-    ({ value, currency }) =>
-      `${currencySymbol(currency.code as Currency)}${Number.parseFloat(value).toFixed(2)}`
+    ({ value, currency }) => `${formatMoney(value, currency.code)}`
+  )
+
+  return Ok({
+    dinero: total,
+    displayAmount: displayAmount,
+    hasUsage,
+  })
+}
+
+// calculate the total price of the plan based on the quantities of the features
+export const calculateTotalPricePlan = ({
+  planVersion,
+  quantities,
+  prorate,
+}: {
+  planVersion: PlanVersionExtended
+  quantities: Record<string, number>
+  prorate?: number
+}): Result<z.infer<typeof calculatePriceSchema>, UnPriceCalculationError> => {
+  const defaultDineroCurrency = currencies[planVersion.currency]
+  let total = dinero({ amount: 0, currency: defaultDineroCurrency })
+
+  planVersion.planFeatures.forEach((feature) => {
+    // flat features are always quantity 1
+    if (["flat"].includes(feature.featureType)) {
+      const { val: price, err } = calculatePricePerFeature({
+        feature: feature,
+        quantity: 1,
+        prorate,
+      })
+
+      if (err) {
+        return Err(err)
+      }
+
+      total = add(total, price.totalPrice.dinero)
+    }
+
+    if (["tier", "package", "usage"].includes(feature.featureType)) {
+      const { val: price, err } = calculatePricePerFeature({
+        feature: feature,
+        quantity: quantities[feature.id] ?? 0,
+        prorate,
+      })
+
+      if (err) {
+        return Err(err)
+      }
+
+      total = add(total, price.totalPrice.dinero)
+    }
+  })
+
+  const displayAmount = toDecimal(
+    total,
+    ({ value, currency }) => `${formatMoney(value, currency.code)}`
   )
 
   return Ok({
     dinero: total,
     displayAmount: displayAmount,
   })
+}
+
+// calculate the number of free units for a feature
+// useful for table pricing and displaying plans
+// returns 0 if the feature is paid, Number.POSITIVE_INFINITY if the feature is free
+export const calculateFreeUnits = ({
+  feature,
+}: {
+  feature: z.infer<typeof planVersionFeatureInsertBaseSchema>
+}): number => {
+  switch (feature.featureType) {
+    case "flat": {
+      // flat features are free or paid
+      const { price } = configFlatSchema.parse(feature.config)
+
+      const { val: priceTotal } = calculateUnitPrice({
+        price,
+        quantity: 1,
+        isUsageBased: false,
+      })
+
+      if (priceTotal?.totalPrice.dinero && isZero(priceTotal.totalPrice.dinero)) {
+        return Number.POSITIVE_INFINITY
+      }
+
+      return 0
+    }
+    case "tier": {
+      const { tiers, tierMode } = configTierSchema.parse(feature.config)
+      let total = 0
+      for (const tier of tiers) {
+        // if limit is infinity, we can't calculate the free units and also means
+        // we are in the last tier so return undefined
+        const limit = tier.lastUnit ?? tier.firstUnit
+
+        const { val: totalPrice } = calculateTierPrice({
+          tiers,
+          quantity: limit,
+          tierMode,
+          isUsageBased: false,
+        })
+
+        if (totalPrice?.totalPrice.dinero && isZero(totalPrice.totalPrice.dinero)) {
+          // with the last tier still 0 means is free no matter what is the amount
+          total = !tier.lastUnit ? Number.POSITIVE_INFINITY : limit
+        }
+      }
+      return total
+    }
+    case "usage": {
+      const { tiers, usageMode, units, price, tierMode } = configUsageSchema.parse(feature.config)
+
+      if (usageMode === "tier" && tierMode && tiers && tiers.length > 0) {
+        let total = 0
+        for (const tier of tiers) {
+          // if limit is infinity, we can't calculate the free units and also means
+          // we are in the last tier so return undefined
+          const limit = tier.lastUnit ?? tier.firstUnit
+
+          const { val: totalPrice } = calculateTierPrice({
+            tiers,
+            quantity: limit,
+            tierMode,
+            isUsageBased: false,
+          })
+
+          if (totalPrice?.totalPrice.dinero && isZero(totalPrice.totalPrice.dinero)) {
+            // with the last tier still 0 means is free no matter what is the amount
+            total = !tier.lastUnit ? Number.POSITIVE_INFINITY : limit
+          }
+        }
+        return total
+      }
+
+      if (usageMode === "unit" && price) {
+        const { val: priceTotal } = calculateUnitPrice({
+          price,
+          quantity: 1,
+          isUsageBased: false,
+        })
+
+        if (priceTotal?.totalPrice.dinero && isZero(priceTotal.totalPrice.dinero)) {
+          return Number.POSITIVE_INFINITY
+        }
+
+        return 0
+      }
+
+      if (usageMode === "package" && units && price) {
+        const { val: priceTotal } = calculatePackagePrice({
+          price,
+          // calculate a price for the whole package
+          quantity: units,
+          units,
+          isUsageBased: false,
+        })
+
+        if (priceTotal?.totalPrice.dinero && isZero(priceTotal.totalPrice.dinero)) {
+          return Number.POSITIVE_INFINITY
+        }
+
+        return 0
+      }
+
+      return 0
+    }
+    case "package": {
+      const { units, price } = configPackageSchema.parse(feature.config)
+
+      const { val: priceTotal } = calculatePackagePrice({
+        price,
+        // calculate a price for the whole package
+        quantity: units,
+        units,
+        isUsageBased: false,
+      })
+
+      if (priceTotal?.totalPrice.dinero && isZero(priceTotal.totalPrice.dinero)) {
+        return Number.POSITIVE_INFINITY
+      }
+
+      return 0
+    }
+    default:
+      return 0
+  }
 }
 
 export const calculateTierPrice = ({
@@ -99,16 +298,16 @@ export const calculateTierPrice = ({
         dinero: total,
         displayAmount: toDecimal(total, ({ value, currency }) => {
           if (isUsageBased) {
-            return `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
+            return `starts at ${formatMoney(value, currency.code)} per unit`
           }
-          return `${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `${formatMoney(value, currency.code)} per unit`
         }),
       },
       totalPrice: {
         dinero: total,
         displayAmount: toDecimal(
           total,
-          ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
+          ({ value, currency }) => `${formatMoney(value, currency.code)}`
         ),
       },
     })
@@ -123,14 +322,18 @@ export const calculateTierPrice = ({
     )! // we are sure the quantity falls into a tier
 
     // flat price needs to be prorated as well
-    const dineroFlatPrice = prorate
-      ? calculatePercentage(dinero(tier.flatPrice.dinero), prorate)
-      : dinero(tier.flatPrice.dinero)
-    const dineroUnitPrice = dinero(tier.unitPrice.dinero)
+    const dineroFlatPrice =
+      prorate !== undefined
+        ? trimScale(calculatePercentage(dinero(tier.flatPrice.dinero), prorate))
+        : trimScale(dinero(tier.flatPrice.dinero))
+    const dineroUnitPrice =
+      prorate !== undefined
+        ? trimScale(calculatePercentage(dinero(tier.unitPrice.dinero), prorate))
+        : trimScale(dinero(tier.unitPrice.dinero))
 
     const dineroTotalPrice = !isZero(dineroFlatPrice)
-      ? add(multiply(dinero(tier.unitPrice.dinero), quantity), dineroFlatPrice)
-      : multiply(dinero(tier.unitPrice.dinero), quantity)
+      ? trimScale(add(multiply(dinero(tier.unitPrice.dinero), quantity), dineroFlatPrice))
+      : trimScale(multiply(dinero(tier.unitPrice.dinero), quantity))
 
     return Ok({
       unitPrice: {
@@ -138,19 +341,20 @@ export const calculateTierPrice = ({
         displayAmount: toDecimal(dineroUnitPrice, ({ value, currency }) => {
           const prefix = isUsageBased ? "starts at " : ""
           if (isZero(dineroFlatPrice)) {
-            return `${prefix} ${currencySymbol(currency.code as Currency)}${value} per unit`
+            return `${prefix} ${formatMoney(value, currency.code)} per unit`
           }
 
-          return `${prefix} ${currencySymbol(currency.code as Currency)}${toDecimal(
-            dineroFlatPrice
-          )} + ${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `${prefix} ${formatMoney(
+            toDecimal(dineroFlatPrice),
+            currency.code
+          )} + ${formatMoney(value, currency.code)} per unit`
         }),
       },
       totalPrice: {
         dinero: dineroTotalPrice,
         displayAmount: toDecimal(
           dineroTotalPrice,
-          ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
+          ({ value, currency }) => `${formatMoney(value, currency.code)}`
         ),
       },
     })
@@ -194,10 +398,11 @@ export const calculateTierPrice = ({
     // add the flat price of the tier the quantity falls into if it exists
     if (tier?.flatPrice) {
       // flat price needs to be prorated as well
-      const dineroFlatPrice = prorate
-        ? calculatePercentage(dinero(tier.flatPrice.dinero), prorate)
-        : dinero(tier.flatPrice.dinero)
-      total = add(total, dineroFlatPrice)
+      const dineroFlatPrice =
+        prorate !== undefined
+          ? trimScale(calculatePercentage(dinero(tier.flatPrice.dinero), prorate))
+          : trimScale(dinero(tier.flatPrice.dinero))
+      total = trimScale(add(total, dineroFlatPrice))
     }
 
     return Ok({
@@ -205,17 +410,17 @@ export const calculateTierPrice = ({
         dinero: dinero(tier.unitPrice.dinero),
         displayAmount: toDecimal(dinero(tier.unitPrice.dinero), ({ value, currency }) => {
           if (isUsageBased) {
-            return `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
+            return `starts at ${formatMoney(value, currency.code)} per unit`
           }
 
-          return `${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `${formatMoney(value, currency.code)} per unit`
         }),
       },
       totalPrice: {
         dinero: total,
         displayAmount: toDecimal(
           total,
-          ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
+          ({ value, currency }) => `${formatMoney(value, currency.code)}`
         ),
       },
     })
@@ -251,16 +456,16 @@ export const calculatePackagePrice = ({
         dinero: total,
         displayAmount: toDecimal(total, ({ value, currency }) => {
           if (isUsageBased) {
-            return `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
+            return `starts at ${formatMoney(value, currency.code)} per ${units} units`
           }
-          return `${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `${formatMoney(value, currency.code)} per ${units} units`
         }),
       },
       totalPrice: {
         dinero: total,
         displayAmount: toDecimal(
           total,
-          ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
+          ({ value, currency }) => `${formatMoney(value, currency.code)}`
         ),
       },
     })
@@ -268,25 +473,31 @@ export const calculatePackagePrice = ({
 
   const packageCount = Math.ceil(quantity / units)
   const dineroPrice = dinero(price.dinero)
-  const total = prorate
-    ? calculatePercentage(multiply(dineroPrice, packageCount), prorate)
-    : multiply(dineroPrice, packageCount)
+  const total =
+    prorate !== undefined
+      ? trimScale(calculatePercentage(multiply(dineroPrice, packageCount), prorate))
+      : trimScale(multiply(dineroPrice, packageCount))
+
+  const unit =
+    prorate !== undefined
+      ? trimScale(calculatePercentage(dineroPrice, prorate))
+      : trimScale(dineroPrice)
 
   return Ok({
     unitPrice: {
-      dinero: dineroPrice,
-      displayAmount: toDecimal(dineroPrice, ({ value, currency }) => {
+      dinero: unit,
+      displayAmount: toDecimal(unit, ({ value, currency }) => {
         if (isUsageBased) {
-          return `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `starts at ${formatMoney(value, currency.code)} per ${units} units`
         }
-        return `${currencySymbol(currency.code as Currency)}${value} per ${units} unit`
+        return `${formatMoney(value, currency.code)} per ${units} units`
       }),
     },
     totalPrice: {
       dinero: total,
       displayAmount: toDecimal(
         total,
-        ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
+        ({ value, currency }) => `${formatMoney(value, currency.code)}`
       ),
     },
   })
@@ -305,27 +516,30 @@ export const calculateUnitPrice = ({
   prorate?: number
   isFlat?: boolean
 }): Result<CalculatedPrice, UnPriceCalculationError> => {
-  const dineroPrice = dinero(price.dinero)
-  const total = prorate
-    ? calculatePercentage(multiply(dineroPrice, quantity), prorate)
-    : multiply(dineroPrice, quantity)
+  const dineroPrice = trimScale(dinero(price.dinero))
+  const total =
+    prorate !== undefined
+      ? trimScale(calculatePercentage(multiply(dineroPrice, quantity), prorate))
+      : trimScale(multiply(dineroPrice, quantity))
+
+  const unit =
+    prorate !== undefined ? trimScale(calculatePercentage(dineroPrice, prorate)) : dineroPrice
 
   return Ok({
     unitPrice: {
-      dinero: dineroPrice,
-      displayAmount: toDecimal(dineroPrice, ({ value, currency }) => {
+      dinero: unit,
+      displayAmount: toDecimal(unit, ({ value, currency }) => {
         if (isUsageBased) {
-          return `starts at ${currencySymbol(currency.code as Currency)}${value} per unit`
+          return `starts at ${formatMoney(value, currency.code)} per unit`
         }
-        return `${currencySymbol(currency.code as Currency)}${value} ${isFlat ? "" : "per unit"}`
+        return `${formatMoney(value, currency.code)} ${isFlat ? "" : "per unit"}`
       }),
     },
     totalPrice: {
       dinero: total,
-      displayAmount: toDecimal(
-        total,
-        ({ value, currency }) => `${currencySymbol(currency.code as Currency)}${value}`
-      ),
+      displayAmount: toDecimal(total, ({ value, currency }) => {
+        return `${formatMoney(value, currency.code)}`
+      }),
     },
   })
 }
@@ -336,7 +550,7 @@ export const calculatePricePerFeature = (
   // set default units to 0 if it's not provided
   // proration only applies to fix costs per billing period
   const { feature, quantity, prorate } = data
-  const defaultQuantity = quantity ?? 0
+  const defaultQuantity = quantity || 0
 
   switch (feature.featureType) {
     case "flat": {

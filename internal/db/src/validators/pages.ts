@@ -45,8 +45,8 @@ export const pageInsertBaseSchema = createInsertSchema(pages, {
   title: z.string().min(3).max(50),
 })
   .omit({
-    createdAt: true,
-    updatedAt: true,
+    createdAtM: true,
+    updatedAtM: true,
     slug: true,
   })
   .partial({

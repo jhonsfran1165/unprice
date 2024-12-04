@@ -51,6 +51,9 @@ export default function AppMiddleware(req: NextAuthRequest) {
   const isApiTrpcRoute = path.startsWith(API_TRPC_ROUTE_PREFIX)
   const isNonWorkspaceRoute = APP_NON_WORKSPACE_ROUTES.has(path)
 
+  // use next param to redirect to the workspace
+  const next = req.nextUrl.searchParams.get("next")
+
   // API routes we don't need to check if the user is logged in
   if (isApiAuthRoute || isApiTrpcRoute || isAppAuthRoute) {
     return NextResponse.next()
@@ -68,13 +71,18 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
   // if the route is not a workspace route
   if (isNonWorkspaceRoute) {
-    return NextResponse.rewrite(new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url))
+    return NextResponse.rewrite(new URL(`/dashboard${fullPath === "/" ? "" : fullPath}`, req.url))
+  }
+
+  // if the next param is set, redirect to the next url
+  if (next) {
+    return NextResponse.redirect(new URL(next, req.url))
   }
 
   // if not workspace in path check cookies or jwt
   if (!currentWorkspaceSlug) {
-    const redirectWorkspaceSlug =
-      req.cookies.get(COOKIES_APP.WORKSPACE)?.value ?? user.workspaces[0]?.slug
+    // get the first workspace
+    const redirectWorkspaceSlug = user.workspaces[0]?.slug
 
     // there is a cookie/jwt claim for the workspace redirect
     if (redirectWorkspaceSlug && redirectWorkspaceSlug !== "") {
@@ -82,19 +90,28 @@ export default function AppMiddleware(req: NextAuthRequest) {
       return NextResponse.redirect(url)
     }
 
-    // TODO: if the user has no active workspace redirect to onboarding
-
-    // this should never happen because every user should have at least one workspace that is created on signup
-    return NextResponse.redirect(new URL("/error", req.url))
+    // if not workspace in path and no workspace in cookies or jwt, redirect to onboarding
+    return NextResponse.redirect(new URL("/new", req.url))
   }
 
   // check jwt claim for the workspace
   const isUserMemberWorkspace = userBelongsToWorkspace(currentWorkspaceSlug)
-  const response = NextResponse.rewrite(new URL(`/app${fullPath === "/" ? "" : fullPath}`, req.url))
+
+  const response = NextResponse.rewrite(
+    new URL(`/dashboard${fullPath === "/" ? "" : fullPath}`, req.url)
+  )
 
   // if the user is not a member of the workspace redirect to root path to be handled by the middleware again
   if (!isUserMemberWorkspace) {
     url.pathname = "/"
+
+    // clear the cookies
+    response.cookies.set(COOKIES_APP.PROJECT, "")
+    response.cookies.set(COOKIES_APP.WORKSPACE, "")
+
+    // Apply those cookies to the request
+    applySetCookie(req, response)
+
     return NextResponse.redirect(url)
   }
 

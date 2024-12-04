@@ -12,29 +12,30 @@ export const dateToUnixMilli = z
   .string()
   .transform((t) => new Date(t.split(" ").at(0) ?? t).getTime())
 
+export const datetimeToUnixMilli = z.string().transform((t) => new Date(t).getTime())
+
 export const featureVerificationSchemaV1 = z.object({
   projectId: z.string(),
   planVersionFeatureId: z.string(),
-  subscriptionId: z.string(),
+  subscriptionItemId: z.string().nullable(),
+  entitlementId: z.string(),
   deniedReason: z.string().optional(),
-  time: z.number(),
+  date: z.number(),
   latency: z.number().optional(),
-  subItemId: z.string(),
   featureSlug: z.string(),
   customerId: z.string(),
 })
 
 export const featureUsageSchemaV1 = z.object({
-  subItemId: z.string(),
+  subscriptionItemId: z.string().nullable(),
+  entitlementId: z.string(),
   featureSlug: z.string(),
   customerId: z.string(),
-  month: z.number().int(),
-  year: z.number().int(),
+  date: z.number(),
   projectId: z.string(),
   planVersionFeatureId: z.string(),
-  subscriptionId: z.string(),
   usage: z.number(),
-  time: z.number(),
+  createdAt: z.number(),
 })
 
 export const auditLogSchemaV1 = z.object({

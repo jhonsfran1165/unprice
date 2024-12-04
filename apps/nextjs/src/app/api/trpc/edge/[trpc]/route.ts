@@ -3,13 +3,13 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
 
 import { createTRPCContext } from "@unprice/api"
-import { edgeRouter } from "@unprice/api/edge"
+import { edgeRouter } from "@unprice/api/routes"
 import { auth } from "@unprice/auth/server"
 
 import { CorsOptions, setCorsHeaders } from "../../../_enableCors"
 
 // TODO: vercel is having trouble with the runtime edge so for now we are using nodejs
-export const runtime = "nodejs"
+export const runtime = "edge"
 export const preferredRegion = ["fra1"]
 
 const handler = auth(async (req) => {

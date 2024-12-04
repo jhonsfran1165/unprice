@@ -1,9 +1,10 @@
+import { cn } from "@unprice/ui/utils"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import type { Metadata, Viewport } from "next"
+import { ViewTransitions } from "next-view-transitions"
 import "~/styles/globals.css"
 import "~/styles/prosemirror.css"
-
-import type { Metadata, Viewport } from "next"
-
-import { cn } from "@unprice/ui/utils"
 
 import { ThemeProvider } from "~/components/layout/theme-provider"
 import { siteConfig } from "~/constants/layout"
@@ -41,25 +42,30 @@ export const viewport: Viewport = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
-        />
-      </head>
-      <body
-        className={cn(
-          "min-h-screen font-secondary antialiased",
-          fontMapper["font-primary"],
-          fontMapper["font-secondary"]
-        )}
-      >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {props.children}
-        </ThemeProvider>
-        {/* <Analytics /> */}
-      </body>
-    </html>
+    <ViewTransitions>
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+          />
+          {/* <script src="https://unpkg.com/react-scan/dist/auto.global.js" /> */}
+        </head>
+        <body
+          className={cn(
+            "min-h-screen font-secondary antialiased",
+            fontMapper["font-primary"],
+            fontMapper["font-secondary"]
+          )}
+        >
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            {props.children}
+          </ThemeProvider>
+          {/* <Analytics /> */}
+          <Analytics />
+          <SpeedInsights />
+        </body>
+      </html>
+    </ViewTransitions>
   )
 }

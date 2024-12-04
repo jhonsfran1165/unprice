@@ -1,0 +1,24 @@
+VERSION 1
+NODE daily_usage
+SQL >
+
+    SELECT
+        customerId,
+        featureSlug,
+        projectId,
+        time,
+        toDate(fromUnixTimestamp64Milli(time)) AS date,
+        finalizeAggregation(sumState(usage)) AS usage_sum,
+        finalizeAggregation(maxState(usage)) AS usage_max,
+        finalizeAggregation(countState(usage)) AS usage_count,
+        finalizeAggregation(argMaxState(usage, time)) AS usage_last_day
+    FROM features_usage
+    GROUP BY
+        customerId,
+        featureSlug,
+        projectId,
+        date,
+        time
+     ORDER BY date
+
+

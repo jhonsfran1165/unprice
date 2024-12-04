@@ -11,12 +11,16 @@ import { useState } from "react"
 
 import type { AppRouter } from "@unprice/api"
 import { transformer } from "@unprice/api/transformer"
-import { createQueryClient, getBaseUrl, lambdas } from "./shared"
+import { createQueryClient, getBaseUrl } from "./shared"
 
 export const api = createTRPCReact<AppRouter>()
 
 export const endingLinkClient = (opts?: {
   headers?: HTTPHeaders | (() => HTTPHeaders)
+  allEndpointsProcedures: {
+    lambda: string[]
+    edge: string[]
+  }
 }) =>
   ((runtime) => {
     const sharedOpts: Partial<HTTPBatchStreamLinkOptions<AnyRootTypes>> = {
@@ -37,7 +41,10 @@ export const endingLinkClient = (opts?: {
 
     return (ctx) => {
       const path = ctx.op.path.split(".") as [string, ...string[]]
-      const endpoint = lambdas.includes(path[0]) ? "lambda" : "edge"
+      // this is a bit of a hack, but it works for now
+      // we try to infer the endpoint based on the path
+      // and split the endpoint to the given runtime
+      const endpoint = opts?.allEndpointsProcedures.lambda.includes(ctx.op.path) ? "lambda" : "edge"
 
       const newCtx = {
         ...ctx,
@@ -60,7 +67,13 @@ const getQueryClient = () => {
   return clientQueryClientSingleton
 }
 
-export function TRPCReactProvider(props: { children: React.ReactNode }) {
+export function TRPCReactProvider(props: {
+  children: React.ReactNode
+  allEndpointsProcedures: {
+    lambda: string[]
+    edge: string[]
+  }
+}) {
   const queryClient = getQueryClient()
 
   const [trpcClient] = useState(() =>
@@ -73,6 +86,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
         }),
         endingLinkClient({
           headers: { "x-trpc-source": "react-query" },
+          allEndpointsProcedures: props.allEndpointsProcedures,
         }),
       ],
     })

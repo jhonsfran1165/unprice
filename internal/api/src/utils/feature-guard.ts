@@ -2,7 +2,7 @@ import type { ProjectExtended } from "@unprice/db/validators"
 
 import { TRPCError } from "@trpc/server"
 import type { Context } from "../trpc"
-import { verifyFeature } from "./shared"
+import { verifyEntitlement } from "./shared"
 
 export const featureGuard = async ({
   project,
@@ -15,7 +15,7 @@ export const featureGuard = async ({
 }) => {
   const unpriceCustomerId = project.workspace.unPriceCustomerId
 
-  const result = await verifyFeature({
+  const result = await verifyEntitlement({
     customerId: unpriceCustomerId,
     featureSlug: featureSlug,
     projectId: project.id,

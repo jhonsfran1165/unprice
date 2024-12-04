@@ -10,7 +10,6 @@ import { FEATURE_TYPES_MAPS, USAGE_MODES_MAP } from "../utils"
 import { featureSelectBaseSchema } from "./features"
 import { planVersionSelectBaseSchema } from "./planVersions"
 import { planSelectBaseSchema } from "./plans"
-import { projectSelectBaseSchema } from "./project"
 import {
   aggregationMethodSchema,
   tierModeSchema,
@@ -76,6 +75,7 @@ export const dineroSchema = z
 
 export const planVersionFeatureMetadataSchema = z.object({
   stripeProductId: z.string().optional(),
+  realtime: z.boolean().optional(),
 })
 
 export const tiersSchema = z.object({
@@ -298,7 +298,7 @@ export const configPackageSchema = z.object({
   price: dineroSchema,
   usageMode: usageModeSchema.optional(),
   tierMode: tierModeSchema.optional(),
-  units: unitSchema,
+  units: unitSchema.describe("Units for the package"),
 })
 
 export const configFeatureSchema = z.union([
@@ -312,7 +312,7 @@ export const configFeatureSchema = z.union([
 export const planVersionFeatureSelectBaseSchema = createSelectSchema(planVersionFeatures, {
   config: configFeatureSchema,
   metadata: planVersionFeatureMetadataSchema,
-  defaultQuantity: z.coerce.number().int().optional(),
+  defaultQuantity: z.coerce.number().int().optional().default(1),
   aggregationMethod: aggregationMethodSchema,
   limit: z.coerce.number().int().optional(),
   featureType: typeFeatureSchema,
@@ -338,12 +338,12 @@ export const planVersionFeatureInsertBaseSchema = createInsertSchema(planVersion
   config: configFeatureSchema.optional(),
   metadata: planVersionFeatureMetadataSchema.optional(),
   aggregationMethod: aggregationMethodSchema.default("count"),
-  defaultQuantity: z.coerce.number().int().optional(),
+  defaultQuantity: z.coerce.number().int(),
   limit: z.coerce.number().int().optional(),
 })
   .omit({
-    createdAt: true,
-    updatedAt: true,
+    createdAtM: true,
+    updatedAtM: true,
   })
   .partial({
     projectId: true,
@@ -451,13 +451,13 @@ export const planVersionFeatureDragDropSchema = planVersionFeatureSelectBaseSche
   feature: featureSelectBaseSchema,
 })
 
-export const planVersionFeatureExtendedSchema = planVersionFeatureSelectBaseSchema.extend({
-  feature: featureSelectBaseSchema,
-  planVersion: planVersionSelectBaseSchema.extend({
-    plan: planSelectBaseSchema,
-  }),
-  project: projectSelectBaseSchema,
-})
+// export const planVersionFeatureExtendedSchema = planVersionFeatureSelectBaseSchema.extend({
+//   feature: featureSelectBaseSchema,
+//   planVersion: planVersionSelectBaseSchema.extend({
+//     plan: planSelectBaseSchema,
+//   }),
+//   project: projectSelectBaseSchema,
+// })
 
 export const planVersionExtendedSchema = planVersionSelectBaseSchema
   .pick({
@@ -477,31 +477,22 @@ export const planVersionExtendedSchema = planVersionSelectBaseSchema
   .extend({
     plan: planSelectBaseSchema.pick({
       slug: true,
+      defaultPlan: true,
+      enterprisePlan: true,
     }),
     planFeatures: z.array(
-      planVersionFeatureSelectBaseSchema
-        .pick({
+      planVersionFeatureSelectBaseSchema.extend({
+        feature: featureSelectBaseSchema.pick({
           id: true,
-          featureId: true,
-          featureType: true,
-          planVersionId: true,
-          config: true,
-          metadata: true,
-          limit: true,
-          defaultQuantity: true,
-        })
-        .extend({
-          feature: featureSelectBaseSchema.pick({
-            id: true,
-            slug: true,
-          }),
-        })
+          slug: true,
+        }),
+      })
     ),
   })
 
 export type PlanVersionFeature = z.infer<typeof planVersionFeatureInsertBaseSchema>
 
-export type PlanVersionFeatureExtended = z.infer<typeof planVersionFeatureExtendedSchema>
+// export type PlanVersionFeatureExtended = z.infer<typeof planVersionFeatureExtendedSchema>
 
 export type PlanVersionFeatureDragDrop = z.infer<typeof planVersionFeatureDragDropSchema>
 

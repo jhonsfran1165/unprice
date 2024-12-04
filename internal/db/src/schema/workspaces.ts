@@ -1,10 +1,10 @@
-import { relations } from "drizzle-orm"
-import { boolean, foreignKey, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
+import { eq, relations } from "drizzle-orm"
+import { bigint, boolean, foreignKey, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { cuid, id, timestamps, workspaceID } from "../utils/sql"
+import { cuid, id, timestamps, workspaceID } from "../utils/fields.sql"
 import { users } from "./auth"
-import { plansEnum, teamRolesEnum } from "./enums"
+import { teamRolesEnum } from "./enums"
 import { projects } from "./projects"
 
 export const workspaces = pgTableProject(
@@ -18,6 +18,8 @@ export const workspaces = pgTableProject(
     // wether or not is a personal workspace - meaning asociated to a user or a team
     isPersonal: boolean("is_personal").default(false),
     isInternal: boolean("is_internal").default(false),
+    // there must be only one main workspace per the whole project
+    isMain: boolean("is_main").default(false),
     createdBy: cuid("created_by")
       .notNull()
       .references(() => users.id),
@@ -27,15 +29,17 @@ export const workspaces = pgTableProject(
     // in Postgres 15.0+ NULLS NOT DISTINCT is available
     unPriceCustomerId: text("unprice_customer_id").notNull().unique("unprice_customer_id"),
 
-    // TODO: remove this
-    plan: plansEnum("legacy_plans").default("FREE").notNull(),
+    // plan slug to show in the UI - this comes from unprice customer
+    plan: text("plan"),
 
     /**
      * if the workspace is disabled, all API requests will be rejected
      */
     enabled: boolean("enabled").notNull().default(true),
   },
-  (_table) => ({})
+  (table) => ({
+    mainWorkspace: uniqueIndex("main_workspace").on(table.isMain).where(eq(table.isMain, true)),
+  })
 )
 
 export const members = pgTableProject(
@@ -51,7 +55,12 @@ export const members = pgTableProject(
       columns: [table.userId],
       foreignColumns: [users.id],
       name: "members_user_id_fkey",
-    }),
+    }).onDelete("cascade"),
+    workspaceFk: foreignKey({
+      columns: [table.workspaceId],
+      foreignColumns: [workspaces.id],
+      name: "members_workspace_id_fkey",
+    }).onDelete("cascade"),
     compoundKey: primaryKey({
       columns: [table.userId, table.workspaceId],
       name: "members_pkey",
@@ -66,13 +75,18 @@ export const invites = pgTableProject(
     ...workspaceID,
     email: text("email").notNull(),
     role: teamRolesEnum("role").default("MEMBER").notNull(),
-    acceptedAt: timestamp("accepted_at", { mode: "date" }),
+    acceptedAt: bigint("accepted_at_m", { mode: "number" }),
   },
   (table) => ({
     compoundKey: primaryKey({
       columns: [table.email, table.workspaceId],
       name: "invites_pkey",
     }),
+    workspaceFk: foreignKey({
+      columns: [table.workspaceId],
+      foreignColumns: [workspaces.id],
+      name: "invites_workspace_id_fkey",
+    }).onDelete("cascade"),
   })
 )
 

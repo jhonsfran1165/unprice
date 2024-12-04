@@ -15,9 +15,10 @@
     "typecheck": "turbo typecheck",
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip --include files,dependencies",
-    "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply",
+    "test": "turbo run test",
+    "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply-unsafe",
     "fmt": "pnpm biome format . && pnpm biome check .",
-    "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt",
+    "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:fix",
     "manypkg:fix": "pnpm manypkg fix",
     "commit": "cz",
     "bump-versions": "pnpm changeset version && pnpm install",
@@ -31,24 +32,18 @@
     "@types/node": "20.11.24",
     "cross-env": "^7.0.3",
     "cz-conventional-changelog": "^3.3.0",
-    "husky": "^9.1.1",
+    "husky": "^9.1.4",
     "knip": "^5.17.4",
-    "lint-staged": "^15.2.2",
+    "lint-staged": "^15.2.9",
     "turbo": "^2.0.6",
     "typescript": "^5.3.3"
   },
-  "git": {
-    "pre-commit": "lint-staged"
-  },
   "lint-staged": {
-    "*": "pnpm fmt:fix && pnpm validate"
+    "*": ["pnpm validate"]
   },
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
-  },
-  "hooks": {
-    "pre-commit": "lint-staged"
   }
 }

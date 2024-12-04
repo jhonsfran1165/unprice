@@ -12,23 +12,33 @@ export function Tab({
   href,
   baseUrl,
   children,
-  isSubmenu,
+  hasSubmenu,
 }: {
   disabled?: boolean
   isNew?: boolean
   href: string
   baseUrl: string
-  isSubmenu?: boolean
+  hasSubmenu?: boolean
   children: React.ReactNode
 }) {
   const pathname = usePathname()
 
   const isActive = (itemHref: string) => {
-    // delete last slash for comparison
-    const path = pathname.replace(baseUrl, "")
-    const href = itemHref.replace(/\/$/, "")
+    const active = baseUrl + itemHref === pathname
+    const relativePath = pathname.replace(baseUrl, "")
 
-    return path === href || (path.startsWith(href) && !["", "/"].includes(href))
+    // active paths like /settings/danger or /settings
+    if (active) {
+      return true
+    }
+
+    // root paths
+    if (itemHref === "/") {
+      return pathname === baseUrl
+    }
+
+    // nested paths like /pages/page_id/edit
+    return !hasSubmenu && relativePath.startsWith(itemHref)
   }
 
   return (
@@ -38,8 +48,7 @@ export function Tab({
         focusRing,
         {
           "cursor-not-allowed opacity-80": disabled,
-          "bg-background-bgHover": isActive(href) && !isSubmenu,
-          "text-background-textContrast": isActive(href) && isSubmenu,
+          "bg-background-bgHover text-background-textContrast": isActive(href),
           transparent: !isActive(href),
         }
       )}

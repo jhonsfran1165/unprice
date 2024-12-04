@@ -1,6 +1,7 @@
 import { boolean, index, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
 import { pgTableProject } from "../utils/_table"
-import { projectID, timestamps } from "../utils/sql"
+import { timestamps } from "../utils/fields.sql"
+import { projectID } from "../utils/sql"
 
 export const pages = pgTableProject(
   "pages",

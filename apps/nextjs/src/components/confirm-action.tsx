@@ -26,7 +26,7 @@ export function ConfirmAction({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription className="font-light">
+          <AlertDialogDescription>
             {message
               ? message
               : "This action cannot be undone. This will permanently delete your data."}

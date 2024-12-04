@@ -3,7 +3,7 @@
 "use client"
 
 import { cn, focusRing } from "@unprice/ui/utils"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { useRouter } from "next/navigation"
 import type { ComponentPropsWithRef } from "react"
 

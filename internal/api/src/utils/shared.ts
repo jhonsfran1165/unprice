@@ -1,22 +1,15 @@
 import { TRPCError } from "@trpc/server"
-import { subscriptionItems, subscriptions } from "@unprice/db/schema"
-import { newId } from "@unprice/db/utils"
-import {
-  type ProjectExtended,
-  type SubscriptionItemConfig,
-  createDefaultSubscriptionConfig,
-  subscriptionInsertSchema,
-  subscriptionItemsConfigSchema,
-} from "@unprice/db/validators"
-import type { z } from "zod"
-import { UnpriceCustomer } from "../pkg/customer"
-import { UnPriceCustomerError } from "../pkg/errors"
+import { type Database, and, eq, sql } from "@unprice/db"
+import { members, workspaces } from "@unprice/db/schema"
+import { createSlug, newId } from "@unprice/db/utils"
+import type { WorkspaceInsert } from "@unprice/db/validators"
+import { CustomerService, UnPriceCustomerError } from "@unprice/services/customers"
 import type { Context } from "../trpc"
 
 // shared logic for some procedures
 // this way I use my product to build my product
 // without setting up unprice sdk
-export const verifyFeature = async ({
+export const verifyEntitlement = async ({
   customerId,
   featureSlug,
   projectId,
@@ -28,28 +21,23 @@ export const verifyFeature = async ({
   ctx: Context
 }) => {
   const now = performance.now()
-  const customer = new UnpriceCustomer({
+  const customer = new CustomerService({
     cache: ctx.cache,
-    db: ctx.db,
+    db: ctx.db as Database,
     analytics: ctx.analytics,
     logger: ctx.logger,
     metrics: ctx.metrics,
     waitUntil: ctx.waitUntil,
   })
 
-  // current year and month - we only support current month and year for now
-  const t = new Date()
-  t.setUTCMonth(t.getUTCMonth() - 1)
-  const year = t.getUTCFullYear()
-  const month = t.getUTCMonth() + 1 // months are 0 indexed
+  // use current date for now
+  const date = Date.now()
 
-  const { err, val } = await customer.verifyFeature({
+  const { err, val } = await customer.verifyEntitlement({
     customerId,
     featureSlug,
     projectId,
-    year,
-    month,
-    ctx,
+    date,
   })
 
   const end = performance.now()
@@ -91,18 +79,23 @@ export const getEntitlements = async ({
   projectId: string
   ctx: Context
 }) => {
-  const customer = new UnpriceCustomer({
+  const customer = new CustomerService({
     cache: ctx.cache,
-    db: ctx.db,
+    db: ctx.db as Database,
     analytics: ctx.analytics,
     logger: ctx.logger,
     metrics: ctx.metrics,
     waitUntil: ctx.waitUntil,
   })
 
-  const { err, val } = await customer.getEntitlements({
+  // use current date for now
+  const now = Date.now()
+
+  const { err, val } = await customer.getEntitlementsByDate({
     customerId,
     projectId,
+    date: now,
+    includeCustom: true,
   })
 
   if (err) {
@@ -123,6 +116,8 @@ export const getEntitlements = async ({
   return val
 }
 
+// abstract the usage reporting to the feature service
+// so we can use the same logic for edge and lambda endpoints
 export const reportUsageFeature = async ({
   customerId,
   featureSlug,
@@ -137,28 +132,24 @@ export const reportUsageFeature = async ({
   usage: number
   ctx: Context
 }) => {
-  const customer = new UnpriceCustomer({
+  const customer = new CustomerService({
     cache: ctx.cache,
-    db: ctx.db,
+    db: ctx.db as Database,
     analytics: ctx.analytics,
     logger: ctx.logger,
     metrics: ctx.metrics,
     waitUntil: ctx.waitUntil,
   })
 
-  // current year and month - we only support current month and year for now
-  const t = new Date()
-  t.setUTCMonth(t.getUTCMonth() - 1)
-  const year = t.getUTCFullYear()
-  const month = t.getUTCMonth() + 1 // months are 0 indexed
+  // use current date for now but we could support reporting usage for past dates
+  const now = Date.now()
 
   const { err, val } = await customer.reportUsage({
     customerId,
     featureSlug,
     projectId,
     usage,
-    year,
-    month,
+    date: now,
   })
 
   if (err) {
@@ -179,262 +170,186 @@ export const reportUsageFeature = async ({
   return val
 }
 
-const input = subscriptionInsertSchema.extend({
-  config: subscriptionItemsConfigSchema.optional(),
-})
-
-export const createSubscription = async ({
-  subscription,
+export const createWorkspace = async ({
+  input,
   ctx,
-  project,
 }: {
-  subscription: z.infer<typeof input>
-  project: ProjectExtended
+  input: WorkspaceInsert & {
+    unPriceCustomerId: string
+    name: string
+  }
   ctx: Context
 }) => {
-  const {
-    planVersionId,
-    customerId,
-    config,
-    trialDays,
-    startDate,
-    endDate,
-    collectionMethod,
-    defaultPaymentMethodId,
-    metadata,
-  } = subscription
+  const { name, unPriceCustomerId, isInternal, id } = input
+  const user = ctx.session?.user
 
-  const versionData = await ctx.db.query.versions.findFirst({
-    with: {
-      planFeatures: {
-        with: {
-          feature: true,
-        },
-      },
-      plan: true,
-    },
-    where(fields, operators) {
-      return operators.and(
-        operators.eq(fields.id, planVersionId),
-        operators.eq(fields.projectId, project.id)
-      )
-    },
+  if (!user) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "User not found",
+    })
+  }
+
+  let isPersonal = true
+
+  // verify if the user is a member of any workspace
+  const countMembers = await ctx.db
+    .select({ count: sql<number>`count(*)` })
+    .from(members)
+    .where(and(eq(members.userId, user.id)))
+    .then((res) => res[0]?.count ?? 0)
+
+  // if the user is a member of any workspace, the workspace is not personal
+  if (countMembers > 0) {
+    isPersonal = false
+  }
+
+  // verify if the customer exists
+  const customer = await ctx.db.query.customers.findFirst({
+    where: (customer, { eq }) => eq(customer.id, unPriceCustomerId),
   })
 
-  if (!versionData?.id) {
+  if (!customer) {
     throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Version not found. Please check the planVersionId",
+      code: "BAD_REQUEST",
+      message: "Customer unrpice not found",
     })
   }
 
-  if (versionData.status !== "published") {
-    throw new TRPCError({
-      code: "CONFLICT",
-      message: "Plan version is not published, only published versions can be subscribed to",
-    })
-  }
-
-  if (!versionData.planFeatures || versionData.planFeatures.length === 0) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Plan version has no features",
-    })
-  }
-
-  const customerData = await ctx.db.query.customers.findFirst({
-    with: {
-      subscriptions: {
-        with: {
-          items: {
-            with: {
-              featurePlanVersion: {
-                with: {
-                  feature: true,
-                },
-              },
-            },
-          },
-        },
-        where: (sub, { eq }) => eq(sub.status, "active"),
-      },
-    },
-    where: (customer, operators) =>
-      operators.and(
-        operators.eq(customer.id, customerId),
-        operators.eq(customer.projectId, project.id)
-      ),
+  // get the subscription of the customer
+  const subscription = await ctx.db.query.subscriptions.findFirst({
+    where: (subscription, { eq }) => eq(subscription.customerId, unPriceCustomerId),
   })
 
-  if (!customerData?.id) {
+  if (!subscription) {
     throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Customer not found. Please check the customerId",
+      code: "BAD_REQUEST",
+      message: "Subscription not found",
     })
   }
 
-  // check the active subscriptions of the customer.
-  // The plan version the customer is attempting to subscript can't have any feature that the customer already has
-  const newFeatures = versionData.planFeatures.map((f) => f.feature.slug)
-  const subscriptionFeatureSlugs = customerData.subscriptions.flatMap((sub) =>
-    sub.items.map((f) => f.featurePlanVersion.feature.slug)
-  )
+  const newWorkspace = await ctx.db.transaction(async (tx) => {
+    const slug = createSlug()
 
-  const commonFeatures = subscriptionFeatureSlugs.filter((f) => newFeatures.includes(f))
-
-  if (commonFeatures.length > 0) {
-    throw new TRPCError({
-      code: "CONFLICT",
-      message: `The customer is trying to subscribe to features that are already active in another subscription: ${commonFeatures.join(
-        ", "
-      )}`,
-    })
-  }
-
-  let configItemsSubscription: SubscriptionItemConfig[] = []
-
-  if (!config) {
-    // if no items are passed, configuration is created from the default quantities of the plan version
-    const { err, val } = createDefaultSubscriptionConfig({
-      planVersion: versionData,
+    // look if the workspace already has a customer
+    const workspaceExists = await ctx.db.query.workspaces.findFirst({
+      where: (workspace, { eq }) => eq(workspace.unPriceCustomerId, unPriceCustomerId),
     })
 
-    if (err) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: err.message,
-      })
+    let workspaceId = ""
+    let workspace = undefined
+
+    if (!workspaceExists?.id) {
+      // create the workspace
+      workspace = await tx
+        .insert(workspaces)
+        .values({
+          id: id ?? newId("workspace"),
+          slug: slug,
+          name: name,
+          imageUrl: user.image,
+          isPersonal: isPersonal ?? false,
+          isInternal: isInternal ?? false,
+          createdBy: user.id,
+          unPriceCustomerId: unPriceCustomerId,
+          plan: subscription.planSlug,
+        })
+        .returning()
+        .then((workspace) => {
+          return workspace[0] ?? undefined
+        })
+        // TODO: use this method to throw errors in all api endpoints
+        .catch((err) => {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: err.message,
+          })
+        })
+
+      if (!workspace?.id) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error creating workspace",
+        })
+      }
+
+      workspaceId = workspace.id
+    } else {
+      workspaceId = workspaceExists.id
+      workspace = workspaceExists
     }
 
-    configItemsSubscription = val
-  } else {
-    configItemsSubscription = config
-  }
+    // verify if the user is already a member of the workspace
+    const member = await tx.query.members.findFirst({
+      where: (member, { eq, and }) =>
+        and(eq(member.workspaceId, workspaceId), eq(member.userId, user.id)),
+    })
 
-  // execute this in a transaction
-  const subscriptionData = await ctx.db.transaction(async (trx) => {
-    // create the subscription
-    const subscriptionId = newId("subscription")
+    // if so don't create a new member
+    if (member) {
+      return workspace
+    }
 
-    const newSubscription = await trx
-      .insert(subscriptions)
+    const memberShip = await tx
+      .insert(members)
       .values({
-        id: subscriptionId,
-        projectId: project.id,
-        planVersionId: versionData.id,
-        customerId: customerData.id,
-        startDate: startDate,
-        endDate: endDate,
-        autoRenew: true,
-        trialDays: trialDays,
-        isNew: true,
-        collectionMethod: collectionMethod,
-        status: "active",
-        metadata: metadata,
-        defaultPaymentMethodId: defaultPaymentMethodId,
+        userId: user.id,
+        workspaceId: workspaceId,
+        role: "OWNER",
       })
       .returning()
-      .then((re) => re[0])
-
-    if (!newSubscription) {
-      ctx.logger.error("Error while creating subscription", {
-        subscription: subscription,
+      .then((members) => members[0] ?? null)
+      .catch((err) => {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err.message,
+        })
       })
-      trx.rollback()
+
+    if (!memberShip?.userId) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Error while creating subscription",
+        message: "Error creating member",
       })
     }
 
-    // add features to the subscription
-    await Promise.all(
-      configItemsSubscription.map((item) =>
-        trx.insert(subscriptionItems).values({
-          id: newId("subscription_item"),
-          projectId: newSubscription.projectId,
-          subscriptionId: newSubscription.id,
-          featurePlanVersionId: item.featurePlanId,
-          units: item.units,
-        })
-      )
-    ).catch((e) => {
-      ctx.logger.error("Error while creating subscription features", {
-        error: e,
-        configItemsSubscription,
-      })
-
-      trx.rollback()
-    })
-
-    return newSubscription
+    return workspace
   })
 
-  if (!subscriptionData) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Error creating subscription",
-    })
+  return newWorkspace
+}
+
+export const signOutCustomer = async ({
+  input,
+  ctx,
+}: {
+  input: { customerId: string; projectId: string }
+  ctx: Context
+}) => {
+  const { customerId, projectId } = input
+
+  const customer = new CustomerService({
+    cache: ctx.cache,
+    db: ctx.db as Database,
+    analytics: ctx.analytics,
+    logger: ctx.logger,
+    metrics: ctx.metrics,
+    waitUntil: ctx.waitUntil,
+  })
+
+  const { err, val } = await customer.signOut({
+    customerId: customerId,
+    projectId: projectId,
+  })
+
+  if (err) {
+    return {
+      success: false,
+      url: "",
+      customerId: "",
+      error: err.message,
+    }
   }
 
-  // every time a subscription is created, we save the subscription in the cache
-  ctx.waitUntil(
-    ctx.db.query.subscriptions
-      .findMany({
-        with: {
-          items: {
-            with: {
-              featurePlanVersion: {
-                with: {
-                  feature: true,
-                },
-              },
-            },
-          },
-        },
-        where: (sub, { eq, and }) =>
-          and(eq(sub.customerId, customerData.id), eq(sub.projectId, subscriptionData.projectId)),
-      })
-      .then(async (subscriptions) => {
-        if (!subscriptions || subscriptions.length === 0) {
-          // TODO: log error
-          console.error("Subscriptions not found")
-          return
-        }
-
-        const customerEntitlements = subscriptions.flatMap((sub) =>
-          sub.items.map((f) => f.featurePlanVersion.feature.slug)
-        )
-
-        const customerSubscriptions = subscriptions.map((sub) => sub.id)
-
-        return Promise.all([
-          // save the customer entitlements
-          ctx.cache.entitlementsByCustomerId.set(customerData.id, customerEntitlements),
-          // save the customer subscriptions
-          ctx.cache.subscriptionsByCustomerId.set(customerData.id, customerSubscriptions),
-          // save features
-          subscriptions.flatMap((sub) =>
-            sub.items.map((f) =>
-              ctx.cache.featureByCustomerId.set(
-                `${sub.customerId}:${f.featurePlanVersion.feature.slug}`,
-                {
-                  id: f.id,
-                  projectId: f.projectId,
-                  featurePlanVersionId: f.featurePlanVersion.id,
-                  subscriptionId: f.subscriptionId,
-                  units: f.units,
-                  featureType: f.featurePlanVersion.featureType,
-                  aggregationMethod: f.featurePlanVersion.aggregationMethod,
-                }
-              )
-            )
-          ),
-        ])
-      })
-  )
-
-  return {
-    subscription: subscriptionData,
-  }
+  return val
 }

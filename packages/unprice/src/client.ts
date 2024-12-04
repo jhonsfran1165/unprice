@@ -264,6 +264,34 @@ export class Unprice {
         })
       },
 
+      signUp: async (
+        req: paths["/edge/customers.signUp"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.signUp"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.signUp"],
+          method: "POST",
+          body: req,
+        })
+      },
+
+      signOut: async (
+        req: paths["/edge/customers.signOut"]["post"]["requestBody"]["content"]["application/json"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.signOut"]["post"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.signOut"],
+          method: "POST",
+          body: req,
+        })
+      },
+
       getByEmail: async (
         req: paths["/edge/customers.getByEmail"]["get"]["parameters"]["query"]
       ): Promise<
@@ -273,20 +301,6 @@ export class Unprice {
       > => {
         return await this.fetch({
           path: ["edge", "customers.getByEmail"],
-          method: "GET",
-          query: req,
-        })
-      },
-
-      getById: async (
-        req: paths["/edge/customers.getById"]["get"]["parameters"]["query"]
-      ): Promise<
-        Result<
-          paths["/edge/customers.getById"]["get"]["responses"]["200"]["content"]["application/json"]
-        >
-      > => {
-        return await this.fetch({
-          path: ["edge", "customers.getById"],
           method: "GET",
           query: req,
         })
@@ -371,6 +385,20 @@ export class Unprice {
       > => {
         return await this.fetch({
           path: ["edge", "customers.reportUsage"],
+          method: "GET",
+          query: req,
+        })
+      },
+
+      getByIdActiveProject: async (
+        req: paths["/edge/customers.getByIdActiveProject"]["get"]["parameters"]["query"]
+      ): Promise<
+        Result<
+          paths["/edge/customers.getByIdActiveProject"]["get"]["responses"]["200"]["content"]["application/json"]
+        >
+      > => {
+        return await this.fetch({
+          path: ["edge", "customers.getByIdActiveProject"],
           method: "GET",
           query: req,
         })

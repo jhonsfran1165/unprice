@@ -5,7 +5,6 @@ import * as schema from "../schema"
 import { projectExtendedSelectSchema } from "./project"
 
 export const insertApiKeySchema = createInsertSchema(schema.apikeys, {
-  expiresAt: z.coerce.date().optional(),
   name: z.string().min(1),
   key: z.string().min(1),
 })
@@ -22,7 +21,7 @@ export const selectApiKeyHeaderSchema = selectApiKeySchema.pick({
   key: true,
 })
 
-export const ApiKeyExtended = selectApiKeySchema
+export const apiKeyExtendedSelectSchema = selectApiKeySchema
   .pick({
     id: true,
     projectId: true,
@@ -36,4 +35,4 @@ export const ApiKeyExtended = selectApiKeySchema
 
 export type CreateApiKey = z.infer<typeof createApiKeySchema>
 export type ApiKey = z.infer<typeof selectApiKeySchema>
-export type ApiKeyExtended = z.infer<typeof ApiKeyExtended>
+export type ApiKeyExtended = z.infer<typeof apiKeyExtendedSelectSchema>

@@ -3,8 +3,12 @@ import { type Dinero, multiply, toSnapshot, transformScale, up } from "dinero.js
 export * from "./utils/_table"
 export * from "./utils/constants"
 export * from "./utils/id"
+export * from "./utils/pagination"
+
+export type { Dinero } from "dinero.js"
 
 import { generateSlug } from "random-word-slugs"
+import type { Currency } from "./validators"
 
 export const createSlug = () => {
   return generateSlug(2, {
@@ -13,6 +17,13 @@ export const createSlug = () => {
     },
   })
 }
+
+export const currencySymbol = (curr: string) =>
+  ({
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+  })[curr] ?? curr
 
 export const isSlug = (str?: string) => {
   return /^[a-z0-9-]+-[a-z0-9-]+$/.test(str ?? "")
@@ -58,6 +69,7 @@ export async function hashStringSHA256(str: string) {
   return hashHex
 }
 
+// return the price to stripe money format cents
 export function toStripeMoney(price: Dinero<number>) {
   const { currency } = toSnapshot(price)
 
@@ -66,7 +78,7 @@ export function toStripeMoney(price: Dinero<number>) {
 
   const { amount } = toSnapshot(currencyScaleMoney)
 
-  return { amount, currency: currency.code.toLowerCase() }
+  return { amount, currency: currency.code.toLowerCase() as Currency }
 }
 
 export function calculatePercentage(price: Dinero<number>, percentage: number) {
@@ -81,4 +93,14 @@ export function calculatePercentage(price: Dinero<number>, percentage: number) {
   const result = multiply(price, { amount: Math.round(rest), scale: scale })
 
   return result
+}
+
+export function formatMoney(amount: string, currencyCode = "USD") {
+  const userLocale = currencyCode === "USD" ? "en-US" : "es-ES"
+  return new Intl.NumberFormat(userLocale, {
+    style: "currency",
+    currency: currencyCode,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number.parseFloat(amount))
 }

@@ -4,16 +4,20 @@ import {
   AGGREGATION_METHODS,
   COLLECTION_METHODS,
   CURRENCIES,
+  DUE_BEHAVIOUR,
   FEATURE_TYPES,
   FEATURE_VERSION_TYPES,
+  INVOICE_STATUS,
+  INVOICE_TYPE,
   PAYMENT_PROVIDERS,
-  SUBSCRIPTION_TYPES,
+  PLAN_BILLING_PERIODS,
+  STATUS_PHASE,
   TIER_MODES,
   USAGE_MODES,
+  WHEN_TO_BILLING,
 } from "../utils"
 
 export const paymentProviderSchema = z.enum(PAYMENT_PROVIDERS)
-export const subscriptionTypeSchema = z.enum(SUBSCRIPTION_TYPES)
 export const currencySchema = z.enum(CURRENCIES)
 export const typeFeatureSchema = z.enum(FEATURE_TYPES)
 export const usageModeSchema = z.enum(USAGE_MODES)
@@ -24,6 +28,59 @@ export const unitSchema = z.coerce.number().int().min(1)
 export const collectionMethodSchema = z.enum(COLLECTION_METHODS)
 export const monthsSchema = z.coerce.number().int().min(1).max(12)
 export const yearsSchema = z.coerce.number().int().min(2000).max(2100)
+export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
+export const whenToBillSchema = z.enum(WHEN_TO_BILLING)
+export const phaseStatusSchema = z.enum(STATUS_PHASE)
+export const dueBehaviourSchema = z.enum(DUE_BEHAVIOUR)
+export const invoiceStatusSchema = z.enum(INVOICE_STATUS)
+export const invoiceTypeSchema = z.enum(INVOICE_TYPE)
+export const startCycleMonthSchema = z.coerce.number().int().min(1).max(31)
+export const startCycleYearSchema = z.coerce.number().int().min(1).max(12)
+export const startCycleSchema = z.union([startCycleMonthSchema, startCycleYearSchema]).default(1)
+
+export const convertDateToUTC = (date: Date) => {
+  // Check if the date is already in UTC
+  if (
+    date.getUTCFullYear() === date.getFullYear() &&
+    date.getUTCMonth() === date.getMonth() &&
+    date.getUTCDate() === date.getDate() &&
+    date.getUTCHours() === date.getHours() &&
+    date.getUTCMinutes() === date.getMinutes() &&
+    date.getUTCSeconds() === date.getSeconds()
+  ) {
+    // The date is already in UTC, return it as is
+    return date
+  }
+
+  // Create a new Date object with UTC values
+  return new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      date.getSeconds(),
+      date.getMilliseconds()
+    )
+  )
+}
+
+export const dateToUnixMilli = z
+  .string()
+  .transform((t) => new Date(t.split(" ").at(0) ?? t).getTime())
+
+export const datetimeToUnixMilli = z.string().transform((t) => new Date(t).getTime())
+
+// transforms the date to unix timestamp
+// allow dates or numbers and transforms them to numbers
+export const datetimeToUnix = z.coerce
+  .date({
+    message: "Date is required",
+  })
+  .transform((val) => {
+    return val.getTime()
+  })
 
 export type Currency = z.infer<typeof currencySchema>
 export type PaymentProvider = z.infer<typeof paymentProviderSchema>
@@ -32,10 +89,10 @@ export type FeatureVersionType = z.infer<typeof featureVersionType>
 export type Year = z.infer<typeof yearsSchema>
 export type Month = z.infer<typeof monthsSchema>
 export type AggregationMethod = z.infer<typeof aggregationMethodSchema>
-
-export const currencySymbol = (curr: string) =>
-  ({
-    USD: "$",
-    EUR: "€",
-    GBP: "£",
-  })[curr] ?? curr
+export type BillingPeriod = z.infer<typeof billingPeriodSchema>
+export type WhenToBill = z.infer<typeof whenToBillSchema>
+export type StartCycle = z.infer<typeof startCycleSchema>
+export type CollectionMethod = z.infer<typeof collectionMethodSchema>
+export type PhaseStatus = z.infer<typeof phaseStatusSchema>
+export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>
+export type InvoiceType = z.infer<typeof invoiceTypeSchema>

@@ -2,7 +2,8 @@ import { relations } from "drizzle-orm"
 import { primaryKey, serial, text, uniqueIndex, varchar } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { projectID, timestamps } from "../utils/sql"
+import { timestamps } from "../utils/fields.sql"
+import { projectID } from "../utils/sql"
 import { projects } from "./projects"
 
 // features are the way we model our features in the system, after adding a feature to a plan we
@@ -13,6 +14,8 @@ export const features = pgTableProject(
     ...projectID,
     ...timestamps,
     slug: text("slug").notNull(),
+    // TODO: add entitlements here so when the user wants to configure a plan version
+    // we can check if the feature has entitlements and if so, we can add them to the plan version
     // code is the unique code for the feature that is used in redis cache for the entitlements calculation (bitmap)
     code: serial("code").notNull(),
     title: varchar("title", { length: 50 }).notNull(),

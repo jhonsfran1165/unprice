@@ -2,6 +2,7 @@ import { QueryClient, defaultShouldDehydrateQuery } from "@tanstack/react-query"
 import { TRPCClientError } from "@trpc/client"
 import { transformer } from "@unprice/api/transformer"
 import type { SuperJSONResult } from "superjson"
+import { getErrorMessage } from "~/lib/handle-error"
 import { toastAction } from "~/lib/toast"
 
 export const getBaseUrl = () => {
@@ -10,9 +11,6 @@ export const getBaseUrl = () => {
   if (vc) return `https://${vc}`
   return "http://localhost:3000"
 }
-
-// lambdas keys must match the first part of the path
-export const lambdas = ["ingestion"]
 
 export const createQueryClient = () =>
   new QueryClient({
@@ -31,10 +29,12 @@ export const createQueryClient = () =>
             }
           : {
               onError: (err) => {
+                const error = getErrorMessage(err)
+
                 if (err instanceof TRPCClientError) {
                   toastAction("error", err.message)
                 } else {
-                  toastAction("error-contact")
+                  toastAction("error-contact", error)
                 }
               },
             },

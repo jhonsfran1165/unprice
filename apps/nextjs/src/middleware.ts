@@ -9,10 +9,8 @@ import AppMiddleware from "~/middleware/app"
 import SitesMiddleware from "~/middleware/sites"
 
 export default auth((req) => {
-  const { domain } = parse(req)
-
-  // TODO: how to create a new request id per request?
-  // req.headers.get("x-request-id") || req.headers.set("x-request-id", newId("request"))
+  const { domain, path } = parse(req)
+  const subdomain = getValidSubdomain(domain) ?? ""
 
   // 1. we validate api routes
   if (API_HOSTNAMES.has(domain)) {
@@ -24,10 +22,15 @@ export default auth((req) => {
     return AppMiddleware(req)
   }
 
-  const subdomain = getValidSubdomain(domain) ?? ""
-
   // 3. validate subdomains www and empty
   if (subdomain === "" || subdomain === "www") {
+    // protect the app routes from being accessed under the base domain or www subdomain
+    if (path.startsWith("/dashboard")) {
+      const url = new URL(req.nextUrl.origin)
+      url.pathname = "/"
+      return NextResponse.redirect(url)
+    }
+
     // public routes under the base domain or www subdomain
     return NextResponse.next()
   }
@@ -37,18 +40,6 @@ export default auth((req) => {
 })
 
 export const config = {
-  // matcher: [
-  //   /*
-  //    * Match all request paths except for the ones starting with:
-  //    * - _vercel (Vercel internals)
-  //    * - _next (next internals)
-  //    * - some-file.extension (static files)
-  //    * - api (api routes)
-  //    */
-  //   "/((?!.+\\.[\\w]+$|_next|api).*)",
-  // ],
-
-  // matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
   // TODO: ignore public routes from here
   matcher: [
     /*

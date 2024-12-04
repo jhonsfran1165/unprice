@@ -12,6 +12,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string
+      email: string
       workspaces: WorkspacesJWTPayload[]
     } & DefaultSession["user"]
   }
@@ -28,8 +29,9 @@ const {
   auth,
   signIn,
   signOut,
+  unstable_update,
 } = NextAuth({
   ...authConfig,
 })
 
-export { GET, POST, signIn, signOut, auth }
+export { GET, POST, signIn, signOut, auth, unstable_update }

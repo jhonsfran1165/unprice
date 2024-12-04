@@ -1,4 +1,7 @@
 {
+  "tinybird.dataProjectSubdir": "internal/tinybird",
+  "tinybird.venvActivat": "",
+  "tinybird.venv": "",
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
@@ -11,7 +14,29 @@
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "quickfix.biome": "explicit",
+    "source.fixAll.eslint": "explicit",
     "source.organizeImports.biome": "explicit"
+  },
+  "[javascript]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll": "explicit"
+    },
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll": "explicit"
+    },
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll": "explicit"
+    },
+    "editor.formatOnSave": true
   },
   "cSpell.words": [
     "apikey",
@@ -20,23 +45,27 @@
     "baselime",
     "basepath",
     "builderai",
-    "unprice",
     "clsx",
     "Configurator",
     "craftjs",
     "datasource",
+    "datetime",
     "dinero",
+    "endday",
+    "extralight",
     "hget",
     "hgetall",
     "hincrby",
     "hset",
     "ianvs",
+    "ilike",
     "incrby",
     "ingestions",
     "LEMONSQUEEZY",
     "Logdrain",
     "Lowlight",
     "lucide",
+    "Milli",
     "nformatter",
     "openai",
     "openapi",
@@ -45,15 +74,18 @@
     "pkey",
     "pxat",
     "Ratelimit",
+    "refetched",
     "satoshi",
     "sidemodule",
     "SIGNIN",
     "signout",
+    "Signup",
     "tinybird",
     "Tiptap",
     "tsbuildinfo",
     "typecheck",
     "uidx",
+    "unprice",
     "Unprice",
     "UPSTASH",
     "webauthn",
@@ -64,7 +96,8 @@
     "**/node_modules": true,
     "**/bower_components": true,
     "**/**/.next": true,
-    "**/tmp": true
+    "**/tmp": true,
+    "**/.trigger": true
   },
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"

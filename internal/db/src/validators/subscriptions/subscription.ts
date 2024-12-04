@@ -1,144 +1,196 @@
+import { Err, Ok } from "@unprice/error"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
 
 import type { Result } from "@unprice/error"
-import { Err, Ok } from "@unprice/error"
-
-import { subscriptionItems, subscriptions } from "../../schema/subscriptions"
+import { subscriptionPhases, subscriptions } from "../../schema/subscriptions"
+import { planVersionSelectBaseSchema } from "../planVersions"
 import { UnPriceCalculationError } from "./../errors"
 import type { PlanVersionExtended } from "./../planVersionFeatures"
+import { configPackageSchema, planVersionExtendedSchema } from "./../planVersionFeatures"
 import {
-  configPackageSchema,
-  planVersionExtendedSchema,
-  planVersionFeatureInsertBaseSchema,
-} from "./../planVersionFeatures"
-import { collectionMethodSchema, subscriptionTypeSchema, typeFeatureSchema } from "./../shared"
+  collectionMethodSchema,
+  dueBehaviourSchema,
+  phaseStatusSchema,
+  startCycleSchema,
+  whenToBillSchema,
+} from "./../shared"
+import {
+  type SubscriptionItem,
+  type SubscriptionItemConfig,
+  subscriptionItemExtendedSchema,
+  subscriptionItemsConfigSchema,
+  subscriptionItemsSelectSchema,
+} from "./items"
 
-const subscriptionItemConfigSchema = z.object({
-  featurePlanId: z.string(),
-  featureSlug: z.string(),
-  units: z.coerce
-    .number()
-    .min(1)
-    .optional()
-    .describe("units of the feature the user is subscribed to"),
-  min: z.coerce
-    .number()
-    .optional()
-    .describe("minimum units of the feature the user is subscribed to"),
-  limit: z.coerce.number().optional().describe("limit of the feature the user is subscribed to"),
+const reasonSchema = z.enum([
+  "payment_failed",
+  "payment_pending",
+  "payment_method_not_found",
+  "policy_violation",
+  "pending_cancellation",
+  "invoice_failed",
+  "invoice_pending",
+  "payment_received",
+  "pending_change",
+  "pending_expiration",
+  "trial_ended",
+  "user_requested",
+  "admin_requested",
+])
+
+export const invoiceMetadataSchema = z.object({
+  note: z.string().optional().describe("Note about the invoice"),
 })
 
 export const subscriptionMetadataSchema = z.object({
-  externalId: z.string().optional(),
-  defaultPaymentMethodId: z.string().optional(),
+  reason: reasonSchema.optional().describe("Reason for the subscription status"),
+  note: z.string().optional().describe("Note about status in the subscription"),
 })
 
-export const subscriptionItemsSelectSchema = createSelectSchema(subscriptionItems, {
-  // units for the item, for flat features it's always 1, usage features it's the current usage
-  units: z.coerce.number().min(0),
+export const subscriptionPhaseMetadataSchema = z.object({
+  reason: reasonSchema.optional().describe("Reason for the status"),
+  note: z.string().optional().describe("Note about status in the subscription phase"),
 })
-
-export const subscriptionItemsInsertSchema = createInsertSchema(subscriptionItems, {
-  // units for the item, for flat features it's always 1, usage features it's the current usage
-  units: z.coerce.number().min(1),
-}).partial({
-  id: true,
-  subscriptionId: true,
-  createdAt: true,
-  updatedAt: true,
-  projectId: true,
-})
-
-// stripe won't allow more than 250 items in a single invoice
-export const subscriptionItemsConfigSchema = z
-  .array(subscriptionItemConfigSchema)
-  .superRefine((items, ctx) => {
-    if (items.length > 50) {
-      // TODO: add a better message and map to the correct path
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Total items for the subscription should be less than 50",
-        path: ["."],
-        fatal: true,
-      })
-
-      return false
-    }
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i]
-
-      if (item?.units && item.limit && item.units > item.limit) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `limit is ${item.limit}`,
-          path: [i, "units"],
-          fatal: true,
-        })
-
-        return false
-      }
-
-      if (item?.units && item.min && item.units < item.min) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `min is ${item.min}`,
-          path: [i, "units"],
-          fatal: true,
-        })
-
-        return false
-      }
-    }
-
-    return true
-  })
-  .refine((items) => {
-    if (items.length > 250) {
-      return false
-    }
-    return true
-  }, "Total items for the subscription should be less than 250")
 
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   metadata: subscriptionMetadataSchema,
-  type: subscriptionTypeSchema,
-  collectionMethod: collectionMethodSchema,
+  timezone: z.string().min(1),
 })
 
-export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
+export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhases, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
-  startDate: z.coerce.date({ message: "Start date is required" }),
   trialDays: z.coerce.number().int().min(0).max(30).default(0),
-  metadata: subscriptionMetadataSchema,
-  type: subscriptionTypeSchema,
+  metadata: subscriptionPhaseMetadataSchema,
   collectionMethod: collectionMethodSchema,
+  startCycle: startCycleSchema,
+  whenToBill: whenToBillSchema,
+  status: phaseStatusSchema,
+  dueBehaviour: dueBehaviourSchema,
+})
+  .extend({
+    items: subscriptionItemsSelectSchema.array().optional(),
+  })
+  .partial({
+    createdAtM: true,
+    updatedAtM: true,
+  })
+
+export const subscriptionPhaseExtendedSchema = subscriptionPhaseSelectSchema.extend({
+  items: subscriptionItemExtendedSchema.array(),
+  planVersion: planVersionSelectBaseSchema,
+})
+
+export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhases, {
+  planVersionId: z.string().min(1, { message: "Plan version is required" }),
+  trialDays: z.coerce.number().int().min(0).max(30).default(0),
+  metadata: subscriptionPhaseMetadataSchema,
+  collectionMethod: collectionMethodSchema,
+  startCycle: startCycleSchema,
+  whenToBill: whenToBillSchema,
 })
   .extend({
     config: subscriptionItemsConfigSchema,
+    customerId: z.string(),
+    paymentMethodRequired: z.boolean(),
+    items: subscriptionItemsSelectSchema.array(),
+  })
+  .partial({
+    id: true,
+    customerId: true,
+    paymentMethodRequired: true,
+    paymentMethodId: true,
+    config: true,
+    items: true,
+    trialDays: true,
   })
   .omit({
-    createdAt: true,
-    updatedAt: true,
+    createdAtM: true,
+    updatedAtM: true,
+    status: true,
+    projectId: true,
+  })
+  .required({
+    planVersionId: true,
+  })
+
+export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
+  metadata: subscriptionMetadataSchema,
+  timezone: z.string().min(1),
+})
+  .extend({
+    // when creating a subscription, we don't need the subscriptionId
+    phases: subscriptionPhaseInsertSchema
+      .partial({
+        subscriptionId: true,
+      })
+      .array()
+      .superRefine((data, ctx) => {
+        // validate payment method if payment method is required
+        data.forEach((phase, index) => {
+          if (phase.paymentMethodRequired) {
+            if (!phase.paymentMethodId) {
+              return ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Payment method is required for this phase",
+                path: [index, "paymentMethodId"],
+              })
+            }
+          }
+        })
+
+        // at least one phase is required
+        if (data.length === 0) {
+          return ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "At least one phase is required",
+          })
+        }
+
+        // start date and end date can overlap
+        for (const phase of data) {
+          if (phase.endAt && phase.startAt >= phase.endAt) {
+            return ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Start date must be before end date",
+            })
+          }
+        }
+
+        // phases must be consecutive and in order
+        for (let i = 0; i < data.length - 1; i++) {
+          const currentPhase = data[i]
+          const nextPhase = data[i + 1]
+
+          if (currentPhase?.endAt && nextPhase?.startAt && currentPhase.endAt > nextPhase.startAt) {
+            return ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Phases must be consecutive, set end date of the previous phase",
+              path: [i + 1, "startAt"],
+            })
+          }
+        }
+      }),
+  })
+  .omit({
+    createdAtM: true,
+    updatedAtM: true,
   })
   .partial({
     id: true,
     projectId: true,
+    currentCycleStartAt: true,
+    currentCycleEndAt: true,
+    nextInvoiceAt: true,
   })
   .required({
     customerId: true,
-    planVersionId: true,
-    type: true,
-    startDate: true,
   })
 
 export const subscriptionExtendedSchema = subscriptionSelectSchema
   .pick({
     id: true,
-    planVersionId: true,
     customerId: true,
-    status: true,
     metadata: true,
   })
   .extend({
@@ -146,32 +198,21 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
     features: subscriptionItemsSelectSchema.array(),
   })
 
-export const subscriptionItemCacheSchema = subscriptionItemsSelectSchema
-  .omit({
-    createdAt: true,
-    updatedAt: true,
-    id: true,
-  })
-  .extend({
-    featureType: typeFeatureSchema,
-  })
-
-export const subscriptionItemExtendedSchema = subscriptionItemsSelectSchema.extend({
-  featurePlan: planVersionFeatureInsertBaseSchema,
-})
-
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>
-export type SubscriptionItem = z.infer<typeof subscriptionItemsSelectSchema>
-export type SubscriptionItemExtended = z.infer<typeof subscriptionItemExtendedSchema>
-export type InsertSubscriptionItem = z.infer<typeof subscriptionItemsInsertSchema>
 export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
-export type SubscriptionItemConfig = z.infer<typeof subscriptionItemConfigSchema>
+export type InsertSubscriptionPhase = z.infer<typeof subscriptionPhaseInsertSchema>
+export type SubscriptionPhase = z.infer<typeof subscriptionPhaseSelectSchema>
+export type SubscriptionPhaseExtended = z.infer<typeof subscriptionPhaseExtendedSchema>
+export type SubscriptionMetadata = z.infer<typeof subscriptionMetadataSchema>
+export type SubscriptionPhaseMetadata = z.infer<typeof subscriptionPhaseMetadataSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,
+  items,
 }: {
   planVersion: PlanVersionExtended
+  items?: SubscriptionItem[]
 }): Result<SubscriptionItemConfig[], UnPriceCalculationError> => {
   if (!planVersion.planFeatures || planVersion.planFeatures.length === 0) {
     return Err(
@@ -184,6 +225,7 @@ export const createDefaultSubscriptionConfig = ({
   const itemsConfig = planVersion.planFeatures.map((planFeature) => {
     switch (planFeature.featureType) {
       case "flat":
+        // flat features are always 1
         return {
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
@@ -195,7 +237,10 @@ export const createDefaultSubscriptionConfig = ({
         return {
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
-          units: planFeature.defaultQuantity ?? 1,
+          units:
+            items?.find((item) => item.featurePlanVersionId === planFeature.id)?.units ??
+            planFeature.defaultQuantity ??
+            1,
           min: 1,
           limit: planFeature.limit,
         }
@@ -205,6 +250,7 @@ export const createDefaultSubscriptionConfig = ({
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
           limit: planFeature.limit,
+          isUsage: true,
         }
 
       case "package": {
@@ -212,7 +258,9 @@ export const createDefaultSubscriptionConfig = ({
         return {
           featurePlanId: planFeature.id,
           featureSlug: planFeature.feature.slug,
-          units: config.units,
+          units:
+            items?.find((item) => item.featurePlanVersionId === planFeature.id)?.units ??
+            config.units,
           limit: planFeature.limit,
           min: 1,
         }

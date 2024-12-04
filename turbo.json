@@ -31,6 +31,9 @@
       "persistent": true,
       "cache": false
     },
+    "test": {
+      "cache": false
+    },
     "typecheck": {
       "dependsOn": ["^topo"],
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]

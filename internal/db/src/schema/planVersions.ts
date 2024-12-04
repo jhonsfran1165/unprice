@@ -1,23 +1,26 @@
 import { relations } from "drizzle-orm"
 import {
+  bigint,
   boolean,
   foreignKey,
   integer,
   json,
   primaryKey,
   text,
-  timestamp,
   varchar,
 } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { cuid, projectID, timestamps } from "../utils/sql"
-import type { PlanVersionMetadata, StartCycleType } from "../validators/planVersions"
+import { cuid, timestamps } from "../utils/fields.sql"
+import { projectID } from "../utils/sql"
+import type { PlanVersionMetadata } from "../validators/planVersions"
+import type { StartCycle } from "../validators/shared"
 import { users } from "./auth"
 import {
+  billingPeriodEnum,
+  collectionMethodEnum,
   currencyEnum,
   paymentProviderEnum,
-  planBillingPeriodEnum,
   planTypeEnum,
   statusPlanEnum,
   whenToBillEnum,
@@ -25,6 +28,7 @@ import {
 import { planVersionFeatures } from "./planVersionFeatures"
 import { plans } from "./plans"
 import { projects } from "./projects"
+import { subscriptionPhases } from "./subscriptions"
 
 // plan_versions are the different versions of the plan
 // each version can have different features and configurations
@@ -55,15 +59,16 @@ export const versions = pgTableProject(
     // handling status of the plan version
     // active: whether the plan version is active or not, if not active, it won't be available for purchase
     active: boolean("active").default(true),
+
     // status of the plan version - draft, published
     status: statusPlanEnum("plan_version_status").default("draft"),
     // date when the plan version was published
-    publishedAt: timestamp("published_at", { mode: "date" }),
+    publishedAt: bigint("published_at_m", { mode: "number" }),
     // user that published the plan version
     publishedBy: cuid("published_by").references(() => users.id),
     // the customers have been migrated to a new version
     archived: boolean("archived").default(false),
-    archivedAt: timestamp("archived_at", { mode: "date" }),
+    archivedAt: bigint("archived_at_m", { mode: "number" }),
     archivedBy: cuid("archived_by").references(() => users.id),
 
     // payment provider for the plan - stripe, paypal, lemonsquezee etc.
@@ -74,22 +79,31 @@ export const versions = pgTableProject(
     // TODO: add more types for now only support recurring
     planType: planTypeEnum("plan_type").default("recurring").notNull(),
 
-    // handle billing data
     // currency of the plan
     currency: currencyEnum("currency").notNull(),
-    // whenToBill: pay_in_advance - pay_in_arrear
-    whenToBill: whenToBillEnum("when_to_bill").default("pay_in_advance"),
     // billingPeriod: billing_period - billing_cycle, only used for recurring plans, only used for recurring plans
-    billingPeriod: planBillingPeriodEnum("billing_period"),
-    // when to start each cycle for this subscription - not used for now, only used for recurring plans
-    startCycle: text("start_cycle").$type<StartCycleType>().default(null), // null means the first day of the month
-    // used for generating invoices - not used for now, only used for recurring plans
+    billingPeriod: billingPeriodEnum("billing_period").notNull().default("month"),
+
+    // ************ billing data defaults ************
+    // whenToBill: pay_in_advance - pay_in_arrear
+    whenToBill: whenToBillEnum("when_to_bill").notNull().default("pay_in_advance"),
+    // when to start each cycle for this subscription -
+    startCycle: integer("start_cycle").notNull().$type<StartCycle>().default(1), // null means the first day of the month
+    // used for generating invoices -
     gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
+    // collection method for the subscription - charge_automatically or send_invoice
+    collectionMethod: collectionMethodEnum("collection_method")
+      .notNull()
+      .default("charge_automatically"),
+    trialDays: integer("trial_days").notNull().default(0),
+    // auto renew the subscription every billing period
+    autoRenew: boolean("auto_renew").notNull().default(true),
+    // ************ billing data defaults ************
 
     // metadata probably will be useful to save external data, etc.
     metadata: json("metadata").$type<PlanVersionMetadata>(),
-
-    version: integer("version").default(1).notNull(),
+    paymentMethodRequired: boolean("payment_method_required").notNull().default(false),
+    version: integer("version").notNull().default(1),
   },
   (table) => ({
     planfk: foreignKey({
@@ -114,4 +128,5 @@ export const versionRelations = relations(versions, ({ one, many }) => ({
     references: [plans.id],
   }),
   planFeatures: many(planVersionFeatures),
+  phases: many(subscriptionPhases),
 }))

@@ -27,6 +27,10 @@ export default function BreadcrumbsApp(props: {
   // the last section is always our "BreadcrumbPage", the remaining segments are our "BreadcrumbItems":
   const breadcrumbPage = breadcrumbs.pop()
 
+  if (!breadcrumbPage) {
+    return null
+  }
+
   return (
     <Breadcrumb className={cn("flex h-[36px] w-full items-center", props.className)}>
       <BreadcrumbList>
@@ -50,7 +54,7 @@ export default function BreadcrumbsApp(props: {
 
                       return (
                         <Fragment key={href}>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem asChild>
                             <SuperLink
                               className="text-background-solid text-xs transition-colors"
                               href={href}

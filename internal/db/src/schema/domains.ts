@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm"
-import { boolean, index, text } from "drizzle-orm/pg-core"
+import { boolean, foreignKey, index, text } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { id, timestamps, workspaceID } from "../utils/sql"
+import { id, timestamps, workspaceID } from "../utils/fields.sql"
 import { workspaces } from "./workspaces"
 
 export const domains = pgTableProject(
@@ -17,6 +17,11 @@ export const domains = pgTableProject(
   },
   (table) => ({
     name: index("name").on(table.name),
+    workspace: foreignKey({
+      columns: [table.workspaceId],
+      foreignColumns: [workspaces.id],
+      name: "fk_domain_workspace",
+    }).onDelete("cascade"),
   })
 )
 

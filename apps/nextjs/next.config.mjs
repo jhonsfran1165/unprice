@@ -25,18 +25,13 @@ const nextConfig = {
   images: {
     domains: ["images.unsplash.com"],
   },
-  // swcMinify: true,
+  swcMinify: true,
   experimental: {
+    turbo: {},
     ppr: true,
     mdxRs: true,
     optimizePackageImports: ["@unprice/ui", "@unprice/api", "@unprice/auth", "@unprice/db"],
-    instrumentationHook: true,
-  },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.ignoreWarnings = [{ module: /opentelemetry/ }]
-    }
-    return config
+    instrumentationHook: process.env.NODE_ENV === "production",
   },
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },

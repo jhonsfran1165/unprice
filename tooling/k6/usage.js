@@ -21,10 +21,10 @@ export default function () {
   const idempotenceKey = Math.floor(Math.random() * 10000000000).toString()
 
   // pick randomly one of the following elements in the array
-  const features = ["apikeys", "seats", "basic-access", "verifications", "customers", "pro-access"]
+  const features = ["api-calls", "basic-access", "customers"]
 
   const payload = {
-    customerId: "cus_2GGH1GE4864s4GrX6ttkjbStDP3k",
+    customerId: "cus_1Czz8gEk98Jm8gSdvhKrV",
     featureSlug: features[Math.floor(Math.random() * features.length)],
     usage: getRandomUsage(-1, 100),
     idempotenceKey: idempotenceKey,
@@ -34,7 +34,7 @@ export default function () {
 
   const res = http.get(`${endpoint}?batch=1&input=${trpcData}`, {
     headers: {
-      Authorization: "Bearer builderai_live_2gqw6y4APfPrAoRFRz2EvkW3veHX",
+      Authorization: "Bearer unprice_live_1D14SWrexspCxWBCqLoq1",
     },
   })
 

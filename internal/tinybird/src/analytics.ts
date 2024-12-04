@@ -62,14 +62,14 @@ export class Analytics {
 
   public get ingestFeaturesVerification() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "features_verifications__v1",
+      datasource: "features_verifications__v2",
       event: featureVerificationSchemaV1,
     })
   }
 
   public get ingestFeaturesUsage() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "features_usage__v1",
+      datasource: "features_usage__v2",
       event: featureUsageSchemaV1,
       wait: true,
     })
@@ -86,14 +86,18 @@ export class Analytics {
         featureSlug: z.string(),
         total: z.number(),
       }),
+      opts: {
+        cache: "no-store",
+      },
     })
   }
 
-  public get getUsageFeature() {
+  public get getTotalUsagePerFeature() {
     return this.readClient.buildPipe({
-      pipe: "total_usage_per_feature__v1",
+      pipe: "get_total_usage_per_feature__v1",
       parameters: z.object({
         featureSlug: z.string(),
+        subscriptionItemId: z.string().optional(),
         customerId: z.string(),
         projectId: z.string(),
         start: z.number(),
@@ -105,12 +109,37 @@ export class Analytics {
         count: z.number(),
         last_during_period: z.number(),
       }),
+      opts: {
+        cache: "no-store",
+      },
     })
   }
 
-  public get getUsageAllFeaturesProject() {
+  public get getTotalUsagePerCustomer() {
     return this.readClient.buildPipe({
-      pipe: "total_usage_per_all_feature__v1",
+      pipe: "get_total_usage_customer__v1",
+      parameters: z.object({
+        customerId: z.string(),
+        projectId: z.string(),
+        start: z.number(),
+        end: z.number(),
+      }),
+      data: z.object({
+        featureSlug: z.string(),
+        sum: z.number(),
+        max: z.number(),
+        count: z.number(),
+        last_during_period: z.number(),
+      }),
+      opts: {
+        cache: "no-store",
+      },
+    })
+  }
+
+  public get getTotalUsagePerProject() {
+    return this.readClient.buildPipe({
+      pipe: "get_total_usage_per_project__v1",
       parameters: z.object({
         projectId: z.string(),
         start: z.number(),

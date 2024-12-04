@@ -2,22 +2,11 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 
 import { versions } from "../schema/planVersions"
-import { PLAN_BILLING_PERIODS } from "../utils"
-import { currencySchema } from "./shared"
+import { billingPeriodSchema, currencySchema, startCycleSchema } from "./shared"
 
 export const planVersionMetadataSchema = z.object({
   externalId: z.string().optional(),
 })
-
-export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
-
-export const startCycleSchema = z.union([
-  z
-    .number()
-    .nonnegative(), // number of day from the start of the cycle
-  z.literal("last_day"), // last day of the month
-  z.null(), // null means the first day of the month
-])
 
 export const planVersionSelectBaseSchema = createSelectSchema(versions, {
   startCycle: startCycleSchema,
@@ -28,20 +17,23 @@ export const planVersionSelectBaseSchema = createSelectSchema(versions, {
 })
 
 export const versionInsertBaseSchema = createInsertSchema(versions, {
+  autoRenew: z.boolean().default(true),
   startCycle: startCycleSchema,
   tags: z.array(z.string()),
   title: z.string().min(3).max(50),
   metadata: planVersionMetadataSchema,
   billingPeriod: billingPeriodSchema,
   currency: currencySchema,
+  trialDays: z.coerce.number().int().min(0).max(30).default(0),
 })
   .omit({
-    createdAt: true,
-    updatedAt: true,
+    createdAtM: true,
+    updatedAtM: true,
   })
   .partial({
     projectId: true,
     id: true,
+    startCycle: true,
   })
   .required({
     planId: true,
@@ -64,8 +56,6 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
     return true
   })
 
-export type StartCycleType = z.infer<typeof startCycleSchema>
 export type PlanVersionMetadata = z.infer<typeof planVersionMetadataSchema>
 export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>
 export type PlanVersion = z.infer<typeof planVersionSelectBaseSchema>
-export type BillingPeriod = z.infer<typeof billingPeriodSchema>

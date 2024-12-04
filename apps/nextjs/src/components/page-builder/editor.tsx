@@ -40,10 +40,6 @@ export function EditorPageComponent({
         onRender={RenderNode}
         onNodesChange={(query) => {
           const _content = query.serialize()
-
-          // console.log(json)
-          // TODO: save content on change
-          // console.log("dasdasdasd")
         }}
         indicator={{
           error: "var(--red-9)",

@@ -1,6 +1,6 @@
-import "server-only"
 import { tracing } from "@baselime/trpc-opentelemetry-middleware"
 import type { Session } from "@unprice/auth/server"
+import "server-only"
 
 import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import type { MwFn } from "@trpc-limiter/core"
@@ -11,21 +11,21 @@ import type { Cache as C } from "@unkey/cache"
 import type { NextAuthRequest } from "@unprice/auth"
 import { auth } from "@unprice/auth/server"
 import { COOKIES_APP } from "@unprice/config"
-import { db } from "@unprice/db"
+import { type Database, type TransactionDatabase, db } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
 import { BaseLimeLogger, ConsoleLogger, type Logger } from "@unprice/logging"
+import type { CacheNamespaces } from "@unprice/services/cache"
+import { CacheService } from "@unprice/services/cache"
+import { LogdrainMetrics, type Metrics, NoopMetrics } from "@unprice/services/metrics"
 import { Analytics } from "@unprice/tinybird"
 import { Ratelimit } from "@upstash/ratelimit"
 import { waitUntil } from "@vercel/functions"
 import { ZodError } from "zod"
+import { fromZodError } from "zod-validation-error"
 import { env } from "./env.mjs"
-import { initCache } from "./pkg/cache"
-import type { CacheNamespaces } from "./pkg/cache/namespaces"
-import { type Metrics, NoopMetrics } from "./pkg/metrics"
-import { LogdrainMetrics } from "./pkg/metrics/logdrain"
 import { transformer } from "./transformer"
-import { projectGuard } from "./utils"
-import { apikeyGuard } from "./utils/apaikey-guard"
+import { projectWorkspaceGuard } from "./utils"
+import { apikeyGuard } from "./utils/apikey-guard"
 import { RATE_LIMIT_WINDOW, redis } from "./utils/upstash"
 import { workspaceGuard } from "./utils/workspace-guard"
 
@@ -58,7 +58,12 @@ export interface CreateContextOptions {
  * This helper generates the "internals" for a tRPC context. If you need to use
  * it, you can export it from here
  */
-export const createInnerTRPCContext = (opts: CreateContextOptions) => {
+export const createInnerTRPCContext = (
+  opts: CreateContextOptions
+): CreateContextOptions & {
+  db: Database | TransactionDatabase
+  analytics: Analytics
+} => {
   return {
     ...opts,
     db: db,
@@ -91,6 +96,7 @@ export const createTRPCContext = async (opts: {
   const requestId = opts.headers.get("x-request-id") || newId("request")
   const region = opts.headers.get("x-vercel-id") || "unknown"
   const country = opts.headers.get("x-vercel-ip-country") || "unknown"
+  const userAgent = opts.headers.get("user-agent") || "unknown"
 
   const ip =
     opts.headers.get("x-real-ip") ||
@@ -102,7 +108,7 @@ export const createTRPCContext = async (opts: {
     ? new BaseLimeLogger({
         apiKey: env.BASELIME_APIKEY,
         requestId,
-        defaultFields: { userId, region, country, source, ip, pathname },
+        defaultFields: { userId, region, country, source, ip, pathname, userAgent },
         namespace: "unprice-api",
         dataset: "unprice-api",
         service: "api", // default service name
@@ -120,12 +126,16 @@ export const createTRPCContext = async (opts: {
     ? new LogdrainMetrics({ requestId, logger })
     : new NoopMetrics()
 
-  const cache = await initCache(
+  const cacheService = new CacheService(
     {
       waitUntil,
     },
     metrics
   )
+
+  await cacheService.init()
+
+  const cache = cacheService.getCache()
 
   // this comes from the cookies or headers of the request
   const activeWorkspaceSlug =
@@ -158,7 +168,6 @@ export const createTRPCContext = async (opts: {
  * This is where the trpc api is initialized, connecting the context and
  * transformer
  */
-// TODO: support Authorization header https://www.npmjs.com/package/@potatohd/trpc-openapi#authorization
 export const t = initTRPC
   .context<typeof createTRPCContext>()
   .meta<OpenApiMeta>()
@@ -180,8 +189,11 @@ export const t = initTRPC
               ? error.cause.flatten()
               : null,
         },
+        message:
+          error.cause instanceof ZodError ? fromZodError(error.cause).toString() : error.message,
       }
 
+      // log the error if it's an internal server error
       if (error.code === "INTERNAL_SERVER_ERROR") {
         ctx?.logger.error("Error 500 in trpc api", {
           error: JSON.stringify(errorResponse),
@@ -261,6 +273,10 @@ export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED" })
   }
 
+  if (!ctx.session?.user?.email) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "User email not found" })
+  }
+
   return next({
     ctx: {
       userId: ctx.session?.user.id,
@@ -274,127 +290,92 @@ export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
 // this is a procedure that requires a user to be logged in and have an active workspace
 // it also sets the active workspace in the context
 // the active workspace is passed in the headers or cookies of the request
-export const protectedActiveWorkspaceProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const activeWorkspaceSlug = ctx.activeWorkspaceSlug
+// if the workspaceSlug is in the input, use it, otherwise use the active workspace slug in the cookie
+export const protectedWorkspaceProcedure = protectedProcedure.use(
+  async ({ ctx, next, getRawInput }) => {
+    const input = (await getRawInput()) as { workspaceSlug?: string }
+    const activeWorkspaceSlug = input?.workspaceSlug ?? ctx.activeWorkspaceSlug
 
-  if (!activeWorkspaceSlug) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "No active workspace in the session",
-    })
-  }
-
-  const workspaces = ctx.session?.user?.workspaces
-  const activeWorkspace = workspaces?.find((workspace) => workspace.slug === activeWorkspaceSlug)
-
-  if (!activeWorkspace) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Workspace not found or you don't have access to the workspace",
-    })
-  }
-
-  const data = await workspaceGuard({
-    workspaceId: activeWorkspace?.id,
-    ctx,
-  })
-
-  return next({
-    ctx: {
-      ...data,
-      session: {
-        ...ctx.session,
-      },
-    },
-  })
-})
-
-export const protectedActiveWorkspaceAdminProcedure = protectedActiveWorkspaceProcedure.use(
-  ({ ctx, next }) => {
-    ctx.verifyRole(["OWNER", "ADMIN"])
-
-    return next({
-      ctx,
-    })
-  }
-)
-
-export const protectedActiveWorkspaceOwnerProcedure = protectedActiveWorkspaceProcedure.use(
-  ({ ctx, next }) => {
-    ctx.verifyRole(["OWNER"])
-
-    return next({
-      ctx,
-    })
-  }
-)
-
-// for those endpoint that are used inside the app but they also can be used with an api key
-export const protectedApiOrActiveProjectProcedure = publicProcedure.use(async ({ ctx, next }) => {
-  const activeProjectSlug = ctx.activeProjectSlug
-  const apikey = ctx.apikey
-
-  // Check db for API key if apiKey is present
-  if (apikey) {
-    const { apiKey } = await apikeyGuard({
-      apikey,
+    const data = await workspaceGuard({
+      workspaceSlug: activeWorkspaceSlug,
       ctx,
     })
 
     return next({
       ctx: {
-        // pass the project data to the context to ensure all changes are applied to the correct project
-        project: apiKey.project,
-        apiKey: apiKey,
+        ...data,
+        session: {
+          ...ctx.session,
+        },
       },
     })
   }
+)
 
-  // if no api key is present, check if the user is logged in
-  if (!ctx.session?.user?.id) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "User or API key not found" })
-  }
+// for those endpoint that are used inside the app but they also can be used with an api key
+export const protectedApiOrActiveProjectProcedure = publicProcedure.use(
+  async ({ ctx, next, getRawInput }) => {
+    const apikey = ctx.apikey
 
-  const data = await projectGuard({
-    projectSlug: activeProjectSlug,
-    ctx,
-  })
+    // Check db for API key if apiKey is present
+    if (apikey) {
+      const { apiKey } = await apikeyGuard({
+        apikey,
+        ctx,
+      })
 
-  return next({
-    ctx: {
-      userId: ctx.session?.user.id,
-      ...data,
-      session: {
-        ...ctx.session,
-      },
-    },
-  })
-})
+      return next({
+        ctx: {
+          // pass the project data to the context to ensure all changes are applied to the correct project
+          project: apiKey.project,
+          apiKey: apiKey,
+        },
+      })
+    }
 
-export const protectedActiveProjectProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const activeProjectSlug = ctx.activeProjectSlug
+    // if no api key is present, check if the user is logged in
+    if (!ctx.session?.user?.id) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "User or API key not found" })
+    }
 
-  const data = await projectGuard({
-    projectSlug: activeProjectSlug,
-    ctx,
-  })
+    const input = (await getRawInput()) as { projectSlug?: string }
+    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug
 
-  return next({
-    ctx: {
-      ...data,
-      session: {
-        ...ctx.session,
-      },
-    },
-  })
-})
-
-export const protectedActiveProjectAdminProcedure = protectedActiveProjectProcedure.use(
-  ({ ctx, next }) => {
-    ctx.verifyRole(["OWNER", "ADMIN"])
+    const data = await projectWorkspaceGuard({
+      projectSlug: activeProjectSlug,
+      ctx,
+    })
 
     return next({
+      ctx: {
+        userId: ctx.session?.user.id,
+        ...data,
+        session: {
+          ...ctx.session,
+        },
+      },
+    })
+  }
+)
+
+export const protectedProjectProcedure = protectedProcedure.use(
+  async ({ ctx, next, getRawInput }) => {
+    const input = (await getRawInput()) as { projectSlug?: string }
+    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug
+
+    // if projectSlug is present, use it if not use the active project slug
+    const data = await projectWorkspaceGuard({
+      projectSlug: activeProjectSlug,
       ctx,
+    })
+
+    return next({
+      ctx: {
+        ...data,
+        session: {
+          ...ctx.session,
+        },
+      },
     })
   }
 )
