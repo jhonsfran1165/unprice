@@ -59,7 +59,7 @@ export const createMockPhase = ({
     },
     createdAtM: Date.now(),
     updatedAtM: Date.now(),
-    paymentMethodId: "",
+    paymentMethodId: "12345",
     active: true,
     trialDays,
     gracePeriod: 1,

@@ -18,7 +18,8 @@
   },
   "license": "AGPL-3.0",
   "scripts": {
-    "test": "pnpm with-env vitest run",
+    "test": "vitest run",
+    "test:file": "vitest $@",
     "clean": "rm -rf .turbo node_modules",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env.local --"

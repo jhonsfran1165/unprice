@@ -1173,7 +1173,10 @@ export class PhaseMachine extends StateMachine<
       )
     }
 
-    if (requiredPaymentMethod && !paymentMethodId.paymentMethodId) {
+    if (
+      requiredPaymentMethod &&
+      (!paymentMethodId.paymentMethodId || paymentMethodId.paymentMethodId === "")
+    ) {
       return Err(
         new UnPriceSubscriptionError({
           message: "Customer has no payment method",

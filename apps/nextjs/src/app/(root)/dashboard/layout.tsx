@@ -26,7 +26,7 @@ export default async function RootLayout({
             <main className="flex w-full flex-1 flex-col overflow-hidden">
               {header}
               {breadcrumbs}
-              <div className="flex-grow overflow-y-auto">{children}</div>
+              <div className="hide-scrollbar flex-grow overflow-y-auto">{children}</div>
             </main>
           </div>
         </TooltipProvider>
