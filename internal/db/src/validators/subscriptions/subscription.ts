@@ -35,6 +35,8 @@ const reasonSchema = z.enum([
   "pending_change",
   "pending_expiration",
   "trial_ended",
+  "user_requested",
+  "admin_requested",
 ])
 
 export const invoiceMetadataSchema = z.object({

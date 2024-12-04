@@ -8,11 +8,11 @@ import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { PaymentProviderService } from "../payment-provider"
-import { SubscriptionStateMachine } from "./machine"
 import { createMockDatabase, createMockPhase, createMockSubscription, mockCustomer } from "./mock"
+import { PhaseMachine } from "./phase-machine"
 
-describe("SubscriptionStateMachine", () => {
-  let machine: SubscriptionStateMachine
+describe("PhaseMachine", () => {
+  let machine: PhaseMachine
   let mockDb: Database
   let mockAnalytics: Analytics
   let mockLogger: Logger
@@ -73,9 +73,9 @@ describe("SubscriptionStateMachine", () => {
       calculatedBillingCycle,
     })
 
-    machine = new SubscriptionStateMachine({
+    machine = new PhaseMachine({
       db: mockDb,
-      activePhase: mockPhase,
+      phase: mockPhase,
       subscription: mockSubscription,
       customer: mockCustomer,
       logger: mockLogger,
@@ -93,7 +93,7 @@ describe("SubscriptionStateMachine", () => {
   describe("endTrial", () => {
     it("should not end trial before trial end date", async () => {
       const tooEarly = new Date("2024-01-10T00:00:00Z").getTime()
-      const result = await machine.endTrial({ now: tooEarly })
+      const result = await machine.transition("END_TRIAL", { now: tooEarly })
 
       expect(result.err?.message).toBe("Trial has not ended yet")
     })
@@ -101,7 +101,7 @@ describe("SubscriptionStateMachine", () => {
     it(
       "should successfully end trial on trial end date",
       async () => {
-        const result = await machine.endTrial({
+        const result = await machine.transition("END_TRIAL", {
           // right after the trial ends
           now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
         })
@@ -145,9 +145,9 @@ describe("SubscriptionStateMachine", () => {
         mockPhase,
       })
 
-      machine = new SubscriptionStateMachine({
+      machine = new PhaseMachine({
         db: mockDb,
-        activePhase: mockPhase,
+        phase: mockPhase,
         subscription: mockSubscription,
         customer: {
           ...mockCustomer,
@@ -159,7 +159,7 @@ describe("SubscriptionStateMachine", () => {
         isTest: true,
       })
 
-      const result = await machine.endTrial({
+      const result = await machine.transition("END_TRIAL", {
         now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
       })
 
@@ -183,9 +183,9 @@ describe("SubscriptionStateMachine", () => {
         mockPhase,
       })
 
-      machine = new SubscriptionStateMachine({
+      machine = new PhaseMachine({
         db: mockDb,
-        activePhase: mockPhase,
+        phase: mockPhase,
         subscription: mockSubscription,
         customer: mockCustomer,
         logger: mockLogger,
@@ -193,12 +193,12 @@ describe("SubscriptionStateMachine", () => {
         isTest: true,
       })
 
-      const result = await machine.endTrial({
+      const result = await machine.transition("END_TRIAL", {
         now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
       })
 
       const alteredSubscription = machine.getSubscription()
-      const alteredPhase = machine.getActivePhase()
+      const alteredPhase = machine.getPhase()
 
       expect(result.err).toBeUndefined()
       expect(result.val?.status).toBe("active")
@@ -217,9 +217,9 @@ describe("SubscriptionStateMachine", () => {
         calculatedBillingCycle,
       })
 
-      machine = new SubscriptionStateMachine({
+      machine = new PhaseMachine({
         db: mockDb,
-        activePhase: mockPhase,
+        phase: mockPhase,
         subscription: mockSubscription,
         customer: mockCustomer,
         logger: mockLogger,
@@ -238,12 +238,12 @@ describe("SubscriptionStateMachine", () => {
       })
 
       // lets finish the trial
-      const result = await machine.endTrial({
+      const result = await machine.transition("END_TRIAL", {
         now: endTrial! + 1,
       })
 
       const alteredSubscription = machine.getSubscription()
-      const alteredPhase = machine.getActivePhase()
+      const alteredPhase = machine.getPhase()
 
       expect(result.err).toBeUndefined()
       expect(result.val?.status).toBe("active")
@@ -257,12 +257,12 @@ describe("SubscriptionStateMachine", () => {
       expect(alteredSubscription.currentCycleEndAt).toEqual(cycleEnd.getTime())
 
       // lets simulate the end of the billing cycle
-      const result2 = await machine.invoice({
+      const result2 = await machine.transition("INVOICE", {
         now: alteredSubscription.currentCycleEndAt + 1,
       })
 
       expect(result2.err).toBeUndefined()
-      expect(result2.val?.invoiceId).toBeDefined()
+      expect(result2.val?.invoice.id).toBeDefined()
       expect(alteredPhase.status).toBe("past_due")
       expect(alteredPhase.whenToBill).toBe("pay_in_arrear")
       // invoice data should be at the end of the cycle

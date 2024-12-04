@@ -20,7 +20,7 @@ export const CancelSubscriptionPhaseButton = ({
 }) => {
   const workspaceSlug = useParams().workspaceSlug as string
 
-  const cancelSubscription = api.subscriptions.cancelPhase.useMutation({
+  const cancelSubscription = api.subscriptions.cancel.useMutation({
     onSuccess: async () => {
       await revalidateAppPath(`/dashboard/${workspaceSlug}/settings/billing`, "page")
     },
@@ -32,6 +32,9 @@ export const CancelSubscriptionPhaseButton = ({
         cancelSubscription.mutateAsync({
           id: subscriptionPhaseId,
           endAt: Date.now(),
+          metadata: {
+            reason: "user_requested",
+          },
         }),
         {
           loading: "Cancelling subscription...",

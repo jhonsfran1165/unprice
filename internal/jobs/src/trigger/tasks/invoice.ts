@@ -1,7 +1,9 @@
 import { task } from "@trigger.dev/sdk/v3"
 import { db } from "@unprice/db"
 import { ConsoleLogger } from "@unprice/logging"
-import { SubscriptionStateMachine } from "@unprice/services/subscriptions"
+import { SubscriptionService } from "@unprice/services/subscriptions"
+
+import { NoopMetrics } from "@unprice/services/metrics"
 import { Analytics } from "@unprice/tinybird"
 import { env } from "../../env.mjs"
 
@@ -12,11 +14,11 @@ export const invoiceTask = task({
   },
   run: async (
     {
-      subscriptionPhaseId,
+      subscriptionId,
       projectId,
       now,
     }: {
-      subscriptionPhaseId: string
+      subscriptionId: string
       projectId: string
       now: number
     },
@@ -30,61 +32,36 @@ export const invoiceTask = task({
     const logger = new ConsoleLogger({
       requestId: ctx.task.id,
       defaultFields: {
-        subscriptionPhaseId,
+        subscriptionId,
         projectId,
         now,
         api: "jobs.subscription.phase.invoice",
       },
     })
 
-    const subscriptionPhase = await db.query.subscriptionPhases.findFirst({
-      with: {
-        subscription: {
-          with: {
-            customer: true,
-          },
-        },
-        items: {
-          with: {
-            featurePlanVersion: {
-              with: {
-                feature: true,
-              },
-            },
-          },
-        },
-        planVersion: {
-          with: {
-            planFeatures: true,
-          },
-        },
-      },
-      where: (table, { eq, and }) =>
-        and(eq(table.id, subscriptionPhaseId), eq(table.projectId, projectId)),
-    })
-
-    if (!subscriptionPhase) {
-      throw new Error("Subscription phase not found")
-    }
-
-    if (!subscriptionPhase.subscription) {
-      throw new Error("Subscription not found")
-    }
-
-    if (!subscriptionPhase.subscription.customer) {
-      throw new Error("Customer not found")
-    }
-
-    const subscriptionStateMachine = new SubscriptionStateMachine({
+    const subscriptionService = new SubscriptionService({
       db: db,
-      activePhase: subscriptionPhase,
-      subscription: subscriptionPhase.subscription,
-      customer: subscriptionPhase.subscription.customer,
-      analytics: tinybird,
+      // all calls made to the database
+      cache: undefined,
+      metrics: new NoopMetrics(),
       logger: logger,
+      waitUntil: () => {},
+      analytics: tinybird,
     })
 
-    const result = await subscriptionStateMachine.invoice({ now })
+    // init phase machine
+    const initPhaseMachineResult = await subscriptionService.initPhaseMachines({
+      subscriptionId,
+      projectId,
+    })
+
+    if (initPhaseMachineResult.err) {
+      throw initPhaseMachineResult.err
+    }
+
+    const result = await subscriptionService.invoiceSubscription({
+      now,
+    })
 
     // we have to throw if there is an error so the task fails
     if (result.err) {
