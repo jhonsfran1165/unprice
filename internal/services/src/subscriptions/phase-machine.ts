@@ -777,7 +777,7 @@ export class PhaseMachine extends StateMachine<
     const { cycleStart, cycleEnd } = configureBillingCycleSubscription({
       currentCycleStartAt: subscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
       billingCycleStart: activePhase.startCycle, // start day of the billing cycle
-      billingPeriod: activePhase.planVersion?.billingPeriod ?? "month", // billing period
+      billingPeriod: activePhase.planVersion.billingPeriod, // billing period
       endAt: activePhase.endAt ?? undefined, // end day of the billing cycle if any
     })
 

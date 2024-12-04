@@ -1118,7 +1118,7 @@ export class InvoiceStateMachine extends StateMachine<
     const calculatedCurrentBillingCycle = configureBillingCycleSubscription({
       currentCycleStartAt: cycleStartAt,
       billingCycleStart: phase.startCycle,
-      billingPeriod: phase.planVersion.billingPeriod ?? "month",
+      billingPeriod: phase.planVersion.billingPeriod,
       endAt: cycleEndAt,
     })
 

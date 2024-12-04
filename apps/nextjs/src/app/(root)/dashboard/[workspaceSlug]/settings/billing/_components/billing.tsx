@@ -49,7 +49,7 @@ export function BillingCard({
     currentDate: new Date(),
     startDate: new Date(activePhase.startAt),
     billingCycleStart: activePhase.startCycle ?? 1,
-    billingPeriod: planVersion.billingPeriod ?? "month",
+    billingPeriod: planVersion.billingPeriod,
   })
 
   const { err, val: flatPricePlan } = calculateFlatPricePlan({
