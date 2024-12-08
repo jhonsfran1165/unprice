@@ -1,5 +1,5 @@
-import { DashboardShell } from "~/components/layout/dashboard-shell"
-import HeaderTab from "~/components/layout/header-tab"
+import { DashboardShell } from "~/components/layout/dashboard-shell";
+import HeaderTab from "~/components/layout/header-tab";
 
 export default function ProjectSettingsLayout(props: {
   children: React.ReactNode
@@ -7,7 +7,7 @@ export default function ProjectSettingsLayout(props: {
 }) {
   return (
     <DashboardShell
-      header={<HeaderTab title="General Settings" description="Manage your workspace settings" />}
+      header={<HeaderTab title="General Settings" description="Manage your project settings" />}
     >
       {props.children}
     </DashboardShell>

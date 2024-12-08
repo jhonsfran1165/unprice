@@ -1,4 +1,30 @@
-import { bigint, varchar } from "drizzle-orm/pg-core"
+import { bigint, customType, varchar } from "drizzle-orm/pg-core"
+import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto"
+
+// Define your encryption key and initialization vector (IV)
+const ENCRYPTION_KEY = randomBytes(32) // 256-bit key
+const IV = randomBytes(16) // 128-bit IV
+
+// Define the custom type for encrypted fields
+export const encrypted = customType<{ data: string; notNull: true; default: false }>({
+  dataType() {
+    return "text" // Store the encrypted data as text in the database
+  },
+  fromDriver(value: unknown) {
+    // Decrypt the value when reading from the database
+    const decipher = createDecipheriv("aes-256-cbc", ENCRYPTION_KEY, IV)
+    let decrypted = decipher.update(String(value), "hex", "utf8")
+    decrypted += decipher.final("utf8")
+    return decrypted
+  },
+  toDriver(value: string) {
+    // Encrypt the value before writing to the database
+    const cipher = createCipheriv("aes-256-cbc", ENCRYPTION_KEY, IV)
+    let encrypted = cipher.update(value, "utf8", "hex")
+    encrypted += cipher.final("hex")
+    return encrypted
+  },
+})
 
 // easier to migrate to another db
 export const cuid = (d: string) => varchar(d, { length: 36 })
