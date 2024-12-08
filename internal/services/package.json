@@ -19,7 +19,7 @@
   "license": "AGPL-3.0",
   "scripts": {
     "test": "vitest run",
-    "test:file": "vitest $@",
+    "test:file": "SKIP_ENV_VALIDATION=true vitest $@",
     "clean": "rm -rf .turbo node_modules",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env.local --"

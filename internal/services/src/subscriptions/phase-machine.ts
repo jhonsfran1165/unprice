@@ -248,7 +248,7 @@ export class PhaseMachine extends StateMachine<
      * Apply expiration to the subscription
      */
     this.addTransition({
-      from: ["past_dued", "active"],
+      from: ["past_dued", "active", "trial_ended"],
       to: ["active"],
       event: "REPORT_PAYMENT",
       onTransition: async (_payload) => {
@@ -1269,6 +1269,7 @@ export class PhaseMachine extends StateMachine<
       return Err(paymentValidation.err)
     }
 
+    // TODO: review this logic with more time
     // pay_in_advance =  invoice flat charges for the current cycle + usage from the previous cycle if any
     // pay_in_arrear = invoice usage + flat charges for the current cycle
     // isCancel = true means the phase is being canceled, we need to invoice the current cycle differently
@@ -1287,7 +1288,7 @@ export class PhaseMachine extends StateMachine<
     }
 
     // don't charge usage records that were created in the trial period
-    if (activePhase.status === "trialing" && whenToBill === "pay_in_advance") {
+    if (activePhase.status === "trial_ended" && whenToBill === "pay_in_advance") {
       invoiceType = "flat"
     }
 

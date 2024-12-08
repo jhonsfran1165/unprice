@@ -9,7 +9,13 @@ import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { addDays } from "date-fns"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { createMockDatabase, createMockPhase, createMockSubscription, mockCustomer } from "./mock"
+import {
+  createMockDatabase,
+  createMockInvoice,
+  createMockPhase,
+  createMockSubscription,
+  mockCustomer,
+} from "./mock"
 import { PhaseMachine } from "./phase-machine"
 
 describe("PhaseMachine", () => {
@@ -171,6 +177,10 @@ describe("PhaseMachine", () => {
       // status of the invoice should be draft
       expect(result2.val?.invoice?.status).toBe("draft")
 
+      // pay in arrear should be hybrid
+      // flat charges and usage charges
+      expect(result2.val?.invoice?.type).toBe("hybrid")
+
       // due date should be calculated based on grace period
       const dueAt = subscription.currentCycleEndAt
       const pastDueAt = addDays(dueAt, phase.gracePeriod).getTime()
@@ -178,7 +188,155 @@ describe("PhaseMachine", () => {
       expect(result2.val?.invoice?.dueAt).toBe(dueAt)
     })
 
+    it("should invoice - pay_in_advance", async () => {
+      // modify the machine to have pay_in_advance
+      machine = new PhaseMachine({
+        db: mockDb,
+        phase: {
+          ...mockPhase,
+          whenToBill: "pay_in_advance",
+        },
+        subscription: mockSubscription,
+        customer: mockCustomer,
+        logger: mockLogger,
+        analytics: mockAnalytics,
+        isTest: true,
+      })
+
+      Object.defineProperty(machine, "paymentProviderService", {
+        value: paymentProviderService,
+      })
+
+      const trial = await machine.transition("END_TRIAL", {
+        // right after the trial ends
+        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+      })
+
+      expect(trial.err).toBeUndefined()
+      // it should be active when pay_in_advance
+      expect(trial.val?.status).toBe("trial_ended")
+
+      const result = await machine.transition("INVOICE", {
+        // when subscription is advance the invoice date is the start of the billing cycle
+        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+      })
+
+      expect(result.err?.message).toBe("Subscription is not ready to be invoiced")
+
+      // new start and end dates for the next cycle
+      const { cycleStart } = configureBillingCycleSubscription({
+        currentCycleStartAt: mockSubscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
+        billingCycleStart: mockPhase.startCycle, // start day of the billing cycle
+        billingPeriod: mockPhase.planVersion.billingPeriod, // billing period
+        endAt: mockPhase.endAt ?? undefined, // end day of the billing cycle if any
+      })
+
+      // let's try to invoice on the expected invoice date
+      const result2 = await machine.transition("INVOICE", {
+        now: cycleStart.getTime() + 1,
+      })
+
+      const subscription = machine.getSubscription()
+      const phase = machine.getPhase()
+
+      expect(result2.err).toBeUndefined()
+      // still trial ended until the payment is processed
+      expect(result2.val?.status).toBe("trial_ended")
+
+      // pay in advance should be flat
+      expect(result2.val?.invoice?.type).toBe("flat")
+
+      // status of the invoice should be draft
+      expect(result2.val?.invoice?.status).toBe("draft")
+
+      // due date should be calculated based on grace period
+      const dueAt = subscription.currentCycleStartAt
+      const pastDueAt = addDays(dueAt, phase.gracePeriod).getTime()
+      expect(result2.val?.invoice?.pastDueAt).toBe(pastDueAt)
+      expect(result2.val?.invoice?.dueAt).toBe(dueAt)
+    })
+
+    it("should invoice - pay_in_advance with pending invoice", async () => {
+      // mock an invoice that is pending
+      const mockInvoice = createMockInvoice({
+        mockPhase,
+        mockSubscription,
+      })
+
+      mockDb = createMockDatabase({
+        mockSubscription,
+        mockPhase,
+        mockInvoice,
+      })
+
+      // modify the machine to have pay_in_advance
+      machine = new PhaseMachine({
+        db: mockDb,
+        phase: {
+          ...mockPhase,
+          whenToBill: "pay_in_advance",
+        },
+        subscription: mockSubscription,
+        customer: mockCustomer,
+        logger: mockLogger,
+        analytics: mockAnalytics,
+        isTest: true,
+      })
+
+      Object.defineProperty(machine, "paymentProviderService", {
+        value: paymentProviderService,
+      })
+
+      const trial = await machine.transition("END_TRIAL", {
+        // right after the trial ends
+        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+      })
+
+      expect(trial.err).toBeUndefined()
+      // it should be active when pay_in_advance
+      expect(trial.val?.status).toBe("trial_ended")
+
+      const result = await machine.transition("INVOICE", {
+        // when subscription is advance the invoice date is the start of the billing cycle
+        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+      })
+
+      expect(result.err?.message).toBe("Subscription is not ready to be invoiced")
+
+      // new start and end dates for the next cycle
+      const { cycleStart } = configureBillingCycleSubscription({
+        currentCycleStartAt: mockSubscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
+        billingCycleStart: mockPhase.startCycle, // start day of the billing cycle
+        billingPeriod: mockPhase.planVersion.billingPeriod, // billing period
+        endAt: mockPhase.endAt ?? undefined, // end day of the billing cycle if any
+      })
+
+      // let's try to invoice on the expected invoice date
+      const result2 = await machine.transition("INVOICE", {
+        now: cycleStart.getTime() + 1,
+      })
+
+      const subscription = machine.getSubscription()
+      const phase = machine.getPhase()
+
+      expect(result2.err).toBeUndefined()
+
+      // should take the pending invoice and not generate a new one
+      expect(result2.val?.invoice?.id).toBe(mockInvoice.id)
+
+      // still trial ended until the payment is processed
+      expect(result2.val?.status).toBe("trial_ended")
+
+      // status of the invoice should be draft
+      expect(result2.val?.invoice?.status).toBe("draft")
+
+      // due date should be calculated based on grace period
+      const dueAt = subscription.currentCycleStartAt
+      const pastDueAt = addDays(dueAt, phase.gracePeriod).getTime()
+      expect(result2.val?.invoice?.pastDueAt).toBe(pastDueAt)
+      expect(result2.val?.invoice?.dueAt).toBe(dueAt)
+    })
+
     // TODO: test with pending invoice
-    // TODO: test in advance
   })
 })

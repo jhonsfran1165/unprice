@@ -3,9 +3,11 @@ import { subscriptionPhases, subscriptions } from "@unprice/db/schema"
 import type {
   Customer,
   Subscription,
+  SubscriptionInvoice,
   SubscriptionPhaseExtended,
   configureBillingCycleSubscription,
 } from "@unprice/db/validators"
+import { addDays } from "date-fns"
 import { vi } from "vitest"
 
 export const createMockPhase = ({
@@ -264,6 +266,48 @@ export const createMockPhase = ({
   return mockPhase
 }
 
+export const createMockInvoice = ({
+  mockPhase,
+  mockSubscription,
+}: {
+  mockPhase: SubscriptionPhaseExtended
+  mockSubscription: Subscription
+}) => {
+  const mockInvoice: SubscriptionInvoice = {
+    id: "inv_1",
+    status: "draft",
+    type: "flat",
+    createdAtM: Date.now(),
+    updatedAtM: Date.now(),
+    projectId: "proj-1",
+    subscriptionPhaseId: mockPhase.id,
+    subscriptionId: mockSubscription.id,
+    requiredPaymentMethod: mockPhase.planVersion.paymentMethodRequired,
+    cycleStartAt: mockSubscription.currentCycleStartAt,
+    cycleEndAt: mockSubscription.currentCycleEndAt,
+    previousCycleStartAt: mockSubscription.previousCycleStartAt,
+    previousCycleEndAt: mockSubscription.previousCycleEndAt,
+    whenToBill: "pay_in_advance",
+    paymentProvider: "stripe",
+    collectionMethod: "charge_automatically",
+    pastDueAt: addDays(mockSubscription.currentCycleStartAt, mockPhase.gracePeriod).getTime(),
+    dueAt: mockSubscription.currentCycleStartAt,
+    customerCreditId: null,
+    amountCreditUsed: 0,
+    subtotal: 0,
+    total: 0,
+    currency: mockPhase.planVersion.currency,
+    metadata: {},
+    invoiceUrl: null,
+    paidAt: null,
+    paymentAttempts: [],
+    sentAt: null,
+    invoiceId: null,
+  }
+
+  return mockInvoice
+}
+
 export const createMockSubscription = ({
   mockPhase,
   calculatedBillingCycle,
@@ -310,9 +354,11 @@ export const mockCustomer: Customer = {
 export const createMockDatabase = ({
   mockSubscription,
   mockPhase,
+  mockInvoice,
 }: {
   mockSubscription: Subscription
   mockPhase: SubscriptionPhaseExtended
+  mockInvoice?: SubscriptionInvoice
 }) => {
   // Mock database operations
   const mockDb = {
@@ -371,7 +417,7 @@ export const createMockDatabase = ({
     }),
     query: {
       invoices: {
-        findFirst: vi.fn(() => Promise.resolve(null)),
+        findFirst: vi.fn(() => Promise.resolve(mockInvoice ?? null)),
         findMany: vi.fn(() => Promise.resolve([])),
       },
       subscriptions: {
