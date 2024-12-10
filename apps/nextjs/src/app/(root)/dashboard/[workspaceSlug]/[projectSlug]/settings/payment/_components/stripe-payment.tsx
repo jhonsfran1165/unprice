@@ -1,11 +1,10 @@
 "use client"
-
-import { useRouter } from "next/navigation"
-import { use, useState } from "react"
-
-import type { RouterOutputs } from "@unprice/api"
-import type { RenameProject } from "@unprice/db/validators"
-import { renameProjectSchema } from "@unprice/db/validators"
+import type {
+  InsertPaymentProviderConfig,
+  PaymentProvider,
+  PaymentProviderConfig,
+} from "@unprice/db/validators"
+import { insertPaymentProviderConfigSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
@@ -20,42 +19,30 @@ import {
   CardTitle,
 } from "@unprice/ui/card"
 import { Switch } from "@unprice/ui/switch"
-import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-export function StripePayment(props: {
-  projectPromise: Promise<RouterOutputs["projects"]["getBySlug"]>
-}) {
-  const { project } = use(props.projectPromise)
-  const apiUtils = api.useUtils()
-  const router = useRouter()
-  const [active, setActive] = useState(false)
-
-  const renameProject = api.projects.rename.useMutation({
-    onSettled: async () => {
-      await apiUtils.projects.listByWorkspace.invalidate()
-      await apiUtils.projects.getBySlug.invalidate({ slug: project.slug })
-      router.refresh()
-    },
-    onSuccess: () => {
-      toastAction("success")
-    },
-  })
+export function StripePayment({
+  provider,
+  paymentProvider,
+}: { provider?: PaymentProviderConfig; paymentProvider: PaymentProvider }) {
+  const saveConfig = api.paymentProvider.saveConfig.useMutation({})
 
   const form = useZodForm({
-    schema: renameProjectSchema,
-    defaultValues: {
-      slug: project.slug,
-      name: project.name,
+    schema: insertPaymentProviderConfigSchema,
+    defaultValues: provider ?? {
+      paymentProvider: paymentProvider,
+      key: "",
+      keyIv: "",
+      active: false,
     },
   })
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(async (data: RenameProject) => {
-          await renameProject.mutateAsync(data)
+        onSubmit={form.handleSubmit(async (data: InsertPaymentProviderConfig) => {
+          await saveConfig.mutateAsync(data)
         })}
         className="space-y-2"
       >
@@ -69,12 +56,18 @@ export function StripePayment(props: {
                 </CardDescription>
               </div>
               <div className="flex flex-col items-end">
-                <FormControl>
-                  <Switch
-                    checked={active}
-                    onCheckedChange={setActive}
-                  />
-                </FormControl>
+                <FormField
+                  control={form.control}
+                  name="active"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
           </CardHeader>
@@ -82,13 +75,17 @@ export function StripePayment(props: {
           <CardContent>
             <FormField
               control={form.control}
-              name="apikey"
-              disabled={!active}
+              name="key"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Api Key</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="my-project" disabled={!active} />
+                    <Input
+                      {...field}
+                      placeholder="stripe api key"
+                      type="password"
+                      disabled={!form.getValues("active")}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -97,7 +94,7 @@ export function StripePayment(props: {
           </CardContent>
 
           <CardFooter className="border-t px-6 py-4">
-            <Button type="submit" disabled={!active}>
+            <Button type="submit" disabled={!form.getValues("active") || saveConfig.isPending}>
               Save
               {form.formState.isSubmitting && <LoadingAnimation className="ml-2" />}
             </Button>

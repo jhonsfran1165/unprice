@@ -13,6 +13,7 @@ export const env = createEnv({
     TINYBIRD_TOKEN: z.string(),
     BASELIME_APIKEY: z.string(),
     CACHE_ENCRYPTION_KEY: z.string(),
+    ENCRYPTION_KEY: z.string(),
     EMIT_METRICS_LOGS: z
       .string()
       .optional()

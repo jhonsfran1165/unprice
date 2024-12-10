@@ -22,6 +22,20 @@
       "when": 1733170100218,
       "tag": "0002_giant_sphinx",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1733699595713,
+      "tag": "0003_tidy_captain_universe",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1733842826371,
+      "tag": "0004_nifty_vision",
+      "breakpoints": true
     }
   ]
 }

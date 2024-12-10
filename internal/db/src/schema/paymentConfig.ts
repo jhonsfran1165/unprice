@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm"
-import { boolean, primaryKey, uniqueIndex } from "drizzle-orm/pg-core"
+import { boolean, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core"
 
 import { pgTableProject } from "../utils/_table"
-import { encrypted, timestamps } from "../utils/fields.sql"
+import { timestamps } from "../utils/fields.sql"
 import { projectID } from "../utils/sql"
 import { paymentProviderEnum } from "./enums"
 import { projects } from "./projects"
@@ -13,13 +13,14 @@ export const paymentProviderConfig = pgTableProject(
     ...projectID,
     ...timestamps,
     active: boolean("active").notNull().default(false),
-    paymentProvider: paymentProviderEnum("payment_provider").notNull().default("stripe"),
-    key: encrypted("key").notNull(),
+    paymentProvider: paymentProviderEnum("payment_provider").default("stripe").notNull(),
+    key: text("key").notNull(),
+    keyIv: text("key_iv").notNull(),
   },
   (table) => ({
     primary: primaryKey({
       columns: [table.id, table.projectId],
-      name: "pk_config",
+      name: "pk_ppconfig",
     }),
     // a project can only have one config per payment provider
     unique: uniqueIndex("unique_payment_provider_config").on(

@@ -1,5 +1,5 @@
-import { DashboardShell } from "~/components/layout/dashboard-shell";
-import HeaderTab from "~/components/layout/header-tab";
+import { DashboardShell } from "~/components/layout/dashboard-shell"
+import HeaderTab from "~/components/layout/header-tab"
 
 export default function ProjectSettingsLayout(props: {
   children: React.ReactNode
