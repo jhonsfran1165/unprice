@@ -1113,8 +1113,7 @@ export class SubscriptionService {
             id: subscriptionId,
             projectId,
             customerId: customerData.id,
-            // create as pending, only when the first phase is created the subscription is active
-            active: false,
+            active: true,
             timezone: timezoneToUse,
             metadata: metadata,
             // provisional values
@@ -1141,7 +1140,7 @@ export class SubscriptionService {
         }
 
         // create the phases
-        await Promise.all(
+        const phasesResult = await Promise.all(
           phases.map((phase) =>
             this.createPhase({
               input: {
@@ -1153,14 +1152,17 @@ export class SubscriptionService {
               now: Date.now(),
             })
           )
-        ).catch((e) => {
-          this.logger.error("Error creating subscription phases", {
-            error: JSON.stringify(e),
-          })
+        )
+
+        const phaseErr = phasesResult.find((r) => r.err)
+
+        // if there is an error, rollback the transaction and throw the error
+        if (phaseErr?.err) {
+          this.logger.error(`Error creating subscription phase ${phaseErr?.err?.message}`)
 
           trx.rollback()
-          throw e
-        })
+          return Err(phaseErr.err)
+        }
 
         return Ok(newSubscription)
       } catch (e) {

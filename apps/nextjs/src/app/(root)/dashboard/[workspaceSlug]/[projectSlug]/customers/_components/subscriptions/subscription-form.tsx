@@ -35,6 +35,8 @@ export function SubscriptionForm({
       toastAction("saved")
       setDialogOpen?.(false)
       router.refresh()
+
+      router.push(`/${workspaceSlug}/${projectSlug}/customers/subscriptions/${subscription.id}`)
     },
   })
 
@@ -73,10 +75,6 @@ export function SubscriptionForm({
     if (!defaultValues.id) {
       await createSubscription.mutateAsync(data as InsertSubscription)
     }
-
-    setDialogOpen?.(false)
-    router.refresh()
-    router.push(`/dashboard/${workspaceSlug}/${projectSlug}/customers/subscriptions/${data.id}`)
   }
 
   return (
