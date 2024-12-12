@@ -15,9 +15,14 @@ export const getConfig = protectedProjectProcedure
     // TODO: use this for configuration of payment providers
     // const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
 
+    // TODO: abstract this into a function
     const config = await opts.ctx.db.query.paymentProviderConfig.findFirst({
       where: (table, { eq, and }) =>
-        and(eq(table.projectId, projectId), eq(table.paymentProvider, paymentProvider)),
+        and(
+          eq(table.projectId, projectId),
+          eq(table.paymentProvider, paymentProvider),
+          eq(table.active, true)
+        ),
     })
 
     if (!config) {

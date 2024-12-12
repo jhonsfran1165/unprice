@@ -36,13 +36,17 @@ export const getSession = rateLimiterProcedure
     // get config payment provider
     const config = await opts.ctx.db.query.paymentProviderConfig.findFirst({
       where: (config, { and, eq }) =>
-        and(eq(config.projectId, projectId), eq(config.paymentProvider, paymentProvider)),
+        and(
+          eq(config.projectId, projectId),
+          eq(config.paymentProvider, paymentProvider),
+          eq(config.active, true)
+        ),
     })
 
     if (!config) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Payment provider config not found",
+        message: "Payment provider config not found or not active",
       })
     }
 

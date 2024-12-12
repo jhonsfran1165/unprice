@@ -1019,14 +1019,15 @@ export class PhaseMachine extends StateMachine<
         where: (config, { and, eq }) =>
           and(
             eq(config.projectId, activePhase.projectId),
-            eq(config.paymentProvider, activePhase.planVersion.paymentProvider)
+            eq(config.paymentProvider, activePhase.planVersion.paymentProvider),
+            eq(config.active, true)
           ),
       })
 
       if (!configPaymentProvider) {
         return Err(
           new UnPriceSubscriptionError({
-            message: "Payment provider config not found",
+            message: "Payment provider config not found or not active",
           })
         )
       }

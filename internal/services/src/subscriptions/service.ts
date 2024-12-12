@@ -369,14 +369,15 @@ export class SubscriptionService {
       where: (config, { and, eq }) =>
         and(
           eq(config.projectId, activePhase.projectId),
-          eq(config.paymentProvider, activePhase.planVersion.paymentProvider)
+          eq(config.paymentProvider, activePhase.planVersion.paymentProvider),
+          eq(config.active, true)
         ),
     })
 
     if (!config) {
       return Err(
         new UnPriceSubscriptionError({
-          message: "Payment provider config not found",
+          message: "Payment provider config not found or not active",
         })
       )
     }
@@ -1383,14 +1384,15 @@ export class SubscriptionService {
       where: (config, { and, eq }) =>
         and(
           eq(config.projectId, phase.projectId),
-          eq(config.paymentProvider, phase.planVersion.paymentProvider)
+          eq(config.paymentProvider, phase.planVersion.paymentProvider),
+          eq(config.active, true)
         ),
     })
 
     if (!configPaymentProvider) {
       return Err(
         new UnPriceSubscriptionError({
-          message: "Payment provider config not found",
+          message: "Payment provider config not found or not active",
         })
       )
     }
@@ -1564,14 +1566,15 @@ export class SubscriptionService {
         where: (config, { and, eq }) =>
           and(
             eq(config.projectId, activePhase.projectId),
-            eq(config.paymentProvider, activePhase.planVersion.paymentProvider)
+            eq(config.paymentProvider, activePhase.planVersion.paymentProvider),
+            eq(config.active, true)
           ),
       })
 
       if (!paymentProviderConfig) {
         return Err(
           new UnPriceSubscriptionError({
-            message: "Payment provider config not found",
+            message: "Payment provider config not found or not active",
           })
         )
       }

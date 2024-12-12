@@ -73,14 +73,15 @@ export const publish = protectedProjectProcedure
           where: (config, { and, eq }) =>
             and(
               eq(config.projectId, project.id),
-              eq(config.paymentProvider, planVersionData.paymentProvider)
+              eq(config.paymentProvider, planVersionData.paymentProvider),
+              eq(config.active, true)
             ),
         })
 
         if (!config) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Payment provider config not found",
+            message: "Payment provider config not found or not active",
           })
         }
 

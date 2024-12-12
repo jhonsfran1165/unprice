@@ -648,14 +648,18 @@ export class CustomerService {
     // get config payment provider
     const configPaymentProvider = await this.db.query.paymentProviderConfig.findFirst({
       where: (config, { and, eq }) =>
-        and(eq(config.projectId, projectId), eq(config.paymentProvider, paymentProvider)),
+        and(
+          eq(config.projectId, projectId),
+          eq(config.paymentProvider, paymentProvider),
+          eq(config.active, true)
+        ),
     })
 
     if (!configPaymentProvider) {
       return Err(
         new UnPriceCustomerError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Payment provider config not found",
+          message: "Payment provider config not found or not active",
         })
       )
     }

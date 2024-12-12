@@ -62,13 +62,17 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
     // get config payment provider
     const config = await opts.ctx.db.query.paymentProviderConfig.findFirst({
       where: (config, { and, eq }) =>
-        and(eq(config.projectId, project.id), eq(config.paymentProvider, provider)),
+        and(
+          eq(config.projectId, project.id),
+          eq(config.paymentProvider, provider),
+          eq(config.active, true)
+        ),
     })
 
     if (!config) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Payment provider config not found",
+        message: "Payment provider config not found or not active",
       })
     }
 

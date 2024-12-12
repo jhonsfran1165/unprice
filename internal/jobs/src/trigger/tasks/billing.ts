@@ -92,12 +92,13 @@ export const billingTask = task({
       where: (config, { and, eq }) =>
         and(
           eq(config.projectId, projectId),
-          eq(config.paymentProvider, subscriptionPhase.planVersion.paymentProvider)
+          eq(config.paymentProvider, subscriptionPhase.planVersion.paymentProvider),
+          eq(config.active, true)
         ),
     })
 
     if (!config) {
-      throw new Error("Payment provider config not found")
+      throw new Error("Payment provider config not found or not active")
     }
 
     const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
