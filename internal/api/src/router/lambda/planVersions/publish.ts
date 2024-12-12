@@ -2,10 +2,12 @@ import { TRPCError } from "@trpc/server"
 import { APP_NAME } from "@unprice/config"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
+import { AesGCM } from "@unprice/db/utils"
 import { calculateFlatPricePlan, planVersionSelectBaseSchema } from "@unprice/db/validators"
 import { PaymentProviderService } from "@unprice/services/payment-provider"
 import { isZero } from "dinero.js"
 import { z } from "zod"
+import { env } from "../../../env.mjs"
 import { protectedProjectProcedure } from "../../../trpc"
 
 export const publish = protectedProjectProcedure
@@ -66,9 +68,33 @@ export const publish = protectedProjectProcedure
     // we need to create each product on the payment provider
     const planVersionDataUpdated = await opts.ctx.db.transaction(async (tx) => {
       try {
+        // get config payment provider
+        const config = await opts.ctx.db.query.paymentProviderConfig.findFirst({
+          where: (config, { and, eq }) =>
+            and(
+              eq(config.projectId, project.id),
+              eq(config.paymentProvider, planVersionData.paymentProvider)
+            ),
+        })
+
+        if (!config) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Payment provider config not found",
+          })
+        }
+
+        const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+        const decryptedKey = await aesGCM.decrypt({
+          iv: config.keyIv,
+          ciphertext: config.key,
+        })
+
         const paymentProviderService = new PaymentProviderService({
           logger: opts.ctx.logger,
-          paymentProviderId: planVersionData.paymentProvider,
+          paymentProvider: planVersionData.paymentProvider,
+          token: decryptedKey,
         })
 
         // create the products

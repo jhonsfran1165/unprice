@@ -9,6 +9,18 @@ export interface PaymentProviderCreateSession {
   customerId: string
 }
 
+export interface PaymentProviderGetSession {
+  metadata: {
+    [name: string]: string
+  } | null
+  customerId: string
+  subscriptionId: string | null
+}
+
+export interface GetSessionOpts {
+  sessionId: string
+}
+
 export interface CreateSessionOpts {
   currency: string
   customerId: string

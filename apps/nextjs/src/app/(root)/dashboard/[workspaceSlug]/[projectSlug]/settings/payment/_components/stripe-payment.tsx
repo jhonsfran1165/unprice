@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from "@unprice/ui/card"
 import { Switch } from "@unprice/ui/switch"
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
@@ -26,7 +27,11 @@ export function StripePayment({
   provider,
   paymentProvider,
 }: { provider?: PaymentProviderConfig; paymentProvider: PaymentProvider }) {
-  const saveConfig = api.paymentProvider.saveConfig.useMutation({})
+  const saveConfig = api.paymentProvider.saveConfig.useMutation({
+    onSuccess: () => {
+      toastAction("saved")
+    },
+  })
 
   const form = useZodForm({
     schema: insertPaymentProviderConfigSchema,

@@ -66,6 +66,7 @@ export class InvoiceStateMachine extends StateMachine<
     analytics,
     isTest = false,
     invoice,
+    paymentProviderToken,
   }: {
     db: Database | TransactionDatabase
     phaseMachine: PhaseMachine
@@ -73,6 +74,7 @@ export class InvoiceStateMachine extends StateMachine<
     analytics: Analytics
     isTest?: boolean
     invoice: SubscriptionInvoice
+    paymentProviderToken: string
   }) {
     // the initial state of the machine
     super(invoice.status)
@@ -85,8 +87,9 @@ export class InvoiceStateMachine extends StateMachine<
 
     this.paymentProviderService = new PaymentProviderService({
       customer: this.phaseMachine.getCustomer(),
-      paymentProviderId: invoice.paymentProvider,
+      paymentProvider: invoice.paymentProvider,
       logger,
+      token: paymentProviderToken,
     })
 
     /*

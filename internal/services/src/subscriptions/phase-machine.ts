@@ -5,7 +5,7 @@ import {
   subscriptionPhases,
   subscriptions,
 } from "@unprice/db/schema"
-import { newId } from "@unprice/db/utils"
+import { AesGCM, newId } from "@unprice/db/utils"
 import {
   type Customer,
   type InvoiceType,
@@ -22,6 +22,7 @@ import { Err, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { addDays } from "date-fns"
+import { env } from "../env.mjs"
 import { StateMachine } from "../machine/service"
 import { PaymentProviderService } from "../payment-provider"
 import { UnPriceSubscriptionError } from "./errors"
@@ -109,6 +110,7 @@ export class PhaseMachine extends StateMachine<
     logger,
     analytics,
     isTest = false,
+    paymentProviderToken,
   }: {
     db: Database | TransactionDatabase
     phase: SubscriptionPhaseExtended
@@ -117,6 +119,7 @@ export class PhaseMachine extends StateMachine<
     logger: Logger
     analytics: Analytics
     isTest?: boolean
+    paymentProviderToken: string
   }) {
     // the initial state of the machine
     super(phase.status)
@@ -131,8 +134,9 @@ export class PhaseMachine extends StateMachine<
 
     this.paymentProviderService = new PaymentProviderService({
       customer,
-      paymentProviderId: phase.planVersion.paymentProvider,
+      paymentProvider: phase.planVersion.paymentProvider,
       logger,
+      token: paymentProviderToken,
     })
 
     // TODO: add isFinalState to the machine so we can handle the final states
@@ -1011,6 +1015,29 @@ export class PhaseMachine extends StateMachine<
         status: "paid",
       })
 
+      const configPaymentProvider = await this.db.query.paymentProviderConfig.findFirst({
+        where: (config, { and, eq }) =>
+          and(
+            eq(config.projectId, activePhase.projectId),
+            eq(config.paymentProvider, activePhase.planVersion.paymentProvider)
+          ),
+      })
+
+      if (!configPaymentProvider) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Payment provider config not found",
+          })
+        )
+      }
+
+      const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+      const decryptedKey = await aesGCM.decrypt({
+        iv: configPaymentProvider.keyIv,
+        ciphertext: configPaymentProvider.key,
+      })
+
       // for paid invoices we need to prorate the invoice
       // this means the customer has already paid for the current cycle
       if (paidInvoice && paidInvoice.whenToBill === "pay_in_advance") {
@@ -1025,6 +1052,7 @@ export class PhaseMachine extends StateMachine<
           logger: this.logger,
           analytics: this.analytics,
           invoice: paidInvoice,
+          paymentProviderToken: decryptedKey,
         })
 
         const proratedInvoice = await invoiceMachine.transition("PRORATE_INVOICE", {
@@ -1059,6 +1087,7 @@ export class PhaseMachine extends StateMachine<
         logger: this.logger,
         analytics: this.analytics,
         invoice: invoice,
+        paymentProviderToken: decryptedKey,
       })
 
       // // collect the payment

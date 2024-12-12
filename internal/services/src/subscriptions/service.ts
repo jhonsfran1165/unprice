@@ -5,7 +5,7 @@ import {
   subscriptionPhases,
   subscriptions,
 } from "@unprice/db/schema"
-import { newId } from "@unprice/db/utils"
+import { AesGCM, newId } from "@unprice/db/utils"
 import {
   type Customer,
   type CustomerEntitlement,
@@ -29,6 +29,7 @@ import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import type { Cache } from "../cache/service"
 import { CustomerService } from "../customers/service"
+import { env } from "../env.mjs"
 import { UnPriceMachineError } from "../machine/errors"
 import type { Metrics } from "../metrics"
 import { configureBillingCycleSubscription } from "./billing"
@@ -363,6 +364,30 @@ export class SubscriptionService {
       )
     }
 
+    // get config payment provider
+    const config = await this.db.query.paymentProviderConfig.findFirst({
+      where: (config, { and, eq }) =>
+        and(
+          eq(config.projectId, activePhase.projectId),
+          eq(config.paymentProvider, activePhase.planVersion.paymentProvider)
+        ),
+    })
+
+    if (!config) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Payment provider config not found",
+        })
+      )
+    }
+
+    const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+    const decryptedKey = await aesGCM.decrypt({
+      iv: config.keyIv,
+      ciphertext: config.key,
+    })
+
     const activePhaseMachine = new PhaseMachine({
       db: this.db,
       phase: activePhase,
@@ -370,6 +395,7 @@ export class SubscriptionService {
       customer: this.customer,
       logger: this.logger,
       analytics: this.analytics,
+      paymentProviderToken: decryptedKey,
     })
 
     return Ok(activePhaseMachine)
@@ -1353,6 +1379,29 @@ export class SubscriptionService {
       )
     }
 
+    const configPaymentProvider = await this.db.query.paymentProviderConfig.findFirst({
+      where: (config, { and, eq }) =>
+        and(
+          eq(config.projectId, phase.projectId),
+          eq(config.paymentProvider, phase.planVersion.paymentProvider)
+        ),
+    })
+
+    if (!configPaymentProvider) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Payment provider config not found",
+        })
+      )
+    }
+
+    const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+    const decryptedKey = await aesGCM.decrypt({
+      iv: configPaymentProvider.keyIv,
+      ciphertext: configPaymentProvider.key,
+    })
+
     const phaseMachine = new PhaseMachine({
       db: this.db,
       phase,
@@ -1360,6 +1409,7 @@ export class SubscriptionService {
       subscription: this.subscription,
       customer: this.customer,
       analytics: this.analytics,
+      paymentProviderToken: decryptedKey,
     })
 
     const { err: pastDueErr } = await phaseMachine.transition("PAST_DUE", {
@@ -1510,12 +1560,36 @@ export class SubscriptionService {
         return Err(invoiceErr)
       }
 
+      const paymentProviderConfig = await this.db.query.paymentProviderConfig.findFirst({
+        where: (config, { and, eq }) =>
+          and(
+            eq(config.projectId, activePhase.projectId),
+            eq(config.paymentProvider, activePhase.planVersion.paymentProvider)
+          ),
+      })
+
+      if (!paymentProviderConfig) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Payment provider config not found",
+          })
+        )
+      }
+
+      const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+      const decryptedKey = await aesGCM.decrypt({
+        iv: paymentProviderConfig.keyIv,
+        ciphertext: paymentProviderConfig.key,
+      })
+
       const invoiceMachine = new InvoiceStateMachine({
         db: this.db,
         phaseMachine: activePhaseMachine,
         logger: this.logger,
         analytics: this.analytics,
         invoice: invoice?.invoice!,
+        paymentProviderToken: decryptedKey,
       })
 
       // 3. collect payment (if billed in advance)

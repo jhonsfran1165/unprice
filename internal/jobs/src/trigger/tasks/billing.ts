@@ -1,5 +1,6 @@
 import { task } from "@trigger.dev/sdk/v3"
 import { db } from "@unprice/db"
+import { AesGCM } from "@unprice/db/utils"
 import { ConsoleLogger } from "@unprice/logging"
 import { InvoiceStateMachine, PhaseMachine } from "@unprice/services/subscriptions"
 import { Analytics } from "@unprice/tinybird"
@@ -49,6 +50,7 @@ export const billingTask = task({
 
     const subscriptionPhase = await db.query.subscriptionPhases.findFirst({
       with: {
+        project: true,
         subscription: {
           with: {
             customer: true,
@@ -85,6 +87,26 @@ export const billingTask = task({
       throw new Error("Customer not found")
     }
 
+    // get config payment provider
+    const config = await db.query.paymentProviderConfig.findFirst({
+      where: (config, { and, eq }) =>
+        and(
+          eq(config.projectId, projectId),
+          eq(config.paymentProvider, subscriptionPhase.planVersion.paymentProvider)
+        ),
+    })
+
+    if (!config) {
+      throw new Error("Payment provider config not found")
+    }
+
+    const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+    const paymentProviderToken = await aesGCM.decrypt({
+      iv: config.keyIv,
+      ciphertext: config.key,
+    })
+
     const phaseMachine = new PhaseMachine({
       db: db,
       phase: subscriptionPhase,
@@ -92,6 +114,7 @@ export const billingTask = task({
       customer: subscriptionPhase.subscription.customer,
       analytics: tinybird,
       logger: logger,
+      paymentProviderToken,
     })
 
     const invoiceMachine = new InvoiceStateMachine({
@@ -100,6 +123,7 @@ export const billingTask = task({
       logger: logger,
       analytics: tinybird,
       invoice: invoice,
+      paymentProviderToken,
     })
 
     const result = await invoiceMachine.transition("COLLECT_PAYMENT", {

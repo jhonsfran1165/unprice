@@ -9,6 +9,7 @@ export const env = createEnv({
     TINYBIRD_TOKEN: z.string(),
     BASELIME_APIKEY: z.string(),
     CACHE_ENCRYPTION_KEY: z.string(),
+    ENCRYPTION_KEY: z.string(),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis

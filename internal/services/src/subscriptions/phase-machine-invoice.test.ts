@@ -91,6 +91,7 @@ describe("PhaseMachine", () => {
       logger: mockLogger,
       analytics: mockAnalytics,
       isTest: true,
+      paymentProviderToken: "12345",
     })
 
     // mock payment method calls
@@ -133,6 +134,7 @@ describe("PhaseMachine", () => {
         logger: mockLogger,
         analytics: mockAnalytics,
         isTest: true,
+        paymentProviderToken: "12345",
       })
 
       Object.defineProperty(machine, "paymentProviderService", {
@@ -201,6 +203,7 @@ describe("PhaseMachine", () => {
         logger: mockLogger,
         analytics: mockAnalytics,
         isTest: true,
+        paymentProviderToken: "12345",
       })
 
       Object.defineProperty(machine, "paymentProviderService", {
@@ -281,6 +284,7 @@ describe("PhaseMachine", () => {
         logger: mockLogger,
         analytics: mockAnalytics,
         isTest: true,
+        paymentProviderToken: "12345",
       })
 
       Object.defineProperty(machine, "paymentProviderService", {

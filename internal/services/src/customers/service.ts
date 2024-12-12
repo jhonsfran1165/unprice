@@ -6,12 +6,13 @@ import {
   customers,
   subscriptions,
 } from "@unprice/db/schema"
-import { newId } from "@unprice/db/utils"
+import { AesGCM, newId } from "@unprice/db/utils"
 import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import type { Cache, CacheNamespaces } from "../cache"
+import { env } from "../env.mjs"
 import type { Metrics } from "../metrics"
 import { PaymentProviderService } from "../payment-provider"
 import { SubscriptionService } from "../subscriptions"
@@ -643,11 +644,35 @@ export class CustomerService {
     const customerId = newId("customer")
     const customerSuccessUrl = successUrl.replace("{CUSTOMER_ID}", customerId)
 
+    // For the main project we use the default key
+    // get config payment provider
+    const configPaymentProvider = await this.db.query.paymentProviderConfig.findFirst({
+      where: (config, { and, eq }) =>
+        and(eq(config.projectId, projectId), eq(config.paymentProvider, paymentProvider)),
+    })
+
+    if (!configPaymentProvider) {
+      return Err(
+        new UnPriceCustomerError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Payment provider config not found",
+        })
+      )
+    }
+
+    const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+    const decryptedKey = await aesGCM.decrypt({
+      iv: configPaymentProvider.keyIv,
+      ciphertext: configPaymentProvider.key,
+    })
+
     // if payment is required, we need to go through payment provider flow first
     if (paymentRequired) {
       const paymentProviderService = new PaymentProviderService({
         logger: this.logger,
-        paymentProviderId: paymentProvider,
+        paymentProvider: paymentProvider,
+        token: decryptedKey,
       })
 
       // create a session with the data of the customer, the plan version and the success and cancel urls

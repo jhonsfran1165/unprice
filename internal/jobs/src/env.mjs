@@ -10,6 +10,7 @@ export const env = createEnv({
     TRIGGER_SECRET_KEY: z.string(),
     STRIPE_API_KEY: z.string(),
     TINYBIRD_TOKEN: z.string(),
+    ENCRYPTION_KEY: z.string(),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis
