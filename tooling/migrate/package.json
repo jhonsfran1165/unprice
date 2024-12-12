@@ -11,15 +11,15 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "@unprice/db": "^0.1.0",
-    "@neondatabase/serverless": "^0.9.0",
-    "drizzle-orm": "^0.31.2",
-    "ws": "^8.17.1"
+    "@neondatabase/serverless": "^0.10.4",
+    "drizzle-orm": "^0.38.1",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@unprice/tsconfig": "^0.1.0",
-    "@types/node": "20.11.24",
-    "dotenv-cli": "^7.3.0",
-    "tsx": "^4.7.2",
-    "typescript": "^5.3.3"
+    "@types/node": "20.17.10",
+    "dotenv-cli": "^7.4.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   }
 }
