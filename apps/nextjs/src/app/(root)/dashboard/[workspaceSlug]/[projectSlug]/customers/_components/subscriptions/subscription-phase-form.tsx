@@ -93,6 +93,7 @@ export function SubscriptionPhaseForm({
   useEffect(() => {
     if (selectedPlanVersion) {
       form.setValue("whenToBill", selectedPlanVersion.whenToBill)
+      form.setValue("startCycle", selectedPlanVersion.startCycle)
       form.setValue("paymentMethodRequired", selectedPlanVersion.paymentMethodRequired)
       form.setValue("collectionMethod", selectedPlanVersion.collectionMethod)
       form.setValue("whenToBill", selectedPlanVersion.whenToBill)

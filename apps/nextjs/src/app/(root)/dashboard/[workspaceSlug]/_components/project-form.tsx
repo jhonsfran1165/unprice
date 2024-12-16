@@ -2,7 +2,12 @@
 
 import { useParams, useRouter } from "next/navigation"
 
-import { type Project, type ProjectInsert, projectInsertBaseSchema } from "@unprice/db/validators"
+import {
+  type Project,
+  type ProjectInsert,
+  projectInsertBaseSchema,
+  projectSelectBaseSchema,
+} from "@unprice/db/validators"
 import {
   Form,
   FormControl,
@@ -22,17 +27,35 @@ import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 
-const CreateProjectForm = (props: {
+export function ProjectForm(props: {
   onSuccess?: (project: Project) => void
-  defaultValues?: ProjectInsert
-}) => {
+  defaultValues: ProjectInsert | Project
+}) {
   const router = useRouter()
   const workspaceSlug = useParams().workspaceSlug as string
   const apiUtils = api.useUtils()
 
+  const editMode = !!props.defaultValues.id
+  const formSchema = editMode ? projectInsertBaseSchema : projectSelectBaseSchema
+
   const form = useZodForm({
-    schema: projectInsertBaseSchema,
+    schema: formSchema,
     defaultValues: props.defaultValues,
+  })
+
+  const updateProject = api.projects.update.useMutation({
+    onSuccess: (data) => {
+      const { project: newProject } = data
+
+      toastAction("success")
+
+      // invalidate the projects query
+      apiUtils.projects.listByActiveWorkspace.invalidate()
+
+      if (props.onSuccess) {
+        props.onSuccess(newProject)
+      }
+    },
   })
 
   const createProject = api.projects.create.useMutation({
@@ -52,8 +75,12 @@ const CreateProjectForm = (props: {
     },
   })
 
-  const onSubmit = async (data: ProjectInsert) => {
-    await createProject.mutateAsync(data)
+  const onSubmit = async (data: ProjectInsert | Project) => {
+    if (editMode) {
+      await updateProject.mutateAsync(data as Project)
+    } else {
+      await createProject.mutateAsync(data as ProjectInsert)
+    }
   }
 
   return (
@@ -127,12 +154,10 @@ const CreateProjectForm = (props: {
             onClick={() => form.handleSubmit(onSubmit)()}
             isDisabled={form.formState.isSubmitting}
             isSubmitting={form.formState.isSubmitting}
-            label="Create Project"
+            label={editMode ? "Update Project" : "Create Project"}
           />
         </div>
       </form>
     </Form>
   )
 }
-
-export default CreateProjectForm

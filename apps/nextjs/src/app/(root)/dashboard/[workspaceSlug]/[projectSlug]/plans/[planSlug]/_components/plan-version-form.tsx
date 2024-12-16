@@ -3,7 +3,7 @@ import type { InsertPlanVersion } from "@unprice/db/validators"
 import { planVersionSelectBaseSchema, versionInsertBaseSchema } from "@unprice/db/validators"
 import { Button } from "@unprice/ui/button"
 import { Form, FormDescription, FormLabel } from "@unprice/ui/form"
-import { usePathname, useRouter } from "next/navigation"
+import { useParams, usePathname, useRouter } from "next/navigation"
 import { startTransition } from "react"
 import type { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
@@ -44,6 +44,8 @@ export function PlanVersionForm({
 }) {
   const pathname = usePathname()
   const router = useRouter()
+  const params = useParams()
+
   const editMode = !!defaultValues.id
   const isPublished = defaultValues.status === "published"
 
@@ -160,7 +162,12 @@ export function PlanVersionForm({
 
           <AutoRenewFormField form={form} isDisabled={isPublished} />
 
-          <PaymentProviderFormField form={form} isDisabled={isPublished} />
+          <PaymentProviderFormField
+            form={form}
+            isDisabled={isPublished}
+            workspaceSlug={params.workspaceSlug as string}
+            projectSlug={params.projectSlug as string}
+          />
         </div>
 
         <div className="mt-8 flex justify-end space-x-4">

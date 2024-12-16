@@ -8,10 +8,12 @@ import type {
   AddInvoiceItemOpts,
   CreateInvoiceOpts,
   CreateSessionOpts,
+  GetSessionOpts,
   GetStatusInvoice,
   InvoiceProviderStatus,
   PaymentMethod,
   PaymentProviderCreateSession,
+  PaymentProviderGetSession,
   PaymentProviderInterface,
   PaymentProviderInvoice,
   SignUpOpts,
@@ -22,19 +24,19 @@ import { StripePaymentProvider } from "./stripe"
 
 export class PaymentProviderService implements PaymentProviderInterface {
   private readonly logger: Logger
-  private readonly paymentProviderId: PaymentProvider
+  private readonly paymentProvider: PaymentProvider
   private readonly stripe: StripePaymentProvider
 
   constructor(opts: {
-    token?: string
+    token: string
     customer?: Customer
     logger: Logger
-    paymentProviderId: PaymentProvider
+    paymentProvider: PaymentProvider
   }) {
     this.logger = opts.logger
-    this.paymentProviderId = opts.paymentProviderId
+    this.paymentProvider = opts.paymentProvider
 
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         const providerCustomerId = opts.customer?.stripeCustomerId
 
@@ -50,10 +52,36 @@ export class PaymentProviderService implements PaymentProviderInterface {
     }
   }
 
+  public setCustomerId(customerId: string) {
+    switch (this.paymentProvider) {
+      case "stripe": {
+        this.stripe.setCustomerId(customerId)
+        break
+      }
+      default: {
+        return Err(new FetchError({ message: "Payment provider not supported", retry: false }))
+      }
+    }
+  }
+
+  public async getSession(
+    opts: GetSessionOpts
+  ): Promise<Result<PaymentProviderGetSession, FetchError>> {
+    switch (this.paymentProvider) {
+      case "stripe": {
+        const result = await this.stripe.getSession(opts)
+        return result
+      }
+      default: {
+        return Err(new FetchError({ message: "Payment provider not supported", retry: false }))
+      }
+    }
+  }
+
   public async createSession(
     opts: CreateSessionOpts
   ): Promise<Result<PaymentProviderCreateSession, FetchError>> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         const result = await this.stripe.createSession(opts)
         return result
@@ -65,7 +93,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   }
 
   public async signUp(opts: SignUpOpts): Promise<Result<PaymentProviderCreateSession, FetchError>> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.signUp(opts)
       }
@@ -78,7 +106,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public formatAmount(
     price: Dinero<number>
   ): Result<{ amount: number; currency: Currency }, FetchError> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         const result = toStripeMoney(price)
         return Ok(result)
@@ -92,7 +120,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async upsertProduct(
     props: Stripe.ProductCreateParams & { id: string }
   ): Promise<Result<{ productId: string }, FetchError>> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.upsertProduct(props)
       }
@@ -105,7 +133,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async listPaymentMethods(opts: { limit?: number }): Promise<
     Result<PaymentMethod[], FetchError | UnPricePaymentProviderError>
   > {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.listPaymentMethods(opts)
       }
@@ -118,7 +146,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async createInvoice(
     opts: CreateInvoiceOpts
   ): Promise<Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.createInvoice(opts)
       }
@@ -131,7 +159,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async updateInvoice(
     opts: UpdateInvoiceOpts
   ): Promise<Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.updateInvoice(opts)
       }
@@ -144,7 +172,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async addInvoiceItem(
     opts: AddInvoiceItemOpts
   ): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.addInvoiceItem(opts)
       }
@@ -157,7 +185,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async updateInvoiceItem(
     opts: UpdateInvoiceItemOpts
   ): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.updateInvoiceItem(opts)
       }
@@ -170,7 +198,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async getDefaultPaymentMethodId(): Promise<
     Result<{ paymentMethodId: string }, FetchError | UnPricePaymentProviderError>
   > {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.getDefaultPaymentMethodId()
       }
@@ -183,7 +211,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async finalizeInvoice(opts: {
     invoiceId: string
   }): Promise<Result<{ invoiceId: string }, FetchError | UnPricePaymentProviderError>> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.finalizeInvoice(opts)
       }
@@ -196,7 +224,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async sendInvoice(opts: {
     invoiceId: string
   }): Promise<Result<void, FetchError | UnPricePaymentProviderError>> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.sendInvoice(opts)
       }
@@ -215,7 +243,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
       FetchError | UnPricePaymentProviderError
     >
   > {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.collectPayment(opts)
       }
@@ -228,7 +256,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async getStatusInvoice(opts: {
     invoiceId: string
   }): Promise<Result<GetStatusInvoice, FetchError | UnPricePaymentProviderError>> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.getStatusInvoice(opts)
       }
@@ -241,7 +269,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   public async getInvoice(opts: {
     invoiceId: string
   }): Promise<Result<PaymentProviderInvoice, FetchError | UnPricePaymentProviderError>> {
-    switch (this.paymentProviderId) {
+    switch (this.paymentProvider) {
       case "stripe": {
         return await this.stripe.getInvoice(opts)
       }

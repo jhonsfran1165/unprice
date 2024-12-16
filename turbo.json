@@ -17,7 +17,8 @@
     "AUTH_GITHUB_CLIENT_ID",
     "AUTH_GITHUB_CLIENT_SECRET",
     "AUTH_REDIRECT_PROXY_URL",
-    "RESEND_API_KEY"
+    "RESEND_API_KEY",
+    "ENCRYPTION_KEY"
   ],
   "tasks": {
     "topo": {

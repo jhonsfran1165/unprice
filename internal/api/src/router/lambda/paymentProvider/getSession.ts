@@ -4,49 +4,40 @@ import { paymentProviderSchema } from "@unprice/db/validators"
 import { PaymentProviderService } from "@unprice/services/payment-provider"
 import { z } from "zod"
 import { env } from "../../../env.mjs"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
+import { rateLimiterProcedure } from "../../../trpc"
 
-// TODO: move to payment provider endpoint
-export const createPaymentMethod = protectedApiOrActiveProjectProcedure
+export const getSession = rateLimiterProcedure
   .meta({
-    span: "customers.createPaymentMethod",
+    span: "paymentProvider.getSession",
     openapi: {
       method: "POST",
-      path: "/edge/customers.createPaymentMethod",
+      path: "/edge/paymentProvider.getSession",
       protect: true,
     },
   })
   .input(
     z.object({
       paymentProvider: paymentProviderSchema,
-      customerId: z.string(),
-      successUrl: z.string().url(),
-      cancelUrl: z.string().url(),
+      sessionId: z.string(),
+      projectId: z.string(),
     })
   )
-  .output(z.object({ success: z.boolean(), url: z.string() }))
-  .mutation(async (opts) => {
-    const project = opts.ctx.project
-
-    const { successUrl, cancelUrl, customerId, paymentProvider } = opts.input
-
-    const customerData = await opts.ctx.db.query.customers.findFirst({
-      where: (customer, { and, eq }) =>
-        and(eq(customer.id, customerId), eq(customer.projectId, project.id)),
+  .output(
+    z.object({
+      metadata: z.record(z.string(), z.string()).nullable(),
+      customerId: z.string(),
+      subscriptionId: z.string().nullable(),
+      paymentMethodId: z.string().nullable(),
     })
-
-    if (!customerData) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Customer not found",
-      })
-    }
+  )
+  .mutation(async (opts) => {
+    const { sessionId, paymentProvider, projectId } = opts.input
 
     // get config payment provider
     const config = await opts.ctx.db.query.paymentProviderConfig.findFirst({
       where: (config, { and, eq }) =>
         and(
-          eq(config.projectId, project.id),
+          eq(config.projectId, projectId),
           eq(config.paymentProvider, paymentProvider),
           eq(config.active, true)
         ),
@@ -67,19 +58,13 @@ export const createPaymentMethod = protectedApiOrActiveProjectProcedure
     })
 
     const paymentProviderService = new PaymentProviderService({
-      customer: customerData,
       logger: opts.ctx.logger,
       paymentProvider: opts.input.paymentProvider,
       token: decryptedKey,
     })
 
-    const { err, val } = await paymentProviderService.createSession({
-      customerId: customerId,
-      projectId: project.id,
-      email: customerData.email,
-      currency: customerData.defaultCurrency,
-      successUrl: successUrl,
-      cancelUrl: cancelUrl,
+    const { err, val } = await paymentProviderService.getSession({
+      sessionId,
     })
 
     if (err) {
@@ -89,5 +74,22 @@ export const createPaymentMethod = protectedApiOrActiveProjectProcedure
       })
     }
 
-    return val
+    // set customer id so we can use it in the next request
+    paymentProviderService.setCustomerId(val.customerId)
+
+    const paymentMethods = await paymentProviderService.listPaymentMethods({
+      limit: 1,
+    })
+
+    if (paymentMethods.err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: paymentMethods.err.message,
+      })
+    }
+
+    return {
+      ...val,
+      paymentMethodId: paymentMethods.val.at(0)?.id ?? null,
+    }
   })

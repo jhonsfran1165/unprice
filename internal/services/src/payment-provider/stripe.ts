@@ -3,16 +3,18 @@ import type { Currency } from "@unprice/db/validators"
 import type { Result } from "@unprice/error"
 import { Err, FetchError, Ok } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
-import { Stripe, stripe } from "@unprice/stripe"
+import { Stripe } from "@unprice/stripe"
 import { UnPricePaymentProviderError } from "./errors"
 import type {
   AddInvoiceItemOpts,
   CreateInvoiceOpts,
   CreateSessionOpts,
+  GetSessionOpts,
   GetStatusInvoice,
   InvoiceProviderStatus,
   PaymentMethod,
   PaymentProviderCreateSession,
+  PaymentProviderGetSession,
   PaymentProviderInterface,
   PaymentProviderInvoice,
   SignUpOpts,
@@ -22,21 +24,21 @@ import type {
 
 export class StripePaymentProvider implements PaymentProviderInterface {
   private readonly client: Stripe
-  private readonly providerCustomerId?: string | null
+  private providerCustomerId?: string | null
   private readonly logger: Logger
 
-  constructor(opts: { token?: string; providerCustomerId?: string | null; logger: Logger }) {
+  constructor(opts: { token: string; providerCustomerId?: string | null; logger: Logger }) {
     this.providerCustomerId = opts?.providerCustomerId
     this.logger = opts?.logger
 
-    if (opts?.token) {
-      this.client = new Stripe(opts.token, {
-        apiVersion: "2023-10-16",
-        typescript: true,
-      })
-    } else {
-      this.client = stripe
-    }
+    this.client = new Stripe(opts.token, {
+      apiVersion: "2023-10-16",
+      typescript: true,
+    })
+  }
+
+  public setCustomerId(customerId: string) {
+    this.providerCustomerId = customerId
   }
 
   public async upsertProduct(
@@ -47,14 +49,14 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       const product = await this.client.products.retrieve(id).catch(() => null)
 
       if (product) {
-        const updatedProduct = await stripe.products.update(id, {
+        const updatedProduct = await this.client.products.update(id, {
           ...rest,
         })
 
         return Ok({ productId: updatedProduct.id })
       }
 
-      return Ok({ productId: (await stripe.products.create(props)).id })
+      return Ok({ productId: (await this.client.products.create(props)).id })
     } catch (error) {
       const e = error as Error
 
@@ -151,7 +153,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
 
       // do not use `new URL(...).searchParams` here, because it will escape the curly braces and stripe will not replace them with the session id
       // we pass urls as metadata and the call one of our endpoints to handle the session validation and then redirect the user to the success or cancel url
-      const apiCallbackUrl = `${API_DOMAIN}providers/stripe/setup?session_id={CHECKOUT_SESSION_ID}`
+      const apiCallbackUrl = `${API_DOMAIN}providers/stripe/setup?session_id={CHECKOUT_SESSION_ID}&project_id=${opts.projectId}`
 
       // create a new session for registering a payment method
       const session = await this.client.checkout.sessions.create({
@@ -191,6 +193,26 @@ export class StripePaymentProvider implements PaymentProviderInterface {
           retry: true,
         })
       )
+    }
+  }
+
+  public async getSession(
+    opts: GetSessionOpts
+  ): Promise<Result<PaymentProviderGetSession, FetchError>> {
+    try {
+      const session = await this.client.checkout.sessions.retrieve(opts.sessionId)
+
+      return Ok({
+        metadata: session.metadata,
+        customerId: session.customer as string,
+        subscriptionId: session.subscription as string,
+      })
+    } catch (error) {
+      const e = error as Stripe.errors.StripeError
+
+      this.logger.error("Error getting session", { error: e.message, ...opts })
+
+      return Err(new FetchError({ message: e.message, retry: false }))
     }
   }
 

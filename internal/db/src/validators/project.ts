@@ -14,14 +14,19 @@ export const projectInsertBaseSchema = createInsertSchema(schema.projects, {
   url: z.string().url().optional(),
   defaultCurrency: currencySchema,
   timezone: z.string().min(1, "Timezone is required"),
-}).omit({
-  id: true,
-  enabled: true,
-  workspaceId: true,
-  slug: true,
-  isMain: true,
-  isInternal: true,
 })
+  .partial({
+    id: true,
+    workspaceId: true,
+  })
+  .omit({
+    createdAtM: true,
+    updatedAtM: true,
+    enabled: true,
+    slug: true,
+    isMain: true,
+    isInternal: true,
+  })
 
 export const renameProjectSchema = projectSelectBaseSchema.pick({
   slug: true,

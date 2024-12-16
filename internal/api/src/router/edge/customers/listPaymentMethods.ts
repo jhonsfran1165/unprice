@@ -1,7 +1,9 @@
 import { TRPCError } from "@trpc/server"
+import { AesGCM } from "@unprice/db/utils"
 import { paymentProviderSchema } from "@unprice/db/validators"
 import { PaymentProviderService } from "@unprice/services/payment-provider"
 import { z } from "zod"
+import { env } from "../../../env.mjs"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
 
 export const listPaymentMethods = protectedApiOrActiveProjectProcedure
@@ -57,11 +59,36 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
       }
     }
 
+    // get config payment provider
+    const config = await opts.ctx.db.query.paymentProviderConfig.findFirst({
+      where: (config, { and, eq }) =>
+        and(
+          eq(config.projectId, project.id),
+          eq(config.paymentProvider, provider),
+          eq(config.active, true)
+        ),
+    })
+
+    if (!config) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Payment provider config not found or not active",
+      })
+    }
+
+    const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+    const decryptedKey = await aesGCM.decrypt({
+      iv: config.keyIv,
+      ciphertext: config.key,
+    })
+
     try {
       const paymentProviderService = new PaymentProviderService({
         customer: customerData,
         logger: opts.ctx.logger,
-        paymentProviderId: provider,
+        paymentProvider: provider,
+        token: decryptedKey,
       })
 
       const defaultPaymentMethodId = await paymentProviderService.getDefaultPaymentMethodId()

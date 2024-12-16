@@ -45,6 +45,10 @@ export const PROJECT_NAV: DashboardRoute[] = [
         name: "Danger",
         href: "/settings/danger",
       },
+      {
+        name: "Payment Provider",
+        href: "/settings/payment",
+      },
     ],
   },
 ]

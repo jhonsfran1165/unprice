@@ -99,7 +99,7 @@ export function CurrencyFormField({
               href="#"
               className="ml-auto inline-block text-info text-xs underline opacity-70"
             >
-              Set default currency for this organization
+              Set default currency for this app
             </SuperLink>
           </div>
 
@@ -206,9 +206,13 @@ export function BillingPeriodFormField({
 export function PaymentProviderFormField({
   form,
   isDisabled,
+  workspaceSlug,
+  projectSlug,
 }: {
   form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
   isDisabled?: boolean
+  workspaceSlug: string
+  projectSlug: string
 }) {
   return (
     <FormField
@@ -220,7 +224,7 @@ export function PaymentProviderFormField({
             <FormLabel>Payment provider</FormLabel>
             {/* // TODO: add link to payment provider configuration */}
             <SuperLink
-              href="#"
+              href={`/${workspaceSlug}/${projectSlug}/settings/payment`}
               className="ml-auto inline-block text-info text-xs underline opacity-70"
             >
               Configure payment provider

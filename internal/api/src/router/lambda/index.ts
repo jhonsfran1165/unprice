@@ -5,6 +5,7 @@ import { domainRouter } from "./domains"
 import { featureRouter } from "./features"
 import { ingestionRouter } from "./ingestions"
 import { pageRouter } from "./pages"
+import { paymentProviderRouter } from "./paymentProvider"
 import { planVersionFeatureRouter } from "./planVersionFeatures"
 import { planVersionRouter } from "./planVersions"
 import { planRouter } from "./plans"
@@ -32,4 +33,5 @@ export const lambdaEndpoints = {
   stripe: stripeRouter,
   customers: customersRouter,
   pages: pageRouter,
+  paymentProvider: paymentProviderRouter,
 }
