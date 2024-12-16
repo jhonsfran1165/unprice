@@ -3,7 +3,7 @@
 import { LazyMotion, domAnimation, m } from "framer-motion"
 import { useParams, useRouter } from "next/navigation"
 import { Balancer } from "react-wrap-balancer"
-import CreateProjectForm from "../../_components/create-project-form"
+import { ProjectForm } from "../../_components/project-form"
 
 export default function CreateProject() {
   const router = useRouter()
@@ -51,7 +51,7 @@ export default function CreateProject() {
               },
             }}
           >
-            <CreateProjectForm
+            <ProjectForm
               onSuccess={({ slug }) => {
                 const searchParams = new URLSearchParams(window.location.search)
                 searchParams.set("step", "create-api-key")

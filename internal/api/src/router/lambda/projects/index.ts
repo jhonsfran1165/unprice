@@ -8,7 +8,7 @@ import { listByWorkspace } from "./listByWorkspace"
 import { rename } from "./rename"
 import { transferToPersonal } from "./transferToPersonal"
 import { transferToWorkspace } from "./transferToWorkspace"
-
+import { update } from "./update"
 export const projectRouter = createTRPCRouter({
   create,
   delete: deleteProject,
@@ -16,6 +16,7 @@ export const projectRouter = createTRPCRouter({
   listByActiveWorkspace,
   listByWorkspace,
   rename,
+  update,
   getById,
   transferToPersonal,
   transferToWorkspace,
