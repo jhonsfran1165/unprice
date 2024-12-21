@@ -3,13 +3,13 @@ import { NextResponse } from "next/server"
 
 import type { NextAuthRequest } from "@unprice/auth"
 
-import { COOKIES_APP } from "@unprice/config"
 import {
   API_AUTH_ROUTE_PREFIX,
   API_TRPC_ROUTE_PREFIX,
   APP_AUTH_ROUTES,
   APP_NON_WORKSPACE_ROUTES,
   AUTH_ROUTES,
+  COOKIES_APP,
 } from "@unprice/config"
 import { isSlug } from "@unprice/db/utils"
 import { parse } from "~/lib/domains"
@@ -81,7 +81,7 @@ export default function AppMiddleware(req: NextAuthRequest) {
 
   // if not workspace in path check cookies or jwt
   if (!currentWorkspaceSlug) {
-    // get the first workspace
+    // get default workspace from user
     const redirectWorkspaceSlug = user.workspaces[0]?.slug
 
     // there is a cookie/jwt claim for the workspace redirect

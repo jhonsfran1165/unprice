@@ -8,12 +8,9 @@ export const env = createEnv({
     DRIZZLE_LOG: z.string().default("false"),
   },
   server: {
-    DATABASE_PRIMARY_URL: z.string().min(1).url(),
-    DATABASE_READ1_URL: z.string().min(1).url(),
-    DATABASE_READ2_URL: z.string().min(1).url(),
-    DATABASE_URL_MIGRATOR: z.string().url().optional(),
-    DATABASE_URL_LOCAL: z.string().url().optional(),
-    DATABASE_URL_MIGRATOR_LOCAL: z.string().url().optional(),
+    DATABASE_URL: z.string().min(1).url(),
+    DATABASE_READ1_URL: z.string().url().optional(),
+    DATABASE_READ2_URL: z.string().url().optional(),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis

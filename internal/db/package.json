@@ -36,7 +36,7 @@
     "studio:neon": "pnpm with-env drizzle-kit studio --config=neon.config.ts --verbose",
     "studio:local": "pnpm with-env drizzle-kit studio --config=local.config.ts --verbose",
     "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env.local --"
+    "with-env": "infisical run --env=preview --path=/app --"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.3",
@@ -54,7 +54,6 @@
   "devDependencies": {
     "@types/ws": "^8.5.10",
     "@unprice/tsconfig": "^0.1.0",
-    "dotenv-cli": "^7.3.0",
     "drizzle-kit": "^0.28.0",
     "tsx": "^4.7.2",
     "typescript": "^5.3.3",

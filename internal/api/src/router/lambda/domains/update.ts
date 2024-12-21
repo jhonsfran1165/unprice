@@ -43,7 +43,7 @@ export const update = protectedWorkspaceProcedure
     }
 
     const vercel = new Vercel({
-      accessToken: env.VERCEL_AUTH_BEARER_TOKEN,
+      accessToken: env.VERCEL_TOKEN,
       teamId: env.TEAM_ID_VERCEL,
     })
 

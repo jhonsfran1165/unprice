@@ -22,8 +22,7 @@ if (env.NODE_ENV === "development") {
 }
 
 const poolConfig = {
-  connectionString:
-    env.NODE_ENV === "development" ? env.DATABASE_URL_LOCAL : env.DATABASE_PRIMARY_URL,
+  connectionString: env.DATABASE_URL,
   connectionTimeoutMillis: 30000,
   keepAlive: true,
 }

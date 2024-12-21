@@ -14,7 +14,7 @@ export const env = createEnv({
     STRIPE_WEBHOOK_SECRET: z.string(),
     PROJECT_ID_VERCEL: z.string(),
     TEAM_ID_VERCEL: z.string(),
-    VERCEL_AUTH_BEARER_TOKEN: z.string(),
+    VERCEL_TOKEN: z.string(),
     BASELIME_APIKEY: z.string(),
     ENCRYPTION_KEY: z.string(),
   },

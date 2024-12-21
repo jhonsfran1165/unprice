@@ -7,16 +7,15 @@
   },
   "engineStrict": true,
   "scripts": {
-    "build": "pnpm with-env next build",
+    "build": "next build",
     "analyze": "ANALYZE=true pnpm --filter nextjs run build",
-    "preview": "pnpm with-env next build && pnpm with-env next start",
+    "preview": "next build && next start",
     "clean": "git clean -xdf .next .turbo node_modules",
-    "dev:turbo": "pnpm with-env next dev --turbo",
-    "dev": "pnpm with-env next dev",
+    "dev:turbo": "next dev --turbo",
+    "dev": "next dev",
     "fmt": "pnpm biome format . --write && pnpm biome check . --apply",
-    "start": "pnpm with-env next start",
-    "typecheck": "tsc",
-    "with-env": "dotenv -e ../../.env.local --"
+    "start": "next start",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "@baselime/node-opentelemetry": "^0.5.8",
@@ -99,7 +98,6 @@
     "@unprice/tailwind-config": "^0.1.0",
     "@unprice/tsconfig": "^0.1.0",
     "autoprefixer": "^10.4.18",
-    "dotenv-cli": "^7.3.0",
     "tailwindcss": "3.4.1",
     "typescript": "^5.3.3"
   }

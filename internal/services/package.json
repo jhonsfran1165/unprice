@@ -22,7 +22,7 @@
     "test:file": "SKIP_ENV_VALIDATION=true vitest $@",
     "clean": "rm -rf .turbo node_modules",
     "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env.local --"
+    "with-env": "infisical run --env=preview --path=/app --"
   },
   "dependencies": {
     "@unkey/cache": "^1.5.0",

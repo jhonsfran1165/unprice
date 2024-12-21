@@ -289,9 +289,6 @@ importers:
       autoprefixer:
         specifier: ^10.4.18
         version: 10.4.20(postcss@8.4.35)
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.4.2
       tailwindcss:
         specifier: 3.4.1
         version: 3.4.1
@@ -500,9 +497,6 @@ importers:
       '@unprice/tsconfig':
         specifier: ^0.1.0
         version: link:../../tooling/typescript
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.4.2
       drizzle-kit:
         specifier: ^0.28.0
         version: 0.28.0
@@ -956,28 +950,6 @@ importers:
         specifier: ^5.3.3
         version: 5.5.4
 
-  tooling/client:
-    dependencies:
-      '@unprice/unprice':
-        specifier: workspace:^
-        version: link:../../packages/unprice
-    devDependencies:
-      '@types/node':
-        specifier: 20.11.24
-        version: 20.11.24
-      '@unprice/tsconfig':
-        specifier: ^0.1.0
-        version: link:../typescript
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.4.2
-      tsx:
-        specifier: ^4.7.2
-        version: 4.17.0
-      typescript:
-        specifier: ^5.3.3
-        version: 5.5.4
-
   tooling/k6:
     devDependencies:
       k6:
@@ -1005,9 +977,6 @@ importers:
       '@unprice/tsconfig':
         specifier: ^0.1.0
         version: link:../typescript
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.4.2
       tsx:
         specifier: ^4.7.2
         version: 4.17.0
@@ -10858,21 +10827,6 @@ packages:
       type-fest: 3.13.1
     dev: true
 
-  /dotenv-cli@7.4.2:
-    resolution: {integrity: sha512-SbUj8l61zIbzyhIbg0FwPJq6+wjbzdn9oEtozQpZ6kW2ihCcapKVZj49oCT3oPM+mgQm+itgvUQcG5szxVrZTA==}
-    hasBin: true
-    dependencies:
-      cross-spawn: 7.0.3
-      dotenv: 16.4.5
-      dotenv-expand: 10.0.0
-      minimist: 1.2.8
-    dev: true
-
-  /dotenv-expand@10.0.0:
-    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
-    engines: {node: '>=12'}
-    dev: true
-
   /dotenv@16.0.3:
     resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
     engines: {node: '>=12'}
@@ -14537,6 +14491,7 @@ packages:
 
   /minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
+    dev: false
 
   /minipass@3.3.6:
     resolution: {integrity: sha512-DxiNidxSEK+tHG6zOIklvNOwm3hvCrbUrdtzY74U6HKTJxvIDfOUL5W5P2Ghd3DTkhhKPYGqeNUIh5qcM4YBfw==}

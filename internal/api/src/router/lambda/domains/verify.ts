@@ -4,8 +4,8 @@ import {
   type DomainVerificationStatusProps,
   domainVerificationStatusSchema,
 } from "@unprice/db/validators"
-import { Vercel } from "@unprice/vercel"
 import type { Domain } from "@unprice/vercel"
+import { Vercel } from "@unprice/vercel"
 import { z } from "zod"
 import { env } from "../../../env.mjs"
 import { protectedWorkspaceProcedure } from "../../../trpc"
@@ -22,7 +22,7 @@ export const verify = protectedWorkspaceProcedure
     let status: DomainVerificationStatusProps = "Valid Configuration"
 
     const vercel = new Vercel({
-      accessToken: env.VERCEL_AUTH_BEARER_TOKEN,
+      accessToken: env.VERCEL_TOKEN,
       teamId: env.TEAM_ID_VERCEL,
     })
 
