@@ -90,6 +90,7 @@ jobs:
 
       - name: Run Migrations
         run: |
+          pnpm install drizzle-kit@^0.30.1 --filter db
           pnpm --filter db generate
           pnpm --filter db migrate
 
