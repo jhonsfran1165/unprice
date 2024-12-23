@@ -32,12 +32,13 @@ jobs:
           secret-path: "/"
           recursive: true
 
-      - name: read .env file and export every key to github env
-        run: |
-          while read -r line; do
-            echo "inserting $line to $GITHUB_ENV"
-            echo "$line" >> $GITHUB_ENV
-          done < .env
+      - uses: cardinalby/export-env-action@v2
+        with:
+          envFile: '.env'
+          exportToGithubEnv: true
+          # export everything except DATABASE_URL using regex
+          filter: ^(?!DATABASE_URL$).*$
+          mask: true
 
       - name: Get branch name
         id: branch-name
@@ -83,3 +84,8 @@ jobs:
           message: |
             Vercel Preview URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
             Neon branch :elephant: : https://console.neon.tech/app/projects/${{ env.NEON_PROJECT_ID }}/branches/${{ steps.create-branch.outputs.branch_id }}
+
+      - name: Delete Secret
+        if: always()
+        run: |
+          rm -rf .env || true
