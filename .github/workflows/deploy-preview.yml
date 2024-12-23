@@ -1,21 +1,22 @@
 name: Deploy Preview
 
 on:
-  push:
-    branches:
-      - feat/devops
+  pull_request:
+    branches: ['*']
+  merge_group:
 
 # You can leverage Vercel Remote Caching with Turbo to speed up your builds
 # @link https://turborepo.org/docs/core-concepts/remote-caching#remote-caching-on-vercel-builds
 env:
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
   SKIP_ENV_VALIDATION: 1
 
 jobs:
   deploy-preview:
-
     runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      contents: read
 
     steps:
       - name: Checkout repo
@@ -40,6 +41,33 @@ jobs:
           filter: ^(?!DATABASE_URL$).*$
           mask: true
 
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8.6.12
+          run_install: false
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.11.0
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: |
+          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install deps (with cache)
+        run: pnpm install --recursive
+
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v8
@@ -60,9 +88,29 @@ jobs:
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> .env
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_ENV
 
-      - run: pnpm run db:migrate
+      - name: Run Migrations
+        run: |
+          pnpm --filter db generate
+          pnpm --filter db migrate
 
-      # Diff the schema?
+      - name: commit migrations
+        run: |
+          git config --global user.email "unprice-bot@unprice.com"
+          git config --global user.name "Unprice Bot"
+
+          git add .
+          git commit -m "Migrations for preview"
+          git push
+
+      - name: Schema Diff
+        uses: neondatabase/schema-diff-action@v1
+        with:
+          project_id: ${{ env.NEON_PROJECT_ID }}
+          parent: main
+          branch_name: preview/pr-${{ steps.branch-name.outputs.current_branch }}
+          username: ${{ env.NEON_DATABASE_USERNAME }}
+          database: ${{ env.NEON_DATABASE_NAME }}
+          api_key: ${{ env.NEON_API_KEY }}
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
