@@ -12,7 +12,7 @@
     "clean": "git clean -xdf node_modules dist .next",
     "clean:workspaces": "turbo clean --parallel",
     "dev": "cross-env FORCE_COLOR=1 turbo dev --parallel",
-    "dev:infisical": "infisical run --env=preview --path=/app pnpm dev",
+    "with-infisical": "infisical run --env=preview --path=/app --",
     "typecheck": "turbo typecheck",
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip --include files,dependencies",
