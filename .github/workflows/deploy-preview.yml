@@ -31,6 +31,12 @@ jobs:
           file-output-path: ".env"
           secret-path: "/"
 
+      - name: read .env file and export every key to github env
+        run: |
+          while read -r line; do
+            echo "$line" >> $GITHUB_ENV
+          done < .env
+
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v8
@@ -48,6 +54,7 @@ jobs:
 
       - run: |
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> .env
+          echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_ENV
 
       - run: pnpm run db:migrate
 
