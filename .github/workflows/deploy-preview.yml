@@ -89,7 +89,8 @@ jobs:
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_ENV
 
       - name: Install Drizzle Kit
-        run: pnpm install drizzle-kit@^0.30.1 -w
+        run: |
+          pnpm add -g drizzle-kit@0.30.1
 
       - name: Run Migrations
         run: |
