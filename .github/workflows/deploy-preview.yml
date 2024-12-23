@@ -89,9 +89,10 @@ jobs:
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_ENV
 
       - name: Run Migrations
+        working-directory: internal/db
         run: |
-          pnpm --filter db generate
-          pnpm --filter db migrate
+          pnpm drizzle-kit generate --config=drizzle.config.ts
+          pnpm drizzle-kit migrate --config=drizzle.config.ts
 
       - name: commit migrations
         run: |
