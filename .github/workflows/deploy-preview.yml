@@ -91,8 +91,8 @@ jobs:
       - name: Run Migrations
         working-directory: internal/db
         run: |
-          pnpm drizzle-kit generate --config=drizzle.config.ts
-          pnpm drizzle-kit migrate --config=drizzle.config.ts
+          pnpm generate
+          pnpm migrate
 
       - name: commit migrations
         run: |
