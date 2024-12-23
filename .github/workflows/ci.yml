@@ -2,7 +2,8 @@ name: CI
 
 on:
   pull_request:
-    branches: ['*']
+  # TODO: change this
+    branches: ['main']
   push:
     branches: ['main']
   merge_group:
