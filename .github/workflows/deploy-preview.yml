@@ -28,7 +28,7 @@ jobs:
           env-slug: "preview"
           project-slug: "unprice-zq-xm"
           export-type: "file"
-          file-output-path: ".env"
+          file-output-path: "/.env"
           secret-path: "/"
 
       - name: read .env file and export every key to github env
@@ -52,6 +52,7 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
+      # override the DATABASE_URL in .env file
       - run: |
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> .env
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_ENV
