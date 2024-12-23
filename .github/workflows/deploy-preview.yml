@@ -28,20 +28,16 @@ jobs:
           env-slug: "preview"
           project-slug: "unprice-zq-xm"
           export-type: "file"
-          file-output-path: "/.env.preview"
+          file-output-path: "/.env"
           secret-path: "/"
+          recursive: true
 
       - name: read .env file and export every key to github env
         run: |
-          pwd
-          ls -la
-          cat "/.env"
           while read -r line; do
             echo "inserting $line to $GITHUB_ENV"
             echo "$line" >> $GITHUB_ENV
-          done < "/.env"
-
-          cat "/.env"
+          done < .env
 
       - name: Get branch name
         id: branch-name
