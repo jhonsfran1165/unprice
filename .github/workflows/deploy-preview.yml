@@ -66,7 +66,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install deps (with cache)
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --recursive
 
       - name: Get branch name
         id: branch-name
@@ -89,10 +89,9 @@ jobs:
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_ENV
 
       - name: Run Migrations
-        working-directory: ./internal/db
         run: |
-          pnpm dlx drizzle-kit generate --config=drizzle.config.ts
-          pnpm dlx drizzle-kit migrate --config=drizzle.config.ts
+          pnpm --filter db generate
+          pnpm --filter db migrate
 
       - name: commit migrations
         run: |
