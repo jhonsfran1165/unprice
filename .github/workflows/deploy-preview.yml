@@ -90,6 +90,7 @@ jobs:
 
       - name: Run Migrations
         run: |
+          pnpm --filter db add -D drizzle-kit@latest drizzle-orm@latest
           pnpm --filter db generate
           pnpm --filter db migrate:custom
 
