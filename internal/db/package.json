@@ -19,14 +19,14 @@
   "scripts": {
     "test": "vitest run",
     "clean": "rm -rf .turbo node_modules",
-    "generate": "drizzle-kit generate --config=drizzle.config.ts",
-    "drop": "drizzle-kit drop --config=drizzle.config.ts",
-    "migrate": "drizzle-kit migrate --config=drizzle.config.ts",
-    "migrate:custom": "tsx src/migrate.ts",
-    "introspect": "drizzle-kit introspect --config=drizzle.config.ts",
-    "push": "drizzle-kit push --config=drizzle.config.ts",
-    "up": "drizzle-kit up --config=drizzle.config.ts",
-    "studio": "drizzle-kit studio --config=drizzle.config.ts --verbose",
+    "generate": "pnpm exec drizzle-kit generate --config=drizzle.config.ts",
+    "drop": "pnpm exec drizzle-kit drop --config=drizzle.config.ts",
+    "migrate": "pnpm exec drizzle-kit migrate --config=drizzle.config.ts",
+    "migrate:custom": "pnpm tsx src/migrate.ts",
+    "introspect": "pnpm exec drizzle-kit introspect --config=drizzle.config.ts",
+    "push": "pnpm exec drizzle-kit push --config=drizzle.config.ts",
+    "up": "pnpm exec drizzle-kit up --config=drizzle.config.ts",
+    "studio": "pnpm exec drizzle-kit studio --config=drizzle.config.ts --verbose",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
