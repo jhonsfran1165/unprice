@@ -127,7 +127,7 @@ jobs:
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_URL preview --force --sensitive --token=${{ env.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
-        run: vercel build --token=${{ env.VERCEL_TOKEN }}
+        run: vercel build --token=${{ env.VERCEL_TOKEN }} --yes
 
       - name: Deploy Preview to Vercel
         id: deploy
