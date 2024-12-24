@@ -23,9 +23,10 @@ jobs:
           secret-path: "/"
 
       - name: Run Migrations
+        working-directory: internal/db
         run: |
-          pnpm run db:generate
-          pnpm run db:migrate
+          pnpm generate
+          pnpm migrate:custom
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest

@@ -34,4 +34,4 @@ const {
   ...authConfig,
 })
 
-export { GET, POST, signIn, signOut, auth, unstable_update }
+export { auth, GET, POST, signIn, signOut, unstable_update }

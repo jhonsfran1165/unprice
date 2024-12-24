@@ -92,7 +92,7 @@ jobs:
         working-directory: internal/db
         run: |
           pnpm generate
-          pnpm migrate
+          pnpm migrate:custom
 
       - name: commit migrations
         run: |
