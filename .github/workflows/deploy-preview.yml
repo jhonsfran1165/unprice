@@ -89,10 +89,9 @@ jobs:
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_ENV
 
       - name: Run Migrations
-        working-directory: internal/db
         run: |
-          pnpm generate
-          pnpm migrate:custom
+          pnpm --filter db generate
+          pnpm --filter db migrate:custom
 
       - name: commit migrations
         run: |

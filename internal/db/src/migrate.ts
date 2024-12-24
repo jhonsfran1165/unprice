@@ -18,7 +18,7 @@ async function main() {
     .then((user) => user ?? null)
 
   if (!userExists) {
-    // create user
+    // create initial user
     const user = await db
       .insert(schema.users)
       .values({
@@ -47,7 +47,7 @@ async function main() {
   let workspace: typeof schema.workspaces.$inferSelect | null = null
 
   if (!unpriceWorkspace?.id) {
-    // create
+    // create initial workspace
     workspace = await db
       .insert(schema.workspaces)
       .values({
@@ -66,7 +66,7 @@ async function main() {
       .returning()
       .then((workspace) => workspace[0] ?? null)
   } else {
-    // update
+    // update initial workspace
     workspace = await db
       .update(schema.workspaces)
       .set({
@@ -124,7 +124,7 @@ async function main() {
         enabled: true,
         isInternal: true,
         isMain: true,
-        defaultCurrency: "USD",
+        defaultCurrency: "EUR",
         timezone: "UTC",
       })
       .returning()
@@ -137,7 +137,7 @@ async function main() {
         isMain: true,
         enabled: true,
         isInternal: true,
-        defaultCurrency: "USD",
+        defaultCurrency: "EUR",
         timezone: "UTC",
       })
       .where(eq(schema.projects.id, unpriceProjectId))
@@ -153,6 +153,7 @@ async function main() {
   })
 
   if (!unpriceOwner) {
+    // create initial customer for the user, this can be changed later
     unpriceOwner = await db
       .insert(schema.customers)
       .values({
@@ -160,9 +161,10 @@ async function main() {
         name: "unprice",
         projectId: project.id,
         email: userExists.email,
+        // stripe customer test
         stripeCustomerId: "cus_QCzIbAwmpxZeEA",
         timezone: "UTC",
-        defaultCurrency: "USD",
+        defaultCurrency: "EUR",
         isMain: true,
       })
       .returning()
