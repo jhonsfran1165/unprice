@@ -123,7 +123,7 @@ jobs:
 
       - name: Override Vercel environment variables
         run: |
-          echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_URL preview --force --sensitive
+          echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_URL preview --force --sensitive --token=${{ env.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
         run: vercel build --token=${{ env.VERCEL_TOKEN }}
