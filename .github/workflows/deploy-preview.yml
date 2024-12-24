@@ -91,19 +91,19 @@ jobs:
       - name: Run Migrations
         working-directory: internal/db
         run: |
-          echo "Installed packages:"
-          pnpm list --depth=0
-          pnpm generate
-          pnpm migrate:custom
+          DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} NODE_ENV=preview pnpm generate
+          DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} NODE_ENV=preview pnpm migrate:custom
 
       - name: commit migrations
         run: |
-          git config --global user.email "unprice-bot@unprice.com"
-          git config --global user.name "Unprice Bot"
-
-          git add .
-          git commit -m "Migrations for preview"
-          git push
+          # commit if there are changes
+          if [ -n "$(git status --porcelain)" ]; then
+            git config --global user.email "unprice-bot@unprice.com"
+            git config --global user.name "Unprice Bot"
+            git add .
+            git commit -m "Migrations for preview"
+            git push
+          fi
 
       - name: Schema Diff
         uses: neondatabase/schema-diff-action@v1
