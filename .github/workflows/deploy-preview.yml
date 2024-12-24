@@ -65,8 +65,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Install deps (with cache)
-        run: pnpm install --recursive --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --recursive --frozen-lockfile --prod=false
 
       - name: Get branch name
         id: branch-name
@@ -88,25 +88,11 @@ jobs:
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> .env
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_ENV
 
-      - name: Ensure drizzle-kit is available
-        run: |
-          pnpm bin
-          echo "Installed packages:"
-          pnpm list --depth=0
-          echo "PATH:"
-          echo $PATH
-
       - name: Run Migrations
         working-directory: internal/db
         run: |
-          # add the pnpm bin to the PATH
-          echo "::add-path::$(pnpm bin)"
-          pnpm bin
-          pnpm install
           echo "Installed packages:"
           pnpm list --depth=0
-          echo "PATH:"
-          echo $PATH
           pnpm generate
           pnpm migrate:custom
 
