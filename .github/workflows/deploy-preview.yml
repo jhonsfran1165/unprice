@@ -124,7 +124,7 @@ jobs:
         with:
           vercel-token: ${{ env.VERCEL_TOKEN }} # Required
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
-          vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
+          vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID}} #Required
           vercel-args: '--env NODE_ENV=preview --env AUTH_PROXY_URL=https://auth-preview.${{ env.UNPRICE_DOMAIN }}'
           working-directory: ./
           alias-domains: | #Optional
