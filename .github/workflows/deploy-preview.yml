@@ -118,28 +118,50 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
-      - name: Override Vercel environment variables
-        run: |
-          vercel link --yes --token=${{ env.VERCEL_TOKEN }} --project unprice
-          echo "${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_URL preview --force --token=${{ env.VERCEL_TOKEN }}
-
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ env.VERCEL_TOKEN }} --yes
-
-      - name: Deploy Preview to Vercel
-        id: deploy
-        run: echo preview_url=$(vercel deploy --prebuilt --token=${{ env.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
-
-      - name: Comment on Pull Request
-        uses: thollander/actions-comment-pull-request@v2
+      - uses: amondnet/vercel-action@v25 #deploy
+        name: Deploy Preview Unprice auth to Vercel
+        id: deploy-auth
         with:
-          # GITHUB_TOKEN: ${{ env.GH_TOKEN }}
-          message: |
-            Vercel Preview URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
-            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ env.NEON_PROJECT_ID }}/branches/${{ steps.create-branch.outputs.branch_id }}
+          vercel-token: ${{ env.VERCEL_TOKEN }} # Required
+          vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
+          vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
+          vercel-args: '--env AUTH_PROXY_URL=auth-preview.${{ env.UNPRICE_DOMAIN }}'
+          working-directory: ./apps/auth-proxy
+          alias-domains: | #Optional
+            auth-preview.${{ env.UNPRICE_DOMAIN }}
+
+      # deploy preview unprice to vercel
+      - uses: amondnet/vercel-action@v25 #deploy
+        name: Deploy Preview Unprice to Vercel
+        id: deploy-unprice
+        with:
+          vercel-token: ${{ env.VERCEL_TOKEN }} # Required
+          vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
+          vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
+          working-directory: ./apps/unprice
+          vercel-args: '--env DATABASE_URL=${{ env.DATABASE_URL }} --env AUTH_PROXY_URL=${{ steps.deploy-auth.outputs.preview_url }}'
+          alias-domains: | #Optional
+            app-preview.${{ env.UNPRICE_DOMAIN }}
+
+      # - name: Override Vercel environment variables
+      #   run: |
+      #     vercel link --yes --token=${{ env.VERCEL_TOKEN }} --project unprice
+      #     echo "${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_URL preview --force --token=${{ env.VERCEL_TOKEN }}
+
+      # - name: Build Project Artifacts
+      #   run: vercel build --token=${{ env.VERCEL_TOKEN }} --yes
+
+      # - name: Deploy Preview Unprice to Vercel
+      #   id: deploy
+      #   run: echo preview_url=$(vercel deploy --prebuilt --token=${{ env.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
+
+      # - name: Comment on Pull Request
+      #   uses: thollander/actions-comment-pull-request@v2
+      #   with:
+      #     # GITHUB_TOKEN: ${{ env.GH_TOKEN }}
+      #     message: |
+      #       Vercel Preview URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+      #       Neon branch :elephant: : https://console.neon.tech/app/projects/${{ env.NEON_PROJECT_ID }}/branches/${{ steps.create-branch.outputs.branch_id }}
 
       - name: Delete Secret
         if: always()
