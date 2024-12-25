@@ -125,8 +125,6 @@ jobs:
         run: |
           vercel link --yes --token=${{ env.VERCEL_TOKEN }} --project unprice
           echo "${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_URL preview --force --token=${{ env.VERCEL_TOKEN }}
-          echo "${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_READ1_URL preview --force --token=${{ env.VERCEL_TOKEN }}
-          echo "${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_READ2_URL preview --force --token=${{ env.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
         run: vercel build --token=${{ env.VERCEL_TOKEN }} --yes
