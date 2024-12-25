@@ -126,7 +126,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           vercel-args: '--env NODE_ENV=preview --env AUTH_PROXY_URL=https://auth-preview.${{ env.UNPRICE_DOMAIN }}'
-          working-directory: ./apps/auth-proxy
+          working-directory: ./
           alias-domains: | #Optional
             auth-preview.${{ env.UNPRICE_DOMAIN }}
 
@@ -138,7 +138,7 @@ jobs:
           vercel-token: ${{ env.VERCEL_TOKEN }} # Required
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
-          working-directory: ./apps/nextjs
+          working-directory: ./
           vercel-args: '--env NODE_ENV=preview --env DATABASE_URL=${{ env.DATABASE_URL }} --env AUTH_PROXY_URL=https://auth-preview.${{ env.UNPRICE_DOMAIN }}'
           alias-domains: | #Optional
             app-preview.${{ env.UNPRICE_DOMAIN }}
