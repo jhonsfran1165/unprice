@@ -118,9 +118,6 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
       - uses: amondnet/vercel-action@v25 #deploy
         name: Deploy Preview Unprice auth to Vercel
         id: deploy-auth
@@ -141,7 +138,7 @@ jobs:
           vercel-token: ${{ env.VERCEL_TOKEN }} # Required
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
-          working-directory: ./apps/unprice
+          working-directory: ./apps/nextjs
           vercel-args: '--env NODE_ENV=preview --env DATABASE_URL=${{ env.DATABASE_URL }} --env AUTH_PROXY_URL=https://auth-preview.${{ env.UNPRICE_DOMAIN }}'
           alias-domains: | #Optional
             app-preview.${{ env.UNPRICE_DOMAIN }}
