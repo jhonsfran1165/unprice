@@ -84,9 +84,9 @@ jobs:
           api_key: ${{ env.NEON_API_KEY }}
 
       # override the DATABASE_URL in .env file
-      - run: |
-          echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> .env
-          echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_ENV
+      # - run: |
+      #     echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> .env
+      #     echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_ENV
 
       - name: Run Migrations
         working-directory: internal/db
@@ -131,7 +131,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID }} #Required
           # always prod because the auth proxy link has to be stable
-          vercel-args: '--env VERCEL=true --env NODE_ENV=production --prod'
+          vercel-args: '--env VERCEL=true --env NODE_ENV=production --prod VERCEL_ENV=production'
           working-directory: ./
 
       # deploy preview unprice to vercel
@@ -143,7 +143,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env NODE_ENV=preview --env DATABASE_URL=${{ env.DATABASE_URL }}'
+          vercel-args: '--env VERCEL=true --env NODE_ENV=production --prod VERCEL_ENV=preview --env DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} '
 
       # - name: Build Project Artifacts
       #   run: vercel build --token=${{ env.VERCEL_TOKEN }} --yes

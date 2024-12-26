@@ -3,7 +3,7 @@ import * as z from "zod"
 
 export const env = createEnv({
   server: {
-    NODE_ENV: z.enum(["development", "production", "test", "preview"]).default("development"),
+    NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     TINYBIRD_TOKEN: z.string(),
