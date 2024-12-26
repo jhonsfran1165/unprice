@@ -118,6 +118,11 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
+      # - name: Override Vercel environment variables
+      #   run: |
+      #     vercel link --yes --token=${{ env.VERCEL_TOKEN }} --project unprice
+      #     echo "${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_URL preview --force --token=${{ env.VERCEL_TOKEN }}
+
       - uses: amondnet/vercel-action@v25 #deploy
         name: Deploy Preview Unprice auth to Vercel
         id: deploy-auth
@@ -125,7 +130,8 @@ jobs:
           vercel-token: ${{ env.VERCEL_TOKEN }} # Required
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID }} #Required
-          vercel-args: '--env NODE_ENV=preview'
+          # always prod because the auth proxy link has to be stable
+          vercel-args: '--env VERCEL=true --env NODE_ENV=production --prod'
           working-directory: ./
 
       # deploy preview unprice to vercel
@@ -138,13 +144,6 @@ jobs:
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
           vercel-args: '--env NODE_ENV=preview --env DATABASE_URL=${{ env.DATABASE_URL }}'
-          # alias-domains: | #Optional
-          #   app-preview.${{ env.UNPRICE_DOMAIN }}
-
-      # - name: Override Vercel environment variables
-      #   run: |
-      #     vercel link --yes --token=${{ env.VERCEL_TOKEN }} --project unprice
-      #     echo "${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_URL preview --force --token=${{ env.VERCEL_TOKEN }}
 
       # - name: Build Project Artifacts
       #   run: vercel build --token=${{ env.VERCEL_TOKEN }} --yes
