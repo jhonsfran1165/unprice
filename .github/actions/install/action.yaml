@@ -1,0 +1,55 @@
+name: Install Repo
+description: Install the toolchain and dependencies
+
+inputs:
+  ts:
+    description: Whether to install Node.js and dependencies
+
+runs:
+  using: "composite"
+
+  steps:
+    - uses: actions/checkout@v4
+
+    - uses: Infisical/secrets-action@v1.0.7
+      with:
+        client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+        client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+        env-slug: "dev"
+        project-slug: "unprice-zq-xm"
+        export-type: "file"
+        file-output-path: ".env"
+        secret-path: "/"
+
+    - name: Set up pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 8.6.12
+        run_install: false
+
+    - name: Setup Node 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.11.0
+
+    - name: Get pnpm store directory
+      if: ${{ inputs.ts == 'true' }}
+      id: pnpm-cache
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+    - uses: actions/cache@v3
+      if: ${{ inputs.ts == 'true' }}
+      name: Setup pnpm cache
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      if: ${{ inputs.ts == 'true' }}
+      shell: bash
+      run: |
+        pnpm install --recursive

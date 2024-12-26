@@ -11,27 +11,21 @@ env:
   SKIP_ENV_VALIDATION: 1
 
 jobs:
+  build-lint:
+    uses: ./.github/workflows/job_build.yaml
+
   deploy-preview:
     runs-on: ubuntu-latest
+
+    needs:
+      - build-lint
 
     permissions:
       pull-requests: write
       contents: read
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - uses: Infisical/secrets-action@v1.0.7
-        with:
-          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
-          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: "preview"
-          project-slug: "unprice-zq-xm"
-          export-type: "file"
-          file-output-path: "/.env"
-          secret-path: "/"
-          recursive: true
+      - uses: ./.github/actions/install/action.yaml
 
       - uses: cardinalby/export-env-action@v2
         with:
@@ -40,33 +34,6 @@ jobs:
           # export everything except DATABASE_URL using regex
           filter: ^(?!DATABASE_URL$).*$
           mask: true
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8.15.4
-          run_install: true
-
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.11.0
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: |
-          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --recursive --frozen-lockfile --prod=false
 
       - name: Get branch name
         id: branch-name
@@ -151,14 +118,6 @@ jobs:
       # - name: Deploy Preview Unprice to Vercel
       #   id: deploy
       #   run: echo preview_url=$(vercel deploy --prebuilt --token=${{ env.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
-
-      # - name: Comment on Pull Request
-      #   uses: thollander/actions-comment-pull-request@v2
-      #   with:
-      #     # GITHUB_TOKEN: ${{ env.GH_TOKEN }}
-      #     message: |
-      #       Vercel Preview URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
-      #       Neon branch :elephant: : https://console.neon.tech/app/projects/${{ env.NEON_PROJECT_ID }}/branches/${{ steps.create-branch.outputs.branch_id }}
 
       - name: Delete Secret
         if: always()
