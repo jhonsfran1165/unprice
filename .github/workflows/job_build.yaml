@@ -7,6 +7,18 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: Infisical/secrets-action@v1.0.7
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: "dev"
+          project-slug: "unprice-zq-xm"
+          export-type: "file"
+          file-output-path: ".env"
+          secret-path: "/"
+
       - uses: ./.github/actions/install
 
       - name: Type-check
