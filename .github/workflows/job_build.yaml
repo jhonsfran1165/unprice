@@ -7,16 +7,14 @@ on:
         type: boolean
         default: true
         description: Whether to pull secrets from Infisical
-      project_slug:
-        type: string
-        description: The slug of the project
-      env_slug:
-        type: string
-        description: The slug of the environment
     secrets:
       MACHINE_IDENTITY_CLIENT_ID:
         required: true
       MACHINE_IDENTITY_CLIENT_SECRET:
+        required: true
+      PROJECT_SLUG:
+        required: true
+      ENV_SLUG:
         required: true
 
 jobs:
@@ -31,8 +29,8 @@ jobs:
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: ${{ inputs.env_slug }}
-          project-slug: ${{ inputs.project_slug }}
+          env-slug: ${{ inputs.ENV_SLUG }}
+          project-slug: ${{ inputs.PROJECT_SLUG }}
           export-type: "file"
           file-output-path: ".env"
           secret-path: "/"

@@ -15,11 +15,11 @@ jobs:
     uses: ./.github/workflows/job_build.yaml
     with:
       pull_secrets: true
-      project_slug: ${{ env.PROJECT_SLUG }}
-      env_slug: ${{ env.ENV_SLUG }}
     secrets:
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+      PROJECT_SLUG: ${{ env.PROJECT_SLUG }}
+      ENV_SLUG: ${{ env.ENV_SLUG }}
 
   deploy-preview:
     runs-on: ubuntu-latest
