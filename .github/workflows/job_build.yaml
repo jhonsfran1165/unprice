@@ -1,6 +1,16 @@
 name: Build
 on:
   workflow_call:
+  secrets:
+    MACHINE_IDENTITY_CLIENT_ID:
+      required: true
+    MACHINE_IDENTITY_CLIENT_SECRET:
+      required: true
+    PROJECT_SLUG:
+      required: true
+    ENV_SLUG:
+      required: true
+
 
 jobs:
   build:
@@ -13,8 +23,8 @@ jobs:
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: "dev"
-          project-slug: "unprice-zq-xm"
+          env-slug: ${{ env.ENV_SLUG }}
+          project-slug: ${{ env.PROJECT_SLUG }}
           export-type: "file"
           file-output-path: ".env"
           secret-path: "/"

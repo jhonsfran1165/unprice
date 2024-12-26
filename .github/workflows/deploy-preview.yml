@@ -9,10 +9,17 @@ on:
 # @link https://turborepo.org/docs/core-concepts/remote-caching#remote-caching-on-vercel-builds
 env:
   SKIP_ENV_VALIDATION: 1
+  PROJECT_SLUG: unprice-zq-xm
+  ENV_SLUG: preview
 
 jobs:
   build-lint:
     uses: ./.github/workflows/job_build.yaml
+    with:
+      PROJECT_SLUG: ${{ env.PROJECT_SLUG }}
+      ENV_SLUG: ${{ env.ENV_SLUG }}
+      MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+      MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
 
   deploy-preview:
     runs-on: ubuntu-latest
@@ -31,8 +38,8 @@ jobs:
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: "dev"
-          project-slug: "unprice-zq-xm"
+          env-slug: ${{ env.ENV_SLUG }}
+          project-slug: ${{ env.PROJECT_SLUG }}
           export-type: "file"
           file-output-path: ".env"
           secret-path: "/"
