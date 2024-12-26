@@ -25,7 +25,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: ./.github/actions/install/action.yaml
+      - uses: ./.github/actions/install
 
       - uses: cardinalby/export-env-action@v2
         with:
