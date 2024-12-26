@@ -1,16 +1,23 @@
 name: Build
+
 on:
   workflow_call:
-  secrets:
-    MACHINE_IDENTITY_CLIENT_ID:
-      required: true
-    MACHINE_IDENTITY_CLIENT_SECRET:
-      required: true
-    PROJECT_SLUG:
-      required: true
-    ENV_SLUG:
-      required: true
-
+    inputs:
+      pull_secrets:
+        type: boolean
+        default: true
+        description: Whether to pull secrets from Infisical
+      project_slug:
+        type: string
+        description: The slug of the project
+      env_slug:
+        type: string
+        description: The slug of the environment
+    secrets:
+      MACHINE_IDENTITY_CLIENT_ID:
+        required: true
+      MACHINE_IDENTITY_CLIENT_SECRET:
+        required: true
 
 jobs:
   build:
@@ -20,11 +27,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: Infisical/secrets-action@v1.0.7
+        if: ${{ inputs.pull_secrets }}
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: ${{ env.ENV_SLUG }}
-          project-slug: ${{ env.PROJECT_SLUG }}
+          env-slug: ${{ inputs.env_slug }}
+          project-slug: ${{ inputs.project_slug }}
           export-type: "file"
           file-output-path: ".env"
           secret-path: "/"
