@@ -4,6 +4,8 @@ description: Install the toolchain and dependencies
 inputs:
   ts:
     description: Whether to install Node.js and dependencies
+    required: true
+    default: true
 
 runs:
   using: "composite"

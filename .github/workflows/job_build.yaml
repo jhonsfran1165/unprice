@@ -39,6 +39,8 @@ jobs:
           secret-path: "/"
 
       - uses: ./.github/actions/install
+        with:
+          ts: true
 
       - name: Type-check
         run: pnpm turbo typecheck

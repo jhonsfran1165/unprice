@@ -43,6 +43,8 @@ jobs:
           secret-path: "/"
 
       - uses: ./.github/actions/install
+        with:
+          ts: true
 
       - uses: cardinalby/export-env-action@v2
         with:
