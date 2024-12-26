@@ -13,11 +13,11 @@ jobs:
     uses: ./.github/workflows/job_build.yaml
     with:
       pull_secrets: true
+      project_slug: unprice-zq-xm
+      env_slug: preview
     secrets:
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-      PROJECT_SLUG: "unprice-zq-xm"
-      ENV_SLUG: "preview"
 
   deploy-preview:
     runs-on: ubuntu-latest
