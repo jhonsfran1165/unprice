@@ -36,9 +36,9 @@ jobs:
           env-slug: ${{ inputs.env_slug }}
           project-slug: ${{ inputs.project_slug }}
           export-type: "file"
-          file-output-path: "./.env.local"
-          recursive: true
+          file-output-path: "/.env.local"
           secret-path: "/"
+          recursive: true
 
       - uses: ./.github/actions/install
         name: Install dependencies
