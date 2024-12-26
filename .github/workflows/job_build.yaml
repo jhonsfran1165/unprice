@@ -28,6 +28,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
         if: ${{ inputs.pull_secrets }}
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
@@ -35,10 +36,12 @@ jobs:
           env-slug: ${{ inputs.env_slug }}
           project-slug: ${{ inputs.project_slug }}
           export-type: "file"
-          file-output-path: ".env"
+          file-output-path: ".env.local"
+          recursive: true
           secret-path: "/"
 
       - uses: ./.github/actions/install
+        name: Install dependencies
         with:
           ts: true
 
