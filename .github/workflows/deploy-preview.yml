@@ -40,7 +40,7 @@ jobs:
           env-slug: "preview"
           project-slug: "unprice-zq-xm"
           export-type: "file"
-          file-output-path: ".env.local"
+          file-output-path: "./.env.local"
           secret-path: "/"
           recursive: true
 
