@@ -43,7 +43,7 @@ jobs:
       - uses: cardinalby/export-env-action@v2
         with:
           envFile: '.env'
-          exportToGithubEnv: true
+          export: true
           # export everything except DATABASE_URL using regex
           filter: ^(?!DATABASE_URL$).*$
           mask: true
@@ -67,7 +67,7 @@ jobs:
         env:
           # fake database url
           DATABASE_URL: postgresql://postgresql:postgresql@localhost:5432/unprice
-
+          NODE_ENV: test
 
 
 
