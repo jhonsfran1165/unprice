@@ -7,8 +7,6 @@ on:
 
 env:
   SKIP_ENV_VALIDATION: 1
-  PROJECT_SLUG: unprice-zq-xm
-  ENV_SLUG: preview
 
 jobs:
   build-lint:
@@ -18,8 +16,8 @@ jobs:
     secrets:
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-      PROJECT_SLUG: ${{ env.PROJECT_SLUG }}
-      ENV_SLUG: ${{ env.ENV_SLUG }}
+      PROJECT_SLUG: "unprice-zq-xm"
+      ENV_SLUG: "preview"
 
   deploy-preview:
     runs-on: ubuntu-latest
@@ -38,8 +36,8 @@ jobs:
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: ${{ env.ENV_SLUG }}
-          project-slug: ${{ env.PROJECT_SLUG }}
+          env-slug: "preview"
+          project-slug: "unprice-zq-xm"
           export-type: "file"
           file-output-path: ".env"
           secret-path: "/"
