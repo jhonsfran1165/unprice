@@ -36,9 +36,17 @@ jobs:
           env-slug: ${{ inputs.env_slug }}
           project-slug: ${{ inputs.project_slug }}
           export-type: "file"
-          file-output-path: "/.env.local"
+          file-output-path: "/.env"
           secret-path: "/"
           recursive: true
+
+      - uses: cardinalby/export-env-action@v2
+        with:
+          envFile: '.env'
+          exportToGithubEnv: true
+          # export everything except DATABASE_URL using regex
+          filter: ^(?!DATABASE_URL$).*$
+          mask: true
 
       - uses: ./.github/actions/install
         name: Install dependencies

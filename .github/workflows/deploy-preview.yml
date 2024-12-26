@@ -40,7 +40,7 @@ jobs:
           env-slug: "preview"
           project-slug: "unprice-zq-xm"
           export-type: "file"
-          file-output-path: "/.env.local"
+          file-output-path: "/.env"
           secret-path: "/"
           recursive: true
 
@@ -50,7 +50,7 @@ jobs:
 
       - uses: cardinalby/export-env-action@v2
         with:
-          envFile: '.env.local'
+          envFile: '.env'
           exportToGithubEnv: true
           # export everything except DATABASE_URL using regex
           filter: ^(?!DATABASE_URL$).*$
@@ -143,4 +143,4 @@ jobs:
       - name: Delete Secret
         if: always()
         run: |
-          rm -rf .env.local || true
+          rm -rf .env || true
