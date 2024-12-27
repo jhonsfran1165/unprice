@@ -11,8 +11,7 @@ import {
   Text,
   TextQuote,
 } from "lucide-react"
-import { createSuggestionItems } from "novel/extensions"
-import { Command, renderItems } from "novel/extensions"
+import { Command, createSuggestionItems, renderItems } from "novel/extensions"
 import { toastAction } from "~/lib/toast"
 
 export const suggestionItems = createSuggestionItems([
@@ -76,7 +75,7 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["unordered", "point"],
     icon: <List size={18} />,
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).toggleBulletList().run()
+      editor.chain().focus().deleteRange(range).toggleList("bullet", "list").run()
     },
   },
   {
@@ -85,7 +84,7 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["ordered"],
     icon: <ListOrdered size={18} />,
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).toggleOrderedList().run()
+      editor.chain().focus().deleteRange(range).toggleList("ordered", "list").run()
     },
   },
   {
@@ -99,7 +98,7 @@ export const suggestionItems = createSuggestionItems([
         .focus()
         .deleteRange(range)
         .toggleNode("paragraph", "paragraph")
-        .toggleBlockquote()
+        .toggleNode("blockquote", "blockquote")
         .run(),
   },
   {

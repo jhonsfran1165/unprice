@@ -29,6 +29,8 @@ export class AesGCM {
       this.key,
       new TextEncoder().encode(secret)
     )
+
+    // @ts-ignore
     return { iv: base64.encode(iv), ciphertext: base64.encode(ciphertext) }
   }
 
