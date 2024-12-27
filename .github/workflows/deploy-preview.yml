@@ -106,6 +106,9 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
       - name: Override Vercel environment variables
         run: |
           vercel link --yes --token=${{ env.VERCEL_TOKEN }} --project unprice
