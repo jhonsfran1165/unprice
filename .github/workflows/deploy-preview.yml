@@ -74,8 +74,8 @@ jobs:
       - name: Run Migrations
         working-directory: internal/db
         run: |
-          DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} NODE_ENV=preview pnpm generate
-          DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} NODE_ENV=preview pnpm migrate:custom
+          DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} NODE_ENV=development pnpm generate
+          DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} NODE_ENV=development pnpm migrate:custom
 
       - name: commit migrations
         working-directory: internal/db
@@ -121,7 +121,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=production" --env "VERCEL_ENV=preview" --env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" --build-env "NODE_ENV=production" --build-env "VERCEL=true" --build-env "VERCEL_ENV=preview" --build-env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" '
+          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=development" --env "VERCEL_ENV=preview" --env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" --build-env "NODE_ENV=development" --build-env "VERCEL=true" --build-env "VERCEL_ENV=preview" --build-env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}"'
           alias-domains: |
             preview-unprice.vercel.app
             pr-${{ github.event.number }}-unprice.vercel.app

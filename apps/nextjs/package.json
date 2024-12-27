@@ -102,7 +102,7 @@
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",
     "@unprice/tailwind-config": "^0.1.0",
-    "@unprice/tsconfig": "^0.1.0",
+    "@unprice/tsconfig": "workspace:^",
     "autoprefixer": "^10.4.18",
     "tailwindcss": "3.4.1",
     "typescript": "^5.3.3"
