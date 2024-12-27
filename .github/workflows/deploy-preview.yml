@@ -3,6 +3,8 @@ name: Deploy Preview
 on:
   pull_request:
     branches: ['*']
+    branches-ignore:
+      - 'renovate/*'
   merge_group:
 
 env:
@@ -28,6 +30,9 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
+
+    # don't execute for renovate renovate/*
+    if: github.event.pull_request.title != "renovate"
 
     steps:
       - uses: actions/checkout@v4
