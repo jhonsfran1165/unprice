@@ -503,8 +503,8 @@ importers:
         specifier: ^0.1.0
         version: link:../error
       base-x:
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: ^5.0.0
+        version: 5.0.0
       date-fns:
         specifier: ^3.3.1
         version: 3.6.0
@@ -9576,8 +9576,8 @@ packages:
     dev: true
     optional: true
 
-  /base-x@4.0.0:
-    resolution: {integrity: sha512-FuwxlW4H5kh37X/oW59pwTzzTKRzfrrQwhmyspRM7swOEZcHtDZSCt45U6oKgtuFE+WYPblePMVIPR4RZrh/hw==}
+  /base-x@5.0.0:
+    resolution: {integrity: sha512-sMW3VGSX1QWVFA6l8U62MLKz29rRfpTlYdCqLdpLo1/Yd4zZwSbnUaDfciIAowAqvq7YFnWq9hrhdg1KYgc1lQ==}
     dev: false
 
   /base64-js@1.5.1:
