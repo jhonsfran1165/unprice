@@ -14,7 +14,7 @@ jobs:
     with:
       pull_secrets: true
       project_slug: unprice-zq-xm
-      env_slug: production
+      env_slug: prod
     secrets:
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
@@ -37,7 +37,7 @@ jobs:
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: "production"
+          env-slug: "prod"
           project-slug: "unprice-zq-xm"
           export-type: "file"
           file-output-path: "/.env"
