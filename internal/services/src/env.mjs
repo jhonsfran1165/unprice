@@ -8,7 +8,6 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     TINYBIRD_TOKEN: z.string(),
     BASELIME_APIKEY: z.string(),
-    CACHE_ENCRYPTION_KEY: z.string(),
     ENCRYPTION_KEY: z.string(),
   },
   client: {},

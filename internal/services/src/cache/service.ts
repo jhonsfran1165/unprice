@@ -43,7 +43,7 @@ export class CacheService {
         : undefined
 
     const metricsMiddleware = withMetrics(this.metrics)
-    const encryptionMiddleware = await withEncryption(env.CACHE_ENCRYPTION_KEY)
+    const encryptionMiddleware = await withEncryption(env.ENCRYPTION_KEY)
 
     // add metrics middleware
     const upstashStoreWithMetrics = upstash ? metricsMiddleware.wrap(upstash) : undefined

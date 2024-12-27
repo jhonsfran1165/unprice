@@ -44,7 +44,7 @@ export const update = protectedWorkspaceProcedure
 
     const vercel = new Vercel({
       accessToken: env.VERCEL_TOKEN,
-      teamId: env.TEAM_ID_VERCEL,
+      teamId: env.VERCEL_TEAM_ID,
     })
 
     const removeData = await vercel.removeProjectDomain(env.PROJECT_ID_VERCEL, oldDomain.name)

@@ -22,6 +22,11 @@ export const getValidSubdomain = (host?: string | null) => {
     subdomain = host
   }
 
+  // in case is a preview domain
+  if (host?.endsWith(".vercel.app")) {
+    subdomain = host.replace(BASE_DOMAIN, "").split(".")[0] ?? ""
+  }
+
   return subdomain
 }
 

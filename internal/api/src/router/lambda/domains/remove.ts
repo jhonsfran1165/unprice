@@ -37,7 +37,7 @@ export const remove = protectedWorkspaceProcedure
     // for now, I will just remove it from the project
     const vercel = new Vercel({
       accessToken: env.VERCEL_TOKEN,
-      teamId: env.TEAM_ID_VERCEL,
+      teamId: env.VERCEL_TEAM_ID,
     })
 
     // remove the old domain from vercel

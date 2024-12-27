@@ -7,11 +7,10 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     PROJECT_ID_VERCEL: z.string(),
-    TEAM_ID_VERCEL: z.string(),
+    VERCEL_TEAM_ID: z.string(),
     VERCEL_TOKEN: z.string(),
     TINYBIRD_TOKEN: z.string(),
     BASELIME_APIKEY: z.string(),
-    CACHE_ENCRYPTION_KEY: z.string(),
     ENCRYPTION_KEY: z.string(),
     EMIT_METRICS_LOGS: z
       .string()

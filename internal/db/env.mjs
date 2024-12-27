@@ -9,8 +9,8 @@ export const env = createEnv({
   },
   server: {
     DATABASE_URL: z.string().min(1).url(),
-    DATABASE_READ1_URL: z.string().url().optional(),
-    DATABASE_READ2_URL: z.string().url().optional(),
+    DATABASE_READ1_URL: z.string().optional(),
+    DATABASE_READ2_URL: z.string().optional(),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis
