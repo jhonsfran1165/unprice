@@ -71,11 +71,6 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
-      # override the DATABASE_URL in .env file
-      # - run: |
-      #     echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> .env
-      #     echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_ENV
-
       - name: Run Migrations
         working-directory: internal/db
         run: |
@@ -114,19 +109,8 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID }} #Required
           # always prod because the auth proxy link has to be stable
-          vercel-args: '--env "VERCEL_ENV=production" --env "VERCEL=true" --env "NODE_ENV=production" --prod'
+          vercel-args: '--env "VERCEL_ENV=production" --env "VERCEL=true" --env "NODE_ENV=production" --prod --build-env "VERCEL_ENV=production" --build-env "VERCEL=true" --build-env "NODE_ENV=production"'
           working-directory: ./
-
-      # - name: Install Vercel CLI
-      #   run: npm install --global vercel@latest
-
-      # - name: Override Vercel environment variables
-      #   run: |
-      #     echo "${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_URL preview --force
-      #   env:
-      #     VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_UNPRICE_ID }}
-      #     VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
-      #     VERCEL_TOKEN: ${{ env.VERCEL_TOKEN }}
 
       # deploy preview unprice to vercel
       - uses: amondnet/vercel-action@v25.2.0 #deploy
@@ -137,10 +121,10 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=production" --env "VERCEL_ENV=preview" --env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}"'
+          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=production" --env "VERCEL_ENV=preview" --env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" --build-env "NODE_ENV=production" --build-env "VERCEL=true" --build-env "VERCEL_ENV=preview" --build-env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" '
           alias-domains: |
             preview-unprice.vercel.app
-            pr-{{PR_NUMBER}}-unprice.vercel.app
+            pr-${{ github.event.number }}-unprice.vercel.app
 
       - name: Delete Secret
         if: always()
