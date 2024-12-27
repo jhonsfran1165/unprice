@@ -9,7 +9,7 @@ neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket :
 
 // TODO: fix push command in drizzle-kit
 // if we're running locally
-if (env.NODE_ENV === "development" && env.VERCEL_ENV !== "development") {
+if (env.NODE_ENV === "development" && env.VERCEL_ENV === "development") {
   // Set the WebSocket proxy to work with the local instance
   neonConfig.wsProxy = (host) => {
     return `${host}:5433/v1?address=db:5432`
