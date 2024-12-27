@@ -106,14 +106,6 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
-      - name: Override Vercel environment variables
-        run: |
-          vercel link --yes --token=${{ env.VERCEL_TOKEN }} --project unprice
-          echo "${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_URL preview --force --token=${{ env.VERCEL_TOKEN }}
-
       - uses: amondnet/vercel-action@v25 #deploy
         name: Deploy Unprice auth to Vercel
         id: deploy-auth
@@ -124,6 +116,17 @@ jobs:
           # always prod because the auth proxy link has to be stable
           vercel-args: '--env VERCEL_ENV=production --env VERCEL=true --env NODE_ENV=production --prod'
           working-directory: ./
+
+      # - name: Install Vercel CLI
+      #   run: npm install --global vercel@latest
+
+      # - name: Override Vercel environment variables
+      #   run: |
+      #     echo "${{ steps.create-branch.outputs.db_url_with_pooler }}" | vercel env add DATABASE_URL preview --force
+      #   env:
+      #     VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_UNPRICE_ID }}
+      #     VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
+      #     VERCEL_TOKEN: ${{ env.VERCEL_TOKEN }}
 
       # deploy preview unprice to vercel
       - uses: amondnet/vercel-action@v25 #deploy
