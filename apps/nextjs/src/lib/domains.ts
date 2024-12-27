@@ -1,5 +1,5 @@
 import type { NextAuthRequest } from "@unprice/auth"
-import { APP_BASE_DOMAIN, BASE_DOMAIN, RESTRICTED_SUBDOMAINS } from "@unprice/config"
+import { BASE_DOMAIN, RESTRICTED_SUBDOMAINS } from "@unprice/config"
 import type { NextRequest } from "next/server"
 
 // validate the subdomain from the host and return it
@@ -22,11 +22,6 @@ export const getValidSubdomain = (host?: string | null) => {
     subdomain = host
   }
 
-  // in case is a preview domain
-  if (host?.endsWith(".vercel.app")) {
-    subdomain = host.replace(BASE_DOMAIN, "").split(".")[0] ?? ""
-  }
-
   return subdomain
 }
 
@@ -34,10 +29,10 @@ export const parse = (req: NextAuthRequest | NextRequest) => {
   let domain = req.headers.get("host")!
   domain = domain.replace("www.", "") // remove www. from domain
 
-  if (domain === "app.localhost:3000" || domain.endsWith(".vercel.app")) {
-    // for local development and preview URLs
-    domain = APP_BASE_DOMAIN
-  }
+  // if (domain === "app.localhost:3000" || domain.endsWith(".vercel.app")) {
+  //   // for local development and preview URLs
+  //   domain = APP_BASE_DOMAIN
+  // }
 
   const subdomain = domain.split(".")[0] === domain ? null : domain.split(".")[0]
   const ip = req.ip ?? "127.0.0.1"
