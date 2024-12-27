@@ -4,16 +4,13 @@ import * as z from "zod"
 export const env = createEnv({
   shared: {
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-    VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
+    VERCEL_ENV: z.enum(["development", "preview", "production"]).default("preview"),
     DRIZZLE_LOG: z.string().default("false"),
   },
   server: {
-    DATABASE_PRIMARY_URL: z.string().min(1).url(),
-    DATABASE_READ1_URL: z.string().min(1).url(),
-    DATABASE_READ2_URL: z.string().min(1).url(),
-    DATABASE_URL_MIGRATOR: z.string().url().optional(),
-    DATABASE_URL_LOCAL: z.string().url().optional(),
-    DATABASE_URL_MIGRATOR_LOCAL: z.string().url().optional(),
+    DATABASE_URL: z.string().min(1).url(),
+    DATABASE_READ1_URL: z.string().optional(),
+    DATABASE_READ2_URL: z.string().optional(),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis

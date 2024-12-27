@@ -4,21 +4,20 @@
   "scripts": {
     "migrate": "pnpm with-env tsx main.ts",
     "clean": "git clean -xdf .next .turbo node_modules",
-    "with-env": "dotenv -e ../../.env.local --"
+    "with-env": "infisical run --env=preview --path=/app --"
   },
   "keywords": [],
   "author": "Sebastian Franco",
   "license": "AGPL-3.0",
   "dependencies": {
-    "@unprice/db": "^0.1.0",
     "@neondatabase/serverless": "^0.9.0",
+    "@unprice/db": "^0.1.0",
     "drizzle-orm": "^0.31.2",
     "ws": "^8.17.1"
   },
   "devDependencies": {
-    "@unprice/tsconfig": "^0.1.0",
     "@types/node": "20.11.24",
-    "dotenv-cli": "^7.3.0",
+    "@unprice/tsconfig": "^0.1.0",
     "tsx": "^4.7.2",
     "typescript": "^5.3.3"
   }

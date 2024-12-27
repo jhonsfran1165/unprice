@@ -22,7 +22,7 @@
     "test:file": "SKIP_ENV_VALIDATION=true vitest $@",
     "clean": "rm -rf .turbo node_modules",
     "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env.local --"
+    "with-env": "infisical run --env=preview --path=/app --"
   },
   "dependencies": {
     "@unkey/cache": "^1.5.0",
@@ -36,7 +36,9 @@
     "@unprice/tinybird": "workspace:^",
     "@upstash/ratelimit": "^2.0.0",
     "@upstash/redis": "^1.33.0",
-    "date-fns": "^3.3.1"
+    "date-fns": "^3.3.1",
+    "zod": "^3.23.8",
+    "@t3-oss/env-nextjs": "0.9.1"
   },
   "devDependencies": {
     "@unprice/tsconfig": "^0.1.0",

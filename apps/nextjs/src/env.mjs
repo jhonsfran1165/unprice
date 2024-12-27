@@ -3,18 +3,13 @@ import { z } from "zod"
 
 export const env = createEnv({
   shared: {
-    NODE_ENV: z.enum(["development", "production"]).default("development"),
-    VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
+    NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+    VERCEL_ENV: z.enum(["development", "preview", "production"]).default("preview"),
   },
   server: {
-    // NEXTJS_URL: z.preprocess(
-    //   (str) => (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str),
-    //   process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
-    // ),
-    STRIPE_WEBHOOK_SECRET: z.string(),
     PROJECT_ID_VERCEL: z.string(),
-    TEAM_ID_VERCEL: z.string(),
-    VERCEL_AUTH_BEARER_TOKEN: z.string(),
+    VERCEL_TEAM_ID: z.string(),
+    VERCEL_TOKEN: z.string(),
     BASELIME_APIKEY: z.string(),
     ENCRYPTION_KEY: z.string(),
   },

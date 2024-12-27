@@ -31,6 +31,9 @@
     "build": "tsup",
     "generate:sdk": "speakeasy generate sdk --schema openapi-spec.json --lang typescript --out ./sdk"
   },
+  "dependencies": {
+    "superjson": "2.2.1"
+  },
   "devDependencies": {
     "@types/node": "20.11.24",
     "@unprice/tsconfig": "^0.1.0",

@@ -2,7 +2,7 @@
   "name": "unprice",
   "private": true,
   "engines": {
-    "node": "20.11.1"
+    "node": "20.x"
   },
   "workspaces": ["apps/*", "packages/*"],
   "engineStrict": true,
@@ -12,10 +12,11 @@
     "clean": "git clean -xdf node_modules dist .next",
     "clean:workspaces": "turbo clean --parallel",
     "dev": "cross-env FORCE_COLOR=1 turbo dev --parallel",
+    "with-infisical": "infisical run --env=preview --path=/app --",
     "typecheck": "turbo typecheck",
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip --include files,dependencies",
-    "test": "SKIP_ENV_VALIDATION=true turbo run test",
+    "test": "SKIP_ENV_VALIDATION=true NODE_ENV=test turbo run test",
     "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply-unsafe",
     "fmt": "pnpm biome format . && pnpm biome check .",
     "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:fix",

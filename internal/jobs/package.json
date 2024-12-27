@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env.local --",
+    "with-env": "infisical run --env=preview --path=/app --",
     "dev:trigger": "pnpm with-env pnpm dlx trigger.dev@beta dev"
   },
   "dependencies": {

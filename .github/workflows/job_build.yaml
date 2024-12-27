@@ -1,0 +1,74 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      pull_secrets:
+        type: boolean
+        default: true
+        description: Whether to pull secrets from Infisical
+      project_slug:
+        type: string
+        description: The slug of the project
+      env_slug:
+        type: string
+        description: The slug of the environment
+    secrets:
+      MACHINE_IDENTITY_CLIENT_ID:
+        required: true
+      MACHINE_IDENTITY_CLIENT_SECRET:
+        required: true
+
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        if: ${{ inputs.pull_secrets }}
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: ${{ inputs.env_slug }}
+          project-slug: ${{ inputs.project_slug }}
+          export-type: "file"
+          file-output-path: "/.env"
+          secret-path: "/"
+          recursive: true
+
+      - uses: cardinalby/export-env-action@v2
+        with:
+          envFile: '.env'
+          export: true
+          # export everything except DATABASE_URL using regex
+          filter: ^(?!DATABASE_URL$).*$
+          mask: true
+
+      - uses: ./.github/actions/install
+        name: Install dependencies
+        with:
+          ts: true
+
+      - name: Type-check
+        run: pnpm turbo typecheck
+
+      - name: Check formatting
+        run: pnpm biome ci .
+
+      - name: Check workspaces
+        run: pnpm manypkg check
+
+      - name: Run tests
+        run: pnpm turbo test
+        env:
+          # fake database url
+          DATABASE_URL: postgresql://postgresql:postgresql@localhost:5432/unprice
+          NODE_ENV: test
+
+
+
+

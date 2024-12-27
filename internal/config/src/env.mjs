@@ -4,12 +4,13 @@ import { z } from "zod"
 export const env = createEnv({
   shared: {
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-    VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
+    VERCEL_ENV: z.enum(["development", "preview", "production"]).default("preview"),
   },
   server: {},
   client: {
     NEXT_PUBLIC_APP_DOMAIN: z.preprocess(
-      (str) => (process.env.NEXT_PUBLIC_VERCEL_URL ? process.env.NEXT_PUBLIC_VERCEL_URL : str),
+      (str) =>
+        process.env.NEXT_PUBLIC_DEPLOYMENT_URL ? process.env.NEXT_PUBLIC_DEPLOYMENT_URL : str,
       z.string().optional().default("")
     ),
   },

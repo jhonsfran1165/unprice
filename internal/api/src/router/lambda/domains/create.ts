@@ -28,8 +28,8 @@ export const create = protectedWorkspaceProcedure
     }
 
     const vercel = new Vercel({
-      accessToken: env.VERCEL_AUTH_BEARER_TOKEN,
-      teamId: env.TEAM_ID_VERCEL,
+      accessToken: env.VERCEL_TOKEN,
+      teamId: env.VERCEL_TEAM_ID,
     })
 
     const response = await vercel.addProjectDomain(env.PROJECT_ID_VERCEL, domain)

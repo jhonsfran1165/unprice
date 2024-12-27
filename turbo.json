@@ -2,15 +2,13 @@
   "$schema": "https://turborepo.org/schema.json",
   "globalDependencies": ["**/.env.*local"],
   "globalEnv": [
-    "DATABASE_PRIMARY_URL",
+    "DATABASE_URL",
     "DATABASE_READ1_URL",
     "DATABASE_READ2_URL",
     "SKIP_ENV_VALIDATION",
-    "STRIPE_API_KEY",
-    "STRIPE_WEBHOOK_SECRET",
     "PROJECT_ID_VERCEL",
-    "TEAM_ID_VERCEL",
-    "VERCEL_AUTH_BEARER_TOKEN",
+    "VERCEL_TEAM_ID",
+    "VERCEL_TOKEN",
     "AUTH_SECRET",
     "TINYBIRD_TOKEN",
     "TINYBIRD_URL",
@@ -18,7 +16,13 @@
     "AUTH_GITHUB_CLIENT_SECRET",
     "AUTH_REDIRECT_PROXY_URL",
     "RESEND_API_KEY",
-    "ENCRYPTION_KEY"
+    "ENCRYPTION_KEY",
+    "BASELIME_APIKEY",
+    "TRIGGER_SECRET_KEY",
+    "UPSTASH_REDIS_REST_TOKEN",
+    "UPSTASH_REDIS_REST_URL",
+    "NODE_ENV",
+    "VERCEL_ENV"
   ],
   "tasks": {
     "topo": {

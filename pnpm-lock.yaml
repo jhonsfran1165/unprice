@@ -78,6 +78,9 @@ importers:
       '@craftjs/layers':
         specifier: ^0.2.3
         version: 0.2.5(@craftjs/core@0.2.10)(react@18.3.1)(styled-components@6.1.12)
+      '@craftjs/utils':
+        specifier: 0.2.4
+        version: 0.2.4(react@18.3.1)
       '@dinero.js/currencies':
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
@@ -87,6 +90,9 @@ importers:
       '@dnd-kit/sortable':
         specifier: ^8.0.0
         version: 8.0.0(@dnd-kit/core@6.1.0)(react@18.3.1)
+      '@dnd-kit/utilities':
+        specifier: ^3.2.2
+        version: 3.2.2(react@18.3.1)
       '@hookform/resolvers':
         specifier: ^3.3.4
         version: 3.9.0(react-hook-form@7.52.2)
@@ -96,6 +102,9 @@ importers:
       '@potatohd/trpc-openapi':
         specifier: ^1.2.3
         version: 1.2.3(@trpc/server@11.0.0-rc.466)(zod@3.23.8)
+      '@radix-ui/react-dropdown-menu':
+        specifier: ^2.0.6
+        version: 2.1.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
       '@t3-oss/env-nextjs':
         specifier: 0.9.1
         version: 0.9.1(typescript@5.5.4)(zod@3.23.8)
@@ -114,6 +123,9 @@ importers:
       '@tiptap/extension-text-align':
         specifier: ^2.5.4
         version: 2.6.4(@tiptap/core@2.6.4)
+      '@tiptap/pm':
+        specifier: 2.6.4
+        version: 2.6.4
       '@trpc/client':
         specifier: 11.0.0-rc.466
         version: 11.0.0-rc.466(@trpc/server@11.0.0-rc.466)
@@ -165,6 +177,9 @@ importers:
       ai:
         specifier: ^3.2.16
         version: 3.3.9(react@18.3.1)(svelte@4.2.18)(vue@3.4.38)(zod@3.23.8)
+      class-variance-authority:
+        specifier: ^0.7.0
+        version: 0.7.0
       date-fns:
         specifier: ^3.3.1
         version: 3.6.0
@@ -216,6 +231,9 @@ importers:
       nuqs:
         specifier: ^1.17.6
         version: 1.17.8(next@14.3.0-canary.44)
+      openapi-types:
+        specifier: 12.1.3
+        version: 12.1.3
       re-resizable:
         specifier: ^6.9.17
         version: 6.9.17(react-dom@18.3.1)(react@18.3.1)
@@ -284,14 +302,11 @@ importers:
         specifier: ^0.1.0
         version: link:../../tooling/tailwind
       '@unprice/tsconfig':
-        specifier: ^0.1.0
+        specifier: workspace:^
         version: link:../../tooling/typescript
       autoprefixer:
         specifier: ^10.4.18
         version: 10.4.20(postcss@8.4.35)
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.4.2
       tailwindcss:
         specifier: 3.4.1
         version: 3.4.1
@@ -313,6 +328,9 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: 0.9.1
         version: 0.9.1(typescript@5.5.4)(zod@3.23.8)
+      '@trpc-limiter/core':
+        specifier: 1.0.0
+        version: 1.0.0(@trpc/server@11.0.0-rc.466)
       '@trpc-limiter/memory':
         specifier: ^1.0.0
         version: 1.0.0(@trpc/server@11.0.0-rc.466)
@@ -404,6 +422,9 @@ importers:
 
   internal/auth:
     dependencies:
+      '@auth/core':
+        specifier: ^0.34.1
+        version: 0.34.2
       '@auth/drizzle-adapter':
         specifier: 1.4.1
         version: 1.4.1
@@ -432,6 +453,9 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
+      '@types/react':
+        specifier: ^18.3.1
+        version: 18.3.3
       '@unprice/tsconfig':
         specifier: ^0.1.0
         version: link:../../tooling/typescript
@@ -460,6 +484,12 @@ importers:
 
   internal/db:
     dependencies:
+      '@auth/core':
+        specifier: ^0.34.1
+        version: 0.34.2
+      '@dinero.js/currencies':
+        specifier: 2.0.0-alpha.14
+        version: 2.0.0-alpha.14
       '@neondatabase/serverless':
         specifier: ^0.10.3
         version: 0.10.3
@@ -482,11 +512,11 @@ importers:
         specifier: 2.0.0-alpha.14
         version: 2.0.0-alpha.14
       drizzle-orm:
-        specifier: ^0.36.1
-        version: 0.36.1(@neondatabase/serverless@0.10.3)
+        specifier: ^0.38.2
+        version: 0.38.2(@neondatabase/serverless@0.10.3)
       drizzle-zod:
         specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.36.1)(zod@3.23.8)
+        version: 0.5.1(drizzle-orm@0.38.2)(zod@3.23.8)
       random-word-slugs:
         specifier: ^0.1.7
         version: 0.1.7
@@ -500,12 +530,9 @@ importers:
       '@unprice/tsconfig':
         specifier: ^0.1.0
         version: link:../../tooling/typescript
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.4.2
       drizzle-kit:
-        specifier: ^0.28.0
-        version: 0.28.0
+        specifier: ^0.30.1
+        version: 0.30.1
       tsx:
         specifier: ^4.7.2
         version: 4.17.0
@@ -674,6 +701,9 @@ importers:
 
   internal/services:
     dependencies:
+      '@t3-oss/env-nextjs':
+        specifier: 0.9.1
+        version: 0.9.1(typescript@5.5.4)(zod@3.23.8)
       '@unkey/cache':
         specifier: ^1.5.0
         version: 1.5.0
@@ -710,6 +740,9 @@ importers:
       date-fns:
         specifier: ^3.3.1
         version: 3.6.0
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
     devDependencies:
       '@unprice/tsconfig':
         specifier: ^0.1.0
@@ -939,6 +972,10 @@ importers:
         version: 5.5.4
 
   packages/unprice:
+    dependencies:
+      superjson:
+        specifier: 2.2.1
+        version: 2.2.1
     devDependencies:
       '@types/node':
         specifier: 20.11.24
@@ -952,28 +989,6 @@ importers:
       tsup:
         specifier: ^8.0.2
         version: 8.2.4(tsx@4.17.0)(typescript@5.5.4)
-      typescript:
-        specifier: ^5.3.3
-        version: 5.5.4
-
-  tooling/client:
-    dependencies:
-      '@unprice/unprice':
-        specifier: workspace:^
-        version: link:../../packages/unprice
-    devDependencies:
-      '@types/node':
-        specifier: 20.11.24
-        version: 20.11.24
-      '@unprice/tsconfig':
-        specifier: ^0.1.0
-        version: link:../typescript
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.4.2
-      tsx:
-        specifier: ^4.7.2
-        version: 4.17.0
       typescript:
         specifier: ^5.3.3
         version: 5.5.4
@@ -1005,9 +1020,6 @@ importers:
       '@unprice/tsconfig':
         specifier: ^0.1.0
         version: link:../typescript
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.4.2
       tsx:
         specifier: ^4.7.2
         version: 4.17.0
@@ -1244,6 +1256,7 @@ packages:
   /@babel/code-frame@7.24.7:
     resolution: {integrity: sha512-BcYH1CVJBO9tvyIZ2jVeXgSIMvGZ2FDRvDdOIVQyuklNKSsx+eppDEBq/g47Ayw+RqNFE+URvOShmf+f/qwAlA==}
     engines: {node: '>=6.9.0'}
+    requiresBuild: true
     dependencies:
       '@babel/highlight': 7.24.7
       picocolors: 1.0.1
@@ -1341,6 +1354,7 @@ packages:
   /@babel/helper-validator-identifier@7.24.7:
     resolution: {integrity: sha512-rR+PBcQ1SMQDDyF6X0wxtG8QyLCgUB0eRAGguqRLfkCA87l7yAP7ehq8SNj96OOGTO8OBV70KhuFYcIkHXOg0w==}
     engines: {node: '>=6.9.0'}
+    requiresBuild: true
     dev: false
 
   /@babel/helper-validator-option@7.24.8:
@@ -1359,6 +1373,7 @@ packages:
   /@babel/highlight@7.24.7:
     resolution: {integrity: sha512-EStJpq4OuY8xYfhGVXngigBJRWxftKX9ksiGDnmlY3o7B/V7KIAc9X4oiK87uPJSc/vs5L869bem5fhZa8caZw==}
     engines: {node: '>=6.9.0'}
+    requiresBuild: true
     dependencies:
       '@babel/helper-validator-identifier': 7.24.7
       chalk: 2.4.2
@@ -10858,21 +10873,6 @@ packages:
       type-fest: 3.13.1
     dev: true
 
-  /dotenv-cli@7.4.2:
-    resolution: {integrity: sha512-SbUj8l61zIbzyhIbg0FwPJq6+wjbzdn9oEtozQpZ6kW2ihCcapKVZj49oCT3oPM+mgQm+itgvUQcG5szxVrZTA==}
-    hasBin: true
-    dependencies:
-      cross-spawn: 7.0.3
-      dotenv: 16.4.5
-      dotenv-expand: 10.0.0
-      minimist: 1.2.8
-    dev: true
-
-  /dotenv-expand@10.0.0:
-    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
-    engines: {node: '>=12'}
-    dev: true
-
   /dotenv@16.0.3:
     resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
     engines: {node: '>=12'}
@@ -10882,8 +10882,8 @@ packages:
     resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
     engines: {node: '>=12'}
 
-  /drizzle-kit@0.28.0:
-    resolution: {integrity: sha512-KqI+CS2Ga9GYIrXpxpCDUJJrH/AT/k4UY0Pb4oRgQEGkgN1EdCnqp664cXgwPWjDr5RBtTsjZipw8+8C//K63A==}
+  /drizzle-kit@0.30.1:
+    resolution: {integrity: sha512-HmA/NeewvHywhJ2ENXD3KvOuM/+K2dGLJfxVfIHsGwaqKICJnS+Ke2L6UcSrSrtMJLJaT0Im1Qv4TFXfaZShyw==}
     hasBin: true
     dependencies:
       '@drizzle-team/brocli': 0.10.2
@@ -10986,15 +10986,15 @@ packages:
       '@neondatabase/serverless': 0.9.4
     dev: false
 
-  /drizzle-orm@0.36.1(@neondatabase/serverless@0.10.3):
-    resolution: {integrity: sha512-F4hbimnMEhyWzDowQB4xEuVJJWXLHZYD7FYwvo8RImY+N7pStGqsbfmT95jDbec1s4qKmQbiuxEDZY90LRrfIw==}
+  /drizzle-orm@0.38.2(@neondatabase/serverless@0.10.3):
+    resolution: {integrity: sha512-eCE3yPRAskLo1WpM9OHpFaM70tBEDsWhwR/0M3CKyztAXKR9Qs3asZlcJOEliIcUSg8GuwrlY0dmYDgmm6y5GQ==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
-      '@cloudflare/workers-types': '>=3'
+      '@cloudflare/workers-types': '>=4'
       '@electric-sql/pglite': '>=0.2.0'
       '@libsql/client': '>=0.10.0'
       '@libsql/client-wasm': '>=0.10.0'
-      '@neondatabase/serverless': '>=0.1'
+      '@neondatabase/serverless': '>=0.10.0'
       '@op-engineering/op-sqlite': '>=2'
       '@opentelemetry/api': ^1.4.1
       '@planetscale/database': '>=1'
@@ -11008,7 +11008,7 @@ packages:
       '@xata.io/client': '*'
       better-sqlite3: '>=7'
       bun-types: '*'
-      expo-sqlite: '>=13.2.0'
+      expo-sqlite: '>=14.0.0'
       knex: '*'
       kysely: '*'
       mysql2: '>=2'
@@ -11081,13 +11081,13 @@ packages:
       '@neondatabase/serverless': 0.10.3
     dev: false
 
-  /drizzle-zod@0.5.1(drizzle-orm@0.36.1)(zod@3.23.8):
+  /drizzle-zod@0.5.1(drizzle-orm@0.38.2)(zod@3.23.8):
     resolution: {integrity: sha512-C/8bvzUH/zSnVfwdSibOgFjLhtDtbKYmkbPbUCq46QZyZCH6kODIMSOgZ8R7rVjoI+tCj3k06MRJMDqsIeoS4A==}
     peerDependencies:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.36.1(@neondatabase/serverless@0.10.3)
+      drizzle-orm: 0.38.2(@neondatabase/serverless@0.10.3)
       zod: 3.23.8
     dev: false
 
@@ -11774,6 +11774,7 @@ packages:
 
   /fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
+    requiresBuild: true
 
   /fast-equals@5.0.1:
     resolution: {integrity: sha512-WF1Wi8PwwSY7/6Kx0vKXtw8RwuSGoM1bvDaJbu7MxDlR1vovZjIAKrnzyrThgAjm6JDTu0fVgWXDlMGspodfoQ==}
@@ -12688,6 +12689,7 @@ packages:
   /import-fresh@3.3.0:
     resolution: {integrity: sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw==}
     engines: {node: '>=6'}
+    requiresBuild: true
     dependencies:
       parent-module: 1.0.1
       resolve-from: 4.0.0
@@ -13235,6 +13237,7 @@ packages:
 
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
+    requiresBuild: true
 
   /js-tokens@9.0.0:
     resolution: {integrity: sha512-WriZw1luRMlmV3LGJaR6QOJjWwgLUTf89OwT2lUOyjX2dJGBwgmIkbcz+7WFZjrZM635JOIR517++e/67CP9dQ==}
@@ -13270,6 +13273,7 @@ packages:
 
   /json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
+    requiresBuild: true
     dev: false
 
   /json-schema-traverse@0.4.1:
@@ -13278,6 +13282,7 @@ packages:
 
   /json-schema-traverse@1.0.0:
     resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
+    requiresBuild: true
 
   /json-schema@0.4.0:
     resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
@@ -13425,6 +13430,7 @@ packages:
 
   /lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
+    requiresBuild: true
 
   /linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
@@ -13584,6 +13590,7 @@ packages:
 
   /lodash.isplainobject@4.0.6:
     resolution: {integrity: sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==}
+    requiresBuild: true
     dev: false
 
   /lodash.map@4.6.0:
@@ -13592,6 +13599,7 @@ packages:
 
   /lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
+    requiresBuild: true
     dev: false
 
   /lodash.mergewith@4.6.2:
@@ -14537,6 +14545,7 @@ packages:
 
   /minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
+    dev: false
 
   /minipass@3.3.6:
     resolution: {integrity: sha512-DxiNidxSEK+tHG6zOIklvNOwm3hvCrbUrdtzY74U6HKTJxvIDfOUL5W5P2Ghd3DTkhhKPYGqeNUIh5qcM4YBfw==}
@@ -16854,6 +16863,7 @@ packages:
   /require-from-string@2.0.2:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
     engines: {node: '>=0.10.0'}
+    requiresBuild: true
 
   /require-in-the-middle@7.4.0:
     resolution: {integrity: sha512-X34iHADNbNDfr6OTStIAHWSAvvKQRYgLO6duASaVf7J2VA3lvmNYboAHOuLC2huav1IwgZJtyEcJCKVzFxOSMQ==}

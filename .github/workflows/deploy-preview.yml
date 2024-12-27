@@ -1,0 +1,137 @@
+name: Deploy Preview
+
+on:
+  pull_request:
+    branches: ['*']
+  merge_group:
+
+env:
+  SKIP_ENV_VALIDATION: 1
+
+jobs:
+  build-lint:
+    uses: ./.github/workflows/job_build.yaml
+    with:
+      pull_secrets: true
+      project_slug: unprice-zq-xm
+      env_slug: preview
+    secrets:
+      MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+      MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+
+  deploy-preview:
+    runs-on: ubuntu-latest
+
+    needs:
+      - build-lint
+
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: "preview"
+          project-slug: "unprice-zq-xm"
+          export-type: "file"
+          file-output-path: "/.env"
+          secret-path: "/"
+          recursive: true
+
+      - uses: ./.github/actions/install
+        with:
+          ts: true
+
+      - uses: cardinalby/export-env-action@v2
+        with:
+          envFile: '.env'
+          export: true
+          # export everything except DATABASE_URL using regex
+          filter: ^(?!DATABASE_URL$).*$
+          mask: true
+
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v8
+
+      - name: Create Neon Branch
+        id: create-branch
+        uses: neondatabase/create-branch-action@v5
+        with:
+          project_id: ${{ env.NEON_PROJECT_ID }}
+          parent: main
+          branch_name: preview/pr-${{ steps.branch-name.outputs.current_branch }}
+          username: ${{ env.NEON_DATABASE_USERNAME }}
+          database: ${{ env.NEON_DATABASE_NAME }}
+          api_key: ${{ env.NEON_API_KEY }}
+
+      - name: Run Migrations
+        working-directory: internal/db
+        run: |
+          pnpm generate
+          pnpm migrate:custom
+        env:
+          VERCEL_ENV: preview
+          NODE_ENV: development
+          DATABASE_URL: ${{ steps.create-branch.outputs.db_url_with_pooler }}
+
+      - name: commit migrations
+        working-directory: internal/db
+        run: |
+          if [ -n "$(git status --porcelain ./)" ]; then
+            echo "Changes detected in db folder, committing..."
+            git config --global user.email "unprice-bot@unprice.com"
+            git config --global user.name "Unprice Bot"
+            git add .
+            git commit -m "Migrations for preview"
+            git push --set-upstream origin ${{ steps.branch-name.outputs.current_branch }}
+          else
+            echo "No changes detected in db folder, skipping commit"
+          fi
+
+      - name: Schema Diff
+        uses: neondatabase/schema-diff-action@v1
+        with:
+          project_id: ${{ env.NEON_PROJECT_ID }}
+          base_branch: main
+          compare_branch: preview/pr-${{ steps.branch-name.outputs.current_branch }}
+          username: ${{ env.NEON_DATABASE_USERNAME }}
+          database: ${{ env.NEON_DATABASE_NAME }}
+          api_key: ${{ env.NEON_API_KEY }}
+
+      - uses: amondnet/vercel-action@v25.2.0 #deploy
+        name: Deploy Unprice auth to Vercel
+        id: deploy-auth
+        with:
+          vercel-token: ${{ env.VERCEL_TOKEN }} # Required
+          vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
+          vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID }} #Required
+          # always prod because the auth proxy link has to be stable
+          vercel-args: '--env "VERCEL_ENV=production" --env "VERCEL=true" --env "NODE_ENV=production" --prod --build-env "VERCEL_ENV=production" --build-env "VERCEL=true" --build-env "NODE_ENV=production"'
+          working-directory: ./
+
+      # deploy preview unprice to vercel
+      - uses: amondnet/vercel-action@v25.2.0 #deploy
+        name: Deploy Preview Unprice to Vercel
+        id: deploy-unprice
+        with:
+          vercel-token: ${{ env.VERCEL_TOKEN }} # Required
+          vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
+          vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
+          working-directory: ./
+          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=development" --env "VERCEL_ENV=preview" --env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" --env "NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app" --build-env "NODE_ENV=development" --build-env "VERCEL=true" --build-env "VERCEL_ENV=preview" --build-env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" --build-env "NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app"'
+          alias-domains: |
+            pr-${{ github.event.number }}-unprice.vercel.app
+            app-pr-${{ github.event.number }}-unprice.vercel.app
+            api-pr-${{ github.event.number }}-unprice.vercel.app
+
+      - name: Delete Secret
+        if: always()
+        run: |
+          rm -rf .env || true

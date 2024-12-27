@@ -9,7 +9,7 @@ neonConfig.webSocketConstructor = typeof WebSocket !== "undefined" ? WebSocket :
 
 // TODO: fix push command in drizzle-kit
 // if we're running locally
-if (env.NODE_ENV === "development") {
+if (env.NODE_ENV === "development" && env.VERCEL_ENV === "development") {
   // Set the WebSocket proxy to work with the local instance
   neonConfig.wsProxy = (host) => {
     return `${host}:5433/v1?address=db:5432`
@@ -22,8 +22,7 @@ if (env.NODE_ENV === "development") {
 }
 
 const poolConfig = {
-  connectionString:
-    env.NODE_ENV === "development" ? env.DATABASE_URL_LOCAL : env.DATABASE_PRIMARY_URL,
+  connectionString: env.DATABASE_URL,
   connectionTimeoutMillis: 30000,
   keepAlive: true,
 }
@@ -59,7 +58,7 @@ export const read2 = drizzleNeon(
 )
 
 export const db =
-  env.NODE_ENV === "production"
+  env.NODE_ENV === "production" && env.VERCEL_ENV === "production"
     ? withReplicas(primary, [read1, read2])
     : withReplicas(primary, [primary])
 

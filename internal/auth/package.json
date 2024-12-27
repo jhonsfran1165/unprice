@@ -20,6 +20,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@auth/core": "^0.34.1",
     "@auth/drizzle-adapter": "1.4.1",
     "@t3-oss/env-nextjs": "0.9.1",
     "@unprice/db": "^0.1.0",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@unprice/tsconfig": "^0.1.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "@types/react": "^18.3.1"
   }
 }

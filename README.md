@@ -7,7 +7,7 @@
 
 ## About
 
-Unprice pricing platform for modern saas.
+Unprice pricing platform for modern saas. Manage, iterate and find the right price for your saas.
 
 ## Tech Stack & Features
 

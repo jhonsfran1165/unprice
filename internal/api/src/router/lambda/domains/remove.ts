@@ -36,8 +36,8 @@ export const remove = protectedWorkspaceProcedure
     // maybe with a cron job that verify if the domain is used by another account and then remove it from our account
     // for now, I will just remove it from the project
     const vercel = new Vercel({
-      accessToken: env.VERCEL_AUTH_BEARER_TOKEN,
-      teamId: env.TEAM_ID_VERCEL,
+      accessToken: env.VERCEL_TOKEN,
+      teamId: env.VERCEL_TEAM_ID,
     })
 
     // remove the old domain from vercel
