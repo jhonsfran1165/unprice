@@ -54,10 +54,9 @@ jobs:
           export: true
           mask: true
 
-      - name: Run Migrations
+      - name: Apply Migrations
         working-directory: internal/db
         run: |
-          pnpm generate
           pnpm migrate:custom
         env:
           VERCEL_ENV: production
@@ -83,7 +82,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=production" --env "VERCEL_ENV=production" --env "DATABASE_URL=${{ env.DATABASE_URL }}" --build-env "NODE_ENV=production" --build-env "VERCEL=true" --build-env "VERCEL_ENV=production" --build-env "DATABASE_URL=${{ env.DATABASE_URL }}"'
+          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=production" --env "VERCEL_ENV=production" --env "DATABASE_URL=${{ env.DATABASE_URL }}" --env "NEXT_PUBLIC_APP_DOMAIN=unprice.dev" --build-env "NODE_ENV=production" --build-env "VERCEL=true" --build-env "VERCEL_ENV=production" --build-env "DATABASE_URL=${{ env.DATABASE_URL }}" --build-env "NEXT_PUBLIC_APP_DOMAIN=unprice.dev"'
           alias-domains: |
             unprice.vercel.app
 

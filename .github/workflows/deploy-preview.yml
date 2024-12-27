@@ -128,6 +128,8 @@ jobs:
           vercel-args: '--env "VERCEL=true" --env "NODE_ENV=development" --env "VERCEL_ENV=preview" --env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" --env "NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app" --build-env "NODE_ENV=development" --build-env "VERCEL=true" --build-env "VERCEL_ENV=preview" --build-env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" --build-env "NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app"'
           alias-domains: |
             pr-${{ github.event.number }}-unprice.vercel.app
+            app.pr-${{ github.event.number }}-unprice.vercel.app
+            api.pr-${{ github.event.number }}-unprice.vercel.app
 
       - name: Delete Secret
         if: always()
