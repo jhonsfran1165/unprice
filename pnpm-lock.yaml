@@ -476,7 +476,7 @@ importers:
         version: 3.23.8
     devDependencies:
       '@unprice/tsconfig':
-        specifier: 0.1.0
+        specifier: workspace:*
         version: link:../../tooling/typescript
       typescript:
         specifier: ^5.3.3
