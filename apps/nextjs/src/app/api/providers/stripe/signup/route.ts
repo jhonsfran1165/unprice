@@ -3,7 +3,6 @@ import { NextResponse } from "next/server"
 
 import { and, db, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
-import { type Stripe, stripe } from "@unprice/stripe"
 import { ratelimitOrThrow } from "~/lib/ratelimit"
 import { api } from "~/trpc/server"
 
@@ -19,45 +18,44 @@ export async function GET(req: NextRequest) {
     await ratelimitOrThrow(req, "stripe-signup")
 
     const sessionId = req.nextUrl.searchParams.get("session_id")
+    const projId = req.nextUrl.searchParams.get("project_id")
 
-    if (!sessionId) {
-      return NextResponse.json({ error: "Session ID is required" }, { status: 400 })
+    if (!sessionId || !projId) {
+      return NextResponse.json({ error: "Session ID and project ID are required" }, { status: 400 })
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    // get session
+    const {
+      metadata,
+      subscriptionId,
+      paymentMethodId,
+      customerId: stripeCustomerId,
+    } = await api.paymentProvider.getSession({
+      sessionId,
+      paymentProvider: "stripe",
+      projectId: projId,
+    })
 
-    if (!session) {
-      return NextResponse.json({ error: "Session not found" }, { status: 404 })
+    if (!metadata) {
+      return NextResponse.json({ error: "Session not metadata" }, { status: 404 })
     }
 
-    if (!session.metadata) {
-      return NextResponse.json({ error: "Session metadata is required" }, { status: 400 })
-    }
+    const customerId = metadata.customerId
+    const projectId = metadata.projectId
+    const successUrl = metadata.successUrl
+    const cancelUrl = metadata.cancelUrl
 
-    const customerSessionId = session.metadata?.customerSessionId as string
-    const successUrl = session.metadata?.successUrl as string
-    const cancelUrl = session.metadata?.cancelUrl as string
-
-    if (!customerSessionId || !successUrl || !cancelUrl) {
+    if (!customerId || !projectId || !successUrl || !cancelUrl) {
       return NextResponse.json({ error: "Metadata is incomplete" }, { status: 400 })
     }
 
     // get the customer session
     const customerSession = await db.query.customerSessions.findFirst({
-      where: eq(schema.customerSessions.id, customerSessionId),
+      where: eq(schema.customerSessions.id, customerId),
     })
 
     if (!customerSession) {
       return NextResponse.json({ error: "Customer session not found" }, { status: 404 })
-    }
-
-    const [customer, paymentMethods] = await Promise.all([
-      stripe.customers.retrieve(session.customer as string) as Promise<Stripe.Customer>,
-      stripe.customers.listPaymentMethods(session.customer as string),
-    ])
-
-    if (!customer.id) {
-      return NextResponse.json({ error: "Customer not found in stripe" }, { status: 404 })
     }
 
     // check if the customer exists in the database
@@ -76,15 +74,15 @@ export async function GET(req: NextRequest) {
         .values({
           id: customerSession.customer.id,
           projectId: customerSession.customer.projectId,
-          stripeCustomerId: customer.id,
-          name: customerSession.customer.name ?? customer.name ?? "",
-          email: customerSession.customer.email ?? customer.email ?? "",
+          stripeCustomerId: stripeCustomerId,
+          name: customerSession.customer.name ?? "",
+          email: customerSession.customer.email ?? "",
           defaultCurrency: customerSession.customer.currency,
           active: true,
           timezone: customerSession.customer.timezone,
           metadata: {
-            stripeSubscriptionId: (session.subscription as string) ?? "",
-            stripeDefaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
+            stripeSubscriptionId: subscriptionId ?? "",
+            stripeDefaultPaymentMethodId: paymentMethodId ?? "",
             externalId: customerSession.customer.externalId,
           },
         })
@@ -93,16 +91,16 @@ export async function GET(req: NextRequest) {
       await db
         .update(schema.customers)
         .set({
-          stripeCustomerId: session.customer as string,
-          name: customerSession.customer.name ?? customer.name ?? "",
-          email: customerSession.customer.email ?? customer.email ?? "",
+          stripeCustomerId: stripeCustomerId,
+          name: customerSession.customer.name ?? "",
+          email: customerSession.customer.email ?? "",
           defaultCurrency: customerSession.customer.currency,
           active: true,
           timezone: customerSession.customer.timezone,
           metadata: {
             ...customerUnprice.metadata,
-            stripeSubscriptionId: (session.subscription as string) ?? "",
-            stripeDefaultPaymentMethodId: paymentMethods.data.at(0)?.id ?? "",
+            stripeSubscriptionId: subscriptionId ?? "",
+            stripeDefaultPaymentMethodId: paymentMethodId ?? "",
             externalId: customerSession.customer.externalId,
           },
         })
@@ -124,7 +122,7 @@ export async function GET(req: NextRequest) {
           startAt: Date.now(),
           planVersionId: customerSession.planVersion.id,
           config: customerSession.planVersion.config,
-          paymentMethodId: paymentMethods.data.at(0)?.id ?? "",
+          paymentMethodId: paymentMethodId,
         },
       ],
     })

@@ -21,7 +21,6 @@ export const SITES_BASE_DOMAIN =
       ? SITES_DOMAIN
       : "localhost:3000"
 
-// TODO: NEXT_PUBLIC_APP_DOMAIN can be different when having multiple domains
 export const APP_HOSTNAMES = new Set([
   `app.${MAIN_DOMAIN}`,
   `app.${env.NEXT_PUBLIC_APP_DOMAIN}`,

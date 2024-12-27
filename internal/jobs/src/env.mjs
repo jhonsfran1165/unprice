@@ -8,7 +8,6 @@ export const env = createEnv({
   },
   server: {
     TRIGGER_SECRET_KEY: z.string(),
-    STRIPE_API_KEY: z.string(),
     TINYBIRD_TOKEN: z.string(),
     ENCRYPTION_KEY: z.string(),
   },

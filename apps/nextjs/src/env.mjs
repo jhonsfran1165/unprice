@@ -7,11 +7,6 @@ export const env = createEnv({
     VERCEL_ENV: z.enum(["development", "preview", "production"]).default("preview"),
   },
   server: {
-    // NEXTJS_URL: z.preprocess(
-    //   (str) => (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str),
-    //   process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
-    // ),
-    STRIPE_WEBHOOK_SECRET: z.string(),
     PROJECT_ID_VERCEL: z.string(),
     TEAM_ID_VERCEL: z.string(),
     VERCEL_TOKEN: z.string(),
