@@ -172,6 +172,8 @@ export const authConfig = {
 
         token.refreshWorkspacesAt = Date.now() + 3600000 // revalidate the token in 1 hour
       } catch (error) {
+        // TODO: delete, this is just for debugging
+        console.error(process.env)
         token.refreshWorkspacesAt = 0 // invalidate the token if there is an error
         token.workspaces = [] // invalidate the token if there is an error
         log.error("Error getting workspaces for user", { error })
