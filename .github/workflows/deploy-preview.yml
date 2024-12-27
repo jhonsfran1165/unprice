@@ -3,7 +3,7 @@ name: Deploy Preview
 on:
   pull_request:
     branches-ignore:
-      - 'renovate/*'
+      - 'renovate/**'
   merge_group:
 
 env:
