@@ -34,8 +34,8 @@ export default function Home() {
         >
           <Balancer>
             Product market fit is a lie, everything starts with price. Product-market-price fit is
-            the new normal. Unprice is the platform that helps you find the right price for your
-            product.
+            the new normal. Unprice helps you manage, iterate and find the right price for your
+            saas.
           </Balancer>
         </p>
         <div
