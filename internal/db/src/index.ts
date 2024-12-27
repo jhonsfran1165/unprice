@@ -57,10 +57,8 @@ export const read2 = drizzleNeon(
   }
 )
 
-console.error(env.NODE_ENV, env.DATABASE_URL)
-
 export const db =
-  env.NODE_ENV === "production"
+  env.NODE_ENV === "production" && env.VERCEL_ENV === "production"
     ? withReplicas(primary, [read1, read2])
     : withReplicas(primary, [primary])
 
