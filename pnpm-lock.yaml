@@ -987,7 +987,7 @@ importers:
         specifier: 7.0.0-next.7
         version: 7.0.0-next.7(typescript@5.5.4)
       tsup:
-        specifier: ^8.0.2
+        specifier: ^8.2.4
         version: 8.2.4(tsx@4.17.0)(typescript@5.5.4)
       typescript:
         specifier: ^5.3.3
