@@ -74,8 +74,12 @@ jobs:
       - name: Run Migrations
         working-directory: internal/db
         run: |
-          DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} NODE_ENV=development pnpm generate
-          DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} NODE_ENV=development pnpm migrate:custom
+          pnpm generate
+          pnpm migrate:custom
+        env:
+          VERCEL_ENV: preview
+          NODE_ENV: development
+          DATABASE_URL: ${{ steps.create-branch.outputs.db_url_with_pooler }}
 
       - name: commit migrations
         working-directory: internal/db

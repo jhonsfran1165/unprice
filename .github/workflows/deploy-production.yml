@@ -5,37 +5,89 @@ on:
     branches:
       - main
 
+env:
+  SKIP_ENV_VALIDATION: 1
+
 jobs:
-  deploy-production:
-    permissions: write-all
+  build-lint:
+    uses: ./.github/workflows/job_build.yaml
+    with:
+      pull_secrets: true
+      project_slug: unprice-zq-xm
+      env_slug: production
+    secrets:
+      MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+      MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+
+  deploy-prod:
     runs-on: ubuntu-latest
+
+    needs:
+      - build-lint
+
+    permissions:
+      pull-requests: write
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: "prod"
+          env-slug: "production"
           project-slug: "unprice-zq-xm"
           export-type: "file"
-          file-output-path: ".env"
+          file-output-path: "/.env"
           secret-path: "/"
+          recursive: true
+
+      - uses: ./.github/actions/install
+        with:
+          ts: true
+
+      - uses: cardinalby/export-env-action@v2
+        with:
+          envFile: '.env'
+          export: true
+          mask: true
 
       - name: Run Migrations
         working-directory: internal/db
         run: |
           pnpm generate
           pnpm migrate:custom
+        env:
+          VERCEL_ENV: production
+          NODE_ENV: production
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+      - uses: amondnet/vercel-action@v25.2.0 #deploy
+        name: Deploy Unprice auth to Vercel
+        id: deploy-auth
+        with:
+          vercel-token: ${{ env.VERCEL_TOKEN }} # Required
+          vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
+          vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID }} #Required
+          # always prod because the auth proxy link has to be stable
+          vercel-args: '--env "VERCEL_ENV=production" --env "VERCEL=true" --env "NODE_ENV=production" --prod --build-env "VERCEL_ENV=production" --build-env "VERCEL=true" --build-env "NODE_ENV=production"'
+          working-directory: ./
 
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      # deploy preview unprice to vercel
+      - uses: amondnet/vercel-action@v25.2.0 #deploy
+        name: Deploy Unprice to Vercel
+        id: deploy-unprice
+        with:
+          vercel-token: ${{ env.VERCEL_TOKEN }} # Required
+          vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
+          vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
+          working-directory: ./
+          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=production" --env "VERCEL_ENV=production" --env "DATABASE_URL=${{ env.DATABASE_URL }}" --build-env "NODE_ENV=production" --build-env "VERCEL=true" --build-env "VERCEL_ENV=production" --build-env "DATABASE_URL=${{ env.DATABASE_URL }}"'
+          alias-domains: |
+            unprice.vercel.app
 
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Delete Secret
+        if: always()
+        run: |
+          rm -rf .env || true
