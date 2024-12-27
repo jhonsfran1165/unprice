@@ -106,7 +106,7 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
-      - uses: amondnet/vercel-action@v25 #deploy
+      - uses: amondnet/vercel-action@v25.2.0 #deploy
         name: Deploy Unprice auth to Vercel
         id: deploy-auth
         with:
@@ -114,7 +114,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID }} #Required
           # always prod because the auth proxy link has to be stable
-          vercel-args: '--env VERCEL_ENV=production --env VERCEL=true --env NODE_ENV=production --prod'
+          vercel-args: '--env "VERCEL_ENV=production" --env "VERCEL=true" --env "NODE_ENV=production" --prod'
           working-directory: ./
 
       # - name: Install Vercel CLI
@@ -129,7 +129,7 @@ jobs:
       #     VERCEL_TOKEN: ${{ env.VERCEL_TOKEN }}
 
       # deploy preview unprice to vercel
-      - uses: amondnet/vercel-action@v25 #deploy
+      - uses: amondnet/vercel-action@v25.2.0 #deploy
         name: Deploy Preview Unprice to Vercel
         id: deploy-unprice
         with:
@@ -137,14 +137,10 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env VERCEL=true --env NODE_ENV=production --env VERCEL_ENV=preview --env DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}'
-
-      # - name: Build Project Artifacts
-      #   run: vercel build --token=${{ env.VERCEL_TOKEN }} --yes
-
-      # - name: Deploy Preview Unprice to Vercel
-      #   id: deploy
-      #   run: echo preview_url=$(vercel deploy --prebuilt --token=${{ env.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
+          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=production" --env "VERCEL_ENV=preview" --env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}"'
+          alias-domains: |
+            preview-unprice.vercel.app
+            pr-{{PR_NUMBER}}-unprice.vercel.app
 
       - name: Delete Secret
         if: always()
