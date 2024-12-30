@@ -29,7 +29,7 @@ import { slashCommand, suggestionItems } from "./slash-command"
 import type { NovelComponentProps } from "./types"
 import { NovelUpdate } from "./update-novel"
 
-export const extensions: AnyExtension[] = [...defaultExtensions, slashCommand]
+export const extensions = [...defaultExtensions, slashCommand]
 
 const hljs = require("highlight.js")
 
@@ -141,7 +141,7 @@ export const NovelComponent: UserComponent<NovelComponentProps> = (props) => {
           // avoid rendering the editor on the server
           immediatelyRender={false}
           editable={enabled}
-          extensions={extensions}
+          extensions={extensions as AnyExtension[]}
           initialContent={editorContent}
           onUpdate={({ editor }) => {
             setProp((props: NovelComponentProps) => {

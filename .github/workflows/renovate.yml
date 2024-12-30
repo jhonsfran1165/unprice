@@ -2,8 +2,8 @@ name: Test Renovate
 
 on:
   pull_request:
-    branches: ['renovate/**']
-  merge_group:
+    branches:
+      - renovate/**
 
 env:
   SKIP_ENV_VALIDATION: 1

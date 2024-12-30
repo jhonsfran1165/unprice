@@ -1,38 +1,68 @@
 {
   "$schema": "https://turborepo.org/schema.json",
-  "globalDependencies": ["**/.env.*local"],
-  "globalEnv": [
-    "DATABASE_URL",
-    "DATABASE_READ1_URL",
-    "DATABASE_READ2_URL",
-    "SKIP_ENV_VALIDATION",
-    "PROJECT_ID_VERCEL",
-    "VERCEL_TEAM_ID",
-    "VERCEL_TOKEN",
-    "AUTH_SECRET",
-    "TINYBIRD_TOKEN",
-    "TINYBIRD_URL",
-    "AUTH_GITHUB_CLIENT_ID",
-    "AUTH_GITHUB_CLIENT_SECRET",
-    "AUTH_REDIRECT_PROXY_URL",
-    "RESEND_API_KEY",
-    "ENCRYPTION_KEY",
-    "BASELIME_APIKEY",
-    "TRIGGER_SECRET_KEY",
-    "UPSTASH_REDIS_REST_TOKEN",
-    "UPSTASH_REDIS_REST_URL",
-    "NODE_ENV",
-    "VERCEL_ENV"
-  ],
+  "globalEnv": ["NODE_ENV", "VERCEL_ENV", "PROJECT_ID_VERCEL", "VERCEL_TEAM_ID", "VERCEL_TOKEN"],
   "tasks": {
-    "topo": {
-      "dependsOn": ["^topo"]
+    "install": {
+      "outputs": ["node_modules/**", "pnpm-lock.yaml", "yarn.lock"]
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "next-env.d.ts", ".expo/**", ".output/**"]
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "next-env.d.ts",
+        ".expo/**",
+        ".output/**",
+        "dist/**"
+      ],
+      "env": [
+        "NEXT_PUBLIC_*",
+        "!NEXT_PUBLIC_VERCEL_*",
+        "DATABASE_URL",
+        "DATABASE_READ1_URL",
+        "DATABASE_READ2_URL",
+        "SKIP_ENV_VALIDATION",
+        "AUTH_SECRET",
+        "TINYBIRD_TOKEN",
+        "TINYBIRD_URL",
+        "AUTH_GITHUB_CLIENT_ID",
+        "AUTH_GITHUB_CLIENT_SECRET",
+        "AUTH_REDIRECT_PROXY_URL",
+        "RESEND_API_KEY",
+        "ENCRYPTION_KEY",
+        "BASELIME_APIKEY",
+        "TRIGGER_SECRET_KEY",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "UPSTASH_REDIS_REST_URL"
+      ]
+    },
+    "fmt": {
+      "cache": false
+    },
+    "start": {
+      "cache": false
     },
     "dev": {
+      "env": [
+        "NEXT_PUBLIC_*",
+        "!NEXT_PUBLIC_VERCEL_*",
+        "DATABASE_URL",
+        "DATABASE_READ1_URL",
+        "DATABASE_READ2_URL",
+        "SKIP_ENV_VALIDATION",
+        "AUTH_SECRET",
+        "TINYBIRD_TOKEN",
+        "TINYBIRD_URL",
+        "AUTH_GITHUB_CLIENT_ID",
+        "AUTH_GITHUB_CLIENT_SECRET",
+        "AUTH_REDIRECT_PROXY_URL",
+        "RESEND_API_KEY",
+        "ENCRYPTION_KEY",
+        "BASELIME_APIKEY",
+        "TRIGGER_SECRET_KEY",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "UPSTASH_REDIS_REST_URL"
+      ],
       "persistent": true,
       "cache": false
     },
@@ -40,13 +70,9 @@
       "cache": false
     },
     "typecheck": {
-      "dependsOn": ["^topo"],
-      "outputs": ["node_modules/.cache/tsbuildinfo.json"]
+      "dependsOn": ["^typecheck"]
     },
-    "clean": {
-      "cache": false
-    },
-    "//#clean": {
+    "clean:workspaces": {
       "cache": false
     }
   }

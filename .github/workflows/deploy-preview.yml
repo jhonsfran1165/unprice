@@ -6,8 +6,6 @@ on:
       - '*'
       - '!renovate/**'
 
-  merge_group:
-
 env:
   SKIP_ENV_VALIDATION: 1
 

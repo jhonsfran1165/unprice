@@ -11,7 +11,7 @@ import {
   TextIcon,
   TextQuote,
 } from "lucide-react"
-import { EditorBubbleItem, useEditor } from "novel"
+import { EditorBubbleItem, type EditorInstance, useEditor } from "novel"
 
 import { Button } from "@unprice/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
@@ -19,8 +19,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 export type SelectorItem = {
   name: string
   icon: LucideIcon
-  command: (editor: ReturnType<typeof useEditor>["editor"]) => void
-  isActive: (editor: ReturnType<typeof useEditor>["editor"]) => boolean
+  command: (editor: EditorInstance) => void
+  isActive: (editor: EditorInstance) => boolean
 }
 
 const items: SelectorItem[] = [

@@ -16,14 +16,15 @@
     "typecheck": "turbo typecheck",
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip --include files,dependencies",
-    "test": "SKIP_ENV_VALIDATION=true NODE_ENV=test turbo run test",
+    "test": "cross-env SKIP_ENV_VALIDATION=true NODE_ENV=test turbo run test",
     "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply-unsafe",
     "fmt": "pnpm biome format . && pnpm biome check .",
     "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:fix",
     "manypkg:fix": "pnpm manypkg fix",
     "commit": "cz",
     "bump-versions": "pnpm changeset version && pnpm install",
-    "prepare": "husky"
+    "prepare": "husky",
+    "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
     "@biomejs/biome": "1.7.3",

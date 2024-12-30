@@ -11,9 +11,9 @@
       }
     ],
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "moduleResolution": "Bundler",
-    "module": "ESNext"
+    "moduleResolution": "bundler",
+    "module": "esnext"
   },
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "*.ts", "*.mjs", "src/**/*"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
