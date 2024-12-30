@@ -4,6 +4,6 @@
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "moduleResolution": "bundler"
   },
-  "include": ["src", "*.ts"],
+  "include": ["*.ts", "src", "*.css"],
   "exclude": ["node_modules"]
 }
