@@ -3,6 +3,7 @@
   "globalEnv": ["NODE_ENV", "VERCEL_ENV", "PROJECT_ID_VERCEL", "VERCEL_TEAM_ID", "VERCEL_TOKEN"],
   "tasks": {
     "install": {
+      "cache": false,
       "outputs": ["node_modules/**", "pnpm-lock.yaml", "yarn.lock"]
     },
     "build": {
