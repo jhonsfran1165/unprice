@@ -20,7 +20,7 @@
   "author": "Sebastian Franco",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "@unprice/tsconfig": "workspace:^",
+    "@unprice/tsconfig": "^0.1.0",
     "@types/node": "20.11.24",
     "typescript": "^5.3.3"
   },

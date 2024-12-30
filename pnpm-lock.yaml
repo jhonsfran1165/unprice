@@ -965,7 +965,7 @@ importers:
         specifier: 20.11.24
         version: 20.11.24
       '@unprice/tsconfig':
-        specifier: workspace:^
+        specifier: ^0.1.0
         version: link:../../tooling/typescript
       typescript:
         specifier: ^5.3.3
