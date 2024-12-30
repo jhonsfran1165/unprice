@@ -70,7 +70,8 @@
       "cache": false
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["^typecheck"],
+      "cache": false
     },
     "clean:workspaces": {
       "cache": false
