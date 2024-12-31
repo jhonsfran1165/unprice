@@ -62,6 +62,7 @@ jobs:
           VERCEL_ENV: production
           NODE_ENV: production
 
+      # TODO: use turbo-ignore to decide if we need to deploy unprice auth
       - uses: amondnet/vercel-action@v25.2.0 #deploy
         name: Deploy Unprice auth to Vercel
         id: deploy-auth
@@ -74,6 +75,7 @@ jobs:
           working-directory: ./
 
       # deploy preview unprice to vercel
+      # TODO: use turbo-ignore to decide if we need to deploy unprice auth
       - uses: amondnet/vercel-action@v25.2.0 #deploy
         name: Deploy Unprice to Vercel
         id: deploy-unprice
