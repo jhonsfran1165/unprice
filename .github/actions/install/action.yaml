@@ -12,7 +12,7 @@ runs:
 
   steps:
     - name: Set up pnpm
-      uses: pnpm/action-setup@v3
+      uses: pnpm/action-setup@v4
       if: ${{ inputs.ts == 'true' }}
       with:
         version: 8.15.4
@@ -22,7 +22,8 @@ runs:
       uses: actions/setup-node@v4
       if: ${{ inputs.ts == 'true' }}
       with:
-        node-version: 20.11.0
+        node-version: 20.11.1
+        cache: 'pnpm'
 
     - name: Get pnpm store directory
       if: ${{ inputs.ts == 'true' }}
