@@ -13,12 +13,14 @@ runs:
   steps:
     - name: Set up pnpm
       uses: pnpm/action-setup@v3
+      if: ${{ inputs.ts == 'true' }}
       with:
-        version: 8.6.12
+        version: 8.15.4
         run_install: false
 
     - name: Setup Node 20
       uses: actions/setup-node@v4
+      if: ${{ inputs.ts == 'true' }}
       with:
         node-version: 20.11.0
 
