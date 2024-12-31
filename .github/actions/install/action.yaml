@@ -42,4 +42,4 @@ runs:
       if: ${{ inputs.ts == 'true' }}
       shell: bash
       run: |
-        pnpm install
+        pnpm install --recursive

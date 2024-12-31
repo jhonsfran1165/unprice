@@ -54,7 +54,7 @@ jobs:
           ts: true
 
       - name: Type-check
-        run: pnpm turbo typecheck
+        run: pnpm typecheck
         env:
           NODE_ENV: test
 
@@ -65,7 +65,7 @@ jobs:
         run: pnpm manypkg check
 
       - name: Run tests
-        run: pnpm turbo test
+        run: pnpm test
         env:
           # fake database url
           DATABASE_URL: postgresql://postgresql:postgresql@localhost:5432/unprice
