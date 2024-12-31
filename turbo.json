@@ -9,9 +9,6 @@
     "SKIP_ENV_VALIDATION"
   ],
   "tasks": {
-    "install": {
-      "outputs": ["node_modules/**", "pnpm-lock.yaml", "yarn.lock"]
-    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": [
