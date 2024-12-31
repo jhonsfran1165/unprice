@@ -7,7 +7,7 @@ export const env = createEnv({
     VERCEL_ENV: z.enum(["development", "preview", "production"]).default("preview"),
   },
   server: {
-    PROJECT_ID_VERCEL: z.string(),
+    VERCEL_PROJECT_UNPRICE_ID: z.string(),
     VERCEL_TEAM_ID: z.string(),
     VERCEL_TOKEN: z.string(),
     BASELIME_APIKEY: z.string(),

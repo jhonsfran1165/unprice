@@ -8,11 +8,11 @@
   "engineStrict": true,
   "packageManager": "pnpm@8.15.4",
   "scripts": {
-    "build": "turbo build",
+    "build": "turbo run build",
     "clean": "git clean -xdf node_modules dist .next",
     "clean:workspaces": "turbo clean --parallel",
-    "dev": "cross-env FORCE_COLOR=1 turbo dev --parallel",
-    "with-infisical": "infisical run --env=preview --path=/app --",
+    "dev": "cross-env FORCE_COLOR=1 turbo run dev --parallel",
+    "with-infisical": "infisical run --env=preview --path=/ --recursive --",
     "typecheck": "turbo run typecheck",
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip --include files,dependencies",
@@ -37,7 +37,7 @@
     "husky": "^9.1.4",
     "knip": "^5.17.4",
     "lint-staged": "^15.2.9",
-    "turbo": "^2.0.6",
+    "turbo": "2.3.3",
     "typescript": "^5.3.3"
   },
   "lint-staged": {

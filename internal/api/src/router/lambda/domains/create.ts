@@ -32,7 +32,7 @@ export const create = protectedWorkspaceProcedure
       teamId: env.VERCEL_TEAM_ID,
     })
 
-    const response = await vercel.addProjectDomain(env.PROJECT_ID_VERCEL, domain)
+    const response = await vercel.addProjectDomain(env.VERCEL_PROJECT_UNPRICE_ID, domain)
 
     if (response.err) {
       throw new TRPCError({

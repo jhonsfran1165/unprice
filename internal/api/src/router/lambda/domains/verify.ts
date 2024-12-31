@@ -27,7 +27,7 @@ export const verify = protectedWorkspaceProcedure
     })
 
     const [domainVercel, configDomain] = await Promise.all([
-      vercel.getProjectDomain(env.PROJECT_ID_VERCEL, opts.input.domain),
+      vercel.getProjectDomain(env.VERCEL_PROJECT_UNPRICE_ID, opts.input.domain),
       vercel.getDomainConfig(opts.input.domain),
     ])
 
@@ -39,7 +39,7 @@ export const verify = protectedWorkspaceProcedure
       status = "Pending Verification"
 
       const domainVerification = await vercel.verifyProjectDomain(
-        env.PROJECT_ID_VERCEL,
+        env.VERCEL_PROJECT_UNPRICE_ID,
         opts.input.domain
       )
 

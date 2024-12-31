@@ -41,7 +41,7 @@ export const remove = protectedWorkspaceProcedure
     })
 
     // remove the old domain from vercel
-    const removeData = await vercel.removeProjectDomain(env.PROJECT_ID_VERCEL, domain.name)
+    const removeData = await vercel.removeProjectDomain(env.VERCEL_PROJECT_UNPRICE_ID, domain.name)
 
     if (removeData.err) {
       throw new TRPCError({

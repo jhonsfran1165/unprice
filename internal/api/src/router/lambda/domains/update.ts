@@ -47,7 +47,10 @@ export const update = protectedWorkspaceProcedure
       teamId: env.VERCEL_TEAM_ID,
     })
 
-    const removeData = await vercel.removeProjectDomain(env.PROJECT_ID_VERCEL, oldDomain.name)
+    const removeData = await vercel.removeProjectDomain(
+      env.VERCEL_PROJECT_UNPRICE_ID,
+      oldDomain.name
+    )
 
     if (removeData.err) {
       throw new TRPCError({
@@ -56,7 +59,7 @@ export const update = protectedWorkspaceProcedure
       })
     }
 
-    const addData = await vercel.addProjectDomain(env.PROJECT_ID_VERCEL, domain)
+    const addData = await vercel.addProjectDomain(env.VERCEL_PROJECT_UNPRICE_ID, domain)
 
     if (addData.err) {
       throw new TRPCError({

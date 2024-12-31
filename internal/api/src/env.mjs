@@ -6,7 +6,7 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
-    PROJECT_ID_VERCEL: z.string(),
+    VERCEL_PROJECT_UNPRICE_ID: z.string(),
     VERCEL_TEAM_ID: z.string(),
     VERCEL_TOKEN: z.string(),
     TINYBIRD_TOKEN: z.string(),
