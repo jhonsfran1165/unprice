@@ -1,6 +1,13 @@
 {
   "$schema": "https://turborepo.org/schema.json",
-  "globalEnv": ["NODE_ENV", "VERCEL_ENV", "PROJECT_ID_VERCEL", "VERCEL_TEAM_ID", "VERCEL_TOKEN"],
+  "globalEnv": [
+    "NODE_ENV",
+    "VERCEL_ENV",
+    "PROJECT_ID_VERCEL",
+    "VERCEL_TEAM_ID",
+    "VERCEL_TOKEN",
+    "SKIP_ENV_VALIDATION"
+  ],
   "tasks": {
     "install": {
       "outputs": ["node_modules/**", "pnpm-lock.yaml", "yarn.lock"]
@@ -21,7 +28,6 @@
         "DATABASE_URL",
         "DATABASE_READ1_URL",
         "DATABASE_READ2_URL",
-        "SKIP_ENV_VALIDATION",
         "AUTH_SECRET",
         "TINYBIRD_TOKEN",
         "TINYBIRD_URL",
