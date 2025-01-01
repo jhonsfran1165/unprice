@@ -12,15 +12,12 @@
   "description": "",
   "keywords": [],
   "scripts": {
-    "build": "tsup",
     "clean": "git clean -xdf .next .turbo node_modules dist"
   },
   "author": "Andreas Thomas",
   "license": "AGPL-3.0",
   "devDependencies": {
     "@types/node": "20.11.24",
-    "tsup": "^8.0.2",
-    "tsx": "^4.7.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {
