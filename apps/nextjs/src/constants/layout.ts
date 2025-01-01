@@ -1,3 +1,4 @@
+import { BASE_DOMAIN } from "@unprice/config"
 import type { SiteConfig } from "../types"
 
 export const navItems = [
@@ -6,11 +7,11 @@ export const navItems = [
     title: "Dashboard",
   },
   {
-    href: "/pricing",
+    href: `${BASE_DOMAIN}/pricing`,
     title: "Pricing",
   },
   {
-    href: "/",
+    href: `${BASE_DOMAIN}/docs`,
     title: "Docs",
   },
 ] satisfies { href: string; title: string }[]
@@ -31,27 +32,3 @@ export const siteConfig: SiteConfig = {
     dashboard: "/",
   },
 }
-
-export const ORGANIZATION_TYPES = {
-  STARTUP: {
-    description: "",
-  },
-  PERSONAL: {
-    description: "",
-  },
-  BUSSINESS: {
-    description: "",
-  },
-  OTHER: {
-    description: "",
-  },
-}
-
-export const ORGANIZATION_ROLES = {
-  MEMBER: {
-    description: "Can view and make changes on pages. No chnages allowed on the organizaiton",
-  },
-  OWNER: {
-    description: "Admin-level access to all resources.",
-  },
-} as const

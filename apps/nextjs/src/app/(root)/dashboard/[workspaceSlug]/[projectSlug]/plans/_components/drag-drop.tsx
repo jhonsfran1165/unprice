@@ -49,6 +49,7 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
     },
   })
 
+  // TODO: when this takes too long we should show a loading state
   const createPlanVersionFeatures = api.planVersionFeatures.create.useMutation({
     onSuccess: ({ planVersionFeature }) => {
       // once the feature is created we update the feature with the new id
