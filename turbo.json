@@ -12,7 +12,10 @@
     "VERCEL_TOKEN",
     "TINYBIRD_TOKEN",
     "RESEND_API_KEY",
-    "TINYBIRD_URL"
+    "TINYBIRD_URL",
+    "EMIT_METRICS_LOGS",
+    "TRPC_LOGGER",
+    "DRIZZLE_LOG"
   ],
   "tasks": {
     "build": {
