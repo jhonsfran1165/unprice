@@ -21,12 +21,11 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "next-env.d.ts",
-        ".expo/**",
-        ".output/**",
-        "dist/**"
+        "app/next.js/.next/**",
+        "app/next.js/!.next/cache/**",
+        "app/next.js/next-env.d.ts",
+        "dist/**",
+        "app/auth-proxy/.output/**"
       ],
       "env": [
         "NEXT_PUBLIC_*",
