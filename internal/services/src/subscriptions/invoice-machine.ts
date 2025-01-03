@@ -433,6 +433,110 @@ export class InvoiceStateMachine extends StateMachine<
       return Err(paymentValidation.err)
     }
 
+    // when trying to finalize an invoice that has no payment method and
+    // $0 we need to set the invoice status to void
+    if (
+      paymentValidation.val.requiredPaymentMethod === false &&
+      paymentValidation.val.paymentMethodId === ""
+    ) {
+      // lets be sure the invoice has price 0
+      const invoiceItemsPrice = await this.calculateSubscriptionActivePhaseItemsPrice({
+        cycleStartAt: invoice.cycleStartAt,
+        cycleEndAt: invoice.cycleEndAt,
+        previousCycleStartAt: invoice.previousCycleStartAt,
+        previousCycleEndAt: invoice.previousCycleEndAt,
+        whenToBill: invoice.whenToBill,
+        type: "hybrid",
+      })
+
+      if (invoiceItemsPrice.err) {
+        return Err(invoiceItemsPrice.err)
+      }
+
+      // upsert the invoice items in the payment provider
+      for (const item of invoiceItemsPrice.val.items) {
+        // depending on the payment provider, the amount is in different unit
+        // get the total amount of the invoice item given the quantity and proration
+        const formattedTotalAmountItem = this.paymentProviderService.formatAmount(
+          item.price.totalPrice.dinero
+        )
+
+        const formattedUnitAmountItem = this.paymentProviderService.formatAmount(
+          item.price.unitPrice.dinero
+        )
+
+        if (formattedTotalAmountItem.err || formattedUnitAmountItem.err) {
+          return Err(
+            new UnPriceSubscriptionError({
+              message: `Error formatting amount: ${
+                formattedTotalAmountItem.err?.message ?? formattedUnitAmountItem.err?.message
+              }`,
+            })
+          )
+        }
+
+        // sum up every item to calculate the subtotal of the invoice
+        paymentProviderInvoiceData.subtotal += formattedUnitAmountItem.val.amount * item.quantity
+      }
+
+      paymentProviderInvoiceData.total = paymentProviderInvoiceData.subtotal
+      paymentProviderInvoiceData.status = "void"
+
+      if (paymentProviderInvoiceData.total > 0) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: `Invoice has charges ${paymentProviderInvoiceData.total}, cannot set to void`,
+          })
+        )
+      }
+
+      // update credit and invoice in a transaction
+      const result = await this.db.transaction(async (tx) => {
+        try {
+          // if all goes well, update the invoice with the payment provider invoice data
+          const updatedInvoice = await tx
+            .update(invoices)
+            .set({
+              invoiceId: "",
+              invoiceUrl: "",
+              subtotal: paymentProviderInvoiceData.subtotal,
+              total: paymentProviderInvoiceData.total,
+              status: paymentProviderInvoiceData.status,
+              amountCreditUsed: 0,
+              metadata: {
+                note: `Invoice for subscription ${
+                  this.phaseMachine.getSubscription().planSlug
+                }, setting status to void`,
+              },
+            })
+            .where(and(eq(invoices.id, invoice.id), eq(invoices.projectId, projectId)))
+            .returning()
+            .then((res) => res[0])
+
+          if (!updatedInvoice) {
+            return Err(new UnPriceSubscriptionError({ message: "Error finalizing invoice" }))
+          }
+
+          // if it's a test, we need to assign the invoice id and url from the invoice
+          if (this.isTest) {
+            Object.assign(updatedInvoice, {
+              ...invoice,
+              ...updatedInvoice,
+            })
+          }
+
+          return Ok({ invoice: updatedInvoice })
+        } catch (e) {
+          const error = e as Error
+          return Err(
+            new UnPriceSubscriptionError({ message: `Error finalizing invoice: ${error.message}` })
+          )
+        }
+      })
+
+      return result
+    }
+
     let invoiceData: PaymentProviderInvoice
 
     // if there is an invoice id, we get the invoice from the payment provider

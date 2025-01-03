@@ -36,7 +36,7 @@ export function ProjectForm(props: {
   const apiUtils = api.useUtils()
 
   const editMode = !!props.defaultValues.id
-  const formSchema = editMode ? projectInsertBaseSchema : projectSelectBaseSchema
+  const formSchema = editMode ? projectSelectBaseSchema : projectInsertBaseSchema
 
   const form = useZodForm({
     schema: formSchema,
