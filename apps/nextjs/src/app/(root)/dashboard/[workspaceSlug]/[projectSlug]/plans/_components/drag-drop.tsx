@@ -18,7 +18,6 @@ import { startTransition, useState } from "react"
 import { createPortal } from "react-dom"
 
 import type { PlanVersionFeatureDragDrop } from "@unprice/db/validators"
-
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 import { FeaturePlan } from "./feature-plan"
@@ -37,7 +36,6 @@ const dropAnimation: DropAnimation = {
 export default function DragDrop({ children }: { children: React.ReactNode }) {
   const [clonedFeatures, setClonedFeatures] = useState<PlanVersionFeatureDragDrop[] | null>(null)
   const router = useRouter()
-
   const [activeFeature, setActiveFeature] = useActiveFeature()
   const [planFeaturesList, setPlanFeaturesList] = usePlanFeaturesList()
   const [activePlanVersion] = useActivePlanVersion()
@@ -52,18 +50,36 @@ export default function DragDrop({ children }: { children: React.ReactNode }) {
   // TODO: when this takes too long we should show a loading state
   const createPlanVersionFeatures = api.planVersionFeatures.create.useMutation({
     onSuccess: ({ planVersionFeature }) => {
-      // once the feature is created we update the feature with the new id
+      // Update the entire features list to maintain consistency with drag-drop
       setPlanFeaturesList((features) => {
-        const index = features.findIndex(
-          (feature) => feature.featureId === planVersionFeature.featureId
+        return features.map((feature) =>
+          feature.featureId === planVersionFeature.featureId
+            ? { ...feature, ...planVersionFeature }
+            : feature
         )
-
-        features[index] = planVersionFeature
-
-        return features
       })
+    },
+    // Optionally add optimistic updates
+    onMutate: (planVersionFeature) => {
+      const previousFeatures = planFeaturesList
 
-      router.refresh()
+      setPlanFeaturesList((features) =>
+        features.map((feature) =>
+          feature.featureId === planVersionFeature.featureId
+            ? { ...feature, ...planVersionFeature }
+            : feature
+        )
+      )
+
+      return { previousFeatures }
+    },
+    onError: (_, __, context) => {
+      // Rollback on error
+      if (context?.previousFeatures) {
+        setPlanFeaturesList(context.previousFeatures)
+      } else {
+        setPlanFeaturesList(clonedFeatures ?? [])
+      }
     },
   })
 
