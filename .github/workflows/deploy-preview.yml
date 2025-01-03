@@ -2,6 +2,7 @@ name: Deploy Preview
 
 on:
   pull_request:
+    types: [opened, synchronize]
     branches:
       - '!renovate/**'
 
