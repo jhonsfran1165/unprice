@@ -65,33 +65,34 @@ export const publish = protectedProjectProcedure
       })
     }
 
+    // get config payment provider
+    const config = await opts.ctx.db.query.paymentProviderConfig.findFirst({
+      where: (config, { and, eq }) =>
+        and(
+          eq(config.projectId, project.id),
+          eq(config.paymentProvider, planVersionData.paymentProvider),
+          eq(config.active, true)
+        ),
+    })
+
+    if (!config) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message:
+          "Payment provider config not found or not active. Please check the payment provider config in the project settings.",
+      })
+    }
+
+    const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+    const decryptedKey = await aesGCM.decrypt({
+      iv: config.keyIv,
+      ciphertext: config.key,
+    })
+
     // we need to create each product on the payment provider
     const planVersionDataUpdated = await opts.ctx.db.transaction(async (tx) => {
       try {
-        // get config payment provider
-        const config = await opts.ctx.db.query.paymentProviderConfig.findFirst({
-          where: (config, { and, eq }) =>
-            and(
-              eq(config.projectId, project.id),
-              eq(config.paymentProvider, planVersionData.paymentProvider),
-              eq(config.active, true)
-            ),
-        })
-
-        if (!config) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Payment provider config not found or not active",
-          })
-        }
-
-        const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
-
-        const decryptedKey = await aesGCM.decrypt({
-          iv: config.keyIv,
-          ciphertext: config.key,
-        })
-
         const paymentProviderService = new PaymentProviderService({
           logger: opts.ctx.logger,
           paymentProvider: planVersionData.paymentProvider,
@@ -187,8 +188,9 @@ export const publish = protectedProjectProcedure
 
         return versionUpdated
       } catch (error) {
+        const e = error as Error
         opts.ctx.logger.error("Error publishing version", {
-          error,
+          error: e.toString(),
         })
 
         tx.rollback()

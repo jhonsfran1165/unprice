@@ -237,6 +237,7 @@ export class PhaseMachine extends StateMachine<
           subscriptionDates: {
             pastDueAt: invoice.val.invoice.pastDueAt,
             lastInvoiceAt: payload.now,
+            // TODO: next invoice at is set after renewing the subscription??
           },
         })
 
@@ -785,26 +786,18 @@ export class PhaseMachine extends StateMachine<
       endAt: activePhase.endAt ?? undefined, // end day of the billing cycle if any
     })
 
+    // TODO: this is not working as expected, we need to fix it
+    // we need to design this in a way that we can invoice multiple times without creating a new invoice
+    // also if renew fails we need to be able to rollback the changes
     // Check if the calculated cycle end is after any scheduled change, cancel or expiry dates
-    if (
-      subscription.changeAt ||
-      subscription.cancelAt ||
-      subscription.expiresAt ||
-      subscription.pastDueAt
-    ) {
-      const changeDate = subscription.changeAt ? new Date(subscription.changeAt) : null
-      const cancelDate = subscription.cancelAt ? new Date(subscription.cancelAt) : null
-      const expiryDate = subscription.expiresAt ? new Date(subscription.expiresAt) : null
-      const pastDueDate = subscription.pastDueAt ? new Date(subscription.pastDueAt) : null
-
+    if (subscription.changeAt || subscription.cancelAt || subscription.expiresAt) {
       // Check if the calculated cycle end date is after any of the scheduled dates that exist
       if (
-        (changeDate && cycleEnd > changeDate) ||
-        (cancelDate && cycleEnd > cancelDate) ||
-        (expiryDate && cycleEnd > expiryDate) ||
-        (pastDueDate && cycleEnd > pastDueDate)
+        (subscription.changeAt && cycleEnd.getTime() > subscription.changeAt) ||
+        (subscription.cancelAt && cycleEnd.getTime() > subscription.cancelAt) ||
+        (subscription.expiresAt && cycleEnd.getTime() > subscription.expiresAt)
       ) {
-        // TODO: should I just end the phase here?
+        // TODO: should I just end the phase here? or override the cycle end date?
         return Err(
           new UnPriceSubscriptionError({
             message:
@@ -1272,8 +1265,23 @@ export class PhaseMachine extends StateMachine<
 
     // check when was the last invoice for the subscription
     if (subscription.lastInvoiceAt && subscription.nextInvoiceAt <= subscription.lastInvoiceAt) {
+      // This allow us to invoice the same invoice multiple times without creating a new one
+      const invoiceData = await this.getPhaseInvoiceByStatus({
+        phaseId: activePhase.id,
+        startAt: subscription.currentCycleStartAt,
+        status: "open",
+      })
+
+      if (invoiceData) {
+        return Ok({
+          invoice: invoiceData,
+        })
+      }
+
       return Err(
-        new UnPriceSubscriptionError({ message: "Subscription has already been invoiced" })
+        new UnPriceSubscriptionError({
+          message: "Subscription has already been invoiced but no invoice found",
+        })
       )
     }
 

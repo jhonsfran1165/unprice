@@ -15,6 +15,7 @@ import type { UseFormReturn } from "react-hook-form"
 import { CURRENCIES, PAYMENT_PROVIDERS, PLAN_BILLING_PERIODS, PLAN_TYPES } from "@unprice/db/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Textarea } from "@unprice/ui/text-area"
+import { useParams } from "next/navigation"
 import { SuperLink } from "~/components/super-link"
 import type { PublishedPlanVersion } from "./plan-version-form"
 
@@ -86,6 +87,8 @@ export function CurrencyFormField({
   form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
   isDisabled?: boolean
 }) {
+  const { workspaceSlug, projectSlug } = useParams()
+
   return (
     <FormField
       control={form.control}
@@ -94,9 +97,8 @@ export function CurrencyFormField({
         <FormItem className="flex flex-col justify-end">
           <div className="flex justify-between">
             <FormLabel>Currency of this version</FormLabel>
-            {/* // TODO: add link to currency configuration */}
             <SuperLink
-              href="#"
+              href={`/${workspaceSlug}/${projectSlug}/settings`}
               className="ml-auto inline-block text-info text-xs underline opacity-70"
             >
               Set default currency for this app

@@ -4,14 +4,14 @@ import { z } from "zod"
 export const env = createEnv({
   shared: {
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-    VERCEL_ENV: z.enum(["development", "preview", "production"]).default("preview"),
+    VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
   },
   server: {},
   client: {
     NEXT_PUBLIC_APP_DOMAIN: z.preprocess(
       (str) =>
         process.env.NEXT_PUBLIC_DEPLOYMENT_URL ? process.env.NEXT_PUBLIC_DEPLOYMENT_URL : str,
-      z.string().optional().default("")
+      z.string().optional().default("localhost:3000")
     ),
   },
   // Client side variables gets destructured here due to Next.js static analysis
