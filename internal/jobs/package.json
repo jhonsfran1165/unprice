@@ -8,18 +8,22 @@
     "clean": "rm -rf .turbo node_modules",
     "typecheck": "tsc --noEmit",
     "with-env": "infisical run --env=preview --path=/app --",
-    "dev:trigger": "pnpm with-env pnpm dlx trigger.dev@beta dev"
+    "with-env-prod": "infisical run --env=prod --path=/ci --",
+    "dev:trigger": "pnpm with-env pnpm dlx trigger.dev@3.3.7 dev",
+    "deploy:trigger-prod": "npx trigger.dev@3.3.7 deploy"
   },
   "dependencies": {
+    "@infisical/sdk": "^3.0.4",
     "@t3-oss/env-nextjs": "0.9.1",
-    "@trigger.dev/sdk": "3.0.0-beta.56",
+    "@trigger.dev/build": "^3.3.7",
+    "@trigger.dev/sdk": "3.3.7",
     "@unprice/db": "workspace:^0.1.0",
     "@unprice/logging": "workspace:^",
     "@unprice/services": "workspace:^",
     "@unprice/stripe": "workspace:^0.1.0",
     "@unprice/tinybird": "workspace:^",
     "date-fns": "^3.3.1",
-    "trigger.dev": "3.0.0-beta.56",
+    "trigger.dev": "3.3.7",
     "zod": "^3.23.8"
   },
   "devDependencies": {
