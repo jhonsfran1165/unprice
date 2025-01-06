@@ -33,13 +33,7 @@ export const publish = protectedProjectProcedure
           },
         },
         project: true,
-        plan: {
-          columns: {
-            slug: true,
-            defaultPlan: true,
-            enterprisePlan: true,
-          },
-        },
+        plan: true,
       },
       where: (version, { and, eq }) => and(eq(version.id, id), eq(version.projectId, project.id)),
     })

@@ -1,6 +1,6 @@
 import { APP_DOMAIN } from "@unprice/config"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
-import { differenceInCalendarDays, endOfMonth, startOfMonth } from "date-fns"
+import { differenceInCalendarDays } from "date-fns"
 import { Fragment } from "react"
 import { PaymentMethodForm } from "~/components/forms/payment-method-form"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -194,17 +194,29 @@ async function UsageCard() {
   const { subscriptions } = await api.auth.mySubscriptions()
 
   // TODO: customer can have multiple subscriptions
+  // for now only care the first one
   const subscription = subscriptions[0]
-  const activePhase = subscription?.phases[0]
 
   // TODO: handle case where no subscription is found
-  if (!subscription || !activePhase) return null
+  if (!subscription) return null
 
-  const { featuresWithUsage } = await api.analytics.getUsageCustomerUnprice({
-    customerId: subscription.customerId,
-    start: startOfMonth(new Date()).getTime(),
-    end: endOfMonth(new Date()).getTime(),
+  const activePhase = subscription.phases.find((phase) => {
+    const now = Date.now()
+    return phase.startAt <= now && (phase.endAt ? phase.endAt >= now : true)
   })
 
-  return <BillingCard subscriptions={subscriptions} featuresWithUsage={featuresWithUsage} />
+  // TODO: handle case where no active phase is found
+  if (!activePhase) return null
+
+  const { entitlements } = await api.analytics.getUsageActiveEntitlementsCustomerUnprice({
+    customerId: subscription.customerId,
+  })
+
+  return (
+    <BillingCard
+      subscription={subscription}
+      entitlements={entitlements}
+      activePhase={activePhase}
+    />
+  )
 }

@@ -459,36 +459,14 @@ export const planVersionFeatureDragDropSchema = planVersionFeatureSelectBaseSche
 //   project: projectSelectBaseSchema,
 // })
 
-export const planVersionExtendedSchema = planVersionSelectBaseSchema
-  .pick({
-    id: true,
-    planId: true,
-    status: true,
-    planType: true,
-    active: true,
-    currency: true,
-    billingPeriod: true,
-    startCycle: true,
-    gracePeriod: true,
-    whenToBill: true,
-    paymentProvider: true,
-    metadata: true,
-  })
-  .extend({
-    plan: planSelectBaseSchema.pick({
-      slug: true,
-      defaultPlan: true,
-      enterprisePlan: true,
-    }),
-    planFeatures: z.array(
-      planVersionFeatureSelectBaseSchema.extend({
-        feature: featureSelectBaseSchema.pick({
-          id: true,
-          slug: true,
-        }),
-      })
-    ),
-  })
+export const planVersionExtendedSchema = planVersionSelectBaseSchema.extend({
+  plan: planSelectBaseSchema,
+  planFeatures: z.array(
+    planVersionFeatureSelectBaseSchema.extend({
+      feature: featureSelectBaseSchema,
+    })
+  ),
+})
 
 export type PlanVersionFeature = z.infer<typeof planVersionFeatureInsertBaseSchema>
 

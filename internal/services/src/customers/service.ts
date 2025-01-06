@@ -1,4 +1,4 @@
-import { type Database, type TransactionDatabase, eq } from "@unprice/db"
+import { type Database, type TransactionDatabase, and, eq } from "@unprice/db"
 
 import {
   customerEntitlements,
@@ -181,12 +181,74 @@ export class CustomerService {
     })
   }
 
+  public async updateEntitlementsUsage(opts: {
+    customerId: string
+    projectId: string
+    date: number
+  }) {
+    const { customerId, projectId, date } = opts
+
+    // get active entitlements from the db
+    const entitlements = await this.getEntitlementsByDate({
+      customerId,
+      projectId,
+      date,
+      includeCustom: true,
+      noCache: true,
+    })
+
+    if (entitlements.err) {
+      return entitlements
+    }
+
+    await Promise.all(
+      entitlements.val.map(async (entitlement) => {
+        // get usage for the period from the analytics service
+        const totalUsage = await this.analytics.getTotalUsagePerCustomer({
+          customerId,
+          projectId,
+          start: entitlement.startAt,
+          end: entitlement.endAt ?? Date.now(),
+        })
+
+        const feature = totalUsage.data.find((u) => u.featureSlug === entitlement.featureSlug)
+        const usage = feature?.[entitlement.aggregationMethod]
+
+        // if the usage is not found, then do nothing
+        if (!usage) {
+          this.logger.warn("Problem with analytics service, usage not found for feature", {
+            featureSlug: entitlement.featureSlug,
+            customerId,
+            projectId,
+          })
+
+          return
+        }
+
+        // update the usage of the entitlement
+        await this.db
+          .update(customerEntitlements)
+          .set({
+            usage: usage,
+            lastUsageUpdateAt: Date.now(),
+          })
+          .where(
+            and(
+              eq(customerEntitlements.id, entitlement.id),
+              eq(customerEntitlements.projectId, projectId)
+            )
+          )
+      })
+    )
+  }
+
   public async getEntitlementsByDate(opts: {
     customerId: string
     projectId: string
     date: number
     includeCustom?: boolean
     noCache?: boolean
+    updateUsage?: boolean
   }): Promise<
     Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
   > {
@@ -205,6 +267,16 @@ export class CustomerService {
     }
 
     const res = await this.cache.entitlementsByCustomerId.swr(opts.customerId, async () => {
+      // updating the usage from the analytics service first and then updating the cache
+      // TODO: mesure the performance of this
+      if (opts.updateUsage) {
+        await this.updateEntitlementsUsage({
+          customerId: opts.customerId,
+          projectId: opts.projectId,
+          date: opts.date,
+        })
+      }
+
       return await getEntitlementsByDateQuery({
         customerId: opts.customerId,
         projectId: opts.projectId,

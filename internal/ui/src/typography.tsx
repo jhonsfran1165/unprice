@@ -30,7 +30,7 @@ const typographyVariants = cva("", {
       h3: "text-2xl font-semibold text-foreground tracking-tight",
       h4: "text-xl font-semibold text-foreground tracking-tight",
       h5: "font-semibold text-base text-foreground leading-none tracking-tight",
-      h6: "font-semibold tracking-tight text-foreground leading-none",
+      h6: "font-semibold tracking-tight text-foreground leading-none text-md",
       p: "leading-5 text-muted-foreground text-sm [&:not(:first-child)]:mt-6",
 
       blockquote: "mt-6 border-l-2 pl-6 italic",

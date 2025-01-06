@@ -32,9 +32,7 @@ export const plans = rateLimiterProcedure.input(z.void()).query(async (opts) => 
       const calculatePrice = calculateFlatPricePlan({
         planVersion: {
           plan: {
-            slug: plan.slug,
-            defaultPlan: plan.defaultPlan,
-            enterprisePlan: plan.enterprisePlan,
+            ...plan,
           },
           ...planVersion,
         },
