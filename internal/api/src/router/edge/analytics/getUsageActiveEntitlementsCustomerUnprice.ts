@@ -3,10 +3,10 @@ import { eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { customerEntitlementSchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedProjectProcedure } from "../../../trpc"
+import { protectedWorkspaceProcedure } from "../../../trpc"
 import { getEntitlements } from "../../../utils/shared"
 
-export const getUsageActiveEntitlementsCustomerUnprice = protectedProjectProcedure
+export const getUsageActiveEntitlementsCustomerUnprice = protectedWorkspaceProcedure
   .input(
     z.object({
       customerId: z.string(),

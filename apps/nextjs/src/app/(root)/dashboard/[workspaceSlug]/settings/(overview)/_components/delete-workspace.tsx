@@ -1,6 +1,4 @@
 "use client"
-
-import { useRouter } from "next/navigation"
 import { startTransition } from "react"
 
 import type { Workspace } from "@unprice/db/validators"
@@ -23,7 +21,6 @@ import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
 export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
-  const router = useRouter()
   const isPersonal = workspace.isPersonal
   const isMain = workspace.isMain
 
@@ -42,8 +39,8 @@ export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
       // trigger the session update
       await updateSession()
 
-      // redirect to the home page
-      router.push("/")
+      // redirect url
+      window.location.href = "/"
     },
   })
 
@@ -99,10 +96,7 @@ export function DeleteWorkspace({ workspace }: { workspace: Workspace }) {
                 isDisabled={deleteWorkspace.isPending}
                 isSubmitting={deleteWorkspace.isPending}
                 label="I'm sure. Delete this workspace"
-                onClick={(e) => {
-                  e.preventDefault()
-                  handleDelete()
-                }}
+                onClick={handleDelete}
               />
             </DialogFooter>
           </DialogContent>

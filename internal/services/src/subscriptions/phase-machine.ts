@@ -393,7 +393,7 @@ export class PhaseMachine extends StateMachine<
 
         // changing a subscription mean creating a new phase
         // the creation of the new phase can happens outside the machine
-        // It's just a new phase that is it.
+        // It's just a new phase that is created.
         // this way the machine only takes care of the active phase
         // and we don't overcomplicate it handling multiple phases
         const endPhaseResult = await this.endSubscriptionActivePhase({
@@ -843,7 +843,7 @@ export class PhaseMachine extends StateMachine<
     return Ok(undefined)
   }
 
-  // And a subscription and end date could be expiration date changed date and canceled date
+  // End date could be expiration date, changed date and canceled date
   // This will apply the changes that are scheduled or it will apply the changes immediately if the above mentioned dates are in the past.
   private async endSubscriptionActivePhase(payload: {
     endAt: number
@@ -1084,7 +1084,7 @@ export class PhaseMachine extends StateMachine<
         paymentProviderToken: decryptedKey,
       })
 
-      // // collect the payment
+      // collect the payment
       const payment = await invoiceMachine.transition("COLLECT_PAYMENT", {
         invoiceId: invoice.id,
         now: payload.now,

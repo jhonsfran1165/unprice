@@ -29,7 +29,7 @@ export function BillingCard({
   activePhase,
 }: {
   subscription: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"][number]
-  entitlements: RouterOutputs["analytics"]["getUsageActiveEntitlementsCustomer"]["entitlements"]
+  entitlements: RouterOutputs["analytics"]["getUsageActiveEntitlementsCustomerUnprice"]["entitlements"]
   activePhase: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"][number]["phases"][number]
 }) {
   const planVersion = activePhase.planVersion

@@ -330,6 +330,42 @@ export class SubscriptionService {
     return Ok(undefined)
   }
 
+  public async getActiveSubscription(): Promise<
+    Result<Subscription | undefined, UnPriceSubscriptionError>
+  > {
+    if (!this.initialized) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription phases not initialized, execute initPhaseMachines first",
+        })
+      )
+    }
+
+    return Ok(this.subscription)
+  }
+
+  public async getActivePhase(): Promise<
+    Result<SubscriptionPhase | undefined, UnPriceSubscriptionError>
+  > {
+    if (!this.initialized) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription phases not initialized, execute initPhaseMachines first",
+        })
+      )
+    }
+
+    const activePhaseMachine = await this.getActivePhaseMachine({ now: Date.now() })
+
+    if (activePhaseMachine.err) {
+      return Err(activePhaseMachine.err)
+    }
+
+    const activePhase = activePhaseMachine.val.getPhase()
+
+    return Ok(activePhase)
+  }
+
   public async getActivePhaseMachine({
     now,
   }: {
@@ -1230,7 +1266,7 @@ export class SubscriptionService {
     })
   }
 
-  // apply a change to the subscription, the new subscription phase should be created
+  // expire a subscription is a 3 step process:
   public async expireSubscription(payload: {
     expiresAt?: number
     now: number
@@ -1434,6 +1470,9 @@ export class SubscriptionService {
   // after that we can create the new phase
   public async changeSubscription(payload: {
     now: number
+    // newPhase is optional because we might not want to create a new phase
+    // for instance if the function is called from a background job
+    // in this case we just want to apply the change to the subscription
     newPhase?: InsertSubscriptionPhase
     changeAt?: number
     metadata?: SubscriptionPhaseMetadata
@@ -1460,6 +1499,15 @@ export class SubscriptionService {
 
     const activePhase = activePhaseMachine.getPhase()
 
+    // before move on let's validate the customer is not changing to the same plan version
+    if (newPhase?.planVersionId === activePhase.planVersionId) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "You cannot change to the same plan version",
+        })
+      )
+    }
+
     const { err: changeErr, val: change } = await activePhaseMachine.transition("CHANGE", {
       now,
       changeAt,
@@ -1470,7 +1518,9 @@ export class SubscriptionService {
       return Err(changeErr)
     }
 
-    // if a new phase is provided we need to create it
+    // This normally happens when the change is applied from the UI
+    // in this case we need to create the new phase immediately that could be in the future
+    // phases are just timeline of changes in the subscription
     if (newPhase) {
       // if all goes well we create the new phase
       const { err: createPhaseErr, val: newPhaseResult } = await this.createPhase({

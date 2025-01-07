@@ -12,6 +12,7 @@ import { Button } from "@unprice/ui/button"
 import { Typography } from "@unprice/ui/typography"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
+import { SubscriptionChangePlanDialog } from "../../[projectSlug]/customers/_components/subscriptions/subscription-change-plan-dialog"
 import { BillingCard } from "./_components/billing"
 
 export default async function BillingPage({ params }: { params: { workspaceSlug: string } }) {
@@ -116,7 +117,19 @@ async function SubscriptionCard({
                 </Typography>
               </div>
 
-              <Button size="sm">Change Plan</Button>
+              <SubscriptionChangePlanDialog
+                defaultValues={{
+                  id: subscription.id,
+                  planVersionId: activePhase.planVersion.id,
+                  config: [],
+                  whenToChange: "end_of_cycle",
+                  currentCycleEndAt: subscription.currentCycleEndAt,
+                  timezone: subscription.timezone,
+                  projectId: subscription.projectId,
+                }}
+              >
+                <Button size="sm">Change Plan</Button>
+              </SubscriptionChangePlanDialog>
             </div>
             {autoRenewal && (
               <Alert>
@@ -151,7 +164,7 @@ async function SubscriptionCard({
               <Alert>
                 <AlertTitle>Trial Period</AlertTitle>
                 <AlertDescription>
-                  {currentTrialDays} days trial ends on{" "}
+                  {activePhase.trialDays} days trial ends on{" "}
                   {formatDate(trialEndsAt, subscription.timezone, "MMM d, yyyy")}
                 </AlertDescription>
               </Alert>

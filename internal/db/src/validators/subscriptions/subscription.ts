@@ -198,6 +198,19 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
     features: subscriptionItemsSelectSchema.array(),
   })
 
+export const subscriptionChangePlanSchema = subscriptionSelectSchema
+  .pick({
+    id: true,
+    timezone: true,
+    currentCycleEndAt: true,
+    projectId: true,
+  })
+  .extend({
+    planVersionId: z.string().min(1, "Plan version is required"),
+    config: subscriptionItemsConfigSchema.optional(),
+    whenToChange: z.enum(["immediately", "end_of_cycle"]).optional(),
+  })
+
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>
 export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
@@ -206,6 +219,7 @@ export type SubscriptionPhase = z.infer<typeof subscriptionPhaseSelectSchema>
 export type SubscriptionPhaseExtended = z.infer<typeof subscriptionPhaseExtendedSchema>
 export type SubscriptionMetadata = z.infer<typeof subscriptionMetadataSchema>
 export type SubscriptionPhaseMetadata = z.infer<typeof subscriptionPhaseMetadataSchema>
+export type SubscriptionChangePlan = z.infer<typeof subscriptionChangePlanSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,
