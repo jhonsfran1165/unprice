@@ -186,27 +186,23 @@ export class CustomerService {
     projectId: string
     date: number
   }) {
-    const { customerId, projectId, date } = opts
-
     // get active entitlements from the db
-    const entitlements = await this.getEntitlementsByDate({
-      customerId,
-      projectId,
-      date,
+    const entitlements = await getEntitlementsByDateQuery({
+      customerId: opts.customerId,
+      projectId: opts.projectId,
+      db: this.db,
+      metrics: this.metrics,
+      logger: this.logger,
+      date: opts.date,
       includeCustom: true,
-      noCache: true,
     })
 
-    if (entitlements.err) {
-      return entitlements
-    }
-
     await Promise.all(
-      entitlements.val.map(async (entitlement) => {
+      entitlements.map(async (entitlement) => {
         // get usage for the period from the analytics service
         const totalUsage = await this.analytics.getTotalUsagePerCustomer({
-          customerId,
-          projectId,
+          customerId: opts.customerId,
+          projectId: opts.projectId,
           start: entitlement.startAt,
           end: entitlement.endAt ?? Date.now(),
         })
@@ -215,13 +211,8 @@ export class CustomerService {
         const usage = feature?.[entitlement.aggregationMethod]
 
         // if the usage is not found, then do nothing
+        // no need to log an error here because could be the case that there is not usage reported yet yet
         if (!usage) {
-          this.logger.warn("Problem with analytics service, usage not found for feature", {
-            featureSlug: entitlement.featureSlug,
-            customerId,
-            projectId,
-          })
-
           return
         }
 
@@ -235,7 +226,7 @@ export class CustomerService {
           .where(
             and(
               eq(customerEntitlements.id, entitlement.id),
-              eq(customerEntitlements.projectId, projectId)
+              eq(customerEntitlements.projectId, opts.projectId)
             )
           )
       })
@@ -253,6 +244,14 @@ export class CustomerService {
     Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
   > {
     if (opts.noCache || !this.cache) {
+      if (opts.updateUsage) {
+        await this.updateEntitlementsUsage({
+          customerId: opts.customerId,
+          projectId: opts.projectId,
+          date: opts.date,
+        })
+      }
+
       const entitlements = await getEntitlementsByDateQuery({
         customerId: opts.customerId,
         projectId: opts.projectId,
@@ -793,6 +792,7 @@ export class CustomerService {
           id: customerId,
           email: email,
           currency: defaultCurrency || planProject.defaultCurrency,
+          projectId: projectId,
         },
       })
 

@@ -41,6 +41,7 @@ export const getUsageActiveEntitlementsCustomerUnprice = protectedProjectProcedu
       projectId: mainProject.id,
       ctx: opts.ctx,
       noCache: true,
+      updateUsage: true,
     })
 
     return {

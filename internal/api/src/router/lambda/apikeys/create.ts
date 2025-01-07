@@ -36,6 +36,14 @@ export const create = protectedProjectProcedure
       })
       .returning()
       .then((res) => res[0])
+      .catch((err) => {
+        opts.ctx.logger.error(err)
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create API key",
+        })
+      })
 
     if (!newApiKey) {
       throw new TRPCError({

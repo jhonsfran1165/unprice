@@ -4,7 +4,7 @@ import type { SiteConfig } from "../types"
 export const navItems = [
   {
     href: "/",
-    title: "Dashboard",
+    title: "Apps",
   },
   {
     href: `${BASE_DOMAIN}/pricing`,

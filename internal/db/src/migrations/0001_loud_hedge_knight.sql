@@ -1,0 +1,1 @@
+ALTER TABLE "unprice_apikeys" DROP CONSTRAINT "name_unique";

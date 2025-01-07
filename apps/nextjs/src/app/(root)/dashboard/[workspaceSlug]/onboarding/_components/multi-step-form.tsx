@@ -14,11 +14,9 @@ const CreateProject = dynamic(() => import("./create-project"), {
   ssr: false,
 })
 
-// TODO: configure onboarding - create api key is creating a new api key in the admin project because
-// the cookie is not set properly when the path is /onboarding
-// const CreateApiKey = dynamic(() => import("./create-api-key"), {
-//   ssr: false,
-// })
+const CreateApiKey = dynamic(() => import("./create-api-key"), {
+  ssr: false,
+})
 
 export function Onboarding(props: { workspaceSlug: string }) {
   const search = useSearchParams()
@@ -29,7 +27,7 @@ export function Onboarding(props: { workspaceSlug: string }) {
       <AnimatePresence mode="wait">
         {!step && <Intro key="intro" />}
         {step === "create-project" && <CreateProject />}
-        {/* {step === "create-api-key" && <CreateApiKey />} */}
+        {step === "create-api-key" && <CreateApiKey />}
         {step === "done" && <Done workspaceSlug={props.workspaceSlug} />}
       </AnimatePresence>
     </div>

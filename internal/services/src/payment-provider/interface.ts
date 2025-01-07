@@ -31,7 +31,7 @@ export interface CreateSessionOpts {
 }
 
 export interface SignUpOpts {
-  customer: { id: string; email: string; currency: string }
+  customer: { id: string; email: string; currency: string; projectId: string }
   customerSessionId: string
   successUrl: string
   cancelUrl: string

@@ -40,18 +40,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Session not metadata" }, { status: 404 })
     }
 
-    const customerId = metadata.customerId
-    const projectId = metadata.projectId
+    const customerSessionId = metadata.customerSessionId
     const successUrl = metadata.successUrl
     const cancelUrl = metadata.cancelUrl
 
-    if (!customerId || !projectId || !successUrl || !cancelUrl) {
+    if (!customerSessionId || !successUrl || !cancelUrl) {
       return NextResponse.json({ error: "Metadata is incomplete" }, { status: 400 })
     }
 
     // get the customer session
     const customerSession = await db.query.customerSessions.findFirst({
-      where: eq(schema.customerSessions.id, customerId),
+      where: eq(schema.customerSessions.id, customerSessionId),
     })
 
     if (!customerSession) {
