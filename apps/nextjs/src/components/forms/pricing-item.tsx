@@ -114,7 +114,7 @@ export function PricingItem({
         </div>
       )}
       <div className="flex w-full items-center gap-1">
-        <span className={cn("font-light text-muted-foreground text-xs capitalize", className)}>
+        <span className={cn("font-light text-muted-foreground text-xs", className)}>
           {displayFeature}
         </span>
 

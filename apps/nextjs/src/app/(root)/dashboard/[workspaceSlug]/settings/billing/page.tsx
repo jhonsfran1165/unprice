@@ -8,6 +8,7 @@ import HeaderTab from "~/components/layout/header-tab"
 
 import type { RouterOutputs } from "@unprice/api"
 import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
+import { Button } from "@unprice/ui/button"
 import { Typography } from "@unprice/ui/typography"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
@@ -80,14 +81,14 @@ async function SubscriptionCard({
 
   const activePhase = subscription.phases.find((phase) => {
     const now = Date.now()
-    return phase.startAt <= now && phase.endAt && phase.endAt >= now
+    return phase.startAt <= now && (phase.endAt ? phase.endAt >= now : true)
   })
 
   if (!activePhase) return null
 
   const autoRenewal = activePhase.autoRenew
   const trialEndsAt = activePhase.trialEndsAt
-  const endAt = subscription.expiresAt
+  const endAt = subscription.expiresAt || subscription.cancelAt || subscription.changeAt
   const currentTrialDays = activePhase.trialEndsAt
     ? differenceInCalendarDays(activePhase.trialEndsAt, Date.now())
     : 0
@@ -110,25 +111,22 @@ async function SubscriptionCard({
               <div className="font-semibold text-md">
                 {currentTrialDays > 0 ? "Trial" : "Subscription"} Plan:{" "}
                 <span className="text-primary">{subscription.planSlug}</span>
+                <Typography variant="p" affects="removePaddingMargin">
+                  {activePhase.planVersion.description}
+                </Typography>
               </div>
 
-              {/* {!subscription.planVersion.plan.defaultPlan && (
-                <UpgradeDialog
-                  defaultValues={{
-                    id: subscription.id,
-                    endAt: Date.now(),
-                    customerId: subscription.customerId,
-                    nextPlanVersionId: "",
-                    config: [],
-                    projectId: subscription.projectId,
-                  }}
-                >
-                  <Button variant="destructive" size="sm">
-                    Change Plan
-                  </Button>
-                </UpgradeDialog>
-              )} */}
+              <Button size="sm">Change Plan</Button>
             </div>
+            {autoRenewal && (
+              <Alert>
+                <AlertTitle>Subscription Will Auto Renew</AlertTitle>
+                <AlertDescription>
+                  Your subscription will automatically renew at{" "}
+                  {formatDate(subscription.currentCycleEndAt, subscription.timezone, "MMM d, yyyy")}
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="gap-2 rounded-lg bg-background-bg p-4">
               <Typography variant="h6">Current Billing Cycle</Typography>
               <Typography variant="p">
@@ -145,7 +143,7 @@ async function SubscriptionCard({
                 </Typography>
                 <Typography variant="p" affects="removePaddingMargin">
                   <span className="font-bold">Next billing date:</span>{" "}
-                  {formatDate(subscription.currentCycleEndAt, subscription.timezone, "MMM d, yyyy")}
+                  {formatDate(subscription.nextInvoiceAt, subscription.timezone, "MMM d, yyyy")}
                 </Typography>
               </div>
             </div>
@@ -163,15 +161,6 @@ async function SubscriptionCard({
                 <AlertTitle>Subscription End Date</AlertTitle>
                 <AlertDescription>
                   {formatDate(endAt, subscription.timezone, "MMM d, yyyy")}
-                </AlertDescription>
-              </Alert>
-            )}
-            {autoRenewal && (
-              <Alert>
-                <AlertTitle>Subscription Will Auto Renew</AlertTitle>
-                <AlertDescription>
-                  Your subscription will automatically renew at{" "}
-                  {formatDate(subscription.currentCycleEndAt, subscription.timezone, "MMM d, yyyy")}
                 </AlertDescription>
               </Alert>
             )}

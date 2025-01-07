@@ -71,6 +71,7 @@ jobs:
           branch_name: preview/pr-${{ steps.branch-name.outputs.current_branch }}
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
+          username: ${{ env.NEON_DATABASE_USERNAME }}
 
       - name: Run Migrations
         working-directory: internal/db

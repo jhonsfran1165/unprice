@@ -114,6 +114,7 @@ export function BillingCard({
             Plan {isTrial ? "trial" : ""}{" "}
             <span className="text-primary">{planVersion.plan.slug}</span>
             <Typography variant="p" affects="removePaddingMargin">
+              {activePhase.planVersion.billingPeriod}{" "}
               {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
             </Typography>
           </div>
@@ -122,6 +123,7 @@ export function BillingCard({
           </div>
         </div>
       </CardHeader>
+
       <CardContent>
         <div className="flex flex-col gap-4 space-y-4">
           {entitlements.map((entitlement) => {
@@ -204,7 +206,7 @@ const LineUsageItem: React.FC<{
           <div className="flex items-center justify-between">
             <PricingItem
               feature={planVersionFeature}
-              className="font-semibold text-content text-md capitalize"
+              className="font-semibold text-content text-md"
               noCheckIcon
             />
             <span className="text-right text-content-subtle text-muted-foreground text-xs">
