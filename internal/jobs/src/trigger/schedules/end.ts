@@ -22,11 +22,8 @@ export const endSchedule = schedules.task({
         ),
     })
 
-    // trigger the end trial task for each subscription phase
-    // TODO: re check this logic
     for (const sub of subscriptionsToEnd) {
       // if dates are in the past we need to take action
-
       const cancelAt = sub.cancelAt
       const expiresAt = sub.expiresAt
       const changeAt = sub.changeAt

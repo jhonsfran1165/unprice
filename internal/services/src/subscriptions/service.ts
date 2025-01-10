@@ -1508,6 +1508,23 @@ export class SubscriptionService {
       )
     }
 
+    const activeSubscription = await this.getActiveSubscription()
+
+    if (activeSubscription.err) {
+      return Err(activeSubscription.err)
+    }
+
+    const subscription = activeSubscription.val
+
+    // second validation is the customer can't change a plan if the last change was in the past 30 days
+    if (subscription?.changedAt && subscription.changedAt > now - 30 * 1000 * 60 * 60 * 24) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "You cannot change a plan in the past 30 days",
+        })
+      )
+    }
+
     const { err: changeErr, val: change } = await activePhaseMachine.transition("CHANGE", {
       now,
       changeAt,
@@ -1526,7 +1543,7 @@ export class SubscriptionService {
       const { err: createPhaseErr, val: newPhaseResult } = await this.createPhase({
         input: {
           ...newPhase,
-          startAt: change.changedAt, // we need to start the new phase at the next millisecond
+          startAt: change.changedAt + 1, // we need to start the new phase at the next millisecond
           subscriptionId: activePhase.subscriptionId,
         },
         projectId: activePhase.projectId,

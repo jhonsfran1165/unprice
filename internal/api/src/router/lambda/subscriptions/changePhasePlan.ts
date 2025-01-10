@@ -34,6 +34,13 @@ export const changePhasePlan = protectedProjectProcedure
 
     const activeSubscription = await subscriptionService.getActiveSubscription()
 
+    if (activeSubscription.err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: activeSubscription.err.message,
+      })
+    }
+
     // if the change is at the end of the cycle, we use the current cycle end date
     // if the change is now, we use the current date
     const changeAt =

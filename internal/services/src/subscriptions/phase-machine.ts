@@ -845,6 +845,7 @@ export class PhaseMachine extends StateMachine<
 
   // End date could be expiration date, changed date and canceled date
   // This will apply the changes that are scheduled or it will apply the changes immediately if the above mentioned dates are in the past.
+  // this is idempotent so if the change is already applied it won't do anything
   private async endSubscriptionActivePhase(payload: {
     endAt: number
     now: number
@@ -927,6 +928,15 @@ export class PhaseMachine extends StateMachine<
 
     // cannot cancel a phase if the subscription is changing
     if (subscription.changeAt && subscription.changeAt > payload.now) {
+      // this is idempotent so if the change is already applied it won't do anything
+      if (subscription.changeAt === payload.endAt) {
+        return Ok({
+          status: finalState,
+          phaseId: activePhase.id,
+          subscriptionId: subscription.id,
+        })
+      }
+
       return Err(
         new UnPriceSubscriptionError({
           message: "The subscription is changing, wait for the change to be applied",
@@ -936,6 +946,15 @@ export class PhaseMachine extends StateMachine<
 
     // we cannot cancel a subscription that is expiring
     if (subscription.expiresAt && subscription.expiresAt > payload.now) {
+      // this is idempotent so if the change is already applied it won't do anything
+      if (subscription.expiresAt === payload.endAt) {
+        return Ok({
+          status: finalState,
+          phaseId: activePhase.id,
+          subscriptionId: subscription.id,
+        })
+      }
+
       return Err(
         new UnPriceSubscriptionError({ message: "Subscription is expiring, wait for it to expire" })
       )
@@ -943,6 +962,15 @@ export class PhaseMachine extends StateMachine<
 
     // we cannot cancel a subscription that is already canceling
     if (subscription.cancelAt && subscription.cancelAt > payload.now) {
+      // this is idempotent so if the change is already applied it won't do anything
+      if (subscription.cancelAt === payload.endAt) {
+        return Ok({
+          status: finalState,
+          phaseId: activePhase.id,
+          subscriptionId: subscription.id,
+        })
+      }
+
       return Err(
         new UnPriceSubscriptionError({
           message: "Subscription is already canceling, wait for it to be canceled",
@@ -952,6 +980,15 @@ export class PhaseMachine extends StateMachine<
 
     // we cannot change a subscription that is past due
     if (subscription.pastDueAt && subscription.pastDueAt > payload.now) {
+      // this is idempotent so if the change is already applied it won't do anything
+      if (subscription.pastDueAt === payload.endAt) {
+        return Ok({
+          status: finalState,
+          phaseId: activePhase.id,
+          subscriptionId: subscription.id,
+        })
+      }
+
       return Err(
         new UnPriceSubscriptionError({ message: "Subscription is past due, wait for payment" })
       )

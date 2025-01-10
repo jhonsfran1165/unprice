@@ -263,7 +263,7 @@ export const update = protectedProjectProcedure
           ...(currency && { currency }),
           ...(billingPeriod && { billingPeriod }),
           ...(startCycle && { startCycle }),
-          ...(gracePeriod && { gracePeriod }),
+          ...(gracePeriod !== undefined && { gracePeriod }),
           ...(title && { title }),
           ...(tags && { tags }),
           ...(whenToBill && { whenToBill }),
@@ -272,7 +272,7 @@ export const update = protectedProjectProcedure
           ...(metadata && { metadata }),
           ...(paymentProvider && { paymentProvider }),
           ...(paymentMethodRequired && { paymentMethodRequired }),
-          ...(trialDays && { trialDays }),
+          ...(trialDays !== undefined && { trialDays }),
           updatedAtM: Date.now(),
         })
         .where(and(eq(schema.versions.id, planVersionData.id)))
