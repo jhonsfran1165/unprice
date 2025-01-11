@@ -120,12 +120,13 @@ async function SubscriptionCard({
               <SubscriptionChangePlanDialog
                 defaultValues={{
                   id: subscription.id,
-                  planVersionId: activePhase.planVersion.id,
+                  planVersionId: "",
                   config: [],
                   whenToChange: "end_of_cycle",
                   currentCycleEndAt: subscription.currentCycleEndAt,
                   timezone: subscription.timezone,
                   projectId: subscription.projectId,
+                  currentPlanVersionId: activePhase.planVersion.id,
                 }}
               >
                 <Button size="sm">Change Plan</Button>
@@ -170,9 +171,10 @@ async function SubscriptionCard({
               </Alert>
             )}
             {endAt && (
-              <Alert variant="destructive">
-                <AlertTitle>Subscription End Date</AlertTitle>
+              <Alert variant="info">
+                <AlertTitle>Phase ending</AlertTitle>
                 <AlertDescription>
+                  Your subscription will end on{" "}
                   {formatDate(endAt, subscription.timezone, "MMM d, yyyy")}
                 </AlertDescription>
               </Alert>

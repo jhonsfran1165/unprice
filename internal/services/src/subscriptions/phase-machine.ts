@@ -389,13 +389,14 @@ export class PhaseMachine extends StateMachine<
           return Err(err)
         }
 
+        // if no change at is provided, we change at the end of the current cycle
         const changeAt = payload.changeAt ?? subscription.currentCycleEndAt
 
         // changing a subscription mean creating a new phase
         // the creation of the new phase can happens outside the machine
         // It's just a new phase that is created.
         // this way the machine only takes care of the active phase
-        // and we don't overcomplicate it handling multiple phases
+        // and we don't overcomplicate it handling multiple phases on this class
         const endPhaseResult = await this.endSubscriptionActivePhase({
           endAt: changeAt, // end date of the phase is the date
           now: payload.now,
@@ -994,6 +995,12 @@ export class PhaseMachine extends StateMachine<
       )
     }
 
+    // set end date to the entitlements in the phase
+    await this.setEntitlementsEndDate({
+      endAt,
+      phaseId: activePhase.id,
+    })
+
     // if subscription is not ready to be canceled, send an error
     // before applying the end date we need to sync the state
     if (endAt > now) {
@@ -1036,6 +1043,8 @@ export class PhaseMachine extends StateMachine<
     }
 
     // skip the invoice part if the subscription is a trial or past due
+    // why past due? because when ending the phase it could be possible we are doing it
+    // because the subscription is past due and we need to collect the payment
     if (!isTrial && !isPastDue) {
       // at this point the end should be applied immediately
       // we need to get the last paid invoice for the phase
@@ -1133,12 +1142,6 @@ export class PhaseMachine extends StateMachine<
       }
     }
 
-    // set end date to the entitlements in the phase
-    await this.setEntitlementsEndDate({
-      endAt,
-      phaseId: activePhase.id,
-    })
-
     // update the subscription dates
     // if something happens in the collection payment it will be handle
     // by the invoice machine
@@ -1185,7 +1188,7 @@ export class PhaseMachine extends StateMachine<
       await this.db
         .update(customerEntitlements)
         .set({ endAt })
-        .where(eq(customerEntitlements.id, item.id))
+        .where(eq(customerEntitlements.subscriptionItemId, item.id))
     }
   }
 

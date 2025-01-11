@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation"
 
 import { Separator } from "@unprice/ui/separator"
 import { cn, focusRing } from "@unprice/ui/utils"
+import { startTransition } from "react"
 
+import { revalidateAppPath } from "~/actions/revalidate"
 import { SuperLink } from "~/components/super-link"
 
 export default function Stepper({
@@ -23,11 +25,19 @@ export default function Stepper({
     step = "overview"
   }
 
+  // TODO: this is a hack to force the page to revalidate try with force-dynamic
+  function onClick(path: string) {
+    startTransition(() => {
+      revalidateAppPath(`${baseUrl}/${path}`, "page")
+    })
+  }
+
   return (
     <div className={className}>
       <div className="flex flex-row items-center gap-4">
         <SuperLink
           href={`${baseUrl}`}
+          onClick={() => onClick("")}
           className={cn(
             "flex flex-row items-center gap-2 text-xs",
             {
@@ -47,6 +57,7 @@ export default function Stepper({
         />
         <SuperLink
           href={`${baseUrl}/review`}
+          onClick={() => onClick("review")}
           className={cn(
             "flex flex-row items-center gap-2 text-xs",
             {

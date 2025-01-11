@@ -40,6 +40,7 @@ export function SubscriptionChangePlanDialog({
               id: "",
               projectId: "",
               planVersionId: "",
+              currentPlanVersionId: "",
               config: [],
               whenToChange: "immediately",
               currentCycleEndAt: Date.now(),

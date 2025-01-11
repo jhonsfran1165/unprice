@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@unprice/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
+import { useRouter } from "next/navigation"
 import ConfigItemsFormField from "~/components/forms/items-fields"
 import SelectPlanFormField from "~/components/forms/select-plan-field"
 import { SubmitButton } from "~/components/submit-button"
@@ -25,6 +26,8 @@ export default function SubscriptionChangePlanForm({
   defaultValues: SubscriptionChangePlan
   setDialogOpen?: (open: boolean) => void
 }) {
+  const router = useRouter()
+
   const form = useZodForm({
     schema: subscriptionChangePlanSchema,
     defaultValues,
@@ -44,6 +47,7 @@ export default function SubscriptionChangePlanForm({
   const changePhasePlan = api.subscriptions.changePhasePlan.useMutation({
     onSuccess: async () => {
       setDialogOpen?.(false)
+      router.refresh()
     },
   })
 
@@ -52,7 +56,7 @@ export default function SubscriptionChangePlanForm({
   }
 
   const planVersions =
-    data?.planVersions.filter((plan) => plan.id !== defaultValues.planVersionId) ?? []
+    data?.planVersions.filter((plan) => plan.id !== defaultValues.currentPlanVersionId) ?? []
 
   return (
     <Form {...form}>

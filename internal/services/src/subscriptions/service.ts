@@ -174,7 +174,7 @@ export class SubscriptionService {
               or(isNull(phase.endAt), gte(phase.endAt, now)),
               eq(phase.projectId, projectId)
             ),
-          // phases are don't overlap, so we can use limit 1
+          // phases don't overlap, so we can use limit 1
           limit: 1,
           with: {
             items: {
@@ -1521,6 +1521,17 @@ export class SubscriptionService {
       return Err(
         new UnPriceSubscriptionError({
           message: "You cannot change a plan in the past 30 days",
+        })
+      )
+    }
+
+    // if there is a change at means we are waiting for the change to be applied
+    const isChanging = subscription?.changeAt
+
+    if (isChanging) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription is already changing, wait for the change to be applied",
         })
       )
     }

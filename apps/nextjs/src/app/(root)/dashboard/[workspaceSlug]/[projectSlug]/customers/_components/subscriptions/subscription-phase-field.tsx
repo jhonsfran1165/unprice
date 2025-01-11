@@ -19,12 +19,15 @@ import { api } from "~/trpc/client"
 import { SubscriptionPhaseForm } from "./subscription-phase-form"
 
 import { startTransition } from "react"
+
 export default function SubscriptionPhaseFormField({
   form,
   subscriptionId,
+  timezone,
 }: {
   form: UseFormReturn<InsertSubscription>
   subscriptionId: string
+  timezone: string
 }) {
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
@@ -181,8 +184,10 @@ export default function SubscriptionPhaseFormField({
                           )}
                         </Typography>
                         <Typography variant="p" affects="removePaddingMargin">
-                          from {formatDate(phase.startAt)} to{" "}
-                          {phase.endAt ? formatDate(phase.endAt) : "forever"}
+                          from {formatDate(phase.startAt, timezone, "MMM dd, yyyy")} to{" "}
+                          {phase.endAt
+                            ? formatDate(phase.endAt, timezone, "MMM dd, yyyy")
+                            : "forever"}
                         </Typography>
                       </div>
                       <div className="flex items-center gap-2">

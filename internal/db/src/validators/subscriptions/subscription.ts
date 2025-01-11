@@ -207,6 +207,7 @@ export const subscriptionChangePlanSchema = subscriptionSelectSchema
   })
   .extend({
     planVersionId: z.string().min(1, "Plan version is required"),
+    currentPlanVersionId: z.string(),
     config: subscriptionItemsConfigSchema.optional(),
     whenToChange: z.enum(["immediately", "end_of_cycle"]).optional(),
   })

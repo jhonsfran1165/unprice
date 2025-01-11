@@ -113,6 +113,7 @@ export function SubscriptionForm({
             // when creating a subscription, we don't have an id yet
             // although the empty id is not used in the backend
             subscriptionId={defaultValues.id ?? ""}
+            timezone={defaultValues.timezone ?? selectedCustomer?.timezone ?? ""}
           />
         </div>
 
