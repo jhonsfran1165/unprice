@@ -8,6 +8,7 @@ import HeaderTab from "~/components/layout/header-tab"
 
 import type { RouterOutputs } from "@unprice/api"
 import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
+import { Badge } from "@unprice/ui/badge"
 import { Button } from "@unprice/ui/button"
 import { Typography } from "@unprice/ui/typography"
 import { formatDate } from "~/lib/dates"
@@ -111,7 +112,14 @@ async function SubscriptionCard({
             <div className="flex items-center justify-between">
               <div className="font-semibold text-md">
                 {currentTrialDays > 0 ? "Trial" : "Subscription"} Plan:{" "}
-                <span className="text-primary">{subscription.planSlug}</span>
+                <span className="inline-flex items-center gap-1 text-primary">
+                  {subscription.planSlug}
+                  {autoRenewal && (
+                    <Badge className="text-xs" variant="default">
+                      auto-renew
+                    </Badge>
+                  )}
+                </span>
                 <Typography variant="p" affects="removePaddingMargin">
                   {activePhase.planVersion.description}
                 </Typography>
@@ -132,15 +140,6 @@ async function SubscriptionCard({
                 <Button size="sm">Change Plan</Button>
               </SubscriptionChangePlanDialog>
             </div>
-            {autoRenewal && (
-              <Alert>
-                <AlertTitle>Subscription Will Auto Renew</AlertTitle>
-                <AlertDescription>
-                  Your subscription will automatically renew at{" "}
-                  {formatDate(subscription.currentCycleEndAt, subscription.timezone, "MMM d, yyyy")}
-                </AlertDescription>
-              </Alert>
-            )}
             <div className="gap-2 rounded-lg bg-background-bg p-4">
               <Typography variant="h6">Current Billing Cycle</Typography>
               <Typography variant="p">
