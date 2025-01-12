@@ -37,10 +37,13 @@ const reasonSchema = z.enum([
   "trial_ended",
   "user_requested",
   "admin_requested",
+  "cancelled",
+  "renewed",
 ])
 
 export const invoiceMetadataSchema = z.object({
   note: z.string().optional().describe("Note about the invoice"),
+  reason: reasonSchema.optional().describe("Reason for the invoice"),
 })
 
 export const subscriptionMetadataSchema = z.object({

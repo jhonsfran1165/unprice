@@ -56,7 +56,7 @@ export type PhaseEventMap<S extends string> = {
   }
   PAST_DUE: {
     payload: { now: number; pastDueAt?: number; metadata?: SubscriptionPhaseMetadata }
-    result: { status: S }
+    result: { status: S; pastDueAt: number; subscriptionId: string; phaseId: string }
     error: UnPriceSubscriptionError
   }
   CHANGE: {
@@ -350,8 +350,6 @@ export class PhaseMachine extends StateMachine<
           return Err(err)
         }
 
-        // TODO: cancel should set end date to the entitlements
-        // end the phase
         const endPhaseResult = await this.endSubscriptionActivePhase({
           endAt: cancelAt, // end date of the phase is the date
           now: payload.now,
@@ -491,6 +489,7 @@ export class PhaseMachine extends StateMachine<
         return Ok({
           status: activePhase.status,
           phaseId: activePhase.id,
+          pastDueAt: pastDueAt,
           subscriptionId: this.subscription.id,
         })
       },
@@ -1044,7 +1043,8 @@ export class PhaseMachine extends StateMachine<
 
     // skip the invoice part if the subscription is a trial or past due
     // why past due? because when ending the phase it could be possible we are doing it
-    // because the subscription is past due and we need to collect the payment
+    // because the subscription is past due and already has an invoice
+    // for collecting the payment there is another machine
     if (!isTrial && !isPastDue) {
       // at this point the end should be applied immediately
       // we need to get the last paid invoice for the phase
@@ -1113,6 +1113,7 @@ export class PhaseMachine extends StateMachine<
       const invoiceResult = await this.createInvoiceSubscriptionActivePhase({
         now: payload.now,
         isCancel,
+        endAt: payload.endAt,
       })
 
       if (invoiceResult.err) {
@@ -1148,6 +1149,7 @@ export class PhaseMachine extends StateMachine<
     await this.syncState({
       state: finalState,
       phaseId: activePhase.id,
+      // set the subscription to inactive when applying the end date
       active: false,
       subscriptionDates: {
         ...(isCancel ? { canceledAt: endAt } : {}),
@@ -1265,6 +1267,7 @@ export class PhaseMachine extends StateMachine<
   private async createInvoiceSubscriptionActivePhase(payload: {
     now: number
     isCancel?: boolean
+    endAt?: number
   }): Promise<
     Result<
       {
@@ -1383,7 +1386,9 @@ export class PhaseMachine extends StateMachine<
 
     // if is cancel due date is always in the end of the cycle
     if (isCancel) {
-      dueAt = subscription.currentCycleEndAt
+      // when cancelling could it be possible that we are cancelling at the end of the cycle
+      // or before the end of the cycle
+      dueAt = payload.endAt ?? subscription.currentCycleEndAt
     }
 
     // calculate the grace period based on the due date
@@ -1418,7 +1423,10 @@ export class PhaseMachine extends StateMachine<
         previousCycleStartAt: subscription.previousCycleStartAt,
         previousCycleEndAt: subscription.previousCycleEndAt,
         metadata: {
-          note: `Invoice for the ${subscription.planSlug} subscription`,
+          note: isCancel
+            ? `Invoice for the ${subscription.planSlug} subscription (cancelled at ${payload.endAt})`
+            : `Invoice for the ${subscription.planSlug} subscription`,
+          reason: isCancel ? "cancelled" : "renewed",
         },
       })
       .onConflictDoUpdate({

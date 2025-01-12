@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
 import { Badge } from "@unprice/ui/badge"
 import { Button } from "@unprice/ui/button"
 import { Typography } from "@unprice/ui/typography"
+import { AlertCircle } from "lucide-react"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
 import { SubscriptionChangePlanDialog } from "../../[projectSlug]/customers/_components/subscriptions/subscription-change-plan-dialog"
@@ -19,7 +20,7 @@ import { BillingCard } from "./_components/billing"
 export default async function BillingPage({ params }: { params: { workspaceSlug: string } }) {
   const { workspaceSlug } = params
 
-  const { subscriptions } = await api.auth.mySubscriptions()
+  const { subscriptions, customerId } = await api.auth.mySubscriptions()
 
   return (
     <DashboardShell
@@ -32,7 +33,7 @@ export default async function BillingPage({ params }: { params: { workspaceSlug:
     >
       <Fragment>
         <SubscriptionCard subscriptions={subscriptions} />
-        <PaymentMethodCard workspaceSlug={workspaceSlug} subscriptions={subscriptions} />
+        <PaymentMethodCard workspaceSlug={workspaceSlug} customerId={customerId} />
         <UsageCard />
       </Fragment>
     </DashboardShell>
@@ -41,17 +42,11 @@ export default async function BillingPage({ params }: { params: { workspaceSlug:
 
 async function PaymentMethodCard({
   workspaceSlug,
-  subscriptions,
+  customerId,
 }: {
   workspaceSlug: string
-  subscriptions: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"]
+  customerId: string
 }) {
-  // TODO: customer can have multiple subscriptions
-  const subscription = subscriptions[0]
-
-  // TODO: handle case where no subscription is found
-  if (!subscription) return null
-
   return (
     <Card>
       <CardHeader>
@@ -59,7 +54,7 @@ async function PaymentMethodCard({
       </CardHeader>
       <CardContent>
         <PaymentMethodForm
-          customerId={subscription.customerId}
+          customerId={customerId}
           successUrl={`${APP_DOMAIN}/${workspaceSlug}/settings/billing`}
           cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/settings/billing`}
           projectSlug="unprice-admin"
@@ -78,8 +73,17 @@ async function SubscriptionCard({
   // TODO: customer can only have one subscription for now
   const subscription = subscriptions[0]
 
-  // TODO: handle case where no subscription is found
-  if (!subscription) return null
+  if (!subscription) {
+    return (
+      <Alert variant="info">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>No Subscription</AlertTitle>
+        <AlertDescription className="font-extralight">
+          You don't have any subscriptions yet or subscription is inactive.
+        </AlertDescription>
+      </Alert>
+    )
+  }
 
   const activePhase = subscription.phases.find((phase) => {
     const now = Date.now()
@@ -125,20 +129,22 @@ async function SubscriptionCard({
                 </Typography>
               </div>
 
-              <SubscriptionChangePlanDialog
-                defaultValues={{
-                  id: subscription.id,
-                  planVersionId: "",
-                  config: [],
-                  whenToChange: "end_of_cycle",
-                  currentCycleEndAt: subscription.currentCycleEndAt,
-                  timezone: subscription.timezone,
-                  projectId: subscription.projectId,
-                  currentPlanVersionId: activePhase.planVersion.id,
-                }}
-              >
-                <Button size="sm">Change Plan</Button>
-              </SubscriptionChangePlanDialog>
+              <div className="flex items-center gap-2">
+                <SubscriptionChangePlanDialog
+                  defaultValues={{
+                    id: subscription.id,
+                    planVersionId: "",
+                    config: [],
+                    whenToChange: "end_of_cycle",
+                    currentCycleEndAt: subscription.currentCycleEndAt,
+                    timezone: subscription.timezone,
+                    projectId: subscription.projectId,
+                    currentPlanVersionId: activePhase.planVersion.id,
+                  }}
+                >
+                  <Button size="sm">Change Plan</Button>
+                </SubscriptionChangePlanDialog>
+              </div>
             </div>
             <div className="gap-2 rounded-lg bg-background-bg p-4">
               <Typography variant="h6">Current Billing Cycle</Typography>
@@ -200,7 +206,6 @@ async function UsageCard() {
   // for now only care the first one
   const subscription = subscriptions[0]
 
-  // TODO: handle case where no subscription is found
   if (!subscription) return null
 
   const activePhase = subscription.phases.find((phase) => {
@@ -209,7 +214,13 @@ async function UsageCard() {
   })
 
   // TODO: handle case where no active phase is found
-  if (!activePhase) return null
+  if (!activePhase)
+    return (
+      <Alert variant="info">
+        <AlertTitle>No Active Phase</AlertTitle>
+        <AlertDescription>You don't have any active phases for this subscription.</AlertDescription>
+      </Alert>
+    )
 
   const { entitlements } = await api.analytics.getUsageActiveEntitlementsCustomerUnprice({
     customerId: subscription.customerId,

@@ -22,6 +22,7 @@ export const mySubscriptions = protectedWorkspaceProcedure
             .array(),
         })
         .array(),
+      customerId: z.string(),
     })
   )
   .query(async (opts) => {
@@ -61,9 +62,11 @@ export const mySubscriptions = protectedWorkspaceProcedure
                   },
                 },
               },
+              where: (phase, { eq }) => eq(phase.active, true),
             },
           },
           orderBy: (subscription, { desc }) => [desc(subscription.createdAtM)],
+          where: (subscription, { eq }) => eq(subscription.active, true),
         },
       },
       where: (customer, { eq }) => eq(customer.id, customerId),
@@ -78,5 +81,6 @@ export const mySubscriptions = protectedWorkspaceProcedure
 
     return {
       subscriptions: customerData.subscriptions,
+      customerId: customerData.id,
     }
   })

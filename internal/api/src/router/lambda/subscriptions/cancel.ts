@@ -39,7 +39,6 @@ export const cancel = protectedProjectProcedure
 
     const { err, val } = await subscriptionService.cancelSubscription({
       cancelAt: endAt,
-      now: Date.now(),
       metadata: metadata ?? undefined,
     })
 

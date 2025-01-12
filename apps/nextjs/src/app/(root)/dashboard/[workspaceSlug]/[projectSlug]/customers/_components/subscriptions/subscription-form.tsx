@@ -3,6 +3,7 @@ import type { InsertSubscription, Subscription, SubscriptionItem } from "@unpric
 import { subscriptionInsertSchema } from "@unprice/db/validators"
 import { Form, FormDescription, FormLabel } from "@unprice/ui/form"
 import { Typography } from "@unprice/ui/typography"
+import { AlertCircle } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect } from "react"
 import type { z } from "zod"
@@ -14,7 +15,10 @@ import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 import CustomerFormField from "./customer-field"
+import { SubscriptionCancelButton } from "./subscription-cancel-button"
 import SubscriptionPhaseFormField from "./subscription-phase-field"
+
+import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
 
 export function SubscriptionForm({
   setDialogOpen,
@@ -27,6 +31,8 @@ export function SubscriptionForm({
 }) {
   const router = useRouter()
   const isEdit = !!defaultValues.id
+  const isInactive = !defaultValues.active
+
   const { workspaceSlug, projectSlug } = useParams()
 
   const createSubscription = api.subscriptions.create.useMutation({
@@ -84,6 +90,17 @@ export function SubscriptionForm({
         onSubmit={form.handleSubmit(onSubmitForm)}
         className="space-y-6"
       >
+        {isInactive && (
+          <Alert variant="info">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Subscription Cancelled</AlertTitle>
+            <AlertDescription className="font-extralight">
+              This subscription was cancelled and won't be billed neither renewed. All phases are
+              inactive as well.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {isEdit && (
           <>
             <div className="flex items-start gap-2">
@@ -117,14 +134,18 @@ export function SubscriptionForm({
           />
         </div>
 
-        <div className="mt-8 flex justify-end space-x-4">
-          <SubmitButton
-            form="subscription-form"
-            onClick={() => form.handleSubmit(onSubmitForm)()}
-            isSubmitting={form.formState.isSubmitting}
-            isDisabled={form.formState.isSubmitting}
-            label={isEdit ? "Update Subscription" : "Create Subscription"}
-          />
+        <div className="mt-8 flex justify-end gap-4">
+          {isEdit && !isInactive && <SubscriptionCancelButton subscriptionId={defaultValues.id!} />}
+
+          {isInactive && (
+            <SubmitButton
+              form="subscription-form"
+              onClick={() => form.handleSubmit(onSubmitForm)()}
+              isSubmitting={form.formState.isSubmitting}
+              isDisabled={form.formState.isSubmitting}
+              label={isEdit ? "Update Subscription" : "Create Subscription"}
+            />
+          )}
         </div>
       </form>
     </Form>

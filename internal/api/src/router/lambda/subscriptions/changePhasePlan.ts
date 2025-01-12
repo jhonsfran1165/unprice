@@ -51,7 +51,6 @@ export const changePhasePlan = protectedProjectProcedure
     // all important validations are done in the phase machine
     const { err, val } = await subscriptionService.changeSubscription({
       changeAt: changeAt,
-      now: Date.now(),
       metadata: {
         note: `Change phase plan to ${planVersionId} at ${new Date(changeAt).toISOString()}`,
         reason: "admin_requested",
