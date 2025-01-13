@@ -9,8 +9,7 @@ export const env = createEnv({
   server: {},
   client: {
     NEXT_PUBLIC_APP_DOMAIN: z.preprocess(
-      (str) =>
-        process.env.NEXT_PUBLIC_DEPLOYMENT_URL ? process.env.NEXT_PUBLIC_DEPLOYMENT_URL : str,
+      (str) => (process.env.NEXT_PUBLIC_VERCEL_URL ? process.env.NEXT_PUBLIC_VERCEL_URL : str),
       z.string().optional().default("localhost:3000")
     ),
   },
