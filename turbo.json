@@ -15,7 +15,8 @@
     "TINYBIRD_URL",
     "EMIT_METRICS_LOGS",
     "TRPC_LOGGER",
-    "DRIZZLE_LOG"
+    "DRIZZLE_LOG",
+    "NEXT_PUBLIC_*"
   ],
   "tasks": {
     "build": {
@@ -25,8 +26,7 @@
         "app/next.js/!.next/cache/**",
         "app/next.js/next-env.d.ts",
         "dist/**",
-        "app/auth-proxy/.output/**",
-        "app/auth-proxy/.vercel/**"
+        "app/auth-proxy/.output/**"
       ],
       "env": [
         "NEXT_PUBLIC_*",
