@@ -49,6 +49,13 @@ export const invoiceMetadataSchema = z.object({
 export const subscriptionMetadataSchema = z.object({
   reason: reasonSchema.optional().describe("Reason for the subscription status"),
   note: z.string().optional().describe("Note about status in the subscription"),
+  pastDue: z
+    .object({
+      phaseId: z.string().describe("Phase id that triggered the past due"),
+      invoiceId: z.string().describe("Invoice id that triggered the past due"),
+    })
+    .optional()
+    .describe("Past due information"),
 })
 
 export const subscriptionPhaseMetadataSchema = z.object({

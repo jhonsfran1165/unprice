@@ -1289,7 +1289,7 @@ export class SubscriptionService {
     const { err: expireErr, val: expire } = await activePhaseMachine.transition("EXPIRE", {
       expiresAt,
       now: currentNow,
-      metadata,
+      metadataPhase: metadata,
     })
 
     if (expireErr) {
@@ -1358,7 +1358,7 @@ export class SubscriptionService {
     const { err: cancelErr, val: cancel } = await activePhaseMachine.transition("CANCEL", {
       cancelAt,
       now: currentNow,
-      metadata,
+      metadataPhase: metadata,
     })
 
     if (cancelErr) {
@@ -1375,16 +1375,23 @@ export class SubscriptionService {
   public async pastDueSubscription(payload: {
     now?: number
     pastDueAt?: number
-    phaseId: string
     invoiceId: string
-    metadata?: SubscriptionPhaseMetadata
+    phaseId: string
+    metadataPhase?: SubscriptionPhaseMetadata
   }): Promise<Result<{ status: PhaseStatus; activePhaseId: string }, UnPriceSubscriptionError>> {
-    const { now, pastDueAt, phaseId, invoiceId, metadata } = payload
+    const { now, pastDueAt, metadataPhase } = payload
     const currentNow = now ?? Date.now()
+
+    const subscription = await this.getActiveSubscription()
+
+    if (subscription.err) {
+      return Err(subscription.err)
+    }
+
     // the phase that trigger the past due don't necessarily have to be the active phase
     // for instance if the subscription is past due because of a previous phase we need to mark it as past due
     // for this we need to get the machine of that phase and not the active one
-    const phase = this.phases.get(phaseId)
+    const phase = this.phases.get(payload.phaseId)
 
     if (!phase) {
       return Err(
@@ -1395,7 +1402,8 @@ export class SubscriptionService {
     }
 
     const invoice = await this.db.query.invoices.findFirst({
-      where: (inv, { eq, and }) => and(eq(inv.id, invoiceId), eq(inv.subscriptionPhaseId, phaseId)),
+      where: (inv, { eq, and }) =>
+        and(eq(inv.id, payload.invoiceId), eq(inv.subscriptionPhaseId, payload.phaseId)),
     })
 
     if (!invoice) {
@@ -1459,7 +1467,13 @@ export class SubscriptionService {
     const { err: pastDueErr, val: pastDue } = await phaseMachine.transition("PAST_DUE", {
       now: currentNow,
       pastDueAt,
-      metadata,
+      metadataPhase: metadataPhase,
+      metadataSubscription: {
+        pastDue: {
+          invoiceId: invoice.id,
+          phaseId: phase.id,
+        },
+      },
     })
 
     if (pastDueErr) {
@@ -1469,7 +1483,8 @@ export class SubscriptionService {
     // there is a special case when is expire or past due
     const dueBehaviour = phase.dueBehaviour
 
-    // when downgrade we create a new phase with latest version of the default plan (FREE)
+    // when dueBehaviour is downgrade we create a new phase with latest version of the default plan (FREE)
+    // when dueBehaviour is cancel we don't do anything more
     if (dueBehaviour === "downgrade") {
       const plans = await this.db.query.plans.findMany({
         with: {
@@ -1614,7 +1629,7 @@ export class SubscriptionService {
     const { err: changeErr, val: change } = await activePhaseMachine.transition("CHANGE", {
       now: currentNow,
       changeAt,
-      metadata,
+      metadataPhase: metadata,
     })
 
     if (changeErr) {

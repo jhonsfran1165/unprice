@@ -59,6 +59,22 @@ export const invoiceTask = task({
       throw initPhaseMachineResult.err
     }
 
+    // skip if the phase is trailing
+    const activePhaseMachine = await subscriptionService.getActivePhaseMachine({ now })
+
+    if (activePhaseMachine.err) {
+      throw activePhaseMachine.err
+    }
+
+    const activePhase = activePhaseMachine.val.getPhase()
+
+    if (activePhase.status === "trialing") {
+      return {
+        status: "skipped",
+        message: "Subscription is in trial phase",
+      }
+    }
+
     const result = await subscriptionService.invoiceSubscription({
       now,
     })

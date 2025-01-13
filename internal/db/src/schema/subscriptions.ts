@@ -56,7 +56,6 @@ export const subscriptions = pgTableProject(
     // this simplifies the queries when we need to get the active subscriptions
     active: boolean("active").notNull().default(true),
     // slug of the plan only for ui purposes
-    // TODO: is it a good idea to have the plan slug here?
     planSlug: text("plan_slug").default("FREE"),
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
 

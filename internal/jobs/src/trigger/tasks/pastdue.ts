@@ -38,8 +38,6 @@ export const pastDueTask = task({
       requestId: ctx.task.id,
       defaultFields: {
         subscriptionId,
-        phaseId,
-        invoiceId,
         projectId,
         api: "jobs.invoice.pastdue",
       },
@@ -68,8 +66,8 @@ export const pastDueTask = task({
     const result = await subscriptionService.pastDueSubscription({
       now,
       pastDueAt,
-      phaseId: phaseId,
-      invoiceId: invoiceId,
+      invoiceId,
+      phaseId,
     })
 
     // we have to throw if there is an error so the task fails

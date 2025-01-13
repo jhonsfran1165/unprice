@@ -45,17 +45,22 @@ export type PhaseEventMap<S extends string> = {
     error: UnPriceSubscriptionError
   }
   CANCEL: {
-    payload: { now: number; cancelAt?: number; metadata?: SubscriptionPhaseMetadata }
+    payload: { now: number; cancelAt?: number; metadataPhase?: SubscriptionPhaseMetadata }
     result: { subscriptionId: string; phaseId: string; status: S }
     error: UnPriceSubscriptionError
   }
   EXPIRE: {
-    payload: { now: number; expiresAt?: number; metadata?: SubscriptionPhaseMetadata }
+    payload: { now: number; expiresAt?: number; metadataPhase?: SubscriptionPhaseMetadata }
     result: { subscriptionId: string; phaseId: string; status: S }
     error: UnPriceSubscriptionError
   }
   PAST_DUE: {
-    payload: { now: number; pastDueAt?: number; metadata?: SubscriptionPhaseMetadata }
+    payload: {
+      now: number
+      pastDueAt?: number
+      metadataPhase?: SubscriptionPhaseMetadata
+      metadataSubscription?: SubscriptionMetadata
+    }
     result: { status: S; pastDueAt: number; subscriptionId: string; phaseId: string }
     error: UnPriceSubscriptionError
   }
@@ -63,7 +68,7 @@ export type PhaseEventMap<S extends string> = {
     payload: {
       now: number
       changeAt?: number
-      metadata?: SubscriptionPhaseMetadata
+      metadataPhase?: SubscriptionPhaseMetadata
     }
     result: { status: S; changedAt: number }
     error: UnPriceSubscriptionError
@@ -354,7 +359,7 @@ export class PhaseMachine extends StateMachine<
           endAt: cancelAt, // end date of the phase is the date
           now: payload.now,
           isCancel: true,
-          metadata: payload.metadata,
+          metadataPhase: payload.metadataPhase,
         })
 
         if (endPhaseResult.err) {
@@ -399,7 +404,7 @@ export class PhaseMachine extends StateMachine<
           endAt: changeAt, // end date of the phase is the date
           now: payload.now,
           isChange: true,
-          metadata: payload.metadata,
+          metadataPhase: payload.metadataPhase,
         })
 
         if (endPhaseResult.err) {
@@ -438,7 +443,7 @@ export class PhaseMachine extends StateMachine<
           endAt: expiresAt, // end date of the phase is the date
           now: payload.now,
           isExpire: true,
-          metadata: payload.metadata,
+          metadataPhase: payload.metadataPhase,
         })
 
         if (endPhaseResult.err) {
@@ -456,7 +461,7 @@ export class PhaseMachine extends StateMachine<
 
     /*
      * PAST_DUE
-     * Apply past due to the subscription
+     * Apply past due to the subscription, this is triggerd by the invoice machine
      */
     this.addTransition({
       from: ["active"],
@@ -478,7 +483,8 @@ export class PhaseMachine extends StateMachine<
           endAt: pastDueAt, // end date of the phase is the date
           now: payload.now,
           isPastDue: true,
-          metadata: payload.metadata,
+          metadataPhase: payload.metadataPhase,
+          metadataSubscription: payload.metadataSubscription,
         })
 
         if (endPhaseResult.err) {
@@ -853,7 +859,8 @@ export class PhaseMachine extends StateMachine<
     isChange?: boolean
     isExpire?: boolean
     isPastDue?: boolean
-    metadata?: SubscriptionPhaseMetadata
+    metadataPhase?: SubscriptionPhaseMetadata
+    metadataSubscription?: SubscriptionMetadata
   }): Promise<
     Result<
       {
@@ -871,7 +878,8 @@ export class PhaseMachine extends StateMachine<
       isChange = false,
       isExpire = false,
       isPastDue = false,
-      metadata,
+      metadataPhase,
+      metadataSubscription,
     } = payload
     // get active phase
     const { err, val: activePhase } = this.getActivePhase({ now })
@@ -910,6 +918,15 @@ export class PhaseMachine extends StateMachine<
       note = "Phase is being canceled, waiting for invoice and payment"
     }
 
+    // if subsciption is already inactive we don't need to do anything
+    if (!subscription.active) {
+      return Ok({
+        status: activePhase.status,
+        phaseId: activePhase.id,
+        subscriptionId: subscription.id,
+      })
+    }
+
     // for cancelations on trailing the cancel date is the end of the trial
     if (activePhase.status === "trialing" && endAt !== activePhase.trialEndsAt) {
       return Err(
@@ -921,9 +938,14 @@ export class PhaseMachine extends StateMachine<
     }
 
     // if metadata is passed in, we use it to set the reason and note
-    if (metadata) {
-      reason = metadata.reason ?? reason
-      note = metadata.note ?? note
+    if (metadataPhase) {
+      reason = metadataPhase.reason ?? reason
+      note = metadataPhase.note ?? note
+    }
+
+    if (metadataSubscription) {
+      reason = metadataSubscription.reason ?? reason
+      note = metadataSubscription.note ?? note
     }
 
     // cannot cancel a phase if the subscription is changing
@@ -931,7 +953,7 @@ export class PhaseMachine extends StateMachine<
       // this is idempotent so if the change is already applied it won't do anything
       if (subscription.changeAt === payload.endAt) {
         return Ok({
-          status: finalState,
+          status: activePhase.status,
           phaseId: activePhase.id,
           subscriptionId: subscription.id,
         })
@@ -949,7 +971,7 @@ export class PhaseMachine extends StateMachine<
       // this is idempotent so if the change is already applied it won't do anything
       if (subscription.expiresAt === payload.endAt) {
         return Ok({
-          status: finalState,
+          status: activePhase.status,
           phaseId: activePhase.id,
           subscriptionId: subscription.id,
         })
@@ -965,7 +987,7 @@ export class PhaseMachine extends StateMachine<
       // this is idempotent so if the change is already applied it won't do anything
       if (subscription.cancelAt === payload.endAt) {
         return Ok({
-          status: finalState,
+          status: activePhase.status,
           phaseId: activePhase.id,
           subscriptionId: subscription.id,
         })
@@ -983,7 +1005,7 @@ export class PhaseMachine extends StateMachine<
       // this is idempotent so if the change is already applied it won't do anything
       if (subscription.pastDueAt === payload.endAt) {
         return Ok({
-          status: finalState,
+          status: activePhase.status,
           phaseId: activePhase.id,
           subscriptionId: subscription.id,
         })
@@ -1000,42 +1022,41 @@ export class PhaseMachine extends StateMachine<
       phaseId: activePhase.id,
     })
 
+    // we set the dates and the next invoice at the end date
+    // so next time we call the machine we will know what to do
+    await this.syncState({
+      phaseId: activePhase.id,
+      subscriptionDates: {
+        ...(isCancel || isTrial ? { cancelAt: endAt } : {}),
+        ...(isChange ? { changeAt: endAt } : {}),
+        ...(isExpire ? { expiredAt: endAt } : {}),
+        ...(isPastDue ? { pastDueAt: endAt } : {}),
+        // the next invoice is the end at date
+        nextInvoiceAt: endAt,
+        currentCycleEndAt: endAt,
+      },
+      phaseDates: {
+        ...(isCancel || isChange || isExpire || isPastDue ? { endAt } : {}),
+      },
+      metadataPhase: {
+        note,
+        reason,
+        ...payload.metadataPhase,
+      },
+      metadataSubscription: {
+        note,
+        reason,
+        ...payload.metadataSubscription,
+      },
+    })
+
     // if subscription is not ready to be canceled, send an error
     // before applying the end date we need to sync the state
     if (endAt > now) {
-      // we set the dates and the next invoice at the end date
-      // so next time we call the machine we will know what to do
-      await this.syncState({
-        phaseId: activePhase.id,
-        subscriptionDates: {
-          ...(isCancel || isTrial ? { cancelAt: endAt } : {}),
-          ...(isChange ? { changeAt: endAt } : {}),
-          ...(isExpire ? { expiredAt: endAt } : {}),
-          ...(isPastDue ? { pastDueAt: endAt } : {}),
-          // the next invoice is the end at date
-          nextInvoiceAt: endAt,
-          currentCycleEndAt: endAt,
-        },
-        phaseDates: {
-          ...(isCancel ? { endAt } : {}),
-          ...(isChange ? { endAt } : {}),
-          ...(isExpire ? { endAt } : {}),
-          ...(isPastDue ? { endAt } : {}),
-        },
-        metadataSubscription: {
-          note,
-          reason,
-        },
-        metadataPhase: {
-          note,
-          reason,
-        },
-      })
-
-      // if all goes well we return the final state
+      // if all goes well we return the phase status
       // the cancellation, change or expiration will be handled in by background jobs
       return Ok({
-        status: finalState,
+        status: activePhase.status,
         phaseId: activePhase.id,
         subscriptionId: subscription.id,
       })
@@ -1143,26 +1164,16 @@ export class PhaseMachine extends StateMachine<
       }
     }
 
-    // update the subscription dates
-    // if something happens in the collection payment it will be handle
-    // by the invoice machine
+    // update the subscription dates and deactivate the subscription
     await this.syncState({
       state: finalState,
       phaseId: activePhase.id,
-      // set the subscription to inactive when applying the end date
+      // set the subscription to inactive when applying the end dates
       active: false,
       subscriptionDates: {
         ...(isCancel ? { canceledAt: endAt } : {}),
         ...(isChange ? { changedAt: endAt } : {}),
         ...(isExpire ? { expiredAt: endAt } : {}),
-      },
-      metadataPhase: {
-        note,
-        reason,
-      },
-      metadataSubscription: {
-        note,
-        reason,
       },
     })
 

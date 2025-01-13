@@ -3,6 +3,7 @@ import { db } from "@unprice/db"
 import { expireTask } from "../.."
 import { cancelTask } from "../tasks/cancel"
 import { changeTask } from "../tasks/change"
+import { pastDueTask } from "../tasks/pastdue"
 
 export const endSchedule = schedules.task({
   id: "subscription.end",
@@ -18,7 +19,12 @@ export const endSchedule = schedules.task({
       where: (sub, { eq, and, lte, or }) =>
         and(
           eq(sub.active, true),
-          or(lte(sub.cancelAt, now), lte(sub.expiresAt, now), lte(sub.changeAt, now))
+          or(
+            lte(sub.cancelAt, now),
+            lte(sub.expiresAt, now),
+            lte(sub.changeAt, now),
+            lte(sub.pastDueAt, now)
+          )
         ),
     })
 
@@ -27,6 +33,7 @@ export const endSchedule = schedules.task({
       const cancelAt = sub.cancelAt
       const expiresAt = sub.expiresAt
       const changeAt = sub.changeAt
+      const pastDueAt = sub.pastDueAt
 
       if (cancelAt && cancelAt <= now) {
         await cancelTask.triggerAndWait({
@@ -48,6 +55,20 @@ export const endSchedule = schedules.task({
           projectId: sub.projectId,
           now,
           changeAt: changeAt,
+        })
+      } else if (pastDueAt && pastDueAt <= now) {
+        // if the subscription is past due it would have a past due metadata
+        if (!sub.metadata?.pastDue?.phaseId || !sub.metadata?.pastDue?.invoiceId) {
+          throw new Error("Subscription is missing past due metadata, cannnot be processed")
+        }
+
+        await pastDueTask.triggerAndWait({
+          subscriptionId: sub.id,
+          projectId: sub.projectId,
+          now,
+          pastDueAt: pastDueAt,
+          phaseId: sub.metadata?.pastDue?.phaseId,
+          invoiceId: sub.metadata?.pastDue?.invoiceId,
         })
       }
     }

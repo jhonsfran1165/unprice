@@ -1015,9 +1015,17 @@ export class InvoiceStateMachine extends StateMachine<
         await this.phaseMachine.transition("PAST_DUE", {
           now,
           pastDueAt,
-          metadata: {
+          metadataPhase: {
             note: "Invoice exceeded the payment due date",
             reason: "payment_pending",
+          },
+          metadataSubscription: {
+            note: "Invoice exceeded the payment due date",
+            reason: "payment_pending",
+            pastDue: {
+              invoiceId: invoice.id,
+              phaseId: this.phaseMachine.getPhase().id,
+            },
           },
         })
 
@@ -1056,9 +1064,17 @@ export class InvoiceStateMachine extends StateMachine<
       await this.phaseMachine.transition("PAST_DUE", {
         now,
         pastDueAt,
-        metadata: {
+        metadataPhase: {
           note: "Invoice has reached the maximum number of payment attempts",
           reason: "payment_failed",
+        },
+        metadataSubscription: {
+          note: "Invoice exceeded the payment due date",
+          reason: "payment_pending",
+          pastDue: {
+            invoiceId: invoice.id,
+            phaseId: this.phaseMachine.getPhase().id,
+          },
         },
       })
 

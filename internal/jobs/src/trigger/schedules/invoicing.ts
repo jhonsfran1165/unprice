@@ -17,18 +17,20 @@ export const invoicingSchedule = schedules.task({
 
     // trigger the end trial task for each subscription phase
     for (const sub of subscriptions) {
-      await invoiceTask.triggerAndWait({
+      const result = await invoiceTask.triggerAndWait({
         subscriptionId: sub.id,
         projectId: sub.projectId,
         now,
       })
 
-      // first invoice is free, so we renew the subscription
-      await renewTask.triggerAndWait({
-        subscriptionId: sub.id,
-        projectId: sub.projectId,
-        now,
-      })
+      if (result.ok) {
+        // first invoice is free, so we renew the subscription
+        await renewTask.triggerAndWait({
+          subscriptionId: sub.id,
+          projectId: sub.projectId,
+          now,
+        })
+      }
     }
 
     logger.info(`Found ${subscriptions.length} subscriptions for invoicing`)
