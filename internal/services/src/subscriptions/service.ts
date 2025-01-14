@@ -367,6 +367,10 @@ export class SubscriptionService {
     return Ok(activePhase)
   }
 
+  /*
+   * Get the active phase machine given the now date
+   * This is the phase machine that is currently active
+   */
   public async getActivePhaseMachine({
     now,
   }: {
@@ -1616,7 +1620,7 @@ export class SubscriptionService {
     }
 
     // if there is a change at means we are waiting for the change to be applied
-    const isChanging = subscription?.changeAt
+    const isChanging = subscription?.changeAt && subscription.changeAt > currentNow
 
     if (isChanging) {
       return Err(

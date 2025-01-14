@@ -96,9 +96,9 @@ export function BillingCard({
           <CardDescription>
             {activePhase.trialEndsAt &&
               subscription.currentCycleEndAt &&
-              `You currently are on the trial of the ${
-                planVersion.plan.slug
-              } plan. After the trial ends on ${formatDate(
+              `You currently are on the trial of the ${(
+                <span className="font-bold text-primary">{planVersion.plan.slug}</span>
+              )} plan. After the trial ends on ${formatDate(
                 activePhase.trialEndsAt,
                 subscription.timezone,
                 "MMM d, yy"
@@ -112,7 +112,7 @@ export function BillingCard({
         <div className="flex items-center justify-between py-6 text-content-subtle">
           <div className={cn("inline-flex w-4/5 items-center gap-2")}>
             Plan {isTrial ? "trial" : ""}{" "}
-            <span className="text-primary">{planVersion.plan.slug}</span>
+            <span className="font-bold text-primary">{planVersion.plan.slug}</span>
             <Typography variant="p" affects="removePaddingMargin">
               {activePhase.planVersion.billingPeriod}{" "}
               {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}

@@ -1,6 +1,5 @@
-import { Toaster } from "@unprice/ui/sonner"
 import { TooltipProvider } from "@unprice/ui/tooltip"
-import { ThemeProvider } from "~/components/layout/theme-provider"
+import { ThemeProvider, ToasterProvider } from "~/components/layout/theme-provider"
 import { siteConfig } from "~/constants/layout"
 import "~/styles/globals.css"
 import "~/styles/prosemirror.css"
@@ -36,12 +35,12 @@ export default function SitesLayout(props: { children: React.ReactNode }) {
           content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
         />
       </head>
-      <body className={"min-h-screen font-secondary antialiased"}>
+      <body className={"min-h-screen antialiased"}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TooltipProvider delayDuration={300}>{props.children}</TooltipProvider>
         </ThemeProvider>
 
-        <Toaster richColors closeButton position="bottom-left" />
+        <ToasterProvider />
       </body>
     </html>
   )

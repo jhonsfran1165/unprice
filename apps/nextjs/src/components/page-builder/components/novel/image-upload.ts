@@ -1,5 +1,5 @@
+import { toast } from "@unprice/ui/sonner"
 import { createImageUpload } from "novel/plugins"
-import { toast } from "sonner"
 
 const onUpload = (file: File) => {
   const promise = fetch("/api/upload", {

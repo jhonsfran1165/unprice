@@ -18,6 +18,7 @@ import StartCycleFormField from "~/components/forms/start-cycle-field"
 import TrialDaysFormField from "~/components/forms/trial-days-field"
 import WhenToBillFormField from "~/components/forms/when-to-bill-field"
 import { SubmitButton } from "~/components/submit-button"
+import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 import DurationFormField from "./duration-field"
@@ -53,7 +54,11 @@ export function SubscriptionPhaseForm({
   })
 
   const createPhase = api.subscriptions.createPhase.useMutation()
-  const updatePhase = api.subscriptions.updatePhase.useMutation()
+  const updatePhase = api.subscriptions.updatePhase.useMutation({
+    onSuccess: () => {
+      toastAction("success")
+    },
+  })
 
   const onSubmitForm = async (data: InsertSubscriptionPhase | SubscriptionPhase) => {
     // if subscription is not created yet no need to create phase

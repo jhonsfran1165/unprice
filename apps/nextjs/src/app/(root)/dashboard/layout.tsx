@@ -1,16 +1,16 @@
-import { Toaster } from "@unprice/ui/sonner"
 import { TooltipProvider } from "@unprice/ui/tooltip"
 
 import { allEndpointsProcedures } from "@unprice/api/routes"
 import { Fragment, type ReactNode } from "react"
 import { TailwindIndicator } from "~/components/layout/tailwind-indicator"
+import { ToasterProvider } from "~/components/layout/theme-provider"
 import { TRPCReactProvider } from "~/trpc/client"
 
-export default async function RootLayout({
-  children,
+export default async function DashboardLayout({
   breadcrumbs,
   sidebar,
   header,
+  children,
 }: {
   children: ReactNode
   breadcrumbs: ReactNode
@@ -31,9 +31,8 @@ export default async function RootLayout({
           </div>
         </TooltipProvider>
       </TRPCReactProvider>
+      <ToasterProvider />
       <TailwindIndicator />
-
-      <Toaster richColors closeButton position="bottom-left" />
     </Fragment>
   )
 }

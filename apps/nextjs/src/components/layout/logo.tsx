@@ -10,7 +10,11 @@ export function Logo({ className = "" }) {
       className={cn("flex items-center justify-start space-x-2 text-primary-text", focusRing)}
     >
       <LogoIcon className={cn("size-6", className)} />
-      <span className={cn("inline-flex whitespace-nowrap font-bold text-2xl tracking-tight")}>
+      <span
+        className={cn(
+          "inline-flex whitespace-nowrap font-bold font-primary text-2xl tracking-tight"
+        )}
+      >
         {siteConfig.name}
       </span>
     </SuperLink>

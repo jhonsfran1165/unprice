@@ -54,6 +54,8 @@ export const signUp = protectedProcedure
       projectId: mainProject.id,
     })
 
+    // TODO: do to delete but disable the workspace
+
     if (err) {
       throw new TRPCError({
         code: "BAD_REQUEST",

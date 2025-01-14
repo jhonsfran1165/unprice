@@ -918,6 +918,8 @@ export class CustomerService {
         and(eq(subscription.customerId, customerId), eq(subscription.projectId, projectId)),
     })
 
+    // TODO: validate if the customer has open invoices before canceling the subscriptions
+
     // all this should be in a transaction
     await this.db.transaction(async (tx) => {
       const cancelSubs = await Promise.all(

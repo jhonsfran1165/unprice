@@ -74,13 +74,13 @@ export const columns: ColumnDef<Subscription>[] = [
     cell: ({ row }) => {
       return (
         <Badge variant={row.original.active ? "success" : "destructive"}>
-          {row.original.active ? "Active" : "Inactive"}
+          {row.original.active ? "active" : "inactive"}
         </Badge>
       )
     },
     size: 20,
     filterFn: (row, _id, value) => {
-      const status = row.original.active ? "Active" : "Inactive"
+      const status = row.original.active ? "active" : "inactive"
 
       return Array.isArray(value) && value.includes(status)
     },
@@ -104,12 +104,12 @@ export const columns: ColumnDef<Subscription>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Start current cycle" />,
     cell: ({ row }) => (
       <div className="flex items-center space-x-1">
-        <div className="whitespace-nowrap text-sm">
+        <Typography variant="p" affects="removePaddingMargin">
           {formatDate(row.original.currentCycleStartAt, row.original.timezone)}
-        </div>
+        </Typography>
         <Tooltip>
           <TooltipTrigger asChild>
-            <AlertCircle className="size-4 font-light" />
+            <AlertCircle className="size-4 font-light text-muted-foreground" />
           </TooltipTrigger>
           <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
             <div className="flex flex-col gap-1">
@@ -145,17 +145,21 @@ export const columns: ColumnDef<Subscription>[] = [
       const endDate = row.original.currentCycleEndAt
 
       if (endDate === null || endDate === undefined) {
-        return <div className="whitespace-nowrap text-sm">Forever</div>
+        return (
+          <Typography variant="p" affects="removePaddingMargin">
+            Forever
+          </Typography>
+        )
       }
 
       return (
         <div className="flex items-center space-x-1">
-          <div className="whitespace-nowrap text-sm">
+          <Typography variant="p" affects="removePaddingMargin">
             {formatDate(endDate, row.original.timezone)}
-          </div>
+          </Typography>
           <Tooltip>
             <TooltipTrigger asChild>
-              <AlertCircle className="size-4 font-light" />
+              <AlertCircle className="size-4 font-light text-muted-foreground" />
             </TooltipTrigger>
             <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
               <div className="flex flex-col gap-1">
@@ -189,17 +193,21 @@ export const columns: ColumnDef<Subscription>[] = [
       const invoiceDate = row.original.nextInvoiceAt
 
       if (invoiceDate === null || invoiceDate === undefined) {
-        return <div className="whitespace-nowrap text-sm">No defined yet</div>
+        return (
+          <Typography variant="p" affects="removePaddingMargin">
+            No defined yet
+          </Typography>
+        )
       }
 
       return (
         <div className="flex items-center space-x-1">
-          <div className="whitespace-nowrap text-sm">
+          <Typography variant="p" affects="removePaddingMargin">
             {formatDate(invoiceDate, row.original.timezone)}
-          </div>
+          </Typography>
           <Tooltip>
             <TooltipTrigger asChild>
-              <AlertCircle className="size-4 font-light" />
+              <AlertCircle className="size-4 font-light text-muted-foreground" />
             </TooltipTrigger>
             <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
               <div className="flex flex-col gap-1">

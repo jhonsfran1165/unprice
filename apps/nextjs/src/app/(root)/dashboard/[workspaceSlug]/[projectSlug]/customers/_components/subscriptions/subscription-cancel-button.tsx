@@ -2,9 +2,9 @@
 
 import { Button } from "@unprice/ui/button"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
+import { toast } from "@unprice/ui/sonner"
 import { useParams } from "next/navigation"
 import { startTransition } from "react"
-import { toast } from "sonner"
 import { revalidateAppPath } from "~/actions/revalidate"
 import { ConfirmAction } from "~/components/confirm-action"
 import { api } from "~/trpc/client"

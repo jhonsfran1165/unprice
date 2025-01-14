@@ -39,6 +39,7 @@ const reasonSchema = z.enum([
   "admin_requested",
   "cancelled",
   "renewed",
+  "auto_renew_disabled",
 ])
 
 export const invoiceMetadataSchema = z.object({

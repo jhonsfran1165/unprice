@@ -240,9 +240,8 @@ export class PhaseMachine extends StateMachine<
         await this.syncState({
           phaseId: activePhase.id,
           subscriptionDates: {
-            pastDueAt: invoice.val.invoice.pastDueAt,
+            // next invoice at is set after renewing the subscription
             lastInvoiceAt: payload.now,
-            // TODO: next invoice at is set after renewing the subscription??
           },
         })
 
@@ -436,6 +435,7 @@ export class PhaseMachine extends StateMachine<
           return Err(err)
         }
 
+        // if the phase is not auto renewing we need to expire the phase
         const expiresAt = payload.expiresAt ?? subscription.currentCycleEndAt
 
         // end the phase
@@ -688,7 +688,7 @@ export class PhaseMachine extends StateMachine<
     // end date can be undefined, which means the phase is active until the subscription ends
     const phase = this.phase
 
-    if (!phase.active) {
+    if (phase.active === false) {
       return Err(new UnPriceSubscriptionError({ message: "Phase is not active" }))
     }
 
@@ -781,6 +781,29 @@ export class PhaseMachine extends StateMachine<
       }
     }
 
+    // if the phase is not auto renewing we need to expire the phase
+    if (!activePhase.autoRenew) {
+      const result = await this.endSubscriptionActivePhase({
+        now,
+        isExpire: true,
+        endAt: subscription.currentCycleEndAt,
+        metadataPhase: {
+          note: "Phase is not auto renewing, setting the end date to the current cycle end date",
+          reason: "auto_renew_disabled",
+        },
+        metadataSubscription: {
+          note: "Phase is not auto renewing, setting the end date to the current cycle end date",
+          reason: "auto_renew_disabled",
+        },
+      })
+
+      if (result.err) {
+        return Err(result.err)
+      }
+
+      return Ok(undefined)
+    }
+
     // calculate next billing cycle
     // here we calculate the next billing cycle, in order to do that we add a millisecond to the current cycle end date example:
     // if the current cycle end date is 2023-12-31T23:59:59Z we add a millisecond to get 2024-01-01T00:00:00.000Z
@@ -812,9 +835,6 @@ export class PhaseMachine extends StateMachine<
         )
       }
     }
-
-    // TODO: renew usage for the phase
-    // TODO: renew entitlements for the phase
 
     // check if the subscription was already renewed
     // check the new cycle start and end dates are between now
@@ -927,6 +947,17 @@ export class PhaseMachine extends StateMachine<
       })
     }
 
+    // if the phase is auto renew and there is a request to expire the phase
+    // we need to send an error
+    if (activePhase.autoRenew && isExpire) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message:
+            "Phase is auto renewing, cannot expire. Set auto renew to false to expire the phase",
+        })
+      )
+    }
+
     // for cancelations on trailing the cancel date is the end of the trial
     if (activePhase.status === "trialing" && endAt !== activePhase.trialEndsAt) {
       return Err(
@@ -1000,22 +1031,6 @@ export class PhaseMachine extends StateMachine<
       )
     }
 
-    // we cannot change a subscription that is past due
-    if (subscription.pastDueAt && subscription.pastDueAt > payload.now) {
-      // this is idempotent so if the change is already applied it won't do anything
-      if (subscription.pastDueAt === payload.endAt) {
-        return Ok({
-          status: activePhase.status,
-          phaseId: activePhase.id,
-          subscriptionId: subscription.id,
-        })
-      }
-
-      return Err(
-        new UnPriceSubscriptionError({ message: "Subscription is past due, wait for payment" })
-      )
-    }
-
     // set end date to the entitlements in the phase
     await this.setEntitlementsEndDate({
       endAt,
@@ -1029,7 +1044,7 @@ export class PhaseMachine extends StateMachine<
       subscriptionDates: {
         ...(isCancel || isTrial ? { cancelAt: endAt } : {}),
         ...(isChange ? { changeAt: endAt } : {}),
-        ...(isExpire ? { expiredAt: endAt } : {}),
+        ...(isExpire ? { expireAt: endAt } : {}),
         ...(isPastDue ? { pastDueAt: endAt } : {}),
         // the next invoice is the end at date
         nextInvoiceAt: endAt,
@@ -1174,6 +1189,10 @@ export class PhaseMachine extends StateMachine<
         ...(isCancel ? { canceledAt: endAt } : {}),
         ...(isChange ? { changedAt: endAt } : {}),
         ...(isExpire ? { expiredAt: endAt } : {}),
+        // clear the other dates
+        ...(isCancel || isChange || isExpire
+          ? { cancelAt: undefined, changeAt: undefined, expiresAt: undefined }
+          : {}),
       },
     })
 

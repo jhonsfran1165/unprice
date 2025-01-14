@@ -53,9 +53,10 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         </head>
         <body
           className={cn(
-            "min-h-screen font-secondary antialiased",
+            "min-h-screen antialiased",
             fontMapper["font-primary"],
-            fontMapper["font-secondary"]
+            fontMapper["font-secondary"],
+            fontMapper["font-mono"]
           )}
         >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

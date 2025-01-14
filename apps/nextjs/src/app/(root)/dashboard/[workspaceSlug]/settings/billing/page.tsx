@@ -117,7 +117,7 @@ async function SubscriptionCard({
               <div className="font-semibold text-md">
                 {currentTrialDays > 0 ? "Trial" : "Subscription"} Plan:{" "}
                 <span className="inline-flex items-center gap-1 text-primary">
-                  {subscription.planSlug}
+                  <span className="font-bold text-primary">{subscription.planSlug}</span>
                   {autoRenewal && (
                     <Badge className="text-xs" variant="default">
                       auto-renew
