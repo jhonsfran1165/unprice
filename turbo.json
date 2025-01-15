@@ -16,7 +16,7 @@
     "EMIT_METRICS_LOGS",
     "TRPC_LOGGER",
     "DRIZZLE_LOG",
-    "NEXT_PUBLIC_*"
+    "NEXT_PUBLIC_APP_DOMAIN"
   ],
   "tasks": {
     "build": {
