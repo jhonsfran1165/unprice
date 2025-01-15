@@ -182,7 +182,7 @@ export class PhaseMachine extends StateMachine<
         }
 
         // ending the trial means renewing the subscription
-        const renewSubscriptionResult = await this.renewActivePhase({
+        const renewSubscriptionResult = await this.renewPhase({
           now: payload.now,
         })
 
@@ -326,12 +326,12 @@ export class PhaseMachine extends StateMachine<
         const phase = this.getPhase()
 
         // TODO: renew should reset the usage
-        const renewActivePhase = await this.renewActivePhase({
+        const renewPhase = await this.renewPhase({
           now: payload.now,
         })
 
-        if (renewActivePhase.err) {
-          return Err(renewActivePhase.err)
+        if (renewPhase.err) {
+          return Err(renewPhase.err)
         }
 
         return Ok({
@@ -680,7 +680,7 @@ export class PhaseMachine extends StateMachine<
   }: {
     phaseId: string
     startAt: number
-    status: "paid" | "open"
+    status: "paid" | "open" | "failed"
   }): Promise<SubscriptionInvoice | undefined> {
     const pendingInvoice = await this.db.query.invoices.findFirst({
       where: (table, { eq, and, inArray }) =>
@@ -691,14 +691,16 @@ export class PhaseMachine extends StateMachine<
           eq(table.cycleStartAt, startAt),
           status === "open"
             ? inArray(table.status, ["draft", "unpaid"])
-            : inArray(table.status, ["paid", "void"])
+            : status === "failed"
+              ? inArray(table.status, ["failed"])
+              : inArray(table.status, ["paid", "void"])
         ),
     })
 
     return pendingInvoice
   }
 
-  private async renewActivePhase({
+  private async renewPhase({
     now,
   }: {
     now: number
@@ -736,6 +738,15 @@ export class PhaseMachine extends StateMachine<
       )
     }
 
+    // do not renew if there is a change, cancel or expire scheduled
+    if (subscription.changeAt || subscription.cancelAt || subscription.expiresAt) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription has a change, cancel or expire scheduled, cannot renew",
+        })
+      )
+    }
+
     const whenToBill = phase.whenToBill
 
     // before renewing the subscription we need to check if the subscription has already been invoiced
@@ -743,8 +754,8 @@ export class PhaseMachine extends StateMachine<
     if (phase.status !== "trialing") {
       if (whenToBill === "pay_in_advance") {
         if (
-          subscription.lastInvoiceAt &&
-          subscription.lastInvoiceAt < subscription.currentCycleStartAt
+          subscription.nextInvoiceAt &&
+          subscription.nextInvoiceAt < subscription.currentCycleStartAt
         ) {
           return Err(
             new UnPriceSubscriptionError({
@@ -754,8 +765,8 @@ export class PhaseMachine extends StateMachine<
         }
       } else if (whenToBill === "pay_in_arrear") {
         if (
-          subscription.lastInvoiceAt &&
-          subscription.lastInvoiceAt < subscription.currentCycleEndAt
+          subscription.nextInvoiceAt &&
+          subscription.nextInvoiceAt < subscription.currentCycleEndAt
         ) {
           return Err(
             new UnPriceSubscriptionError({
@@ -948,6 +959,15 @@ export class PhaseMachine extends StateMachine<
           return Err(
             new UnPriceSubscriptionError({
               message: "Change metadata is required",
+            })
+          )
+        }
+
+        if (subscription?.changedAt && subscription.changedAt > now - 30 * 1000 * 60 * 60 * 24) {
+          return Err(
+            new UnPriceSubscriptionError({
+              message:
+                "You already changed the plan in the past 30 days, can't change again until 30 days have passed",
             })
           )
         }
@@ -1435,7 +1455,7 @@ export class PhaseMachine extends StateMachine<
     }
 
     // check when was the last invoice for the subscription
-    if (subscription.lastInvoiceAt && subscription.nextInvoiceAt <= subscription.lastInvoiceAt) {
+    if (subscription.lastInvoiceAt && subscription.lastInvoiceAt >= subscription.nextInvoiceAt) {
       // This allow us to invoice the same invoice multiple times without creating a new one
       const invoiceData = await this.getPhaseInvoiceByStatus({
         phaseId: phase.id,

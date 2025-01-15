@@ -33,6 +33,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: Infisical/secrets-action@v1.0.7
         name: Pull secrets from Infisical
@@ -111,8 +113,11 @@ jobs:
         # verify if auth-proxy has changed, if it has, we need to deploy it
         run: |
           # If the command exits with code 1, the build continues as normal
-          # If the command exits with code 0, the build is immediately aborted,
-          if [ -n "$(npx turbo-ignore --fallback ${{ github.event.pull_request.head.sha }} -d apps/auth-proxy)" ]; then
+          # If the command exits with code 0, the build is immediately aborted
+          check=$(npx turbo-ignore --fallback ${{ github.event.pull_request.head.sha }} -d apps/auth-proxy) || true
+          echo "check: $check"
+
+          if [ -n "$check" ]; then
             echo "Changes detected in auth-proxy folder, deploying..."
             # save to output github action
             echo "deploy_auth_proxy=true" >> $GITHUB_OUTPUT

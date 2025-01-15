@@ -1553,29 +1553,6 @@ export class SubscriptionService {
       return Err(activeSubscription.err)
     }
 
-    const subscription = activeSubscription.val
-
-    // second validation is the customer can't change a plan if the last change was in the past 30 days
-    if (subscription?.changedAt && subscription.changedAt > currentNow - 30 * 1000 * 60 * 60 * 24) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message:
-            "You already changed the plan in the past 30 days, can't change again until 30 days have passed",
-        })
-      )
-    }
-
-    // if there is a change at means we are waiting for the change to be applied
-    const isChanging = subscription?.changeAt && subscription.changeAt > currentNow
-
-    if (isChanging) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message: "Subscription is already changing, wait for the change to be applied",
-        })
-      )
-    }
-
     const { err: changeErr, val: change } = await activePhaseMachine.transition("CHANGE", {
       now: currentNow,
       changeAt,

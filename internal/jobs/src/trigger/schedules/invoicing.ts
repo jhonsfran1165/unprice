@@ -25,7 +25,12 @@ export const invoicingSchedule = schedules.task({
 
     // trigger the end trial task for each subscription phase
     for (const sub of subscriptions) {
-      const phase = sub.phases[0]!
+      const phase = sub.phases[0]
+
+      if (!phase) {
+        logger.error(`No active phase found for subscription ${sub.id}`)
+        continue
+      }
 
       const result = await invoiceTask.triggerAndWait({
         subscriptionId: sub.id,

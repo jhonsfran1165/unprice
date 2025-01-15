@@ -21,15 +21,31 @@ export const renewSchedule = schedules.task({
           orderBy: (phase, { asc }) => [asc(phase.startAt)],
         },
       },
-      where: (sub, { eq, and, lte }) => and(eq(sub.active, true), lte(sub.renewAt, now)),
+      where: (sub, { eq, and, lte, isNull }) =>
+        and(
+          eq(sub.active, true),
+          lte(sub.renewAt, now),
+          // next invoice at should be after the renew at
+          // so we are sure the subscription has been invoiced
+          lte(sub.renewAt, sub.nextInvoiceAt),
+          // we should not renew if there is a change, cancel or expire scheduled
+          isNull(sub.changeAt),
+          isNull(sub.cancelAt),
+          isNull(sub.expiresAt)
+        ),
     })
 
-    logger.info(`Found ${subscriptions.length} subscriptions for invoicing`)
+    logger.info(`Found ${subscriptions.length} subscriptions for renewing`)
 
     // trigger the end trial task for each subscription phase
     for (const sub of subscriptions) {
       // get the first active phase
-      const phase = sub.phases[0]!
+      const phase = sub.phases[0]
+
+      if (!phase) {
+        logger.error(`No active phase found for subscription ${sub.id}`)
+        continue
+      }
 
       await renewTask.triggerAndWait({
         subscriptionId: sub.id,
