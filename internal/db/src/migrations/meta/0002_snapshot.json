@@ -1,5 +1,5 @@
 {
-  "id": "2a4d92f0-4034-4d5a-ae65-0ca62ba7bd37",
+  "id": "073c4cf3-920b-43a0-bd1b-84547ba12684",
   "prevId": "b2b08ee3-a269-4e76-9390-c3bf8f541829",
   "version": "7",
   "dialect": "postgresql",
@@ -2773,7 +2773,8 @@
           "name": "renew_at_m",
           "type": "bigint",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 0
         },
         "past_due_at_m": {
           "name": "past_due_at_m",

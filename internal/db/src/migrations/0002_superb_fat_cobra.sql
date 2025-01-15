@@ -1,1 +1,0 @@
-ALTER TABLE "unprice_subscriptions" ADD COLUMN "renew_at_m" bigint;
