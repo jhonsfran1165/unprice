@@ -113,15 +113,14 @@ jobs:
         run: |
           # If the command exits with code 1, the build continues as normal
           # If the command exits with code 0, the build is immediately aborted
-          check=$(npx turbo-ignore --fallback ${{ github.event.pull_request.head.sha }} -d apps/auth-proxy) || true
-          echo "check: $check"
+          check=$(npx turbo-ignore -d apps/auth-proxy) || true
 
-          if [ -n "$check" ]; then
-            echo "No changes detected in auth-proxy folder, skipping build"
-            # save to output github action
+          # if check has Proceeding with deployment string, we need to deploy it use  grep
+          if echo "$check" | grep -q "Proceeding with deployment"; then
+            echo "Proceeding with deployment, deploying auth-proxy"
             echo "deploy_auth_proxy=true" >> $GITHUB_OUTPUT
           else
-            echo "Changes detected in auth-proxy folder, deploying..."
+            echo "No changes detected in auth-proxy folder, skipping build"
             echo "deploy_auth_proxy=false" >> $GITHUB_OUTPUT
           fi
 
