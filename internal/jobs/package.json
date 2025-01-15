@@ -22,7 +22,7 @@
     "@unprice/services": "workspace:^",
     "@unprice/stripe": "workspace:^0.1.0",
     "@unprice/tinybird": "workspace:^",
-    "date-fns": "^3.3.1",
+    "date-fns": "^4.1.0",
     "trigger.dev": "3.3.10",
     "zod": "^3.23.8"
   },
