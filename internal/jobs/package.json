@@ -10,7 +10,8 @@
     "with-env": "infisical run --env=preview --path=/app --",
     "with-env-prod": "infisical run --env=prod --path=/ci --",
     "dev:trigger": "pnpm with-env pnpm dlx trigger.dev@3.3.10 dev",
-    "deploy:trigger-prod": "npx trigger.dev@3.3.10 deploy"
+    "deploy:trigger-prod": "npx trigger.dev@3.3.10 deploy",
+    "delete": "pnpm tsx src/delete.ts"
   },
   "dependencies": {
     "@infisical/sdk": "^3.0.4",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@unprice/tsconfig": "^0.1.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.2"
   }
 }

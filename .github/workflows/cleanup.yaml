@@ -2,14 +2,11 @@ name: Clean up Preview Deployment
 on:
   pull_request:
     types: [closed]
-    branches:
-      - '**'
-      - '!renovate/**'
-      - '!main'
 
 jobs:
   delete-preview:
     runs-on: ubuntu-latest
+    if: "!contains(github.head_ref, 'renovate/') || !contains(github.head_ref, 'main')"
     steps:
       - uses: Infisical/secrets-action@v1.0.7
         with:
