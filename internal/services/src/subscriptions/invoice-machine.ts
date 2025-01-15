@@ -77,7 +77,8 @@ export class InvoiceStateMachine extends StateMachine<
     paymentProviderToken: string
   }) {
     // the initial state of the machine
-    super(invoice.status)
+    const isFinalState = ["paid", "void", "failed"].includes(invoice.status)
+    super(invoice.status, isFinalState)
 
     this.phaseMachine = phaseMachine
     this.db = db
@@ -426,7 +427,7 @@ export class InvoiceStateMachine extends StateMachine<
       status: "unpaid" as InvoiceStatus,
     }
 
-    const paymentValidation = await this.phaseMachine.validateCustomerPaymentMethod({ now })
+    const paymentValidation = await this.phaseMachine.validateCustomerPaymentMethod()
     const customer = this.phaseMachine.getCustomer()
 
     if (paymentValidation.err) {
@@ -1016,16 +1017,15 @@ export class InvoiceStateMachine extends StateMachine<
           now,
           pastDueAt,
           metadataPhase: {
-            note: "Invoice exceeded the payment due date",
-            reason: "payment_pending",
+            pastDue: {
+              reason: "payment_pending",
+              note: "Invoice exceeded the payment due date",
+              invoiceId: invoice.id,
+            },
           },
           metadataSubscription: {
-            note: "Invoice exceeded the payment due date",
             reason: "payment_pending",
-            pastDue: {
-              invoiceId: invoice.id,
-              phaseId: this.phaseMachine.getPhase().id,
-            },
+            note: "Invoice exceeded the payment due date",
           },
         })
 
@@ -1065,16 +1065,15 @@ export class InvoiceStateMachine extends StateMachine<
         now,
         pastDueAt,
         metadataPhase: {
-          note: "Invoice has reached the maximum number of payment attempts",
-          reason: "payment_failed",
+          pastDue: {
+            reason: "payment_failed",
+            note: "Invoice has reached the maximum number of payment attempts",
+            invoiceId: invoice.id,
+          },
         },
         metadataSubscription: {
-          note: "Invoice exceeded the payment due date",
-          reason: "payment_pending",
-          pastDue: {
-            invoiceId: invoice.id,
-            phaseId: this.phaseMachine.getPhase().id,
-          },
+          reason: "payment_failed",
+          note: "Invoice has reached the maximum number of payment attempts",
         },
       })
 

@@ -17,10 +17,12 @@ export const invoiceTask = task({
       subscriptionId,
       projectId,
       now,
+      phaseId,
     }: {
       subscriptionId: string
       projectId: string
       now: number
+      phaseId: string
     },
     { ctx }
   ) => {
@@ -36,6 +38,7 @@ export const invoiceTask = task({
         projectId,
         now,
         api: "jobs.subscription.phase.invoice",
+        phaseId,
       },
     })
 
@@ -59,24 +62,9 @@ export const invoiceTask = task({
       throw initPhaseMachineResult.err
     }
 
-    // skip if the phase is trailing
-    const activePhaseMachine = await subscriptionService.getActivePhaseMachine({ now })
-
-    if (activePhaseMachine.err) {
-      throw activePhaseMachine.err
-    }
-
-    const activePhase = activePhaseMachine.val.getPhase()
-
-    if (activePhase.status === "trialing") {
-      return {
-        status: "skipped",
-        message: "Subscription is in trial phase",
-      }
-    }
-
     const result = await subscriptionService.invoiceSubscription({
       now,
+      phaseId,
     })
 
     // we have to throw if there is an error so the task fails

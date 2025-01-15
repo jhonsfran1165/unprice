@@ -17,11 +17,13 @@ export const cancelTask = task({
       projectId,
       now,
       cancelAt,
+      phaseId,
     }: {
       subscriptionId: string
       projectId: string
       now: number
       cancelAt?: number
+      phaseId: string
     },
     { ctx }
   ) => {
@@ -36,6 +38,7 @@ export const cancelTask = task({
         subscriptionId,
         projectId,
         api: "jobs.subscription.cancel",
+        phaseId,
       },
     })
 
@@ -62,6 +65,7 @@ export const cancelTask = task({
     const result = await subscriptionService.cancelSubscription({
       now,
       cancelAt,
+      phaseId,
     })
 
     // we have to throw if there is an error so the task fails

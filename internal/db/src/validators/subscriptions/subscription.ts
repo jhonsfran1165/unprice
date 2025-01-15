@@ -50,18 +50,47 @@ export const invoiceMetadataSchema = z.object({
 export const subscriptionMetadataSchema = z.object({
   reason: reasonSchema.optional().describe("Reason for the subscription status"),
   note: z.string().optional().describe("Note about status in the subscription"),
-  pastDue: z
-    .object({
-      phaseId: z.string().describe("Phase id that triggered the past due"),
-      invoiceId: z.string().describe("Invoice id that triggered the past due"),
-    })
-    .optional()
-    .describe("Past due information"),
 })
 
 export const subscriptionPhaseMetadataSchema = z.object({
-  reason: reasonSchema.optional().describe("Reason for the status"),
-  note: z.string().optional().describe("Note about status in the subscription phase"),
+  pastDue: z
+    .object({
+      invoiceId: z.string().describe("Invoice id that triggered the past due"),
+      reason: reasonSchema.optional().describe("Reason for the status"),
+      note: z.string().optional().describe("Note about status in the subscription phase"),
+    })
+    .optional()
+    .describe("Past due information"),
+  expire: z
+    .object({
+      phaseId: z.string().optional().describe("Phase id that triggered the expiration"),
+      reason: reasonSchema.optional().describe("Reason for the status"),
+      note: z.string().optional().describe("Note about status in the subscription phase"),
+    })
+    .optional()
+    .describe("Expiration information"),
+  cancel: z
+    .object({
+      reason: reasonSchema.optional().describe("Reason for the status"),
+      note: z.string().optional().describe("Note about status in the subscription phase"),
+    })
+    .optional()
+    .describe("Cancellation information"),
+  renew: z
+    .object({
+      reason: reasonSchema.optional().describe("Reason for the status"),
+      note: z.string().optional().describe("Note about status in the subscription phase"),
+    })
+    .optional()
+    .describe("Renewal information"),
+  change: z
+    .object({
+      reason: reasonSchema.optional().describe("Reason for the status"),
+      note: z.string().optional().describe("Note about status in the subscription phase"),
+      nextPhaseId: z.string().optional().describe("Next phase id"),
+    })
+    .optional()
+    .describe("Change information"),
 })
 
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {

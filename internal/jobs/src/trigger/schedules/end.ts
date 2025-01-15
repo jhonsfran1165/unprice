@@ -14,69 +14,61 @@ export const endSchedule = schedules.task({
   run: async (payload) => {
     const now = payload.timestamp.getTime()
 
-    // get the subscription ready for billing
-    const subscriptionsToEnd = await db.query.subscriptions.findMany({
+    // get the subscription phases that are ending
+    const subscriptionPhasesToEnd = await db.query.subscriptionPhases.findMany({
+      with: {
+        subscription: true,
+      },
       where: (sub, { eq, and, lte, or }) =>
-        and(
-          eq(sub.active, true),
-          or(
-            lte(sub.cancelAt, now),
-            lte(sub.expiresAt, now),
-            lte(sub.changeAt, now),
-            lte(sub.pastDueAt, now)
-          )
-        ),
+        and(eq(sub.active, true), eq(sub.status, "active"), or(lte(sub.endAt, now))),
     })
 
-    for (const sub of subscriptionsToEnd) {
+    for (const phase of subscriptionPhasesToEnd) {
       // if dates are in the past we need to take action
-      const cancelAt = sub.cancelAt
-      const expiresAt = sub.expiresAt
-      const changeAt = sub.changeAt
-      const pastDueAt = sub.pastDueAt
+      const cancelAt = phase.subscription.cancelAt
+      const expiresAt = phase.subscription.expiresAt
+      const changeAt = phase.subscription.changeAt
+      const pastDueAt = phase.subscription.pastDueAt
 
       if (cancelAt && cancelAt <= now) {
         await cancelTask.triggerAndWait({
-          subscriptionId: sub.id,
-          projectId: sub.projectId,
-          now,
+          subscriptionId: phase.subscription.id,
+          projectId: phase.subscription.projectId,
+          now: cancelAt + 1,
           cancelAt,
+          phaseId: phase.id,
         })
       } else if (expiresAt && expiresAt <= now) {
         await expireTask.triggerAndWait({
-          subscriptionId: sub.id,
-          projectId: sub.projectId,
-          now,
+          subscriptionId: phase.subscription.id,
+          projectId: phase.subscription.projectId,
+          now: expiresAt + 1,
           expiresAt,
+          phaseId: phase.id,
         })
       } else if (changeAt && changeAt <= now) {
         await changeTask.triggerAndWait({
-          subscriptionId: sub.id,
-          projectId: sub.projectId,
-          now,
+          subscriptionId: phase.subscription.id,
+          projectId: phase.subscription.projectId,
+          now: changeAt + 1,
           changeAt: changeAt,
+          phaseId: phase.id,
         })
       } else if (pastDueAt && pastDueAt <= now) {
-        // if the subscription is past due it would have a past due metadata
-        if (!sub.metadata?.pastDue?.phaseId || !sub.metadata?.pastDue?.invoiceId) {
-          throw new Error("Subscription is missing past due metadata, cannnot be processed")
-        }
-
         await pastDueTask.triggerAndWait({
-          subscriptionId: sub.id,
-          projectId: sub.projectId,
-          now,
+          subscriptionId: phase.subscription.id,
+          projectId: phase.subscription.projectId,
+          now: pastDueAt + 1,
           pastDueAt: pastDueAt,
-          phaseId: sub.metadata?.pastDue?.phaseId,
-          invoiceId: sub.metadata?.pastDue?.invoiceId,
+          phaseId: phase.id,
         })
       }
     }
 
-    logger.info(`Found ${subscriptionsToEnd.length} subscriptions to end`)
+    logger.info(`Found ${subscriptionPhasesToEnd.length} subscription phases to end`)
 
     return {
-      subscriptionIds: subscriptionsToEnd.map((s) => s.id),
+      subscriptionIds: subscriptionPhasesToEnd.map((s) => s.subscription.id),
     }
   },
 })

@@ -23,10 +23,11 @@
       "dependsOn": ["^build"],
       "outputs": [
         "app/next.js/.next/**",
-        "app/next.js/!.next/cache/**",
+        "!app/next.js/.next/cache/**",
         "app/next.js/next-env.d.ts",
         "dist/**",
-        "app/auth-proxy/.output/**"
+        "app/auth-proxy/.output/**",
+        "!app/auth-proxy/.output/cache/**"
       ],
       "env": [
         "NEXT_PUBLIC_*",

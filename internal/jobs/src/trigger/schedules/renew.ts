@@ -1,48 +1,42 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
-import { db, notInArray } from "@unprice/db"
+import { db } from "@unprice/db"
 import { renewTask } from "../tasks"
-import { invoiceTask } from "../tasks/invoice"
 
-export const invoicingSchedule = schedules.task({
-  id: "subscriptionPhase.invoicing",
+export const renewSchedule = schedules.task({
+  id: "subscriptionPhase.renew",
   // every 12 hours (UTC timezone)
   cron: "0 */12 * * *",
   run: async (payload) => {
     const now = payload.timestamp.getTime()
 
-    // get the subscription ready for billing
     const subscriptions = await db.query.subscriptions.findMany({
       with: {
         phases: {
-          where: (phase, { eq, and }) =>
-            and(eq(phase.active, true), notInArray(phase.status, ["trialing"])),
+          where: (phase, { eq, and, inArray }) =>
+            and(
+              eq(phase.active, true),
+              inArray(phase.status, ["active", "trial_ended"]),
+              eq(phase.autoRenew, true)
+            ),
+          orderBy: (phase, { asc }) => [asc(phase.startAt)],
         },
       },
-      where: (sub, { eq, and, lte }) => and(eq(sub.active, true), lte(sub.nextInvoiceAt, now)),
+      where: (sub, { eq, and, lte }) => and(eq(sub.active, true), lte(sub.renewAt, now)),
     })
 
     logger.info(`Found ${subscriptions.length} subscriptions for invoicing`)
 
     // trigger the end trial task for each subscription phase
     for (const sub of subscriptions) {
+      // get the first active phase
       const phase = sub.phases[0]!
 
-      const result = await invoiceTask.triggerAndWait({
+      await renewTask.triggerAndWait({
         subscriptionId: sub.id,
         projectId: sub.projectId,
         now: sub.nextInvoiceAt + 1,
         phaseId: phase.id,
       })
-
-      if (result.ok) {
-        // renew the subscription
-        await renewTask.triggerAndWait({
-          subscriptionId: sub.id,
-          projectId: sub.projectId,
-          now: sub.nextInvoiceAt + 1,
-          phaseId: phase.id,
-        })
-      }
     }
 
     return {

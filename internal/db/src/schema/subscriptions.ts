@@ -70,6 +70,8 @@ export const subscriptions = pgTableProject(
     nextInvoiceAt: bigint("next_invoice_at_m", { mode: "number" }).notNull().default(0),
     // lastBilledAt is the last time the subscription was billed
     lastInvoiceAt: bigint("last_invoice_at_m", { mode: "number" }),
+    // renewAt indicates the next time the subscription will be renewed
+    renewAt: bigint("renew_at_m", { mode: "number" }).notNull().default(0),
     // when the subscription is considered past due
     pastDueAt: bigint("past_due_at_m", { mode: "number" }),
     // when the subscription was ended because it was past due
