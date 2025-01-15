@@ -39,7 +39,7 @@ export default function CreateProject() {
               },
             }}
           >
-            <Balancer>{`Let's start off by creating your first project`}</Balancer>
+            <Balancer>{`Let's start off by creating your first app`}</Balancer>
           </m.h1>
           <m.div
             variants={{
@@ -61,8 +61,8 @@ export default function CreateProject() {
               defaultValues={{
                 defaultCurrency: "USD",
                 timezone: "UTC",
-                name: "My Project",
-                url: "https://project.com",
+                name: "My SaaS",
+                url: "https://my-saas.com",
               }}
             />
           </m.div>
