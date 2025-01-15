@@ -517,6 +517,9 @@ importers:
       random-word-slugs:
         specifier: ^0.1.7
         version: 0.1.7
+      ws:
+        specifier: ^8.17.1
+        version: 8.18.0
       zod:
         specifier: ^3.23.8
         version: 3.24.1
@@ -539,9 +542,6 @@ importers:
       vitest:
         specifier: ^2.0.5
         version: 2.1.8(@types/node@20.11.24)
-      ws:
-        specifier: ^8.17.1
-        version: 8.18.0
 
   internal/email:
     dependencies:
@@ -611,11 +611,11 @@ importers:
         specifier: 0.9.1
         version: 0.9.1(typescript@5.7.2)(zod@3.24.1)
       '@trigger.dev/build':
-        specifier: ^3.3.7
-        version: 3.3.7(typescript@5.7.2)
+        specifier: ^3.3.10
+        version: 3.3.10(typescript@5.7.2)
       '@trigger.dev/sdk':
-        specifier: 3.3.7
-        version: 3.3.7(zod@3.24.1)
+        specifier: 3.3.10
+        version: 3.3.10(zod@3.24.1)
       '@unprice/db':
         specifier: workspace:^0.1.0
         version: link:../db
@@ -635,8 +635,8 @@ importers:
         specifier: ^3.3.1
         version: 3.6.0
       trigger.dev:
-        specifier: 3.3.7
-        version: 3.3.7(typescript@5.7.2)
+        specifier: 3.3.10
+        version: 3.3.10(typescript@5.7.2)
       zod:
         specifier: ^3.23.8
         version: 3.24.1
@@ -781,6 +781,9 @@ importers:
 
   internal/tinybird:
     dependencies:
+      '@chronark/zod-bird':
+        specifier: ^0.3.9
+        version: 0.3.10
       '@t3-oss/env-nextjs':
         specifier: 0.9.1
         version: 0.9.1(typescript@5.7.2)(zod@3.24.1)
@@ -788,12 +791,6 @@ importers:
         specifier: ^3.23.8
         version: 3.24.1
     devDependencies:
-      '@chronark/zod-bird':
-        specifier: ^0.3.9
-        version: 0.3.10
-      '@unprice/db':
-        specifier: ^0.1.0
-        version: link:../db
       '@unprice/tsconfig':
         specifier: ^0.1.0
         version: link:../../tooling/typescript
@@ -1750,7 +1747,7 @@ packages:
     resolution: {integrity: sha512-QkGvy8Lz+NTGPOfBH2lIEAxiaizp9vrEufxsi1wYz8WM0/ADqs4hUqO1zRjt7ntoZdKiXCcnpZtzUMdOjfo5AQ==}
     dependencies:
       zod: 3.24.1
-    dev: true
+    dev: false
 
   /@clack/core@0.3.5:
     resolution: {integrity: sha512-5cfhQNH+1VQ2xLQlmzXMqUoiaH0lRBq9/CLW9lTyMbuKLC3+xEK01tHVvyut++mLOn5urSHmkm6I0Lg9MaJSTQ==}
@@ -8142,11 +8139,11 @@ packages:
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
     dev: false
 
-  /@trigger.dev/build@3.3.7(typescript@5.7.2):
-    resolution: {integrity: sha512-WtbcnHUpIyHziOcUOyjgqFtEGQBtRg5UDVJEywyhuKdifsRP5I+JOIxD4kDY1ShLPwhaS/0EGV+MUisdLY13Rw==}
+  /@trigger.dev/build@3.3.10(typescript@5.7.2):
+    resolution: {integrity: sha512-CtDYSxunxGNWt80Aya1qxgNfVom5AMZMIHVcCDB1mnz4RtqqAjiwpZsbR83D79ElAjWvVLcigbiFGNbU5J5Ltw==}
     engines: {node: '>=18.20.0'}
     dependencies:
-      '@trigger.dev/core': 3.3.7
+      '@trigger.dev/core': 3.3.10
       pkg-types: 1.3.0
       tinyglobby: 0.2.10
       tsconfck: 3.1.3(typescript@5.7.2)
@@ -8157,8 +8154,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@trigger.dev/core@3.3.7:
-    resolution: {integrity: sha512-K5mAYXYbhSi8TP57VorfTlbNcbR4WIhUfjCsuSwL5tl6rVIM88ZJDdTN034XlZBh0FhAKIIIp8MUG1wt3bRjkA==}
+  /@trigger.dev/core@3.3.10:
+    resolution: {integrity: sha512-LwOIE69aQKHFIbUyx4jaTksGAwHX8CUpVl0y/VlXqXChjUr6uHlAqgIRYGGOYy2S8zr61BWiXLdncisZnSQ8xA==}
     engines: {node: '>=18.20.0'}
     dependencies:
       '@electric-sql/client': 1.0.0-beta.1
@@ -8192,8 +8189,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@trigger.dev/sdk@3.3.7(zod@3.24.1):
-    resolution: {integrity: sha512-PoEp6BMuC2UA6s8AgBaBth8w0GEgKvGfdbGPb5hxuUojm0ejSkQ9pFTNaV/R0l4FyfHzc1sTrC06GQuBXnoA8g==}
+  /@trigger.dev/sdk@3.3.10(zod@3.24.1):
+    resolution: {integrity: sha512-Rcro3OH96FtNyy7VmxiSz2A+QHkm4SURUiba92xVUrHMgF8o6aAdp1QCiec5yQzRcs6YNEdLfFbHULMsz8oNrA==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       zod: ^3.0.0
@@ -8201,7 +8198,7 @@ packages:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.52.1
       '@opentelemetry/semantic-conventions': 1.25.1
-      '@trigger.dev/core': 3.3.7
+      '@trigger.dev/core': 3.3.10
       chalk: 5.4.1
       cronstrue: 2.52.0
       debug: 4.4.0(supports-color@9.4.0)
@@ -18003,8 +18000,8 @@ packages:
     hasBin: true
     dev: true
 
-  /trigger.dev@3.3.7(typescript@5.7.2):
-    resolution: {integrity: sha512-Mwb37DsBenS+aP+DzujIBeLKbS1ffoTSnjZYCu/Go9D+zRE7mgfL1qRg3x50SbmDmQFrSXxmPt8Xen0J39ywWw==}
+  /trigger.dev@3.3.10(typescript@5.7.2):
+    resolution: {integrity: sha512-LoGtGxTCNuG/fT5W7ttfP6ZA6hfL8J4XMQxEIyrD/iqTFZuVPsVs4WKBQK/70yiLtyw32xgDfLsBmX6BwwFnYA==}
     engines: {node: '>=18.20.0'}
     hasBin: true
     dependencies:
@@ -18022,10 +18019,11 @@ packages:
       '@opentelemetry/sdk-trace-base': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-node': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.25.1
-      '@trigger.dev/build': 3.3.7(typescript@5.7.2)
-      '@trigger.dev/core': 3.3.7
+      '@trigger.dev/build': 3.3.10(typescript@5.7.2)
+      '@trigger.dev/core': 3.3.10
       c12: 1.11.2(magicast@0.3.5)
       chalk: 5.4.1
+      chokidar: 3.6.0
       cli-table3: 0.6.5
       commander: 9.5.0
       defu: 6.1.4
@@ -18054,6 +18052,7 @@ packages:
       terminal-link: 3.0.0
       tiny-invariant: 1.3.3
       tinyexec: 0.3.1
+      tinyglobby: 0.2.10
       ws: 8.18.0
       xdg-app-paths: 8.3.0
       zod: 3.23.8
@@ -19216,6 +19215,7 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+    dev: false
 
   /xdg-app-paths@8.3.0:
     resolution: {integrity: sha512-mgxlWVZw0TNWHoGmXq+NC3uhCIc55dDpAlDkMQUaIAcQzysb0kxctwv//fvuW61/nAAeUBJMQ8mnZjMmuYwOcQ==}
@@ -19367,6 +19367,7 @@ packages:
 
   /zod@3.24.1:
     resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
+    dev: false
 
   /zustand@4.5.5(@types/react@18.3.18)(react@18.3.1):
     resolution: {integrity: sha512-+0PALYNJNgK6hldkgDq2vLrw5f6g/jCInz52n9RTpropGgeAf/ioFUCdtsjCqu4gNhW9D01rUQBROoRjdzyn2Q==}

@@ -39,7 +39,9 @@
         "AUTH_GITHUB_CLIENT_ID",
         "AUTH_GITHUB_CLIENT_SECRET",
         "AUTH_REDIRECT_PROXY_URL",
-        "ENCRYPTION_KEY"
+        "ENCRYPTION_KEY",
+        "VERCEL_ENV",
+        "NODE_ENV"
       ]
     },
     "fmt": {
@@ -59,7 +61,9 @@
         "AUTH_GITHUB_CLIENT_ID",
         "AUTH_GITHUB_CLIENT_SECRET",
         "AUTH_REDIRECT_PROXY_URL",
-        "ENCRYPTION_KEY"
+        "ENCRYPTION_KEY",
+        "VERCEL_ENV",
+        "NODE_ENV"
       ],
       "persistent": true,
       "cache": false

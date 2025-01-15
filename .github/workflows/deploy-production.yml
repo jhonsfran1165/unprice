@@ -31,6 +31,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: Infisical/secrets-action@v1.0.7
         name: Pull secrets from Infisical
@@ -67,7 +69,7 @@ jobs:
         run: |
           # If the command exits with code 1, the build continues as normal
           # If the command exits with code 0, the build is immediately aborted
-          check=$(npx turbo-ignore --fallback ${{ github.event.pull_request.head.sha }} -d apps/auth-proxy) || true
+          check=$(npx turbo-ignore -d apps/auth-proxy) || true
           echo "check: $check"
 
           if [ -n "$check" ]; then

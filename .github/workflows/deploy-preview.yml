@@ -3,15 +3,13 @@ name: Deploy Preview
 on:
   pull_request:
     types: [opened, synchronize]
-    branches:
-      - '**'
-      - '!renovate/**'
 
 env:
   SKIP_ENV_VALIDATION: 1
 
 jobs:
   build-lint:
+    if: "!contains(github.head_ref, 'renovate/')"
     uses: ./.github/workflows/job_build.yaml
     with:
       pull_secrets: true
@@ -22,6 +20,7 @@ jobs:
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
 
   deploy-preview:
+    if: "!contains(github.head_ref, 'renovate/')"
     runs-on: ubuntu-latest
 
     needs:

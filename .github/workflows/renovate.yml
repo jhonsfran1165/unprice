@@ -2,8 +2,9 @@ name: Test Renovate
 
 on:
   pull_request:
+    types: [opened, synchronize]
     branches:
-      - renovate/**
+      - "renovate/**"
 
 env:
   SKIP_ENV_VALIDATION: 1
