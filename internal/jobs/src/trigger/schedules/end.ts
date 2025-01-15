@@ -24,6 +24,11 @@ export const endSchedule = schedules.task({
     })
 
     for (const phase of subscriptionPhasesToEnd) {
+      // if subscription not active, skip
+      if (!phase.subscription.active) {
+        continue
+      }
+
       // if dates are in the past we need to take action
       const cancelAt = phase.subscription.cancelAt
       const expiresAt = phase.subscription.expiresAt
@@ -68,7 +73,7 @@ export const endSchedule = schedules.task({
     logger.info(`Found ${subscriptionPhasesToEnd.length} subscription phases to end`)
 
     return {
-      subscriptionIds: subscriptionPhasesToEnd.map((s) => s.subscription.id),
+      subscriptionPhaseIds: subscriptionPhasesToEnd.map((s) => s.id),
     }
   },
 })

@@ -52,13 +52,6 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
       })
     }
 
-    // if the customer doesn't have a customer provider id, we return an empty array
-    if (!customerData.stripeCustomerId) {
-      return {
-        paymentMethods: [],
-      }
-    }
-
     // get config payment provider
     const config = await opts.ctx.db.query.paymentProviderConfig.findFirst({
       where: (config, { and, eq }) =>
@@ -92,6 +85,13 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
       })
 
       const defaultPaymentMethodId = await paymentProviderService.getDefaultPaymentMethodId()
+      const customerId = paymentProviderService.getCustomerId()
+
+      if (!customerId) {
+        return {
+          paymentMethods: [],
+        }
+      }
 
       if (defaultPaymentMethodId.err) {
         throw new TRPCError({

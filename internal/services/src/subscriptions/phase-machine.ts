@@ -397,6 +397,7 @@ export class PhaseMachine extends StateMachine<
           now: payload.now,
           isChange: true,
           metadataPhase: payload.metadataPhase,
+          metadataSubscription: payload.metadataSubscription,
         })
 
         if (endPhaseResult.err) {
@@ -680,7 +681,7 @@ export class PhaseMachine extends StateMachine<
   }: {
     phaseId: string
     startAt: number
-    status: "paid" | "open" | "failed"
+    status: "paid" | "open" | "failed" | "all"
   }): Promise<SubscriptionInvoice | undefined> {
     const pendingInvoice = await this.db.query.invoices.findFirst({
       where: (table, { eq, and, inArray }) =>
@@ -693,7 +694,9 @@ export class PhaseMachine extends StateMachine<
             ? inArray(table.status, ["draft", "unpaid"])
             : status === "failed"
               ? inArray(table.status, ["failed"])
-              : inArray(table.status, ["paid", "void"])
+              : status === "all"
+                ? inArray(table.status, ["paid", "void", "draft", "unpaid", "failed"])
+                : inArray(table.status, ["paid", "void"])
         ),
     })
 
@@ -1262,15 +1265,17 @@ export class PhaseMachine extends StateMachine<
         paymentProviderToken: decryptedKey,
       })
 
-      // collect the payment
-      const payment = await invoiceMachine.transition("COLLECT_PAYMENT", {
-        invoiceId: invoice.id,
-        now: payload.now,
-        autoFinalize: true,
-      })
+      if (!["paid", "void", "failed"].includes(invoice.status)) {
+        // collect the payment
+        const payment = await invoiceMachine.transition("COLLECT_PAYMENT", {
+          invoiceId: invoice.id,
+          now: payload.now,
+          autoFinalize: true,
+        })
 
-      if (payment.err) {
-        return Err(payment.err)
+        if (payment.err) {
+          return Err(payment.err)
+        }
       }
     }
 
@@ -1460,7 +1465,7 @@ export class PhaseMachine extends StateMachine<
       const invoiceData = await this.getPhaseInvoiceByStatus({
         phaseId: phase.id,
         startAt: subscription.currentCycleStartAt,
-        status: "open",
+        status: "all",
       })
 
       if (invoiceData) {
@@ -1476,7 +1481,7 @@ export class PhaseMachine extends StateMachine<
       )
     }
 
-    // get the pening invoice for the given date
+    // get the pending invoice for the given date
     const pendingInvoice = await this.getPhaseInvoiceByStatus({
       phaseId: phase.id,
       startAt: subscription.currentCycleStartAt,

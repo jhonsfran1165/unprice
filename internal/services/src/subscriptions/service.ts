@@ -19,6 +19,7 @@ import {
   type SubscriptionPhase,
   type SubscriptionPhaseExtended,
   type SubscriptionPhaseMetadata,
+  configureBillingCycleSubscription,
   createDefaultSubscriptionConfig,
   subscriptionInsertSchema,
   subscriptionPhaseInsertSchema,
@@ -33,7 +34,7 @@ import { CustomerService } from "../customers/service"
 import { env } from "../env.mjs"
 import { UnPriceMachineError } from "../machine/errors"
 import type { Metrics } from "../metrics"
-import { configureBillingCycleSubscription } from "./billing"
+import { PaymentProviderService } from "../payment-provider/service"
 import { UnPriceSubscriptionError } from "./errors"
 import { InvoiceStateMachine } from "./invoice-machine"
 import { PhaseMachine } from "./phase-machine"
@@ -1547,10 +1548,78 @@ export class SubscriptionService {
       )
     }
 
-    const activeSubscription = await this.getActiveSubscription()
+    let paymentMethodId: string | undefined
 
-    if (activeSubscription.err) {
-      return Err(activeSubscription.err)
+    if (newPhase) {
+      const planVersionNewPhase = await this.db.query.versions.findFirst({
+        where: (planVersion, { eq, and }) =>
+          and(
+            eq(planVersion.id, newPhase.planVersionId),
+            eq(planVersion.projectId, activePhase.projectId)
+          ),
+      })
+
+      if (!planVersionNewPhase) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Plan version not found, cannot apply change",
+          })
+        )
+      }
+
+      // get config payment provider for this customer
+      const config = await this.db.query.paymentProviderConfig.findFirst({
+        where: (config, { and, eq }) =>
+          and(
+            eq(config.projectId, activePhase.projectId),
+            eq(config.paymentProvider, planVersionNewPhase.paymentProvider),
+            eq(config.active, true)
+          ),
+      })
+
+      if (!config) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Payment provider config not found or not active for this plan",
+          })
+        )
+      }
+
+      const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+      const decryptedKey = await aesGCM.decrypt({
+        iv: config.keyIv,
+        ciphertext: config.key,
+      })
+
+      // get customer payment provider id
+      const paymentProviderService = new PaymentProviderService({
+        customer: this.customer,
+        logger: this.logger,
+        paymentProvider: planVersionNewPhase.paymentProvider,
+        token: decryptedKey,
+      })
+
+      const defaultPaymentMethodId = await paymentProviderService.getDefaultPaymentMethodId()
+
+      if (defaultPaymentMethodId.err) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: `Error getting default payment method: ${defaultPaymentMethodId.err.message}`,
+          })
+        )
+      }
+
+      paymentMethodId = defaultPaymentMethodId.val.paymentMethodId
+
+      if (planVersionNewPhase.paymentMethodRequired && !paymentMethodId) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message:
+              "Customer has no payment method for this plan, please add a payment method to continue",
+          })
+        )
+      }
     }
 
     const { err: changeErr, val: change } = await activePhaseMachine.transition("CHANGE", {
@@ -1574,6 +1643,7 @@ export class SubscriptionService {
           ...newPhase,
           startAt: change.changedAt + 1, // we need to start the new phase at the next millisecond
           subscriptionId: activePhase.subscriptionId,
+          paymentMethodId,
         },
         projectId: activePhase.projectId,
         db: this.db,
