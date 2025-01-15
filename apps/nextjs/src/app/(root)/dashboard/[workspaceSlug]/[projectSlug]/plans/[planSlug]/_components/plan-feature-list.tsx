@@ -93,7 +93,7 @@ export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
                 {filteredFeatures.map((feature) => (
                   <SortableFeature
                     disabled={activePlanVersion?.status === "published"}
-                    key={Math.random()}
+                    key={feature.featureId}
                     mode="FeaturePlan"
                     planFeatureVersion={feature}
                   />

@@ -52,6 +52,10 @@ export class PaymentProviderService implements PaymentProviderInterface {
     }
   }
 
+  public getCustomerId(): string {
+    return this.paymentProvider
+  }
+
   public setCustomerId(customerId: string) {
     switch (this.paymentProvider) {
       case "stripe": {

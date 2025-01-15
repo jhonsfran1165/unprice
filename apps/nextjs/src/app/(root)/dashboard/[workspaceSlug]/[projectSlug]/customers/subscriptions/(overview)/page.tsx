@@ -96,7 +96,7 @@ export default async function PlanSubscriptionsPage({
               filterDateRange: true,
               filterServerSide: true,
               filterSelectors: {
-                status: ["Active", "Inactive"].map((value) => ({
+                status: ["active", "inactive"].map((value) => ({
                   value: value,
                   label: value,
                 })),

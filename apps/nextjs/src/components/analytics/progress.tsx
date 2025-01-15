@@ -12,7 +12,8 @@ export function ProgressBar({
   max: number
   className?: string
 }) {
-  const progress = (value / max) * 100
+  // for inifinity, set max to 999999
+  const progress = (value / (max === Number.POSITIVE_INFINITY ? 999999 : max)) * 100
 
   return (
     <div className="flex items-center">

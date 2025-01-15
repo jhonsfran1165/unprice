@@ -17,10 +17,12 @@ export const invoiceTask = task({
       subscriptionId,
       projectId,
       now,
+      phaseId,
     }: {
       subscriptionId: string
       projectId: string
       now: number
+      phaseId: string
     },
     { ctx }
   ) => {
@@ -36,6 +38,7 @@ export const invoiceTask = task({
         projectId,
         now,
         api: "jobs.subscription.phase.invoice",
+        phaseId,
       },
     })
 
@@ -61,6 +64,7 @@ export const invoiceTask = task({
 
     const result = await subscriptionService.invoiceSubscription({
       now,
+      phaseId,
     })
 
     // we have to throw if there is an error so the task fails

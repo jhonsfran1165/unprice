@@ -47,15 +47,15 @@
   }
 
   h4 {
-    @apply font-primary text-lg font-semibold;
+    @apply font-secondary text-lg font-semibold;
   }
 
   h5 {
-    @apply font-primary font-semibold text-base leading-none tracking-tight;
+    @apply font-secondary font-semibold text-base leading-none tracking-tight;
   }
 
   h6 {
-    @apply font-primary font-semibold leading-none tracking-tight;
+    @apply font-secondary font-semibold leading-none tracking-tight;
   }
 
   p {

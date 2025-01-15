@@ -2,7 +2,9 @@ name: Deploy Preview
 
 on:
   pull_request:
+    types: [opened, synchronize]
     branches:
+      - '**'
       - '!renovate/**'
 
 env:
@@ -31,6 +33,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: Infisical/secrets-action@v1.0.7
         name: Pull secrets from Infisical
@@ -67,9 +71,9 @@ jobs:
           project_id: ${{ env.NEON_PROJECT_ID }}
           parent: main
           branch_name: preview/pr-${{ steps.branch-name.outputs.current_branch }}
-          username: ${{ env.NEON_DATABASE_USERNAME }}
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
+          username: ${{ env.NEON_DATABASE_USERNAME }}
 
       - name: Run Migrations
         working-directory: internal/db
@@ -105,9 +109,27 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
+      - name: verify auth-proxy turbo-ignore
+        # verify if auth-proxy has changed, if it has, we need to deploy it
+        run: |
+          # If the command exits with code 1, the build continues as normal
+          # If the command exits with code 0, the build is immediately aborted
+          check=$(npx turbo-ignore --fallback ${{ github.event.pull_request.head.sha }} -d apps/auth-proxy) || true
+          echo "check: $check"
+
+          if [ -n "$check" ]; then
+            echo "No changes detected in auth-proxy folder, skipping build"
+            # save to output github action
+            echo "deploy_auth_proxy=true" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected in auth-proxy folder, deploying..."
+            echo "deploy_auth_proxy=false" >> $GITHUB_OUTPUT
+          fi
+
       - uses: amondnet/vercel-action@v25.2.0 #deploy
         name: Deploy Unprice auth to Vercel
         id: deploy-auth
+        if: ${{ steps.verify-auth-proxy.outputs.deploy_auth_proxy == 'true' }}
         with:
           vercel-token: ${{ env.VERCEL_TOKEN }} # Required
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required

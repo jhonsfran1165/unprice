@@ -25,19 +25,19 @@ type AffectsKey = "lead" | "small" | "muted" | "removePaddingMargin" | "contrast
 const typographyVariants = cva("", {
   variants: {
     variant: {
-      h1: "text-4xl font-extrabold text-foreground tracking-tight lg:text-5xl",
-      h2: "pb-2 text-3xl font-semibold text-foreground tracking-tight first:mt-0",
-      h3: "text-2xl font-semibold text-foreground tracking-tight",
-      h4: "text-xl font-semibold text-foreground tracking-tight",
-      h5: "font-semibold text-base text-foreground leading-none tracking-tight",
-      h6: "font-semibold tracking-tight text-foreground leading-none",
-      p: "leading-5 text-muted-foreground text-sm [&:not(:first-child)]:mt-6",
+      h1: "text-4xl font-primary font-extrabold text-foreground tracking-tight lg:text-5xl",
+      h2: "pb-2 text-3xl font-primary font-semibold text-foreground tracking-tight first:mt-0",
+      h3: "text-2xl font-primary font-semibold text-foreground tracking-tight",
+      h4: "text-xl font-secondary font-semibold text-foreground tracking-tight",
+      h5: "font-secondary font-semibold text-base text-foreground leading-none tracking-tight",
+      h6: "font-secondary tracking-tight text-foreground leading-none text-md",
+      p: "font-secondary leading-5 text-muted-foreground text-sm [&:not(:first-child)]:mt-6",
 
       blockquote: "mt-6 border-l-2 pl-6 italic",
       table:
         "w-full [&_td]:border [&_td]:px-4 [&_td]:py-2 [&_td]:text-left [&_td]:[&[align=center]]:text-center [&_td]:[&[align=right]]:text-right [&_th]:border [&_th]:px-4 [&_th]:py-2 [&_th]:text-left [&_th]:font-bold [&_th]:[&[align=center]]:text-center [&_th]:[&[align=right]]:text-right [&_tr]:m-0 [&_tr]:border-t [&_tr]:p-0 even:[&_tr]:bg-muted",
       list: "my-6 ml-6 list-disc [&>li]:mt-2",
-      code: "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold",
+      code: "font-mono relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold",
       large: "text-lg font-semibold",
       normal: "text-base font-normal",
       anchor: "font-medium text-primary underline underline-offset-4",

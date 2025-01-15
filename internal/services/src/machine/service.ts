@@ -35,9 +35,11 @@ export type TransitionDefinition<S extends string, E extends EventMap<S>, A exte
 export abstract class StateMachine<S extends string, E extends EventMap<S>, A extends keyof E> {
   private currentState: S
   private transitions: Array<TransitionDefinition<S, E, A>> = []
+  private isFinalState: boolean
 
-  constructor(initialState: S) {
+  constructor(initialState: S, isFinalState: boolean) {
     this.currentState = initialState
+    this.isFinalState = isFinalState
   }
 
   /**
@@ -65,6 +67,12 @@ export abstract class StateMachine<S extends string, E extends EventMap<S>, A ex
     action: T,
     payload: InferPayload<S, E, T>
   ): Promise<Result<InferResult<S, E, T>, InferError<S, E, T> | UnPriceMachineError>> {
+    if (this.isFinalState) {
+      return Err(
+        new UnPriceMachineError({ message: "Machine is in final state, cannot perform transition" })
+      )
+    }
+
     const transition = this.transitions.find(
       (t) => t.event === action && t.from.includes(this.currentState)
     ) as TransitionDefinition<S, E, T> | undefined

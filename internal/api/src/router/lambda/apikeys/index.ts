@@ -5,8 +5,8 @@ import { revoke } from "./revoke"
 import { roll } from "./roll"
 
 export const apiKeyRouter = createTRPCRouter({
-  listByActiveProject,
-  create,
-  revoke,
-  roll,
+  listByActiveProject: listByActiveProject,
+  create: create,
+  revoke: revoke,
+  roll: roll,
 })

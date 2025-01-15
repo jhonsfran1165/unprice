@@ -2,20 +2,20 @@
 
 import { Button } from "@unprice/ui/button"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
+import { toast } from "@unprice/ui/sonner"
 import { useParams } from "next/navigation"
 import { startTransition } from "react"
-import { toast } from "sonner"
 import { revalidateAppPath } from "~/actions/revalidate"
 import { ConfirmAction } from "~/components/confirm-action"
 import { api } from "~/trpc/client"
 
-export const CancelSubscriptionPhaseButton = ({
+export const SubscriptionCancelButton = ({
   onConfirmAction,
-  subscriptionPhaseId,
+  subscriptionId,
   variant = "destructive",
 }: {
   onConfirmAction?: () => void
-  subscriptionPhaseId: string
+  subscriptionId: string
   variant?: "destructive" | "secondary"
 }) => {
   const workspaceSlug = useParams().workspaceSlug as string
@@ -30,11 +30,9 @@ export const CancelSubscriptionPhaseButton = ({
     startTransition(() => {
       toast.promise(
         cancelSubscription.mutateAsync({
-          id: subscriptionPhaseId,
+          id: subscriptionId,
           endAt: Date.now(),
-          metadata: {
-            reason: "user_requested",
-          },
+          metadata: null,
         }),
         {
           loading: "Cancelling subscription...",
@@ -46,14 +44,14 @@ export const CancelSubscriptionPhaseButton = ({
 
   return (
     <ConfirmAction
-      message="Once you cancel this plan, you will lose access to all the features of the plan. Are you sure you want to cancel this plan?"
+      message="Once you cancel this subscription, you will lose access immediately. If you want to downgrade/upgrade please create a new phase instead. Are you sure you want to cancel this subscription?"
       confirmAction={() => {
         onConfirmAction?.()
         onCancelSubscription()
       }}
     >
-      <Button variant={variant} size={"sm"} disabled={cancelSubscription.isPending}>
-        Cancel Plan
+      <Button variant={variant} disabled={cancelSubscription.isPending}>
+        Cancel Subscription
         {cancelSubscription.isPending && <LoadingAnimation className={"ml-2"} />}
       </Button>
     </ConfirmAction>

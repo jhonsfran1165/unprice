@@ -228,7 +228,7 @@ describe("PhaseMachine", () => {
       expect(result.err?.message).contains("Customer has no payment method")
     })
 
-    it("should validate transition if already ended", async () => {
+    it("should validate transition if trial already ended", async () => {
       // modify the machine to have no payment method
       machine = new PhaseMachine({
         db: mockDb,
@@ -255,8 +255,8 @@ describe("PhaseMachine", () => {
         now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
       })
 
-      // TODO: Handle year and custom billing cycles
-      expect(result.err?.message).contains("Invalid transition: END_TRIAL from trial_ended")
+      expect(result.err).toBeUndefined()
+      expect(result.val?.status).toBe("trial_ended")
     })
   })
 })

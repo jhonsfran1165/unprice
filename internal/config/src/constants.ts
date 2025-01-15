@@ -34,7 +34,7 @@ export const APP_DOMAIN =
     ? `https://app.${MAIN_DOMAIN}/`
     : env.VERCEL_ENV === "preview"
       ? `https://app-${env.NEXT_PUBLIC_APP_DOMAIN}/`
-      : "http://app.localhost:3000/"
+      : `https://app-${env.NEXT_PUBLIC_APP_DOMAIN}/`
 
 export const API_HOSTNAMES = new Set([
   `api.${MAIN_DOMAIN}`,

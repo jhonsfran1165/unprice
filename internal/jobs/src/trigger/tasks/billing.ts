@@ -72,15 +72,19 @@ export const billingTask = task({
         },
       },
       where: (table, { eq, and }) =>
-        and(eq(table.id, invoice.subscriptionPhaseId), eq(table.projectId, projectId)),
+        and(
+          eq(table.id, invoice.subscriptionPhaseId),
+          eq(table.projectId, projectId),
+          eq(table.active, true)
+        ),
     })
 
     if (!subscriptionPhase) {
-      throw new Error("Subscription phase not found")
+      throw new Error("Subscription phase not found or not active")
     }
 
     if (!subscriptionPhase.subscription) {
-      throw new Error("Subscription not found")
+      throw new Error("Subscription not found or not active")
     }
 
     if (!subscriptionPhase.subscription.customer) {

@@ -45,7 +45,7 @@ export default function Intro() {
                 },
               }}
             >
-              <Balancer>Welcome to Acme Corp</Balancer>
+              <Balancer>Welcome to Unprice</Balancer>
             </m.h1>
             <m.p
               className="max-w-md text-muted-foreground transition-colors sm:text-lg"
@@ -58,8 +58,7 @@ export default function Intro() {
                 },
               }}
             >
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt.
+              Manage, iterate and find the right price for your SaaS.
             </m.p>
             <m.div
               variants={{

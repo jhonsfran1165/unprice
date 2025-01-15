@@ -4,7 +4,7 @@ import { z } from "zod"
 export const env = createEnv({
   shared: {
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-    VERCEL_ENV: z.enum(["development", "preview", "production"]).default("preview"),
+    VERCEL_ENV: z.enum(["development", "preview", "production"]).default("development"),
   },
   server: {
     VERCEL_PROJECT_UNPRICE_ID: z.string(),

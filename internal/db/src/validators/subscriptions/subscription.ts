@@ -37,10 +37,15 @@ const reasonSchema = z.enum([
   "trial_ended",
   "user_requested",
   "admin_requested",
+  "cancelled",
+  "renewed",
+  "auto_renew_disabled",
+  "customer_signout",
 ])
 
 export const invoiceMetadataSchema = z.object({
   note: z.string().optional().describe("Note about the invoice"),
+  reason: reasonSchema.optional().describe("Reason for the invoice"),
 })
 
 export const subscriptionMetadataSchema = z.object({
@@ -49,8 +54,44 @@ export const subscriptionMetadataSchema = z.object({
 })
 
 export const subscriptionPhaseMetadataSchema = z.object({
-  reason: reasonSchema.optional().describe("Reason for the status"),
-  note: z.string().optional().describe("Note about status in the subscription phase"),
+  pastDue: z
+    .object({
+      invoiceId: z.string().describe("Invoice id that triggered the past due"),
+      reason: reasonSchema.optional().describe("Reason for the status"),
+      note: z.string().optional().describe("Note about status in the subscription phase"),
+    })
+    .optional()
+    .describe("Past due information"),
+  expire: z
+    .object({
+      phaseId: z.string().optional().describe("Phase id that triggered the expiration"),
+      reason: reasonSchema.optional().describe("Reason for the status"),
+      note: z.string().optional().describe("Note about status in the subscription phase"),
+    })
+    .optional()
+    .describe("Expiration information"),
+  cancel: z
+    .object({
+      reason: reasonSchema.optional().describe("Reason for the status"),
+      note: z.string().optional().describe("Note about status in the subscription phase"),
+    })
+    .optional()
+    .describe("Cancellation information"),
+  renew: z
+    .object({
+      reason: reasonSchema.optional().describe("Reason for the status"),
+      note: z.string().optional().describe("Note about status in the subscription phase"),
+    })
+    .optional()
+    .describe("Renewal information"),
+  change: z
+    .object({
+      reason: reasonSchema.optional().describe("Reason for the status"),
+      note: z.string().optional().describe("Note about status in the subscription phase"),
+      nextPhaseId: z.string().optional().describe("Next phase id"),
+    })
+    .optional()
+    .describe("Change information"),
 })
 
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
@@ -198,6 +239,20 @@ export const subscriptionExtendedSchema = subscriptionSelectSchema
     features: subscriptionItemsSelectSchema.array(),
   })
 
+export const subscriptionChangePlanSchema = subscriptionSelectSchema
+  .pick({
+    id: true,
+    timezone: true,
+    currentCycleEndAt: true,
+    projectId: true,
+  })
+  .extend({
+    planVersionId: z.string().min(1, "Plan version is required"),
+    currentPlanVersionId: z.string(),
+    config: subscriptionItemsConfigSchema.optional(),
+    whenToChange: z.enum(["immediately", "end_of_cycle"]).optional(),
+  })
+
 export type Subscription = z.infer<typeof subscriptionSelectSchema>
 export type InsertSubscription = z.infer<typeof subscriptionInsertSchema>
 export type SubscriptionExtended = z.infer<typeof subscriptionExtendedSchema>
@@ -206,6 +261,7 @@ export type SubscriptionPhase = z.infer<typeof subscriptionPhaseSelectSchema>
 export type SubscriptionPhaseExtended = z.infer<typeof subscriptionPhaseExtendedSchema>
 export type SubscriptionMetadata = z.infer<typeof subscriptionMetadataSchema>
 export type SubscriptionPhaseMetadata = z.infer<typeof subscriptionPhaseMetadataSchema>
+export type SubscriptionChangePlan = z.infer<typeof subscriptionChangePlanSchema>
 
 export const createDefaultSubscriptionConfig = ({
   planVersion,

@@ -62,10 +62,27 @@ jobs:
           VERCEL_ENV: production
           NODE_ENV: production
 
-      # TODO: use turbo-ignore to decide if we need to deploy unprice auth
+      - name: verify auth-proxy turbo-ignore
+        # verify if auth-proxy has changed, if it has, we need to deploy it
+        run: |
+          # If the command exits with code 1, the build continues as normal
+          # If the command exits with code 0, the build is immediately aborted
+          check=$(npx turbo-ignore --fallback ${{ github.event.pull_request.head.sha }} -d apps/auth-proxy) || true
+          echo "check: $check"
+
+          if [ -n "$check" ]; then
+            echo "No changes detected in auth-proxy folder, skipping build"
+            # save to output github action
+            echo "deploy_auth_proxy=true" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected in auth-proxy folder, deploying..."
+            echo "deploy_auth_proxy=false" >> $GITHUB_OUTPUT
+          fi
+
       - uses: amondnet/vercel-action@v25.2.0 #deploy
         name: Deploy Unprice auth to Vercel
         id: deploy-auth
+        if: ${{ steps.verify-auth-proxy.outputs.deploy_auth_proxy == 'true' }}
         with:
           vercel-token: ${{ env.VERCEL_TOKEN }} # Required
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
@@ -74,8 +91,7 @@ jobs:
           vercel-args: '--env "VERCEL_ENV=production" --env "VERCEL=true" --env "NODE_ENV=production" --prod --build-env "VERCEL_ENV=production" --build-env "VERCEL=true" --build-env "NODE_ENV=production"'
           working-directory: ./
 
-      # deploy preview unprice to vercel
-      # TODO: use turbo-ignore to decide if we need to deploy unprice auth
+      # deploy unprice to vercel
       - uses: amondnet/vercel-action@v25.2.0 #deploy
         name: Deploy Unprice to Vercel
         id: deploy-unprice

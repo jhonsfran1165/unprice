@@ -66,7 +66,7 @@ export function WorkspaceSwitcher({
           <span className="truncate font-semibold">
             {activeWorkspace.name}
             <Badge
-              className={cn("ml-2 font-normal", {
+              className={cn("ml-2 font-mono font-normal", {
                 "border-destructive": activeWorkspace.isMain,
               })}
               variant={activeWorkspace.isMain ? "destructive" : "outline"}

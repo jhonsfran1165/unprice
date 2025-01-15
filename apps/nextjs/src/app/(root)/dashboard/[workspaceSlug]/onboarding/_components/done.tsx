@@ -54,10 +54,10 @@ export default function Done(props: { workspaceSlug: string }) {
             variant="p"
             className="max-w-md text-muted-foreground transition-colors sm:text-lg"
           >
-            Congratulations, you have successfully created your first project. Check out the{" "}
+            Congratulations, you have successfully created your first app. Check out the{" "}
             <Link href="/docs">docs</Link> to learn more on how to use the platform.
           </Typography>
-          <Typography variant="p">You will be redirected to your project momentarily.</Typography>
+          <Typography variant="p">You will be redirected to your app shortly.</Typography>
         </m.div>
       </m.div>
     </LazyMotion>

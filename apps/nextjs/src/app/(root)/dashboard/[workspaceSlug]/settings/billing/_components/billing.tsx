@@ -24,25 +24,14 @@ import { formatDate } from "~/lib/dates"
 import { nFormatter } from "~/lib/nformatter"
 
 export function BillingCard({
-  subscriptions,
-  featuresWithUsage,
+  subscription,
+  entitlements,
+  activePhase,
 }: {
-  subscriptions: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"]
-  featuresWithUsage: RouterOutputs["analytics"]["getUsageCustomerUnprice"]["featuresWithUsage"]
+  subscription: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"][number]
+  entitlements: RouterOutputs["analytics"]["getUsageActiveEntitlementsCustomerUnprice"]["entitlements"]
+  activePhase: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"][number]["phases"][number]
 }) {
-  // TODO: customer can only have one subscription for now
-  const subscription = subscriptions[0]
-
-  // TODO: handle case where no subscription is found
-  if (!subscription) return null
-
-  const activePhase = subscription.phases.find((phase) => {
-    const now = Date.now()
-    return phase.startAt <= now && phase.endAt && phase.endAt >= now
-  })
-
-  if (!activePhase) return null
-
   const planVersion = activePhase.planVersion
 
   const calculatedBillingCycle = calculateBillingCycle({
@@ -57,21 +46,21 @@ export function BillingCard({
     prorate: calculatedBillingCycle.prorationFactor,
   })
 
-  const quantities = featuresWithUsage.reduce(
-    (acc, feature) => {
-      acc[feature.id] =
-        feature.featureType === "usage" ? feature.usage.usage ?? 0 : feature.usage.units ?? 0
+  const quantities = entitlements.reduce(
+    (acc, entitlement) => {
+      acc[entitlement.id] =
+        entitlement.featureType === "usage" ? entitlement.usage ?? 0 : entitlement.units ?? 0
       return acc
     },
     {} as Record<string, number>
   )
 
-  const quantitiesForecast = featuresWithUsage.reduce(
-    (acc, feature) => {
-      acc[feature.id] =
-        feature.featureType === "usage"
-          ? forecastUsage(feature.usage.usage ?? 0)
-          : feature.usage.units ?? 0
+  const quantitiesForecast = entitlements.reduce(
+    (acc, entitlement) => {
+      acc[entitlement.id] =
+        entitlement.featureType === "usage"
+          ? forecastUsage(entitlement.usage ?? 0)
+          : entitlement.units ?? 0
       return acc
     },
     {} as Record<string, number>
@@ -102,28 +91,30 @@ export function BillingCard({
   return (
     <Card className="mt-4">
       <CardHeader>
-        <CardTitle>Subscription usage</CardTitle>
-        <CardDescription>
-          {isTrial &&
-            activePhase.trialEndsAt &&
-            subscription.currentCycleEndAt &&
-            `You currently are on the trial of the ${
-              planVersion.plan.slug
-            } plan. After the trial ends on ${formatDate(
-              activePhase.trialEndsAt,
-              subscription.timezone,
-              "MMM d, yy"
-            )}, you will be billed in the next billing cycle on ${formatDate(
-              subscription.currentCycleEndAt,
-              subscription.timezone,
-              "MMM d, yy"
-            )} the following price.`}
-        </CardDescription>
+        <CardTitle>Subscription Entitlements</CardTitle>
+        {isTrial && (
+          <CardDescription>
+            {activePhase.trialEndsAt &&
+              subscription.currentCycleEndAt &&
+              `You currently are on the trial of the ${(
+                <span className="font-bold text-primary">{planVersion.plan.slug}</span>
+              )} plan. After the trial ends on ${formatDate(
+                activePhase.trialEndsAt,
+                subscription.timezone,
+                "MMM d, yy"
+              )}, you will be billed in the next billing cycle on ${formatDate(
+                subscription.currentCycleEndAt,
+                subscription.timezone,
+                "MMM d, yy"
+              )} the following price.`}
+          </CardDescription>
+        )}
         <div className="flex items-center justify-between py-6 text-content-subtle">
           <div className={cn("inline-flex w-4/5 items-center gap-2")}>
             Plan {isTrial ? "trial" : ""}{" "}
-            <span className="text-primary">{planVersion.plan.slug}</span>
+            <span className="font-bold text-primary">{planVersion.plan.slug}</span>
             <Typography variant="p" affects="removePaddingMargin">
+              {activePhase.planVersion.billingPeriod}{" "}
               {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
             </Typography>
           </div>
@@ -132,13 +123,24 @@ export function BillingCard({
           </div>
         </div>
       </CardHeader>
+
       <CardContent>
         <div className="flex flex-col gap-4 space-y-4">
-          {featuresWithUsage
-            .filter((f) => f.featureType !== "flat")
-            .map((f) => {
-              return <LineItem key={f.id} featureWithUsage={f} />
-            })}
+          {entitlements.map((entitlement) => {
+            const planVersionFeature = planVersion.planFeatures.find(
+              (e) => e.id === entitlement.featurePlanVersionId
+            )
+
+            if (!planVersionFeature) return null
+
+            return (
+              <LineUsageItem
+                key={entitlement.id}
+                entitlement={entitlement}
+                planVersionFeature={planVersionFeature}
+              />
+            )
+          })}
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-4 border-t py-4">
@@ -169,41 +171,71 @@ export function BillingCard({
   )
 }
 
-const LineItem: React.FC<{
-  featureWithUsage: RouterOutputs["analytics"]["getUsageCustomerUnprice"]["featuresWithUsage"][number]
+const LineUsageItem: React.FC<{
+  entitlement: RouterOutputs["analytics"]["getUsageActiveEntitlementsCustomer"]["entitlements"][number]
+  planVersionFeature: RouterOutputs["planVersions"]["getById"]["planVersion"]["planFeatures"][number]
 }> = (props) => {
-  const { usage, ...feature } = props.featureWithUsage
+  const { entitlement, planVersionFeature } = props
+
+  const isFlat = entitlement.featureType === "flat"
 
   // separate logic for tiers and packages and usage features
-  const max = ["tier", "package"].includes(feature.featureType)
-    ? usage.units ?? 0
-    : usage.limit ?? Number.POSITIVE_INFINITY
-  const used = usage.usage ?? 0
+  const max = ["tier", "package"].includes(entitlement.featureType)
+    ? entitlement.units ?? 0
+    : entitlement.limit ?? Number.POSITIVE_INFINITY
+
+  const used = entitlement.usage ?? 0
 
   const { val: price, err } = calculatePricePerFeature({
-    feature: feature,
+    feature: planVersionFeature,
     // tier and package features are calculated based on units which are the units the customer has purchased
     // usage features are calculated based on usage which is the usage of the feature
-    quantity: ["tier", "package"].includes(feature.featureType)
-      ? usage.units ?? 0
-      : usage.usage ?? 0,
+    quantity: ["tier", "package"].includes(entitlement.featureType)
+      ? entitlement.units ?? 0
+      : entitlement.usage ?? 0,
   })
 
   if (err) {
     return <div className="text-danger">{err.message}</div>
   }
 
-  const freeUnits = calculateFreeUnits({ feature: feature })
+  if (isFlat) {
+    return (
+      <div className="flex items-center justify-between">
+        <div className={cn("flex w-4/5 flex-col gap-2")}>
+          <div className="flex items-center justify-between">
+            <PricingItem
+              feature={planVersionFeature}
+              className="font-semibold text-content text-md"
+              noCheckIcon
+            />
+            <span className="text-right text-content-subtle text-muted-foreground text-xs">
+              Flat feature
+            </span>
+          </div>
+          <ProgressBar value={used} max={max} />
+          <div className="flex items-center justify-between">
+            <span className="text-content-subtle text-muted-foreground text-xs">N/A usage</span>
+          </div>
+        </div>
+        <span className={cn("text-sm tabular-nums")}>{price.totalPrice.displayAmount}</span>
+      </div>
+    )
+  }
+
+  const freeUnits = calculateFreeUnits({ feature: planVersionFeature })
   const forecast = forecastUsage(used)
   const included =
-    freeUnits === Number.POSITIVE_INFINITY ? feature.limit ?? Number.POSITIVE_INFINITY : freeUnits
+    freeUnits === Number.POSITIVE_INFINITY
+      ? planVersionFeature.limit ?? Number.POSITIVE_INFINITY
+      : freeUnits
 
   return (
     <div className="flex items-center justify-between">
       <div className={cn("flex w-4/5 flex-col gap-2")}>
         <div className="flex items-center justify-between">
           <PricingItem
-            feature={feature}
+            feature={planVersionFeature}
             className="font-semibold text-content text-md capitalize"
             noCheckIcon
           />

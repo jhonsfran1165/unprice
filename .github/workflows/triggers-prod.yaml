@@ -1,0 +1,34 @@
+name: Deploy to Trigger.dev (prod)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: "prod"
+          project-slug: "unprice-zq-xm"
+          secret-path: "/"
+          recursive: true
+
+      - uses: ./.github/actions/install
+        with:
+          ts: true
+
+      - name: 🚀 Deploy Trigger.dev (prod)
+        working-directory: internal/jobs
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ env.TRIGGER_ACCESS_TOKEN }}
+        run: |
+          pnpm deploy:trigger-prod

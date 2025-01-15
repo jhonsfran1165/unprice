@@ -15,9 +15,11 @@ import {
   type Subscription,
   type SubscriptionItemConfig,
   type SubscriptionItemExtended,
+  type SubscriptionMetadata,
   type SubscriptionPhase,
   type SubscriptionPhaseExtended,
   type SubscriptionPhaseMetadata,
+  configureBillingCycleSubscription,
   createDefaultSubscriptionConfig,
   subscriptionInsertSchema,
   subscriptionPhaseInsertSchema,
@@ -32,7 +34,7 @@ import { CustomerService } from "../customers/service"
 import { env } from "../env.mjs"
 import { UnPriceMachineError } from "../machine/errors"
 import type { Metrics } from "../metrics"
-import { configureBillingCycleSubscription } from "./billing"
+import { PaymentProviderService } from "../payment-provider/service"
 import { UnPriceSubscriptionError } from "./errors"
 import { InvoiceStateMachine } from "./invoice-machine"
 import { PhaseMachine } from "./phase-machine"
@@ -111,13 +113,14 @@ export class SubscriptionService {
         customer: true,
       },
 
-      where: (sub, { eq, and }) => and(eq(sub.id, subscriptionId), eq(sub.projectId, projectId)),
+      where: (sub, { eq, and }) =>
+        and(eq(sub.id, subscriptionId), eq(sub.projectId, projectId), eq(sub.active, true)),
     })
 
     if (!subscription) {
       return Err(
         new UnPriceSubscriptionError({
-          message: "Subscription not found",
+          message: "Subscription not found or not active",
         })
       )
     }
@@ -174,7 +177,7 @@ export class SubscriptionService {
               or(isNull(phase.endAt), gte(phase.endAt, now)),
               eq(phase.projectId, projectId)
             ),
-          // phases are don't overlap, so we can use limit 1
+          // phases don't overlap, so we can use limit 1
           limit: 1,
           with: {
             items: {
@@ -330,10 +333,31 @@ export class SubscriptionService {
     return Ok(undefined)
   }
 
+  public async getActiveSubscription(): Promise<
+    Result<Subscription | undefined, UnPriceSubscriptionError>
+  > {
+    if (!this.initialized) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "Subscription phases not initialized, execute initPhaseMachines first",
+        })
+      )
+    }
+
+    return Ok(this.subscription)
+  }
+
+  /*
+   * Get the active phase machine given the now date
+   * This is the phase machine that is currently active
+   * if phaseId is provided, it will return the phase machine for that phase
+   */
   public async getActivePhaseMachine({
     now,
+    phaseId,
   }: {
     now: number
+    phaseId?: string
   }): Promise<Result<PhaseMachine, UnPriceSubscriptionError>> {
     if (!this.initialized) {
       return Err(
@@ -343,17 +367,35 @@ export class SubscriptionService {
       )
     }
 
-    // active phase is the one where now is between startAt and endAt
-    const activePhase = Array.from(this.phases.values()).find((phase) => {
-      return now >= phase.startAt && (phase.endAt ? now <= phase.endAt : true)
-    })
+    let phase: SubscriptionPhaseExtended
 
-    if (!activePhase) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message: "No active phase found",
-        })
-      )
+    if (phaseId) {
+      const currentPhase = this.phases.get(phaseId)
+
+      if (!currentPhase) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: `Phase not found in the subscription: ${phaseId}`,
+          })
+        )
+      }
+
+      phase = currentPhase
+    } else {
+      // active phase is the one where now is between startAt and endAt
+      const activePhase = Array.from(this.phases.values()).find((phase) => {
+        return now >= phase.startAt && (phase.endAt ? now <= phase.endAt : true)
+      })
+
+      if (!activePhase) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "No active phase found",
+          })
+        )
+      }
+
+      phase = activePhase
     }
 
     if (!this.subscription || !this.customer) {
@@ -368,8 +410,8 @@ export class SubscriptionService {
     const config = await this.db.query.paymentProviderConfig.findFirst({
       where: (config, { and, eq }) =>
         and(
-          eq(config.projectId, activePhase.projectId),
-          eq(config.paymentProvider, activePhase.planVersion.paymentProvider),
+          eq(config.projectId, phase.projectId),
+          eq(config.paymentProvider, phase.planVersion.paymentProvider),
           eq(config.active, true)
         ),
     })
@@ -391,7 +433,7 @@ export class SubscriptionService {
 
     const activePhaseMachine = new PhaseMachine({
       db: this.db,
-      phase: activePhase,
+      phase,
       subscription: this.subscription,
       customer: this.customer,
       logger: this.logger,
@@ -445,7 +487,7 @@ export class SubscriptionService {
     } = data
 
     const startAtToUse = startAt ?? now
-    let endAtToUse = endAt ?? null
+    let endAtToUse = endAt ?? undefined
 
     // get subscription with phases from start date
     const subscriptionWithPhases = await (db ?? this.db).query.subscriptions.findFirst({
@@ -725,18 +767,22 @@ export class SubscriptionService {
         (subscriptionPhase.endAt ?? Number.POSITIVE_INFINITY) >= Date.now()
 
       if (isActivePhase) {
+        const nextInvoiceAt =
+          trialDaysToUse > 0 ? calculatedBillingCycle.cycleEnd.getTime() : nextInvoiceAtToUse
+
         await trx
           .update(subscriptions)
           .set({
             active: true,
             // if there are trial days, we set the next invoice at to the end of the trial
-            nextInvoiceAt:
-              trialDaysToUse > 0 ? calculatedBillingCycle.cycleEnd.getTime() : nextInvoiceAtToUse,
+            nextInvoiceAt,
             planSlug: versionData.plan.slug,
             currentCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
             currentCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
             // if there is an end date, we set the expiration date
             expiresAt: endAtToUse,
+            // renew at after next invoice at + 1 millisecond
+            renewAt: nextInvoiceAt + 1,
           })
           .where(eq(subscriptions.id, subscriptionId))
       }
@@ -1202,12 +1248,19 @@ export class SubscriptionService {
     return Ok(subscription)
   }
 
-  public async renewSubscription(payload: { now: number }): Promise<
+  public async renewSubscription(payload: {
+    now?: number
+    phaseId?: string
+    renewAt?: number
+  }): Promise<
     Result<{ phaseStatus: PhaseStatus; activePhaseId: string }, UnPriceSubscriptionError>
   > {
     const { now } = payload
+    const currentNow = now ?? Date.now()
+
     const { err, val: activePhaseMachine } = await this.getActivePhaseMachine({
-      now,
+      now: currentNow,
+      phaseId: payload.phaseId,
     })
 
     if (err) {
@@ -1217,12 +1270,30 @@ export class SubscriptionService {
     const activePhase = activePhaseMachine.getPhase()
 
     const { err: renewErr, val: renew } = await activePhaseMachine.transition("RENEW", {
-      now,
+      now: currentNow,
     })
 
     if (renewErr) {
       return Err(renewErr)
     }
+
+    const subscription = activePhaseMachine.getSubscription()
+
+    const customerService = new CustomerService({
+      cache: this.cache,
+      db: this.db,
+      analytics: this.analytics,
+      logger: this.logger,
+      metrics: this.metrics,
+      waitUntil: this.waitUntil,
+    })
+
+    // after renewing the subscription, we need to update the entitlements usage
+    await customerService.updateEntitlementsUsage({
+      customerId: subscription.customerId,
+      projectId: subscription.projectId,
+      date: currentNow,
+    })
 
     return Ok({
       phaseStatus: renew.status,
@@ -1230,16 +1301,20 @@ export class SubscriptionService {
     })
   }
 
-  // apply a change to the subscription, the new subscription phase should be created
+  // expire a subscription is a 3 step process:
   public async expireSubscription(payload: {
     expiresAt?: number
-    now: number
-    metadata?: SubscriptionPhaseMetadata
+    now?: number
+    phaseId?: string
+    metadataPhase?: SubscriptionPhaseMetadata
+    metadataSubscription?: SubscriptionMetadata
   }): Promise<Result<{ status: PhaseStatus }, UnPriceSubscriptionError>> {
-    const { expiresAt, now, metadata } = payload
+    const { expiresAt, now, phaseId, metadataPhase, metadataSubscription } = payload
+    const currentNow = now ?? Date.now()
 
     const { err, val: activePhaseMachine } = await this.getActivePhaseMachine({
-      now,
+      now: currentNow,
+      phaseId,
     })
 
     if (err) {
@@ -1248,8 +1323,9 @@ export class SubscriptionService {
 
     const { err: expireErr, val: expire } = await activePhaseMachine.transition("EXPIRE", {
       expiresAt,
-      now,
-      metadata,
+      now: currentNow,
+      metadataPhase: metadataPhase,
+      metadataSubscription: metadataSubscription,
     })
 
     if (expireErr) {
@@ -1261,16 +1337,18 @@ export class SubscriptionService {
     })
   }
 
-  public async invoiceSubscription(payload: { now: number }): Promise<
+  public async invoiceSubscription(payload: { now?: number; phaseId?: string }): Promise<
     Result<
       { invoiceId: string; phaseStatus: PhaseStatus; activePhaseId: string },
       UnPriceSubscriptionError
     >
   > {
     const { now } = payload
+    const currentNow = now ?? Date.now()
 
     const { err, val: activePhaseMachine } = await this.getActivePhaseMachine({
-      now,
+      now: currentNow,
+      phaseId: payload.phaseId,
     })
 
     if (err) {
@@ -1280,7 +1358,7 @@ export class SubscriptionService {
     const activePhase = activePhaseMachine.getPhase()
 
     const { err: invoiceErr, val: invoiceResult } = await activePhaseMachine.transition("INVOICE", {
-      now,
+      now: currentNow,
     })
 
     if (invoiceErr) {
@@ -1297,15 +1375,18 @@ export class SubscriptionService {
   // apply a change to the subscription, the new subscription phase should be created
   public async cancelSubscription(payload: {
     cancelAt?: number
-    now: number
-    metadata?: SubscriptionPhaseMetadata
+    now?: number
+    phaseId?: string
+    subscriptionMetadata?: SubscriptionMetadata
+    phaseMetadata?: SubscriptionPhaseMetadata
   }): Promise<
     Result<{ phaseStatus: PhaseStatus; activePhaseId: string }, UnPriceSubscriptionError>
   > {
-    const { cancelAt, now, metadata } = payload
-
+    const { cancelAt, now, phaseId, subscriptionMetadata, phaseMetadata } = payload
+    const currentNow = now ?? Date.now()
     const { err, val: activePhaseMachine } = await this.getActivePhaseMachine({
-      now,
+      now: currentNow,
+      phaseId,
     })
 
     if (err) {
@@ -1316,8 +1397,9 @@ export class SubscriptionService {
 
     const { err: cancelErr, val: cancel } = await activePhaseMachine.transition("CANCEL", {
       cancelAt,
-      now,
-      metadata,
+      now: currentNow,
+      metadataPhase: phaseMetadata,
+      metadataSubscription: subscriptionMetadata,
     })
 
     if (cancelErr) {
@@ -1332,111 +1414,123 @@ export class SubscriptionService {
 
   // when an invoice is past due we need to mark the subscription as past due
   public async pastDueSubscription(payload: {
-    now: number
+    now?: number
     pastDueAt?: number
-    phaseId: string
-    invoiceId: string
-    metadata?: SubscriptionPhaseMetadata
-  }): Promise<Result<void, UnPriceSubscriptionError>> {
-    const { now, pastDueAt, phaseId, invoiceId, metadata } = payload
+    phaseId?: string
+    metadataPhase?: SubscriptionPhaseMetadata
+    metadataSubscription?: SubscriptionMetadata
+  }): Promise<Result<{ status: PhaseStatus; activePhaseId: string }, UnPriceSubscriptionError>> {
+    const { now, pastDueAt, phaseId, metadataPhase, metadataSubscription } = payload
+    const currentNow = now ?? Date.now()
 
-    // the phase that trigger the past due don't necessarily have to be the active phase
-    // for instance if the subscription is past due because of a previous phase we need to mark it as past due
-    // for this we need to get the machine of that phase.
-
-    const phase = this.phases.get(phaseId)
-
-    if (!phase) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message: "Phase not found",
-        })
-      )
-    }
-
-    const invoice = await this.db.query.invoices.findFirst({
-      where: (inv, { eq, and }) => and(eq(inv.id, invoiceId), eq(inv.subscriptionPhaseId, phaseId)),
+    const { err, val: activePhaseMachine } = await this.getActivePhaseMachine({
+      now: currentNow,
+      phaseId,
     })
 
-    if (!invoice) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message: "Invoice not found",
-        })
-      )
+    if (err) {
+      return Err(err)
     }
 
-    if (["paid", "void"].includes(invoice.status)) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message: "Invoice is not past due, it has been already paid or voided",
-        })
-      )
-    }
+    const activePhase = activePhaseMachine.getPhase()
 
-    if (!this.subscription || !this.customer) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message: "Subscription or customer not found",
-        })
-      )
-    }
-
-    const configPaymentProvider = await this.db.query.paymentProviderConfig.findFirst({
-      where: (config, { and, eq }) =>
-        and(
-          eq(config.projectId, phase.projectId),
-          eq(config.paymentProvider, phase.planVersion.paymentProvider),
-          eq(config.active, true)
-        ),
-    })
-
-    if (!configPaymentProvider) {
-      return Err(
-        new UnPriceSubscriptionError({
-          message: "Payment provider config not found or not active",
-        })
-      )
-    }
-
-    const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
-
-    const decryptedKey = await aesGCM.decrypt({
-      iv: configPaymentProvider.keyIv,
-      ciphertext: configPaymentProvider.key,
-    })
-
-    const phaseMachine = new PhaseMachine({
-      db: this.db,
-      phase,
-      logger: this.logger,
-      subscription: this.subscription,
-      customer: this.customer,
-      analytics: this.analytics,
-      paymentProviderToken: decryptedKey,
-    })
-
-    const { err: pastDueErr } = await phaseMachine.transition("PAST_DUE", {
-      now,
+    const { err: pastDueErr, val: pastDue } = await activePhaseMachine.transition("PAST_DUE", {
+      now: currentNow,
       pastDueAt,
-      metadata,
+      metadataPhase: metadataPhase,
+      metadataSubscription: metadataSubscription,
     })
 
     if (pastDueErr) {
       return Err(pastDueErr)
     }
 
-    return Ok(undefined)
+    // there is a special case when is expire or past due
+    const dueBehaviour = activePhase.dueBehaviour
+
+    // when dueBehaviour is downgrade we create a new phase with latest version of the default plan (FREE)
+    // when dueBehaviour is cancel we don't do anything more
+    if (dueBehaviour === "downgrade") {
+      const plans = await this.db.query.plans.findMany({
+        with: {
+          versions: {
+            where: (fields, operators) =>
+              operators.and(
+                operators.eq(fields.status, "published"),
+                operators.eq(fields.latest, true)
+              ),
+          },
+        },
+        where: (plan, { eq }) => eq(plan.defaultPlan, true),
+      })
+
+      if (plans.length === 0) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Default plan not found",
+          })
+        )
+      }
+
+      const defaultPlan = plans.at(0)
+
+      if (!defaultPlan) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Default plan not found",
+          })
+        )
+      }
+
+      const defaultPlanVersion = defaultPlan.versions.at(0)
+
+      if (!defaultPlanVersion) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Default plan version not found",
+          })
+        )
+      }
+
+      const newPhase = await this.createPhase({
+        input: {
+          subscriptionId: activePhase.subscriptionId,
+          planVersionId: defaultPlanVersion.id,
+          startAt: pastDue.pastDueAt + 1, // we need to start the new phase at the next millisecond
+        },
+        projectId: activePhase.projectId,
+        db: this.db,
+        now: currentNow,
+      })
+
+      if (newPhase.err) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: `Error while creating new phase: ${newPhase.err.message}`,
+          })
+        )
+      }
+    }
+
+    return Ok({
+      status: pastDue.status,
+      activePhaseId: activePhase.id,
+    })
   }
 
   // change subscription implies creating a new phase and ending the current one
   // for the current phase we need to prorate open invoices, create a new invoice and collect payment
   // after that we can create the new phase
   public async changeSubscription(payload: {
-    now: number
+    now?: number
+    // newPhase is optional because we might not want to create a new phase
+    // for instance if the function is called from a background job
+    // in this case we just want to apply the change to the subscription
     newPhase?: InsertSubscriptionPhase
     changeAt?: number
-    metadata?: SubscriptionPhaseMetadata
+    phaseId?: string
+    phaseMetadata?: SubscriptionPhaseMetadata
+    subscriptionMetadata?: SubscriptionMetadata
   }): Promise<
     Result<
       {
@@ -1448,10 +1542,13 @@ export class SubscriptionService {
       UnPriceSubscriptionError
     >
   > {
-    const { now, newPhase, changeAt, metadata } = payload
+    const { now, newPhase, changeAt, phaseId, phaseMetadata, subscriptionMetadata } = payload
+
+    const currentNow = now ?? Date.now()
 
     const { err, val: activePhaseMachine } = await this.getActivePhaseMachine({
-      now,
+      now: currentNow,
+      phaseId,
     })
 
     if (err) {
@@ -1460,28 +1557,115 @@ export class SubscriptionService {
 
     const activePhase = activePhaseMachine.getPhase()
 
+    // before move on let's validate the customer is not changing to the same plan version
+    if (newPhase?.planVersionId === activePhase.planVersionId) {
+      return Err(
+        new UnPriceSubscriptionError({
+          message: "You cannot change to the same plan version",
+        })
+      )
+    }
+
+    let paymentMethodId: string | undefined
+
+    if (newPhase) {
+      const planVersionNewPhase = await this.db.query.versions.findFirst({
+        where: (planVersion, { eq, and }) =>
+          and(
+            eq(planVersion.id, newPhase.planVersionId),
+            eq(planVersion.projectId, activePhase.projectId)
+          ),
+      })
+
+      if (!planVersionNewPhase) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Plan version not found, cannot apply change",
+          })
+        )
+      }
+
+      // get config payment provider for this customer
+      const config = await this.db.query.paymentProviderConfig.findFirst({
+        where: (config, { and, eq }) =>
+          and(
+            eq(config.projectId, activePhase.projectId),
+            eq(config.paymentProvider, planVersionNewPhase.paymentProvider),
+            eq(config.active, true)
+          ),
+      })
+
+      if (!config) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Payment provider config not found or not active for this plan",
+          })
+        )
+      }
+
+      const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
+
+      const decryptedKey = await aesGCM.decrypt({
+        iv: config.keyIv,
+        ciphertext: config.key,
+      })
+
+      // get customer payment provider id
+      const paymentProviderService = new PaymentProviderService({
+        customer: this.customer,
+        logger: this.logger,
+        paymentProvider: planVersionNewPhase.paymentProvider,
+        token: decryptedKey,
+      })
+
+      const defaultPaymentMethodId = await paymentProviderService.getDefaultPaymentMethodId()
+
+      if (defaultPaymentMethodId.err) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: `Error getting default payment method: ${defaultPaymentMethodId.err.message}`,
+          })
+        )
+      }
+
+      paymentMethodId = defaultPaymentMethodId.val.paymentMethodId
+
+      if (planVersionNewPhase.paymentMethodRequired && !paymentMethodId) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message:
+              "Customer has no payment method for this plan, please add a payment method to continue",
+          })
+        )
+      }
+    }
+
     const { err: changeErr, val: change } = await activePhaseMachine.transition("CHANGE", {
-      now,
+      now: currentNow,
       changeAt,
-      metadata,
+      metadataPhase: phaseMetadata,
+      metadataSubscription: subscriptionMetadata,
     })
 
     if (changeErr) {
       return Err(changeErr)
     }
 
-    // if a new phase is provided we need to create it
+    // This normally happens when the change is applied from the UI
+    // in this case we need to create the new phase immediately that could be in the future
+    // phases are just timeline of changes in the subscription
     if (newPhase) {
       // if all goes well we create the new phase
       const { err: createPhaseErr, val: newPhaseResult } = await this.createPhase({
         input: {
           ...newPhase,
-          startAt: change.changedAt, // we need to start the new phase at the next millisecond
+          startAt: change.changedAt + 1, // we need to start the new phase at the next millisecond
           subscriptionId: activePhase.subscriptionId,
+          paymentMethodId,
         },
         projectId: activePhase.projectId,
         db: this.db,
-        now,
+        now: currentNow,
       })
 
       if (createPhaseErr) {
@@ -1512,7 +1696,7 @@ export class SubscriptionService {
   // 1. end trial
   // 2. invoice (if billed in advance)
   // 3. collect payment (if billed in advance)
-  public async endSubscriptionTrial(payload: { now: number }): Promise<
+  public async endSubscriptionTrial(payload: { now?: number; phaseId?: string }): Promise<
     Result<
       {
         phaseStatus: PhaseStatus
@@ -1524,9 +1708,12 @@ export class SubscriptionService {
       UnPriceSubscriptionError
     >
   > {
-    const { now } = payload
+    const { now, phaseId } = payload
+    const currentNow = now ?? Date.now()
+
     const { err, val: activePhaseMachine } = await this.getActivePhaseMachine({
-      now,
+      now: currentNow,
+      phaseId,
     })
 
     if (err) {
@@ -1540,13 +1727,11 @@ export class SubscriptionService {
     const { err: endTrialErr, val: endTrialVal } = await activePhaseMachine.transition(
       "END_TRIAL",
       {
-        now,
+        now: currentNow,
       }
     )
 
-    // UnPriceMachineError is expected if the machine is in a state that does not allow the transition
-    // which means the process failed at some point and we need to retry
-    if (endTrialErr && !(endTrialErr instanceof UnPriceMachineError)) {
+    if (endTrialErr) {
       return Err(endTrialErr)
     }
 
@@ -1557,7 +1742,7 @@ export class SubscriptionService {
     if (whenToBill === "pay_in_advance") {
       // 2. create invoice (if billed in advance)
       const { err: invoiceErr, val: invoice } = await activePhaseMachine.transition("INVOICE", {
-        now,
+        now: currentNow,
       })
 
       if (invoiceErr && !(invoiceErr instanceof UnPriceMachineError)) {
@@ -1600,7 +1785,7 @@ export class SubscriptionService {
       // 3. collect payment (if billed in advance)
       const payment = await invoiceMachine.transition("COLLECT_PAYMENT", {
         invoiceId: invoice?.invoice.id!,
-        now,
+        now: currentNow,
         autoFinalize: true,
       })
 

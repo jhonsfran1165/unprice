@@ -1,5 +1,5 @@
-import type { ExternalToast } from "sonner"
-import { toast } from "sonner"
+import type { ExternalToast } from "@unprice/ui/sonner"
+import { toast } from "@unprice/ui/sonner"
 
 type ToastType = "default" | "description" | "success" | "warning" | "info" | "error" | "promise"
 

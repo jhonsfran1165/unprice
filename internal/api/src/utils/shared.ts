@@ -74,10 +74,16 @@ export const getEntitlements = async ({
   customerId,
   projectId,
   ctx,
+  includeCustom = true,
+  updateUsage = true,
+  noCache = false,
 }: {
   customerId: string
   projectId: string
   ctx: Context
+  includeCustom?: boolean
+  updateUsage?: boolean
+  noCache?: boolean
 }) => {
   const customer = new CustomerService({
     cache: ctx.cache,
@@ -95,7 +101,10 @@ export const getEntitlements = async ({
     customerId,
     projectId,
     date: now,
-    includeCustom: true,
+    includeCustom,
+    // update usage from analytics service on revalidation
+    updateUsage,
+    noCache,
   })
 
   if (err) {
@@ -345,9 +354,7 @@ export const signOutCustomer = async ({
   if (err) {
     return {
       success: false,
-      url: "",
-      customerId: "",
-      error: err.message,
+      message: err.message,
     }
   }
 

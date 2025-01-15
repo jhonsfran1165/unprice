@@ -1,5 +1,5 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
-import { db } from "@unprice/db"
+import { db, notInArray } from "@unprice/db"
 import { renewTask } from "../tasks"
 import { invoiceTask } from "../tasks/invoice"
 
@@ -12,26 +12,43 @@ export const invoicingSchedule = schedules.task({
 
     // get the subscription ready for billing
     const subscriptions = await db.query.subscriptions.findMany({
+      with: {
+        phases: {
+          where: (phase, { eq, and }) =>
+            and(eq(phase.active, true), notInArray(phase.status, ["trialing"])),
+        },
+      },
       where: (sub, { eq, and, lte }) => and(eq(sub.active, true), lte(sub.nextInvoiceAt, now)),
     })
 
+    logger.info(`Found ${subscriptions.length} subscriptions for invoicing`)
+
     // trigger the end trial task for each subscription phase
     for (const sub of subscriptions) {
-      await invoiceTask.triggerAndWait({
+      const phase = sub.phases[0]
+
+      if (!phase) {
+        logger.error(`No active phase found for subscription ${sub.id}`)
+        continue
+      }
+
+      const result = await invoiceTask.triggerAndWait({
         subscriptionId: sub.id,
         projectId: sub.projectId,
-        now,
+        now: sub.nextInvoiceAt + 1,
+        phaseId: phase.id,
       })
 
-      // first invoice is free, so we renew the subscription
-      await renewTask.triggerAndWait({
-        subscriptionId: sub.id,
-        projectId: sub.projectId,
-        now,
-      })
+      if (result.ok) {
+        // renew the subscription
+        await renewTask.triggerAndWait({
+          subscriptionId: sub.id,
+          projectId: sub.projectId,
+          now: sub.nextInvoiceAt + 1,
+          phaseId: phase.id,
+        })
+      }
     }
-
-    logger.info(`Found ${subscriptions.length} subscriptions for invoicing`)
 
     return {
       subscriptionIds: subscriptions.map((s) => s.id),

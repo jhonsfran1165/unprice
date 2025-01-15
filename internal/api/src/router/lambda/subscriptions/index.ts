@@ -1,5 +1,6 @@
 import { createTRPCRouter } from "../../../trpc"
 import { cancel } from "./cancel"
+import { changePhasePlan } from "./changePhasePlan"
 import { create } from "./create"
 import { createPhase } from "./createPhase"
 import { getById } from "./getById"
@@ -19,4 +20,5 @@ export const subscriptionRouter = createTRPCRouter({
   cancel: cancel,
   updatePhase: updatePhase,
   removePhase: removePhase,
+  changePhasePlan: changePhasePlan,
 })

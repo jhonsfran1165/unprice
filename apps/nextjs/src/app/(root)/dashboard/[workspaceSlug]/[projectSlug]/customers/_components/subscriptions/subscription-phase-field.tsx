@@ -5,13 +5,13 @@ import { Button } from "@unprice/ui/button"
 import { FormDescription, FormLabel, FormMessage } from "@unprice/ui/form"
 import { Separator } from "@unprice/ui/separator"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@unprice/ui/sheet"
+import { toast } from "@unprice/ui/sonner"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { LayoutGrid, PencilIcon, TrashIcon, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { type FieldErrors, type UseFormReturn, useFieldArray } from "react-hook-form"
-import { toast } from "sonner"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { PropagationStopper } from "~/components/prevent-propagation"
 import { formatDate } from "~/lib/dates"
@@ -19,12 +19,15 @@ import { api } from "~/trpc/client"
 import { SubscriptionPhaseForm } from "./subscription-phase-form"
 
 import { startTransition } from "react"
+
 export default function SubscriptionPhaseFormField({
   form,
   subscriptionId,
+  timezone,
 }: {
   form: UseFormReturn<InsertSubscription>
   subscriptionId: string
+  timezone: string
 }) {
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
@@ -174,15 +177,17 @@ export default function SubscriptionPhaseFormField({
                             <Badge className="ml-2">no trial</Badge>
                           )}
                           {isActive && (
-                            <div className="mx-2 inline-flex items-center font-secondary font-semibold text-info text-xs">
+                            <div className="mx-2 inline-flex items-center font-semibold text-info text-xs">
                               <span className="flex h-2 w-2 rounded-full bg-info" />
                               <span className="ml-1">{"active phase"}</span>
                             </div>
                           )}
                         </Typography>
                         <Typography variant="p" affects="removePaddingMargin">
-                          from {formatDate(phase.startAt)} to{" "}
-                          {phase.endAt ? formatDate(phase.endAt) : "forever"}
+                          from {formatDate(phase.startAt, timezone, "MMM dd, yyyy")} to{" "}
+                          {phase.endAt
+                            ? formatDate(phase.endAt, timezone, "MMM dd, yyyy")
+                            : "forever"}
                         </Typography>
                       </div>
                       <div className="flex items-center gap-2">

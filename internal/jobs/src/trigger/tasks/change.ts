@@ -17,11 +17,13 @@ export const changeTask = task({
       projectId,
       now,
       changeAt,
+      phaseId,
     }: {
       subscriptionId: string
       projectId: string
       now: number
       changeAt?: number
+      phaseId: string
     },
     { ctx }
   ) => {
@@ -36,6 +38,7 @@ export const changeTask = task({
         subscriptionId,
         projectId,
         api: "jobs.subscription.change",
+        phaseId,
       },
     })
 
@@ -62,6 +65,7 @@ export const changeTask = task({
     const result = await subscriptionService.changeSubscription({
       now,
       changeAt,
+      phaseId,
     })
 
     // we have to throw if there is an error so the task fails

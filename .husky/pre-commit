@@ -1,2 +1,3 @@
 echo "Running pre-commit hook"
 pnpm lint-staged
+pnpm test

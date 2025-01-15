@@ -6,7 +6,7 @@ import { forwardRef, startTransition } from "react"
 
 import { Button } from "@unprice/ui/button"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
-import { toast } from "sonner"
+import { toast } from "@unprice/ui/sonner"
 
 import { ConfirmAction } from "~/components/confirm-action"
 import { toastAction } from "~/lib/toast"
@@ -173,4 +173,4 @@ const PlanVersionDeactivate = forwardRef<ElementRef<"button">, PlanVersionDuplic
 
 PlanVersionDeactivate.displayName = "PlanVersionDeactivate"
 
-export { PlanVersionDuplicate, PlanVersionPublish, PlanVersionDeactivate }
+export { PlanVersionDeactivate, PlanVersionDuplicate, PlanVersionPublish }

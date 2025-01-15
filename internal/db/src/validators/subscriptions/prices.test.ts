@@ -1,14 +1,21 @@
 import { toDecimal } from "dinero.js"
 import { describe, expect, it } from "vitest"
+import type { Feature } from "../features"
 import type { PlanVersionExtended } from "../planVersionFeatures"
+import type { Plan } from "../plans"
 import { calculateFlatPricePlan } from "./prices"
 
 describe("calculateFlatPricePlan", () => {
   it("should calculate flat price for a plan with flat features", () => {
-    const planVersion: PlanVersionExtended = {
+    const planVersion = {
       id: "pv_4Hs8cAjTgxCWUpFSjta8bDFEkqpF",
       currency: "USD",
-      plan: { slug: "free-plan", defaultPlan: true, enterprisePlan: false },
+      plan: {
+        slug: "free-plan",
+        defaultPlan: true,
+        enterprisePlan: false,
+        id: "plan_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
+      } as Plan,
       planId: "plan_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
       active: true,
       status: "published",
@@ -49,7 +56,7 @@ describe("calculateFlatPricePlan", () => {
           feature: {
             id: "feature_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
             slug: "feature-1",
-          },
+          } as Feature,
         },
         {
           id: "fv_4HsTVDfaaTtnAkq5sKB1Raj4tg23G",
@@ -84,14 +91,14 @@ describe("calculateFlatPricePlan", () => {
           feature: {
             id: "feature_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
             slug: "feature-2",
-          },
+          } as Feature,
         },
       ],
       whenToBill: "pay_in_advance",
       startCycle: 1,
       gracePeriod: null,
       metadata: null,
-    }
+    } as PlanVersionExtended
 
     const result = calculateFlatPricePlan({ planVersion })
     expect(result.err).toBe(undefined)

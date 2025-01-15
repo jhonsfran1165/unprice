@@ -34,8 +34,9 @@ export const unPriceTailwindPreset: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        primary: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        secondary: ["var(--font-geist-mono)", "system-ui", "sans-serif"],
+        primary: ["var(--font-primary)"],
+        secondary: ["var(--font-geist-sans)"],
+        mono: ["var(--font-geist-mono)"],
       },
       typography: {
         DEFAULT: {

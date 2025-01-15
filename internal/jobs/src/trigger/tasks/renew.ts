@@ -16,10 +16,12 @@ export const renewTask = task({
       subscriptionId,
       projectId,
       now,
+      phaseId,
     }: {
       subscriptionId: string
       projectId: string
       now: number
+      phaseId: string
     },
     { ctx }
   ) => {
@@ -59,6 +61,7 @@ export const renewTask = task({
 
     const result = await subscriptionService.renewSubscription({
       now,
+      phaseId,
     })
 
     // we have to throw if there is an error so the task fails

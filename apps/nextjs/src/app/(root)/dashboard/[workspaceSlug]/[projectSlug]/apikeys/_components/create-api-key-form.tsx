@@ -20,7 +20,7 @@ import { Calendar as CalendarIcon } from "@unprice/ui/icons"
 import { Input } from "@unprice/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
 
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import { revalidateAppPath } from "~/actions/revalidate"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
@@ -33,13 +33,24 @@ export default function CreateApiKeyForm(props: {
   defaultValues?: CreateApiKey
 }) {
   const params = useParams()
+  const searchParams = useSearchParams()
+
   const workspaceSlug = params.workspaceSlug as string
-  const projectSlug = params.projectSlug as string
+  let projectSlug = params.projectSlug as string
+
+  if (!projectSlug) {
+    projectSlug = searchParams.get("projectSlug") as string
+  }
+
   const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   const form = useZodForm({
     schema: createApiKeySchema,
-    defaultValues: props.defaultValues,
+    defaultValues: {
+      ...props.defaultValues,
+      // from onboarding we can't infer the projectSlug, so we pass it as a search param
+      ...(projectSlug ? { projectSlug } : {}),
+    },
   })
 
   const create = api.apikeys.create.useMutation({

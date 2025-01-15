@@ -114,7 +114,7 @@ export function PricingItem({
         </div>
       )}
       <div className="flex w-full items-center gap-1">
-        <span className={cn("font-light text-muted-foreground text-xs capitalize", className)}>
+        <span className={cn("font-light text-muted-foreground text-xs", className)}>
           {displayFeature}
         </span>
 
@@ -124,7 +124,7 @@ export function PricingItem({
           </TooltipTrigger>
           <TooltipContent align="end" side="right" sideOffset={10} alignOffset={-5}>
             <div className="flex w-[300px] flex-col gap-2 p-2">
-              <Typography variant="h6">
+              <Typography variant="h6" affects="removePaddingMargin">
                 Feature type {feature.featureType} {feature.config?.usageMode}
               </Typography>
 

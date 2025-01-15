@@ -1,6 +1,6 @@
 import { APP_DOMAIN } from "@unprice/config"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@unprice/ui/card"
-import { differenceInCalendarDays, endOfMonth, startOfMonth } from "date-fns"
+import { differenceInCalendarDays } from "date-fns"
 import { Fragment } from "react"
 import { PaymentMethodForm } from "~/components/forms/payment-method-form"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -8,15 +8,19 @@ import HeaderTab from "~/components/layout/header-tab"
 
 import type { RouterOutputs } from "@unprice/api"
 import { Alert, AlertDescription, AlertTitle } from "@unprice/ui/alert"
+import { Badge } from "@unprice/ui/badge"
+import { Button } from "@unprice/ui/button"
 import { Typography } from "@unprice/ui/typography"
+import { AlertCircle } from "lucide-react"
 import { formatDate } from "~/lib/dates"
 import { api } from "~/trpc/server"
+import { SubscriptionChangePlanDialog } from "../../[projectSlug]/customers/_components/subscriptions/subscription-change-plan-dialog"
 import { BillingCard } from "./_components/billing"
 
 export default async function BillingPage({ params }: { params: { workspaceSlug: string } }) {
   const { workspaceSlug } = params
 
-  const { subscriptions } = await api.auth.mySubscriptions()
+  const { subscriptions, customerId } = await api.auth.mySubscriptions()
 
   return (
     <DashboardShell
@@ -29,7 +33,7 @@ export default async function BillingPage({ params }: { params: { workspaceSlug:
     >
       <Fragment>
         <SubscriptionCard subscriptions={subscriptions} />
-        <PaymentMethodCard workspaceSlug={workspaceSlug} subscriptions={subscriptions} />
+        <PaymentMethodCard workspaceSlug={workspaceSlug} customerId={customerId} />
         <UsageCard />
       </Fragment>
     </DashboardShell>
@@ -38,17 +42,11 @@ export default async function BillingPage({ params }: { params: { workspaceSlug:
 
 async function PaymentMethodCard({
   workspaceSlug,
-  subscriptions,
+  customerId,
 }: {
   workspaceSlug: string
-  subscriptions: RouterOutputs["auth"]["mySubscriptions"]["subscriptions"]
+  customerId: string
 }) {
-  // TODO: customer can have multiple subscriptions
-  const subscription = subscriptions[0]
-
-  // TODO: handle case where no subscription is found
-  if (!subscription) return null
-
   return (
     <Card>
       <CardHeader>
@@ -56,7 +54,7 @@ async function PaymentMethodCard({
       </CardHeader>
       <CardContent>
         <PaymentMethodForm
-          customerId={subscription.customerId}
+          customerId={customerId}
           successUrl={`${APP_DOMAIN}/${workspaceSlug}/settings/billing`}
           cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/settings/billing`}
           projectSlug="unprice-admin"
@@ -75,19 +73,27 @@ async function SubscriptionCard({
   // TODO: customer can only have one subscription for now
   const subscription = subscriptions[0]
 
-  // TODO: handle case where no subscription is found
-  if (!subscription) return null
+  if (!subscription) {
+    return (
+      <Alert variant="info">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>No Subscription</AlertTitle>
+        <AlertDescription className="font-extralight">
+          You don't have any subscriptions yet or subscription is inactive.
+        </AlertDescription>
+      </Alert>
+    )
+  }
 
   const activePhase = subscription.phases.find((phase) => {
     const now = Date.now()
-    return phase.startAt <= now && phase.endAt && phase.endAt >= now
+    return phase.startAt <= now && (phase.endAt ? phase.endAt >= now : true)
   })
 
   if (!activePhase) return null
 
   const autoRenewal = activePhase.autoRenew
   const trialEndsAt = activePhase.trialEndsAt
-  const endAt = subscription.expiresAt
   const currentTrialDays = activePhase.trialEndsAt
     ? differenceInCalendarDays(activePhase.trialEndsAt, Date.now())
     : 0
@@ -109,25 +115,35 @@ async function SubscriptionCard({
             <div className="flex items-center justify-between">
               <div className="font-semibold text-md">
                 {currentTrialDays > 0 ? "Trial" : "Subscription"} Plan:{" "}
-                <span className="text-primary">{subscription.planSlug}</span>
+                <span className="inline-flex items-center gap-1 text-primary">
+                  <span className="font-bold text-primary">{subscription.planSlug}</span>
+                  {autoRenewal && (
+                    <Badge className="text-xs" variant="default">
+                      auto-renew
+                    </Badge>
+                  )}
+                </span>
+                <Typography variant="p" affects="removePaddingMargin">
+                  {activePhase.planVersion.description}
+                </Typography>
               </div>
 
-              {/* {!subscription.planVersion.plan.defaultPlan && (
-                <UpgradeDialog
+              <div className="flex items-center gap-2">
+                <SubscriptionChangePlanDialog
                   defaultValues={{
                     id: subscription.id,
-                    endAt: Date.now(),
-                    customerId: subscription.customerId,
-                    nextPlanVersionId: "",
+                    planVersionId: "",
                     config: [],
+                    whenToChange: "end_of_cycle",
+                    currentCycleEndAt: subscription.currentCycleEndAt,
+                    timezone: subscription.timezone,
                     projectId: subscription.projectId,
+                    currentPlanVersionId: activePhase.planVersion.id,
                   }}
                 >
-                  <Button variant="destructive" size="sm">
-                    Change Plan
-                  </Button>
-                </UpgradeDialog>
-              )} */}
+                  <Button size="sm">Change Plan</Button>
+                </SubscriptionChangePlanDialog>
+              </div>
             </div>
             <div className="gap-2 rounded-lg bg-background-bg p-4">
               <Typography variant="h6">Current Billing Cycle</Typography>
@@ -145,7 +161,7 @@ async function SubscriptionCard({
                 </Typography>
                 <Typography variant="p" affects="removePaddingMargin">
                   <span className="font-bold">Next billing date:</span>{" "}
-                  {formatDate(subscription.currentCycleEndAt, subscription.timezone, "MMM d, yyyy")}
+                  {formatDate(subscription.nextInvoiceAt, subscription.timezone, "MMM d, yyyy")}
                 </Typography>
               </div>
             </div>
@@ -153,25 +169,44 @@ async function SubscriptionCard({
               <Alert>
                 <AlertTitle>Trial Period</AlertTitle>
                 <AlertDescription>
-                  {currentTrialDays} days trial ends on{" "}
+                  {activePhase.trialDays} days trial ends on{" "}
                   {formatDate(trialEndsAt, subscription.timezone, "MMM d, yyyy")}
                 </AlertDescription>
               </Alert>
             )}
-            {endAt && (
-              <Alert variant="destructive">
-                <AlertTitle>Subscription End Date</AlertTitle>
+            {subscription.expiresAt && (
+              <Alert variant="info">
+                <AlertTitle>Subscription expires</AlertTitle>
                 <AlertDescription>
-                  {formatDate(endAt, subscription.timezone, "MMM d, yyyy")}
+                  Your subscription will expire on{" "}
+                  {formatDate(subscription.expiresAt, subscription.timezone, "MMM d, yyyy")}
                 </AlertDescription>
               </Alert>
             )}
-            {autoRenewal && (
-              <Alert>
-                <AlertTitle>Subscription Will Auto Renew</AlertTitle>
+            {subscription.cancelAt && (
+              <Alert variant="info">
+                <AlertTitle>Subscription cancelled</AlertTitle>
                 <AlertDescription>
-                  Your subscription will automatically renew at{" "}
-                  {formatDate(subscription.currentCycleEndAt, subscription.timezone, "MMM d, yyyy")}
+                  Your subscription will be cancelled on{" "}
+                  {formatDate(subscription.cancelAt, subscription.timezone, "MMM d, yyyy")}
+                </AlertDescription>
+              </Alert>
+            )}
+            {subscription.changeAt && (
+              <Alert variant="info">
+                <AlertTitle>Subscription changed</AlertTitle>
+                <AlertDescription>
+                  Your subscription will be changed on{" "}
+                  {formatDate(subscription.changeAt, subscription.timezone, "MMM d, yyyy")}
+                </AlertDescription>
+              </Alert>
+            )}
+            {subscription.pastDueAt && (
+              <Alert variant="info">
+                <AlertTitle>Subscription past due</AlertTitle>
+                <AlertDescription>
+                  Your subscription will be past due on{" "}
+                  {formatDate(subscription.pastDueAt, subscription.timezone, "MMM d, yyyy")}
                 </AlertDescription>
               </Alert>
             )}
@@ -194,17 +229,34 @@ async function UsageCard() {
   const { subscriptions } = await api.auth.mySubscriptions()
 
   // TODO: customer can have multiple subscriptions
+  // for now only care the first one
   const subscription = subscriptions[0]
-  const activePhase = subscription?.phases[0]
 
-  // TODO: handle case where no subscription is found
-  if (!subscription || !activePhase) return null
+  if (!subscription) return null
 
-  const { featuresWithUsage } = await api.analytics.getUsageCustomerUnprice({
-    customerId: subscription.customerId,
-    start: startOfMonth(new Date()).getTime(),
-    end: endOfMonth(new Date()).getTime(),
+  const activePhase = subscription.phases.find((phase) => {
+    const now = Date.now()
+    return phase.startAt <= now && (phase.endAt ? phase.endAt >= now : true)
   })
 
-  return <BillingCard subscriptions={subscriptions} featuresWithUsage={featuresWithUsage} />
+  // TODO: handle case where no active phase is found
+  if (!activePhase)
+    return (
+      <Alert variant="info">
+        <AlertTitle>No Active Phase</AlertTitle>
+        <AlertDescription>You don't have any active phases for this subscription.</AlertDescription>
+      </Alert>
+    )
+
+  const { entitlements } = await api.analytics.getUsageActiveEntitlementsCustomerUnprice({
+    customerId: subscription.customerId,
+  })
+
+  return (
+    <BillingCard
+      subscription={subscription}
+      entitlements={entitlements}
+      activePhase={activePhase}
+    />
+  )
 }

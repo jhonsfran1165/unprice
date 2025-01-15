@@ -12,40 +12,42 @@ export const endTrialsSchedule = schedules.task({
     const now = payload.timestamp.getTime()
 
     // find all subscriptions phases that are currently in trial and the trial ends at is in the past
-    const subscriptions = await db.query.subscriptions.findMany({
+    const subscriptionPhases = await db.query.subscriptionPhases.findMany({
       with: {
-        phases: {
-          where: (table, { eq, and, lte }) =>
-            and(eq(table.status, "trialing"), lte(table.trialEndsAt, now), eq(table.active, true)),
-          // phases are don't overlap, so we can use limit 1
-          limit: 1,
-          orderBy: (table, { desc }) => desc(table.trialEndsAt),
-        },
+        subscription: true,
       },
+      where: (table, { eq, and, lte, inArray }) =>
+        and(
+          inArray(table.status, ["trialing", "trial_ended"]),
+          lte(table.trialEndsAt, now),
+          eq(table.active, true)
+        ),
       limit: 1000,
+      orderBy: (table, { desc }) => desc(table.trialEndsAt),
     })
 
     // trigger the end trial task for each subscription phase
-    for (const sub of subscriptions) {
-      const phaseId = sub.phases[0]?.id
+    for (const phase of subscriptionPhases) {
+      const phaseId = phase.id
 
       if (!phaseId) {
-        logger.error(`Subscription ${sub.id} has no active phase`)
+        logger.error(`Subscription phase ${phase.subscription.id} is not active`)
         continue
       }
 
       await endTrialTask.triggerAndWait({
-        subscriptionId: sub.id,
-        projectId: sub.projectId,
-        now,
+        subscriptionId: phase.subscription.id,
+        projectId: phase.subscription.projectId,
+        // we pass the now date as the trialEndsAt date + 1 so the tasks can validate the right date
+        now: phase.trialEndsAt! + 1,
         phaseId,
       })
     }
 
-    logger.info(`Found ${subscriptions.length} subscriptions`)
+    logger.info(`Found ${subscriptionPhases.length} subscription phases`)
 
     return {
-      subscriptionIds: subscriptions.map((s) => s.id),
+      subscriptionIds: subscriptionPhases.map((s) => s.subscription.id),
     }
   },
 })

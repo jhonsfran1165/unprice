@@ -32,6 +32,6 @@ export const listWorkspacesByActiveUser = protectedProcedure
     }))
 
     return {
-      workspaces: workspaces,
+      workspaces: workspaces.filter((workspace) => workspace.enabled),
     }
   })

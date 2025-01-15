@@ -47,7 +47,7 @@ export const deleteWorkspace = protectedWorkspaceProcedure
       })
     }
 
-    await signOutCustomer({
+    const result = await signOutCustomer({
       input: {
         customerId: workspace.unPriceCustomerId,
         projectId: mainProject.id,
@@ -55,8 +55,18 @@ export const deleteWorkspace = protectedWorkspaceProcedure
       ctx: opts.ctx,
     })
 
+    if (!result.success) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: result.message,
+      })
+    }
+
     const deletedWorkspace = await opts.ctx.db
-      .delete(schema.workspaces)
+      .update(schema.workspaces)
+      .set({
+        enabled: false,
+      })
       .where(eq(schema.workspaces.id, workspace.id))
       .returning()
       .then((wk) => wk[0] ?? undefined)

@@ -1,11 +1,6 @@
-import { type Database, type TransactionDatabase, eq } from "@unprice/db"
+import { type Database, type TransactionDatabase, and, eq } from "@unprice/db"
 
-import {
-  customerEntitlements,
-  customerSessions,
-  customers,
-  subscriptions,
-} from "@unprice/db/schema"
+import { customerEntitlements, customerSessions, customers } from "@unprice/db/schema"
 import { AesGCM, newId } from "@unprice/db/utils"
 import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result } from "@unprice/error"
@@ -181,16 +176,81 @@ export class CustomerService {
     })
   }
 
+  public async updateEntitlementsUsage(opts: {
+    customerId: string
+    projectId: string
+    date: number
+  }) {
+    // get active entitlements from the db
+    const entitlements = await getEntitlementsByDateQuery({
+      customerId: opts.customerId,
+      projectId: opts.projectId,
+      db: this.db,
+      metrics: this.metrics,
+      logger: this.logger,
+      date: opts.date,
+      includeCustom: true,
+    })
+
+    // we need to get the current subscription
+
+    await Promise.all(
+      entitlements.map(async (entitlement) => {
+        // get usage for the period from the analytics service
+        const totalUsage = await this.analytics.getTotalUsagePerCustomer({
+          customerId: opts.customerId,
+          projectId: opts.projectId,
+          subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
+          start:
+            entitlement.subscriptionItem?.subscriptionPhase?.subscription?.currentCycleStartAt!,
+          end: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.currentCycleEndAt!,
+        })
+
+        const feature = totalUsage.data.find((u) => u.featureSlug === entitlement.featureSlug)
+        const usage = feature?.[entitlement.aggregationMethod]
+
+        // if the usage is not found, then do nothing
+        // no need to log an error here because could be the case that there is not usage reported yet yet
+        if (!usage) {
+          return
+        }
+
+        // update the usage of the entitlement
+        await this.db
+          .update(customerEntitlements)
+          .set({
+            usage: usage,
+            lastUsageUpdateAt: Date.now(),
+          })
+          .where(
+            and(
+              eq(customerEntitlements.id, entitlement.id),
+              eq(customerEntitlements.projectId, opts.projectId)
+            )
+          )
+      })
+    )
+  }
+
   public async getEntitlementsByDate(opts: {
     customerId: string
     projectId: string
     date: number
     includeCustom?: boolean
     noCache?: boolean
+    updateUsage?: boolean
   }): Promise<
     Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
   > {
     if (opts.noCache || !this.cache) {
+      if (opts.updateUsage) {
+        await this.updateEntitlementsUsage({
+          customerId: opts.customerId,
+          projectId: opts.projectId,
+          date: opts.date,
+        })
+      }
+
       const entitlements = await getEntitlementsByDateQuery({
         customerId: opts.customerId,
         projectId: opts.projectId,
@@ -205,6 +265,16 @@ export class CustomerService {
     }
 
     const res = await this.cache.entitlementsByCustomerId.swr(opts.customerId, async () => {
+      // updating the usage from the analytics service first and then updating the cache
+      // TODO: mesure the performance of this
+      if (opts.updateUsage) {
+        await this.updateEntitlementsUsage({
+          customerId: opts.customerId,
+          projectId: opts.projectId,
+          date: opts.date,
+        })
+      }
+
       return await getEntitlementsByDateQuery({
         customerId: opts.customerId,
         projectId: opts.projectId,
@@ -356,6 +426,8 @@ export class CustomerService {
                 ...analyticsPayload,
                 latency: performance.now() - start,
                 deniedReason: "LIMIT_EXCEEDED",
+                subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
+                subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
               })
             )
 
@@ -377,6 +449,8 @@ export class CustomerService {
                 ...analyticsPayload,
                 latency: performance.now() - start,
                 deniedReason: "USAGE_EXCEEDED",
+                subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
+                subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
               })
             )
 
@@ -406,6 +480,8 @@ export class CustomerService {
           .ingestFeaturesVerification({
             ...analyticsPayload,
             latency: performance.now() - start,
+            subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
+            subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
           })
           .catch((error) =>
             this.logger.error("Error reporting usage to analytics ve", {
@@ -530,6 +606,8 @@ export class CustomerService {
               entitlementId: entitlement.id,
               featureSlug: featureSlug,
               customerId: customerId,
+              subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
+              subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
             })
             .then(() => {
               // TODO: Only available in pro plus plan
@@ -721,6 +799,7 @@ export class CustomerService {
           id: customerId,
           email: email,
           currency: defaultCurrency || planProject.defaultCurrency,
+          projectId: projectId,
         },
       })
 
@@ -850,22 +929,38 @@ export class CustomerService {
     await this.db.transaction(async (tx) => {
       const cancelSubs = await Promise.all(
         customerSubs.map(async (sub) => {
-          // check if the subscription is in trials, if so set the endAt to the trialEndsAt
-          const endDate = sub.cancelAt
-            ? sub.cancelAt > Date.now()
-              ? sub.cancelAt
-              : Date.now()
-            : Date.now()
+          const subscriptionService = new SubscriptionService({
+            db: tx,
+            cache: this.cache,
+            metrics: this.metrics,
+            logger: this.logger,
+            waitUntil: this.waitUntil,
+            analytics: this.analytics,
+          })
 
-          await tx
-            .update(subscriptions)
-            .set({
-              metadata: {
-                reason: "pending_cancellation",
+          // init phase machine
+          const initPhaseMachineResult = await subscriptionService.initPhaseMachines({
+            subscriptionId: sub.id,
+            projectId,
+          })
+
+          if (initPhaseMachineResult.err) {
+            throw initPhaseMachineResult.err
+          }
+
+          return await subscriptionService.cancelSubscription({
+            now: Date.now(),
+            subscriptionMetadata: {
+              reason: "customer_signout",
+              note: "Customer signed out",
+            },
+            phaseMetadata: {
+              cancel: {
+                reason: "customer_signout",
+                note: "Customer signed out",
               },
-              canceledAt: endDate,
-            })
-            .where(eq(subscriptions.id, sub.id))
+            },
+          })
         })
       )
         .catch((err) => {
@@ -886,10 +981,6 @@ export class CustomerService {
           })
         )
       }
-
-      // TODO: trigger payment to collect the last bill
-
-      // TODO: send email to the customer
 
       // Deactivate the customer
       await tx

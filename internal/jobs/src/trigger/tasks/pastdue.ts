@@ -18,14 +18,12 @@ export const pastDueTask = task({
       now,
       pastDueAt,
       phaseId,
-      invoiceId,
     }: {
       subscriptionId: string
       projectId: string
       now: number
       pastDueAt?: number
       phaseId: string
-      invoiceId: string
     },
     { ctx }
   ) => {
@@ -38,10 +36,9 @@ export const pastDueTask = task({
       requestId: ctx.task.id,
       defaultFields: {
         subscriptionId,
-        phaseId,
-        invoiceId,
         projectId,
         api: "jobs.invoice.pastdue",
+        phaseId,
       },
     })
 
@@ -68,8 +65,7 @@ export const pastDueTask = task({
     const result = await subscriptionService.pastDueSubscription({
       now,
       pastDueAt,
-      phaseId: phaseId,
-      invoiceId: invoiceId,
+      phaseId,
     })
 
     // we have to throw if there is an error so the task fails

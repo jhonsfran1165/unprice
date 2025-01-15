@@ -17,11 +17,13 @@ export const expireTask = task({
       projectId,
       now,
       expiresAt,
+      phaseId,
     }: {
       subscriptionId: string
       projectId: string
       now: number
       expiresAt?: number
+      phaseId: string
     },
     { ctx }
   ) => {
@@ -36,6 +38,7 @@ export const expireTask = task({
         subscriptionId,
         projectId,
         api: "jobs.subscription.expire",
+        phaseId,
       },
     })
 
@@ -62,6 +65,7 @@ export const expireTask = task({
     const result = await subscriptionService.expireSubscription({
       now,
       expiresAt,
+      phaseId,
     })
 
     // we have to throw if there is an error so the task fails
