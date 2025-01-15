@@ -572,7 +572,6 @@ export class PhaseMachine extends StateMachine<
         const subscriptionUpdated = await tx
           .update(subscriptions)
           .set({
-            active: active ?? activePhase.active,
             // update the subscription dates
             ...(subscriptionDates ? subscriptionDates : undefined),
             ...(metadataSubscription

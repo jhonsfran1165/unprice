@@ -487,7 +487,7 @@ export class SubscriptionService {
     } = data
 
     const startAtToUse = startAt ?? now
-    let endAtToUse = endAt ?? null
+    let endAtToUse = endAt ?? undefined
 
     // get subscription with phases from start date
     const subscriptionWithPhases = await (db ?? this.db).query.subscriptions.findFirst({

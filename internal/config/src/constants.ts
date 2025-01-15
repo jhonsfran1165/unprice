@@ -9,7 +9,7 @@ export const BASE_DOMAIN =
   env.VERCEL_ENV === "production"
     ? MAIN_DOMAIN
     : env.VERCEL_ENV === "preview"
-      ? `${env.NEXT_PUBLIC_APP_DOMAIN}`
+      ? `${env.APP_DOMAIN}`
       : "localhost:3000"
 
 export const APP_BASE_DOMAIN = `app.${BASE_DOMAIN}`
@@ -23,9 +23,9 @@ export const SITES_BASE_DOMAIN =
 
 export const APP_HOSTNAMES = new Set([
   `app.${MAIN_DOMAIN}`,
-  `app.${env.NEXT_PUBLIC_APP_DOMAIN}`,
+  `app.${env.APP_DOMAIN}`,
   // for preview deployments
-  `app-${env.NEXT_PUBLIC_APP_DOMAIN}`,
+  `app-${env.APP_DOMAIN}`,
   "app.localhost:3000",
 ])
 
@@ -33,14 +33,14 @@ export const APP_DOMAIN =
   env.VERCEL_ENV === "production"
     ? `https://app.${MAIN_DOMAIN}/`
     : env.VERCEL_ENV === "preview"
-      ? `https://app-${env.NEXT_PUBLIC_APP_DOMAIN}/`
+      ? `https://app-${env.APP_DOMAIN}/`
       : "http://app.localhost:3000/"
 
 export const API_HOSTNAMES = new Set([
   `api.${MAIN_DOMAIN}`,
-  `api.${env.NEXT_PUBLIC_APP_DOMAIN}`,
+  `api.${env.APP_DOMAIN}`,
   // for preview deployments
-  `api-${env.NEXT_PUBLIC_APP_DOMAIN}`,
+  `api-${env.APP_DOMAIN}`,
   "api.localhost:3000",
 ])
 
@@ -48,7 +48,7 @@ export const API_DOMAIN =
   env.VERCEL_ENV === "production"
     ? `https://api.${MAIN_DOMAIN}/`
     : env.VERCEL_ENV === "preview"
-      ? `https://api-${env.NEXT_PUBLIC_APP_DOMAIN}/`
+      ? `https://api-${env.APP_DOMAIN}/`
       : "http://api.localhost:3000/"
 
 export const AUTH_ROUTES = {

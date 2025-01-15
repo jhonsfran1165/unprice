@@ -66,13 +66,16 @@ jobs:
         # verify if auth-proxy has changed, if it has, we need to deploy it
         run: |
           # If the command exits with code 1, the build continues as normal
-          # If the command exits with code 0, the build is immediately aborted,
-          if [ -n "$(npx turbo-ignore --fallback ${{ github.sha }} -d apps/auth-proxy)" ]; then
-            echo "Changes detected in auth-proxy folder, deploying..."
+          # If the command exits with code 0, the build is immediately aborted
+          check=$(npx turbo-ignore --fallback ${{ github.event.pull_request.head.sha }} -d apps/auth-proxy) || true
+          echo "check: $check"
+
+          if [ -n "$check" ]; then
+            echo "No changes detected in auth-proxy folder, skipping build"
             # save to output github action
             echo "deploy_auth_proxy=true" >> $GITHUB_OUTPUT
           else
-            echo "No changes detected in auth-proxy folder, skipping build"
+            echo "Changes detected in auth-proxy folder, deploying..."
             echo "deploy_auth_proxy=false" >> $GITHUB_OUTPUT
           fi
 
@@ -97,7 +100,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=production" --env "VERCEL_ENV=production" --env "DATABASE_URL=${{ env.DATABASE_URL }}" --env "NEXT_PUBLIC_APP_DOMAIN=unprice.dev" --build-env "NODE_ENV=production" --build-env "VERCEL=true" --build-env "VERCEL_ENV=production" --build-env "DATABASE_URL=${{ env.DATABASE_URL }}" --build-env "NEXT_PUBLIC_APP_DOMAIN=unprice.dev" --prod'
+          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=production" --env "VERCEL_ENV=production" --env "DATABASE_URL=${{ env.DATABASE_URL }}" --env "APP_DOMAIN=unprice.dev" --build-env "NODE_ENV=production" --build-env "VERCEL=true" --build-env "VERCEL_ENV=production" --build-env "DATABASE_URL=${{ env.DATABASE_URL }}" --build-env "APP_DOMAIN=unprice.dev" --prod'
           alias-domains: |
             unprice.vercel.app
 

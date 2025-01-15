@@ -63,6 +63,7 @@ export const changePhasePlan = protectedProjectProcedure
         subscriptionId,
         // startAt is overwritten after validation of the changeAt
         startAt: changeAt + 1,
+        endAt: undefined,
       },
     })
 
