@@ -3,8 +3,6 @@ name: Test Renovate
 on:
   pull_request:
     types: [opened, synchronize]
-    branches:
-      - "renovate/**"
 
 env:
   SKIP_ENV_VALIDATION: 1
@@ -12,6 +10,7 @@ env:
 jobs:
   build-lint:
     uses: ./.github/workflows/job_build.yaml
+    if: "contains(github.head_ref, 'renovate/')"
     with:
       pull_secrets: true
       project_slug: unprice-zq-xm
