@@ -1277,6 +1277,24 @@ export class SubscriptionService {
       return Err(renewErr)
     }
 
+    const subscription = activePhaseMachine.getSubscription()
+
+    const customerService = new CustomerService({
+      cache: this.cache,
+      db: this.db,
+      analytics: this.analytics,
+      logger: this.logger,
+      metrics: this.metrics,
+      waitUntil: this.waitUntil,
+    })
+
+    // after renewing the subscription, we need to update the entitlements usage
+    await customerService.updateEntitlementsUsage({
+      customerId: subscription.customerId,
+      projectId: subscription.projectId,
+      date: currentNow,
+    })
+
     return Ok({
       phaseStatus: renew.status,
       activePhaseId: activePhase.id,

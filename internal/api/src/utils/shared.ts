@@ -354,9 +354,7 @@ export const signOutCustomer = async ({
   if (err) {
     return {
       success: false,
-      url: "",
-      customerId: "",
-      error: err.message,
+      message: err.message,
     }
   }
 

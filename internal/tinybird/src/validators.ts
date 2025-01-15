@@ -18,6 +18,8 @@ export const featureVerificationSchemaV1 = z.object({
   projectId: z.string(),
   planVersionFeatureId: z.string(),
   subscriptionItemId: z.string().nullable(),
+  subscriptionPhaseId: z.string().nullable(),
+  subscriptionId: z.string().nullable(),
   entitlementId: z.string(),
   deniedReason: z.string().optional(),
   date: z.number(),
@@ -28,6 +30,8 @@ export const featureVerificationSchemaV1 = z.object({
 
 export const featureUsageSchemaV1 = z.object({
   subscriptionItemId: z.string().nullable(),
+  subscriptionPhaseId: z.string().nullable(),
+  subscriptionId: z.string().nullable(),
   entitlementId: z.string(),
   featureSlug: z.string(),
   customerId: z.string(),

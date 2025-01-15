@@ -325,7 +325,6 @@ export class PhaseMachine extends StateMachine<
       onTransition: async (payload) => {
         const phase = this.getPhase()
 
-        // TODO: renew should reset the usage
         const renewPhase = await this.renewPhase({
           now: payload.now,
         })
@@ -566,13 +565,16 @@ export class PhaseMachine extends StateMachine<
     const activePhase = this.phase
     const subscription = this.subscription
 
+    const isCanceled = ["canceled"].includes(state ?? activePhase.status)
+
     try {
       return await this.db.transaction(async (tx) => {
         // update the subscription status
         const subscriptionUpdated = await tx
           .update(subscriptions)
           .set({
-            // update the subscription dates
+            // deactivate the subscription if it's canceled
+            active: !isCanceled,
             ...(subscriptionDates ? subscriptionDates : undefined),
             ...(metadataSubscription
               ? {
@@ -1307,6 +1309,23 @@ export class PhaseMachine extends StateMachine<
         return Err(
           new UnPriceSubscriptionError({
             message: "Invoice is already paid or voided",
+          })
+        )
+      }
+    }
+
+    if (isCancel) {
+      // if want to cancel the subscription, validate there are no open invoices
+      const invoiceData = await this.getPhaseInvoiceByStatus({
+        phaseId: phase.id,
+        startAt: subscription.currentCycleStartAt,
+        status: "open",
+      })
+
+      if (invoiceData) {
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Subscription has open invoices, cannot cancel. Please pay the invoice first.",
           })
         )
       }

@@ -120,6 +120,7 @@ export class Analytics {
       pipe: "get_total_usage_customer__v1",
       parameters: z.object({
         customerId: z.string(),
+        subscriptionId: z.string(),
         projectId: z.string(),
         start: z.number(),
         end: z.number(),
