@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "nitro build",
-    "clean": "rm -rf .turbo node_modules .nitro .output",
+    "clean": "rm -rf .turbo node_modules .nitro .output .vercel",
     "dev": "nitro dev --port 3100",
     "typecheck": "tsc --noEmit"
   },
