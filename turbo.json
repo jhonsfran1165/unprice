@@ -28,7 +28,8 @@
         "dist/**",
         "app/auth-proxy/.output/**",
         "app/auth-proxy/.vercel/**",
-        "!app/auth-proxy/.output/cache/**"
+        "!app/auth-proxy/.output/cache/**",
+        "!app/auth-proxy/.output/public/**"
       ],
       "env": [
         "NEXT_PUBLIC_*",
