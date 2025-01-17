@@ -37,8 +37,9 @@ const reasonSchema = z.enum([
   "trial_ended",
   "user_requested",
   "admin_requested",
-  "cancelled",
+  "ending",
   "renewed",
+  "cancelled",
   "auto_renew_disabled",
   "customer_signout",
 ])
@@ -46,6 +47,13 @@ const reasonSchema = z.enum([
 export const invoiceMetadataSchema = z.object({
   note: z.string().optional().describe("Note about the invoice"),
   reason: reasonSchema.optional().describe("Reason for the invoice"),
+  proration: z
+    .object({
+      proratedAt: z.number().optional().describe("Date of the proration"),
+      note: z.string().optional().describe("Note about the proration"),
+    })
+    .optional()
+    .describe("Proration information"),
 })
 
 export const subscriptionMetadataSchema = z.object({
@@ -262,7 +270,7 @@ export type SubscriptionPhaseExtended = z.infer<typeof subscriptionPhaseExtended
 export type SubscriptionMetadata = z.infer<typeof subscriptionMetadataSchema>
 export type SubscriptionPhaseMetadata = z.infer<typeof subscriptionPhaseMetadataSchema>
 export type SubscriptionChangePlan = z.infer<typeof subscriptionChangePlanSchema>
-
+export type InvoiceMetadata = z.infer<typeof invoiceMetadataSchema>
 export const createDefaultSubscriptionConfig = ({
   planVersion,
   items,

@@ -200,7 +200,7 @@ export class InvoiceStateMachine extends StateMachine<
   }
 
   // given an invoice that is already paid, we need to prorate the flat charges
-  // this is normally done when a phase is canceled mid cycle and the when to invoice is pay in advance
+  // this is normally done when a phase is canceled mid cycle and when to invoice is pay in advance
   private async prorateInvoice({
     invoiceId,
     startAt,
@@ -253,16 +253,6 @@ export class InvoiceStateMachine extends StateMachine<
       )
     }
 
-    // calculate the prorated flat charges given these dates
-    const invoiceProratedFlatItemsPrice = await this.calculateSubscriptionActivePhaseItemsPrice({
-      cycleStartAt: startAt,
-      cycleEndAt: endAt, // IMPORTANT: this is the end of the prorated period
-      previousCycleStartAt: invoice.previousCycleStartAt,
-      previousCycleEndAt: invoice.previousCycleEndAt,
-      whenToBill: invoice.whenToBill,
-      type: "flat", // we are prorating flat charges only
-    })
-
     if (!invoice.invoiceId) {
       return Err(new UnPriceSubscriptionError({ message: "Invoice has no invoice id" }))
     }
@@ -276,6 +266,7 @@ export class InvoiceStateMachine extends StateMachine<
       )
     }
 
+    // get the payment provider invoice with items
     const paymentProviderInvoice = await this.paymentProviderService.getInvoice({
       invoiceId: invoice.invoiceId,
     })
@@ -288,7 +279,17 @@ export class InvoiceStateMachine extends StateMachine<
       )
     }
 
-    let amountRefund = 0
+    // calculate the prorated flat charges given these dates
+    const invoiceProratedFlatItemsPrice = await this.calculateSubscriptionActivePhaseItemsPrice({
+      cycleStartAt: startAt,
+      cycleEndAt: endAt, // IMPORTANT: this is the end of the prorated period
+      previousCycleStartAt: invoice.previousCycleStartAt,
+      previousCycleEndAt: invoice.previousCycleEndAt,
+      whenToBill: invoice.whenToBill,
+      type: "flat", // we are prorating flat charges only
+    })
+
+    let amountRefunded = 0
 
     // calculate the prorated flat charges
     // There must be a parity between flat items and item invoices.
@@ -343,30 +344,68 @@ export class InvoiceStateMachine extends StateMachine<
       }
 
       // all of this to calculate how much to refund to the customer
-      amountRefund += amountPaid - formattedAmount.val.amount
+      amountRefunded += amountPaid - formattedAmount.val.amount
     }
 
-    if (amountRefund > 0) {
-      // create a credit for the customer
-      const credit = await this.db
-        .insert(customerCredits)
-        .values({
-          id: newId("customer_credit"),
-          totalAmount: amountRefund,
-          amountUsed: 0,
-          customerId: customer.id,
-          projectId: invoice.projectId,
-          active: true,
-          metadata: {
-            note: `Refund for the prorated flat charges from ${startAt} to ${endAt} from invoice ${invoiceId}`,
-          },
-        })
-        .returning()
+    if (amountRefunded > 0) {
+      // find the existing credit for the customer if any
+      const existingCredit = await this.db.query.customerCredits.findFirst({
+        where: (table, { eq, and }) =>
+          and(eq(table.customerId, customer.id), eq(table.projectId, invoice.projectId)),
+      })
 
-      if (!credit) {
-        return Err(new UnPriceSubscriptionError({ message: "Error creating credit" }))
+      if (!existingCredit) {
+        // create a credit for the customer
+        const credit = await this.db
+          .insert(customerCredits)
+          .values({
+            id: newId("customer_credit"),
+            totalAmount: amountRefunded,
+            amountUsed: 0,
+            customerId: customer.id,
+            projectId: invoice.projectId,
+            active: true,
+            metadata: {
+              note: `Refund for the prorated flat charges from ${startAt} to ${endAt} from invoice ${invoiceId}`,
+            },
+          })
+          .returning()
+
+        if (!credit) {
+          return Err(new UnPriceSubscriptionError({ message: "Error creating credit" }))
+        }
+      } else {
+        // update the existing credit
+        await this.db
+          .update(customerCredits)
+          .set({
+            totalAmount: existingCredit.totalAmount + amountRefunded,
+            metadata: {
+              note: `Refund for the prorated flat charges from ${startAt} to ${endAt} from invoice ${invoiceId}`,
+            },
+          })
+          .where(
+            and(
+              eq(customerCredits.id, existingCredit.id),
+              eq(customerCredits.projectId, invoice.projectId)
+            )
+          )
       }
     }
+
+    // update the invoice metadata
+    await this.db
+      .update(invoices)
+      .set({
+        metadata: {
+          proration: {
+            proratedAt: Date.now(),
+            note: `Prorated flat charges from ${startAt} to ${endAt}`,
+          },
+        },
+        prorated: true,
+      })
+      .where(eq(invoices.id, invoiceId))
 
     return Ok(undefined)
   }
@@ -727,7 +766,8 @@ export class InvoiceStateMachine extends StateMachine<
 
       const remainingCredit = credits.totalAmount - credits.amountUsed
 
-      // set the total amount of the credit
+      // set the total amount of the credit used if the remaining credit is greater than the invoice subtotal
+      // amountCreditUsed will never be negative because of this check
       if (remainingCredit >= paymentProviderInvoiceData.subtotal) {
         amountCreditUsed = paymentProviderInvoiceData.subtotal
       } else {

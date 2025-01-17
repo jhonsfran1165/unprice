@@ -142,13 +142,17 @@ describe("PhaseMachine", () => {
       const subscription = machine.getSubscription()
 
       expect(result.err).toBeUndefined()
-      // dates should be renewed for the next cycle
+      // new next invoice should be set
+
+      const nextInvoiceAt =
+        phase.whenToBill === "pay_in_advance" ? cycleStart.getTime() + 1 : cycleEnd.getTime() + 1
+
       expect(subscription.currentCycleEndAt).toBe(cycleEnd.getTime())
       expect(subscription.currentCycleStartAt).toBe(cycleStart.getTime())
 
       // if phase is pay in arrear, it should be active
       expect(phase.status).toBe("active")
-      expect(subscription.nextInvoiceAt).toBe(cycleEnd.getTime() + 1)
+      expect(subscription.nextInvoiceAt).toBe(nextInvoiceAt)
     })
 
     it("should successfully end trial on trial end date - pay_in_advance", async () => {

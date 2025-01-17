@@ -303,6 +303,7 @@ export const createMockInvoice = ({
     paymentAttempts: [],
     sentAt: null,
     invoiceId: null,
+    prorated: false,
   }
 
   return mockInvoice
@@ -315,11 +316,16 @@ export const createMockSubscription = ({
   mockPhase: SubscriptionPhaseExtended
   calculatedBillingCycle: ReturnType<typeof configureBillingCycleSubscription>
 }) => {
-  const nextInvoiceAt =
+  // calculate the next billing at given the when to bill
+  const nextInvoiceAtToUse =
     mockPhase.whenToBill === "pay_in_advance"
       ? calculatedBillingCycle.cycleStart.getTime()
       : calculatedBillingCycle.cycleEnd.getTime()
 
+  const nextInvoiceAt =
+    mockPhase.trialDays > 0 ? calculatedBillingCycle.cycleEnd.getTime() : nextInvoiceAtToUse
+
+  // TODO: use createSubscription from the service
   const mockSubscription: Subscription = {
     id: "sub-1",
     projectId: "proj-1",
@@ -332,8 +338,8 @@ export const createMockSubscription = ({
     currentCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
     currentCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
     // if there are trial days, we set the next invoice at to the end of the trial
-    nextInvoiceAt:
-      mockPhase.trialDays > 0 ? calculatedBillingCycle.cycleEnd.getTime() : nextInvoiceAt,
+    nextInvoiceAt: nextInvoiceAt,
+    renewAt: nextInvoiceAt + 1,
   } as Subscription
 
   return mockSubscription

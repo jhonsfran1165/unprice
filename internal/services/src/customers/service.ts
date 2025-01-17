@@ -193,7 +193,6 @@ export class CustomerService {
     })
 
     // we need to get the current subscription
-
     await Promise.all(
       entitlements.map(async (entitlement) => {
         // get usage for the period from the analytics service

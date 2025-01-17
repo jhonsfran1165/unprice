@@ -767,6 +767,8 @@ export class SubscriptionService {
         (subscriptionPhase.endAt ?? Number.POSITIVE_INFINITY) >= Date.now()
 
       if (isActivePhase) {
+        // when there are trial days, we set the next invoice at to the end of the trial
+        // this allow us to invoice right after the trial ends
         const nextInvoiceAt =
           trialDaysToUse > 0 ? calculatedBillingCycle.cycleEnd.getTime() : nextInvoiceAtToUse
 
@@ -1248,6 +1250,23 @@ export class SubscriptionService {
     return Ok(subscription)
   }
 
+  private async updateEntitlementsUsage(subscription: Subscription) {
+    const customerService = new CustomerService({
+      cache: this.cache,
+      db: this.db,
+      analytics: this.analytics,
+      logger: this.logger,
+      metrics: this.metrics,
+      waitUntil: this.waitUntil,
+    })
+
+    await customerService.updateEntitlementsUsage({
+      customerId: subscription.customerId,
+      projectId: subscription.projectId,
+      date: Date.now(),
+    })
+  }
+
   public async renewSubscription(payload: {
     now?: number
     phaseId?: string
@@ -1277,23 +1296,9 @@ export class SubscriptionService {
       return Err(renewErr)
     }
 
+    // after any change in the subscription, we need to update the entitlements usage
     const subscription = activePhaseMachine.getSubscription()
-
-    const customerService = new CustomerService({
-      cache: this.cache,
-      db: this.db,
-      analytics: this.analytics,
-      logger: this.logger,
-      metrics: this.metrics,
-      waitUntil: this.waitUntil,
-    })
-
-    // after renewing the subscription, we need to update the entitlements usage
-    await customerService.updateEntitlementsUsage({
-      customerId: subscription.customerId,
-      projectId: subscription.projectId,
-      date: currentNow,
-    })
+    await this.updateEntitlementsUsage(subscription)
 
     return Ok({
       phaseStatus: renew.status,

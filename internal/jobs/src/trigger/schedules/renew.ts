@@ -31,7 +31,8 @@ export const renewSchedule = schedules.task({
           // we should not renew if there is a change, cancel or expire scheduled
           isNull(sub.changeAt),
           isNull(sub.cancelAt),
-          isNull(sub.expiresAt)
+          isNull(sub.expiresAt),
+          isNull(sub.pastDueAt)
         ),
     })
 

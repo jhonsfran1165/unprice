@@ -9,6 +9,7 @@ import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { addDays } from "date-fns"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { UnPriceSubscriptionError } from "./errors"
 import {
   createMockDatabase,
   createMockInvoice,
@@ -150,11 +151,23 @@ describe("PhaseMachine", () => {
       // it should be active when pay_in_arrear
       expect(trial.val?.status).toBe("active")
 
+      // tries to renew the subscription before the invoice date
+      const renew = await machine.transition("RENEW", {
+        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+      })
+
+      expect(renew.err).toBeInstanceOf(UnPriceSubscriptionError)
+      expect(renew.err?.message).toBe(
+        "Subscription has not been invoiced, invoice the current cycle first"
+      )
+
+      // let's try to invoice before the invoice date
       const result = await machine.transition("INVOICE", {
         // when subscription is arrear the invoice date is the end of the billing cycle
         now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
       })
 
+      expect(result.err).toBeInstanceOf(UnPriceSubscriptionError)
       expect(result.err?.message).toBe("Subscription is not ready to be invoiced")
 
       // new start and end dates for the next cycle
@@ -184,8 +197,9 @@ describe("PhaseMachine", () => {
       expect(result2.val?.invoice?.type).toBe("hybrid")
 
       // due date should be calculated based on grace period
-      const dueAt = subscription.currentCycleEndAt
+      const dueAt = subscription.currentCycleEndAt + 1
       const pastDueAt = addDays(dueAt, phase.gracePeriod).getTime()
+
       expect(result2.val?.invoice?.pastDueAt).toBe(pastDueAt)
       expect(result2.val?.invoice?.dueAt).toBe(dueAt)
     })
@@ -253,7 +267,7 @@ describe("PhaseMachine", () => {
       expect(result2.val?.invoice?.status).toBe("draft")
 
       // due date should be calculated based on grace period
-      const dueAt = subscription.currentCycleStartAt
+      const dueAt = subscription.currentCycleStartAt + 1
       const pastDueAt = addDays(dueAt, phase.gracePeriod).getTime()
       expect(result2.val?.invoice?.pastDueAt).toBe(pastDueAt)
       expect(result2.val?.invoice?.dueAt).toBe(dueAt)
@@ -335,7 +349,7 @@ describe("PhaseMachine", () => {
       expect(result2.val?.invoice?.status).toBe("draft")
 
       // due date should be calculated based on grace period
-      const dueAt = subscription.currentCycleStartAt
+      const dueAt = subscription.currentCycleStartAt + 1
       const pastDueAt = addDays(dueAt, phase.gracePeriod).getTime()
       expect(result2.val?.invoice?.pastDueAt).toBe(pastDueAt)
       expect(result2.val?.invoice?.dueAt).toBe(dueAt)

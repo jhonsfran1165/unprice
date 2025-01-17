@@ -18,7 +18,16 @@ export const invoicingSchedule = schedules.task({
             and(eq(phase.active, true), notInArray(phase.status, ["trialing"])),
         },
       },
-      where: (sub, { eq, and, lte }) => and(eq(sub.active, true), lte(sub.nextInvoiceAt, now)),
+      where: (sub, { eq, and, lte, isNull }) =>
+        and(
+          eq(sub.active, true),
+          lte(sub.nextInvoiceAt, now),
+          // we don't invoice if there is a change, cancel or expire scheduled
+          isNull(sub.cancelAt),
+          isNull(sub.pastDueAt),
+          isNull(sub.expiresAt),
+          isNull(sub.changeAt)
+        ),
     })
 
     logger.info(`Found ${subscriptions.length} subscriptions for invoicing`)
@@ -39,8 +48,8 @@ export const invoicingSchedule = schedules.task({
         phaseId: phase.id,
       })
 
-      if (result.ok) {
-        // renew the subscription
+      if (result.ok && phase.autoRenew) {
+        // renew the subscription right after the invoice is created
         await renewTask.triggerAndWait({
           subscriptionId: sub.id,
           projectId: sub.projectId,

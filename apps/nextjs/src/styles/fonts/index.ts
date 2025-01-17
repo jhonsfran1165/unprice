@@ -8,7 +8,7 @@ export const cal = localFont({
 })
 
 export const fontMapper = {
-  "font-primary": cal.variable,
+  "font-primary": GeistSans.variable,
   "font-secondary": GeistSans.variable,
   "font-mono": GeistMono.variable,
 }
