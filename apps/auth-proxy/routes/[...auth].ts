@@ -15,7 +15,6 @@ export default eventHandler((event) =>
         profile: (p) => ({
           id: p.id.toString(),
           name: p.login,
-          emailVerified: true,
           email: p.email,
           image: p.avatar_url,
         }),

@@ -1,5 +1,5 @@
 import { signIn } from "@unprice/auth/server"
-import { APP_BASE_DOMAIN } from "@unprice/config"
+import { APP_DOMAIN } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
 import { GitHub } from "@unprice/ui/icons"
 
@@ -12,7 +12,7 @@ export function SignInGithub() {
             "use server"
             await signIn("github", {
               redirect: true,
-              redirectTo: APP_BASE_DOMAIN,
+              redirectTo: APP_DOMAIN,
             })
           }}
         >
