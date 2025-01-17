@@ -17,6 +17,7 @@ export default eventHandler((event) =>
           name: p.login,
           email: p.email,
           image: p.avatar_url,
+          emailVerified: true,
         }),
       }),
     ],

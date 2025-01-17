@@ -108,26 +108,16 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
-      - name: verify auth-proxy turbo-ignore
-        # verify if auth-proxy has changed, if it has, we need to deploy it
-        run: |
-          # If the command exits with code 1, the build continues as normal
-          # If the command exits with code 0, the build is immediately aborted
-          check=$(npx turbo-ignore -d apps/auth-proxy) || true
-
-          # if check has Proceeding with deployment string, we need to deploy it use  grep
-          if echo "$check" | grep -q "Proceeding with deployment"; then
-            echo "Proceeding with deployment, deploying auth-proxy"
-            echo "deploy_auth_proxy=true" >> $GITHUB_OUTPUT
-          else
-            echo "No changes detected in auth-proxy folder, skipping build"
-            echo "deploy_auth_proxy=false" >> $GITHUB_OUTPUT
-          fi
+      - name: Check for changes
+        id: turbo-ignore
+        continue-on-error: true
+        run: npx turbo-ignore -d apps/auth-proxy
 
       - uses: amondnet/vercel-action@v25.2.0 #deploy
         name: Deploy Unprice auth to Vercel
         id: deploy-auth
-        if: ${{ steps.verify-auth-proxy.outputs.deploy_auth_proxy == 'true' }}
+        # if turbo-ignore fails,that means there are no changes in the auth-proxy folder
+        if: steps.turbo-ignore.outcome == 'failure'
         with:
           vercel-token: ${{ env.VERCEL_TOKEN }} # Required
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
