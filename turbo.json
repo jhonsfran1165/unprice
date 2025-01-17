@@ -27,6 +27,7 @@
         "app/next.js/next-env.d.ts",
         "dist/**",
         "app/auth-proxy/.output/**",
+        "app/auth-proxy/.vercel/**",
         "!app/auth-proxy/.output/cache/**"
       ],
       "env": [
