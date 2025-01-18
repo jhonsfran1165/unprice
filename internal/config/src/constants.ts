@@ -9,22 +9,28 @@ console.info(
   process.env.VERCEL_ENV,
   process.env.NODE_ENV,
   process.env.NEXT_PUBLIC_APP_DOMAIN,
-  "env"
+  "env",
+  env.VERCEL_ENV,
+  env.NODE_ENV,
+  env.NEXT_PUBLIC_APP_DOMAIN
 )
 
+// sometimes we need to use the vercel env from the client
+const VERCEL_ENV = env.VERCEL_ENV || env.NEXT_PUBLIC_VERCEL_ENV
+
 export const BASE_DOMAIN =
-  env.VERCEL_ENV === "production"
+  VERCEL_ENV === "production"
     ? MAIN_DOMAIN
-    : env.VERCEL_ENV === "preview"
+    : VERCEL_ENV === "preview"
       ? `${env.NEXT_PUBLIC_APP_DOMAIN}`
       : "localhost:3000"
 
 export const APP_BASE_DOMAIN = `app.${BASE_DOMAIN}`
 
 export const SITES_BASE_DOMAIN =
-  env.VERCEL_ENV === "production"
+  VERCEL_ENV === "production"
     ? SITES_DOMAIN
-    : env.VERCEL_ENV === "preview"
+    : VERCEL_ENV === "preview"
       ? SITES_DOMAIN
       : "localhost:3000"
 
@@ -37,9 +43,9 @@ export const APP_HOSTNAMES = new Set([
 ])
 
 export const APP_DOMAIN =
-  env.VERCEL_ENV === "production"
+  VERCEL_ENV === "production"
     ? `https://app.${MAIN_DOMAIN}/`
-    : env.VERCEL_ENV === "preview"
+    : VERCEL_ENV === "preview"
       ? `https://app-${env.NEXT_PUBLIC_APP_DOMAIN}/`
       : "http://app.localhost:3000/"
 
@@ -52,9 +58,9 @@ export const API_HOSTNAMES = new Set([
 ])
 
 export const API_DOMAIN =
-  env.VERCEL_ENV === "production"
+  VERCEL_ENV === "production"
     ? `https://api.${MAIN_DOMAIN}/`
-    : env.VERCEL_ENV === "preview"
+    : VERCEL_ENV === "preview"
       ? `https://api-${env.NEXT_PUBLIC_APP_DOMAIN}/`
       : "http://api.localhost:3000/"
 

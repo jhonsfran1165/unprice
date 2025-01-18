@@ -123,7 +123,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID }} #Required
           # always prod because the auth proxy link has to be stable
-          vercel-args: '--env "VERCEL_ENV=production" --env "VERCEL=true" --env "NODE_ENV=production" --prod --build-env "VERCEL_ENV=production" --build-env "VERCEL=true" --build-env "NODE_ENV=production"'
+          vercel-args: '--prod --env VERCEL_ENV=production --env NODE_ENV=production --build-env NODE_ENV=production'
           working-directory: ./
 
       # deploy preview unprice to vercel
@@ -135,7 +135,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=development" --env "VERCEL_ENV=preview" --env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" --env "NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app" --build-env "NODE_ENV=development" --build-env "VERCEL=true" --build-env "VERCEL_ENV=preview" --build-env "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}" --build-env "NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app"'
+          vercel-args: '--env NODE_ENV=development --env DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} --env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --env NEXT_PUBLIC_VERCEL_ENV=preview --build-env NODE_ENV=development --build-env DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} --build-env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --build-env PR_NUMBER=${{ github.event.number }} --build-env NEXT_PUBLIC_VERCEL_ENV=preview'
           alias-domains: |
             pr-${{ github.event.number }}-unprice.vercel.app
             app-pr-${{ github.event.number }}-unprice.vercel.app
