@@ -79,7 +79,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_AUTH_UNPRICE_ID }} #Required
           # always prod because the auth proxy link has to be stable
-          vercel-args: '--env "VERCEL_ENV=production" --env "VERCEL=true" --env "NODE_ENV=production" --prod --build-env "VERCEL_ENV=production" --build-env "VERCEL=true" --build-env "NODE_ENV=production"'
+          vercel-args: '--env VERCEL_ENV=production --env VERCEL=true --env NODE_ENV=production --prod --build-env VERCEL_ENV=production --build-env VERCEL=true --build-env NODE_ENV=production'
           working-directory: ./
 
       # deploy unprice to vercel
@@ -91,7 +91,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env "VERCEL=true" --env "NODE_ENV=production" --env "VERCEL_ENV=production" --env "DATABASE_URL=${{ env.DATABASE_URL }}" --env "NEXT_PUBLIC_APP_DOMAIN=unprice.dev" --build-env "NODE_ENV=production" --build-env "VERCEL=true" --build-env "VERCEL_ENV=production" --build-env "DATABASE_URL=${{ env.DATABASE_URL }}" --build-env "NEXT_PUBLIC_APP_DOMAIN=unprice.dev" --prod'
+          vercel-args: '--env VERCEL=true --env NODE_ENV=production --env VERCEL_ENV=production --env DATABASE_URL=${{ env.DATABASE_URL }} --env NEXT_PUBLIC_APP_DOMAIN=unprice.dev --build-env VERCEL=true --build-env NODE_ENV=production --build-env VERCEL_ENV=production --build-env DATABASE_URL=${{ env.DATABASE_URL }} --build-env NEXT_PUBLIC_APP_DOMAIN=unprice.dev --prod'
           alias-domains: |
             unprice.vercel.app
 

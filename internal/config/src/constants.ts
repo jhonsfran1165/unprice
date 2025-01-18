@@ -5,8 +5,13 @@ export const STAGES = ["prod", "test", "dev"] as const
 const MAIN_DOMAIN = "unprice.dev"
 const SITES_DOMAIN = "builderai.sh"
 
-console.info(env.VERCEL_ENV, env.NEXT_PUBLIC_APP_DOMAIN, "env")
-console.info(process.env.VERCEL_ENV, process.env.NEXT_PUBLIC_APP_DOMAIN, "env")
+console.info(env.VERCEL_ENV, env.NODE_ENV, env.NEXT_PUBLIC_APP_DOMAIN, "env")
+console.info(
+  process.env.VERCEL_ENV,
+  process.env.NODE_ENV,
+  process.env.NEXT_PUBLIC_APP_DOMAIN,
+  "env"
+)
 
 export const BASE_DOMAIN =
   env.VERCEL_ENV === "production"
