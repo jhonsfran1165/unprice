@@ -95,7 +95,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--prod --env NEXT_PUBLIC_APP_DOMAIN=unprice.dev --env NEXT_PUBLIC_VERCEL_ENV=production --build-env NEXT_PUBLIC_APP_DOMAIN=unprice.dev --build-env PR_NUMBER=${{ github.event.number }} --build-env NEXT_PUBLIC_VERCEL_ENV=production'
+          vercel-args: '--prod --env NEXT_PUBLIC_APP_DOMAIN=unprice.dev --env NEXT_PUBLIC_VERCEL_ENV=production --build-env NEXT_PUBLIC_APP_DOMAIN=unprice.dev --build-env NEXT_PUBLIC_VERCEL_ENV=production'
           alias-domains: |
             unprice.vercel.app
 
