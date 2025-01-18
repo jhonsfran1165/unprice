@@ -43,7 +43,7 @@ jobs:
           project-slug: "unprice-zq-xm"
           export-type: "file"
           file-output-path: "/.env"
-          secret-path: "/ci"
+          secret-path: "/"
           recursive: true
 
       - uses: ./.github/actions/install
