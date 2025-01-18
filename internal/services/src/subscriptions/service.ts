@@ -207,7 +207,6 @@ export class SubscriptionService {
     // get all the active entitlements for the customer
     const { err, val } = await customerService.getEntitlementsByDate({
       customerId,
-      projectId,
       // get the entitlements for the given date
       date: now,
       // we don't want to cache the entitlements here, because we want to get the latest ones
@@ -1240,7 +1239,6 @@ export class SubscriptionService {
     this.waitUntil(
       customerService.updateCacheAllCustomerEntitlementsByDate({
         customerId,
-        projectId,
         date: Date.now(),
       })
     )
@@ -1262,7 +1260,6 @@ export class SubscriptionService {
 
     await customerService.updateEntitlementsUsage({
       customerId: subscription.customerId,
-      projectId: subscription.projectId,
       date: Date.now(),
     })
   }

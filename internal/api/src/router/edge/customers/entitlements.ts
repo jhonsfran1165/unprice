@@ -29,13 +29,10 @@ export const entitlements = protectedApiOrActiveProjectProcedure
   )
   .query(async (opts) => {
     const { customerId } = opts.input
-    const { apiKey, ...ctx } = opts.ctx
-    const projectId = apiKey.projectId
 
     const res = await getEntitlements({
       customerId,
-      projectId: projectId,
-      ctx,
+      ctx: opts.ctx,
     })
 
     return {

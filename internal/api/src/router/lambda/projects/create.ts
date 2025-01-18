@@ -1,16 +1,11 @@
 import { TRPCError } from "@trpc/server"
-import { eq, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import { projectInsertBaseSchema, projectSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedWorkspaceProcedure } from "../../../trpc"
-
-// TODO: Don't hardcode the limit to PRO
-const PROJECT_LIMITS = {
-  FREE: 1,
-  PRO: 3,
-} as const
+import { featureGuard } from "../../../utils/feature-guard"
+import { reportUsageFeature } from "../../../utils/shared"
 
 export const create = protectedWorkspaceProcedure
   .input(projectInsertBaseSchema)
@@ -18,23 +13,22 @@ export const create = protectedWorkspaceProcedure
   .mutation(async (opts) => {
     const { name, url, defaultCurrency, timezone } = opts.input
     const workspace = opts.ctx.workspace
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "projects"
 
     // only owner and admin can create a project
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
-    const countProjectsWorkspace = await opts.ctx.db
-      .select({ count: sql<number>`count(*)` })
-      .from(schema.projects)
-      .where(eq(schema.projects.workspaceId, workspace.id))
-      .then((res) => res[0]?.count ?? 0)
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      noCache: true,
+      updateUsage: true,
+      includeCustom: true,
+    })
 
-    // TODO: Don't hardcode the limit to PRO
-    // TODO: use unprice verification here
-    if (countProjectsWorkspace >= PROJECT_LIMITS.PRO) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Limit of projects reached" })
-    }
-
-    // TODO: should be able to retry if the slug already exists
     const projectId = utils.newId("project")
     const projectSlug = utils.createSlug()
 
@@ -60,6 +54,16 @@ export const create = protectedWorkspaceProcedure
         message: "Error creating project",
       })
     }
+
+    opts.ctx.waitUntil(
+      // report usage for the new project in background
+      reportUsageFeature({
+        customerId,
+        featureSlug,
+        usage: 1, // the new project
+        ctx: opts.ctx,
+      })
+    )
 
     return {
       project: newProject,

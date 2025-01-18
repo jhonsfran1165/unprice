@@ -12,13 +12,17 @@ import type { Context } from "../trpc"
 export const verifyEntitlement = async ({
   customerId,
   featureSlug,
-  projectId,
   ctx,
+  noCache = false,
+  updateUsage = false,
+  includeCustom = true,
 }: {
   customerId: string
   featureSlug: string
-  projectId: string
   ctx: Context
+  noCache?: boolean
+  updateUsage?: boolean
+  includeCustom?: boolean
 }) => {
   const now = performance.now()
   const customer = new CustomerService({
@@ -36,8 +40,10 @@ export const verifyEntitlement = async ({
   const { err, val } = await customer.verifyEntitlement({
     customerId,
     featureSlug,
-    projectId,
     date,
+    noCache,
+    updateUsage,
+    includeCustom,
   })
 
   const end = performance.now()
@@ -70,16 +76,69 @@ export const verifyEntitlement = async ({
   return val
 }
 
-export const getEntitlements = async ({
+export const getEntitlement = async ({
   customerId,
-  projectId,
+  featureSlug,
   ctx,
   includeCustom = true,
   updateUsage = true,
   noCache = false,
 }: {
   customerId: string
-  projectId: string
+  featureSlug: string
+  ctx: Context
+  includeCustom?: boolean
+  updateUsage?: boolean
+  noCache?: boolean
+}) => {
+  const customer = new CustomerService({
+    cache: ctx.cache,
+    db: ctx.db as Database,
+    analytics: ctx.analytics,
+    logger: ctx.logger,
+    metrics: ctx.metrics,
+    waitUntil: ctx.waitUntil,
+  })
+
+  // use current date for now
+  const now = Date.now()
+
+  const { err, val } = await customer.getEntitlementByDate({
+    customerId,
+    featureSlug,
+    date: now,
+    includeCustom,
+    // update usage from analytics service on revalidation
+    updateUsage,
+    noCache,
+  })
+
+  if (err) {
+    switch (true) {
+      case err instanceof UnPriceCustomerError:
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: err.code,
+        })
+      default:
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error verifying entitlements",
+        })
+    }
+  }
+
+  return val
+}
+
+export const getEntitlements = async ({
+  customerId,
+  ctx,
+  includeCustom = true,
+  updateUsage = true,
+  noCache = false,
+}: {
+  customerId: string
   ctx: Context
   includeCustom?: boolean
   updateUsage?: boolean
@@ -99,7 +158,6 @@ export const getEntitlements = async ({
 
   const { err, val } = await customer.getEntitlementsByDate({
     customerId,
-    projectId,
     date: now,
     includeCustom,
     // update usage from analytics service on revalidation
@@ -130,14 +188,11 @@ export const getEntitlements = async ({
 export const reportUsageFeature = async ({
   customerId,
   featureSlug,
-  projectId,
   usage,
   ctx,
 }: {
   customerId: string
   featureSlug: string
-  projectId: string
-  workspaceId: string
   usage: number
   ctx: Context
 }) => {
@@ -156,7 +211,6 @@ export const reportUsageFeature = async ({
   const { err, val } = await customer.reportUsage({
     customerId,
     featureSlug,
-    projectId,
     usage,
     date: now,
   })

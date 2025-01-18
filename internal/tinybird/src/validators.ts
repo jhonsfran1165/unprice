@@ -40,6 +40,7 @@ export const featureUsageSchemaV1 = z.object({
   planVersionFeatureId: z.string(),
   usage: z.number(),
   createdAt: z.number(),
+  workspaceId: z.string(),
 })
 
 export const auditLogSchemaV1 = z.object({

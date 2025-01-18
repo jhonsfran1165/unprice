@@ -20,12 +20,10 @@ export const getUsageActiveEntitlementsCustomer = protectedApiOrActiveProjectPro
     })
   )
   .query(async (opts) => {
-    const project = opts.ctx.project
     const { customerId } = opts.input
 
     const entitlements = await getEntitlements({
       customerId,
-      projectId: project.id,
       ctx: opts.ctx,
       noCache: true,
     })

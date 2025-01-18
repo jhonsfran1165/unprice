@@ -30,7 +30,6 @@ export const reportUsage = protectedApiOrActiveProjectProcedure
   .query(async (opts) => {
     const { customerId, featureSlug, usage, idempotenceKey } = opts.input
     const projectId = opts.ctx.project.id
-    const workspaceId = opts.ctx.project.workspaceId
 
     // this is to avoid reporting the same usage multiple times
     const body = JSON.stringify({ customerId, featureSlug, usage, idempotenceKey, projectId })
@@ -48,19 +47,15 @@ export const reportUsage = protectedApiOrActiveProjectProcedure
     }
 
     // if cache miss, report usage
-    const { apiKey, ...ctx } = opts.ctx
-
     const response = await reportUsageFeature({
       customerId,
       featureSlug,
-      projectId: projectId,
-      workspaceId: workspaceId,
       usage: usage,
-      ctx,
+      ctx: opts.ctx,
     })
 
     // cache the result
-    ctx.waitUntil(
+    opts.ctx.waitUntil(
       opts.ctx.cache.idempotentRequestUsageByHash.set(hashKey, {
         access: response.success,
         message: response.message,

@@ -130,6 +130,11 @@ export const customerEntitlements = pgTableProject(
       foreignColumns: [customers.id, customers.projectId],
       name: "customer_id_fkey",
     }),
+    projectfk: foreignKey({
+      columns: [table.projectId],
+      foreignColumns: [customers.projectId],
+      name: "project_id_fkey",
+    }),
   })
 )
 
@@ -170,6 +175,11 @@ export const customerCredits = pgTableProject(
     unique: uniqueIndex("customer_credits_customer_id_active_key")
       .on(table.customerId, table.active)
       .where(eq(table.active, true)),
+    projectfk: foreignKey({
+      columns: [table.projectId],
+      foreignColumns: [customers.projectId],
+      name: "project_id_fkey",
+    }),
   })
 )
 
@@ -185,6 +195,10 @@ export const customerEntitlementsRelations = relations(customerEntitlements, ({ 
   customer: one(customers, {
     fields: [customerEntitlements.customerId, customerEntitlements.projectId],
     references: [customers.id, customers.projectId],
+  }),
+  project: one(projects, {
+    fields: [customerEntitlements.projectId],
+    references: [projects.id],
   }),
 }))
 
@@ -202,5 +216,9 @@ export const customerCreditsRelations = relations(customerCredits, ({ one }) => 
   customer: one(customers, {
     fields: [customerCredits.customerId, customerCredits.projectId],
     references: [customers.id, customers.projectId],
+  }),
+  project: one(projects, {
+    fields: [customerCredits.projectId],
+    references: [projects.id],
   }),
 }))

@@ -1,24 +1,19 @@
 import { TRPCError } from "@trpc/server"
 
-import type { ProjectExtended } from "@unprice/db/validators"
-
 import type { Context } from "../trpc"
 import { getEntitlements } from "./shared"
 
 export const entitlementGuard = async ({
-  project,
+  customerId,
   ctx,
   featureSlug,
 }: {
-  project: ProjectExtended
+  customerId: string
   ctx: Context
   featureSlug: string
 }) => {
-  const unpriceCustomerId = project.workspace.unPriceCustomerId
-
   const entitlements = await getEntitlements({
-    customerId: unpriceCustomerId,
-    projectId: project.id,
+    customerId: customerId,
     ctx: ctx,
   })
 

@@ -31,13 +31,10 @@ export const can = protectedApiOrActiveProjectProcedure
   )
   .query(async (opts) => {
     const { customerId, featureSlug } = opts.input
-    const { apiKey, ...ctx } = opts.ctx
-    const projectId = apiKey.projectId
 
     return await verifyEntitlement({
       customerId,
       featureSlug,
-      projectId: projectId,
-      ctx,
+      ctx: opts.ctx,
     })
   })

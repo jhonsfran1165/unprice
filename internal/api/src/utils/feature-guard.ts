@@ -1,25 +1,29 @@
-import type { ProjectExtended } from "@unprice/db/validators"
-
 import { TRPCError } from "@trpc/server"
 import type { Context } from "../trpc"
 import { verifyEntitlement } from "./shared"
 
 export const featureGuard = async ({
-  project,
+  customerId,
   featureSlug,
   ctx,
+  noCache = false,
+  updateUsage = true,
+  includeCustom = true,
 }: {
-  project: ProjectExtended
+  customerId: string
   featureSlug: string
   ctx: Context
+  noCache?: boolean
+  updateUsage?: boolean
+  includeCustom?: boolean
 }) => {
-  const unpriceCustomerId = project.workspace.unPriceCustomerId
-
   const result = await verifyEntitlement({
-    customerId: unpriceCustomerId,
+    customerId: customerId,
     featureSlug: featureSlug,
-    projectId: project.id,
     ctx: ctx,
+    noCache,
+    updateUsage,
+    includeCustom,
   })
 
   if (!result.access) {

@@ -41,25 +41,33 @@ export class CustomerService {
 
   private async _getCustomerEntitlementByDate(opts: {
     customerId: string
-    projectId: string
     featureSlug: string
     date: number
+    noCache?: boolean
+    updateUsage?: boolean
+    includeCustom?: boolean
   }): Promise<
     Result<
       Omit<CustomerEntitlement, "createdAtM" | "updatedAtM">,
       UnPriceCustomerError | FetchError
     >
   > {
-    // if not cache then retrive from database
-    if (!this.cache) {
+    if (opts.noCache || !this.cache) {
+      if (opts.updateUsage) {
+        await this.updateEntitlementsUsage({
+          customerId: opts.customerId,
+          date: opts.date,
+        })
+      }
+
       const entitlement = await getEntitlementByDateQuery({
         customerId: opts.customerId,
-        projectId: opts.projectId,
         db: this.db,
         metrics: this.metrics,
         logger: this.logger,
         date: opts.date,
         featureSlug: opts.featureSlug,
+        includeCustom: opts.includeCustom,
       })
 
       if (!entitlement) {
@@ -77,14 +85,21 @@ export class CustomerService {
     const res = await this.cache.featureByCustomerId.swr(
       `${opts.customerId}:${opts.featureSlug}`,
       async () => {
+        if (opts.updateUsage) {
+          await this.updateEntitlementsUsage({
+            customerId: opts.customerId,
+            date: opts.date,
+          })
+        }
+
         return await getEntitlementByDateQuery({
           customerId: opts.customerId,
-          projectId: opts.projectId,
           db: this.db,
           metrics: this.metrics,
           logger: this.logger,
           date: opts.date,
           featureSlug: opts.featureSlug,
+          includeCustom: opts.includeCustom,
         })
       }
     )
@@ -94,7 +109,6 @@ export class CustomerService {
         error: JSON.stringify(res.err),
         customerId: opts.customerId,
         featureSlug: opts.featureSlug,
-        projectId: opts.projectId,
       })
 
       return Err(
@@ -110,12 +124,12 @@ export class CustomerService {
     if (!res.val) {
       const entitlement = await getEntitlementByDateQuery({
         customerId: opts.customerId,
-        projectId: opts.projectId,
         db: this.db,
         metrics: this.metrics,
         logger: this.logger,
         date: opts.date,
         featureSlug: opts.featureSlug,
+        includeCustom: opts.includeCustom,
       })
 
       if (!entitlement) {
@@ -135,11 +149,9 @@ export class CustomerService {
 
   public async updateCacheAllCustomerEntitlementsByDate({
     customerId,
-    projectId,
     date,
   }: {
     customerId: string
-    projectId: string
     date: number
   }) {
     if (!this.cache) {
@@ -149,7 +161,6 @@ export class CustomerService {
     // update the cache
     await getEntitlementsByDateQuery({
       customerId,
-      projectId,
       db: this.db,
       metrics: this.metrics,
       date,
@@ -178,13 +189,11 @@ export class CustomerService {
 
   public async updateEntitlementsUsage(opts: {
     customerId: string
-    projectId: string
     date: number
   }) {
     // get active entitlements from the db
     const entitlements = await getEntitlementsByDateQuery({
       customerId: opts.customerId,
-      projectId: opts.projectId,
       db: this.db,
       metrics: this.metrics,
       logger: this.logger,
@@ -198,11 +207,11 @@ export class CustomerService {
         // get usage for the period from the analytics service
         const totalUsage = await this.analytics.getTotalUsagePerCustomer({
           customerId: opts.customerId,
-          projectId: opts.projectId,
           subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
           start:
             entitlement.subscriptionItem?.subscriptionPhase?.subscription?.currentCycleStartAt!,
           end: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.currentCycleEndAt!,
+          projectId: entitlement.projectId,
         })
 
         const feature = totalUsage.data.find((u) => u.featureSlug === entitlement.featureSlug)
@@ -224,16 +233,31 @@ export class CustomerService {
           .where(
             and(
               eq(customerEntitlements.id, entitlement.id),
-              eq(customerEntitlements.projectId, opts.projectId)
+              eq(customerEntitlements.projectId, entitlement.projectId)
             )
           )
       })
     )
   }
 
+  public async getEntitlementByDate(opts: {
+    customerId: string
+    featureSlug: string
+    date: number
+    includeCustom?: boolean
+    updateUsage?: boolean
+    noCache?: boolean
+  }): Promise<
+    Result<
+      Omit<CustomerEntitlement, "createdAtM" | "updatedAtM">,
+      UnPriceCustomerError | FetchError
+    >
+  > {
+    return await this._getCustomerEntitlementByDate(opts)
+  }
+
   public async getEntitlementsByDate(opts: {
     customerId: string
-    projectId: string
     date: number
     includeCustom?: boolean
     noCache?: boolean
@@ -245,14 +269,12 @@ export class CustomerService {
       if (opts.updateUsage) {
         await this.updateEntitlementsUsage({
           customerId: opts.customerId,
-          projectId: opts.projectId,
           date: opts.date,
         })
       }
 
       const entitlements = await getEntitlementsByDateQuery({
         customerId: opts.customerId,
-        projectId: opts.projectId,
         db: this.db,
         metrics: this.metrics,
         logger: this.logger,
@@ -269,14 +291,12 @@ export class CustomerService {
       if (opts.updateUsage) {
         await this.updateEntitlementsUsage({
           customerId: opts.customerId,
-          projectId: opts.projectId,
           date: opts.date,
         })
       }
 
       return await getEntitlementsByDateQuery({
         customerId: opts.customerId,
-        projectId: opts.projectId,
         db: this.db,
         metrics: this.metrics,
         date: opts.date,
@@ -289,7 +309,6 @@ export class CustomerService {
       this.logger.error("unable to fetch entitlements", {
         error: JSON.stringify(res.err),
         customerId: opts.customerId,
-        projectId: opts.projectId,
       })
 
       return Err(
@@ -315,7 +334,6 @@ export class CustomerService {
     // cache miss, get from db
     const entitlements = await getEntitlementsByDateQuery({
       customerId: opts.customerId,
-      projectId: opts.projectId,
       db: this.db,
       metrics: this.metrics,
       logger: this.logger,
@@ -332,8 +350,10 @@ export class CustomerService {
   public async verifyEntitlement(opts: {
     customerId: string
     featureSlug: string
-    projectId: string
     date: number
+    noCache?: boolean
+    updateUsage?: boolean
+    includeCustom?: boolean
   }): Promise<
     Result<
       {
@@ -349,7 +369,7 @@ export class CustomerService {
     >
   > {
     try {
-      const { customerId, projectId, featureSlug, date } = opts
+      const { customerId, featureSlug, date } = opts
       const start = performance.now()
 
       // TODO: should I validate if the subscription is active?
@@ -357,9 +377,11 @@ export class CustomerService {
 
       const res = await this._getCustomerEntitlementByDate({
         customerId,
-        projectId,
         featureSlug,
         date,
+        noCache: opts.noCache,
+        updateUsage: opts.updateUsage,
+        includeCustom: opts.includeCustom,
       })
 
       if (res.err) {
@@ -369,7 +391,6 @@ export class CustomerService {
           error: JSON.stringify(error),
           customerId: opts.customerId,
           featureSlug: opts.featureSlug,
-          projectId: opts.projectId,
         })
 
         switch (true) {
@@ -500,7 +521,6 @@ export class CustomerService {
         error: JSON.stringify(error),
         customerId: opts.customerId,
         featureSlug: opts.featureSlug,
-        projectId: opts.projectId,
       })
 
       return Err(
@@ -515,17 +535,15 @@ export class CustomerService {
   public async reportUsage(opts: {
     customerId: string
     featureSlug: string
-    projectId: string
     date: number
     usage: number
   }): Promise<Result<{ success: boolean; message?: string }, UnPriceCustomerError | FetchError>> {
     try {
-      const { customerId, featureSlug, projectId, usage, date } = opts
+      const { customerId, featureSlug, usage, date } = opts
 
       // get the item details from the cache or the db
       const res = await this._getCustomerEntitlementByDate({
         customerId,
-        projectId,
         featureSlug,
         date,
       })
@@ -607,6 +625,7 @@ export class CustomerService {
               customerId: customerId,
               subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
               subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
+              workspaceId: entitlement.project.workspaceId,
             })
             .then(() => {
               // TODO: Only available in pro plus plan
@@ -649,7 +668,6 @@ export class CustomerService {
         error: JSON.stringify(error),
         customerId: opts.customerId,
         featureSlug: opts.featureSlug,
-        projectId: opts.projectId,
       })
 
       throw e

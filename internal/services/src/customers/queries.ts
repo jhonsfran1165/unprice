@@ -1,4 +1,5 @@
 import type { Database, TransactionDatabase } from "@unprice/db"
+import { customers } from "@unprice/db/schema"
 import type { CustomerEntitlement } from "@unprice/db/validators"
 import type { Logger } from "@unprice/logging"
 import type { Metrics } from "@unprice/services/metrics"
@@ -6,7 +7,6 @@ import type { Metrics } from "@unprice/services/metrics"
 // this queries are important to get some metrics
 // they are performance critical
 export const getEntitlementsByDateQuery = async ({
-  projectId,
   customerId,
   db,
   metrics,
@@ -14,7 +14,6 @@ export const getEntitlementsByDateQuery = async ({
   date,
   includeCustom = true,
 }: {
-  projectId: string
   customerId: string
   db: Database | TransactionDatabase
   metrics: Metrics
@@ -27,6 +26,12 @@ export const getEntitlementsByDateQuery = async ({
   const entitlements = await db.query.customerEntitlements
     .findMany({
       with: {
+        project: {
+          columns: {
+            id: true,
+            workspaceId: true,
+          },
+        },
         subscriptionItem: {
           columns: {
             id: true,
@@ -52,7 +57,7 @@ export const getEntitlementsByDateQuery = async ({
       where: (ent, { eq, and, gte, lte, isNull, or }) =>
         and(
           eq(ent.customerId, customerId),
-          eq(ent.projectId, projectId),
+          eq(ent.projectId, customers.projectId),
           lte(ent.startAt, date),
           or(isNull(ent.endAt), gte(ent.endAt, date)),
           includeCustom ? undefined : eq(ent.isCustom, false)
@@ -61,7 +66,6 @@ export const getEntitlementsByDateQuery = async ({
     .catch((error) => {
       logger.error("Error getting customer entitlements", {
         error: JSON.stringify(error),
-        projectId,
         customerId,
       })
 
@@ -72,7 +76,7 @@ export const getEntitlementsByDateQuery = async ({
   const end = performance.now()
 
   metrics.emit({
-    metric: "metric.db.write",
+    metric: "metric.db.read",
     query: "getEntitlementsByDate",
     duration: end - start,
     service: "customer",
@@ -82,7 +86,6 @@ export const getEntitlementsByDateQuery = async ({
 }
 
 export const getEntitlementByDateQuery = async ({
-  projectId,
   customerId,
   db,
   metrics,
@@ -91,7 +94,6 @@ export const getEntitlementByDateQuery = async ({
   featureSlug,
   includeCustom = true,
 }: {
-  projectId: string
   customerId: string
   db: Database | TransactionDatabase
   metrics: Metrics
@@ -105,6 +107,12 @@ export const getEntitlementByDateQuery = async ({
   const entitlement = await db.query.customerEntitlements
     .findFirst({
       with: {
+        project: {
+          columns: {
+            id: true,
+            workspaceId: true,
+          },
+        },
         subscriptionItem: {
           columns: {
             id: true,
@@ -130,7 +138,7 @@ export const getEntitlementByDateQuery = async ({
       where: (ent, { eq, and, gte, lte, isNull, or }) =>
         and(
           eq(ent.customerId, customerId),
-          eq(ent.projectId, projectId),
+          eq(ent.projectId, customers.projectId),
           lte(ent.startAt, date),
           or(isNull(ent.endAt), gte(ent.endAt, date)),
           includeCustom ? undefined : eq(ent.isCustom, false),
@@ -140,7 +148,6 @@ export const getEntitlementByDateQuery = async ({
     .catch((error) => {
       logger.error("Error getting customer entitlements", {
         error: JSON.stringify(error),
-        projectId,
         customerId,
       })
 
@@ -151,8 +158,8 @@ export const getEntitlementByDateQuery = async ({
   const end = performance.now()
 
   metrics.emit({
-    metric: "metric.db.write",
-    query: "getEntitlementsByDate",
+    metric: "metric.db.read",
+    query: "getEntitlementByDate",
     duration: end - start,
     service: "customer",
   })
