@@ -8,6 +8,10 @@ on:
 env:
   SKIP_ENV_VALIDATION: 1
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-lint:
     uses: ./.github/workflows/job_build.yaml
