@@ -2,7 +2,7 @@ import type { FeatureType } from "@unprice/db/validators"
 import { deniedReasonSchema } from "@unprice/services/customers"
 import { z } from "zod"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
-import { verifyEntitlement } from "../../../utils/shared"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const can = protectedApiOrActiveProjectProcedure
   .meta({
@@ -22,7 +22,7 @@ export const can = protectedApiOrActiveProjectProcedure
   .output(
     z.object({
       access: z.boolean(),
-      deniedReason: deniedReasonSchema.optional(),
+      deniedReason: deniedReasonSchema.optional().nullable(),
       currentUsage: z.number().optional(),
       limit: z.number().optional(),
       featureType: z.custom<FeatureType>().optional(),
@@ -32,9 +32,10 @@ export const can = protectedApiOrActiveProjectProcedure
   .query(async (opts) => {
     const { customerId, featureSlug } = opts.input
 
-    return await verifyEntitlement({
+    return await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
+      throwOnNoAccess: true,
     })
   })

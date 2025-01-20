@@ -1,16 +1,11 @@
 import { TRPCError } from "@trpc/server"
-import { eq, sql } from "@unprice/db"
+import { eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { projectSelectBaseSchema, transferToPersonalProjectSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedWorkspaceProcedure } from "../../../trpc"
 import { projectWorkspaceGuard } from "../../../utils"
-
-// TODO: Don't hardcode the limit to PRO
-const PROJECT_LIMITS = {
-  FREE: 1,
-  PRO: 3,
-} as const
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const transferToPersonal = protectedWorkspaceProcedure
   .input(transferToPersonalProjectSchema)
@@ -23,10 +18,25 @@ export const transferToPersonal = protectedWorkspaceProcedure
   .mutation(async (opts) => {
     const { slug: projectSlug } = opts.input
     const userId = opts.ctx.userId
+    const workspace = opts.ctx.workspace
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "projects"
 
-    // only owner and admin can transfer a project to personal
-    opts.ctx.verifyRole(["OWNER", "ADMIN"])
+    // only owner can transfer a project to personal
+    opts.ctx.verifyRole(["OWNER"])
 
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      noCache: true,
+      updateUsage: true,
+      includeCustom: true,
+      isInternal: workspace.isInternal,
+    })
+
+    // get the project data
     const { project: projectData } = await projectWorkspaceGuard({
       projectSlug,
       ctx: opts.ctx,
@@ -59,21 +69,6 @@ export const transferToPersonal = protectedWorkspaceProcedure
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "There is no personal workspace for the user",
-      })
-    }
-
-    // TODO: do not hard code the limit - is it possible to reduce the queries?
-    const projectsCount = await opts.ctx.db
-      .select({ count: sql<number>`count(*)` })
-      .from(schema.projects)
-      .where(eq(schema.projects.workspaceId, personalTargetWorkspace.id))
-      .then((res) => res[0]?.count ?? 0)
-
-    // TODO: Don't hardcode the limit to PRO - the user is paying, should it be possible to transfer projects?
-    if (projectsCount >= PROJECT_LIMITS.PRO) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "The target workspace reached its limit of projects",
       })
     }
 

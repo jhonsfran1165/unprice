@@ -5,6 +5,8 @@ import { hashStringSHA256 } from "@unprice/db/utils"
 import { createApiKeySchema, selectApiKeySchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
+import { reportUsageFeature } from "../../../utils/shared"
 
 export const create = protectedProjectProcedure
   .input(createApiKeySchema)
@@ -16,11 +18,26 @@ export const create = protectedProjectProcedure
   .mutation(async (opts) => {
     const { name, expiresAt } = opts.input
     const project = opts.ctx.project
+    const customerId = project.workspace.unPriceCustomerId
+    const featureSlug = "apikeys"
 
-    const apiKeyId = utils.newId("apikey")
+    // only owner and admin
+    opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      noCache: true,
+      updateUsage: true,
+      isInternal: project.workspace.isInternal,
+    })
 
     // Generate the key
     const apiKey = utils.newId("apikey_key")
+    // generate the id
+    const apiKeyId = utils.newId("apikey")
     // generate hash of the key
     const apiKeyHash = await hashStringSHA256(apiKey)
 
@@ -51,6 +68,17 @@ export const create = protectedProjectProcedure
         message: "Failed to create API key",
       })
     }
+
+    opts.ctx.waitUntil(
+      // report usage for the new project in background
+      reportUsageFeature({
+        customerId,
+        featureSlug,
+        usage: 1, // the new project
+        ctx: opts.ctx,
+        isInternal: project.workspace.isInternal,
+      })
+    )
 
     return { apikey: newApiKey }
   })

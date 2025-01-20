@@ -4,6 +4,7 @@ import * as schema from "@unprice/db/schema"
 import { workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedWorkspaceProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const getBySlug = protectedWorkspaceProcedure
   .input(workspaceSelectBase.pick({ slug: true }))
@@ -14,12 +15,23 @@ export const getBySlug = protectedWorkspaceProcedure
   )
   .query(async (opts) => {
     const { slug } = opts.input
+    const workspace = opts.ctx.workspace
 
-    const workspace = await opts.ctx.db.query.workspaces.findFirst({
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: workspace.unPriceCustomerId,
+      featureSlug: "access-pro",
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: false,
+      throwOnNoAccess: false,
+    })
+
+    const workspaceData = await opts.ctx.db.query.workspaces.findFirst({
       where: eq(schema.workspaces.slug, slug),
     })
 
-    if (!workspace) {
+    if (!workspaceData) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "Workspace not found",
@@ -27,6 +39,6 @@ export const getBySlug = protectedWorkspaceProcedure
     }
 
     return {
-      workspace: workspace,
+      workspace: workspaceData,
     }
   })

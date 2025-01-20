@@ -5,12 +5,8 @@ import { projectSelectBaseSchema, transferToWorkspaceSchema } from "@unprice/db/
 import { z } from "zod"
 import { protectedWorkspaceProcedure } from "../../../trpc"
 import { projectWorkspaceGuard } from "../../../utils"
+import { featureGuard } from "../../../utils/feature-guard"
 
-// TODO: Don't hardcode the limit to PRO
-const PROJECT_LIMITS = {
-  FREE: 1,
-  PRO: 3,
-} as const
 export const transferToWorkspace = protectedWorkspaceProcedure
   .input(transferToWorkspaceSchema)
   .output(
@@ -21,9 +17,21 @@ export const transferToWorkspace = protectedWorkspaceProcedure
   )
   .mutation(async (opts) => {
     const { targetWorkspaceId, projectSlug } = opts.input
+    const workspace = opts.ctx.workspace
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "projects"
 
-    // only owner and admin can transfer a project to a workspace
-    opts.ctx.verifyRole(["OWNER", "ADMIN"])
+    // only owner can transfer a project to a workspace
+    opts.ctx.verifyRole(["OWNER"])
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: workspace.isInternal,
+    })
 
     const { project: projectData } = await projectWorkspaceGuard({
       projectSlug,
@@ -48,6 +56,8 @@ export const transferToWorkspace = protectedWorkspaceProcedure
       columns: {
         id: true,
         slug: true,
+        unPriceCustomerId: true,
+        isInternal: true,
       },
       with: {
         projects: true,
@@ -62,11 +72,20 @@ export const transferToWorkspace = protectedWorkspaceProcedure
       })
     }
 
-    // TODO: Don't hardcode the limit to PRO - the user is paying, should it be possible to transfer projects?
-    if (targetWorkspace.projects.length >= PROJECT_LIMITS.PRO) {
+    // check if the customer of the target workspace has access to the feature
+    try {
+      await featureGuard({
+        customerId: targetWorkspace.unPriceCustomerId,
+        featureSlug,
+        ctx: opts.ctx,
+        noCache: true,
+        isInternal: targetWorkspace.isInternal,
+      })
+    } catch (error) {
+      const e = error as TRPCError
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "The target workspace reached its limit of projects",
+        message: `The target workspace has no access to the feature: ${e.message}`,
       })
     }
 

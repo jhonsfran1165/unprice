@@ -4,6 +4,7 @@ import * as schema from "@unprice/db/schema"
 import { customerSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const update = protectedApiOrActiveProjectProcedure
   .meta({
@@ -34,6 +35,17 @@ export const update = protectedApiOrActiveProjectProcedure
   .mutation(async (opts) => {
     const { email, id, description, metadata, name, timezone } = opts.input
     const { project } = opts.ctx
+    const unPriceCustomerId = project.workspace.unPriceCustomerId
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: unPriceCustomerId,
+      featureSlug: "customers",
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: project.workspace.isInternal,
+      throwOnNoAccess: false,
+    })
 
     const customerData = await opts.ctx.db.query.customers.findFirst({
       where: (feature, { eq, and }) => and(eq(feature.id, id), eq(feature.projectId, project.id)),

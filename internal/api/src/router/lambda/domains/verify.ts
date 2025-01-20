@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server"
 import { and, eq } from "@unprice/db"
 import { domains } from "@unprice/db/schema"
 import {
@@ -9,6 +10,7 @@ import { Vercel } from "@unprice/vercel"
 import { z } from "zod"
 import { env } from "../../../env.mjs"
 import { protectedWorkspaceProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const verify = protectedWorkspaceProcedure
   .input(z.object({ domain: z.string() }))
@@ -20,6 +22,27 @@ export const verify = protectedWorkspaceProcedure
   )
   .query(async (opts) => {
     let status: DomainVerificationStatusProps = "Valid Configuration"
+    const workspace = opts.ctx.workspace
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "domains"
+
+    // check if the customer has access to the feature
+    const result = await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: workspace.isInternal,
+      // verify endpoint does not need to throw an error
+      throwOnNoAccess: false,
+    })
+
+    if (result.deniedReason === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const vercel = new Vercel({
       accessToken: env.VERCEL_TOKEN,

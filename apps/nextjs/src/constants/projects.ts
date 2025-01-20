@@ -21,7 +21,7 @@ export const PROJECT_NAV: DashboardRoute[] = [
     href: "/pages",
   },
   {
-    name: "Usage",
+    name: "Events",
     icon: BarChartIcon,
     href: "/ingestions",
     disabled: true,

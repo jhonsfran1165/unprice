@@ -9,6 +9,7 @@ import { z } from "zod"
 
 import { withDateFilters, withPagination } from "@unprice/db/utils"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const listByActiveProject = protectedApiOrActiveProjectProcedure
   .input(searchParamsSchemaDataTable)
@@ -19,12 +20,17 @@ export const listByActiveProject = protectedApiOrActiveProjectProcedure
     const columns = getTableColumns(schema.customers)
     const filter = `%${search}%`
 
-    // we just need to validate the entitlements
-    // await entitlementGuard({
-    //   project,
-    //   featureSlug: "customers",
-    //   ctx,
-    // })
+    const unPriceCustomerId = project.workspace.unPriceCustomerId
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: unPriceCustomerId,
+      featureSlug: "customers",
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: project.workspace.isInternal,
+      throwOnNoAccess: false,
+    })
 
     try {
       const expressions = [

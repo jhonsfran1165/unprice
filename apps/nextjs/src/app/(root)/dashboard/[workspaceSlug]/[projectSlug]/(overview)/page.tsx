@@ -116,7 +116,7 @@ export default async function DashboardPage(props: {
             />
           }
         >
-          <RecentIngestions
+          <RecentEvents
             className="w-full md:w-1/3"
             projectSlug={projectSlug}
             workspaceSlug={workspaceSlug}
@@ -174,8 +174,8 @@ function IngestionCard(props: {
   )
 }
 
-// #region RecentIngestions
-async function RecentIngestions(props: {
+// #region RecentEvents
+async function RecentEvents(props: {
   projectSlug: string
   workspaceSlug: string
   className?: string

@@ -1,5 +1,5 @@
 import { Button } from "@unprice/ui/button"
-import { Add, Plus } from "@unprice/ui/icons"
+import { Plus } from "@unprice/ui/icons"
 
 import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -26,13 +26,6 @@ export default function Loading() {
       }
     >
       <Fragment>
-        <div className="flex w-full justify-end">
-          <SuperLink href={"/"} aria-disabled>
-            <Button className="h-8 w-8" size={"icon"}>
-              <Add className="h-4 w-4" />
-            </Button>
-          </SuperLink>
-        </div>
         <div className="relative">
           <ul className="grid select-none grid-cols-1 gap-4 opacity-40 lg:grid-cols-3">
             <ProjectCardSkeleton />

@@ -25,10 +25,10 @@ export const getUsageActiveEntitlementsCustomer = protectedApiOrActiveProjectPro
     const entitlements = await getEntitlements({
       customerId,
       ctx: opts.ctx,
-      noCache: true,
+      includeCustom: true,
     })
 
     return {
-      entitlements,
+      entitlements: entitlements,
     }
   })

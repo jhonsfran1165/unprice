@@ -6,6 +6,7 @@ import { Vercel } from "@unprice/vercel"
 import { z } from "zod"
 import { env } from "../../../env.mjs"
 import { protectedWorkspaceProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const update = protectedWorkspaceProcedure
   .input(domainUpdateBaseSchema)
@@ -13,8 +14,28 @@ export const update = protectedWorkspaceProcedure
   .mutation(async (opts) => {
     const workspace = opts.ctx.workspace
     const { id, name: domain } = opts.input
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "domains"
 
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    // check if the customer has access to the feature
+    const result = await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: workspace.isInternal,
+      // update endpoint does not need to throw an error
+      throwOnNoAccess: false,
+    })
+
+    if (result.deniedReason === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const oldDomain = await opts.ctx.db.query.domains.findFirst({
       where: (d, { eq, and }) => and(eq(d.id, id), eq(d.workspaceId, workspace.id)),

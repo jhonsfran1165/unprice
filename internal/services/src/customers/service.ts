@@ -75,6 +75,7 @@ export class CustomerService {
           new UnPriceCustomerError({
             code: "FEATURE_OR_CUSTOMER_NOT_FOUND",
             customerId: opts.customerId,
+            message: `Feature ${opts.featureSlug} or customer ${opts.customerId} not found in subscription`,
           })
         )
       }
@@ -137,6 +138,7 @@ export class CustomerService {
           new UnPriceCustomerError({
             code: "FEATURE_OR_CUSTOMER_NOT_FOUND",
             customerId: opts.customerId,
+            message: `Feature ${opts.featureSlug} or customer ${opts.customerId} not found in subscription`,
           })
         )
       }
@@ -201,6 +203,9 @@ export class CustomerService {
       includeCustom: true,
     })
 
+    // TODO: we want to be able to get data from entitlements where date doesn't matter
+    // meaning count all the usage for the customer ever
+
     // we need to get the current subscription
     await Promise.all(
       entitlements.map(async (entitlement) => {
@@ -212,6 +217,9 @@ export class CustomerService {
             entitlement.subscriptionItem?.subscriptionPhase?.subscription?.currentCycleStartAt!,
           end: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.currentCycleEndAt!,
           projectId: entitlement.projectId,
+          // when period the query will be for the current period
+          // when all the query will be for all the usage ever
+          type: entitlement.aggregationMethod.endsWith("_all") ? "all" : "period",
         })
 
         const feature = totalUsage.data.find((u) => u.featureSlug === entitlement.featureSlug)
@@ -261,18 +269,12 @@ export class CustomerService {
     date: number
     includeCustom?: boolean
     noCache?: boolean
+    // update usage from analytics service on revalidation
     updateUsage?: boolean
   }): Promise<
     Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
   > {
     if (opts.noCache || !this.cache) {
-      if (opts.updateUsage) {
-        await this.updateEntitlementsUsage({
-          customerId: opts.customerId,
-          date: opts.date,
-        })
-      }
-
       const entitlements = await getEntitlementsByDateQuery({
         customerId: opts.customerId,
         db: this.db,
@@ -282,6 +284,15 @@ export class CustomerService {
         includeCustom: opts.includeCustom,
       })
 
+      if (opts.updateUsage) {
+        this.waitUntil(
+          this.updateEntitlementsUsage({
+            customerId: opts.customerId,
+            date: opts.date,
+          })
+        )
+      }
+
       return Ok(entitlements)
     }
 
@@ -289,10 +300,12 @@ export class CustomerService {
       // updating the usage from the analytics service first and then updating the cache
       // TODO: mesure the performance of this
       if (opts.updateUsage) {
-        await this.updateEntitlementsUsage({
-          customerId: opts.customerId,
-          date: opts.date,
-        })
+        this.waitUntil(
+          this.updateEntitlementsUsage({
+            customerId: opts.customerId,
+            date: opts.date,
+          })
+        )
       }
 
       return await getEntitlementsByDateQuery({

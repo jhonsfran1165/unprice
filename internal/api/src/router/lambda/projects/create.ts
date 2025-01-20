@@ -25,8 +25,9 @@ export const create = protectedWorkspaceProcedure
       featureSlug,
       ctx: opts.ctx,
       noCache: true,
+      // update usage when creating a project
       updateUsage: true,
-      includeCustom: true,
+      isInternal: workspace.isInternal,
     })
 
     const projectId = utils.newId("project")
@@ -46,6 +47,14 @@ export const create = protectedWorkspaceProcedure
         isInternal: false,
       })
       .returning()
+      .catch((err) => {
+        opts.ctx.logger.error(err)
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create API key",
+        })
+      })
       .then((res) => res[0] ?? null)
 
     if (!newProject?.id) {
@@ -62,6 +71,7 @@ export const create = protectedWorkspaceProcedure
         featureSlug,
         usage: 1, // the new project
         ctx: opts.ctx,
+        isInternal: workspace.isInternal,
       })
     )
 

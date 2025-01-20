@@ -4,6 +4,8 @@ import * as schema from "@unprice/db/schema"
 import { customerSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
+import { reportUsageFeature } from "../../../utils/shared"
 
 export const remove = protectedApiOrActiveProjectProcedure
   .meta({
@@ -20,15 +22,17 @@ export const remove = protectedApiOrActiveProjectProcedure
     const { id } = opts.input
     const { project } = opts.ctx
 
-    // const unpriceCustomerId = project.workspace.unPriceCustomerId
-    // const workspaceId = project.workspaceId
+    const unPriceCustomerId = project.workspace.unPriceCustomerId
 
-    // we just need to validate the entitlements
-    // await entitlementGuard({
-    //   project,
-    //   featureSlug: "customers",
-    //   ctx,
-    // })
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: unPriceCustomerId,
+      featureSlug: "customers",
+      ctx: opts.ctx,
+      noCache: true,
+      updateUsage: true,
+      isInternal: project.workspace.isInternal,
+    })
 
     const deletedCustomer = await opts.ctx.db
       .delete(schema.customers)
@@ -43,16 +47,16 @@ export const remove = protectedApiOrActiveProjectProcedure
       })
     }
 
-    // waitUntil(
-    //   reportUsageFeature({
-    //     customerId: unpriceCustomerId,
-    //     featureSlug: "customers",
-    //     projectId: project.id,
-    //     workspaceId: workspaceId,
-    //     ctx: ctx,
-    //     usage: -1,
-    //   })
-    // )
+    opts.ctx.waitUntil(
+      // report usage for the new project in background
+      reportUsageFeature({
+        customerId: unPriceCustomerId,
+        featureSlug: "customers",
+        usage: -1, // the deleted project
+        ctx: opts.ctx,
+        isInternal: project.workspace.isInternal,
+      })
+    )
 
     return {
       customer: deletedCustomer,

@@ -4,6 +4,7 @@ import * as schema from "@unprice/db/schema"
 import { invitesSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedWorkspaceProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const deleteInvite = protectedWorkspaceProcedure
   .input(
@@ -20,14 +21,17 @@ export const deleteInvite = protectedWorkspaceProcedure
     const { email } = opts.input
     const workspace = opts.ctx.workspace
 
-    opts.ctx.verifyRole(["OWNER", "ADMIN"])
+    opts.ctx.verifyRole(["OWNER"])
 
-    if (!workspace) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Workspace not found",
-      })
-    }
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: workspace.unPriceCustomerId,
+      featureSlug: "access-pro",
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: false,
+      throwOnNoAccess: false,
+    })
 
     const deletedInvite = await opts.ctx.db
       .delete(schema.invites)

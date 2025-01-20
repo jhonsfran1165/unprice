@@ -6,6 +6,7 @@ import { hashStringSHA256 } from "@unprice/db/utils"
 import { selectApiKeySchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const roll = protectedProjectProcedure
   .input(z.object({ id: z.string() }))
@@ -17,6 +18,18 @@ export const roll = protectedProjectProcedure
   .mutation(async (opts) => {
     const { id } = opts.input
     const project = opts.ctx.project
+    const customerId = project.workspace.unPriceCustomerId
+    const featureSlug = "apikeys"
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: project.workspace.isInternal,
+      throwOnNoAccess: false,
+    })
 
     const apiKey = await opts.ctx.db.query.apikeys.findFirst({
       where: (apikey, { eq, and }) => and(eq(apikey.id, id), eq(apikey.projectId, project.id)),

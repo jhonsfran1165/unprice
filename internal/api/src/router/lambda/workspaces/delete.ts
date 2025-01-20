@@ -4,6 +4,7 @@ import * as schema from "@unprice/db/schema"
 import { workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedWorkspaceProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 import { signOutCustomer } from "../../../utils/shared"
 
 export const deleteWorkspace = protectedWorkspaceProcedure
@@ -13,7 +14,17 @@ export const deleteWorkspace = protectedWorkspaceProcedure
     const { id } = opts.input
     const workspace = opts.ctx.workspace
 
-    opts.ctx.verifyRole(["OWNER", "ADMIN"])
+    opts.ctx.verifyRole(["OWNER"])
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: workspace.unPriceCustomerId,
+      featureSlug: "access-pro",
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: false,
+      throwOnNoAccess: false,
+    })
 
     if (workspace.isMain) {
       throw new TRPCError({
