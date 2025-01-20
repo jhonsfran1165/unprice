@@ -18,12 +18,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@t3-oss/env-nextjs": "0.9.1",
+    "@t3-oss/env-nextjs": "0.11.1",
     "@unprice/ui": "0.1.0",
-    "zod": "^3.23.8"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@unprice/tsconfig": "workspace:*",
-    "typescript": "^5.3.3"
+    "typescript": "^5.7.3"
   }
 }

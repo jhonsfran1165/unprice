@@ -2,11 +2,11 @@
   "name": "unprice",
   "private": true,
   "engines": {
-    "node": "20.x"
+    "node": "20.18.1"
   },
   "workspaces": ["apps/*", "packages/*"],
   "engineStrict": true,
-  "packageManager": "pnpm@8.15.4",
+  "packageManager": "pnpm@8.15.9",
   "scripts": {
     "build": "turbo run build",
     "clean": "git clean -xdf node_modules dist .next",
@@ -27,18 +27,18 @@
     "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
-    "@biomejs/biome": "1.7.3",
-    "@changesets/cli": "^2.27.7",
-    "@manypkg/cli": "^0.21.2",
-    "@turbo/gen": "^1.12.4",
-    "@types/node": "20.11.24",
+    "@biomejs/biome": "1.9.4",
+    "@changesets/cli": "^2.27.11",
+    "@manypkg/cli": "^0.23.0",
+    "@turbo/gen": "^1.13.4",
+    "@types/node": "20.17.14",
     "cross-env": "^7.0.3",
     "cz-conventional-changelog": "^3.3.0",
-    "husky": "^9.1.4",
-    "knip": "^5.17.4",
-    "lint-staged": "^15.2.9",
+    "husky": "^9.1.7",
+    "knip": "^5.42.2",
+    "lint-staged": "^15.4.1",
     "turbo": "2.3.3",
-    "typescript": "^5.3.3"
+    "typescript": "^5.7.3"
   },
   "lint-staged": {
     "*": ["pnpm validate"]
