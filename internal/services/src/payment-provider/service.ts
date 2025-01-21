@@ -26,6 +26,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
   private readonly logger: Logger
   private readonly paymentProvider: PaymentProvider
   private readonly stripe: StripePaymentProvider
+  private readonly providerCustomerId?: string
 
   constructor(opts: {
     token: string
@@ -40,6 +41,8 @@ export class PaymentProviderService implements PaymentProviderInterface {
       case "stripe": {
         const providerCustomerId = opts.customer?.stripeCustomerId
 
+        this.providerCustomerId = providerCustomerId ?? undefined
+
         this.stripe = new StripePaymentProvider({
           token: opts.token,
           providerCustomerId: providerCustomerId,
@@ -52,8 +55,8 @@ export class PaymentProviderService implements PaymentProviderInterface {
     }
   }
 
-  public getCustomerId(): string {
-    return this.paymentProvider
+  public getCustomerId(): string | undefined {
+    return this.providerCustomerId
   }
 
   public setCustomerId(customerId: string) {

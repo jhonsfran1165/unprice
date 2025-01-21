@@ -10,7 +10,6 @@ import { planVersionFeatureRouter } from "./planVersionFeatures"
 import { planVersionRouter } from "./planVersions"
 import { planRouter } from "./plans"
 import { projectRouter } from "./projects"
-import { stripeRouter } from "./stripe"
 import { subscriptionRouter } from "./subscriptions"
 import { workspaceRouter } from "./workspaces"
 
@@ -30,7 +29,6 @@ export const lambdaEndpoints = {
   features: featureRouter,
   subscriptions: subscriptionRouter,
   domains: domainRouter,
-  stripe: stripeRouter,
   customers: customersRouter,
   pages: pageRouter,
   paymentProvider: paymentProviderRouter,

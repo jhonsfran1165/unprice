@@ -11,6 +11,7 @@ import {
 } from "@unprice/db/validators"
 
 import { protectedProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const getSubscriptionsBySlug = protectedProjectProcedure
   .input(z.object({ slug: z.string() }))
@@ -29,6 +30,20 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
     const { slug } = opts.input
     const project = opts.ctx.project
     const customerColumns = getTableColumns(schema.customers)
+    const workspace = opts.ctx.project.workspace
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "plans"
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: workspace.isInternal,
+      // getSubscriptionsBySlug endpoint does not need to throw an error
+      throwOnNoAccess: false,
+    })
 
     const plan = await opts.ctx.db.query.plans.findFirst({
       where: (plan, { eq, and }) => and(eq(plan.slug, slug), eq(plan.projectId, project.id)),

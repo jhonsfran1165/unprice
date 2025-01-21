@@ -80,6 +80,7 @@ export const getEntitlementsByDateQuery = async ({
     query: "getEntitlementsByDate",
     duration: end - start,
     service: "customer",
+    customerId,
   })
 
   return entitlements
@@ -162,6 +163,8 @@ export const getEntitlementByDateQuery = async ({
     query: "getEntitlementByDate",
     duration: end - start,
     service: "customer",
+    customerId,
+    featureSlug,
   })
 
   return entitlement

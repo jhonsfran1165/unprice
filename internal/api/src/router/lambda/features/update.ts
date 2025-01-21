@@ -4,6 +4,7 @@ import * as schema from "@unprice/db/schema"
 import { featureSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const update = protectedProjectProcedure
   .input(
@@ -15,6 +16,17 @@ export const update = protectedProjectProcedure
   .mutation(async (opts) => {
     const { title, id, description } = opts.input
     const project = opts.ctx.project
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: project.workspace.unPriceCustomerId,
+      featureSlug: "features",
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: project.workspace.isInternal,
+      // getById endpoint does not need to throw an error
+      throwOnNoAccess: false,
+    })
 
     const featureData = await opts.ctx.db.query.features.findFirst({
       where: (feature, { eq, and }) => and(eq(feature.id, id), eq(feature.projectId, project.id)),

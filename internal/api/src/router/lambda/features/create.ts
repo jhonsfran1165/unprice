@@ -4,8 +4,9 @@ import { z } from "zod"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import { featureInsertBaseSchema, featureSelectBaseSchema } from "@unprice/db/validators"
-
 import { protectedProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
+import { reportUsageFeature } from "../../../utils/shared"
 
 export const create = protectedProjectProcedure
   .input(featureInsertBaseSchema)
@@ -13,6 +14,17 @@ export const create = protectedProjectProcedure
   .mutation(async (opts) => {
     const { description, slug, title } = opts.input
     const project = opts.ctx.project
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: project.workspace.unPriceCustomerId,
+      featureSlug: "features",
+      ctx: opts.ctx,
+      noCache: true,
+      // update usage when creating a feature
+      updateUsage: true,
+      isInternal: project.workspace.isInternal,
+    })
 
     const featureId = utils.newId("feature")
 
@@ -34,6 +46,17 @@ export const create = protectedProjectProcedure
         message: "Error creating feature",
       })
     }
+
+    opts.ctx.waitUntil(
+      // report usage for the new project in background
+      reportUsageFeature({
+        customerId: project.workspace.unPriceCustomerId,
+        featureSlug: "features",
+        usage: 1, // the new project
+        ctx: opts.ctx,
+        isInternal: project.workspace.isInternal,
+      })
+    )
 
     return {
       feature: featureData,

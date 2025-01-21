@@ -6,6 +6,7 @@ import * as schema from "@unprice/db/schema"
 import { planInsertBaseSchema, planSelectBaseSchema } from "@unprice/db/validators"
 
 import { protectedProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const update = protectedProjectProcedure
   .input(planInsertBaseSchema.required({ id: true }))
@@ -17,9 +18,23 @@ export const update = protectedProjectProcedure
   .mutation(async (opts) => {
     const { id, description, active, defaultPlan, enterprisePlan } = opts.input
     const project = opts.ctx.project
+    const workspace = opts.ctx.project.workspace
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "plans"
 
     // only owner and admin can update a plan
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: workspace.isInternal,
+      // update endpoint does not need to throw an error
+      throwOnNoAccess: false,
+    })
 
     if (defaultPlan && enterprisePlan) {
       throw new TRPCError({

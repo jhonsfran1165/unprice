@@ -84,7 +84,6 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
         token: decryptedKey,
       })
 
-      const defaultPaymentMethodId = await paymentProviderService.getDefaultPaymentMethodId()
       const customerId = paymentProviderService.getCustomerId()
 
       if (!customerId) {
@@ -92,6 +91,8 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
           paymentMethods: [],
         }
       }
+
+      const defaultPaymentMethodId = await paymentProviderService.getDefaultPaymentMethodId()
 
       if (defaultPaymentMethodId.err) {
         throw new TRPCError({

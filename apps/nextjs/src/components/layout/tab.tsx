@@ -76,22 +76,12 @@ export function ShortLink({
   href: string
   children: React.ReactNode
 }) {
-  const pathname = usePathname()
-
-  const isActive = (itemHref: string) => {
-    return pathname === itemHref
-  }
-
   return (
     <SuperLink
       href={href}
       className={cn(
         "flex items-center gap-x-2.5 rounded-md px-2 py-1.5 font-medium text-sm transition",
-        focusRing,
-        {
-          "bg-background-bgHover text-background-textContrast": isActive(href),
-          "hover:text-background-textContrast": !isActive(href),
-        }
+        focusRing
       )}
     >
       {children}

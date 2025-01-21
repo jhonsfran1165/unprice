@@ -4,8 +4,9 @@ import { z } from "zod"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import { planInsertBaseSchema, planSelectBaseSchema } from "@unprice/db/validators"
-
 import { protectedProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
+import { reportUsageFeature } from "../../../utils/shared"
 
 export const create = protectedProjectProcedure
   .input(planInsertBaseSchema)
@@ -17,6 +18,23 @@ export const create = protectedProjectProcedure
   .mutation(async (opts) => {
     const { slug, description, defaultPlan, enterprisePlan } = opts.input
     const project = opts.ctx.project
+    const workspace = opts.ctx.project.workspace
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "plans"
+
+    // only owner and admin can create a plan
+    opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      noCache: true,
+      // update usage when creating a plan
+      updateUsage: true,
+      isInternal: workspace.isInternal,
+    })
 
     const planId = utils.newId("plan")
 
@@ -78,6 +96,17 @@ export const create = protectedProjectProcedure
         message: "error creating plan",
       })
     }
+
+    opts.ctx.waitUntil(
+      // report usage for the new plan in background
+      reportUsageFeature({
+        customerId,
+        featureSlug,
+        usage: 1, // the new plan
+        ctx: opts.ctx,
+        isInternal: workspace.isInternal,
+      })
+    )
 
     return {
       plan: planData,

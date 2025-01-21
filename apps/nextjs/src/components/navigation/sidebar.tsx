@@ -56,8 +56,8 @@ export function Sidebar({
               <span className="font-medium text-background-solid text-xs leading-6">Shortcuts</span>
               <ul aria-label="shortcuts" className="space-y-0.5">
                 {shortcuts.map((item) => (
-                  <li key={baseUrl + item.name}>
-                    <ShortLink href={item.href}>
+                  <li key={`${baseUrl}/${item.href}`}>
+                    <ShortLink href={`${baseUrl}/${item.href}`}>
                       <item.icon className="size-3 shrink-0" aria-hidden="true" />
                       {item.name}
                     </ShortLink>
@@ -118,8 +118,8 @@ export function Sidebar({
                 </span>
                 <ul aria-label="shortcuts" className="space-y-0.5">
                   {shortcuts.map((item) => (
-                    <li key={item.name}>
-                      <ShortLink href={item.href}>
+                    <li key={`${baseUrl}/${item.href}`}>
+                      <ShortLink href={`${baseUrl}/${item.href}`}>
                         <item.icon className="size-3 shrink-0" aria-hidden="true" />
                         {item.name}
                       </ShortLink>

@@ -3,7 +3,6 @@
 import { Button } from "@unprice/ui/button"
 import { Typography } from "@unprice/ui/typography"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
 import Balancer from "react-wrap-balancer"
 import { BlurImage } from "~/components/blur-image"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
@@ -13,14 +12,12 @@ export default function ErrorPage({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
+  error: Error & { digest?: string; code?: string }
   reset: () => void
 }) {
-  useEffect(() => {
-    // Log the error to an error reporting service
-    console.error(error)
-  }, [error])
   const router = useRouter()
+
+  const update = error.message.includes("not found in subscription")
 
   return (
     <DashboardShell>
@@ -43,12 +40,21 @@ export default function ErrorPage({
           </EmptyPlaceholder.Description>
           <EmptyPlaceholder.Action>
             <div className="mt-6 flex flex-row items-center justify-center gap-10">
-              <Button variant="primary" onClick={() => reset()}>
-                Try again
-              </Button>
-              <Button variant="default" onClick={() => router.back()}>
-                Back
-              </Button>
+              {/* TODO: add update subscription button */}
+              {update ? (
+                <Button variant="primary" onClick={() => reset()}>
+                  Update subscription
+                </Button>
+              ) : (
+                <>
+                  <Button variant="primary" onClick={() => reset()}>
+                    Try again
+                  </Button>
+                  <Button variant="default" onClick={() => router.back()}>
+                    Back
+                  </Button>
+                </>
+              )}
             </div>
           </EmptyPlaceholder.Action>
         </EmptyPlaceholder>

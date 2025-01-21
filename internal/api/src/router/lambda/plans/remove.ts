@@ -4,8 +4,9 @@ import { z } from "zod"
 import { and, eq, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { planSelectBaseSchema } from "@unprice/db/validators"
-
 import { protectedProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
+import { reportUsageFeature } from "../../../utils/shared"
 
 export const remove = protectedProjectProcedure
   .input(planSelectBaseSchema.pick({ id: true }))
@@ -13,6 +14,21 @@ export const remove = protectedProjectProcedure
   .mutation(async (opts) => {
     const { id } = opts.input
     const project = opts.ctx.project
+    const workspace = opts.ctx.project.workspace
+    opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: workspace.unPriceCustomerId,
+      featureSlug: "plans",
+      ctx: opts.ctx,
+      noCache: true,
+      // update usage when deleting a project
+      updateUsage: true,
+      isInternal: workspace.isInternal,
+      // delete endpoint does not need to throw an error
+      throwOnNoAccess: false,
+    })
 
     const countVersionsPlan = await opts.ctx.db
       .select({ count: sql<number>`count(*)` })
@@ -39,6 +55,17 @@ export const remove = protectedProjectProcedure
         message: "Error deleting plan",
       })
     }
+
+    opts.ctx.waitUntil(
+      // report usage for the new project in background
+      reportUsageFeature({
+        customerId: workspace.unPriceCustomerId,
+        featureSlug: "plans",
+        usage: -1, // the deleted plan
+        ctx: opts.ctx,
+        isInternal: workspace.isInternal,
+      })
+    )
 
     return {
       plan: deletedPlan,
