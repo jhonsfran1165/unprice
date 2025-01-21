@@ -9,6 +9,7 @@ import { isZero } from "dinero.js"
 import { z } from "zod"
 import { env } from "../../../env.mjs"
 import { protectedProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const publish = protectedProjectProcedure
   .input(planVersionSelectBaseSchema.partial().required({ id: true }))
@@ -21,9 +22,21 @@ export const publish = protectedProjectProcedure
     const { id } = opts.input
 
     const project = opts.ctx.project
+    const workspace = opts.ctx.project.workspace
 
     // only owner and admin can publish a plan version
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: workspace.unPriceCustomerId,
+      featureSlug: "plan-versions",
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: workspace.isInternal,
+      // publish endpoint does not need to throw an error
+      throwOnNoAccess: false,
+    })
 
     const planVersionData = await opts.ctx.db.query.versions.findFirst({
       with: {

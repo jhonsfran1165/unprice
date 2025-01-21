@@ -400,8 +400,7 @@ export class CustomerService {
       if (res.err) {
         const error = res.err
 
-        this.logger.error("Error in ve", {
-          error: JSON.stringify(error),
+        this.logger.error(`Error in verifyEntitlement: ${error.message}`, {
           customerId: opts.customerId,
           featureSlug: opts.featureSlug,
         })

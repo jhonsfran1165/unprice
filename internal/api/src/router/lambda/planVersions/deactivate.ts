@@ -4,6 +4,7 @@ import * as schema from "@unprice/db/schema"
 import { planVersionSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
 
 export const deactivate = protectedProjectProcedure
   .input(
@@ -17,9 +18,20 @@ export const deactivate = protectedProjectProcedure
   .mutation(async (opts) => {
     const { id } = opts.input
     const project = opts.ctx.project
-
+    const workspace = opts.ctx.project.workspace
     // only owner and admin can deactivate a plan version
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: workspace.unPriceCustomerId,
+      featureSlug: "plan-versions",
+      ctx: opts.ctx,
+      noCache: true,
+      isInternal: workspace.isInternal,
+      // deactivate endpoint does not need to throw an error
+      throwOnNoAccess: false,
+    })
 
     const planVersionData = await opts.ctx.db.query.versions.findFirst({
       where: (version, { and, eq }) => and(eq(version.id, id), eq(version.projectId, project.id)),

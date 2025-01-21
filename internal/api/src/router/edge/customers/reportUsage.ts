@@ -1,9 +1,9 @@
 import * as utils from "@unprice/db/utils"
 import { z } from "zod"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
+import { protectedApiOrActiveWorkspaceProcedure } from "../../../trpc"
 import { reportUsageFeature } from "../../../utils/shared"
 
-export const reportUsage = protectedApiOrActiveProjectProcedure
+export const reportUsage = protectedApiOrActiveWorkspaceProcedure
   .meta({
     span: "customers.reportUsage",
     openapi: {
@@ -29,10 +29,9 @@ export const reportUsage = protectedApiOrActiveProjectProcedure
   )
   .query(async (opts) => {
     const { customerId, featureSlug, usage, idempotenceKey } = opts.input
-    const projectId = opts.ctx.project.id
 
     // this is to avoid reporting the same usage multiple times
-    const body = JSON.stringify({ customerId, featureSlug, usage, idempotenceKey, projectId })
+    const body = JSON.stringify({ customerId, featureSlug, usage, idempotenceKey })
     const hashKey = await utils.hashStringSHA256(body)
 
     // get result if it exists

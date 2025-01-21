@@ -184,6 +184,8 @@ export const t = initTRPC
         ...shape,
         data: {
           ...shape.data,
+          code: error.code,
+          cause: error.cause,
           zodError:
             error.code === "BAD_REQUEST" && error.cause instanceof ZodError
               ? error.cause.flatten()
@@ -303,6 +305,52 @@ export const protectedWorkspaceProcedure = protectedProcedure.use(
 
     return next({
       ctx: {
+        ...data,
+        session: {
+          ...ctx.session,
+        },
+      },
+    })
+  }
+)
+
+// for those endpoint that are used inside the app but they also can be used with an api key
+export const protectedApiOrActiveWorkspaceProcedure = publicProcedure.use(
+  async ({ ctx, next, getRawInput }) => {
+    const apikey = ctx.apikey
+
+    // Check db for API key if apiKey is present
+    if (apikey) {
+      const { apiKey } = await apikeyGuard({
+        apikey,
+        ctx,
+      })
+
+      return next({
+        ctx: {
+          // pass the project data to the context to ensure all changes are applied to the correct project
+          workspace: apiKey.project.workspace,
+          apiKey: apiKey,
+        },
+      })
+    }
+
+    // if no api key is present, check if the user is logged in
+    if (!ctx.session?.user?.id) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "User or API key not found" })
+    }
+
+    const input = (await getRawInput()) as { workspaceSlug?: string }
+    const activeWorkspaceSlug = input?.workspaceSlug ?? ctx.activeWorkspaceSlug
+
+    const data = await workspaceGuard({
+      workspaceSlug: activeWorkspaceSlug,
+      ctx,
+    })
+
+    return next({
+      ctx: {
+        userId: ctx.session?.user.id,
         ...data,
         session: {
           ...ctx.session,

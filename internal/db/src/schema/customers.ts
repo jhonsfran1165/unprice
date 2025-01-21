@@ -52,6 +52,11 @@ export const customers = pgTableProject(
       columns: [table.id, table.projectId],
       name: "pk_customer",
     }),
+    projectfk: foreignKey({
+      columns: [table.projectId],
+      foreignColumns: [projects.id],
+      name: "project_id_fkey",
+    }),
   })
 )
 
@@ -132,7 +137,7 @@ export const customerEntitlements = pgTableProject(
     }),
     projectfk: foreignKey({
       columns: [table.projectId],
-      foreignColumns: [customers.projectId],
+      foreignColumns: [projects.id],
       name: "project_id_fkey",
     }),
   })
@@ -177,7 +182,7 @@ export const customerCredits = pgTableProject(
       .where(eq(table.active, true)),
     projectfk: foreignKey({
       columns: [table.projectId],
-      foreignColumns: [customers.projectId],
+      foreignColumns: [projects.id],
       name: "project_id_fkey",
     }),
   })

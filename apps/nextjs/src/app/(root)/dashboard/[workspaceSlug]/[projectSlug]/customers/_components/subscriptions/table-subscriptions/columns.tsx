@@ -161,7 +161,7 @@ export const columns: ColumnDef<Subscription>[] = [
             <TooltipTrigger asChild>
               <AlertCircle className="size-4 font-light text-muted-foreground" />
             </TooltipTrigger>
-            <TooltipContent align="start" side="right" sideOffset={10} alignOffset={-5}>
+            <TooltipContent align="start" side="bottom" sideOffset={10} alignOffset={-5}>
               <div className="flex flex-col gap-1">
                 <Typography variant="p" affects="removePaddingMargin" className="font-semibold">
                   Timezone: {row.original.timezone}

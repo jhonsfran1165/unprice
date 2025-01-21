@@ -100,7 +100,10 @@
     "**/.trigger": true,
     "**/dist": true,
     "**/build": true,
-    "**/.turbo": true
+    "**/.turbo": true,
+    "**/.vercel": true,
+    "**/.nitro": true,
+    "**/tsconfig.tsbuildinfo": true
   },
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"

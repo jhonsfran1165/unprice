@@ -5,6 +5,8 @@ import * as utils from "@unprice/db/utils"
 import { planVersionSelectBaseSchema, versionInsertBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedProjectProcedure } from "../../../trpc"
+import { featureGuard } from "../../../utils/feature-guard"
+import { reportUsageFeature } from "../../../utils/shared"
 
 export const create = protectedProjectProcedure
   .input(versionInsertBaseSchema)
@@ -33,9 +35,23 @@ export const create = protectedProjectProcedure
       autoRenew,
     } = opts.input
     const project = opts.ctx.project
+    const workspace = opts.ctx.project.workspace
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "plan-versions"
 
     // only owner and admin can create a plan version
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      noCache: true,
+      // update usage when creating a plan version
+      updateUsage: true,
+      isInternal: workspace.isInternal,
+    })
 
     const planData = await opts.ctx.db.query.plans.findFirst({
       where: (plan, { eq, and }) => and(eq(plan.id, planId), eq(plan.projectId, project.id)),
@@ -75,12 +91,11 @@ export const create = protectedProjectProcedure
             currency,
             paymentMethodRequired,
             autoRenew: autoRenew ?? true,
-            // TODO: check if this is ok
-            billingPeriod: billingPeriod ?? "month",
+            billingPeriod: billingPeriod,
             trialDays: trialDays ?? 0,
             startCycle: startCycle ?? 1,
             gracePeriod: gracePeriod ?? 0,
-            whenToBill: whenToBill ?? "pay_in_advance",
+            whenToBill: whenToBill,
             metadata,
             version: Number(countVersionsPlan) + 1,
           })
@@ -117,6 +132,17 @@ export const create = protectedProjectProcedure
         })
       }
     })
+
+    opts.ctx.waitUntil(
+      // report usage for the new project in background
+      reportUsageFeature({
+        customerId,
+        featureSlug,
+        usage: 1, // the new project
+        ctx: opts.ctx,
+        isInternal: workspace.isInternal,
+      })
+    )
 
     return {
       planVersion: planVersionData,

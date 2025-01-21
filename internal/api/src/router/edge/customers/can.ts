@@ -1,10 +1,10 @@
 import type { FeatureType } from "@unprice/db/validators"
 import { deniedReasonSchema } from "@unprice/services/customers"
 import { z } from "zod"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
+import { protectedApiOrActiveWorkspaceProcedure } from "../../../trpc"
 import { featureGuard } from "../../../utils/feature-guard"
 
-export const can = protectedApiOrActiveProjectProcedure
+export const can = protectedApiOrActiveWorkspaceProcedure
   .meta({
     span: "customers.can",
     openapi: {

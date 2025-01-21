@@ -105,7 +105,7 @@ export const featureGuard = async ({
   ) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: `You don't have access to this feature ${val.deniedReason}. Please upgrade your plan.`,
+      message: `This feature ${featureSlug} not found in your subscription. Please upgrade your plan.`,
     })
   }
 

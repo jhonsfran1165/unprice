@@ -31,7 +31,7 @@ export function SubscriptionForm({
 }) {
   const router = useRouter()
   const isEdit = !!defaultValues.id
-  const isInactive = !defaultValues.active
+  const isInactive = isEdit && !defaultValues.active
 
   const { workspaceSlug, projectSlug } = useParams()
 

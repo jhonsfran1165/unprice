@@ -7,6 +7,7 @@ import {
 import { z } from "zod"
 import { protectedProcedure } from "../../../trpc"
 
+// global endpoint, no need to check for feature access
 export const listByProjectId = protectedProcedure
   .input(
     z.object({
