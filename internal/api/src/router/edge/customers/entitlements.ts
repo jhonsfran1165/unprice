@@ -15,7 +15,6 @@ export const entitlements = protectedApiOrActiveWorkspaceProcedure
   .input(
     z.object({
       customerId: z.string(),
-      workspaceSlug: z.string().optional(),
       noCache: z.boolean().optional(),
     })
   )
@@ -30,7 +29,7 @@ export const entitlements = protectedApiOrActiveWorkspaceProcedure
     })
   )
   .query(async (opts) => {
-    const { customerId, workspaceSlug } = opts.input
+    const { customerId } = opts.input
 
     const res = await getEntitlements({
       customerId,

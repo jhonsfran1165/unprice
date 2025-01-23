@@ -12,10 +12,10 @@ import { ScrollArea } from "@unprice/ui/scroll-area"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { useDebounce } from "~/hooks/use-debounce"
+import { usePlanFeaturesList } from "~/hooks/use-features"
 import { api } from "~/trpc/client"
 import { FeatureDialog } from "../../_components/feature-dialog"
 import { SortableFeature } from "../../_components/sortable-feature"
-import { usePlanFeaturesList } from "../../_components/use-features"
 
 interface FeatureListProps {
   featuresPromise: Promise<RouterOutputs["features"]["searchBy"]>

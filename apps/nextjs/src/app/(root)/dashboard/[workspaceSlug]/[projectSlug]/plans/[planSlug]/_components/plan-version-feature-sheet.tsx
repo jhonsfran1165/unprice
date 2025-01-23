@@ -11,7 +11,7 @@ import {
   SheetTrigger,
 } from "@unprice/ui/sheet"
 
-import { usePlanVersionFeatureOpen } from "../../_components/use-features"
+import { usePlanVersionFeatureOpen } from "~/hooks/use-features"
 import { FeatureConfig } from "./feature-config"
 
 export function PlanVersionFeatureSheet({

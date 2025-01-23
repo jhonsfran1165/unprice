@@ -1,9 +1,8 @@
 import { TooltipProvider } from "@unprice/ui/tooltip"
 
 import { allEndpointsProcedures } from "@unprice/api/routes"
-import { getSession } from "@unprice/auth/server-rsc"
+import { Provider } from "jotai"
 import { Fragment, type ReactNode } from "react"
-import { EntitlementProvider } from "~/components/entitlement-provider"
 import { TailwindIndicator } from "~/components/layout/tailwind-indicator"
 import { ToasterProvider } from "~/components/layout/theme-provider"
 import { TRPCReactProvider } from "~/trpc/client"
@@ -19,13 +18,11 @@ export default async function DashboardLayout({
   sidebar: ReactNode
   header: ReactNode
 }) {
-  const session = await getSession()
-
   return (
     <Fragment>
       <TRPCReactProvider allEndpointsProcedures={allEndpointsProcedures}>
         <TooltipProvider delayDuration={300}>
-          <EntitlementProvider session={session}>
+          <Provider>
             <div className="flex h-screen flex-col lg:flex-row">
               {sidebar}
               <main className="flex w-full flex-1 flex-col overflow-hidden">
@@ -34,7 +31,7 @@ export default async function DashboardLayout({
                 <div className="hide-scrollbar flex-grow overflow-y-auto">{children}</div>
               </main>
             </div>
-          </EntitlementProvider>
+          </Provider>
         </TooltipProvider>
       </TRPCReactProvider>
       <ToasterProvider />

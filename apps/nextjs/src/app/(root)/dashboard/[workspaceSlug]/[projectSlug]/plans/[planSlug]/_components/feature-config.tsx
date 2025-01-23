@@ -3,7 +3,7 @@
 import { Separator } from "@unprice/ui/separator"
 
 import { CopyButton } from "~/components/copy-button"
-import { useActiveFeature, useActivePlanVersion } from "../../_components/use-features"
+import { useActiveFeature, useActivePlanVersion } from "~/hooks/use-features"
 import { FeatureConfigForm } from "./feature-config-form"
 
 export function FeatureConfig({

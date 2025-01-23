@@ -18,9 +18,9 @@ import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { useEntitlement } from "~/components/entitlement-provider"
 import { FilterScroll } from "~/components/filter-scroll"
 import { SuperLink } from "~/components/super-link"
+import { useEntitlement } from "~/hooks/use-entitlement"
 import { api } from "~/trpc/client"
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 
@@ -184,7 +184,7 @@ export function WorkspaceSwitcher({
                     </SuperLink>
                   </TooltipTrigger>
                   <TooltipContent align="start" side="bottom" sideOffset={10} alignOffset={-5}>
-                    <div className="flex max-w-[200px] flex-col gap-4 py-4">
+                    <div className="flex max-w-[200px] flex-col gap-4 py-2">
                       <Typography variant="p" className="text-center">
                         {workspacesRemaining === 0
                           ? "You have reached the limit of workspaces"
