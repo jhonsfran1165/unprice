@@ -10,6 +10,7 @@ export const env = createEnv({
     VERCEL_TEAM_ID: z.string(),
     VERCEL_TOKEN: z.string(),
     TINYBIRD_TOKEN: z.string(),
+    TINYBIRD_URL: z.string(),
     BASELIME_APIKEY: z.string(),
     ENCRYPTION_KEY: z.string(),
     EMIT_METRICS_LOGS: z

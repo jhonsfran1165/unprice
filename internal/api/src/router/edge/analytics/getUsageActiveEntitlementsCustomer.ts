@@ -26,6 +26,7 @@ export const getUsageActiveEntitlementsCustomer = protectedApiOrActiveProjectPro
       customerId,
       ctx: opts.ctx,
       includeCustom: true,
+      updateUsage: false,
     })
 
     return {

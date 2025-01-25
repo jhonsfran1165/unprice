@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# Please Use Google Shell Style: https://google.github.io/styleguide/shell.xml
+
+# ---- Start unofficial bash strict mode boilerplate
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -o errexit  # always exit on error
+set -o errtrace # trap errors in functions as well
+set -o pipefail # don't ignore exit codes when piping output
+set -o posix    # more strict failures in subshells
+# set -x          # enable debugging
+
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+echo "Starting up"
+
+docker-compose up -d
+
+# check if tinybird http://localhost:8080 is running
+if ! curl -s http://localhost:8080 > /dev/null 2>&1; then
+  echo "Tinybird is not running, you need to wait for it to start"
+  exit 1
+fi
+
+# We need to override on development some variables so we can work with local first tools.
+TB_TOKEN=$(curl -s http://localhost:8080/tokens | jq -r ".workspace_admin_token")
+# override tinybird host
+TB_HOST="http://localhost:8080"
+REDIS_URL="http://localhost:8079"
+REDIS_TOKEN="example_token"
+
+echo "TINYBIRD_TOKEN=$TB_TOKEN"
+echo "TINYBIRD_URL=$TB_HOST"
+echo "UPSTASH_REDIS_REST_URL=$REDIS_URL"
+echo "UPSTASH_REDIS_REST_TOKEN=$REDIS_TOKEN"
+
+infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" UPSTASH_REDIS_REST_URL="$REDIS_URL" UPSTASH_REDIS_REST_TOKEN="$REDIS_TOKEN" pnpm run dev

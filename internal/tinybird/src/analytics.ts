@@ -1,6 +1,5 @@
 import { NoopTinybird, Tinybird } from "@chronark/zod-bird"
 import { z } from "zod"
-
 import { auditLogSchemaV1, featureUsageSchemaV1, featureVerificationSchemaV1 } from "./validators"
 
 export class Analytics {
@@ -11,6 +10,7 @@ export class Analytics {
   constructor(opts: {
     emit: boolean
     tinybirdToken?: string
+    tinybirdUrl: string
     tinybirdProxy?: {
       url: string
       token: string
@@ -18,7 +18,7 @@ export class Analytics {
   }) {
     this.readClient =
       opts.tinybirdToken && opts.emit
-        ? new Tinybird({ token: opts.tinybirdToken })
+        ? new Tinybird({ token: opts.tinybirdToken, baseUrl: opts.tinybirdUrl })
         : new NoopTinybird()
 
     this.writeClient =
@@ -85,6 +85,85 @@ export class Analytics {
       data: z.object({
         featureSlug: z.string(),
         total: z.number(),
+      }),
+      opts: {
+        cache: "no-store",
+      },
+    })
+  }
+
+  public get getTotalUsagePerEntitlementPeriod() {
+    return this.readClient.buildPipe({
+      pipe: "get_total_usage_per_entitlement_period__v1",
+      parameters: z.object({
+        entitlementId: z.string(),
+        customerId: z.string(),
+        projectId: z.string(),
+        start: z.number(),
+        end: z.number(),
+      }),
+      data: z.object({
+        sum: z.number(),
+        max: z.number(),
+        count: z.number(),
+        last_during_period: z.number(),
+      }),
+      opts: {
+        cache: "no-store",
+      },
+    })
+  }
+
+  public get getTotalUsagePerEntitlementAll() {
+    return this.readClient.buildPipe({
+      pipe: "get_total_usage_per_entitlement_all__v1",
+      parameters: z.object({
+        entitlementId: z.string(),
+        customerId: z.string(),
+        projectId: z.string(),
+      }),
+      data: z.object({
+        sum_all: z.number(),
+        count_all: z.number(),
+        max_all: z.number(),
+      }),
+    })
+  }
+
+  public get getTotalUsagePerBillableFeaturePeriod() {
+    return this.readClient.buildPipe({
+      pipe: "get_total_usage_per_billable_feature_period__v1",
+      parameters: z.object({
+        subscriptionItemId: z.string(),
+        customerId: z.string(),
+        projectId: z.string(),
+        start: z.number(),
+        end: z.number(),
+      }),
+      data: z.object({
+        sum: z.number(),
+        max: z.number(),
+        count: z.number(),
+        last_during_period: z.number(),
+      }),
+      opts: {
+        cache: "no-store",
+      },
+    })
+  }
+
+  public get getTotalUsagePerBillableFeatureAll() {
+    return this.readClient.buildPipe({
+      pipe: "get_total_usage_per_billable_feature_all__v1",
+      parameters: z.object({
+        subscriptionItemId: z.string(),
+        customerId: z.string(),
+        projectId: z.string(),
+      }),
+      data: z.object({
+        sum_all: z.number(),
+        count_all: z.number(),
+        max_all: z.number(),
       }),
       opts: {
         cache: "no-store",

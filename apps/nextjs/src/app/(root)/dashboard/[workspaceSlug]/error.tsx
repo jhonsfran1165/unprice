@@ -1,8 +1,8 @@
 "use client"
+
 import { Button } from "@unprice/ui/button"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import Balancer from "react-wrap-balancer"
 import { BlurImage } from "~/components/blur-image"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -53,10 +53,8 @@ export default function ErrorPage({
               className="invert-0 filter dark:invert"
             />
           </EmptyPlaceholder.Icon>
-          <EmptyPlaceholder.Description>
-            <Balancer>
-              <span className="mx-auto w-1/2 items-center justify-center py-4">{errorMessage}</span>
-            </Balancer>
+          <EmptyPlaceholder.Description className="mx-auto w-1/3 text-center">
+            {errorMessage}
           </EmptyPlaceholder.Description>
           <EmptyPlaceholder.Action>
             <div className="mt-6 flex flex-row items-center justify-center gap-10">

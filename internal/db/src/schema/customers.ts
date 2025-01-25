@@ -73,6 +73,7 @@ export const customerEntitlements = pgTableProject(
     customerId: cuid("customer_id").notNull(),
     // subscriptionItemId is the id of the subscription item that the customer is entitled to
     subscriptionItemId: cuid("subscription_item_id"),
+    // TODO: we need to add a subscriptionId to the entitlement?
     // featurePlanVersionId is the id of the feature plan version that the customer is entitled to
     featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
 

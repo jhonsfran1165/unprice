@@ -51,7 +51,7 @@ export class SubscriptionService {
   private subscription: Subscription | undefined
   private customer: Customer | undefined
   private initialized = false
-
+  private customerService: CustomerService
   constructor({
     db,
     cache,
@@ -73,6 +73,17 @@ export class SubscriptionService {
     this.logger = logger
     this.waitUntil = waitUntil
     this.analytics = analytics
+
+    const customerService = new CustomerService({
+      cache: this.cache,
+      db: this.db,
+      analytics: this.analytics,
+      logger: this.logger,
+      metrics: this.metrics,
+      waitUntil: this.waitUntil,
+    })
+
+    this.customerService = customerService
   }
 
   public async initPhaseMachines({
@@ -195,17 +206,8 @@ export class SubscriptionService {
       where: (sub, { eq, and }) => and(eq(sub.id, subscriptionId), eq(sub.projectId, projectId)),
     })
 
-    const customerService = new CustomerService({
-      cache: this.cache,
-      db: db ?? this.db,
-      metrics: this.metrics,
-      logger: this.logger,
-      waitUntil: this.waitUntil,
-      analytics: this.analytics,
-    })
-
     // get all the active entitlements for the customer
-    const { err, val } = await customerService.getEntitlementsByDate({
+    const { err, val } = await this.customerService.getEntitlementsByDate({
       customerId,
       // get the entitlements for the given date
       date: now,
@@ -213,6 +215,7 @@ export class SubscriptionService {
       noCache: true,
       // custom entitlements are not synced with the subscription items
       includeCustom: false,
+      updateUsage: false,
     })
 
     if (err) {
@@ -1226,18 +1229,9 @@ export class SubscriptionService {
       return Err(result.err)
     }
 
-    const customerService = new CustomerService({
-      cache: this.cache,
-      db: this.db,
-      analytics: this.analytics,
-      logger: this.logger,
-      metrics: this.metrics,
-      waitUntil: this.waitUntil,
-    })
-
     // once the subscription is created, we can update the cache
     this.waitUntil(
-      customerService.updateCacheAllCustomerEntitlementsByDate({
+      this.customerService.updateCacheAllCustomerEntitlementsByDate({
         customerId,
         date: Date.now(),
       })
@@ -1246,22 +1240,6 @@ export class SubscriptionService {
     const subscription = result.val
 
     return Ok(subscription)
-  }
-
-  private async updateEntitlementsUsage(subscription: Subscription) {
-    const customerService = new CustomerService({
-      cache: this.cache,
-      db: this.db,
-      analytics: this.analytics,
-      logger: this.logger,
-      metrics: this.metrics,
-      waitUntil: this.waitUntil,
-    })
-
-    await customerService.updateEntitlementsUsage({
-      customerId: subscription.customerId,
-      date: Date.now(),
-    })
   }
 
   public async renewSubscription(payload: {
@@ -1295,7 +1273,13 @@ export class SubscriptionService {
 
     // after any change in the subscription, we need to update the entitlements usage
     const subscription = activePhaseMachine.getSubscription()
-    await this.updateEntitlementsUsage(subscription)
+
+    this.waitUntil(
+      this.customerService.updateEntitlementsUsage({
+        customerId: subscription.customerId,
+        date: Date.now(),
+      })
+    )
 
     return Ok({
       phaseStatus: renew.status,

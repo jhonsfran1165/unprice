@@ -1322,21 +1322,30 @@ export class InvoiceStateMachine extends StateMachine<
           if (["flat", "tier", "package"].includes(item.featurePlanVersion.featureType)) {
             quantity = item.units! // all non usage features have a quantity the customer bought in the subscription
           } else {
-            const usage = await this.analytics
-              .getTotalUsagePerFeature({
-                featureSlug: item.featurePlanVersion.feature.slug,
-                subscriptionItemId: item.id,
-                projectId: subscription.projectId,
-                customerId: customer.id,
-                // get usage for the current cycle
-                start: cycleStartAt,
-                end: cycleEndAt,
-              })
-              .then((usage) => {
-                return usage.data[0]
-              })
+            const usage = item.featurePlanVersion.aggregationMethod.endsWith("_all")
+              ? await this.analytics
+                  .getTotalUsagePerBillableFeatureAll({
+                    subscriptionItemId: item.id,
+                    projectId: subscription.projectId,
+                    customerId: customer.id,
+                  })
+                  .then((usage) => usage.data[0])
+              : await this.analytics
+                  .getTotalUsagePerBillableFeaturePeriod({
+                    subscriptionItemId: item.id,
+                    projectId: subscription.projectId,
+                    customerId: customer.id,
+                    // get usage for the current cycle
+                    start: cycleStartAt,
+                    end: cycleEndAt,
+                  })
+                  .then((usage) => {
+                    return usage.data[0]
+                  })
 
-            const units = usage ? usage[item.featurePlanVersion.aggregationMethod] || 0 : 0
+            const units = usage
+              ? usage[item.featurePlanVersion.aggregationMethod as keyof typeof usage] || 0
+              : 0
 
             // the amount of units the customer used in the current cycle
             quantity = units
@@ -1350,18 +1359,27 @@ export class InvoiceStateMachine extends StateMachine<
             // this way we combine one single invoice for the cycle
             if (previousCycleStartAt && previousCycleEndAt) {
               // get usage for the current cycle
-              const usage = await this.analytics
-                .getTotalUsagePerFeature({
-                  featureSlug: item.featurePlanVersion.feature.slug,
-                  projectId: subscription.projectId,
-                  subscriptionItemId: item.id,
-                  customerId: customer.id,
-                  start: previousCycleStartAt,
-                  end: previousCycleEndAt,
-                })
-                .then((usage) => usage.data[0])
+              const usage = item.featurePlanVersion.aggregationMethod.endsWith("_all")
+                ? await this.analytics
+                    .getTotalUsagePerBillableFeatureAll({
+                      subscriptionItemId: item.id,
+                      customerId: customer.id,
+                      projectId: subscription.projectId,
+                    })
+                    .then((usage) => usage.data[0])
+                : await this.analytics
+                    .getTotalUsagePerBillableFeaturePeriod({
+                      subscriptionItemId: item.id,
+                      customerId: customer.id,
+                      projectId: subscription.projectId,
+                      start: previousCycleStartAt,
+                      end: previousCycleEndAt,
+                    })
+                    .then((usage) => usage.data[0])
 
-              const units = usage ? usage[item.featurePlanVersion.aggregationMethod] || 0 : 0
+              const units = usage
+                ? usage[item.featurePlanVersion.aggregationMethod as keyof typeof usage] || 0
+                : 0
 
               // the amount of units the customer used in the previous cycle
               quantity = units

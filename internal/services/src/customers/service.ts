@@ -53,13 +53,6 @@ export class CustomerService {
     >
   > {
     if (opts.noCache || !this.cache) {
-      if (opts.updateUsage) {
-        await this.updateEntitlementsUsage({
-          customerId: opts.customerId,
-          date: opts.date,
-        })
-      }
-
       const entitlement = await getEntitlementByDateQuery({
         customerId: opts.customerId,
         db: this.db,
@@ -80,20 +73,23 @@ export class CustomerService {
         )
       }
 
+      if (opts.updateUsage) {
+        this.waitUntil(
+          this.updateEntitlementUsage({
+            customerId: opts.customerId,
+            entitlementId: entitlement.id,
+            date: opts.date,
+          })
+        )
+      }
+
       return Ok(entitlement)
     }
 
     const res = await this.cache.featureByCustomerId.swr(
       `${opts.customerId}:${opts.featureSlug}`,
       async () => {
-        if (opts.updateUsage) {
-          await this.updateEntitlementsUsage({
-            customerId: opts.customerId,
-            date: opts.date,
-          })
-        }
-
-        return await getEntitlementByDateQuery({
+        const entitlement = await getEntitlementByDateQuery({
           customerId: opts.customerId,
           db: this.db,
           metrics: this.metrics,
@@ -102,6 +98,20 @@ export class CustomerService {
           featureSlug: opts.featureSlug,
           includeCustom: opts.includeCustom,
         })
+
+        if (!entitlement) {
+          return null
+        }
+
+        if (opts.updateUsage) {
+          this.updateEntitlementUsage({
+            customerId: opts.customerId,
+            entitlementId: entitlement.id,
+            date: opts.date,
+          })
+        }
+
+        return entitlement
       }
     )
 
@@ -181,12 +191,127 @@ export class CustomerService {
         // ),
         // save features
 
-        // we nned to think about the best way to cache the features
+        // we need to think about the best way to cache the features
         activeEntitlements.map((item) => {
           return this.cache?.featureByCustomerId.set(`${customerId}:${item.featureSlug}`, item)
         }),
       ])
     })
+  }
+
+  public async updateEntitlementUsage(opts: {
+    customerId: string
+    entitlementId: string
+    date: number
+  }) {
+    // get entitlement from the db
+    const entitlement = await this.db.query.customerEntitlements.findFirst({
+      with: {
+        subscriptionItem: {
+          with: {
+            subscriptionPhase: {
+              with: {
+                subscription: true,
+              },
+            },
+          },
+        },
+      },
+      where: (ent, { eq, and }) =>
+        and(eq(ent.id, opts.entitlementId), eq(ent.customerId, opts.customerId)),
+    })
+
+    if (!entitlement) {
+      this.logger.error("updateEntitlementUsage: entitlement not found", {
+        entitlementId: opts.entitlementId,
+        customerId: opts.customerId,
+      })
+
+      return
+    }
+
+    const activeSubscription = entitlement.subscriptionItem?.subscriptionPhase?.subscription
+    const subscriptionItemId = entitlement.subscriptionItem?.id
+
+    // TODO: if the entitlement is not tied to a subscription (isCustom), we need to get the subscription from the customer
+    if (!activeSubscription || !subscriptionItemId) {
+      this.logger.error(
+        "updateEntitlementUsage: active subscription or subscription item not found",
+        {
+          entitlementId: opts.entitlementId,
+          customerId: opts.customerId,
+        }
+      )
+
+      return
+    }
+
+    // TODO: we want to be able to get data from entitlements where date doesn't matter
+    // meaning count all the usage for the customer ever
+
+    // we need to get the current subscription
+    // get usage for the period from the analytics service
+    const totalUsage = entitlement.aggregationMethod.endsWith("_all")
+      ? await this.analytics
+          .getTotalUsagePerEntitlementAll({
+            customerId: opts.customerId,
+            entitlementId: entitlement.id,
+            projectId: entitlement.projectId,
+          })
+          .then((usage) => usage.data[0])
+          .catch((error) => {
+            this.logger.error("Error getting getTotalUsagePerEntitlementAll", {
+              error: JSON.stringify(error.message),
+              customerId: opts.customerId,
+              entitlementId: entitlement.id,
+            })
+
+            return null
+          })
+      : await this.analytics
+          .getTotalUsagePerEntitlementPeriod({
+            customerId: opts.customerId,
+            entitlementId: entitlement.id,
+            start: activeSubscription.currentCycleStartAt,
+            end: activeSubscription.currentCycleEndAt,
+            projectId: entitlement.projectId,
+          })
+          .then((usage) => usage.data[0])
+          .catch((error) => {
+            this.logger.error("Error getting getTotalUsagePerEntitlementPeriod", {
+              error: JSON.stringify(error.message),
+              customerId: opts.customerId,
+              entitlementId: entitlement.id,
+            })
+
+            return null
+          })
+
+    if (!totalUsage) {
+      return
+    }
+
+    const usage = totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage]
+
+    // if the usage is not found, then do nothing
+    // no need to log an error here because could be the case that there is not usage reported yet yet
+    if (!usage) {
+      return
+    }
+
+    // update the usage of the entitlement
+    await this.db
+      .update(customerEntitlements)
+      .set({
+        usage: usage,
+        lastUsageUpdateAt: Date.now(),
+      })
+      .where(
+        and(
+          eq(customerEntitlements.id, entitlement.id),
+          eq(customerEntitlements.projectId, entitlement.projectId)
+        )
+      )
   }
 
   public async updateEntitlementsUsage(opts: {
@@ -203,47 +328,21 @@ export class CustomerService {
       includeCustom: true,
     })
 
+    if (entitlements.length === 0) {
+      return
+    }
+
     // TODO: we want to be able to get data from entitlements where date doesn't matter
     // meaning count all the usage for the customer ever
 
-    // we need to get the current subscription
+    // we need  to update the usage for each entitlement
     await Promise.all(
-      entitlements.map(async (entitlement) => {
-        // get usage for the period from the analytics service
-        const totalUsage = await this.analytics.getTotalUsagePerCustomer({
+      entitlements.map((entitlement) => {
+        return this.updateEntitlementUsage({
           customerId: opts.customerId,
-          subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
-          start:
-            entitlement.subscriptionItem?.subscriptionPhase?.subscription?.currentCycleStartAt!,
-          end: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.currentCycleEndAt!,
-          projectId: entitlement.projectId,
-          // when period the query will be for the current period
-          // when all the query will be for all the usage ever
-          type: entitlement.aggregationMethod.endsWith("_all") ? "all" : "period",
+          entitlementId: entitlement.id,
+          date: opts.date,
         })
-
-        const feature = totalUsage.data.find((u) => u.featureSlug === entitlement.featureSlug)
-        const usage = feature?.[entitlement.aggregationMethod]
-
-        // if the usage is not found, then do nothing
-        // no need to log an error here because could be the case that there is not usage reported yet yet
-        if (!usage) {
-          return
-        }
-
-        // update the usage of the entitlement
-        await this.db
-          .update(customerEntitlements)
-          .set({
-            usage: usage,
-            lastUsageUpdateAt: Date.now(),
-          })
-          .where(
-            and(
-              eq(customerEntitlements.id, entitlement.id),
-              eq(customerEntitlements.projectId, entitlement.projectId)
-            )
-          )
       })
     )
   }
@@ -300,12 +399,10 @@ export class CustomerService {
       // updating the usage from the analytics service first and then updating the cache
       // TODO: mesure the performance of this
       if (opts.updateUsage) {
-        this.waitUntil(
-          this.updateEntitlementsUsage({
-            customerId: opts.customerId,
-            date: opts.date,
-          })
-        )
+        this.updateEntitlementsUsage({
+          customerId: opts.customerId,
+          date: opts.date,
+        })
       }
 
       return await getEntitlementsByDateQuery({
@@ -432,7 +529,7 @@ export class CustomerService {
         entitlementId: entitlement.id,
         featureSlug: featureSlug,
         customerId: customerId,
-        date: Date.now(),
+        createdAt: Date.now(),
       }
 
       switch (entitlement.featureType) {
@@ -440,27 +537,52 @@ export class CustomerService {
           // flat feature are like feature flags
           break
         }
+
+        case "usage": {
+          const { usage, limit } = entitlement
+          const currentUsage = usage ?? 0
+          const hitLimit = limit ? limit - currentUsage : undefined
+
+          if (hitLimit && hitLimit <= 0) {
+            return Ok({
+              currentUsage: currentUsage,
+              limit: limit ?? undefined,
+              featureType: entitlement.featureType,
+              access: false,
+              deniedReason: "LIMIT_EXCEEDED",
+              remaining: hitLimit,
+            })
+          }
+          // the rest of the features need to check the usage
+          break
+        }
+
         // the rest of the features need to check the usage
-        case "usage":
         case "tier":
         case "package": {
-          const currentUsage = entitlement.usage ?? 0
-          const limit = entitlement.limit
-          const units = entitlement.units
-          // remaining usage given the units the user bought
-          const remainingUsage = units ? units - currentUsage : undefined
-          const remainingToLimit = limit ? limit - currentUsage : undefined
+          const { usage, limit, units } = entitlement
+          const currentUsage = usage ?? 0
+          const hitLimit = limit ? limit - currentUsage : undefined
+          const hitUnits = units ? units - currentUsage : undefined
 
           // check limits first
-          if (remainingToLimit && remainingToLimit <= 0) {
+          if (hitLimit && hitLimit <= 0) {
             this.waitUntil(
-              this.analytics.ingestFeaturesVerification({
-                ...analyticsPayload,
-                latency: performance.now() - start,
-                deniedReason: "LIMIT_EXCEEDED",
-                subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
-                subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
-              })
+              this.analytics
+                .ingestFeaturesVerification({
+                  ...analyticsPayload,
+                  latency: performance.now() - start,
+                  deniedReason: "LIMIT_EXCEEDED",
+                  subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
+                  subscriptionId:
+                    entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
+                })
+                .catch((error) =>
+                  this.logger.error("Error reporting usage to analytics verifyEntitlement", {
+                    error: JSON.stringify(error),
+                    analyticsPayload,
+                  })
+                )
             )
 
             return Ok({
@@ -470,20 +592,28 @@ export class CustomerService {
               featureType: entitlement.featureType,
               access: false,
               deniedReason: "LIMIT_EXCEEDED",
-              remaining: remainingToLimit,
+              remaining: hitLimit,
             })
           }
 
           // check usage
-          if (remainingUsage && remainingUsage <= 0) {
+          if (hitUnits && hitUnits <= 0) {
             this.waitUntil(
-              this.analytics.ingestFeaturesVerification({
-                ...analyticsPayload,
-                latency: performance.now() - start,
-                deniedReason: "USAGE_EXCEEDED",
-                subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
-                subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
-              })
+              this.analytics
+                .ingestFeaturesVerification({
+                  ...analyticsPayload,
+                  latency: performance.now() - start,
+                  deniedReason: "USAGE_EXCEEDED",
+                  subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
+                  subscriptionId:
+                    entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
+                })
+                .catch((error) =>
+                  this.logger.error("Error reporting usage to analytics verifyEntitlement", {
+                    error: JSON.stringify(error),
+                    analyticsPayload,
+                  })
+                )
             )
 
             return Ok({
@@ -493,7 +623,7 @@ export class CustomerService {
               units: units ?? undefined,
               access: false,
               deniedReason: "USAGE_EXCEEDED",
-              remaining: remainingUsage,
+              remaining: hitUnits,
             })
           }
 
@@ -503,6 +633,7 @@ export class CustomerService {
         default:
           this.logger.error("Unhandled feature type", {
             featureType: entitlement.featureType,
+            analyticsPayload,
           })
           break
       }
@@ -516,7 +647,7 @@ export class CustomerService {
             subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
           })
           .catch((error) =>
-            this.logger.error("Error reporting usage to analytics ve", {
+            this.logger.error("Error reporting usage to analytics verifyEntitlement", {
               error: JSON.stringify(error),
               analyticsPayload,
             })

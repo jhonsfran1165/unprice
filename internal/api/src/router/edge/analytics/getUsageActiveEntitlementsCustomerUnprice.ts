@@ -26,7 +26,7 @@ export const getUsageActiveEntitlementsCustomerUnprice = protectedWorkspaceProce
       customerId,
       ctx: opts.ctx,
       noCache: true,
-      updateUsage: true,
+      updateUsage: false,
     })
 
     return {

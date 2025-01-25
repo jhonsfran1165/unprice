@@ -1,14 +1,16 @@
-VERSION 1
+VERSION 2
 
 SCHEMA >
+    `createdAt` Int64 `json:$.createdAt`,
     `customerId` String `json:$.customerId`,
+    `entitlementId` String `json:$.entitlementId`,
     `featureSlug` String `json:$.featureSlug`,
     `latency` Float32 `json:$.latency`,
     `planVersionFeatureId` String `json:$.planVersionFeatureId`,
     `projectId` String `json:$.projectId`,
-    `subItemId` String `json:$.subItemId`,
     `subscriptionId` String `json:$.subscriptionId`,
-    `time` Int64 `json:$.time`
+    `subscriptionItemId` String `json:$.subscriptionItemId`,
+    `subscriptionPhaseId` String `json:$.subscriptionPhaseId`
 
 ENGINE "MergeTree"
-ENGINE_SORTING_KEY "subItemId, subscriptionId, time"
+ENGINE_SORTING_KEY "subscriptionId, subscriptionItemId, subscriptionPhaseId"

@@ -74,6 +74,7 @@
     ".": "./src/index.ts",
     "./loading-animation": "./src/loading-animation.tsx",
     "./typography": "./src/typography.tsx",
+    "./ripple": "./src/ripple.tsx",
     "./bar-chart": "./src/bar-chart.tsx",
     "./border-beam": "./src/border-beam.tsx",
     "./code": "./src/code.tsx",

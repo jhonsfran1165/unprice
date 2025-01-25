@@ -22,7 +22,10 @@ export const featureVerificationSchemaV1 = z.object({
   subscriptionId: z.string().nullable(),
   entitlementId: z.string(),
   deniedReason: z.string().optional(),
-  date: z.number(),
+  createdAt: z
+    .number()
+    .default(Date.now())
+    .describe("timestamp of when this usage record was created"),
   latency: z.number().optional(),
   featureSlug: z.string(),
   customerId: z.string(),
@@ -35,11 +38,14 @@ export const featureUsageSchemaV1 = z.object({
   entitlementId: z.string(),
   featureSlug: z.string(),
   customerId: z.string(),
-  date: z.number(),
+  date: z.number().describe("timestamp of when this usage record should be billed"),
   projectId: z.string(),
   planVersionFeatureId: z.string(),
   usage: z.number(),
-  createdAt: z.number(),
+  createdAt: z
+    .number()
+    .default(Date.now())
+    .describe("timestamp of when this usage record was created"),
   workspaceId: z.string(),
 })
 

@@ -35,6 +35,7 @@ export const entitlements = protectedApiOrActiveWorkspaceProcedure
       customerId,
       ctx: opts.ctx,
       noCache: opts.input.noCache,
+      updateUsage: false,
     })
 
     return {

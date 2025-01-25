@@ -69,6 +69,7 @@ export const createInnerTRPCContext = (
     db: db,
     analytics: new Analytics({
       tinybirdToken: env.TINYBIRD_TOKEN,
+      tinybirdUrl: env.TINYBIRD_URL,
       emit: env.EMIT_ANALYTICS,
     }),
     // INFO: better wait for native support for RLS in Drizzle

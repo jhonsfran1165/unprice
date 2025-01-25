@@ -1,7 +1,7 @@
 {
   "tinybird.dataProjectSubdir": "internal/tinybird",
-  "tinybird.venvActivat": "",
-  "tinybird.venv": "",
+  "tinybird.venvActivate": "bin/activate",
+  "tinybird.venv": ".venv",
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
@@ -107,5 +107,6 @@
   },
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"
-  }
+  },
+  "CodeGPT.apiKey": "Ollama"
 }

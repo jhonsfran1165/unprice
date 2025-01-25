@@ -30,6 +30,7 @@ export const changeTask = task({
     const tinybird = new Analytics({
       emit: true,
       tinybirdToken: env.TINYBIRD_TOKEN,
+      tinybirdUrl: env.TINYBIRD_URL,
     })
 
     const logger = new ConsoleLogger({
