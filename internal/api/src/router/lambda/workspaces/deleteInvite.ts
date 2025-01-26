@@ -28,7 +28,7 @@ export const deleteInvite = protectedWorkspaceProcedure
       customerId: workspace.unPriceCustomerId,
       featureSlug: "access-pro",
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       isInternal: false,
       throwOnNoAccess: false,
     })

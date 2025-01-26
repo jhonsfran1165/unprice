@@ -15,7 +15,7 @@ export const entitlements = protectedApiOrActiveWorkspaceProcedure
   .input(
     z.object({
       customerId: z.string(),
-      noCache: z.boolean().optional(),
+      skipCache: z.boolean().optional(),
     })
   )
   .output(
@@ -34,7 +34,7 @@ export const entitlements = protectedApiOrActiveWorkspaceProcedure
     const res = await getEntitlements({
       customerId,
       ctx: opts.ctx,
-      noCache: opts.input.noCache,
+      skipCache: opts.input.skipCache,
       updateUsage: false,
     })
 

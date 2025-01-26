@@ -30,7 +30,7 @@ export const listByActiveWorkspace = protectedWorkspaceProcedure
       customerId,
       featureSlug,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       isInternal: opts.ctx.workspace.isInternal,
       // list endpoint does not need to throw an error
       throwOnNoAccess: false,

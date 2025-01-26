@@ -29,7 +29,7 @@ export const remove = protectedWorkspaceProcedure
       customerId,
       featureSlug,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       updateUsage: true,
       isInternal: workspace.isInternal,
     })

@@ -44,7 +44,7 @@ export const create = protectedProcedure
         customerId: opts.input.unPriceCustomerId,
         featureSlug,
         ctx: opts.ctx,
-        noCache: true,
+        skipCache: true,
         updateUsage: true,
         includeCustom: true,
         isInternal: false,

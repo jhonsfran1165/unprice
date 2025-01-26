@@ -15,7 +15,7 @@ export const featureGuard = async ({
   customerId,
   featureSlug,
   ctx,
-  noCache = false,
+  skipCache = false,
   updateUsage = false,
   includeCustom = true,
   isInternal = false,
@@ -28,7 +28,7 @@ export const featureGuard = async ({
   /** The TRPC context containing services like cache, db, analytics etc */
   ctx: Context
   /** Whether to bypass cache and check entitlement directly. Defaults to false */
-  noCache?: boolean
+  skipCache?: boolean
   /** Whether to increment usage counter for the feature. Defaults to false */
   updateUsage?: boolean
   /** Whether to include custom entitlements in check. Defaults to true */
@@ -63,7 +63,7 @@ export const featureGuard = async ({
     customerId,
     featureSlug,
     date,
-    noCache,
+    skipCache,
     updateUsage,
     includeCustom,
   })

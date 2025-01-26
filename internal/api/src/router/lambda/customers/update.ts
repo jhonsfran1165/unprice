@@ -42,7 +42,7 @@ export const update = protectedApiOrActiveProjectProcedure
       customerId: unPriceCustomerId,
       featureSlug: "customers",
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       isInternal: project.workspace.isInternal,
       throwOnNoAccess: false,
     })

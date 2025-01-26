@@ -19,7 +19,7 @@ export const remove = protectedProjectProcedure
       customerId: project.workspace.unPriceCustomerId,
       featureSlug: "features",
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       // update usage when deleting a feature
       updateUsage: true,
       isInternal: project.workspace.isInternal,

@@ -29,7 +29,7 @@ export const transferToWorkspace = protectedWorkspaceProcedure
       customerId,
       featureSlug,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       isInternal: workspace.isInternal,
     })
 
@@ -78,7 +78,7 @@ export const transferToWorkspace = protectedWorkspaceProcedure
         customerId: targetWorkspace.unPriceCustomerId,
         featureSlug,
         ctx: opts.ctx,
-        noCache: true,
+        skipCache: true,
         isInternal: targetWorkspace.isInternal,
       })
     } catch (error) {

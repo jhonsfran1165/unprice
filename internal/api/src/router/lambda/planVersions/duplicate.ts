@@ -31,7 +31,7 @@ export const duplicate = protectedProjectProcedure
       customerId: workspace.unPriceCustomerId,
       featureSlug: "plan-versions",
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       isInternal: workspace.isInternal,
       // duplicate endpoint does not need to throw an error
       throwOnNoAccess: false,

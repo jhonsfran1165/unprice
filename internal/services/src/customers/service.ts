@@ -43,7 +43,7 @@ export class CustomerService {
     customerId: string
     featureSlug: string
     date: number
-    noCache?: boolean
+    skipCache?: boolean
     updateUsage?: boolean
     includeCustom?: boolean
   }): Promise<
@@ -52,7 +52,7 @@ export class CustomerService {
       UnPriceCustomerError | FetchError
     >
   > {
-    if (opts.noCache || !this.cache) {
+    if (opts.skipCache || !this.cache) {
       const entitlement = await getEntitlementByDateQuery({
         customerId: opts.customerId,
         db: this.db,
@@ -353,7 +353,7 @@ export class CustomerService {
     date: number
     includeCustom?: boolean
     updateUsage?: boolean
-    noCache?: boolean
+    skipCache?: boolean
   }): Promise<
     Result<
       Omit<CustomerEntitlement, "createdAtM" | "updatedAtM">,
@@ -367,13 +367,13 @@ export class CustomerService {
     customerId: string
     date: number
     includeCustom?: boolean
-    noCache?: boolean
+    skipCache?: boolean
     // update usage from analytics service on revalidation
     updateUsage?: boolean
   }): Promise<
     Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
   > {
-    if (opts.noCache || !this.cache) {
+    if (opts.skipCache || !this.cache) {
       const entitlements = await getEntitlementsByDateQuery({
         customerId: opts.customerId,
         db: this.db,
@@ -461,7 +461,7 @@ export class CustomerService {
     customerId: string
     featureSlug: string
     date: number
-    noCache?: boolean
+    skipCache?: boolean
     updateUsage?: boolean
     includeCustom?: boolean
   }): Promise<
@@ -489,7 +489,7 @@ export class CustomerService {
         customerId,
         featureSlug,
         date,
-        noCache: opts.noCache,
+        skipCache: opts.skipCache,
         updateUsage: opts.updateUsage,
         includeCustom: opts.includeCustom,
       })

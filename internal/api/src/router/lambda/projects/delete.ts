@@ -40,7 +40,7 @@ export const deleteProject = protectedProjectProcedure
       customerId,
       featureSlug,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       // update usage when deleting a project
       updateUsage: true,
       isInternal: workspace.isInternal,

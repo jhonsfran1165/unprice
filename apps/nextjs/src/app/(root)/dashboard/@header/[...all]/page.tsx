@@ -60,7 +60,7 @@ export default async function Page(props: {
       void trpc.customers.entitlements.prefetch(
         {
           customerId: activeWorkspace.unPriceCustomerId,
-          noCache: true,
+          skipCache: true,
         },
         {
           staleTime: 1000 * 60 * 60, // 1 hour

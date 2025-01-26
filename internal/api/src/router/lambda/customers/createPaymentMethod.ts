@@ -37,7 +37,7 @@ export const createPaymentMethod = protectedApiOrActiveProjectProcedure
       customerId: unPriceCustomerId,
       featureSlug,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       isInternal: project.workspace.isInternal,
       throwOnNoAccess: false,
     })

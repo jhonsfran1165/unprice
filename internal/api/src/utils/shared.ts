@@ -11,13 +11,13 @@ export const getEntitlements = async ({
   ctx,
   includeCustom = true,
   updateUsage = true,
-  noCache = false,
+  skipCache = false,
 }: {
   customerId: string
   ctx: Context
   includeCustom?: boolean
   updateUsage?: boolean
-  noCache?: boolean
+  skipCache?: boolean
 }) => {
   const now = performance.now()
   const customer = new CustomerService({
@@ -38,7 +38,7 @@ export const getEntitlements = async ({
     includeCustom,
     // update usage from analytics service on revalidation
     updateUsage,
-    noCache,
+    skipCache,
   })
 
   const end = performance.now()

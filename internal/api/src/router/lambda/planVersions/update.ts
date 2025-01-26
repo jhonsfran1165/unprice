@@ -53,7 +53,7 @@ export const update = protectedProjectProcedure
       customerId,
       featureSlug,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       isInternal: workspace.isInternal,
       // update endpoint does not need to throw an error
       throwOnNoAccess: false,

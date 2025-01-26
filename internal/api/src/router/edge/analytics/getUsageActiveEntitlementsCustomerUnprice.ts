@@ -25,7 +25,7 @@ export const getUsageActiveEntitlementsCustomerUnprice = protectedWorkspaceProce
     const entitlements = await getEntitlements({
       customerId,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       updateUsage: false,
     })
 

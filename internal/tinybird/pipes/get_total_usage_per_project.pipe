@@ -1,7 +1,7 @@
-VERSION 1
+VERSION 2
 TOKEN "total_usage_per_all_feature__v1_endpoint_read_5983" READ
 
-NODE daily_usage_mv_pipe_6315_0
+NODE total_usage_per_project
 SQL >
 
     %
@@ -10,10 +10,10 @@ SQL >
         finalizeAggregation(sumState(usage)) AS sum,
         finalizeAggregation(maxState(usage)) AS max,
         finalizeAggregation(countState(usage)) AS count,
-        finalizeAggregation(argMaxState(usage, time)) AS last_during_period
+        finalizeAggregation(argMaxState(usage, date)) AS last_during_period
     FROM features_usage
     WHERE
-        time BETWEEN {{ Int64(start, required=True) }}
+        date BETWEEN {{ Int64(start, required=True) }}
         AND {{ Int64(end, required=True) }}
         AND projectId ={{ String(projectId, required=True) }}
     GROUP BY

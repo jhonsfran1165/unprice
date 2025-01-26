@@ -29,7 +29,7 @@ export const remove = protectedApiOrActiveProjectProcedure
       customerId: unPriceCustomerId,
       featureSlug: "customers",
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       updateUsage: true,
       isInternal: project.workspace.isInternal,
     })

@@ -1,9 +1,5 @@
-VERSION 1
-NODE daily_usage
+NODE features_usage_pipe_9414_0
 SQL >
-SELECT *
-FROM
-(
     SELECT
         customerId,
         featureSlug,
@@ -13,12 +9,6 @@ FROM
         finalizeAggregation(maxState(usage)) AS usage_max,
         finalizeAggregation(countState(usage)) AS usage_count,
         finalizeAggregation(argMaxState(usage, date)) AS usage_last_day
-    FROM features_usage__v2 AS features_usage__v2
-    GROUP BY
-        customerId,
-        featureSlug,
-        projectId,
-        date
-    ORDER BY date ASC
-)
-
+    FROM features_usage
+    GROUP BY customerId, featureSlug, projectId, date
+    ORDER BY date

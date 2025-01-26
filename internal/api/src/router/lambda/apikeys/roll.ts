@@ -26,7 +26,7 @@ export const roll = protectedProjectProcedure
       customerId,
       featureSlug,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       isInternal: project.workspace.isInternal,
       throwOnNoAccess: false,
     })

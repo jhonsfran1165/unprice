@@ -51,6 +51,15 @@ jobs:
           secret-path: "/"
           recursive: true
 
+      # TODO: ove after install
+      - name: "Create Tinybird Branch"
+        uses: ./.github/actions/tinybirdci
+        with:
+          data_project_dir: internal/tinybird
+          tb_format: true
+          tb_admin_token: ${{ env.TB_ADMIN_TOKEN }}
+          tb_host: https://api.tinybird.co
+
       - uses: ./.github/actions/install
         with:
           ts: true
@@ -66,6 +75,13 @@ jobs:
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v8
+
+      - name: Create Tinybird Token
+        id: create-tb-token
+        shell: bash
+        run: |
+          tb branch use ${{ steps.branch-name.outputs.current_branch }}
+          echo "TB_ADMIN_TOKEN=${{ env.TB_ADMIN_TOKEN }}" >> $GITHUB_OUTPUT
 
       - name: Create Neon Branch
         id: create-branch

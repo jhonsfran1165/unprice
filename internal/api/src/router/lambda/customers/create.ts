@@ -31,7 +31,7 @@ export const create = protectedApiOrActiveProjectProcedure
       customerId: unPriceCustomerId,
       featureSlug,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       updateUsage: true,
       isInternal: project.workspace.isInternal,
     })

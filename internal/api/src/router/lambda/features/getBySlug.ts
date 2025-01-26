@@ -15,7 +15,7 @@ export const getBySlug = protectedProjectProcedure
       customerId: project.workspace.unPriceCustomerId,
       featureSlug: "features",
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       isInternal: project.workspace.isInternal,
       // getById endpoint does not need to throw an error
       throwOnNoAccess: false,

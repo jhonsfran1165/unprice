@@ -25,7 +25,7 @@ export const remove = protectedProjectProcedure
       customerId,
       featureSlug,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       updateUsage: true,
       isInternal: workspace.isInternal,
       // remove endpoint does not need to throw an error

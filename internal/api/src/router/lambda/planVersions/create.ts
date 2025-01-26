@@ -47,7 +47,7 @@ export const create = protectedProjectProcedure
       customerId,
       featureSlug,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       // update usage when creating a plan version
       updateUsage: true,
       isInternal: workspace.isInternal,

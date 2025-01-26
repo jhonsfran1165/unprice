@@ -30,7 +30,7 @@ export const transferToPersonal = protectedWorkspaceProcedure
       customerId,
       featureSlug,
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       updateUsage: true,
       includeCustom: true,
       isInternal: workspace.isInternal,

@@ -212,7 +212,7 @@ export class SubscriptionService {
       // get the entitlements for the given date
       date: now,
       // we don't want to cache the entitlements here, because we want to get the latest ones
-      noCache: true,
+      skipCache: true,
       // custom entitlements are not synced with the subscription items
       includeCustom: false,
       updateUsage: false,

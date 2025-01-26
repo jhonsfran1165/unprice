@@ -1,5 +1,8 @@
 VERSION 2
 
+DESCRIPTION >
+    This table is used to store the features usage for each customer, entitlement, project and date
+
 SCHEMA >
     `createdAt` Int64 `json:$.createdAt`,
     `customerId` String `json:$.customerId`,
@@ -14,5 +17,5 @@ SCHEMA >
     `usage` Int16 `json:$.usage`,
     `workspaceId` String `json:$.workspaceId`
 
-ENGINE "MergeTree"
-ENGINE_SORTING_KEY "subscriptionPhaseId, usage, workspaceId"
+ENGINE MergeTree
+ENGINE_SORTING_KEY customerId, entitlementId, projectId, date

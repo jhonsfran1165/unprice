@@ -29,7 +29,7 @@ export const listByActiveProject = protectedProjectProcedure
       customerId: project.workspace.unPriceCustomerId,
       featureSlug: "apikeys",
       ctx: opts.ctx,
-      noCache: true,
+      skipCache: true,
       isInternal: project.workspace.isInternal,
       throwOnNoAccess: false,
     })

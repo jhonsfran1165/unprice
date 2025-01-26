@@ -284,7 +284,11 @@ export class PhaseMachine extends StateMachine<
         })
 
         if (!invoice) {
-          return Err(new UnPriceSubscriptionError({ message: "Invoice not found" }))
+          return Err(
+            new UnPriceSubscriptionError({
+              message: "Invoice not found, please check the invoice id",
+            })
+          )
         }
 
         if (!["paid", "void"].includes(invoice.status)) {
@@ -601,8 +605,9 @@ export class PhaseMachine extends StateMachine<
           .returning()
           .then((res) => res[0])
           .catch((e) => {
-            console.error("Error updating subscription status:", e)
+            this.logger.error("syncState error updating subscription status:", e)
             tx.rollback()
+            throw e
           })
 
         // update the subscription phase status
@@ -627,8 +632,9 @@ export class PhaseMachine extends StateMachine<
           .returning()
           .then((res) => res[0])
           .catch((e) => {
-            console.error("Error updating subscription phase status:", e)
+            this.logger.error("syncState error updating subscription phase status:", e)
             tx.rollback()
+            throw e
           })
 
         // when testing we mock bd calls so we need to sync this way
@@ -680,7 +686,7 @@ export class PhaseMachine extends StateMachine<
       const error = e as Error
       return Err(
         new UnPriceSubscriptionError({
-          message: `Error updating subscription status: ${error.message}`,
+          message: `syncState error updating status in phase machine: ${error.message}`,
         })
       )
     }
@@ -1079,7 +1085,8 @@ export class PhaseMachine extends StateMachine<
     if (invoiceData) {
       return Err(
         new UnPriceSubscriptionError({
-          message: "Subscription has open invoices, cannot cancel. Please pay the invoice first.",
+          message:
+            "Subscription has open invoices, cannot cancel. Please pay the invoice first or if you already paid the invoice, please wait for the invoice to be processed.",
         })
       )
     }
@@ -1504,13 +1511,19 @@ export class PhaseMachine extends StateMachine<
       where: (e, { eq }) => eq(e.subscriptionPhaseId, phaseId),
     })
 
+    const promises = []
+
     // set the end date to the entitlements
     for (const item of items) {
-      await this.db
-        .update(customerEntitlements)
-        .set({ endAt })
-        .where(eq(customerEntitlements.subscriptionItemId, item.id))
+      promises.push(
+        this.db
+          .update(customerEntitlements)
+          .set({ endAt })
+          .where(eq(customerEntitlements.subscriptionItemId, item.id))
+      )
     }
+
+    await Promise.all(promises)
   }
 
   // check if the subscription requires a payment method and if the customer has one
@@ -1823,7 +1836,7 @@ export class PhaseMachine extends StateMachine<
       .returning()
       .then((res) => res[0])
       .catch((e) => {
-        this.logger.error("Error creating invoice:", e)
+        this.logger.error("InvoicePhase error creating invoice:", e)
         return undefined
       })
 

@@ -8,7 +8,7 @@ export const entitlementGuard = async ({
   customerId,
   ctx,
   featureSlug,
-  noCache = false,
+  skipCache = false,
   updateUsage = true,
   includeCustom = true,
   throwOnNoAccess = true,
@@ -17,7 +17,7 @@ export const entitlementGuard = async ({
   customerId: string
   ctx: Context
   featureSlug: string
-  noCache?: boolean
+  skipCache?: boolean
   updateUsage?: boolean
   includeCustom?: boolean
   throwOnNoAccess?: boolean
@@ -48,7 +48,7 @@ export const entitlementGuard = async ({
     includeCustom,
     // update usage from analytics service on revalidation
     updateUsage,
-    noCache,
+    skipCache,
   })
 
   const end = performance.now()
