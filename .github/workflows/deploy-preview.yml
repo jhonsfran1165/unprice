@@ -28,12 +28,8 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      branch_name:
-        type: string
-        value: ${{ steps.deploy-preview-tinybird.outputs.branch_name }}
-      tb_branch_token:
-        type: string
-        value: ${{ steps.deploy-preview-tinybird.outputs.tb_branch_token }}
+      branch_name: ${{ steps.deploy-preview-tinybird.outputs.branch_name }}
+      tb_branch_token: ${{ steps.deploy-preview-tinybird.outputs.tb_branch_token }}
 
     permissions:
       pull-requests: write
@@ -70,12 +66,8 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      branch_name:
-        type: string
-        value: ${{ steps.branch-name.outputs.current_branch }}
-      database_url:
-        type: string
-        value: ${{ steps.create-branch.outputs.db_url_with_pooler }}
+      branch_name: ${{ steps.branch-name.outputs.current_branch }}
+      database_url: ${{ steps.create-branch.outputs.db_url_with_pooler }}
 
     needs:
       - deploy-preview-tinybird
@@ -231,3 +223,4 @@ jobs:
         if: always()
         run: |
           rm -rf .env || true
+          rm -rf .tinyenv || true
