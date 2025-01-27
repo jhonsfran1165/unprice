@@ -92,7 +92,6 @@ runs:
     - name: Check formatting
       if: ${{ inputs.tb_format && steps.files.outputs.any_changed == 'true' }}
       shell: bash
-      working-directory: ${{ inputs.data_project_dir }}
       run: |
         for file in ${{ steps.files.outputs.all_changed_files }}; do
           tb fmt --diff "$file"
