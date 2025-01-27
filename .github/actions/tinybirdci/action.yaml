@@ -32,8 +32,10 @@ inputs:
     required: true
 
 outputs:
-  branch_name: ${{ steps.create-branch-tb.outputs.branch_name }}
-  tb_branch_token: ${{ steps.get-env-token.outputs.tb_branch_token }}
+  branch_name:
+    value: ${{ steps.create-branch-tb.outputs.branch_name }}
+  tb_branch_token:
+    value: ${{ steps.get-env-token.outputs.tb_branch_token }}
 
 runs:
   using: "composite"
