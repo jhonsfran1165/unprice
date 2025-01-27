@@ -23,12 +23,62 @@ jobs:
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
 
-  deploy-preview:
+  deploy-preview-tinybird:
     if: "!contains(github.head_ref, 'renovate/')"
     runs-on: ubuntu-latest
 
+    outputs:
+      branch_name:
+        type: string
+        value: ${{ steps.deploy-preview-tinybird.outputs.branch_name }}
+      tb_branch_token:
+        type: string
+        value: ${{ steps.deploy-preview-tinybird.outputs.tb_branch_token }}
+
+    permissions:
+      pull-requests: write
+      contents: read
+
     needs:
       - build-lint
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: "preview"
+          project-slug: "unprice-zq-xm"
+          secret-path: "/ci"
+          recursive: true
+
+      - uses: ./.github/actions/tinybirdci
+        name: Deploy Preview Tinybird
+        id: deploy-preview-tinybird
+        with:
+          tb_format: true
+          tb_admin_token: ${{ env.TB_ADMIN_TOKEN }}
+          tb_host: https://api.tinybird.co
+
+  deploy-preview-neon:
+    if: "!contains(github.head_ref, 'renovate/')"
+    runs-on: ubuntu-latest
+
+    outputs:
+      branch_name:
+        type: string
+        value: ${{ steps.branch-name.outputs.current_branch }}
+      database_url:
+        type: string
+        value: ${{ steps.create-branch.outputs.db_url_with_pooler }}
+
+    needs:
+      - deploy-preview-tinybird
 
     permissions:
       pull-requests: write
@@ -46,42 +96,16 @@ jobs:
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
           env-slug: "preview"
           project-slug: "unprice-zq-xm"
-          export-type: "file"
-          file-output-path: "/.env"
-          secret-path: "/"
+          secret-path: "/ci"
           recursive: true
-
-      # TODO: ove after install
-      - name: "Create Tinybird Branch"
-        uses: ./.github/actions/tinybirdci
-        with:
-          data_project_dir: internal/tinybird
-          tb_format: true
-          tb_admin_token: ${{ env.TB_ADMIN_TOKEN }}
-          tb_host: https://api.tinybird.co
 
       - uses: ./.github/actions/install
         with:
           ts: true
 
-      - uses: cardinalby/export-env-action@v2
-        with:
-          envFile: '.env'
-          export: true
-          # export everything except DATABASE_URL using regex
-          filter: ^(?!DATABASE_URL$).*$
-          mask: true
-
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v8
-
-      - name: Create Tinybird Token
-        id: create-tb-token
-        shell: bash
-        run: |
-          tb branch use ${{ steps.branch-name.outputs.current_branch }}
-          echo "TB_ADMIN_TOKEN=${{ env.TB_ADMIN_TOKEN }}" >> $GITHUB_OUTPUT
 
       - name: Create Neon Branch
         id: create-branch
@@ -128,6 +152,48 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
+  deploy-preview-vercel:
+    if: "!contains(github.head_ref, 'renovate/')"
+    runs-on: ubuntu-latest
+
+    needs:
+      - deploy-preview-neon
+      - deploy-preview-tinybird
+
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: "preview"
+          project-slug: "unprice-zq-xm"
+          export-type: "file"
+          file-output-path: "/.env"
+          secret-path: "/"
+          recursive: true
+
+      - uses: ./.github/actions/install
+        with:
+          ts: true
+          python: true
+
+      - uses: cardinalby/export-env-action@v2
+        with:
+          envFile: '.env'
+          export: true
+          # export everything except DATABASE_URL and TINYBIRD_TOKEN using regex
+          filter: ^(?!DATABASE_URL$|TINYBIRD_TOKEN$).*$
+          mask: true
+
       - name: Check for changes
         id: turbo-ignore
         continue-on-error: true
@@ -155,7 +221,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env NODE_ENV=production --env DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} --env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --env NEXT_PUBLIC_VERCEL_ENV=preview --build-env NODE_ENV=production --build-env DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }} --build-env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --build-env NEXT_PUBLIC_VERCEL_ENV=preview'
+          vercel-args: '--env NODE_ENV=production --env DATABASE_URL=${{ needs.deploy-preview-neon.outputs.database_url }} --env TINYBIRD_TOKEN=${{ needs.deploy-preview-tinybird.outputs.tb_branch_token }} --env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --env NEXT_PUBLIC_VERCEL_ENV=preview --build-env NODE_ENV=production --build-env DATABASE_URL=${{ needs.deploy-preview-neon.outputs.database_url }} --build-env TINYBIRD_TOKEN=${{ needs.deploy-preview-tinybird.outputs.tb_branch_token }} --build-env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --build-env NEXT_PUBLIC_VERCEL_ENV=preview'
           alias-domains: |
             pr-${{ github.event.number }}-unprice.vercel.app
             app-pr-${{ github.event.number }}-unprice.vercel.app

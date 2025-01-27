@@ -16,7 +16,7 @@ inputs:
     description: "Number of commits to fetch. 0 indicates all history for all branches and tags"
     required: false
     type: number
-    default: 300
+    default: 0
   use_last_partition:
     description: "true to include --last-partition flag when creating branches"
     required: false
@@ -30,15 +30,16 @@ inputs:
     required: true
   tb_host:
     required: true
+
 outputs:
   branch_name:
     description: "the name of the branch created"
     type: string
     value: ${{ steps.create-branch-tb.outputs.branch_name }}
-  tb_env_token:
+  tb_branch_token:
     description: "the token of the environment"
     type: string
-    value: ${{ steps.get-env-token.outputs.TB_ENV_TOKEN }}
+    value: ${{ steps.get-env-token.outputs.tb_branch_token }}
 
 runs:
   using: "composite"
@@ -58,7 +59,7 @@ runs:
 
     - name: Validate input
       run: |
-        [[ "${{ secrets.tb_admin_token }}" ]] || { echo "Go to the tokens section in your Workspace, copy the 'admin token' and set TB_ADMIN_TOKEN as a Secret in your Git repository"; exit 1; }
+        [[ "${{ inputs.tb_admin_token }}" ]] || { echo "Go to the tokens section in your Workspace, copy the 'admin token' and set TB_ADMIN_TOKEN as a Secret in your Git repository"; exit 1; }
 
     - name: Set environment variables
       run: |
@@ -102,18 +103,18 @@ runs:
       run: tb check
 
     - name: Check auth
-      run: tb --host ${{ secrets.tb_host }} --token ${{ secrets.tb_admin_token }} auth info
+      run: tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} auth info
 
     - name: Try delete previous Branch
       run: |
-        output=$(tb --host ${{ secrets.tb_host }} --token ${{ secrets.tb_admin_token }} branch ls)
+        output=$(tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} branch ls)
         BRANCH_NAME="tmp_ci_${_NORMALIZED_BRANCH_NAME}_${{ github.event.pull_request.number }}"
 
         # Check if the branch name exists in the output
         if echo "$output" | grep -q "\b$BRANCH_NAME\b"; then
             tb \
-              --host ${{ secrets.tb_host }} \
-              --token ${{ secrets.tb_admin_token }} \
+              --host ${{ inputs.tb_host }} \
+              --token ${{ inputs.tb_admin_token }} \
               branch rm $BRANCH_NAME \
               --yes
         else
@@ -126,9 +127,10 @@ runs:
         echo "Creating branch"
         branch_name="tmp_ci_${_NORMALIZED_BRANCH_NAME}_${{ github.event.pull_request.number }}"
         echo "Branch name: $branch_name"
+
         tb \
-        --host ${{ secrets.tb_host }} \
-        --token ${{ secrets.tb_admin_token }} \
+        --host ${{ inputs.tb_host }} \
+        --token ${{ inputs.tb_admin_token }} \
         branch create $branch_name \
         ${_ENV_FLAGS}
 
@@ -139,7 +141,7 @@ runs:
     - name: Use Branch
       run: |
         BRANCH_NAME="tmp_ci_${_NORMALIZED_BRANCH_NAME}_${{ github.event.pull_request.number }}"
-        tb --host ${{ secrets.tb_host }} --token ${{ secrets.tb_admin_token }} branch use $BRANCH_NAME
+        tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} branch use $BRANCH_NAME
 
     - name: Get env token
       id: get-env-token
@@ -147,7 +149,7 @@ runs:
         ENV_TOKEN=$(python -c "import json; print(json.load(open('.tinyb'))['token'])")
         echo "::add-mask::$ENV_TOKEN"
         echo "TB_ENV_TOKEN=$ENV_TOKEN" >> $GITHUB_ENV
-        echo "TB_ENV_TOKEN=$ENV_TOKEN" >> $GITHUB_OUTPUT
+        echo "tb_branch_token=$ENV_TOKEN" >> $GITHUB_OUTPUT
 
     - name: Deploy changes to the test Branch
       run: |
@@ -193,7 +195,7 @@ runs:
       id: regression_labels
       uses: alrocar/get-labels-action@v1.0.1
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ inputs.GITHUB_TOKEN }}
         label_key: regression
 
     - name: Run pipe regression tests
