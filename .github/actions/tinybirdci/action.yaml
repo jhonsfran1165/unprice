@@ -40,6 +40,8 @@ outputs:
 runs:
   using: "composite"
 
+  working-directory: ${{ inputs.data_project_dir }}
+
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -74,8 +76,8 @@ runs:
     - name: Install Tinybird CLI
       shell: bash
       run: |
-        if [ -f "${{ inputs.data_project_dir }}/requirements.txt" ]; then
-          pip install -r ${{ inputs.data_project_dir }}/requirements.txt
+        if [ -f "requirements.txt" ]; then
+          pip install -r requirements.txt
         else
           pip install tinybird-cli
         fi
