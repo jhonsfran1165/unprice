@@ -96,12 +96,15 @@ runs:
         done
 
     - name: Tinybird version
+      shell: bash
       run: tb --version
 
     - name: Check all the data files syntax
+      shell: bash
       run: tb check
 
     - name: Check auth
+      shell: bash
       run: tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} auth info
 
     - name: Try delete previous Branch
