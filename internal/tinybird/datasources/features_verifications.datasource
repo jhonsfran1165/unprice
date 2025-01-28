@@ -12,5 +12,5 @@ SCHEMA >
     `subscriptionItemId` String `json:$.subscriptionItemId`,
     `subscriptionPhaseId` String `json:$.subscriptionPhaseId`
 
-ENGINE "MergeTree"
-ENGINE_SORTING_KEY "subscriptionId, subscriptionItemId, subscriptionPhaseId"
+ENGINE MergeTree
+ENGINE_SORTING_KEY subscriptionId, subscriptionItemId, subscriptionPhaseId
