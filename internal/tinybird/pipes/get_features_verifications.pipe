@@ -1,9 +1,9 @@
 VERSION 1
+
 TOKEN "get_features_verifications_endpoint_read_5096" READ
 
 NODE features_verifications_4399_pipe_5518_0
 SQL >
-
     %
     SELECT featureSlug, count(featureSlug) as total
     FROM features_verifications
@@ -12,5 +12,3 @@ SQL >
         AND time BETWEEN {{ Int64(start, required=True) }}
         AND {{ Int64(end, required=True) }}
     GROUP BY featureSlug
-
-

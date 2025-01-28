@@ -1,9 +1,9 @@
 VERSION 2
+
 TOKEN "total_usage_per_all_feature__v1_endpoint_read_5983" READ
 
 NODE total_usage_per_project
 SQL >
-
     %
     SELECT
         featureSlug,
@@ -16,7 +16,4 @@ SQL >
         date BETWEEN {{ Int64(start, required=True) }}
         AND {{ Int64(end, required=True) }}
         AND projectId ={{ String(projectId, required=True) }}
-    GROUP BY
-        featureSlug
-
-
+    GROUP BY featureSlug

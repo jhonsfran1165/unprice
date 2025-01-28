@@ -1,9 +1,9 @@
 VERSION 1
+
 TOKEN "get_total_usage_per_feature__v1_endpoint_read_4156" READ
 
 NODE daily_usage_mv_pipe_6315_0
 SQL >
-
     %
     SELECT
         finalizeAggregation(sumState(usage)) AS sum,
@@ -17,5 +17,3 @@ SQL >
         AND projectId ={{ String(projectId, required=True) }}
         AND featureSlug ={{ String(featureSlug, required=True) }}
         AND customerId ={{ String(customerId, required=True) }}
-
-
