@@ -1,4 +1,4 @@
 .tinyb
 .env
 .venv
-.tinyenv
+.diff_tmp/
