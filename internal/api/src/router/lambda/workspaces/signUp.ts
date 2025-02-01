@@ -1,12 +1,12 @@
-import { CustomerService } from "#/services/customers"
 import { eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import { workspaceSignupSchema } from "@unprice/db/validators"
 import { z } from "zod"
+import { CustomerService } from "#services/customers"
 
-import { protectedProcedure } from "#/trpc"
 import { TRPCError } from "@trpc/server"
+import { protectedProcedure } from "#trpc"
 
 export const signUp = protectedProcedure
   .input(workspaceSignupSchema)

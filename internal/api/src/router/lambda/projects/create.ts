@@ -1,11 +1,11 @@
-import { protectedWorkspaceProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
-import { reportUsageFeature } from "#/utils/shared"
 import { TRPCError } from "@trpc/server"
-import * as schema from "@unprice/db/schema"
-import * as utils from "@unprice/db/utils"
+import { projects } from "@unprice/db/schema"
+import { createSlug, newId } from "@unprice/db/utils"
 import { projectInsertBaseSchema, projectSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
+import { protectedWorkspaceProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
+import { reportUsageFeature } from "#utils/shared"
 
 export const create = protectedWorkspaceProcedure
   .input(projectInsertBaseSchema)
@@ -30,11 +30,11 @@ export const create = protectedWorkspaceProcedure
       isInternal: workspace.isInternal,
     })
 
-    const projectId = utils.newId("project")
-    const projectSlug = utils.createSlug()
+    const projectId = newId("project")
+    const projectSlug = createSlug()
 
     const newProject = await opts.ctx.db
-      .insert(schema.projects)
+      .insert(projects)
       .values({
         id: projectId,
         workspaceId: workspace.id,

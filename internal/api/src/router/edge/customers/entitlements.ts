@@ -1,8 +1,8 @@
 import { customerEntitlementSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { protectedApiOrActiveWorkspaceProcedure } from "#/trpc"
-import { getEntitlements } from "#/utils/shared"
+import { protectedApiOrActiveWorkspaceProcedure } from "#trpc"
+import { getEntitlements } from "#utils/shared"
 
 export const entitlements = protectedApiOrActiveWorkspaceProcedure
   .meta({

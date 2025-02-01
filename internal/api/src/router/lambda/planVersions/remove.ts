@@ -4,9 +4,9 @@ import * as schema from "@unprice/db/schema"
 import { planVersionSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { protectedProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
-import { reportUsageFeature } from "#/utils/shared"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
+import { reportUsageFeature } from "#utils/shared"
 
 export const remove = protectedProjectProcedure
   .input(

@@ -1,6 +1,6 @@
-import { CustomerService, UnPriceCustomerError } from "#/services/customers"
-import type { Context } from "#/trpc"
 import { TRPCError } from "@trpc/server"
+import { CustomerService, UnPriceCustomerError } from "#services/customers"
+import type { Context } from "#trpc"
 
 /**
  * Shared logic for verifying feature access across procedures.

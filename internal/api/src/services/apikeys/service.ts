@@ -1,5 +1,3 @@
-import type { Cache } from "#/services/cache"
-import type { Metrics } from "#/services/metrics"
 import { type Database, eq } from "@unprice/db"
 import { apiKeyPrepared } from "@unprice/db/queries"
 import * as schema from "@unprice/db/schema"
@@ -8,6 +6,8 @@ import type { ApiKeyExtended } from "@unprice/db/validators"
 import { Err, type FetchError, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
+import type { Cache } from "#services/cache"
+import type { Metrics } from "#services/metrics"
 import { UnPriceApiKeyError } from "./errors"
 
 export class ApiKeysService {

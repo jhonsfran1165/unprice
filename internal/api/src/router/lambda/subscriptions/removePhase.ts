@@ -1,7 +1,7 @@
-import { SubscriptionService } from "#/services/subscriptions"
-import { protectedProjectProcedure } from "#/trpc"
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
+import { SubscriptionService } from "#services/subscriptions"
+import { protectedProjectProcedure } from "#trpc"
 
 export const removePhase = protectedProjectProcedure
   .input(z.object({ id: z.string() }))

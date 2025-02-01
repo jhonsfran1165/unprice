@@ -1,7 +1,7 @@
 import { listMembersSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { protectedWorkspaceProcedure } from "#/trpc"
+import { protectedWorkspaceProcedure } from "#trpc"
 
 export const listMembersByActiveWorkspace = protectedWorkspaceProcedure
   .input(z.void())

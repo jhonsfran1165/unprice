@@ -22,7 +22,7 @@ export const createContext = async ({
 }) => {
   const cache = new CacheService(
     {
-      waitUntil: () => { },
+      waitUntil: () => {},
     },
     new NoopMetrics()
   )
@@ -47,7 +47,7 @@ export const createContext = async ({
   })
 
   return {
-    waitUntil: () => { },
+    waitUntil: () => {},
     headers: new Headers(),
     session: null,
     activeWorkspaceSlug: "",

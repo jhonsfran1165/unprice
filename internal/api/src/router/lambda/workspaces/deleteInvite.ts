@@ -4,8 +4,8 @@ import * as schema from "@unprice/db/schema"
 import { invitesSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { protectedWorkspaceProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
+import { protectedWorkspaceProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const deleteInvite = protectedWorkspaceProcedure
   .input(

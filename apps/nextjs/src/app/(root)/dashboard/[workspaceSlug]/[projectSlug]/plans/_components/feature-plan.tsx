@@ -92,6 +92,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
       )}
       onClick={handleClick}
       onKeyDown={handleKeyDown} // Add onKeyDown event listener
+      // biome-ignore lint/a11y/useSemanticElements: <explanation>
       role="button" // Add the role attribute to indicate interactive nature
       tabIndex={0} // Add tabIndex to make it focusable
     >

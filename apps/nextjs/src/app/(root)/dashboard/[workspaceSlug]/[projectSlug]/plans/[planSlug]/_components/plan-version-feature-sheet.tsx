@@ -33,7 +33,7 @@ export function PlanVersionFeatureSheet({
       }}
     >
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="flex max-h-screen w-full flex-col justify-between overflow-y-scroll lg:w-[600px] md:w-1/2">
+      <SheetContent className="flex max-h-screen w-full flex-col justify-between overflow-y-scroll md:w-1/2 lg:w-[600px]">
         <SheetHeader>
           <SheetTitle className="text-2xl">Plan version feature form</SheetTitle>
           <SheetDescription>Configure the feature for the plan version</SheetDescription>

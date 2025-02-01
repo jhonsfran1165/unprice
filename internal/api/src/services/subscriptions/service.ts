@@ -26,9 +26,9 @@ import {
   subscriptionPhaseSelectSchema,
 } from "@unprice/db/validators"
 
-import { env } from "#/env.mjs"
-import type { Context } from "@unprice/api"
 import { Err, Ok, type Result, SchemaError } from "@unprice/error"
+import { env } from "#env.mjs"
+import type { Context } from "#trpc"
 import { CustomerService } from "../customers/service"
 import { UnPriceMachineError } from "../machine/errors"
 import { PaymentProviderService } from "../payment-provider/service"

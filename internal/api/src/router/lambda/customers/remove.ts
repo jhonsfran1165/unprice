@@ -1,11 +1,12 @@
-import { protectedApiOrActiveProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
-import { reportUsageFeature } from "#/utils/shared"
+import { z } from "zod"
+
 import { TRPCError } from "@trpc/server"
 import { and, eq } from "@unprice/db"
-import * as schema from "@unprice/db/schema"
+import { customers } from "@unprice/db/schema"
 import { customerSelectSchema } from "@unprice/db/validators"
-import { z } from "zod"
+import { protectedApiOrActiveProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
+import { reportUsageFeature } from "#utils/shared"
 
 export const remove = protectedApiOrActiveProjectProcedure
   .meta({
@@ -35,8 +36,8 @@ export const remove = protectedApiOrActiveProjectProcedure
     })
 
     const deletedCustomer = await opts.ctx.db
-      .delete(schema.customers)
-      .where(and(eq(schema.customers.projectId, project.id), eq(schema.customers.id, id)))
+      .delete(customers)
+      .where(and(eq(customers.projectId, project.id), eq(customers.id, id)))
       .returning()
       .then((re) => re[0])
 

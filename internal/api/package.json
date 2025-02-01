@@ -20,7 +20,9 @@
     }
   },
   "imports": {
-    "#/*": "./src/*"
+    "#*": "./src/*.ts",
+    "#services/*": "./src/services/*.ts",
+    "#env.mjs": "./src/env.mjs"
   },
   "license": "AGPL-3.0",
   "scripts": {

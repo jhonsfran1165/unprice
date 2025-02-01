@@ -1,4 +1,4 @@
-import { createTRPCRouter } from "#/trpc"
+import { createTRPCRouter } from "#trpc"
 import { cancel } from "./cancel"
 import { changePhasePlan } from "./changePhasePlan"
 import { create } from "./create"

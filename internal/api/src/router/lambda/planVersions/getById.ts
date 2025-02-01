@@ -1,5 +1,3 @@
-import { protectedProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
 import { TRPCError } from "@trpc/server"
 import {
   featureSelectBaseSchema,
@@ -8,6 +6,8 @@ import {
   planVersionSelectBaseSchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const getById = protectedProjectProcedure
   .input(

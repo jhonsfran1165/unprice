@@ -1,8 +1,8 @@
-import { CustomerService } from "#/services/customers"
-import { protectedApiOrActiveProjectProcedure } from "#/trpc"
 import { TRPCError } from "@trpc/server"
 import { customerSignUpSchema } from "@unprice/db/validators"
 import { z } from "zod"
+import { CustomerService } from "#services/customers"
+import { protectedApiOrActiveProjectProcedure } from "#trpc"
 
 export const signUp = protectedApiOrActiveProjectProcedure
   .meta({

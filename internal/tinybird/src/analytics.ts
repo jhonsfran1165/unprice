@@ -24,9 +24,9 @@ export class Analytics {
     this.writeClient =
       opts.tinybirdProxy && opts.emit
         ? new Tinybird({
-          token: opts.tinybirdProxy.token,
-          baseUrl: opts.tinybirdProxy.url,
-        })
+            token: opts.tinybirdProxy.token,
+            baseUrl: opts.tinybirdProxy.url,
+          })
         : this.readClient
 
     this.isNoop = this.writeClient instanceof NoopTinybird

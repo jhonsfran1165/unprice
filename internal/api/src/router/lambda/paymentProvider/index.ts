@@ -1,4 +1,4 @@
-import { createTRPCRouter } from "#/trpc"
+import { createTRPCRouter } from "#trpc"
 import { getConfig } from "./getConfig"
 import { getSession } from "./getSession"
 import { saveConfig } from "./saveConfig"

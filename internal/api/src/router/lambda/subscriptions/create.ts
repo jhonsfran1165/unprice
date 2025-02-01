@@ -1,9 +1,10 @@
-import { SubscriptionService } from "#/services/subscriptions"
-import { TRPCError } from "@trpc/server"
 import { subscriptionInsertSchema, subscriptionSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
+import { SubscriptionService } from "#services/subscriptions"
 
-import { protectedProjectProcedure } from "#/trpc"
+import { TRPCError } from "@trpc/server"
+
+import { protectedProjectProcedure } from "#trpc"
 
 export const create = protectedProjectProcedure
   .input(subscriptionInsertSchema)

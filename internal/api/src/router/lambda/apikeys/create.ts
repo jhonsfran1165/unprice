@@ -1,12 +1,11 @@
-import { protectedProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
-import { reportUsageFeature } from "#/utils/shared"
 import { TRPCError } from "@trpc/server"
-import * as schema from "@unprice/db/schema"
-import * as utils from "@unprice/db/utils"
-import { hashStringSHA256 } from "@unprice/db/utils"
+import { apikeys } from "@unprice/db/schema"
+import { hashStringSHA256, newId } from "@unprice/db/utils"
 import { createApiKeySchema, selectApiKeySchema } from "@unprice/db/validators"
 import { z } from "zod"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
+import { reportUsageFeature } from "#utils/shared"
 
 export const create = protectedProjectProcedure
   .input(createApiKeySchema)
@@ -35,14 +34,14 @@ export const create = protectedProjectProcedure
     })
 
     // Generate the key
-    const apiKey = utils.newId("apikey_key")
+    const apiKey = newId("apikey_key")
     // generate the id
-    const apiKeyId = utils.newId("apikey")
+    const apiKeyId = newId("apikey")
     // generate hash of the key
     const apiKeyHash = await hashStringSHA256(apiKey)
 
     const newApiKey = await opts.ctx.db
-      .insert(schema.apikeys)
+      .insert(apikeys)
       .values({
         id: apiKeyId,
         name: name,

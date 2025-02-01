@@ -1,7 +1,7 @@
 import { Ratelimit } from "@upstash/ratelimit"
 import { Redis } from "@upstash/redis"
 
-import { env } from "#/env.mjs"
+import { env } from "#env.mjs"
 
 const LATENCY_LOGGING = env.NODE_ENV === "development"
 const ENABLE_AUTO_PIPELINING = true

@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server"
 import { subscriptionPhaseExtendedSchema, subscriptionSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { protectedProcedure } from "#/trpc"
+import { protectedProcedure } from "#trpc"
 
 export const getById = protectedProcedure
   .input(subscriptionSelectSchema.pick({ id: true }))

@@ -53,6 +53,7 @@ export function WorkspaceSwitcher({
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
+          // biome-ignore lint/a11y/useSemanticElements: <explanation>
           role="combobox"
           aria-expanded={switcherOpen}
           aria-label="Select a workspace"

@@ -1,4 +1,4 @@
-import { protectedProcedure } from "#/trpc"
+import { protectedProcedure } from "#trpc"
 
 export const listOrganizations = protectedProcedure.query(async (opts) => {
   const userId = opts.ctx.userId

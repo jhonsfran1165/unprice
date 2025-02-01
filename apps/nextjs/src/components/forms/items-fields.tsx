@@ -272,7 +272,7 @@ export default function ConfigItemsFormField<TFieldValues extends FormValues>({
                                 </Button>
                               </DialogTrigger>
 
-                              <DialogContent className="flex max-h-[800px] w-full flex-col justify-between overflow-y-scroll lg:w-[600px] md:w-1/2">
+                              <DialogContent className="flex max-h-[800px] w-full flex-col justify-between overflow-y-scroll md:w-1/2 lg:w-[600px]">
                                 <DialogHeader>
                                   <DialogTitle>Feature: {feature.feature.title}</DialogTitle>
                                 </DialogHeader>

@@ -2,8 +2,8 @@ import { TRPCError } from "@trpc/server"
 import { projectSelectBaseSchema, workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { protectedWorkspaceProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
+import { protectedWorkspaceProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const getBySlug = protectedWorkspaceProcedure
   .input(z.object({ slug: z.string() }))

@@ -3,9 +3,9 @@
   "compilerOptions": {
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "moduleResolution": "bundler",
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "#/*": ["*"]
+      "#*": ["./src/*"]
     }
   },
   "include": ["src", "*.ts"],

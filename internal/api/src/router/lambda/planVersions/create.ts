@@ -5,9 +5,9 @@ import * as utils from "@unprice/db/utils"
 import { planVersionSelectBaseSchema, versionInsertBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { protectedProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
-import { reportUsageFeature } from "#/utils/shared"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
+import { reportUsageFeature } from "#utils/shared"
 
 export const create = protectedProjectProcedure
   .input(versionInsertBaseSchema)

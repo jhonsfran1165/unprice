@@ -1,7 +1,7 @@
 import { z } from "zod"
 
-import { protectedProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const exist = protectedProjectProcedure
   .input(z.object({ slug: z.string() }))

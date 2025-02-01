@@ -1,7 +1,7 @@
-import { protectedWorkspaceProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
+import { protectedWorkspaceProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const exists = protectedWorkspaceProcedure
   .input(z.object({ domain: z.string() }))

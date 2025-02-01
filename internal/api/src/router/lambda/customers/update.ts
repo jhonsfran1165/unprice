@@ -1,10 +1,11 @@
-import { protectedApiOrActiveProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
+import { z } from "zod"
+
 import { TRPCError } from "@trpc/server"
 import { and, eq } from "@unprice/db"
-import * as schema from "@unprice/db/schema"
+import { customers } from "@unprice/db/schema"
 import { customerSelectSchema } from "@unprice/db/validators"
-import { z } from "zod"
+import { protectedApiOrActiveProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const update = protectedApiOrActiveProjectProcedure
   .meta({
@@ -59,7 +60,7 @@ export const update = protectedApiOrActiveProjectProcedure
     }
 
     const updatedCustomer = await opts.ctx.db
-      .update(schema.customers)
+      .update(customers)
       .set({
         ...(email && { email }),
         ...(description && { description }),
@@ -73,7 +74,7 @@ export const update = protectedApiOrActiveProjectProcedure
         ...(timezone && { timezone }),
         updatedAtM: Date.now(),
       })
-      .where(and(eq(schema.customers.id, id), eq(schema.customers.projectId, project.id)))
+      .where(and(eq(customers.id, id), eq(customers.projectId, project.id)))
       .returning()
       .then((data) => data[0])
 

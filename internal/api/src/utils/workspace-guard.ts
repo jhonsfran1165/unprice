@@ -2,8 +2,8 @@ import { TRPCError } from "@trpc/server"
 
 import type { User, Workspace, WorkspaceRole } from "@unprice/db/validators"
 
-import type { Context } from "#/trpc"
 import { workspaceGuardPrepared } from "@unprice/db/queries"
+import type { Context } from "#trpc"
 
 interface WorkspaceGuardType {
   workspace: Workspace

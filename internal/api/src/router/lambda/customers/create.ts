@@ -1,11 +1,12 @@
-import { protectedApiOrActiveProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
-import { reportUsageFeature } from "#/utils/shared"
-import { TRPCError } from "@trpc/server"
-import * as schema from "@unprice/db/schema"
-import * as utils from "@unprice/db/utils"
-import { customerInsertBaseSchema, customerSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
+
+import { TRPCError } from "@trpc/server"
+import { customers } from "@unprice/db/schema"
+import { newId } from "@unprice/db/utils"
+import { customerInsertBaseSchema, customerSelectSchema } from "@unprice/db/validators"
+import { protectedApiOrActiveProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
+import { reportUsageFeature } from "#utils/shared"
 
 export const create = protectedApiOrActiveProjectProcedure
   .meta({
@@ -36,12 +37,12 @@ export const create = protectedApiOrActiveProjectProcedure
       isInternal: project.workspace.isInternal,
     })
 
-    const customerId = utils.newId("customer")
+    const customerId = newId("customer")
 
     // TODO: check what happens when the currency changes?
 
     const customerData = await opts.ctx.db
-      .insert(schema.customers)
+      .insert(customers)
       .values({
         id: customerId,
         name,

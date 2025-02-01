@@ -1,6 +1,6 @@
-import { protectedApiOrActiveProjectProcedure } from "#/trpc"
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
+import { protectedApiOrActiveProjectProcedure } from "#trpc"
 
 export const getAllFeatureVerificationsActiveProject = protectedApiOrActiveProjectProcedure
   .input(

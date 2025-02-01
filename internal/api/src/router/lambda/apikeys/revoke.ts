@@ -1,9 +1,9 @@
-import { protectedProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
 import { TRPCError } from "@trpc/server"
 import { sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { z } from "zod"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const revoke = protectedProjectProcedure
   .input(z.object({ ids: z.string().array() }))

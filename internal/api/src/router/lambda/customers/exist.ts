@@ -1,7 +1,8 @@
-import { protectedApiOrActiveProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
-import { customerSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
+
+import { customerSelectSchema } from "@unprice/db/validators"
+import { protectedApiOrActiveProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const exist = protectedApiOrActiveProjectProcedure
   .meta({

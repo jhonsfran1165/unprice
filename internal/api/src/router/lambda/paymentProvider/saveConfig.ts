@@ -7,8 +7,8 @@ import {
 } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { env } from "#/env.mjs"
-import { protectedProjectProcedure } from "#/trpc"
+import { env } from "#env.mjs"
+import { protectedProjectProcedure } from "#trpc"
 
 export const saveConfig = protectedProjectProcedure
   .input(insertPaymentProviderConfigSchema)

@@ -1,4 +1,3 @@
-import { env } from "#/env.mjs"
 import { type Database, type TransactionDatabase, and, eq } from "@unprice/db"
 import {
   customerEntitlements,
@@ -23,6 +22,7 @@ import { Err, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { addDays } from "date-fns"
+import { env } from "#env.mjs"
 import { StateMachine } from "../machine/service"
 import { PaymentProviderService } from "../payment-provider"
 import { UnPriceSubscriptionError } from "./errors"
@@ -597,8 +597,8 @@ export class PhaseMachine extends StateMachine<
             ...(subscriptionData ? subscriptionData : undefined),
             ...(metadataSubscription
               ? {
-                metadata: metadataSubscription,
-              }
+                  metadata: metadataSubscription,
+                }
               : undefined),
           })
           .where(eq(subscriptions.id, subscription.id))
@@ -619,8 +619,8 @@ export class PhaseMachine extends StateMachine<
             ...(phaseData ? phaseData : undefined),
             ...(metadataPhase
               ? {
-                metadata: metadataPhase,
-              }
+                  metadata: metadataPhase,
+                }
               : undefined),
           })
           .where(
@@ -647,8 +647,8 @@ export class PhaseMachine extends StateMachine<
               ...(subscriptionData ? subscriptionData : undefined),
               ...(metadataSubscription
                 ? {
-                  metadata: metadataSubscription,
-                }
+                    metadata: metadataSubscription,
+                  }
                 : undefined),
             },
           })
@@ -661,8 +661,8 @@ export class PhaseMachine extends StateMachine<
               ...(phaseData ? phaseData : undefined),
               ...(metadataPhase
                 ? {
-                  metadata: metadataPhase,
-                }
+                    metadata: metadataPhase,
+                  }
                 : undefined),
             },
           })

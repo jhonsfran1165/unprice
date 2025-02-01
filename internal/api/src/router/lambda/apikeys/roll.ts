@@ -1,12 +1,12 @@
-import { protectedProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
 import { TRPCError } from "@trpc/server"
-import { eq } from "@unprice/db"
-import * as schema from "@unprice/db/schema"
-import * as utils from "@unprice/db/utils"
-import { hashStringSHA256 } from "@unprice/db/utils"
+import { hashStringSHA256, newId } from "@unprice/db/utils"
 import { selectApiKeySchema } from "@unprice/db/validators"
 import { z } from "zod"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
+
+import { eq } from "@unprice/db"
+import * as schema from "@unprice/db/schema"
 
 export const roll = protectedProjectProcedure
   .input(z.object({ id: z.string() }))
@@ -43,7 +43,7 @@ export const roll = protectedProjectProcedure
     }
 
     // Generate a new key
-    const newKey = utils.newId("apikey_key")
+    const newKey = newId("apikey_key")
     // generate hash of the key
     const apiKeyHash = await hashStringSHA256(newKey)
 

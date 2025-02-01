@@ -1,7 +1,7 @@
 import { z } from "zod"
 
-import { protectedApiOrActiveProjectProcedure } from "#/trpc"
-import { signOutCustomer } from "#/utils/shared"
+import { protectedApiOrActiveProjectProcedure } from "#trpc"
+import { signOutCustomer } from "#utils/shared"
 
 export const signOut = protectedApiOrActiveProjectProcedure
   .meta({

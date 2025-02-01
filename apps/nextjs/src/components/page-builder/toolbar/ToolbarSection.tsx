@@ -30,7 +30,7 @@ export const ToolbarSection = <T extends Record<string, unknown>>({
   return (
     <Accordion type="multiple" className="w-full">
       <AccordionItem value="item-1">
-        <AccordionTrigger className="h-10 border-background-bgSubtle border-b bg-background-base px-4 [&>svg]:hidden hover:no-underline">
+        <AccordionTrigger className="h-10 border-background-bgSubtle border-b bg-background-base px-4 hover:no-underline [&>svg]:hidden">
           <div className="flex w-full items-center justify-between">
             <h6>{title}</h6>
             {summary && props ? (

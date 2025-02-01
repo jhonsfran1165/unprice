@@ -1,9 +1,9 @@
-import { SubscriptionService } from "#/services/subscriptions"
 import { subscriptionInsertSchema, subscriptionSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
+import { SubscriptionService } from "#services/subscriptions"
 
-import { rateLimiterProcedure } from "#/trpc"
 import { TRPCError } from "@trpc/server"
+import { rateLimiterProcedure } from "#trpc"
 
 export const signUp = rateLimiterProcedure
   .input(

@@ -5,9 +5,9 @@ import { and, eq, sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { planSelectBaseSchema } from "@unprice/db/validators"
 
-import { protectedProjectProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
-import { reportUsageFeature } from "#/utils/shared"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
+import { reportUsageFeature } from "#utils/shared"
 
 export const remove = protectedProjectProcedure
   .input(planSelectBaseSchema.pick({ id: true }))

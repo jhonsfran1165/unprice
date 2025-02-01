@@ -1,8 +1,9 @@
-import { protectedWorkspaceProcedure } from "#/trpc"
-import { featureGuard } from "#/utils/feature-guard"
-import { getRandomPatternStyle } from "#/utils/generate-pattern"
 import { projectSelectBaseSchema, workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
+
+import { protectedWorkspaceProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
+import { getRandomPatternStyle } from "#utils/generate-pattern"
 
 export const listByWorkspace = protectedWorkspaceProcedure
   .input(z.object({ workspaceSlug: z.string() }))

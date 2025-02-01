@@ -1,4 +1,4 @@
-import { createTRPCRouter } from "#/trpc"
+import { createTRPCRouter } from "#trpc"
 import { create } from "./create"
 import { getByDomain } from "./getByDomain"
 import { getById } from "./getById"

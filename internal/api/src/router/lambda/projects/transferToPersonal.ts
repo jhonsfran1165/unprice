@@ -4,9 +4,9 @@ import * as schema from "@unprice/db/schema"
 import { projectSelectBaseSchema, transferToPersonalProjectSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { protectedWorkspaceProcedure } from "#/trpc"
-import { projectWorkspaceGuard } from "#/utils"
-import { featureGuard } from "#/utils/feature-guard"
+import { protectedWorkspaceProcedure } from "#trpc"
+import { projectWorkspaceGuard } from "#utils"
+import { featureGuard } from "#utils/feature-guard"
 
 export const transferToPersonal = protectedWorkspaceProcedure
   .input(transferToPersonalProjectSchema)

@@ -9,7 +9,7 @@ import { siteConfig } from "~/constants/layout"
 export default function AuthLayout(props: { children: React.ReactNode }) {
   return (
     <Fragment>
-      <div className="relative grid min-h-screen grid-cols-1 overflow-hidden lg:grid-cols-2 md:grid-cols-3">
+      <div className="relative grid min-h-screen grid-cols-1 overflow-hidden md:grid-cols-3 lg:grid-cols-2">
         <div className="relative">
           <div
             className="absolute inset-0 bg-cover"
@@ -29,7 +29,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
           </Link>
         </div>
 
-        <div className="-translate-y-1/2 container absolute top-1/2 col-span-1 flex items-center md:static md:top-0 lg:col-span-1 md:col-span-2 md:flex md:translate-y-0">
+        <div className="-translate-y-1/2 container absolute top-1/2 col-span-1 flex items-center md:static md:top-0 md:col-span-2 md:flex md:translate-y-0 lg:col-span-1">
           {props.children}
         </div>
       </div>
