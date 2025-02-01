@@ -1,7 +1,7 @@
+import { protectedApiOrActiveWorkspaceProcedure } from "#/trpc"
+import { reportUsageFeature } from "#/utils/shared"
 import * as utils from "@unprice/db/utils"
 import { z } from "zod"
-import { protectedApiOrActiveWorkspaceProcedure } from "../../../trpc"
-import { reportUsageFeature } from "../../../utils/shared"
 
 export const reportUsage = protectedApiOrActiveWorkspaceProcedure
   .meta({

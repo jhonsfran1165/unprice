@@ -1,8 +1,8 @@
+import { protectedWorkspaceProcedure } from "#/trpc"
+import { projectWorkspaceGuard } from "#/utils"
 import { TRPCError } from "@trpc/server"
 import { ingestionSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedWorkspaceProcedure } from "../../../trpc"
-import { projectWorkspaceGuard } from "../../../utils"
 
 export const byId = protectedWorkspaceProcedure
   .input(z.object({ id: z.string(), projectSlug: z.string() }))

@@ -1,10 +1,11 @@
-import { TRPCError } from "@trpc/server"
+import { PaymentProviderService } from "#/services/payment-provider"
 import { AesGCM } from "@unprice/db/utils"
 import { paymentProviderSchema } from "@unprice/db/validators"
-import { PaymentProviderService } from "@unprice/services/payment-provider"
 import { z } from "zod"
-import { env } from "../../../env.mjs"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
+
+import { env } from "#/env.mjs"
+import { protectedApiOrActiveProjectProcedure } from "#/trpc"
+import { TRPCError } from "@trpc/server"
 
 export const listPaymentMethods = protectedApiOrActiveProjectProcedure
   .meta({

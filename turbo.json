@@ -78,6 +78,9 @@
     },
     "clean:workspaces": {
       "cache": false
+    },
+    "clean": {
+      "cache": false
     }
   }
 }

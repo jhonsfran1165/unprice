@@ -1,11 +1,12 @@
-import { TRPCError } from "@trpc/server"
-import { type Database, eq } from "@unprice/db"
+import { CustomerService } from "#/services/customers"
+import { eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import { workspaceSignupSchema } from "@unprice/db/validators"
-import { CustomerService } from "@unprice/services/customers"
 import { z } from "zod"
-import { protectedProcedure } from "../../../trpc"
+
+import { protectedProcedure } from "#/trpc"
+import { TRPCError } from "@trpc/server"
 
 export const signUp = protectedProcedure
   .input(workspaceSignupSchema)
@@ -30,14 +31,7 @@ export const signUp = protectedProcedure
       })
     }
 
-    const customer = new CustomerService({
-      cache: opts.ctx.cache,
-      db: opts.ctx.db as Database,
-      analytics: opts.ctx.analytics,
-      logger: opts.ctx.logger,
-      metrics: opts.ctx.metrics,
-      waitUntil: opts.ctx.waitUntil,
-    })
+    const customer = new CustomerService(opts.ctx)
 
     const { err, val } = await customer.signUp({
       input: {

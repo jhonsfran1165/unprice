@@ -1,11 +1,12 @@
-import { TRPCError } from "@trpc/server"
+import { SubscriptionService } from "#/services/subscriptions"
 import {
   subscriptionPhaseInsertSchema,
   subscriptionPhaseSelectSchema,
 } from "@unprice/db/validators"
-import { SubscriptionService } from "@unprice/services/subscriptions"
 import { z } from "zod"
-import { protectedProjectProcedure } from "../../../trpc"
+
+import { protectedProjectProcedure } from "#/trpc"
+import { TRPCError } from "@trpc/server"
 
 export const createPhase = protectedProjectProcedure
   .input(subscriptionPhaseInsertSchema)
@@ -13,14 +14,7 @@ export const createPhase = protectedProjectProcedure
   .mutation(async (opts) => {
     const projectId = opts.ctx.project.id
 
-    const subscriptionService = new SubscriptionService({
-      db: opts.ctx.db,
-      cache: opts.ctx.cache,
-      metrics: opts.ctx.metrics,
-      logger: opts.ctx.logger,
-      waitUntil: opts.ctx.waitUntil,
-      analytics: opts.ctx.analytics,
-    })
+    const subscriptionService = new SubscriptionService(opts.ctx)
 
     const { err, val } = await subscriptionService.createPhase({
       input: opts.input,

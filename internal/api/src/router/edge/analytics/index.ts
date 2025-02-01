@@ -1,4 +1,5 @@
-import { createTRPCRouter } from "../../../trpc"
+import { createTRPCRouter } from "#/trpc"
+
 import { getAllFeatureVerificationsActiveProject } from "./getAllFeatureVerificationsActiveProject"
 import { getTotalUsagePerFeatureActiveProject } from "./getTotalUsagePerFeatureActiveProject"
 import { getUsageActiveEntitlementsCustomer } from "./getUsageActiveEntitlementsCustomer"

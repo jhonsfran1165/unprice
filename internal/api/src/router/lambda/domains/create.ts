@@ -1,13 +1,13 @@
+import { env } from "#/env.mjs"
+import { protectedWorkspaceProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
+import { reportUsageFeature } from "#/utils/shared"
 import { TRPCError } from "@trpc/server"
 import { domains } from "@unprice/db/schema"
 import { newId } from "@unprice/db/utils"
 import { domainCreateBaseSchema, domainSelectBaseSchema } from "@unprice/db/validators"
 import { Vercel } from "@unprice/vercel"
 import { z } from "zod"
-import { env } from "../../../env.mjs"
-import { protectedWorkspaceProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
-import { reportUsageFeature } from "../../../utils/shared"
 
 export const create = protectedWorkspaceProcedure
   .input(domainCreateBaseSchema.pick({ name: true }))

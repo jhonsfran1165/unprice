@@ -1,8 +1,8 @@
+import { deniedReasonSchema } from "#/services/customers"
+import { protectedApiOrActiveWorkspaceProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
 import type { FeatureType } from "@unprice/db/validators"
-import { deniedReasonSchema } from "@unprice/services/customers"
 import { z } from "zod"
-import { protectedApiOrActiveWorkspaceProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
 
 export const can = protectedApiOrActiveWorkspaceProcedure
   .meta({

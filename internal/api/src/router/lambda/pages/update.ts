@@ -3,8 +3,9 @@ import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { pageInsertBaseSchema, pageSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedProjectProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
+
+import { protectedProjectProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
 
 export const update = protectedProjectProcedure
   .input(pageInsertBaseSchema.partial().required({ id: true }))

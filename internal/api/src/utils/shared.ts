@@ -1,10 +1,9 @@
+import { CustomerService, UnPriceCustomerError } from "#/services/customers"
+import type { Context } from "#/trpc"
 import { TRPCError } from "@trpc/server"
-import type { Database } from "@unprice/db"
 import { members, workspaces } from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
 import type { WorkspaceInsert } from "@unprice/db/validators"
-import { CustomerService, UnPriceCustomerError } from "@unprice/services/customers"
-import type { Context } from "../trpc"
 
 export const getEntitlements = async ({
   customerId,
@@ -20,14 +19,7 @@ export const getEntitlements = async ({
   skipCache?: boolean
 }) => {
   const now = performance.now()
-  const customer = new CustomerService({
-    cache: ctx.cache,
-    db: ctx.db as Database,
-    analytics: ctx.analytics,
-    logger: ctx.logger,
-    metrics: ctx.metrics,
-    waitUntil: ctx.waitUntil,
-  })
+  const customer = new CustomerService(ctx)
 
   // use current date for now
   const date = Date.now()
@@ -93,14 +85,7 @@ export const reportUsageFeature = async ({
     }
   }
 
-  const customer = new CustomerService({
-    cache: ctx.cache,
-    db: ctx.db as Database,
-    analytics: ctx.analytics,
-    logger: ctx.logger,
-    metrics: ctx.metrics,
-    waitUntil: ctx.waitUntil,
-  })
+  const customer = new CustomerService(ctx)
 
   // use current date for now but we could support reporting usage for past dates
   const now = Date.now()
@@ -273,14 +258,7 @@ export const signOutCustomer = async ({
 }) => {
   const { customerId, projectId } = input
 
-  const customer = new CustomerService({
-    cache: ctx.cache,
-    db: ctx.db as Database,
-    analytics: ctx.analytics,
-    logger: ctx.logger,
-    metrics: ctx.metrics,
-    waitUntil: ctx.waitUntil,
-  })
+  const customer = new CustomerService(ctx)
 
   const { err, val } = await customer.signOut({
     customerId: customerId,

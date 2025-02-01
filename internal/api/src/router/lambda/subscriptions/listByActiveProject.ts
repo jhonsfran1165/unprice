@@ -1,3 +1,4 @@
+import { protectedProjectProcedure } from "#/trpc"
 import { TRPCError } from "@trpc/server"
 import { and, count, eq, getTableColumns } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
@@ -9,7 +10,6 @@ import {
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedProjectProcedure } from "../../../trpc"
 
 export const listByActiveProject = protectedProjectProcedure
   .input(searchParamsSchemaDataTable)

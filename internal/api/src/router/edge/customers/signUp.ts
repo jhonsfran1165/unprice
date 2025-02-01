@@ -1,9 +1,8 @@
+import { CustomerService } from "#/services/customers"
+import { protectedApiOrActiveProjectProcedure } from "#/trpc"
 import { TRPCError } from "@trpc/server"
-import type { Database } from "@unprice/db"
 import { customerSignUpSchema } from "@unprice/db/validators"
-import { CustomerService } from "@unprice/services/customers"
 import { z } from "zod"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
 
 export const signUp = protectedApiOrActiveProjectProcedure
   .meta({
@@ -26,14 +25,7 @@ export const signUp = protectedApiOrActiveProjectProcedure
   .mutation(async (opts) => {
     const project = opts.ctx.project
 
-    const customer = new CustomerService({
-      cache: opts.ctx.cache,
-      db: opts.ctx.db as Database,
-      analytics: opts.ctx.analytics,
-      logger: opts.ctx.logger,
-      metrics: opts.ctx.metrics,
-      waitUntil: opts.ctx.waitUntil,
-    })
+    const customer = new CustomerService(opts.ctx)
 
     const { err, val } = await customer.signUp({
       input: opts.input,

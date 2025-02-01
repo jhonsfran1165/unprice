@@ -1,3 +1,4 @@
+import { protectedApiOrActiveProjectProcedure } from "#/trpc"
 import { TRPCError } from "@trpc/server"
 import {
   customerSelectSchema,
@@ -5,7 +6,6 @@ import {
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
 
 export const getSubscriptions = protectedApiOrActiveProjectProcedure
   .meta({

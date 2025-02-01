@@ -1,8 +1,6 @@
+import { CustomerService, UnPriceCustomerError } from "#/services/customers"
+import type { Context } from "#/trpc"
 import { TRPCError } from "@trpc/server"
-
-import type { Database } from "@unprice/db"
-import { CustomerService, UnPriceCustomerError } from "@unprice/services/customers"
-import type { Context } from "../trpc"
 
 export const entitlementGuard = async ({
   customerId,
@@ -29,14 +27,7 @@ export const entitlementGuard = async ({
   }
 
   const now = performance.now()
-  const customer = new CustomerService({
-    cache: ctx.cache,
-    db: ctx.db as Database,
-    analytics: ctx.analytics,
-    logger: ctx.logger,
-    metrics: ctx.metrics,
-    waitUntil: ctx.waitUntil,
-  })
+  const customer = new CustomerService(ctx)
 
   // use current date for now
   const date = Date.now()

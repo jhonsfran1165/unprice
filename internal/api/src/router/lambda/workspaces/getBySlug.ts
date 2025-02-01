@@ -3,7 +3,8 @@ import { eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedWorkspaceProcedure } from "../../../trpc"
+
+import { protectedWorkspaceProcedure } from "#/trpc"
 
 export const getBySlug = protectedWorkspaceProcedure
   .input(workspaceSelectBase.pick({ slug: true }))

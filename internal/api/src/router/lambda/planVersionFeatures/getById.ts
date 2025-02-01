@@ -7,7 +7,7 @@ import {
   planVersionSelectBaseSchema,
 } from "@unprice/db/validators"
 
-import { protectedProjectProcedure } from "../../../trpc"
+import { protectedProjectProcedure } from "#/trpc"
 
 export const getById = protectedProjectProcedure
   .input(

@@ -1,7 +1,7 @@
+import { protectedWorkspaceProcedure } from "#/trpc"
+import { projectWorkspaceGuard } from "#/utils"
 import { ingestionSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedWorkspaceProcedure } from "../../../trpc"
-import { projectWorkspaceGuard } from "../../../utils"
 
 export const list = protectedWorkspaceProcedure
   .input(

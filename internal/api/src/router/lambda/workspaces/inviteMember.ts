@@ -4,8 +4,9 @@ import * as schema from "@unprice/db/schema"
 import { inviteMembersSchema, invitesSelectBase } from "@unprice/db/validators"
 import { WelcomeEmail, sendEmail } from "@unprice/email"
 import { z } from "zod"
-import { protectedWorkspaceProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
+
+import { protectedWorkspaceProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
 
 export const inviteMember = protectedWorkspaceProcedure
   .input(inviteMembersSchema)

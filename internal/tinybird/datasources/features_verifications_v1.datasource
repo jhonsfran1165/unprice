@@ -1,0 +1,25 @@
+VERSION 1
+
+DESCRIPTION >
+    This table stores features verifications per customer, entitlement, project and date, optimized for time-series analytics
+
+SCHEMA >
+    `timestamp` DateTime64(3) `json:$.timestamp`,
+    `createdAt` DateTime64(3) `json:$.createdAt`,
+    `featureSlug` LowCardinality(String) `json:$.featureSlug`,
+    `customerId` String `json:$.customerId`,
+    `latency` Float32 `json:$.latency`,
+    `planVersionFeatureId` String `json:$.planVersionFeatureId`,
+    `requestId` String `json:$.requestId`,
+    `workspaceId` String `json:$.workspaceId`,
+    `projectId` String `json:$.projectId`,
+    `entitlementId` String `json:$.entitlementId`,
+    `subscriptionId` Nullable(String) `json:$.subscriptionId`,
+    `subscriptionItemId` Nullable(String) `json:$.subscriptionItemId`,
+    `subscriptionPhaseId` Nullable(String) `json:$.subscriptionPhaseId`,
+    `deleted` UInt8 `json:$.deleted` DEFAULT 0
+
+ENGINE MergeTree
+ENGINE_PARTITION_KEY toYYYYMM(timestamp)
+ENGINE_SORTING_KEY (timestamp, projectId, customerId)
+ENGINE_TTL toDate(timestamp) + INTERVAL 6 MONTH

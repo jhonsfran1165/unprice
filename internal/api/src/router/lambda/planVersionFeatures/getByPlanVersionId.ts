@@ -3,7 +3,7 @@ import { z } from "zod"
 
 import { planVersionFeatureDragDropSchema } from "@unprice/db/validators"
 
-import { protectedProjectProcedure } from "../../../trpc"
+import { protectedProjectProcedure } from "#/trpc"
 
 export const getByPlanVersionId = protectedProjectProcedure
   .input(

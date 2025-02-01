@@ -1,8 +1,8 @@
+import { protectedWorkspaceProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
 import { TRPCError } from "@trpc/server"
 import { domainSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedWorkspaceProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
 
 export const getAllByActiveWorkspace = protectedWorkspaceProcedure
   .input(z.void())

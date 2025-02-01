@@ -1,12 +1,12 @@
+import { protectedProjectProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
+import { reportUsageFeature } from "#/utils/shared"
 import { TRPCError } from "@trpc/server"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import { hashStringSHA256 } from "@unprice/db/utils"
 import { createApiKeySchema, selectApiKeySchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedProjectProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
-import { reportUsageFeature } from "../../../utils/shared"
 
 export const create = protectedProjectProcedure
   .input(createApiKeySchema)

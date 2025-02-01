@@ -24,9 +24,9 @@ export class Analytics {
     this.writeClient =
       opts.tinybirdProxy && opts.emit
         ? new Tinybird({
-            token: opts.tinybirdProxy.token,
-            baseUrl: opts.tinybirdProxy.url,
-          })
+          token: opts.tinybirdProxy.token,
+          baseUrl: opts.tinybirdProxy.url,
+        })
         : this.readClient
 
     this.isNoop = this.writeClient instanceof NoopTinybird
@@ -71,6 +71,7 @@ export class Analytics {
     return this.writeClient.buildIngestEndpoint({
       datasource: "features_usage__v2",
       event: featureUsageSchemaV1,
+      // we need to wait for the ingestion to be done before returning
       wait: true,
     })
   }
@@ -110,6 +111,10 @@ export class Analytics {
       }),
       opts: {
         cache: "no-store",
+        // cache for 1 day
+        // next: {
+        //   revalidate: 60 * 60 * 24, // 1 day
+        // },
       },
     })
   }

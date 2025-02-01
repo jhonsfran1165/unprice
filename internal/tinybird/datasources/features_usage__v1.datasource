@@ -1,0 +1,26 @@
+VERSION 1
+
+DESCRIPTION >
+    This table stores features usage metrics per customer, entitlement, project and date, optimized for time-series analytics
+
+SCHEMA >
+    `timestamp` DateTime64(3) `json:$.timestamp`,
+    `featureSlug` LowCardinality(String) `json:$.featureSlug`,
+    `customerId` String `json:$.customerId`,
+    `usage` UInt32 `json:$.usage`,
+    `requestId` String `json:$.requestId`,
+    `workspaceId` String `json:$.workspaceId`,
+    `projectId` String `json:$.projectId`,
+    `entitlementId` String `json:$.entitlementId`,
+    `planVersionFeatureId` String `json:$.planVersionFeatureId`,
+    `subscriptionId` Nullable(String) `json:$.subscriptionId`,
+    `subscriptionItemId` Nullable(String) `json:$.subscriptionItemId`,
+    `subscriptionPhaseId` Nullable(String) `json:$.subscriptionPhaseId`,
+    `createdAt` DateTime64(3) `json:$.createdAt`,
+    `metadata` Nullable(String) `json:$.metadata`,
+    `deleted` UInt8 `json:$.deleted` DEFAULT 0
+
+ENGINE MergeTree
+ENGINE_PARTITION_KEY toYYYYMM(timestamp)
+ENGINE_SORTING_KEY (timestamp, projectId, customerId)
+ENGINE_TTL toDate(timestamp) + INTERVAL 6 MONTH

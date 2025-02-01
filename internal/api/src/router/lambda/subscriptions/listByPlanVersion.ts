@@ -1,7 +1,8 @@
 import { TRPCError } from "@trpc/server"
 import { subscriptionSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedProjectProcedure } from "../../../trpc"
+
+import { protectedProjectProcedure } from "#/trpc"
 
 export const listByPlanVersion = protectedProjectProcedure
   .input(z.object({ planVersionId: z.string() }))

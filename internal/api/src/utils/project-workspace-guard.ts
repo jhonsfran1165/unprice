@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server"
 import { projectWorkspaceGuardPrepared } from "@unprice/db/queries"
 import type { ProjectExtended, User, WorkspaceRole } from "@unprice/db/validators"
 
-import type { Context } from "../trpc"
+import type { Context } from "#/trpc"
 
 interface ProjectGuardType {
   project: ProjectExtended

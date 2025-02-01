@@ -26,64 +26,28 @@ import {
   subscriptionPhaseSelectSchema,
 } from "@unprice/db/validators"
 
+import { env } from "#/env.mjs"
+import type { Context } from "@unprice/api"
 import { Err, Ok, type Result, SchemaError } from "@unprice/error"
-import type { Logger } from "@unprice/logging"
-import type { Analytics } from "@unprice/tinybird"
-import type { Cache } from "../cache/service"
 import { CustomerService } from "../customers/service"
-import { env } from "../env.mjs"
 import { UnPriceMachineError } from "../machine/errors"
-import type { Metrics } from "../metrics"
 import { PaymentProviderService } from "../payment-provider/service"
 import { UnPriceSubscriptionError } from "./errors"
 import { InvoiceStateMachine } from "./invoice-machine"
 import { PhaseMachine } from "./phase-machine"
 
 export class SubscriptionService {
-  private readonly db: Database | TransactionDatabase
-  private readonly cache: Cache | undefined
-  private readonly metrics: Metrics
-  private readonly logger: Logger
-  private readonly waitUntil: (p: Promise<unknown>) => void
-  private readonly analytics: Analytics
+  private readonly ctx: Context
   // map of phase id to phase machine
   private readonly phases: Map<string, SubscriptionPhaseExtended> = new Map()
   private subscription: Subscription | undefined
   private customer: Customer | undefined
   private initialized = false
   private customerService: CustomerService
-  constructor({
-    db,
-    cache,
-    metrics,
-    logger,
-    waitUntil,
-    analytics,
-  }: {
-    db: Database | TransactionDatabase
-    cache: Cache | undefined
-    metrics: Metrics
-    logger: Logger
-    waitUntil: (p: Promise<unknown>) => void
-    analytics: Analytics
-  }) {
-    this.db = db
-    this.cache = cache
-    this.metrics = metrics
-    this.logger = logger
-    this.waitUntil = waitUntil
-    this.analytics = analytics
 
-    const customerService = new CustomerService({
-      cache: this.cache,
-      db: this.db,
-      analytics: this.analytics,
-      logger: this.logger,
-      metrics: this.metrics,
-      waitUntil: this.waitUntil,
-    })
-
-    this.customerService = customerService
+  constructor(opts: Context) {
+    this.ctx = opts
+    this.customerService = new CustomerService(opts)
   }
 
   public async initPhaseMachines({
@@ -96,7 +60,7 @@ export class SubscriptionService {
     db?: Database | TransactionDatabase
   }): Promise<Result<void, UnPriceSubscriptionError>> {
     // get the active phases for the subscription
-    const subscription = await (db ?? this.db).query.subscriptions.findFirst({
+    const subscription = await (db ?? this.ctx.db).query.subscriptions.findFirst({
       with: {
         phases: {
           with: {
@@ -177,7 +141,7 @@ export class SubscriptionService {
     db?: Database | TransactionDatabase
   }): Promise<Result<void, UnPriceSubscriptionError>> {
     // get the active phase for the subscription
-    const subscription = await (db ?? this.db).query.subscriptions.findFirst({
+    const subscription = await (db ?? this.ctx.db).query.subscriptions.findFirst({
       with: {
         phases: {
           // get active phase now
@@ -302,7 +266,7 @@ export class SubscriptionService {
     }
 
     // Perform database operations
-    await (db ?? this.db).transaction(async (tx) => {
+    await (db ?? this.ctx.db).transaction(async (tx) => {
       try {
         for (const entity of entitiesToCreate) {
           await tx.insert(customerEntitlements).values(entity)
@@ -323,7 +287,7 @@ export class SubscriptionService {
             .where(eq(customerEntitlements.id, id))
         }
       } catch (err) {
-        this.logger.error("Error syncing entitlements", {
+        this.ctx.logger.error("Error syncing entitlements", {
           error: JSON.stringify(err),
         })
 
@@ -409,7 +373,7 @@ export class SubscriptionService {
     }
 
     // get config payment provider
-    const config = await this.db.query.paymentProviderConfig.findFirst({
+    const config = await this.ctx.db.query.paymentProviderConfig.findFirst({
       where: (config, { and, eq }) =>
         and(
           eq(config.projectId, phase.projectId),
@@ -434,12 +398,12 @@ export class SubscriptionService {
     })
 
     const activePhaseMachine = new PhaseMachine({
-      db: this.db,
+      db: this.ctx.db,
       phase,
       subscription: this.subscription,
       customer: this.customer,
-      logger: this.logger,
-      analytics: this.analytics,
+      logger: this.ctx.logger,
+      analytics: this.ctx.analytics,
       paymentProviderToken: decryptedKey,
     })
 
@@ -492,7 +456,7 @@ export class SubscriptionService {
     let endAtToUse = endAt ?? undefined
 
     // get subscription with phases from start date
-    const subscriptionWithPhases = await (db ?? this.db).query.subscriptions.findFirst({
+    const subscriptionWithPhases = await (db ?? this.ctx.db).query.subscriptions.findFirst({
       where: (sub, { eq }) => eq(sub.id, subscriptionId),
       with: {
         phases: true,
@@ -570,7 +534,7 @@ export class SubscriptionService {
       )
     }
 
-    const versionData = await (db ?? this.db).query.versions.findFirst({
+    const versionData = await (db ?? this.ctx.db).query.versions.findFirst({
       with: {
         planFeatures: {
           with: {
@@ -694,7 +658,7 @@ export class SubscriptionService {
       ? calculatedBillingCycle.trialDaysEndAt.getTime()
       : undefined
 
-    const result = await (db ?? this.db).transaction(async (trx) => {
+    const result = await (db ?? this.ctx.db).transaction(async (trx) => {
       // create the subscription phase
       const subscriptionPhase = await trx
         .insert(subscriptionPhases)
@@ -720,7 +684,7 @@ export class SubscriptionService {
         })
         .returning()
         .catch((e) => {
-          this.logger.error("Error creating subscription phase", {
+          this.ctx.logger.error("Error creating subscription phase", {
             error: JSON.stringify(e),
           })
           throw e
@@ -756,7 +720,7 @@ export class SubscriptionService {
           })
         )
       ).catch((e) => {
-        this.logger.error("Error inserting subscription items", {
+        this.ctx.logger.error("Error inserting subscription items", {
           error: JSON.stringify(e),
         })
         trx.rollback()
@@ -804,7 +768,7 @@ export class SubscriptionService {
       })
 
       if (syncEntitlementsResult.err) {
-        this.logger.error("Error syncing entitlements", {
+        this.ctx.logger.error("Error syncing entitlements", {
           error: JSON.stringify(syncEntitlementsResult.err),
         })
         trx.rollback()
@@ -828,7 +792,7 @@ export class SubscriptionService {
   }): Promise<Result<boolean, UnPriceSubscriptionError | SchemaError>> {
     // only allow that are not active
     // and are not in the past
-    const phase = await this.db.query.subscriptionPhases.findFirst({
+    const phase = await this.ctx.db.query.subscriptionPhases.findFirst({
       where: (phase, { eq, and }) => and(eq(phase.id, phaseId), eq(phase.projectId, projectId)),
     })
 
@@ -851,7 +815,7 @@ export class SubscriptionService {
       )
     }
 
-    const result = await this.db.transaction(async (trx) => {
+    const result = await this.ctx.db.transaction(async (trx) => {
       // removing the phase will cascade to the subscription items and entitlements
       const subscriptionPhase = await trx
         .delete(subscriptionPhases)
@@ -895,7 +859,7 @@ export class SubscriptionService {
     const { startAt, endAt, items } = data
 
     // get subscription with phases from start date
-    const subscriptionWithPhases = await (db ?? this.db).query.subscriptions.findFirst({
+    const subscriptionWithPhases = await (db ?? this.ctx.db).query.subscriptions.findFirst({
       where: (sub, { eq }) => eq(sub.id, subscriptionId),
       with: {
         phases: {
@@ -1004,7 +968,7 @@ export class SubscriptionService {
       )
     }
 
-    const result = await (db ?? this.db).transaction(async (trx) => {
+    const result = await (db ?? this.ctx.db).transaction(async (trx) => {
       // create the subscription phase
       const subscriptionPhase = await trx
         .update(subscriptionPhases)
@@ -1037,7 +1001,7 @@ export class SubscriptionService {
               .where(eq(subscriptionItems.id, item.id))
           )
         ).catch((e) => {
-          this.logger.error("Error inserting subscription items", {
+          this.ctx.logger.error("Error inserting subscription items", {
             error: JSON.stringify(e),
           })
           trx.rollback()
@@ -1072,7 +1036,7 @@ export class SubscriptionService {
       })
 
       if (syncEntitlementsResult.err) {
-        this.logger.error("Error syncing entitlements", {
+        this.ctx.logger.error("Error syncing entitlements", {
           error: JSON.stringify(syncEntitlementsResult.err),
         })
         trx.rollback()
@@ -1105,7 +1069,7 @@ export class SubscriptionService {
 
     const { customerId, phases, metadata, timezone } = data
 
-    const customerData = await this.db.query.customers.findFirst({
+    const customerData = await this.ctx.db.query.customers.findFirst({
       with: {
         subscriptions: {
           // get active subscriptions of the customer
@@ -1151,7 +1115,7 @@ export class SubscriptionService {
     const timezoneToUse = timezone || customerData.project.timezone
 
     // execute this in a transaction
-    const result = await this.db.transaction(async (trx) => {
+    const result = await this.ctx.db.transaction(async (trx) => {
       try {
         // create the subscription
         const subscriptionId = newId("subscription")
@@ -1174,7 +1138,7 @@ export class SubscriptionService {
           .returning()
           .then((re) => re[0])
           .catch((e) => {
-            this.logger.error("Error creating subscription", {
+            this.ctx.logger.error("Error creating subscription", {
               error: JSON.stringify(e),
             })
             trx.rollback()
@@ -1208,7 +1172,7 @@ export class SubscriptionService {
 
         // if there is an error, rollback the transaction and throw the error
         if (phaseErr?.err) {
-          this.logger.error(`Error creating subscription phase ${phaseErr?.err?.message}`)
+          this.ctx.logger.error(`Error creating subscription phase ${phaseErr?.err?.message}`)
 
           trx.rollback()
           return Err(phaseErr.err)
@@ -1216,7 +1180,7 @@ export class SubscriptionService {
 
         return Ok(newSubscription)
       } catch (e) {
-        this.logger.error("Error creating subscription", {
+        this.ctx.logger.error("Error creating subscription", {
           error: JSON.stringify(e),
         })
 
@@ -1230,7 +1194,7 @@ export class SubscriptionService {
     }
 
     // once the subscription is created, we can update the cache
-    this.waitUntil(
+    this.ctx.waitUntil(
       this.customerService.updateCacheAllCustomerEntitlementsByDate({
         customerId,
         date: Date.now(),
@@ -1274,7 +1238,7 @@ export class SubscriptionService {
     // after any change in the subscription, we need to update the entitlements usage
     const subscription = activePhaseMachine.getSubscription()
 
-    this.waitUntil(
+    this.ctx.waitUntil(
       this.customerService.updateEntitlementsUsage({
         customerId: subscription.customerId,
         date: Date.now(),
@@ -1437,7 +1401,7 @@ export class SubscriptionService {
     // when dueBehaviour is downgrade we create a new phase with latest version of the default plan (FREE)
     // when dueBehaviour is cancel we don't do anything more
     if (dueBehaviour === "downgrade") {
-      const plans = await this.db.query.plans.findMany({
+      const plans = await this.ctx.db.query.plans.findMany({
         with: {
           versions: {
             where: (fields, operators) =>
@@ -1485,7 +1449,7 @@ export class SubscriptionService {
           startAt: pastDue.pastDueAt + 1, // we need to start the new phase at the next millisecond
         },
         projectId: activePhase.projectId,
-        db: this.db,
+        db: this.ctx.db,
         now: currentNow,
       })
 
@@ -1555,7 +1519,7 @@ export class SubscriptionService {
     let paymentMethodId: string | undefined
 
     if (newPhase) {
-      const planVersionNewPhase = await this.db.query.versions.findFirst({
+      const planVersionNewPhase = await this.ctx.db.query.versions.findFirst({
         where: (planVersion, { eq, and }) =>
           and(
             eq(planVersion.id, newPhase.planVersionId),
@@ -1572,7 +1536,7 @@ export class SubscriptionService {
       }
 
       // get config payment provider for this customer
-      const config = await this.db.query.paymentProviderConfig.findFirst({
+      const config = await this.ctx.db.query.paymentProviderConfig.findFirst({
         where: (config, { and, eq }) =>
           and(
             eq(config.projectId, activePhase.projectId),
@@ -1599,7 +1563,7 @@ export class SubscriptionService {
       // get customer payment provider id
       const paymentProviderService = new PaymentProviderService({
         customer: this.customer,
-        logger: this.logger,
+        logger: this.ctx.logger,
         paymentProvider: planVersionNewPhase.paymentProvider,
         token: decryptedKey,
       })
@@ -1650,7 +1614,7 @@ export class SubscriptionService {
           paymentMethodId,
         },
         projectId: activePhase.projectId,
-        db: this.db,
+        db: this.ctx.db,
         now: currentNow,
       })
 
@@ -1735,7 +1699,7 @@ export class SubscriptionService {
         return Err(invoiceErr)
       }
 
-      const paymentProviderConfig = await this.db.query.paymentProviderConfig.findFirst({
+      const paymentProviderConfig = await this.ctx.db.query.paymentProviderConfig.findFirst({
         where: (config, { and, eq }) =>
           and(
             eq(config.projectId, activePhase.projectId),
@@ -1760,10 +1724,10 @@ export class SubscriptionService {
       })
 
       const invoiceMachine = new InvoiceStateMachine({
-        db: this.db,
+        db: this.ctx.db,
         phaseMachine: activePhaseMachine,
-        logger: this.logger,
-        analytics: this.analytics,
+        logger: this.ctx.logger,
+        analytics: this.ctx.analytics,
         invoice: invoice?.invoice!,
         paymentProviderToken: decryptedKey,
       })

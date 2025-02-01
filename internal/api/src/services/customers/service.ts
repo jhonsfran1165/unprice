@@ -1,42 +1,23 @@
-import { type Database, type TransactionDatabase, and, eq } from "@unprice/db"
+import { and, eq } from "@unprice/db"
 
+import { env } from "#/env.mjs"
+import type { CacheNamespaces } from "#/services/cache"
+import { PaymentProviderService } from "#/services/payment-provider"
+import { SubscriptionService } from "#/services/subscriptions"
+import type { Context } from "#/trpc"
 import { customerEntitlements, customerSessions, customers } from "@unprice/db/schema"
 import { AesGCM, newId } from "@unprice/db/utils"
 import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
 import { Err, FetchError, Ok, type Result } from "@unprice/error"
-import type { Logger } from "@unprice/logging"
-import type { Analytics } from "@unprice/tinybird"
-import type { Cache, CacheNamespaces } from "../cache"
-import { env } from "../env.mjs"
-import type { Metrics } from "../metrics"
-import { PaymentProviderService } from "../payment-provider"
-import { SubscriptionService } from "../subscriptions"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
 import { getEntitlementByDateQuery, getEntitlementsByDateQuery } from "./queries"
 
 export class CustomerService {
-  private readonly cache: Cache | undefined
-  private readonly db: Database | TransactionDatabase
-  private readonly metrics: Metrics
-  private readonly logger: Logger
-  private readonly waitUntil: (p: Promise<unknown>) => void
-  private readonly analytics: Analytics
+  private readonly ctx: Context
 
-  constructor(opts: {
-    cache: Cache | undefined
-    metrics: Metrics
-    db: Database | TransactionDatabase
-    analytics: Analytics
-    logger: Logger
-    waitUntil: (p: Promise<unknown>) => void
-  }) {
-    this.cache = opts.cache
-    this.db = opts.db
-    this.metrics = opts.metrics
-    this.analytics = opts.analytics
-    this.logger = opts.logger
-    this.waitUntil = opts.waitUntil
+  constructor(opts: Context) {
+    this.ctx = opts
   }
 
   private async _getCustomerEntitlementByDate(opts: {
@@ -52,12 +33,12 @@ export class CustomerService {
       UnPriceCustomerError | FetchError
     >
   > {
-    if (opts.skipCache || !this.cache) {
+    if (opts.skipCache || !this.ctx.cache) {
       const entitlement = await getEntitlementByDateQuery({
         customerId: opts.customerId,
-        db: this.db,
-        metrics: this.metrics,
-        logger: this.logger,
+        db: this.ctx.db,
+        metrics: this.ctx.metrics,
+        logger: this.ctx.logger,
         date: opts.date,
         featureSlug: opts.featureSlug,
         includeCustom: opts.includeCustom,
@@ -74,7 +55,7 @@ export class CustomerService {
       }
 
       if (opts.updateUsage) {
-        this.waitUntil(
+        this.ctx.waitUntil(
           this.updateEntitlementUsage({
             customerId: opts.customerId,
             entitlementId: entitlement.id,
@@ -86,14 +67,14 @@ export class CustomerService {
       return Ok(entitlement)
     }
 
-    const res = await this.cache.featureByCustomerId.swr(
+    const res = await this.ctx.cache.featureByCustomerId.swr(
       `${opts.customerId}:${opts.featureSlug}`,
       async () => {
         const entitlement = await getEntitlementByDateQuery({
           customerId: opts.customerId,
-          db: this.db,
-          metrics: this.metrics,
-          logger: this.logger,
+          db: this.ctx.db,
+          metrics: this.ctx.metrics,
+          logger: this.ctx.logger,
           date: opts.date,
           featureSlug: opts.featureSlug,
           includeCustom: opts.includeCustom,
@@ -116,7 +97,7 @@ export class CustomerService {
     )
 
     if (res.err) {
-      this.logger.error(`Error in _getCustomerEntitlementByDate: ${res.err.message}`, {
+      this.ctx.logger.error(`Error in _getCustomerEntitlementByDate: ${res.err.message}`, {
         error: JSON.stringify(res.err),
         customerId: opts.customerId,
         featureSlug: opts.featureSlug,
@@ -135,9 +116,9 @@ export class CustomerService {
     if (!res.val) {
       const entitlement = await getEntitlementByDateQuery({
         customerId: opts.customerId,
-        db: this.db,
-        metrics: this.metrics,
-        logger: this.logger,
+        db: this.ctx.db,
+        metrics: this.ctx.metrics,
+        logger: this.ctx.logger,
         date: opts.date,
         featureSlug: opts.featureSlug,
         includeCustom: opts.includeCustom,
@@ -166,17 +147,17 @@ export class CustomerService {
     customerId: string
     date: number
   }) {
-    if (!this.cache) {
+    if (!this.ctx.cache) {
       return
     }
 
     // update the cache
     await getEntitlementsByDateQuery({
       customerId,
-      db: this.db,
-      metrics: this.metrics,
+      db: this.ctx.db,
+      metrics: this.ctx.metrics,
       date,
-      logger: this.logger,
+      logger: this.ctx.logger,
       includeCustom: true,
     }).then(async (activeEntitlements) => {
       if (activeEntitlements.length === 0) {
@@ -185,7 +166,7 @@ export class CustomerService {
 
       return Promise.all([
         // save the customer entitlements
-        // this.cache.entitlementsByCustomerId.set(
+        // this.ctx.cache.entitlementsByCustomerId.set(
         //   subscriptionData.customerId,
         //   customerEntitlements
         // ),
@@ -193,7 +174,7 @@ export class CustomerService {
 
         // we need to think about the best way to cache the features
         activeEntitlements.map((item) => {
-          return this.cache?.featureByCustomerId.set(`${customerId}:${item.featureSlug}`, item)
+          return this.ctx.cache?.featureByCustomerId.set(`${customerId}:${item.featureSlug}`, item)
         }),
       ])
     })
@@ -205,7 +186,7 @@ export class CustomerService {
     date: number
   }) {
     // get entitlement from the db
-    const entitlement = await this.db.query.customerEntitlements.findFirst({
+    const entitlement = await this.ctx.db.query.customerEntitlements.findFirst({
       with: {
         subscriptionItem: {
           with: {
@@ -222,7 +203,7 @@ export class CustomerService {
     })
 
     if (!entitlement) {
-      this.logger.error("updateEntitlementUsage: entitlement not found", {
+      this.ctx.logger.error("updateEntitlementUsage: entitlement not found", {
         entitlementId: opts.entitlementId,
         customerId: opts.customerId,
       })
@@ -235,7 +216,7 @@ export class CustomerService {
 
     // TODO: if the entitlement is not tied to a subscription (isCustom), we need to get the subscription from the customer
     if (!activeSubscription || !subscriptionItemId) {
-      this.logger.error(
+      this.ctx.logger.error(
         "updateEntitlementUsage: active subscription or subscription item not found",
         {
           entitlementId: opts.entitlementId,
@@ -252,40 +233,40 @@ export class CustomerService {
     // we need to get the current subscription
     // get usage for the period from the analytics service
     const totalUsage = entitlement.aggregationMethod.endsWith("_all")
-      ? await this.analytics
-          .getTotalUsagePerEntitlementAll({
+      ? await this.ctx.analytics
+        .getTotalUsagePerEntitlementAll({
+          customerId: opts.customerId,
+          entitlementId: entitlement.id,
+          projectId: entitlement.projectId,
+        })
+        .then((usage) => usage.data[0])
+        .catch((error) => {
+          this.ctx.logger.error("Error getting getTotalUsagePerEntitlementAll", {
+            error: JSON.stringify(error.message),
             customerId: opts.customerId,
             entitlementId: entitlement.id,
-            projectId: entitlement.projectId,
           })
-          .then((usage) => usage.data[0])
-          .catch((error) => {
-            this.logger.error("Error getting getTotalUsagePerEntitlementAll", {
-              error: JSON.stringify(error.message),
-              customerId: opts.customerId,
-              entitlementId: entitlement.id,
-            })
 
-            return null
-          })
-      : await this.analytics
-          .getTotalUsagePerEntitlementPeriod({
+          return null
+        })
+      : await this.ctx.analytics
+        .getTotalUsagePerEntitlementPeriod({
+          customerId: opts.customerId,
+          entitlementId: entitlement.id,
+          start: activeSubscription.currentCycleStartAt,
+          end: activeSubscription.currentCycleEndAt,
+          projectId: entitlement.projectId,
+        })
+        .then((usage) => usage.data[0])
+        .catch((error) => {
+          this.ctx.logger.error("Error getting getTotalUsagePerEntitlementPeriod", {
+            error: JSON.stringify(error.message),
             customerId: opts.customerId,
             entitlementId: entitlement.id,
-            start: activeSubscription.currentCycleStartAt,
-            end: activeSubscription.currentCycleEndAt,
-            projectId: entitlement.projectId,
           })
-          .then((usage) => usage.data[0])
-          .catch((error) => {
-            this.logger.error("Error getting getTotalUsagePerEntitlementPeriod", {
-              error: JSON.stringify(error.message),
-              customerId: opts.customerId,
-              entitlementId: entitlement.id,
-            })
 
-            return null
-          })
+          return null
+        })
 
     if (!totalUsage) {
       return
@@ -300,7 +281,7 @@ export class CustomerService {
     }
 
     // update the usage of the entitlement
-    await this.db
+    await this.ctx.db
       .update(customerEntitlements)
       .set({
         usage: usage,
@@ -321,9 +302,9 @@ export class CustomerService {
     // get active entitlements from the db
     const entitlements = await getEntitlementsByDateQuery({
       customerId: opts.customerId,
-      db: this.db,
-      metrics: this.metrics,
-      logger: this.logger,
+      db: this.ctx.db,
+      metrics: this.ctx.metrics,
+      logger: this.ctx.logger,
       date: opts.date,
       includeCustom: true,
     })
@@ -373,18 +354,18 @@ export class CustomerService {
   }): Promise<
     Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
   > {
-    if (opts.skipCache || !this.cache) {
+    if (opts.skipCache || !this.ctx.cache) {
       const entitlements = await getEntitlementsByDateQuery({
         customerId: opts.customerId,
-        db: this.db,
-        metrics: this.metrics,
-        logger: this.logger,
+        db: this.ctx.db,
+        metrics: this.ctx.metrics,
+        logger: this.ctx.logger,
         date: opts.date,
         includeCustom: opts.includeCustom,
       })
 
       if (opts.updateUsage) {
-        this.waitUntil(
+        this.ctx.waitUntil(
           this.updateEntitlementsUsage({
             customerId: opts.customerId,
             date: opts.date,
@@ -395,7 +376,7 @@ export class CustomerService {
       return Ok(entitlements)
     }
 
-    const res = await this.cache.entitlementsByCustomerId.swr(opts.customerId, async () => {
+    const res = await this.ctx.cache.entitlementsByCustomerId.swr(opts.customerId, async () => {
       // updating the usage from the analytics service first and then updating the cache
       // TODO: mesure the performance of this
       if (opts.updateUsage) {
@@ -407,16 +388,16 @@ export class CustomerService {
 
       return await getEntitlementsByDateQuery({
         customerId: opts.customerId,
-        db: this.db,
-        metrics: this.metrics,
+        db: this.ctx.db,
+        metrics: this.ctx.metrics,
         date: opts.date,
-        logger: this.logger,
+        logger: this.ctx.logger,
         includeCustom: opts.includeCustom,
       })
     })
 
     if (res.err) {
-      this.logger.error("unable to fetch entitlements", {
+      this.ctx.logger.error("unable to fetch entitlements", {
         error: JSON.stringify(res.err),
         customerId: opts.customerId,
       })
@@ -444,15 +425,15 @@ export class CustomerService {
     // cache miss, get from db
     const entitlements = await getEntitlementsByDateQuery({
       customerId: opts.customerId,
-      db: this.db,
-      metrics: this.metrics,
-      logger: this.logger,
+      db: this.ctx.db,
+      metrics: this.ctx.metrics,
+      logger: this.ctx.logger,
       date: opts.date,
       includeCustom: opts.includeCustom,
     })
 
     // cache the active entitlements
-    this.waitUntil(this.cache.entitlementsByCustomerId.set(opts.customerId, entitlements))
+    this.ctx.waitUntil(this.ctx.cache.entitlementsByCustomerId.set(opts.customerId, entitlements))
 
     return Ok(entitlements)
   }
@@ -497,7 +478,7 @@ export class CustomerService {
       if (res.err) {
         const error = res.err
 
-        this.logger.error(`Error in verifyEntitlement: ${error.message}`, {
+        this.ctx.logger.error(`Error in verifyEntitlement: ${error.message}`, {
           customerId: opts.customerId,
           featureSlug: opts.featureSlug,
         })
@@ -567,8 +548,8 @@ export class CustomerService {
 
           // check limits first
           if (hitLimit && hitLimit <= 0) {
-            this.waitUntil(
-              this.analytics
+            this.ctx.waitUntil(
+              this.ctx.analytics
                 .ingestFeaturesVerification({
                   ...analyticsPayload,
                   latency: performance.now() - start,
@@ -578,7 +559,7 @@ export class CustomerService {
                     entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
                 })
                 .catch((error) =>
-                  this.logger.error("Error reporting usage to analytics verifyEntitlement", {
+                  this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement", {
                     error: JSON.stringify(error),
                     analyticsPayload,
                   })
@@ -598,8 +579,8 @@ export class CustomerService {
 
           // check usage
           if (hitUnits && hitUnits <= 0) {
-            this.waitUntil(
-              this.analytics
+            this.ctx.waitUntil(
+              this.ctx.analytics
                 .ingestFeaturesVerification({
                   ...analyticsPayload,
                   latency: performance.now() - start,
@@ -609,7 +590,7 @@ export class CustomerService {
                     entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
                 })
                 .catch((error) =>
-                  this.logger.error("Error reporting usage to analytics verifyEntitlement", {
+                  this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement", {
                     error: JSON.stringify(error),
                     analyticsPayload,
                   })
@@ -631,15 +612,15 @@ export class CustomerService {
         }
 
         default:
-          this.logger.error("Unhandled feature type", {
+          this.ctx.logger.error("Unhandled feature type", {
             featureType: entitlement.featureType,
             analyticsPayload,
           })
           break
       }
 
-      this.waitUntil(
-        this.analytics
+      this.ctx.waitUntil(
+        this.ctx.analytics
           .ingestFeaturesVerification({
             ...analyticsPayload,
             latency: performance.now() - start,
@@ -647,7 +628,7 @@ export class CustomerService {
             subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
           })
           .catch((error) =>
-            this.logger.error("Error reporting usage to analytics verifyEntitlement", {
+            this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement", {
               error: JSON.stringify(error),
               analyticsPayload,
             })
@@ -660,7 +641,7 @@ export class CustomerService {
       })
     } catch (e) {
       const error = e as Error
-      this.logger.error("Unhandled error while verifying feature", {
+      this.ctx.logger.error("Unhandled error while verifying feature", {
         error: JSON.stringify(error),
         customerId: opts.customerId,
         featureSlug: opts.featureSlug,
@@ -749,19 +730,19 @@ export class CustomerService {
         })
       }
 
-      this.waitUntil(
+      this.ctx.waitUntil(
         Promise.all([
           // notify usage
           // TODO: add notification to email, slack?
           notifyUsage && Promise.resolve(),
           // report the usage to analytics db
-          this.analytics
+          this.ctx.analytics
             .ingestFeaturesUsage({
               planVersionFeatureId: entitlement.featurePlanVersionId,
               subscriptionItemId: entitlement.subscriptionItemId,
               projectId: entitlement.projectId,
               usage: usage,
-              date: opts.date,
+              timestamp: opts.date,
               createdAt: Date.now(),
               entitlementId: entitlement.id,
               featureSlug: featureSlug,
@@ -769,21 +750,33 @@ export class CustomerService {
               subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
               subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
               workspaceId: entitlement.project.workspaceId,
+              requestId: this.ctx.requestId,
+              // TODO: add metadata to the usage
+              metadata: {
+                prompt: "test",
+              },
             })
-            .then(() => {
+            .then((res) => {
+              if (res.successful_rows <= 0) {
+                this.ctx.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
+                  ...res,
+                  entitlement: entitlement,
+                  usage: usage,
+                })
+              }
               // TODO: Only available in pro plus plan
               // TODO: usage is not always sum to the current usage, could be counter, etc
               // also if there are many request per second, we could debounce the update somehow
               // only update the cache if the feature is realtime
-              if (entitlement.realtime && this.cache) {
-                this.cache.featureByCustomerId.set(`${customerId}:${featureSlug}`, {
+              if (entitlement.realtime && this.ctx.cache) {
+                this.ctx.cache.featureByCustomerId.set(`${customerId}:${featureSlug}`, {
                   ...entitlement,
                   usage: (entitlement.usage ?? 0) + usage,
                   lastUsageUpdateAt: Date.now(),
                 })
               } else if (entitlement.realtime) {
                 // update the usage in db
-                this.db
+                this.ctx.db
                   .update(customerEntitlements)
                   .set({
                     usage: (entitlement.usage ?? 0) + usage,
@@ -792,7 +785,7 @@ export class CustomerService {
               }
             })
             .catch((error) => {
-              this.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
+              this.ctx.logger.error("Error reporting usage to analytics ingestFeaturesUsage", {
                 error: JSON.stringify(error),
                 entitlement: entitlement,
                 usage: usage,
@@ -807,7 +800,7 @@ export class CustomerService {
       })
     } catch (e) {
       const error = e as Error
-      this.logger.error("Unhandled error while reporting usage", {
+      this.ctx.logger.error("Unhandled error while reporting usage", {
         error: JSON.stringify(error),
         customerId: opts.customerId,
         featureSlug: opts.featureSlug,
@@ -839,7 +832,7 @@ export class CustomerService {
       externalId,
     } = input
 
-    const planVersion = await this.db.query.versions.findFirst({
+    const planVersion = await this.ctx.db.query.versions.findFirst({
       with: {
         project: true,
         plan: true,
@@ -884,7 +877,7 @@ export class CustomerService {
 
     // For the main project we use the default key
     // get config payment provider
-    const configPaymentProvider = await this.db.query.paymentProviderConfig.findFirst({
+    const configPaymentProvider = await this.ctx.db.query.paymentProviderConfig.findFirst({
       where: (config, { and, eq }) =>
         and(
           eq(config.projectId, projectId),
@@ -912,7 +905,7 @@ export class CustomerService {
     // if payment is required, we need to go through payment provider flow first
     if (paymentRequired) {
       const paymentProviderService = new PaymentProviderService({
-        logger: this.logger,
+        logger: this.ctx.logger,
         paymentProvider: paymentProvider,
         token: decryptedKey,
       })
@@ -920,7 +913,7 @@ export class CustomerService {
       // create a session with the data of the customer, the plan version and the success and cancel urls
       // pass the session id to stripe metadata and then once the customer adds a payment method, we call our api to create the subscription
       const sessionId = newId("customer_session")
-      const customerSession = await this.db
+      const customerSession = await this.ctx.db
         .insert(customerSessions)
         .values({
           id: sessionId,
@@ -981,7 +974,7 @@ export class CustomerService {
 
     // if payment is not required, we can create the customer directly with its subscription
     try {
-      await this.db.transaction(async (trx) => {
+      await this.ctx.db.transaction(async (trx) => {
         const newCustomer = await trx
           .insert(customers)
           .values({
@@ -1005,14 +998,7 @@ export class CustomerService {
           )
         }
 
-        const subscriptionService = new SubscriptionService({
-          db: trx,
-          cache: this.cache,
-          metrics: this.metrics,
-          logger: this.logger,
-          waitUntil: this.waitUntil,
-          analytics: this.analytics,
-        })
+        const subscriptionService = new SubscriptionService(this.ctx)
 
         const { err, val: newSubscription } = await subscriptionService.createSubscription({
           input: {
@@ -1036,7 +1022,7 @@ export class CustomerService {
         })
 
         if (err) {
-          this.logger.error("Error creating subscription", {
+          this.ctx.logger.error("Error creating subscription", {
             error: JSON.stringify(err),
           })
 
@@ -1080,23 +1066,16 @@ export class CustomerService {
     const { customerId, projectId } = opts
 
     // cancel all subscriptions
-    const customerSubs = await this.db.query.subscriptions.findMany({
+    const customerSubs = await this.ctx.db.query.subscriptions.findMany({
       where: (subscription, { eq, and }) =>
         and(eq(subscription.customerId, customerId), eq(subscription.projectId, projectId)),
     })
 
     // all this should be in a transaction
-    await this.db.transaction(async (tx) => {
+    await this.ctx.db.transaction(async (tx) => {
       const cancelSubs = await Promise.all(
         customerSubs.map(async (sub) => {
-          const subscriptionService = new SubscriptionService({
-            db: tx,
-            cache: this.cache,
-            metrics: this.metrics,
-            logger: this.logger,
-            waitUntil: this.waitUntil,
-            analytics: this.analytics,
-          })
+          const subscriptionService = new SubscriptionService(this.ctx)
 
           // init phase machine
           const initPhaseMachineResult = await subscriptionService.initPhaseMachines({

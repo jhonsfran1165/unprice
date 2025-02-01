@@ -2,8 +2,8 @@ import { type Cache as C, type Context, Namespace, createCache } from "@unkey/ca
 import { withEncryption, withMetrics } from "@unkey/cache/middleware"
 import { MemoryStore, type Store, UpstashRedisStore } from "@unkey/cache/stores"
 
-import { env } from "../env.mjs"
-import type { Metrics } from "../metrics"
+import { env } from "#/env.mjs"
+import type { Metrics } from "#/services/metrics"
 import type { CacheNamespace, CacheNamespaces } from "./namespaces"
 import { CACHE_FRESHNESS_TIME_MS, CACHE_STALENESS_TIME_MS } from "./stale-while-revalidate"
 import { redis } from "./upstash"
@@ -38,8 +38,8 @@ export class CacheService {
     const upstash: Store<CacheNamespace, CacheNamespaces[CacheNamespace]> | undefined =
       env.UPSTASH_REDIS_REST_TOKEN && env.UPSTASH_REDIS_REST_URL
         ? new UpstashRedisStore({
-            redis: redis,
-          })
+          redis: redis,
+        })
         : undefined
 
     const metricsMiddleware = withMetrics(this.metrics)

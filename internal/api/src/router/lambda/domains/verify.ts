@@ -1,3 +1,6 @@
+import { env } from "#/env.mjs"
+import { protectedWorkspaceProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
 import { TRPCError } from "@trpc/server"
 import { and, eq } from "@unprice/db"
 import { domains } from "@unprice/db/schema"
@@ -8,9 +11,6 @@ import {
 import type { Domain } from "@unprice/vercel"
 import { Vercel } from "@unprice/vercel"
 import { z } from "zod"
-import { env } from "../../../env.mjs"
-import { protectedWorkspaceProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
 
 export const verify = protectedWorkspaceProcedure
   .input(z.object({ domain: z.string() }))

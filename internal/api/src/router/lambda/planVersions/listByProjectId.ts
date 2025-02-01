@@ -1,3 +1,4 @@
+import { protectedProcedure } from "#/trpc"
 import {
   featureSelectBaseSchema,
   planSelectBaseSchema,
@@ -5,7 +6,6 @@ import {
   planVersionSelectBaseSchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedProcedure } from "../../../trpc"
 
 // global endpoint, no need to check for feature access
 export const listByProjectId = protectedProcedure

@@ -30,7 +30,7 @@ TB_HOST="http://localhost:8080"
 REDIS_URL="http://localhost:8079"
 REDIS_TOKEN="example_token"
 
-echo "TINYBIRD_TOKEN=$TB_TOKEN"
+echo "use 'tb auth --token $TB_TOKEN' to authenticate with tinybird"
 echo "TINYBIRD_URL=$TB_HOST"
 echo "UPSTASH_REDIS_REST_URL=$REDIS_URL"
 echo "UPSTASH_REDIS_REST_TOKEN=$REDIS_TOKEN"

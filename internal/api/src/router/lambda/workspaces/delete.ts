@@ -3,8 +3,9 @@ import { eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedWorkspaceProcedure } from "../../../trpc"
-import { signOutCustomer } from "../../../utils/shared"
+
+import { protectedWorkspaceProcedure } from "#/trpc"
+import { signOutCustomer } from "#/utils/shared"
 
 export const deleteWorkspace = protectedWorkspaceProcedure
   .input(workspaceSelectBase.pick({ id: true }))

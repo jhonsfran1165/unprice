@@ -1,8 +1,8 @@
+import type { Metrics } from "#/services/metrics"
 import type { Database, TransactionDatabase } from "@unprice/db"
 import { customers } from "@unprice/db/schema"
 import type { CustomerEntitlement } from "@unprice/db/validators"
 import type { Logger } from "@unprice/logging"
-import type { Metrics } from "@unprice/services/metrics"
 
 // this queries are important to get some metrics
 // they are performance critical

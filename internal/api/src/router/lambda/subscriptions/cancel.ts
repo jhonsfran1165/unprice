@@ -1,8 +1,8 @@
+import { SubscriptionService } from "#/services/subscriptions"
+import { protectedProjectProcedure } from "#/trpc"
 import { TRPCError } from "@trpc/server"
 import { phaseStatusSchema, subscriptionSelectSchema } from "@unprice/db/validators"
-import { SubscriptionService } from "@unprice/services/subscriptions"
 import { z } from "zod"
-import { protectedProjectProcedure } from "../../../trpc"
 
 export const cancel = protectedProjectProcedure
   .input(
@@ -18,14 +18,7 @@ export const cancel = protectedProjectProcedure
     const { id: subscriptionId, endAt, metadata } = opts.input
     const projectId = opts.ctx.project.id
 
-    const subscriptionService = new SubscriptionService({
-      db: opts.ctx.db,
-      cache: opts.ctx.cache,
-      metrics: opts.ctx.metrics,
-      logger: opts.ctx.logger,
-      waitUntil: opts.ctx.waitUntil,
-      analytics: opts.ctx.analytics,
-    })
+    const subscriptionService = new SubscriptionService(opts.ctx)
 
     // init phase machine
     const initPhaseMachineResult = await subscriptionService.initPhaseMachines({

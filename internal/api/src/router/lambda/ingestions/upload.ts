@@ -1,8 +1,8 @@
+import { protectedApiFormDataProcedure } from "#/trpc"
 import * as schema from "@unprice/db/schema"
 import * as utils from "@unprice/db/utils"
 import { z } from "zod"
 import { zfd } from "zod-form-data"
-import { protectedApiFormDataProcedure } from "../../../trpc"
 
 const myFileValidator = z.preprocess(
   // @ts-expect-error - this is a hack. not sure why it's needed since it should already be a File

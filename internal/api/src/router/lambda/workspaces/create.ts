@@ -3,9 +3,10 @@ import { and, eq, sql } from "@unprice/db"
 import { members } from "@unprice/db/schema"
 import { workspaceInsertBase, workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
-import { createWorkspace } from "../../../utils/shared"
+
+import { protectedProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
+import { createWorkspace } from "#/utils/shared"
 
 export const create = protectedProcedure
   .input(

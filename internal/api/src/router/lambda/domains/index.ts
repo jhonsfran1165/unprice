@@ -1,4 +1,4 @@
-import { createTRPCRouter } from "../../../trpc"
+import { createTRPCRouter } from "#/trpc"
 import { create } from "./create"
 import { exists } from "./exists"
 import { getAllByActiveWorkspace } from "./getAllByActiveWorkspace"

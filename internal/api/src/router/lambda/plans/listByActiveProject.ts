@@ -1,8 +1,8 @@
 import { planSelectBaseSchema, planVersionSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { protectedProjectProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
+import { protectedProjectProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
 
 export const listByActiveProject = protectedProjectProcedure
   .input(

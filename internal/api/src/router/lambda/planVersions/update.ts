@@ -10,8 +10,9 @@ import {
   configUsageSchema,
   planVersionSelectBaseSchema,
 } from "@unprice/db/validators"
-import { protectedProjectProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
+
+import { protectedProjectProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
 
 export const update = protectedProjectProcedure
   .input(planVersionSelectBaseSchema.partial().required({ id: true }))

@@ -1,11 +1,11 @@
+import { protectedProjectProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
+import { reportUsageFeature } from "#/utils/shared"
 import { TRPCError } from "@trpc/server"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { featureSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedProjectProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
-import { reportUsageFeature } from "../../../utils/shared"
 
 export const remove = protectedProjectProcedure
   .input(featureSelectBaseSchema.pick({ id: true }))

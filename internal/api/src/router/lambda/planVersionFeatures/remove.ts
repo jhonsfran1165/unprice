@@ -5,7 +5,7 @@ import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { planVersionFeatureSelectBaseSchema } from "@unprice/db/validators"
 
-import { protectedProjectProcedure } from "../../../trpc"
+import { protectedProjectProcedure } from "#/trpc"
 
 export const remove = protectedProjectProcedure
   .input(

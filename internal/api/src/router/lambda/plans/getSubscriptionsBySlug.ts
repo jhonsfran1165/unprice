@@ -10,8 +10,8 @@ import {
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 
-import { protectedProjectProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
+import { protectedProjectProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
 
 export const getSubscriptionsBySlug = protectedProjectProcedure
   .input(z.object({ slug: z.string() }))

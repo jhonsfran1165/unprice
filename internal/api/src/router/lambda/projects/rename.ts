@@ -2,8 +2,9 @@ import { eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { projectSelectBaseSchema, renameProjectSchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedProjectProcedure } from "../../../trpc"
-import { featureGuard } from "../../../utils/feature-guard"
+
+import { protectedProjectProcedure } from "#/trpc"
+import { featureGuard } from "#/utils/feature-guard"
 
 export const rename = protectedProjectProcedure
   .input(renameProjectSchema)

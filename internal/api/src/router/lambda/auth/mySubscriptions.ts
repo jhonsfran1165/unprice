@@ -7,7 +7,7 @@ import {
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 
-import { protectedWorkspaceProcedure } from "../../../trpc"
+import { protectedWorkspaceProcedure } from "#/trpc"
 
 export const mySubscriptions = protectedWorkspaceProcedure
   .input(z.void())

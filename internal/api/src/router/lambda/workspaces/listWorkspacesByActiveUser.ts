@@ -1,6 +1,7 @@
 import { workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedProcedure } from "../../../trpc"
+
+import { protectedProcedure } from "#/trpc"
 
 export const listWorkspacesByActiveUser = protectedProcedure
   .input(z.void())

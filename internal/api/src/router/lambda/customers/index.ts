@@ -1,4 +1,4 @@
-import { createTRPCRouter } from "../../../trpc"
+import { createTRPCRouter } from "#/trpc"
 import { create } from "./create"
 import { createPaymentMethod } from "./createPaymentMethod"
 import { exist } from "./exist"

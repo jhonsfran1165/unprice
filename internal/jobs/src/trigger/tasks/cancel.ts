@@ -1,10 +1,6 @@
 import { task } from "@trigger.dev/sdk/v3"
-import { db } from "@unprice/db"
-import { ConsoleLogger } from "@unprice/logging"
-import { NoopMetrics } from "@unprice/services/metrics"
-import { SubscriptionService } from "@unprice/services/subscriptions"
-import { Analytics } from "@unprice/tinybird"
-import { env } from "../../env.mjs"
+import { SubscriptionService } from "@unprice/api/services/subscriptions"
+import { createContext } from "./context"
 
 export const cancelTask = task({
   id: "subscription.cancel",
@@ -27,14 +23,11 @@ export const cancelTask = task({
     },
     { ctx }
   ) => {
-    const tinybird = new Analytics({
-      emit: true,
-      tinybirdToken: env.TINYBIRD_TOKEN,
-      tinybirdUrl: env.TINYBIRD_URL,
-    })
-
-    const logger = new ConsoleLogger({
-      requestId: ctx.task.id,
+    const context = await createContext({
+      taskId: ctx.task.id,
+      subscriptionId,
+      projectId,
+      phaseId,
       defaultFields: {
         subscriptionId,
         projectId,
@@ -43,15 +36,7 @@ export const cancelTask = task({
       },
     })
 
-    const subscriptionService = new SubscriptionService({
-      db: db,
-      // all calls made to the database
-      cache: undefined,
-      metrics: new NoopMetrics(),
-      logger: logger,
-      waitUntil: () => {},
-      analytics: tinybird,
-    })
+    const subscriptionService = new SubscriptionService(context)
 
     // init phase machine
     const initPhaseMachineResult = await subscriptionService.initPhaseMachines({
