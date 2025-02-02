@@ -214,7 +214,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env NODE_ENV=production --env DATABASE_URL=${{ needs.deploy-preview-neon.outputs.database_url }} --env TINYBIRD_TOKEN=${{ needs.deploy-preview-tinybird.outputs.tb_branch_token }} --env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --env NEXT_PUBLIC_VERCEL_ENV=preview --build-env NODE_ENV=production --build-env DATABASE_URL=${{ needs.deploy-preview-neon.outputs.database_url }} --build-env TINYBIRD_TOKEN=${{ needs.deploy-preview-tinybird.outputs.tb_branch_token }} --build-env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --build-env NEXT_PUBLIC_VERCEL_ENV=preview'
+          vercel-args: '--env NODE_ENV=production --env DATABASE_URL=${{ jobs.deploy-preview-neon.outputs.database_url }} --env TINYBIRD_TOKEN=${{ jobs.deploy-preview-tinybird.outputs.tb_branch_token }} --env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --env NEXT_PUBLIC_VERCEL_ENV=preview --build-env NODE_ENV=production --build-env DATABASE_URL=${{ jobs.deploy-preview-neon.outputs.database_url }} --build-env TINYBIRD_TOKEN=${{ jobs.deploy-preview-tinybird.outputs.tb_branch_token }} --build-env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --build-env NEXT_PUBLIC_VERCEL_ENV=preview'
           alias-domains: |
             pr-${{ github.event.number }}-unprice.vercel.app
             app-pr-${{ github.event.number }}-unprice.vercel.app
