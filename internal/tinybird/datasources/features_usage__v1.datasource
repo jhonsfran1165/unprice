@@ -1,7 +1,7 @@
-VERSION 1
+VERSION 2
 
 DESCRIPTION >
-    This table stores features usage metrics per customer, entitlement, project and date, optimized for time-series analytics
+    This table stores features usage metrics per customer, entitlement, project and date, optimized for time-series analytics with deduplication support
 
 SCHEMA >
     `timestamp` DateTime64(3) `json:$.timestamp`,
@@ -20,7 +20,7 @@ SCHEMA >
     `metadata` Nullable(String) `json:$.metadata`,
     `deleted` UInt8 `json:$.deleted` DEFAULT 0
 
-ENGINE MergeTree
+ENGINE ReplacingMergeTree(createdAt)
 ENGINE_PARTITION_KEY toYYYYMM(timestamp)
-ENGINE_SORTING_KEY (timestamp, projectId, customerId)
+ENGINE_SORTING_KEY (requestId, timestamp, projectId)
 ENGINE_TTL toDate(timestamp) + INTERVAL 6 MONTH
