@@ -14,8 +14,8 @@ export default eventHandler((event) =>
         clientSecret: process.env.GITHUB_SECRET,
         profile: (p) => ({
           id: p.id.toString(),
-          name: p.login,
           email: p.email,
+          name: p.login,
           image: p.avatar_url,
         }),
       }),
