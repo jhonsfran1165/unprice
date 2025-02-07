@@ -1,0 +1,29 @@
+VERSION 1
+
+TAGS "usage,billing"
+
+NODE feature_usage_no_duplicates_node
+SQL >
+
+    %
+    SELECT
+        projectId,
+        customerId,
+        featureSlug,
+        entitlementId,
+        countState() AS event_count,
+        sumState(usage) AS total_usage,
+        maxState(usage) AS max_usage,
+        argMaxState(usage, timestamp) AS latest_usage
+    FROM features_usage FINAL
+    WHERE
+        1 = 1
+        {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
+        {% if defined(customerId) %} AND customerId = {{ String(customerId) }} {% end %}
+        {% if defined(featureSlug) %} AND featureSlug = {{ String(featureSlug) }} {% end %}
+        {% if defined(entitlementId) %} AND entitlementId = {{ String(entitlementId) }} {% end %}
+        {% if defined(start) & defined(end) %}
+          AND date BETWEEN fromUnixTimestamp64Milli({{ Int64(start) }})
+          AND fromUnixTimestamp64Milli({{ Int64(end) }})
+        {% end %}
+    GROUP BY projectId, customerId, featureSlug, entitlementId

@@ -57,6 +57,9 @@ export const featureVerificationSchemaV1 = z.object({
   latency: z.number().optional(),
   featureSlug: z.string(),
   customerId: z.string(),
+  requestId: z.string(),
+  workspaceId: z.string(),
+  metadata: nullableJsonToString.default(null),
 })
 
 export const featureUsageSchemaV1 = z.object({
@@ -66,7 +69,10 @@ export const featureUsageSchemaV1 = z.object({
   entitlementId: z.string(),
   featureSlug: z.string(),
   customerId: z.string(),
-  timestamp: unixMilliToDate.describe("timestamp of when this usage record should be billed"),
+  timestamp: z
+    .number()
+    .default(Date.now())
+    .describe("timestamp of when this usage record should be billed"),
   projectId: z.string(),
   planVersionFeatureId: z.string(),
   usage: z.number(),

@@ -256,6 +256,7 @@ export class CustomerService {
             start: activeSubscription.currentCycleStartAt,
             end: activeSubscription.currentCycleEndAt,
             projectId: entitlement.projectId,
+            featureSlug: entitlement.featureSlug,
           })
           .then((usage) => usage.data[0])
           .catch((error) => {
@@ -554,9 +555,11 @@ export class CustomerService {
                   ...analyticsPayload,
                   latency: performance.now() - start,
                   deniedReason: "LIMIT_EXCEEDED",
-                  subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
+                  subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id ?? null,
                   subscriptionId:
-                    entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
+                    entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id ?? null,
+                  workspaceId: entitlement.project.workspaceId,
+                  requestId: this.ctx.requestId,
                 })
                 .catch((error) =>
                   this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement", {
@@ -585,9 +588,11 @@ export class CustomerService {
                   ...analyticsPayload,
                   latency: performance.now() - start,
                   deniedReason: "USAGE_EXCEEDED",
-                  subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
+                  subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id ?? null,
                   subscriptionId:
-                    entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
+                    entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id ?? null,
+                  workspaceId: entitlement.project.workspaceId,
+                  requestId: this.ctx.requestId,
                 })
                 .catch((error) =>
                   this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement", {
@@ -624,8 +629,11 @@ export class CustomerService {
           .ingestFeaturesVerification({
             ...analyticsPayload,
             latency: performance.now() - start,
-            subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id!,
-            subscriptionId: entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id!,
+            subscriptionPhaseId: entitlement.subscriptionItem?.subscriptionPhase?.id ?? null,
+            subscriptionId:
+              entitlement.subscriptionItem?.subscriptionPhase?.subscription?.id ?? null,
+            workspaceId: entitlement.project.workspaceId,
+            requestId: this.ctx.requestId,
           })
           .catch((error) =>
             this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement", {

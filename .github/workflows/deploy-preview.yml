@@ -62,8 +62,8 @@ jobs:
           tb_host: https://api.tinybird.co
           data_project_dir: internal/tinybird
 
-# TODO: https://nitratine.net/blog/post/how-to-pass-secrets-between-runners-in-github-actions/
-# https://github.com/marketplace/actions/secret-output
+      # TODO: https://nitratine.net/blog/post/how-to-pass-secrets-between-runners-in-github-actions/
+      # https://github.com/marketplace/actions/secret-output
       - name: Set Outputs for Tinybird
         id: set-output
         shell: bash

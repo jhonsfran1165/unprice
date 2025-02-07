@@ -62,14 +62,14 @@ export class Analytics {
 
   public get ingestFeaturesVerification() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "features_verifications__v2",
+      datasource: "features_verifications__v1",
       event: featureVerificationSchemaV1,
     })
   }
 
   public get ingestFeaturesUsage() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "features_usage__v2",
+      datasource: "features_usage__v1",
       event: featureUsageSchemaV1,
       // we need to wait for the ingestion to be done before returning
       wait: true,
@@ -93,21 +93,53 @@ export class Analytics {
     })
   }
 
+  public get getFeaturesUsage() {
+    return this.readClient.buildPipe({
+      pipe: "feature_usage_period__v1",
+      parameters: z.object({
+        projectId: z.string().optional(),
+        customerId: z.string().optional(),
+        featureSlug: z.string().optional(),
+        entitlementId: z.string().optional(),
+        start: z.number().optional(),
+        end: z.number().optional(),
+      }),
+      data: z.object({
+        projectId: z.string(),
+        customerId: z.string(),
+        featureSlug: z.string(),
+        entitlementId: z.string(),
+        total_usage: z.number(),
+        max_usage: z.number(),
+        event_count: z.number(),
+        latest_usage: z.number(),
+      }),
+      opts: {
+        cache: "no-store",
+        // cache for 1 day
+        // next: {
+        //   revalidate: 60 * 60 * 24, // 1 day
+        // },
+      },
+    })
+  }
+
   public get getTotalUsagePerEntitlementPeriod() {
     return this.readClient.buildPipe({
       pipe: "get_total_usage_per_entitlement_period__v1",
       parameters: z.object({
         entitlementId: z.string(),
         customerId: z.string(),
+        featureSlug: z.string(),
         projectId: z.string(),
         start: z.number(),
         end: z.number(),
       }),
       data: z.object({
-        sum: z.number(),
-        max: z.number(),
-        count: z.number(),
-        last_during_period: z.number(),
+        total_usage: z.number(),
+        max_usage: z.number(),
+        event_count: z.number(),
+        latest_usage: z.number(),
       }),
       opts: {
         cache: "no-store",

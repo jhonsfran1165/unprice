@@ -23,16 +23,28 @@ if ! curl -s http://localhost:8080 > /dev/null 2>&1; then
   exit 1
 fi
 
-# We need to override on development some variables so we can work with local first tools.
-TB_TOKEN=$(curl -s http://localhost:8080/tokens | jq -r ".workspace_admin_token")
-# override tinybird host
-TB_HOST="http://localhost:8080"
-REDIS_URL="http://localhost:8079"
-REDIS_TOKEN="example_token"
+# take the first parameter as the mode id if not provided, use dev
+MODE_ID=${1:-dev}
 
-echo "use 'tb auth --token $TB_TOKEN' to authenticate with tinybird"
-echo "TINYBIRD_URL=$TB_HOST"
-echo "UPSTASH_REDIS_REST_URL=$REDIS_URL"
-echo "UPSTASH_REDIS_REST_TOKEN=$REDIS_TOKEN"
 
-infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" UPSTASH_REDIS_REST_URL="$REDIS_URL" UPSTASH_REDIS_REST_TOKEN="$REDIS_TOKEN" pnpm run dev
+if [ "$MODE_ID" = "dev" ]; then
+
+  # We need to override on development some variables so we can work with local first tools.
+  TB_TOKEN=$(curl -s http://localhost:8080/tokens | jq -r ".workspace_admin_token")
+  # override tinybird host
+  TB_HOST="http://localhost:8080"
+  REDIS_URL="http://localhost:8079"
+  REDIS_TOKEN="example_token"
+
+  echo "use 'tb auth --token $TB_TOKEN' to authenticate with tinybird"
+  echo "TINYBIRD_URL=$TB_HOST"
+  echo "UPSTASH_REDIS_REST_URL=$REDIS_URL"
+  echo "UPSTASH_REDIS_REST_TOKEN=$REDIS_TOKEN"
+
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" UPSTASH_REDIS_REST_URL="$REDIS_URL" UPSTASH_REDIS_REST_TOKEN="$REDIS_TOKEN" pnpm run dev
+elif [ "$MODE_ID" = "preview" ]; then
+  infisical run --env=preview --path=/ --recursive -- pnpm run dev
+else
+  echo "Invalid mode: $MODE_ID"
+  exit 1
+fi

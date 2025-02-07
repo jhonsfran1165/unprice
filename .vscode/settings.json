@@ -103,7 +103,8 @@
     "**/.turbo": true,
     "**/.vercel": true,
     "**/.nitro": true,
-    "**/tsconfig.tsbuildinfo": true
+    "**/tsconfig.tsbuildinfo": true,
+    "**/.venv": true
   },
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"

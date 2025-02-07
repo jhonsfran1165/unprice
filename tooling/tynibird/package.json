@@ -1,0 +1,23 @@
+{
+  "name": "@unprice/tynibird",
+  "version": "1.0.0",
+  "scripts": {
+    "generate": "pnpm with-env tsx main.ts",
+    "clean": "git clean -xdf .next .turbo node_modules",
+    "with-env": "infisical run --env=preview --path=/app --"
+  },
+  "keywords": [],
+  "author": "Sebastian Franco",
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "@tinybirdco/mockingbird": "2.0.0-rc.0",
+    "@unprice/tinybird": "workspace:*",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.24",
+    "@unprice/tsconfig": "^0.1.0",
+    "tsx": "^4.7.2",
+    "typescript": "^5.3.3"
+  }
+}
