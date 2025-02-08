@@ -1,5 +1,7 @@
 VERSION 1
 
+TOKEN "web-apps" READ
+
 TAGS "verifications"
 
 NODE features_verifications_node
@@ -23,7 +25,6 @@ SQL >
         {% if defined(featureSlug) %} AND featureSlug = {{ String(featureSlug) }} {% end %}
         {% if defined(entitlementId) %} AND entitlementId = {{ String(entitlementId) }} {% end %}
         {% if defined(start) & defined(end) %}
-            AND timestamp BETWEEN fromUnixTimestamp64Milli({{ Int64(start) }})
-            AND fromUnixTimestamp64Milli({{ Int64(end) }})
+            AND timestamp BETWEEN {{ Int64(start) }} AND {{ Int64(end) }}
         {% end %}
     GROUP BY projectId, customerId, featureSlug, entitlementId

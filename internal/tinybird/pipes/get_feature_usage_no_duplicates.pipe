@@ -1,5 +1,7 @@
 VERSION 1
 
+TOKEN "web-apps" READ
+
 TAGS "usage, billing"
 
 NODE feature_usage_no_duplicates_node

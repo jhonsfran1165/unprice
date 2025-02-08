@@ -5,10 +5,6 @@ import { protectedApiOrActiveProjectProcedure } from "#trpc"
 export const getUsage = protectedApiOrActiveProjectProcedure
   .input(
     z.object({
-      projectId: z.string().optional(),
-      customerId: z.string().optional(),
-      featureSlug: z.string().optional(),
-      entitlementId: z.string().optional(),
       start: z.number().optional(),
       end: z.number().optional(),
     })
@@ -30,12 +26,11 @@ export const getUsage = protectedApiOrActiveProjectProcedure
     })
   )
   .query(async (opts) => {
+    const project = opts.ctx.project
+
     const data = await opts.ctx.analytics
       .getFeaturesUsage({
-        projectId: opts.input.projectId,
-        customerId: opts.input.customerId,
-        featureSlug: opts.input.featureSlug,
-        entitlementId: opts.input.entitlementId,
+        projectId: project.id,
         start: opts.input.start,
         end: opts.input.end,
       })

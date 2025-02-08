@@ -53,7 +53,6 @@ function PaymentMethodCardLoading() {
           customerId="customer_id"
           successUrl={""}
           cancelUrl={""}
-          projectSlug="unprice-admin"
           readonly={true}
           loading={true}
         />

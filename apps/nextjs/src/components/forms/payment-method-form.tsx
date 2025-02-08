@@ -14,14 +14,12 @@ export function PaymentMethodForm({
   customerId,
   successUrl,
   cancelUrl,
-  projectSlug,
   readonly = false,
   loading = false,
 }: {
   customerId: string
   successUrl: string
   cancelUrl: string
-  projectSlug?: string
   readonly?: boolean
   loading?: boolean
 }) {
@@ -32,7 +30,6 @@ export function PaymentMethodForm({
     {
       customerId,
       provider: provider,
-      projectSlug,
     },
     {
       enabled: !loading,

@@ -342,7 +342,7 @@ export const protectedApiOrActiveWorkspaceProcedure = publicProcedure.use(
     }
 
     const input = (await getRawInput()) as { workspaceSlug?: string }
-    const activeWorkspaceSlug = input?.workspaceSlug ?? ctx.activeWorkspaceSlug
+    const activeWorkspaceSlug = input?.workspaceSlug ?? ctx.activeWorkspaceSlug ?? undefined
 
     const data = await workspaceGuard({
       workspaceSlug: activeWorkspaceSlug,
@@ -388,7 +388,7 @@ export const protectedApiOrActiveProjectProcedure = publicProcedure.use(
     }
 
     const input = (await getRawInput()) as { projectSlug?: string }
-    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug
+    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug ?? undefined
 
     const data = await projectWorkspaceGuard({
       projectSlug: activeProjectSlug,
@@ -410,7 +410,7 @@ export const protectedApiOrActiveProjectProcedure = publicProcedure.use(
 export const protectedProjectProcedure = protectedProcedure.use(
   async ({ ctx, next, getRawInput }) => {
     const input = (await getRawInput()) as { projectSlug?: string }
-    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug
+    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug ?? undefined
 
     // if projectSlug is present, use it if not use the active project slug
     const data = await projectWorkspaceGuard({

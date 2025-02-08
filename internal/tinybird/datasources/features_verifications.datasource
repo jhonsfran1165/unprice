@@ -3,6 +3,8 @@ VERSION 1
 DESCRIPTION >
     This table stores features verifications per customer, entitlement, project and date, optimized for time-series analytics
 
+TAGS "verifications"
+
 SCHEMA >
     `timestamp` Int64 `json:$.timestamp`,
     `createdAt` Int64 `json:$.createdAt`,

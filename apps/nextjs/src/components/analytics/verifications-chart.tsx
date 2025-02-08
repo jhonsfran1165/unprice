@@ -20,6 +20,15 @@ const chartConfig = {
   verifications: {
     label: "Verifications",
   },
+  p95_latency: {
+    label: "P95 Latency",
+  },
+  max_latency: {
+    label: "Max Latency",
+  },
+  latest_latency: {
+    label: "Latest Latency",
+  },
 } satisfies ChartConfig
 
 export function VerificationsChart() {
@@ -35,6 +44,9 @@ export function VerificationsChart() {
   const chartData = data.verifications.map((v) => ({
     feature: v.featureSlug,
     verifications: v.count,
+    p95_latency: v.p95_latency,
+    max_latency: v.max_latency,
+    latest_latency: v.latest_latency,
   }))
 
   if (chartData.length === 0) {

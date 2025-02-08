@@ -5,10 +5,6 @@ import { protectedApiOrActiveProjectProcedure } from "#trpc"
 export const getVerifications = protectedApiOrActiveProjectProcedure
   .input(
     z.object({
-      projectId: z.string().optional(),
-      customerId: z.string().optional(),
-      featureSlug: z.string().optional(),
-      entitlementId: z.string().optional(),
       start: z.number().optional(),
       end: z.number().optional(),
     })
@@ -30,16 +26,16 @@ export const getVerifications = protectedApiOrActiveProjectProcedure
     })
   )
   .query(async (opts) => {
+    const project = opts.ctx.project
+
     const data = await opts.ctx.analytics
       .getFeaturesVerifications({
-        projectId: opts.input.projectId,
-        customerId: opts.input.customerId,
-        featureSlug: opts.input.featureSlug,
-        entitlementId: opts.input.entitlementId,
+        projectId: project.id,
         start: opts.input.start,
         end: opts.input.end,
       })
       .catch((err) => {
+        console.error(err)
         opts.ctx.logger.error(err)
 
         return {

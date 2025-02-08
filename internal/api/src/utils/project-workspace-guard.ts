@@ -33,7 +33,7 @@ export const projectWorkspaceGuard = async ({
   if (!projectId && !projectSlug) {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: "Has to provide project id or project slug",
+      message: "Project ID or project slug is required",
     })
   }
 

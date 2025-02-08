@@ -30,6 +30,8 @@ inputs:
     required: true
   tb_host:
     required: true
+  token_name:
+    required: true
 
 outputs:
   branch_name:
@@ -62,15 +64,19 @@ runs:
       shell: bash
       working-directory: ${{ inputs.data_project_dir }}
       run: |
-        [[ -z "${_ENV_FLAGS}" ]] && _ENV_FLAGS="${{ inputs.use_last_partition && '--last-partition ' || '' }}--wait"
-        _NORMALIZED_BRANCH_NAME=$(echo $DATA_PROJECT_DIR | rev | cut -d "/" -f 1 | rev | tr '.-' '_')
         GIT_BRANCH=${GITHUB_HEAD_REF}
+        [[ -z "${_ENV_FLAGS}" ]] && _ENV_FLAGS="${{ inputs.use_last_partition && '--last-partition ' || '' }}--wait"
+        _NORMALIZED_BRANCH_NAME=$(echo $GIT_BRANCH | rev | cut -d "/" -f 1 | rev | tr '.-' '_')
+
         echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
         echo "_ENV_FLAGS=$_ENV_FLAGS" >> $GITHUB_ENV
         echo "_NORMALIZED_BRANCH_NAME=$_NORMALIZED_BRANCH_NAME" >> $GITHUB_ENV
         echo "TB_ENV=${{ inputs.tb_env }}" >> $GITHUB_ENV
         grep -v '^#' .tinyenv >> $GITHUB_ENV
         echo >> $GITHUB_ENV # Ensures new line at the end of the file
+        BRANCH_NAME="ci_${_NORMALIZED_BRANCH_NAME}"
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
 
     - name: Install Tinybird CLI
       shell: bash
@@ -117,7 +123,6 @@ runs:
       working-directory: ${{ inputs.data_project_dir }}
       run: |
         output=$(tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} branch ls)
-        BRANCH_NAME="tmp_ci_${_NORMALIZED_BRANCH_NAME}_${{ github.event.pull_request.number }}"
 
         # Check if the branch name exists in the output
         if echo "$output" | grep -q "\b$BRANCH_NAME\b"; then
@@ -136,34 +141,47 @@ runs:
       working-directory: ${{ inputs.data_project_dir }}
       run: |
         echo "Creating branch"
-        branch_name="tmp_ci_${_NORMALIZED_BRANCH_NAME}_${{ github.event.pull_request.number }}"
-        echo "Branch name: $branch_name"
+        echo "Branch name: $BRANCH_NAME"
 
         tb \
         --host ${{ inputs.tb_host }} \
         --token ${{ inputs.tb_admin_token }} \
-        branch create $branch_name \
+        branch create $BRANCH_NAME \
         ${_ENV_FLAGS}
 
-        echo "Branch created: $branch_name"
+        echo "Branch created: $BRANCH_NAME"
         # add it to the output
-        echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
+        echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
     - name: Use Branch
       shell: bash
       working-directory: ${{ inputs.data_project_dir }}
       run: |
-        BRANCH_NAME="tmp_ci_${_NORMALIZED_BRANCH_NAME}_${{ github.event.pull_request.number }}"
         tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} branch use $BRANCH_NAME
 
-    - name: Get env token
+    - name: Get env token for the branch
       id: get-env-token
       shell: bash
       working-directory: ${{ inputs.data_project_dir }}
       run: |
-        ENV_TOKEN=$(python -c "import json; print(json.load(open('.tinyb'))['token'])")
+        TB_TOKEN_ID=$(tb token ls | awk '/^id: /{id=$2} /^name: /{print id " - " $2}' | grep ${{ inputs.token_name }} | head -n 1 | cut -d' ' -f1)
+
+        if [ -z "$TB_TOKEN_ID" ]; then
+          echo "Token ${{ inputs.token_name }} not found, make sure it exists in the main workspace"
+          exit 1
+        fi
+
+        echo "Copying token..."
+        tb token copy $TB_TOKEN_ID
+
+        # Retrieve the token from the clipboard
+        if command -v xclip &>/dev/null; then
+          ENV_TOKEN=$(xclip -o -selection clipboard)
+        else
+          ENV_TOKEN=$(xsel --clipboard --output)
+        fi
+
         echo "::add-mask::$ENV_TOKEN"
-        echo "TB_ENV_TOKEN=$ENV_TOKEN" >> $GITHUB_ENV
         echo "tb_branch_token=$ENV_TOKEN" >> $GITHUB_OUTPUT
 
     # - name: Deploy changes to the test Branch

@@ -61,6 +61,7 @@ jobs:
           tb_admin_token: ${{ env.TB_ADMIN_TOKEN }}
           tb_host: https://api.tinybird.co
           data_project_dir: internal/tinybird
+          token_name: web-apps
 
       - uses: cloudposse/github-action-secret-outputs@main
         id: tb-token
