@@ -24,6 +24,3 @@ SQL >
 
 TYPE MATERIALIZED
 DATASOURCE features_usage_hourly_mv
-""
-ENGINE_PARTITION_KEY toYYYYMM(date)
-ENGINE_SORTING_KEY date, projectId, customerId, entitlementId, featureSlug
