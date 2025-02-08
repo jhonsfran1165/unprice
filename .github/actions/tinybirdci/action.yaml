@@ -52,7 +52,9 @@ runs:
     - name: install xclip
       shell: bash
       run: |
+        sudo apt-get update
         sudo apt-get install -y xclip
+        pip install pyperclip
 
     - uses: actions/setup-python@v5
       with:
