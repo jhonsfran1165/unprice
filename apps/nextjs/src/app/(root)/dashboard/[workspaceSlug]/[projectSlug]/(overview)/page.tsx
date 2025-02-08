@@ -82,10 +82,7 @@ export default async function DashboardPage(props: {
       </div>
       <div className="mt-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
         <AnalyticsCard
-          promiseKeys={[
-            "getAllFeatureVerificationsActiveProject",
-            "getTotalUsagePerFeatureActiveProject",
-          ]}
+          promiseKeys={["getUsage"]}
           interval={filter.interval}
           className="w-full"
           title="Feature Verifications & Usage"

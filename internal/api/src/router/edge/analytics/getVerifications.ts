@@ -2,7 +2,7 @@ import { z } from "zod"
 
 import { protectedApiOrActiveProjectProcedure } from "#trpc"
 
-export const getUsage = protectedApiOrActiveProjectProcedure
+export const getVerifications = protectedApiOrActiveProjectProcedure
   .input(
     z.object({
       projectId: z.string().optional(),
@@ -15,23 +15,23 @@ export const getUsage = protectedApiOrActiveProjectProcedure
   )
   .output(
     z.object({
-      usage: z
+      verifications: z
         .object({
           projectId: z.string(),
           customerId: z.string(),
-          featureSlug: z.string(),
           entitlementId: z.string(),
+          featureSlug: z.string(),
           count: z.number(),
-          sum: z.number(),
-          max: z.number(),
-          last_during_period: z.number(),
+          p95_latency: z.number(),
+          max_latency: z.number(),
+          latest_latency: z.number(),
         })
         .array(),
     })
   )
   .query(async (opts) => {
     const data = await opts.ctx.analytics
-      .getFeaturesUsage({
+      .getFeaturesVerifications({
         projectId: opts.input.projectId,
         customerId: opts.input.customerId,
         featureSlug: opts.input.featureSlug,
@@ -48,6 +48,6 @@ export const getUsage = protectedApiOrActiveProjectProcedure
       })
 
     return {
-      usage: data.data,
+      verifications: data.data,
     }
   })

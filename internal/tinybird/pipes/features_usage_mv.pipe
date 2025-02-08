@@ -1,39 +1,29 @@
 VERSION 1
 
-NODE mv_usage_hourly
-
 TAGS "usage"
 
+NODE node_features_usage
 DESCRIPTION >
     Materialized view that aggregates features usage metrics by hour, customer, feature, and project
-        We use a ReplacingMergeTree engine to deduplicate events but that is not warranted here
+    We use a ReplacingMergeTree engine to deduplicate events but that is not warranted here
 
 SQL >
-
     SELECT
         toStartOfHour(fromUnixTimestamp64Milli(timestamp)) AS date,
         customerId,
         entitlementId,
         featureSlug,
         projectId,
-        countState() AS event_count,
-        sumState(usage) AS total_usage,
-        maxState(usage) AS max_usage,
-        argMaxState(usage, timestamp) AS latest_usage
+        countState() AS count,
+        sumState(usage) AS sum,
+        maxState(usage) AS max,
+        argMaxState(usage, timestamp) AS last_during_period
     FROM features_usage
     WHERE deleted = 0
-    GROUP BY
-        date,
-        customerId,
-        entitlementId,
-        featureSlug,
-        projectId
+    GROUP BY date, customerId, entitlementId, featureSlug, projectId
 
-TYPE materialized
+TYPE MATERIALIZED
 DATASOURCE features_usage_hourly_mv
-ENGINE_PARTITION_KEY "toYYYYMM(date)"
-ENGINE_SORTING_KEY "date, projectId, customerId, entitlementId, featureSlug"
-
-
-
-
+""
+ENGINE_PARTITION_KEY toYYYYMM(date)
+ENGINE_SORTING_KEY date, projectId, customerId, entitlementId, featureSlug

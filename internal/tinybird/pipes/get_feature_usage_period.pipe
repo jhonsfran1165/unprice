@@ -4,17 +4,16 @@ TAGS "usage"
 
 NODE feature_usage_period_node
 SQL >
-
     %
     SELECT
         projectId,
         customerId,
         featureSlug,
         entitlementId,
-        countMerge(event_count) as event_count,
-        sumMerge(total_usage) as sum,
-        maxMerge(max_usage) as max,
-        argMaxMerge(latest_usage) as last_during_period
+        countMerge(count) as count,
+        sumMerge(sum) as sum,
+        maxMerge(max) as max,
+        argMaxMerge(last_during_period) as last_during_period
     FROM features_usage_hourly_mv
     WHERE
         1 = 1
@@ -23,7 +22,7 @@ SQL >
         {% if defined(featureSlug) %} AND featureSlug = {{ String(featureSlug) }} {% end %}
         {% if defined(entitlementId) %} AND entitlementId = {{ String(entitlementId) }} {% end %}
         {% if defined(start) & defined(end) %}
-          AND date BETWEEN fromUnixTimestamp64Milli({{ Int64(start) }})
-          AND fromUnixTimestamp64Milli({{ Int64(end) }})
+            AND date BETWEEN fromUnixTimestamp64Milli({{ Int64(start) }})
+            AND fromUnixTimestamp64Milli({{ Int64(end) }})
         {% end %}
     GROUP BY projectId, customerId, featureSlug, entitlementId

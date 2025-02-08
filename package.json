@@ -24,7 +24,8 @@
     "commit": "cz",
     "bump-versions": "pnpm changeset version && pnpm install",
     "prepare": "husky",
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "tb-fmt": "tb fmt --yes"
   },
   "dependencies": {
     "@biomejs/biome": "1.9.4",
@@ -41,7 +42,8 @@
     "typescript": "^5.3.3"
   },
   "lint-staged": {
-    "*": ["pnpm validate"]
+    "*": ["pnpm validate"],
+    "*.{datasource,pipe}": "pnpm run tb-fmt"
   },
   "config": {
     "commitizen": {

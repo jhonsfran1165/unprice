@@ -27,14 +27,14 @@ export function VerificationsChart() {
   const { start, end } = prepareInterval(interval)
 
   // this is prefetched from the server
-  const [data] = api.analytics.getAllFeatureVerificationsActiveProject.useSuspenseQuery({
+  const [data] = api.analytics.getVerifications.useSuspenseQuery({
     start,
     end,
   })
 
   const chartData = data.verifications.map((v) => ({
     feature: v.featureSlug,
-    verifications: v.total,
+    verifications: v.count,
   }))
 
   if (chartData.length === 0) {

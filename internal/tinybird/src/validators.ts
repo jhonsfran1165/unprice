@@ -50,6 +50,10 @@ export const featureVerificationSchemaV1 = z.object({
   subscriptionId: z.string().nullable(),
   entitlementId: z.string(),
   deniedReason: z.string().optional(),
+  timestamp: z
+    .number()
+    .default(Date.now())
+    .describe("timestamp of when this usage record should be billed"),
   createdAt: z
     .number()
     .default(Date.now())

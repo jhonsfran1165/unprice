@@ -79,13 +79,22 @@ export class Analytics {
     return this.readClient.buildPipe({
       pipe: "get_features_verifications__v1",
       parameters: z.object({
-        projectId: z.string(),
-        start: z.number(),
-        end: z.number(),
+        projectId: z.string().optional(),
+        customerId: z.string().optional(),
+        entitlementId: z.string().optional(),
+        featureSlug: z.string().optional(),
+        start: z.number().optional(),
+        end: z.number().optional(),
       }),
       data: z.object({
+        projectId: z.string(),
+        customerId: z.string(),
+        entitlementId: z.string(),
         featureSlug: z.string(),
-        total: z.number(),
+        count: z.number(),
+        p95_latency: z.number(),
+        max_latency: z.number(),
+        latest_latency: z.number(),
       }),
       opts: {
         cache: "no-store",
@@ -95,7 +104,7 @@ export class Analytics {
 
   public get getFeaturesUsage() {
     return this.readClient.buildPipe({
-      pipe: "feature_usage_period__v1",
+      pipe: "get_feature_usage_period__v1",
       parameters: z.object({
         projectId: z.string().optional(),
         customerId: z.string().optional(),
@@ -109,10 +118,10 @@ export class Analytics {
         customerId: z.string(),
         featureSlug: z.string(),
         entitlementId: z.string(),
-        total_usage: z.number(),
-        max_usage: z.number(),
-        event_count: z.number(),
-        latest_usage: z.number(),
+        count: z.number(),
+        sum: z.number(),
+        max: z.number(),
+        last_during_period: z.number(),
       }),
       opts: {
         cache: "no-store",
@@ -121,49 +130,6 @@ export class Analytics {
         //   revalidate: 60 * 60 * 24, // 1 day
         // },
       },
-    })
-  }
-
-  public get getTotalUsagePerEntitlementPeriod() {
-    return this.readClient.buildPipe({
-      pipe: "get_total_usage_per_entitlement_period__v1",
-      parameters: z.object({
-        entitlementId: z.string(),
-        customerId: z.string(),
-        featureSlug: z.string(),
-        projectId: z.string(),
-        start: z.number(),
-        end: z.number(),
-      }),
-      data: z.object({
-        total_usage: z.number(),
-        max_usage: z.number(),
-        event_count: z.number(),
-        latest_usage: z.number(),
-      }),
-      opts: {
-        cache: "no-store",
-        // cache for 1 day
-        // next: {
-        //   revalidate: 60 * 60 * 24, // 1 day
-        // },
-      },
-    })
-  }
-
-  public get getTotalUsagePerEntitlementAll() {
-    return this.readClient.buildPipe({
-      pipe: "get_total_usage_per_entitlement_all__v1",
-      parameters: z.object({
-        entitlementId: z.string(),
-        customerId: z.string(),
-        projectId: z.string(),
-      }),
-      data: z.object({
-        sum_all: z.number(),
-        count_all: z.number(),
-        max_all: z.number(),
-      }),
     })
   }
 
@@ -205,77 +171,6 @@ export class Analytics {
       opts: {
         cache: "no-store",
       },
-    })
-  }
-
-  public get getTotalUsagePerFeature() {
-    return this.readClient.buildPipe({
-      pipe: "get_total_usage_per_feature__v1",
-      parameters: z.object({
-        featureSlug: z.string(),
-        subscriptionItemId: z.string().optional(),
-        customerId: z.string(),
-        projectId: z.string(),
-        start: z.number(),
-        end: z.number(),
-      }),
-      data: z.object({
-        sum: z.number(),
-        max: z.number(),
-        count: z.number(),
-        last_during_period: z.number(),
-        sum_all: z.number(),
-        count_all: z.number(),
-        max_all: z.number(),
-      }),
-      opts: {
-        cache: "no-store",
-      },
-    })
-  }
-
-  public get getTotalUsagePerCustomer() {
-    return this.readClient.buildPipe({
-      pipe: "get_total_usage_customer__v1",
-      parameters: z.object({
-        customerId: z.string(),
-        subscriptionId: z.string(),
-        projectId: z.string(),
-        start: z.number(),
-        end: z.number(),
-        type: z.enum(["period", "all"]),
-      }),
-      data: z.object({
-        featureSlug: z.string(),
-        sum: z.number().optional(),
-        max: z.number().optional(),
-        count: z.number().optional(),
-        last_during_period: z.number().optional(),
-        sum_all: z.number().optional(),
-        count_all: z.number().optional(),
-        max_all: z.number().optional(),
-      }),
-      opts: {
-        cache: "no-store",
-      },
-    })
-  }
-
-  public get getTotalUsagePerProject() {
-    return this.readClient.buildPipe({
-      pipe: "get_total_usage_per_project__v1",
-      parameters: z.object({
-        projectId: z.string(),
-        start: z.number(),
-        end: z.number(),
-      }),
-      data: z.object({
-        featureSlug: z.string(),
-        sum: z.number(),
-        max: z.number(),
-        count: z.number(),
-        last_during_period: z.number(),
-      }),
     })
   }
 }

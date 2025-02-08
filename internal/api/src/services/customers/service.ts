@@ -229,19 +229,20 @@ export class CustomerService {
 
     // TODO: we want to be able to get data from entitlements where date doesn't matter
     // meaning count all the usage for the customer ever
+    const isAll = entitlement.aggregationMethod.endsWith("_all")
 
     // we need to get the current subscription
     // get usage for the period from the analytics service
-    const totalUsage = entitlement.aggregationMethod.endsWith("_all")
+    const totalUsage = isAll
       ? await this.ctx.analytics
-          .getTotalUsagePerEntitlementAll({
+          .getFeaturesUsage({
             customerId: opts.customerId,
             entitlementId: entitlement.id,
             projectId: entitlement.projectId,
           })
           .then((usage) => usage.data[0])
           .catch((error) => {
-            this.ctx.logger.error("Error getting getTotalUsagePerEntitlementAll", {
+            this.ctx.logger.error("Error getting getFeaturesUsage all", {
               error: JSON.stringify(error.message),
               customerId: opts.customerId,
               entitlementId: entitlement.id,
@@ -250,7 +251,7 @@ export class CustomerService {
             return null
           })
       : await this.ctx.analytics
-          .getTotalUsagePerEntitlementPeriod({
+          .getFeaturesUsage({
             customerId: opts.customerId,
             entitlementId: entitlement.id,
             start: activeSubscription.currentCycleStartAt,
@@ -260,7 +261,7 @@ export class CustomerService {
           })
           .then((usage) => usage.data[0])
           .catch((error) => {
-            this.ctx.logger.error("Error getting getTotalUsagePerEntitlementPeriod", {
+            this.ctx.logger.error("Error getting getFeaturesUsage", {
               error: JSON.stringify(error.message),
               customerId: opts.customerId,
               entitlementId: entitlement.id,
@@ -273,7 +274,15 @@ export class CustomerService {
       return
     }
 
-    const usage = totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage]
+    let usage = 0
+
+    // TODO: check this
+    if (isAll) {
+      const key = entitlement.aggregationMethod.replace("_all", "") as keyof typeof totalUsage
+      usage = (totalUsage[key] as number) ?? 0
+    } else {
+      usage = (totalUsage[entitlement.aggregationMethod as keyof typeof totalUsage] as number) ?? 0
+    }
 
     // if the usage is not found, then do nothing
     // no need to log an error here because could be the case that there is not usage reported yet yet
@@ -512,6 +521,7 @@ export class CustomerService {
         featureSlug: featureSlug,
         customerId: customerId,
         createdAt: Date.now(),
+        timestamp: Date.now(),
       }
 
       switch (entitlement.featureType) {
