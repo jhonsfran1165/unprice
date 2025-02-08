@@ -49,6 +49,11 @@ runs:
         fetch-depth: ${{ inputs.git_depth }}
         ref: ${{ github.event.pull_request.head.sha }}
 
+    - name: install xclip
+      shell: bash
+      run: |
+        sudo apt-get install -y xclip
+
     - uses: actions/setup-python@v5
       with:
         python-version: "3.11"
