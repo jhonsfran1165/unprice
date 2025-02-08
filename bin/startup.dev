@@ -23,9 +23,10 @@ if ! curl -s http://localhost:8080 > /dev/null 2>&1; then
   exit 1
 fi
 
+# TODO: add tmux to start the services in different panes
+
 # take the first parameter as the mode id if not provided, use dev
 MODE_ID=${1:-dev}
-
 
 if [ "$MODE_ID" = "dev" ]; then
 
@@ -41,8 +42,24 @@ if [ "$MODE_ID" = "dev" ]; then
   echo "UPSTASH_REDIS_REST_URL=$REDIS_URL"
   echo "UPSTASH_REDIS_REST_TOKEN=$REDIS_TOKEN"
 
+  # loging to tb
+  cd internal/tinybird
+  source .venv/bin/activate
+  tb auth --token $TB_TOKEN
+  deactivate
+  cd ../../
+
   infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" UPSTASH_REDIS_REST_URL="$REDIS_URL" UPSTASH_REDIS_REST_TOKEN="$REDIS_TOKEN" pnpm run dev
 elif [ "$MODE_ID" = "preview" ]; then
+  # get the token from infisical
+  TB_TOKEN=$( infisical secrets get TINYBIRD_TOKEN --env=preview --path=/app --raw-value)
+  # loging to tb
+  cd internal/tinybird
+  source .venv/bin/activate
+  tb auth --token $TB_TOKEN
+  deactivate
+  cd ../../
+
   infisical run --env=preview --path=/ --recursive -- pnpm run dev
 else
   echo "Invalid mode: $MODE_ID"

@@ -35,7 +35,7 @@ const nextConfig = {
   swcMinify: true,
   experimental: {
     turbo: {},
-    ppr: true,
+    // ppr: true, // TODO: activate later
     mdxRs: true,
     optimizePackageImports: ["@unprice/ui", "@unprice/api", "@unprice/auth", "@unprice/db"],
     instrumentationHook: process.env.NODE_ENV === "production",
