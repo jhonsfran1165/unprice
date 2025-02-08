@@ -28,8 +28,8 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      tb_branch_name: ${{ steps.set-output.outputs.branch_name }}
-      tb_branch_token: ${{ steps.set-output.outputs.tb_branch_token }}
+      tb_branch_name: ${{ steps.tb-branch.outputs.out }}
+      tb_branch_token: ${{ steps.tb-token.outputs.out }}
 
     permissions:
       pull-requests: write
@@ -62,22 +62,31 @@ jobs:
           tb_host: https://api.tinybird.co
           data_project_dir: internal/tinybird
 
-      # TODO: https://nitratine.net/blog/post/how-to-pass-secrets-between-runners-in-github-actions/
-      # https://github.com/marketplace/actions/secret-output
-      - name: Set Outputs for Tinybird
-        id: set-output
-        shell: bash
-        run: |
-          echo "branch_name=${{ steps.deploy-preview-tinybird.outputs.branch_name }}" >> $GITHUB_OUTPUT
-          echo "tb_branch_token=${{ steps.deploy-preview-tinybird.outputs.tb_branch_token }}" >> $GITHUB_OUTPUT
+      - uses: cloudposse/github-action-secret-outputs@main
+        id: tb-token
+        with:
+          ## PASSWORD is a gpg passphrase stored in Github Secrets.
+          secret: ${{ secrets.PASSWORD_ENCRYPT }}
+          op: encode
+          in: ${{ steps.deploy-preview-tinybird.outputs.tb_branch_token }}
+
+      - uses: cloudposse/github-action-secret-outputs@main
+        id: tb-branch
+        with:
+          ## PASSWORD is a gpg passphrase stored in Github Secrets.
+          secret: ${{ secrets.PASSWORD_ENCRYPT }}
+          op: encode
+          in: ${{ steps.deploy-preview-tinybird.outputs.tb_branch_name }}
+
+
 
   deploy-preview-neon:
     if: "!contains(github.head_ref, 'renovate/')"
     runs-on: ubuntu-latest
 
     outputs:
-      db_branch_name: ${{ steps.set-output.outputs.database_branch_name }}
-      db_url: ${{ steps.set-output.outputs.database_url }}
+      db_branch_name: ${{ steps.db-branch.outputs.out }}
+      db_url: ${{ steps.db-url.outputs.out }}
 
     needs:
       - deploy-preview-tinybird
@@ -154,12 +163,22 @@ jobs:
           database: ${{ env.NEON_DATABASE_NAME }}
           api_key: ${{ env.NEON_API_KEY }}
 
-      - name: Set Outputs for Neon
-        id: set-output
-        shell: bash
-        run: |
-          echo "database_branch_name=preview/pr-${{ steps.branch-name.outputs.current_branch }}" >> $GITHUB_OUTPUT
-          echo "database_url=${{ steps.create-branch.outputs.db_url_with_pooler }}" >> $GITHUB_OUTPUT
+      - uses: cloudposse/github-action-secret-outputs@main
+        id: db-url
+        with:
+          ## PASSWORD is a gpg passphrase stored in Github Secrets.
+          secret: ${{ secrets.PASSWORD_ENCRYPT }}
+          op: encode
+          in: ${{ steps.create-branch.outputs.db_url_with_pooler }}
+
+      - uses: cloudposse/github-action-secret-outputs@main
+        id: db-branch
+        with:
+          ## PASSWORD is a gpg passphrase stored in Github Secrets.
+          secret: ${{ secrets.PASSWORD_ENCRYPT }}
+          op: encode
+          in: ${{ steps.branch-name.outputs.current_branch }}
+
 
 
   deploy-preview-vercel:
@@ -178,6 +197,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - uses: cloudposse/github-action-secret-outputs@main
+        id: tb-token
+        with:
+          ## PASSWORD is a gpg passphrase stored in Github Secrets.
+          secret: ${{ secrets.PASSWORD_ENCRYPT }}
+          op: decode
+          in: ${{ needs.deploy-preview-tinybird.outputs.tb_branch_token }}
+
+      - uses: cloudposse/github-action-secret-outputs@main
+        id: db-url
+        with:
+          ## PASSWORD is a gpg passphrase stored in Github Secrets.
+          secret: ${{ secrets.PASSWORD_ENCRYPT }}
+          op: decode
+          in: ${{ needs.deploy-preview-neon.outputs.db_url }}
 
       - uses: Infisical/secrets-action@v1.0.7
         name: Pull secrets from Infisical
@@ -231,7 +266,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env NODE_ENV=production --env DATABASE_URL=${{ needs.deploy-preview-neon.outputs.db_url }} --env TINYBIRD_TOKEN=${{ needs.deploy-preview-tinybird.outputs.tb_branch_token }} --env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --env NEXT_PUBLIC_VERCEL_ENV=preview --build-env NODE_ENV=production --build-env DATABASE_URL=${{ needs.deploy-preview-neon.outputs.db_url }} --build-env TINYBIRD_TOKEN=${{ needs.deploy-preview-tinybird.outputs.tb_branch_token }} --build-env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --build-env NEXT_PUBLIC_VERCEL_ENV=preview'
+          vercel-args: '--env NODE_ENV=production --env DATABASE_URL=${{ steps.db-url.outputs.out }} --env TINYBIRD_TOKEN=${{ steps.tb-token.outputs.out }} --env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --env NEXT_PUBLIC_VERCEL_ENV=preview --build-env NODE_ENV=production --build-env DATABASE_URL=${{ steps.db-url.outputs.out }} --build-env TINYBIRD_TOKEN=${{ steps.tb-token.outputs.out }} --build-env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --build-env NEXT_PUBLIC_VERCEL_ENV=preview'
           alias-domains: |
             pr-${{ github.event.number }}-unprice.vercel.app
             app-pr-${{ github.event.number }}-unprice.vercel.app
