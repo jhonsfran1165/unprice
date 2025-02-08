@@ -49,17 +49,18 @@ runs:
         fetch-depth: ${{ inputs.git_depth }}
         ref: ${{ github.event.pull_request.head.sha }}
 
-    - name: install xclip
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y xclip
-
     - uses: actions/setup-python@v5
       with:
         python-version: "3.11"
         architecture: "x64"
         cache: 'pip'
+
+    - name: install xclip
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xclip
+        pip install pyperclip
 
     - name: Validate input
       shell: bash
