@@ -35,7 +35,7 @@ describe("PhaseMachine", () => {
   beforeEach(() => {
     // Mock analytics
     mockAnalytics = {
-      getTotalUsagePerFeature: vi.fn((input) => {
+      getFeaturesUsage: vi.fn((input) => {
         const result = {
           sum: 0,
           max: 0,
