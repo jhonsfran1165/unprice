@@ -1,1 +1,2 @@
 tinybird-cli==5.15.1
+pyperclip==1.8.2

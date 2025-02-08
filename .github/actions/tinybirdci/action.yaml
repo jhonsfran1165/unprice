@@ -59,8 +59,8 @@ runs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get install -y xclip
-        pip install pyperclip
+        sudo apt-get install -y xclip xsel
+        pip install pyperclip gtk3
 
     - name: Validate input
       shell: bash
