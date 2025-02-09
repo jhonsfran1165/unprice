@@ -55,13 +55,6 @@ runs:
         architecture: "x64"
         cache: 'pip'
 
-    - name: install xclip
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y xclip xsel
-        pip install pyperclip
-
     - name: Validate input
       shell: bash
       run: |
@@ -178,18 +171,16 @@ runs:
           exit 1
         fi
 
-        echo "Copying token..."
-        tb token copy $TB_TOKEN_ID
+        echo "Getting branch token..."
+        # I don't know who decided to use pyperclip, but it's not available on the runners
 
-        # Retrieve the token from the clipboard
-        if command -v xclip &>/dev/null; then
-          ENV_TOKEN=$(xclip -o -selection clipboard)
-        else
-          ENV_TOKEN=$(xsel --clipboard --output)
-        fi
+        TOKEN=$(curl -X GET \
+            -H "Authorization: Bearer ${{ inputs.tb_admin_token }}" \
+            "${{ inputs.tb_host }}/v0/tokens/$TB_TOKEN_ID" | jq .token)
 
-        echo "::add-mask::$ENV_TOKEN"
-        echo "tb_branch_token=$ENV_TOKEN" >> $GITHUB_OUTPUT
+        # Mask the token
+        echo "::add-mask::$TOKEN"
+        echo "tb_branch_token=$TOKEN" >> $GITHUB_OUTPUT
 
     # - name: Deploy changes to the test Branch
     #   shell: bash
