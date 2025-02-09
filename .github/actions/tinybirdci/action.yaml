@@ -172,11 +172,9 @@ runs:
         fi
 
         echo "Getting branch token..."
-        # I don't know who decided to use pyperclip, but it's not available on the runners
 
-        TOKEN=$(curl -X GET \
-            -H "Authorization: Bearer ${{ inputs.tb_admin_token }}" \
-            "${{ inputs.tb_host }}/v0/tokens/$TB_TOKEN_ID" | jq .token)
+        # I don't know who decided to use pyperclip, but it's not available on the runners
+        TOKEN=$(curl -X GET -H "Authorization: Bearer ${{ inputs.tb_admin_token }}" "${{ inputs.tb_host }}/v0/tokens/$TB_TOKEN_ID" | jq .token)
 
         # Mask the token
         echo "::add-mask::$TOKEN"

@@ -30,7 +30,8 @@
         "app/auth-proxy/.vercel/output/**",
         "!app/auth-proxy/.vercel/cache/**",
         "app/auth-proxy/.next/**",
-        "!app/auth-proxy/.next/cache/**"
+        "!app/auth-proxy/.next/cache/**",
+        ".output/**"
       ],
       "env": [
         "NEXT_PUBLIC_*",
