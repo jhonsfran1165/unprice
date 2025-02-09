@@ -164,19 +164,25 @@ runs:
       shell: bash
       working-directory: ${{ inputs.data_project_dir }}
       run: |
-        TB_TOKEN_ID=$(tb token ls | awk '/^id: /{id=$2} /^name: /{print id " - " $2}' | grep ${{ inputs.token_name }} | head -n 1 | cut -d' ' -f1)
+        TB_TOKEN_ID=$(tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} token ls | awk '/^id: /{id=$2} /^name: /{print id " - " $2}' | grep ${{ inputs.token_name }} | head -n 1 | cut -d' ' -f1)
 
         if [ -z "$TB_TOKEN_ID" ]; then
           echo "Token ${{ inputs.token_name }} not found, make sure it exists in the main workspace"
           exit 1
         fi
 
-        echo "Getting branch token..."
+        echo "Getting ${TB_TOKEN_ID} token"
 
-        # I don't know who decided to use pyperclip, but it's not available on the runners
+        # I don't know who decided to use pyperclip for tb token copy
+        # but it's not available on the runners -.-
         TOKEN=$(curl -X GET -H "Authorization: Bearer ${{ inputs.tb_admin_token }}" "${{ inputs.tb_host }}/v0/tokens/$TB_TOKEN_ID" | jq .token)
 
-        # Mask the token
+        if [ -z "$TOKEN" ]; then
+          echo "Token with name ${{ inputs.token_name }} in branch $BRANCH_NAME not found, make sure it exists in the main workspace"
+          exit 1
+        fi
+
+        # Mask the token before outputting it
         echo "::add-mask::$TOKEN"
         echo "tb_branch_token=$TOKEN" >> $GITHUB_OUTPUT
 
