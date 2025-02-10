@@ -23,7 +23,7 @@ jobs:
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
 
-  deploy-preview-tinybird:
+  deploy-prod-tinybird:
     runs-on: ubuntu-latest
 
     permissions:
@@ -57,7 +57,6 @@ jobs:
           tb_host: https://api.tinybird.co
           data_project_dir: internal/tinybird
           token_name: web-apps
-
 
   deploy-prod:
     runs-on: ubuntu-latest

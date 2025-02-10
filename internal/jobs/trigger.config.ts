@@ -39,4 +39,5 @@ export default defineConfig({
       randomize: true,
     },
   },
+  maxDuration: 300, // 300 seconds or 5 minutes
 })
