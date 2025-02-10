@@ -10,7 +10,7 @@ inputs:
     description: "Number of commits to fetch. 0 indicates all history for all branches and tags"
     required: false
     type: number
-    default: 300
+    default: 0
   tb_env:
     description: "a global environment variable to replace inside the jobs and run conditional workflows (e.g. staging/production deployments)"
     required: false
@@ -20,7 +20,7 @@ inputs:
   tb_host:
     required: true
 
-jobs:
+runs:
   using: "composite"
 
   steps:
