@@ -32,6 +32,8 @@ inputs:
     required: true
   token_name:
     required: true
+    default: web-apps
+    description: "Token with the proper permissions to deploy on the application"
 
 outputs:
   branch_name:
@@ -116,21 +118,19 @@ runs:
     - name: Check auth
       shell: bash
       working-directory: ${{ inputs.data_project_dir }}
-      run: tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} auth info
+      run: |
+        tb auth --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }}
+        tb auth info
 
     - name: Try delete previous Branch
       shell: bash
       working-directory: ${{ inputs.data_project_dir }}
       run: |
-        output=$(tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} branch ls)
+        output=$(tb branch ls)
 
         # Check if the branch name exists in the output
         if echo "$output" | grep -q "\b$BRANCH_NAME\b"; then
-            tb \
-              --host ${{ inputs.tb_host }} \
-              --token ${{ inputs.tb_admin_token }} \
-              branch rm $BRANCH_NAME \
-              --yes
+            tb branch rm $BRANCH_NAME --yes
         else
             echo "Skipping clean up: The Branch '$BRANCH_NAME' does not exist."
         fi
@@ -143,11 +143,7 @@ runs:
         echo "Creating branch"
         echo "Branch name: $BRANCH_NAME"
 
-        tb \
-        --host ${{ inputs.tb_host }} \
-        --token ${{ inputs.tb_admin_token }} \
-        branch create $BRANCH_NAME \
-        ${_ENV_FLAGS}
+        tb branch create $BRANCH_NAME ${_ENV_FLAGS}
 
         echo "Branch created: $BRANCH_NAME"
         # add it to the output
@@ -157,25 +153,28 @@ runs:
       shell: bash
       working-directory: ${{ inputs.data_project_dir }}
       run: |
-        tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} branch use $BRANCH_NAME
+        tb branch use $BRANCH_NAME
 
     - name: Get env token for the branch
       id: get-env-token
       shell: bash
       working-directory: ${{ inputs.data_project_dir }}
       run: |
-        TB_TOKEN_ID=$(tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} token ls | awk '/^id: /{id=$2} /^name: /{print id " - " $2}' | grep ${{ inputs.token_name }} | head -n 1 | cut -d' ' -f1)
+        # when switching to the branch, the token is saved in the .tinyb file
+        BRANCH_ADMIN_TOKEN=$(cat .tinyb | jq .token)
+        BRANCH_TOKEN_ID=$(tb token ls | awk '/^id: /{id=$2} /^name: /{print id " - " $2}' | grep ${{ inputs.token_name }} | head -n 1 | cut -d' ' -f1)
 
-        if [ -z "$TB_TOKEN_ID" ]; then
+        if [ -z "$BRANCH_TOKEN_ID" ]; then
           echo "Token ${{ inputs.token_name }} not found, make sure it exists in the main workspace"
           exit 1
         fi
 
-        echo "Getting ${TB_TOKEN_ID} token"
+        echo "Getting ${BRANCH_TOKEN_ID} token"
 
         # I don't know who decided to use pyperclip for tb token copy
         # but it's not available on the runners -.-
-        TOKEN=$(curl -X GET -H "Authorization: Bearer ${{ inputs.tb_admin_token }}" "${{ inputs.tb_host }}/v0/tokens/$TB_TOKEN_ID" | jq .token)
+        # we need this token to avoid pass the admin token from the workflow to the branch
+        TOKEN=$(curl -X GET -H "Authorization: Bearer $BRANCH_ADMIN_TOKEN" "${{ inputs.tb_host }}/v0/tokens/$BRANCH_TOKEN_ID" | jq .token)
 
         if [ -z "$TOKEN" ]; then
           echo "Token with name ${{ inputs.token_name }} in branch $BRANCH_NAME not found, make sure it exists in the main workspace"
@@ -281,3 +280,10 @@ runs:
     #   working-directory: ${{ inputs.data_project_dir }}
     #   run: |
     #     tb test run -v -c 4
+
+    - name: delete token info
+      shell: bash
+      working-directory: ${{ inputs.data_project_dir }}
+      if: always()
+      run: |
+        rm .tinyb || true

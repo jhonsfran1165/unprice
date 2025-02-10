@@ -1,10 +1,10 @@
-name: Clean up Preview Deployment
+name: Clean up
 on:
   pull_request:
     types: [closed]
 
 jobs:
-  delete-preview:
+  delete-neon-preview:
     runs-on: ubuntu-latest
     if: "!contains(github.head_ref, 'renovate/') || !contains(github.head_ref, 'main')"
     steps:
@@ -26,3 +26,5 @@ jobs:
           project_id: ${{ env.NEON_PROJECT_ID }}
           branch: preview/pr-${{ steps.branch-name.outputs.current_branch }}
           api_key: ${{ env.NEON_API_KEY }}
+
+# TODO: Delete Tinybird Branch
