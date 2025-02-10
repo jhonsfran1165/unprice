@@ -63,9 +63,12 @@ runs:
 
     # horrible hack to get the token
     - name: Install Xvfb
-      run: apt-get update && apt-get install -y xvfb xclip
+      shell: bash
+      run: |
+        apt-get update && apt-get install -y xvfb xclip
 
     - name: simulate display on memory with Xvfb
+      shell: bash
       run: |
         Xvfb :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
         echo "Xvfb started"
