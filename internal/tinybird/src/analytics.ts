@@ -1,6 +1,5 @@
 import { NoopTinybird, Tinybird } from "@chronark/zod-bird"
 import { z } from "zod"
-
 import { auditLogSchemaV1, featureUsageSchemaV1, featureVerificationSchemaV1 } from "./validators"
 
 export class Analytics {
@@ -11,6 +10,7 @@ export class Analytics {
   constructor(opts: {
     emit: boolean
     tinybirdToken?: string
+    tinybirdUrl: string
     tinybirdProxy?: {
       url: string
       token: string
@@ -18,7 +18,7 @@ export class Analytics {
   }) {
     this.readClient =
       opts.tinybirdToken && opts.emit
-        ? new Tinybird({ token: opts.tinybirdToken })
+        ? new Tinybird({ token: opts.tinybirdToken, baseUrl: opts.tinybirdUrl })
         : new NoopTinybird()
 
     this.writeClient =
@@ -62,15 +62,16 @@ export class Analytics {
 
   public get ingestFeaturesVerification() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "features_verifications__v2",
+      datasource: "features_verifications__v1",
       event: featureVerificationSchemaV1,
     })
   }
 
   public get ingestFeaturesUsage() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "features_usage__v2",
+      datasource: "features_usage__v1",
       event: featureUsageSchemaV1,
+      // we need to wait for the ingestion to be done before returning
       wait: true,
     })
   }
@@ -78,13 +79,22 @@ export class Analytics {
     return this.readClient.buildPipe({
       pipe: "get_features_verifications__v1",
       parameters: z.object({
-        projectId: z.string(),
-        start: z.number(),
-        end: z.number(),
+        projectId: z.string().optional(),
+        customerId: z.string().optional(),
+        entitlementId: z.string().optional(),
+        featureSlug: z.string().optional(),
+        start: z.number().optional(),
+        end: z.number().optional(),
       }),
       data: z.object({
+        projectId: z.string(),
+        customerId: z.string(),
+        entitlementId: z.string(),
         featureSlug: z.string(),
-        total: z.number(),
+        count: z.number(),
+        p95_latency: z.number(),
+        max_latency: z.number(),
+        latest_latency: z.number(),
       }),
       opts: {
         cache: "no-store",
@@ -92,12 +102,42 @@ export class Analytics {
     })
   }
 
-  public get getTotalUsagePerFeature() {
+  public get getFeaturesUsage() {
     return this.readClient.buildPipe({
-      pipe: "get_total_usage_per_feature__v1",
+      pipe: "get_feature_usage_period__v1",
       parameters: z.object({
+        projectId: z.string().optional(),
+        customerId: z.string().optional(),
+        featureSlug: z.string().optional(),
+        entitlementId: z.string().optional(),
+        start: z.number().optional(),
+        end: z.number().optional(),
+      }),
+      data: z.object({
+        projectId: z.string(),
+        customerId: z.string(),
         featureSlug: z.string(),
-        subscriptionItemId: z.string().optional(),
+        entitlementId: z.string(),
+        count: z.number(),
+        sum: z.number(),
+        max: z.number(),
+        last_during_period: z.number(),
+      }),
+      opts: {
+        cache: "no-store",
+        // cache for 1 day
+        // next: {
+        //   revalidate: 60 * 60 * 24, // 1 day
+        // },
+      },
+    })
+  }
+
+  public get getTotalUsagePerBillableFeaturePeriod() {
+    return this.readClient.buildPipe({
+      pipe: "get_total_usage_per_billable_feature_period__v1",
+      parameters: z.object({
+        subscriptionItemId: z.string(),
         customerId: z.string(),
         projectId: z.string(),
         start: z.number(),
@@ -115,44 +155,22 @@ export class Analytics {
     })
   }
 
-  public get getTotalUsagePerCustomer() {
+  public get getTotalUsagePerBillableFeatureAll() {
     return this.readClient.buildPipe({
-      pipe: "get_total_usage_customer__v1",
+      pipe: "get_total_usage_per_billable_feature_all__v1",
       parameters: z.object({
+        subscriptionItemId: z.string(),
         customerId: z.string(),
-        subscriptionId: z.string(),
         projectId: z.string(),
-        start: z.number(),
-        end: z.number(),
       }),
       data: z.object({
-        featureSlug: z.string(),
-        sum: z.number(),
-        max: z.number(),
-        count: z.number(),
-        last_during_period: z.number(),
+        sum_all: z.number(),
+        count_all: z.number(),
+        max_all: z.number(),
       }),
       opts: {
         cache: "no-store",
       },
-    })
-  }
-
-  public get getTotalUsagePerProject() {
-    return this.readClient.buildPipe({
-      pipe: "get_total_usage_per_project__v1",
-      parameters: z.object({
-        projectId: z.string(),
-        start: z.number(),
-        end: z.number(),
-      }),
-      data: z.object({
-        featureSlug: z.string(),
-        sum: z.number(),
-        max: z.number(),
-        count: z.number(),
-        last_during_period: z.number(),
-      }),
     })
   }
 }

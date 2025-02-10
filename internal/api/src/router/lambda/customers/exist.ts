@@ -1,6 +1,8 @@
-import { customerSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
+
+import { customerSelectSchema } from "@unprice/db/validators"
+import { protectedApiOrActiveProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const exist = protectedApiOrActiveProjectProcedure
   .meta({
@@ -15,7 +17,18 @@ export const exist = protectedApiOrActiveProjectProcedure
   .output(z.object({ exist: z.boolean() }))
   .mutation(async (opts) => {
     const { email } = opts.input
-    const { project } = opts.ctx
+    const project = opts.ctx.project
+    const unPriceCustomerId = project.workspace.unPriceCustomerId
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: unPriceCustomerId,
+      featureSlug: "customers",
+      ctx: opts.ctx,
+      skipCache: true,
+      isInternal: project.workspace.isInternal,
+      throwOnNoAccess: false,
+    })
 
     const customerData = await opts.ctx.db.query.customers.findFirst({
       columns: {

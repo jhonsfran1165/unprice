@@ -3,7 +3,8 @@ import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { membersSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedWorkspaceProcedure } from "../../../trpc"
+
+import { protectedWorkspaceProcedure } from "#trpc"
 
 export const deleteMember = protectedWorkspaceProcedure
   .input(

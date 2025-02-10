@@ -16,10 +16,10 @@ export const workspaces = pgTableProject(
     name: text("name").notNull(),
 
     // wether or not is a personal workspace - meaning asociated to a user or a team
-    isPersonal: boolean("is_personal").default(false),
-    isInternal: boolean("is_internal").default(false),
+    isPersonal: boolean("is_personal").notNull().default(false),
+    isInternal: boolean("is_internal").notNull().default(false),
     // there must be only one main workspace per the whole project
-    isMain: boolean("is_main").default(false),
+    isMain: boolean("is_main").notNull().default(false),
     createdBy: cuid("created_by")
       .notNull()
       .references(() => users.id),

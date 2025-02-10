@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server"
 import { eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { workspaceSelectBase } from "@unprice/db/validators"
-import { protectedWorkspaceProcedure } from "../../../trpc"
+import { protectedWorkspaceProcedure } from "#trpc"
 
 export const rename = protectedWorkspaceProcedure
   .input(workspaceSelectBase.pick({ name: true }))

@@ -1,4 +1,3 @@
-import { Provider } from "jotai"
 import { PlusIcon } from "lucide-react"
 import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
@@ -41,42 +40,40 @@ export default async function OverviewVersionPage({
   const defaultLayout = layout?.value ? (JSON.parse(layout.value) as [number, number]) : [30, 70]
 
   return (
-    <Provider>
-      <Card className="w-full">
-        <DragDrop>
-          <ResizablePanelConfig
-            defaultLayout={defaultLayout}
-            featureList={
-              <Fragment>
-                <div className={cn("flex h-[70px] items-center justify-between space-x-1 px-4")}>
-                  <Typography variant="h4">All features</Typography>
-                  <FeatureDialog>
-                    <Button variant="default" size="sm">
-                      <PlusIcon className="h-3.5 w-3.5" />
-                    </Button>
-                  </FeatureDialog>
-                </div>
+    <Card className="w-full">
+      <DragDrop>
+        <ResizablePanelConfig
+          defaultLayout={defaultLayout}
+          featureList={
+            <Fragment>
+              <div className={cn("flex h-[70px] items-center justify-between space-x-1 px-4")}>
+                <Typography variant="h4">All features</Typography>
+                <FeatureDialog>
+                  <Button variant="default" size="sm">
+                    <PlusIcon className="h-3.5 w-3.5" />
+                  </Button>
+                </FeatureDialog>
+              </div>
 
-                <Separator />
+              <Separator />
 
-                <Suspense
-                  fallback={
-                    <div className="flex h-full items-center justify-center">
-                      <LoadingAnimation className="size-6" />
-                    </div>
-                  }
-                >
-                  <FeatureList
-                    planVersion={planVersion}
-                    featuresPromise={api.features.listByActiveProject()}
-                  />
-                </Suspense>
-              </Fragment>
-            }
-            planFeatureList={<PlanFeatureList planVersion={planVersion} />}
-          />
-        </DragDrop>
-      </Card>
-    </Provider>
+              <Suspense
+                fallback={
+                  <div className="flex h-full items-center justify-center">
+                    <LoadingAnimation className="size-6" />
+                  </div>
+                }
+              >
+                <FeatureList
+                  planVersion={planVersion}
+                  featuresPromise={api.features.listByActiveProject()}
+                />
+              </Suspense>
+            </Fragment>
+          }
+          planFeatureList={<PlanFeatureList planVersion={planVersion} />}
+        />
+      </DragDrop>
+    </Card>
   )
 }

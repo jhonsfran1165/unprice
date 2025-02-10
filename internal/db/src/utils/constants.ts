@@ -53,19 +53,31 @@ export const USAGE_MODES_MAP = {
 export const AGGREGATION_METHODS_MAP = {
   sum: {
     label: "Sum",
-    description: "Adds up all events values within a time period",
+    description: "Adds up all events values within the current cycle period",
+  },
+  sum_all: {
+    label: "Sum all",
+    description: "Adds up all events values ever",
   },
   last_during_period: {
     label: "Last during period",
-    description: "Last event value during a time period",
+    description: "Last event value during the current cycle period",
   },
   count: {
     label: "Count",
-    description: "Counts the number of events within a time period",
+    description: "Counts the number of events within the current cycle period",
+  },
+  count_all: {
+    label: "Count all",
+    description: "Counts the number of events ever",
   },
   max: {
     label: "Maximum",
-    description: "Maximum event value within a time period",
+    description: "Maximum event value within the current cycle period",
+  },
+  max_all: {
+    label: "Maximum all",
+    description: "Maximum event value ever",
   },
 } as const
 

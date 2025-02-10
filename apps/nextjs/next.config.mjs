@@ -3,6 +3,13 @@ import "@unprice/auth/env"
 import "@unprice/stripe/env"
 import "./src/env.mjs"
 
+import path from "node:path"
+
+import { fileURLToPath } from "node:url"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 // import MillionLint from "@million/lint"
 import createMDX from "@next/mdx"
 
@@ -28,7 +35,7 @@ const nextConfig = {
   swcMinify: true,
   experimental: {
     turbo: {},
-    ppr: true,
+    // ppr: true, // TODO: activate later
     mdxRs: true,
     optimizePackageImports: ["@unprice/ui", "@unprice/api", "@unprice/auth", "@unprice/db"],
     instrumentationHook: process.env.NODE_ENV === "production",
@@ -36,6 +43,17 @@ const nextConfig = {
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
+  /**
+   * This is a workaround to allow us to use inside api a path alias
+   * TODO: remove when api is deployed as an app
+   */
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "#": path.resolve(__dirname, "../../internal/api/src/"),
+    }
+    return config
+  },
 }
 
 const withMDX = createMDX({

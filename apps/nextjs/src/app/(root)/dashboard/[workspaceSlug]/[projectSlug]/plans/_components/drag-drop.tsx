@@ -18,10 +18,10 @@ import { startTransition, useState } from "react"
 import { createPortal } from "react-dom"
 
 import type { PlanVersionFeatureDragDrop } from "@unprice/db/validators"
+import { useActiveFeature, useActivePlanVersion, usePlanFeaturesList } from "~/hooks/use-features"
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 import { FeaturePlan } from "./feature-plan"
-import { useActiveFeature, useActivePlanVersion, usePlanFeaturesList } from "./use-features"
 
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({

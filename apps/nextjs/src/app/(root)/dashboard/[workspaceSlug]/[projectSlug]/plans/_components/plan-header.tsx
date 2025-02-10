@@ -63,6 +63,7 @@ export default function PlanHeader(props: {
                   currency: "USD",
                   planType: "recurring",
                   paymentProvider: "stripe",
+                  billingPeriod: "month",
                 }}
               >
                 <Button variant={"custom"}>

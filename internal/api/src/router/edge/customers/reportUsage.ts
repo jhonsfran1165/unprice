@@ -1,9 +1,9 @@
 import * as utils from "@unprice/db/utils"
 import { z } from "zod"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
-import { reportUsageFeature } from "../../../utils/shared"
+import { protectedApiOrActiveWorkspaceProcedure } from "#trpc"
+import { reportUsageFeature } from "#utils/shared"
 
-export const reportUsage = protectedApiOrActiveProjectProcedure
+export const reportUsage = protectedApiOrActiveWorkspaceProcedure
   .meta({
     span: "customers.reportUsage",
     openapi: {
@@ -29,11 +29,9 @@ export const reportUsage = protectedApiOrActiveProjectProcedure
   )
   .query(async (opts) => {
     const { customerId, featureSlug, usage, idempotenceKey } = opts.input
-    const projectId = opts.ctx.project.id
-    const workspaceId = opts.ctx.project.workspaceId
 
     // this is to avoid reporting the same usage multiple times
-    const body = JSON.stringify({ customerId, featureSlug, usage, idempotenceKey, projectId })
+    const body = JSON.stringify({ customerId, featureSlug, usage, idempotenceKey })
     const hashKey = await utils.hashStringSHA256(body)
 
     // get result if it exists
@@ -48,19 +46,15 @@ export const reportUsage = protectedApiOrActiveProjectProcedure
     }
 
     // if cache miss, report usage
-    const { apiKey, ...ctx } = opts.ctx
-
     const response = await reportUsageFeature({
       customerId,
       featureSlug,
-      projectId: projectId,
-      workspaceId: workspaceId,
       usage: usage,
-      ctx,
+      ctx: opts.ctx,
     })
 
     // cache the result
-    ctx.waitUntil(
+    opts.ctx.waitUntil(
       opts.ctx.cache.idempotentRequestUsageByHash.set(hashKey, {
         access: response.success,
         message: response.message,

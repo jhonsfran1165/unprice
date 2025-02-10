@@ -23,6 +23,6 @@ export function manipulateDate(
 
   return {
     from: date?.from?.getTime() ?? undefined,
-    to: isToDateMidnight ? addOneDayToDate : date?.to?.getTime() ?? undefined,
+    to: isToDateMidnight ? addOneDayToDate : (date?.to?.getTime() ?? undefined),
   }
 }

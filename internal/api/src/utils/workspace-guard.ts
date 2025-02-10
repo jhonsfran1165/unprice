@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server"
 import type { User, Workspace, WorkspaceRole } from "@unprice/db/validators"
 
 import { workspaceGuardPrepared } from "@unprice/db/queries"
-import type { Context } from "../trpc"
+import type { Context } from "#trpc"
 
 interface WorkspaceGuardType {
   workspace: Workspace
@@ -21,15 +21,6 @@ export const workspaceGuard = async ({
   ctx: Context
 }): Promise<WorkspaceGuardType> => {
   const userId = ctx.session?.user.id
-  const workspaces = ctx.session?.user?.workspaces
-  const activeWorkspace = workspaces?.find((workspace) => workspace.slug === workspaceSlug)
-
-  if (!activeWorkspace) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Workspace not found or you don't have access to the workspace",
-    })
-  }
 
   if (!workspaceId && !workspaceSlug) {
     throw new TRPCError({

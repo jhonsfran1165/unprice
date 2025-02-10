@@ -1,6 +1,7 @@
 import { z } from "zod"
 
-import { protectedProjectProcedure } from "../../../trpc"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const exist = protectedProjectProcedure
   .input(z.object({ slug: z.string(), id: z.string().optional() }))
@@ -12,6 +13,20 @@ export const exist = protectedProjectProcedure
   .mutation(async (opts) => {
     const { slug, id } = opts.input
     const project = opts.ctx.project
+    const workspace = opts.ctx.project.workspace
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "plans"
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      skipCache: true,
+      isInternal: workspace.isInternal,
+      // exist endpoint does not need to throw an error
+      throwOnNoAccess: false,
+    })
 
     const plan = await opts.ctx.db.query.plans.findFirst({
       columns: {

@@ -3,7 +3,8 @@ import { eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedWorkspaceProcedure } from "../../../trpc"
+
+import { protectedWorkspaceProcedure } from "#trpc"
 
 export const getBySlug = protectedWorkspaceProcedure
   .input(workspaceSelectBase.pick({ slug: true }))
@@ -15,11 +16,11 @@ export const getBySlug = protectedWorkspaceProcedure
   .query(async (opts) => {
     const { slug } = opts.input
 
-    const workspace = await opts.ctx.db.query.workspaces.findFirst({
+    const workspaceData = await opts.ctx.db.query.workspaces.findFirst({
       where: eq(schema.workspaces.slug, slug),
     })
 
-    if (!workspace) {
+    if (!workspaceData) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "Workspace not found",
@@ -27,6 +28,6 @@ export const getBySlug = protectedWorkspaceProcedure
     }
 
     return {
-      workspace: workspace,
+      workspace: workspaceData,
     }
   })

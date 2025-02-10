@@ -8,7 +8,7 @@ import {
   planVersionFeatureSelectBaseSchema,
 } from "@unprice/db/validators"
 
-import { protectedProjectProcedure } from "../../../trpc"
+import { protectedProjectProcedure } from "#trpc"
 
 export const update = protectedProjectProcedure
   .input(planVersionFeatureSelectBaseSchema.partial().required({ id: true, planVersionId: true }))

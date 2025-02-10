@@ -64,6 +64,7 @@ export default function TimeZoneFormField<TFieldValues extends FormValues>({
                   <Button
                     type="button"
                     variant="outline"
+                    // biome-ignore lint/a11y/useSemanticElements: <explanation>
                     role="combobox"
                     disabled={isDisabled}
                     className={cn("w-full justify-between")}

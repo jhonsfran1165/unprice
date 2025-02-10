@@ -23,6 +23,42 @@ jobs:
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
 
+  deploy-preview-tinybird:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      contents: read
+
+    needs:
+      - build-lint
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: "prod"
+          project-slug: "unprice-zq-xm"
+          secret-path: "/ci"
+          recursive: true
+
+      - uses: ./.github/actions/tinybirdcd
+        name: Deploy Production Tinybird
+        id: deploy-production-tinybird
+        with:
+          tb_format: true
+          tb_admin_token: ${{ env.TB_ADMIN_TOKEN }}
+          tb_host: https://api.tinybird.co
+          data_project_dir: internal/tinybird
+          token_name: web-apps
+
+
   deploy-prod:
     runs-on: ubuntu-latest
 

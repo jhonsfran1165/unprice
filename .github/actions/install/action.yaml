@@ -6,6 +6,10 @@ inputs:
     description: Whether to install Node.js and dependencies
     required: true
     default: true
+  python:
+    description: Whether to install Python and dependencies
+    required: false
+    default: false
 
 runs:
   using: "composite"
@@ -17,6 +21,13 @@ runs:
       with:
         version: 8.15.4
         run_install: false
+
+    - uses: actions/setup-python@v5
+      if: ${{ inputs.python == 'true' }}
+      with:
+        python-version: "3.11"
+        architecture: "x64"
+        cache: 'pip'
 
     - name: Setup Node 20
       uses: actions/setup-node@v4

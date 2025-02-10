@@ -1,12 +1,13 @@
-import { TRPCError } from "@trpc/server"
 import { AesGCM } from "@unprice/db/utils"
 import { paymentProviderSchema } from "@unprice/db/validators"
-import { PaymentProviderService } from "@unprice/services/payment-provider"
 import { z } from "zod"
-import { env } from "../../../env.mjs"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
+import { PaymentProviderService } from "#services/payment-provider"
 
-export const listPaymentMethods = protectedApiOrActiveProjectProcedure
+import { TRPCError } from "@trpc/server"
+import { env } from "#env.mjs"
+import { protectedApiOrActiveWorkspaceProcedure } from "#trpc"
+
+export const listPaymentMethods = protectedApiOrActiveWorkspaceProcedure
   .meta({
     span: "customers.listPaymentMethods",
     openapi: {
@@ -19,7 +20,6 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
     z.object({
       customerId: z.string(),
       provider: paymentProviderSchema,
-      projectSlug: z.string().optional(),
     })
   )
   .output(
@@ -38,11 +38,9 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
   )
   .query(async (opts) => {
     const { customerId, provider } = opts.input
-    const project = opts.ctx.project
 
     const customerData = await opts.ctx.db.query.customers.findFirst({
-      where: (customer, { and, eq }) =>
-        and(eq(customer.id, customerId), eq(customer.projectId, project.id)),
+      where: (customer, { and, eq }) => and(eq(customer.id, customerId)),
     })
 
     if (!customerData) {
@@ -56,7 +54,7 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
     const config = await opts.ctx.db.query.paymentProviderConfig.findFirst({
       where: (config, { and, eq }) =>
         and(
-          eq(config.projectId, project.id),
+          eq(config.projectId, customerData.projectId),
           eq(config.paymentProvider, provider),
           eq(config.active, true)
         ),
@@ -84,7 +82,6 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
         token: decryptedKey,
       })
 
-      const defaultPaymentMethodId = await paymentProviderService.getDefaultPaymentMethodId()
       const customerId = paymentProviderService.getCustomerId()
 
       if (!customerId) {
@@ -92,6 +89,8 @@ export const listPaymentMethods = protectedApiOrActiveProjectProcedure
           paymentMethods: [],
         }
       }
+
+      const defaultPaymentMethodId = await paymentProviderService.getDefaultPaymentMethodId()
 
       if (defaultPaymentMethodId.err) {
         throw new TRPCError({

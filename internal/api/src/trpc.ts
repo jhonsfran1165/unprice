@@ -14,15 +14,15 @@ import { COOKIES_APP } from "@unprice/config"
 import { type Database, type TransactionDatabase, db } from "@unprice/db"
 import { newId } from "@unprice/db/utils"
 import { BaseLimeLogger, ConsoleLogger, type Logger } from "@unprice/logging"
-import type { CacheNamespaces } from "@unprice/services/cache"
-import { CacheService } from "@unprice/services/cache"
-import { LogdrainMetrics, type Metrics, NoopMetrics } from "@unprice/services/metrics"
 import { Analytics } from "@unprice/tinybird"
 import { Ratelimit } from "@upstash/ratelimit"
 import { waitUntil } from "@vercel/functions"
 import { ZodError } from "zod"
 import { fromZodError } from "zod-validation-error"
-import { env } from "./env.mjs"
+import { env } from "#env.mjs"
+import type { CacheNamespaces } from "#services/cache"
+import { CacheService } from "#services/cache"
+import { LogdrainMetrics, type Metrics, NoopMetrics } from "#services/metrics"
 import { transformer } from "./transformer"
 import { projectWorkspaceGuard } from "./utils"
 import { apikeyGuard } from "./utils/apikey-guard"
@@ -69,6 +69,7 @@ export const createInnerTRPCContext = (
     db: db,
     analytics: new Analytics({
       tinybirdToken: env.TINYBIRD_TOKEN,
+      tinybirdUrl: env.TINYBIRD_URL,
       emit: env.EMIT_ANALYTICS,
     }),
     // INFO: better wait for native support for RLS in Drizzle
@@ -184,6 +185,8 @@ export const t = initTRPC
         ...shape,
         data: {
           ...shape.data,
+          code: error.code,
+          cause: error.cause,
           zodError:
             error.code === "BAD_REQUEST" && error.cause instanceof ZodError
               ? error.cause.flatten()
@@ -313,6 +316,52 @@ export const protectedWorkspaceProcedure = protectedProcedure.use(
 )
 
 // for those endpoint that are used inside the app but they also can be used with an api key
+export const protectedApiOrActiveWorkspaceProcedure = publicProcedure.use(
+  async ({ ctx, next, getRawInput }) => {
+    const apikey = ctx.apikey
+
+    // Check db for API key if apiKey is present
+    if (apikey) {
+      const { apiKey } = await apikeyGuard({
+        apikey,
+        ctx,
+      })
+
+      return next({
+        ctx: {
+          // pass the project data to the context to ensure all changes are applied to the correct project
+          workspace: apiKey.project.workspace,
+          apiKey: apiKey,
+        },
+      })
+    }
+
+    // if no api key is present, check if the user is logged in
+    if (!ctx.session?.user?.id) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "User or API key not found" })
+    }
+
+    const input = (await getRawInput()) as { workspaceSlug?: string }
+    const activeWorkspaceSlug = input?.workspaceSlug ?? ctx.activeWorkspaceSlug ?? undefined
+
+    const data = await workspaceGuard({
+      workspaceSlug: activeWorkspaceSlug,
+      ctx,
+    })
+
+    return next({
+      ctx: {
+        userId: ctx.session?.user.id,
+        ...data,
+        session: {
+          ...ctx.session,
+        },
+      },
+    })
+  }
+)
+
+// for those endpoint that are used inside the app but they also can be used with an api key
 export const protectedApiOrActiveProjectProcedure = publicProcedure.use(
   async ({ ctx, next, getRawInput }) => {
     const apikey = ctx.apikey
@@ -339,7 +388,7 @@ export const protectedApiOrActiveProjectProcedure = publicProcedure.use(
     }
 
     const input = (await getRawInput()) as { projectSlug?: string }
-    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug
+    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug ?? undefined
 
     const data = await projectWorkspaceGuard({
       projectSlug: activeProjectSlug,
@@ -361,7 +410,7 @@ export const protectedApiOrActiveProjectProcedure = publicProcedure.use(
 export const protectedProjectProcedure = protectedProcedure.use(
   async ({ ctx, next, getRawInput }) => {
     const input = (await getRawInput()) as { projectSlug?: string }
-    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug
+    const activeProjectSlug = input?.projectSlug ?? ctx.activeProjectSlug ?? undefined
 
     // if projectSlug is present, use it if not use the active project slug
     const data = await projectWorkspaceGuard({

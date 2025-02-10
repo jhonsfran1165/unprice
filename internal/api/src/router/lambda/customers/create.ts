@@ -1,9 +1,12 @@
-import { TRPCError } from "@trpc/server"
-import * as schema from "@unprice/db/schema"
-import * as utils from "@unprice/db/utils"
-import { customerInsertBaseSchema, customerSelectSchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
+
+import { TRPCError } from "@trpc/server"
+import { customers } from "@unprice/db/schema"
+import { newId } from "@unprice/db/utils"
+import { customerInsertBaseSchema, customerSelectSchema } from "@unprice/db/validators"
+import { protectedApiOrActiveProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
+import { reportUsageFeature } from "#utils/shared"
 
 export const create = protectedApiOrActiveProjectProcedure
   .meta({
@@ -21,15 +24,25 @@ export const create = protectedApiOrActiveProjectProcedure
       opts.input
     const { project } = opts.ctx
 
-    // const unpriceCustomerId = project.workspace.unPriceCustomerId
-    // const workspaceId = project.workspaceId
+    const unPriceCustomerId = project.workspace.unPriceCustomerId
+    const featureSlug = "customers"
 
-    const customerId = utils.newId("customer")
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: unPriceCustomerId,
+      featureSlug,
+      ctx: opts.ctx,
+      skipCache: true,
+      updateUsage: true,
+      isInternal: project.workspace.isInternal,
+    })
+
+    const customerId = newId("customer")
 
     // TODO: check what happens when the currency changes?
 
     const customerData = await opts.ctx.db
-      .insert(schema.customers)
+      .insert(customers)
       .values({
         id: customerId,
         name,
@@ -52,16 +65,16 @@ export const create = protectedApiOrActiveProjectProcedure
       })
     }
 
-    // waitUntil(
-    //   reportUsageFeature({
-    //     customerId: unpriceCustomerId,
-    //     featureSlug: "customers",
-    //     projectId: project.id,
-    //     workspaceId: workspaceId,
-    //     ctx: ctx,
-    //     usage: 1,
-    //   })
-    // )
+    opts.ctx.waitUntil(
+      // report usage for the new project in background
+      reportUsageFeature({
+        customerId: unPriceCustomerId,
+        featureSlug,
+        usage: 1, // the new customer
+        ctx: opts.ctx,
+        isInternal: project.workspace.isInternal,
+      })
+    )
 
     return {
       customer: customerData,

@@ -5,7 +5,7 @@ import {
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
+import { protectedApiOrActiveProjectProcedure } from "#trpc"
 
 export const getSubscriptions = protectedApiOrActiveProjectProcedure
   .meta({

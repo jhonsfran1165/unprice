@@ -159,14 +159,19 @@ export const authConfig = {
           userId,
         })
 
-        const workspaces = userWithWorkspaces?.members.map((member) => ({
-          id: member.workspace.id,
-          slug: member.workspace.slug,
-          role: member.role,
-          isPersonal: member.workspace.isPersonal,
-          enabled: member.workspace.enabled,
-          unPriceCustomerId: member.workspace.unPriceCustomerId,
-        }))
+        // filter out the workspaces that are not enabled
+        const workspaces = userWithWorkspaces?.members
+          .filter((member) => member.workspace.enabled)
+          .map((member) => ({
+            id: member.workspace.id,
+            slug: member.workspace.slug,
+            role: member.role,
+            isPersonal: member.workspace.isPersonal,
+            enabled: member.workspace.enabled,
+            unPriceCustomerId: member.workspace.unPriceCustomerId,
+            isInternal: member.workspace.isInternal,
+            isMain: member.workspace.isMain,
+          }))
 
         token.workspaces = workspaces ? workspaces : []
 

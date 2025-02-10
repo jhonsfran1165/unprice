@@ -28,11 +28,15 @@ import { Separator } from "@unprice/ui/separator"
 import { Switch } from "@unprice/ui/switch"
 import { cn } from "@unprice/ui/utils"
 
+import { Warning } from "@unprice/ui/icons"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
+import { Typography } from "@unprice/ui/typography"
 import { SubmitButton } from "~/components/submit-button"
+import { useEntitlement } from "~/hooks/use-entitlement"
+import { usePlanFeaturesList } from "~/hooks/use-features"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
-import { usePlanFeaturesList } from "../../_components/use-features"
 import { BannerPublishedVersion } from "../[planVersionId]/_components/banner"
 import { FlatFormFields } from "./flat-form-fields"
 import { PackageFormFields } from "./package-form-fields"
@@ -55,6 +59,7 @@ export function FeatureConfigForm({
 
   const editMode = !!defaultValues.id
   const isPublished = planVersion?.status === "published"
+  const { access: isProAccess } = useEntitlement("pro-access")
 
   // we set all possible values for the form so react-hook-form don't complain
   const controlledDefaultValues = {
@@ -192,11 +197,31 @@ export function FeatureConfigForm({
                 </FormDescription>
               </div>
               <FormControl>
-                <Switch
-                  checked={field.value ?? false}
-                  onCheckedChange={field.onChange}
-                  disabled={isPublished}
-                />
+                {!isProAccess ? (
+                  <Switch
+                    checked={field.value ?? false}
+                    onCheckedChange={field.onChange}
+                    disabled={isPublished}
+                  />
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-center rounded-full p-2 text-muted-foreground">
+                        <Warning className="h-8 w-8" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent align="start" side="bottom" sideOffset={10} alignOffset={-5}>
+                      <div className="flex max-w-[200px] flex-col gap-4 py-2">
+                        <Typography variant="p" className="text-center">
+                          You don't have access to this feature
+                        </Typography>
+                        <Button variant="primary" size="sm" className="mx-auto w-2/3">
+                          Upgrade
+                        </Button>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </FormControl>
             </FormItem>
           )}

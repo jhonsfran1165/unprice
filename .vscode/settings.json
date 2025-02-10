@@ -1,7 +1,7 @@
 {
   "tinybird.dataProjectSubdir": "internal/tinybird",
-  "tinybird.venvActivat": "",
-  "tinybird.venv": "",
+  "tinybird.venvActivate": "bin/activate",
+  "tinybird.venv": ".venv",
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
@@ -100,9 +100,14 @@
     "**/.trigger": true,
     "**/dist": true,
     "**/build": true,
-    "**/.turbo": true
+    "**/.turbo": true,
+    "**/.vercel": true,
+    "**/.nitro": true,
+    "**/tsconfig.tsbuildinfo": true,
+    "**/.venv": true
   },
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"
-  }
+  },
+  "CodeGPT.apiKey": "Ollama"
 }

@@ -17,17 +17,18 @@
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip --include files,dependencies",
     "test": "cross-env SKIP_ENV_VALIDATION=1 NODE_ENV=test turbo run test",
-    "fmt:fix": "pnpm biome format . --write && pnpm biome check . --apply-unsafe",
+    "fmt:fix": "pnpm biome format . --write && pnpm biome check .  --write --unsafe ",
     "fmt": "pnpm biome format . && pnpm biome check .",
     "validate": "pnpm typecheck && pnpm manypkg check && pnpm fmt:fix",
     "manypkg:fix": "pnpm manypkg fix",
     "commit": "cz",
     "bump-versions": "pnpm changeset version && pnpm install",
     "prepare": "husky",
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "tb-fmt": "tb fmt --yes"
   },
   "dependencies": {
-    "@biomejs/biome": "1.7.3",
+    "@biomejs/biome": "1.9.4",
     "@changesets/cli": "^2.27.7",
     "@manypkg/cli": "^0.21.2",
     "@turbo/gen": "^1.12.4",
@@ -41,7 +42,8 @@
     "typescript": "^5.3.3"
   },
   "lint-staged": {
-    "*": ["pnpm validate"]
+    "*": ["pnpm validate"],
+    "*.{datasource,pipe}": "pnpm run tb-fmt"
   },
   "config": {
     "commitizen": {

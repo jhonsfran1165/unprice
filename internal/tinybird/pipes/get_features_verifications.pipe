@@ -1,16 +1,30 @@
 VERSION 1
-TOKEN "get_features_verifications_endpoint_read_5096" READ
 
-NODE features_verifications_4399_pipe_5518_0
+TOKEN "web-apps" READ
+
+TAGS "verifications"
+
+NODE features_verifications_node
 SQL >
-
     %
-    SELECT featureSlug, count(featureSlug) as total
+    SELECT
+        projectId,
+        customerId,
+        entitlementId,
+        featureSlug,
+        count() AS count,
+        quantile(0.95)
+        (latency) AS p95_latency,
+        max(latency) AS max_latency,
+        argMax(latency, timestamp) AS latest_latency
     FROM features_verifications
     WHERE
-        projectId ={{ String(projectId, required=True) }}
-        AND time BETWEEN {{ Int64(start, required=True) }}
-        AND {{ Int64(end, required=True) }}
-    GROUP BY featureSlug
-
-
+        1 = 1
+        {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
+        {% if defined(customerId) %} AND customerId = {{ String(customerId) }} {% end %}
+        {% if defined(featureSlug) %} AND featureSlug = {{ String(featureSlug) }} {% end %}
+        {% if defined(entitlementId) %} AND entitlementId = {{ String(entitlementId) }} {% end %}
+        {% if defined(start) & defined(end) %}
+            AND timestamp BETWEEN {{ Int64(start) }} AND {{ Int64(end) }}
+        {% end %}
+    GROUP BY projectId, customerId, featureSlug, entitlementId

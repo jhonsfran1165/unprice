@@ -15,15 +15,15 @@ import { Button } from "@unprice/ui/button"
 import { cn, focusRing } from "@unprice/ui/utils"
 
 import { Ping } from "~/components/ping"
-import { api } from "~/trpc/client"
-import { PlanVersionFeatureSheet } from "../[planSlug]/_components/plan-version-feature-sheet"
-import { FeatureDialog } from "./feature-dialog"
 import {
   useActiveFeature,
   useActivePlanVersion,
   usePlanFeaturesList,
   usePlanVersionFeatureOpen,
-} from "./use-features"
+} from "~/hooks/use-features"
+import { api } from "~/trpc/client"
+import { PlanVersionFeatureSheet } from "../[planSlug]/_components/plan-version-feature-sheet"
+import { FeatureDialog } from "./feature-dialog"
 
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
 
@@ -92,6 +92,7 @@ const FeaturePlan = forwardRef<ElementRef<"div">, FeaturePlanProps>((props, ref)
       )}
       onClick={handleClick}
       onKeyDown={handleKeyDown} // Add onKeyDown event listener
+      // biome-ignore lint/a11y/useSemanticElements: <explanation>
       role="button" // Add the role attribute to indicate interactive nature
       tabIndex={0} // Add tabIndex to make it focusable
     >

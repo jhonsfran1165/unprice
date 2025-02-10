@@ -1,7 +1,12 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server"
 
 import { type AppRouter, appRouter } from "./routes"
-import { createCallerFactory, createInnerTRPCContext, createTRPCContext } from "./trpc"
+import {
+  type Context,
+  createCallerFactory,
+  createInnerTRPCContext,
+  createTRPCContext,
+} from "./trpc"
 
 export { t } from "./trpc"
 export { ratelimit } from "./utils/upstash"
@@ -30,3 +35,4 @@ export type RouterInputs = inferRouterInputs<AppRouter>
 export type RouterOutputs = inferRouterOutputs<AppRouter>
 
 export { appRouter, createCaller, createInnerTRPCContext, createTRPCContext }
+export type { Context }

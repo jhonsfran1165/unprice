@@ -1,10 +1,10 @@
-name: Clean up Preview Deployment
+name: Clean up
 on:
   pull_request:
     types: [closed]
 
 jobs:
-  delete-preview:
+  delete-neon-preview:
     runs-on: ubuntu-latest
     if: "!contains(github.head_ref, 'renovate/') || !contains(github.head_ref, 'main')"
     steps:
@@ -26,3 +26,58 @@ jobs:
           project_id: ${{ env.NEON_PROJECT_ID }}
           branch: preview/pr-${{ steps.branch-name.outputs.current_branch }}
           api_key: ${{ env.NEON_API_KEY }}
+
+  delete-tinybird-preview:
+    runs-on: ubuntu-latest
+    if: "!contains(github.head_ref, 'renovate/') || !contains(github.head_ref, 'main')"
+    steps:
+      - uses: Infisical/secrets-action@v1.0.7
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: "preview"
+          project-slug: "unprice-zq-xm"
+          secret-path: "/ci"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          architecture: "x64"
+          cache: 'pip'
+
+      - name: Install Tinybird CLI
+        shell: bash
+        working-directory: internal/tinybird
+        run: |
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          else
+            pip install tinybird-cli
+          fi
+
+      - name: Check auth
+        shell: bash
+        working-directory: internal/tinybird
+        run: |
+          tb auth --host ${{ env.TB_HOST }} --token ${{ env.TB_ADMIN_TOKEN }}
+          tb auth info
+
+      - name: Delete Tinybird Branch
+        working-directory: internal/tinybird
+        run: |
+          output=$(tb branch ls)
+          if echo "$output" | grep -q "\b$BRANCH_NAME\b"; then
+            tb branch rm ${{ steps.branch-name.outputs.current_branch }} --yes
+          else
+            echo "Skipping clean up: The Branch '$BRANCH_NAME' already exists and recreate_branch is set to false"
+          fi
+
+      - name: delete token info
+        shell: bash
+        working-directory: internal/tinybird
+        if: always()
+        run: |
+          rm .tinyb || true

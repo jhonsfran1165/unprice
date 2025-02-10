@@ -9,9 +9,9 @@ import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { toast } from "@unprice/ui/sonner"
 
 import { ConfirmAction } from "~/components/confirm-action"
+import { usePlanFeaturesList } from "~/hooks/use-features"
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
-import { usePlanFeaturesList } from "./use-features"
 
 const PlanVersionPublish: React.FC<{
   planVersionId: string

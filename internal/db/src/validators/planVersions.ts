@@ -40,6 +40,7 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
     currency: true,
     planType: true,
     paymentProvider: true,
+    billingPeriod: true,
   })
   .superRefine((data, ctx) => {
     if (data.planType === "recurring" && !data.billingPeriod) {

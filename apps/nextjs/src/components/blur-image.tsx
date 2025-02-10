@@ -20,6 +20,7 @@ export function BlurImage(props: ImageProps) {
       {...props}
       src={src}
       alt={props.alt}
+      priority={props.priority ?? true}
       className={cn(loading ? "blur-[2px]" : "blur-0", props.className)}
       onLoad={handleLoad}
       onError={() => {

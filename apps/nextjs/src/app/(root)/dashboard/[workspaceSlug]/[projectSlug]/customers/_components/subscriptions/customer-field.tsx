@@ -71,7 +71,6 @@ export default function CustomerFormField({
                   <Button
                     type="button"
                     variant="outline"
-                    role="combobox"
                     disabled={isDisabled}
                     className={cn("w-full justify-between")}
                   >

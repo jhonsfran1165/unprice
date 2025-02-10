@@ -29,6 +29,13 @@
       "when": 1737144157128,
       "tag": "0003_fresh_mariko_yashida",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1737460915845,
+      "tag": "0004_blushing_franklin_richards",
+      "breakpoints": true
     }
   ]
 }

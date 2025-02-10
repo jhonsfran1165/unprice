@@ -23,12 +23,15 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [
-        "app/next.js/.next/**",
-        "!app/next.js/.next/cache/**",
-        "app/next.js/next-env.d.ts",
+        "app/nextjs/.next/**",
+        "!app/nextjs/.next/cache/**",
+        "app/nextjs/next-env.d.ts",
         "dist/**",
         "app/auth-proxy/.vercel/output/**",
-        "!app/auth-proxy/.vercel/cache/**"
+        "!app/auth-proxy/.vercel/cache/**",
+        "app/auth-proxy/.next/**",
+        "!app/auth-proxy/.next/cache/**",
+        ".output/**"
       ],
       "env": [
         "NEXT_PUBLIC_*",
@@ -77,6 +80,9 @@
       "cache": false
     },
     "clean:workspaces": {
+      "cache": false
+    },
+    "clean": {
       "cache": false
     }
   }

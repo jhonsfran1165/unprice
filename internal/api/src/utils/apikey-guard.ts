@@ -1,8 +1,7 @@
 import { TRPCError } from "@trpc/server"
-
 import type { Database } from "@unprice/db"
-import { ApiKeysService, UnPriceApiKeyError } from "@unprice/services/apikeys"
-import type { Context } from "../trpc"
+import { ApiKeysService, UnPriceApiKeyError } from "#services/apikeys"
+import type { Context } from "#trpc"
 
 export const apikeyGuard = async ({
   apikey,

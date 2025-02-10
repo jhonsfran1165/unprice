@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation"
 import { startTransition } from "react"
-import { z } from "zod"
 
 import type { InsertCustomer } from "@unprice/db/validators"
 import { customerInsertBaseSchema } from "@unprice/db/validators"
@@ -39,24 +38,9 @@ export function CustomerForm({
 }) {
   const router = useRouter()
   const editMode = !!defaultValues.id
-  const customerExist = api.plans.exist.useMutation()
 
-  // async validation only when creating a new plan
-  const formSchema = editMode
-    ? customerInsertBaseSchema
-    : customerInsertBaseSchema.extend({
-        email: z
-          .string()
-          .min(3)
-          .email()
-          .refine(async (slug) => {
-            const { exist } = await customerExist.mutateAsync({
-              slug: slug,
-            })
-
-            return !exist
-          }, "Email already exists."),
-      })
+  // async validation only when creating a new customer
+  const formSchema = customerInsertBaseSchema
 
   const form = useZodForm({
     schema: formSchema,

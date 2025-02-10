@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+
+# Please Use Google Shell Style: https://google.github.io/styleguide/shell.xml
+
+# ---- Start unofficial bash strict mode boilerplate
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -o errexit  # always exit on error
+set -o errtrace # trap errors in functions as well
+set -o pipefail # don't ignore exit codes when piping output
+set -o posix    # more strict failures in subshells
+# set -x          # enable debugging
+
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+echo "Starting up"
+
+docker-compose up -d
+
+# check if tinybird http://localhost:8080 is running
+if ! curl -s http://localhost:8080 > /dev/null 2>&1; then
+  echo "Tinybird is not running, you need to wait for it to start"
+  exit 1
+fi
+
+
+CURRENT_GIT_BRANCH=$(git branch --show-current)
+
+# TODO: add tmux to start the services in different panes
+
+# take the first parameter as the mode id if not provided, use dev
+MODE_ID=${1:-dev}
+
+if [ "$MODE_ID" = "dev" ]; then
+  # banner to show the user that we are using the preview environment
+  echo ""
+  echo "########################################################"
+  echo "# Using development environment"
+  echo "########################################################"
+  echo ""
+
+  # We need to override on development some variables so we can work with local first tools.
+  TB_TOKEN=$(curl -s http://localhost:8080/tokens | jq -r ".workspace_admin_token")
+
+  # override tinybird host
+  TB_HOST="http://localhost:8080"
+  REDIS_URL="http://localhost:8079"
+  REDIS_TOKEN="example_token"
+
+  # loging to tb
+  cd internal/tinybird
+  source .venv/bin/activate
+  tb auth --token $TB_TOKEN --host $TB_HOST
+  tb push -f --override-datasource --no-check
+  deactivate
+  cd ../../
+
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" UPSTASH_REDIS_REST_URL="$REDIS_URL" UPSTASH_REDIS_REST_TOKEN="$REDIS_TOKEN" pnpm run dev
+elif [ "$MODE_ID" = "preview" ]; then
+  # banner to show the user that we are using the preview environment
+  echo ""
+  echo "########################################################"
+  echo "# Using preview environment"
+  echo "########################################################"
+  echo ""
+
+  TB_HOST=$(infisical secrets get TINYBIRD_URL --env=preview --path=/app --raw-value)
+  # get the admin token from infisical
+  TB_ADMIN_TOKEN=$(infisical secrets get TB_ADMIN_TOKEN --env=preview --path=/ci --raw-value)
+  # use the normal token with less permissions
+  TB_TOKEN=$(infisical secrets get TINYBIRD_TOKEN --env=preview --path=/app --raw-value)
+
+  NORMALIZED_BRANCH_NAME=$(echo $CURRENT_GIT_BRANCH | rev | cut -d "/" -f 1 | rev | tr '.-' '_')
+  TB_BRANCH_NAME="ci_${NORMALIZED_BRANCH_NAME}"
+
+  # activate the tinybird cli
+  cd internal/tinybird
+  source .venv/bin/activate
+
+  # auth tb with the admin token
+  tb auth --token $TB_ADMIN_TOKEN --host $TB_HOST
+
+  # get the branch name from the current git branch
+  OUTPUT=$(tb branch ls)
+
+  # echo "OUTPUT: $OUTPUT"
+
+  # create the branch if it does not exist
+  if echo "$OUTPUT" | grep -q "\b$TB_BRANCH_NAME\b"; then
+    echo "Skipping branch creation for '$TB_BRANCH_NAME' because it already exists."
+  else
+    echo "Creating branch '$TB_BRANCH_NAME' because it does not exist."
+
+    tb branch create --last-partition --wait $TB_BRANCH_NAME
+  fi
+
+  # use the branch
+  tb branch use $TB_BRANCH_NAME
+
+  TB_TOKEN_ID=$(tb token ls | awk '/^id: /{id=$2} /^name: /{print id " - " $2}' | grep web-apps | head -n 1 | cut -d' ' -f1)
+
+  if [ -z "$TB_TOKEN_ID" ]; then
+    echo "Token not found, make sure it exists in the main workspace"
+    exit 1
+  fi
+
+  # copy the token to the clipboard
+  tb token copy $TB_TOKEN_ID
+
+  # get the token from the clipboard
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if command -v xclip &>/dev/null; then
+      TB_TOKEN=$(xclip -o -selection clipboard)
+    else
+      TB_TOKEN=$(xsel --clipboard --output)
+    fi
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    TB_TOKEN=$(pbpaste)
+  elif [[ "$OSTYPE" == "msys"* || "$OSTYPE" == "cygwin"* || "$OSTYPE" == "win32" ]]; then
+    TB_TOKEN=$(powershell.exe Get-Clipboard)
+  else
+    echo "Unsupported OS. Please manually paste the token."
+    exit 1
+  fi
+
+  # auth tb with the normal token
+  tb auth --token $TB_TOKEN --host $TB_HOST
+
+  deactivate
+
+  cd ../../
+
+  # override the token in the env
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" pnpm run dev
+else
+  echo "Invalid mode: $MODE_ID"
+  exit 1
+fi

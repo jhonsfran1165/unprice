@@ -17,6 +17,7 @@ import {
 import { Warning } from "@unprice/ui/icons"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 
+import { revalidateAppPath } from "~/actions/revalidate"
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
@@ -36,6 +37,7 @@ export function DeleteProject({
     onSuccess: async () => {
       toastAction("success")
       await apiUtils.projects.listByActiveWorkspace.invalidate()
+      await revalidateAppPath(`/${workspaceSlug}`, "page")
       router.push(`/${workspaceSlug}`)
     },
   })

@@ -1,7 +1,8 @@
 import { planSelectBaseSchema, planVersionSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
-import { protectedProjectProcedure } from "../../../trpc"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const listByActiveProject = protectedProjectProcedure
   .input(
@@ -32,6 +33,21 @@ export const listByActiveProject = protectedProjectProcedure
   .query(async (opts) => {
     const { fromDate, toDate, published, active } = opts.input
     const project = opts.ctx.project
+
+    const workspace = opts.ctx.project.workspace
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "plans"
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      skipCache: true,
+      isInternal: workspace.isInternal,
+      // listByActiveProject endpoint does not need to throw an error
+      throwOnNoAccess: false,
+    })
 
     const needsPublished = published === undefined || published
     const needsActive = active === undefined || active

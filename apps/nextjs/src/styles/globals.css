@@ -5,7 +5,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @layer base {
   :root {
     --radius: 0.5rem;
@@ -68,9 +67,7 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings:
-      "rlig" 1,
-      "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 
   .container {
@@ -194,10 +191,9 @@ body[style*="pointer-events: none"] .overflow-x-auto {
   @apply relative;
 }
 .component-selected::after {
-  content: ' ';
+  content: " ";
   @apply border-info border border-dashed w-full h-full absolute left-0 top-0 pointer-events-none block z-30;
 }
-
 
 pre {
   background: #0d0d0d;
@@ -265,4 +261,3 @@ pre {
     font-weight: 700;
   }
 }
-

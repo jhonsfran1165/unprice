@@ -1,4 +1,4 @@
-import { createTRPCRouter } from "../../../trpc"
+import { createTRPCRouter } from "#trpc"
 import { create } from "./create"
 import { deactivate } from "./deactivate"
 import { duplicate } from "./duplicate"

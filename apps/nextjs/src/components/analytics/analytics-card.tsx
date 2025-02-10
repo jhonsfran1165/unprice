@@ -9,9 +9,7 @@ import { type ReactNode, Suspense } from "react"
 import { HydrateClient, trpc } from "~/trpc/server"
 import { Filter } from "./filter"
 
-type AnalyticPromiseKey =
-  | "getTotalUsagePerFeatureActiveProject"
-  | "getAllFeatureVerificationsActiveProject"
+type AnalyticPromiseKey = "getUsage"
 
 export function AnalyticsCard<T extends string>({
   tabs,

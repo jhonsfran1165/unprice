@@ -6,6 +6,7 @@ export function ProjectSwitcherSkeleton() {
     <Button
       variant="ghost"
       size="sm"
+      // biome-ignore lint/a11y/useSemanticElements: <explanation>
       role="combobox"
       aria-label="project"
       className="w-44 justify-between opacity-50"

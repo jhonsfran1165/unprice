@@ -54,6 +54,7 @@ export default async function PlanSubscriptionsPage({
                     projectId: plan.projectId,
                     currency: project.defaultCurrency,
                     planType: "recurring",
+                    billingPeriod: "month",
                     paymentProvider: "stripe",
                   }}
                 >

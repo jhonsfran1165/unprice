@@ -1,9 +1,10 @@
 import { customerEntitlementSchema } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedApiOrActiveProjectProcedure } from "../../../trpc"
-import { getEntitlements } from "../../../utils/shared"
 
-export const entitlements = protectedApiOrActiveProjectProcedure
+import { protectedApiOrActiveWorkspaceProcedure } from "#trpc"
+import { getEntitlements } from "#utils/shared"
+
+export const entitlements = protectedApiOrActiveWorkspaceProcedure
   .meta({
     span: "customers.entitlements",
     openapi: {
@@ -15,6 +16,7 @@ export const entitlements = protectedApiOrActiveProjectProcedure
   .input(
     z.object({
       customerId: z.string(),
+      skipCache: z.boolean().optional(),
     })
   )
   .output(
@@ -29,13 +31,12 @@ export const entitlements = protectedApiOrActiveProjectProcedure
   )
   .query(async (opts) => {
     const { customerId } = opts.input
-    const { apiKey, ...ctx } = opts.ctx
-    const projectId = apiKey.projectId
 
     const res = await getEntitlements({
       customerId,
-      projectId: projectId,
-      ctx,
+      ctx: opts.ctx,
+      skipCache: opts.input.skipCache,
+      updateUsage: false,
     })
 
     return {

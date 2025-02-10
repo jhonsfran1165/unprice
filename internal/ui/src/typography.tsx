@@ -4,7 +4,7 @@ import { cva } from "class-variance-authority"
 import React from "react"
 import { cn } from "./utils"
 
-type VariantKey =
+export type VariantKeyTypography =
   | "h1"
   | "h2"
   | "h3"
@@ -52,7 +52,7 @@ const typographyVariants = cva("", {
   },
 })
 
-const variantToTag: Record<VariantKey, string> = {
+const variantToTag: Record<VariantKeyTypography, string> = {
   h1: "h1",
   h2: "h2",
   h3: "h3",
@@ -71,7 +71,7 @@ const variantToTag: Record<VariantKey, string> = {
 }
 
 interface TypographyProps extends React.HTMLAttributes<HTMLElement> {
-  variant?: VariantKey
+  variant?: VariantKeyTypography
   affects?: AffectsKey
   children: React.ReactNode
   className?: string

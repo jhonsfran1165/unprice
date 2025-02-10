@@ -27,7 +27,7 @@ export function UsageChart() {
   const { start, end } = prepareInterval(interval)
 
   // this is prefetched from the server
-  const [data] = api.analytics.getTotalUsagePerFeatureActiveProject.useSuspenseQuery({
+  const [data] = api.analytics.getUsage.useSuspenseQuery({
     start,
     end,
   })

@@ -89,6 +89,10 @@ export const customerEntitlementSchema = createSelectSchema(schema.customerEntit
   aggregationMethod: aggregationMethodSchema,
   featureType: typeFeatureSchema,
 }).extend({
+  project: z.object({
+    id: z.string(),
+    workspaceId: z.string(),
+  }),
   subscriptionItem: z
     .object({
       id: z.string(),

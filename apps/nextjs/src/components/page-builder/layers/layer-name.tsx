@@ -25,7 +25,7 @@ export const LayerName = ({
   return (
     <Input
       className={cn(
-        "flex flex-1 border-none bg-transparent px-0 py-2.5 font-primary font-semibold leading-none tracking-tight active:border-none focus:border-none focus-visible:ring-0",
+        "flex flex-1 border-none bg-transparent px-0 py-2.5 font-primary font-semibold leading-none tracking-tight focus:border-none focus-visible:ring-0 active:border-none",
         className
       )}
       value={initialName}

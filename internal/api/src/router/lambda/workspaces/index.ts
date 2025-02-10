@@ -1,4 +1,4 @@
-import { createTRPCRouter } from "../../../trpc"
+import { createTRPCRouter } from "#trpc"
 import { changeRoleMember } from "./changeRoleMember"
 import { create } from "./create"
 import { deleteWorkspace } from "./delete"

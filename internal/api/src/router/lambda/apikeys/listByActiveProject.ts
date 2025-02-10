@@ -7,7 +7,8 @@ import {
   selectApiKeySchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedProjectProcedure } from "../../../trpc"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const listByActiveProject = protectedProjectProcedure
   .input(searchParamsSchemaDataTable)
@@ -22,6 +23,16 @@ export const listByActiveProject = protectedProjectProcedure
     const project = opts.ctx.project
     const columns = getTableColumns(schema.apikeys)
     const filter = `%${search}%`
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId: project.workspace.unPriceCustomerId,
+      featureSlug: "apikeys",
+      ctx: opts.ctx,
+      skipCache: true,
+      isInternal: project.workspace.isInternal,
+      throwOnNoAccess: false,
+    })
 
     try {
       const expressions = [

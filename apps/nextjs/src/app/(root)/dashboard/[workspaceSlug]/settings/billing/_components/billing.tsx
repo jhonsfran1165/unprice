@@ -49,7 +49,7 @@ export function BillingCard({
   const quantities = entitlements.reduce(
     (acc, entitlement) => {
       acc[entitlement.id] =
-        entitlement.featureType === "usage" ? entitlement.usage ?? 0 : entitlement.units ?? 0
+        entitlement.featureType === "usage" ? (entitlement.usage ?? 0) : (entitlement.units ?? 0)
       return acc
     },
     {} as Record<string, number>
@@ -60,7 +60,7 @@ export function BillingCard({
       acc[entitlement.id] =
         entitlement.featureType === "usage"
           ? forecastUsage(entitlement.usage ?? 0)
-          : entitlement.units ?? 0
+          : (entitlement.units ?? 0)
       return acc
     },
     {} as Record<string, number>
@@ -96,9 +96,7 @@ export function BillingCard({
           <CardDescription>
             {activePhase.trialEndsAt &&
               subscription.currentCycleEndAt &&
-              `You currently are on the trial of the ${(
-                <span className="font-bold text-primary">{planVersion.plan.slug}</span>
-              )} plan. After the trial ends on ${formatDate(
+              `You currently are on the trial of the ${<span className="font-bold text-primary">{planVersion.plan.slug}</span>} plan. After the trial ends on ${formatDate(
                 activePhase.trialEndsAt,
                 subscription.timezone,
                 "MMM d, yy"
@@ -181,8 +179,8 @@ const LineUsageItem: React.FC<{
 
   // separate logic for tiers and packages and usage features
   const max = ["tier", "package"].includes(entitlement.featureType)
-    ? entitlement.units ?? 0
-    : entitlement.limit ?? Number.POSITIVE_INFINITY
+    ? (entitlement.units ?? 0)
+    : (entitlement.limit ?? Number.POSITIVE_INFINITY)
 
   const used = entitlement.usage ?? 0
 
@@ -191,8 +189,8 @@ const LineUsageItem: React.FC<{
     // tier and package features are calculated based on units which are the units the customer has purchased
     // usage features are calculated based on usage which is the usage of the feature
     quantity: ["tier", "package"].includes(entitlement.featureType)
-      ? entitlement.units ?? 0
-      : entitlement.usage ?? 0,
+      ? (entitlement.units ?? 0)
+      : (entitlement.usage ?? 0),
   })
 
   if (err) {
@@ -227,7 +225,7 @@ const LineUsageItem: React.FC<{
   const forecast = forecastUsage(used)
   const included =
     freeUnits === Number.POSITIVE_INFINITY
-      ? planVersionFeature.limit ?? Number.POSITIVE_INFINITY
+      ? (planVersionFeature.limit ?? Number.POSITIVE_INFINITY)
       : freeUnits
 
   return (

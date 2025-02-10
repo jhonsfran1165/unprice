@@ -2,7 +2,8 @@ import { TRPCError } from "@trpc/server"
 import { sql } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { z } from "zod"
-import { protectedProjectProcedure } from "../../../trpc"
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const revoke = protectedProjectProcedure
   .input(z.object({ ids: z.string().array() }))
@@ -10,6 +11,18 @@ export const revoke = protectedProjectProcedure
   .mutation(async (opts) => {
     const { ids } = opts.input
     const project = opts.ctx.project
+    const customerId = project.workspace.unPriceCustomerId
+    const featureSlug = "apikeys"
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      skipCache: true,
+      isInternal: project.workspace.isInternal,
+      throwOnNoAccess: false,
+    })
 
     const result = await opts.ctx.db
       .update(schema.apikeys)

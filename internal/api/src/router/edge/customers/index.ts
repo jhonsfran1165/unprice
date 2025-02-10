@@ -1,4 +1,5 @@
-import { createTRPCRouter } from "../../../trpc"
+import { createTRPCRouter } from "#trpc"
+
 import { can } from "./can"
 import { entitlements } from "./entitlements"
 import { listPaymentMethods } from "./listPaymentMethods"

@@ -1,7 +1,7 @@
 import type * as React from "react"
 
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
-import { Typography } from "@unprice/ui/typography"
+import { Typography, type VariantKeyTypography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 
 export function EmptyPlaceholder({
@@ -39,15 +39,18 @@ EmptyPlaceholder.Icon = function EmptyPlaceHolderIcon({
   return <div className="flex items-center justify-center rounded-full">{children}</div>
 }
 
-type EmptyPlaceholderTitleProps = React.HTMLAttributes<HTMLHeadingElement>
+type EmptyPlaceholderTitleProps = React.HTMLAttributes<HTMLHeadingElement> & {
+  variant?: VariantKeyTypography
+}
 
 EmptyPlaceholder.Title = function EmptyPlaceholderTitle({
   className,
   children,
+  variant = "h4",
   ...props
 }: EmptyPlaceholderTitleProps) {
   return (
-    <Typography variant="h4" className={cn("mt-4", className)} {...props}>
+    <Typography variant={variant} className={cn("mt-4", className)} {...props}>
       {children}
     </Typography>
   )

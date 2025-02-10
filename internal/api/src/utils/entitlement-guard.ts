@@ -1,35 +1,81 @@
 import { TRPCError } from "@trpc/server"
-
-import type { ProjectExtended } from "@unprice/db/validators"
-
-import type { Context } from "../trpc"
-import { getEntitlements } from "./shared"
+import { CustomerService, UnPriceCustomerError } from "#services/customers"
+import type { Context } from "#trpc"
 
 export const entitlementGuard = async ({
-  project,
+  customerId,
   ctx,
   featureSlug,
+  skipCache = false,
+  updateUsage = true,
+  includeCustom = true,
+  throwOnNoAccess = true,
+  isInternal = false,
 }: {
-  project: ProjectExtended
+  customerId: string
   ctx: Context
   featureSlug: string
+  skipCache?: boolean
+  updateUsage?: boolean
+  includeCustom?: boolean
+  throwOnNoAccess?: boolean
+  isInternal?: boolean
 }) => {
-  const unpriceCustomerId = project.workspace.unPriceCustomerId
+  // internal workspaces have unlimited access to all features
+  if (isInternal) {
+    return []
+  }
 
-  const entitlements = await getEntitlements({
-    customerId: unpriceCustomerId,
-    projectId: project.id,
-    ctx: ctx,
+  const now = performance.now()
+  const customer = new CustomerService(ctx)
+
+  // use current date for now
+  const date = Date.now()
+
+  const { err, val } = await customer.getEntitlementByDate({
+    customerId,
+    featureSlug,
+    date: date,
+    includeCustom,
+    // update usage from analytics service on revalidation
+    updateUsage,
+    skipCache,
   })
 
-  const access = entitlements.some((e) => e.featureSlug === featureSlug)
+  const end = performance.now()
 
-  if (!access) {
+  ctx.metrics.emit({
+    metric: "metric.db.read",
+    query: "getEntitlementByDate",
+    duration: end - now,
+    customerId,
+    featureSlug,
+    valid: !err,
+    code: err?.code ?? "",
+    service: "customer",
+  })
+
+  if (err) {
+    switch (true) {
+      case err instanceof UnPriceCustomerError:
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: err.message,
+        })
+      default:
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Error verifying feature: ${err.toString()}`,
+        })
+    }
+  }
+
+  if (!val.id && throwOnNoAccess) {
     throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "You don't have access to this feature, please upgrade your plan",
+      code: "UNAUTHORIZED",
+      message: `You don't have access to this feature. Please upgrade your plan.`,
     })
   }
 
-  return entitlements
+  return val
 }

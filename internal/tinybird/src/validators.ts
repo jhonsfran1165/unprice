@@ -14,6 +14,34 @@ export const dateToUnixMilli = z
 
 export const datetimeToUnixMilli = z.string().transform((t) => new Date(t).getTime())
 
+export const unixMilliToDate = z.number().transform((d) => {
+  const date = new Date(d)
+  // always use UTC
+  date.setUTCHours(0, 0, 0, 0)
+  return date.getTime()
+})
+
+export const jsonToNullableString = z.string().transform((s) => {
+  try {
+    return JSON.parse(s)
+  } catch {
+    return null
+  }
+})
+
+export const anyObject = z.record(z.union([z.string(), z.number(), z.boolean(), z.null()]))
+
+export const nullableJsonToString = anyObject.nullable().transform((s) => {
+  if (s === null) return null
+  try {
+    return JSON.stringify(s)
+  } catch {
+    return null
+  }
+})
+
+export const booleanToUInt8 = z.boolean().transform((b) => (b ? 1 : 0))
+
 export const featureVerificationSchemaV1 = z.object({
   projectId: z.string(),
   planVersionFeatureId: z.string(),
@@ -22,10 +50,20 @@ export const featureVerificationSchemaV1 = z.object({
   subscriptionId: z.string().nullable(),
   entitlementId: z.string(),
   deniedReason: z.string().optional(),
-  date: z.number(),
+  timestamp: z
+    .number()
+    .default(Date.now())
+    .describe("timestamp of when this usage record should be billed"),
+  createdAt: z
+    .number()
+    .default(Date.now())
+    .describe("timestamp of when this usage record was created"),
   latency: z.number().optional(),
   featureSlug: z.string(),
   customerId: z.string(),
+  requestId: z.string(),
+  workspaceId: z.string(),
+  metadata: nullableJsonToString.default(null),
 })
 
 export const featureUsageSchemaV1 = z.object({
@@ -35,11 +73,21 @@ export const featureUsageSchemaV1 = z.object({
   entitlementId: z.string(),
   featureSlug: z.string(),
   customerId: z.string(),
-  date: z.number(),
+  timestamp: z
+    .number()
+    .default(Date.now())
+    .describe("timestamp of when this usage record should be billed"),
   projectId: z.string(),
   planVersionFeatureId: z.string(),
   usage: z.number(),
-  createdAt: z.number(),
+  createdAt: z
+    .number()
+    .default(Date.now())
+    .describe("timestamp of when this usage record was created"),
+  workspaceId: z.string(),
+  requestId: z.string(),
+  deleted: booleanToUInt8.default(false).describe("1 if the usage record was deleted, 0 otherwise"),
+  metadata: nullableJsonToString.default(null),
 })
 
 export const auditLogSchemaV1 = z.object({

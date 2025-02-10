@@ -12,15 +12,15 @@ import { Separator } from "@unprice/ui/separator"
 
 import { Typography } from "@unprice/ui/typography"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
-import { DroppableContainer } from "../../_components/droppable"
-import { FeatureDialog } from "../../_components/feature-dialog"
-import { SortableFeature } from "../../_components/sortable-feature"
 import {
   configActivePlanAtom,
   configActivePlanVersionAtom,
   configPlanFeaturesListAtom,
   usePlanFeaturesList,
-} from "../../_components/use-features"
+} from "~/hooks/use-features"
+import { DroppableContainer } from "../../_components/droppable"
+import { FeatureDialog } from "../../_components/feature-dialog"
+import { SortableFeature } from "../../_components/sortable-feature"
 
 interface PlanFeatureListProps {
   planVersion: RouterOutputs["planVersions"]["getById"]["planVersion"]

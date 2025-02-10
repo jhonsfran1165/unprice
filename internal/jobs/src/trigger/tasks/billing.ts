@@ -1,10 +1,9 @@
 import { task } from "@trigger.dev/sdk/v3"
+import { InvoiceStateMachine, PhaseMachine } from "@unprice/api/services/subscriptions"
 import { db } from "@unprice/db"
 import { AesGCM } from "@unprice/db/utils"
-import { ConsoleLogger } from "@unprice/logging"
-import { InvoiceStateMachine, PhaseMachine } from "@unprice/services/subscriptions"
-import { Analytics } from "@unprice/tinybird"
 import { env } from "../../env.mjs"
+import { createContext } from "./context"
 
 export const billingTask = task({
   id: "subscription.phase.billing",
@@ -25,21 +24,6 @@ export const billingTask = task({
     },
     { ctx }
   ) => {
-    const tinybird = new Analytics({
-      emit: true,
-      tinybirdToken: env.TINYBIRD_TOKEN,
-    })
-
-    const logger = new ConsoleLogger({
-      requestId: ctx.task.id,
-      defaultFields: {
-        subscriptionPhaseId,
-        invoiceId,
-        projectId,
-        api: "jobs.subscription.phase.billing",
-      },
-    })
-
     const invoice = await db.query.invoices.findFirst({
       where: (table, { eq, and }) => and(eq(table.id, invoiceId), eq(table.projectId, projectId)),
     })
@@ -112,21 +96,34 @@ export const billingTask = task({
       ciphertext: config.key,
     })
 
+    const context = await createContext({
+      taskId: ctx.task.id,
+      subscriptionId: subscriptionPhase.subscription.id,
+      projectId,
+      phaseId: subscriptionPhase.id,
+      defaultFields: {
+        subscriptionPhaseId,
+        invoiceId,
+        projectId,
+        api: "jobs.subscription.phase.billing",
+      },
+    })
+
     const phaseMachine = new PhaseMachine({
       db: db,
       phase: subscriptionPhase,
       subscription: subscriptionPhase.subscription,
       customer: subscriptionPhase.subscription.customer,
-      analytics: tinybird,
-      logger: logger,
+      analytics: context.analytics,
+      logger: context.logger,
       paymentProviderToken,
     })
 
     const invoiceMachine = new InvoiceStateMachine({
       db: db,
       phaseMachine: phaseMachine,
-      logger: logger,
-      analytics: tinybird,
+      logger: context.logger,
+      analytics: context.analytics,
       invoice: invoice,
       paymentProviderToken,
     })

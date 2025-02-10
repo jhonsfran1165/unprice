@@ -57,7 +57,6 @@ async function PaymentMethodCard({
           customerId={customerId}
           successUrl={`${APP_DOMAIN}/${workspaceSlug}/settings/billing`}
           cancelUrl={`${APP_DOMAIN}/${workspaceSlug}/settings/billing`}
-          projectSlug="unprice-admin"
           readonly={true}
         />
       </CardContent>

@@ -1,0 +1,64 @@
+name: Deploy Tinybird
+
+on:
+  workflow_call:
+    inputs:
+      pull_secrets:
+        type: boolean
+        description: Whether to pull secrets from Infisical
+      secrets-path:
+        type: string
+        description: The path to the secrets file
+      project_slug:
+        type: string
+        description: The slug of the project
+      env_slug:
+        type: string
+        description: The slug of the environment
+    secrets:
+      MACHINE_IDENTITY_CLIENT_ID:
+        required: true
+      MACHINE_IDENTITY_CLIENT_SECRET:
+        required: true
+      TB_ADMIN_TOKEN:
+        required: true
+    outputs:
+      tb_branch_name: ${{ steps.set-output.outputs.branch_name }}
+      tb_branch_token: ${{ steps.set-output.outputs.tb_branch_token }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: ${{ inputs.env_slug }}
+          project-slug: ${{ inputs.project_slug }}
+          secret-path: ${{ inputs.secrets_path }}
+          recursive: true
+
+      - uses: ./.github/actions/tinybirdci
+        name: Deploy Preview Tinybird
+        id: deploy-preview-tinybird
+        with:
+          tb_format: true
+          tb_admin_token: ${{ env.TB_ADMIN_TOKEN }}
+          tb_host: https://api.tinybird.co
+          data_project_dir: internal/tinybird
+
+      - name: Set Outputs for Tinybird
+        id: set-output
+        shell: bash
+        run: |
+          echo "branch_name=${{ steps.deploy-preview-tinybird.outputs.branch_name }}" >> $GITHUB_OUTPUT
+          echo "tb_branch_token=${{ steps.deploy-preview-tinybird.outputs.tb_branch_token }}" >> $GITHUB_OUTPUT
+
+

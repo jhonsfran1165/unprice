@@ -66,6 +66,8 @@ const workspacesByUserPrepared = db.query.users
               name: true,
               enabled: true,
               unPriceCustomerId: true,
+              isInternal: true,
+              isMain: true,
             },
           },
         },

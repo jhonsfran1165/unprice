@@ -13,11 +13,14 @@ import {
 } from "@unprice/ui/command"
 import { Check, ChevronsUpDown, PlusCircle } from "@unprice/ui/icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@unprice/ui/popover"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@unprice/ui/tooltip"
+import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { FilterScroll } from "~/components/filter-scroll"
 import { SuperLink } from "~/components/super-link"
+import { useEntitlement } from "~/hooks/use-entitlement"
 import { api } from "~/trpc/client"
 import { WorkspaceSwitcherSkeleton } from "./workspace-switcher-skeleton"
 
@@ -28,6 +31,9 @@ export function WorkspaceSwitcher({
 }) {
   const router = useRouter()
   const [switcherOpen, setSwitcherOpen] = useState(false)
+
+  const { access: isProAccess } = useEntitlement("pro-access")
+  const { access: accessWorkspaces, remaining: workspacesRemaining } = useEntitlement("workspaces")
 
   const [data] = api.workspaces.listWorkspacesByActiveUser.useSuspenseQuery(undefined, {
     staleTime: 1000 * 60 * 60, // 1 hour
@@ -47,6 +53,7 @@ export function WorkspaceSwitcher({
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
+          // biome-ignore lint/a11y/useSemanticElements: <explanation>
           role="combobox"
           aria-expanded={switcherOpen}
           aria-label="Select a workspace"
@@ -167,12 +174,37 @@ export function WorkspaceSwitcher({
           <CommandSeparator />
           <CommandList>
             <CommandGroup>
-              <SuperLink href="/new">
-                <CommandItem className="cursor-pointer">
-                  <PlusCircle className="mr-2 size-4" />
-                  Create Workspace
-                </CommandItem>
-              </SuperLink>
+              {!isProAccess && !accessWorkspaces ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <SuperLink href="/new" className="cursor-not-allowed">
+                      <CommandItem className="cursor-not-allowed" disabled>
+                        <PlusCircle className="mr-2 size-4" />
+                        Create Workspace
+                      </CommandItem>
+                    </SuperLink>
+                  </TooltipTrigger>
+                  <TooltipContent align="start" side="bottom" sideOffset={10} alignOffset={-5}>
+                    <div className="flex max-w-[200px] flex-col gap-4 py-2">
+                      <Typography variant="p" className="text-center">
+                        {workspacesRemaining === 0
+                          ? "You have reached the limit of workspaces"
+                          : "You don't have access to this feature"}
+                      </Typography>
+                      <Button variant="primary" size="sm" className="mx-auto w-2/3">
+                        Upgrade
+                      </Button>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <SuperLink href="/new">
+                  <CommandItem className="cursor-pointer">
+                    <PlusCircle className="mr-2 size-4" />
+                    Create Workspace
+                  </CommandItem>
+                </SuperLink>
+              )}
             </CommandGroup>
           </CommandList>
         </Command>

@@ -10,7 +10,9 @@ import {
   configUsageSchema,
   planVersionSelectBaseSchema,
 } from "@unprice/db/validators"
-import { protectedProjectProcedure } from "../../../trpc"
+
+import { protectedProjectProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
 
 export const update = protectedProjectProcedure
   .input(planVersionSelectBaseSchema.partial().required({ id: true }))
@@ -42,6 +44,21 @@ export const update = protectedProjectProcedure
 
     // only owner and admin can update a plan version
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    const workspace = opts.ctx.project.workspace
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "plan-versions"
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      skipCache: true,
+      isInternal: workspace.isInternal,
+      // update endpoint does not need to throw an error
+      throwOnNoAccess: false,
+    })
 
     const planVersionData = await opts.ctx.db.query.versions.findFirst({
       with: {

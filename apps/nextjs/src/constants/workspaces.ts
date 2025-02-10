@@ -23,7 +23,7 @@ export const WORKSPACE_NAV: DashboardRoute[] = [
         href: "/settings/members",
       },
       {
-        name: "Billing",
+        name: "Billing & Usage",
         href: "/settings/billing",
       },
     ],
@@ -33,17 +33,17 @@ export const WORKSPACE_NAV: DashboardRoute[] = [
 export const WORKSPACE_SHORTCUTS: Shortcut[] = [
   {
     name: "Add member",
-    href: "#",
+    href: "settings/members",
     icon: Link,
   },
   {
     name: "Workspace usage",
-    href: "#",
+    href: "settings/billing",
     icon: Link,
   },
   {
     name: "Add domain",
-    href: "#",
+    href: "domains",
     icon: Link,
   },
 ]

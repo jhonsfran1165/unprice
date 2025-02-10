@@ -4,8 +4,10 @@ import { newId } from "@unprice/db/utils"
 import { domainCreateBaseSchema, domainSelectBaseSchema } from "@unprice/db/validators"
 import { Vercel } from "@unprice/vercel"
 import { z } from "zod"
-import { env } from "../../../env.mjs"
-import { protectedWorkspaceProcedure } from "../../../trpc"
+import { env } from "#env.mjs"
+import { protectedWorkspaceProcedure } from "#trpc"
+import { featureGuard } from "#utils/feature-guard"
+import { reportUsageFeature } from "#utils/shared"
 
 export const create = protectedWorkspaceProcedure
   .input(domainCreateBaseSchema.pick({ name: true }))
@@ -13,8 +15,20 @@ export const create = protectedWorkspaceProcedure
   .mutation(async (opts) => {
     const workspace = opts.ctx.workspace
     const domain = opts.input.name
+    const customerId = workspace.unPriceCustomerId
+    const featureSlug = "domains"
 
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    // check if the customer has access to the feature
+    await featureGuard({
+      customerId,
+      featureSlug,
+      ctx: opts.ctx,
+      skipCache: true,
+      updateUsage: true,
+      isInternal: workspace.isInternal,
+    })
 
     const domainExist = await opts.ctx.db.query.domains.findFirst({
       where: (d, { eq }) => eq(d.name, domain),
@@ -69,6 +83,17 @@ export const create = protectedWorkspaceProcedure
         message: "Error adding domain",
       })
     }
+
+    opts.ctx.waitUntil(
+      // report usage for the new domain in background
+      reportUsageFeature({
+        customerId,
+        featureSlug,
+        usage: 1, // the new domain
+        ctx: opts.ctx,
+        isInternal: workspace.isInternal,
+      })
+    )
 
     return { domain: domainData }
   })

@@ -1,8 +1,9 @@
-import { TRPCError } from "@trpc/server"
 import { subscriptionInsertSchema, subscriptionSelectSchema } from "@unprice/db/validators"
-import { SubscriptionService } from "@unprice/services/subscriptions"
 import { z } from "zod"
-import { rateLimiterProcedure } from "../../../trpc"
+import { SubscriptionService } from "#services/subscriptions"
+
+import { TRPCError } from "@trpc/server"
+import { rateLimiterProcedure } from "#trpc"
 
 export const signUp = rateLimiterProcedure
   .input(
@@ -27,14 +28,7 @@ export const signUp = rateLimiterProcedure
       })
     }
 
-    const subscriptionService = new SubscriptionService({
-      db: opts.ctx.db,
-      cache: opts.ctx.cache,
-      metrics: opts.ctx.metrics,
-      logger: opts.ctx.logger,
-      waitUntil: opts.ctx.waitUntil,
-      analytics: opts.ctx.analytics,
-    })
+    const subscriptionService = new SubscriptionService(opts.ctx)
 
     const { err, val } = await subscriptionService.createSubscription({
       input: opts.input,

@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server"
 import { projectWorkspaceGuardPrepared } from "@unprice/db/queries"
 import type { ProjectExtended, User, WorkspaceRole } from "@unprice/db/validators"
 
-import type { Context } from "../trpc"
+import type { Context } from "#trpc"
 
 interface ProjectGuardType {
   project: ProjectExtended
@@ -21,7 +21,7 @@ export const projectWorkspaceGuard = async ({
   ctx: Context
 }): Promise<ProjectGuardType> => {
   const userId = ctx.session?.user.id
-  const workspaces = ctx.session?.user?.workspaces
+  const activeWorkspace = ctx.activeWorkspaceSlug
 
   if (!userId) {
     throw new TRPCError({
@@ -33,7 +33,7 @@ export const projectWorkspaceGuard = async ({
   if (!projectId && !projectSlug) {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: "Has to provide project id or project slug",
+      message: "Project ID or project slug is required",
     })
   }
 
@@ -73,12 +73,10 @@ export const projectWorkspaceGuard = async ({
     })
   }
 
-  const activeWorkspace = workspaces?.find((workspace) => workspace.id === project.workspaceId)
-
-  if (!activeWorkspace) {
+  if (activeWorkspace !== workspace.slug) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: "You are not a member of this workspace",
+      message: "Active workspace does not match the workspace of the project",
     })
   }
 

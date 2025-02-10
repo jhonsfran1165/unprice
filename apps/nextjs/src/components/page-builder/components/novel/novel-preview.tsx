@@ -34,7 +34,7 @@ export const NovelPreview = (props: NovelComponentProps) => {
     >
       <article
         className={
-          "prose prose-lg dark:prose-invert prose-background-text max-w-full font-normal transition-colors prose-headings:font-sans prose-headings:text-background-textContrast focus:outline-none"
+          "prose prose-lg dark:prose-invert prose-background-text max-w-full font-normal prose-headings:font-sans prose-headings:text-background-textContrast transition-colors focus:outline-none"
         }
         suppressHydrationWarning={true}
         dangerouslySetInnerHTML={{ __html: bodyContent }}

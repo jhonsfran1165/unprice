@@ -1,11 +1,6 @@
 import { task } from "@trigger.dev/sdk/v3"
-import { db } from "@unprice/db"
-import { ConsoleLogger } from "@unprice/logging"
-import { SubscriptionService } from "@unprice/services/subscriptions"
-
-import { NoopMetrics } from "@unprice/services/metrics"
-import { Analytics } from "@unprice/tinybird"
-import { env } from "../../env.mjs"
+import { SubscriptionService } from "@unprice/api/services/subscriptions"
+import { createContext } from "./context"
 
 export const invoiceTask = task({
   id: "subscription.phase.invoice",
@@ -26,31 +21,20 @@ export const invoiceTask = task({
     },
     { ctx }
   ) => {
-    const tinybird = new Analytics({
-      emit: true,
-      tinybirdToken: env.TINYBIRD_TOKEN,
-    })
-
-    const logger = new ConsoleLogger({
-      requestId: ctx.task.id,
+    const context = await createContext({
+      taskId: ctx.task.id,
+      subscriptionId,
+      projectId,
+      phaseId,
       defaultFields: {
         subscriptionId,
         projectId,
-        now,
         api: "jobs.subscription.phase.invoice",
         phaseId,
       },
     })
 
-    const subscriptionService = new SubscriptionService({
-      db: db,
-      // all calls made to the database
-      cache: undefined,
-      metrics: new NoopMetrics(),
-      logger: logger,
-      waitUntil: () => {},
-      analytics: tinybird,
-    })
+    const subscriptionService = new SubscriptionService(context)
 
     // init phase machine
     const initPhaseMachineResult = await subscriptionService.initPhaseMachines({

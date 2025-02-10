@@ -1,4 +1,4 @@
-import { createTRPCRouter } from "../../../trpc"
+import { createTRPCRouter } from "#trpc"
 import { create } from "./create"
 import { deleteProject } from "./delete"
 import { getById } from "./getById"
@@ -10,14 +10,14 @@ import { transferToPersonal } from "./transferToPersonal"
 import { transferToWorkspace } from "./transferToWorkspace"
 import { update } from "./update"
 export const projectRouter = createTRPCRouter({
-  create,
+  create: create,
   delete: deleteProject,
-  getBySlug,
-  listByActiveWorkspace,
-  listByWorkspace,
-  rename,
-  update,
-  getById,
-  transferToPersonal,
-  transferToWorkspace,
+  getBySlug: getBySlug,
+  listByActiveWorkspace: listByActiveWorkspace,
+  listByWorkspace: listByWorkspace,
+  rename: rename,
+  update: update,
+  getById: getById,
+  transferToPersonal: transferToPersonal,
+  transferToWorkspace: transferToWorkspace,
 })

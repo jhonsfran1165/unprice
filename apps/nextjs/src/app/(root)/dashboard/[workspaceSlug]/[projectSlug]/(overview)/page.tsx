@@ -38,7 +38,7 @@ export default async function DashboardPage(props: {
 
   return (
     <DashboardShell>
-      <div className="grid gap-4 lg:grid-cols-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="font-medium text-sm">Total Revenue</CardTitle>
@@ -82,10 +82,7 @@ export default async function DashboardPage(props: {
       </div>
       <div className="mt-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
         <AnalyticsCard
-          promiseKeys={[
-            "getAllFeatureVerificationsActiveProject",
-            "getTotalUsagePerFeatureActiveProject",
-          ]}
+          promiseKeys={["getUsage"]}
           interval={filter.interval}
           className="w-full"
           title="Feature Verifications & Usage"
@@ -112,11 +109,11 @@ export default async function DashboardPage(props: {
             <LoadingCard
               title="Recent Ingestions"
               description="Loading recent ingestions..."
-              className="col-span-7 lg:col-span-3 md:col-span-2"
+              className="col-span-7 md:col-span-2 lg:col-span-3"
             />
           }
         >
-          <RecentIngestions
+          <RecentEvents
             className="w-full md:w-1/3"
             projectSlug={projectSlug}
             workspaceSlug={workspaceSlug}
@@ -174,8 +171,8 @@ function IngestionCard(props: {
   )
 }
 
-// #region RecentIngestions
-async function RecentIngestions(props: {
+// #region RecentEvents
+async function RecentEvents(props: {
   projectSlug: string
   workspaceSlug: string
   className?: string
