@@ -64,6 +64,7 @@ jobs:
 
     needs:
       - build-lint
+      - deploy-preview-tinybird
 
     permissions:
       pull-requests: write

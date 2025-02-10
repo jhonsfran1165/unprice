@@ -9,22 +9,22 @@
     "typecheck": "tsc --noEmit",
     "with-env": "infisical run --env=preview --path=/app --",
     "with-env-prod": "infisical run --env=prod --path=/ci --",
-    "dev:trigger": "pnpm with-env pnpm dlx trigger.dev@3.3.10 dev",
-    "deploy:trigger-prod": "npx trigger.dev@3.3.10 deploy",
+    "dev:trigger": "pnpm with-env pnpm dlx trigger.dev@3.3.13 dev",
+    "deploy:trigger-prod": "npx trigger.dev@3.3.13 deploy",
     "delete": "pnpm tsx src/delete.ts"
   },
   "dependencies": {
     "@infisical/sdk": "^3.0.4",
     "@t3-oss/env-nextjs": "0.9.1",
-    "@trigger.dev/build": "^3.3.10",
-    "@trigger.dev/sdk": "3.3.10",
+    "@trigger.dev/build": "^3.3.13",
+    "@trigger.dev/sdk": "3.3.13",
     "@unprice/api": "workspace:^",
     "@unprice/db": "workspace:^0.1.0",
     "@unprice/logging": "workspace:^",
     "@unprice/stripe": "workspace:^0.1.0",
     "@unprice/tinybird": "workspace:^",
     "date-fns": "^3.3.1",
-    "trigger.dev": "3.3.10",
+    "trigger.dev": "3.3.13",
     "zod": "^3.23.8"
   },
   "devDependencies": {

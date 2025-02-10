@@ -37,6 +37,7 @@ jobs:
       cache: 'pip'
 
   - name: Validate input
+    shell: bash
     run: |
       [[ "${{ inputs.tb_admin_token }}" ]] || { echo "Go to the tokens section in your Workspace, copy the 'admin token' and set TB_ADMIN_TOKEN as a Secret in your Git repository"; exit 1; }
 
@@ -58,6 +59,7 @@ jobs:
       echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
   - name: Install Tinybird CLI
+    shell: bash
     run: |
       if [ -f "requirements.txt" ]; then
         pip install -r requirements.txt
@@ -66,12 +68,16 @@ jobs:
       fi
 
   - name: Tinybird version
+    shell: bash
     run: tb --version
 
   - name: Check auth
-    run: tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} auth info
+    shell: bash
+    run: |
+      tb --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }} auth info
 
   - name: Deploy changes to the main Workspace
+    shell: bash
     run: |
       DEPLOY_FILE=./deploy/${VERSION}/deploy.sh
       if [ ! -f "$DEPLOY_FILE" ]; then
@@ -81,6 +87,7 @@ jobs:
       fi
 
   - name: Custom deployment to the main Workspace
+    shell: bash
     run: |
       DEPLOY_FILE=./deploy/${VERSION}/deploy.sh
       if [ -f "$DEPLOY_FILE" ]; then
@@ -96,12 +103,14 @@ jobs:
       fi
 
   - name: Get env token
+    shell: bash
     run: |
       ENV_TOKEN=$(python -c "import json; print(json.load(open('.tinyb'))['token'])")
       echo "::add-mask::$ENV_TOKEN"
       echo "TB_ENV_TOKEN=$ENV_TOKEN" >> $GITHUB_ENV
 
   - name: Post deploy
+    shell: bash
     run: |
       POSTDEPLOY_FILE=./deploy/${VERSION}/postdeploy.sh
       if [ -f "$POSTDEPLOY_FILE" ]; then
@@ -114,3 +123,10 @@ jobs:
           $POSTDEPLOY_FILE
         fi
       fi
+
+  - name: delete token info
+    shell: bash
+    working-directory: ${{ inputs.data_project_dir }}
+    if: always()
+    run: |
+      rm .tinyb || true
