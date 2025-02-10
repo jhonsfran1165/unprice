@@ -34,6 +34,10 @@ inputs:
     required: true
     default: web-apps
     description: "Token with the proper permissions to deploy on the application"
+  recreate_branch:
+    required: false
+    type: boolean
+    default: false
 
 outputs:
   branch_name:
@@ -122,7 +126,8 @@ runs:
         tb auth --host ${{ inputs.tb_host }} --token ${{ inputs.tb_admin_token }}
         tb auth info
 
-    - name: Try delete previous Branch
+    - name: Create new test Branch
+      id: create-branch-tb
       shell: bash
       working-directory: ${{ inputs.data_project_dir }}
       run: |
@@ -130,23 +135,15 @@ runs:
 
         # Check if the branch name exists in the output
         if echo "$output" | grep -q "\b$BRANCH_NAME\b"; then
+          if [ ${{ inputs.recreate_branch }} = true ]; then
             tb branch rm $BRANCH_NAME --yes
+          else
+            echo "Skipping recreate_branch is set to false"
+          fi
         else
-            echo "Skipping clean up: The Branch '$BRANCH_NAME' does not exist."
+          tb branch create $BRANCH_NAME ${_ENV_FLAGS}
         fi
 
-    - name: Create new test Branch
-      id: create-branch-tb
-      shell: bash
-      working-directory: ${{ inputs.data_project_dir }}
-      run: |
-        echo "Creating branch"
-        echo "Branch name: $BRANCH_NAME"
-
-        tb branch create $BRANCH_NAME ${_ENV_FLAGS}
-
-        echo "Branch created: $BRANCH_NAME"
-        # add it to the output
         echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
     - name: Use Branch
