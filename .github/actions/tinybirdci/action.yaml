@@ -61,6 +61,16 @@ runs:
         architecture: "x64"
         cache: 'pip'
 
+    # horrible hack to get the token
+    - name: Install Xvfb
+      run: apt-get update && apt-get install -y xvfb xclip
+
+    - name: simulate display on memory with Xvfb
+      run: |
+        Xvfb :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+        echo "Xvfb started"
+        echo "DISPLAY=:99" >> $GITHUB_ENV
+
     - name: Validate input
       shell: bash
       run: |
@@ -82,7 +92,6 @@ runs:
         echo >> $GITHUB_ENV # Ensures new line at the end of the file
         BRANCH_NAME="ci_${_NORMALIZED_BRANCH_NAME}"
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-
 
     - name: Install Tinybird CLI
       shell: bash
@@ -158,8 +167,7 @@ runs:
       working-directory: ${{ inputs.data_project_dir }}
       run: |
         # when switching to the branch, the token is saved in the .tinyb file
-        BRANCH_ADMIN_TOKEN=$(cat .tinyb | jq .token)
-        BRANCH_TOKEN_ID=$(tb token ls | awk '/^id: /{id=$2} /^name: /{print id " - " $2}' | grep ${{ inputs.token_name }} | head -n 1 | cut -d' ' -f1)
+        BRANCH_TOKEN_ID=$(tb token ls | awk '/^id: /{id=$2} /^name: /{print id " - " $2}' | grep "${{ inputs.token_name }}" | head -n 1 | cut -d' ' -f1)
 
         if [ -z "$BRANCH_TOKEN_ID" ]; then
           echo "Token ${{ inputs.token_name }} not found, make sure it exists in the main workspace"
@@ -169,13 +177,16 @@ runs:
         echo "Getting ${BRANCH_TOKEN_ID} token"
 
         # I don't know who decided to use pyperclip for tb token copy
-        # but it's not available on the runners -.-
-        # we need this token to avoid pass the admin token from the workflow to the branch
-        TOKEN=$(curl -X GET -H "Authorization: Bearer $BRANCH_ADMIN_TOKEN" "${{ inputs.tb_host }}/v0/tokens/$BRANCH_TOKEN_ID" | jq .token)
+        # but it's not available on the runners -.- so I'm using xclip
+        # copy the token to the clipboard
+        tb token copy $BRANCH_TOKEN_ID
+
+        # get the token from the clipboard
+        TOKEN=$(xclip -o -selection clipboard)
 
         if [ -z "$TOKEN" ]; then
           echo "Token with name ${{ inputs.token_name }} in branch $BRANCH_NAME not found, make sure it exists in the main workspace"
-          exit 1
+          exit 1z
         fi
 
         # Mask the token before outputting it
