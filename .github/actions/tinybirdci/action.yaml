@@ -275,7 +275,7 @@ runs:
       run: |
         if [ -f ./scripts/append_fixtures.sh ]; then
           echo "append_fixtures script found"
-          ./scripts/append_fixtures.sh
+          ./scripts/append_fixtures.sh $VERSION
         fi
 
     - name: Run fixture tests
@@ -283,7 +283,7 @@ runs:
       working-directory: ${{ inputs.data_project_dir }}
       run: |
         if [ -f ./scripts/exec_test.sh ]; then
-          ./scripts/exec_test.sh
+          ./scripts/exec_test.sh $VERSION
         fi
 
     - name: Run data quality tests
