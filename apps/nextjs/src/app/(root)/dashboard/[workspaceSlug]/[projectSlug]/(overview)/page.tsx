@@ -26,8 +26,8 @@ import { LoadingCard } from "../_components/loading-card"
 // Run this on edge analytics don't query the database
 // This is hitting the limits of the free tier in vercel :/
 // export const runtime = "edge"
-// Only needed if we want dynamic data but we moved this to AnalyticsCard to prefetch data
-// export const dynamic = "force-dynamic"
+
+export const dynamic = "force-dynamic"
 
 export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }

@@ -11,7 +11,7 @@ import { Filter } from "./filter"
 
 type AnalyticPromiseKey = "getUsage"
 
-export function AnalyticsCard<T extends string>({
+export async function AnalyticsCard<T extends string>({
   tabs,
   defaultTab,
   title,
@@ -37,13 +37,15 @@ export function AnalyticsCard<T extends string>({
 }) {
   const { start, end } = prepareInterval(interval)
 
-  // Prefetch all key analytics data
-  promiseKeys.forEach((promiseKey) => {
-    void trpc.analytics[promiseKey].prefetch({
-      start,
-      end,
+  // Prefetch all key analytics data in parallel
+  await Promise.all(
+    promiseKeys.map((promiseKey) => {
+      trpc.analytics[promiseKey].prefetch({
+        start,
+        end,
+      })
     })
-  })
+  )
 
   return (
     <Card className={cn("flex flex-col", className)}>

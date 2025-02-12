@@ -9,7 +9,7 @@
   "packageManager": "pnpm@8.15.4",
   "scripts": {
     "build": "turbo run build",
-    "clean": "git clean -xdf node_modules dist .next",
+    "clean": "git clean -xdf node_modules dist .next && rm -rf node_modules",
     "clean:workspaces": "turbo clean --parallel",
     "dev": "cross-env FORCE_COLOR=1 turbo run dev --parallel",
     "with-infisical": "infisical run --env=preview --path=/ --recursive --",

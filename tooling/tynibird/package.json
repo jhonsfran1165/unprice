@@ -1,8 +1,9 @@
 {
-  "name": "@unprice/tynibird",
+  "name": "@unprice/tynibird-tooling",
   "version": "1.0.0",
   "scripts": {
     "generate": "pnpm with-env tsx main.ts",
+    "cookie": "tsx cookie.ts",
     "clean": "git clean -xdf .next .turbo node_modules",
     "with-env": "infisical run --env=preview --path=/app --"
   },

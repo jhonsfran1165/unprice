@@ -8,6 +8,7 @@ import { TRPCError } from "@trpc/server"
 import { type appRouter, createCaller, createTRPCContext } from "@unprice/api"
 import { getSession } from "@unprice/auth/server-rsc"
 import { COOKIES_APP } from "@unprice/config"
+import { newId } from "@unprice/db/utils"
 import { createQueryClient } from "./shared"
 
 /**
@@ -22,6 +23,7 @@ const createContext = cache(async () => {
   heads.set("x-trpc-source", "rsc")
   heads.set(COOKIES_APP.WORKSPACE, activeWorkspaceSlug)
   heads.set(COOKIES_APP.PROJECT, activeProjectSlug)
+  heads.set("x-request-id", newId("request"))
 
   return createTRPCContext({
     session: await getSession(),

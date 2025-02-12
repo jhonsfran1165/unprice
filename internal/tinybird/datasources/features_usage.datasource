@@ -9,7 +9,7 @@ SCHEMA >
     `timestamp` Int64 `json:$.timestamp`,
     `featureSlug` LowCardinality(String) `json:$.featureSlug`,
     `customerId` String `json:$.customerId`,
-    `usage` UInt32 `json:$.usage`,
+    `usage` Int32 `json:$.usage`,
     `requestId` String `json:$.requestId`,
     `workspaceId` String `json:$.workspaceId`,
     `projectId` String `json:$.projectId`,

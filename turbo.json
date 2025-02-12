@@ -17,7 +17,8 @@
     "TRPC_LOGGER",
     "DRIZZLE_LOG",
     "NEXT_PUBLIC_APP_DOMAIN",
-    "NEXT_PUBLIC_VERCEL_ENV"
+    "NEXT_PUBLIC_VERCEL_ENV",
+    "COOKIE_ENCRYPTION_KEY"
   ],
   "tasks": {
     "build": {

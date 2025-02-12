@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Generate a 256-bit (32-byte) random key
+key=$(openssl rand -base64 32)
+
+# Convert it to a JWK JSON format
+jq -n --arg k "$(echo -n "$key" | base64 | tr -d '\n')" '{
+  kty: "oct",
+  k: $k,
+  alg: "A256CBC",
+  ext: true,
+  key_ops: ["encrypt", "decrypt"]
+}'

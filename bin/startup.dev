@@ -23,6 +23,7 @@ if ! curl -s http://localhost:8080 > /dev/null 2>&1; then
   exit 1
 fi
 
+bash -ic 'nvm use'
 
 CURRENT_GIT_BRANCH=$(git branch --show-current)
 
@@ -87,9 +88,9 @@ elif [ "$MODE_ID" = "preview" ]; then
 
   # create the branch if it does not exist
   if echo "$OUTPUT" | grep -q "\b$TB_BRANCH_NAME\b"; then
-    echo "Skipping branch creation for '$TB_BRANCH_NAME' because it already exists."
+    echo "Skipping branch creation for tinybird '$TB_BRANCH_NAME' because it already exists."
   else
-    echo "Creating branch '$TB_BRANCH_NAME' because it does not exist."
+    echo "Creating branch '$TB_BRANCH_NAME' for tinybird because it does not exist."
 
     tb branch create --last-partition --wait $TB_BRANCH_NAME
   fi
@@ -100,7 +101,7 @@ elif [ "$MODE_ID" = "preview" ]; then
   TB_TOKEN_ID=$(tb token ls | awk '/^id: /{id=$2} /^name: /{print id " - " $2}' | grep web-apps | head -n 1 | cut -d' ' -f1)
 
   if [ -z "$TB_TOKEN_ID" ]; then
-    echo "Token not found, make sure it exists in the main workspace"
+    echo "Token not found for tinybird, make sure it exists in the main workspace"
     exit 1
   fi
 
