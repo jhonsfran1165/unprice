@@ -62,7 +62,7 @@ export class Analytics {
 
   public get ingestFeaturesVerification() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "features_verifications__v1",
+      datasource: "features_verifications__v2",
       event: featureVerificationSchemaV1,
       // we need to wait for the ingestion to be done before returning
       wait: true,
@@ -79,7 +79,7 @@ export class Analytics {
   }
   public get getFeaturesVerifications() {
     return this.readClient.buildPipe({
-      pipe: "get_features_verifications__v1",
+      pipe: "get_features_verifications__v2",
       parameters: z.object({
         projectId: z.string().optional(),
         customerId: z.string().optional(),
