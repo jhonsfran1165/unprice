@@ -4,7 +4,6 @@ import { cookies, headers } from "next/headers"
 import { cache } from "react"
 
 import { createHydrationHelpers } from "@trpc/react-query/rsc"
-import { TRPCError } from "@trpc/server"
 import { type appRouter, createCaller, createTRPCContext } from "@unprice/api"
 import { getSession } from "@unprice/auth/server-rsc"
 import { COOKIES_APP } from "@unprice/config"
@@ -37,19 +36,6 @@ const createContext = cache(async () => {
  */
 const getQueryClient = cache(createQueryClient)
 
-export const api = createCaller(createContext, {
-  onError: (opts) => {
-    if (opts.error instanceof TRPCError) {
-      throw new Error(
-        JSON.stringify({
-          code: opts.error.code,
-          message: opts.error.message,
-        })
-      )
-    }
-
-    throw opts.error
-  },
-})
+export const api = createCaller(createContext)
 
 export const { trpc, HydrateClient } = createHydrationHelpers<typeof appRouter>(api, getQueryClient)

@@ -5,6 +5,7 @@ import { Typography } from "@unprice/ui/typography"
 import { Plus } from "lucide-react"
 import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
+import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
 import { api } from "~/trpc/server"
@@ -13,9 +14,13 @@ import { ProjectCard, ProjectCardSkeleton } from "../_components/project-card"
 export default async function WorkspaceOverviewPage(props: {
   params: { workspaceSlug: string }
 }) {
-  const { projects } = await api.projects.listByWorkspace({
+  const { projects, error } = await api.projects.listByWorkspace({
     workspaceSlug: props.params.workspaceSlug,
   })
+
+  if (!error?.access) {
+    return <UpgradePlanError error={error} />
+  }
 
   return (
     <DashboardShell

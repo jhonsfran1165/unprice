@@ -26,13 +26,23 @@ export const transferToWorkspace = protectedWorkspaceProcedure
     opts.ctx.verifyRole(["OWNER"])
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
+      metadata: {
+        action: "transferToWorkspace",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const { project: projectData } = await projectWorkspaceGuard({
       projectSlug,

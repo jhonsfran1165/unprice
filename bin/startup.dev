@@ -18,10 +18,19 @@ echo "Starting up"
 docker-compose up -d
 
 # check if tinybird http://localhost:8080 is running
-if ! curl -s http://localhost:8080 > /dev/null 2>&1; then
-  echo "Tinybird is not running, you need to wait for it to start"
-  exit 1
-fi
+echo "Waiting for Tinybird to be ready..."
+max_attempts=12  # 2 minutes total
+attempt=1
+
+while ! curl -s http://localhost:8080 > /dev/null 2>&1; do
+  if [ $attempt -ge $max_attempts ]; then
+    echo "Tinybird failed to start after 2 minutes"
+    exit 1
+  fi
+  echo "Attempt $attempt of $max_attempts: Tinybird not ready, waiting 10 seconds..."
+  sleep 10
+  ((attempt++))
+done
 
 bash -ic 'nvm use'
 

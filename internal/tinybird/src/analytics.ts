@@ -64,6 +64,8 @@ export class Analytics {
     return this.writeClient.buildIngestEndpoint({
       datasource: "features_verifications__v1",
       event: featureVerificationSchemaV1,
+      // we need to wait for the ingestion to be done before returning
+      wait: true,
     })
   }
 

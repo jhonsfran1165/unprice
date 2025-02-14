@@ -1,10 +1,10 @@
 import { projectSelectBaseSchema, workspaceSelectBase } from "@unprice/db/validators"
 import { z } from "zod"
 
+import { TRPCError } from "@trpc/server"
 import { protectedWorkspaceProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 import { getRandomPatternStyle } from "#utils/generate-pattern"
-
 export const listByActiveWorkspace = protectedWorkspaceProcedure
   .input(z.void())
   .output(
@@ -27,15 +27,23 @@ export const listByActiveWorkspace = protectedWorkspaceProcedure
     const featureSlug = "projects"
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
       skipCache: true,
       isInternal: opts.ctx.workspace.isInternal,
-      // list endpoint does not need to throw an error
-      throwOnNoAccess: false,
+      metadata: {
+        action: "listByActiveWorkspace",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const workspaceProjects = await opts.ctx.db.query.workspaces.findFirst({
       with: {

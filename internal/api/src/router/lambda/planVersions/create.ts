@@ -44,7 +44,7 @@ export const create = protectedProjectProcedure
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
@@ -52,7 +52,17 @@ export const create = protectedProjectProcedure
       // update usage when creating a plan version
       updateUsage: true,
       isInternal: workspace.isInternal,
+      metadata: {
+        action: "create",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const planData = await opts.ctx.db.query.plans.findFirst({
       where: (plan, { eq, and }) => and(eq(plan.id, planId), eq(plan.projectId, project.id)),

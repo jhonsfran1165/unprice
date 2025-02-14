@@ -36,17 +36,27 @@ export const update = protectedApiOrActiveProjectProcedure
   .mutation(async (opts) => {
     const { email, id, description, metadata, name, timezone } = opts.input
     const { project } = opts.ctx
-    const unPriceCustomerId = project.workspace.unPriceCustomerId
 
-    // check if the customer has access to the feature
-    await featureGuard({
+    const unPriceCustomerId = project.workspace.unPriceCustomerId
+    const featureSlug = "customers"
+
+    const result = await featureGuard({
       customerId: unPriceCustomerId,
-      featureSlug: "customers",
+      featureSlug,
       ctx: opts.ctx,
       skipCache: true,
       isInternal: project.workspace.isInternal,
-      throwOnNoAccess: false,
+      metadata: {
+        action: "update",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const customerData = await opts.ctx.db.query.customers.findFirst({
       where: (feature, { eq, and }) => and(eq(feature.id, id), eq(feature.projectId, project.id)),

@@ -16,6 +16,8 @@ export default function VersionOverview({
 }: {
   planVersion: RouterOutputs["planVersions"]["getById"]["planVersion"]
 }) {
+  if (!planVersion) return null
+
   return (
     <div className="flex flex-col gap-4">
       <Card variant="ghost">

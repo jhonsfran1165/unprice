@@ -27,16 +27,23 @@ export const duplicate = protectedProjectProcedure
     // only owner and admin can duplicate a plan version
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
-    // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId: workspace.unPriceCustomerId,
       featureSlug: "plan-versions",
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
-      // duplicate endpoint does not need to throw an error
-      throwOnNoAccess: false,
+      metadata: {
+        action: "duplicate",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const planVersionData = await opts.ctx.db.query.versions.findFirst({
       where: (version, { and, eq }) => and(eq(version.id, id), eq(version.projectId, project.id)),

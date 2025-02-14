@@ -34,16 +34,20 @@ export const getSubscriptionsBySlug = protectedProjectProcedure
     const customerId = workspace.unPriceCustomerId
     const featureSlug = "plans"
 
-    // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
-      // getSubscriptionsBySlug endpoint does not need to throw an error
-      throwOnNoAccess: false,
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const plan = await opts.ctx.db.query.plans.findFirst({
       where: (plan, { eq, and }) => and(eq(plan.slug, slug), eq(plan.projectId, project.id)),

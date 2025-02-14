@@ -20,15 +20,23 @@ export const getById = protectedWorkspaceProcedure
     const featureSlug = "projects"
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
-      // getById endpoint does not need to throw an error
-      throwOnNoAccess: false,
+      metadata: {
+        action: "getById",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const projectData = await opts.ctx.db.query.projects.findFirst({
       with: {

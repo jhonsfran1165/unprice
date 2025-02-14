@@ -11,6 +11,8 @@ export function PricingCard({
 }: {
   planVersion: RouterOutputs["planVersions"]["getById"]["planVersion"]
 }) {
+  if (!planVersion) return null
+
   const { err, val: totalPricePlan } = calculateFlatPricePlan({
     planVersion,
   })

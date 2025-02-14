@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { TRPCError } from "@trpc/server"
 import { protectedProjectProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 
@@ -10,15 +11,20 @@ export const exist = protectedProjectProcedure
     const { slug } = opts.input
     const project = opts.ctx.project
 
-    await featureGuard({
+    const result = await featureGuard({
       customerId: project.workspace.unPriceCustomerId,
       featureSlug: "features",
       ctx: opts.ctx,
       skipCache: true,
       isInternal: project.workspace.isInternal,
-      // getById endpoint does not need to throw an error
-      throwOnNoAccess: false,
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const feature = await opts.ctx.db.query.features.findFirst({
       columns: {
