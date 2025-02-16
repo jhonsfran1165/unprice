@@ -27,4 +27,5 @@ SQL >
         {% end %}
     GROUP BY projectId, customerId, featureSlug, entitlementId
 
+
 TYPE endpoint

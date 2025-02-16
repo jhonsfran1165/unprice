@@ -17,8 +17,9 @@ SCHEMA >
     `subscriptionId` Nullable(String) `json:$.subscriptionId`,
     `subscriptionItemId` Nullable(String) `json:$.subscriptionItemId`,
     `subscriptionPhaseId` Nullable(String) `json:$.subscriptionPhaseId`,
-    `metadata` Nullable(String) `json:$.metadata`,
-    `deniedReason` LowCardinality(Nullable(String)) `json:$.deniedReason`
+    `deniedReason` LowCardinality(Nullable(String)) `json:$.deniedReason`,
+    `metadata` Nullable(String) `json:$.metadata`
+
 
 ENGINE MergeTree
 ENGINE_PARTITION_KEY toYYYYMM(fromUnixTimestamp64Milli(timestamp))
