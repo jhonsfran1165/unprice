@@ -821,7 +821,7 @@ export class CustomerService {
               // TODO: usage is not always sum to the current usage, could be counter, etc
               // also if there are many request per second, we could debounce the update somehow
               // only update the cache if the feature is realtime
-              if (entitlement.realtime && this.ctx.cache) {
+              if (this.ctx.cache) {
                 this.ctx.cache.featureByCustomerId.set(`${customerId}:${featureSlug}`, {
                   ...entitlement,
                   usage: (entitlement.usage ?? 0) + usage,

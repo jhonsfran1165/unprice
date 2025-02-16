@@ -9,7 +9,7 @@ export const getByEmail = protectedApiOrActiveProjectProcedure
     span: "customers.getByEmail",
     openapi: {
       method: "GET",
-      path: "/edge/customers.getByEmail",
+      path: "/lambda/customers.getByEmail",
       protect: true,
     },
   })

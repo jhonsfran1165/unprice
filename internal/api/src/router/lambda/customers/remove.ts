@@ -13,7 +13,7 @@ export const remove = protectedApiOrActiveProjectProcedure
     span: "customers.remove",
     openapi: {
       method: "POST",
-      path: "/edge/customers.remove",
+      path: "/lambda/customers.remove",
       protect: true,
     },
   })

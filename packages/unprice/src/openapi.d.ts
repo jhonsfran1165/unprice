@@ -4,1081 +4,1231 @@
  */
 
 export interface paths {
-    "/edge/paymentProvider.getSession": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["paymentProvider-getSession"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["customers-create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.remove": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["customers-remove"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["customers-update"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.createPaymentMethod": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["customers-createPaymentMethod"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.exist": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["customers-exist"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.getByEmail": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["customers-getByEmail"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.getByIdActiveProject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["customers-getByIdActiveProject"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.getSubscriptions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["customers-getSubscriptions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.listPaymentMethods": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["customers-listPaymentMethods"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.signUp": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["customers-signUp"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.signOut": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["customers-signOut"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.entitlements": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["customers-entitlements"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.can": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["customers-can"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/edge/customers.reportUsage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["customers-reportUsage"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
+  "/lambda/paymentProvider.getSession": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations["paymentProvider-getSession"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/lambda/customers.create": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations["customers-create"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/lambda/customers.remove": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations["customers-remove"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/lambda/customers.update": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations["customers-update"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/lambda/customers.createPaymentMethod": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations["customers-createPaymentMethod"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/lambda/customers.exist": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations["customers-exist"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/lambda/customers.getByEmail": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations["customers-getByEmail"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/lambda/customers.getByIdActiveProject": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations["customers-getByIdActiveProject"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/lambda/customers.getSubscriptions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations["customers-getSubscriptions"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/edge/customers.listPaymentMethods": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations["customers-listPaymentMethods"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/edge/customers.signUp": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations["customers-signUp"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/edge/customers.signOut": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations["customers-signOut"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/edge/customers.entitlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations["customers-entitlements"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/edge/customers.can": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations["customers-can"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/edge/customers.reportUsage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations["customers-reportUsage"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
-export type webhooks = Record<string, never>;
+export type webhooks = Record<string, never>
 export interface components {
-    schemas: never;
-    responses: {
-        /** @description Error response */
-        error: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": {
-                    message: string;
-                    code: string;
-                    issues?: {
-                        message: string;
-                    }[];
-                };
-            };
-        };
-    };
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+  schemas: never
+  responses: {
+    /** @description Error response */
+    error: {
+      headers: {
+        [name: string]: unknown
+      }
+      content: {
+        "application/json": {
+          message: string
+          code: string
+          issues?: {
+            message: string
+          }[]
+        }
+      }
+    }
+  }
+  parameters: never
+  requestBodies: never
+  headers: never
+  pathItems: never
 }
-export type $defs = Record<string, never>;
+export type $defs = Record<string, never>
 export interface operations {
-    "paymentProvider-getSession": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @enum {string} */
-                    paymentProvider: "stripe" | "lemonsqueezy";
-                    sessionId: string;
-                    projectId: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        metadata: {
-                            [key: string]: string | undefined;
-                        } | null;
-                        customerId: string;
-                        subscriptionId: string | null;
-                        paymentMethodId: string | null;
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    id?: string;
-                    projectId?: string;
-                    /** Format: email */
-                    email: string;
-                    name: string;
-                    description?: string | null;
-                    metadata?: {
-                        externalId?: string;
-                        stripeSubscriptionId?: string;
-                        stripeDefaultPaymentMethodId?: string;
-                    } | null;
-                    stripeCustomerId?: string | null;
-                    active?: boolean | null;
-                    isMain?: boolean | null;
-                    /** @enum {string} */
-                    defaultCurrency?: "USD" | "EUR";
-                    timezone?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        customer: {
-                            id: string;
-                            projectId: string;
-                            createdAtM: number;
-                            updatedAtM: number;
-                            email: string;
-                            name: string;
-                            description: string | null;
-                            metadata: {
-                                externalId?: string;
-                                stripeSubscriptionId?: string;
-                                stripeDefaultPaymentMethodId?: string;
-                            } | null;
-                            stripeCustomerId: string | null;
-                            active: boolean | null;
-                            isMain: boolean | null;
-                            /** @enum {string} */
-                            defaultCurrency: "USD" | "EUR";
-                            timezone: string;
-                        };
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-remove": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    id: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        customer: {
-                            id: string;
-                            projectId: string;
-                            createdAtM: number;
-                            updatedAtM: number;
-                            email: string;
-                            name: string;
-                            description: string | null;
-                            metadata: {
-                                externalId?: string;
-                                stripeSubscriptionId?: string;
-                                stripeDefaultPaymentMethodId?: string;
-                            } | null;
-                            stripeCustomerId: string | null;
-                            active: boolean | null;
-                            isMain: boolean | null;
-                            /** @enum {string} */
-                            defaultCurrency: "USD" | "EUR";
-                            timezone: string;
-                        };
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    id: string;
-                    name: string;
-                    description?: string | null;
-                    email: string;
-                    metadata?: {
-                        externalId?: string;
-                        stripeSubscriptionId?: string;
-                        stripeDefaultPaymentMethodId?: string;
-                    } | null;
-                    timezone?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        customer: {
-                            id: string;
-                            projectId: string;
-                            createdAtM: number;
-                            updatedAtM: number;
-                            email: string;
-                            name: string;
-                            description: string | null;
-                            metadata: {
-                                externalId?: string;
-                                stripeSubscriptionId?: string;
-                                stripeDefaultPaymentMethodId?: string;
-                            } | null;
-                            stripeCustomerId: string | null;
-                            active: boolean | null;
-                            isMain: boolean | null;
-                            /** @enum {string} */
-                            defaultCurrency: "USD" | "EUR";
-                            timezone: string;
-                        };
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-createPaymentMethod": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @enum {string} */
-                    paymentProvider: "stripe" | "lemonsqueezy";
-                    customerId: string;
-                    /** Format: uri */
-                    successUrl: string;
-                    /** Format: uri */
-                    cancelUrl: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        success: boolean;
-                        url: string;
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-exist": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    email: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        exist: boolean;
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-getByEmail": {
-        parameters: {
-            query: {
-                email: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        customer: {
-                            id: string;
-                            projectId: string;
-                            createdAtM: number;
-                            updatedAtM: number;
-                            email: string;
-                            name: string;
-                            description: string | null;
-                            metadata: {
-                                externalId?: string;
-                                stripeSubscriptionId?: string;
-                                stripeDefaultPaymentMethodId?: string;
-                            } | null;
-                            stripeCustomerId: string | null;
-                            active: boolean | null;
-                            isMain: boolean | null;
-                            /** @enum {string} */
-                            defaultCurrency: "USD" | "EUR";
-                            timezone: string;
-                        };
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-getByIdActiveProject": {
-        parameters: {
-            query: {
-                id: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        customer: {
-                            id: string;
-                            projectId: string;
-                            createdAtM: number;
-                            updatedAtM: number;
-                            email: string;
-                            name: string;
-                            description: string | null;
-                            metadata: {
-                                externalId?: string;
-                                stripeSubscriptionId?: string;
-                                stripeDefaultPaymentMethodId?: string;
-                            } | null;
-                            stripeCustomerId: string | null;
-                            active: boolean | null;
-                            isMain: boolean | null;
-                            /** @enum {string} */
-                            defaultCurrency: "USD" | "EUR";
-                            timezone: string;
-                        };
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-getSubscriptions": {
-        parameters: {
-            query: {
-                customerId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        customer: {
-                            id: string;
-                            projectId: string;
-                            createdAtM: number;
-                            updatedAtM: number;
-                            email: string;
-                            name: string;
-                            description: string | null;
-                            metadata: {
-                                externalId?: string;
-                                stripeSubscriptionId?: string;
-                                stripeDefaultPaymentMethodId?: string;
-                            } | null;
-                            stripeCustomerId: string | null;
-                            active: boolean | null;
-                            isMain: boolean | null;
-                            /** @enum {string} */
-                            defaultCurrency: "USD" | "EUR";
-                            timezone: string;
-                            subscriptions: {
-                                id: string;
-                                projectId: string;
-                                createdAtM: number;
-                                updatedAtM: number;
-                                customerId: string;
-                                active: boolean;
-                                planSlug: string | null;
-                                timezone: string;
-                                previousCycleStartAt: number | null;
-                                previousCycleEndAt: number | null;
-                                currentCycleStartAt: number;
-                                currentCycleEndAt: number;
-                                nextInvoiceAt: number;
-                                lastInvoiceAt: number | null;
-                                lastRenewAt: number | null;
-                                renewAt: number;
-                                pastDueAt: number | null;
-                                pastDuedAt: number | null;
-                                cancelAt: number | null;
-                                canceledAt: number | null;
-                                expiresAt: number | null;
-                                expiredAt: number | null;
-                                changeAt: number | null;
-                                changedAt: number | null;
-                                metadata: {
-                                    /**
-                                     * @description Reason for the subscription status
-                                     * @enum {string}
-                                     */
-                                    reason?: "payment_failed" | "payment_pending" | "payment_method_not_found" | "policy_violation" | "pending_cancellation" | "invoice_failed" | "invoice_pending" | "payment_received" | "pending_change" | "pending_expiration" | "trial_ended" | "user_requested" | "admin_requested" | "ending" | "renewed" | "cancelled" | "auto_renew_disabled" | "customer_signout";
-                                    /** @description Note about status in the subscription */
-                                    note?: string;
-                                } | null;
-                                customer: {
-                                    id: string;
-                                    projectId: string;
-                                    createdAtM: number;
-                                    updatedAtM: number;
-                                    email: string;
-                                    name: string;
-                                    description: string | null;
-                                    metadata: {
-                                        externalId?: string;
-                                        stripeSubscriptionId?: string;
-                                        stripeDefaultPaymentMethodId?: string;
-                                    } | null;
-                                    stripeCustomerId: string | null;
-                                    active: boolean | null;
-                                    isMain: boolean | null;
-                                    /** @enum {string} */
-                                    defaultCurrency: "USD" | "EUR";
-                                    timezone: string;
-                                };
-                                phases: {
-                                    id: string;
-                                    projectId: string;
-                                    createdAtM?: number;
-                                    updatedAtM?: number;
-                                    subscriptionId: string;
-                                    planVersionId: string;
-                                    paymentMethodId: string | null;
-                                    /** @enum {string} */
-                                    status: "active" | "trialing" | "changed" | "canceled" | "expired" | "past_dued" | "trial_ended";
-                                    /** @default 0 */
-                                    trialDays: number;
-                                    active: boolean;
-                                    /** @enum {string} */
-                                    dueBehaviour: "cancel" | "downgrade";
-                                    /** @enum {string} */
-                                    whenToBill: "pay_in_advance" | "pay_in_arrear";
-                                    /** @default 1 */
-                                    startCycle: number;
-                                    gracePeriod: number;
-                                    /** @enum {string} */
-                                    collectionMethod: "charge_automatically" | "send_invoice";
-                                    autoRenew: boolean;
-                                    /** @enum {string} */
-                                    billingPeriod: "month" | "year" | "custom" | "onetime";
-                                    trialEndsAt: number | null;
-                                    startAt: number;
-                                    endAt: number | null;
-                                    metadata: {
-                                        /** @description Past due information */
-                                        pastDue?: {
-                                            /** @description Invoice id that triggered the past due */
-                                            invoiceId: string;
-                                            /**
-                                             * @description Reason for the status
-                                             * @enum {string}
-                                             */
-                                            reason?: "payment_failed" | "payment_pending" | "payment_method_not_found" | "policy_violation" | "pending_cancellation" | "invoice_failed" | "invoice_pending" | "payment_received" | "pending_change" | "pending_expiration" | "trial_ended" | "user_requested" | "admin_requested" | "ending" | "renewed" | "cancelled" | "auto_renew_disabled" | "customer_signout";
-                                            /** @description Note about status in the subscription phase */
-                                            note?: string;
-                                        };
-                                        /** @description Expiration information */
-                                        expire?: {
-                                            /** @description Phase id that triggered the expiration */
-                                            phaseId?: string;
-                                            /**
-                                             * @description Reason for the status
-                                             * @enum {string}
-                                             */
-                                            reason?: "payment_failed" | "payment_pending" | "payment_method_not_found" | "policy_violation" | "pending_cancellation" | "invoice_failed" | "invoice_pending" | "payment_received" | "pending_change" | "pending_expiration" | "trial_ended" | "user_requested" | "admin_requested" | "ending" | "renewed" | "cancelled" | "auto_renew_disabled" | "customer_signout";
-                                            /** @description Note about status in the subscription phase */
-                                            note?: string;
-                                        };
-                                        /** @description Cancellation information */
-                                        cancel?: {
-                                            /**
-                                             * @description Reason for the status
-                                             * @enum {string}
-                                             */
-                                            reason?: "payment_failed" | "payment_pending" | "payment_method_not_found" | "policy_violation" | "pending_cancellation" | "invoice_failed" | "invoice_pending" | "payment_received" | "pending_change" | "pending_expiration" | "trial_ended" | "user_requested" | "admin_requested" | "ending" | "renewed" | "cancelled" | "auto_renew_disabled" | "customer_signout";
-                                            /** @description Note about status in the subscription phase */
-                                            note?: string;
-                                        };
-                                        /** @description Renewal information */
-                                        renew?: {
-                                            /**
-                                             * @description Reason for the status
-                                             * @enum {string}
-                                             */
-                                            reason?: "payment_failed" | "payment_pending" | "payment_method_not_found" | "policy_violation" | "pending_cancellation" | "invoice_failed" | "invoice_pending" | "payment_received" | "pending_change" | "pending_expiration" | "trial_ended" | "user_requested" | "admin_requested" | "ending" | "renewed" | "cancelled" | "auto_renew_disabled" | "customer_signout";
-                                            /** @description Note about status in the subscription phase */
-                                            note?: string;
-                                        };
-                                        /** @description Change information */
-                                        change?: {
-                                            /**
-                                             * @description Reason for the status
-                                             * @enum {string}
-                                             */
-                                            reason?: "payment_failed" | "payment_pending" | "payment_method_not_found" | "policy_violation" | "pending_cancellation" | "invoice_failed" | "invoice_pending" | "payment_received" | "pending_change" | "pending_expiration" | "trial_ended" | "user_requested" | "admin_requested" | "ending" | "renewed" | "cancelled" | "auto_renew_disabled" | "customer_signout";
-                                            /** @description Note about status in the subscription phase */
-                                            note?: string;
-                                            /** @description Next phase id */
-                                            nextPhaseId?: string;
-                                        };
-                                    } | null;
-                                    items?: {
-                                        id: string;
-                                        projectId: string;
-                                        createdAtM: number;
-                                        updatedAtM: number;
-                                        units: number | null;
-                                        featurePlanVersionId: string;
-                                        subscriptionPhaseId: string;
-                                    }[];
-                                }[];
-                            }[];
-                        };
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-listPaymentMethods": {
-        parameters: {
-            query: {
-                customerId: string;
-                provider: "stripe" | "lemonsqueezy";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        paymentMethods: {
-                            id: string;
-                            name: string | null;
-                            last4?: string;
-                            expMonth?: number;
-                            expYear?: number;
-                            brand?: string;
-                        }[];
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-signUp": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    id?: string;
-                    projectId?: string;
-                    /** Format: email */
-                    email: string;
-                    name?: string;
-                    description?: string | null;
-                    metadata?: {
-                        externalId?: string;
-                        stripeSubscriptionId?: string;
-                        stripeDefaultPaymentMethodId?: string;
-                    } | null;
-                    stripeCustomerId?: string | null;
-                    active?: boolean | null;
-                    isMain?: boolean | null;
-                    /** @enum {string} */
-                    defaultCurrency?: "USD" | "EUR";
-                    timezone?: string;
-                    planVersionId: string;
-                    config?: {
-                        featurePlanId: string;
-                        featureSlug: string;
-                        /** @description if the item is a usage item */
-                        isUsage?: boolean;
-                        /** @description units of the feature the user is subscribed to */
-                        units?: number;
-                        /** @description minimum units of the feature the user is subscribed to */
-                        min?: number;
-                        /** @description limit of the feature the user is subscribed to */
-                        limit?: number;
-                    }[];
-                    externalId?: string;
-                    /** Format: uri */
-                    successUrl: string;
-                    /** Format: uri */
-                    cancelUrl: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        success: boolean;
-                        url: string;
-                        customerId: string;
-                        error?: string;
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-signOut": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    customerId: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        success: boolean;
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-entitlements": {
-        parameters: {
-            query: {
-                customerId: string;
-                skipCache?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        entitlements: {
-                            id: string;
-                            projectId: string;
-                            customerId: string;
-                            subscriptionItemId: string | null;
-                            featurePlanVersionId: string;
-                            units: number | null;
-                            limit: number | null;
-                            usage: number | null;
-                            featureSlug: string;
-                            /** @enum {string} */
-                            featureType: "flat" | "tier" | "package" | "usage";
-                            /** @enum {string} */
-                            aggregationMethod: "sum" | "sum_all" | "last_during_period" | "count" | "count_all" | "max" | "max_all";
-                            realtime: boolean;
-                            type: string;
-                            startAt: number;
-                            endAt: number | null;
-                            isCustom: boolean;
-                            lastUsageUpdateAt: number;
-                            metadata: ((string | number | boolean | "null") | unknown[] | {
-                                [key: string]: unknown;
-                            }) | null;
-                            project: {
-                                id: string;
-                                workspaceId: string;
-                            };
-                            subscriptionItem: {
-                                id: string;
-                                subscriptionPhase: {
-                                    id: string;
-                                    subscription: {
-                                        id: string;
-                                        currentCycleStartAt: number;
-                                        currentCycleEndAt: number;
-                                    } | null;
-                                } | null;
-                            } | null;
-                        }[];
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-can": {
-        parameters: {
-            query: {
-                customerId: string;
-                featureSlug: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        access: boolean;
-                        deniedReason?: ("RATE_LIMITED" | "USAGE_EXCEEDED" | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION" | "FEATURE_OR_CUSTOMER_NOT_FOUND" | "FEATURE_HAS_NO_USAGE_RECORD" | "LIMIT_EXCEEDED") | ("SUBSCRIPTION_EXPIRED" | "SUBSCRIPTION_NOT_ACTIVE" | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION" | "FEATURE_OR_CUSTOMER_NOT_FOUND" | "CUSTOMER_HAS_NO_SUBSCRIPTIONS" | "CUSTOMER_NOT_FOUND" | "FEATURE_TYPE_NOT_SUPPORTED" | "FEATURE_IS_NOT_USAGE_TYPE" | "FEATURE_HAS_NO_USAGE_RECORD" | "FEATURE_NOT_SUPPORT_USAGE" | "UNHANDLED_ERROR" | "INTERNAL_SERVER_ERROR");
-                        currentUsage?: number;
-                        limit?: number;
-                        /** @enum {string} */
-                        featureType?: "flat" | "tier" | "package" | "usage";
-                        units?: number;
-                        message?: string;
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
-    "customers-reportUsage": {
-        parameters: {
-            query: {
-                customerId: string;
-                featureSlug: string;
-                usage: number;
-                idempotenceKey: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        success: boolean;
-                        message?: string;
-                        cacheHit?: boolean;
-                    };
-                };
-            };
-            default: components["responses"]["error"];
-        };
-    };
+  "paymentProvider-getSession": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          paymentProvider: "stripe" | "lemonsqueezy"
+          sessionId: string
+          projectId: string
+        }
+      }
+    }
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            metadata: {
+              [key: string]: string | undefined
+            } | null
+            customerId: string
+            subscriptionId: string | null
+            paymentMethodId: string | null
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-create": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": {
+          id?: string
+          projectId?: string
+          /** Format: email */
+          email: string
+          name: string
+          description?: string | null
+          metadata?: {
+            externalId?: string
+            stripeSubscriptionId?: string
+            stripeDefaultPaymentMethodId?: string
+          } | null
+          stripeCustomerId?: string | null
+          active?: boolean | null
+          isMain?: boolean | null
+          /** @enum {string} */
+          defaultCurrency?: "USD" | "EUR"
+          timezone?: string
+        }
+      }
+    }
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            customer: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              email: string
+              name: string
+              description: string | null
+              metadata: {
+                externalId?: string
+                stripeSubscriptionId?: string
+                stripeDefaultPaymentMethodId?: string
+              } | null
+              stripeCustomerId: string | null
+              active: boolean | null
+              isMain: boolean | null
+              /** @enum {string} */
+              defaultCurrency: "USD" | "EUR"
+              timezone: string
+            }
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-remove": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": {
+          id: string
+        }
+      }
+    }
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            customer: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              email: string
+              name: string
+              description: string | null
+              metadata: {
+                externalId?: string
+                stripeSubscriptionId?: string
+                stripeDefaultPaymentMethodId?: string
+              } | null
+              stripeCustomerId: string | null
+              active: boolean | null
+              isMain: boolean | null
+              /** @enum {string} */
+              defaultCurrency: "USD" | "EUR"
+              timezone: string
+            }
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-update": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": {
+          id: string
+          name: string
+          description?: string | null
+          email: string
+          metadata?: {
+            externalId?: string
+            stripeSubscriptionId?: string
+            stripeDefaultPaymentMethodId?: string
+          } | null
+          timezone?: string
+        }
+      }
+    }
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            customer: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              email: string
+              name: string
+              description: string | null
+              metadata: {
+                externalId?: string
+                stripeSubscriptionId?: string
+                stripeDefaultPaymentMethodId?: string
+              } | null
+              stripeCustomerId: string | null
+              active: boolean | null
+              isMain: boolean | null
+              /** @enum {string} */
+              defaultCurrency: "USD" | "EUR"
+              timezone: string
+            }
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-createPaymentMethod": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          paymentProvider: "stripe" | "lemonsqueezy"
+          customerId: string
+          /** Format: uri */
+          successUrl: string
+          /** Format: uri */
+          cancelUrl: string
+        }
+      }
+    }
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            success: boolean
+            url: string
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-exist": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string
+        }
+      }
+    }
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            exist: boolean
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-getByEmail": {
+    parameters: {
+      query: {
+        email: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            customer: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              email: string
+              name: string
+              description: string | null
+              metadata: {
+                externalId?: string
+                stripeSubscriptionId?: string
+                stripeDefaultPaymentMethodId?: string
+              } | null
+              stripeCustomerId: string | null
+              active: boolean | null
+              isMain: boolean | null
+              /** @enum {string} */
+              defaultCurrency: "USD" | "EUR"
+              timezone: string
+            }
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-getByIdActiveProject": {
+    parameters: {
+      query: {
+        id: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            customer: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              email: string
+              name: string
+              description: string | null
+              metadata: {
+                externalId?: string
+                stripeSubscriptionId?: string
+                stripeDefaultPaymentMethodId?: string
+              } | null
+              stripeCustomerId: string | null
+              active: boolean | null
+              isMain: boolean | null
+              /** @enum {string} */
+              defaultCurrency: "USD" | "EUR"
+              timezone: string
+            }
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-getSubscriptions": {
+    parameters: {
+      query: {
+        customerId: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            customer: {
+              id: string
+              projectId: string
+              createdAtM: number
+              updatedAtM: number
+              email: string
+              name: string
+              description: string | null
+              metadata: {
+                externalId?: string
+                stripeSubscriptionId?: string
+                stripeDefaultPaymentMethodId?: string
+              } | null
+              stripeCustomerId: string | null
+              active: boolean | null
+              isMain: boolean | null
+              /** @enum {string} */
+              defaultCurrency: "USD" | "EUR"
+              timezone: string
+              subscriptions: {
+                id: string
+                projectId: string
+                createdAtM: number
+                updatedAtM: number
+                customerId: string
+                active: boolean
+                planSlug: string | null
+                timezone: string
+                previousCycleStartAt: number | null
+                previousCycleEndAt: number | null
+                currentCycleStartAt: number
+                currentCycleEndAt: number
+                nextInvoiceAt: number
+                lastInvoiceAt: number | null
+                lastRenewAt: number | null
+                renewAt: number
+                pastDueAt: number | null
+                pastDuedAt: number | null
+                cancelAt: number | null
+                canceledAt: number | null
+                expiresAt: number | null
+                expiredAt: number | null
+                changeAt: number | null
+                changedAt: number | null
+                metadata: {
+                  /**
+                   * @description Reason for the subscription status
+                   * @enum {string}
+                   */
+                  reason?:
+                    | "payment_failed"
+                    | "payment_pending"
+                    | "payment_method_not_found"
+                    | "policy_violation"
+                    | "pending_cancellation"
+                    | "invoice_failed"
+                    | "invoice_pending"
+                    | "payment_received"
+                    | "pending_change"
+                    | "pending_expiration"
+                    | "trial_ended"
+                    | "user_requested"
+                    | "admin_requested"
+                    | "ending"
+                    | "renewed"
+                    | "cancelled"
+                    | "auto_renew_disabled"
+                    | "customer_signout"
+                  /** @description Note about status in the subscription */
+                  note?: string
+                } | null
+                customer: {
+                  id: string
+                  projectId: string
+                  createdAtM: number
+                  updatedAtM: number
+                  email: string
+                  name: string
+                  description: string | null
+                  metadata: {
+                    externalId?: string
+                    stripeSubscriptionId?: string
+                    stripeDefaultPaymentMethodId?: string
+                  } | null
+                  stripeCustomerId: string | null
+                  active: boolean | null
+                  isMain: boolean | null
+                  /** @enum {string} */
+                  defaultCurrency: "USD" | "EUR"
+                  timezone: string
+                }
+                phases: {
+                  id: string
+                  projectId: string
+                  createdAtM?: number
+                  updatedAtM?: number
+                  subscriptionId: string
+                  planVersionId: string
+                  paymentMethodId: string | null
+                  /** @enum {string} */
+                  status:
+                    | "active"
+                    | "trialing"
+                    | "changed"
+                    | "canceled"
+                    | "expired"
+                    | "past_dued"
+                    | "trial_ended"
+                  /** @default 0 */
+                  trialDays: number
+                  active: boolean
+                  /** @enum {string} */
+                  dueBehaviour: "cancel" | "downgrade"
+                  /** @enum {string} */
+                  whenToBill: "pay_in_advance" | "pay_in_arrear"
+                  /** @default 1 */
+                  startCycle: number
+                  gracePeriod: number
+                  /** @enum {string} */
+                  collectionMethod: "charge_automatically" | "send_invoice"
+                  autoRenew: boolean
+                  /** @enum {string} */
+                  billingPeriod: "month" | "year" | "custom" | "onetime"
+                  trialEndsAt: number | null
+                  startAt: number
+                  endAt: number | null
+                  metadata: {
+                    /** @description Past due information */
+                    pastDue?: {
+                      /** @description Invoice id that triggered the past due */
+                      invoiceId: string
+                      /**
+                       * @description Reason for the status
+                       * @enum {string}
+                       */
+                      reason?:
+                        | "payment_failed"
+                        | "payment_pending"
+                        | "payment_method_not_found"
+                        | "policy_violation"
+                        | "pending_cancellation"
+                        | "invoice_failed"
+                        | "invoice_pending"
+                        | "payment_received"
+                        | "pending_change"
+                        | "pending_expiration"
+                        | "trial_ended"
+                        | "user_requested"
+                        | "admin_requested"
+                        | "ending"
+                        | "renewed"
+                        | "cancelled"
+                        | "auto_renew_disabled"
+                        | "customer_signout"
+                      /** @description Note about status in the subscription phase */
+                      note?: string
+                    }
+                    /** @description Expiration information */
+                    expire?: {
+                      /** @description Phase id that triggered the expiration */
+                      phaseId?: string
+                      /**
+                       * @description Reason for the status
+                       * @enum {string}
+                       */
+                      reason?:
+                        | "payment_failed"
+                        | "payment_pending"
+                        | "payment_method_not_found"
+                        | "policy_violation"
+                        | "pending_cancellation"
+                        | "invoice_failed"
+                        | "invoice_pending"
+                        | "payment_received"
+                        | "pending_change"
+                        | "pending_expiration"
+                        | "trial_ended"
+                        | "user_requested"
+                        | "admin_requested"
+                        | "ending"
+                        | "renewed"
+                        | "cancelled"
+                        | "auto_renew_disabled"
+                        | "customer_signout"
+                      /** @description Note about status in the subscription phase */
+                      note?: string
+                    }
+                    /** @description Cancellation information */
+                    cancel?: {
+                      /**
+                       * @description Reason for the status
+                       * @enum {string}
+                       */
+                      reason?:
+                        | "payment_failed"
+                        | "payment_pending"
+                        | "payment_method_not_found"
+                        | "policy_violation"
+                        | "pending_cancellation"
+                        | "invoice_failed"
+                        | "invoice_pending"
+                        | "payment_received"
+                        | "pending_change"
+                        | "pending_expiration"
+                        | "trial_ended"
+                        | "user_requested"
+                        | "admin_requested"
+                        | "ending"
+                        | "renewed"
+                        | "cancelled"
+                        | "auto_renew_disabled"
+                        | "customer_signout"
+                      /** @description Note about status in the subscription phase */
+                      note?: string
+                    }
+                    /** @description Renewal information */
+                    renew?: {
+                      /**
+                       * @description Reason for the status
+                       * @enum {string}
+                       */
+                      reason?:
+                        | "payment_failed"
+                        | "payment_pending"
+                        | "payment_method_not_found"
+                        | "policy_violation"
+                        | "pending_cancellation"
+                        | "invoice_failed"
+                        | "invoice_pending"
+                        | "payment_received"
+                        | "pending_change"
+                        | "pending_expiration"
+                        | "trial_ended"
+                        | "user_requested"
+                        | "admin_requested"
+                        | "ending"
+                        | "renewed"
+                        | "cancelled"
+                        | "auto_renew_disabled"
+                        | "customer_signout"
+                      /** @description Note about status in the subscription phase */
+                      note?: string
+                    }
+                    /** @description Change information */
+                    change?: {
+                      /**
+                       * @description Reason for the status
+                       * @enum {string}
+                       */
+                      reason?:
+                        | "payment_failed"
+                        | "payment_pending"
+                        | "payment_method_not_found"
+                        | "policy_violation"
+                        | "pending_cancellation"
+                        | "invoice_failed"
+                        | "invoice_pending"
+                        | "payment_received"
+                        | "pending_change"
+                        | "pending_expiration"
+                        | "trial_ended"
+                        | "user_requested"
+                        | "admin_requested"
+                        | "ending"
+                        | "renewed"
+                        | "cancelled"
+                        | "auto_renew_disabled"
+                        | "customer_signout"
+                      /** @description Note about status in the subscription phase */
+                      note?: string
+                      /** @description Next phase id */
+                      nextPhaseId?: string
+                    }
+                  } | null
+                  items?: {
+                    id: string
+                    projectId: string
+                    createdAtM: number
+                    updatedAtM: number
+                    units: number | null
+                    featurePlanVersionId: string
+                    subscriptionPhaseId: string
+                  }[]
+                }[]
+              }[]
+            }
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-listPaymentMethods": {
+    parameters: {
+      query: {
+        customerId: string
+        provider: "stripe" | "lemonsqueezy"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            paymentMethods: {
+              id: string
+              name: string | null
+              last4?: string
+              expMonth?: number
+              expYear?: number
+              brand?: string
+            }[]
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-signUp": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": {
+          id?: string
+          projectId?: string
+          /** Format: email */
+          email: string
+          name?: string
+          description?: string | null
+          metadata?: {
+            externalId?: string
+            stripeSubscriptionId?: string
+            stripeDefaultPaymentMethodId?: string
+          } | null
+          stripeCustomerId?: string | null
+          active?: boolean | null
+          isMain?: boolean | null
+          /** @enum {string} */
+          defaultCurrency?: "USD" | "EUR"
+          timezone?: string
+          planVersionId: string
+          config?: {
+            featurePlanId: string
+            featureSlug: string
+            /** @description if the item is a usage item */
+            isUsage?: boolean
+            /** @description units of the feature the user is subscribed to */
+            units?: number
+            /** @description minimum units of the feature the user is subscribed to */
+            min?: number
+            /** @description limit of the feature the user is subscribed to */
+            limit?: number
+          }[]
+          externalId?: string
+          /** Format: uri */
+          successUrl: string
+          /** Format: uri */
+          cancelUrl: string
+        }
+      }
+    }
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            success: boolean
+            url: string
+            customerId: string
+            error?: string
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-signOut": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": {
+          customerId: string
+        }
+      }
+    }
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            success: boolean
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-entitlements": {
+    parameters: {
+      query: {
+        customerId: string
+        skipCache?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            entitlements: {
+              id: string
+              projectId: string
+              customerId: string
+              subscriptionItemId: string | null
+              featurePlanVersionId: string
+              units: number | null
+              limit: number | null
+              usage: number | null
+              featureSlug: string
+              /** @enum {string} */
+              featureType: "flat" | "tier" | "package" | "usage"
+              /** @enum {string} */
+              aggregationMethod:
+                | "sum"
+                | "sum_all"
+                | "last_during_period"
+                | "count"
+                | "count_all"
+                | "max"
+                | "max_all"
+              realtime: boolean
+              type: string
+              startAt: number
+              endAt: number | null
+              isCustom: boolean
+              lastUsageUpdateAt: number
+              metadata:
+                | (
+                    | (string | number | boolean | "null")
+                    | unknown[]
+                    | {
+                        [key: string]: unknown
+                      }
+                  )
+                | null
+              project: {
+                id: string
+                workspaceId: string
+              }
+              subscriptionItem: {
+                id: string
+                subscriptionPhase: {
+                  id: string
+                  subscription: {
+                    id: string
+                    currentCycleStartAt: number
+                    currentCycleEndAt: number
+                  } | null
+                } | null
+              } | null
+            }[]
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-can": {
+    parameters: {
+      query: {
+        customerId: string
+        featureSlug: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            access: boolean
+            deniedReason?:
+              | (
+                  | "RATE_LIMITED"
+                  | "USAGE_EXCEEDED"
+                  | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION"
+                  | "FEATURE_OR_CUSTOMER_NOT_FOUND"
+                  | "FEATURE_HAS_NO_USAGE_RECORD"
+                  | "LIMIT_EXCEEDED"
+                )
+              | (
+                  | "SUBSCRIPTION_EXPIRED"
+                  | "SUBSCRIPTION_NOT_ACTIVE"
+                  | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION"
+                  | "FEATURE_OR_CUSTOMER_NOT_FOUND"
+                  | "CUSTOMER_HAS_NO_SUBSCRIPTIONS"
+                  | "CUSTOMER_NOT_FOUND"
+                  | "FEATURE_TYPE_NOT_SUPPORTED"
+                  | "FEATURE_IS_NOT_USAGE_TYPE"
+                  | "FEATURE_HAS_NO_USAGE_RECORD"
+                  | "FEATURE_NOT_SUPPORT_USAGE"
+                  | "UNHANDLED_ERROR"
+                  | "INTERNAL_SERVER_ERROR"
+                )
+            currentUsage?: number
+            limit?: number
+            /** @enum {string} */
+            featureType?: "flat" | "tier" | "package" | "usage"
+            units?: number
+            message?: string
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
+  "customers-reportUsage": {
+    parameters: {
+      query: {
+        customerId: string
+        featureSlug: string
+        usage: number
+        idempotenceKey: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            success: boolean
+            message?: string
+            cacheHit?: boolean
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
 }

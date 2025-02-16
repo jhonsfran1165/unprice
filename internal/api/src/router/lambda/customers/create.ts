@@ -13,7 +13,7 @@ export const create = protectedApiOrActiveProjectProcedure
     span: "customers.create",
     openapi: {
       method: "POST",
-      path: "/edge/customers.create",
+      path: "/lambda/customers.create",
       protect: true,
     },
   })

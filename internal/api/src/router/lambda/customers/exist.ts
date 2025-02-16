@@ -8,7 +8,7 @@ export const exist = protectedApiOrActiveProjectProcedure
     span: "customers.exist",
     openapi: {
       method: "POST",
-      path: "/edge/customers.exist",
+      path: "/lambda/customers.exist",
       protect: true,
     },
   })

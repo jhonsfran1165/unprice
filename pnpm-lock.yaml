@@ -1003,7 +1003,7 @@ importers:
         specifier: ^5.3.3
         version: 5.7.3
 
-  tooling/tynibird:
+  tooling/tiny-tools:
     dependencies:
       '@tinybirdco/mockingbird':
         specifier: 2.0.0-rc.0
@@ -1011,6 +1011,9 @@ importers:
       '@unprice/tinybird':
         specifier: workspace:*
         version: link:../../internal/tinybird
+      '@unprice/unprice':
+        specifier: workspace:*
+        version: link:../../packages/unprice
       zod:
         specifier: ^3.23.8
         version: 3.24.1

@@ -12,7 +12,7 @@ export const getSubscriptions = protectedApiOrActiveProjectProcedure
     span: "customers.getSubscriptions",
     openapi: {
       method: "GET",
-      path: "/edge/customers.getSubscriptions",
+      path: "/lambda/customers.getSubscriptions",
       protect: true,
     },
   })

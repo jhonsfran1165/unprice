@@ -12,7 +12,7 @@ export const createPaymentMethod = protectedApiOrActiveProjectProcedure
     span: "customers.createPaymentMethod",
     openapi: {
       method: "POST",
-      path: "/edge/customers.createPaymentMethod",
+      path: "/lambda/customers.createPaymentMethod",
       protect: true,
     },
   })

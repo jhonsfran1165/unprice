@@ -12,7 +12,7 @@ export const update = protectedApiOrActiveProjectProcedure
     span: "customers.update",
     openapi: {
       method: "POST",
-      path: "/edge/customers.update",
+      path: "/lambda/customers.update",
       protect: true,
     },
   })
