@@ -7,11 +7,12 @@ set -o posix    # more strict failures in subshells
 
 echo "Running pre-commit hook"
 
-# Activate virtual environment
-source internal/tinybird/.venv/bin/activate
-
 pnpm lint-staged
 pnpm test
 
-# Deactivate virtual environment
-deactivate
+echo "Checking tinybird deployment"
+cd internal/tinybird
+tb deployment create --check
+cd ../../
+
+echo "Pre-commit hook completed"

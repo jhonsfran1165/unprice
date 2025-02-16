@@ -1,0 +1,34 @@
+name: Tinybird - CD Workflow
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  cd:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: internal/tinybird
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Tinybird CLI
+        run: curl -LsSf https://api.tinybird.co/static/install.sh | sh
+
+      - uses: Infisical/secrets-action@v1.0.7
+        name: Pull secrets from Infisical
+        with:
+          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
+          env-slug: "prod"
+          project-slug: "unprice-zq-xm"
+          secret-path: "/ci"
+          recursive: true
+
+      - name: Authenticate
+        run: tb auth --host https://api.europe-west2.gcp.tinybird.co --token ${{ env.TB_ADMIN_TOKEN }}
+      - name: Deploy project
+        run: tb --cloud deploy

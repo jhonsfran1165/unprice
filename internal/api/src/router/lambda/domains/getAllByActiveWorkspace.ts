@@ -23,6 +23,9 @@ export const getAllByActiveWorkspace = protectedWorkspaceProcedure
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
+      metadata: {
+        action: "getAllByActiveWorkspace",
+      },
     })
 
     if (!result.access) {

@@ -1,22 +1,21 @@
-VERSION 1
-
 TOKEN "web-apps" READ
 
-TAGS "usage"
+TAGS "verifications"
 
-NODE feature_usage_period_node
+NODE feature_verifications_node
 SQL >
     %
     SELECT
         projectId,
         customerId,
-        featureSlug,
         entitlementId,
-        countMerge(count) as count,
-        sumMerge(sum) as sum,
-        maxMerge(max) as max,
-        argMaxMerge(last_during_period) as last_during_period
-    FROM features_usage_hourly_mv
+        featureSlug,
+        count() AS count,
+        quantile(0.95)
+        (latency) AS p95_latency,
+        max(latency) AS max_latency,
+        argMax(latency, timestamp) AS latest_latency
+    FROM feature_verifications
     WHERE
         1 = 1
         {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
@@ -24,7 +23,8 @@ SQL >
         {% if defined(featureSlug) %} AND featureSlug = {{ String(featureSlug) }} {% end %}
         {% if defined(entitlementId) %} AND entitlementId = {{ String(entitlementId) }} {% end %}
         {% if defined(start) & defined(end) %}
-            AND date BETWEEN fromUnixTimestamp64Milli({{ Int64(start) }})
-            AND fromUnixTimestamp64Milli({{ Int64(end) }})
+            AND timestamp BETWEEN {{ Int64(start) }} AND {{ Int64(end) }}
         {% end %}
     GROUP BY projectId, customerId, featureSlug, entitlementId
+
+TYPE endpoint

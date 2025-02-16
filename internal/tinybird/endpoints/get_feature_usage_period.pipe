@@ -1,10 +1,8 @@
-VERSION 1
-
 TOKEN "web-apps" READ
 
-TAGS "usage, billing"
+TAGS "usage"
 
-NODE feature_usage_no_duplicates_node
+NODE feature_usage_period_node
 SQL >
     %
     SELECT
@@ -12,11 +10,11 @@ SQL >
         customerId,
         featureSlug,
         entitlementId,
-        countState() AS count,
-        sumState(usage) AS sum,
-        maxState(usage) AS max,
-        argMaxState(usage, timestamp) AS last_during_period
-    FROM features_usage FINAL
+        countMerge(count) as count,
+        sumMerge(sum) as sum,
+        maxMerge(max) as max,
+        argMaxMerge(last_during_period) as last_during_period
+    FROM feature_usage_hourly_mv_data
     WHERE
         1 = 1
         {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
@@ -28,3 +26,5 @@ SQL >
             AND fromUnixTimestamp64Milli({{ Int64(end) }})
         {% end %}
     GROUP BY projectId, customerId, featureSlug, entitlementId
+
+TYPE endpoint
