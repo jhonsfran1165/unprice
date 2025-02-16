@@ -62,8 +62,8 @@ jobs:
       - uses: ./.github/actions/install
         name: Install dependencies
         with:
-          ts: true
-          python: false
+          ts: "true"
+          python: "false"
 
       - name: Get branch name
         id: branch-name
