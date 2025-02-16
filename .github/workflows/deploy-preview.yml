@@ -48,8 +48,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: Infisical/secrets-action@v1.0.7
         name: Pull secrets from Infisical
@@ -62,8 +60,10 @@ jobs:
           recursive: true
 
       - uses: ./.github/actions/install
+        name: Install dependencies
         with:
           ts: true
+          python: false
 
       - name: Get branch name
         id: branch-name
