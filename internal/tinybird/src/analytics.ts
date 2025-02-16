@@ -90,8 +90,8 @@ export class Analytics {
       }),
       data: z.object({
         projectId: z.string(),
-        customerId: z.string(),
-        entitlementId: z.string(),
+        customerId: z.string().optional(),
+        entitlementId: z.string().optional(),
         featureSlug: z.string(),
         count: z.number(),
         p95_latency: z.number(),
@@ -117,9 +117,9 @@ export class Analytics {
       }),
       data: z.object({
         projectId: z.string(),
-        customerId: z.string(),
+        customerId: z.string().optional(),
+        entitlementId: z.string().optional(),
         featureSlug: z.string(),
-        entitlementId: z.string(),
         count: z.number(),
         sum: z.number(),
         max: z.number(),

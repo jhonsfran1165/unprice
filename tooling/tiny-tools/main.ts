@@ -52,11 +52,11 @@ async function main() {
       featureSlug: entitlement.featureSlug,
     })
 
-    console.info(verifyFeature)
+    console.info("Verify feature", entitlement.featureSlug)
 
     if (!verifyFeature.result?.access) {
       console.info(
-        `Feature ${entitlement.featureSlug} not found, ${verifyFeature.result?.deniedReason}`
+        `Feature ${entitlement.featureSlug} don't have access, ${verifyFeature.result?.deniedReason}`
       )
       continue
     }
