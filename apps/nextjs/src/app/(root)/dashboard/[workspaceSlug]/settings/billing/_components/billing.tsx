@@ -234,7 +234,7 @@ const LineUsageItem: React.FC<{
         <div className="flex items-center justify-between">
           <PricingItem
             feature={planVersionFeature}
-            className="font-semibold text-content text-md capitalize"
+            className="font-semibold text-content text-md"
             noCheckIcon
           />
           <span className="text-right text-content-subtle text-muted-foreground text-xs">

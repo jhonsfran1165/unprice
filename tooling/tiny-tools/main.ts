@@ -35,7 +35,7 @@ const unprice = new Unprice({
 })
 
 async function main() {
-  const customerId = "cus_1F7u4RMKSXTdpwap5F1eN"
+  const customerId = "cus_1G2iqcKJKEHAbrZ69VFUR"
 
   // get the usage
   const entitlements = await unprice.customers.entitlements({
@@ -61,7 +61,11 @@ async function main() {
       continue
     }
 
-    if (entitlement.featureType === "usage") {
+    if (
+      entitlement.featureType === "usage" ||
+      entitlement.featureType === "tier" ||
+      entitlement.featureType === "package"
+    ) {
       console.info(`Reporting usage for entitlement ${entitlement.featureSlug}: ${usage}`)
 
       await unprice.customers.reportUsage({

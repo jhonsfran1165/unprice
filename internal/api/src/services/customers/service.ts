@@ -246,6 +246,7 @@ export class CustomerService {
               error: JSON.stringify(error.message),
               customerId: opts.customerId,
               entitlementId: entitlement.id,
+              projectId: entitlement.projectId,
             })
 
             return null
@@ -256,8 +257,6 @@ export class CustomerService {
             entitlementId: entitlement.id,
             start: activeSubscription.currentCycleStartAt,
             end: activeSubscription.currentCycleEndAt,
-            projectId: entitlement.projectId,
-            featureSlug: entitlement.featureSlug,
           })
           .then((usage) => usage.data[0])
           .catch((error) => {
@@ -1051,7 +1050,12 @@ export class CustomerService {
           )
         }
 
-        const subscriptionService = new SubscriptionService(this.ctx)
+        const subscriptionService = new SubscriptionService({
+          ...this.ctx,
+          // pass the transaction to the subscription service
+          // so we can use it to create the subscription
+          db: trx,
+        })
 
         const { err, val: newSubscription } = await subscriptionService.createSubscription({
           input: {
@@ -1076,7 +1080,7 @@ export class CustomerService {
 
         if (err) {
           this.ctx.logger.error("Error creating subscription", {
-            error: JSON.stringify(err),
+            error: err.message,
           })
 
           trx.rollback()
