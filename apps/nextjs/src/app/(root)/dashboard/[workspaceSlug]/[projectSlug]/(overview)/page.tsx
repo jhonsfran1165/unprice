@@ -1,6 +1,7 @@
 import { formatRelative } from "date-fns"
 
 import type { RouterOutputs } from "@unprice/api"
+import { prepareInterval } from "@unprice/tinybird"
 import { Button } from "@unprice/ui/button"
 import {
   Card,
@@ -20,14 +21,14 @@ import { VerificationsChart } from "~/components/analytics/verifications-chart"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 import { SuperLink } from "~/components/super-link"
 import { intervalParserCache } from "~/lib/searchParams"
-import { api } from "~/trpc/server"
+import { HydrateClient, api, trpc } from "~/trpc/server"
 import { LoadingCard } from "../_components/loading-card"
 
 // Run this on edge analytics don't query the database
 // This is hitting the limits of the free tier in vercel :/
 // export const runtime = "edge"
-// Only needed if we want dynamic data but we moved this to AnalyticsCard to prefetch data
-// export const dynamic = "force-dynamic"
+
+export const dynamic = "force-dynamic"
 
 export default async function DashboardPage(props: {
   params: { workspaceSlug: string; projectSlug: string }
@@ -35,6 +36,17 @@ export default async function DashboardPage(props: {
 }) {
   const { projectSlug, workspaceSlug } = props.params
   const filter = intervalParserCache.parse(props.searchParams)
+  const { start, end } = prepareInterval(filter.interval)
+
+  void trpc.analytics.getVerifications.prefetch({
+    start,
+    end,
+  })
+
+  void trpc.analytics.getUsage.prefetch({
+    start,
+    end,
+  })
 
   return (
     <DashboardShell>
@@ -81,28 +93,28 @@ export default async function DashboardPage(props: {
         </Card>
       </div>
       <div className="mt-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-        <AnalyticsCard
-          promiseKeys={["getUsage"]}
-          interval={filter.interval}
-          className="w-full"
-          title="Feature Verifications & Usage"
-          description="Feature verifications and usage recorded for this month."
-          defaultTab="verifications"
-          tabs={[
-            {
-              id: "verifications",
-              label: "Verifications",
-              description: "Feature verifications recorded for the selected interval.",
-              chart: () => <VerificationsChart />,
-            },
-            {
-              id: "usage",
-              label: "Usage",
-              description: "Feature usage recorded for the selected interval.",
-              chart: () => <UsageChart />,
-            },
-          ]}
-        />
+        <HydrateClient>
+          <AnalyticsCard
+            className="w-full"
+            title="Feature Verifications & Usage"
+            description="Feature verifications and usage recorded for this month."
+            defaultTab="verifications"
+            tabs={[
+              {
+                id: "verifications",
+                label: "Verifications",
+                description: "Feature verifications recorded for the selected interval.",
+                chart: () => <VerificationsChart />,
+              },
+              {
+                id: "usage",
+                label: "Usage",
+                description: "Feature usage recorded for the selected interval.",
+                chart: () => <UsageChart />,
+              },
+            ]}
+          />
+        </HydrateClient>
 
         <Suspense
           fallback={

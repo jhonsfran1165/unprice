@@ -8,6 +8,7 @@ import { columns } from "~/app/(root)/dashboard/[workspaceSlug]/[projectSlug]/cu
 import { DataTable } from "~/components/data-table/data-table"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
+import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
 import { SuperLink } from "~/components/super-link"
 import { filtersDataTableCache } from "~/lib/searchParams"
@@ -21,7 +22,11 @@ export default async function ProjectUsersPage(props: {
   const { workspaceSlug, projectSlug } = props.params
   const baseUrl = `/${workspaceSlug}/${projectSlug}/customers`
   const filters = filtersDataTableCache.parse(props.searchParams)
-  const { customers, pageCount } = await api.customers.listByActiveProject(filters)
+  const { customers, pageCount, error } = await api.customers.listByActiveProject(filters)
+
+  if (!error?.access) {
+    return <UpgradePlanError error={error} />
+  }
 
   return (
     <DashboardShell

@@ -48,10 +48,10 @@ export const signUp = protectedProcedure
       projectId: mainProject.id,
     })
 
-    if (err) {
+    if (err || !val?.success) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: err.message,
+        message: err?.message ?? val?.error ?? "Unknown error, please try again later",
       })
     }
 

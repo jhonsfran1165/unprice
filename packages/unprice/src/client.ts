@@ -209,56 +209,56 @@ export class Unprice {
   public get customers() {
     return {
       create: async (
-        req: paths["/edge/customers.create"]["post"]["requestBody"]["content"]["application/json"]
+        req: paths["/lambda/customers.create"]["post"]["requestBody"]["content"]["application/json"]
       ): Promise<
         Result<
-          paths["/edge/customers.create"]["post"]["responses"]["200"]["content"]["application/json"]
+          paths["/lambda/customers.create"]["post"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["edge", "customers.create"],
+          path: ["lambda", "customers.create"],
           method: "POST",
           body: req,
         })
       },
 
       update: async (
-        req: paths["/edge/customers.update"]["post"]["requestBody"]["content"]["application/json"]
+        req: paths["/lambda/customers.update"]["post"]["requestBody"]["content"]["application/json"]
       ): Promise<
         Result<
-          paths["/edge/customers.update"]["post"]["responses"]["200"]["content"]["application/json"]
+          paths["/lambda/customers.update"]["post"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["edge", "customers.update"],
+          path: ["lambda", "customers.update"],
           method: "POST",
           body: req,
         })
       },
 
       remove: async (
-        req: paths["/edge/customers.remove"]["post"]["requestBody"]["content"]["application/json"]
+        req: paths["/lambda/customers.remove"]["post"]["requestBody"]["content"]["application/json"]
       ): Promise<
         Result<
-          paths["/edge/customers.remove"]["post"]["responses"]["200"]["content"]["application/json"]
+          paths["/lambda/customers.remove"]["post"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["edge", "customers.remove"],
+          path: ["lambda", "customers.remove"],
           method: "POST",
           body: req,
         })
       },
 
       exist: async (
-        req: paths["/edge/customers.exist"]["post"]["requestBody"]["content"]["application/json"]
+        req: paths["/lambda/customers.exist"]["post"]["requestBody"]["content"]["application/json"]
       ): Promise<
         Result<
-          paths["/edge/customers.exist"]["post"]["responses"]["200"]["content"]["application/json"]
+          paths["/lambda/customers.exist"]["post"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["edge", "customers.exist"],
+          path: ["lambda", "customers.exist"],
           method: "POST",
           body: req,
         })
@@ -293,28 +293,28 @@ export class Unprice {
       },
 
       getByEmail: async (
-        req: paths["/edge/customers.getByEmail"]["get"]["parameters"]["query"]
+        req: paths["/lambda/customers.getByEmail"]["get"]["parameters"]["query"]
       ): Promise<
         Result<
-          paths["/edge/customers.getByEmail"]["get"]["responses"]["200"]["content"]["application/json"]
+          paths["/lambda/customers.getByEmail"]["get"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["edge", "customers.getByEmail"],
+          path: ["lambda", "customers.getByEmail"],
           method: "GET",
           query: req,
         })
       },
 
       getSubscriptions: async (
-        req: paths["/edge/customers.getSubscriptions"]["get"]["parameters"]["query"]
+        req: paths["/lambda/customers.getSubscriptions"]["get"]["parameters"]["query"]
       ): Promise<
         Result<
-          paths["/edge/customers.getSubscriptions"]["get"]["responses"]["200"]["content"]["application/json"]
+          paths["/lambda/customers.getSubscriptions"]["get"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["edge", "customers.getSubscriptions"],
+          path: ["lambda", "customers.getSubscriptions"],
           method: "GET",
           query: req,
         })
@@ -349,14 +349,14 @@ export class Unprice {
       },
 
       createPaymentMethod: async (
-        req: paths["/edge/customers.createPaymentMethod"]["post"]["requestBody"]["content"]["application/json"]
+        req: paths["/lambda/customers.createPaymentMethod"]["post"]["requestBody"]["content"]["application/json"]
       ): Promise<
         Result<
-          paths["/edge/customers.createPaymentMethod"]["post"]["responses"]["200"]["content"]["application/json"]
+          paths["/lambda/customers.createPaymentMethod"]["post"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["edge", "customers.createPaymentMethod"],
+          path: ["lambda", "customers.createPaymentMethod"],
           method: "GET",
           query: req,
         })
@@ -391,14 +391,14 @@ export class Unprice {
       },
 
       getByIdActiveProject: async (
-        req: paths["/edge/customers.getByIdActiveProject"]["get"]["parameters"]["query"]
+        req: paths["/lambda/customers.getByIdActiveProject"]["get"]["parameters"]["query"]
       ): Promise<
         Result<
-          paths["/edge/customers.getByIdActiveProject"]["get"]["responses"]["200"]["content"]["application/json"]
+          paths["/lambda/customers.getByIdActiveProject"]["get"]["responses"]["200"]["content"]["application/json"]
         >
       > => {
         return await this.fetch({
-          path: ["edge", "customers.getByIdActiveProject"],
+          path: ["lambda", "customers.getByIdActiveProject"],
           method: "GET",
           query: req,
         })

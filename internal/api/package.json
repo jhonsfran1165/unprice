@@ -40,7 +40,7 @@
     "@t3-oss/env-nextjs": "0.9.1",
     "@trpc-limiter/memory": "^1.0.0",
     "@trpc-limiter/upstash": "^1.0.0",
-    "@trpc/server": "11.0.0-rc.466",
+    "@trpc/server": "11.0.0-rc.761",
     "@unkey/cache": "^1.5.0",
     "@unprice/auth": "^0.1.0",
     "@unprice/config": "^0.1.0",

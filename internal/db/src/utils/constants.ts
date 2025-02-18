@@ -1,3 +1,5 @@
+import type { Duration } from "date-fns"
+
 export const TIER_MODES_MAP = {
   volume: {
     label: "Volume",
@@ -81,7 +83,58 @@ export const AGGREGATION_METHODS_MAP = {
   },
 } as const
 
+export const PLAN_BILLING_PERIODS = ["month", "year", "onetime", "5m"] as const
+type billingKeys = (typeof PLAN_BILLING_PERIODS)[number]
+
+export const BILLING_PERIODS_MAP: Record<
+  billingKeys,
+  {
+    label: string
+    recurring: boolean
+    description: string
+    duration: Duration
+    alignToCalendar?: boolean
+  }
+> = {
+  month: {
+    label: "Month",
+    recurring: true,
+    description: "Every month",
+    duration: {
+      months: 1,
+    } as Duration,
+    alignToCalendar: true,
+  },
+  year: {
+    label: "Year",
+    recurring: true,
+    description: "Every year",
+    duration: {
+      years: 1,
+    } as Duration,
+    alignToCalendar: true,
+  },
+  onetime: {
+    label: "Onetime",
+    recurring: false,
+    description: "One time payment",
+    duration: {
+      days: 0,
+    } as Duration,
+  },
+  "5m": {
+    label: "5 minutes",
+    recurring: true,
+    description: "Every 5 minutes",
+    duration: {
+      minutes: 5,
+    } as Duration,
+    alignToCalendar: false,
+  },
+}
+
 type AggregationMethod = keyof typeof AGGREGATION_METHODS_MAP
+
 export type TierMode = keyof typeof TIER_MODES_MAP
 export type UsageMode = keyof typeof USAGE_MODES_MAP
 export type FeatureType = keyof typeof FEATURE_TYPES_MAPS
@@ -106,7 +159,6 @@ export const STATUS_PHASE = [
 ] as const
 
 export const PLAN_TYPES = ["recurring"] as const
-export const PLAN_BILLING_PERIODS = ["month", "year", "custom", "onetime"] as const
 export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
 export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
 export const DUE_BEHAVIOUR = ["cancel", "downgrade"] as const

@@ -49,7 +49,7 @@ export class CustomerService {
           new UnPriceCustomerError({
             code: "FEATURE_OR_CUSTOMER_NOT_FOUND",
             customerId: opts.customerId,
-            message: `Feature ${opts.featureSlug} or customer ${opts.customerId} not found in subscription`,
+            message: `Feature ${opts.featureSlug} not found in subscription`,
           })
         )
       }
@@ -129,7 +129,7 @@ export class CustomerService {
           new UnPriceCustomerError({
             code: "FEATURE_OR_CUSTOMER_NOT_FOUND",
             customerId: opts.customerId,
-            message: `Feature ${opts.featureSlug} or customer ${opts.customerId} not found in subscription`,
+            message: `Feature ${opts.featureSlug} not found in subscription`,
           })
         )
       }
@@ -246,6 +246,7 @@ export class CustomerService {
               error: JSON.stringify(error.message),
               customerId: opts.customerId,
               entitlementId: entitlement.id,
+              projectId: entitlement.projectId,
             })
 
             return null
@@ -256,8 +257,6 @@ export class CustomerService {
             entitlementId: entitlement.id,
             start: activeSubscription.currentCycleStartAt,
             end: activeSubscription.currentCycleEndAt,
-            projectId: entitlement.projectId,
-            featureSlug: entitlement.featureSlug,
           })
           .then((usage) => usage.data[0])
           .catch((error) => {
@@ -455,6 +454,7 @@ export class CustomerService {
     skipCache?: boolean
     updateUsage?: boolean
     includeCustom?: boolean
+    metadata?: Record<string, string | number | boolean | null>
   }): Promise<
     Result<
       {
@@ -470,7 +470,7 @@ export class CustomerService {
     >
   > {
     try {
-      const { customerId, featureSlug, date } = opts
+      const { customerId, featureSlug, date, metadata } = opts
       const start = performance.now()
 
       // TODO: should I validate if the subscription is active?
@@ -485,6 +485,21 @@ export class CustomerService {
         includeCustom: opts.includeCustom,
       })
 
+      // TODO: I could save more information here later on, for instance, the country, web browser details, etc.
+      // The main idea is trying to give as much insights as possible of the usage of these features so we can decide later on different plans or strategies to increase conversion.
+      // For instance, if we see that a feature is being used a lot in a specific country, we can decide to add it to the plan for that country.
+      const baseAnalyticsPayload = {
+        projectId: "",
+        planVersionFeatureId: "",
+        subscriptionItemId: "",
+        entitlementId: "",
+        featureSlug: featureSlug,
+        customerId: customerId,
+        createdAt: Date.now(),
+        timestamp: Date.now(),
+        metadata,
+      }
+
       if (res.err) {
         const error = res.err
 
@@ -492,6 +507,28 @@ export class CustomerService {
           customerId: opts.customerId,
           featureSlug: opts.featureSlug,
         })
+
+        // Here lies a valuable information because when the customer is trying to access to a feature
+        // that doesn't have that is considered an intent that we can capitalize later on on different plans.
+        // We can use this information to send emails to the customer to upgrade to a higher plan, etc.
+        this.ctx.waitUntil(
+          this.ctx.analytics
+            .ingestFeaturesVerification({
+              ...baseAnalyticsPayload,
+              latency: performance.now() - start,
+              deniedReason: error.code,
+              subscriptionPhaseId: "",
+              subscriptionId: "",
+              workspaceId: "",
+              requestId: this.ctx.requestId,
+            })
+            .catch((error) =>
+              this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement 1", {
+                error: JSON.stringify(error),
+                baseAnalyticsPayload,
+              })
+            )
+        )
 
         switch (true) {
           case error instanceof UnPriceCustomerError: {
@@ -514,14 +551,11 @@ export class CustomerService {
       const entitlement = res.val
 
       const analyticsPayload = {
+        ...baseAnalyticsPayload,
         projectId: entitlement.projectId,
         planVersionFeatureId: entitlement.featurePlanVersionId,
         subscriptionItemId: entitlement.subscriptionItemId,
         entitlementId: entitlement.id,
-        featureSlug: featureSlug,
-        customerId: customerId,
-        createdAt: Date.now(),
-        timestamp: Date.now(),
       }
 
       switch (entitlement.featureType) {
@@ -572,7 +606,7 @@ export class CustomerService {
                   requestId: this.ctx.requestId,
                 })
                 .catch((error) =>
-                  this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement", {
+                  this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement 2", {
                     error: JSON.stringify(error),
                     analyticsPayload,
                   })
@@ -605,7 +639,7 @@ export class CustomerService {
                   requestId: this.ctx.requestId,
                 })
                 .catch((error) =>
-                  this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement", {
+                  this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement 3", {
                     error: JSON.stringify(error),
                     analyticsPayload,
                   })
@@ -646,7 +680,7 @@ export class CustomerService {
             requestId: this.ctx.requestId,
           })
           .catch((error) =>
-            this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement", {
+            this.ctx.logger.error("Error reporting usage to analytics verifyEntitlement 4", {
               error: JSON.stringify(error),
               analyticsPayload,
             })
@@ -786,7 +820,7 @@ export class CustomerService {
               // TODO: usage is not always sum to the current usage, could be counter, etc
               // also if there are many request per second, we could debounce the update somehow
               // only update the cache if the feature is realtime
-              if (entitlement.realtime && this.ctx.cache) {
+              if (this.ctx.cache) {
                 this.ctx.cache.featureByCustomerId.set(`${customerId}:${featureSlug}`, {
                   ...entitlement,
                   usage: (entitlement.usage ?? 0) + usage,
@@ -1016,7 +1050,12 @@ export class CustomerService {
           )
         }
 
-        const subscriptionService = new SubscriptionService(this.ctx)
+        const subscriptionService = new SubscriptionService({
+          ...this.ctx,
+          // pass the transaction to the subscription service
+          // so we can use it to create the subscription
+          db: trx,
+        })
 
         const { err, val: newSubscription } = await subscriptionService.createSubscription({
           input: {
@@ -1041,7 +1080,7 @@ export class CustomerService {
 
         if (err) {
           this.ctx.logger.error("Error creating subscription", {
-            error: JSON.stringify(err),
+            error: err.message,
           })
 
           trx.rollback()

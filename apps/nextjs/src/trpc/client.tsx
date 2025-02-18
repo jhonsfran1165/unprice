@@ -4,37 +4,39 @@ import { type QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import type { TRPCLink } from "@trpc/client"
 import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client"
-import type { HTTPBatchStreamLinkOptions, HTTPHeaders } from "@trpc/react-query"
 import { createTRPCReact } from "@trpc/react-query"
-import type { AnyRootTypes } from "@trpc/server/unstable-core-do-not-import"
-import { useState } from "react"
+import { use, useState } from "react"
 
 import type { AppRouter } from "@unprice/api"
 import { transformer } from "@unprice/api/transformer"
+import { newId } from "@unprice/db/utils"
+import { useSSROnlySecret } from "ssr-only-secrets"
 import { createQueryClient, getBaseUrl } from "./shared"
 
 export const api = createTRPCReact<AppRouter>()
 
 export const endingLinkClient = (opts?: {
-  headers?: HTTPHeaders | (() => HTTPHeaders)
   allEndpointsProcedures: {
     lambda: string[]
     edge: string[]
   }
+  cookies: string | undefined
 }) =>
   ((runtime) => {
-    const sharedOpts: Partial<HTTPBatchStreamLinkOptions<AnyRootTypes>> = {
-      headers: opts?.headers,
+    const headers = {
+      "x-request-id": newId("request"),
+      "x-trpc-source": typeof window !== "undefined" ? "react-query" : "react-query-ssr",
+      ...(opts?.cookies ? { cookie: opts.cookies } : {}),
     }
 
     const edgeLink = unstable_httpBatchStreamLink({
-      ...sharedOpts,
+      headers,
       transformer: transformer,
       url: `${getBaseUrl()}/api/trpc/edge`,
     })(runtime)
 
     const lambdaLink = unstable_httpBatchStreamLink({
-      ...sharedOpts,
+      headers,
       transformer: transformer,
       url: `${getBaseUrl()}/api/trpc/lambda`,
     })(runtime)
@@ -69,12 +71,14 @@ const getQueryClient = () => {
 
 export function TRPCReactProvider(props: {
   children: React.ReactNode
+  cookiePromise: Promise<string>
   allEndpointsProcedures: {
     lambda: string[]
     edge: string[]
   }
 }) {
   const queryClient = getQueryClient()
+  const cookies = useSSROnlySecret(use(props.cookiePromise), "COOKIE_ENCRYPTION_KEY")
 
   const [trpcClient] = useState(() =>
     api.createClient({
@@ -85,8 +89,8 @@ export function TRPCReactProvider(props: {
             (opts.direction === "down" && opts.result instanceof Error),
         }),
         endingLinkClient({
-          headers: { "x-trpc-source": "react-query" },
           allEndpointsProcedures: props.allEndpointsProcedures,
+          cookies: cookies,
         }),
       ],
     })

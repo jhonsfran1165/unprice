@@ -41,7 +41,7 @@ export const create = protectedProcedure
     // check if the customer has access to the feature when is not a personal workspace
     if (!isPersonal) {
       // check if the customer has access to the feature
-      await featureGuard({
+      const result = await featureGuard({
         customerId: opts.input.unPriceCustomerId,
         featureSlug,
         ctx: opts.ctx,
@@ -49,7 +49,17 @@ export const create = protectedProcedure
         updateUsage: true,
         includeCustom: true,
         isInternal: false,
+        metadata: {
+          action: "create",
+        },
       })
+
+      if (!result.access) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: `You don't have access to this feature ${result.deniedReason}`,
+        })
+      }
     }
 
     const newWorkspace = await createWorkspace({

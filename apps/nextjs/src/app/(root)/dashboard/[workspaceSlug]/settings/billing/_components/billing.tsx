@@ -2,11 +2,11 @@
 
 import type { RouterOutputs } from "@unprice/api"
 import {
-  calculateBillingCycle,
   calculateFlatPricePlan,
   calculateFreeUnits,
   calculatePricePerFeature,
   calculateTotalPricePlan,
+  configureBillingCycleSubscription,
 } from "@unprice/db/validators"
 import {
   Card,
@@ -34,9 +34,8 @@ export function BillingCard({
 }) {
   const planVersion = activePhase.planVersion
 
-  const calculatedBillingCycle = calculateBillingCycle({
-    currentDate: new Date(),
-    startDate: new Date(activePhase.startAt),
+  const calculatedBillingCycle = configureBillingCycleSubscription({
+    currentCycleStartAt: activePhase.startAt,
     billingCycleStart: activePhase.startCycle ?? 1,
     billingPeriod: planVersion.billingPeriod,
   })
@@ -234,7 +233,7 @@ const LineUsageItem: React.FC<{
         <div className="flex items-center justify-between">
           <PricingItem
             feature={planVersionFeature}
-            className="font-semibold text-content text-md capitalize"
+            className="font-semibold text-content text-md"
             noCheckIcon
           />
           <span className="text-right text-content-subtle text-muted-foreground text-xs">

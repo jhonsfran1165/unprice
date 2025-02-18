@@ -3,6 +3,7 @@ import { Suspense } from "react"
 import { DataTable } from "~/components/data-table/data-table"
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
+import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
 import { filtersDataTableCache } from "~/lib/searchParams"
 import { api } from "~/trpc/server"
@@ -16,7 +17,11 @@ export default async function ApiKeysPage(props: {
   searchParams: SearchParams
 }) {
   const filters = filtersDataTableCache.parse(props.searchParams)
-  const { apikeys, pageCount } = await api.apikeys.listByActiveProject(filters)
+  const { apikeys, pageCount, error } = await api.apikeys.listByActiveProject(filters)
+
+  if (!error?.access) {
+    return <UpgradePlanError error={error} />
+  }
 
   return (
     <DashboardShell

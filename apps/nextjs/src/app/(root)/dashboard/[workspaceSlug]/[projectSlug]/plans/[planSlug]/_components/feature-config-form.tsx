@@ -59,7 +59,7 @@ export function FeatureConfigForm({
 
   const editMode = !!defaultValues.id
   const isPublished = planVersion?.status === "published"
-  const { access: isProAccess } = useEntitlement("pro-access")
+  const { access: isProAccess } = useEntitlement("access-pro")
 
   // we set all possible values for the form so react-hook-form don't complain
   const controlledDefaultValues = {

@@ -1,0 +1,1550 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "tRPC OpenAPI", "description": "API for Unprice", "version": "1.0.0" },
+  "servers": [{ "url": "http://app.localhost:3000/api/trpc" }],
+  "paths": {
+    "/lambda/paymentProvider.getSession": {
+      "post": {
+        "operationId": "paymentProvider-getSession",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paymentProvider": { "type": "string", "enum": ["stripe", "lemonsqueezy"] },
+                  "sessionId": { "type": "string" },
+                  "projectId": { "type": "string" }
+                },
+                "required": ["paymentProvider", "sessionId", "projectId"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "metadata": {
+                      "type": "object",
+                      "additionalProperties": { "type": "string" },
+                      "nullable": true
+                    },
+                    "customerId": { "type": "string" },
+                    "subscriptionId": { "type": "string", "nullable": true },
+                    "paymentMethodId": { "type": "string", "nullable": true }
+                  },
+                  "required": ["metadata", "customerId", "subscriptionId", "paymentMethodId"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/lambda/customers.create": {
+      "post": {
+        "operationId": "customers-create",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "maxLength": 36 },
+                  "projectId": { "type": "string", "maxLength": 36 },
+                  "email": { "type": "string", "minLength": 3, "format": "email" },
+                  "name": { "type": "string", "minLength": 3 },
+                  "description": { "type": "string", "nullable": true },
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "externalId": { "type": "string" },
+                      "stripeSubscriptionId": { "type": "string" },
+                      "stripeDefaultPaymentMethodId": { "type": "string" }
+                    },
+                    "additionalProperties": false,
+                    "nullable": true
+                  },
+                  "stripeCustomerId": { "type": "string", "nullable": true },
+                  "active": { "type": "boolean", "nullable": true },
+                  "isMain": { "type": "boolean", "nullable": true },
+                  "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] },
+                  "timezone": { "type": "string", "minLength": 1 }
+                },
+                "required": ["email", "name"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "maxLength": 36 },
+                        "projectId": { "type": "string", "maxLength": 36 },
+                        "createdAtM": { "type": "number" },
+                        "updatedAtM": { "type": "number" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "isMain": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] },
+                        "timezone": { "type": "string", "minLength": 1 }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAtM",
+                        "updatedAtM",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "isMain",
+                        "defaultCurrency",
+                        "timezone"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/lambda/customers.remove": {
+      "post": {
+        "operationId": "customers-remove",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "id": { "type": "string", "maxLength": 36 } },
+                "required": ["id"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "maxLength": 36 },
+                        "projectId": { "type": "string", "maxLength": 36 },
+                        "createdAtM": { "type": "number" },
+                        "updatedAtM": { "type": "number" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "isMain": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] },
+                        "timezone": { "type": "string", "minLength": 1 }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAtM",
+                        "updatedAtM",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "isMain",
+                        "defaultCurrency",
+                        "timezone"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/lambda/customers.update": {
+      "post": {
+        "operationId": "customers-update",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "maxLength": 36 },
+                  "name": { "type": "string" },
+                  "description": { "type": "string", "nullable": true },
+                  "email": { "type": "string" },
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "externalId": { "type": "string" },
+                      "stripeSubscriptionId": { "type": "string" },
+                      "stripeDefaultPaymentMethodId": { "type": "string" }
+                    },
+                    "additionalProperties": false,
+                    "nullable": true
+                  },
+                  "timezone": { "type": "string", "minLength": 1 }
+                },
+                "required": ["id", "name", "email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "maxLength": 36 },
+                        "projectId": { "type": "string", "maxLength": 36 },
+                        "createdAtM": { "type": "number" },
+                        "updatedAtM": { "type": "number" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "isMain": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] },
+                        "timezone": { "type": "string", "minLength": 1 }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAtM",
+                        "updatedAtM",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "isMain",
+                        "defaultCurrency",
+                        "timezone"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/lambda/customers.createPaymentMethod": {
+      "post": {
+        "operationId": "customers-createPaymentMethod",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paymentProvider": { "type": "string", "enum": ["stripe", "lemonsqueezy"] },
+                  "customerId": { "type": "string" },
+                  "successUrl": { "type": "string", "format": "uri" },
+                  "cancelUrl": { "type": "string", "format": "uri" }
+                },
+                "required": ["paymentProvider", "customerId", "successUrl", "cancelUrl"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "success": { "type": "boolean" }, "url": { "type": "string" } },
+                  "required": ["success", "url"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/lambda/customers.exist": {
+      "post": {
+        "operationId": "customers-exist",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "email": { "type": "string" } },
+                "required": ["email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "exist": { "type": "boolean" } },
+                  "required": ["exist"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/lambda/customers.getByEmail": {
+      "get": {
+        "operationId": "customers-getByEmail",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "email", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "maxLength": 36 },
+                        "projectId": { "type": "string", "maxLength": 36 },
+                        "createdAtM": { "type": "number" },
+                        "updatedAtM": { "type": "number" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "isMain": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] },
+                        "timezone": { "type": "string", "minLength": 1 }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAtM",
+                        "updatedAtM",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "isMain",
+                        "defaultCurrency",
+                        "timezone"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/lambda/customers.getByIdActiveProject": {
+      "get": {
+        "operationId": "customers-getByIdActiveProject",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "maxLength": 36 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "maxLength": 36 },
+                        "projectId": { "type": "string", "maxLength": 36 },
+                        "createdAtM": { "type": "number" },
+                        "updatedAtM": { "type": "number" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "isMain": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] },
+                        "timezone": { "type": "string", "minLength": 1 }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAtM",
+                        "updatedAtM",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "isMain",
+                        "defaultCurrency",
+                        "timezone"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/lambda/customers.getSubscriptions": {
+      "get": {
+        "operationId": "customers-getSubscriptions",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "customerId", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "maxLength": 36 },
+                        "projectId": { "type": "string", "maxLength": 36 },
+                        "createdAtM": { "type": "number" },
+                        "updatedAtM": { "type": "number" },
+                        "email": { "type": "string" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string", "nullable": true },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "externalId": { "type": "string" },
+                            "stripeSubscriptionId": { "type": "string" },
+                            "stripeDefaultPaymentMethodId": { "type": "string" }
+                          },
+                          "additionalProperties": false,
+                          "nullable": true
+                        },
+                        "stripeCustomerId": { "type": "string", "nullable": true },
+                        "active": { "type": "boolean", "nullable": true },
+                        "isMain": { "type": "boolean", "nullable": true },
+                        "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] },
+                        "timezone": { "type": "string", "minLength": 1 },
+                        "subscriptions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string", "maxLength": 36 },
+                              "projectId": { "type": "string", "maxLength": 36 },
+                              "createdAtM": { "type": "number" },
+                              "updatedAtM": { "type": "number" },
+                              "customerId": { "type": "string", "maxLength": 36 },
+                              "active": { "type": "boolean" },
+                              "planSlug": { "type": "string", "nullable": true },
+                              "timezone": { "type": "string", "minLength": 1 },
+                              "previousCycleStartAt": { "type": "number", "nullable": true },
+                              "previousCycleEndAt": { "type": "number", "nullable": true },
+                              "currentCycleStartAt": { "type": "number" },
+                              "currentCycleEndAt": { "type": "number" },
+                              "nextInvoiceAt": { "type": "number" },
+                              "lastInvoiceAt": { "type": "number", "nullable": true },
+                              "lastRenewAt": { "type": "number", "nullable": true },
+                              "renewAt": { "type": "number" },
+                              "pastDueAt": { "type": "number", "nullable": true },
+                              "pastDuedAt": { "type": "number", "nullable": true },
+                              "cancelAt": { "type": "number", "nullable": true },
+                              "canceledAt": { "type": "number", "nullable": true },
+                              "expiresAt": { "type": "number", "nullable": true },
+                              "expiredAt": { "type": "number", "nullable": true },
+                              "changeAt": { "type": "number", "nullable": true },
+                              "changedAt": { "type": "number", "nullable": true },
+                              "metadata": {
+                                "type": "object",
+                                "properties": {
+                                  "reason": {
+                                    "type": "string",
+                                    "enum": [
+                                      "payment_failed",
+                                      "payment_pending",
+                                      "payment_method_not_found",
+                                      "policy_violation",
+                                      "pending_cancellation",
+                                      "invoice_failed",
+                                      "invoice_pending",
+                                      "payment_received",
+                                      "pending_change",
+                                      "pending_expiration",
+                                      "trial_ended",
+                                      "user_requested",
+                                      "admin_requested",
+                                      "ending",
+                                      "renewed",
+                                      "cancelled",
+                                      "auto_renew_disabled",
+                                      "customer_signout"
+                                    ],
+                                    "description": "Reason for the subscription status"
+                                  },
+                                  "note": {
+                                    "type": "string",
+                                    "description": "Note about status in the subscription"
+                                  }
+                                },
+                                "additionalProperties": false,
+                                "nullable": true
+                              },
+                              "customer": {
+                                "type": "object",
+                                "properties": {
+                                  "id": { "type": "string", "maxLength": 36 },
+                                  "projectId": { "type": "string", "maxLength": 36 },
+                                  "createdAtM": { "type": "number" },
+                                  "updatedAtM": { "type": "number" },
+                                  "email": { "type": "string" },
+                                  "name": { "type": "string" },
+                                  "description": { "type": "string", "nullable": true },
+                                  "metadata": {
+                                    "type": "object",
+                                    "properties": {
+                                      "externalId": { "type": "string" },
+                                      "stripeSubscriptionId": { "type": "string" },
+                                      "stripeDefaultPaymentMethodId": { "type": "string" }
+                                    },
+                                    "additionalProperties": false,
+                                    "nullable": true
+                                  },
+                                  "stripeCustomerId": { "type": "string", "nullable": true },
+                                  "active": { "type": "boolean", "nullable": true },
+                                  "isMain": { "type": "boolean", "nullable": true },
+                                  "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] },
+                                  "timezone": { "type": "string", "minLength": 1 }
+                                },
+                                "required": [
+                                  "id",
+                                  "projectId",
+                                  "createdAtM",
+                                  "updatedAtM",
+                                  "email",
+                                  "name",
+                                  "description",
+                                  "metadata",
+                                  "stripeCustomerId",
+                                  "active",
+                                  "isMain",
+                                  "defaultCurrency",
+                                  "timezone"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "phases": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": { "type": "string", "maxLength": 36 },
+                                    "projectId": { "type": "string", "maxLength": 36 },
+                                    "createdAtM": { "type": "number" },
+                                    "updatedAtM": { "type": "number" },
+                                    "subscriptionId": { "type": "string", "maxLength": 36 },
+                                    "planVersionId": { "type": "string", "minLength": 1 },
+                                    "paymentMethodId": { "type": "string", "nullable": true },
+                                    "status": {
+                                      "type": "string",
+                                      "enum": [
+                                        "active",
+                                        "trialing",
+                                        "changed",
+                                        "canceled",
+                                        "expired",
+                                        "past_dued",
+                                        "trial_ended"
+                                      ]
+                                    },
+                                    "trialDays": {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 30,
+                                      "default": 0
+                                    },
+                                    "active": { "type": "boolean" },
+                                    "dueBehaviour": {
+                                      "type": "string",
+                                      "enum": ["cancel", "downgrade"]
+                                    },
+                                    "whenToBill": {
+                                      "type": "string",
+                                      "enum": ["pay_in_advance", "pay_in_arrear"]
+                                    },
+                                    "startCycle": {
+                                      "anyOf": [
+                                        { "type": "integer", "minimum": 1, "maximum": 31 },
+                                        { "type": "integer", "minimum": 1, "maximum": 12 }
+                                      ],
+                                      "default": 1
+                                    },
+                                    "gracePeriod": { "type": "number" },
+                                    "collectionMethod": {
+                                      "type": "string",
+                                      "enum": ["charge_automatically", "send_invoice"]
+                                    },
+                                    "autoRenew": { "type": "boolean" },
+                                    "billingPeriod": {
+                                      "type": "string",
+                                      "enum": ["month", "year", "custom", "onetime"]
+                                    },
+                                    "trialEndsAt": { "type": "number", "nullable": true },
+                                    "startAt": { "type": "number" },
+                                    "endAt": { "type": "number", "nullable": true },
+                                    "metadata": {
+                                      "type": "object",
+                                      "properties": {
+                                        "pastDue": {
+                                          "type": "object",
+                                          "properties": {
+                                            "invoiceId": {
+                                              "type": "string",
+                                              "description": "Invoice id that triggered the past due"
+                                            },
+                                            "reason": {
+                                              "type": "string",
+                                              "enum": [
+                                                "payment_failed",
+                                                "payment_pending",
+                                                "payment_method_not_found",
+                                                "policy_violation",
+                                                "pending_cancellation",
+                                                "invoice_failed",
+                                                "invoice_pending",
+                                                "payment_received",
+                                                "pending_change",
+                                                "pending_expiration",
+                                                "trial_ended",
+                                                "user_requested",
+                                                "admin_requested",
+                                                "ending",
+                                                "renewed",
+                                                "cancelled",
+                                                "auto_renew_disabled",
+                                                "customer_signout"
+                                              ],
+                                              "description": "Reason for the status"
+                                            },
+                                            "note": {
+                                              "type": "string",
+                                              "description": "Note about status in the subscription phase"
+                                            }
+                                          },
+                                          "required": ["invoiceId"],
+                                          "additionalProperties": false,
+                                          "description": "Past due information"
+                                        },
+                                        "expire": {
+                                          "type": "object",
+                                          "properties": {
+                                            "phaseId": {
+                                              "type": "string",
+                                              "description": "Phase id that triggered the expiration"
+                                            },
+                                            "reason": {
+                                              "type": "string",
+                                              "enum": [
+                                                "payment_failed",
+                                                "payment_pending",
+                                                "payment_method_not_found",
+                                                "policy_violation",
+                                                "pending_cancellation",
+                                                "invoice_failed",
+                                                "invoice_pending",
+                                                "payment_received",
+                                                "pending_change",
+                                                "pending_expiration",
+                                                "trial_ended",
+                                                "user_requested",
+                                                "admin_requested",
+                                                "ending",
+                                                "renewed",
+                                                "cancelled",
+                                                "auto_renew_disabled",
+                                                "customer_signout"
+                                              ],
+                                              "description": "Reason for the status"
+                                            },
+                                            "note": {
+                                              "type": "string",
+                                              "description": "Note about status in the subscription phase"
+                                            }
+                                          },
+                                          "additionalProperties": false,
+                                          "description": "Expiration information"
+                                        },
+                                        "cancel": {
+                                          "type": "object",
+                                          "properties": {
+                                            "reason": {
+                                              "type": "string",
+                                              "enum": [
+                                                "payment_failed",
+                                                "payment_pending",
+                                                "payment_method_not_found",
+                                                "policy_violation",
+                                                "pending_cancellation",
+                                                "invoice_failed",
+                                                "invoice_pending",
+                                                "payment_received",
+                                                "pending_change",
+                                                "pending_expiration",
+                                                "trial_ended",
+                                                "user_requested",
+                                                "admin_requested",
+                                                "ending",
+                                                "renewed",
+                                                "cancelled",
+                                                "auto_renew_disabled",
+                                                "customer_signout"
+                                              ],
+                                              "description": "Reason for the status"
+                                            },
+                                            "note": {
+                                              "type": "string",
+                                              "description": "Note about status in the subscription phase"
+                                            }
+                                          },
+                                          "additionalProperties": false,
+                                          "description": "Cancellation information"
+                                        },
+                                        "renew": {
+                                          "type": "object",
+                                          "properties": {
+                                            "reason": {
+                                              "type": "string",
+                                              "enum": [
+                                                "payment_failed",
+                                                "payment_pending",
+                                                "payment_method_not_found",
+                                                "policy_violation",
+                                                "pending_cancellation",
+                                                "invoice_failed",
+                                                "invoice_pending",
+                                                "payment_received",
+                                                "pending_change",
+                                                "pending_expiration",
+                                                "trial_ended",
+                                                "user_requested",
+                                                "admin_requested",
+                                                "ending",
+                                                "renewed",
+                                                "cancelled",
+                                                "auto_renew_disabled",
+                                                "customer_signout"
+                                              ],
+                                              "description": "Reason for the status"
+                                            },
+                                            "note": {
+                                              "type": "string",
+                                              "description": "Note about status in the subscription phase"
+                                            }
+                                          },
+                                          "additionalProperties": false,
+                                          "description": "Renewal information"
+                                        },
+                                        "change": {
+                                          "type": "object",
+                                          "properties": {
+                                            "reason": {
+                                              "type": "string",
+                                              "enum": [
+                                                "payment_failed",
+                                                "payment_pending",
+                                                "payment_method_not_found",
+                                                "policy_violation",
+                                                "pending_cancellation",
+                                                "invoice_failed",
+                                                "invoice_pending",
+                                                "payment_received",
+                                                "pending_change",
+                                                "pending_expiration",
+                                                "trial_ended",
+                                                "user_requested",
+                                                "admin_requested",
+                                                "ending",
+                                                "renewed",
+                                                "cancelled",
+                                                "auto_renew_disabled",
+                                                "customer_signout"
+                                              ],
+                                              "description": "Reason for the status"
+                                            },
+                                            "note": {
+                                              "type": "string",
+                                              "description": "Note about status in the subscription phase"
+                                            },
+                                            "nextPhaseId": {
+                                              "type": "string",
+                                              "description": "Next phase id"
+                                            }
+                                          },
+                                          "additionalProperties": false,
+                                          "description": "Change information"
+                                        }
+                                      },
+                                      "additionalProperties": false,
+                                      "nullable": true
+                                    },
+                                    "items": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "properties": {
+                                          "id": { "type": "string", "maxLength": 36 },
+                                          "projectId": { "type": "string", "maxLength": 36 },
+                                          "createdAtM": { "type": "number" },
+                                          "updatedAtM": { "type": "number" },
+                                          "units": { "type": "number", "nullable": true },
+                                          "featurePlanVersionId": {
+                                            "type": "string",
+                                            "maxLength": 36
+                                          },
+                                          "subscriptionPhaseId": {
+                                            "type": "string",
+                                            "maxLength": 36
+                                          }
+                                        },
+                                        "required": [
+                                          "id",
+                                          "projectId",
+                                          "createdAtM",
+                                          "updatedAtM",
+                                          "units",
+                                          "featurePlanVersionId",
+                                          "subscriptionPhaseId"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "projectId",
+                                    "subscriptionId",
+                                    "planVersionId",
+                                    "paymentMethodId",
+                                    "status",
+                                    "active",
+                                    "dueBehaviour",
+                                    "whenToBill",
+                                    "gracePeriod",
+                                    "collectionMethod",
+                                    "autoRenew",
+                                    "billingPeriod",
+                                    "trialEndsAt",
+                                    "startAt",
+                                    "endAt",
+                                    "metadata"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "projectId",
+                              "createdAtM",
+                              "updatedAtM",
+                              "customerId",
+                              "active",
+                              "planSlug",
+                              "timezone",
+                              "previousCycleStartAt",
+                              "previousCycleEndAt",
+                              "currentCycleStartAt",
+                              "currentCycleEndAt",
+                              "nextInvoiceAt",
+                              "lastInvoiceAt",
+                              "lastRenewAt",
+                              "renewAt",
+                              "pastDueAt",
+                              "pastDuedAt",
+                              "cancelAt",
+                              "canceledAt",
+                              "expiresAt",
+                              "expiredAt",
+                              "changeAt",
+                              "changedAt",
+                              "metadata",
+                              "customer",
+                              "phases"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "projectId",
+                        "createdAtM",
+                        "updatedAtM",
+                        "email",
+                        "name",
+                        "description",
+                        "metadata",
+                        "stripeCustomerId",
+                        "active",
+                        "isMain",
+                        "defaultCurrency",
+                        "timezone",
+                        "subscriptions"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["customer"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.listPaymentMethods": {
+      "get": {
+        "operationId": "customers-listPaymentMethods",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "customerId", "in": "query", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "provider",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "enum": ["stripe", "lemonsqueezy"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "paymentMethods": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "name": { "type": "string", "nullable": true },
+                          "last4": { "type": "string" },
+                          "expMonth": { "type": "number" },
+                          "expYear": { "type": "number" },
+                          "brand": { "type": "string" }
+                        },
+                        "required": ["id", "name"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["paymentMethods"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.signUp": {
+      "post": {
+        "operationId": "customers-signUp",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "maxLength": 36 },
+                  "projectId": { "type": "string", "maxLength": 36 },
+                  "email": { "type": "string", "minLength": 3, "format": "email" },
+                  "name": { "type": "string", "minLength": 3 },
+                  "description": { "type": "string", "nullable": true },
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "externalId": { "type": "string" },
+                      "stripeSubscriptionId": { "type": "string" },
+                      "stripeDefaultPaymentMethodId": { "type": "string" }
+                    },
+                    "additionalProperties": false,
+                    "nullable": true
+                  },
+                  "stripeCustomerId": { "type": "string", "nullable": true },
+                  "active": { "type": "boolean", "nullable": true },
+                  "isMain": { "type": "boolean", "nullable": true },
+                  "defaultCurrency": { "type": "string", "enum": ["USD", "EUR"] },
+                  "timezone": { "type": "string", "minLength": 1 },
+                  "planVersionId": { "type": "string", "minLength": 1 },
+                  "config": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "featurePlanId": { "type": "string" },
+                        "featureSlug": { "type": "string" },
+                        "isUsage": {
+                          "type": "boolean",
+                          "description": "if the item is a usage item"
+                        },
+                        "units": {
+                          "type": "number",
+                          "minimum": 1,
+                          "description": "units of the feature the user is subscribed to"
+                        },
+                        "min": {
+                          "type": "number",
+                          "description": "minimum units of the feature the user is subscribed to"
+                        },
+                        "limit": {
+                          "type": "number",
+                          "description": "limit of the feature the user is subscribed to"
+                        }
+                      },
+                      "required": ["featurePlanId", "featureSlug"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "externalId": { "type": "string" },
+                  "successUrl": { "type": "string", "format": "uri" },
+                  "cancelUrl": { "type": "string", "format": "uri" }
+                },
+                "required": ["email", "planVersionId", "successUrl", "cancelUrl"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "url": { "type": "string" },
+                    "customerId": { "type": "string" },
+                    "error": { "type": "string" }
+                  },
+                  "required": ["success", "url", "customerId"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.signOut": {
+      "post": {
+        "operationId": "customers-signOut",
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "customerId": { "type": "string" } },
+                "required": ["customerId"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "success": { "type": "boolean" } },
+                  "required": ["success"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.entitlements": {
+      "get": {
+        "operationId": "customers-entitlements",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "customerId", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "skipCache", "in": "query", "required": false, "schema": { "type": "boolean" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entitlements": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string", "maxLength": 36 },
+                          "projectId": { "type": "string", "maxLength": 36 },
+                          "customerId": { "type": "string", "maxLength": 36 },
+                          "subscriptionItemId": {
+                            "type": "string",
+                            "maxLength": 36,
+                            "nullable": true
+                          },
+                          "featurePlanVersionId": { "type": "string", "maxLength": 36 },
+                          "units": { "type": "number", "nullable": true },
+                          "limit": { "type": "number", "nullable": true },
+                          "usage": { "type": "number", "nullable": true },
+                          "featureSlug": { "type": "string" },
+                          "featureType": {
+                            "type": "string",
+                            "enum": ["flat", "tier", "package", "usage"]
+                          },
+                          "aggregationMethod": {
+                            "type": "string",
+                            "enum": [
+                              "sum",
+                              "sum_all",
+                              "last_during_period",
+                              "count",
+                              "count_all",
+                              "max",
+                              "max_all"
+                            ]
+                          },
+                          "realtime": { "type": "boolean" },
+                          "type": { "type": "string" },
+                          "startAt": { "type": "number" },
+                          "endAt": { "type": "number", "nullable": true },
+                          "isCustom": { "type": "boolean" },
+                          "lastUsageUpdateAt": { "type": "number" },
+                          "metadata": {
+                            "anyOf": [
+                              {
+                                "anyOf": [
+                                  { "type": "string" },
+                                  { "type": "number" },
+                                  { "type": "boolean" },
+                                  { "enum": ["null"], "nullable": true }
+                                ]
+                              },
+                              { "type": "array", "items": {} },
+                              { "type": "object", "additionalProperties": {} }
+                            ],
+                            "nullable": true
+                          },
+                          "project": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string" },
+                              "workspaceId": { "type": "string" }
+                            },
+                            "required": ["id", "workspaceId"],
+                            "additionalProperties": false
+                          },
+                          "subscriptionItem": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string" },
+                              "subscriptionPhase": {
+                                "type": "object",
+                                "properties": {
+                                  "id": { "type": "string" },
+                                  "subscription": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": { "type": "string", "maxLength": 36 },
+                                      "currentCycleStartAt": { "type": "number" },
+                                      "currentCycleEndAt": { "type": "number" }
+                                    },
+                                    "required": ["id", "currentCycleStartAt", "currentCycleEndAt"],
+                                    "additionalProperties": false,
+                                    "nullable": true
+                                  }
+                                },
+                                "required": ["id", "subscription"],
+                                "additionalProperties": false,
+                                "nullable": true
+                              }
+                            },
+                            "required": ["id", "subscriptionPhase"],
+                            "additionalProperties": false,
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "projectId",
+                          "customerId",
+                          "subscriptionItemId",
+                          "featurePlanVersionId",
+                          "units",
+                          "limit",
+                          "usage",
+                          "featureSlug",
+                          "featureType",
+                          "aggregationMethod",
+                          "realtime",
+                          "type",
+                          "startAt",
+                          "endAt",
+                          "isCustom",
+                          "lastUsageUpdateAt",
+                          "metadata",
+                          "project",
+                          "subscriptionItem"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["entitlements"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.can": {
+      "get": {
+        "operationId": "customers-can",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "customerId", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "featureSlug", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access": { "type": "boolean" },
+                    "deniedReason": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "RATE_LIMITED",
+                            "USAGE_EXCEEDED",
+                            "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+                            "FEATURE_OR_CUSTOMER_NOT_FOUND",
+                            "FEATURE_HAS_NO_USAGE_RECORD",
+                            "LIMIT_EXCEEDED"
+                          ]
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "SUBSCRIPTION_EXPIRED",
+                            "SUBSCRIPTION_NOT_ACTIVE",
+                            "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+                            "FEATURE_OR_CUSTOMER_NOT_FOUND",
+                            "CUSTOMER_HAS_NO_SUBSCRIPTIONS",
+                            "CUSTOMER_NOT_FOUND",
+                            "FEATURE_TYPE_NOT_SUPPORTED",
+                            "FEATURE_IS_NOT_USAGE_TYPE",
+                            "FEATURE_HAS_NO_USAGE_RECORD",
+                            "FEATURE_NOT_SUPPORT_USAGE",
+                            "UNHANDLED_ERROR",
+                            "INTERNAL_SERVER_ERROR"
+                          ]
+                        }
+                      ]
+                    },
+                    "currentUsage": { "type": "number" },
+                    "limit": { "type": "number" },
+                    "featureType": {
+                      "type": "string",
+                      "enum": ["flat", "tier", "package", "usage"]
+                    },
+                    "units": { "type": "number" },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["access"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/edge/customers.reportUsage": {
+      "get": {
+        "operationId": "customers-reportUsage",
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          { "name": "customerId", "in": "query", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "featureSlug",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          { "name": "usage", "in": "query", "required": true, "schema": { "type": "number" } },
+          {
+            "name": "idempotenceKey",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "cacheHit": { "type": "boolean" }
+                  },
+                  "required": ["success"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": { "Authorization": { "type": "http", "scheme": "bearer" } },
+    "responses": {
+      "error": {
+        "description": "Error response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "code": { "type": "string" },
+                "issues": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": { "message": { "type": "string" } },
+                    "required": ["message"],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": ["message", "code"],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "schemas": {}
+  },
+  "tags": [{ "name": "unprice", "description": "Operations related to unprice" }],
+  "externalDocs": { "url": "http://example.com/docs" },
+  "x-speakeasy-retries": {
+    "strategy": "backoff",
+    "backoff": {
+      "initialInterval": 500,
+      "maxInterval": 60000,
+      "maxElapsedTime": 3600000,
+      "exponent": 1.5
+    },
+    "statusCodes": ["5XX"],
+    "retryConnectionErrors": true
+  }
+}

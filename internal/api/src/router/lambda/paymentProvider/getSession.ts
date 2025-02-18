@@ -12,7 +12,7 @@ export const getSession = rateLimiterProcedure
     span: "paymentProvider.getSession",
     openapi: {
       method: "POST",
-      path: "/edge/paymentProvider.getSession",
+      path: "/lambda/paymentProvider.getSession",
       protect: true,
     },
   })

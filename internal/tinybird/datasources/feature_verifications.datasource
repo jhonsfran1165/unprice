@@ -1,5 +1,3 @@
-VERSION 1
-
 DESCRIPTION >
     This table stores features verifications per customer, entitlement, project and date, optimized for time-series analytics
 
@@ -19,7 +17,9 @@ SCHEMA >
     `subscriptionId` Nullable(String) `json:$.subscriptionId`,
     `subscriptionItemId` Nullable(String) `json:$.subscriptionItemId`,
     `subscriptionPhaseId` Nullable(String) `json:$.subscriptionPhaseId`,
+    `deniedReason` LowCardinality(Nullable(String)) `json:$.deniedReason`,
     `metadata` Nullable(String) `json:$.metadata`
+
 
 ENGINE MergeTree
 ENGINE_PARTITION_KEY toYYYYMM(fromUnixTimestamp64Milli(timestamp))

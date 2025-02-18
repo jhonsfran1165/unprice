@@ -30,7 +30,8 @@ jobs:
       - uses: ./.github/actions/install
         name: Install dependencies
         with:
-          ts: true
+          ts: "true"
+          python: "false"
 
       - name: Type-check
         run: pnpm typecheck

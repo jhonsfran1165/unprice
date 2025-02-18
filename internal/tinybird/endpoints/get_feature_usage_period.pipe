@@ -1,5 +1,3 @@
-VERSION 1
-
 TOKEN "web-apps" READ
 
 TAGS "usage"
@@ -9,14 +7,14 @@ SQL >
     %
     SELECT
         projectId,
-        customerId,
+        {% if defined(customerId) %} customerId, {% end %}
+        {% if defined(entitlementId) %} entitlementId, {% end %}
         featureSlug,
-        entitlementId,
         countMerge(count) as count,
         sumMerge(sum) as sum,
         maxMerge(max) as max,
         argMaxMerge(last_during_period) as last_during_period
-    FROM features_usage_hourly_mv
+    FROM feature_usage_hourly_mv_data
     WHERE
         1 = 1
         {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
@@ -27,4 +25,6 @@ SQL >
             AND date BETWEEN fromUnixTimestamp64Milli({{ Int64(start) }})
             AND fromUnixTimestamp64Milli({{ Int64(end) }})
         {% end %}
-    GROUP BY projectId, customerId, featureSlug, entitlementId
+    {% if defined(customerId) %} GROUP BY projectId, customerId, featureSlug, entitlementId {% else %} {% if defined(entitlementId) %} GROUP BY projectId, featureSlug, entitlementId {% else %} GROUP BY projectId, featureSlug {% end %} {% end %}
+
+TYPE endpoint

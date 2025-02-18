@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server"
+import type { FeatureVerification } from "@unprice/db/validators"
 import { CustomerService, UnPriceCustomerError } from "#services/customers"
 import type { Context } from "#trpc"
 
@@ -17,7 +18,7 @@ export const featureGuard = async ({
   updateUsage = false,
   includeCustom = true,
   isInternal = false,
-  throwOnNoAccess = true,
+  metadata = {},
 }: {
   /** The UnPrice customer ID to check feature access for */
   customerId: string
@@ -33,14 +34,13 @@ export const featureGuard = async ({
   includeCustom?: boolean
   /** Whether this is an internal workspace with unlimited access. Defaults to false */
   isInternal?: boolean
-  /** Whether to throw error on no access, meaning the customer does have the entitlement but it's not active or limits reached. If false, returns access:false instead. Defaults to true */
-  throwOnNoAccess?: boolean
-}) => {
+  /** Metadata to include in the feature verification. Defaults to an empty object */
+  metadata?: Record<string, string | number | boolean | null>
+}): Promise<FeatureVerification> => {
   // internal workspaces have unlimited access to all features
   if (isInternal) {
     return {
       access: true,
-      deniedReason: null,
     }
   }
 
@@ -57,6 +57,7 @@ export const featureGuard = async ({
     skipCache,
     updateUsage,
     includeCustom,
+    metadata,
   })
 
   const end = performance.now()
@@ -75,36 +76,17 @@ export const featureGuard = async ({
   if (err) {
     switch (true) {
       case err instanceof UnPriceCustomerError:
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
+        return {
+          access: false,
+          deniedReason: err.code,
           message: err.message,
-        })
+        }
       default:
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: `Error verifying feature: ${err.toString()}`,
         })
     }
-  }
-
-  // if the feature is not found in the subscription or the customer is not found, throw an error
-  if (
-    val.deniedReason &&
-    ["FEATURE_NOT_FOUND_IN_SUBSCRIPTION", "FEATURE_OR_CUSTOMER_NOT_FOUND"].includes(
-      val.deniedReason
-    )
-  ) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: `This feature ${featureSlug} not found in your subscription. Please upgrade your plan.`,
-    })
-  }
-
-  if (!val.access && throwOnNoAccess) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: `You don't have access to this feature ${val.deniedReason}.`,
-    })
   }
 
   return val

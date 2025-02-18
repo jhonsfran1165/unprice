@@ -1,7 +1,9 @@
+import type { Duration } from "date-fns"
 import * as z from "zod"
 
 import {
   AGGREGATION_METHODS,
+  BILLING_PERIODS_MAP,
   COLLECTION_METHODS,
   CURRENCIES,
   DUE_BEHAVIOUR,
@@ -37,6 +39,30 @@ export const invoiceTypeSchema = z.enum(INVOICE_TYPE)
 export const startCycleMonthSchema = z.coerce.number().int().min(1).max(31)
 export const startCycleYearSchema = z.coerce.number().int().min(1).max(12)
 export const startCycleSchema = z.union([startCycleMonthSchema, startCycleYearSchema]).default(1)
+
+export const unpriceCustomerErrorSchema = z.enum([
+  "SUBSCRIPTION_EXPIRED",
+  "SUBSCRIPTION_NOT_ACTIVE",
+  "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+  "FEATURE_OR_CUSTOMER_NOT_FOUND",
+  "CUSTOMER_HAS_NO_SUBSCRIPTIONS",
+  "CUSTOMER_NOT_FOUND",
+  "FEATURE_TYPE_NOT_SUPPORTED",
+  "FEATURE_IS_NOT_USAGE_TYPE",
+  "FEATURE_HAS_NO_USAGE_RECORD",
+  "FEATURE_NOT_SUPPORT_USAGE",
+  "UNHANDLED_ERROR",
+  "INTERNAL_SERVER_ERROR",
+])
+
+export const deniedReasonSchema = z.enum([
+  "RATE_LIMITED",
+  "USAGE_EXCEEDED",
+  "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+  "FEATURE_OR_CUSTOMER_NOT_FOUND",
+  "FEATURE_HAS_NO_USAGE_RECORD",
+  "LIMIT_EXCEEDED",
+])
 
 export const convertDateToUTC = (date: Date) => {
   // Check if the date is already in UTC
@@ -89,10 +115,20 @@ export type FeatureVersionType = z.infer<typeof featureVersionType>
 export type Year = z.infer<typeof yearsSchema>
 export type Month = z.infer<typeof monthsSchema>
 export type AggregationMethod = z.infer<typeof aggregationMethodSchema>
-export type BillingPeriod = z.infer<typeof billingPeriodSchema>
+export type BillingPeriod = (typeof PLAN_BILLING_PERIODS)[number]
 export type WhenToBill = z.infer<typeof whenToBillSchema>
 export type StartCycle = z.infer<typeof startCycleSchema>
 export type CollectionMethod = z.infer<typeof collectionMethodSchema>
 export type PhaseStatus = z.infer<typeof phaseStatusSchema>
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>
 export type InvoiceType = z.infer<typeof invoiceTypeSchema>
+
+// Helper to validate and normalize billing period
+export function normalizeBillingPeriod(period: BillingPeriod): Duration {
+  const billingPeriod = BILLING_PERIODS_MAP[period]
+  if (!billingPeriod) {
+    throw new Error("Invalid billing period")
+  }
+
+  return billingPeriod.duration
+}

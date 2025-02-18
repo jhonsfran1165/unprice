@@ -1,5 +1,3 @@
-VERSION 1
-
 DESCRIPTION >
     This table stores features usage metrics per customer, entitlement, project and date, optimized for time-series analytics with deduplication support
 
@@ -9,7 +7,7 @@ SCHEMA >
     `timestamp` Int64 `json:$.timestamp`,
     `featureSlug` LowCardinality(String) `json:$.featureSlug`,
     `customerId` String `json:$.customerId`,
-    `usage` UInt32 `json:$.usage`,
+    `usage` Int32 `json:$.usage`,
     `requestId` String `json:$.requestId`,
     `workspaceId` String `json:$.workspaceId`,
     `projectId` String `json:$.projectId`,

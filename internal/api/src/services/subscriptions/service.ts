@@ -645,17 +645,17 @@ export class SubscriptionService {
     const autoRenewToUse = autoRenew ?? versionData.autoRenew ?? true
 
     if (!autoRenewToUse) {
-      endAtToUse = calculatedBillingCycle.cycleEnd.getTime()
+      endAtToUse = calculatedBillingCycle.cycleEndMs
     }
 
     // calculate the next billing at given the when to bill
     const nextInvoiceAtToUse =
       whenToBillToUse === "pay_in_advance"
-        ? calculatedBillingCycle.cycleStart.getTime()
-        : calculatedBillingCycle.cycleEnd.getTime()
+        ? calculatedBillingCycle.cycleStartMs
+        : calculatedBillingCycle.cycleEndMs
 
-    const trialDaysEndAt = calculatedBillingCycle.trialDaysEndAt
-      ? calculatedBillingCycle.trialDaysEndAt.getTime()
+    const trialDaysEndAt = calculatedBillingCycle.trialEndsAtMs
+      ? calculatedBillingCycle.trialEndsAtMs
       : undefined
 
     const result = await (db ?? this.ctx.db).transaction(async (trx) => {
@@ -736,7 +736,7 @@ export class SubscriptionService {
         // when there are trial days, we set the next invoice at to the end of the trial
         // this allow us to invoice right after the trial ends
         const nextInvoiceAt =
-          trialDaysToUse > 0 ? calculatedBillingCycle.cycleEnd.getTime() : nextInvoiceAtToUse
+          trialDaysToUse > 0 ? calculatedBillingCycle.cycleEndMs : nextInvoiceAtToUse
 
         await trx
           .update(subscriptions)
@@ -745,8 +745,8 @@ export class SubscriptionService {
             // if there are trial days, we set the next invoice at to the end of the trial
             nextInvoiceAt,
             planSlug: versionData.plan.slug,
-            currentCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
-            currentCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
+            currentCycleStartAt: calculatedBillingCycle.cycleStartMs,
+            currentCycleEndAt: calculatedBillingCycle.cycleEndMs,
             // if there is an end date, we set the expiration date
             expiresAt: endAtToUse,
             // renew at after next invoice at + 1 millisecond
