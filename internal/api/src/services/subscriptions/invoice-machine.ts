@@ -1431,8 +1431,8 @@ export class InvoiceStateMachine extends StateMachine<
         }
 
         if (prorate !== 1) {
-          const startDate = new Date(Number(calculatedCurrentBillingCycle.cycleStart))
-          const endDate = new Date(Number(calculatedCurrentBillingCycle.cycleEnd))
+          const startDate = new Date(calculatedCurrentBillingCycle.cycleStartMs)
+          const endDate = new Date(calculatedCurrentBillingCycle.cycleEndMs)
           const billingPeriod = `${startDate.toLocaleString("default", {
             month: "short",
           })} ${startDate.getDate()} - ${endDate.toLocaleString("default", {

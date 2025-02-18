@@ -109,14 +109,14 @@ describe("PhaseMachine", () => {
     it("should not invoice before expected invoice date", async () => {
       const trial = await machine.transition("END_TRIAL", {
         // right after the trial ends
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       expect(trial.err).toBeUndefined()
       expect(trial.val?.status).toBe("trial_ended")
 
       const result = await machine.transition("INVOICE", {
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime(),
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       expect(result.err?.message).toBe("Subscription is not ready to be invoiced")
@@ -144,7 +144,7 @@ describe("PhaseMachine", () => {
 
       const trial = await machine.transition("END_TRIAL", {
         // right after the trial ends
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       expect(trial.err).toBeUndefined()
@@ -153,7 +153,7 @@ describe("PhaseMachine", () => {
 
       // tries to renew the subscription before the invoice date
       const renew = await machine.transition("RENEW", {
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       expect(renew.err).toBeInstanceOf(UnPriceSubscriptionError)
@@ -164,14 +164,14 @@ describe("PhaseMachine", () => {
       // let's try to invoice before the invoice date
       const result = await machine.transition("INVOICE", {
         // when subscription is arrear the invoice date is the end of the billing cycle
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.cycleEndMs + 1,
       })
 
       expect(result.err).toBeInstanceOf(UnPriceSubscriptionError)
       expect(result.err?.message).toBe("Subscription is not ready to be invoiced")
 
       // new start and end dates for the next cycle
-      const { cycleEnd } = configureBillingCycleSubscription({
+      const { cycleEndMs } = configureBillingCycleSubscription({
         currentCycleStartAt: mockSubscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
         billingCycleStart: mockPhase.startCycle, // start day of the billing cycle
         billingPeriod: mockPhase.planVersion.billingPeriod, // billing period
@@ -180,7 +180,7 @@ describe("PhaseMachine", () => {
 
       // let's try to invoice on the expected invoice date
       const result2 = await machine.transition("INVOICE", {
-        now: cycleEnd.getTime() + 1,
+        now: cycleEndMs + 1,
       })
 
       const subscription = machine.getSubscription()
@@ -226,7 +226,7 @@ describe("PhaseMachine", () => {
 
       const trial = await machine.transition("END_TRIAL", {
         // right after the trial ends
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       expect(trial.err).toBeUndefined()
@@ -235,13 +235,13 @@ describe("PhaseMachine", () => {
 
       const result = await machine.transition("INVOICE", {
         // when subscription is advance the invoice date is the start of the billing cycle
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.cycleStartMs + 1,
       })
 
       expect(result.err?.message).toBe("Subscription is not ready to be invoiced")
 
       // new start and end dates for the next cycle
-      const { cycleStart } = configureBillingCycleSubscription({
+      const { cycleStartMs } = configureBillingCycleSubscription({
         currentCycleStartAt: mockSubscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
         billingCycleStart: mockPhase.startCycle, // start day of the billing cycle
         billingPeriod: mockPhase.planVersion.billingPeriod, // billing period
@@ -250,7 +250,7 @@ describe("PhaseMachine", () => {
 
       // let's try to invoice on the expected invoice date
       const result2 = await machine.transition("INVOICE", {
-        now: cycleStart.getTime() + 1,
+        now: cycleStartMs + 1,
       })
 
       const subscription = machine.getSubscription()
@@ -307,7 +307,7 @@ describe("PhaseMachine", () => {
 
       const trial = await machine.transition("END_TRIAL", {
         // right after the trial ends
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       expect(trial.err).toBeUndefined()
@@ -316,13 +316,13 @@ describe("PhaseMachine", () => {
 
       const result = await machine.transition("INVOICE", {
         // when subscription is advance the invoice date is the start of the billing cycle
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       expect(result.err?.message).toBe("Subscription is not ready to be invoiced")
 
       // new start and end dates for the next cycle
-      const { cycleStart } = configureBillingCycleSubscription({
+      const { cycleStartMs } = configureBillingCycleSubscription({
         currentCycleStartAt: mockSubscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
         billingCycleStart: mockPhase.startCycle, // start day of the billing cycle
         billingPeriod: mockPhase.planVersion.billingPeriod, // billing period
@@ -331,7 +331,7 @@ describe("PhaseMachine", () => {
 
       // let's try to invoice on the expected invoice date
       const result2 = await machine.transition("INVOICE", {
-        now: cycleStart.getTime() + 1,
+        now: cycleStartMs + 1,
       })
 
       const subscription = machine.getSubscription()

@@ -126,7 +126,7 @@ describe("PhaseMachine", () => {
       })
 
       // new start and end dates for the next cycle
-      const { cycleStart, cycleEnd } = configureBillingCycleSubscription({
+      const { cycleStartMs, cycleEndMs } = configureBillingCycleSubscription({
         currentCycleStartAt: mockSubscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
         billingCycleStart: mockPhase.startCycle, // start day of the billing cycle
         billingPeriod: mockPhase.planVersion.billingPeriod, // billing period
@@ -135,7 +135,7 @@ describe("PhaseMachine", () => {
 
       const result = await machine.transition("END_TRIAL", {
         // right after the trial ends
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       const phase = machine.getPhase()
@@ -145,10 +145,10 @@ describe("PhaseMachine", () => {
       // new next invoice should be set
 
       const nextInvoiceAt =
-        phase.whenToBill === "pay_in_advance" ? cycleStart.getTime() + 1 : cycleEnd.getTime() + 1
+        phase.whenToBill === "pay_in_advance" ? cycleStartMs + 1 : cycleEndMs + 1
 
-      expect(subscription.currentCycleEndAt).toBe(cycleEnd.getTime())
-      expect(subscription.currentCycleStartAt).toBe(cycleStart.getTime())
+      expect(subscription.currentCycleEndAt).toBe(cycleEndMs)
+      expect(subscription.currentCycleStartAt).toBe(cycleStartMs)
 
       // if phase is pay in arrear, it should be active
       expect(phase.status).toBe("active")
@@ -176,7 +176,7 @@ describe("PhaseMachine", () => {
       })
 
       // new start and end dates for the next cycle
-      const { cycleStart, cycleEnd } = configureBillingCycleSubscription({
+      const { cycleStartMs, cycleEndMs } = configureBillingCycleSubscription({
         currentCycleStartAt: mockSubscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
         billingCycleStart: mockPhase.startCycle, // start day of the billing cycle
         billingPeriod: mockPhase.planVersion.billingPeriod, // billing period
@@ -185,7 +185,7 @@ describe("PhaseMachine", () => {
 
       const result = await machine.transition("END_TRIAL", {
         // right after the trial ends
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       const phase = machine.getPhase()
@@ -193,11 +193,11 @@ describe("PhaseMachine", () => {
 
       expect(result.err).toBeUndefined()
       // dates should be renewed for the next cycle
-      expect(subscription.currentCycleEndAt).toBe(cycleEnd.getTime())
-      expect(subscription.currentCycleStartAt).toBe(cycleStart.getTime())
+      expect(subscription.currentCycleEndAt).toBe(cycleEndMs)
+      expect(subscription.currentCycleStartAt).toBe(cycleStartMs)
 
       expect(phase.status).toBe("trial_ended")
-      expect(subscription.nextInvoiceAt).toBe(cycleStart.getTime() + 1)
+      expect(subscription.nextInvoiceAt).toBe(cycleStartMs + 1)
     })
 
     it("should validate payment method", async () => {
@@ -226,7 +226,7 @@ describe("PhaseMachine", () => {
 
       const result = await machine.transition("END_TRIAL", {
         // right after the trial ends
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       expect(result.err?.message).contains("Customer has no payment method")
@@ -251,12 +251,12 @@ describe("PhaseMachine", () => {
 
       await machine.transition("END_TRIAL", {
         // right after the trial ends
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       const result = await machine.transition("END_TRIAL", {
         // right after the trial ends
-        now: calculatedBillingCycle.trialDaysEndAt!.getTime() + 1,
+        now: calculatedBillingCycle.trialEndsAtMs! + 1,
       })
 
       expect(result.err).toBeUndefined()

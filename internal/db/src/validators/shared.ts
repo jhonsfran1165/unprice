@@ -1,7 +1,9 @@
+import type { Duration } from "date-fns"
 import * as z from "zod"
 
 import {
   AGGREGATION_METHODS,
+  BILLING_PERIODS_MAP,
   COLLECTION_METHODS,
   CURRENCIES,
   DUE_BEHAVIOUR,
@@ -113,10 +115,20 @@ export type FeatureVersionType = z.infer<typeof featureVersionType>
 export type Year = z.infer<typeof yearsSchema>
 export type Month = z.infer<typeof monthsSchema>
 export type AggregationMethod = z.infer<typeof aggregationMethodSchema>
-export type BillingPeriod = z.infer<typeof billingPeriodSchema>
+export type BillingPeriod = (typeof PLAN_BILLING_PERIODS)[number]
 export type WhenToBill = z.infer<typeof whenToBillSchema>
 export type StartCycle = z.infer<typeof startCycleSchema>
 export type CollectionMethod = z.infer<typeof collectionMethodSchema>
 export type PhaseStatus = z.infer<typeof phaseStatusSchema>
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>
 export type InvoiceType = z.infer<typeof invoiceTypeSchema>
+
+// Helper to validate and normalize billing period
+export function normalizeBillingPeriod(period: BillingPeriod): Duration {
+  const billingPeriod = BILLING_PERIODS_MAP[period]
+  if (!billingPeriod) {
+    throw new Error("Invalid billing period")
+  }
+
+  return billingPeriod.duration
+}

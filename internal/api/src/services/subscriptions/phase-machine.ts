@@ -188,7 +188,7 @@ export class PhaseMachine extends StateMachine<
 
         // when ending the trial we need to update the subscription
         // calculate next billing cycle
-        const { cycleStart, cycleEnd } = configureBillingCycleSubscription({
+        const { cycleStartMs, cycleEndMs } = configureBillingCycleSubscription({
           currentCycleStartAt: subscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
           billingCycleStart: phase.startCycle, // start day of the billing cycle
           billingPeriod: phase.planVersion.billingPeriod, // billing period
@@ -196,7 +196,7 @@ export class PhaseMachine extends StateMachine<
         })
 
         const nextInvoiceAt =
-          phase.whenToBill === "pay_in_advance" ? cycleStart.getTime() + 1 : cycleEnd.getTime() + 1
+          phase.whenToBill === "pay_in_advance" ? cycleStartMs + 1 : cycleEndMs + 1
 
         // for phases that are billed in arrear, we don't do anything more
         // but we already validate the payment method so we are kind of sure the payment will be collected
@@ -206,8 +206,8 @@ export class PhaseMachine extends StateMachine<
             state: "active",
             subscriptionData: {
               nextInvoiceAt,
-              currentCycleEndAt: cycleEnd.getTime(),
-              currentCycleStartAt: cycleStart.getTime(),
+              currentCycleEndAt: cycleEndMs,
+              currentCycleStartAt: cycleStartMs,
               previousCycleEndAt: subscription.currentCycleEndAt,
               previousCycleStartAt: subscription.currentCycleStartAt,
             },
@@ -219,8 +219,8 @@ export class PhaseMachine extends StateMachine<
           state: "trial_ended",
           subscriptionData: {
             nextInvoiceAt,
-            currentCycleEndAt: cycleEnd.getTime(),
-            currentCycleStartAt: cycleStart.getTime(),
+            currentCycleEndAt: cycleEndMs,
+            currentCycleStartAt: cycleStartMs,
             previousCycleEndAt: subscription.currentCycleEndAt,
             previousCycleStartAt: subscription.currentCycleStartAt,
           },
@@ -818,7 +818,7 @@ export class PhaseMachine extends StateMachine<
     // here we calculate the next billing cycle, in order to do that we add a millisecond to the current cycle end date example:
     // if the current cycle end date is 2023-12-31T23:59:59Z we add a millisecond to get 2024-01-01T00:00:00.000Z
     // so we keep continuity with the current cycle
-    const { cycleStart, cycleEnd } = configureBillingCycleSubscription({
+    const { cycleStartMs, cycleEndMs } = configureBillingCycleSubscription({
       currentCycleStartAt: subscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping with the current cycle
       billingCycleStart: phase.startCycle, // start day of the billing cycle
       billingPeriod: phase.planVersion.billingPeriod, // billing period
@@ -842,8 +842,7 @@ export class PhaseMachine extends StateMachine<
       )
     }
 
-    const nextInvoiceAt =
-      phase.whenToBill === "pay_in_advance" ? cycleStart.getTime() + 1 : cycleEnd.getTime() + 1
+    const nextInvoiceAt = phase.whenToBill === "pay_in_advance" ? cycleStartMs + 1 : cycleEndMs + 1
 
     // renewing a phase implies setting the new cycle for the subscription
     const syncStateResult = await this.syncState({
@@ -852,8 +851,8 @@ export class PhaseMachine extends StateMachine<
       subscriptionData: {
         previousCycleStartAt: subscription.currentCycleStartAt,
         previousCycleEndAt: subscription.currentCycleEndAt,
-        currentCycleStartAt: cycleStart.getTime(),
-        currentCycleEndAt: cycleEnd.getTime(),
+        currentCycleStartAt: cycleStartMs,
+        currentCycleEndAt: cycleEndMs,
         // renew at is the next invoice at + 1 millisecond this is because we invoice first and then renew
         renewAt: nextInvoiceAt + 1,
         lastRenewAt: Date.now(),
@@ -1844,15 +1843,14 @@ export class PhaseMachine extends StateMachine<
       return Err(new UnPriceSubscriptionError({ message: `Error creating invoice ${invoiceId}` }))
     }
 
-    const { cycleStart, cycleEnd } = configureBillingCycleSubscription({
+    const { cycleStartMs, cycleEndMs } = configureBillingCycleSubscription({
       currentCycleStartAt: invoiceEndAt + 1, // add one millisecond to avoid overlapping
       billingCycleStart: phase.startCycle, // start day of the billing cycle
       billingPeriod: phase.planVersion.billingPeriod, // billing period
       endAt: endAt, // end day of the billing cycle if any
     })
 
-    const nextInvoiceAt =
-      whenToBill === "pay_in_advance" ? cycleStart.getTime() + 1 : cycleEnd.getTime() + 1
+    const nextInvoiceAt = whenToBill === "pay_in_advance" ? cycleStartMs + 1 : cycleEndMs + 1
 
     // update subscription invoice information
     await this.syncState({

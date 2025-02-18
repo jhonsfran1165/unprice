@@ -66,13 +66,13 @@ export const createMockPhase = ({
     trialDays,
     gracePeriod: 1,
     dueBehaviour: "cancel",
-    trialEndsAt: calculatedBillingCycle.trialDaysEndAt?.getTime() ?? null,
+    trialEndsAt: calculatedBillingCycle.trialEndsAtMs ?? null,
     whenToBill: "pay_in_advance",
     collectionMethod: "charge_automatically",
     autoRenew: true,
     startCycle: billingCycleStart,
     metadata: null,
-    startAt: calculatedBillingCycle.cycleStart.getTime(),
+    startAt: calculatedBillingCycle.cycleStartMs,
     endAt: endDate?.getTime() ?? null,
     items: [
       {
@@ -319,11 +319,11 @@ export const createMockSubscription = ({
   // calculate the next billing at given the when to bill
   const nextInvoiceAtToUse =
     mockPhase.whenToBill === "pay_in_advance"
-      ? calculatedBillingCycle.cycleStart.getTime()
-      : calculatedBillingCycle.cycleEnd.getTime()
+      ? calculatedBillingCycle.cycleStartMs
+      : calculatedBillingCycle.cycleEndMs
 
   const nextInvoiceAt =
-    mockPhase.trialDays > 0 ? calculatedBillingCycle.cycleEnd.getTime() : nextInvoiceAtToUse
+    mockPhase.trialDays > 0 ? calculatedBillingCycle.cycleEndMs : nextInvoiceAtToUse
 
   // TODO: use createSubscription from the service
   const mockSubscription: Subscription = {
@@ -335,8 +335,8 @@ export const createMockSubscription = ({
     timezone: "UTC",
     createdAtM: Date.now(),
     updatedAtM: Date.now(),
-    currentCycleStartAt: calculatedBillingCycle.cycleStart.getTime(),
-    currentCycleEndAt: calculatedBillingCycle.cycleEnd.getTime(),
+    currentCycleStartAt: calculatedBillingCycle.cycleStartMs,
+    currentCycleEndAt: calculatedBillingCycle.cycleEndMs,
     // if there are trial days, we set the next invoice at to the end of the trial
     nextInvoiceAt: nextInvoiceAt,
     renewAt: nextInvoiceAt + 1,

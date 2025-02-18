@@ -2,11 +2,11 @@
 
 import type { RouterOutputs } from "@unprice/api"
 import {
-  calculateBillingCycle,
   calculateFlatPricePlan,
   calculateFreeUnits,
   calculatePricePerFeature,
   calculateTotalPricePlan,
+  configureBillingCycleSubscription,
 } from "@unprice/db/validators"
 import {
   Card,
@@ -34,9 +34,8 @@ export function BillingCard({
 }) {
   const planVersion = activePhase.planVersion
 
-  const calculatedBillingCycle = calculateBillingCycle({
-    currentDate: new Date(),
-    startDate: new Date(activePhase.startAt),
+  const calculatedBillingCycle = configureBillingCycleSubscription({
+    currentCycleStartAt: activePhase.startAt,
     billingCycleStart: activePhase.startCycle ?? 1,
     billingPeriod: planVersion.billingPeriod,
   })
