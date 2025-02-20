@@ -158,7 +158,7 @@ export const STATUS_PHASE = [
   "trial_ended", // the phase trial has ended
 ] as const
 
-export const PLAN_TYPES = ["recurring"] as const
+export const PLAN_TYPES = ["recurring", "onetime"] as const
 export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
 export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
 export const DUE_BEHAVIOUR = ["cancel", "downgrade"] as const

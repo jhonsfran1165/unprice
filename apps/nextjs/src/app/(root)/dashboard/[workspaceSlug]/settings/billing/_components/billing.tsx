@@ -34,6 +34,7 @@ export function BillingCard({
 }) {
   const planVersion = activePhase.planVersion
 
+  // TODO: get current cycle
   const calculatedBillingCycle = configureBillingCycleSubscription({
     currentCycleStartAt: activePhase.startAt,
     billingCycleStart: activePhase.startCycle ?? 1,
