@@ -66,7 +66,7 @@ if [ "$MODE_ID" = "dev" ]; then
   cd internal/tinybird
 
   # start the tinybird local server
-  tb local start
+  tb local restart && tb upgrade
 
   # check if tinybird http://localhost:7181 is running
   echo "Waiting for Tinybird to be ready..."

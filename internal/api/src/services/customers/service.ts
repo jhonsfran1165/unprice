@@ -364,15 +364,6 @@ export class CustomerService {
     Result<CacheNamespaces["entitlementsByCustomerId"], UnPriceCustomerError | FetchError>
   > {
     if (opts.skipCache || !this.ctx.cache) {
-      const entitlements = await getEntitlementsByDateQuery({
-        customerId: opts.customerId,
-        db: this.ctx.db,
-        metrics: this.ctx.metrics,
-        logger: this.ctx.logger,
-        date: opts.date,
-        includeCustom: opts.includeCustom,
-      })
-
       if (opts.updateUsage) {
         this.ctx.waitUntil(
           this.updateEntitlementsUsage({
@@ -381,6 +372,15 @@ export class CustomerService {
           })
         )
       }
+
+      const entitlements = await getEntitlementsByDateQuery({
+        customerId: opts.customerId,
+        db: this.ctx.db,
+        metrics: this.ctx.metrics,
+        logger: this.ctx.logger,
+        date: opts.date,
+        includeCustom: opts.includeCustom,
+      })
 
       return Ok(entitlements)
     }
