@@ -714,8 +714,8 @@ importers:
         specifier: ^0.1.0
         version: link:../db
       stripe:
-        specifier: ^14.19.0
-        version: 14.25.0
+        specifier: ^17.7.0
+        version: 17.7.0
       zod:
         specifier: ^3.23.8
         version: 3.24.1
@@ -18974,8 +18974,8 @@ packages:
       js-tokens: 9.0.1
     dev: true
 
-  /stripe@14.25.0:
-    resolution: {integrity: sha512-wQS3GNMofCXwH8TSje8E1SE8zr6ODiGtHQgPtO95p9Mb4FhKC9jvXR2NUTpZ9ZINlckJcFidCmaTFV4P6vsb9g==}
+  /stripe@17.7.0:
+    resolution: {integrity: sha512-aT2BU9KkizY9SATf14WhhYVv2uOapBWX0OFWF4xvcj1mPaNotlSc2CsxpS4DS46ZueSppmCF5BX1sNYBtwBvfw==}
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 20.11.24
