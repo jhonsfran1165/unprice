@@ -12,12 +12,7 @@ export const renewSchedule = schedules.task({
     const subscriptions = await db.query.subscriptions.findMany({
       with: {
         phases: {
-          where: (phase, { eq, and, inArray }) =>
-            and(
-              eq(phase.active, true),
-              inArray(phase.status, ["active", "trial_ended"]),
-              eq(phase.autoRenew, true)
-            ),
+          where: (phase, { lte }) => lte(phase.startAt, now),
           orderBy: (phase, { asc }) => [asc(phase.startAt)],
         },
       },

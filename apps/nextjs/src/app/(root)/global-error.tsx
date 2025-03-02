@@ -1,9 +1,7 @@
 "use client"
 
 import { Button } from "@unprice/ui/button"
-import { Typography } from "@unprice/ui/typography"
 import { useRouter } from "next/navigation"
-import Balancer from "react-wrap-balancer"
 import { BlurImage } from "~/components/blur-image"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
@@ -23,8 +21,8 @@ export default function GlobalError({
         <DashboardShell>
           <div className="flex flex-col items-center justify-center">
             <EmptyPlaceholder className="min-h-[800px] w-full space-y-10">
-              <EmptyPlaceholder.Title className="p-10">
-                <Typography variant="h1">Something went wrong</Typography>
+              <EmptyPlaceholder.Title className="mt-0 p-10" variant="h1">
+                "Something went wrong"
               </EmptyPlaceholder.Title>
               <EmptyPlaceholder.Icon>
                 <BlurImage
@@ -35,8 +33,8 @@ export default function GlobalError({
                   className="invert-0 filter dark:invert"
                 />
               </EmptyPlaceholder.Icon>
-              <EmptyPlaceholder.Description>
-                <Balancer>{error.message}</Balancer>
+              <EmptyPlaceholder.Description className="mx-auto w-1/3 text-center">
+                {error.message}
               </EmptyPlaceholder.Description>
               <EmptyPlaceholder.Action>
                 <div className="mt-6 flex flex-row items-center justify-center gap-10">

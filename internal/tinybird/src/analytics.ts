@@ -34,7 +34,7 @@ export class Analytics {
 
   public get ingestSdkTelemetry() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "sdk_telemetry__v1",
+      datasource: "sdk_telemetry",
       event: z.object({
         runtime: z.string(),
         platform: z.string(),
@@ -62,14 +62,16 @@ export class Analytics {
 
   public get ingestFeaturesVerification() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "features_verifications__v1",
+      datasource: "feature_verifications",
       event: featureVerificationSchemaV1,
+      // we need to wait for the ingestion to be done before returning
+      wait: true,
     })
   }
 
   public get ingestFeaturesUsage() {
     return this.writeClient.buildIngestEndpoint({
-      datasource: "features_usage__v1",
+      datasource: "feature_usage_records",
       event: featureUsageSchemaV1,
       // we need to wait for the ingestion to be done before returning
       wait: true,
@@ -77,7 +79,7 @@ export class Analytics {
   }
   public get getFeaturesVerifications() {
     return this.readClient.buildPipe({
-      pipe: "get_features_verifications__v1",
+      pipe: "get_feature_verifications",
       parameters: z.object({
         projectId: z.string().optional(),
         customerId: z.string().optional(),
@@ -88,8 +90,8 @@ export class Analytics {
       }),
       data: z.object({
         projectId: z.string(),
-        customerId: z.string(),
-        entitlementId: z.string(),
+        customerId: z.string().optional(),
+        entitlementId: z.string().optional(),
         featureSlug: z.string(),
         count: z.number(),
         p95_latency: z.number(),
@@ -104,7 +106,7 @@ export class Analytics {
 
   public get getFeaturesUsage() {
     return this.readClient.buildPipe({
-      pipe: "get_feature_usage_period__v1",
+      pipe: "get_feature_usage_period",
       parameters: z.object({
         projectId: z.string().optional(),
         customerId: z.string().optional(),
@@ -115,9 +117,9 @@ export class Analytics {
       }),
       data: z.object({
         projectId: z.string(),
-        customerId: z.string(),
+        customerId: z.string().optional(),
+        entitlementId: z.string().optional(),
         featureSlug: z.string(),
-        entitlementId: z.string(),
         count: z.number(),
         sum: z.number(),
         max: z.number(),
@@ -135,7 +137,7 @@ export class Analytics {
 
   public get getTotalUsagePerBillableFeaturePeriod() {
     return this.readClient.buildPipe({
-      pipe: "get_total_usage_per_billable_feature_period__v1",
+      pipe: "get_total_usage_per_billable_feature_period",
       parameters: z.object({
         subscriptionItemId: z.string(),
         customerId: z.string(),
@@ -157,7 +159,7 @@ export class Analytics {
 
   public get getTotalUsagePerBillableFeatureAll() {
     return this.readClient.buildPipe({
-      pipe: "get_total_usage_per_billable_feature_all__v1",
+      pipe: "get_total_usage_per_billable_feature_all",
       parameters: z.object({
         subscriptionItemId: z.string(),
         customerId: z.string(),

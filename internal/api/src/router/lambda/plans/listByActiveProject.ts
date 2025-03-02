@@ -1,4 +1,8 @@
-import { planSelectBaseSchema, planVersionSelectBaseSchema } from "@unprice/db/validators"
+import {
+  featureVerificationSchema,
+  planSelectBaseSchema,
+  planVersionSelectBaseSchema,
+} from "@unprice/db/validators"
 import { z } from "zod"
 
 import { protectedProjectProcedure } from "#trpc"
@@ -28,6 +32,7 @@ export const listByActiveProject = protectedProjectProcedure
           ),
         })
       ),
+      error: featureVerificationSchema,
     })
   )
   .query(async (opts) => {
@@ -39,15 +44,20 @@ export const listByActiveProject = protectedProjectProcedure
     const featureSlug = "plans"
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
-      // listByActiveProject endpoint does not need to throw an error
-      throwOnNoAccess: false,
     })
+
+    if (!result.access) {
+      return {
+        plans: [],
+        error: result,
+      }
+    }
 
     const needsPublished = published === undefined || published
     const needsActive = active === undefined || active
@@ -81,5 +91,6 @@ export const listByActiveProject = protectedProjectProcedure
 
     return {
       plans,
+      error: result,
     }
   })

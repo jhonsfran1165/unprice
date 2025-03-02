@@ -9,8 +9,8 @@ import type { z } from "zod"
 import { ConfirmAction } from "~/components/confirm-action"
 import { CopyButton } from "~/components/copy-button"
 import AutoRenewFormField from "~/components/forms/autorenew-field"
+import BillingConfigFormField from "~/components/forms/billing-config-field"
 import CollectionMethodFormField from "~/components/forms/collection-method-field"
-import StartCycleFormField from "~/components/forms/start-cycle-field"
 import TrialDaysFormField from "~/components/forms/trial-days-field"
 import WhenToBillFormField from "~/components/forms/when-to-bill-field"
 import { SubmitButton } from "~/components/submit-button"
@@ -19,19 +19,18 @@ import { useZodForm } from "~/lib/zod-form"
 import { api } from "~/trpc/client"
 import { BannerPublishedVersion } from "../[planVersionId]/_components/banner"
 import {
-  BillingPeriodFormField,
   CurrencyFormField,
   DescriptionFormField,
   PaymentMethodRequiredFormField,
   PaymentProviderFormField,
-  PlanTypeFormField,
   TitleFormField,
 } from "./version-fields-form"
 
-const isPublishedSchema = planVersionSelectBaseSchema.partial().required({
-  id: true,
-  projectId: true,
-})
+const isPublishedSchema = planVersionSelectBaseSchema
+  .required({
+    id: true,
+    projectId: true,
+  })
 
 export type PublishedPlanVersion = z.infer<typeof isPublishedSchema>
 
@@ -40,7 +39,7 @@ export function PlanVersionForm({
   defaultValues,
 }: {
   setDialogOpen?: (open: boolean) => void
-  defaultValues: InsertPlanVersion
+  defaultValues: InsertPlanVersion | PublishedPlanVersion
 }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -50,7 +49,7 @@ export function PlanVersionForm({
   const isPublished = defaultValues.status === "published"
 
   const form = useZodForm({
-    schema: isPublished ? isPublishedSchema : versionInsertBaseSchema,
+    schema: versionInsertBaseSchema,
     defaultValues,
   })
 
@@ -120,8 +119,6 @@ export function PlanVersionForm({
     })
   }
 
-  const planType = form.watch("planType")
-
   return (
     <Form {...form}>
       <form className="space-y-6">
@@ -144,21 +141,13 @@ export function PlanVersionForm({
 
           <CurrencyFormField form={form} isDisabled={isPublished} />
 
-          <PlanTypeFormField form={form} isDisabled={isPublished} />
-
-          {planType === "recurring" && (
-            <BillingPeriodFormField form={form} isDisabled={isPublished} />
-          )}
-
           <CollectionMethodFormField form={form} isDisabled={isPublished} />
 
-          <StartCycleFormField form={form} isDisabled={isPublished} />
+          <BillingConfigFormField form={form} isDisabled={isPublished} />
 
           <TrialDaysFormField form={form} isDisabled={isPublished} />
 
           <WhenToBillFormField form={form} isDisabled={isPublished} />
-
-          <DescriptionFormField form={form} isDisabled={isPublished} />
 
           <AutoRenewFormField form={form} isDisabled={isPublished} />
 
@@ -168,6 +157,8 @@ export function PlanVersionForm({
             workspaceSlug={params.workspaceSlug as string}
             projectSlug={params.projectSlug as string}
           />
+
+          <DescriptionFormField form={form} isDisabled={isPublished} />
         </div>
 
         <div className="mt-8 flex justify-end space-x-4">

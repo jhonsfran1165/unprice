@@ -14,9 +14,9 @@ export const getUsage = protectedApiOrActiveProjectProcedure
       usage: z
         .object({
           projectId: z.string(),
-          customerId: z.string(),
+          customerId: z.string().optional(),
+          entitlementId: z.string().optional(),
           featureSlug: z.string(),
-          entitlementId: z.string(),
           count: z.number(),
           sum: z.number(),
           max: z.number(),

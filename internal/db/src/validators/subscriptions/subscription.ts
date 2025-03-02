@@ -8,13 +8,7 @@ import { planVersionSelectBaseSchema } from "../planVersions"
 import { UnPriceCalculationError } from "./../errors"
 import type { PlanVersionExtended } from "./../planVersionFeatures"
 import { configPackageSchema, planVersionExtendedSchema } from "./../planVersionFeatures"
-import {
-  collectionMethodSchema,
-  dueBehaviourSchema,
-  phaseStatusSchema,
-  startCycleSchema,
-  whenToBillSchema,
-} from "./../shared"
+import { subscriptionStatusSchema } from "./../shared"
 import {
   type SubscriptionItem,
   type SubscriptionItemConfig,
@@ -59,63 +53,41 @@ export const invoiceMetadataSchema = z.object({
 export const subscriptionMetadataSchema = z.object({
   reason: reasonSchema.optional().describe("Reason for the subscription status"),
   note: z.string().optional().describe("Note about status in the subscription"),
+  dates: z
+    .object({
+      previousCycleStartAt: z
+        .number()
+        .optional()
+        .describe("Date of the previous cycle start")
+        .optional(),
+      previousCycleEndAt: z
+        .number()
+        .optional()
+        .describe("Date of the previous cycle end")
+        .optional(),
+      lastChangeAt: z.number().optional().describe("Date of the last change").optional(),
+      lastRenewAt: z.number().optional().describe("Date of the last renewal").optional(),
+      lastInvoiceAt: z.number().optional().describe("Date of the last invoice").optional(),
+    })
+    .optional()
+    .describe("Important dates for the subscription"),
 })
 
 export const subscriptionPhaseMetadataSchema = z.object({
-  pastDue: z
-    .object({
-      invoiceId: z.string().describe("Invoice id that triggered the past due"),
-      reason: reasonSchema.optional().describe("Reason for the status"),
-      note: z.string().optional().describe("Note about status in the subscription phase"),
-    })
-    .optional()
-    .describe("Past due information"),
-  expire: z
-    .object({
-      phaseId: z.string().optional().describe("Phase id that triggered the expiration"),
-      reason: reasonSchema.optional().describe("Reason for the status"),
-      note: z.string().optional().describe("Note about status in the subscription phase"),
-    })
-    .optional()
-    .describe("Expiration information"),
-  cancel: z
-    .object({
-      reason: reasonSchema.optional().describe("Reason for the status"),
-      note: z.string().optional().describe("Note about status in the subscription phase"),
-    })
-    .optional()
-    .describe("Cancellation information"),
-  renew: z
-    .object({
-      reason: reasonSchema.optional().describe("Reason for the status"),
-      note: z.string().optional().describe("Note about status in the subscription phase"),
-    })
-    .optional()
-    .describe("Renewal information"),
-  change: z
-    .object({
-      reason: reasonSchema.optional().describe("Reason for the status"),
-      note: z.string().optional().describe("Note about status in the subscription phase"),
-      nextPhaseId: z.string().optional().describe("Next phase id"),
-    })
-    .optional()
-    .describe("Change information"),
+  note: z.string().optional().describe("Note about the subscription phase"),
+  reason: reasonSchema.optional().describe("Reason for the subscription phase"),
 })
 
 export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
   metadata: subscriptionMetadataSchema,
   timezone: z.string().min(1),
+  status: subscriptionStatusSchema,
 })
 
 export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhases, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
   trialDays: z.coerce.number().int().min(0).max(30).default(0),
   metadata: subscriptionPhaseMetadataSchema,
-  collectionMethod: collectionMethodSchema,
-  startCycle: startCycleSchema,
-  whenToBill: whenToBillSchema,
-  status: phaseStatusSchema,
-  dueBehaviour: dueBehaviourSchema,
 })
   .extend({
     items: subscriptionItemsSelectSchema.array().optional(),
@@ -133,10 +105,6 @@ export const subscriptionPhaseExtendedSchema = subscriptionPhaseSelectSchema.ext
 export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhases, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
   trialDays: z.coerce.number().int().min(0).max(30).default(0),
-  metadata: subscriptionPhaseMetadataSchema,
-  collectionMethod: collectionMethodSchema,
-  startCycle: startCycleSchema,
-  whenToBill: whenToBillSchema,
 })
   .extend({
     config: subscriptionItemsConfigSchema,
@@ -147,7 +115,6 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
   .partial({
     id: true,
     customerId: true,
-    paymentMethodRequired: true,
     paymentMethodId: true,
     config: true,
     items: true,
@@ -156,7 +123,6 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
   .omit({
     createdAtM: true,
     updatedAtM: true,
-    status: true,
     projectId: true,
   })
   .required({

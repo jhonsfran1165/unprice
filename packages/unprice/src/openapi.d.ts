@@ -4,7 +4,23 @@
  */
 
 export interface paths {
-  "/edge/customers.create": {
+  "/lambda/paymentProvider.getSession": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations["paymentProvider-getSession"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/lambda/customers.create": {
     parameters: {
       query?: never
       header?: never
@@ -20,7 +36,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/edge/customers.remove": {
+  "/lambda/customers.remove": {
     parameters: {
       query?: never
       header?: never
@@ -36,7 +52,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/edge/customers.update": {
+  "/lambda/customers.update": {
     parameters: {
       query?: never
       header?: never
@@ -52,7 +68,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/edge/customers.createPaymentMethod": {
+  "/lambda/customers.createPaymentMethod": {
     parameters: {
       query?: never
       header?: never
@@ -68,7 +84,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/edge/customers.exist": {
+  "/lambda/customers.exist": {
     parameters: {
       query?: never
       header?: never
@@ -84,7 +100,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/edge/customers.getByEmail": {
+  "/lambda/customers.getByEmail": {
     parameters: {
       query?: never
       header?: never
@@ -100,7 +116,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/edge/customers.getByIdActiveProject": {
+  "/lambda/customers.getByIdActiveProject": {
     parameters: {
       query?: never
       header?: never
@@ -116,7 +132,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/edge/customers.getSubscriptions": {
+  "/lambda/customers.getSubscriptions": {
     parameters: {
       query?: never
       header?: never
@@ -256,6 +272,43 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
+  "paymentProvider-getSession": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          paymentProvider: "stripe" | "lemonsqueezy"
+          sessionId: string
+          projectId: string
+        }
+      }
+    }
+    responses: {
+      /** @description Successful response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            metadata: {
+              [key: string]: string | undefined
+            } | null
+            customerId: string
+            subscriptionId: string | null
+            paymentMethodId: string | null
+          }
+        }
+      }
+      default: components["responses"]["error"]
+    }
+  }
   "customers-create": {
     parameters: {
       query?: never
@@ -279,6 +332,7 @@ export interface operations {
           } | null
           stripeCustomerId?: string | null
           active?: boolean | null
+          isMain?: boolean | null
           /** @enum {string} */
           defaultCurrency?: "USD" | "EUR"
           timezone?: string
@@ -308,6 +362,7 @@ export interface operations {
               } | null
               stripeCustomerId: string | null
               active: boolean | null
+              isMain: boolean | null
               /** @enum {string} */
               defaultCurrency: "USD" | "EUR"
               timezone: string
@@ -355,6 +410,7 @@ export interface operations {
               } | null
               stripeCustomerId: string | null
               active: boolean | null
+              isMain: boolean | null
               /** @enum {string} */
               defaultCurrency: "USD" | "EUR"
               timezone: string
@@ -411,6 +467,7 @@ export interface operations {
               } | null
               stripeCustomerId: string | null
               active: boolean | null
+              isMain: boolean | null
               /** @enum {string} */
               defaultCurrency: "USD" | "EUR"
               timezone: string
@@ -519,6 +576,7 @@ export interface operations {
               } | null
               stripeCustomerId: string | null
               active: boolean | null
+              isMain: boolean | null
               /** @enum {string} */
               defaultCurrency: "USD" | "EUR"
               timezone: string
@@ -562,6 +620,7 @@ export interface operations {
               } | null
               stripeCustomerId: string | null
               active: boolean | null
+              isMain: boolean | null
               /** @enum {string} */
               defaultCurrency: "USD" | "EUR"
               timezone: string
@@ -605,6 +664,7 @@ export interface operations {
               } | null
               stripeCustomerId: string | null
               active: boolean | null
+              isMain: boolean | null
               /** @enum {string} */
               defaultCurrency: "USD" | "EUR"
               timezone: string
@@ -614,18 +674,23 @@ export interface operations {
                 createdAtM: number
                 updatedAtM: number
                 customerId: string
-                /** @enum {string} */
-                status?: "pending" | "active" | "trialing" | "canceled" | "expired" | "past_due"
                 active: boolean
                 planSlug: string | null
                 timezone: string
+                previousCycleStartAt: number | null
+                previousCycleEndAt: number | null
                 currentCycleStartAt: number
                 currentCycleEndAt: number
                 nextInvoiceAt: number
                 lastInvoiceAt: number | null
+                lastRenewAt: number | null
+                renewAt: number
                 pastDueAt: number | null
+                pastDuedAt: number | null
                 cancelAt: number | null
                 canceledAt: number | null
+                expiresAt: number | null
+                expiredAt: number | null
                 changeAt: number | null
                 changedAt: number | null
                 metadata: {
@@ -634,20 +699,26 @@ export interface operations {
                    * @enum {string}
                    */
                   reason?:
-                    | "user_requested"
-                    | "admin_requested"
                     | "payment_failed"
                     | "payment_pending"
                     | "payment_method_not_found"
                     | "policy_violation"
-                    | "no_auto_renew"
+                    | "pending_cancellation"
+                    | "invoice_failed"
+                    | "invoice_pending"
+                    | "payment_received"
+                    | "pending_change"
+                    | "pending_expiration"
+                    | "trial_ended"
+                    | "user_requested"
+                    | "admin_requested"
+                    | "ending"
+                    | "renewed"
+                    | "cancelled"
+                    | "auto_renew_disabled"
+                    | "customer_signout"
                   /** @description Note about status in the subscription */
                   note?: string
-                  /**
-                   * @description What to do when the subscription is past due
-                   * @enum {string}
-                   */
-                  dueBehaviour?: "cancel" | "downgrade"
                 } | null
                 customer: {
                   id: string
@@ -664,187 +735,203 @@ export interface operations {
                   } | null
                   stripeCustomerId: string | null
                   active: boolean | null
+                  isMain: boolean | null
                   /** @enum {string} */
                   defaultCurrency: "USD" | "EUR"
                   timezone: string
                 }
-                version: {
+                phases: {
                   id: string
                   projectId: string
-                  createdAtM: number
-                  updatedAtM: number
-                  planId: string
-                  description: string | null
-                  latest: boolean | null
-                  title: string
-                  tags: string[] | null
-                  active: boolean | null
-                  /** @enum {string|null} */
-                  status: "draft" | "published"
-                  publishedAt: number | null
-                  publishedBy: string | null
-                  archived: boolean | null
-                  archivedAt: number | null
-                  archivedBy: string | null
+                  createdAtM?: number
+                  updatedAtM?: number
+                  subscriptionId: string
+                  planVersionId: string
+                  paymentMethodId: string | null
                   /** @enum {string} */
-                  paymentProvider: "stripe" | "lemonsqueezy"
+                  status:
+                    | "active"
+                    | "trialing"
+                    | "changed"
+                    | "canceled"
+                    | "expired"
+                    | "past_dued"
+                    | "trial_ended"
+                  /** @default 0 */
+                  trialDays: number
+                  active: boolean
                   /** @enum {string} */
-                  planType: "recurring"
-                  /** @enum {string} */
-                  currency: "USD" | "EUR"
-                  /** @enum {string|null} */
-                  billingPeriod: "month" | "year"
+                  dueBehaviour: "cancel" | "downgrade"
                   /** @enum {string} */
                   whenToBill: "pay_in_advance" | "pay_in_arrear"
                   /** @default 1 */
-                  startCycle: number | null
-                  gracePeriod: number | null
+                  startCycle: number
+                  gracePeriod: number
                   /** @enum {string} */
                   collectionMethod: "charge_automatically" | "send_invoice"
-                  trialDays: number
                   autoRenew: boolean
+                  /** @enum {string} */
+                  billingPeriod: "month" | "year" | "custom" | "onetime"
+                  trialEndsAt: number | null
+                  startAt: number
+                  endAt: number | null
                   metadata: {
-                    externalId?: string
+                    /** @description Past due information */
+                    pastDue?: {
+                      /** @description Invoice id that triggered the past due */
+                      invoiceId: string
+                      /**
+                       * @description Reason for the status
+                       * @enum {string}
+                       */
+                      reason?:
+                        | "payment_failed"
+                        | "payment_pending"
+                        | "payment_method_not_found"
+                        | "policy_violation"
+                        | "pending_cancellation"
+                        | "invoice_failed"
+                        | "invoice_pending"
+                        | "payment_received"
+                        | "pending_change"
+                        | "pending_expiration"
+                        | "trial_ended"
+                        | "user_requested"
+                        | "admin_requested"
+                        | "ending"
+                        | "renewed"
+                        | "cancelled"
+                        | "auto_renew_disabled"
+                        | "customer_signout"
+                      /** @description Note about status in the subscription phase */
+                      note?: string
+                    }
+                    /** @description Expiration information */
+                    expire?: {
+                      /** @description Phase id that triggered the expiration */
+                      phaseId?: string
+                      /**
+                       * @description Reason for the status
+                       * @enum {string}
+                       */
+                      reason?:
+                        | "payment_failed"
+                        | "payment_pending"
+                        | "payment_method_not_found"
+                        | "policy_violation"
+                        | "pending_cancellation"
+                        | "invoice_failed"
+                        | "invoice_pending"
+                        | "payment_received"
+                        | "pending_change"
+                        | "pending_expiration"
+                        | "trial_ended"
+                        | "user_requested"
+                        | "admin_requested"
+                        | "ending"
+                        | "renewed"
+                        | "cancelled"
+                        | "auto_renew_disabled"
+                        | "customer_signout"
+                      /** @description Note about status in the subscription phase */
+                      note?: string
+                    }
+                    /** @description Cancellation information */
+                    cancel?: {
+                      /**
+                       * @description Reason for the status
+                       * @enum {string}
+                       */
+                      reason?:
+                        | "payment_failed"
+                        | "payment_pending"
+                        | "payment_method_not_found"
+                        | "policy_violation"
+                        | "pending_cancellation"
+                        | "invoice_failed"
+                        | "invoice_pending"
+                        | "payment_received"
+                        | "pending_change"
+                        | "pending_expiration"
+                        | "trial_ended"
+                        | "user_requested"
+                        | "admin_requested"
+                        | "ending"
+                        | "renewed"
+                        | "cancelled"
+                        | "auto_renew_disabled"
+                        | "customer_signout"
+                      /** @description Note about status in the subscription phase */
+                      note?: string
+                    }
+                    /** @description Renewal information */
+                    renew?: {
+                      /**
+                       * @description Reason for the status
+                       * @enum {string}
+                       */
+                      reason?:
+                        | "payment_failed"
+                        | "payment_pending"
+                        | "payment_method_not_found"
+                        | "policy_violation"
+                        | "pending_cancellation"
+                        | "invoice_failed"
+                        | "invoice_pending"
+                        | "payment_received"
+                        | "pending_change"
+                        | "pending_expiration"
+                        | "trial_ended"
+                        | "user_requested"
+                        | "admin_requested"
+                        | "ending"
+                        | "renewed"
+                        | "cancelled"
+                        | "auto_renew_disabled"
+                        | "customer_signout"
+                      /** @description Note about status in the subscription phase */
+                      note?: string
+                    }
+                    /** @description Change information */
+                    change?: {
+                      /**
+                       * @description Reason for the status
+                       * @enum {string}
+                       */
+                      reason?:
+                        | "payment_failed"
+                        | "payment_pending"
+                        | "payment_method_not_found"
+                        | "policy_violation"
+                        | "pending_cancellation"
+                        | "invoice_failed"
+                        | "invoice_pending"
+                        | "payment_received"
+                        | "pending_change"
+                        | "pending_expiration"
+                        | "trial_ended"
+                        | "user_requested"
+                        | "admin_requested"
+                        | "ending"
+                        | "renewed"
+                        | "cancelled"
+                        | "auto_renew_disabled"
+                        | "customer_signout"
+                      /** @description Note about status in the subscription phase */
+                      note?: string
+                      /** @description Next phase id */
+                      nextPhaseId?: string
+                    }
                   } | null
-                  paymentMethodRequired: boolean | null
-                  version: number
-                }
-                items: {
-                  id: string
-                  projectId: string
-                  createdAtM: number
-                  updatedAtM: number
-                  units: number | null
-                  featurePlanVersionId: string
-                  subscriptionPhaseId: string
-                  featurePlanVersion: {
+                  items?: {
                     id: string
                     projectId: string
                     createdAtM: number
                     updatedAtM: number
-                    planVersionId: string
-                    featureId: string
-                    /** @enum {string} */
-                    featureType: "flat" | "tier" | "package" | "usage"
-                    config:
-                      | (
-                          | {
-                              tiers?: {
-                                unitPrice: {
-                                  dinero?: unknown
-                                  displayAmount: string
-                                }
-                                flatPrice: {
-                                  dinero?: unknown
-                                  displayAmount: string
-                                }
-                                firstUnit: number
-                                lastUnit: number | null
-                              }[]
-                              price: {
-                                dinero?: unknown
-                                displayAmount: string
-                              }
-                              /** @enum {string} */
-                              usageMode?: "tier" | "package" | "unit"
-                              /** @enum {string} */
-                              tierMode?: "volume" | "graduated"
-                              units?: number
-                            }
-                          | {
-                              price?: {
-                                dinero?: unknown
-                                displayAmount: string
-                              }
-                              /** @enum {string} */
-                              tierMode: "volume" | "graduated"
-                              tiers: {
-                                unitPrice: {
-                                  dinero?: unknown
-                                  displayAmount: string
-                                }
-                                flatPrice: {
-                                  dinero?: unknown
-                                  displayAmount: string
-                                }
-                                firstUnit: number
-                                lastUnit: number | null
-                              }[]
-                              /** @enum {string} */
-                              usageMode?: "tier" | "package" | "unit"
-                              units?: number
-                            }
-                          | {
-                              price?: {
-                                dinero?: unknown
-                                displayAmount: string
-                              }
-                              /** @enum {string} */
-                              usageMode: "tier" | "package" | "unit"
-                              /** @enum {string} */
-                              tierMode?: "volume" | "graduated"
-                              tiers?: {
-                                unitPrice: {
-                                  dinero?: unknown
-                                  displayAmount: string
-                                }
-                                flatPrice: {
-                                  dinero?: unknown
-                                  displayAmount: string
-                                }
-                                firstUnit: number
-                                lastUnit: number | null
-                              }[]
-                              units?: number
-                            }
-                          | {
-                              tiers?: {
-                                unitPrice: {
-                                  dinero?: unknown
-                                  displayAmount: string
-                                }
-                                flatPrice: {
-                                  dinero?: unknown
-                                  displayAmount: string
-                                }
-                                firstUnit: number
-                                lastUnit: number | null
-                              }[]
-                              price: {
-                                dinero?: unknown
-                                displayAmount: string
-                              }
-                              /** @enum {string} */
-                              usageMode?: "tier" | "package" | "unit"
-                              /** @enum {string} */
-                              tierMode?: "volume" | "graduated"
-                              /** @description Units for the package */
-                              units: number
-                            }
-                        )
-                      | null
-                    metadata: {
-                      stripeProductId?: string
-                      realtime?: boolean
-                    } | null
-                    /** @enum {string} */
-                    aggregationMethod: "sum" | "last_during_period" | "count" | "max"
-                    order: number
-                    /** @default 1 */
-                    defaultQuantity: number | null
-                    limit?: number | null
-                    hidden: boolean
-                    feature: {
-                      id: string
-                      projectId: string
-                      createdAtM: number
-                      updatedAtM: number
-                      slug: string
-                      code: number
-                      title: string
-                      description: string | null
-                    }
-                  }
+                    units: number | null
+                    featurePlanVersionId: string
+                    subscriptionPhaseId: string
+                  }[]
                 }[]
               }[]
             }
@@ -859,7 +946,6 @@ export interface operations {
       query: {
         customerId: string
         provider: "stripe" | "lemonsqueezy"
-        projectSlug?: string
       }
       header?: never
       path?: never
@@ -911,6 +997,7 @@ export interface operations {
           } | null
           stripeCustomerId?: string | null
           active?: boolean | null
+          isMain?: boolean | null
           /** @enum {string} */
           defaultCurrency?: "USD" | "EUR"
           timezone?: string
@@ -918,11 +1005,8 @@ export interface operations {
           config?: {
             featurePlanId: string
             featureSlug: string
-            /**
-             * @description if the item is a usage item
-             * @default false
-             */
-            isUsage: boolean
+            /** @description if the item is a usage item */
+            isUsage?: boolean
             /** @description units of the feature the user is subscribed to */
             units?: number
             /** @description minimum units of the feature the user is subscribed to */
@@ -989,6 +1073,7 @@ export interface operations {
     parameters: {
       query: {
         customerId: string
+        skipCache?: boolean
       }
       header?: never
       path?: never
@@ -1003,7 +1088,58 @@ export interface operations {
         }
         content: {
           "application/json": {
-            entitlements?: unknown
+            entitlements: {
+              id: string
+              projectId: string
+              customerId: string
+              subscriptionItemId: string | null
+              featurePlanVersionId: string
+              units: number | null
+              limit: number | null
+              usage: number | null
+              featureSlug: string
+              /** @enum {string} */
+              featureType: "flat" | "tier" | "package" | "usage"
+              /** @enum {string} */
+              aggregationMethod:
+                | "sum"
+                | "sum_all"
+                | "last_during_period"
+                | "count"
+                | "count_all"
+                | "max"
+                | "max_all"
+              realtime: boolean
+              type: string
+              startAt: number
+              endAt: number | null
+              isCustom: boolean
+              lastUsageUpdateAt: number
+              metadata:
+                | (
+                    | (string | number | boolean | "null")
+                    | unknown[]
+                    | {
+                        [key: string]: unknown
+                      }
+                  )
+                | null
+              project: {
+                id: string
+                workspaceId: string
+              }
+              subscriptionItem: {
+                id: string
+                subscriptionPhase: {
+                  id: string
+                  subscription: {
+                    id: string
+                    currentCycleStartAt: number
+                    currentCycleEndAt: number
+                  } | null
+                } | null
+              } | null
+            }[]
           }
         }
       }
@@ -1030,18 +1166,35 @@ export interface operations {
         content: {
           "application/json": {
             access: boolean
-            /** @enum {string} */
             deniedReason?:
-              | "RATE_LIMITED"
-              | "USAGE_EXCEEDED"
-              | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION"
-              | "FEATURE_OR_CUSTOMER_NOT_FOUND"
-              | "FEATURE_HAS_NO_USAGE_RECORD"
-              | "LIMIT_EXCEEDED"
+              | (
+                  | "RATE_LIMITED"
+                  | "USAGE_EXCEEDED"
+                  | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION"
+                  | "FEATURE_OR_CUSTOMER_NOT_FOUND"
+                  | "FEATURE_HAS_NO_USAGE_RECORD"
+                  | "LIMIT_EXCEEDED"
+                )
+              | (
+                  | "SUBSCRIPTION_EXPIRED"
+                  | "SUBSCRIPTION_NOT_ACTIVE"
+                  | "FEATURE_NOT_FOUND_IN_SUBSCRIPTION"
+                  | "FEATURE_OR_CUSTOMER_NOT_FOUND"
+                  | "CUSTOMER_HAS_NO_SUBSCRIPTIONS"
+                  | "CUSTOMER_NOT_FOUND"
+                  | "FEATURE_TYPE_NOT_SUPPORTED"
+                  | "FEATURE_IS_NOT_USAGE_TYPE"
+                  | "FEATURE_HAS_NO_USAGE_RECORD"
+                  | "FEATURE_NOT_SUPPORT_USAGE"
+                  | "UNHANDLED_ERROR"
+                  | "INTERNAL_SERVER_ERROR"
+                )
             currentUsage?: number
             limit?: number
-            featureType?: unknown
+            /** @enum {string} */
+            featureType?: "flat" | "tier" | "package" | "usage"
             units?: number
+            message?: string
           }
         }
       }

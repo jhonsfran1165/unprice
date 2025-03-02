@@ -29,6 +29,8 @@ interface PlanFeatureListProps {
 export function PlanFeatureList({ planVersion }: PlanFeatureListProps) {
   const [filter, setFilter] = useState("")
 
+  if (!planVersion) return null
+
   const { planFeatures, plan, ...activePlanVersion } = planVersion
 
   // hydrate atoms with initial data

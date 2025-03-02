@@ -3,6 +3,7 @@ import * as schema from "@unprice/db/schema"
 import { withDateFilters, withPagination } from "@unprice/db/utils"
 import {
   type ApiKey,
+  featureVerificationSchema,
   searchParamsSchemaDataTable,
   selectApiKeySchema,
 } from "@unprice/db/validators"
@@ -16,6 +17,7 @@ export const listByActiveProject = protectedProjectProcedure
     z.object({
       apikeys: z.array(selectApiKeySchema),
       pageCount: z.number(),
+      error: featureVerificationSchema,
     })
   )
   .query(async (opts) => {
@@ -24,15 +26,21 @@ export const listByActiveProject = protectedProjectProcedure
     const columns = getTableColumns(schema.apikeys)
     const filter = `%${search}%`
 
-    // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId: project.workspace.unPriceCustomerId,
       featureSlug: "apikeys",
       ctx: opts.ctx,
       skipCache: true,
       isInternal: project.workspace.isInternal,
-      throwOnNoAccess: false,
     })
+
+    if (!result.access) {
+      return {
+        apikeys: [],
+        pageCount: 0,
+        error: result,
+      }
+    }
 
     try {
       const expressions = [
@@ -75,9 +83,9 @@ export const listByActiveProject = protectedProjectProcedure
       })
 
       const pageCount = Math.ceil(total / page_size)
-      return { apikeys: data, pageCount }
+      return { apikeys: data, pageCount, error: result }
     } catch (err: unknown) {
       console.error(err)
-      return { apikeys: [], pageCount: 0 }
+      return { apikeys: [], pageCount: 0, error: result }
     }
   })

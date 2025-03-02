@@ -48,17 +48,15 @@ export const pastDueTask = task({
       throw initPhaseMachineResult.err
     }
 
-    const result = await subscriptionService.pastDueSubscription({
+    console.info("Past due", {
+      subscriptionId,
+      projectId,
       now,
       pastDueAt,
       phaseId,
     })
 
-    // we have to throw if there is an error so the task fails
-    if (result.err) {
-      throw result.err
-    }
-
-    return result.val
+    // TODO: past due the subscription
+    return true
   },
 })

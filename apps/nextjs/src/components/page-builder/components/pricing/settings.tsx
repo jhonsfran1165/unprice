@@ -59,31 +59,37 @@ export const PricingTableSettings = () => {
               }, 500)
             }}
           >
-            {({ value, index }) => (
-              <Fragment>
-                <ToolbarItemDropdown
-                  label="Plan"
-                  isLoading={isLoading}
-                  options={options ?? []}
-                  value={value.id}
-                  onChange={(planId) => {
-                    setProp((props) => {
-                      const plan = findPlan(planId)
-                      if (plan) {
-                        props.plans[index] = plan
-                      }
-                    }, 500)
-                  }}
-                  trigger={() => (
-                    <Button variant="outline" size={"sm"} className="w-full">
-                      <div className="flex items-center gap-2">
-                        <span>{`${value.title} - ${value.version}`}</span>
-                      </div>
-                    </Button>
-                  )}
-                />
-              </Fragment>
-            )}
+            {({ value, index }) => {
+              if (!value) {
+                return null
+              }
+
+              return (
+                <Fragment>
+                  <ToolbarItemDropdown
+                    label="Plan"
+                    isLoading={isLoading}
+                    options={options ?? []}
+                    value={value.id}
+                    onChange={(planId) => {
+                      setProp((props) => {
+                        const plan = findPlan(planId)
+                        if (plan) {
+                          props.plans[index] = plan
+                        }
+                      }, 500)
+                    }}
+                    trigger={() => (
+                      <Button variant="outline" size={"sm"} className="w-full">
+                        <div className="flex items-center gap-2">
+                          <span>{`${value.title} - ${value.version}`}</span>
+                        </div>
+                      </Button>
+                    )}
+                  />
+                </Fragment>
+              )
+            }}
           </ToolbarItemArray>
         )}
       </ToolbarSection>

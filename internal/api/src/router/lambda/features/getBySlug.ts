@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server"
 import { featureSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
@@ -10,16 +11,20 @@ export const getBySlug = protectedProjectProcedure
     const { slug } = opts.input
     const project = opts.ctx.project
 
-    // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId: project.workspace.unPriceCustomerId,
       featureSlug: "features",
       ctx: opts.ctx,
       skipCache: true,
       isInternal: project.workspace.isInternal,
-      // getById endpoint does not need to throw an error
-      throwOnNoAccess: false,
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const feature = await opts.ctx.db.query.features.findFirst({
       with: {

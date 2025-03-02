@@ -34,7 +34,7 @@ export const remove = protectedWorkspaceProcedure
       isInternal: workspace.isInternal,
     })
 
-    if (result.deniedReason === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
+    if (!result.access) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: `You don't have access to this feature ${result.deniedReason}`,

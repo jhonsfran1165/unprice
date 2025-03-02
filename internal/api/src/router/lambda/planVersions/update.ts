@@ -27,8 +27,7 @@ export const update = protectedProjectProcedure
       id,
       description,
       currency,
-      billingPeriod,
-      startCycle,
+      billingConfig,
       gracePeriod,
       title,
       tags,
@@ -50,15 +49,23 @@ export const update = protectedProjectProcedure
     const featureSlug = "plan-versions"
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
-      // update endpoint does not need to throw an error
-      throwOnNoAccess: false,
+      metadata: {
+        action: "update",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const planVersionData = await opts.ctx.db.query.versions.findFirst({
       with: {
@@ -278,8 +285,7 @@ export const update = protectedProjectProcedure
         .set({
           ...(description && { description }),
           ...(currency && { currency }),
-          ...(billingPeriod && { billingPeriod }),
-          ...(startCycle && { startCycle }),
+          ...(billingConfig && { billingConfig }),
           ...(gracePeriod !== undefined && { gracePeriod }),
           ...(title && { title }),
           ...(tags && { tags }),

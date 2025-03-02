@@ -33,11 +33,9 @@ export const verify = protectedWorkspaceProcedure
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
-      // verify endpoint does not need to throw an error
-      throwOnNoAccess: false,
     })
 
-    if (result.deniedReason === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
+    if (!result.access) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: `You don't have access to this feature ${result.deniedReason}`,

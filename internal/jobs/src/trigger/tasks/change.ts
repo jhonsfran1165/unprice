@@ -48,17 +48,15 @@ export const changeTask = task({
       throw initPhaseMachineResult.err
     }
 
-    const result = await subscriptionService.changeSubscription({
+    console.info("Changing subscription", {
+      subscriptionId,
+      projectId,
       now,
       changeAt,
       phaseId,
     })
 
-    // we have to throw if there is an error so the task fails
-    if (result.err) {
-      throw result.err
-    }
-
-    return result.val
+    // TODO: change the subscription
+    return true
   },
 })

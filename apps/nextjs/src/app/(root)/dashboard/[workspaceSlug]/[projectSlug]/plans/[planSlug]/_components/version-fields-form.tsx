@@ -1,5 +1,5 @@
 "use client"
-import type { InsertPlanVersion } from "@unprice/db/validators"
+import type { Currency, PaymentProvider } from "@unprice/db/validators"
 import {
   FormControl,
   FormDescription,
@@ -10,26 +10,34 @@ import {
 } from "@unprice/ui/form"
 import { Input } from "@unprice/ui/input"
 import { Switch } from "@unprice/ui/switch"
-import type { UseFormReturn } from "react-hook-form"
+import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form"
 
-import { CURRENCIES, PAYMENT_PROVIDERS, PLAN_BILLING_PERIODS, PLAN_TYPES } from "@unprice/db/utils"
+import { CURRENCIES, PAYMENT_PROVIDERS } from "@unprice/db/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@unprice/ui/select"
 import { Textarea } from "@unprice/ui/text-area"
 import { useParams } from "next/navigation"
 import { SuperLink } from "~/components/super-link"
-import type { PublishedPlanVersion } from "./plan-version-form"
 
-export function PaymentMethodRequiredFormField({
+interface FormValues extends FieldValues {
+  paymentMethodRequired: boolean
+  title: string
+  currency: Currency
+  paymentProvider: PaymentProvider
+  description: string
+  trialDays: number
+}
+
+export function PaymentMethodRequiredFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
 }: {
-  form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
+  form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
 }) {
   return (
     <FormField
       control={form.control}
-      name="paymentMethodRequired"
+      name={"paymentMethodRequired" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
           <div className="space-y-0.5">
@@ -42,7 +50,9 @@ export function PaymentMethodRequiredFormField({
           <FormControl>
             <Switch
               checked={field.value ?? false}
-              onCheckedChange={field.onChange}
+              onCheckedChange={(value) => {
+                field.onChange(value)
+              }}
               disabled={isDisabled}
             />
           </FormControl>
@@ -52,17 +62,17 @@ export function PaymentMethodRequiredFormField({
   )
 }
 
-export function TitleFormField({
+export function TitleFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
 }: {
-  form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
+  form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
 }) {
   return (
     <FormField
       control={form.control}
-      name="title"
+      name={"title" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="flex flex-col justify-end">
           <FormLabel>Plan version Title</FormLabel>
@@ -80,11 +90,11 @@ export function TitleFormField({
   )
 }
 
-export function CurrencyFormField({
+export function CurrencyFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
 }: {
-  form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
+  form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
 }) {
   const { workspaceSlug, projectSlug } = useParams()
@@ -92,7 +102,7 @@ export function CurrencyFormField({
   return (
     <FormField
       control={form.control}
-      name="currency"
+      name={"currency" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="flex flex-col justify-end">
           <div className="flex justify-between">
@@ -129,89 +139,13 @@ export function CurrencyFormField({
   )
 }
 
-export function PlanTypeFormField({
-  form,
-  isDisabled,
-}: {
-  form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
-  isDisabled?: boolean
-}) {
-  return (
-    <FormField
-      control={form.control}
-      name="planType"
-      render={({ field }) => (
-        <FormItem className="flex flex-col justify-end">
-          <FormLabel>Type of the plan</FormLabel>
-          <FormDescription>Only recurring plans are supported at the moment.</FormDescription>
-          <Select onValueChange={field.onChange} value={field.value ?? ""} disabled={isDisabled}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a plan type" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {PLAN_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  )
-}
-
-export function BillingPeriodFormField({
-  form,
-  isDisabled,
-}: {
-  form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
-  isDisabled?: boolean
-}) {
-  return (
-    <FormField
-      control={form.control}
-      name="billingPeriod"
-      render={({ field }) => (
-        <FormItem className="col-start-2 flex flex-col justify-end">
-          <FormLabel>Billing period</FormLabel>
-          <FormDescription>How often you want to bill customers</FormDescription>
-          <Select
-            onValueChange={field.onChange}
-            value={field.value ?? "month"}
-            disabled={isDisabled}
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a billing period" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {PLAN_BILLING_PERIODS.map((period) => (
-                <SelectItem key={period} value={period}>
-                  {period}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  )
-}
-
-export function PaymentProviderFormField({
+export function PaymentProviderFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
   workspaceSlug,
   projectSlug,
 }: {
-  form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
+  form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
   workspaceSlug: string
   projectSlug: string
@@ -219,7 +153,7 @@ export function PaymentProviderFormField({
   return (
     <FormField
       control={form.control}
-      name="paymentProvider"
+      name={"paymentProvider" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="col-start-1 row-start-5 flex flex-col justify-end">
           <div className="flex justify-between">
@@ -257,17 +191,17 @@ export function PaymentProviderFormField({
   )
 }
 
-export function DescriptionFormField({
+export function DescriptionFormField<TFieldValues extends FormValues>({
   form,
   isDisabled,
 }: {
-  form: UseFormReturn<InsertPlanVersion | PublishedPlanVersion>
+  form: UseFormReturn<TFieldValues>
   isDisabled?: boolean
 }) {
   return (
     <FormField
       control={form.control}
-      name="description"
+      name={"description" as FieldPath<TFieldValues>}
       render={({ field }) => (
         <FormItem className="col-start-2 row-span-2 flex flex-col justify-start">
           <FormLabel>Description</FormLabel>

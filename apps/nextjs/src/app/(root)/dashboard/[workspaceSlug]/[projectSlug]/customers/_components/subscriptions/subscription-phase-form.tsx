@@ -8,15 +8,10 @@ import {
 } from "@unprice/db/validators"
 import { Form } from "@unprice/ui/form"
 import { Separator } from "@unprice/ui/separator"
-import { useEffect } from "react"
 import { z } from "zod"
-import CollectionMethodFormField from "~/components/forms/collection-method-field"
 import ConfigItemsFormField from "~/components/forms/items-fields"
 import PaymentMethodsFormField from "~/components/forms/payment-method-field"
 import SelectPlanFormField from "~/components/forms/select-plan-field"
-import StartCycleFormField from "~/components/forms/start-cycle-field"
-import TrialDaysFormField from "~/components/forms/trial-days-field"
-import WhenToBillFormField from "~/components/forms/when-to-bill-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
@@ -37,16 +32,16 @@ export function SubscriptionPhaseForm({
   const formSchema = editMode
     ? subscriptionPhaseSelectSchema
     : subscriptionPhaseInsertSchema.superRefine((data, ctx) => {
-        if (data.paymentMethodRequired) {
-          if (!data.paymentMethodId) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Payment method is required for this phase",
-              path: ["paymentMethodId"],
-            })
-          }
+      if (data.paymentMethodRequired) {
+        if (!data.paymentMethodId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Payment method is required for this phase",
+            path: ["paymentMethodId"],
+          })
         }
-      })
+      }
+    })
 
   const form = useZodForm({
     schema: formSchema,
@@ -95,17 +90,6 @@ export function SubscriptionPhaseForm({
     (version) => version.id === selectedPlanVersionId
   )
 
-  useEffect(() => {
-    if (selectedPlanVersion) {
-      form.setValue("whenToBill", selectedPlanVersion.whenToBill)
-      form.setValue("startCycle", selectedPlanVersion.startCycle)
-      form.setValue("paymentMethodRequired", selectedPlanVersion.paymentMethodRequired)
-      form.setValue("collectionMethod", selectedPlanVersion.collectionMethod)
-      form.setValue("whenToBill", selectedPlanVersion.whenToBill)
-      form.setValue("trialDays", selectedPlanVersion.trialDays)
-    }
-  }, [selectedPlanVersion?.id])
-
   return (
     <Form {...form}>
       <form className="space-y-6">
@@ -115,20 +99,6 @@ export function SubscriptionPhaseForm({
           planVersions={planVersions?.planVersions ?? []}
           isLoading={isLoading}
         />
-
-        <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
-          <CollectionMethodFormField form={form} isDisabled={editMode} />
-          <TrialDaysFormField form={form} isDisabled={editMode} />
-        </div>
-
-        <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
-          <StartCycleFormField
-            form={form}
-            billingPeriod={selectedPlanVersion?.billingPeriod}
-            isDisabled={editMode}
-          />
-          <WhenToBillFormField form={form} isDisabled={editMode} />
-        </div>
 
         <Separator />
 

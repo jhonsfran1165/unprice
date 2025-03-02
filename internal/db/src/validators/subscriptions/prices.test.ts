@@ -20,7 +20,9 @@ describe("calculateFlatPricePlan", () => {
       active: true,
       status: "published",
       paymentProvider: "stripe",
-      billingPeriod: "month",
+      billingInterval: "month",
+      billingIntervalCount: 1,
+      billingAnchor: 1,
       planType: "recurring",
       planFeatures: [
         {
@@ -95,7 +97,6 @@ describe("calculateFlatPricePlan", () => {
         },
       ],
       whenToBill: "pay_in_advance",
-      startCycle: 1,
       gracePeriod: null,
       metadata: null,
     } as PlanVersionExtended

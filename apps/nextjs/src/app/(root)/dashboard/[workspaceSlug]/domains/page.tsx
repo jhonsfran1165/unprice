@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@unprice/ui/card"
 import { Button } from "@unprice/ui/button"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
+import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
 import { api } from "~/trpc/server"
 import DomainConfiguration from "./_components/domain-configuration"
@@ -15,7 +16,11 @@ import { DomainDialog } from "./_components/domain-dialog"
 import { VerifyDomainButton } from "./_components/domain-verify-button"
 
 export default async function PageDomains() {
-  const domains = await api.domains.getAllByActiveWorkspace()
+  const { domains, error } = await api.domains.getAllByActiveWorkspace()
+
+  if (!error?.access) {
+    return <UpgradePlanError error={error} />
+  }
 
   return (
     <DashboardShell
@@ -66,7 +71,7 @@ export default async function PageDomains() {
 const DomainCard = ({
   domain,
 }: {
-  domain: RouterOutputs["domains"]["getAllByActiveWorkspace"][number]
+  domain: RouterOutputs["domains"]["getAllByActiveWorkspace"]["domains"][number]
 }) => {
   const domainVerified = !!domain.verified
 

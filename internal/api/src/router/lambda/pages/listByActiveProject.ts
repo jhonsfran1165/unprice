@@ -1,4 +1,4 @@
-import { pageSelectBaseSchema } from "@unprice/db/validators"
+import { featureVerificationSchema, pageSelectBaseSchema } from "@unprice/db/validators"
 import { z } from "zod"
 
 import { protectedProjectProcedure } from "#trpc"
@@ -14,6 +14,7 @@ export const listByActiveProject = protectedProjectProcedure
   .output(
     z.object({
       pages: z.array(pageSelectBaseSchema.extend({})),
+      error: featureVerificationSchema,
     })
   )
   .query(async (opts) => {
@@ -23,17 +24,20 @@ export const listByActiveProject = protectedProjectProcedure
     const customerId = workspace.unPriceCustomerId
     const featureSlug = "pages"
 
-    // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
-      // listByActiveProject endpoint does not need to throw an error
-      throwOnNoAccess: false,
     })
 
+    if (!result.access) {
+      return {
+        pages: [],
+        error: result,
+      }
+    }
     const pages = await opts.ctx.db.query.pages.findMany({
       where: (page, { eq, and, between, gte, lte }) =>
         and(
@@ -46,5 +50,6 @@ export const listByActiveProject = protectedProjectProcedure
 
     return {
       pages,
+      error: result,
     }
   })

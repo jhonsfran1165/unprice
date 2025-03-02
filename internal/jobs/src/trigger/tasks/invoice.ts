@@ -46,16 +46,14 @@ export const invoiceTask = task({
       throw initPhaseMachineResult.err
     }
 
-    const result = await subscriptionService.invoiceSubscription({
+    console.info("Invoicing subscription", {
+      subscriptionId,
+      projectId,
       now,
       phaseId,
     })
 
-    // we have to throw if there is an error so the task fails
-    if (result.err) {
-      throw result.err
-    }
-
-    return result.val
+    // TODO: invoice the subscription
+    return true
   },
 })

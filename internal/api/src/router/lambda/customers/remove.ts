@@ -13,7 +13,7 @@ export const remove = protectedApiOrActiveProjectProcedure
     span: "customers.remove",
     openapi: {
       method: "POST",
-      path: "/edge/customers.remove",
+      path: "/lambda/customers.remove",
       protect: true,
     },
   })
@@ -22,18 +22,26 @@ export const remove = protectedApiOrActiveProjectProcedure
   .mutation(async (opts) => {
     const { id } = opts.input
     const { project } = opts.ctx
-
     const unPriceCustomerId = project.workspace.unPriceCustomerId
 
-    // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId: unPriceCustomerId,
       featureSlug: "customers",
       ctx: opts.ctx,
       skipCache: true,
       updateUsage: true,
       isInternal: project.workspace.isInternal,
+      metadata: {
+        action: "remove",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const deletedCustomer = await opts.ctx.db
       .delete(customers)

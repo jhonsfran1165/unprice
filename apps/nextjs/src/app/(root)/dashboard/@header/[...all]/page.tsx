@@ -56,6 +56,7 @@ export default async function Page(props: {
         unPriceCustomerId: atw.unPriceCustomerId,
         isInternal: atw.isInternal,
       }
+
       // prefetch entitlements
       void trpc.customers.entitlements.prefetch(
         {
@@ -63,7 +64,7 @@ export default async function Page(props: {
           skipCache: true,
         },
         {
-          staleTime: 1000 * 60 * 60, // 1 hour
+          staleTime: 1000 * 60 * 5, // 5 minutes
         }
       )
     }

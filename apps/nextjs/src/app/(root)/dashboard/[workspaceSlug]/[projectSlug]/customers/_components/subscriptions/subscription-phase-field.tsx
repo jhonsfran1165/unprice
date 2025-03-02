@@ -45,7 +45,9 @@ export default function SubscriptionPhaseFormField({
     planVersionId: "",
     config: [],
     items: [],
-    startCycle: 1,
+    billingInterval: "month",
+    billingIntervalCount: 1,
+    billingAnchor: 1,
     whenToBill: "pay_in_advance",
     collectionMethod: "charge_automatically",
     startAt: Date.now(),
@@ -170,7 +172,7 @@ export default function SubscriptionPhaseFormField({
                       <div className="flex flex-col gap-2">
                         <Typography variant="h5">
                           {index + 1}. {selectedPlanVersion.title} v{selectedPlanVersion.version} -{" "}
-                          {selectedPlanVersion.billingPeriod}
+                          {selectedPlanVersion.billingInterval}
                           {phase.trialDays && phase.trialDays > 0 ? (
                             <Badge className="ml-2">{phase.trialDays} days trial</Badge>
                           ) : (

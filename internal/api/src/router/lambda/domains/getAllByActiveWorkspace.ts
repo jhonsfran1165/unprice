@@ -1,12 +1,16 @@
-import { TRPCError } from "@trpc/server"
-import { domainSelectBaseSchema } from "@unprice/db/validators"
+import { domainSelectBaseSchema, featureVerificationSchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedWorkspaceProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
 
 export const getAllByActiveWorkspace = protectedWorkspaceProcedure
   .input(z.void())
-  .output(z.array(domainSelectBaseSchema))
+  .output(
+    z.object({
+      domains: z.array(domainSelectBaseSchema),
+      error: featureVerificationSchema,
+    })
+  )
   .query(async (opts) => {
     const workspace = opts.ctx.workspace
     const customerId = workspace.unPriceCustomerId
@@ -19,20 +23,27 @@ export const getAllByActiveWorkspace = protectedWorkspaceProcedure
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
-      // list endpoint does not need to throw an error
-      throwOnNoAccess: false,
+      metadata: {
+        action: "getAllByActiveWorkspace",
+      },
     })
 
-    if (result.deniedReason === "FEATURE_NOT_FOUND_IN_SUBSCRIPTION") {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: `You don't have access to this feature ${result.deniedReason}`,
-      })
+    if (!result.access) {
+      return {
+        domains: [],
+        error: {
+          access: result.access,
+          deniedReason: result.deniedReason,
+        },
+      }
     }
 
     const domains = await opts.ctx.db.query.domains.findMany({
       where: (d, { eq }) => eq(d.workspaceId, workspace.id),
     })
 
-    return domains
+    return {
+      domains,
+      error: result,
+    }
   })

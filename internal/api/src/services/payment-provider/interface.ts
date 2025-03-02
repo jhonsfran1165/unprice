@@ -41,7 +41,7 @@ export interface CreateInvoiceOpts {
   currency: Currency
   customerName: string
   email: string
-  startCycle: number
+  billingAnchor: number
   endCycle: number
   collectionMethod: CollectionMethod
   description: string
@@ -50,7 +50,7 @@ export interface CreateInvoiceOpts {
 
 export interface UpdateInvoiceOpts {
   invoiceId: string
-  startCycle: number
+  billingAnchor: number
   endCycle: number
   collectionMethod: CollectionMethod
   description: string

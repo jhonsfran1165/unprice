@@ -13,15 +13,13 @@ import {
 import { pgTableProject } from "../utils/_table"
 import { cuid, timestamps } from "../utils/fields.sql"
 import { projectID } from "../utils/sql"
-import type { PlanVersionMetadata } from "../validators/planVersions"
-import type { StartCycle } from "../validators/shared"
+import type { BillingConfig, PlanVersionMetadata } from "../validators/planVersions"
 import { users } from "./auth"
 import {
-  billingPeriodEnum,
   collectionMethodEnum,
   currencyEnum,
+  dueBehaviourEnum,
   paymentProviderEnum,
-  planTypeEnum,
   statusPlanEnum,
   whenToBillEnum,
 } from "./enums"
@@ -47,7 +45,7 @@ export const versions = pgTableProject(
     // basic information of the plan version
     planId: cuid("plan_id").notNull(),
     // description of the plan version
-    description: text("description"),
+    description: text("description").notNull(),
     // whether this is the latest version of the plan for the given currency, payment provider, plan type, and plan id
     latest: boolean("latest").default(false),
     // title of the version, this is useful for multiple languages. eg. "Basic Plan", "Plan Basico"
@@ -73,24 +71,21 @@ export const versions = pgTableProject(
 
     // payment provider for the plan - stripe, paypal, lemonsquezee etc.
     paymentProvider: paymentProviderEnum("payment_providers").notNull(),
-    // type of the plan - recurring, one-time, etc.
-    // the idea is to support different types of plans in the future
-    // and compere which one is more useful for the business
-    // TODO: add more types for now only support recurring
-    planType: planTypeEnum("plan_type").default("recurring").notNull(),
+
+    // due behaviour for the phase - cancel or downgrade
+    dueBehaviour: dueBehaviourEnum("due_behaviour").notNull().default("cancel"),
 
     // currency of the plan
     currency: currencyEnum("currency").notNull(),
-    // billingPeriod: billing_period - billing_cycle, only used for recurring plans, only used for recurring plans
-    billingPeriod: billingPeriodEnum("billing_period").notNull().default("month"),
+
+    // billing config for the plan
+    billingConfig: json("billing_config").$type<BillingConfig>().notNull(),
 
     // ************ billing data defaults ************
     // whenToBill: pay_in_advance - pay_in_arrear
     whenToBill: whenToBillEnum("when_to_bill").notNull().default("pay_in_advance"),
-    // when to start each cycle for this subscription -
-    startCycle: integer("start_cycle").notNull().$type<StartCycle>().default(1), // null means the first day of the month
     // used for generating invoices -
-    gracePeriod: integer("grace_period").default(0), // 0 means no grace period to pay the invoice
+    gracePeriod: integer("grace_period").notNull().default(0), // 0 means no grace period to pay the invoice
     // collection method for the subscription - charge_automatically or send_invoice
     collectionMethod: collectionMethodEnum("collection_method")
       .notNull()
@@ -102,8 +97,8 @@ export const versions = pgTableProject(
 
     // metadata probably will be useful to save external data, etc.
     metadata: json("metadata").$type<PlanVersionMetadata>(),
-    paymentMethodRequired: boolean("payment_method_required").notNull().default(false),
-    version: integer("version").notNull().default(1),
+    paymentMethodRequired: boolean("payment_method_required").default(false).notNull(),
+    version: integer("version").default(1).notNull(),
   },
   (table) => ({
     planfk: foreignKey({

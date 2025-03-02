@@ -14,8 +14,8 @@ export const getVerifications = protectedApiOrActiveProjectProcedure
       verifications: z
         .object({
           projectId: z.string(),
-          customerId: z.string(),
-          entitlementId: z.string(),
+          customerId: z.string().optional(),
+          entitlementId: z.string().optional(),
           featureSlug: z.string(),
           count: z.number(),
           p95_latency: z.number(),
@@ -35,8 +35,12 @@ export const getVerifications = protectedApiOrActiveProjectProcedure
         end: opts.input.end,
       })
       .catch((err) => {
-        console.error(err)
-        opts.ctx.logger.error(err)
+        opts.ctx.logger.error(
+          JSON.stringify({
+            message: "Error getting verifications",
+            error: err,
+          })
+        )
 
         return {
           data: [],

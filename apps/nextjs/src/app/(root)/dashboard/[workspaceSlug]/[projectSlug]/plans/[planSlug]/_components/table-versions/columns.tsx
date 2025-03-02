@@ -105,10 +105,10 @@ export const columns: ColumnDef<PlanVersion>[] = [
     size: 20,
   },
   {
-    accessorKey: "period",
+    accessorKey: "interval",
     enableResizing: true,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="period" />,
-    cell: ({ row }) => <Badge>{row.original.billingPeriod}</Badge>,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="interval" />,
+    cell: ({ row }) => <Badge>{row.original.billingConfig.name}</Badge>,
     size: 20,
   },
   {
@@ -173,8 +173,8 @@ export const columns: ColumnDef<PlanVersion>[] = [
   {
     accessorKey: "planType",
     enableResizing: true,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
-    cell: ({ row }) => <Badge className="text-xs">{row.original.planType}</Badge>,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="plan Type" />,
+    cell: ({ row }) => <Badge className="text-xs">{row.original.billingConfig.planType}</Badge>,
     size: 40,
   },
   {

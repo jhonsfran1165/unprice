@@ -64,7 +64,7 @@ export const workspaceGuard = async ({
   const verifyRole = (roles: WorkspaceRole[]) => {
     if (roles && !roles.includes(member.role)) {
       throw new TRPCError({
-        code: "UNAUTHORIZED",
+        code: "FORBIDDEN",
         message: `You must be a member with roles (${roles.join(
           "/"
         )}) of this workspace to perform this action`,

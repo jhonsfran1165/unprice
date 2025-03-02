@@ -22,8 +22,7 @@ export const create = protectedProjectProcedure
       metadata,
       description,
       currency,
-      billingPeriod,
-      startCycle,
+      billingConfig,
       gracePeriod,
       paymentMethodRequired,
       title,
@@ -31,7 +30,6 @@ export const create = protectedProjectProcedure
       whenToBill,
       status,
       paymentProvider,
-      planType,
       trialDays,
       autoRenew,
     } = opts.input
@@ -44,7 +42,7 @@ export const create = protectedProjectProcedure
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
@@ -52,7 +50,17 @@ export const create = protectedProjectProcedure
       // update usage when creating a plan version
       updateUsage: true,
       isInternal: workspace.isInternal,
+      metadata: {
+        action: "create",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const planData = await opts.ctx.db.query.plans.findFirst({
       where: (plan, { eq, and }) => and(eq(plan.id, planId), eq(plan.projectId, project.id)),
@@ -84,18 +92,16 @@ export const create = protectedProjectProcedure
             planId,
             projectId: project.id,
             description,
-            title: title ?? planData.slug,
+            title: title,
             tags: tags ?? [],
             status: status ?? "draft",
             paymentProvider,
-            planType,
             currency,
             paymentMethodRequired,
-            autoRenew: autoRenew ?? true,
-            billingPeriod: billingPeriod,
-            trialDays: trialDays ?? 0,
-            startCycle: startCycle ?? 1,
-            gracePeriod: gracePeriod ?? 0,
+            autoRenew: autoRenew,
+            billingConfig,
+            trialDays: trialDays,
+            gracePeriod: gracePeriod,
             whenToBill: whenToBill,
             metadata,
             version: Number(countVersionsPlan) + 1,

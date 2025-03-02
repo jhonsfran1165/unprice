@@ -3,10 +3,10 @@ import { hashStringSHA256, newId } from "@unprice/db/utils"
 import { selectApiKeySchema } from "@unprice/db/validators"
 import { z } from "zod"
 import { protectedProjectProcedure } from "#trpc"
-import { featureGuard } from "#utils/feature-guard"
 
 import { eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
+import { featureGuard } from "#utils/feature-guard"
 
 export const roll = protectedProjectProcedure
   .input(z.object({ id: z.string() }))
@@ -18,18 +18,26 @@ export const roll = protectedProjectProcedure
   .mutation(async (opts) => {
     const { id } = opts.input
     const project = opts.ctx.project
-    const customerId = project.workspace.unPriceCustomerId
-    const featureSlug = "apikeys"
 
-    // check if the customer has access to the feature
-    await featureGuard({
-      customerId,
-      featureSlug,
+    opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    const result = await featureGuard({
+      customerId: project.workspace.unPriceCustomerId,
+      featureSlug: "apikeys",
       ctx: opts.ctx,
       skipCache: true,
       isInternal: project.workspace.isInternal,
-      throwOnNoAccess: false,
+      metadata: {
+        action: "roll",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const apiKey = await opts.ctx.db.query.apikeys.findFirst({
       where: (apikey, { eq, and }) => and(eq(apikey.id, id), eq(apikey.projectId, project.id)),

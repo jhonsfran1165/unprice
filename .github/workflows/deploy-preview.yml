@@ -23,63 +23,12 @@ jobs:
       MACHINE_IDENTITY_CLIENT_ID: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
       MACHINE_IDENTITY_CLIENT_SECRET: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
 
+
   deploy-preview-tinybird:
     if: "!contains(github.head_ref, 'renovate/')"
-    runs-on: ubuntu-latest
-
-    outputs:
-      tb_branch_name: ${{ steps.tb-branch.outputs.out }}
-      tb_branch_token: ${{ steps.tb-token.outputs.out }}
-
-    permissions:
-      pull-requests: write
-      contents: read
-
+    uses: ./.github/workflows/job_tinybird_ci.yml
     needs:
       - build-lint
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: Infisical/secrets-action@v1.0.7
-        name: Pull secrets from Infisical
-        with:
-          client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
-          client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
-          env-slug: "preview"
-          project-slug: "unprice-zq-xm"
-          secret-path: "/ci"
-          recursive: true
-
-      - uses: ./.github/actions/tinybirdci
-        name: Deploy Preview Tinybird
-        id: deploy-preview-tinybird
-        with:
-          tb_format: true
-          tb_admin_token: ${{ env.TB_ADMIN_TOKEN }}
-          tb_host: ${{ env.TB_HOST }}
-          data_project_dir: internal/tinybird
-          token_name: web-apps
-
-      - uses: cloudposse/github-action-secret-outputs@main
-        id: tb-token
-        with:
-          ## PASSWORD is a gpg passphrase stored in Github Secrets.
-          secret: ${{ secrets.PASSWORD_ENCRYPT }}
-          op: encode
-          in: ${{ steps.deploy-preview-tinybird.outputs.tb_branch_token }}
-
-      - uses: cloudposse/github-action-secret-outputs@main
-        id: tb-branch
-        with:
-          ## PASSWORD is a gpg passphrase stored in Github Secrets.
-          secret: ${{ secrets.PASSWORD_ENCRYPT }}
-          op: encode
-          in: ${{ steps.deploy-preview-tinybird.outputs.tb_branch_name }}
-
-
 
   deploy-preview-neon:
     if: "!contains(github.head_ref, 'renovate/')"
@@ -91,6 +40,7 @@ jobs:
 
     needs:
       - deploy-preview-tinybird
+      - build-lint
 
     permissions:
       pull-requests: write
@@ -98,8 +48,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: Infisical/secrets-action@v1.0.7
         name: Pull secrets from Infisical
@@ -112,8 +60,10 @@ jobs:
           recursive: true
 
       - uses: ./.github/actions/install
+        name: Install dependencies
         with:
-          ts: true
+          ts: "true"
+          python: "false"
 
       - name: Get branch name
         id: branch-name
@@ -188,7 +138,6 @@ jobs:
 
     needs:
       - deploy-preview-neon
-      - deploy-preview-tinybird
 
     permissions:
       pull-requests: write
@@ -198,14 +147,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - uses: cloudposse/github-action-secret-outputs@main
-        id: tb-token
-        with:
-          ## PASSWORD is a gpg passphrase stored in Github Secrets.
-          secret: ${{ secrets.PASSWORD_ENCRYPT }}
-          op: decode
-          in: ${{ needs.deploy-preview-tinybird.outputs.tb_branch_token }}
 
       - uses: cloudposse/github-action-secret-outputs@main
         id: db-url
@@ -229,15 +170,15 @@ jobs:
 
       - uses: ./.github/actions/install
         with:
-          ts: true
-          python: true
+          ts: "true"
+          python: "false"
 
       - uses: cardinalby/export-env-action@v2
         with:
           envFile: '.env'
           export: true
-          # export everything except DATABASE_URL and TINYBIRD_TOKEN using regex
-          filter: ^(?!DATABASE_URL$|TINYBIRD_TOKEN$).*$
+          # export everything except DATABASE_URL using regex
+          filter: ^(?!DATABASE_URL$).*$
           mask: true
 
       - name: Check for changes
@@ -267,7 +208,7 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID}}  #Required
           vercel-project-id: ${{ env.VERCEL_PROJECT_UNPRICE_ID}} #Required
           working-directory: ./
-          vercel-args: '--env NODE_ENV=production --env DATABASE_URL=${{ steps.db-url.outputs.out }} --env TINYBIRD_TOKEN=${{ steps.tb-token.outputs.out }} --env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --env NEXT_PUBLIC_VERCEL_ENV=preview --build-env NODE_ENV=production --build-env DATABASE_URL=${{ steps.db-url.outputs.out }} --build-env TINYBIRD_TOKEN=${{ steps.tb-token.outputs.out }} --build-env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --build-env NEXT_PUBLIC_VERCEL_ENV=preview'
+          vercel-args: '--env NODE_ENV=production --env DATABASE_URL=${{ steps.db-url.outputs.out }} --env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --env NEXT_PUBLIC_VERCEL_ENV=preview --build-env NODE_ENV=production --build-env DATABASE_URL=${{ steps.db-url.outputs.out }} --build-env NEXT_PUBLIC_APP_DOMAIN=pr-${{ github.event.number }}-unprice.vercel.app --build-env NEXT_PUBLIC_VERCEL_ENV=preview'
           alias-domains: |
             pr-${{ github.event.number }}-unprice.vercel.app
             app-pr-${{ github.event.number }}-unprice.vercel.app

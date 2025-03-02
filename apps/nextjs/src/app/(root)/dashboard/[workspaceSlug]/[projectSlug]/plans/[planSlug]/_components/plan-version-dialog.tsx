@@ -41,14 +41,22 @@ export function PlanVersionDialog({
               planId: "",
               projectId: "",
               currency: "USD",
-              planType: "recurring",
               paymentProvider: "stripe",
               description: "",
-              startCycle: 0,
-              billingPeriod: "month",
               collectionMethod: "charge_automatically",
               whenToBill: "pay_in_arrear",
               autoRenew: true,
+              paymentMethodRequired: false,
+              trialDays: 0,
+              dueBehaviour: "cancel",
+              gracePeriod: 0,
+              billingConfig: {
+                name: "monthly",
+                billingInterval: "month",
+                billingIntervalCount: 1,
+                billingAnchor: "dayOfCreation",
+                planType: "recurring",
+              },
             }
           }
           setDialogOpen={setDialogOpen}

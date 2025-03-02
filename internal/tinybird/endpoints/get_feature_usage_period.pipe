@@ -1,0 +1,30 @@
+TOKEN "web-apps" READ
+
+TAGS "usage"
+
+NODE feature_usage_period_node
+SQL >
+    %
+    SELECT
+        projectId,
+        {% if defined(customerId) %} customerId, {% end %}
+        {% if defined(entitlementId) %} entitlementId, {% end %}
+        featureSlug,
+        countMerge(count) as count,
+        sumMerge(sum) as sum,
+        maxMerge(max) as max,
+        argMaxMerge(last_during_period) as last_during_period
+    FROM feature_usage_hourly_mv_data
+    WHERE
+        1 = 1
+        {% if defined(projectId) %} AND projectId = {{ String(projectId) }} {% end %}
+        {% if defined(customerId) %} AND customerId = {{ String(customerId) }} {% end %}
+        {% if defined(featureSlug) %} AND featureSlug = {{ String(featureSlug) }} {% end %}
+        {% if defined(entitlementId) %} AND entitlementId = {{ String(entitlementId) }} {% end %}
+        {% if defined(start) & defined(end) %}
+            AND date BETWEEN fromUnixTimestamp64Milli({{ Int64(start) }})
+            AND fromUnixTimestamp64Milli({{ Int64(end) }})
+        {% end %}
+    {% if defined(customerId) %} GROUP BY projectId, customerId, featureSlug, entitlementId {% else %} {% if defined(entitlementId) %} GROUP BY projectId, featureSlug, entitlementId {% else %} GROUP BY projectId, featureSlug {% end %} {% end %}
+
+TYPE endpoint

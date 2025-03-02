@@ -273,11 +273,11 @@ export const rateLimiterProcedure = publicProcedure.use(rateLimiterMemory).use(r
  */
 export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
   if (!ctx.session?.user?.id) {
-    throw new TRPCError({ code: "UNAUTHORIZED" })
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "User not found in session" })
   }
 
   if (!ctx.session?.user?.email) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "User email not found" })
+    throw new TRPCError({ code: "BAD_REQUEST", message: "User email not found in session" })
   }
 
   return next({

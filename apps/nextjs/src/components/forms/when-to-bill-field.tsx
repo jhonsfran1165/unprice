@@ -32,7 +32,7 @@ export default function WhenToBillFormField<TFieldValues extends FormValues>({
         <FormItem className="flex w-full flex-col">
           <FormLabel>When to bill</FormLabel>
           <FormDescription>
-            This will determine if the customer will be billed at the start or end of the cycle.
+            Billing at the start or end of the cycle?
           </FormDescription>
           <Select onValueChange={field.onChange} value={field.value ?? ""} disabled={isDisabled}>
             <FormControl>

@@ -48,17 +48,20 @@ export const expireTask = task({
       throw initPhaseMachineResult.err
     }
 
-    const result = await subscriptionService.expireSubscription({
+    // we have to throw if there is an error so the task fails
+    // if (result.err) {
+    //   throw result.err
+    // }
+
+    console.info("Expiring subscription", {
+      subscriptionId,
+      projectId,
       now,
       expiresAt,
       phaseId,
     })
 
-    // we have to throw if there is an error so the task fails
-    if (result.err) {
-      throw result.err
-    }
-
-    return result.val
+    // TODO: expire the subscription
+    return true
   },
 })
