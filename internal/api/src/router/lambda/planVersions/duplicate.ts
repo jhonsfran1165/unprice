@@ -83,7 +83,9 @@ export const duplicate = protectedProjectProcedure
             ...planVersionData,
             id: planVersionId,
             trialDays: planVersionData.trialDays,
-            startCycle: planVersionData.startCycle,
+            billingInterval: planVersionData.billingInterval,
+            billingIntervalCount: planVersionData.billingIntervalCount,
+            billingAnchor: planVersionData.billingAnchor,
             autoRenew: planVersionData.autoRenew,
             paymentMethodRequired: planVersionData.paymentMethodRequired,
             metadata: {

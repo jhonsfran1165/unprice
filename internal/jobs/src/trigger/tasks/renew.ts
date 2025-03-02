@@ -46,16 +46,14 @@ export const renewTask = task({
       throw initPhaseMachineResult.err
     }
 
-    const result = await subscriptionService.renewSubscription({
+    console.info("Renewing subscription", {
+      subscriptionId,
+      projectId,
       now,
       phaseId,
     })
 
-    // we have to throw if there is an error so the task fails
-    if (result.err) {
-      throw result.err
-    }
-
-    return result.val
+    // TODO: renew the subscription
+    return true
   },
 })

@@ -1,9 +1,5 @@
 import { task } from "@trigger.dev/sdk/v3"
-import { InvoiceStateMachine, PhaseMachine } from "@unprice/api/services/subscriptions"
 import { db } from "@unprice/db"
-import { AesGCM } from "@unprice/db/utils"
-import { env } from "../../env.mjs"
-import { createContext } from "./context"
 
 export const billingTask = task({
   id: "subscription.phase.billing",
@@ -56,11 +52,7 @@ export const billingTask = task({
         },
       },
       where: (table, { eq, and }) =>
-        and(
-          eq(table.id, invoice.subscriptionPhaseId),
-          eq(table.projectId, projectId),
-          eq(table.active, true)
-        ),
+        and(eq(table.id, invoice.subscriptionPhaseId), eq(table.projectId, projectId)),
     })
 
     if (!subscriptionPhase) {
@@ -75,70 +67,15 @@ export const billingTask = task({
       throw new Error("Customer not found")
     }
 
-    // get config payment provider
-    const config = await db.query.paymentProviderConfig.findFirst({
-      where: (config, { and, eq }) =>
-        and(
-          eq(config.projectId, projectId),
-          eq(config.paymentProvider, subscriptionPhase.planVersion.paymentProvider),
-          eq(config.active, true)
-        ),
-    })
-
-    if (!config) {
-      throw new Error("Payment provider config not found or not active")
-    }
-
-    const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
-
-    const paymentProviderToken = await aesGCM.decrypt({
-      iv: config.keyIv,
-      ciphertext: config.key,
-    })
-
-    const context = await createContext({
-      taskId: ctx.task.id,
-      subscriptionId: subscriptionPhase.subscription.id,
-      projectId,
-      phaseId: subscriptionPhase.id,
-      defaultFields: {
-        subscriptionPhaseId,
-        invoiceId,
-        projectId,
-        api: "jobs.subscription.phase.billing",
-      },
-    })
-
-    const phaseMachine = new PhaseMachine({
-      db: db,
-      phase: subscriptionPhase,
-      subscription: subscriptionPhase.subscription,
-      customer: subscriptionPhase.subscription.customer,
-      analytics: context.analytics,
-      logger: context.logger,
-      paymentProviderToken,
-    })
-
-    const invoiceMachine = new InvoiceStateMachine({
-      db: db,
-      phaseMachine: phaseMachine,
-      logger: context.logger,
-      analytics: context.analytics,
-      invoice: invoice,
-      paymentProviderToken,
-    })
-
-    const result = await invoiceMachine.transition("COLLECT_PAYMENT", {
+    console.info("Billing subscription", {
+      subscriptionPhaseId,
       invoiceId,
-      autoFinalize: true,
+      projectId,
       now,
+      taskId: ctx.task.id
     })
 
-    // we have to throw if there is an error so the task fails
-    if (result.err) {
-      throw result.err
-    }
-
-    return result.val
+    // TODO: billing the subscription
+    return true
   },
 })

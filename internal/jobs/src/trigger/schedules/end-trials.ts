@@ -16,12 +16,7 @@ export const endTrialsSchedule = schedules.task({
       with: {
         subscription: true,
       },
-      where: (table, { eq, and, lte, inArray }) =>
-        and(
-          inArray(table.status, ["trialing", "trial_ended"]),
-          lte(table.trialEndsAt, now),
-          eq(table.active, true)
-        ),
+      where: (table, { lte }) => lte(table.trialEndsAt, now),
       limit: 1000,
       orderBy: (table, { desc }) => desc(table.trialEndsAt),
     })

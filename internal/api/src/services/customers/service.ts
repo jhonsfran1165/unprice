@@ -1,14 +1,14 @@
 import { and, eq } from "@unprice/db"
 
-import { customerEntitlements, customerSessions, customers } from "@unprice/db/schema"
-import { AesGCM, newId } from "@unprice/db/utils"
-import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
-import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import { env } from "#env.mjs"
 import type { CacheNamespaces } from "#services/cache"
 import { PaymentProviderService } from "#services/payment-provider"
 import { SubscriptionService } from "#services/subscriptions"
 import type { Context } from "#trpc"
+import { customerEntitlements, customerSessions, customers } from "@unprice/db/schema"
+import { AesGCM, newId } from "@unprice/db/utils"
+import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
+import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
 import { getEntitlementByDateQuery, getEntitlementsByDateQuery } from "./queries"
@@ -235,39 +235,39 @@ export class CustomerService {
     // get usage for the period from the analytics service
     const totalUsage = isAll
       ? await this.ctx.analytics
-          .getFeaturesUsage({
+        .getFeaturesUsage({
+          customerId: opts.customerId,
+          entitlementId: entitlement.id,
+          projectId: entitlement.projectId,
+        })
+        .then((usage) => usage.data[0])
+        .catch((error) => {
+          this.ctx.logger.error("Error getting getFeaturesUsage all", {
+            error: JSON.stringify(error.message),
             customerId: opts.customerId,
             entitlementId: entitlement.id,
             projectId: entitlement.projectId,
           })
-          .then((usage) => usage.data[0])
-          .catch((error) => {
-            this.ctx.logger.error("Error getting getFeaturesUsage all", {
-              error: JSON.stringify(error.message),
-              customerId: opts.customerId,
-              entitlementId: entitlement.id,
-              projectId: entitlement.projectId,
-            })
 
-            return null
-          })
+          return null
+        })
       : await this.ctx.analytics
-          .getFeaturesUsage({
+        .getFeaturesUsage({
+          customerId: opts.customerId,
+          entitlementId: entitlement.id,
+          start: activeSubscription.currentCycleStartAt,
+          end: activeSubscription.currentCycleEndAt,
+        })
+        .then((usage) => usage.data[0])
+        .catch((error) => {
+          this.ctx.logger.error("Error getting getFeaturesUsage", {
+            error: JSON.stringify(error.message),
             customerId: opts.customerId,
             entitlementId: entitlement.id,
-            start: activeSubscription.currentCycleStartAt,
-            end: activeSubscription.currentCycleEndAt,
           })
-          .then((usage) => usage.data[0])
-          .catch((error) => {
-            this.ctx.logger.error("Error getting getFeaturesUsage", {
-              error: JSON.stringify(error.message),
-              customerId: opts.customerId,
-              entitlementId: entitlement.id,
-            })
 
-            return null
-          })
+          return null
+        })
 
     if (!totalUsage) {
       return
@@ -1066,11 +1066,12 @@ export class CustomerService {
               {
                 planVersionId: planVersion.id,
                 startAt: Date.now(),
-                active: true,
                 config: config,
                 collectionMethod: planVersion.collectionMethod,
                 whenToBill: planVersion.whenToBill,
-                startCycle: planVersion.startCycle ?? 1,
+                billingInterval: planVersion.billingInterval,
+                billingIntervalCount: planVersion.billingIntervalCount,
+                billingAnchor: planVersion.billingAnchor,
                 gracePeriod: planVersion.gracePeriod ?? 0,
               },
             ],
@@ -1144,19 +1145,8 @@ export class CustomerService {
             throw initPhaseMachineResult.err
           }
 
-          return await subscriptionService.cancelSubscription({
-            now: Date.now(),
-            subscriptionMetadata: {
-              reason: "customer_signout",
-              note: "Customer signed out",
-            },
-            phaseMetadata: {
-              cancel: {
-                reason: "customer_signout",
-                note: "Customer signed out",
-              },
-            },
-          })
+          // TODO: cancel the subscription
+          return true
         })
       )
         .catch((err) => {

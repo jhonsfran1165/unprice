@@ -1,4 +1,4 @@
-import type { Duration } from "date-fns"
+import type { PlanType } from "../validators/shared"
 
 export const TIER_MODES_MAP = {
   volume: {
@@ -83,58 +83,56 @@ export const AGGREGATION_METHODS_MAP = {
   },
 } as const
 
-export const PLAN_BILLING_PERIODS = ["month", "year", "onetime", "5m"] as const
-type billingKeys = (typeof PLAN_BILLING_PERIODS)[number]
+export const BILLING_INTERVALS = ["month", "year", "day", "minute", "onetime"] as const
 
-export const BILLING_PERIODS_MAP: Record<
-  billingKeys,
+export const BILLING_CONFIG: Record<
+  string,
   {
     label: string
-    recurring: boolean
     description: string
-    duration: Duration
-    alignToCalendar?: boolean
+    billingInterval: (typeof BILLING_INTERVALS)[number]
+    billingIntervalCount: number
+    billingAnchorOptions: (number | "dayOfCreation")[]
+    dev?: boolean
+    planType: PlanType
   }
 > = {
-  month: {
-    label: "Month",
-    recurring: true,
-    description: "Every month",
-    duration: {
-      months: 1,
-    } as Duration,
-    alignToCalendar: true,
+  monthly: {
+    label: "Monthly",
+    description: "Billed monthly at the specified billing anchor",
+    billingInterval: "month",
+    billingIntervalCount: 1,
+    billingAnchorOptions: ["dayOfCreation", ...Array.from({ length: 31 }, (_, i) => i + 1)],
+    planType: "recurring",
   },
-  year: {
-    label: "Year",
-    recurring: true,
-    description: "Every year",
-    duration: {
-      years: 1,
-    } as Duration,
-    alignToCalendar: true,
+  yearly: {
+    label: "Yearly",
+    description: "Billed yearly at the specified billing anchor",
+    billingInterval: "year",
+    billingIntervalCount: 1,
+    billingAnchorOptions: ["dayOfCreation", ...Array.from({ length: 12 }, (_, i) => i + 1)],
+    planType: "recurring",
+  },
+  "every-5-minutes": {
+    label: "Every 5 minutes",
+    description: "Billed every 5 minutes",
+    billingInterval: "minute",
+    billingIntervalCount: 5,
+    billingAnchorOptions: [],
+    dev: true,
+    planType: "recurring",
   },
   onetime: {
     label: "Onetime",
-    recurring: false,
-    description: "One time payment",
-    duration: {
-      days: 0,
-    } as Duration,
-  },
-  "5m": {
-    label: "5 minutes",
-    recurring: true,
-    description: "Every 5 minutes",
-    duration: {
-      minutes: 5,
-    } as Duration,
-    alignToCalendar: false,
+    description: "Billed once",
+    billingInterval: "onetime",
+    billingIntervalCount: 1,
+    billingAnchorOptions: [],
+    planType: "onetime",
   },
 }
 
 type AggregationMethod = keyof typeof AGGREGATION_METHODS_MAP
-
 export type TierMode = keyof typeof TIER_MODES_MAP
 export type UsageMode = keyof typeof USAGE_MODES_MAP
 export type FeatureType = keyof typeof FEATURE_TYPES_MAPS
@@ -148,14 +146,19 @@ export const STATUS_PLAN = ["draft", "published"] as const
 // but phases can have different statuses than the subscription is they are not active
 // for instance a phase was changed to new plan, we create a new phase with status as active
 // and we leave the old phase with status changed.
-export const STATUS_PHASE = [
-  "active", // the phase is active
-  "trialing", // the phase is trialing
-  "changed", // the phase is changed
-  "canceled", // the phase is cancelled
-  "expired", // the phase has expired - no auto-renew
-  "past_dued", // the phase is past due - payment pending
-  "trial_ended", // the phase trial has ended
+export const SUBSCRIPTION_STATUS = [
+  "renewing", // the subscription is renewing
+  "changing", // the subscription is changing
+  "canceling", // the subscription is canceling
+  "expiring", // the subscription is expiring
+  "invoicing", // the subscription is invoicing
+  "invoiced", // the subscription is invoiced, ready to be renewed
+  "ending_trial", // the subscription is ending trial
+  "active", // the subscription is active
+  "trialing", // the subscription is trialing
+  "canceled", // the subscription is cancelled
+  "expired", // the subscription has expired - no auto-renew
+  "past_due", // the subscription is past due - payment pending
 ] as const
 
 export const PLAN_TYPES = ["recurring", "onetime"] as const

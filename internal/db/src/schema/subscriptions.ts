@@ -11,8 +11,6 @@ import {
 } from "drizzle-orm/pg-core"
 import type { z } from "zod"
 
-import type { StartCycle } from "../validators/shared"
-
 import { pgTableProject } from "../utils/_table"
 import { cuid, timestamps } from "../utils/fields.sql"
 import { projectID } from "../utils/sql"
@@ -23,14 +21,12 @@ import type {
 } from "../validators/subscriptions"
 import { customerCredits, customers } from "./customers"
 import {
-  billingPeriodEnum,
   collectionMethodEnum,
   currencyEnum,
-  dueBehaviourEnum,
   invoiceStatusEnum,
   invoiceTypeEnum,
   paymentProviderEnum,
-  phaseStatusEnum,
+  subscriptionStatusEnum,
   whenToBillEnum,
 } from "./enums"
 import { planVersionFeatures } from "./planVersionFeatures"
@@ -50,6 +46,7 @@ export const subscriptions = pgTableProject(
     ...timestamps,
     // customer to get the payment info from that customer
     customerId: cuid("customers_id").notNull(),
+    status: subscriptionStatusEnum("status").notNull().default("active"),
 
     // whether the subscription is active or not
     // normally is active if the status is active, trialing or past_due or changing
@@ -60,38 +57,15 @@ export const subscriptions = pgTableProject(
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
 
     // ************ subscription important dates ************
-    // previous cycle dates for invoices purposes
-    previousCycleStartAt: bigint("previous_cycle_start_at_m", { mode: "number" }),
-    previousCycleEndAt: bigint("previous_cycle_end_at_m", { mode: "number" }),
     // current cycle dates for invoices purposes
     currentCycleStartAt: bigint("current_cycle_start_at_m", { mode: "number" }).notNull(),
     currentCycleEndAt: bigint("current_cycle_end_at_m", { mode: "number" }).notNull(),
     // when the subscription is going to be billed next
     nextInvoiceAt: bigint("next_invoice_at_m", { mode: "number" }).notNull().default(0),
-    // lastBilledAt is the last time the subscription was billed
-    lastInvoiceAt: bigint("last_invoice_at_m", { mode: "number" }),
-    // lastRenewAt is the last time the subscription was renewed
-    lastRenewAt: bigint("last_renew_at_m", { mode: "number" }),
     // renewAt indicates the next time the subscription will be renewed
     renewAt: bigint("renew_at_m", { mode: "number" }).notNull().default(0),
-    // when the subscription is considered past due
-    pastDueAt: bigint("past_due_at_m", { mode: "number" }),
-    // when the subscription was ended because it was past due
-    pastDuedAt: bigint("past_dued_at_m", { mode: "number" }),
-    // when the subscription is going to be cancelled
-    cancelAt: bigint("cancel_at_m", { mode: "number" }),
-    // when the subscription was cancelled
-    canceledAt: bigint("canceled_at_m", { mode: "number" }),
-    // when the subscription is going to be expired
-    expiresAt: bigint("expires_at_m", { mode: "number" }),
-    // when the subscription was expired
-    expiredAt: bigint("expired_at_m", { mode: "number" }),
-    // when the subscription is going to be changed
-    changeAt: bigint("change_at_m", { mode: "number" }),
-    // when the subscription was changed and the change was applied
-    // this is useful for auditing the changes and to lock many changes on the subscription
-    // normally we allow to change the plan every 30 days
-    changedAt: bigint("changed_at_m", { mode: "number" }),
+    // endAt is the date when the subscription will end
+    endAt: bigint("end_at_m", { mode: "number" }),
     // ************ subscription important dates ************
     // metadata for the subscription
     metadata: json("metadata").$type<z.infer<typeof subscriptionMetadataSchema>>(),
@@ -128,34 +102,8 @@ export const subscriptionPhases = pgTableProject(
     // payment method id of the customer - if not set, the first payment method will be used
     // payment method is tied to the phase because it's tied to the plan version payment provider
     paymentMethodId: text("payment_method_id"),
-    // status of the phase - for history purposes
-    status: phaseStatusEnum("status").notNull().default("active"),
     // trial days of the phase
     trialDays: integer("trial_days").notNull().default(0),
-    // whether the subscription is active or not
-    // normally is active if the status is active, trialing or past_due or changing
-    // this simplifies the queries when we need to get the active subscriptions
-    active: boolean("active").notNull().default(true),
-    // due behaviour for the phase - cancel or downgrade
-    dueBehaviour: dueBehaviourEnum("due_behaviour").notNull().default("cancel"),
-
-    // ************ billing data defaults comes from plan but created here so we can override if needed ************
-    // this data normally comes from the plan version but we can override if needed
-    whenToBill: whenToBillEnum("when_to_bill").notNull().default("pay_in_advance"),
-    // when to start each cycle for this subscription -
-    startCycle: integer("start_cycle").notNull().$type<StartCycle>().default(1), // null means the first day of the month
-    // a grace period of 1 day could handle edge cases when the payment is late for a few hours
-    gracePeriod: integer("grace_period").notNull().default(1),
-    // collection method for the subscription - charge_automatically or send_invoice
-    collectionMethod: collectionMethodEnum("collection_method")
-      .notNull()
-      .default("charge_automatically"),
-    // auto renew the subscription every billing period
-    autoRenew: boolean("auto_renew").notNull().default(true),
-    // billingPeriod: billing_period - billing_cycle, only used for recurring plans, only used for recurring plans
-    billingPeriod: billingPeriodEnum("billing_period").notNull().default("month"),
-    // ************ billing data defaults *********************************************************
-
     // ************ subscription important dates ************
     // when the trial ends
     trialEndsAt: bigint("trial_ends_at_m", { mode: "number" }),
@@ -210,8 +158,6 @@ export const subscriptionItems = pgTableProject(
       foreignColumns: [planVersionFeatures.id, planVersionFeatures.projectId],
       name: "subscription_items_plan_version_id_fkey",
     }).onDelete("cascade"),
-    // project fk
-    // TODO: review this is used on all tables with delete cascade
     projectfk: foreignKey({
       columns: [table.projectId],
       foreignColumns: [projects.id],

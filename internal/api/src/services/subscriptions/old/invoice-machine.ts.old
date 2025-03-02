@@ -17,7 +17,7 @@ import { StateMachine } from "../machine/service"
 import { PaymentProviderService } from "../payment-provider"
 import type { PaymentProviderInvoice } from "../payment-provider/interface"
 import { UnPriceSubscriptionError } from "./errors"
-import type { PhaseMachine } from "./phase-machine"
+import type { PhaseMachine } from "./phase-machine.ts.old"
 
 // all event operate with the now parameter which is the timestamp of the event
 // this allows us to handle the events in a deterministic way
@@ -508,9 +508,8 @@ export class InvoiceStateMachine extends StateMachine<
         if (formattedTotalAmountItem.err || formattedUnitAmountItem.err) {
           return Err(
             new UnPriceSubscriptionError({
-              message: `Error formatting amount: ${
-                formattedTotalAmountItem.err?.message ?? formattedUnitAmountItem.err?.message
-              }`,
+              message: `Error formatting amount: ${formattedTotalAmountItem.err?.message ?? formattedUnitAmountItem.err?.message
+                }`,
             })
           )
         }
@@ -544,9 +543,8 @@ export class InvoiceStateMachine extends StateMachine<
               status: paymentProviderInvoiceData.status,
               amountCreditUsed: 0,
               metadata: {
-                note: `Invoice for subscription ${
-                  this.phaseMachine.getSubscription().planSlug
-                }, setting status to void`,
+                note: `Invoice for subscription ${this.phaseMachine.getSubscription().planSlug
+                  }, setting status to void`,
               },
             })
             .where(and(eq(invoices.id, invoice.id), eq(invoices.projectId, projectId)))
@@ -675,9 +673,8 @@ export class InvoiceStateMachine extends StateMachine<
       if (formattedTotalAmountItem.err || formattedUnitAmountItem.err) {
         return Err(
           new UnPriceSubscriptionError({
-            message: `Error formatting amount: ${
-              formattedTotalAmountItem.err?.message ?? formattedUnitAmountItem.err?.message
-            }`,
+            message: `Error formatting amount: ${formattedTotalAmountItem.err?.message ?? formattedUnitAmountItem.err?.message
+              }`,
           })
         )
       }
@@ -1292,9 +1289,9 @@ export class InvoiceStateMachine extends StateMachine<
         ? phase.items
         : type === "flat"
           ? // flat charges are those when the quantity is defined in the subscription item
-            phase.items.filter((item) =>
-              ["flat", "tier", "package"].includes(item.featurePlanVersion.featureType)
-            )
+          phase.items.filter((item) =>
+            ["flat", "tier", "package"].includes(item.featurePlanVersion.featureType)
+          )
           : phase.items.filter((item) => item.featurePlanVersion.featureType === "usage")
 
     // we bill the subscriptions items attached to the phase, that way if the customer changes the plan,
@@ -1324,24 +1321,24 @@ export class InvoiceStateMachine extends StateMachine<
           } else {
             const usage = item.featurePlanVersion.aggregationMethod.endsWith("_all")
               ? await this.analytics
-                  .getTotalUsagePerBillableFeatureAll({
-                    subscriptionItemId: item.id,
-                    projectId: subscription.projectId,
-                    customerId: customer.id,
-                  })
-                  .then((usage) => usage.data[0])
+                .getTotalUsagePerBillableFeatureAll({
+                  subscriptionItemId: item.id,
+                  projectId: subscription.projectId,
+                  customerId: customer.id,
+                })
+                .then((usage) => usage.data[0])
               : await this.analytics
-                  .getTotalUsagePerBillableFeaturePeriod({
-                    subscriptionItemId: item.id,
-                    projectId: subscription.projectId,
-                    customerId: customer.id,
-                    // get usage for the current cycle
-                    start: cycleStartAt,
-                    end: cycleEndAt,
-                  })
-                  .then((usage) => {
-                    return usage.data[0]
-                  })
+                .getTotalUsagePerBillableFeaturePeriod({
+                  subscriptionItemId: item.id,
+                  projectId: subscription.projectId,
+                  customerId: customer.id,
+                  // get usage for the current cycle
+                  start: cycleStartAt,
+                  end: cycleEndAt,
+                })
+                .then((usage) => {
+                  return usage.data[0]
+                })
 
             const units = usage
               ? usage[item.featurePlanVersion.aggregationMethod as keyof typeof usage] || 0
@@ -1361,21 +1358,21 @@ export class InvoiceStateMachine extends StateMachine<
               // get usage for the current cycle
               const usage = item.featurePlanVersion.aggregationMethod.endsWith("_all")
                 ? await this.analytics
-                    .getTotalUsagePerBillableFeatureAll({
-                      subscriptionItemId: item.id,
-                      customerId: customer.id,
-                      projectId: subscription.projectId,
-                    })
-                    .then((usage) => usage.data[0])
+                  .getTotalUsagePerBillableFeatureAll({
+                    subscriptionItemId: item.id,
+                    customerId: customer.id,
+                    projectId: subscription.projectId,
+                  })
+                  .then((usage) => usage.data[0])
                 : await this.analytics
-                    .getTotalUsagePerBillableFeaturePeriod({
-                      subscriptionItemId: item.id,
-                      customerId: customer.id,
-                      projectId: subscription.projectId,
-                      start: previousCycleStartAt,
-                      end: previousCycleEndAt,
-                    })
-                    .then((usage) => usage.data[0])
+                  .getTotalUsagePerBillableFeaturePeriod({
+                    subscriptionItemId: item.id,
+                    customerId: customer.id,
+                    projectId: subscription.projectId,
+                    start: previousCycleStartAt,
+                    end: previousCycleEndAt,
+                  })
+                  .then((usage) => usage.data[0])
 
               const units = usage
                 ? usage[item.featurePlanVersion.aggregationMethod as keyof typeof usage] || 0

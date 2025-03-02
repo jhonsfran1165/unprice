@@ -1,16 +1,16 @@
+import { PaymentProviderService } from "#services/payment-provider"
 import { and, eq } from "@unprice/db"
 import * as schema from "@unprice/db/schema"
 import { AesGCM } from "@unprice/db/utils"
 import { calculateFlatPricePlan, planVersionSelectBaseSchema } from "@unprice/db/validators"
 import { isZero } from "dinero.js"
 import { z } from "zod"
-import { PaymentProviderService } from "#services/payment-provider"
 
-import { TRPCError } from "@trpc/server"
-import { APP_NAME } from "@unprice/config"
 import { env } from "#env.mjs"
 import { protectedProjectProcedure } from "#trpc"
 import { featureGuard } from "#utils/feature-guard"
+import { TRPCError } from "@trpc/server"
+import { APP_NAME } from "@unprice/config"
 
 export const publish = protectedProjectProcedure
   .input(planVersionSelectBaseSchema.partial().required({ id: true }))
@@ -95,7 +95,7 @@ export const publish = protectedProjectProcedure
       throw new TRPCError({
         code: "BAD_REQUEST",
         message:
-          "Payment provider config not found or not active. Please check the payment provider config in the project settings.",
+          "Payment provider config not found or not active. Please check the payment provider config in the project settings. You can create a new one in the project settings.",
       })
     }
 
@@ -127,8 +127,8 @@ export const publish = protectedProjectProcedure
               // only pass the description if it is not empty
               ...(planFeature.feature.description
                 ? {
-                    description: planFeature.feature.description,
-                  }
+                  description: planFeature.feature.description,
+                }
                 : {}),
             })
 

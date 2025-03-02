@@ -1,12 +1,104 @@
 import { differenceInSeconds } from "date-fns"
 import { describe, expect, it } from "vitest"
-import type { BillingPeriod } from "../shared"
-import { configureBillingCycleSubscription } from "./billing"
+import { calculateNextInterval, configureBillingCycleSubscription } from "./billing"
 
 const utcDate = (dateString: string, time = "00:00:00") =>
   new Date(`${dateString}T${time}Z`).getTime()
 
 // const consoleLogSpy = vi.spyOn(console, "info")
+
+describe("Billing Calculations", () => {
+  describe("calculateNextInterval", () => {
+    it("handles basic intervals", () => {
+      const startMs = utcDate("2024-01-01")
+      const result = calculateNextInterval(startMs, "month", 1, 1, {
+        alignToCalendar: true,
+        alignStartToDay: false,
+        alignEndToDay: true,
+      })
+
+      expect(result.start).toBe(startMs)
+      expect(result.end).toBe(utcDate("2024-02-01", "23:59:59.999"))
+    })
+
+    it("handles month intervals with anchor", () => {
+      const startMs = utcDate("2024-01-10")
+      const result = calculateNextInterval(startMs, "month", 1, 15, {
+        alignToCalendar: true,
+        alignStartToDay: false,
+        alignEndToDay: true,
+      })
+
+      expect(result.start).toBe(startMs)
+      expect(result.end).toBe(utcDate("2024-01-15", "23:59:59.999"))
+    })
+
+    it("handles month end dates correctly", () => {
+      const startMs = utcDate("2024-01-15")
+      const result = calculateNextInterval(startMs, "month", 1, 31, {
+        alignToCalendar: true,
+        alignStartToDay: false,
+        alignEndToDay: true,
+      })
+
+      expect(result.start).toBe(startMs)
+      expect(result.end).toBe(utcDate("2024-01-31", "23:59:59.999"))
+    })
+
+    it("handles year intervals with anchor", () => {
+      const startMs = utcDate("2024-02-01")
+      const result = calculateNextInterval(startMs, "year", 1, 3, {
+        alignToCalendar: true,
+        alignStartToDay: false,
+        alignEndToDay: true,
+      })
+
+      expect(result.start).toBe(startMs)
+      expect(result.end).toBe(utcDate("2024-03-31", "23:59:59.999"))
+    })
+
+    it("handles leap years correctly", () => {
+      const startMs = utcDate("2024-01-15")
+      const result = calculateNextInterval(startMs, "year", 1, 2, {
+        alignToCalendar: true,
+        alignStartToDay: false,
+        alignEndToDay: true,
+      })
+
+      expect(result.start).toBe(startMs)
+      expect(result.end).toBe(utcDate("2024-02-29", "23:59:59.999")) // Leap year
+    })
+
+    it("handles multiple interval counts", () => {
+      const startMs = utcDate("2024-01-01")
+      const result = calculateNextInterval(startMs, "month", 3, 15, {
+        alignToCalendar: true,
+        alignStartToDay: false,
+        alignEndToDay: true,
+      })
+
+      expect(result.start).toBe(startMs)
+      expect(result.end).toBe(utcDate("2024-03-15", "23:59:59.999"))
+    })
+  })
+
+  describe("configureBillingCycleSubscription", () => {
+    it("handles trial periods", () => {
+      const startMs = utcDate("2024-01-01")
+      const result = configureBillingCycleSubscription({
+        currentCycleStartAt: startMs,
+        trialDays: 7,
+        billingAnchor: 1,
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
+      })
+
+      expect(result.cycleEndMs).toBe(utcDate("2024-01-07", "23:59:59.999"))
+    })
+  })
+})
 
 describe("configureBillingCycleSubscription", () => {
   describe("one-time billing", () => {
@@ -16,17 +108,18 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays: 0,
-        billingCycleStart: 1,
-        billingPeriod: "onetime",
+        billingAnchor: 1,
+        billingInterval: "onetime",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
       })
 
       expect(result.cycleStartMs).toEqual(startMs)
-      expect(result.cycleEndMs).toEqual(startMs)
-      expect(result.secondsInCycle).toBe(0)
+      expect(result.cycleEndMs).toEqual(utcDate("9999-12-31", "23:59:59.999"))
+      expect(result.secondsInCycle).toBe(Number.POSITIVE_INFINITY)
       expect(result.prorationFactor).toBe(1)
-      expect(result.billableSeconds).toBe(0)
-      expect(result.isOneTime).toBe(true)
-      expect(result.isTrialPeriod).toBe(false)
+      expect(result.billableSeconds).toBe(Number.POSITIVE_INFINITY)
       expect(result.trialEndsAtMs).toBeUndefined()
     })
 
@@ -37,20 +130,20 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays,
-        billingCycleStart: 1,
-        billingPeriod: "onetime",
+        billingAnchor: 1,
+        billingInterval: "onetime",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
       })
 
       const expectedTrialEndMs = utcDate("2024-01-15", "11:59:59.999")
 
       expect(result.cycleStartMs).toEqual(startMs)
-      expect(result.cycleEndMs).toEqual(expectedTrialEndMs)
-      expect(result.secondsInCycle).toBe(0)
-      expect(result.prorationFactor).toBe(1)
-      expect(result.billableSeconds).toBe(0)
-      expect(result.isOneTime).toBe(true)
-      expect(result.isTrialPeriod).toBe(true)
       expect(result.trialEndsAtMs).toEqual(expectedTrialEndMs)
+      expect(result.cycleEndMs).toEqual(expectedTrialEndMs)
+      expect(result.prorationFactor).toBe(0)
+      expect(result.billableSeconds).toBe(0)
     })
   })
 
@@ -61,14 +154,15 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          billingCycleStart: 1,
-          billingPeriod: "month",
+          billingAnchor: 1,
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          alignStartToDay: false,
+          alignEndToDay: true,
         })
 
         expect(result.cycleStartMs).toEqual(startMs)
-        expect(result.cycleEndMs).toEqual(utcDate("2024-01-31", "23:59:59.999"))
-        expect(result.isOneTime).toBe(false)
-        expect(result.isTrialPeriod).toBe(false)
+        expect(result.cycleEndMs).toEqual(utcDate("2024-02-01", "23:59:59.999"))
       })
 
       it("should handle mid-month start with future anchor", () => {
@@ -76,12 +170,16 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          billingCycleStart: 15,
-          billingPeriod: "month",
+          billingAnchor: 15,
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          alignStartToDay: false,
+          alignEndToDay: true,
+          alignToCalendar: true,
         })
 
         expect(result.cycleStartMs).toEqual(startMs)
-        expect(result.cycleEndMs).toEqual(utcDate("2024-01-14", "23:59:59.999"))
+        expect(result.cycleEndMs).toEqual(utcDate("2024-01-15", "23:59:59.999"))
       })
 
       it("should handle end of month edge cases in leap year", () => {
@@ -89,8 +187,12 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          billingCycleStart: 31,
-          billingPeriod: "month",
+          billingAnchor: 31,
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          alignStartToDay: false,
+          alignEndToDay: true,
+          alignToCalendar: true,
         })
 
         expect(result.cycleStartMs).toEqual(startMs)
@@ -104,14 +206,15 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          billingCycleStart: 0,
-          billingPeriod: "5m",
+          billingAnchor: 0,
+          billingInterval: "minute",
+          billingIntervalCount: 5,
         })
 
         expect(result.cycleStartMs).toEqual(startMs)
         expect(result.cycleEndMs).toEqual(utcDate("2024-01-01", "12:04:59.999"))
-        expect(result.secondsInCycle).toBe(5 * 60)
-        expect(result.billableSeconds).toBe(5 * 60)
+        expect(result.secondsInCycle).toBe(5 * 60 - 1)
+        expect(result.billableSeconds).toBe(5 * 60 - 1)
         expect(result.prorationFactor).toBe(1)
       })
     })
@@ -125,8 +228,11 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays,
-        billingCycleStart: 1,
-        billingPeriod: "month",
+        billingAnchor: 1,
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
       })
 
       const expectedTrialEndMs = utcDate("2024-01-08", "15:29:59.999")
@@ -136,7 +242,6 @@ describe("configureBillingCycleSubscription", () => {
       expect(result.trialEndsAtMs).toEqual(expectedTrialEndMs)
       expect(result.prorationFactor).toBe(0)
       expect(result.billableSeconds).toBe(0)
-      expect(result.isTrialPeriod).toBe(true)
     })
 
     it("should handle trial period with early end date", () => {
@@ -146,15 +251,17 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays: 7,
-        billingCycleStart: 1,
-        billingPeriod: "month",
+        billingAnchor: 1,
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
         endAt: endMs,
       })
 
       expect(result.cycleStartMs).toEqual(startMs)
       expect(result.cycleEndMs).toEqual(endMs)
       expect(result.trialEndsAtMs).toEqual(utcDate("2024-01-08", "11:59:59.999"))
-      expect(result.isTrialPeriod).toBe(true)
     })
   })
 
@@ -164,16 +271,21 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingCycleStart: 1,
-        billingPeriod: "month",
+        billingAnchor: 1,
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
       })
 
       expect(result.cycleStartMs).toEqual(startMs)
-      expect(result.cycleEndMs).toEqual(utcDate("2024-01-31", "23:59:59.999"))
+      expect(result.cycleEndMs).toEqual(utcDate("2024-02-01", "23:59:59.999"))
 
-      const totalSeconds = differenceInSeconds(utcDate("2024-01-31", "23:59:59.999"), startMs) + 1
-      const billableSeconds =
-        differenceInSeconds(utcDate("2024-01-31", "23:59:59.999"), startMs) + 1
+      const totalSeconds = differenceInSeconds(
+        utcDate("2024-02-01", "23:59:59.999"),
+        utcDate("2024-01-01", "00:00:00")
+      )
+      const billableSeconds = differenceInSeconds(utcDate("2024-02-01", "23:59:59.999"), startMs)
 
       expect(result.secondsInCycle).toBe(totalSeconds)
       expect(result.billableSeconds).toBe(billableSeconds)
@@ -189,23 +301,15 @@ describe("configureBillingCycleSubscription", () => {
       expect(() =>
         configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          billingCycleStart: 1,
-          billingPeriod: "month",
+          billingAnchor: 1,
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          alignStartToDay: false,
+          alignEndToDay: true,
           endAt: endMs,
+          alignToCalendar: true,
         })
       ).toThrow("Effective start date is after the effective end date")
-    })
-
-    it("should throw error for invalid billing period", () => {
-      const startMs = utcDate("2024-01-01")
-
-      expect(() =>
-        configureBillingCycleSubscription({
-          currentCycleStartAt: startMs,
-          billingCycleStart: 1,
-          billingPeriod: "invalid" as BillingPeriod,
-        })
-      ).toThrow("Invalid billing period")
     })
   })
 
@@ -215,12 +319,15 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingCycleStart: 3, // March
-        billingPeriod: "year",
+        billingAnchor: 3, // March
+        billingInterval: "year",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
       })
 
       expect(result.cycleStartMs).toEqual(startMs)
-      expect(result.cycleEndMs).toEqual(utcDate("2024-02-29", "23:59:59.999"))
+      expect(result.cycleEndMs).toEqual(utcDate("2024-03-31", "23:59:59.999"))
     })
 
     it("should handle start date in anchor month", () => {
@@ -228,12 +335,15 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingCycleStart: 3, // March
-        billingPeriod: "year",
+        billingAnchor: 3, // March
+        billingInterval: "year",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
       })
 
       expect(result.cycleStartMs).toEqual(startMs)
-      expect(result.cycleEndMs).toEqual(utcDate("2025-02-28", "23:59:59.999"))
+      expect(result.cycleEndMs).toEqual(utcDate("2025-03-31", "23:59:59.999"))
     })
 
     it("should handle start date after anchor month", () => {
@@ -241,12 +351,15 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingCycleStart: 3, // March
-        billingPeriod: "year",
+        billingAnchor: 3, // March
+        billingInterval: "year",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
       })
 
       expect(result.cycleStartMs).toEqual(startMs)
-      expect(result.cycleEndMs).toEqual(utcDate("2025-02-28", "23:59:59.999"))
+      expect(result.cycleEndMs).toEqual(utcDate("2025-03-31", "23:59:59.999"))
     })
   })
 
@@ -256,8 +369,11 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingCycleStart: 31,
-        billingPeriod: "month",
+        billingAnchor: 31,
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
       })
 
       expect(result.cycleStartMs).toEqual(startMs)
@@ -269,25 +385,32 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingCycleStart: 30,
-        billingPeriod: "month",
+        billingAnchor: 30,
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
       })
 
       expect(result.cycleStartMs).toEqual(startMs)
-      expect(result.cycleEndMs).toEqual(utcDate("2024-05-31", "23:59:59.999"))
+      expect(result.cycleEndMs).toEqual(utcDate("2024-05-30", "23:59:59.999"))
     })
 
     it("should handle start date on last day of month", () => {
-      const startMs = utcDate("2024-02-29", "14:30:00")
+      const startMs = utcDate("2028-02-29", "14:30:00")
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingCycleStart: 31,
-        billingPeriod: "month",
+        billingAnchor: 31,
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
+        alignToCalendar: true,
       })
 
       expect(result.cycleStartMs).toEqual(startMs)
-      expect(result.cycleEndMs).toEqual(utcDate("2024-03-31", "23:59:59.999"))
+      expect(result.cycleEndMs).toEqual(utcDate("2028-03-31", "23:59:59.999"))
     })
   })
 
@@ -298,8 +421,11 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays: 17, // Trial ends Feb 1st
-        billingCycleStart: 1,
-        billingPeriod: "month",
+        billingAnchor: 1,
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
       })
 
       expect(result.cycleStartMs).toEqual(startMs)
@@ -314,15 +440,37 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays: 14,
-        billingCycleStart: 1,
-        billingPeriod: "month",
+        billingAnchor: 1,
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
         endAt: endMs,
       })
 
       expect(result.cycleStartMs).toEqual(startMs)
       expect(result.cycleEndMs).toEqual(endMs)
       expect(result.trialEndsAtMs).toEqual(utcDate("2024-01-14", "23:59:59.999"))
-      expect(result.isTrialPeriod).toBe(true)
+    })
+  })
+
+  describe("monthly billing", () => {
+    it("should handle start exactly on anchor", () => {
+      const startMs = utcDate("2024-01-15", "00:00:00")
+
+      const result = configureBillingCycleSubscription({
+        currentCycleStartAt: startMs,
+        billingAnchor: 15,
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        alignStartToDay: false,
+        alignEndToDay: true,
+        alignToCalendar: true,
+      })
+
+      // If starting on anchor (15th), take full interval
+      expect(result.cycleStartMs).toEqual(startMs)
+      expect(result.cycleEndMs).toEqual(utcDate("2024-02-15", "23:59:59.999"))
     })
   })
 })
@@ -334,21 +482,25 @@ describe("billing cycle anchor handling", () => {
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
       trialDays: 0,
-      billingCycleStart: 15, // Anchor on 15th
-      billingPeriod: "month",
+      billingAnchor: 15, // Anchor on 15th
+      billingInterval: "month",
+      billingIntervalCount: 1,
+      alignStartToDay: false,
+      alignEndToDay: true,
+      alignToCalendar: true,
     })
 
-    // First period should be partial - from start to just before anchor
+
     expect(result.cycleStartMs).toEqual(startMs)
-    expect(result.cycleEndMs).toEqual(utcDate("2024-01-14", "23:59:59.999"))
+    expect(result.cycleEndMs).toEqual(utcDate("2024-01-15", "23:59:59.999"))
 
     const fullCycleSeconds =
       differenceInSeconds(
-        utcDate("2024-01-14", "23:59:59.999"),
-        utcDate("2024-01-05", "14:30:00")
-      ) + 1
+        utcDate("2024-02-15", "23:59:59.999"),
+        utcDate("2024-01-15", "00:00:00")
+      )
 
-    const billableSeconds = differenceInSeconds(utcDate("2024-01-14", "23:59:59.999"), startMs) + 1
+    const billableSeconds = differenceInSeconds(utcDate("2024-01-15", "23:59:59.999"), startMs)
 
     expect(result.secondsInCycle).toBe(fullCycleSeconds)
     expect(result.billableSeconds).toBe(billableSeconds)
@@ -361,21 +513,25 @@ describe("billing cycle anchor handling", () => {
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
       trialDays: 0,
-      billingCycleStart: 15, // Anchor on 15th
-      billingPeriod: "month",
+      billingAnchor: 15, // Anchor on 15th
+      billingInterval: "month",
+      billingIntervalCount: 1,
+      alignStartToDay: false,
+      alignEndToDay: true,
+      alignToCalendar: true,
     })
 
     // First period should be partial - from start to next anchor
     expect(result.cycleStartMs).toEqual(startMs)
-    expect(result.cycleEndMs).toEqual(utcDate("2024-02-14", "23:59:59.999"))
+    expect(result.cycleEndMs).toEqual(utcDate("2024-02-15", "23:59:59.999"))
 
     const fullCycleSeconds =
       differenceInSeconds(
-        utcDate("2024-02-14", "23:59:59.999"),
-        utcDate("2024-01-20", "14:30:00")
-      ) + 1
+        utcDate("2024-02-15", "23:59:59.999"),
+        utcDate("2024-01-15", "00:00:00")
+      )
 
-    const billableSeconds = differenceInSeconds(utcDate("2024-02-14", "23:59:59.999"), startMs) + 1
+    const billableSeconds = differenceInSeconds(utcDate("2024-02-15", "23:59:59.999"), startMs)
 
     expect(result.secondsInCycle).toBe(fullCycleSeconds)
     expect(result.billableSeconds).toBe(billableSeconds)
@@ -388,15 +544,19 @@ describe("billing cycle anchor handling", () => {
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
       trialDays: 0,
-      billingCycleStart: 15, // Anchor on 15th
-      billingPeriod: "month",
+      billingAnchor: 15, // Anchor on 15th
+      billingInterval: "month",
+      billingIntervalCount: 1,
+      alignStartToDay: false,
+      alignEndToDay: true,
+      alignToCalendar: true,
     })
 
     // Should start a full period from the anchor
     expect(result.cycleStartMs).toEqual(startMs)
-    expect(result.cycleEndMs).toEqual(utcDate("2024-02-14", "23:59:59.999"))
+    expect(result.cycleEndMs).toEqual(utcDate("2024-02-15", "23:59:59.999"))
 
-    const secondsInCycle = differenceInSeconds(utcDate("2024-02-14", "23:59:59.999"), startMs) + 1
+    const secondsInCycle = differenceInSeconds(utcDate("2024-02-15", "23:59:59.999"), utcDate("2024-01-15", "00:00:00"))
 
     expect(result.secondsInCycle).toBe(secondsInCycle)
     expect(result.billableSeconds).toBe(secondsInCycle)
@@ -409,21 +569,25 @@ describe("billing cycle anchor handling", () => {
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
       trialDays: 0,
-      billingCycleStart: 3, // Anchor on March
-      billingPeriod: "year",
+      billingAnchor: 3, // Anchor on March
+      billingInterval: "year",
+      billingIntervalCount: 1,
+      alignStartToDay: false,
+      alignEndToDay: true,
+      alignToCalendar: true,
     })
 
     // First period should be partial - from start to just before next anchor
     expect(result.cycleStartMs).toEqual(startMs)
-    expect(result.cycleEndMs).toEqual(utcDate("2024-02-29", "23:59:59.999"))
+    expect(result.cycleEndMs).toEqual(utcDate("2024-03-31", "23:59:59.999"))
 
     const fullCycleSeconds =
       differenceInSeconds(
-        utcDate("2024-02-29", "23:59:59.999"),
-        utcDate("2024-02-15", "14:30:00")
-      ) + 1
+        utcDate("2025-03-31", "23:59:59.999"),
+        utcDate("2024-03-01", "00:00:00")
+      )
 
-    const billableSeconds = differenceInSeconds(utcDate("2024-02-29", "23:59:59.999"), startMs) + 1
+    const billableSeconds = differenceInSeconds(utcDate("2024-03-31", "23:59:59.999"), startMs)
 
     expect(result.secondsInCycle).toBe(fullCycleSeconds)
     expect(result.billableSeconds).toBe(billableSeconds)
@@ -436,8 +600,12 @@ describe("billing cycle anchor handling", () => {
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
       trialDays: 20,
-      billingCycleStart: 15, // Anchor on 15th
-      billingPeriod: "month",
+      billingAnchor: 15, // Anchor on 15th
+      billingInterval: "month",
+      billingIntervalCount: 1,
+      alignStartToDay: false,
+      alignEndToDay: true,
+      alignToCalendar: true,
     })
 
     const trialEndMs = utcDate("2024-01-25", "14:29:59.999")

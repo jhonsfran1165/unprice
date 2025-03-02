@@ -9,7 +9,7 @@ import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createMockDatabase, createMockPhase, createMockSubscription, mockCustomer } from "./mock"
-import { PhaseMachine } from "./phase-machine"
+import { PhaseMachine } from "./phase-machine.ts.old"
 
 describe("PhaseMachine", () => {
   let machine: PhaseMachine

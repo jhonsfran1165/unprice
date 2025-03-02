@@ -19,8 +19,7 @@ export const endSchedule = schedules.task({
       with: {
         subscription: true,
       },
-      where: (sub, { eq, and, lte, or }) =>
-        and(eq(sub.active, true), eq(sub.status, "active"), or(lte(sub.endAt, now))),
+      where: (sub, { lte }) => lte(sub.endAt, now),
     })
 
     for (const phase of subscriptionPhasesToEnd) {

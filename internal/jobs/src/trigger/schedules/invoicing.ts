@@ -1,5 +1,5 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3"
-import { db, notInArray } from "@unprice/db"
+import { db } from "@unprice/db"
 import { renewTask } from "../tasks"
 import { invoiceTask } from "../tasks/invoice"
 
@@ -14,8 +14,7 @@ export const invoicingSchedule = schedules.task({
     const subscriptions = await db.query.subscriptions.findMany({
       with: {
         phases: {
-          where: (phase, { eq, and }) =>
-            and(eq(phase.active, true), notInArray(phase.status, ["trialing"])),
+          where: (phase, { lte }) => lte(phase.startAt, now),
         },
       },
       where: (sub, { eq, and, lte, isNull }) =>

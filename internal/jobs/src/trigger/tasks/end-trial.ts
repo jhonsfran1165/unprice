@@ -46,15 +46,13 @@ export const endTrialTask = task({
       throw initPhaseMachineResult.err
     }
 
-    const result = await subscriptionService.endSubscriptionTrial({
+    console.info("Ending trial", {
+      subscriptionId,
+      projectId,
       now,
+      phaseId,
     })
 
-    // we have to throw if there is an error so the task fails
-    if (result.err) {
-      throw result.err
-    }
-
-    return result.val
+    // TODO: end the trial
   },
 })

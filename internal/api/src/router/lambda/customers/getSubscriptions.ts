@@ -1,3 +1,4 @@
+import { protectedApiOrActiveProjectProcedure } from "#trpc"
 import { TRPCError } from "@trpc/server"
 import {
   customerSelectSchema,
@@ -5,7 +6,6 @@ import {
   subscriptionSelectSchema,
 } from "@unprice/db/validators"
 import { z } from "zod"
-import { protectedApiOrActiveProjectProcedure } from "#trpc"
 
 export const getSubscriptions = protectedApiOrActiveProjectProcedure
   .meta({
@@ -44,9 +44,8 @@ export const getSubscriptions = protectedApiOrActiveProjectProcedure
             customer: true,
             phases: {
               // get the active phase, and the start and end date is between now and the end date
-              where: (table, { and, eq, gte, lte, isNull, or }) =>
+              where: (table, { and, gte, lte, isNull, or }) =>
                 and(
-                  eq(table.active, true),
                   lte(table.startAt, Date.now()),
                   or(isNull(table.endAt), gte(table.endAt, Date.now()))
                 ),

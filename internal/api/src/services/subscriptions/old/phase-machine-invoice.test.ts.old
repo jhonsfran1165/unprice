@@ -17,7 +17,7 @@ import {
   createMockSubscription,
   mockCustomer,
 } from "./mock"
-import { PhaseMachine } from "./phase-machine"
+import { PhaseMachine } from "./phase-machine.ts.old"
 
 describe("PhaseMachine", () => {
   let machine: PhaseMachine

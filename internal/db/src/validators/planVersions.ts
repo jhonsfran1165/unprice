@@ -1,30 +1,66 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
-
 import { versions } from "../schema/planVersions"
-import { billingPeriodSchema, currencySchema, startCycleSchema } from "./shared"
+import {
+  billingAnchorSchema,
+  billingIntervalCountSchema,
+  billingIntervalSchema,
+  currencySchema,
+  planTypeSchema,
+} from "./shared"
 
 export const planVersionMetadataSchema = z.object({
   externalId: z.string().optional(),
 })
 
+export const billingConfigSchema = z.object({
+  name: z.string().min(1),
+  billingInterval: billingIntervalSchema,
+  billingIntervalCount: billingIntervalCountSchema,
+  billingAnchor: billingAnchorSchema,
+  planType: planTypeSchema,
+}).superRefine((data, ctx) => {
+  if (data.planType === "recurring" && !data.name) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Billing interval is required for recurring plans",
+      path: ["name"],
+      fatal: true,
+    })
+
+    return false
+  }
+
+  // billing anchor required for recurring plans
+  if (data.planType === "recurring" && !data.billingAnchor) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Billing anchor is required",
+      path: ["billingAnchor"],
+      fatal: true,
+    })
+
+    return false
+  }
+
+  return true
+})
+
+
 export const planVersionSelectBaseSchema = createSelectSchema(versions, {
-  startCycle: startCycleSchema,
   tags: z.array(z.string()),
   metadata: planVersionMetadataSchema,
-  billingPeriod: billingPeriodSchema,
   currency: currencySchema,
+  billingConfig: billingConfigSchema,
+  trialDays: z.coerce.number(),
 })
 
 export const versionInsertBaseSchema = createInsertSchema(versions, {
-  autoRenew: z.boolean().default(true),
-  startCycle: startCycleSchema,
   tags: z.array(z.string()),
-  title: z.string().min(3).max(50),
   metadata: planVersionMetadataSchema,
-  billingPeriod: billingPeriodSchema,
   currency: currencySchema,
-  trialDays: z.coerce.number().int().min(0).max(30).default(0),
+  billingConfig: billingConfigSchema,
+  trialDays: z.coerce.number(),
 })
   .omit({
     createdAtM: true,
@@ -33,30 +69,19 @@ export const versionInsertBaseSchema = createInsertSchema(versions, {
   .partial({
     projectId: true,
     id: true,
-    startCycle: true,
   })
   .required({
     planId: true,
     currency: true,
-    planType: true,
     paymentProvider: true,
-    billingPeriod: true,
-  })
-  .superRefine((data, ctx) => {
-    if (data.planType === "recurring" && !data.billingPeriod) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Billing period is required for recurring plans",
-        path: ["billingPeriod"],
-        fatal: true,
-      })
-
-      return false
-    }
-
-    return true
+    paymentMethodRequired: true,
+    trialDays: true,
+    whenToBill: true,
+    billingConfig: true,
+    autoRenew: true,
   })
 
-export type PlanVersionMetadata = z.infer<typeof planVersionMetadataSchema>
 export type InsertPlanVersion = z.infer<typeof versionInsertBaseSchema>
+export type PlanVersionMetadata = z.infer<typeof planVersionMetadataSchema>
 export type PlanVersion = z.infer<typeof planVersionSelectBaseSchema>
+export type BillingConfig = z.infer<typeof billingConfigSchema>
