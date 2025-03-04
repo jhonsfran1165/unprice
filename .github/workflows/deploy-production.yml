@@ -38,7 +38,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: Infisical/secrets-action@v1.0.7
+      - uses: Infisical/secrets-action@v1.0.9
         name: Pull secrets from Infisical
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
@@ -72,7 +72,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: Infisical/secrets-action@v1.0.7
+      - uses: Infisical/secrets-action@v1.0.9
         name: Pull secrets from Infisical
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}

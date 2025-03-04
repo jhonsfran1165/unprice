@@ -30,27 +30,27 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.3",
-    "@auth/core": "^0.34.1",
+    "@neondatabase/serverless": "^0.10.4",
+    "@auth/core": "^0.38.0",
     "@dinero.js/currencies": "2.0.0-alpha.14",
-    "@t3-oss/env-nextjs": "0.9.1",
+    "@t3-oss/env-nextjs": "0.12.0",
     "@unprice/config": "^0.1.0",
     "@unprice/error": "^0.1.0",
     "base-x": "^4.0.0",
-    "date-fns": "^3.3.1",
+    "date-fns": "^3.6.0",
     "dinero.js": "2.0.0-alpha.14",
-    "drizzle-orm": "^0.38.2",
-    "drizzle-zod": "^0.5.1",
+    "drizzle-orm": "^0.40.0",
+    "drizzle-zod": "^0.7.0",
     "random-word-slugs": "^0.1.7",
-    "zod": "^3.23.8",
-    "ws": "^8.17.1"
+    "zod": "^3.24.2",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
-    "@types/ws": "^8.5.10",
+    "@types/ws": "^8.5.14",
     "@unprice/tsconfig": "^0.1.0",
-    "drizzle-kit": "^0.30.1",
-    "tsx": "^4.7.2",
-    "typescript": "^5.3.3",
-    "vitest": "^2.0.5"
+    "drizzle-kit": "^0.30.5",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "vitest": "^2.1.9"
   }
 }
