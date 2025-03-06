@@ -1,7 +1,7 @@
 "use client"
 
 import { BILLING_CONFIG } from "@unprice/db/utils"
-import type { BillingAnchor, BillingInterval, PlanType } from "@unprice/db/validators"
+import type { BillingConfig, BillingInterval } from "@unprice/db/validators"
 import {
   FormControl,
   FormDescription,
@@ -16,13 +16,7 @@ import type { FieldPath, FieldValues, PathValue, UseFormReturn } from "react-hoo
 import { FilterScroll } from "~/components/filter-scroll"
 
 interface FormValues extends FieldValues {
-  billingConfig: {
-    name: string
-    billingInterval: BillingInterval
-    billingIntervalCount: number
-    planType: PlanType
-    billingAnchor: BillingAnchor
-  }
+  billingConfig: BillingConfig
 }
 
 export default function BillingConfigFormField<TFieldValues extends FormValues>({
@@ -68,17 +62,30 @@ export default function BillingConfigFormField<TFieldValues extends FormValues>(
                 if (!config) return
 
                 const planTypePath = "billingConfig.planType" as FieldPath<TFieldValues>
-                form.setValue(planTypePath, config.planType as PathValue<TFieldValues, typeof planTypePath>)
+                form.setValue(
+                  planTypePath,
+                  config.planType as PathValue<TFieldValues, typeof planTypePath>
+                )
 
-                const intervalCountPath = "billingConfig.billingIntervalCount" as FieldPath<TFieldValues>
-                form.setValue(intervalCountPath, config.billingIntervalCount as PathValue<TFieldValues, typeof intervalCountPath>)
+                const intervalCountPath =
+                  "billingConfig.billingIntervalCount" as FieldPath<TFieldValues>
+                form.setValue(
+                  intervalCountPath,
+                  config.billingIntervalCount as PathValue<TFieldValues, typeof intervalCountPath>
+                )
 
                 const intervalPath = "billingConfig.billingInterval" as FieldPath<TFieldValues>
-                form.setValue(intervalPath, config.billingInterval as PathValue<TFieldValues, typeof intervalPath>)
+                form.setValue(
+                  intervalPath,
+                  config.billingInterval as PathValue<TFieldValues, typeof intervalPath>
+                )
 
                 if (config.billingAnchorOptions.length === 0) {
                   const anchorPath = "billingConfig.billingAnchor" as FieldPath<TFieldValues>
-                  form.setValue(anchorPath, "dayOfCreation" as PathValue<TFieldValues, typeof anchorPath>)
+                  form.setValue(
+                    anchorPath,
+                    "dayOfCreation" as PathValue<TFieldValues, typeof anchorPath>
+                  )
                 }
 
                 const namePath = "billingConfig.name" as FieldPath<TFieldValues>
@@ -111,19 +118,14 @@ export default function BillingConfigFormField<TFieldValues extends FormValues>(
         )}
       />
       {optionAnchor && optionAnchor.length > 0 && (
-        <m.div
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.6, type: "spring" }}
-        >
+        <m.div exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.6, type: "spring" }}>
           <FormField
             control={form.control}
             name={"billingConfig.billingAnchor" as FieldPath<TFieldValues>}
             render={({ field }) => (
               <FormItem className="flex w-full flex-col">
                 <FormLabel>Billing Anchor</FormLabel>
-                <FormDescription>
-                  Anchor specific to the billing interval.
-                </FormDescription>
+                <FormDescription>Anchor specific to the billing interval.</FormDescription>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value)
@@ -139,10 +141,7 @@ export default function BillingConfigFormField<TFieldValues extends FormValues>(
                   <SelectContent>
                     <FilterScroll>
                       {optionAnchor.map((option) => (
-                        <SelectItem
-                          value={option.toString()}
-                          key={option.toString()}
-                        >
+                        <SelectItem value={option.toString()} key={option.toString()}>
                           {option}
                         </SelectItem>
                       ))}

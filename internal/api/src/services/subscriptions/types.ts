@@ -1,12 +1,21 @@
 import type {
   Customer,
   Subscription,
-  SubscriptionInvoice,
   SubscriptionPhaseExtended,
+  SubscriptionStatus,
 } from "@unprice/db/validators"
+
+export type SusbriptionMachineStatus =
+  | SubscriptionStatus
+  | "loading"
+  | "error"
+  | "success"
+  | "restored"
 
 // State machine types
 export interface SubscriptionContext {
+  // Current time in milliseconds for the machine
+  now: number
   subscriptionId: string
   projectId: string
   // Current subscription data
@@ -14,11 +23,8 @@ export interface SubscriptionContext {
   customer: Customer
   paymentMethodId: string | null
   requiredPaymentMethod: boolean
-  // All phases, including past, current, and future
-  phases: Array<SubscriptionPhaseExtended>
   // Current active phase for convenience
   currentPhase: SubscriptionPhaseExtended | null
-  openInvoices: Array<SubscriptionInvoice>
   error?: {
     message: string
   }
@@ -29,8 +35,10 @@ export type SubscriptionEvent =
   | { type: "TRIAL_END" }
   | { type: "RENEW" }
   | { type: "RESTORE" }
-  | { type: "PAYMENT_FAILURE" }
-  | { type: "PAYMENT_SUCCESS" }
+  | { type: "PAYMENT_FAILURE"; invoiceId: string; error: string }
+  | { type: "PAYMENT_SUCCESS"; invoiceId: string }
+  | { type: "INVOICE_SUCCESS"; invoiceId: string }
+  | { type: "INVOICE_FAILURE"; invoiceId: string; error: string }
   | { type: "CANCEL" }
   | { type: "CHANGE" }
   | { type: "INVOICE" }
@@ -44,12 +52,20 @@ export type SubscriptionGuards = {
   | "isAlreadyRenewed"
   | "isAutoRenewEnabled"
   | "isAlreadyInvoiced"
+  | "currentPhaseNull"
 }
 
 export type SubscriptionActions = {
-  type:
-  | "logStateTransition"
-  | "notifyCustomer"
+  type: "logStateTransition" | "notifyCustomer"
 }
 
-export type MachineTags = "subscription" | "machine"
+export type MachineTags =
+  | "subscription"
+  | "machine"
+  | "loading"
+  | "error"
+  | "trialing"
+  | "invoicing"
+  | "ending"
+  | "active"
+  | "renewing"

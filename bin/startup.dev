@@ -48,6 +48,7 @@ bash -ic 'nvm use'
 
 # take the first parameter as the mode id if not provided, use dev
 MODE_ID=${1:-dev}
+RESTART_TINYBIRD=${2:-false}
 
 if [ "$MODE_ID" = "dev" ]; then
   # banner to show the user that we are using the preview environment
@@ -61,12 +62,16 @@ if [ "$MODE_ID" = "dev" ]; then
   TB_HOST="http://localhost:7181"
   REDIS_URL="http://localhost:8079"
   REDIS_TOKEN="example_token"
+  TB_RESTARTED=$RESTART_TINYBIRD
 
   # loging to tb
   cd internal/tinybird
 
-  # start the tinybird local server
-  tb local restart && tb update
+  # check if tinybird is running
+  if [ "$RESTART_TINYBIRD" = "true" ]; then
+    # restart tinybird
+    tb local restart && tb update
+  fi
 
   # check if tinybird http://localhost:7181 is running
   echo "Waiting for Tinybird to be ready..."
@@ -80,6 +85,7 @@ if [ "$MODE_ID" = "dev" ]; then
     fi
     echo "Attempt $attempt of $max_attempts: Tinybird not ready, waiting 10 seconds..."
     sleep 10
+
     ((attempt++))
   done
 
@@ -89,11 +95,13 @@ if [ "$MODE_ID" = "dev" ]; then
   # auth tb with the admin token
   tb auth --token $TB_TOKEN --host $TB_HOST
 
-  # build the project
-  tb build
+  if [ "$TB_RESTARTED" = true ]; then
+    # build the project
+    tb build
 
-  # deploy the project
-  tb deploy
+    # deploy the project
+    tb deploy
+  fi
 
   cd ../../
 

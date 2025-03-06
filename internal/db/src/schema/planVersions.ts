@@ -79,7 +79,7 @@ export const versions = pgTableProject(
     currency: currencyEnum("currency").notNull(),
 
     // billing config for the plan
-    billingConfig: json("billing_config").$type<BillingConfig>().notNull(),
+    billingConfig: json("billing_config").notNull().$type<BillingConfig>(),
 
     // ************ billing data defaults ************
     // whenToBill: pay_in_advance - pay_in_arrear

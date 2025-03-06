@@ -147,6 +147,7 @@ export const STATUS_PLAN = ["draft", "published"] as const
 // for instance a phase was changed to new plan, we create a new phase with status as active
 // and we leave the old phase with status changed.
 export const SUBSCRIPTION_STATUS = [
+  "idle", // the subscription is idle
   "renewing", // the subscription is renewing
   "changing", // the subscription is changing
   "canceling", // the subscription is canceling

@@ -26,8 +26,8 @@ export function SubscriptionForm({
 }: {
   setDialogOpen?: (open: boolean) => void
   defaultValues:
-    | (InsertSubscription & { items?: SubscriptionItem[] })
-    | (Subscription & { items?: SubscriptionItem[] })
+  | (InsertSubscription & { items?: SubscriptionItem[] })
+  | (Subscription & { items?: SubscriptionItem[] })
 }) {
   const router = useRouter()
   const isEdit = !!defaultValues.id
@@ -127,6 +127,7 @@ export function SubscriptionForm({
 
           <SubscriptionPhaseFormField
             form={form}
+            paymentMethodRequired={true}
             // when creating a subscription, we don't have an id yet
             // although the empty id is not used in the backend
             subscriptionId={defaultValues.id ?? ""}
@@ -137,15 +138,13 @@ export function SubscriptionForm({
         <div className="mt-8 flex justify-end gap-4">
           {isEdit && !isInactive && <SubscriptionCancelButton subscriptionId={defaultValues.id!} />}
 
-          {isInactive && (
-            <SubmitButton
-              form="subscription-form"
-              onClick={() => form.handleSubmit(onSubmitForm)()}
-              isSubmitting={form.formState.isSubmitting}
-              isDisabled={form.formState.isSubmitting}
-              label={isEdit ? "Update Subscription" : "Create Subscription"}
-            />
-          )}
+          <SubmitButton
+            form="subscription-form"
+            onClick={() => form.handleSubmit(onSubmitForm)()}
+            isSubmitting={form.formState.isSubmitting}
+            isDisabled={form.formState.isSubmitting}
+            label={isEdit ? "Update Subscription" : "Create Subscription"}
+          />
         </div>
       </form>
     </Form>

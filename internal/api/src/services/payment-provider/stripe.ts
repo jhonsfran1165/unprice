@@ -265,9 +265,6 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
 
-    const billingPeriod = `${new Date(opts.billingAnchor).toISOString().split("T")[0]} to ${new Date(opts.endCycle).toISOString().split("T")[0]
-      }`
-
     // const dueDate only if collection method is send_invoice
     let dueDate: number | undefined
     if (opts.collectionMethod === "send_invoice") {
@@ -292,10 +289,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
             name: "Email",
             value: opts.email,
           },
-          {
-            name: "Billing Period",
-            value: billingPeriod,
-          },
+          ...(opts.customFields ?? []),
         ],
       })
       .then((invoice) =>
@@ -326,9 +320,6 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         new UnPricePaymentProviderError({ message: "Customer payment provider id not set" })
       )
 
-    const billingPeriod = `${new Date(opts.billingAnchor).toISOString().split("T")[0]} to ${new Date(opts.endCycle).toISOString().split("T")[0]
-      }`
-
     // const dueDate only if collection method is send_invoice
     let dueDate: number | undefined
     if (opts.collectionMethod === "send_invoice") {
@@ -342,12 +333,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
         collection_method: opts.collectionMethod,
         description: opts.description,
         due_date: dueDate,
-        custom_fields: [
-          {
-            name: "Billing Period",
-            value: billingPeriod,
-          },
-        ],
+        custom_fields: opts.customFields,
       })
       .then((invoice) =>
         Ok({
@@ -478,7 +464,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     paymentMethodId: string
   }): Promise<
     Result<
-      { invoiceId: string; status: InvoiceProviderStatus },
+      { invoiceId: string; status: InvoiceProviderStatus; invoiceUrl: string },
       FetchError | UnPricePaymentProviderError
     >
   > {
@@ -490,6 +476,7 @@ export class StripePaymentProvider implements PaymentProviderInterface {
       return Ok({
         invoiceId: invoice.id,
         status: invoice.status ?? "open",
+        invoiceUrl: invoice.hosted_invoice_url ?? invoice.invoice_pdf ?? "",
       })
     } catch (error) {
       const e = error as Stripe.errors.StripeError

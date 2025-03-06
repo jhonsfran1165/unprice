@@ -1,50 +1,45 @@
 import { z } from "zod"
 
-import { SubscriptionMachine } from "#services/subscriptions"
+import { SubscriptionService } from "#services/subscriptions"
 import { publicProcedure } from "#trpc"
 import { TRPCError } from "@trpc/server"
 
-export const testing = publicProcedure
-  .input(
-    z.void()
-  )
-  .query(async (opts) => {
-    const {
-      val: subscription,
-      err
-    } = await SubscriptionMachine.create({
-      subscriptionId: "sub_1EhEuYZPSpEskDikKYwJn",
-      projectId: "proj_1EM4YA1jwN6rY51TYo5rY",
-      analytics: opts.ctx.analytics,
-      logger: opts.ctx.logger,
-      waitUntil: opts.ctx.waitUntil,
-    })
+export const testing = publicProcedure.input(z.void()).query(async (opts) => {
+  const subscriptionService = new SubscriptionService(opts.ctx)
 
-    if (err) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: err.message,
-        cause: err,
-      })
-    }
-
-    const {
-      val: result,
-      err: errEndTrial,
-    } = await subscription.endTrial()
-
-    if (errEndTrial) {
-      // Throw a proper TRPC error to be returned to the client
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: errEndTrial.message,
-        cause: errEndTrial,
-      })
-    }
-
-    // If successful, return the result
-    return {
-      status: result,
-      message: "Subscription ended successfully",
-    }
+  const { err: errFinalizeInvoice, val: valFinalizeInvoice } = await subscriptionService.billingInvoice({
+    invoiceId: "inv_1GatYPGYMnbtRz9sUiC5Y",
+    projectId: "proj_1GRtWUw24S2k9XTxgFD7N",
+    subscriptionId: "sub_1Gap1TgsKhES9ooTepLbT",
+    now: Date.now(),
   })
+
+  if (errFinalizeInvoice) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: errFinalizeInvoice.message,
+    })
+  }
+
+  return {
+    invoice: valFinalizeInvoice,
+  }
+
+  // // invoice first
+  // const { err: errBilling, val: valBilling } = await subscriptionService.invoiceSubscription({
+  //   subscriptionId: "sub_1Gap1TgsKhES9ooTepLbT",
+  //   projectId: "proj_1GRtWUw24S2k9XTxgFD7N",
+  //   now: Date.now(),
+  // })
+
+  // if (errBilling) {
+  //   throw new TRPCError({
+  //     code: "INTERNAL_SERVER_ERROR",
+  //     message: errBilling.message,
+  //   })
+  // }
+
+  // return {
+  //   subscription: valBilling,
+  // }
+})

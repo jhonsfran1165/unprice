@@ -9,6 +9,8 @@ export const canRenew = (input: { context: SubscriptionContext }): boolean => {
 
   if (!input.context.currentPhase) return false
 
+  const now = input.context.now
+
   const billingCycle = configureBillingCycleSubscription({
     currentCycleStartAt: subscription.currentCycleEndAt,
     billingConfig: input.context.currentPhase.planVersion.billingConfig,
@@ -19,35 +21,39 @@ export const canRenew = (input: { context: SubscriptionContext }): boolean => {
     alignToCalendar: true,
   })
 
-  // if the next billing period interferes with a change, cancel, expire or past due then we can't renew
-  if (subscription.metadata?.dates?.changeAt && billingCycle.cycleStartMs < subscription.metadata?.dates?.changeAt) {
+  // if the next renewal period has already passed then we can't renew
+  if (subscription.renewAt && subscription.renewAt > now) {
     return false
   }
 
+  // if the next billing period interferes with a cancellation then we can't renew
   if (subscription.metadata?.dates?.cancelAt && billingCycle.cycleStartMs < subscription.metadata?.dates?.cancelAt) {
     return false
   }
 
-  if (subscription.metadata?.dates?.expiresAt && billingCycle.cycleStartMs < subscription.metadata?.dates?.expiresAt) {
-    return false
-  }
-
-  if (subscription.metadata?.dates?.pastDueAt && billingCycle.cycleStartMs < subscription.metadata?.dates?.pastDueAt) {
-    return false
-  }
+  // TODO: add more guards here for expiration, change, etc
 
   return true
 }
 
 export const isAlreadyRenewed = (input: { context: SubscriptionContext }): boolean => {
   const subscription = input.context.subscription
+  const currentPhase = input.context.currentPhase
 
-  if (!subscription) return false
+  if (!subscription || !currentPhase) return false
 
-  const alreadyRenewed =
-    subscription.metadata?.dates?.lastRenewAt && subscription.metadata?.dates?.lastRenewAt >= subscription.nextInvoiceAt
+  // meaning if the current phase last renew is in the current cycle
+  const lastRenewAt = subscription.lastRenewAt
+  const currentCycleEndAt = subscription.currentCycleEndAt
+  const currentCycleStartAt = subscription.currentCycleStartAt
+  const now = input.context.now
 
-  return alreadyRenewed === true
+  const isLastRenewInCurrentCycle = lastRenewAt && lastRenewAt >= currentCycleStartAt && lastRenewAt <= currentCycleEndAt
+
+  return Boolean(
+    !isLastRenewInCurrentCycle &&
+    subscription.renewAt >= now
+  )
 }
 
 export const isAutoRenewEnabled = (input: { context: SubscriptionContext }): boolean => {
@@ -63,7 +69,7 @@ export const isAutoRenewEnabled = (input: { context: SubscriptionContext }): boo
  */
 export const isTrialExpired = (input: { context: SubscriptionContext }): boolean => {
   if (!input.context.currentPhase) return false
-  const now = Date.now()
+  const now = input.context.now
   const trialEndsAt = input.context.currentPhase.trialEndsAt
 
   if (!trialEndsAt) {
@@ -88,20 +94,38 @@ export const hasValidPaymentMethod = (input: { context: SubscriptionContext }): 
 
 export const canInvoice = (input: { context: SubscriptionContext }): boolean => {
   const subscription = input.context.subscription
-  const now = Date.now()
+  const now = input.context.now
 
-  if (subscription.nextInvoiceAt && subscription.nextInvoiceAt > now) {
-    return false
+  // only invoice if the next invoice is in the future
+  if (subscription.invoiceAt && now > subscription.invoiceAt) {
+    return true
   }
 
-  return true
+  return false
+}
+
+export const currentPhaseNull = (input: { context: SubscriptionContext }): boolean => {
+  const currentPhase = input.context.currentPhase
+  return !currentPhase?.id
 }
 
 export const isAlreadyInvoiced = (input: { context: SubscriptionContext }): boolean => {
   const subscription = input.context.subscription
+  const currentPhase = input.context.currentPhase
 
-  const alreadyInvoiced =
-    subscription.metadata?.dates?.lastInvoiceAt && subscription.metadata?.dates?.lastInvoiceAt >= subscription.nextInvoiceAt
+  if (!currentPhase) return false
 
-  return alreadyInvoiced === true
+  // meaning if the current phase last invoice is in the current cycle
+  const lastInvoiceAt = subscription.lastInvoiceAt
+  const currentCycleEndAt = subscription.currentCycleEndAt
+  const currentCycleStartAt = subscription.currentCycleStartAt
+  const now = input.context.now
+
+  const isLastInvoiceInCurrentCycle = lastInvoiceAt && lastInvoiceAt >= currentCycleStartAt && lastInvoiceAt <= currentCycleEndAt
+
+  return Boolean(
+    !isLastInvoiceInCurrentCycle &&
+    subscription.invoiceAt >= now
+  )
 }
+

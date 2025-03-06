@@ -8,6 +8,7 @@ import {
 } from "@unprice/db/validators"
 import { Form } from "@unprice/ui/form"
 import { Separator } from "@unprice/ui/separator"
+import { useEffect } from "react"
 import { z } from "zod"
 import ConfigItemsFormField from "~/components/forms/items-fields"
 import PaymentMethodsFormField from "~/components/forms/payment-method-field"
@@ -24,7 +25,7 @@ export function SubscriptionPhaseForm({
   onSubmit,
 }: {
   setDialogOpen?: (open: boolean) => void
-  defaultValues: InsertSubscriptionPhase | SubscriptionPhase
+  defaultValues: InsertSubscriptionPhase | Partial<SubscriptionPhase>
   onSubmit: (data: InsertSubscriptionPhase | SubscriptionPhase) => void
 }) {
   const editMode = defaultValues.id !== "" && defaultValues.id !== undefined
@@ -39,7 +40,11 @@ export function SubscriptionPhaseForm({
             message: "Payment method is required for this phase",
             path: ["paymentMethodId"],
           })
+
+          return false
         }
+
+        return true
       }
     })
 
@@ -55,10 +60,10 @@ export function SubscriptionPhaseForm({
     },
   })
 
-  const onSubmitForm = async (data: InsertSubscriptionPhase | SubscriptionPhase) => {
+  const onSubmitForm = async (data: InsertSubscriptionPhase | Partial<SubscriptionPhase>) => {
     // if subscription is not created yet no need to create phase
     if (!defaultValues.subscriptionId) {
-      onSubmit(data)
+      onSubmit(data as InsertSubscriptionPhase)
       setDialogOpen?.(false)
       return
     }
@@ -89,6 +94,13 @@ export function SubscriptionPhaseForm({
   const selectedPlanVersion = planVersions?.planVersions.find(
     (version) => version.id === selectedPlanVersionId
   )
+
+  // when plan is selected set payment method required to true
+  useEffect(() => {
+    if (selectedPlanVersion) {
+      form.setValue("paymentMethodRequired", selectedPlanVersion.paymentMethodRequired)
+    }
+  }, [selectedPlanVersion])
 
   return (
     <Form {...form}>

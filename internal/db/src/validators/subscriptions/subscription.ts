@@ -19,6 +19,7 @@ import {
 
 const reasonSchema = z.enum([
   "payment_failed",
+  "invoice_voided",
   "payment_pending",
   "payment_method_not_found",
   "policy_violation",
@@ -55,19 +56,8 @@ export const subscriptionMetadataSchema = z.object({
   note: z.string().optional().describe("Note about status in the subscription"),
   dates: z
     .object({
-      previousCycleStartAt: z
-        .number()
-        .optional()
-        .describe("Date of the previous cycle start")
-        .optional(),
-      previousCycleEndAt: z
-        .number()
-        .optional()
-        .describe("Date of the previous cycle end")
-        .optional(),
       lastChangeAt: z.number().optional().describe("Date of the last change").optional(),
-      lastRenewAt: z.number().optional().describe("Date of the last renewal").optional(),
-      lastInvoiceAt: z.number().optional().describe("Date of the last invoice").optional(),
+      cancelAt: z.number().optional().describe("Date of the cancellation").optional(),
     })
     .optional()
     .describe("Important dates for the subscription"),
@@ -86,7 +76,7 @@ export const subscriptionSelectSchema = createSelectSchema(subscriptions, {
 
 export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhases, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
-  trialDays: z.coerce.number().int().min(0).max(30).default(0),
+  trialDays: z.coerce.number().int().min(0).default(0),
   metadata: subscriptionPhaseMetadataSchema,
 })
   .extend({
@@ -95,6 +85,7 @@ export const subscriptionPhaseSelectSchema = createSelectSchema(subscriptionPhas
   .partial({
     createdAtM: true,
     updatedAtM: true,
+    metadata: true,
   })
 
 export const subscriptionPhaseExtendedSchema = subscriptionPhaseSelectSchema.extend({
@@ -104,7 +95,7 @@ export const subscriptionPhaseExtendedSchema = subscriptionPhaseSelectSchema.ext
 
 export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhases, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
-  trialDays: z.coerce.number().int().min(0).max(30).default(0),
+  metadata: subscriptionPhaseMetadataSchema,
 })
   .extend({
     config: subscriptionItemsConfigSchema,
@@ -118,6 +109,7 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
     paymentMethodId: true,
     config: true,
     items: true,
+    metadata: true,
     trialDays: true,
   })
   .omit({
@@ -127,6 +119,8 @@ export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhas
   })
   .required({
     planVersionId: true,
+    paymentMethodRequired: true,
+    customerId: true,
   })
 
 export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
@@ -196,7 +190,7 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
     projectId: true,
     currentCycleStartAt: true,
     currentCycleEndAt: true,
-    nextInvoiceAt: true,
+    invoiceAt: true,
   })
   .required({
     customerId: true,
@@ -237,6 +231,8 @@ export type SubscriptionMetadata = z.infer<typeof subscriptionMetadataSchema>
 export type SubscriptionPhaseMetadata = z.infer<typeof subscriptionPhaseMetadataSchema>
 export type SubscriptionChangePlan = z.infer<typeof subscriptionChangePlanSchema>
 export type InvoiceMetadata = z.infer<typeof invoiceMetadataSchema>
+
+// TODO: TEST THIS
 export const createDefaultSubscriptionConfig = ({
   planVersion,
   items,

@@ -24,9 +24,9 @@ export class Analytics {
     this.writeClient =
       opts.tinybirdProxy && opts.emit
         ? new Tinybird({
-            token: opts.tinybirdProxy.token,
-            baseUrl: opts.tinybirdProxy.url,
-          })
+          token: opts.tinybirdProxy.token,
+          baseUrl: opts.tinybirdProxy.url,
+        })
         : this.readClient
 
     this.isNoop = this.writeClient instanceof NoopTinybird
@@ -135,40 +135,25 @@ export class Analytics {
     })
   }
 
-  public get getTotalUsagePerBillableFeaturePeriod() {
+  public get getBillingUsage() {
     return this.readClient.buildPipe({
-      pipe: "get_total_usage_per_billable_feature_period",
+      pipe: "get_feature_usage_no_duplicates",
       parameters: z.object({
         subscriptionItemId: z.string(),
         customerId: z.string(),
         projectId: z.string(),
-        start: z.number(),
-        end: z.number(),
+        start: z.number().optional(),
+        end: z.number().optional(),
       }),
       data: z.object({
+        projectId: z.string(),
+        customerId: z.string().optional(),
+        subscriptionItemId: z.string().optional(),
+        featureSlug: z.string(),
         sum: z.number(),
         max: z.number(),
         count: z.number(),
         last_during_period: z.number(),
-      }),
-      opts: {
-        cache: "no-store",
-      },
-    })
-  }
-
-  public get getTotalUsagePerBillableFeatureAll() {
-    return this.readClient.buildPipe({
-      pipe: "get_total_usage_per_billable_feature_all",
-      parameters: z.object({
-        subscriptionItemId: z.string(),
-        customerId: z.string(),
-        projectId: z.string(),
-      }),
-      data: z.object({
-        sum_all: z.number(),
-        count_all: z.number(),
-        max_all: z.number(),
       }),
       opts: {
         cache: "no-store",

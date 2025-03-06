@@ -70,7 +70,7 @@ export const publish = protectedProjectProcedure
     if (planVersionData.status === "published") {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Cannot update a published version, read only",
+        message: "Version already published",
       })
     }
 

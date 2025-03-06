@@ -91,7 +91,7 @@ async function SubscriptionCard({
 
   if (!activePhase) return null
 
-  const autoRenewal = activePhase.autoRenew
+  const autoRenewal = activePhase.planVersion.autoRenew
   const trialEndsAt = activePhase.trialEndsAt
   const currentTrialDays = activePhase.trialEndsAt
     ? differenceInCalendarDays(activePhase.trialEndsAt, Date.now())
@@ -160,7 +160,7 @@ async function SubscriptionCard({
                 </Typography>
                 <Typography variant="p" affects="removePaddingMargin">
                   <span className="font-bold">Next billing date:</span>{" "}
-                  {formatDate(subscription.nextInvoiceAt, subscription.timezone, "MMM d, yyyy")}
+                  {formatDate(subscription.invoiceAt, subscription.timezone, "MMM d, yyyy")}
                 </Typography>
               </div>
             </div>
@@ -170,42 +170,6 @@ async function SubscriptionCard({
                 <AlertDescription>
                   {activePhase.trialDays} days trial ends on{" "}
                   {formatDate(trialEndsAt, subscription.timezone, "MMM d, yyyy")}
-                </AlertDescription>
-              </Alert>
-            )}
-            {subscription.expiresAt && (
-              <Alert variant="info">
-                <AlertTitle>Subscription expires</AlertTitle>
-                <AlertDescription>
-                  Your subscription will expire on{" "}
-                  {formatDate(subscription.expiresAt, subscription.timezone, "MMM d, yyyy")}
-                </AlertDescription>
-              </Alert>
-            )}
-            {subscription.cancelAt && (
-              <Alert variant="info">
-                <AlertTitle>Subscription cancelled</AlertTitle>
-                <AlertDescription>
-                  Your subscription will be cancelled on{" "}
-                  {formatDate(subscription.cancelAt, subscription.timezone, "MMM d, yyyy")}
-                </AlertDescription>
-              </Alert>
-            )}
-            {subscription.changeAt && (
-              <Alert variant="info">
-                <AlertTitle>Subscription changed</AlertTitle>
-                <AlertDescription>
-                  Your subscription will be changed on{" "}
-                  {formatDate(subscription.changeAt, subscription.timezone, "MMM d, yyyy")}
-                </AlertDescription>
-              </Alert>
-            )}
-            {subscription.pastDueAt && (
-              <Alert variant="info">
-                <AlertTitle>Subscription past due</AlertTitle>
-                <AlertDescription>
-                  Your subscription will be past due on{" "}
-                  {formatDate(subscription.pastDueAt, subscription.timezone, "MMM d, yyyy")}
                 </AlertDescription>
               </Alert>
             )}

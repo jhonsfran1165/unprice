@@ -83,9 +83,7 @@ export const duplicate = protectedProjectProcedure
             ...planVersionData,
             id: planVersionId,
             trialDays: planVersionData.trialDays,
-            billingInterval: planVersionData.billingInterval,
-            billingIntervalCount: planVersionData.billingIntervalCount,
-            billingAnchor: planVersionData.billingAnchor,
+            billingConfig: planVersionData.billingConfig,
             autoRenew: planVersionData.autoRenew,
             paymentMethodRequired: planVersionData.paymentMethodRequired,
             metadata: {
@@ -100,7 +98,7 @@ export const duplicate = protectedProjectProcedure
           })
           .returning()
           .catch((err) => {
-            console.error(err)
+            opts.ctx.logger.error(err.message)
             tx.rollback()
             throw err
           })

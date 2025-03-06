@@ -7,81 +7,64 @@ import { addDays } from "date-fns"
 import type { SubscriptionContext } from "./types"
 import { validatePaymentMethod } from "./utils"
 
-export async function loadSubscription({
-  subscriptionId,
-  projectId,
-  logger,
-}: { subscriptionId: string; projectId: string; logger: Logger }): Promise<SubscriptionContext> {
-  const [subscription, openInvoices] = await Promise.all([
-    db.query.subscriptions.findFirst({
-      where: (table, { eq }) => eq(table.id, subscriptionId),
-      with: {
-        phases: {
-          with: {
-            items: {
-              with: {
-                featurePlanVersion: {
-                  with: {
-                    feature: true,
-                  },
-                },
-              },
-            },
-            planVersion: true,
-          },
-        },
-        customer: true,
-      },
-    }),
-    db.query.invoices.findMany({
-      where: (table, { eq, and, inArray }) =>
-        and(
-          eq(table.subscriptionId, subscriptionId),
-          eq(table.projectId, projectId),
-          inArray(table.status, ["draft", "unpaid", "failed", "waiting"])
-        ),
-      orderBy: (table, { asc }) => [asc(table.cycleEndAt)],
-      limit: 1,
-    }),
-  ])
+export async function loadSubscription(payload: {
+  context: SubscriptionContext
+  logger: Logger
+}): Promise<SubscriptionContext> {
+  const { context, logger } = payload
+  const { subscriptionId, projectId, now } = context
 
-  if (!subscription) {
+  const result = await db.query.subscriptions.findFirst({
+    where: (table, { eq, and }) =>
+      and(eq(table.id, subscriptionId), eq(table.projectId, projectId)),
+    with: {
+      phases: {
+        with: {
+          planVersion: true,
+        },
+      },
+      customer: true,
+    },
+  })
+
+  if (!result) {
     throw new Error(`Subscription with ID ${subscriptionId} not found`)
   }
 
-  if (!subscription.customer) {
-    throw new Error(`Customer with ID ${subscription.customerId} not found`)
+  const { phases, customer, ...subscription } = result
+
+  if (!customer) {
+    throw new Error(`Customer with ID ${result.customerId} not found`)
   }
 
-  const now = Date.now()
-  const currentPhase = subscription.phases.find(
+  // phase can be undefined if the subscription is paused or ended but still the machine can be in active state
+  //  for instance the subscription was pasued there is no current phase but there is an option to resume and
+  // subscribe to a new phase
+  const currentPhase = phases.find(
     (phase) => phase.startAt <= now && (!phase.endAt || phase.endAt > now)
   )
 
-  // // TODO: remove this just for testing
-  // if (currentPhase) {
-  //   currentPhase = {
-  //     ...currentPhase,
-  //     trialEndsAt: new Date("2025-03-27").getTime(),
-  //   }
-  // }
-
   // check the payment method as well
   const { paymentMethodId, requiredPaymentMethod } = await validatePaymentMethod({
-    customer: subscription.customer,
+    customer,
     paymentProvider: currentPhase?.planVersion.paymentProvider,
     requiredPaymentMethod: currentPhase?.planVersion.paymentMethodRequired,
     logger: logger,
   })
 
   return {
+    now,
     subscriptionId: subscription.id,
     projectId: subscription.projectId,
-    customer: subscription.customer,
-    phases: subscription.phases,
-    currentPhase: currentPhase ?? null,
-    subscription: subscription,
-    openInvoices: openInvoices,
+    customer,
+    currentPhase: currentPhase
+      ? {
+        ...currentPhase,
+        // items are not needed for the machine
+        items: [],
+      }
+      : null,
+    subscription,
     paymentMethodId,
     requiredPaymentMethod,
   }
@@ -102,24 +85,30 @@ export async function renewSubscription({ context }: { context: SubscriptionCont
     alignToCalendar: true,
   })
 
-  await db
+  const renewAt =
+    currentPhase.planVersion.whenToBill === "pay_in_advance"
+      ? billingCycle.cycleStartMs
+      : billingCycle.cycleEndMs
+
+  // update subscription and current phase last renew at
+  const result = await db
     .update(subscriptions)
     .set({
       currentCycleStartAt: billingCycle.cycleStartMs,
       currentCycleEndAt: billingCycle.cycleEndMs,
+      renewAt: renewAt,
+      lastRenewAt: subscription.renewAt,
       previousCycleStartAt: subscription.currentCycleStartAt,
       previousCycleEndAt: subscription.currentCycleEndAt,
-      lastRenewAt: Date.now(),
     })
     .where(eq(subscriptions.id, subscriptionId))
+    .returning()
+    .then((result) => result[0])
+
+  if (!result) throw new Error("Subscription not found, or not updated")
 
   return {
-    subscription: {
-      ...context.subscription,
-      currentCycleStartAt: billingCycle.cycleStartMs,
-      currentCycleEndAt: billingCycle.cycleEndMs,
-      lastRenewalAt: Date.now(),
-    },
+    subscription: result,
   }
 }
 
@@ -133,17 +122,7 @@ export async function invoiceSubscription({
 
   if (!currentPhase) throw new Error("No active phase found")
 
-  // due at activate background job to process the invoice
-  const dueAt =
-    currentPhase.planVersion.whenToBill === "pay_in_advance"
-      ? subscription.currentCycleStartAt + 1
-      : subscription.currentCycleEndAt + 1
-
-  // calculate the grace period based on the due date
-  // this is when the invoice will be considered past due after that if not paid we can end it, cancel it, etc.
-  const pastDueAt = addDays(dueAt, currentPhase.planVersion.gracePeriod).getTime()
-  // if the subscription is ending the trial, we will only charge the flat charges
-  const invoiceType = isTrialEnding ? "flat" : ("hybrid" as InvoiceType)
+  const whenToBill = currentPhase.planVersion.whenToBill
 
   // calculate the next billing cycle to get the next invoice at
   const billingCycle = configureBillingCycleSubscription({
@@ -157,55 +136,20 @@ export async function invoiceSubscription({
   })
 
   // calculate the next invoice at depending on the billing cycle
-  const nextInvoiceAt =
+  const invoiceAt =
     currentPhase.planVersion.whenToBill === "pay_in_advance"
-      ? billingCycle.cycleStartMs + 1
-      : billingCycle.cycleEndMs + 1
+      ? billingCycle.cycleStartMs
+      : billingCycle.cycleEndMs
 
-  // this should happen in a transaction
-  const result = await db.transaction(async (tx) => {
-    // create the invoice for the current cycle
-    // this will charge the customer for the usage of the previous cycle
-    // and the flat charges of the current cycle
-    const invoice = await tx.insert(invoices).values({
-      id: newId("invoice"),
-      subscriptionId: subscription.id,
-      subscriptionPhaseId: currentPhase.id,
-      cycleStartAt: subscription.currentCycleStartAt,
-      cycleEndAt: subscription.currentCycleEndAt,
-      status: "draft",
-      type: invoiceType,
-      // this allows us to know when to bill the invoice, when to get usage from past cycles
-      whenToBill: currentPhase.planVersion.whenToBill,
-      dueAt,
-      pastDueAt,
-      total: 0, // this will be updated when the invoice is finalized
-      subtotal: 0, // this will be updated when the invoice is finalized
-      amountCreditUsed: 0, // this will be updated when the invoice is finalized
-      invoiceUrl: "", // this will be updated when the invoice is finalized
-      invoiceId: "", // this will be updated when the invoice is finalized
-      paymentProvider: currentPhase.planVersion.paymentProvider,
-      requiredPaymentMethod: currentPhase.planVersion.paymentMethodRequired,
-      projectId: subscription.projectId,
-      collectionMethod: currentPhase.planVersion.collectionMethod,
-      currency: currentPhase.planVersion.currency,
-      previousCycleStartAt: subscription.metadata?.dates?.previousCycleStartAt,
-      previousCycleEndAt: subscription.metadata?.dates?.previousCycleEndAt,
-      metadata: {},
-    })
-
+  // only create invoice when trial is false or when trial is ending and whenToBill is pay_in_advance
+  if (isTrialEnding && whenToBill === "pay_in_arrear") {
+    // update subscription to set the next invoice at to the end of the trial
     // update the subscription invoice information
-    const subscriptionData = await tx
+    const result = await db
       .update(subscriptions)
       .set({
-        nextInvoiceAt,
-        metadata: {
-          ...subscription.metadata,
-          dates: {
-            ...subscription.metadata?.dates,
-            lastInvoiceAt: Date.now(),
-          },
-        },
+        invoiceAt,
+        lastInvoiceAt: invoiceAt,
       })
       .where(
         and(
@@ -214,17 +158,89 @@ export async function invoiceSubscription({
         )
       )
       .returning()
-      .then((res) => res[0])
+      .then((result) => result[0])
+
+    if (!result) throw new Error("Subscription not found, or not updated")
 
     return {
-      subscriptionId,
+      subscription: result,
+    }
+  }
+
+  // due at activate background job to process the invoice
+  const dueAt =
+    whenToBill === "pay_in_advance"
+      ? subscription.currentCycleStartAt
+      : subscription.currentCycleEndAt
+
+  // calculate the grace period based on the due date
+  // this is when the invoice will be considered past due after that if not paid we can end it, cancel it, etc.
+  const pastDueAt = addDays(dueAt, currentPhase.planVersion.gracePeriod).getTime()
+  // if the subscription is ending the trial, we will only charge the flat charges
+  const invoiceType = isTrialEnding ? "flat" : ("hybrid" as InvoiceType)
+  // this should happen in a transaction
+  const result = await db.transaction(async (tx) => {
+    // Execute all operations in parallel and wait for them to complete
+    const [invoice, subscriptionData] = await Promise.all([
+      // Create invoice
+      tx
+        .insert(invoices)
+        .values({
+          id: newId("invoice"),
+          subscriptionId: subscription.id,
+          subscriptionPhaseId: currentPhase.id,
+          cycleStartAt: subscription.currentCycleStartAt,
+          cycleEndAt: subscription.currentCycleEndAt,
+          paymentMethodId: context.paymentMethodId,
+          status: "draft",
+          type: invoiceType,
+          whenToBill: currentPhase.planVersion.whenToBill,
+          dueAt,
+          pastDueAt,
+          total: 0,
+          subtotal: 0,
+          amountCreditUsed: 0,
+          invoicePaymentProviderUrl: "",
+          invoicePaymentProviderId: "",
+          paymentProvider: currentPhase.planVersion.paymentProvider,
+          requiredPaymentMethod: currentPhase.planVersion.paymentMethodRequired,
+          projectId: subscription.projectId,
+          collectionMethod: currentPhase.planVersion.collectionMethod,
+          currency: currentPhase.planVersion.currency,
+          previousCycleStartAt: subscription.previousCycleStartAt,
+          previousCycleEndAt: subscription.previousCycleEndAt,
+          metadata: {},
+        })
+        .returning()
+        .then((result) => result[0]),
+
+      // Update subscription
+      tx
+        .update(subscriptions)
+        .set({
+          invoiceAt,
+          lastInvoiceAt: subscription.invoiceAt,
+        })
+        .where(
+          and(
+            eq(subscriptions.id, subscriptionId),
+            eq(subscriptions.projectId, subscription.projectId)
+          )
+        )
+        .returning()
+        .then((result) => result[0]),
+    ])
+
+    if (!invoice) throw new Error("Invoice not found, or not created")
+    if (!subscriptionData) throw new Error("Subscription not found, or not updated")
+
+    return {
       subscription: subscriptionData,
       invoice: invoice,
     }
   })
 
   return {
-    subscriptionId,
     subscription: result.subscription,
   }
 }

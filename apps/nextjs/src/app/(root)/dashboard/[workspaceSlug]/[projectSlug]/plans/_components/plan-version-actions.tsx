@@ -13,59 +13,71 @@ import { usePlanFeaturesList } from "~/hooks/use-features"
 import { toastAction } from "~/lib/toast"
 import { api } from "~/trpc/client"
 
-const PlanVersionPublish: React.FC<{
+export interface PlanVersionPublishProps extends React.ComponentPropsWithoutRef<"button"> {
   planVersionId: string
   onConfirmAction?: () => void
   classNames?: string
   variant?: "primary" | "custom"
-}> = ({ planVersionId, onConfirmAction, classNames, variant = "primary" }) => {
-  const router = useRouter()
-  const [planFeatures] = usePlanFeaturesList()
-
-  // is valid when all features have config
-  const isValidConfig = Object.values(planFeatures).every((f) => f.id !== undefined)
-
-  const publishVersion = api.planVersions.publish.useMutation({
-    onSuccess: () => {
-      router.refresh()
-    },
-  })
-
-  function onPublishVersion() {
-    startTransition(() => {
-      if (!isValidConfig) {
-        toastAction("error", "There are some features without configuration. try again")
-        return
-      }
-
-      toast.promise(
-        publishVersion.mutateAsync({
-          id: planVersionId,
-        }),
-        {
-          loading: "Publishing...",
-          success: "Version published",
-        }
-      )
-    })
-  }
-
-  return (
-    <ConfirmAction
-      message="Once you publish this version, it will be available to your customers. You won't be able to edit it anymore. Are you sure you want to publish this version?"
-      confirmAction={() => {
-        onConfirmAction?.()
-        onPublishVersion()
-      }}
-    >
-      {/* // TODO: create a confetti animation or something in the first version published? */}
-      <Button variant={variant} disabled={publishVersion.isPending} className={classNames}>
-        Publish version
-        {publishVersion.isPending && <LoadingAnimation className={"ml-2"} />}
-      </Button>
-    </ConfirmAction>
-  )
 }
+
+const PlanVersionPublish = forwardRef<ElementRef<"button">, PlanVersionPublishProps>(
+  (props, ref) => {
+    const { planVersionId, onConfirmAction, classNames, variant = "primary" } = props
+    const router = useRouter()
+    const [planFeatures] = usePlanFeaturesList()
+
+    // is valid when all features have config
+    const isValidConfig = Object.values(planFeatures).every((f) => f.id !== undefined)
+
+    const publishVersion = api.planVersions.publish.useMutation({
+      onSuccess: () => {
+        router.refresh()
+      },
+    })
+
+    function onPublishVersion() {
+      startTransition(() => {
+        if (!isValidConfig) {
+          toastAction("error", "There are some features without configuration. try again")
+          return
+        }
+
+        toast.promise(
+          publishVersion.mutateAsync({
+            id: planVersionId,
+          }),
+          {
+            loading: "Publishing...",
+            success: "Version published",
+          }
+        )
+      })
+    }
+
+    return (
+      <ConfirmAction
+        message="Once you publish this version, it will be available to your customers. You won't be able to edit it anymore. Are you sure you want to publish this version?"
+        confirmAction={() => {
+          onConfirmAction?.()
+          onPublishVersion()
+        }}
+      >
+        {/* // TODO: create a confetti animation or something in the first version published? */}
+        <Button
+          ref={ref}
+          variant={variant}
+          disabled={publishVersion.isPending}
+          className={classNames}
+        >
+          Publish version
+          {publishVersion.isPending && <LoadingAnimation className={"ml-2"} />}
+        </Button>
+      </ConfirmAction>
+    )
+  }
+)
+
+PlanVersionPublish.displayName = "PlanVersionPublish"
 
 export interface PlanVersionDuplicateProps extends React.ComponentPropsWithoutRef<"button"> {
   planVersionId: string

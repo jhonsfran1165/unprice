@@ -26,8 +26,8 @@
 
 // main()
 
-import { randomUUID } from "node:crypto"
 import { Unprice } from "@unprice/unprice"
+import { randomUUID } from "node:crypto"
 
 const unprice = new Unprice({
   token: process.env.UNPRICE_TOKEN || "",
@@ -35,7 +35,7 @@ const unprice = new Unprice({
 })
 
 async function main() {
-  const customerId = "cus_1G2iqcKJKEHAbrZ69VFUR"
+  const customerId = "cus_1GTzSGrapiBW1QwCL3Fcn"
 
   // get the usage
   const entitlements = await unprice.customers.entitlements({

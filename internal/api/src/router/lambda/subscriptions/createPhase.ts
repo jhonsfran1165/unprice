@@ -9,8 +9,10 @@ import { z } from "zod"
 export const createPhase = protectedProjectProcedure
   .input(subscriptionPhaseInsertSchema)
   .output(z.object({ phase: subscriptionPhaseSelectSchema }))
-  .mutation(async () => {
-    // TODO: implement
+  .mutation(async (opts) => {
+    const { input, ctx } = opts
+
+    console.log("input", input)
 
     return {
       phase: {} as SubscriptionPhase,

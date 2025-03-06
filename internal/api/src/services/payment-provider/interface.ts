@@ -41,20 +41,24 @@ export interface CreateInvoiceOpts {
   currency: Currency
   customerName: string
   email: string
-  billingAnchor: number
-  endCycle: number
   collectionMethod: CollectionMethod
   description: string
   dueDate?: number
+  customFields?: {
+    name: string
+    value: string
+  }[]
 }
 
 export interface UpdateInvoiceOpts {
   invoiceId: string
-  billingAnchor: number
-  endCycle: number
   collectionMethod: CollectionMethod
   description: string
   dueDate?: number
+  customFields?: {
+    name: string
+    value: string
+  }[]
 }
 
 export interface AddInvoiceItemOpts {

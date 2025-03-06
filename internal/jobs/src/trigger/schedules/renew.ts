@@ -22,7 +22,7 @@ export const renewSchedule = schedules.task({
           lte(sub.renewAt, now),
           // next invoice at should be after the renew at
           // so we are sure the subscription has been invoiced
-          lte(sub.renewAt, sub.nextInvoiceAt),
+          lte(sub.renewAt, sub.invoiceAt),
           // we should not renew if there is a change, cancel or expire scheduled
           isNull(sub.changeAt),
           isNull(sub.cancelAt),
@@ -46,7 +46,7 @@ export const renewSchedule = schedules.task({
       await renewTask.triggerAndWait({
         subscriptionId: sub.id,
         projectId: sub.projectId,
-        now: sub.nextInvoiceAt + 1,
+        now: sub.invoiceAt + 1,
         phaseId: phase.id,
       })
     }

@@ -24,10 +24,12 @@ export default function SubscriptionPhaseFormField({
   form,
   subscriptionId,
   timezone,
+  paymentMethodRequired,
 }: {
   form: UseFormReturn<InsertSubscription>
   subscriptionId: string
   timezone: string
+  paymentMethodRequired: boolean
 }) {
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
@@ -45,13 +47,10 @@ export default function SubscriptionPhaseFormField({
     planVersionId: "",
     config: [],
     items: [],
-    billingInterval: "month",
-    billingIntervalCount: 1,
-    billingAnchor: 1,
-    whenToBill: "pay_in_advance",
-    collectionMethod: "charge_automatically",
     startAt: Date.now(),
     subscriptionId,
+    paymentMethodRequired,
+    trialDays: 0,
   } as InsertSubscriptionPhase
 
   const [selectedPhase, setSelectedPhase] = useState<InsertSubscriptionPhase>(defaultValuesPhase)
@@ -172,7 +171,7 @@ export default function SubscriptionPhaseFormField({
                       <div className="flex flex-col gap-2">
                         <Typography variant="h5">
                           {index + 1}. {selectedPlanVersion.title} v{selectedPlanVersion.version} -{" "}
-                          {selectedPlanVersion.billingInterval}
+                          {selectedPlanVersion.billingConfig.name}
                           {phase.trialDays && phase.trialDays > 0 ? (
                             <Badge className="ml-2">{phase.trialDays} days trial</Badge>
                           ) : (
@@ -383,12 +382,24 @@ export default function SubscriptionPhaseFormField({
                 if (data.id !== "") {
                   const index = fields.findIndex((phase) => phase.id === data.id)
                   if (index !== -1) {
-                    update(index, data)
+                    update(index, {
+                      ...data,
+                      paymentMethodRequired,
+                      customerId: selectedCustomer
+                    })
                   } else {
-                    append(data)
+                    append({
+                      ...data,
+                      paymentMethodRequired,
+                      customerId: selectedCustomer
+                    })
                   }
                 } else {
-                  append(data)
+                  append({
+                    ...data,
+                    paymentMethodRequired,
+                    customerId: selectedCustomer
+                  })
                 }
               }}
               setDialogOpen={setDialogOpen}

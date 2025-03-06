@@ -51,7 +51,7 @@ export function PaymentMethodRequiredFormField<TFieldValues extends FormValues>(
             <Switch
               checked={field.value ?? false}
               onCheckedChange={(value) => {
-                field.onChange(value)
+                field.onChange(value === true)
               }}
               disabled={isDisabled}
             />

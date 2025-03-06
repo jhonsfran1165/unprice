@@ -46,26 +46,37 @@ export const subscriptions = pgTableProject(
     ...timestamps,
     // customer to get the payment info from that customer
     customerId: cuid("customers_id").notNull(),
-    status: subscriptionStatusEnum("status").notNull().default("active"),
+    status: subscriptionStatusEnum("status").notNull().default("idle"),
 
     // whether the subscription is active or not
     // normally is active if the status is active, trialing or past_due or changing
     // this simplifies the queries when we need to get the active subscriptions
-    active: boolean("active").notNull().default(true),
+    active: boolean("active").notNull().default(false),
     // slug of the plan only for ui purposes
     planSlug: text("plan_slug").default("FREE"),
     timezone: varchar("timezone", { length: 32 }).notNull().default("UTC"),
+
+    // whether the subscription is locked or not
+    // this is used to avoid race conditions when multiple machines are started at the same time
+    locked: boolean("locked").notNull().default(false),
+    lockedAt: bigint("locked_at_m", { mode: "number" }),
 
     // ************ subscription important dates ************
     // current cycle dates for invoices purposes
     currentCycleStartAt: bigint("current_cycle_start_at_m", { mode: "number" }).notNull(),
     currentCycleEndAt: bigint("current_cycle_end_at_m", { mode: "number" }).notNull(),
+    previousCycleStartAt: bigint("previous_cycle_start_at_m", { mode: "number" }),
+    previousCycleEndAt: bigint("previous_cycle_end_at_m", { mode: "number" }),
     // when the subscription is going to be billed next
-    nextInvoiceAt: bigint("next_invoice_at_m", { mode: "number" }).notNull().default(0),
+    invoiceAt: bigint("invoice_at_m", { mode: "number" }).notNull().default(0),
     // renewAt indicates the next time the subscription will be renewed
     renewAt: bigint("renew_at_m", { mode: "number" }).notNull().default(0),
     // endAt is the date when the subscription will end
     endAt: bigint("end_at_m", { mode: "number" }),
+    // when the subscription is going to be billed next
+    lastRenewAt: bigint("last_renew_at_m", { mode: "number" }).notNull().default(0),
+    // when the subscription is going to be billed next
+    lastInvoiceAt: bigint("last_invoice_at_m", { mode: "number" }).notNull().default(0),
     // ************ subscription important dates ************
     // metadata for the subscription
     metadata: json("metadata").$type<z.infer<typeof subscriptionMetadataSchema>>(),
@@ -104,6 +115,8 @@ export const subscriptionPhases = pgTableProject(
     paymentMethodId: text("payment_method_id"),
     // trial days of the phase
     trialDays: integer("trial_days").notNull().default(0),
+    // billing anchor of the phase
+    billingAnchor: integer("billing_anchor").notNull().default(0), // 0 means not applicable
     // ************ subscription important dates ************
     // when the trial ends
     trialEndsAt: bigint("trial_ends_at_m", { mode: "number" }),
@@ -147,6 +160,7 @@ export const subscriptionItems = pgTableProject(
     units: integer("units"),
     featurePlanVersionId: cuid("feature_plan_version_id").notNull(),
     subscriptionPhaseId: cuid("subscription_phase_id").notNull(),
+    subscriptionId: cuid("subscription_id").notNull(),
   },
   (table) => ({
     primary: primaryKey({
@@ -168,6 +182,11 @@ export const subscriptionItems = pgTableProject(
       foreignColumns: [subscriptionPhases.id, subscriptionPhases.projectId],
       name: "subscription_items_subscription_phase_id_fkey",
     }).onDelete("cascade"),
+    subscriptionfk: foreignKey({
+      columns: [table.subscriptionId, table.projectId],
+      foreignColumns: [subscriptions.id, subscriptions.projectId],
+      name: "subscription_items_subscription_id_fkey",
+    }).onDelete("cascade"),
   })
 )
 
@@ -180,6 +199,7 @@ export const invoices = pgTableProject(
     subscriptionId: cuid("subscription_id").notNull(),
     subscriptionPhaseId: cuid("subscription_phase_id").notNull(),
     requiredPaymentMethod: boolean("required_payment_method").notNull().default(false),
+    paymentMethodId: text("payment_method_id"),
     status: invoiceStatusEnum("status").notNull().default("draft"),
     // type of invoice charges (flat, usage, hybrid)
     type: invoiceTypeEnum("type").notNull().default("hybrid"),
@@ -217,8 +237,8 @@ export const invoices = pgTableProject(
     collectionMethod: collectionMethodEnum("collection_method")
       .notNull()
       .default("charge_automatically"),
-    invoiceId: text("invoice_id"),
-    invoiceUrl: text("invoice_url"),
+    invoicePaymentProviderId: text("invoice_payment_provider_id"),
+    invoicePaymentProviderUrl: text("invoice_payment_provider_url"),
     // payment provider for the plan - stripe, paypal, lemonsquezee etc.
     paymentProvider: paymentProviderEnum("payment_providers").notNull(),
     // currency of the plan

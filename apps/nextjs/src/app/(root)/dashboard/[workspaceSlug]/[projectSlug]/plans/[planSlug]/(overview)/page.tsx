@@ -86,10 +86,10 @@ export default async function PlanPage({
       <TabNavigation>
         <div className="flex items-center">
           <TabNavigationLink active asChild>
-            <SuperLink href={`${baseUrl}`}>Versions</SuperLink>
+            <SuperLink prefetch={true} href={`${baseUrl}`}>Versions</SuperLink>
           </TabNavigationLink>
           <TabNavigationLink asChild>
-            <SuperLink href={`${baseUrl}/subscriptions`}>Subscriptions</SuperLink>
+            <SuperLink prefetch={true} href={`${baseUrl}/subscriptions`}>Subscriptions</SuperLink>
           </TabNavigationLink>
         </div>
       </TabNavigation>

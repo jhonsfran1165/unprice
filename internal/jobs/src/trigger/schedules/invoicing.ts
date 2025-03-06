@@ -14,18 +14,19 @@ export const invoicingSchedule = schedules.task({
     const subscriptions = await db.query.subscriptions.findMany({
       with: {
         phases: {
-          where: (phase, { lte }) => lte(phase.startAt, now),
+          where: (phase, { lte, and, gte, isNull, or }) => and(
+            lte(phase.startAt, now),
+            or(
+              isNull(phase.endAt),
+              gte(phase.endAt, now)
+            )
+          ),
         },
       },
-      where: (sub, { eq, and, lte, isNull }) =>
+      where: (sub, { eq, and, lte }) =>
         and(
           eq(sub.active, true),
-          lte(sub.nextInvoiceAt, now),
-          // we don't invoice if there is a change, cancel or expire scheduled
-          isNull(sub.cancelAt),
-          isNull(sub.pastDueAt),
-          isNull(sub.expiresAt),
-          isNull(sub.changeAt)
+          lte(sub.invoiceAt, now),
         ),
     })
 
@@ -40,22 +41,20 @@ export const invoicingSchedule = schedules.task({
         continue
       }
 
-      const result = await invoiceTask.triggerAndWait({
+      await invoiceTask.triggerAndWait({
         subscriptionId: sub.id,
         projectId: sub.projectId,
-        now: sub.nextInvoiceAt + 1,
+        now: sub.invoiceAt + 1,
         phaseId: phase.id,
       })
 
-      if (result.ok && phase.autoRenew) {
-        // renew the subscription right after the invoice is created
-        await renewTask.triggerAndWait({
-          subscriptionId: sub.id,
-          projectId: sub.projectId,
-          now: sub.nextInvoiceAt + 1,
-          phaseId: phase.id,
-        })
-      }
+      // renew the subscription right after the invoice is created
+      await renewTask.triggerAndWait({
+        subscriptionId: sub.id,
+        projectId: sub.projectId,
+        now: sub.invoiceAt + 1,
+        phaseId: phase.id,
+      })
     }
 
     return {
