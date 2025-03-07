@@ -385,20 +385,20 @@ export default function SubscriptionPhaseFormField({
                     update(index, {
                       ...data,
                       paymentMethodRequired,
-                      customerId: selectedCustomer
+                      customerId: selectedCustomer,
                     })
                   } else {
                     append({
                       ...data,
                       paymentMethodRequired,
-                      customerId: selectedCustomer
+                      customerId: selectedCustomer,
                     })
                   }
                 } else {
                   append({
                     ...data,
                     paymentMethodRequired,
-                    customerId: selectedCustomer
+                    customerId: selectedCustomer,
                   })
                 }
               }}

@@ -83,6 +83,7 @@ export const stripePlanVersionSchema = z.object({
   id: z.string().min(1, "Plan version id is required"),
   projectId: z.string().min(1, "Project id is required"),
   config: subscriptionItemsConfigSchema.optional(),
+  paymentMethodRequired: z.boolean(),
 })
 
 export const customerEntitlementSchema = createSelectSchema(schema.customerEntitlements, {

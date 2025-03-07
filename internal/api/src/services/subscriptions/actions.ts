@@ -1,8 +1,8 @@
-import { env } from "#env.mjs"
 import { db, eq } from "@unprice/db"
 import { subscriptions } from "@unprice/db/schema"
 import type { SubscriptionMetadata } from "@unprice/db/validators"
 import type { Logger } from "@unprice/logging"
+import { env } from "#env.mjs"
 import type { SubscriptionContext, SubscriptionEvent } from "./types"
 
 /**

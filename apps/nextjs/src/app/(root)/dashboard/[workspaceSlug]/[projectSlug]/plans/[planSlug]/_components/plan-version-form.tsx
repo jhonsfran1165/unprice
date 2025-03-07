@@ -26,13 +26,11 @@ import {
   TitleFormField,
 } from "./version-fields-form"
 
-const isPublishedSchema = planVersionSelectBaseSchema
-  .partial()
-  .required({
-    id: true,
-    projectId: true,
-    billingConfig: true,
-  })
+const isPublishedSchema = planVersionSelectBaseSchema.partial().required({
+  id: true,
+  projectId: true,
+  billingConfig: true,
+})
 
 export type PublishedPlanVersion = z.infer<typeof isPublishedSchema>
 
@@ -52,7 +50,7 @@ export function PlanVersionForm({
 
   const form = useZodForm({
     schema: versionInsertBaseSchema,
-    defaultValues: defaultValues
+    defaultValues: defaultValues,
   })
 
   const createPlanVersion = api.planVersions.create.useMutation({

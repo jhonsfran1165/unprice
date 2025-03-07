@@ -397,19 +397,19 @@ export class StripePaymentProvider implements PaymentProviderInterface {
     // if the product we send price data, otherwise we send the amount
     const priceData = productId
       ? {
-        quantity: quantity,
-        price_data: {
-          currency: currency,
-          product: productId,
-          unit_amount: unitAmount,
-        },
-      }
+          quantity: quantity,
+          price_data: {
+            currency: currency,
+            product: productId,
+            unit_amount: unitAmount,
+          },
+        }
       : {
-        // for items that are not associated to a product, we send the total amount
-        currency: currency,
-        unit_amount: unitAmount,
-        quantity: quantity,
-      }
+          // for items that are not associated to a product, we send the total amount
+          currency: currency,
+          unit_amount: unitAmount,
+          quantity: quantity,
+        }
 
     return await this.client.invoiceItems
       .create({

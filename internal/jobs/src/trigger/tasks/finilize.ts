@@ -2,8 +2,8 @@ import { task } from "@trigger.dev/sdk/v3"
 import { SubscriptionService } from "#services/subscriptions"
 import { createContext } from "./context"
 
-export const billingTask = task({
-  id: "subscription.phase.billing",
+export const finilizeTask = task({
+  id: "subscription.phase.finilize",
   retry: {
     maxAttempts: 1,
   },
@@ -40,19 +40,19 @@ export const billingTask = task({
 
     const subscriptionService = new SubscriptionService(context)
 
-    const billingResult = await subscriptionService.billingInvoice({
+    const finalizeInvoiceResult = await subscriptionService.finalizeInvoice({
       invoiceId,
       projectId,
       subscriptionId,
       now,
     })
 
-    if (billingResult.err) {
-      throw billingResult.err
+    if (finalizeInvoiceResult.err) {
+      throw finalizeInvoiceResult.err
     }
 
     return {
-      status: billingResult.val.status,
+      status: finalizeInvoiceResult.val.status,
       subscriptionId,
       projectId,
       now,

@@ -7,9 +7,11 @@ import { calculateFlatPricePlan } from "./prices"
 
 describe("calculateFlatPricePlan", () => {
   it("should calculate flat price for a plan with flat features", () => {
-    const planVersion = {
+    const planVersion: PlanVersionExtended = {
       id: "pv_4Hs8cAjTgxCWUpFSjta8bDFEkqpF",
       currency: "USD",
+      projectId: "project_4HryYvFLF7qeKUuVZtjfixTcXJ5y",
+      version: 1,
       plan: {
         slug: "free-plan",
         defaultPlan: true,
@@ -20,10 +22,17 @@ describe("calculateFlatPricePlan", () => {
       active: true,
       status: "published",
       paymentProvider: "stripe",
-      billingInterval: "month",
-      billingIntervalCount: 1,
-      billingAnchor: 1,
-      planType: "recurring",
+      collectionMethod: "charge_automatically",
+      trialDays: 0,
+      autoRenew: true,
+      paymentMethodRequired: false,
+      billingConfig: {
+        name: "test",
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        planType: "recurring",
+        billingAnchor: 1,
+      },
       planFeatures: [
         {
           id: "fv_4HsTVDfaaTtnAkq5sKB1Raj4tgaG",
@@ -97,9 +106,21 @@ describe("calculateFlatPricePlan", () => {
         },
       ],
       whenToBill: "pay_in_advance",
-      gracePeriod: null,
+      gracePeriod: 0,
       metadata: null,
-    } as PlanVersionExtended
+      createdAtM: 0,
+      updatedAtM: 0,
+      description: "",
+      latest: true,
+      title: "",
+      tags: [],
+      publishedAt: 0,
+      publishedBy: "",
+      archived: false,
+      archivedAt: null,
+      archivedBy: null,
+      dueBehaviour: "cancel",
+    }
 
     const result = calculateFlatPricePlan({ planVersion })
     expect(result.err).toBe(undefined)

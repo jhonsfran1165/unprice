@@ -34,7 +34,9 @@ export const subscriptionStatusSchema = z.enum(SUBSCRIPTION_STATUS)
 export const dueBehaviourSchema = z.enum(DUE_BEHAVIOUR)
 export const invoiceStatusSchema = z.enum(INVOICE_STATUS)
 export const invoiceTypeSchema = z.enum(INVOICE_TYPE)
-export const billingAnchorSchema = z.union([z.coerce.number().int().min(0).max(31), z.literal("dayOfCreation")]).default("dayOfCreation")
+export const billingAnchorSchema = z
+  .union([z.coerce.number().int().min(0).max(31), z.literal("dayOfCreation")])
+  .default("dayOfCreation")
 
 export const billingIntervalSchema = z.enum(BILLING_INTERVALS)
 export const billingIntervalCountSchema = z.coerce.number().int().min(1).max(12)

@@ -11,11 +11,21 @@ describe("Billing Calculations", () => {
   describe("calculateNextInterval", () => {
     it("handles basic intervals", () => {
       const startMs = utcDate("2024-01-01")
-      const result = calculateNextInterval(startMs, "month", 1, 1, {
-        alignToCalendar: true,
-        alignStartToDay: false,
-        alignEndToDay: true,
-      })
+      const result = calculateNextInterval(
+        startMs,
+        {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 1,
+        },
+        {
+          alignToCalendar: true,
+          alignStartToDay: false,
+          alignEndToDay: true,
+        }
+      )
 
       expect(result.start).toBe(startMs)
       expect(result.end).toBe(utcDate("2024-02-01", "23:59:59.999"))
@@ -23,11 +33,21 @@ describe("Billing Calculations", () => {
 
     it("handles month intervals with anchor", () => {
       const startMs = utcDate("2024-01-10")
-      const result = calculateNextInterval(startMs, "month", 1, 15, {
-        alignToCalendar: true,
-        alignStartToDay: false,
-        alignEndToDay: true,
-      })
+      const result = calculateNextInterval(
+        startMs,
+        {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 15,
+        },
+        {
+          alignToCalendar: true,
+          alignStartToDay: false,
+          alignEndToDay: true,
+        }
+      )
 
       expect(result.start).toBe(startMs)
       expect(result.end).toBe(utcDate("2024-01-15", "23:59:59.999"))
@@ -35,11 +55,21 @@ describe("Billing Calculations", () => {
 
     it("handles month end dates correctly", () => {
       const startMs = utcDate("2024-01-15")
-      const result = calculateNextInterval(startMs, "month", 1, 31, {
-        alignToCalendar: true,
-        alignStartToDay: false,
-        alignEndToDay: true,
-      })
+      const result = calculateNextInterval(
+        startMs,
+        {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 31,
+        },
+        {
+          alignToCalendar: true,
+          alignStartToDay: false,
+          alignEndToDay: true,
+        }
+      )
 
       expect(result.start).toBe(startMs)
       expect(result.end).toBe(utcDate("2024-01-31", "23:59:59.999"))
@@ -47,11 +77,21 @@ describe("Billing Calculations", () => {
 
     it("handles year intervals with anchor", () => {
       const startMs = utcDate("2024-02-01")
-      const result = calculateNextInterval(startMs, "year", 1, 3, {
-        alignToCalendar: true,
-        alignStartToDay: false,
-        alignEndToDay: true,
-      })
+      const result = calculateNextInterval(
+        startMs,
+        {
+          name: "test",
+          billingInterval: "year",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 3,
+        },
+        {
+          alignToCalendar: true,
+          alignStartToDay: false,
+          alignEndToDay: true,
+        }
+      )
 
       expect(result.start).toBe(startMs)
       expect(result.end).toBe(utcDate("2024-03-31", "23:59:59.999"))
@@ -59,11 +99,21 @@ describe("Billing Calculations", () => {
 
     it("handles leap years correctly", () => {
       const startMs = utcDate("2024-01-15")
-      const result = calculateNextInterval(startMs, "year", 1, 2, {
-        alignToCalendar: true,
-        alignStartToDay: false,
-        alignEndToDay: true,
-      })
+      const result = calculateNextInterval(
+        startMs,
+        {
+          name: "test",
+          billingInterval: "year",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 2,
+        },
+        {
+          alignToCalendar: true,
+          alignStartToDay: false,
+          alignEndToDay: true,
+        }
+      )
 
       expect(result.start).toBe(startMs)
       expect(result.end).toBe(utcDate("2024-02-29", "23:59:59.999")) // Leap year
@@ -71,11 +121,21 @@ describe("Billing Calculations", () => {
 
     it("handles multiple interval counts", () => {
       const startMs = utcDate("2024-01-01")
-      const result = calculateNextInterval(startMs, "month", 3, 15, {
-        alignToCalendar: true,
-        alignStartToDay: false,
-        alignEndToDay: true,
-      })
+      const result = calculateNextInterval(
+        startMs,
+        {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 3,
+          planType: "recurring",
+          billingAnchor: 15,
+        },
+        {
+          alignToCalendar: true,
+          alignStartToDay: false,
+          alignEndToDay: true,
+        }
+      )
 
       expect(result.start).toBe(startMs)
       expect(result.end).toBe(utcDate("2024-03-15", "23:59:59.999"))
@@ -88,9 +148,13 @@ describe("Billing Calculations", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays: 7,
-        billingAnchor: 1,
-        billingInterval: "month",
-        billingIntervalCount: 1,
+        billingConfig: {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 1,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
       })
@@ -108,9 +172,12 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays: 0,
-        billingAnchor: 1,
-        billingInterval: "onetime",
-        billingIntervalCount: 1,
+        billingConfig: {
+          name: "test",
+          billingInterval: "onetime",
+          billingIntervalCount: 1,
+          planType: "onetime",
+        },
         alignStartToDay: false,
         alignEndToDay: true,
       })
@@ -130,9 +197,12 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays,
-        billingAnchor: 1,
-        billingInterval: "onetime",
-        billingIntervalCount: 1,
+        billingConfig: {
+          name: "test",
+          billingInterval: "onetime",
+          billingIntervalCount: 1,
+          planType: "onetime",
+        },
         alignStartToDay: false,
         alignEndToDay: true,
       })
@@ -154,9 +224,14 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          billingAnchor: 1,
-          billingInterval: "month",
-          billingIntervalCount: 1,
+          trialDays: 0,
+          billingConfig: {
+            name: "test",
+            billingInterval: "month",
+            billingIntervalCount: 1,
+            planType: "recurring",
+            billingAnchor: 1,
+          },
           alignStartToDay: false,
           alignEndToDay: true,
         })
@@ -170,9 +245,14 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          billingAnchor: 15,
-          billingInterval: "month",
-          billingIntervalCount: 1,
+          trialDays: 0,
+          billingConfig: {
+            name: "test",
+            billingInterval: "month",
+            billingIntervalCount: 1,
+            planType: "recurring",
+            billingAnchor: 15,
+          },
           alignStartToDay: false,
           alignEndToDay: true,
           alignToCalendar: true,
@@ -187,9 +267,14 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          billingAnchor: 31,
-          billingInterval: "month",
-          billingIntervalCount: 1,
+          trialDays: 0,
+          billingConfig: {
+            name: "test",
+            billingInterval: "month",
+            billingIntervalCount: 1,
+            planType: "recurring",
+            billingAnchor: 31,
+          },
           alignStartToDay: false,
           alignEndToDay: true,
           alignToCalendar: true,
@@ -206,9 +291,14 @@ describe("configureBillingCycleSubscription", () => {
 
         const result = configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          billingAnchor: 0,
-          billingInterval: "minute",
-          billingIntervalCount: 5,
+          trialDays: 0,
+          billingConfig: {
+            name: "test",
+            billingInterval: "minute",
+            billingIntervalCount: 5,
+            planType: "recurring",
+            billingAnchor: 0,
+          },
         })
 
         expect(result.cycleStartMs).toEqual(startMs)
@@ -228,9 +318,13 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays,
-        billingAnchor: 1,
-        billingInterval: "month",
-        billingIntervalCount: 1,
+        billingConfig: {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 1,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
       })
@@ -251,9 +345,13 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays: 7,
-        billingAnchor: 1,
-        billingInterval: "month",
-        billingIntervalCount: 1,
+        billingConfig: {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 1,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
         endAt: endMs,
@@ -271,9 +369,14 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingAnchor: 1,
-        billingInterval: "month",
-        billingIntervalCount: 1,
+        trialDays: 0,
+        billingConfig: {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 1,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
       })
@@ -301,9 +404,14 @@ describe("configureBillingCycleSubscription", () => {
       expect(() =>
         configureBillingCycleSubscription({
           currentCycleStartAt: startMs,
-          billingAnchor: 1,
-          billingInterval: "month",
-          billingIntervalCount: 1,
+          trialDays: 0,
+          billingConfig: {
+            name: "test",
+            billingInterval: "month",
+            billingIntervalCount: 1,
+            planType: "recurring",
+            billingAnchor: 1,
+          },
           alignStartToDay: false,
           alignEndToDay: true,
           endAt: endMs,
@@ -319,9 +427,14 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingAnchor: 3, // March
-        billingInterval: "year",
-        billingIntervalCount: 1,
+        trialDays: 0,
+        billingConfig: {
+          name: "test",
+          billingInterval: "year",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 3,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
       })
@@ -335,9 +448,14 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingAnchor: 3, // March
-        billingInterval: "year",
-        billingIntervalCount: 1,
+        trialDays: 0,
+        billingConfig: {
+          name: "test",
+          billingInterval: "year",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 3,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
       })
@@ -351,9 +469,14 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingAnchor: 3, // March
-        billingInterval: "year",
-        billingIntervalCount: 1,
+        trialDays: 0,
+        billingConfig: {
+          name: "test",
+          billingInterval: "year",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 3,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
       })
@@ -369,9 +492,14 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingAnchor: 31,
-        billingInterval: "month",
-        billingIntervalCount: 1,
+        trialDays: 0,
+        billingConfig: {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 31,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
       })
@@ -385,9 +513,14 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingAnchor: 30,
-        billingInterval: "month",
-        billingIntervalCount: 1,
+        trialDays: 0,
+        billingConfig: {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 30,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
       })
@@ -401,9 +534,14 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingAnchor: 31,
-        billingInterval: "month",
-        billingIntervalCount: 1,
+        trialDays: 0,
+        billingConfig: {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 31,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
         alignToCalendar: true,
@@ -421,9 +559,13 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays: 17, // Trial ends Feb 1st
-        billingAnchor: 1,
-        billingInterval: "month",
-        billingIntervalCount: 1,
+        billingConfig: {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 1,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
       })
@@ -440,9 +582,13 @@ describe("configureBillingCycleSubscription", () => {
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
         trialDays: 14,
-        billingAnchor: 1,
-        billingInterval: "month",
-        billingIntervalCount: 1,
+        billingConfig: {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 1,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
         endAt: endMs,
@@ -460,9 +606,14 @@ describe("configureBillingCycleSubscription", () => {
 
       const result = configureBillingCycleSubscription({
         currentCycleStartAt: startMs,
-        billingAnchor: 15,
-        billingInterval: "month",
-        billingIntervalCount: 1,
+        trialDays: 0,
+        billingConfig: {
+          name: "test",
+          billingInterval: "month",
+          billingIntervalCount: 1,
+          planType: "recurring",
+          billingAnchor: 15,
+        },
         alignStartToDay: false,
         alignEndToDay: true,
         alignToCalendar: true,
@@ -482,23 +633,25 @@ describe("billing cycle anchor handling", () => {
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
       trialDays: 0,
-      billingAnchor: 15, // Anchor on 15th
-      billingInterval: "month",
-      billingIntervalCount: 1,
+      billingConfig: {
+        name: "test",
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        planType: "recurring",
+        billingAnchor: 15,
+      },
       alignStartToDay: false,
       alignEndToDay: true,
       alignToCalendar: true,
     })
 
-
     expect(result.cycleStartMs).toEqual(startMs)
     expect(result.cycleEndMs).toEqual(utcDate("2024-01-15", "23:59:59.999"))
 
-    const fullCycleSeconds =
-      differenceInSeconds(
-        utcDate("2024-02-15", "23:59:59.999"),
-        utcDate("2024-01-15", "00:00:00")
-      )
+    const fullCycleSeconds = differenceInSeconds(
+      utcDate("2024-02-15", "23:59:59.999"),
+      utcDate("2024-01-15", "00:00:00")
+    )
 
     const billableSeconds = differenceInSeconds(utcDate("2024-01-15", "23:59:59.999"), startMs)
 
@@ -513,9 +666,13 @@ describe("billing cycle anchor handling", () => {
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
       trialDays: 0,
-      billingAnchor: 15, // Anchor on 15th
-      billingInterval: "month",
-      billingIntervalCount: 1,
+      billingConfig: {
+        name: "test",
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        planType: "recurring",
+        billingAnchor: 15,
+      },
       alignStartToDay: false,
       alignEndToDay: true,
       alignToCalendar: true,
@@ -525,11 +682,10 @@ describe("billing cycle anchor handling", () => {
     expect(result.cycleStartMs).toEqual(startMs)
     expect(result.cycleEndMs).toEqual(utcDate("2024-02-15", "23:59:59.999"))
 
-    const fullCycleSeconds =
-      differenceInSeconds(
-        utcDate("2024-02-15", "23:59:59.999"),
-        utcDate("2024-01-15", "00:00:00")
-      )
+    const fullCycleSeconds = differenceInSeconds(
+      utcDate("2024-02-15", "23:59:59.999"),
+      utcDate("2024-01-15", "00:00:00")
+    )
 
     const billableSeconds = differenceInSeconds(utcDate("2024-02-15", "23:59:59.999"), startMs)
 
@@ -544,9 +700,13 @@ describe("billing cycle anchor handling", () => {
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
       trialDays: 0,
-      billingAnchor: 15, // Anchor on 15th
-      billingInterval: "month",
-      billingIntervalCount: 1,
+      billingConfig: {
+        name: "test",
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        planType: "recurring",
+        billingAnchor: 15,
+      },
       alignStartToDay: false,
       alignEndToDay: true,
       alignToCalendar: true,
@@ -556,7 +716,10 @@ describe("billing cycle anchor handling", () => {
     expect(result.cycleStartMs).toEqual(startMs)
     expect(result.cycleEndMs).toEqual(utcDate("2024-02-15", "23:59:59.999"))
 
-    const secondsInCycle = differenceInSeconds(utcDate("2024-02-15", "23:59:59.999"), utcDate("2024-01-15", "00:00:00"))
+    const secondsInCycle = differenceInSeconds(
+      utcDate("2024-02-15", "23:59:59.999"),
+      utcDate("2024-01-15", "00:00:00")
+    )
 
     expect(result.secondsInCycle).toBe(secondsInCycle)
     expect(result.billableSeconds).toBe(secondsInCycle)
@@ -569,9 +732,13 @@ describe("billing cycle anchor handling", () => {
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
       trialDays: 0,
-      billingAnchor: 3, // Anchor on March
-      billingInterval: "year",
-      billingIntervalCount: 1,
+      billingConfig: {
+        name: "test",
+        billingInterval: "year",
+        billingIntervalCount: 1,
+        planType: "recurring",
+        billingAnchor: 3,
+      },
       alignStartToDay: false,
       alignEndToDay: true,
       alignToCalendar: true,
@@ -581,11 +748,10 @@ describe("billing cycle anchor handling", () => {
     expect(result.cycleStartMs).toEqual(startMs)
     expect(result.cycleEndMs).toEqual(utcDate("2024-03-31", "23:59:59.999"))
 
-    const fullCycleSeconds =
-      differenceInSeconds(
-        utcDate("2025-03-31", "23:59:59.999"),
-        utcDate("2024-03-01", "00:00:00")
-      )
+    const fullCycleSeconds = differenceInSeconds(
+      utcDate("2025-03-31", "23:59:59.999"),
+      utcDate("2024-03-01", "00:00:00")
+    )
 
     const billableSeconds = differenceInSeconds(utcDate("2024-03-31", "23:59:59.999"), startMs)
 
@@ -600,9 +766,13 @@ describe("billing cycle anchor handling", () => {
     const result = configureBillingCycleSubscription({
       currentCycleStartAt: startMs,
       trialDays: 20,
-      billingAnchor: 15, // Anchor on 15th
-      billingInterval: "month",
-      billingIntervalCount: 1,
+      billingConfig: {
+        name: "test",
+        billingInterval: "month",
+        billingIntervalCount: 1,
+        planType: "recurring",
+        billingAnchor: 15,
+      },
       alignStartToDay: false,
       alignEndToDay: true,
       alignToCalendar: true,

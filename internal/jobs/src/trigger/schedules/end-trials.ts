@@ -4,10 +4,9 @@ import { endTrialTask } from "../tasks/end-trial"
 
 export const endTrialsSchedule = schedules.task({
   id: "subscription.endtrials",
-  //every two hours (UTC timezone)
-  // cron: "0 */2 * * *",
   // every 12 hours (UTC timezone)
-  cron: "0 */12 * * *",
+  // if dev then every 5 minutes in dev mode
+  cron: process.env.NODE_ENV === "development" ? "*/5 * * * *" : "0 */12 * * *",
   run: async (payload) => {
     const now = payload.timestamp.getTime()
 
@@ -23,18 +22,24 @@ export const endTrialsSchedule = schedules.task({
 
     // trigger the end trial task for each subscription phase
     for (const phase of subscriptionPhases) {
-      const phaseId = phase.id
+      const subscription = phase.subscription
 
-      if (!phaseId) {
-        logger.error(`Subscription phase ${phase.subscription.id} is not active`)
+      if (subscription.locked) {
+        logger.error(`Subscription ${subscription.id} is locked, skipping`)
         continue
       }
+
+      if (!["ending_trial", "trialing"].includes(subscription.status)) {
+        logger.error(`Subscription ${subscription.id} is not trialing, skipping`)
+        continue
+      }
+
+      const phaseId = phase.id
 
       await endTrialTask.triggerAndWait({
         subscriptionId: phase.subscription.id,
         projectId: phase.subscription.projectId,
-        // we pass the now date as the trialEndsAt date + 1 so the tasks can validate the right date
-        now: phase.trialEndsAt! + 1,
+        now,
         phaseId,
       })
     }

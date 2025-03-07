@@ -1,4 +1,3 @@
-import { UnPriceMachineError } from "#services/machine/errors"
 import { db, eq } from "@unprice/db"
 import { subscriptions } from "@unprice/db/schema"
 import type { Customer, Subscription, SubscriptionStatus } from "@unprice/db/validators"
@@ -15,6 +14,7 @@ import {
   not,
   setup,
 } from "xstate"
+import { UnPriceMachineError } from "#services/machine/errors"
 
 import { logTransition, sendCustomerNotification, updateMetadataSubscription } from "./actions"
 import {
@@ -517,9 +517,7 @@ export class SubscriptionMachine {
             },
             PAYMENT_SUCCESS: {
               target: "active",
-              actions: [
-                "logStateTransition",
-              ],
+              actions: ["logStateTransition"],
             },
             PAYMENT_FAILURE: {
               target: "past_due",
@@ -533,9 +531,7 @@ export class SubscriptionMachine {
             },
             INVOICE_SUCCESS: {
               target: "active",
-              actions: [
-                "logStateTransition",
-              ],
+              actions: ["logStateTransition"],
             },
             INVOICE_FAILURE: {
               target: "past_due",
@@ -547,37 +543,38 @@ export class SubscriptionMachine {
                 },
               ],
             },
-            INVOICE: [{
-              guard: "currentPhaseNull",
-              target: "error",
-              actions: assign({
-                error: () => ({
-                  message: "Subscription has no active phase",
+            INVOICE: [
+              {
+                guard: "currentPhaseNull",
+                target: "error",
+                actions: assign({
+                  error: () => ({
+                    message: "Subscription has no active phase",
+                  }),
                 }),
-              }),
-            },
-            {
-              guard: "isAlreadyInvoiced",
-              target: "invoiced",
-              actions: "logStateTransition",
-            },
-            {
-              guard: and(["canInvoice", "hasValidPaymentMethod"]),
-              target: "invoicing",
-              actions: "logStateTransition",
-            },
-            {
-              target: "error",
-              actions: assign({
-                error: ({ context }) => {
-                  const invoiceAt = new Date(context.subscription.invoiceAt).toLocaleString()
+              },
+              {
+                guard: "isAlreadyInvoiced",
+                target: "invoiced",
+                actions: "logStateTransition",
+              },
+              {
+                guard: and(["canInvoice", "hasValidPaymentMethod"]),
+                target: "invoicing",
+                actions: "logStateTransition",
+              },
+              {
+                target: "error",
+                actions: assign({
+                  error: ({ context }) => {
+                    const invoiceAt = new Date(context.subscription.invoiceAt).toLocaleString()
 
-                  return {
-                    message: `Cannot invoice subscription, payment method is invalid or subscription is not due to be invoiced at ${invoiceAt}`,
-                  }
-                },
-              }),
-            },
+                    return {
+                      message: `Cannot invoice subscription, payment method is invalid or subscription is not due to be invoiced at ${invoiceAt}`,
+                    }
+                  },
+                }),
+              },
             ],
           },
         },
@@ -587,9 +584,7 @@ export class SubscriptionMachine {
           on: {
             PAYMENT_SUCCESS: {
               target: "active",
-              actions: [
-                "logStateTransition",
-              ],
+              actions: ["logStateTransition"],
             },
             PAYMENT_FAILURE: {
               target: "active",
@@ -611,9 +606,7 @@ export class SubscriptionMachine {
             },
             INVOICE_SUCCESS: {
               target: "active",
-              actions: [
-                "logStateTransition",
-              ],
+              actions: ["logStateTransition"],
             },
             CANCEL: {
               target: "canceled",
@@ -890,8 +883,9 @@ export class SubscriptionMachine {
         resolve(
           Err(
             new UnPriceMachineError({
-              message: `Timeout waiting for state ${state ?? "unknown"} or tag ${tag ?? "unknown"
-                } after ${timeout}ms${event ? ` (event: ${event.type})` : ""}`,
+              message: `Timeout waiting for state ${state ?? "unknown"} or tag ${
+                tag ?? "unknown"
+              } after ${timeout}ms${event ? ` (event: ${event.type})` : ""}`,
             })
           )
         )

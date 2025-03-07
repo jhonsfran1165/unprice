@@ -1,7 +1,7 @@
-import { protectedApiOrActiveWorkspaceProcedure } from "#trpc"
-import { reportUsageFeature } from "#utils/shared"
 import * as utils from "@unprice/db/utils"
 import { z } from "zod"
+import { protectedApiOrActiveWorkspaceProcedure } from "#trpc"
+import { reportUsageFeature } from "#utils/shared"
 
 export const reportUsage = protectedApiOrActiveWorkspaceProcedure
   .meta({
@@ -52,7 +52,6 @@ export const reportUsage = protectedApiOrActiveWorkspaceProcedure
       usage: usage,
       ctx: opts.ctx,
       // TODO: testing delete this line
-      // now: Math.floor(Math.random() * (1741246870143 - 1741246570144 + 1)) + 1741246570144,
       now: Date.now(),
     })
 

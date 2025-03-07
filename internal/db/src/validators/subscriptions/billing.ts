@@ -17,70 +17,85 @@ interface BillingCycleResult {
 export function getBillingCycleMessage(billingConfig: BillingConfig): {
   message: string
 } {
-  const {
-    billingInterval,
-    billingIntervalCount,
-    billingAnchor,
-  } = billingConfig
+  const { billingInterval, billingIntervalCount, billingAnchor } = billingConfig
 
-  const intervalCount = billingIntervalCount || 1;
+  const intervalCount = billingIntervalCount || 1
 
   // Handle one-time billing
   if (billingInterval === "onetime") {
-    return { message: "billed once" };
+    return { message: "billed once" }
   }
 
   // For regular intervals without a specific anchor
   if (!billingAnchor || billingAnchor === "dayOfCreation") {
     if (intervalCount === 1) {
-      return { message: `billed ${billingInterval === "minute" ? "every" : "once every"} ${billingInterval}` };
+      return {
+        message: `billed ${billingInterval === "minute" ? "every" : "once every"} ${billingInterval}`,
+      }
     }
 
     // Handle plural forms
     const intervalPlural =
-      billingInterval === "day" ? "days" :
-        billingInterval === "month" ? "months" :
-          billingInterval === "year" ? "years" :
-            billingInterval === "minute" ? "minutes" :
-              `${billingInterval}s`;
+      billingInterval === "day"
+        ? "days"
+        : billingInterval === "month"
+          ? "months"
+          : billingInterval === "year"
+            ? "years"
+            : billingInterval === "minute"
+              ? "minutes"
+              : `${billingInterval}s`
 
-    return { message: `billed once every ${intervalCount} ${intervalPlural}` };
+    return { message: `billed once every ${intervalCount} ${intervalPlural}` }
   }
 
   // For intervals with specific anchors
   if (billingInterval === "month") {
-    const dayOfMonth = typeof billingAnchor === "number" ? billingAnchor : 1;
-    const day = dayOfMonth === 1 ? "1st" :
-      dayOfMonth === 2 ? "2nd" :
-        dayOfMonth === 3 ? "3rd" :
-          `${dayOfMonth}th`;
+    const dayOfMonth = typeof billingAnchor === "number" ? billingAnchor : 1
+    const day =
+      dayOfMonth === 1
+        ? "1st"
+        : dayOfMonth === 2
+          ? "2nd"
+          : dayOfMonth === 3
+            ? "3rd"
+            : `${dayOfMonth}th`
 
     if (intervalCount === 1) {
-      return { message: `billed monthly on the ${day} of the month` };
+      return { message: `billed monthly on the ${day} of the month` }
     }
-    return { message: `billed every ${intervalCount} months on the ${day} of the month` };
-
+    return { message: `billed every ${intervalCount} months on the ${day} of the month` }
   }
 
   if (billingInterval === "year") {
-    const monthAnchor = typeof billingAnchor === "number" ? billingAnchor : 1;
+    const monthAnchor = typeof billingAnchor === "number" ? billingAnchor : 1
     const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    const month = monthNames[Math.min(Math.max(1, monthAnchor), 12) - 1];
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ]
+    const month = monthNames[Math.min(Math.max(1, monthAnchor), 12) - 1]
 
     if (intervalCount === 1) {
-      return { message: `billed yearly on the 1st of ${month}` };
+      return { message: `billed yearly on the 1st of ${month}` }
     }
-    return { message: `billed every ${intervalCount} years on the 1st of ${month}` };
+    return { message: `billed every ${intervalCount} years on the 1st of ${month}` }
   }
 
   // Default fallback for any other cases
   if (intervalCount === 1) {
-    return { message: `billed every ${billingInterval}` };
+    return { message: `billed every ${billingInterval}` }
   }
-  return { message: `billed every ${intervalCount} ${billingInterval}s` };
+  return { message: `billed every ${intervalCount} ${billingInterval}s` }
 }
 
 export function configureBillingCycleSubscription({
@@ -120,15 +135,11 @@ export function configureBillingCycleSubscription({
   }
 
   // Calculate next interval
-  const interval = calculateNextInterval(
-    currentCycleStartAt,
-    billingConfig,
-    {
-      alignToCalendar,
-      alignStartToDay,
-      alignEndToDay,
-    }
-  )
+  const interval = calculateNextInterval(currentCycleStartAt, billingConfig, {
+    alignToCalendar,
+    alignStartToDay,
+    alignEndToDay,
+  })
 
   // Calculate effective dates and proration
   const effectiveStartMs = Math.max(currentCycleStartAt, interval.start)
@@ -142,7 +153,8 @@ export function configureBillingCycleSubscription({
   if (billingConfig.billingInterval === "onetime") {
     return {
       cycleStartMs: interval.start,
-      cycleEndMs: Number.POSITIVE_INFINITY,
+      // onetime is forever
+      cycleEndMs: new Date("9999-12-31T23:59:59.999Z").getTime(),
       secondsInCycle: Number.POSITIVE_INFINITY,
       prorationFactor: 1,
       billableSeconds: Number.POSITIVE_INFINITY,
@@ -227,10 +239,10 @@ export function calculateNextInterval(
     alignStartToDay?: boolean
     alignEndToDay?: boolean
   } = {
-      alignToCalendar: true,
-      alignStartToDay: false,
-      alignEndToDay: true,
-    }
+    alignToCalendar: true,
+    alignStartToDay: false,
+    alignEndToDay: true,
+  }
 ): {
   start: number
   end: number

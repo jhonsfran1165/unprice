@@ -5,7 +5,7 @@ import { createContext } from "./context"
 export const invoiceTask = task({
   id: "subscription.phase.invoice",
   retry: {
-    maxAttempts: 1,
+    maxAttempts: 3,
   },
   run: async (
     {
@@ -31,29 +31,25 @@ export const invoiceTask = task({
         projectId,
         api: "jobs.subscription.phase.invoice",
         phaseId,
+        now: now.toString(),
       },
     })
 
     const subscriptionService = new SubscriptionService(context)
 
     // init phase machine
-    const initPhaseMachineResult = await subscriptionService.initPhaseMachines({
-      subscriptionId,
-      projectId,
-    })
-
-    if (initPhaseMachineResult.err) {
-      throw initPhaseMachineResult.err
-    }
-
-    console.info("Invoicing subscription", {
+    const billingInvoiceResult = await subscriptionService.invoiceSubscription({
       subscriptionId,
       projectId,
       now,
-      phaseId,
     })
 
-    // TODO: invoice the subscription
-    return true
+    if (billingInvoiceResult.err) {
+      throw billingInvoiceResult.err
+    }
+
+    return {
+      status: billingInvoiceResult.val.status,
+    }
   },
 })

@@ -5,7 +5,7 @@ import { createContext } from "./context"
 export const endTrialTask = task({
   id: "subscription.endtrial",
   retry: {
-    maxAttempts: 1,
+    maxAttempts: 3,
   },
   run: async (
     {
@@ -31,28 +31,28 @@ export const endTrialTask = task({
         projectId,
         api: "jobs.subscription.endtrial",
         phaseId,
+        now: now.toString(),
       },
     })
 
     const subscriptionService = new SubscriptionService(context)
 
-    // init phase machine
-    const initPhaseMachineResult = await subscriptionService.initPhaseMachines({
+    const endTrialResult = await subscriptionService.endTrial({
       subscriptionId,
       projectId,
+      now,
     })
 
-    if (initPhaseMachineResult.err) {
-      throw initPhaseMachineResult.err
+    if (endTrialResult.err) {
+      throw endTrialResult.err
     }
 
-    console.info("Ending trial", {
+    return {
+      status: endTrialResult.val.status,
       subscriptionId,
       projectId,
       now,
       phaseId,
-    })
-
-    // TODO: end the trial
+    }
   },
 })

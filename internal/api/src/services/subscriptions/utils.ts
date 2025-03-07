@@ -1,4 +1,3 @@
-import { env } from "#env.mjs"
 import { and, db, eq } from "@unprice/db"
 import { invoices } from "@unprice/db/schema"
 import { AesGCM } from "@unprice/db/utils"
@@ -16,6 +15,7 @@ import {
 import { Err, Ok, type Result } from "@unprice/error"
 import type { Logger } from "@unprice/logging"
 import type { Analytics } from "@unprice/tinybird"
+import { env } from "#env.mjs"
 import { PaymentProviderService } from "../payment-provider"
 import { UnPriceSubscriptionError } from "./errors"
 
@@ -248,8 +248,9 @@ export async function finalizeInvoice(payload: {
     if (formattedTotalAmount.err || formattedUnitAmount.err) {
       return Err(
         new UnPriceSubscriptionError({
-          message: `Error formatting amount: ${formattedTotalAmount.err?.message ?? formattedUnitAmount.err?.message
-            }`,
+          message: `Error formatting amount: ${
+            formattedTotalAmount.err?.message ?? formattedUnitAmount.err?.message
+          }`,
         })
       )
     }
@@ -328,8 +329,9 @@ export async function finalizeInvoice(payload: {
     customFields: [
       {
         name: "Billing Period",
-        value: `${new Date(invoice.cycleStartAt).toISOString().split("T")[0]} to ${new Date(invoice.cycleEndAt).toISOString().split("T")[0]
-          }`,
+        value: `${new Date(invoice.cycleStartAt).toISOString().split("T")[0]} to ${
+          new Date(invoice.cycleEndAt).toISOString().split("T")[0]
+        }`,
       },
     ],
   })
@@ -351,15 +353,14 @@ export async function finalizeInvoice(payload: {
       item.price.totalPrice.dinero
     )
 
-    const formattedUnitAmountItem = paymentProviderService.formatAmount(
-      item.price.unitPrice.dinero
-    )
+    const formattedUnitAmountItem = paymentProviderService.formatAmount(item.price.unitPrice.dinero)
 
     if (formattedTotalAmountItem.err || formattedUnitAmountItem.err) {
       return Err(
         new UnPriceSubscriptionError({
-          message: `Error formatting amount: ${formattedTotalAmountItem.err?.message ?? formattedUnitAmountItem.err?.message
-            }`,
+          message: `Error formatting amount: ${
+            formattedTotalAmountItem.err?.message ?? formattedUnitAmountItem.err?.message
+          }`,
         })
       )
     }
@@ -469,9 +470,9 @@ const calculateInvoiceItemsPrice = async (payload: {
       ? items
       : invoice.type === "flat"
         ? // flat charges are those when the quantity is defined in the subscription item
-        items.filter((item) =>
-          ["flat", "tier", "package"].includes(item.featurePlanVersion.featureType)
-        )
+          items.filter((item) =>
+            ["flat", "tier", "package"].includes(item.featurePlanVersion.featureType)
+          )
         : items.filter((item) => item.featurePlanVersion.featureType === "usage")
 
   // we bill the subscriptions items attached to the phase, that way if the customer changes the plan,
@@ -502,30 +503,30 @@ const calculateInvoiceItemsPrice = async (payload: {
           // if the aggregation method is _all we get the usage for all time
           const usage = item.featurePlanVersion.aggregationMethod.endsWith("_all")
             ? await analytics
-              .getBillingUsage({
-                subscriptionItemId: item.id,
-                projectId: item.projectId,
-                customerId: customer.id,
-              })
-              .then((usage) => usage.data[0])
+                .getBillingUsage({
+                  subscriptionItemId: item.id,
+                  projectId: item.projectId,
+                  customerId: customer.id,
+                })
+                .then((usage) => usage.data[0])
             : await analytics
-              .getBillingUsage({
-                subscriptionItemId: item.id,
-                projectId: item.projectId,
-                customerId: customer.id,
-                // get usage for the current cycle
-                start: invoice.cycleStartAt,
-                end: invoice.cycleEndAt,
-              })
-              .then((usage) => {
-                return usage.data[0]
-              })
+                .getBillingUsage({
+                  subscriptionItemId: item.id,
+                  projectId: item.projectId,
+                  customerId: customer.id,
+                  // get usage for the current cycle
+                  start: invoice.cycleStartAt,
+                  end: invoice.cycleEndAt,
+                })
+                .then((usage) => {
+                  return usage.data[0]
+                })
 
           // here we replace _all with the aggregation method because tinybird returns without _all as a key
           const units = usage
             ? (usage[
-              item.featurePlanVersion.aggregationMethod.replace("_all", "") as keyof typeof usage
-            ] as number) || 0
+                item.featurePlanVersion.aggregationMethod.replace("_all", "") as keyof typeof usage
+              ] as number) || 0
             : 0
 
           // the amount of units the customer used in the current cycle
@@ -543,30 +544,30 @@ const calculateInvoiceItemsPrice = async (payload: {
             // get usage for the current cycle
             const usage = item.featurePlanVersion.aggregationMethod.endsWith("_all")
               ? await analytics
-                .getBillingUsage({
-                  subscriptionItemId: item.id,
-                  customerId: customer.id,
-                  projectId: invoice.projectId,
-                })
-                .then((usage) => usage.data[0])
+                  .getBillingUsage({
+                    subscriptionItemId: item.id,
+                    customerId: customer.id,
+                    projectId: invoice.projectId,
+                  })
+                  .then((usage) => usage.data[0])
               : await analytics
-                .getBillingUsage({
-                  subscriptionItemId: item.id,
-                  customerId: customer.id,
-                  projectId: invoice.projectId,
-                  start: invoice.previousCycleStartAt,
-                  end: invoice.previousCycleEndAt,
-                })
-                .then((usage) => usage.data[0])
+                  .getBillingUsage({
+                    subscriptionItemId: item.id,
+                    customerId: customer.id,
+                    projectId: invoice.projectId,
+                    start: invoice.previousCycleStartAt,
+                    end: invoice.previousCycleEndAt,
+                  })
+                  .then((usage) => usage.data[0])
 
             // here we replace _all with the aggregation method because tinybird returns without _all as a key
             const units = usage
               ? (usage[
-                item.featurePlanVersion.aggregationMethod.replace(
-                  "_all",
-                  ""
-                ) as keyof typeof usage
-              ] as number) || 0
+                  item.featurePlanVersion.aggregationMethod.replace(
+                    "_all",
+                    ""
+                  ) as keyof typeof usage
+                ] as number) || 0
               : 0
 
             // the amount of units the customer used in the previous cycle

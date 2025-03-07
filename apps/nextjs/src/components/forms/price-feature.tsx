@@ -39,7 +39,7 @@ export function PriceFeature({
     return (
       <div className="inline text-end text-xs">
         {pricePerFeature?.totalPrice.displayAmount &&
-          `${pricePerFeature.totalPrice.displayAmount}/ ${selectedPlanVersion.billingPeriod}`}
+          `${pricePerFeature.totalPrice.displayAmount}/ ${selectedPlanVersion.billingConfig.billingInterval}`}
       </div>
     )
   }
@@ -50,7 +50,7 @@ export function PriceFeature({
       {!isZero(pricePerFeature.unitPrice.dinero) && (
         <div className="inline text-muted-foreground text-xs italic">
           {pricePerFeature.unitPrice.displayAmount &&
-            `${pricePerFeature.unitPrice.displayAmount}/ ${selectedPlanVersion.billingPeriod}`}
+            `${pricePerFeature.unitPrice.displayAmount}/ ${selectedPlanVersion.billingConfig.billingInterval}`}
         </div>
       )}
     </>

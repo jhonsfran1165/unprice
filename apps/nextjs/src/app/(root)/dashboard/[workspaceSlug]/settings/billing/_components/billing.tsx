@@ -37,9 +37,12 @@ export function BillingCard({
   // TODO: get current cycle
   const calculatedBillingCycle = configureBillingCycleSubscription({
     currentCycleStartAt: activePhase.startAt,
-    billingInterval: planVersion.billingInterval,
-    billingIntervalCount: planVersion.billingIntervalCount,
-    billingAnchor: planVersion.billingAnchor,
+    billingConfig: planVersion.billingConfig,
+    trialDays: activePhase.trialDays,
+    alignStartToDay: true,
+    alignEndToDay: true,
+    endAt: activePhase.endAt ?? undefined,
+    alignToCalendar: true,
   })
 
   const { err, val: flatPricePlan } = calculateFlatPricePlan({
@@ -113,7 +116,7 @@ export function BillingCard({
             Plan {isTrial ? "trial" : ""}{" "}
             <span className="font-bold text-primary">{planVersion.plan.slug}</span>
             <Typography variant="p" affects="removePaddingMargin">
-              {activePhase.planVersion.billingInterval}{" "}
+              {activePhase.planVersion.billingConfig.name}{" "}
               {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
             </Typography>
           </div>

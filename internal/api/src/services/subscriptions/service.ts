@@ -1,4 +1,3 @@
-import type { Context } from "#trpc"
 import { type Database, type TransactionDatabase, and, eq } from "@unprice/db"
 import {
   customerEntitlements,
@@ -16,7 +15,6 @@ import {
   type SubscriptionItemConfig,
   type SubscriptionItemExtended,
   type SubscriptionPhase,
-  type SubscriptionStatus,
   configureBillingCycleSubscription,
   createDefaultSubscriptionConfig,
   subscriptionInsertSchema,
@@ -25,9 +23,11 @@ import {
 } from "@unprice/db/validators"
 import { Err, Ok, type Result, SchemaError } from "@unprice/error"
 import { getDay } from "date-fns"
+import type { Context } from "#trpc"
 import { CustomerService } from "../customers/service"
 import { UnPriceSubscriptionError } from "./errors"
 import { SubscriptionMachine } from "./machine"
+import type { SusbriptionMachineStatus } from "./types"
 import { collectInvoicePayment, finalizeInvoice } from "./utils"
 export class SubscriptionService {
   private readonly ctx: Context
@@ -993,7 +993,7 @@ export class SubscriptionService {
     subscriptionId: string
     projectId: string
     now?: number
-  }) {
+  }): Promise<Result<{ status: SusbriptionMachineStatus }, UnPriceSubscriptionError>> {
     const { err, val: machine } = await SubscriptionMachine.create({
       subscriptionId,
       projectId,
@@ -1013,7 +1013,9 @@ export class SubscriptionService {
       return Err(errEndTrial)
     }
 
-    return Ok(result)
+    return Ok({
+      status: result,
+    })
   }
 
   public async billingInvoice({
@@ -1049,12 +1051,13 @@ export class SubscriptionService {
     }
 
     // lets try to finalize the invoice
-    const { err: errCollectInvoicePayment, val: resultCollectInvoicePayment } = await collectInvoicePayment({
-      invoiceId,
-      projectId,
-      logger: this.ctx.logger,
-      now,
-    })
+    const { err: errCollectInvoicePayment, val: resultCollectInvoicePayment } =
+      await collectInvoicePayment({
+        invoiceId,
+        projectId,
+        logger: this.ctx.logger,
+        now,
+      })
 
     if (errCollectInvoicePayment) {
       // report fail to machine
@@ -1097,7 +1100,6 @@ export class SubscriptionService {
       status: resultCollectInvoicePayment.invoice.status,
     })
   }
-
 
   public async finalizeInvoice({
     invoiceId,
@@ -1173,7 +1175,14 @@ export class SubscriptionService {
     subscriptionId: string
     projectId: string
     now?: number
-  }): Promise<Result<SubscriptionStatus, UnPriceSubscriptionError>> {
+  }): Promise<
+    Result<
+      {
+        status: SusbriptionMachineStatus
+      },
+      UnPriceSubscriptionError
+    >
+  > {
     const { err, val: machine } = await SubscriptionMachine.create({
       now,
       subscriptionId,
@@ -1205,7 +1214,9 @@ export class SubscriptionService {
 
         await machine.shutdown()
 
-        return Ok(resultRenew as SubscriptionStatus)
+        return Ok({
+          status: resultRenew,
+        })
       }
       case "invoiced": {
         const { err: errRenew, val: resultRenew } = await machine.renew()
@@ -1215,7 +1226,9 @@ export class SubscriptionService {
 
         await machine.shutdown()
 
-        return Ok(resultRenew as SubscriptionStatus)
+        return Ok({
+          status: resultRenew,
+        })
       }
       default:
         return Err(

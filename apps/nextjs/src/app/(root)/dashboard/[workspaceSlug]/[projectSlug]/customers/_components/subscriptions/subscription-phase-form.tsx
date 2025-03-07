@@ -33,20 +33,20 @@ export function SubscriptionPhaseForm({
   const formSchema = editMode
     ? subscriptionPhaseSelectSchema
     : subscriptionPhaseInsertSchema.superRefine((data, ctx) => {
-      if (data.paymentMethodRequired) {
-        if (!data.paymentMethodId) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Payment method is required for this phase",
-            path: ["paymentMethodId"],
-          })
+        if (data.paymentMethodRequired) {
+          if (!data.paymentMethodId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Payment method is required for this phase",
+              path: ["paymentMethodId"],
+            })
 
-          return false
+            return false
+          }
+
+          return true
         }
-
-        return true
-      }
-    })
+      })
 
   const form = useZodForm({
     schema: formSchema,

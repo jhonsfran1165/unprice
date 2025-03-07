@@ -13,18 +13,20 @@ export const planVersionMetadataSchema = z.object({
   externalId: z.string().optional(),
 })
 
-export const billingConfigSchema = z.object({
-  name: z.string().min(1),
-  billingInterval: billingIntervalSchema,
-  billingIntervalCount: billingIntervalCountSchema,
-  billingAnchor: billingAnchorSchema.optional(),
-  planType: planTypeSchema,
-}).required({
-  name: true,
-  billingInterval: true,
-  billingIntervalCount: true,
-  planType: true,
-})
+export const billingConfigSchema = z
+  .object({
+    name: z.string().min(1),
+    billingInterval: billingIntervalSchema,
+    billingIntervalCount: billingIntervalCountSchema,
+    billingAnchor: billingAnchorSchema.optional(),
+    planType: planTypeSchema,
+  })
+  .required({
+    name: true,
+    billingInterval: true,
+    billingIntervalCount: true,
+    planType: true,
+  })
   .superRefine((data, ctx) => {
     // config is required for recurring plans
     if (data.planType === "recurring" && !data.name) {

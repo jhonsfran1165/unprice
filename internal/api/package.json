@@ -1,6 +1,7 @@
 {
   "name": "@unprice/api",
   "version": "0.1.0",
+  "type": "module",
   "exports": {
     ".": "./src/index.ts",
     "./env": "./src/env.mjs",
@@ -27,7 +28,7 @@
   "license": "AGPL-3.0",
   "scripts": {
     "test": "vitest run",
-    "test:file": "SKIP_ENV_VALIDATION=true vitest $@",
+    "test:file": "SKIP_ENV_VALIDATION=true vitest 'src/**/$@'",
     "clean": "rm -rf .turbo node_modules",
     "typecheck": "tsc --noEmit",
     "with-env": "infisical run --env=preview --path=/app --"

@@ -1,18 +1,19 @@
 import { z } from "zod"
 
+import { TRPCError } from "@trpc/server"
 import { SubscriptionService } from "#services/subscriptions"
 import { publicProcedure } from "#trpc"
-import { TRPCError } from "@trpc/server"
 
 export const testing = publicProcedure.input(z.void()).query(async (opts) => {
   const subscriptionService = new SubscriptionService(opts.ctx)
 
-  const { err: errFinalizeInvoice, val: valFinalizeInvoice } = await subscriptionService.billingInvoice({
-    invoiceId: "inv_1GatYPGYMnbtRz9sUiC5Y",
-    projectId: "proj_1GRtWUw24S2k9XTxgFD7N",
-    subscriptionId: "sub_1Gap1TgsKhES9ooTepLbT",
-    now: Date.now(),
-  })
+  const { err: errFinalizeInvoice, val: valFinalizeInvoice } =
+    await subscriptionService.billingInvoice({
+      invoiceId: "inv_1GatYPGYMnbtRz9sUiC5Y",
+      projectId: "proj_1GRtWUw24S2k9XTxgFD7N",
+      subscriptionId: "sub_1Gap1TgsKhES9ooTepLbT",
+      now: Date.now(),
+    })
 
   if (errFinalizeInvoice) {
     throw new TRPCError({

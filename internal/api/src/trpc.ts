@@ -2,10 +2,6 @@ import { tracing } from "@baselime/trpc-opentelemetry-middleware"
 import type { Session } from "@unprice/auth/server"
 import "server-only"
 
-import { env } from "#env.mjs"
-import type { CacheNamespaces } from "#services/cache"
-import { CacheService } from "#services/cache"
-import { LogdrainMetrics, type Metrics, NoopMetrics } from "#services/metrics"
 import type { OpenApiMeta } from "@potatohd/trpc-openapi"
 import type { MwFn } from "@trpc-limiter/core"
 import { createTRPCStoreLimiter } from "@trpc-limiter/memory"
@@ -23,6 +19,10 @@ import { Ratelimit } from "@upstash/ratelimit"
 import { waitUntil } from "@vercel/functions"
 import { ZodError } from "zod"
 import { fromZodError } from "zod-validation-error"
+import { env } from "#env.mjs"
+import type { CacheNamespaces } from "#services/cache"
+import { CacheService } from "#services/cache"
+import { LogdrainMetrics, type Metrics, NoopMetrics } from "#services/metrics"
 import { transformer } from "./transformer"
 import { projectWorkspaceGuard } from "./utils"
 import { apikeyGuard } from "./utils/apikey-guard"
@@ -107,21 +107,21 @@ export const createTRPCContext = async (opts: {
 
   const logger = env.EMIT_METRICS_LOGS
     ? new BaseLimeLogger({
-      apiKey: env.BASELIME_APIKEY,
-      requestId,
-      defaultFields: { userId, region, country, source, ip, pathname, userAgent },
-      namespace: "unprice-api",
-      dataset: "unprice-api",
-      service: "api", // default service name
-      flushAfterMs: 3000, // flush after 3 secs
-      ctx: {
-        waitUntil, // flush will be executed as a background task
-      },
-    })
+        apiKey: env.BASELIME_APIKEY,
+        requestId,
+        defaultFields: { userId, region, country, source, ip, pathname, userAgent },
+        namespace: "unprice-api",
+        dataset: "unprice-api",
+        service: "api", // default service name
+        flushAfterMs: 3000, // flush after 3 secs
+        ctx: {
+          waitUntil, // flush will be executed as a background task
+        },
+      })
     : new ConsoleLogger({
-      requestId,
-      defaultFields: { userId, region, country, source, ip, pathname },
-    })
+        requestId,
+        defaultFields: { userId, region, country, source, ip, pathname },
+      })
 
   const metrics: Metrics = env.EMIT_METRICS_LOGS
     ? new LogdrainMetrics({ requestId, logger })

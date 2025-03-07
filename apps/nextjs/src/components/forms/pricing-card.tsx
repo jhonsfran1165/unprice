@@ -32,7 +32,7 @@ export function PricingCard({
                   ? `+${totalPricePlan.displayAmount}`
                   : totalPricePlan.displayAmount}
             </span>
-            <span className="text-sm">{planVersion.billingPeriod}</span>
+            <span className="text-sm">{planVersion.billingConfig.billingInterval}</span>
           </div>
         )}
       </CardHeader>

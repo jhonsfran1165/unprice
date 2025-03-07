@@ -45,14 +45,14 @@ export type SubscriptionEvent =
 
 export type SubscriptionGuards = {
   type:
-  | "isTrialExpired"
-  | "canRenew"
-  | "hasValidPaymentMethod"
-  | "canInvoice"
-  | "isAlreadyRenewed"
-  | "isAutoRenewEnabled"
-  | "isAlreadyInvoiced"
-  | "currentPhaseNull"
+    | "isTrialExpired"
+    | "canRenew"
+    | "hasValidPaymentMethod"
+    | "canInvoice"
+    | "isAlreadyRenewed"
+    | "isAutoRenewEnabled"
+    | "isAlreadyInvoiced"
+    | "currentPhaseNull"
 }
 
 export type SubscriptionActions = {

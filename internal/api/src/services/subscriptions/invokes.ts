@@ -59,10 +59,10 @@ export async function loadSubscription(payload: {
     customer,
     currentPhase: currentPhase
       ? {
-        ...currentPhase,
-        // items are not needed for the machine
-        items: [],
-      }
+          ...currentPhase,
+          // items are not needed for the machine
+          items: [],
+        }
       : null,
     subscription,
     paymentMethodId,

@@ -1,14 +1,14 @@
 import { and, eq } from "@unprice/db"
 
+import { customerEntitlements, customerSessions, customers } from "@unprice/db/schema"
+import { AesGCM, newId } from "@unprice/db/utils"
+import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
+import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import { env } from "#env.mjs"
 import type { CacheNamespaces } from "#services/cache"
 import { PaymentProviderService } from "#services/payment-provider"
 import { SubscriptionService } from "#services/subscriptions"
 import type { Context } from "#trpc"
-import { customerEntitlements, customerSessions, customers } from "@unprice/db/schema"
-import { AesGCM, newId } from "@unprice/db/utils"
-import type { CustomerEntitlement, CustomerSignUp, FeatureType } from "@unprice/db/validators"
-import { Err, FetchError, Ok, type Result } from "@unprice/error"
 import type { DenyReason } from "./errors"
 import { UnPriceCustomerError } from "./errors"
 import { getEntitlementByDateQuery, getEntitlementsByDateQuery } from "./queries"
@@ -235,39 +235,39 @@ export class CustomerService {
     // get usage for the period from the analytics service
     const totalUsage = isAll
       ? await this.ctx.analytics
-        .getFeaturesUsage({
-          customerId: opts.customerId,
-          entitlementId: entitlement.id,
-          projectId: entitlement.projectId,
-        })
-        .then((usage) => usage.data[0])
-        .catch((error) => {
-          this.ctx.logger.error("Error getting getFeaturesUsage all", {
-            error: JSON.stringify(error.message),
+          .getFeaturesUsage({
             customerId: opts.customerId,
             entitlementId: entitlement.id,
             projectId: entitlement.projectId,
           })
+          .then((usage) => usage.data[0])
+          .catch((error) => {
+            this.ctx.logger.error("Error getting getFeaturesUsage all", {
+              error: JSON.stringify(error.message),
+              customerId: opts.customerId,
+              entitlementId: entitlement.id,
+              projectId: entitlement.projectId,
+            })
 
-          return null
-        })
+            return null
+          })
       : await this.ctx.analytics
-        .getFeaturesUsage({
-          customerId: opts.customerId,
-          entitlementId: entitlement.id,
-          start: activeSubscription.currentCycleStartAt,
-          end: activeSubscription.currentCycleEndAt,
-        })
-        .then((usage) => usage.data[0])
-        .catch((error) => {
-          this.ctx.logger.error("Error getting getFeaturesUsage", {
-            error: JSON.stringify(error.message),
+          .getFeaturesUsage({
             customerId: opts.customerId,
             entitlementId: entitlement.id,
+            start: activeSubscription.currentCycleStartAt,
+            end: activeSubscription.currentCycleEndAt,
           })
+          .then((usage) => usage.data[0])
+          .catch((error) => {
+            this.ctx.logger.error("Error getting getFeaturesUsage", {
+              error: JSON.stringify(error.message),
+              customerId: opts.customerId,
+              entitlementId: entitlement.id,
+            })
 
-          return null
-        })
+            return null
+          })
 
     if (!totalUsage) {
       return
@@ -982,6 +982,7 @@ export class CustomerService {
             id: planVersion.id,
             projectId: projectId,
             config: config,
+            paymentMethodRequired: paymentRequired,
           },
         })
         .returning()
@@ -1067,12 +1068,8 @@ export class CustomerService {
                 planVersionId: planVersion.id,
                 startAt: Date.now(),
                 config: config,
-                collectionMethod: planVersion.collectionMethod,
-                whenToBill: planVersion.whenToBill,
-                billingInterval: planVersion.billingInterval,
-                billingIntervalCount: planVersion.billingIntervalCount,
-                billingAnchor: planVersion.billingAnchor,
-                gracePeriod: planVersion.gracePeriod ?? 0,
+                paymentMethodRequired: planVersion.paymentMethodRequired,
+                customerId: newCustomer.id,
               },
             ],
           },
@@ -1132,19 +1129,7 @@ export class CustomerService {
     // all this should be in a transaction
     await this.ctx.db.transaction(async (tx) => {
       const cancelSubs = await Promise.all(
-        customerSubs.map(async (sub) => {
-          const subscriptionService = new SubscriptionService(this.ctx)
-
-          // init phase machine
-          const initPhaseMachineResult = await subscriptionService.initPhaseMachines({
-            subscriptionId: sub.id,
-            projectId,
-          })
-
-          if (initPhaseMachineResult.err) {
-            throw initPhaseMachineResult.err
-          }
-
+        customerSubs.map(async () => {
           // TODO: cancel the subscription
           return true
         })

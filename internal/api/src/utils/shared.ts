@@ -1,9 +1,9 @@
-import { CustomerService, UnPriceCustomerError } from "#services/customers"
-import type { Context } from "#trpc"
 import { TRPCError } from "@trpc/server"
 import { members, workspaces } from "@unprice/db/schema"
 import { createSlug, newId } from "@unprice/db/utils"
 import type { WorkspaceInsert } from "@unprice/db/validators"
+import { CustomerService, UnPriceCustomerError } from "#services/customers"
+import type { Context } from "#trpc"
 
 export const getEntitlements = async ({
   customerId,

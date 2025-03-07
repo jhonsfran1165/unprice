@@ -133,8 +133,11 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
           </Popover>
           {selectedPlanVersion && (
             <div className="text-muted-foreground text-sm">
-              Plan version: <b>{selectedPlanVersion.plan.slug} v{selectedPlanVersion.version}
-                {" "} - {getBillingCycleMessage(selectedPlanVersion.billingConfig).message}{" "}</b>
+              Plan version:{" "}
+              <b>
+                {selectedPlanVersion.plan.slug} v{selectedPlanVersion.version} -{" "}
+                {getBillingCycleMessage(selectedPlanVersion.billingConfig).message}{" "}
+              </b>
               {selectedPlanVersion.paymentMethodRequired && (
                 <Badge variant="outline">payment method required</Badge>
               )}

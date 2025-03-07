@@ -7,9 +7,7 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "typecheck": "tsc --noEmit",
-    "with-env": "infisical run --env=preview --path=/app --",
-    "with-env-prod": "infisical run --env=prod --path=/ci --",
-    "dev:trigger": "pnpm with-env pnpm dlx trigger.dev@3.3.13 dev",
+    "dev:trigger": "pnpm dlx trigger.dev@3.3.13 dev",
     "deploy:trigger-prod": "npx trigger.dev@3.3.13 deploy",
     "delete": "pnpm tsx src/delete.ts"
   },

@@ -27,7 +27,10 @@ export const canRenew = (input: { context: SubscriptionContext }): boolean => {
   }
 
   // if the next billing period interferes with a cancellation then we can't renew
-  if (subscription.metadata?.dates?.cancelAt && billingCycle.cycleStartMs < subscription.metadata?.dates?.cancelAt) {
+  if (
+    subscription.metadata?.dates?.cancelAt &&
+    billingCycle.cycleStartMs < subscription.metadata?.dates?.cancelAt
+  ) {
     return false
   }
 
@@ -48,12 +51,10 @@ export const isAlreadyRenewed = (input: { context: SubscriptionContext }): boole
   const currentCycleStartAt = subscription.currentCycleStartAt
   const now = input.context.now
 
-  const isLastRenewInCurrentCycle = lastRenewAt && lastRenewAt >= currentCycleStartAt && lastRenewAt <= currentCycleEndAt
+  const isLastRenewInCurrentCycle =
+    lastRenewAt && lastRenewAt >= currentCycleStartAt && lastRenewAt <= currentCycleEndAt
 
-  return Boolean(
-    !isLastRenewInCurrentCycle &&
-    subscription.renewAt >= now
-  )
+  return Boolean(!isLastRenewInCurrentCycle && subscription.renewAt >= now)
 }
 
 export const isAutoRenewEnabled = (input: { context: SubscriptionContext }): boolean => {
@@ -121,11 +122,8 @@ export const isAlreadyInvoiced = (input: { context: SubscriptionContext }): bool
   const currentCycleStartAt = subscription.currentCycleStartAt
   const now = input.context.now
 
-  const isLastInvoiceInCurrentCycle = lastInvoiceAt && lastInvoiceAt >= currentCycleStartAt && lastInvoiceAt <= currentCycleEndAt
+  const isLastInvoiceInCurrentCycle =
+    lastInvoiceAt && lastInvoiceAt >= currentCycleStartAt && lastInvoiceAt <= currentCycleEndAt
 
-  return Boolean(
-    !isLastInvoiceInCurrentCycle &&
-    subscription.invoiceAt >= now
-  )
+  return Boolean(!isLastInvoiceInCurrentCycle && subscription.invoiceAt >= now)
 }
-

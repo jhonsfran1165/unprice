@@ -61,9 +61,19 @@ export default function PlanHeader(props: {
                   projectId: plan.projectId,
                   // TODO: use default currency from org settings
                   currency: "USD",
-                  planType: "recurring",
                   paymentProvider: "stripe",
-                  billingPeriod: "month",
+                  collectionMethod: "charge_automatically",
+                  whenToBill: "pay_in_arrear",
+                  trialDays: 0,
+                  autoRenew: true,
+                  paymentMethodRequired: false,
+                  billingConfig: {
+                    name: "monthly",
+                    billingInterval: "month",
+                    billingIntervalCount: 1,
+                    billingAnchor: "dayOfCreation",
+                    planType: "recurring",
+                  },
                 }}
               >
                 <Button variant={"custom"}>

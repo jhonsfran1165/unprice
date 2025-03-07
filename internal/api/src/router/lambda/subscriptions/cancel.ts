@@ -1,6 +1,6 @@
-import { protectedProjectProcedure } from "#trpc"
 import { subscriptionSelectSchema, subscriptionStatusSchema } from "@unprice/db/validators"
 import { z } from "zod"
+import { protectedProjectProcedure } from "#trpc"
 
 export const cancel = protectedProjectProcedure
   .input(
