@@ -6,7 +6,7 @@ export default async function NewSubscriptionPage() {
   return (
     <DashboardShell>
       <div className="flex flex-col items-center justify-center">
-        <Card variant="ghost">
+        <Card variant="ghost" className="w-full">
           <CardHeader>
             <CardTitle>Create Workspace</CardTitle>
             <CardDescription>Create a new workspace to get started.</CardDescription>

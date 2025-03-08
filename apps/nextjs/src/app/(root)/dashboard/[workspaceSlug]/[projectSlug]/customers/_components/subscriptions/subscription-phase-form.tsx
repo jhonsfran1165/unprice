@@ -13,6 +13,7 @@ import { z } from "zod"
 import ConfigItemsFormField from "~/components/forms/items-fields"
 import PaymentMethodsFormField from "~/components/forms/payment-method-field"
 import SelectPlanFormField from "~/components/forms/select-plan-field"
+import TrialDaysFormField from "~/components/forms/trial-days-field"
 import { SubmitButton } from "~/components/submit-button"
 import { toastAction } from "~/lib/toast"
 import { useZodForm } from "~/lib/zod-form"
@@ -99,6 +100,7 @@ export function SubscriptionPhaseForm({
   useEffect(() => {
     if (selectedPlanVersion) {
       form.setValue("paymentMethodRequired", selectedPlanVersion.paymentMethodRequired)
+      form.setValue("paymentMethodId", defaultValues.paymentMethodId)
     }
   }, [selectedPlanVersion])
 
@@ -114,8 +116,10 @@ export function SubscriptionPhaseForm({
 
         <Separator />
 
-        <div className="flex flex-col items-center justify-between gap-8 lg:flex-row">
-          <DurationFormField form={form} startDisabled={editMode} />
+        <div className="flex flex-col items-center justify-start gap-4 lg:flex-row">
+          <DurationFormField form={form} startDisabled={editMode} className="w-full" />
+
+          <TrialDaysFormField form={form} isDisabled={editMode} className="w-full" />
         </div>
 
         <PaymentMethodsFormField

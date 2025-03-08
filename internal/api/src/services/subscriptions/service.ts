@@ -939,6 +939,8 @@ export class SubscriptionService {
               input: {
                 ...phase,
                 subscriptionId: newSubscription.id,
+                customerId: customerData.id,
+                paymentMethodRequired: phase.paymentMethodRequired ?? false,
               },
               projectId,
               db: trx,

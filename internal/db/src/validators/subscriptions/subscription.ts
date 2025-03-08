@@ -96,6 +96,7 @@ export const subscriptionPhaseExtendedSchema = subscriptionPhaseSelectSchema.ext
 export const subscriptionPhaseInsertSchema = createInsertSchema(subscriptionPhases, {
   planVersionId: z.string().min(1, { message: "Plan version is required" }),
   metadata: subscriptionPhaseMetadataSchema,
+  trialDays: z.coerce.number().int().min(0).default(0),
 })
   .extend({
     config: subscriptionItemsConfigSchema,
@@ -132,6 +133,9 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
     phases: subscriptionPhaseInsertSchema
       .partial({
         subscriptionId: true,
+        paymentMethodId: true,
+        customerId: true,
+        paymentMethodRequired: true,
       })
       .array()
       .superRefine((data, ctx) => {
@@ -143,6 +147,16 @@ export const subscriptionInsertSchema = createInsertSchema(subscriptions, {
                 code: z.ZodIssueCode.custom,
                 message: "Payment method is required for this phase",
                 path: [index, "paymentMethodId"],
+              })
+            }
+          }
+
+          if (phase.trialDays) {
+            if (phase.trialDays < 0) {
+              return ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Trial days must be greater than 0",
+                path: [index, "trialDays"],
               })
             }
           }

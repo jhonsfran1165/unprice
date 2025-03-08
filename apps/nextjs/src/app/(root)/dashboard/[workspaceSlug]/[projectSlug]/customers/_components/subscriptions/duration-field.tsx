@@ -32,10 +32,12 @@ export default function DurationFormField<TFieldValues extends FormValues>({
   form,
   startDisabled,
   endDisabled,
+  className,
 }: {
   form: UseFormReturn<TFieldValues>
   startDisabled?: boolean
   endDisabled?: boolean
+  className?: string
 }) {
   const startAt = form.getValues("startAt" as FieldPath<TFieldValues>)
   const endAt = form.getValues("endAt" as FieldPath<TFieldValues>)
@@ -66,7 +68,7 @@ export default function DurationFormField<TFieldValues extends FormValues>({
   }
 
   return (
-    <div className="flex w-full flex-col gap-2 lg:w-1/2">
+    <div className={cn("flex w-full flex-col gap-2", className)}>
       <FormLabel
         className={cn({
           "text-destructive": errors.startAt,

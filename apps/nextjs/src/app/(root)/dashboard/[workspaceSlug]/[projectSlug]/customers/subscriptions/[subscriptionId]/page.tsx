@@ -24,12 +24,12 @@ export default async function EditSubscriptionPage({
   return (
     <DashboardShell>
       <div className="flex flex-col items-center justify-center">
-        <Card variant="ghost">
+        <Card variant="ghost" className="w-full">
           <CardHeader>
             <CardTitle>Edit Subscription</CardTitle>
             <CardDescription>Edit the subscription.</CardDescription>
           </CardHeader>
-          <CardContent className="py-4">
+          <CardContent className="w-full py-4">
             <SubscriptionForm defaultValues={subscription} />
           </CardContent>
         </Card>
