@@ -25,6 +25,8 @@ jobs:
 
   deploy-prod-tinybird:
     uses: ./.github/workflows/job_tinybird_cd.yml
+    needs:
+      - build-lint
 
   deploy-prod:
     runs-on: ubuntu-latest

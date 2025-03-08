@@ -130,8 +130,6 @@ jobs:
           op: encode
           in: ${{ steps.branch-name.outputs.current_branch }}
 
-
-
   deploy-preview-vercel:
     if: "!contains(github.head_ref, 'renovate/')"
     runs-on: ubuntu-latest
