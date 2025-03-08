@@ -56,7 +56,7 @@ export type SubscriptionGuards = {
 }
 
 export type SubscriptionActions = {
-  type: "logStateTransition" | "notifyCustomer"
+  type: "logStateTransition" | "notifyCustomer" | "updateSubscription"
 }
 
 export type MachineTags =

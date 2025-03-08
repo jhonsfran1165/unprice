@@ -78,7 +78,6 @@ export async function renewSubscription({ context }: { context: SubscriptionCont
   const billingCycle = configureBillingCycleSubscription({
     currentCycleStartAt: subscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping
     billingConfig: currentPhase.planVersion.billingConfig,
-    trialDays: currentPhase.trialDays,
     endAt: currentPhase.endAt ?? undefined,
     alignStartToDay: false,
     alignEndToDay: true,
@@ -128,7 +127,6 @@ export async function invoiceSubscription({
   const billingCycle = configureBillingCycleSubscription({
     currentCycleStartAt: subscription.currentCycleEndAt + 1, // add one millisecond to avoid overlapping
     billingConfig: currentPhase.planVersion.billingConfig,
-    trialDays: currentPhase.trialDays,
     endAt: currentPhase.endAt ?? undefined,
     alignStartToDay: false,
     alignEndToDay: true,
@@ -169,9 +167,7 @@ export async function invoiceSubscription({
 
   // due at activate background job to process the invoice
   const dueAt =
-    whenToBill === "pay_in_advance"
-      ? subscription.currentCycleStartAt
-      : subscription.currentCycleEndAt
+    whenToBill === "pay_in_advance" ? billingCycle.cycleStartMs : billingCycle.cycleEndMs
 
   // calculate the grace period based on the due date
   // this is when the invoice will be considered past due after that if not paid we can end it, cancel it, etc.
@@ -179,6 +175,7 @@ export async function invoiceSubscription({
   // if the subscription is ending the trial, we will only charge the flat charges
   const invoiceType = isTrialEnding ? "flat" : ("hybrid" as InvoiceType)
   // this should happen in a transaction
+
   const result = await db.transaction(async (tx) => {
     // Execute all operations in parallel and wait for them to complete
     const [invoice, subscriptionData] = await Promise.all([
@@ -213,7 +210,6 @@ export async function invoiceSubscription({
         })
         .returning()
         .then((result) => result[0]),
-
       // Update subscription
       tx
         .update(subscriptions)

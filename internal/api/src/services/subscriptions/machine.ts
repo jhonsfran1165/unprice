@@ -16,7 +16,7 @@ import {
 } from "xstate"
 import { UnPriceMachineError } from "#services/machine/errors"
 
-import { logTransition, sendCustomerNotification, updateMetadataSubscription } from "./actions"
+import { logTransition, sendCustomerNotification, updateSubscription } from "./actions"
 import {
   canInvoice,
   canRenew,
@@ -371,11 +371,13 @@ export class SubscriptionMachine {
               target: "past_due",
               // update the metadata for the subscription to keep track of the reason
               actions: ({ context }) =>
-                updateMetadataSubscription({
+                updateSubscription({
                   context,
-                  metadata: {
-                    reason: "invoice_failed",
-                    note: "Invoice failed after trial ended",
+                  subscription: {
+                    metadata: {
+                      reason: "invoice_failed",
+                      note: "Invoice failed after trial ended",
+                    },
                   },
                 }),
             },
@@ -409,11 +411,13 @@ export class SubscriptionMachine {
               actions: [
                 // update the metadata for the subscription to keep track of the reason
                 ({ context }) =>
-                  updateMetadataSubscription({
+                  updateSubscription({
                     context,
-                    metadata: {
-                      reason: "invoice_failed",
-                      note: "Invoice failed after trying to invoice",
+                    subscription: {
+                      metadata: {
+                        reason: "invoice_failed",
+                        note: "Invoice failed after trying to invoice",
+                      },
                     },
                   }),
                 "logStateTransition",
@@ -778,7 +782,7 @@ export class SubscriptionMachine {
 
   private async sendEvent(
     event: SubscriptionEvent,
-    state: SusbriptionMachineStatus
+    states?: SusbriptionMachineStatus[]
   ): Promise<Result<SusbriptionMachineStatus, UnPriceMachineError>> {
     const snapshot = this.actor.getSnapshot()
     const nextEvents = this.getNextEvents(snapshot)
@@ -796,7 +800,7 @@ export class SubscriptionMachine {
     this.actor.send(event)
 
     // wait for the event to be processed
-    const result = await this.waitForState({ event, state })
+    const result = await this.waitForState({ event, states: states })
 
     // Wait for any pending state update to complete
     if (this.pendingStateUpdate) {
@@ -809,17 +813,20 @@ export class SubscriptionMachine {
   private async waitForState({
     timeout = 5000,
     event,
-    state,
+    states,
     tag,
   }: {
     timeout?: number
     event?: SubscriptionEvent
-    state?: SusbriptionMachineStatus
+    states?: SusbriptionMachineStatus[]
     tag?: MachineTags
   }): Promise<Result<SusbriptionMachineStatus, UnPriceMachineError>> {
     // First check if we're already in the desired state/tag
     const currentSnapshot = this.actor.getSnapshot()
-    if ((state && currentSnapshot.matches(state)) || (tag && currentSnapshot.hasTag(tag))) {
+    if (
+      states?.includes(currentSnapshot.value as SusbriptionMachineStatus) ||
+      (tag && currentSnapshot.hasTag(tag))
+    ) {
       return Ok(currentSnapshot.value as SusbriptionMachineStatus)
     }
 
@@ -852,7 +859,10 @@ export class SubscriptionMachine {
           }
 
           // Check if we've reached the desired state or tag
-          if ((state && snapshot.matches(state)) || (tag && snapshot.hasTag(tag))) {
+          if (
+            states?.includes(snapshot.value as SusbriptionMachineStatus) ||
+            (tag && snapshot.hasTag(tag))
+          ) {
             cleanup()
             resolve(Ok(snapshot.value as SusbriptionMachineStatus))
           }
@@ -883,7 +893,7 @@ export class SubscriptionMachine {
         resolve(
           Err(
             new UnPriceMachineError({
-              message: `Timeout waiting for state ${state ?? "unknown"} or tag ${
+              message: `Timeout waiting for state ${states?.join(", ") ?? "unknown"} or tag ${
                 tag ?? "unknown"
               } after ${timeout}ms${event ? ` (event: ${event.type})` : ""}`,
             })
@@ -897,18 +907,18 @@ export class SubscriptionMachine {
    * Simplified endTrial method
    */
   public async endTrial(): Promise<Result<SusbriptionMachineStatus, UnPriceMachineError>> {
-    return await this.sendEvent({ type: "TRIAL_END" }, "trialing")
+    return await this.sendEvent({ type: "TRIAL_END" }, ["invoiced", "past_due", "active"])
   }
 
   /**
    * Renews the subscription for the next billing cycle
    */
   public async renew(): Promise<Result<SusbriptionMachineStatus, UnPriceMachineError>> {
-    return await this.sendEvent({ type: "RENEW" }, "active")
+    return await this.sendEvent({ type: "RENEW" }, ["active", "expired"])
   }
 
   public async invoice(): Promise<Result<SusbriptionMachineStatus, UnPriceMachineError>> {
-    return await this.sendEvent({ type: "INVOICE" }, "invoiced")
+    return await this.sendEvent({ type: "INVOICE" }, ["invoiced"])
   }
 
   public async reportPaymentSuccess({
@@ -916,7 +926,7 @@ export class SubscriptionMachine {
   }: {
     invoiceId: string
   }): Promise<Result<SusbriptionMachineStatus, UnPriceMachineError>> {
-    return await this.sendEvent({ type: "PAYMENT_SUCCESS", invoiceId }, "active")
+    return await this.sendEvent({ type: "PAYMENT_SUCCESS", invoiceId }, ["active"])
   }
 
   public async reportPaymentFailure({
@@ -926,7 +936,7 @@ export class SubscriptionMachine {
     invoiceId: string
     error: string
   }): Promise<Result<SusbriptionMachineStatus, UnPriceMachineError>> {
-    return await this.sendEvent({ type: "PAYMENT_FAILURE", invoiceId, error }, "past_due")
+    return await this.sendEvent({ type: "PAYMENT_FAILURE", invoiceId, error }, ["past_due"])
   }
 
   public async reportInvoiceSuccess({
@@ -939,7 +949,7 @@ export class SubscriptionMachine {
         type: "INVOICE_SUCCESS",
         invoiceId,
       },
-      "active"
+      ["active"]
     )
   }
 
@@ -956,7 +966,7 @@ export class SubscriptionMachine {
         invoiceId,
         error,
       },
-      "past_due"
+      ["past_due"]
     )
   }
 

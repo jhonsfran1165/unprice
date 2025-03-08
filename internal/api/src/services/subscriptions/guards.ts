@@ -14,7 +14,6 @@ export const canRenew = (input: { context: SubscriptionContext }): boolean => {
   const billingCycle = configureBillingCycleSubscription({
     currentCycleStartAt: subscription.currentCycleEndAt,
     billingConfig: input.context.currentPhase.planVersion.billingConfig,
-    trialDays: input.context.currentPhase.trialDays,
     endAt: input.context.currentPhase.endAt ?? undefined,
     alignStartToDay: false,
     alignEndToDay: true,
@@ -107,6 +106,7 @@ export const canInvoice = (input: { context: SubscriptionContext }): boolean => 
 
 export const currentPhaseNull = (input: { context: SubscriptionContext }): boolean => {
   const currentPhase = input.context.currentPhase
+
   return !currentPhase?.id
 }
 

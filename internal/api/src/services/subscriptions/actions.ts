@@ -1,6 +1,6 @@
-import { db, eq } from "@unprice/db"
+import { and, db, eq } from "@unprice/db"
 import { subscriptions } from "@unprice/db/schema"
-import type { SubscriptionMetadata } from "@unprice/db/validators"
+import type { Subscription } from "@unprice/db/validators"
 import type { Logger } from "@unprice/logging"
 import { env } from "#env.mjs"
 import type { SubscriptionContext, SubscriptionEvent } from "./types"
@@ -50,24 +50,20 @@ export const sendCustomerNotification = ({
 /**
  * Action: Update metadata for subscription
  */
-export const updateMetadataSubscription = async ({
+export const updateSubscription = async ({
   context,
-  metadata,
+  subscription,
 }: {
   context: SubscriptionContext
-  metadata: SubscriptionMetadata
+  subscription: Partial<Subscription>
 }): Promise<void> => {
-  // update the metadata for the subscription
-  const newMetadata = {
-    ...context.subscription.metadata,
-    ...metadata,
-  }
+  const { subscriptionId, projectId } = context
 
   // update the subscription
   await db
     .update(subscriptions)
     .set({
-      metadata: newMetadata,
+      ...subscription,
     })
-    .where(eq(subscriptions.id, context.subscriptionId))
+    .where(and(eq(subscriptions.id, subscriptionId), eq(subscriptions.projectId, projectId)))
 }

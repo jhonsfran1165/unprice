@@ -27,8 +27,8 @@
   },
   "license": "AGPL-3.0",
   "scripts": {
-    "test": "vitest run",
-    "test:file": "SKIP_ENV_VALIDATION=true vitest 'src/**/$@'",
+    "test": "SKIP_ENV_VALIDATION=true NODE_ENV=test vitest run",
+    "test:file": "NODE_ENV=test SKIP_ENV_VALIDATION=true VERCEL_ENV=preview vitest 'src/**/$@'",
     "clean": "rm -rf .turbo node_modules",
     "typecheck": "tsc --noEmit",
     "with-env": "infisical run --env=preview --path=/app --"

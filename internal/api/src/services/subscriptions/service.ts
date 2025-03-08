@@ -1007,15 +1007,48 @@ export class SubscriptionService {
       return Err(err)
     }
 
-    const { err: errEndTrial, val: result } = await machine.endTrial()
+    const currentState = machine.getState()
 
-    if (errEndTrial) {
-      return Err(errEndTrial)
+    switch (currentState) {
+      case "trialing":
+      case "ending_trial": {
+        const { err: errEndTrial } = await machine.endTrial()
+        if (errEndTrial) {
+          return Err(errEndTrial)
+        }
+
+        const { err: errRenew, val: resultRenew } = await machine.renew()
+        if (errRenew) {
+          return Err(errRenew)
+        }
+
+        await machine.shutdown()
+
+        return Ok({
+          status: resultRenew,
+        })
+      }
+      case "renewing":
+      case "past_due":
+      case "invoiced": {
+        const { err: errRenew, val: resultRenew } = await machine.renew()
+        if (errRenew) {
+          return Err(errRenew)
+        }
+
+        await machine.shutdown()
+
+        return Ok({
+          status: resultRenew,
+        })
+      }
+      default:
+        return Err(
+          new UnPriceSubscriptionError({
+            message: "Subscription is not in a valid state or not found",
+          })
+        )
     }
-
-    return Ok({
-      status: result,
-    })
   }
 
   public async billingInvoice({

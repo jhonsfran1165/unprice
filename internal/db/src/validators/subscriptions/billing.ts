@@ -107,7 +107,7 @@ export function configureBillingCycleSubscription({
   alignEndToDay = true,
   alignToCalendar = true,
 }: {
-  trialDays: number
+  trialDays?: number
   currentCycleStartAt: number
   billingConfig: BillingConfig
   endAt?: number
