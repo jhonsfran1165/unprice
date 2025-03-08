@@ -62,6 +62,7 @@ export const db =
     ? withReplicas(primary, [read1, read2])
     : withReplicas(primary, [primary])
 
+// TODO: add custom logger https://orm.drizzle.team/docs/goodies#logging
 export * from "drizzle-orm"
 export { pgTableProject as tableCreator } from "./utils"
 export type Database = typeof db

@@ -187,10 +187,10 @@ export const columns: ColumnDef<Subscription>[] = [
     size: 40,
   },
   {
-    accessorKey: "nextInvoiceAt",
+    accessorKey: "invoiceAt",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Next invoice" />,
     cell: ({ row }) => {
-      const invoiceDate = row.original.nextInvoiceAt
+      const invoiceDate = row.original.invoiceAt
 
       if (invoiceDate === null || invoiceDate === undefined) {
         return (

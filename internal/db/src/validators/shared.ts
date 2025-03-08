@@ -2,6 +2,7 @@ import * as z from "zod"
 
 import {
   AGGREGATION_METHODS,
+  BILLING_INTERVALS,
   COLLECTION_METHODS,
   CURRENCIES,
   DUE_BEHAVIOUR,
@@ -10,8 +11,8 @@ import {
   INVOICE_STATUS,
   INVOICE_TYPE,
   PAYMENT_PROVIDERS,
-  PLAN_BILLING_PERIODS,
-  STATUS_PHASE,
+  PLAN_TYPES,
+  SUBSCRIPTION_STATUS,
   TIER_MODES,
   USAGE_MODES,
   WHEN_TO_BILLING,
@@ -28,15 +29,42 @@ export const unitSchema = z.coerce.number().int().min(1)
 export const collectionMethodSchema = z.enum(COLLECTION_METHODS)
 export const monthsSchema = z.coerce.number().int().min(1).max(12)
 export const yearsSchema = z.coerce.number().int().min(2000).max(2100)
-export const billingPeriodSchema = z.enum(PLAN_BILLING_PERIODS)
 export const whenToBillSchema = z.enum(WHEN_TO_BILLING)
-export const phaseStatusSchema = z.enum(STATUS_PHASE)
+export const subscriptionStatusSchema = z.enum(SUBSCRIPTION_STATUS)
 export const dueBehaviourSchema = z.enum(DUE_BEHAVIOUR)
 export const invoiceStatusSchema = z.enum(INVOICE_STATUS)
 export const invoiceTypeSchema = z.enum(INVOICE_TYPE)
-export const startCycleMonthSchema = z.coerce.number().int().min(1).max(31)
-export const startCycleYearSchema = z.coerce.number().int().min(1).max(12)
-export const startCycleSchema = z.union([startCycleMonthSchema, startCycleYearSchema]).default(1)
+export const billingAnchorSchema = z
+  .union([z.coerce.number().int().min(0).max(31), z.literal("dayOfCreation")])
+  .default("dayOfCreation")
+
+export const billingIntervalSchema = z.enum(BILLING_INTERVALS)
+export const billingIntervalCountSchema = z.coerce.number().int().min(1).max(12)
+export const planTypeSchema = z.enum(PLAN_TYPES)
+
+export const unpriceCustomerErrorSchema = z.enum([
+  "SUBSCRIPTION_EXPIRED",
+  "SUBSCRIPTION_NOT_ACTIVE",
+  "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+  "FEATURE_OR_CUSTOMER_NOT_FOUND",
+  "CUSTOMER_HAS_NO_SUBSCRIPTIONS",
+  "CUSTOMER_NOT_FOUND",
+  "FEATURE_TYPE_NOT_SUPPORTED",
+  "FEATURE_IS_NOT_USAGE_TYPE",
+  "FEATURE_HAS_NO_USAGE_RECORD",
+  "FEATURE_NOT_SUPPORT_USAGE",
+  "UNHANDLED_ERROR",
+  "INTERNAL_SERVER_ERROR",
+])
+
+export const deniedReasonSchema = z.enum([
+  "RATE_LIMITED",
+  "USAGE_EXCEEDED",
+  "FEATURE_NOT_FOUND_IN_SUBSCRIPTION",
+  "FEATURE_OR_CUSTOMER_NOT_FOUND",
+  "FEATURE_HAS_NO_USAGE_RECORD",
+  "LIMIT_EXCEEDED",
+])
 
 export const convertDateToUTC = (date: Date) => {
   // Check if the date is already in UTC
@@ -89,10 +117,11 @@ export type FeatureVersionType = z.infer<typeof featureVersionType>
 export type Year = z.infer<typeof yearsSchema>
 export type Month = z.infer<typeof monthsSchema>
 export type AggregationMethod = z.infer<typeof aggregationMethodSchema>
-export type BillingPeriod = z.infer<typeof billingPeriodSchema>
 export type WhenToBill = z.infer<typeof whenToBillSchema>
-export type StartCycle = z.infer<typeof startCycleSchema>
+export type BillingAnchor = z.infer<typeof billingAnchorSchema>
 export type CollectionMethod = z.infer<typeof collectionMethodSchema>
-export type PhaseStatus = z.infer<typeof phaseStatusSchema>
+export type SubscriptionStatus = z.infer<typeof subscriptionStatusSchema>
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>
 export type InvoiceType = z.infer<typeof invoiceTypeSchema>
+export type BillingInterval = z.infer<typeof billingIntervalSchema>
+export type PlanType = z.infer<typeof planTypeSchema>

@@ -1,4 +1,3 @@
-import { type Interval, prepareInterval } from "@unprice/tinybird"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@unprice/ui/card"
 import { LoadingAnimation } from "@unprice/ui/loading-animation"
 import { ScrollArea } from "@unprice/ui/scroll-area"
@@ -6,19 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@unprice/ui/tabs"
 import { Typography } from "@unprice/ui/typography"
 import { cn } from "@unprice/ui/utils"
 import { type ReactNode, Suspense } from "react"
-import { HydrateClient, trpc } from "~/trpc/server"
 import { Filter } from "./filter"
 
-type AnalyticPromiseKey = "getUsage"
-
-export function AnalyticsCard<T extends string>({
+export async function AnalyticsCard<T extends string>({
   tabs,
   defaultTab,
   title,
   description,
   className,
-  interval,
-  promiseKeys,
 }: {
   title: string
   className?: string
@@ -32,19 +26,7 @@ export function AnalyticsCard<T extends string>({
     }) => ReactNode
   }[]
   defaultTab: T
-  interval: Interval
-  promiseKeys: AnalyticPromiseKey[]
 }) {
-  const { start, end } = prepareInterval(interval)
-
-  // Prefetch all key analytics data
-  promiseKeys.forEach((promiseKey) => {
-    void trpc.analytics[promiseKey].prefetch({
-      start,
-      end,
-    })
-  })
-
   return (
     <Card className={cn("flex flex-col", className)}>
       <CardHeader>
@@ -65,28 +47,26 @@ export function AnalyticsCard<T extends string>({
             <Filter />
           </div>
 
-          <HydrateClient>
-            {tabs.map(({ id, chart, description }) => (
-              <TabsContent key={id} value={id}>
-                <div className="flex flex-col px-1 py-4">
-                  <Typography variant="p" affects="removePaddingMargin">
-                    {description}
-                  </Typography>
-                </div>
-                <ScrollArea className="h-[400px] p-4">
-                  <Suspense
-                    fallback={
-                      <div className="flex h-[360px] items-center justify-center">
-                        <LoadingAnimation className="size-8" />
-                      </div>
-                    }
-                  >
-                    <div className="h-max-[360px]">{chart({ tab: id })}</div>
-                  </Suspense>
-                </ScrollArea>
-              </TabsContent>
-            ))}
-          </HydrateClient>
+          {tabs.map(({ id, chart, description }) => (
+            <TabsContent key={id} value={id}>
+              <div className="flex flex-col px-1 py-4">
+                <Typography variant="p" affects="removePaddingMargin">
+                  {description}
+                </Typography>
+              </div>
+              <ScrollArea className="h-[400px] p-4">
+                <Suspense
+                  fallback={
+                    <div className="flex h-[360px] items-center justify-center">
+                      <LoadingAnimation className="size-8" />
+                    </div>
+                  }
+                >
+                  <div className="h-max-[360px]">{chart({ tab: id })}</div>
+                </Suspense>
+              </ScrollArea>
+            </TabsContent>
+          ))}
         </Tabs>
       </CardContent>
     </Card>

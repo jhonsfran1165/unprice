@@ -32,7 +32,7 @@ export function WorkspaceSwitcher({
   const router = useRouter()
   const [switcherOpen, setSwitcherOpen] = useState(false)
 
-  const { access: isProAccess } = useEntitlement("pro-access")
+  const { access: isProAccess } = useEntitlement("access-pro")
   const { access: accessWorkspaces, remaining: workspacesRemaining } = useEntitlement("workspaces")
 
   const [data] = api.workspaces.listWorkspacesByActiveUser.useSuspenseQuery(undefined, {

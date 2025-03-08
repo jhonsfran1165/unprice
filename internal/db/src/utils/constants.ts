@@ -1,3 +1,5 @@
+import type { PlanType } from "../validators/shared"
+
 export const TIER_MODES_MAP = {
   volume: {
     label: "Volume",
@@ -81,6 +83,55 @@ export const AGGREGATION_METHODS_MAP = {
   },
 } as const
 
+export const BILLING_INTERVALS = ["month", "year", "day", "minute", "onetime"] as const
+
+export const BILLING_CONFIG: Record<
+  string,
+  {
+    label: string
+    description: string
+    billingInterval: (typeof BILLING_INTERVALS)[number]
+    billingIntervalCount: number
+    billingAnchorOptions: (number | "dayOfCreation")[]
+    dev?: boolean
+    planType: PlanType
+  }
+> = {
+  monthly: {
+    label: "Monthly",
+    description: "Billed monthly at the specified billing anchor",
+    billingInterval: "month",
+    billingIntervalCount: 1,
+    billingAnchorOptions: ["dayOfCreation", ...Array.from({ length: 31 }, (_, i) => i + 1)],
+    planType: "recurring",
+  },
+  yearly: {
+    label: "Yearly",
+    description: "Billed yearly at the specified billing anchor",
+    billingInterval: "year",
+    billingIntervalCount: 1,
+    billingAnchorOptions: ["dayOfCreation", ...Array.from({ length: 12 }, (_, i) => i + 1)],
+    planType: "recurring",
+  },
+  "every-5-minutes": {
+    label: "Every 5 minutes",
+    description: "Billed every 5 minutes",
+    billingInterval: "minute",
+    billingIntervalCount: 5,
+    billingAnchorOptions: [],
+    dev: true,
+    planType: "recurring",
+  },
+  onetime: {
+    label: "Onetime",
+    description: "Billed once",
+    billingInterval: "onetime",
+    billingIntervalCount: 1,
+    billingAnchorOptions: [],
+    planType: "onetime",
+  },
+}
+
 type AggregationMethod = keyof typeof AGGREGATION_METHODS_MAP
 export type TierMode = keyof typeof TIER_MODES_MAP
 export type UsageMode = keyof typeof USAGE_MODES_MAP
@@ -95,18 +146,23 @@ export const STATUS_PLAN = ["draft", "published"] as const
 // but phases can have different statuses than the subscription is they are not active
 // for instance a phase was changed to new plan, we create a new phase with status as active
 // and we leave the old phase with status changed.
-export const STATUS_PHASE = [
-  "active", // the phase is active
-  "trialing", // the phase is trialing
-  "changed", // the phase is changed
-  "canceled", // the phase is cancelled
-  "expired", // the phase has expired - no auto-renew
-  "past_dued", // the phase is past due - payment pending
-  "trial_ended", // the phase trial has ended
+export const SUBSCRIPTION_STATUS = [
+  "idle", // the subscription is idle
+  "renewing", // the subscription is renewing
+  "changing", // the subscription is changing
+  "canceling", // the subscription is canceling
+  "expiring", // the subscription is expiring
+  "invoicing", // the subscription is invoicing
+  "invoiced", // the subscription is invoiced, ready to be renewed
+  "ending_trial", // the subscription is ending trial
+  "active", // the subscription is active
+  "trialing", // the subscription is trialing
+  "canceled", // the subscription is cancelled
+  "expired", // the subscription has expired - no auto-renew
+  "past_due", // the subscription is past due - payment pending
 ] as const
 
-export const PLAN_TYPES = ["recurring"] as const
-export const PLAN_BILLING_PERIODS = ["month", "year", "custom", "onetime"] as const
+export const PLAN_TYPES = ["recurring", "onetime"] as const
 export const ROLES_APP = ["OWNER", "ADMIN", "MEMBER"] as const
 export const WHEN_TO_BILLING = ["pay_in_advance", "pay_in_arrear"] as const
 export const DUE_BEHAVIOUR = ["cancel", "downgrade"] as const

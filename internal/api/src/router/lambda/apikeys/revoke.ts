@@ -11,20 +11,28 @@ export const revoke = protectedProjectProcedure
   .mutation(async (opts) => {
     const { ids } = opts.input
     const project = opts.ctx.project
-    const customerId = project.workspace.unPriceCustomerId
-    const featureSlug = "apikeys"
 
-    // check if the customer has access to the feature
-    await featureGuard({
-      customerId,
-      featureSlug,
+    opts.ctx.verifyRole(["OWNER", "ADMIN"])
+
+    const result = await featureGuard({
+      customerId: project.workspace.unPriceCustomerId,
+      featureSlug: "apikeys",
       ctx: opts.ctx,
       skipCache: true,
       isInternal: project.workspace.isInternal,
-      throwOnNoAccess: false,
+      metadata: {
+        action: "revoke",
+      },
     })
 
-    const result = await opts.ctx.db
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
+
+    const data = await opts.ctx.db
       .update(schema.apikeys)
       .set({ revokedAt: Date.now(), updatedAtM: Date.now() })
       .where(
@@ -32,7 +40,7 @@ export const revoke = protectedProjectProcedure
       )
       .returning()
 
-    if (result.length === 0) {
+    if (data.length === 0) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "API key not found you don't have access to this project",
@@ -41,8 +49,8 @@ export const revoke = protectedProjectProcedure
 
     // remove from cache
     opts.ctx.waitUntil(
-      Promise.all(result.map(async (apikey) => opts.ctx.cache.apiKeyByHash.remove(apikey.hash)))
+      Promise.all(data.map(async (apikey) => opts.ctx.cache.apiKeyByHash.remove(apikey.hash)))
     )
 
-    return { success: true, numRevoked: result.length }
+    return { success: true, numRevoked: data.length }
   })

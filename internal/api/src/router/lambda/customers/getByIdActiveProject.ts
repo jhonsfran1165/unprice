@@ -3,14 +3,13 @@ import { z } from "zod"
 import { TRPCError } from "@trpc/server"
 import { customerSelectSchema } from "@unprice/db/validators"
 import { protectedApiOrActiveProjectProcedure } from "#trpc"
-import { featureGuard } from "#utils/feature-guard"
 
 export const getByIdActiveProject = protectedApiOrActiveProjectProcedure
   .meta({
     span: "customers.getByIdActiveProject",
     openapi: {
       method: "GET",
-      path: "/edge/customers.getByIdActiveProject",
+      path: "/lambda/customers.getByIdActiveProject",
       protect: true,
     },
   })
@@ -19,18 +18,6 @@ export const getByIdActiveProject = protectedApiOrActiveProjectProcedure
   .query(async (opts) => {
     const { id } = opts.input
     const { project } = opts.ctx
-
-    const unPriceCustomerId = project.workspace.unPriceCustomerId
-
-    // check if the customer has access to the feature
-    await featureGuard({
-      customerId: unPriceCustomerId,
-      featureSlug: "customers",
-      ctx: opts.ctx,
-      skipCache: true,
-      isInternal: project.workspace.isInternal,
-      throwOnNoAccess: false,
-    })
 
     const customerData = await opts.ctx.db.query.customers.findFirst({
       where: (customer, { eq, and }) =>

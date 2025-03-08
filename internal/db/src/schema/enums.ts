@@ -2,6 +2,7 @@ import { pgEnum } from "drizzle-orm/pg-core"
 
 import {
   AGGREGATION_METHODS,
+  BILLING_INTERVALS,
   COLLECTION_METHODS,
   CURRENCIES,
   DUE_BEHAVIOUR,
@@ -10,18 +11,17 @@ import {
   INVOICE_STATUS,
   INVOICE_TYPE,
   PAYMENT_PROVIDERS,
-  PLAN_BILLING_PERIODS,
   PLAN_TYPES,
   ROLES_APP,
   STAGES,
-  STATUS_PHASE,
   STATUS_PLAN,
+  SUBSCRIPTION_STATUS,
   TIER_MODES,
   USAGE_MODES,
   WHEN_TO_BILLING,
 } from "../utils"
 
-export const phaseStatusEnum = pgEnum("phase_status", STATUS_PHASE)
+export const subscriptionStatusEnum = pgEnum("subscription_status", SUBSCRIPTION_STATUS)
 export const invoiceStatusEnum = pgEnum("invoice_status", INVOICE_STATUS)
 export const invoiceTypeEnum = pgEnum("invoice_type", INVOICE_TYPE)
 export const statusPlanEnum = pgEnum("plan_version_status", STATUS_PLAN)
@@ -35,7 +35,7 @@ export const dueBehaviourEnum = pgEnum("due_behaviour", DUE_BEHAVIOUR)
 export const currencyEnum = pgEnum("currency", CURRENCIES)
 export const stageEnum = pgEnum("app_stages", STAGES)
 export const teamRolesEnum = pgEnum("team_roles", ROLES_APP)
-export const billingPeriodEnum = pgEnum("billing_period", PLAN_BILLING_PERIODS)
+export const billingIntervalEnum = pgEnum("billing_interval", BILLING_INTERVALS)
 export const planTypeEnum = pgEnum("plan_type", PLAN_TYPES)
 export const whenToBillEnum = pgEnum("when_to_bill", WHEN_TO_BILLING)
 export const collectionMethodEnum = pgEnum("collection_method", COLLECTION_METHODS)

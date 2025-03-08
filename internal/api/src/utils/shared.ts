@@ -71,12 +71,14 @@ export const reportUsageFeature = async ({
   usage,
   ctx,
   isInternal,
+  now = Date.now(),
 }: {
   customerId: string
   featureSlug: string
   usage: number
   ctx: Context
   isInternal?: boolean
+  now?: number
 }) => {
   // if the feature is internal, we don't need to report usage
   if (isInternal) {
@@ -86,9 +88,6 @@ export const reportUsageFeature = async ({
   }
 
   const customer = new CustomerService(ctx)
-
-  // use current date for now but we could support reporting usage for past dates
-  const now = Date.now()
 
   const { err, val } = await customer.reportUsage({
     customerId,

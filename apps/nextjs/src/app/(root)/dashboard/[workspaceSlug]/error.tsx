@@ -2,47 +2,25 @@
 
 import { Button } from "@unprice/ui/button"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
 import { BlurImage } from "~/components/blur-image"
 import { EmptyPlaceholder } from "~/components/empty-placeholder"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
 
 export default function ErrorPage({
-  error,
   reset,
+  error,
 }: {
-  error: Error & { digest?: string }
+  error: Error
   reset: () => void
 }) {
   const router = useRouter()
-  const [errorMessage, setErrorMessage] = useState("An unknown error occurred")
-  const [errorCode, setErrorCode] = useState("Something went wrong")
-  const [updateSubscription, setUpdateSubscription] = useState(false)
-
-  useEffect(() => {
-    try {
-      const parsedError = JSON.parse(error.message)
-
-      if (parsedError.code) {
-        setErrorCode(parsedError.code)
-      }
-
-      if (parsedError.code === "UNAUTHORIZED") {
-        setErrorMessage(parsedError.message)
-        setUpdateSubscription(true)
-      }
-    } catch (_e) {
-      // If parsing fails, use the default error message
-      setErrorMessage(error.message)
-    }
-  }, [error])
 
   return (
     <DashboardShell>
       <div className="flex flex-col items-center justify-center">
         <EmptyPlaceholder className="min-h-[800px] w-full space-y-10">
           <EmptyPlaceholder.Title className="mt-0 p-10" variant="h1">
-            {errorCode}
+            "Something went wrong"
           </EmptyPlaceholder.Title>
           <EmptyPlaceholder.Icon>
             <BlurImage
@@ -54,25 +32,16 @@ export default function ErrorPage({
             />
           </EmptyPlaceholder.Icon>
           <EmptyPlaceholder.Description className="mx-auto w-1/3 text-center">
-            {errorMessage}
+            {error.message}
           </EmptyPlaceholder.Description>
           <EmptyPlaceholder.Action>
             <div className="mt-6 flex flex-row items-center justify-center gap-10">
-              {/* TODO: add update subscription button */}
-              {updateSubscription ? (
-                <Button variant="primary" onClick={() => reset()}>
-                  Update plan
-                </Button>
-              ) : (
-                <>
-                  <Button variant="primary" onClick={() => reset()}>
-                    Try again
-                  </Button>
-                  <Button variant="default" onClick={() => router.back()}>
-                    Back
-                  </Button>
-                </>
-              )}
+              <Button variant="primary" onClick={() => reset()}>
+                Try again
+              </Button>
+              <Button variant="default" onClick={() => router.back()}>
+                Back
+              </Button>
             </div>
           </EmptyPlaceholder.Action>
         </EmptyPlaceholder>

@@ -1,13 +1,16 @@
 // See https://typeofweb.hashnode.dev/nextjs-prefetch-onmouseenter for a detailed explanation and more code
 // See it in action: https://demo.yournextstore.com
 "use client"
-
 import { cn, focusRing } from "@unprice/ui/utils"
-import { Link } from "next-view-transitions"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
-import type { ComponentPropsWithRef } from "react"
+import { forwardRef } from "react"
 
-export const SuperLink = (props: ComponentPropsWithRef<typeof Link>) => {
+interface SuperLinkProps extends React.ComponentPropsWithoutRef<typeof Link> {
+  children: React.ReactNode
+}
+
+const SuperLink = forwardRef<HTMLAnchorElement, SuperLinkProps>(({ children, ...props }, ref) => {
   const router = useRouter()
   const strHref = typeof props.href === "string" ? props.href : props.href.href
 
@@ -19,10 +22,11 @@ export const SuperLink = (props: ComponentPropsWithRef<typeof Link>) => {
 
   return (
     <Link
+      ref={ref}
       className={cn("cursor-pointer", focusRing, props.className)}
-      {...props}
       prefetch={false}
       scroll={false}
+      {...props}
       onMouseEnter={(e) => {
         conditionalPrefetch()
         return props.onMouseEnter?.(e)
@@ -39,6 +43,12 @@ export const SuperLink = (props: ComponentPropsWithRef<typeof Link>) => {
         conditionalPrefetch()
         return props.onFocus?.(e)
       }}
-    />
+    >
+      {children}
+    </Link>
   )
-}
+})
+
+SuperLink.displayName = "SuperLink"
+
+export { SuperLink }

@@ -41,6 +41,8 @@ export function FeatureList({ featuresPromise, planVersion }: FeatureListProps) 
     }
   )
 
+  if (!planVersion) return null
+
   const planFeatureIds = planVersionFeatureList.map((feature) => feature.feature.id)
 
   const searchableFeatures = data.features.filter((feature) => !planFeatureIds.includes(feature.id))

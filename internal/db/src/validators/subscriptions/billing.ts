@@ -1,225 +1,402 @@
-import {
-  addMonths,
-  addYears,
-  differenceInSeconds,
-  endOfDay,
-  endOfMonth,
-  getDaysInMonth,
-  setDate,
-  setMonth,
-  startOfDay,
-  startOfYear,
-} from "date-fns"
-import { type BillingPeriod, convertDateToUTC } from "../shared"
+import { addDays, addMinutes, addMonths, addYears, differenceInSeconds, endOfMonth } from "date-fns"
+import type { BillingConfig } from "../../validators"
+import type { BillingAnchor, BillingInterval } from "../shared"
 
-// this function calculate the billing cycle for a subscription
-// when trials are passed the subscription cycle will be the start date + trial days
-// TODO: handle errors for this
-export function configureBillingCycleSubscription({
-  trialDays = 0,
-  currentCycleStartAt,
-  billingCycleStart,
-  billingPeriod,
-  endAt,
-}: {
-  trialDays?: number
-  currentCycleStartAt: number
-  billingCycleStart: number
-  billingPeriod: BillingPeriod
-  endAt?: number
-}): {
-  cycleStart: Date
-  cycleEnd: Date
+interface BillingCycleResult {
+  cycleStartMs: number // UTC timestamp in milliseconds
+  cycleEndMs: number // UTC timestamp in milliseconds
   secondsInCycle: number
   prorationFactor: number
   billableSeconds: number
-  trialDaysEndAt?: Date
+  trialEndsAtMs?: number // UTC timestamp in milliseconds
+}
+
+// given a billing interval, give a message to the user to explain the billing cycle
+// like billed once every 30 days, billed once every month, billed once every year, billed once every 3 months, bill every 5 minutes
+// bill yearly on the 1st of the month, bill monthly on the 1st of the month, bill weekly on monday, bill daily at 12:00
+export function getBillingCycleMessage(billingConfig: BillingConfig): {
+  message: string
 } {
+  const { billingInterval, billingIntervalCount, billingAnchor } = billingConfig
+
+  const intervalCount = billingIntervalCount || 1
+
+  // Handle one-time billing
+  if (billingInterval === "onetime") {
+    return { message: "billed once" }
+  }
+
+  // For regular intervals without a specific anchor
+  if (!billingAnchor || billingAnchor === "dayOfCreation") {
+    if (intervalCount === 1) {
+      return {
+        message: `billed ${billingInterval === "minute" ? "every" : "once every"} ${billingInterval}`,
+      }
+    }
+
+    // Handle plural forms
+    const intervalPlural =
+      billingInterval === "day"
+        ? "days"
+        : billingInterval === "month"
+          ? "months"
+          : billingInterval === "year"
+            ? "years"
+            : billingInterval === "minute"
+              ? "minutes"
+              : `${billingInterval}s`
+
+    return { message: `billed once every ${intervalCount} ${intervalPlural}` }
+  }
+
+  // For intervals with specific anchors
+  if (billingInterval === "month") {
+    const dayOfMonth = typeof billingAnchor === "number" ? billingAnchor : 1
+    const day =
+      dayOfMonth === 1
+        ? "1st"
+        : dayOfMonth === 2
+          ? "2nd"
+          : dayOfMonth === 3
+            ? "3rd"
+            : `${dayOfMonth}th`
+
+    if (intervalCount === 1) {
+      return { message: `billed monthly on the ${day} of the month` }
+    }
+    return { message: `billed every ${intervalCount} months on the ${day} of the month` }
+  }
+
+  if (billingInterval === "year") {
+    const monthAnchor = typeof billingAnchor === "number" ? billingAnchor : 1
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ]
+    const month = monthNames[Math.min(Math.max(1, monthAnchor), 12) - 1]
+
+    if (intervalCount === 1) {
+      return { message: `billed yearly on the 1st of ${month}` }
+    }
+    return { message: `billed every ${intervalCount} years on the 1st of ${month}` }
+  }
+
+  // Default fallback for any other cases
+  if (intervalCount === 1) {
+    return { message: `billed every ${billingInterval}` }
+  }
+  return { message: `billed every ${intervalCount} ${billingInterval}s` }
+}
+
+export function configureBillingCycleSubscription({
+  trialDays = 0,
+  currentCycleStartAt,
+  billingConfig,
+  endAt,
+  alignStartToDay = false,
+  alignEndToDay = true,
+  alignToCalendar = true,
+}: {
+  trialDays?: number
+  currentCycleStartAt: number
+  billingConfig: BillingConfig
+  endAt?: number
+  alignStartToDay?: boolean
+  alignEndToDay?: boolean
+  alignToCalendar?: boolean
+}): BillingCycleResult {
+  // Handle trial period
   if (trialDays > 0) {
-    // calculate the trials, here we don't need to worry about the end of the day because
-    // we are calculating the proration to the seconds, after the first cycle the billing will align with the start of the day
-    const startDate = new Date(currentCycleStartAt)
-    // we subtract one millisecond to avoid overlapping with the next cycle
-    const trialDaysEndAt = startDate.setUTCDate(startDate.getUTCDate() + trialDays) - 1
-    // if there  are trial days, our first cycle would be when the trails starts and ends at the end of the trial days
-    // in this part proration is zero
+    const trialEndsAtMs = currentCycleStartAt + trialDays * 24 * 60 * 60 * 1000 - 1
+    const effectiveEndMs = endAt ? Math.min(trialEndsAtMs, endAt) : trialEndsAtMs
 
-    // if the end date is less than the trial days end date, we need to use the end date
-    const effectiveEndCycle = endAt && endAt > 0 ? Math.min(trialDaysEndAt, endAt) : trialDaysEndAt
-    const secondsInCycle = differenceInSeconds(effectiveEndCycle, currentCycleStartAt)
-
-    // blow this up if the start date is after the end date
-    if (currentCycleStartAt > effectiveEndCycle) {
+    if (currentCycleStartAt > effectiveEndMs) {
       throw new Error("Start date is after the end date")
     }
 
     return {
-      cycleStart: new Date(currentCycleStartAt),
-      cycleEnd: new Date(effectiveEndCycle),
-      secondsInCycle,
+      cycleStartMs: currentCycleStartAt,
+      cycleEndMs: effectiveEndMs,
+      secondsInCycle: differenceInSeconds(effectiveEndMs, currentCycleStartAt),
       prorationFactor: 0,
       billableSeconds: 0,
-      trialDaysEndAt: new Date(trialDaysEndAt),
+      trialEndsAtMs,
     }
   }
 
-  // given the current date, calculate the start and end of the current billing cycle
-  const { cycleStart, cycleEnd } =
-    billingPeriod === "month"
-      ? calculateMonthlyBillingCycle(new Date(currentCycleStartAt), billingCycleStart)
-      : calculateYearlyBillingCycle(new Date(currentCycleStartAt), billingCycleStart)
+  // Calculate next interval
+  const interval = calculateNextInterval(currentCycleStartAt, billingConfig, {
+    alignToCalendar,
+    alignStartToDay,
+    alignEndToDay,
+  })
 
-  // we want to keep fairness so we calculate the proration to the seconds
-  // INFO: if you find some ways we can improve fairness along the whole project please give me a shout
-  const effectiveStartDate = Math.max(currentCycleStartAt, cycleStart.getTime())
-  // if end date is defined define the effective end date
-  const effectiveEndDate =
-    endAt && endAt > 0 ? Math.min(endAt, cycleEnd.getTime()) : cycleEnd.getTime()
+  // Calculate effective dates and proration
+  const effectiveStartMs = Math.max(currentCycleStartAt, interval.start)
+  const effectiveEndMs = endAt ? Math.min(endAt, interval.end) : interval.end
 
-  // The + 1 is added to include both the start and end dates in the calculation.
-  // This ensures that a full day is counted even if the difference is calculated to the same time on consecutive days.
-  const secondsInCycle = differenceInSeconds(cycleEnd, cycleStart) + 1
+  if (effectiveStartMs > effectiveEndMs) {
+    throw new Error("Effective start date is after the effective end date")
+  }
 
-  // Similarly, the + 1 here ensures that the last second of the billing period is included.
-  // The Math.max ensures we don't get negative billable seconds if effectiveStartDate is after effectiveEndCycle.
-  const billableSeconds = Math.max(0, differenceInSeconds(effectiveEndDate, effectiveStartDate) + 1)
-
-  // The prorationFactor is calculated using the adjusted billableSeconds and secondsInCycle
-  const prorationFactor = billableSeconds / secondsInCycle
-
-  // blow this up if the start date is after the end date
-  if (effectiveStartDate > effectiveEndDate) {
-    throw new Error("Start date is after the end date")
+  // Handle onetime interval
+  if (billingConfig.billingInterval === "onetime") {
+    return {
+      cycleStartMs: interval.start,
+      // onetime is forever
+      cycleEndMs: new Date("9999-12-31T23:59:59.999Z").getTime(),
+      secondsInCycle: Number.POSITIVE_INFINITY,
+      prorationFactor: 1,
+      billableSeconds: Number.POSITIVE_INFINITY,
+    }
   }
 
   return {
-    cycleStart: new Date(effectiveStartDate),
-    cycleEnd: new Date(effectiveEndDate),
-    secondsInCycle,
-    prorationFactor,
-    billableSeconds,
+    cycleStartMs: interval.start,
+    cycleEndMs: interval.end,
+    secondsInCycle: interval.secondsInCycle,
+    prorationFactor: interval.prorationFactor,
+    billableSeconds: interval.billableSeconds,
   }
 }
 
-// TODO: handle errors
-export function calculateBillingCycle({
-  currentDate,
-  startDate,
-  billingCycleStart,
-  billingPeriod,
-}: {
-  currentDate: Date
-  startDate: Date
-  billingCycleStart: number
-  billingPeriod: BillingPeriod
-}): {
-  cycleStart: Date
-  cycleEnd: Date
+function validateAnchor(interval: BillingInterval, anchor: BillingAnchor): number {
+  if (anchor === "dayOfCreation") {
+    return new Date().getUTCDate()
+  }
+
+  if (interval === "month") {
+    // For months, anchor should be 1-31, if greater use 31
+    return Math.min(Math.max(1, anchor), 31)
+  }
+  if (interval === "year") {
+    // For years, anchor should be 1-12, if greater use 12
+    return Math.min(Math.max(1, anchor), 12)
+  }
+  return anchor
+}
+
+function getAnchorDate(
+  date: Date,
+  interval: BillingInterval,
+  anchor: number,
+  endOfPeriod = false
+): Date {
+  let result = new Date(date)
+
+  if (interval === "month") {
+    // For month, handle last day of month cases
+    if (anchor >= 31) {
+      return endOfMonth(result)
+    }
+    const lastDayOfMonth = endOfMonth(result).getUTCDate()
+    result.setUTCDate(Math.min(anchor, lastDayOfMonth))
+  } else if (interval === "year") {
+    // For year, set to start/end of anchor month
+    result.setUTCMonth(anchor - 1)
+    if (endOfPeriod) {
+      result.setUTCDate(1)
+      result = endOfMonth(result)
+      result.setUTCHours(23, 59, 59, 999)
+    } else {
+      result.setUTCDate(1)
+      result.setUTCHours(0, 0, 0, 0)
+    }
+  }
+
+  return result
+}
+
+function alignPeriodBoundary(date: Date, alignToDay: boolean, isEnd: boolean): Date {
+  if (!alignToDay) return date
+
+  const result = new Date(date)
+  if (isEnd) {
+    // Set to end of day in UTC
+    result.setUTCHours(23, 59, 59, 999)
+  } else {
+    // Set to start of day in UTC
+    result.setUTCHours(0, 0, 0, 0)
+  }
+  return result
+}
+
+export function calculateNextInterval(
+  startDate: number,
+  billingConfig: BillingConfig,
+  options: {
+    alignToCalendar?: boolean
+    alignStartToDay?: boolean
+    alignEndToDay?: boolean
+  } = {
+    alignToCalendar: true,
+    alignStartToDay: false,
+    alignEndToDay: true,
+  }
+): {
+  start: number
+  end: number
   secondsInCycle: number
-  prorationFactor: number
   billableSeconds: number
+  prorationFactor: number
 } {
-  const { cycleStart, cycleEnd } =
-    billingPeriod === "month"
-      ? calculateMonthlyBillingCycle(convertDateToUTC(currentDate), billingCycleStart)
-      : calculateYearlyBillingCycle(convertDateToUTC(currentDate), billingCycleStart)
+  const date = new Date(startDate)
+  let endDate: Date
 
-  // we want to keep fairness so we calculate the proration to the seconds
-  // INFO: if you find some ways we can improve fairness along the whole project please give me a shout
-  const secondsInCycle = differenceInSeconds(cycleEnd, cycleStart) + 1
-  const effectiveStartDate = startDate < cycleStart ? cycleStart : startDate
-  const effectiveEndDate = cycleEnd
-  const billableSeconds = differenceInSeconds(effectiveEndDate, effectiveStartDate) + 1
-  const prorationFactor = billableSeconds / secondsInCycle
+  const intervalMap = {
+    minute: addMinutes,
+    day: addDays,
+    month: addMonths,
+    year: addYears,
+    onetime: (d: Date) => d,
+  }
+
+  const { billingInterval, billingIntervalCount, billingAnchor } = billingConfig
+
+  const addFunction = intervalMap[billingInterval]
+  if (!addFunction) {
+    throw new Error(`Unsupported interval: ${billingInterval}`)
+  }
+
+  // Handle onetime interval
+  if (billingInterval === "onetime") {
+    return {
+      start: startDate,
+      end: new Date("9999-12-31T23:59:59.999Z").getTime(),
+      secondsInCycle: Number.POSITIVE_INFINITY,
+      billableSeconds: Number.POSITIVE_INFINITY,
+      prorationFactor: 1,
+    }
+  }
+
+  // Handle calendar-aligned intervals with anchor
+  if (
+    options?.alignToCalendar &&
+    billingAnchor &&
+    (billingInterval === "month" || billingInterval === "year")
+  ) {
+    const anchor = validateAnchor(billingInterval, billingAnchor)
+
+    let startDateFull: Date
+    let endDateFull: Date
+
+    if (billingInterval === "month") {
+      // First calculate the full cycle duration without anchor
+      // start date is the first day of the cycle with the anchor
+      // for instance if the current date is 3th of the month and the anchor is 15, the start date will be 15th of the previous month
+      startDateFull = getAnchorDate(
+        addFunction(date, billingIntervalCount - 1),
+        billingInterval,
+        anchor
+      )
+      endDateFull = getAnchorDate(
+        addFunction(date, billingIntervalCount),
+        billingInterval,
+        anchor,
+        true
+      )
+
+      const currentDay = date.getUTCDate()
+      const lastDayOfMonth = endOfMonth(date).getUTCDate()
+
+      // If we're on the last day of month and anchor is >= that day
+      // OR if we're exactly on the anchor day
+      // then take the full interval
+      if ((currentDay === lastDayOfMonth && anchor >= lastDayOfMonth) || currentDay === anchor) {
+        endDate = getAnchorDate(
+          addFunction(date, billingIntervalCount),
+          billingInterval,
+          anchor,
+          true
+        )
+      } else if (currentDay > anchor) {
+        // If we're past the anchor, get next month's anchor plus remaining intervals
+        endDate = getAnchorDate(
+          addFunction(date, billingIntervalCount),
+          billingInterval,
+          anchor,
+          true
+        )
+      } else {
+        // If we're before the anchor, get this month's anchor plus remaining intervals
+        endDate = getAnchorDate(
+          addFunction(date, billingIntervalCount - 1),
+          billingInterval,
+          anchor,
+          true
+        )
+      }
+    } else {
+      // year
+      startDateFull = getAnchorDate(
+        addFunction(date, billingIntervalCount - 1),
+        billingInterval,
+        anchor
+      )
+      endDateFull = getAnchorDate(
+        addFunction(date, billingIntervalCount),
+        billingInterval,
+        anchor,
+        true
+      )
+      const yearAnchor = anchor
+      const currentMonth = date.getUTCMonth() + 1 // Convert to 1-12 based
+
+      if (currentMonth >= yearAnchor) {
+        // If we're past the anchor month, move to next year
+        endDate = addFunction(date, billingIntervalCount)
+      } else {
+        // If we're before or in the anchor month, use current year
+        endDate = addFunction(date, billingIntervalCount - 1)
+      }
+
+      endDate.setUTCMonth(yearAnchor - 1) // Convert anchor (1-12) to UTC month (0-11)
+      endDate = endOfMonth(endDate)
+    }
+
+    const fullCycleStartAligned = alignPeriodBoundary(startDateFull, true, false)
+
+    const fullCycleEndAligned = alignPeriodBoundary(endDateFull, true, true)
+
+    const secondsInFullCycle = differenceInSeconds(
+      fullCycleEndAligned.getTime(),
+      fullCycleStartAligned.getTime()
+    )
+
+    const startResult = alignPeriodBoundary(date, options?.alignStartToDay ?? false, false)
+    const endResult = alignPeriodBoundary(endDate, options?.alignEndToDay ?? false, true)
+
+    const billableSeconds = differenceInSeconds(endResult.getTime(), startResult.getTime())
+
+    return {
+      start: startResult.getTime(),
+      end: endResult.getTime(),
+      secondsInCycle: secondsInFullCycle,
+      billableSeconds,
+      prorationFactor: billableSeconds / secondsInFullCycle,
+    }
+  }
+
+  // For non-calendar aligned intervals
+  endDate = addFunction(date, billingIntervalCount)
+
+  const billableSeconds = differenceInSeconds(endDate.getTime() - 1, date.getTime())
 
   return {
-    cycleStart: convertDateToUTC(cycleStart),
-    cycleEnd: convertDateToUTC(cycleEnd),
-    secondsInCycle,
+    start: date.getTime(),
+    end: endDate.getTime() - 1,
+    secondsInCycle: billableSeconds,
     billableSeconds,
-    prorationFactor: prorationFactor,
+    prorationFactor: 1,
   }
-}
-
-function calculateMonthlyBillingCycle(
-  currentDate: Date,
-  billingCycleStartDay: number
-): {
-  cycleStart: Date
-  cycleEnd: Date
-} {
-  // Ensure billingCycleStartDay is within valid range (1-31)
-  const billingCycleStartDayAdjusted = Math.max(1, Math.min(31, billingCycleStartDay))
-
-  // Adjust billingCycleStartDay if it's greater than the number of days in the current month
-  // for instance february 31st is not a valid date and should be set to 28th-29th depending on the year
-  const daysInCurrentMonth = getDaysInMonth(currentDate)
-
-  const adjustedBillingCycleStartDay = Math.min(billingCycleStartDayAdjusted, daysInCurrentMonth)
-
-  // set the start date to the adjusted billing cycle start day
-  let cycleStart = startOfDay(setDate(currentDate, adjustedBillingCycleStartDay))
-  // if the current date is before the adjusted billing cycle start day, we need to set the cycle start to the previous month
-  // and calculate the adjusted billing cycle start day again
-  if (currentDate.getDate() < adjustedBillingCycleStartDay) {
-    const daysInPreviousMonth = getDaysInMonth(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
-    )
-
-    const adjustedBillingCycleStartDayPreviousMonth = Math.min(
-      billingCycleStartDayAdjusted,
-      daysInPreviousMonth
-    )
-
-    // set the start date to the adjusted billing cycle start day
-    cycleStart = startOfDay(
-      new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() - 1,
-        adjustedBillingCycleStartDayPreviousMonth
-      )
-    )
-  }
-
-  // calculate the end of the billing cycle which have to consider the end of the day
-  let cycleEnd = addMonths(cycleStart, 1)
-  cycleEnd = endOfDay(setDate(cycleEnd, adjustedBillingCycleStartDay - 1))
-
-  return { cycleStart: convertDateToUTC(cycleStart), cycleEnd: convertDateToUTC(cycleEnd) }
-}
-
-function calculateYearlyBillingCycle(
-  currentDate: Date,
-  billingCycleStartMonth: number
-): {
-  cycleStart: Date
-  cycleEnd: Date
-} {
-  // Ensure billingCycleStartMonth is within valid range (1-12)
-  const billingCycleStartMonthAdjusted = Math.max(1, Math.min(12, billingCycleStartMonth)) - 1 // Adjust for 0-based month
-
-  // Calculate the start of the current billing cycle
-  // this is the first day of the month
-  let cycleStart = convertDateToUTC(startOfYear(currentDate))
-
-  // set the start date to the adjusted billing cycle start day
-  cycleStart = setMonth(cycleStart, billingCycleStartMonthAdjusted)
-  // cycle start of the day
-  cycleStart = startOfDay(cycleStart)
-
-  // If the current date is before the billing cycle starts
-  // set the cycle start to the previous year
-  // meaning the billing cycle started in the previous year
-  if (currentDate.getTime() < cycleStart.getTime()) {
-    cycleStart = addYears(cycleStart, -1)
-  }
-
-  // calculate the end of the billing cycle which have to consider the end of the day
-  let cycleEnd = addYears(cycleStart, 1)
-  cycleEnd = setDate(cycleEnd, 1)
-  cycleEnd = addMonths(cycleEnd, -1)
-  cycleEnd = endOfMonth(cycleEnd)
-  cycleEnd = endOfDay(cycleEnd)
-
-  return { cycleStart: convertDateToUTC(cycleStart), cycleEnd: convertDateToUTC(cycleEnd) }
 }

@@ -15,7 +15,7 @@ export const create = protectedProjectProcedure
     const project = opts.ctx.project
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId: project.workspace.unPriceCustomerId,
       featureSlug: "features",
       ctx: opts.ctx,
@@ -25,8 +25,14 @@ export const create = protectedProjectProcedure
       isInternal: project.workspace.isInternal,
     })
 
-    const featureId = newId("feature")
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
+    const featureId = newId("feature")
     const featureData = await opts.ctx.db
       .insert(schema.features)
       .values({

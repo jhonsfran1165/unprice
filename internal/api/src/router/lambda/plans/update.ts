@@ -25,16 +25,23 @@ export const update = protectedProjectProcedure
     // only owner and admin can update a plan
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
-    // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
-      // update endpoint does not need to throw an error
-      throwOnNoAccess: false,
+      metadata: {
+        action: "update",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     if (defaultPlan && enterprisePlan) {
       throw new TRPCError({

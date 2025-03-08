@@ -1,0 +1,18 @@
+DESCRIPTION >
+    Materialized view that stores hourly aggregated feature usage metrics
+
+SCHEMA >
+    `date` DateTime,
+    `projectId` String,
+    `customerId` String,
+    `featureSlug` LowCardinality(String),
+    `entitlementId` String,
+    `count` AggregateFunction(count),
+    `sum` AggregateFunction(sum, Int32),
+    `max` AggregateFunction(max, Int32),
+    `last_during_period` AggregateFunction(argMax, Int32, Int64)
+
+ENGINE AggregatingMergeTree
+ENGINE_PARTITION_KEY toYYYYMM(date)
+ENGINE_SORTING_KEY (date, projectId, customerId, featureSlug, entitlementId)
+ENGINE_TTL date + INTERVAL 12 MONTH

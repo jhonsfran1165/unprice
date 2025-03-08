@@ -5,11 +5,11 @@ inputs:
   ts:
     description: Whether to install Node.js and dependencies
     required: true
-    default: true
+    default: "true"
   python:
     description: Whether to install Python and dependencies
     required: false
-    default: false
+    default: "false"
 
 runs:
   using: "composite"

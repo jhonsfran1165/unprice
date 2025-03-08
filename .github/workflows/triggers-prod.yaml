@@ -28,7 +28,8 @@ jobs:
 
       - uses: ./.github/actions/install
         with:
-          ts: true
+          ts: "true"
+          python: "false"
 
       - name: 🚀 Deploy Trigger.dev (prod)
         working-directory: internal/jobs

@@ -11,6 +11,8 @@ export function PricingCard({
 }: {
   planVersion: RouterOutputs["planVersions"]["getById"]["planVersion"]
 }) {
+  if (!planVersion) return null
+
   const { err, val: totalPricePlan } = calculateFlatPricePlan({
     planVersion,
   })
@@ -30,7 +32,7 @@ export function PricingCard({
                   ? `+${totalPricePlan.displayAmount}`
                   : totalPricePlan.displayAmount}
             </span>
-            <span className="text-sm">{planVersion.billingPeriod}</span>
+            <span className="text-sm">{planVersion.billingConfig.billingInterval}</span>
           </div>
         )}
       </CardHeader>

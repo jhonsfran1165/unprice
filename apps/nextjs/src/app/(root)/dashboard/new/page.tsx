@@ -17,7 +17,7 @@ export default function PageSuccess(props: {
 
   return (
     <Suspense fallback={<LayoutLoader />}>
-      <Content customerId={customer_id} />
+      <Content customerId={customer_id ?? undefined} />
     </Suspense>
   )
 }
@@ -25,9 +25,9 @@ export default function PageSuccess(props: {
 async function Content({
   customerId,
 }: {
-  customerId: string
+  customerId: string | undefined
 }) {
-  if (!customerId) {
+  if (!customerId || customerId === "") {
     return (
       <DashboardShell>
         <div className="flex flex-col items-center justify-center">

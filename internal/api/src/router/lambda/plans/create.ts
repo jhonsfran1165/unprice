@@ -26,7 +26,7 @@ export const create = protectedProjectProcedure
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
@@ -35,6 +35,13 @@ export const create = protectedProjectProcedure
       updateUsage: true,
       isInternal: workspace.isInternal,
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const planId = utils.newId("plan")
 

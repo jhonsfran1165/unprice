@@ -6,14 +6,13 @@ import { AesGCM } from "@unprice/db/utils"
 import { env } from "#env.mjs"
 import { PaymentProviderService } from "#services/payment-provider/service"
 import { protectedApiOrActiveProjectProcedure } from "#trpc"
-import { featureGuard } from "#utils/feature-guard"
 
 export const createPaymentMethod = protectedApiOrActiveProjectProcedure
   .meta({
     span: "customers.createPaymentMethod",
     openapi: {
       method: "POST",
-      path: "/edge/customers.createPaymentMethod",
+      path: "/lambda/customers.createPaymentMethod",
       protect: true,
     },
   })
@@ -30,18 +29,6 @@ export const createPaymentMethod = protectedApiOrActiveProjectProcedure
     const { successUrl, cancelUrl, customerId, paymentProvider } = opts.input
 
     const project = opts.ctx.project
-    const unPriceCustomerId = project.workspace.unPriceCustomerId
-    const featureSlug = "customers"
-
-    // check if the customer has access to the feature
-    await featureGuard({
-      customerId: unPriceCustomerId,
-      featureSlug,
-      ctx: opts.ctx,
-      skipCache: true,
-      isInternal: project.workspace.isInternal,
-      throwOnNoAccess: false,
-    })
 
     const customerData = await opts.ctx.db.query.customers.findFirst({
       where: (customer, { and, eq }) =>

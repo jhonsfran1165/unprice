@@ -122,6 +122,8 @@ export async function GET(req: NextRequest) {
           planVersionId: customerSession.planVersion.id,
           config: customerSession.planVersion.config,
           paymentMethodId: paymentMethodId,
+          paymentMethodRequired: customerSession.planVersion.paymentMethodRequired,
+          customerId: customerSession.customer.id,
         },
       ],
     })

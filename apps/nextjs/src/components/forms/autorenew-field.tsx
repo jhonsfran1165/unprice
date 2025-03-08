@@ -30,7 +30,7 @@ export default function AutoRenewFormField<TFieldValues extends FormValues>({
           <FormLabel>Auto Renew</FormLabel>
           <FormDescription>If the subscription should be auto renewed.</FormDescription>
           <Select
-            onValueChange={field.onChange}
+            onValueChange={(value) => field.onChange(value === "true")}
             value={field.value?.toString() ?? "true"}
             disabled={isDisabled}
           >

@@ -113,8 +113,17 @@ export function SubscriptionForm({
             <div className="flex flex-col items-start gap-2">
               <Typography variant="h5">Current Billing Cycle</Typography>
               <Typography variant="p" affects="removePaddingMargin">
-                {formatDate(defaultValues.currentCycleStartAt!, defaultValues.timezone)} to{" "}
-                {formatDate(defaultValues.currentCycleEndAt!, defaultValues.timezone)}
+                {formatDate(
+                  defaultValues.currentCycleStartAt!,
+                  defaultValues.timezone,
+                  "MMM dd, yyyy HH:mm"
+                )}{" "}
+                {" -> "}
+                {formatDate(
+                  defaultValues.currentCycleEndAt!,
+                  defaultValues.timezone,
+                  "MMM dd, yyyy HH:mm"
+                )}
               </Typography>
             </div>
           </>
@@ -137,13 +146,13 @@ export function SubscriptionForm({
         <div className="mt-8 flex justify-end gap-4">
           {isEdit && !isInactive && <SubscriptionCancelButton subscriptionId={defaultValues.id!} />}
 
-          {isInactive && (
+          {!isEdit && !isInactive && (
             <SubmitButton
               form="subscription-form"
               onClick={() => form.handleSubmit(onSubmitForm)()}
               isSubmitting={form.formState.isSubmitting}
               isDisabled={form.formState.isSubmitting}
-              label={isEdit ? "Update Subscription" : "Create Subscription"}
+              label={"Create Subscription"}
             />
           )}
         </div>

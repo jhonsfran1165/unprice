@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+
+# Please Use Google Shell Style: https://google.github.io/styleguide/shell.xml
+
+# ---- Start unofficial bash strict mode boilerplate
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -o errexit  # always exit on error
+set -o errtrace # trap errors in functions as well
+set -o pipefail # don't ignore exit codes when piping output
+set -o posix    # more strict failures in subshells
+# set -x          # enable debugging
+
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+echo "Starting up"
+
+# lets check first that docker, tb cli and node are installed
+if ! command -v docker &> /dev/null; then
+  echo "Docker could not be found"
+  exit 1
+fi
+
+if ! command -v docker-compose &> /dev/null; then
+  echo "Docker Compose could not be found"
+  exit 1
+fi
+
+if ! command -v tb &> /dev/null; then
+  echo "Tinybird CLI could not be found"
+  exit 1
+fi
+
+if ! command -v node &> /dev/null; then
+  echo "Node could not be found"
+  exit 1
+fi
+
+# use the correct node version
+bash -ic 'nvm use'
+
+# take the first parameter as the mode id if not provided, use dev
+MODE_ID=${1:-dev}
+RESTART_TINYBIRD=${2:-false}
+
+if [ "$MODE_ID" = "dev" ]; then
+  # banner to show the user that we are using the preview environment
+  echo ""
+  echo "########################################################"
+  echo "# Using development environment"
+  echo "########################################################"
+  echo ""
+
+  # override tinybird host
+  TB_HOST="http://localhost:7181"
+  REDIS_URL="http://localhost:8079"
+  REDIS_TOKEN="example_token"
+  TB_RESTARTED=$RESTART_TINYBIRD
+
+  # loging to tb
+  cd internal/tinybird
+
+  # check if tinybird is running
+  if [ "$RESTART_TINYBIRD" = "true" ]; then
+    # restart tinybird
+    tb local restart && tb update
+  fi
+
+  # check if tinybird http://localhost:7181 is running
+  echo "Waiting for Tinybird to be ready..."
+  max_attempts=12  # 2 minutes total
+  attempt=1
+
+  while ! curl -s http://localhost:7181 > /dev/null 2>&1; do
+    if [ $attempt -ge $max_attempts ]; then
+      echo "Tinybird failed to start after 2 minutes"
+      exit 1
+    fi
+    echo "Attempt $attempt of $max_attempts: Tinybird not ready, waiting 10 seconds..."
+    sleep 10
+
+    ((attempt++))
+  done
+
+  # We need to override on development some variables so we can work with local first tools.
+  TB_TOKEN=$(curl -s http://localhost:7181/tokens | jq -r ".workspace_admin_token")
+
+  # auth tb with the admin token
+  tb auth --token $TB_TOKEN --host $TB_HOST
+
+  if [ "$TB_RESTARTED" = true ]; then
+    # build the project
+    tb build
+
+    # deploy the project
+    tb deploy
+  fi
+
+  cd ../../
+
+  infisical run --env=preview --path=/ --recursive -- env TINYBIRD_TOKEN="$TB_TOKEN" TINYBIRD_URL="$TB_HOST" UPSTASH_REDIS_REST_URL="$REDIS_URL" UPSTASH_REDIS_REST_TOKEN="$REDIS_TOKEN" pnpm --filter jobs run dev:trigger
+
+
+elif [ "$MODE_ID" = "preview" ]; then
+  # banner to show the user that we are using the preview environment
+  # TODO: Preview should use the preview database as well
+  echo ""
+  echo "########################################################"
+  echo "# Using preview environment"
+  echo "########################################################"
+  echo ""
+
+  # auth tb with the admin token
+  tb auth --token $TB_ADMIN_TOKEN --host $TB_HOST
+
+  cd ../../
+
+  # override the token in the env
+  infisical run --env=preview --path=/ --recursive -- pnpm --filter jobs run dev:trigger
+else
+  echo "Invalid mode: $MODE_ID"
+  exit 1
+fi

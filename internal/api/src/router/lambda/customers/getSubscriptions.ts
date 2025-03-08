@@ -12,7 +12,7 @@ export const getSubscriptions = protectedApiOrActiveProjectProcedure
     span: "customers.getSubscriptions",
     openapi: {
       method: "GET",
-      path: "/edge/customers.getSubscriptions",
+      path: "/lambda/customers.getSubscriptions",
       protect: true,
     },
   })
@@ -44,9 +44,8 @@ export const getSubscriptions = protectedApiOrActiveProjectProcedure
             customer: true,
             phases: {
               // get the active phase, and the start and end date is between now and the end date
-              where: (table, { and, eq, gte, lte, isNull, or }) =>
+              where: (table, { and, gte, lte, isNull, or }) =>
                 and(
-                  eq(table.active, true),
                   lte(table.startAt, Date.now()),
                   or(isNull(table.endAt), gte(table.endAt, Date.now()))
                 ),

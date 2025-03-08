@@ -29,15 +29,23 @@ export const publish = protectedProjectProcedure
     opts.ctx.verifyRole(["OWNER", "ADMIN"])
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId: workspace.unPriceCustomerId,
       featureSlug: "plan-versions",
       ctx: opts.ctx,
       skipCache: true,
       isInternal: workspace.isInternal,
-      // publish endpoint does not need to throw an error
-      throwOnNoAccess: false,
+      metadata: {
+        action: "publish",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const planVersionData = await opts.ctx.db.query.versions.findFirst({
       with: {
@@ -62,7 +70,7 @@ export const publish = protectedProjectProcedure
     if (planVersionData.status === "published") {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Cannot update a published version, read only",
+        message: "Version already published",
       })
     }
 
@@ -87,7 +95,7 @@ export const publish = protectedProjectProcedure
       throw new TRPCError({
         code: "BAD_REQUEST",
         message:
-          "Payment provider config not found or not active. Please check the payment provider config in the project settings.",
+          "Payment provider config not found or not active. Please check the payment provider config in the project settings. You can create a new one in the project settings.",
       })
     }
 

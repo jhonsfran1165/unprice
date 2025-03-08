@@ -13,7 +13,7 @@ export const create = protectedApiOrActiveProjectProcedure
     span: "customers.create",
     openapi: {
       method: "POST",
-      path: "/edge/customers.create",
+      path: "/lambda/customers.create",
       protect: true,
     },
   })
@@ -28,14 +28,24 @@ export const create = protectedApiOrActiveProjectProcedure
     const featureSlug = "customers"
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId: unPriceCustomerId,
       featureSlug,
       ctx: opts.ctx,
       skipCache: true,
       updateUsage: true,
       isInternal: project.workspace.isInternal,
+      metadata: {
+        action: "create",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const customerId = newId("customer")
 

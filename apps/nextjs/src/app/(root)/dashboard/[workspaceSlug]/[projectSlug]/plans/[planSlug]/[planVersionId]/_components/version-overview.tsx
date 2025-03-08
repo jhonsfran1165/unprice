@@ -16,6 +16,8 @@ export default function VersionOverview({
 }: {
   planVersion: RouterOutputs["planVersions"]["getById"]["planVersion"]
 }) {
+  if (!planVersion) return null
+
   return (
     <div className="flex flex-col gap-4">
       <Card variant="ghost">
@@ -71,12 +73,18 @@ export default function VersionOverview({
                 <dd>{planVersion.currency}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-1 text-muted-foreground">Type</dt>
-                <dd>{planVersion.planType}</dd>
+                <dt className="flex items-center gap-1 text-muted-foreground">Billing Config</dt>
+                <dd>{planVersion.billingConfig.name}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-1 text-muted-foreground">Billing Period</dt>
-                <dd>{planVersion.billingPeriod}</dd>
+                <dt className="flex items-center gap-1 text-muted-foreground">Billing Interval</dt>
+                <dd>{planVersion.billingConfig.billingInterval}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="flex items-center gap-1 text-muted-foreground">
+                  Billing Interval Count
+                </dt>
+                <dd>{planVersion.billingConfig.billingIntervalCount}</dd>
               </div>
             </dl>
           </div>
@@ -94,7 +102,7 @@ export default function VersionOverview({
               </div>
               <div className="flex items-center justify-between">
                 <dt className="flex items-center gap-1 text-muted-foreground">start Cycle</dt>
-                <dd>{planVersion.startCycle}</dd>
+                <dd>{planVersion.billingConfig.billingAnchor}</dd>
               </div>
             </dl>
           </div>

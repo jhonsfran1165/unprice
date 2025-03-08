@@ -1,8 +1,5 @@
 import { task } from "@trigger.dev/sdk/v3"
-import { InvoiceStateMachine, PhaseMachine } from "@unprice/api/services/subscriptions"
-import { db } from "@unprice/db"
-import { AesGCM } from "@unprice/db/utils"
-import { env } from "../../env.mjs"
+import { SubscriptionService } from "#services/subscriptions"
 import { createContext } from "./context"
 
 export const billingTask = task({
@@ -16,129 +13,50 @@ export const billingTask = task({
       invoiceId,
       projectId,
       now,
+      subscriptionId,
     }: {
       subscriptionPhaseId: string
       projectId: string
       invoiceId: string
       now: number
+      subscriptionId: string
     },
     { ctx }
   ) => {
-    const invoice = await db.query.invoices.findFirst({
-      where: (table, { eq, and }) => and(eq(table.id, invoiceId), eq(table.projectId, projectId)),
-    })
-
-    if (!invoice) {
-      throw new Error("Invoice not found")
-    }
-
-    const subscriptionPhase = await db.query.subscriptionPhases.findFirst({
-      with: {
-        project: true,
-        subscription: {
-          with: {
-            customer: true,
-          },
-        },
-        items: {
-          with: {
-            featurePlanVersion: {
-              with: {
-                feature: true,
-              },
-            },
-          },
-        },
-        planVersion: {
-          with: {
-            planFeatures: true,
-          },
-        },
-      },
-      where: (table, { eq, and }) =>
-        and(
-          eq(table.id, invoice.subscriptionPhaseId),
-          eq(table.projectId, projectId),
-          eq(table.active, true)
-        ),
-    })
-
-    if (!subscriptionPhase) {
-      throw new Error("Subscription phase not found or not active")
-    }
-
-    if (!subscriptionPhase.subscription) {
-      throw new Error("Subscription not found or not active")
-    }
-
-    if (!subscriptionPhase.subscription.customer) {
-      throw new Error("Customer not found")
-    }
-
-    // get config payment provider
-    const config = await db.query.paymentProviderConfig.findFirst({
-      where: (config, { and, eq }) =>
-        and(
-          eq(config.projectId, projectId),
-          eq(config.paymentProvider, subscriptionPhase.planVersion.paymentProvider),
-          eq(config.active, true)
-        ),
-    })
-
-    if (!config) {
-      throw new Error("Payment provider config not found or not active")
-    }
-
-    const aesGCM = await AesGCM.withBase64Key(env.ENCRYPTION_KEY)
-
-    const paymentProviderToken = await aesGCM.decrypt({
-      iv: config.keyIv,
-      ciphertext: config.key,
-    })
-
     const context = await createContext({
       taskId: ctx.task.id,
-      subscriptionId: subscriptionPhase.subscription.id,
+      subscriptionId,
       projectId,
-      phaseId: subscriptionPhase.id,
+      phaseId: subscriptionPhaseId,
       defaultFields: {
-        subscriptionPhaseId,
-        invoiceId,
+        subscriptionId,
         projectId,
         api: "jobs.subscription.phase.billing",
+        subscriptionPhaseId,
+        invoiceId,
+        now: now.toString(),
       },
     })
 
-    const phaseMachine = new PhaseMachine({
-      db: db,
-      phase: subscriptionPhase,
-      subscription: subscriptionPhase.subscription,
-      customer: subscriptionPhase.subscription.customer,
-      analytics: context.analytics,
-      logger: context.logger,
-      paymentProviderToken,
-    })
+    const subscriptionService = new SubscriptionService(context)
 
-    const invoiceMachine = new InvoiceStateMachine({
-      db: db,
-      phaseMachine: phaseMachine,
-      logger: context.logger,
-      analytics: context.analytics,
-      invoice: invoice,
-      paymentProviderToken,
-    })
-
-    const result = await invoiceMachine.transition("COLLECT_PAYMENT", {
+    const billingResult = await subscriptionService.billingInvoice({
       invoiceId,
-      autoFinalize: true,
+      projectId,
+      subscriptionId,
       now,
     })
 
-    // we have to throw if there is an error so the task fails
-    if (result.err) {
-      throw result.err
+    if (billingResult.err) {
+      throw billingResult.err
     }
 
-    return result.val
+    return {
+      status: billingResult.val.status,
+      subscriptionId,
+      projectId,
+      now,
+      subscriptionPhaseId,
+    }
   },
 })

@@ -5,6 +5,7 @@ import { Plus } from "@unprice/ui/icons"
 import { Typography } from "@unprice/ui/typography"
 import { Fragment } from "react"
 import { DashboardShell } from "~/components/layout/dashboard-shell"
+import UpgradePlanError from "~/components/layout/error"
 import HeaderTab from "~/components/layout/header-tab"
 import { api } from "~/trpc/server"
 import { PageCard, PageCardSkeleton } from "../_components/page-card"
@@ -16,7 +17,11 @@ export default async function PageOverviewPage(props: {
 }) {
   const { projectSlug, workspaceSlug } = props.params
 
-  const { pages } = await api.pages.listByActiveProject({})
+  const { pages, error } = await api.pages.listByActiveProject({})
+
+  if (!error?.access) {
+    return <UpgradePlanError error={error} />
+  }
 
   return (
     <DashboardShell

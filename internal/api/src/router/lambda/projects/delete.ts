@@ -37,7 +37,7 @@ export const deleteProject = protectedProjectProcedure
     }
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId,
       featureSlug,
       ctx: opts.ctx,
@@ -45,9 +45,17 @@ export const deleteProject = protectedProjectProcedure
       // update usage when deleting a project
       updateUsage: true,
       isInternal: workspace.isInternal,
-      // delete endpoint does not need to throw an error
-      throwOnNoAccess: false,
+      metadata: {
+        action: "delete",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const deletedProject = await opts.ctx.db
       .delete(schema.projects)

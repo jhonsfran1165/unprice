@@ -12,7 +12,7 @@ import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form"
 import { InputWithAddons } from "~/components/input-addons"
 
 interface FormValues extends FieldValues {
-  trialDays?: number | null
+  trialDays?: number
 }
 
 export default function TrialDaysFormField<TFieldValues extends FormValues>({
@@ -32,13 +32,13 @@ export default function TrialDaysFormField<TFieldValues extends FormValues>({
         <FormItem className={cn("flex w-full flex-col", className)}>
           <FormLabel>Trial Days</FormLabel>
           <FormDescription>
-            The number of days the customer can use the plan for free.
+            The number of days trial for the subscription in the phase.
           </FormDescription>
           <FormControl className="w-full">
             <InputWithAddons
               {...field}
               trailing={"days"}
-              value={field.value ?? "0"}
+              value={field.value ?? 0}
               disabled={isDisabled}
             />
           </FormControl>

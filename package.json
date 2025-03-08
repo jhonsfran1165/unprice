@@ -9,10 +9,10 @@
   "packageManager": "pnpm@8.15.4",
   "scripts": {
     "build": "turbo run build",
-    "clean": "git clean -xdf node_modules dist .next",
+    "clean": "git clean -xdf node_modules dist .next && rm -rf node_modules",
     "clean:workspaces": "turbo clean --parallel",
     "dev": "cross-env FORCE_COLOR=1 turbo run dev --parallel",
-    "with-infisical": "infisical run --env=preview --path=/ --recursive --",
+    "with-infisical": "infisical run --env=prod --path=/ --recursive --",
     "typecheck": "turbo run typecheck",
     "wh": "pnpm dlx webhookthing@latest",
     "knip": "knip --include files,dependencies",
@@ -24,8 +24,7 @@
     "commit": "cz",
     "bump-versions": "pnpm changeset version && pnpm install",
     "prepare": "husky",
-    "preinstall": "npx only-allow pnpm",
-    "tb-fmt": "tb fmt --yes"
+    "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
     "@biomejs/biome": "1.9.4",
@@ -42,8 +41,7 @@
     "typescript": "^5.3.3"
   },
   "lint-staged": {
-    "*": ["pnpm validate"],
-    "*.{datasource,pipe}": "pnpm run tb-fmt"
+    "*": ["pnpm validate"]
   },
   "config": {
     "commitizen": {

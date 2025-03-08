@@ -7,10 +7,10 @@ import { remove } from "./remove"
 import { update } from "./update"
 
 export const pageRouter = createTRPCRouter({
-  create,
-  update,
-  getById,
-  getByDomain,
-  remove,
-  listByActiveProject,
+  create: create,
+  update: update,
+  getById: getById,
+  getByDomain: getByDomain,
+  remove: remove,
+  listByActiveProject: listByActiveProject,
 })

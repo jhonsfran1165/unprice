@@ -2,11 +2,11 @@
 
 import type { RouterOutputs } from "@unprice/api"
 import {
-  calculateBillingCycle,
   calculateFlatPricePlan,
   calculateFreeUnits,
   calculatePricePerFeature,
   calculateTotalPricePlan,
+  configureBillingCycleSubscription,
 } from "@unprice/db/validators"
 import {
   Card,
@@ -34,11 +34,15 @@ export function BillingCard({
 }) {
   const planVersion = activePhase.planVersion
 
-  const calculatedBillingCycle = calculateBillingCycle({
-    currentDate: new Date(),
-    startDate: new Date(activePhase.startAt),
-    billingCycleStart: activePhase.startCycle ?? 1,
-    billingPeriod: planVersion.billingPeriod,
+  // TODO: get current cycle
+  const calculatedBillingCycle = configureBillingCycleSubscription({
+    currentCycleStartAt: activePhase.startAt,
+    billingConfig: planVersion.billingConfig,
+    trialDays: activePhase.trialDays,
+    alignStartToDay: true,
+    alignEndToDay: true,
+    endAt: activePhase.endAt ?? undefined,
+    alignToCalendar: true,
   })
 
   const { err, val: flatPricePlan } = calculateFlatPricePlan({
@@ -112,7 +116,7 @@ export function BillingCard({
             Plan {isTrial ? "trial" : ""}{" "}
             <span className="font-bold text-primary">{planVersion.plan.slug}</span>
             <Typography variant="p" affects="removePaddingMargin">
-              {activePhase.planVersion.billingPeriod}{" "}
+              {activePhase.planVersion.billingConfig.name}{" "}
               {calculatedBillingCycle.prorationFactor < 1 ? "(prorated)" : ""}
             </Typography>
           </div>
@@ -234,7 +238,7 @@ const LineUsageItem: React.FC<{
         <div className="flex items-center justify-between">
           <PricingItem
             feature={planVersionFeature}
-            className="font-semibold text-content text-md capitalize"
+            className="font-semibold text-content text-md"
             noCheckIcon
           />
           <span className="text-right text-content-subtle text-muted-foreground text-xs">

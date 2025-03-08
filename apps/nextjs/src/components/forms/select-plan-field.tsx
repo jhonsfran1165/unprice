@@ -1,5 +1,7 @@
 "use client"
 import type { RouterOutputs } from "@unprice/api"
+import { getBillingCycleMessage } from "@unprice/db/validators"
+import { Badge } from "@unprice/ui/badge"
 import { Button } from "@unprice/ui/button"
 import {
   Command,
@@ -56,8 +58,9 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
         <FormItem className="flex flex-col">
           <FormLabel>Plan Version</FormLabel>
           <FormDescription>
-            Select the plan version to create the subscription phase
+            Select the plan version to create the subscription phase.
           </FormDescription>
+
           <Popover
             modal={true}
             open={switcherCustomerOpen}
@@ -80,7 +83,7 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
                     {isLoading ? (
                       <LoadingAnimation className="h-4 w-4" variant="dots" />
                     ) : selectedPlanVersion ? (
-                      `${selectedPlanVersion.plan.slug} v${selectedPlanVersion.version} - ${selectedPlanVersion.title} - ${selectedPlanVersion.billingPeriod}`
+                      `${selectedPlanVersion.plan.slug} v${selectedPlanVersion.version} - ${selectedPlanVersion.title} - ${selectedPlanVersion.billingConfig.name}`
                     ) : (
                       "Select plan"
                     )}
@@ -100,7 +103,7 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
                       <div className="flex flex-col gap-2 pt-1">
                         {planVersions.map((version) => (
                           <CommandItem
-                            value={`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
+                            value={`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingConfig.name}`}
                             key={version.id}
                             onSelect={() => {
                               field.onChange(version.id)
@@ -113,7 +116,7 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
                                 version.id === field.value ? "opacity-100" : "opacity-0"
                               )}
                             />
-                            {`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingPeriod}`}
+                            {`${version.plan.slug} v${version.version} - ${version.title} - ${version.billingConfig.name}`}
                           </CommandItem>
                         ))}
                         {noData && !isLoading && (
@@ -128,6 +131,18 @@ export default function SelectPlanFormField<TFieldValues extends FormValues>({
               </Command>
             </PopoverContent>
           </Popover>
+          {selectedPlanVersion && (
+            <div className="text-muted-foreground text-sm">
+              Plan version:{" "}
+              <b>
+                {selectedPlanVersion.plan.slug} v{selectedPlanVersion.version} -{" "}
+                {getBillingCycleMessage(selectedPlanVersion.billingConfig).message}{" "}
+              </b>
+              {selectedPlanVersion.paymentMethodRequired && (
+                <Badge variant="outline">payment method required</Badge>
+              )}
+            </div>
+          )}
           <FormMessage />
         </FormItem>
       )}

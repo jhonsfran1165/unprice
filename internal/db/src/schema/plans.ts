@@ -21,7 +21,7 @@ export const plans = pgTableProject(
     // this is useful for plans that are not available anymore so the api won't list them
     active: boolean("active").default(true),
     // description of the plan
-    description: text("description"),
+    description: text("description").notNull(),
     // metadata probably will be useful to save external data, etc.
     metadata: json("metadata").$type<z.infer<typeof planMetadataSchema>>(),
     // whether this is the default plan for the project where all the users are subscribed by default

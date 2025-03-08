@@ -51,6 +51,8 @@ export const reportUsage = protectedApiOrActiveWorkspaceProcedure
       featureSlug,
       usage: usage,
       ctx: opts.ctx,
+      // TODO: testing delete this line
+      now: Date.now(),
     })
 
     // cache the result

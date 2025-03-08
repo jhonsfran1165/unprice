@@ -4,10 +4,10 @@ import { cookies, headers } from "next/headers"
 import { cache } from "react"
 
 import { createHydrationHelpers } from "@trpc/react-query/rsc"
-import { TRPCError } from "@trpc/server"
 import { type appRouter, createCaller, createTRPCContext } from "@unprice/api"
 import { getSession } from "@unprice/auth/server-rsc"
 import { COOKIES_APP } from "@unprice/config"
+import { newId } from "@unprice/db/utils"
 import { createQueryClient } from "./shared"
 
 /**
@@ -22,6 +22,7 @@ const createContext = cache(async () => {
   heads.set("x-trpc-source", "rsc")
   heads.set(COOKIES_APP.WORKSPACE, activeWorkspaceSlug)
   heads.set(COOKIES_APP.PROJECT, activeProjectSlug)
+  heads.set("x-request-id", newId("request"))
 
   return createTRPCContext({
     session: await getSession(),
@@ -35,19 +36,6 @@ const createContext = cache(async () => {
  */
 const getQueryClient = cache(createQueryClient)
 
-export const api = createCaller(createContext, {
-  onError: (opts) => {
-    if (opts.error instanceof TRPCError) {
-      throw new Error(
-        JSON.stringify({
-          code: opts.error.code,
-          message: opts.error.message,
-        })
-      )
-    }
-
-    throw opts.error
-  },
-})
+export const api = createCaller(createContext)
 
 export const { trpc, HydrateClient } = createHydrationHelpers<typeof appRouter>(api, getQueryClient)

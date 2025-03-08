@@ -30,15 +30,24 @@ export const inviteMember = protectedWorkspaceProcedure
       })
     }
 
-    await featureGuard({
+    const result = await featureGuard({
       customerId: workspace.unPriceCustomerId,
       featureSlug,
       ctx: opts.ctx,
       skipCache: true,
-      updateUsage: true,
       includeCustom: true,
       isInternal: workspace.isInternal,
+      metadata: {
+        action: "inviteMember",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const userByEmail = await opts.ctx.db.query.users.findFirst({
       where: eq(schema.users.email, email),

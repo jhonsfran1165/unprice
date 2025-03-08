@@ -246,7 +246,7 @@ export class PaymentProviderService implements PaymentProviderInterface {
     paymentMethodId: string
   }): Promise<
     Result<
-      { invoiceId: string; status: InvoiceProviderStatus },
+      { invoiceId: string; status: InvoiceProviderStatus; invoiceUrl: string },
       FetchError | UnPricePaymentProviderError
     >
   > {

@@ -12,6 +12,7 @@ export const env = createEnv({
     VERCEL_TOKEN: z.string(),
     BASELIME_APIKEY: z.string(),
     ENCRYPTION_KEY: z.string(),
+    COOKIE_ENCRYPTION_KEY: z.string(),
   },
   client: {},
   // Client side variables gets destructured here due to Next.js static analysis

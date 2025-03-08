@@ -54,12 +54,19 @@ export default async function PlanPage({
                     title: plan.slug,
                     projectId: plan.projectId,
                     currency: project.defaultCurrency,
-                    planType: "recurring",
                     paymentProvider: "stripe",
-                    startCycle: 1,
-                    billingPeriod: "month",
                     collectionMethod: "charge_automatically",
                     whenToBill: "pay_in_arrear",
+                    trialDays: 0,
+                    autoRenew: true,
+                    paymentMethodRequired: false,
+                    billingConfig: {
+                      name: "monthly",
+                      billingInterval: "month",
+                      billingIntervalCount: 1,
+                      billingAnchor: "dayOfCreation",
+                      planType: "recurring",
+                    },
                   }}
                 >
                   <Button variant={"custom"}>
@@ -79,10 +86,9 @@ export default async function PlanPage({
       <TabNavigation>
         <div className="flex items-center">
           <TabNavigationLink active asChild>
-            <SuperLink href={`${baseUrl}`}>Versions</SuperLink>
-          </TabNavigationLink>
-          <TabNavigationLink asChild>
-            <SuperLink href={`${baseUrl}/subscriptions`}>Subscriptions</SuperLink>
+            <SuperLink prefetch={true} href={`${baseUrl}`}>
+              Versions
+            </SuperLink>
           </TabNavigationLink>
         </div>
       </TabNavigation>

@@ -25,14 +25,23 @@ export const deleteInvite = protectedWorkspaceProcedure
     opts.ctx.verifyRole(["OWNER"])
 
     // check if the customer has access to the feature
-    await featureGuard({
+    const result = await featureGuard({
       customerId: workspace.unPriceCustomerId,
       featureSlug: "access-pro",
       ctx: opts.ctx,
       skipCache: true,
       isInternal: false,
-      throwOnNoAccess: false,
+      metadata: {
+        action: "deleteInvite",
+      },
     })
+
+    if (!result.access) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `You don't have access to this feature ${result.deniedReason}`,
+      })
+    }
 
     const deletedInvite = await opts.ctx.db
       .delete(schema.invites)
