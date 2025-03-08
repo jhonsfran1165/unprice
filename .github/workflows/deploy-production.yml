@@ -27,6 +27,7 @@ jobs:
     uses: ./.github/workflows/job_tinybird_cd.yml
     needs:
       - build-lint
+    secrets: inherit
 
   deploy-prod:
     runs-on: ubuntu-latest

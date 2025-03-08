@@ -6,7 +6,9 @@ on:
 jobs:
   cd:
     runs-on: ubuntu-latest
-    working-directory: internal/tinybird
+    defaults:
+      run:
+        working-directory: internal/tinybird
     steps:
       - uses: actions/checkout@v4
       - name: Install Tinybird CLI
