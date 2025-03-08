@@ -1,0 +1,116 @@
+---
+description: nextjs
+globs: apps/nextjs/**
+alwaysApply: false
+---
+
+---
+name: nextjs-best-practices.mdc
+description: Best practices for Next.js applications and routing
+globs: **/*.{ts,tsx}
+---
+
+- Utilize Next.js 14's new features like the App Router for improved performance and routing.
+- Implement server components to reduce client-side JavaScript and improve initial load times.
+- Use `next/image` for optimized image loading and better performance.
+- Leverage `next/font` for font optimization and faster page loads.
+- Implement proper error handling with `error.js` files in the App Router.
+
+---
+name: react-best-practices.mdc
+description: Best practices for React development
+globs: **/*.{ts,tsx,js,jsx}
+---
+
+- Use functional components with hooks instead of class components.
+- Implement proper state management using context or state management libraries like Jotai.
+- Utilize memoization techniques like `useMemo` and `useCallback` for performance optimization.
+- Follow React's new concurrent rendering patterns for better user experience.
+
+---
+name: typescript-best-practices.mdc
+description: TypeScript coding standards and type safety guidelines
+globs: **/*.{ts,tsx}
+---
+
+- Enable strict mode in your `tsconfig.json` for better type checking.
+- Use union types instead of enums for better performance and flexibility.
+- Implement custom type guards for runtime type checking.
+- Utilize mapped types and conditional types for advanced type manipulation.
+
+---
+name: tailwindcss-best-practices.mdc
+description: Best practices for using Tailwind CSS
+globs: **/*.{ts,tsx,css}
+---
+
+- Use utility-first classes for most styling, but create custom components for complex, reusable UI elements.
+- Implement responsive design using Tailwind's responsive modifiers.
+- Utilize Tailwind's dark mode support for easy theming.
+- Keep your `tailwind.config.js` organized and use plugins like `tailwindcss-animate` for enhanced animations.
+
+---
+name: react-query-best-practices.mdc
+description: Best practices for managing data with React Query
+globs: **/*.{ts,tsx}
+---
+
+- Use `useQuery` for fetching data and `useMutation` for updating data.
+- Implement proper error handling and loading states with React Query's built-in features.
+- Utilize query keys effectively for caching and refetching.
+- Leverage `queryClient` for managing global query state and prefetching data.
+
+---
+name: trpc-best-practices.mdc
+description: Best practices for using tRPC in Next.js applications
+globs: **/*.{ts,tsx}
+---
+
+- Use tRPC's type-safe API routes to reduce boilerplate and improve developer experience.
+- Implement proper error handling using tRPC's error types.
+- Utilize tRPC's built-in support for React Query for seamless data fetching and caching.
+- Leverage tRPC's OpenAPI support for generating API documentation and client SDKs.
+
+---
+name: zod-best-practices.mdc
+description: Best practices for schema validation with Zod
+globs: **/*.{ts,tsx}
+---
+
+- Use Zod for input validation on both client and server sides.
+- Implement custom error messages for better user feedback.
+- Utilize Zod's type inference to generate TypeScript types from your schemas.
+- Leverage Zod's integration with other libraries like React Hook Form for seamless form validation.
+
+---
+name: react-hook-form-best-practices.mdc
+description: Best practices for form handling with React Hook Form
+globs: **/*.{ts,tsx}
+---
+
+- Use controlled components for better performance and easier state management.
+- Implement proper validation using Zod or other validation libraries.
+- Utilize the `useForm` hook for managing form state and validation.
+- Leverage the `Controller` component for integrating with UI libraries like Radix UI.
+
+---
+name: radix-ui-best-practices.mdc
+description: Best practices for using Radix UI components
+globs: **/*.{ts,tsx}
+---
+
+- Use Radix UI primitives for building custom, accessible components.
+- Implement proper ARIA attributes for enhanced accessibility.
+- Utilize Radix UI's styling API for consistent theming across components.
+- Leverage Radix UI's composition patterns for creating complex, reusable UI elements.
+
+---
+name: framer-motion-best-practices.mdc
+description: Best practices for animations with Framer Motion
+globs: **/*.{ts,tsx}
+---
+
+- Use Framer Motion's declarative API for simple animations.
+- Implement complex animations using Framer Motion's imperative API when needed.
+- Utilize Framer Motion's gesture support for interactive animations.
+- Leverage Framer Motion's integration with React for seamless animation management.
