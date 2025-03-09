@@ -13,8 +13,6 @@ import {
   SunMedium,
 } from "lucide-react"
 
-import { cn } from "./utils"
-
 export {
   Activity,
   AppWindow,
@@ -215,14 +213,14 @@ export const Nextjs: Icon = (props) => (
   </svg>
 )
 
-export const StripeLinkLogo: React.FC<{ className?: string }> = ({ className }) => (
+export const StripeLinkLogo: Icon = (props) => (
   <svg
-    className={cn("fill-current", className)}
     height="32"
     width="32"
     viewBox="0 0 32 32"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    {...props}
   >
     <g clipPath="url(#bi_link__a)">
       <path fill="#33DDB3" d="M0 0h32v32H0z" />
@@ -239,7 +237,7 @@ export const StripeLinkLogo: React.FC<{ className?: string }> = ({ className }) 
   </svg>
 )
 
-export const Kysely: Icon = (props) => (
+export const Drizzle: Icon = (props) => (
   <svg
     width="132"
     height="132"

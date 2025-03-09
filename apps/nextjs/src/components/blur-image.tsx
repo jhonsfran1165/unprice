@@ -1,3 +1,5 @@
+"use client"
+
 import { cn } from "@unprice/ui/utils"
 import Image, { type ImageProps } from "next/image"
 import { useEffect, useState } from "react"
