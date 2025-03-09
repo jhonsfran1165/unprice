@@ -1,17 +1,17 @@
-import { BASE_DOMAIN } from "@unprice/config"
-import type { SiteConfig } from "../types"
+import { BASE_URL } from "@unprice/config";
+import type { SiteConfig } from "../types";
 
 export const navItems = [
   {
     href: "/",
-    title: "Apps",
+    title: "Home",
   },
   {
-    href: `${BASE_DOMAIN}/pricing`,
+    href: `${BASE_URL}/pricing`,
     title: "Pricing",
   },
   {
-    href: `${BASE_DOMAIN}/docs`,
+    href: `${BASE_URL}/docs`,
     title: "Docs",
   },
 ] satisfies { href: string; title: string }[]

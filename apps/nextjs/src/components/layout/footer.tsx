@@ -5,8 +5,6 @@ import { Button } from "@unprice/ui/button"
 import { GitHub, Twitter } from "@unprice/ui/icons"
 import { Skeleton } from "@unprice/ui/skeleton"
 import { cn } from "@unprice/ui/utils"
-
-import { Logo } from "~/components/layout/logo"
 import { siteConfig } from "~/constants/layout"
 
 const ThemeToggle = dynamic(() => import("~/components/layout/theme-toggle"), {
@@ -22,12 +20,12 @@ export default function Footer(props: { className?: string }) {
   return (
     <footer
       className={cn(
-        "z-30 mx-auto flex w-full items-center justify-between gap-4 border-t bg-background-bgSubtle px-6 md:h-16 md:flex-row md:py-0",
+        "z-30 mx-auto flex h-16 w-full items-center justify-between gap-4 border-t bg-background-bgSubtle px-6 md:flex-row md:py-0",
         props.className
       )}
     >
-      <div className="flex items-center gap-4 text-primary-text md:flex-row md:gap-2 md:px-0">
-        <Logo />
+      <div className="flex items-center gap-4 md:flex-row md:gap-2 md:px-0">
+        <p className="text-sm leading-5">&copy; {new Date().getFullYear()} Unprice, Inc.</p>
       </div>
 
       <div className="flex flex-1 items-center justify-end">
