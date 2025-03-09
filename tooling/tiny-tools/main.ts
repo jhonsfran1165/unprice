@@ -26,8 +26,8 @@
 
 // main()
 
-import { randomUUID } from "node:crypto"
 import { Unprice } from "@unprice/unprice"
+import { randomUUID } from "node:crypto"
 
 const unprice = new Unprice({
   token: process.env.UNPRICE_TOKEN || "",
