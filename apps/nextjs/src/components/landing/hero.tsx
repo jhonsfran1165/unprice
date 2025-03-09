@@ -1,5 +1,6 @@
 "use client"
 
+import { APP_DOMAIN } from "@unprice/config"
 import { Button } from "@unprice/ui/button"
 import { GitHub } from "@unprice/ui/icons"
 import { motion } from "framer-motion"
@@ -70,7 +71,7 @@ export default function Hero() {
         variants={itemVariants}
       >
         <Button className="h-10 font-semibold">
-          <Link href="#">Start 14-day trial</Link>
+          <Link href={`${APP_DOMAIN}`}>Start for free</Link>
         </Button>
         <Button asChild variant="link">
           <Link
@@ -93,14 +94,14 @@ export default function Hero() {
           <HeroVideoDialog
             className="block dark:hidden"
             animationStyle="from-center"
-            videoSrc="https://www.youtube.com/embed/qh3NGpYRG3I?si=4rb-zSdDkVK9qxxb"
+            videoSrc="https://www.youtube.com/embed/vAirXo6FJDs"
             thumbnailSrc="/unprice-light.png"
             thumbnailAlt="Hero Video"
           />
           <HeroVideoDialog
             className="hidden dark:block"
             animationStyle="from-center"
-            videoSrc="https://www.youtube.com/embed/qh3NGpYRG3I?si=4rb-zSdDkVK9qxxb"
+            videoSrc="https://www.youtube.com/embed/vAirXo6FJDs"
             thumbnailSrc="/unprice-dark.png"
             thumbnailAlt="Hero Video"
           />
