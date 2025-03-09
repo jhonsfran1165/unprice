@@ -1,5 +1,5 @@
-import { BASE_URL } from "@unprice/config";
-import type { SiteConfig } from "../types";
+import { BASE_URL } from "@unprice/config"
+import type { SiteConfig } from "../types"
 
 export const navItems = [
   {

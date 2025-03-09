@@ -119,7 +119,7 @@ const signUp = await unprice.customers.signUp({
 const customerId = signUp.result?.customerId
 
 redirect(signUp.result?.url ?? "/")
-`
+`,
   },
 }
 
@@ -133,7 +133,7 @@ export function SDKDemo() {
   // Get the code for the active framework and method
   const code =
     codeExamples[activeFramework as keyof typeof codeExamples][
-    activeMethod as keyof typeof codeExamples.nextjs
+      activeMethod as keyof typeof codeExamples.nextjs
     ]
 
   return (

@@ -1,5 +1,5 @@
-import { cn } from "@unprice/ui/utils";
-import { Highlight, themes } from "prism-react-renderer";
+import { cn } from "@unprice/ui/utils"
+import { Highlight, themes } from "prism-react-renderer"
 
 export function CodeEditor({ codeBlock, language }: { codeBlock: string; language: string }) {
   return (

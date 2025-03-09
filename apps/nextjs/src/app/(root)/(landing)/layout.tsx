@@ -21,7 +21,10 @@ export default function MarketingLayout(props: { children: ReactNode }) {
       >
         <div className="flex h-14 w-full items-center space-x-2 sm:justify-between sm:space-x-0">
           <div className="flex items-center justify-start">
-            <Logo /> <Badge variant="secondary" className="ml-2">Beta</Badge>
+            <Logo />{" "}
+            <Badge variant="secondary" className="ml-2">
+              Beta
+            </Badge>
           </div>
 
           <div className="flex flex-1 items-center justify-end space-x-2">

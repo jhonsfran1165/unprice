@@ -1,11 +1,10 @@
+"use client"
 
-"use client";
+import { AnimatePresence, motion } from "framer-motion"
+import { Play, XIcon } from "lucide-react"
+import { useState } from "react"
 
-import { AnimatePresence, motion } from "framer-motion";
-import { Play, XIcon } from "lucide-react";
-import { useState } from "react";
-
-import { cn } from "@unprice/ui/utils";
+import { cn } from "@unprice/ui/utils"
 
 type AnimationStyle =
   | "from-bottom"
@@ -15,14 +14,14 @@ type AnimationStyle =
   | "from-right"
   | "fade"
   | "top-in-bottom-out"
-  | "left-in-right-out";
+  | "left-in-right-out"
 
 interface HeroVideoProps {
-  animationStyle?: AnimationStyle;
-  videoSrc: string;
-  thumbnailSrc: string;
-  thumbnailAlt?: string;
-  className?: string;
+  animationStyle?: AnimationStyle
+  videoSrc: string
+  thumbnailSrc: string
+  thumbnailAlt?: string
+  className?: string
 }
 
 const animationVariants = {
@@ -66,7 +65,7 @@ const animationVariants = {
     animate: { x: 0, opacity: 1 },
     exit: { x: "100%", opacity: 0 },
   },
-};
+}
 
 export function HeroVideoDialog({
   animationStyle = "from-center",
@@ -75,16 +74,13 @@ export function HeroVideoDialog({
   thumbnailAlt = "Video thumbnail",
   className,
 }: HeroVideoProps) {
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
-  const selectedAnimation = animationVariants[animationStyle];
+  const [isVideoOpen, setIsVideoOpen] = useState(false)
+  const selectedAnimation = animationVariants[animationStyle]
 
   return (
     <div className={cn("relative", className)}>
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
-      <div
-        className="group relative cursor-pointer"
-        onClick={() => setIsVideoOpen(true)}
-      >
+      <div className="group relative cursor-pointer" onClick={() => setIsVideoOpen(true)}>
         <img
           src={thumbnailSrc}
           alt={thumbnailAlt}
@@ -95,7 +91,9 @@ export function HeroVideoDialog({
         <div className="absolute inset-0 flex scale-[0.9] items-center justify-center rounded-2xl transition-all duration-200 ease-out group-hover:scale-100">
           <div className="flex size-28 items-center justify-center rounded-full bg-primary/10 backdrop-blur-md">
             <div
-              className={"relative flex size-20 scale-100 items-center justify-center rounded-full bg-gradient-to-b from-primary/30 to-primary shadow-md transition-all duration-200 ease-out group-hover:scale-[1.2]"}
+              className={
+                "relative flex size-20 scale-100 items-center justify-center rounded-full bg-gradient-to-b from-primary/30 to-primary shadow-md transition-all duration-200 ease-out group-hover:scale-[1.2]"
+              }
             >
               <Play
                 className="size-8 scale-100 fill-background-textContrast text-background-textContrast transition-transform duration-200 ease-out group-hover:scale-105"
@@ -139,5 +137,5 @@ export function HeroVideoDialog({
         )}
       </AnimatePresence>
     </div>
-  );
+  )
 }
