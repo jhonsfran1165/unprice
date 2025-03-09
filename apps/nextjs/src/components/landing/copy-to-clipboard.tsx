@@ -26,9 +26,9 @@ export default function CopyToClipboard({ code }: { code: string }) {
       className="select-none backdrop-blur-xl"
     >
       {!copied ? (
-        <CopyIcon aria-hidden="true" className="size-5" />
+        <CopyIcon aria-hidden="true" className="size-4" />
       ) : (
-        <CheckIcon aria-hidden="true" className="size-5" />
+        <CheckIcon aria-hidden="true" className="size-4" />
       )}
     </Button>
   )

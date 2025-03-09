@@ -1,11 +1,11 @@
-'use client'
+"use client"
 
 import { Button } from "@unprice/ui/button"
+import { GitHub } from "@unprice/ui/icons"
 import { motion } from "framer-motion"
-import { PlayCircle } from "lucide-react"
 import Link from "next/link"
-import HeroImage from "./hero-image"
-
+import Balancer from "react-wrap-balancer"
+import { HeroVideoDialog } from "./hero-video"
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -55,17 +55,15 @@ export default function Hero() {
     >
       <motion.h1
         id="hero-title"
-        className="inline-block bg-gradient-to-br from-background-text to-background-textContrast bg-clip-text p-2 font-bold text-4xl text-transparent tracking-tighter sm:text-6xl md:text-7xl"
+        className="inline-block bg-clip-text p-2 font-bold text-4xl text-background-textContrast tracking-tighter sm:text-6xl md:text-7xl"
         variants={itemVariants}
       >
-        Pricingengine for <br /> modern applications
+        <Balancer>Unprice pricing platform for modern saas.</Balancer>
       </motion.h1>
-      <motion.p
-        className="mt-6 max-w-lg text-background-text text-lg"
-        variants={itemVariants}
-      >
-        Unprice is a general purpose, relational database built for modern
-        application developers and for the cloud era.
+      <motion.p className="mt-6 max-w-xl text-background-text text-lg" variants={itemVariants}>
+        Product market fit is a lie, in the world of saas everything starts with price.
+        Product-market-price fit is the new normal. Unprice helps you manage, iterate and find the
+        right price for your saas.
       </motion.p>
       <motion.div
         className="mt-8 flex w-full flex-col justify-center gap-3 px-3 align-middle sm:flex-row"
@@ -74,22 +72,16 @@ export default function Hero() {
         <Button className="h-10 font-semibold">
           <Link href="#">Start 14-day trial</Link>
         </Button>
-        <Button
-          asChild
-          variant="link"
-        >
+        <Button asChild variant="link">
           <Link
-            href="https://www.youtube.com/watch?v=QRZ_l7cVzzU"
+            href="https://github.com/jhonsfran1165/unprice"
             className="text-background-textContrast"
             target="_blank"
           >
             <span className="mr-1 flex size-6 items-center justify-center rounded-full transition-all">
-              <PlayCircle
-                aria-hidden="true"
-                className="size-5 shrink-0 text-background-textContrast"
-              />
+              <GitHub aria-hidden="true" className="size-5 shrink-0 text-background-textContrast" />
             </span>
-            Watch video
+            <span>Star on GitHub</span>
           </Link>
         </Button>
       </motion.div>
@@ -97,12 +89,37 @@ export default function Hero() {
         className="relative mx-auto mt-20 ml-3 h-fit w-[40rem] max-w-6xl sm:ml-auto sm:w-full sm:px-2"
         variants={heroImageVariants}
       >
-        <HeroImage />
+        <div className="relative">
+          <HeroVideoDialog
+            className="block dark:hidden"
+            animationStyle="from-center"
+            videoSrc="https://www.youtube.com/embed/qh3NGpYRG3I?si=4rb-zSdDkVK9qxxb"
+            thumbnailSrc="/unprice-light.png"
+            thumbnailAlt="Hero Video"
+          />
+          <HeroVideoDialog
+            className="hidden dark:block"
+            animationStyle="from-center"
+            videoSrc="https://www.youtube.com/embed/qh3NGpYRG3I?si=4rb-zSdDkVK9qxxb"
+            thumbnailSrc="/unprice-dark.png"
+            thumbnailAlt="Hero Video"
+          />
+        </div>
+
         <div
           className="-bottom-20 -mx-10 absolute inset-x-0 h-2/4 bg-gradient-to-t from-background-base via-background-base to-transparent lg:h-1/4"
           aria-hidden="true"
         />
       </motion.div>
+
+      <motion.p
+        className="mt-28 max-w-2xl py-16 text-background-text text-lg"
+        variants={itemVariants}
+      >
+        Unprice is a feature flag engine with superpowers. Track feature usage, bill customer,
+        support subscription, validate access to features, analyze feature performance and optimize
+        your pricing strategy easily.
+      </motion.p>
     </motion.section>
   )
 }

@@ -1,5 +1,3 @@
-"use client"
-
 import ThemedImage from "./themed-image"
 
 export default function HeroImage() {

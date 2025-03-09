@@ -8,18 +8,14 @@ export default function LogoCloud() {
       className="mt-24 flex animate-slide-up-fade flex-col items-center justify-center gap-y-6 text-center sm:mt-32"
       style={{ animationDuration: "1500ms" }}
     >
-      <p className="font-medium text-lg tracking-tighter">
-        Trusted by the world&rsquo;s best engineering teams
+      <p className="font-semibold text-xl tracking-tighter">
+        Made with ❤️ using the best tools for the job
       </p>
-      <div className="grid grid-cols-2 gap-10 gap-y-4 md:grid-cols-4 md:gap-x-20">
-        <Logos.Biosynthesis className="w-28" />
-        <Logos.AltShift className="w-28" />
-        <Logos.Capsule className="w-28" />
-        <Logos.Catalog className="w-28" />
-        <Logos.Cloudwatch className="w-28" />
-        <Logos.FocalPoint className="w-28" />
-        <Logos.Interlock className="w-28" />
-        <Logos.Sisyphus className="w-28" />
+      <br />
+      <div className="grid grid-cols-2 gap-10 gap-y-6 md:grid-cols-4 md:gap-x-20">
+        {Object.entries(Logos).map(([key, Logo]) => (
+          <Logo key={key} className="size-10" />
+        ))}
       </div>
     </section>
   )

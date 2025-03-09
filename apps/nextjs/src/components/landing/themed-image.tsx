@@ -1,6 +1,8 @@
 "use client"
+
 import { useTheme } from "next-themes"
 import Image from "next/image"
+import { useEffect, useState } from "react"
 
 const ThemedImage = ({
   lightSrc,
@@ -18,30 +20,23 @@ const ThemedImage = ({
   className?: string
 }) => {
   const { theme } = useTheme()
-  let src: string
+  const [src, setSrc] = useState<string>(lightSrc)
 
-  switch (theme) {
-    case "light":
-      src = lightSrc
-      break
-    case "dark":
-      src = darkSrc
-      break
-    default:
-      src = lightSrc
-      break
-  }
+  useEffect(() => {
+    switch (theme) {
+      case "light":
+        setSrc(lightSrc)
+        break
+      case "dark":
+        setSrc(darkSrc)
+        break
+      default:
+        setSrc(lightSrc)
+        break
+    }
+  }, [theme])
 
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      priority
-    />
-  )
+  return <Image src={src} alt={alt} width={width} height={height} className={className} priority />
 }
 
 export default ThemedImage

@@ -1,57 +1,20 @@
 "use client"
-
-import createGlobe from "cobe"
-import { type FunctionComponent, useEffect, useRef } from "react"
+import type { FunctionComponent } from "react"
+import { Globe } from "./globe"
 
 export const Global: FunctionComponent = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  useEffect(() => {
-    let phi = 4.7
-
-    const globe = createGlobe(canvasRef.current!, {
-      devicePixelRatio: 2,
-      width: 1200 * 2,
-      height: 1200 * 2,
-      phi: 0,
-      theta: -0.3,
-      dark: 1,
-      diffuse: 1.2,
-      mapSamples: 25000,
-      mapBrightness: 13,
-      mapBaseBrightness: 0.05,
-      baseColor: [0.3, 0.3, 0.3],
-      glowColor: [0.15, 0.15, 0.15],
-      markerColor: [100, 100, 100],
-      markers: [
-        // { location: [37.7595, -122.4367], size: 0.03 }, // San Francisco
-        // { location: [40.7128, -74.006], size: 0.03 }, // New York City
-        // { location: [35.6895, 139.6917], size: 0.03 }, // Tokyo
-        // { location: [28.7041, 77.1025], size: 0.03 }, // Delhi
-      ],
-      onRender: (state: { phi?: number }) => {
-        state.phi = phi
-        phi += 0.0002
-      },
-    })
-
-    return () => {
-      globe.destroy()
-    }
-  }, [])
-
   const features = [
     {
-      name: "Global Clusters",
-      description: "Enable low-latency global access, enhancing performance.",
+      name: "Global low latency",
+      description: "Tier caching for low-latency global access.",
     },
     {
-      name: "Serverless Triggers",
-      description: "Trigger functions automatically for dynamic app behavior.",
+      name: "Subscription billing",
+      description: "Subscription machines for global billing, no matter where you are.",
     },
     {
-      name: "Monitoring & Alerts",
-      description: "Monitor health with key metrics or integrate third-party tools.",
+      name: "Analytics",
+      description: "Powered by ClickHouse, the fastest analytics database.",
     },
   ]
 
@@ -59,25 +22,19 @@ export const Global: FunctionComponent = () => {
     <div className="px-3">
       <section
         aria-labelledby="global-database-title"
-        className="relative mx-auto mt-28 flex w-full max-w-6xl flex-col items-center justify-center overflow-hidden rounded-3xl bg-background pt-24 shadow-black/30 shadow-xl md:mt-40"
+        className="relative mx-auto mt-28 flex w-full max-w-6xl flex-col items-center justify-center overflow-hidden rounded-3xl bg-background pt-24 md:mt-40"
       >
         <div className="absolute top-[17rem] size-[40rem] rounded-full bg-primary-bgHover blur-3xl md:top-[20rem]" />
         <div className="z-10 inline-block rounded-lg border border-primary-border bg-primary-bg px-3 py-1.5 font-semibold text-primary-text uppercase leading-4 tracking-tight sm:text-sm">
-          <span>
-            Made for the cloud
-          </span>
+          <span>Made for the cloud</span>
         </div>
         <h2
           id="global-database-title"
-          className="z-10 mt-6 inline-block px-2 text-center font-bold text-5xl text-background-text tracking-tighter md:text-8xl"
+          className="z-10 mt-6 inline-block px-2 text-center font-bold text-5xl text-background-textContrast tracking-tighter md:text-8xl"
         >
-          The global <br /> cloud database
+          The market is the <br /> world
         </h2>
-        <canvas
-          className="absolute top-[7.1rem] z-20 aspect-square size-full max-w-fit md:top-[12rem]"
-          ref={canvasRef}
-          style={{ width: 1200, height: 1200 }}
-        />
+        <Globe className="absolute top-[4rem] z-20 aspect-square size-full max-w-fit sm:top-[15rem]" />
         <div className="-mt-32 md:-mt-36 z-20 h-[36rem] w-full overflow-hidden">
           <div className="absolute bottom-0 h-3/5 w-full bg-gradient-to-b from-transparent via-background-base to-background-base" />
           <div className="absolute inset-x-6 bottom-12 m-auto max-w-4xl md:top-2/3">
