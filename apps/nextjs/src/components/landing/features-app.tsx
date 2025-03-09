@@ -50,7 +50,7 @@ const statsContainerVariants = {
   },
 }
 
-export function Features() {
+export function FeaturesApp() {
   return (
     <motion.section
       initial="hidden"
