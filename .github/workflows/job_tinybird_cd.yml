@@ -13,22 +13,26 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: should deploy only if changes in tinybird folder
+        id: should-deploy
         run: |
           # Get the base SHA for comparison
           BASE_SHA=$(git rev-parse origin/main)
 
           if git diff --name-only $BASE_SHA HEAD | grep -q "internal/tinybird"; then
             echo "Changes detected in the tinybird folder"
+            echo "skip=0" >> $GITHUB_OUTPUT
           else
             echo "No changes in the tinybird folder"
-            exit 0
+            echo "skip=1" >> $GITHUB_OUTPUT
           fi
 
       - name: Install Tinybird CLI
+        if: steps.should-deploy.outputs.skip != '1'
         run: curl -LsSf https://api.tinybird.co/static/install.sh | sh
 
       - uses: Infisical/secrets-action@v1.0.7
         name: Pull secrets from Infisical
+        if: steps.should-deploy.outputs.skip != '1'
         with:
           client-id: ${{ secrets.MACHINE_IDENTITY_CLIENT_ID }}
           client-secret: ${{ secrets.MACHINE_IDENTITY_CLIENT_SECRET }}
@@ -38,7 +42,9 @@ jobs:
           recursive: true
 
       - name: Authenticate
+        if: steps.should-deploy.outputs.skip != '1'
         run: tb auth --host https://api.europe-west2.gcp.tinybird.co  --token ${{ env.TB_ADMIN_TOKEN }}
 
       - name: Deploy project
+        if: steps.should-deploy.outputs.skip != '1'
         run: tb --cloud deploy
