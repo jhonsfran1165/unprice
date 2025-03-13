@@ -53,7 +53,7 @@
     "@vercel/edge": "^1.1.2",
     "@vercel/otel": "^1.10.1",
     "@vercel/speed-insights": "^1.0.12",
-    "ai": "^3.2.16",
+    "ai": "^4.1.61",
     "class-variance-authority": "^0.7.0",
     "cobe": "^0.6.3",
     "date-fns": "^3.3.1",
